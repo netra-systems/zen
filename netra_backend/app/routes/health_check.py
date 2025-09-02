@@ -100,8 +100,8 @@ async def readiness_probe(
         timestamp=datetime.now(timezone.utc).isoformat(),
         uptime_seconds=time.time() - STARTUP_TIME,
         checks=checks,
-        version=os.getenv("SERVICE_VERSION", "unknown"),
-        environment=os.getenv("ENVIRONMENT", "development")
+        version=get_env().get("SERVICE_VERSION", "unknown"),
+        environment=get_env().get("ENVIRONMENT", "development")
     )
     
     if overall_status == "unhealthy":
@@ -173,8 +173,8 @@ async def liveness_probe(
         timestamp=datetime.now(timezone.utc).isoformat(),
         uptime_seconds=time.time() - STARTUP_TIME,
         checks=checks,
-        version=os.getenv("SERVICE_VERSION", "unknown"),
-        environment=os.getenv("ENVIRONMENT", "development")
+        version=get_env().get("SERVICE_VERSION", "unknown"),
+        environment=get_env().get("ENVIRONMENT", "development")
     )
     
     if overall_status == "unhealthy":
@@ -255,8 +255,8 @@ async def startup_probe(
         timestamp=datetime.now(timezone.utc).isoformat(),
         uptime_seconds=time.time() - STARTUP_TIME,
         checks=checks,
-        version=os.getenv("SERVICE_VERSION", "unknown"),
-        environment=os.getenv("ENVIRONMENT", "development")
+        version=get_env().get("SERVICE_VERSION", "unknown"),
+        environment=get_env().get("ENVIRONMENT", "development")
     )
     
     if not all_initialized:

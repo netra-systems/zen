@@ -1,3 +1,4 @@
+from shared.isolated_environment import get_env
 """
 Docker Cleanup Scheduler - Automated resource management for Docker environments
 

@@ -37,8 +37,8 @@ class IDManager:
     - Ensuring format compliance
     """
     
-    # SSOT: Run ID format pattern
-    RUN_ID_PATTERN = re.compile(r'^run_([^_]+)_([a-f0-9]{8})$')
+    # SSOT: Run ID format pattern - allows thread_id with underscores
+    RUN_ID_PATTERN = re.compile(r'^run_(.+)_([a-f0-9]{8})$')
     
     # SSOT: Thread ID format pattern (flexible for legacy support)
     THREAD_ID_PATTERN = re.compile(r'^[a-zA-Z0-9][a-zA-Z0-9_\-]*$')

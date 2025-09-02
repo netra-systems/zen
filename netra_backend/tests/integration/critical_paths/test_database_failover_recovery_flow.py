@@ -1,3 +1,4 @@
+from shared.isolated_environment import get_env
 #!/usr/bin/env python3
 """
 Comprehensive test for database failover and recovery flow:
@@ -32,10 +33,10 @@ import psutil
 import pytest
 
 # Configuration
-BACKEND_URL = os.getenv("BACKEND_URL", "http://localhost:8000")
-PRIMARY_DB_URL = os.getenv("PRIMARY_DB_URL", "postgresql://localhost:5432/netra_primary")
-REPLICA_DB_URL = os.getenv("REPLICA_DB_URL", "postgresql://localhost:5433/netra_replica")
-CLICKHOUSE_URL = os.getenv("CLICKHOUSE_URL", "http://localhost:8123")
+BACKEND_URL = get_env().get("BACKEND_URL", "http://localhost:8000")
+PRIMARY_DB_URL = get_env().get("PRIMARY_DB_URL", "postgresql://localhost:5432/netra_primary")
+REPLICA_DB_URL = get_env().get("REPLICA_DB_URL", "postgresql://localhost:5433/netra_replica")
+CLICKHOUSE_URL = get_env().get("CLICKHOUSE_URL", "http://localhost:8123")
 
 # Test configuration
 REPLICATION_LAG_THRESHOLD = 5  # seconds
@@ -275,7 +276,7 @@ class DatabaseFailoverTester:
             pre_failover_state = await self.capture_database_state()
             
             # Simulate primary failure (if in test mode)
-            if os.getenv("TEST_MODE") == "true":
+            if get_env().get("TEST_MODE") == "true":
                 print("[INFO] Simulating primary database failure...")
                 
                 async with self.session.post(

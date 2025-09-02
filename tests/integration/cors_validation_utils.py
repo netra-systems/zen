@@ -1,3 +1,4 @@
+from shared.isolated_environment import get_env
 """
 CORS Validation Utilities for Integration Tests
 
@@ -275,7 +276,7 @@ def cors_integration_test(environment: str = "development"):
 # Environment detection for automatic CORS testing
 def get_current_test_environment() -> str:
     """Get the current test environment from environment variables."""
-    return os.getenv("ENVIRONMENT", os.getenv("NETRA_ENV", "development")).lower()
+    return get_env().get("ENVIRONMENT", get_env().get("NETRA_ENV", "development")).lower()
 
 
 # Example usage in integration tests:

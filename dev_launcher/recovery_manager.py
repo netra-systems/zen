@@ -1,3 +1,4 @@
+from shared.isolated_environment import get_env
 """
 Recovery management system for dev launcher services.
 
@@ -234,9 +235,9 @@ class RecoveryManager:
         env_info = []
         try:
             # Environment variables
-            env_info.append(f"NODE_ENV: {os.getenv('NODE_ENV', 'not set')}")
-            env_info.append(f"NETRA_ENV: {os.getenv('NETRA_ENV', 'not set')}")
-            env_info.append(f"PORT: {os.getenv('PORT', 'not set')}")
+            env_info.append(f"NODE_ENV: {get_env().get('NODE_ENV', 'not set')}")
+            env_info.append(f"NETRA_ENV: {get_env().get('NETRA_ENV', 'not set')}")
+            env_info.append(f"PORT: {get_env().get('PORT', 'not set')}")
             
             # System info
             import psutil

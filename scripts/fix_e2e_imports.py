@@ -1,3 +1,4 @@
+from shared.isolated_environment import get_env
 #!/usr/bin/env python3
 """
 Advanced E2E Test Import Fixer
@@ -291,11 +292,11 @@ from typing import Optional
 
 def get_staging_url() -> str:
     """Get staging URL."""
-    return os.getenv("STAGING_URL", "https://staging.netrasystems.ai")
+    return get_env().get("STAGING_URL", "https://staging.netrasystems.ai")
 
 def get_staging_api_key() -> Optional[str]:
     """Get staging API key."""
-    return os.getenv("STAGING_API_KEY")
+    return get_env().get("STAGING_API_KEY")
 
 class StagingTestBase:
     """Base class for staging tests."""

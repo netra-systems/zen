@@ -1,3 +1,4 @@
+from shared.isolated_environment import get_env
 """
 RED TEAM TEST 1: Cross-Service Auth Token Validation
 
@@ -115,7 +116,7 @@ class TestCrossServiceAuthTokenValidation:
         3. Token generation logic may be incomplete
         """
         # Try to connect to REAL auth service
-        auth_service_url = os.getenv("AUTH_SERVICE_URL", "http://localhost:8001")
+        auth_service_url = get_env().get("AUTH_SERVICE_URL", "http://localhost:8001")
         
         async with httpx.AsyncClient() as client:
             try:
@@ -177,7 +178,7 @@ class TestCrossServiceAuthTokenValidation:
         }
         
         # Use test JWT secret - will likely fail if secrets don't match
-        jwt_secret = os.getenv("JWT_SECRET_KEY", "test-jwt-secret-key-for-testing-only-must-be-32-chars")
+        jwt_secret = get_env().get("JWT_SECRET_KEY", "test-jwt-secret-key-for-testing-only-must-be-32-chars")
         test_token = pyjwt.encode(test_payload, jwt_secret, algorithm="HS256")
         
         # Try to access protected endpoint with token - will likely fail
@@ -220,7 +221,7 @@ class TestCrossServiceAuthTokenValidation:
             "aud": "netra-backend"
         }
         
-        jwt_secret = os.getenv("JWT_SECRET_KEY", "test-jwt-secret-key-for-testing-only-must-be-32-chars")
+        jwt_secret = get_env().get("JWT_SECRET_KEY", "test-jwt-secret-key-for-testing-only-must-be-32-chars")
         expired_token = pyjwt.encode(expired_payload, jwt_secret, algorithm="HS256")
         
         auth_headers = {"Authorization": f"Bearer {expired_token}"}
@@ -271,8 +272,8 @@ class TestCrossServiceAuthTokenValidation:
         Will likely FAIL because secrets may not be synchronized.
         """
         # Try to get JWT secrets from both services
-        auth_service_url = os.getenv("AUTH_SERVICE_URL", "http://localhost:8001")
-        backend_url = os.getenv("BACKEND_URL", "http://localhost:8000")
+        auth_service_url = get_env().get("AUTH_SERVICE_URL", "http://localhost:8001")
+        backend_url = get_env().get("BACKEND_URL", "http://localhost:8000")
         
         # Create test token with known secret
         test_secret = "consistent-test-secret-key-123456789"
@@ -324,7 +325,7 @@ class TestCrossServiceAuthTokenValidation:
             "iat": int(time.time())
         }
         
-        jwt_secret = os.getenv("JWT_SECRET_KEY", "test-jwt-secret-key-for-testing-only-must-be-32-chars")
+        jwt_secret = get_env().get("JWT_SECRET_KEY", "test-jwt-secret-key-for-testing-only-must-be-32-chars")
         context_token = pyjwt.encode(user_context, jwt_secret, algorithm="HS256")
         
         auth_headers = {"Authorization": f"Bearer {context_token}"}
@@ -359,7 +360,7 @@ class TestCrossServiceAuthTokenValidation:
         """
         # Create multiple test tokens
         tokens = []
-        jwt_secret = os.getenv("JWT_SECRET_KEY", "test-jwt-secret-key-for-testing-only-must-be-32-chars")
+        jwt_secret = get_env().get("JWT_SECRET_KEY", "test-jwt-secret-key-for-testing-only-must-be-32-chars")
         
         for i in range(20):
             payload = {
@@ -407,7 +408,7 @@ class TestCrossServiceAuthTokenValidation:
         Tests that token refresh works between auth service and backend.
         Will likely FAIL because refresh token logic may not be implemented.
         """
-        auth_service_url = os.getenv("AUTH_SERVICE_URL", "http://localhost:8001")
+        auth_service_url = get_env().get("AUTH_SERVICE_URL", "http://localhost:8001")
         
         # Store a refresh token in Redis (simulating auth service)
         refresh_token = secrets.token_urlsafe(64)
@@ -456,7 +457,7 @@ class RedTeamTokenTestUtils:
     def generate_test_jwt(payload: Dict[str, Any], secret: str = None) -> str:
         """Generate a test JWT token."""
         if secret is None:
-            secret = os.getenv("JWT_SECRET_KEY", "test-jwt-secret-key-for-testing-only-must-be-32-chars")
+            secret = get_env().get("JWT_SECRET_KEY", "test-jwt-secret-key-for-testing-only-must-be-32-chars")
         
         default_payload = {
             "iat": int(time.time()),

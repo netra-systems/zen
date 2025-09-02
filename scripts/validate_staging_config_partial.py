@@ -1,3 +1,4 @@
+from shared.isolated_environment import get_env
 #!/usr/bin/env python3
 """
 Validate staging environment configuration and connectivity.
@@ -31,7 +32,7 @@ def print_section(title: str):
 
 def check_env_var(var_name: str, required: bool = True, sensitive: bool = False) -> Tuple[bool, str]:
     """Check if an environment variable is set."""
-    value = os.getenv(var_name)
+    value = get_env().get(var_name)
     if value:
         display_value = "***" if sensitive else value[:20] + "..." if len(value) > 20 else value
         return True, display_value
@@ -54,7 +55,7 @@ def check_github_secrets() -> Dict[str, bool]:
     
     # In GitHub Actions, secrets are passed as env vars
     for secret_name in secrets:
-        if os.getenv(secret_name):
+        if get_env().get(secret_name):
             print(f"{Fore.GREEN}✓ {secret_name}: Configured{Style.RESET_ALL}")
             secrets[secret_name] = True
         else:
@@ -67,7 +68,7 @@ def check_github_secrets() -> Dict[str, bool]:
 
 def _get_database_url() -> Optional[str]:
     """Get and validate DATABASE_URL environment variable."""
-    db_url = os.getenv("DATABASE_URL")
+    db_url = get_env().get("DATABASE_URL")
     if not db_url:
         print(f"{Fore.RED}✗ DATABASE_URL not set{Style.RESET_ALL}")
         return None

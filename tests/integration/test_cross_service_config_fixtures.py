@@ -1,3 +1,4 @@
+from shared.isolated_environment import get_env
 """Fixtures Tests - Split from test_cross_service_config.py"""
 
 import asyncio

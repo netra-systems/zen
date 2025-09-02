@@ -23,7 +23,7 @@
 | **Fix a bug** | [`SPEC/learnings/index.xml`](SPEC/learnings/index.xml) | Check learnings first |
 | **Add new feature** | [`SPEC/core.xml`](SPEC/core.xml) | Architecture patterns |
 | **Agent implementation** | [`docs/GOLDEN_AGENT_INDEX.md`](docs/GOLDEN_AGENT_INDEX.md) | **Complete agent patterns & migration** |
-| **Fix tests** | [`docs/testing/TESTING_GUIDE.md`](docs/testing/TESTING_GUIDE.md) | Test framework guide |
+| **Fix tests** | [`SPEC/test_infrastructure_ssot.xml`](SPEC/test_infrastructure_ssot.xml) | **SSOT test infrastructure (94.5% compliance)** |
 | **Deploy changes** | [`scripts/deploy_to_gcp.py`](scripts/deploy_to_gcp.py) | Official deploy script |
 | **Check compliance** | [`scripts/check_architecture_compliance.py`](scripts/check_architecture_compliance.py) | Architecture validator |
 | **WebSocket issues** | [`SPEC/learnings/websocket_agent_integration_critical.xml`](SPEC/learnings/websocket_agent_integration_critical.xml) | Critical fixes |
@@ -214,20 +214,29 @@
 | **Symbol Types Supported** | All extractors | **Language-specific symbols** | Python: class/function/method/variable, JS/TS: interface/type/enum/const, Arrow functions |
 | **Business Value** | Enterprise/Mid segments | **Development velocity** | 60-80% reduction in context switching, IDE-like navigation |
 
-### Test Files (Unified Testing System)
+### Test Files (SSOT UNIFIED TESTING SYSTEM - CRITICAL MISSION COMPLETE) ✅
 | Component | Location | Purpose | Documentation |
 |-----------|----------|---------|---------------|
+| **🎯 SSOT COMPLIANCE: 94.5/100** | | **ALL P0 VIOLATIONS RESOLVED** | |
 | **📖 MAIN TESTING GUIDE** | `/TESTING.md` | **Comprehensive testing documentation** | Start here for all testing |
-| **🔴 CENTRALIZED DOCKER MANAGER** | `/test_framework/centralized_docker_manager.py` | **Docker crash remediation with rate limiting** | Prevents restart storms, manages parallel tests |
-| **🔴 DOCKER COMPOSE MANAGER** | `/test_framework/docker_compose_manager.py` | **Docker Compose lifecycle management** | Service health monitoring, port discovery |
-| **Test Framework** | `/test_framework/` | Enhanced test framework | Core runner and configuration |
-| **Test Runner** | `/test_framework/runner.py` | Main test runner | Unified test execution |
-| **Test Config** | `/test_framework/test_config.py` | Test configuration | Test levels, environments |
+| **🔴 SSOT TEST RUNNER** | `/tests/unified_test_runner.py` | **SINGLE SOURCE OF TRUTH for test execution** | [`SPEC/test_infrastructure_ssot.xml`](SPEC/test_infrastructure_ssot.xml) |
+| **🔴 SSOT BASE TEST CASE** | `/test_framework/ssot/base_test_case.py` | **CANONICAL BaseTestCase - ALL tests inherit from this** | Eliminated 6,096+ duplicate implementations |
+| **🔴 SSOT MOCK FACTORY** | `/test_framework/ssot/mock_factory.py` | **SINGLE mock generator - NO duplicate mocks allowed** | Eliminated 20+ MockAgent implementations |
+| **🔴 SSOT DATABASE UTILITY** | `/test_framework/ssot/database_test_utility.py` | **UNIFIED database testing** | Transaction isolation, real DB integration |
+| **🔴 SSOT WEBSOCKET UTILITY** | `/test_framework/ssot/websocket_test_utility.py` | **UNIFIED WebSocket testing** | Event validation, connection management |
+| **🔴 SSOT DOCKER UTILITY** | `/test_framework/ssot/docker_test_utility.py` | **UNIFIED Docker orchestration** | [`test_framework/unified_docker_manager.py`](test_framework/unified_docker_manager.py) |
+| **🔴 UNIFIED DOCKER MANAGER** | `/test_framework/unified_docker_manager.py` | **ONLY Docker manager allowed** | Automatic conflict resolution, health monitoring |
+| **🔴 SSOT COMPLIANCE TESTS** | `/tests/mission_critical/test_ssot_compliance_suite.py` | **Validates SSOT violations** | Continuous compliance monitoring |
+| **🔴 MOCK POLICY ENFORCEMENT** | `/tests/mission_critical/test_mock_policy_violations.py` | **Enforces MOCKS ARE FORBIDDEN policy** | Integration/E2E must use real services |
+| **🔴 SSOT FRAMEWORK TESTS** | `/test_framework/tests/test_ssot_framework.py` | **Tests SSOT infrastructure itself** | Validates BaseTestCase, MockFactory, etc. |
 | **Test Discovery** | `/test_framework/test_discovery.py` | Test discovery and analysis | Coverage gaps, untested modules |
 | **Service Availability** | `/test_framework/service_availability.py` | Service availability checker | Hard failures when real services unavailable |
 | **LLM Config Manager** | `/test_framework/llm_config_manager.py` | Single source of truth for LLM config | Replaces multiple duplicate systems |
 | **PyTest Config** | `/pyproject.toml` | Optimized pytest configuration | Collection optimization, markers |
-| **Test Collection Report** | `/TEST_COLLECTION_IMPROVEMENTS.md` | Test collection improvements doc | Audit results and recommendations |
+| **🔴 SSOT ARCHITECTURE SPEC** | [`SPEC/test_infrastructure_ssot.xml`](SPEC/test_infrastructure_ssot.xml) | **Complete SSOT architecture documentation** | Canonical test infrastructure patterns |
+| **🔴 SSOT VIOLATIONS RESOLVED** | [`TEST_INFRASTRUCTURE_SSOT_VIOLATIONS_REPORT.md`](TEST_INFRASTRUCTURE_SSOT_VIOLATIONS_REPORT.md) | **Resolution of ALL critical violations** | 94.5/100 compliance achieved |
+| **🔴 SSOT COMPLIANCE REPORT** | [`TEST_INFRASTRUCTURE_COMPLIANCE_REPORT_FINAL.md`](TEST_INFRASTRUCTURE_COMPLIANCE_REPORT_FINAL.md) | **Final status: MISSION COMPLETE** | Comprehensive compliance metrics |
+| **🔴 SSOT MIGRATION GUIDE** | [`SSOT_MIGRATION_GUIDE.md`](SSOT_MIGRATION_GUIDE.md) | **Developer migration instructions** | Complete patterns and examples |
 
 #### Test Locations by Service
 | Test Type | Location | Pattern | Run Command |
@@ -512,14 +521,19 @@ python netra_backend/tests/integration/critical_paths/test_websocket_silent_fail
 - [`SPEC/redis_staging_configuration.xml`](SPEC/redis_staging_configuration.xml) - **Redis endpoint configuration (10.107.0.3)**
 - [`SPEC/llm_configuration_architecture.xml`](SPEC/llm_configuration_architecture.xml) - **LLM centralized config (GEMINI_2_5_FLASH default)**
 
-### Test System & Quality (2025-01-28 IMPROVED)
+### Test System & Quality (SSOT INFRASTRUCTURE - MISSION COMPLETE 2025-09-02) ✅
+- **🎯 SSOT COMPLIANCE: 94.5/100** | **ALL P0 VIOLATIONS RESOLVED** | **SPACECRAFT READY FOR LAUNCH**
+- **🔴 SSOT TEST INFRASTRUCTURE SPEC** | [`SPEC/test_infrastructure_ssot.xml`](SPEC/test_infrastructure_ssot.xml) | **CANONICAL test architecture (94.5% compliance)**
+- **🔴 SSOT VIOLATIONS RESOLVED** | [`TEST_INFRASTRUCTURE_SSOT_VIOLATIONS_REPORT.md`](TEST_INFRASTRUCTURE_SSOT_VIOLATIONS_REPORT.md) | **Complete resolution documentation**
+- **🔴 SSOT COMPLIANCE REPORT** | [`TEST_INFRASTRUCTURE_COMPLIANCE_REPORT_FINAL.md`](TEST_INFRASTRUCTURE_COMPLIANCE_REPORT_FINAL.md) | **Final mission status report**
+- **🔴 SSOT MIGRATION GUIDE** | [`SSOT_MIGRATION_GUIDE.md`](SSOT_MIGRATION_GUIDE.md) | **Developer migration instructions**
+- **🔴 SSOT TEST RUNNER** | `/tests/unified_test_runner.py` | **SINGLE SOURCE OF TRUTH for test execution**
 - **🔴 TEST EXECUTION TRACKER** | `/scripts/test_execution_tracker.py` | Test history, flaky detection, prioritization
 - **🔴 TEST DASHBOARD** | `/scripts/test_dashboard.py` | Interactive metrics, HTML reports, recommendations  
-- **🔴 UNIFIED TEST RUNNER** | `/tests/unified_test_runner.py` | **FIXED E2E categories**, integrated tracking
 - **🔴 PRE-DEPLOYMENT AUDIT** | `/scripts/pre_deployment_audit.py` | **Catch LLM coding errors before deploy**
 - [`SPEC/pre_deployment_audit.xml`](SPEC/pre_deployment_audit.xml) - **Pre-deployment audit specification**
 - [`SPEC/learnings/test_system_improvements.xml`](SPEC/learnings/test_system_improvements.xml) - **E2E fix & test tracking learnings**
-- [`SPEC/test_infrastructure_architecture.xml`](SPEC/test_infrastructure_architecture.xml) - Test architecture patterns
+- [`SPEC/test_infrastructure_architecture.xml`](SPEC/test_infrastructure_architecture.xml) - Legacy test architecture patterns
 - [`reports/audit/E2E_TEST_BLOCKING_AUDIT.md`](reports/audit/E2E_TEST_BLOCKING_AUDIT.md) - E2E test issues documentation
 
 ---

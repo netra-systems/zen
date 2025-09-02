@@ -1,3 +1,4 @@
+from shared.isolated_environment import get_env
 """
 Critical Test: Staging Configuration Must Not Use Localhost Defaults
 

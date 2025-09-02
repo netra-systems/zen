@@ -1,3 +1,4 @@
+from shared.isolated_environment import get_env
 """
 Initialize database tables for Netra application.
 Uses environment variables for database configuration.
@@ -29,7 +30,7 @@ logger = central_logger.get_logger(__name__)
 async def create_tables():
     """Create all database tables."""
     # Get DATABASE_URL from environment
-    database_url = os.getenv("DATABASE_URL")
+    database_url = get_env().get("DATABASE_URL")
     if not database_url:
         raise ValueError("DATABASE_URL environment variable is not set")
     

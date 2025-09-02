@@ -1,3 +1,4 @@
+from shared.isolated_environment import get_env
 #!/usr/bin/env python
 """
 Generate OpenAPI/Swagger specification from FastAPI app and sync to ReadMe.
@@ -54,7 +55,7 @@ def _add_metadata(schema: dict) -> dict:
         "This API provides endpoints for agent orchestration, workflow management, "
         "and AI optimization tools."
     )
-    schema["info"]["version"] = os.getenv("API_VERSION", "1.0.0")
+    schema["info"]["version"] = get_env().get("API_VERSION", "1.0.0")
     return _add_contact_info(schema)
 
 
@@ -328,7 +329,7 @@ def _handle_validate_only() -> None:
 
 def _handle_readme_sync(args: argparse.Namespace, spec_file: str) -> None:
     """Handle ReadMe synchronization."""
-    api_key = args.readme_api_key or os.getenv("README_API_KEY")
+    api_key = args.readme_api_key or get_env().get("README_API_KEY")
     if not api_key:
         _handle_missing_api_key()
     success = sync_to_readme(spec_file, api_key, args.readme_version, args.readme_url)

@@ -1,3 +1,4 @@
+from shared.isolated_environment import get_env
 """System Startup Sequences L4 Integration Tests
 
 Tests comprehensive system initialization and startup sequences across all services.
@@ -556,10 +557,10 @@ class TestSystemStartupSequencesL4:
         """Test 13: Configuration validation during startup."""
         # Mock configuration
         config = {
-            "jwt_secret": os.getenv("JWT_SECRET", "test_secret"),
-            "database_url": os.getenv("DATABASE_URL", "postgresql://localhost/test"),
-            "redis_url": os.getenv("REDIS_URL", "redis://localhost:6379"),
-            "auth_service_url": os.getenv("AUTH_SERVICE_URL", "http://localhost:8001"),
+            "jwt_secret": get_env().get("JWT_SECRET", "test_secret"),
+            "database_url": get_env().get("DATABASE_URL", "postgresql://localhost/test"),
+            "redis_url": get_env().get("REDIS_URL", "redis://localhost:6379"),
+            "auth_service_url": get_env().get("AUTH_SERVICE_URL", "http://localhost:8001"),
             "enable_monitoring": True,
             "enable_rate_limiting": True,
             "max_connections": 100
@@ -580,10 +581,10 @@ class TestSystemStartupSequencesL4:
         """Test 14: SSL certificate loading and validation during startup."""
         # Mock SSL configuration
         ssl_config = {
-            "enabled": os.getenv("SSL_ENABLED", "false") == "true",
-            "cert_path": os.getenv("SSL_CERT_PATH", "/certs/cert.pem"),
-            "key_path": os.getenv("SSL_KEY_PATH", "/certs/key.pem"),
-            "ca_path": os.getenv("SSL_CA_PATH", "/certs/ca.pem")
+            "enabled": get_env().get("SSL_ENABLED", "false") == "true",
+            "cert_path": get_env().get("SSL_CERT_PATH", "/certs/cert.pem"),
+            "key_path": get_env().get("SSL_KEY_PATH", "/certs/key.pem"),
+            "ca_path": get_env().get("SSL_CA_PATH", "/certs/ca.pem")
         }
         
         if ssl_config["enabled"]:

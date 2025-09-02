@@ -1,3 +1,4 @@
+from shared.isolated_environment import get_env
 """Critical path test for staging environment module imports.
 
 Business Value: Platform/Internal - Deployment Stability - Ensures the backend

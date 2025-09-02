@@ -1,3 +1,4 @@
+from shared.isolated_environment import get_env
 """
 RED TEAM TEST 14: LLM Service Integration
 
@@ -118,8 +119,8 @@ class TestLLMServiceIntegration:
             "timeout_seconds": 30,
             "max_retries": 3,
             "test_mode": True,
-            "openai_api_key": os.getenv("GOOGLE_API_KEY"),
-            "anthropic_api_key": os.getenv("ANTHROPIC_API_KEY"),
+            "openai_api_key": get_env().get("GOOGLE_API_KEY"),
+            "anthropic_api_key": get_env().get("ANTHROPIC_API_KEY"),
         }
 
     @pytest.mark.asyncio
@@ -653,7 +654,7 @@ class RedTeamLLMTestUtils:
         
         env_var = key_env_vars.get(provider.lower())
         if env_var:
-            return bool(os.getenv(env_var))
+            return bool(get_env().get(env_var))
         return False
     
     @staticmethod

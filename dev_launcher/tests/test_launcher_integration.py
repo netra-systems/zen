@@ -1,3 +1,4 @@
+from shared.isolated_environment import get_env
 """
 Integration tests for the dev launcher.
 

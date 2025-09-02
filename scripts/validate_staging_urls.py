@@ -1,3 +1,4 @@
+from shared.isolated_environment import get_env
 #!/usr/bin/env python3
 """
 Staging URL Validation Script
@@ -101,7 +102,7 @@ class StagingURLValidator:
         
         if self.environment in ['staging', 'production']:
             for var_name in self.url_variables:
-                value = os.getenv(var_name)
+                value = get_env().get(var_name)
                 if value and 'localhost' in value:
                     issues.append(f"Environment variable {var_name}={value} contains localhost in {self.environment}")
                     

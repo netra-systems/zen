@@ -1,3 +1,4 @@
+from shared.isolated_environment import get_env
 #!/usr/bin/env python3
 """Debug script for reproducing uvicorn recursion errors.
 

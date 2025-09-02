@@ -1,3 +1,4 @@
+from shared.isolated_environment import get_env
 """Configuration Migration Validation Test
 
 CRITICAL: Validates that 371 os.environ violations were properly fixed.

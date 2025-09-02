@@ -1,3 +1,4 @@
+from shared.isolated_environment import get_env
 #!/usr/bin/env python3
 """
 Test Data Seeder for Real Services
@@ -30,27 +31,27 @@ class TestDataSeeder:
         
     def _build_postgres_url(self) -> str:
         """Build PostgreSQL connection URL from environment."""
-        host = os.getenv("POSTGRES_HOST", "localhost")
-        port = os.getenv("POSTGRES_PORT", "5432")
-        user = os.getenv("POSTGRES_USER", "test_user")
-        password = os.getenv("POSTGRES_PASSWORD", "test_pass")
-        db = os.getenv("POSTGRES_DB", "netra_test")
+        host = get_env().get("POSTGRES_HOST", "localhost")
+        port = get_env().get("POSTGRES_PORT", "5432")
+        user = get_env().get("POSTGRES_USER", "test_user")
+        password = get_env().get("POSTGRES_PASSWORD", "test_pass")
+        db = get_env().get("POSTGRES_DB", "netra_test")
         return f"postgresql://{user}:{password}@{host}:{port}/{db}"
     
     def _build_redis_url(self) -> str:
         """Build Redis connection URL from environment."""
-        host = os.getenv("REDIS_HOST", "localhost")
-        port = os.getenv("REDIS_PORT", "6379")
+        host = get_env().get("REDIS_HOST", "localhost")
+        port = get_env().get("REDIS_PORT", "6379")
         return f"redis://{host}:{port}/0"
     
     def _build_clickhouse_config(self) -> Dict:
         """Build ClickHouse connection config from environment."""
         return {
-            "host": os.getenv("CLICKHOUSE_HOST", "localhost"),
-            "port": int(os.getenv("CLICKHOUSE_PORT", "8123")),
-            "user": os.getenv("CLICKHOUSE_USER", "test_user"),
-            "password": os.getenv("CLICKHOUSE_PASSWORD", "test_pass"),
-            "database": os.getenv("CLICKHOUSE_DB", "netra_test_analytics")
+            "host": get_env().get("CLICKHOUSE_HOST", "localhost"),
+            "port": int(get_env().get("CLICKHOUSE_PORT", "8123")),
+            "user": get_env().get("CLICKHOUSE_USER", "test_user"),
+            "password": get_env().get("CLICKHOUSE_PASSWORD", "test_pass"),
+            "database": get_env().get("CLICKHOUSE_DB", "netra_test_analytics")
         }
     
     async def wait_for_services(self) -> None:

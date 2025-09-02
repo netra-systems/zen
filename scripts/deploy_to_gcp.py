@@ -233,7 +233,7 @@ class GCPDeployer:
         
         missing_vars = []
         for var in required_env_vars:
-            if not os.getenv(var):
+            if not get_env().get(var):
                 missing_vars.append(var)
         
         if missing_vars:
@@ -251,7 +251,7 @@ class GCPDeployer:
         ]
         
         for var_name in url_vars_to_check:
-            var_value = os.getenv(var_name, "")
+            var_value = get_env().get(var_name, "")
             if "localhost" in var_value:
                 localhost_vars.append(f"{var_name}={var_value}")
         
@@ -1013,8 +1013,8 @@ CMD ["npm", "start"]
             "jwt-secret-staging": jwt_secret_value,  # Both backend and auth service use JWT_SECRET_STAGING
             # TOMBSTONE: google-client-id-staging and google-client-secret-staging
             # These should be configured using environment-specific OAuth variables
-            "google-oauth-client-id-staging": os.getenv("GOOGLE_OAUTH_CLIENT_ID_STAGING", "REPLACE_WITH_REAL_OAUTH_CLIENT_ID"),
-            "google-oauth-client-secret-staging": os.getenv("GOOGLE_OAUTH_CLIENT_SECRET_STAGING", "REPLACE_WITH_REAL_OAUTH_CLIENT_SECRET"),
+            "google-oauth-client-id-staging": get_env().get("GOOGLE_OAUTH_CLIENT_ID_STAGING", "REPLACE_WITH_REAL_OAUTH_CLIENT_ID"),
+            "google-oauth-client-secret-staging": get_env().get("GOOGLE_OAUTH_CLIENT_SECRET_STAGING", "REPLACE_WITH_REAL_OAUTH_CLIENT_SECRET"),
             "oauth-hmac-secret-staging": "oauth_hmac_secret_for_staging_at_least_32_chars_secure",
             # Enhanced JWT security for auth service
             "service-secret-staging": "REPLACE_WITH_SECURE_32_BYTE_HEX_STRING",
@@ -1029,8 +1029,8 @@ CMD ["npm", "start"]
             "clickhouse-db-staging": "default",
             "clickhouse-password-staging": "REPLACE_WITH_CLICKHOUSE_PASSWORD",
             # Additional required secrets for comprehensive staging support
-            "gemini-api-key-staging": os.getenv("GEMINI_API_KEY", "REPLACE_WITH_REAL_GEMINI_KEY"),
-            "anthropic-api-key-staging": os.getenv("ANTHROPIC_API_KEY", "REPLACE_WITH_REAL_ANTHROPIC_KEY")
+            "gemini-api-key-staging": get_env().get("GEMINI_API_KEY", "REPLACE_WITH_REAL_GEMINI_KEY"),
+            "anthropic-api-key-staging": get_env().get("ANTHROPIC_API_KEY", "REPLACE_WITH_REAL_ANTHROPIC_KEY")
         }
         
         for name, value in secrets.items():

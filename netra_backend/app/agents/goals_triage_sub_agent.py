@@ -310,10 +310,9 @@ class GoalsTriageSubAgent(BaseAgent):
                                          triage_results: List[GoalTriageResult],
                                          prioritized_plan: Dict[str, Any]) -> Dict[str, Any]:
         """Finalize and structure the goal triage results."""
-        state = context.state
         
-        # Update state with results
-        state.goal_triage_result = {
+        # Structure the result data
+        goal_triage_result = {
             "triage_results": [self._goal_to_dict(g) for g in triage_results],
             "prioritized_plan": prioritized_plan,
             "metadata": {
@@ -324,8 +323,11 @@ class GoalsTriageSubAgent(BaseAgent):
             }
         }
         
+        # Store result in agent metadata for future reference
+        context.state.metadata.custom_fields["goal_triage_result"] = str(goal_triage_result)
+        
         return {
-            "goal_triage_result": state.goal_triage_result,
+            "goal_triage_result": goal_triage_result,
             "recommendations": self._generate_strategic_recommendations(triage_results, prioritized_plan)
         }
 
@@ -555,7 +557,7 @@ class GoalsTriageSubAgent(BaseAgent):
             }
         }
         
-        context.state.goal_triage_result = fallback_result
+        context.state.metadata.custom_fields["goal_triage_result"] = str(fallback_result)
         
         if context.stream_updates:
             await self.emit_agent_completed({
@@ -571,7 +573,5 @@ class GoalsTriageSubAgent(BaseAgent):
     
     async def cleanup(self, state: DeepAgentState, run_id: str) -> None:
         """Cleanup after execution - goal triage specific cleanup only."""
-        if hasattr(state, 'goal_triage_result') and state.goal_triage_result:
-            metadata = state.goal_triage_result.get("metadata", {})
-            if metadata:
-                self.logger.debug(f"Goal triage metrics for run_id {run_id}: {metadata}")
+        if "goal_triage_result" in state.metadata.custom_fields:
+            self.logger.debug(f"Goal triage completed for run_id {run_id}")

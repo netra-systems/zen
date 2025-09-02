@@ -68,14 +68,14 @@ class ComprehensiveEnvironmentViolationAnalyzer(ast.NodeVisitor):
         self.generic_visit(node)
     
     def visit_Call(self, node):
-        """Detect function calls including os.getenv() and os.environ.get()."""
+        """Detect function calls including get_env().get() and os.environ.get()."""
         violation_type = None
         access_type = None
         
-        # Check for os.getenv() calls
+        # Check for get_env().get() calls
         if isinstance(node.func, ast.Attribute):
             if self._is_os_reference(node.func.value) and node.func.attr == 'getenv':
-                violation_type = 'os.getenv()'
+                violation_type = 'get_env().get()'
                 access_type = 'GETENV'
             elif self._is_environ_access(node.func.value) and node.func.attr == 'get':
                 violation_type = 'os.environ.get()'
@@ -355,7 +355,7 @@ class TestEnvironmentViolationsComprehensive:
         # Known violation locations that MUST be fixed
         known_violations = [
             ('project_utils.py', [74, 78, 82, 86, 91]),  # os.environ.get() calls
-            ('environment_validator.py', [106, 108]),      # os.getenv() calls
+            ('environment_validator.py', [106, 108]),      # get_env().get() calls
         ]
         
         found_known_violations = []
@@ -395,7 +395,7 @@ class TestEnvironmentViolationsComprehensive:
         patterns = [
             (r'os\.environ\s*\[', 'os.environ[]'),
             (r'os\.environ\.get\s*\(', 'os.environ.get()'),
-            (r'os\.getenv\s*\(', 'os.getenv()'),
+            (r'os\.getenv\s*\(', 'get_env().get()'),
             # Direct imports pattern (less common but possible)
             (r'environ\s*\[(?!.*PATH)', 'environ[]'),  # Direct environ access (excluding PATH)
             (r'(?<!os\.)getenv\s*\(', 'getenv()'),  # Direct getenv call
@@ -496,7 +496,7 @@ class TestEnvironmentViolationsComprehensive:
             
             report += "💡 REMEDIATION:\n"
             report += "   1. Replace os.environ.get() with env.get()\n"
-            report += "   2. Replace os.getenv() with env.get()\n"
+            report += "   2. Replace get_env().get() with env.get()\n"
             report += "   3. Import: from shared.isolated_environment import get_env\n"
             
             pytest.fail(report)
@@ -687,7 +687,7 @@ class TestEnvironmentViolationsComprehensive:
                 lines = content.split('\n')
                 for line_no, line in enumerate(lines, 1):
                     # Look for direct environment access patterns
-                    if any(pattern in line for pattern in ['env.get(', 'os.getenv(']):
+                    if any(pattern in line for pattern in ['env.get(', 'get_env().get(']):
                         # Skip comments
                         if line.strip().startswith('#'):
                             continue
@@ -713,7 +713,7 @@ class TestEnvironmentViolationsComprehensive:
             
             report += "💡 These violations MUST be fixed by:\n"
             report += "   1. Replace os.environ.get() with env.get()\n" 
-            report += "   2. Replace os.getenv() with env.get()\n"
+            report += "   2. Replace get_env().get() with env.get()\n"
             report += "   3. Import: from shared.isolated_environment import get_env\n"
             
             pytest.fail(report)
@@ -840,7 +840,7 @@ class TestEnvironmentViolationsComprehensive:
         
         print(f"\n💡 REMEDIATION STEPS:")
         print("   1. Replace os.environ.get() with env.get()")
-        print("   2. Replace os.getenv() with env.get()")
+        print("   2. Replace get_env().get() with env.get()")
         print("   3. Replace env.get('KEY') with env.get('KEY')")
         print("   4. Import: from shared.isolated_environment import get_env")
         print("   5. Initialize: env = get_env()")

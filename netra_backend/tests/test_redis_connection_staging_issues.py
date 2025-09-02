@@ -1,3 +1,4 @@
+from shared.isolated_environment import get_env
 """Redis Connection Staging Issues - Failing Tests
 
 Tests that expose Redis connection failures found during GCP staging logs audit.

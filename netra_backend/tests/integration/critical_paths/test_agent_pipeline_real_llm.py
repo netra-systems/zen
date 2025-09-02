@@ -1,3 +1,4 @@
+from shared.isolated_environment import get_env
 """Agent Pipeline Real LLM Critical Path Tests (L4 - Staging Environment)
 
 Business Value Justification (BVJ):
@@ -59,7 +60,7 @@ logger = logging.getLogger(__name__)
 
 # L4 Environment Configuration - Support both staging and local
 # Check environment variables to determine which environment to use
-ENVIRONMENT_MODE = os.getenv("TEST_ENVIRONMENT_MODE", "local")  # local, staging
+ENVIRONMENT_MODE = get_env().get("TEST_ENVIRONMENT_MODE", "local")  # local, staging
 
 if ENVIRONMENT_MODE == "staging":
     TESTING_CONFIG = {
@@ -867,9 +868,9 @@ async def l4_pipeline_tester():
     
     # Check for real LLM testing configuration from multiple sources
     real_llm_enabled = (
-        os.getenv("ENABLE_REAL_LLM_TESTING", "false").lower() == "true" or
-        os.getenv("TEST_USE_REAL_LLM", "false").lower() == "true" or
-        os.getenv("REAL_LLM", "false").lower() == "true" or
+        get_env().get("ENABLE_REAL_LLM_TESTING", "false").lower() == "true" or
+        get_env().get("TEST_USE_REAL_LLM", "false").lower() == "true" or
+        get_env().get("REAL_LLM", "false").lower() == "true" or
         hasattr(pytest, "real_llm") or  # Keep for pytest option compatibility
         hasattr(pytest, "staging_environment")  # Keep for staging compatibility
     )

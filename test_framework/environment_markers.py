@@ -1,3 +1,4 @@
+from shared.isolated_environment import get_env
 """Environment-aware testing markers and utilities.
 
 This module provides decorators and utilities for marking tests with their

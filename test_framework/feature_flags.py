@@ -1,3 +1,4 @@
+from shared.isolated_environment import get_env
 """Test feature flags configuration and management.
 
 This module provides a robust feature flagging system for tests, enabling:

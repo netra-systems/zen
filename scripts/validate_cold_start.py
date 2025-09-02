@@ -1,3 +1,4 @@
+from shared.isolated_environment import get_env
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
@@ -66,9 +67,9 @@ class ColdStartValidator:
         
         # Check critical environment variables
         env_vars = {
-            "OPENAI_API_KEY": os.getenv("OPENAI_API_KEY"),
-            "JWT_SECRET_KEY": os.getenv("JWT_SECRET_KEY"),
-            "DATABASE_URL": os.getenv("DATABASE_URL")
+            "OPENAI_API_KEY": get_env().get("OPENAI_API_KEY"),
+            "JWT_SECRET_KEY": get_env().get("JWT_SECRET_KEY"),
+            "DATABASE_URL": get_env().get("DATABASE_URL")
         }
         
         all_present = True
@@ -172,7 +173,7 @@ class ColdStartValidator:
             from auth_service.auth_core.security.jwt_handler import JWTHandler
             
             # Check JWT configuration
-            jwt_secret = os.getenv("JWT_SECRET_KEY") or os.getenv("JWT_SECRET")
+            jwt_secret = get_env().get("JWT_SECRET_KEY") or get_env().get("JWT_SECRET")
             if jwt_secret:
                 self.print_step("JWT secret configured", "success")
             else:
@@ -212,7 +213,7 @@ class ColdStartValidator:
                 from netra_backend.app.core.llm_factory import LLMFactory
                 
                 # Check OpenAI key
-                if not os.getenv("OPENAI_API_KEY"):
+                if not get_env().get("OPENAI_API_KEY"):
                     self.print_step("OpenAI API key not configured", "failure")
                     return False
                 

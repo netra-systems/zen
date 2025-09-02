@@ -1,3 +1,4 @@
+from shared.isolated_environment import get_env
 #!/usr/bin/env python
 """
 Report Generators - Generate test reports in different formats
@@ -303,10 +304,10 @@ def generate_json_report(results: Dict, level: str, config: Dict, exit_code: int
         "duration": duration,
         "environment": {
             "staging": staging_mode,
-            "staging_url": os.getenv("STAGING_URL", ""),
-            "staging_api_url": os.getenv("STAGING_API_URL", ""),
-            "pr_number": os.getenv("PR_NUMBER", ""),
-            "pr_branch": os.getenv("PR_BRANCH", ""),
+            "staging_url": get_env().get("STAGING_URL", ""),
+            "staging_api_url": get_env().get("STAGING_API_URL", ""),
+            "pr_number": get_env().get("PR_NUMBER", ""),
+            "pr_branch": get_env().get("PR_BRANCH", ""),
         },
         "summary": {
             "total": total_counts["total"],
@@ -366,9 +367,9 @@ def generate_text_report(results: Dict, level: str, config: Dict, exit_code: int
     
     if staging_mode:
         report.append("\nSTAGING ENVIRONMENT:")
-        report.append(f"  Frontend: {os.getenv('STAGING_URL', 'N/A')}")
-        report.append(f"  API: {os.getenv('STAGING_API_URL', 'N/A')}")
-        report.append(f"  PR Number: {os.getenv('PR_NUMBER', 'N/A')}")
+        report.append(f"  Frontend: {get_env().get('STAGING_URL', 'N/A')}")
+        report.append(f"  API: {get_env().get('STAGING_API_URL', 'N/A')}")
+        report.append(f"  PR Number: {get_env().get('PR_NUMBER', 'N/A')}")
     
     report.append("\nTEST SUMMARY:")
     report.append(f"  Total: {total_counts['total']}")

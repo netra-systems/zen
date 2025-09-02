@@ -34,8 +34,8 @@ class TestDatabaseConnectionFix:
                        f"Should use postgres:postgres credentials for development database.")
         
         # Check environment variables
-        test_db_url = os.getenv('TEST_DATABASE_URL')
-        db_url = os.getenv('DATABASE_URL')
+        test_db_url = get_env().get('TEST_DATABASE_URL')
+        db_url = get_env().get('DATABASE_URL')
         
         print(f"TEST_DATABASE_URL env var: {test_db_url}")
         print(f"DATABASE_URL env var: {db_url}")

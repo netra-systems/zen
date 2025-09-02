@@ -1,3 +1,4 @@
+from shared.isolated_environment import get_env
 """Direct ClickHouse reset script - drops all tables for both cloud and local instances."""
 
 import asyncio

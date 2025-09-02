@@ -1,3 +1,4 @@
+from shared.isolated_environment import get_env
 """Centralized LLM Model Configuration and Defaults.
 
 This module enforces standardized LLM model selection across the entire codebase.
@@ -47,7 +48,7 @@ class LLMModel(Enum):
             GEMINI_2_5_PRO for tests, GEMINI_2_5_FLASH otherwise.
         """
         # Allow environment override for special cases
-        env_default = os.getenv('NETRA_DEFAULT_LLM_MODEL')
+        env_default = get_env().get('NETRA_DEFAULT_LLM_MODEL')
         if env_default:
             try:
                 return cls(env_default)
@@ -55,7 +56,7 @@ class LLMModel(Enum):
                 pass  # Fall through to default
         
         # Use GEMINI_2_5_PRO for tests by default
-        if os.getenv('TESTING') == 'true' or os.getenv('TEST_ENV'):
+        if get_env().get('TESTING') == 'true' or get_env().get('TEST_ENV'):
             return cls.GEMINI_2_5_PRO
         
         # Default to GEMINI_2_5_FLASH for non-test environments

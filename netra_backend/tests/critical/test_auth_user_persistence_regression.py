@@ -1,3 +1,4 @@
+from shared.isolated_environment import get_env
 """
 Regression tests for auth service user persistence.
 Ensures auth service creates real database users, not just tokens.
@@ -267,7 +268,7 @@ class TestAuthServiceIntegration:
         
         # Test that database URL format is correct
         default_url = "postgresql+asyncpg://postgres:postgres@localhost:5432/apex_development"
-        db_url = os.getenv("DATABASE_URL", default_url)
+        db_url = get_env().get("DATABASE_URL", default_url)
         
         # Verify URL format is compatible with async SQLAlchemy
         assert ("postgresql+asyncpg://" in db_url or "postgresql://" in db_url or 

@@ -1,3 +1,4 @@
+from shared.isolated_environment import get_env
 #!/usr/bin/env python3
 """
 Category Configuration Loader - YAML-based configuration with environment overrides
@@ -138,7 +139,7 @@ class CategoryConfigLoader:
         self.environments_dir = self.config_dir / "environments"
         
         # Environment configuration
-        self.current_environment = os.getenv("TEST_ENVIRONMENT", "local")
+        self.current_environment = get_env().get("TEST_ENVIRONMENT", "local")
         self.load_env_files()
         
         # Loaded configuration
@@ -855,7 +856,7 @@ class CategoryConfigLoader:
         
         if environment in required_env_vars:
             for var in required_env_vars[environment]:
-                if not os.getenv(var):
+                if not get_env().get(var):
                     warnings.append(f"Environment variable '{var}' not set for environment '{environment}'")
         
         return warnings

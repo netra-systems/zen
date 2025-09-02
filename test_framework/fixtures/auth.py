@@ -1,3 +1,4 @@
+from shared.isolated_environment import get_env
 """
 Authentication Test Fixtures
 
@@ -55,7 +56,7 @@ class MockAuthToken:
     def __init__(self, user_id: str, permissions: List[str] = None,
                  expires_in: int = 3600, use_real_jwt: bool = False):
         # Environment guard - prevent mock tokens in production
-        current_env = os.getenv("NETRA_ENV", "development")
+        current_env = get_env().get("NETRA_ENV", "development")
         if current_env == "production":
             raise ValueError("Mock tokens are not allowed in production environment")
             
@@ -71,7 +72,7 @@ class MockAuthToken:
     
     def _create_real_jwt_token(self) -> str:
         """Create a real JWT token for integration/e2e tests."""
-        secret = os.getenv("JWT_SECRET", "test_secret_key")
+        secret = get_env().get("JWT_SECRET", "test_secret_key")
         payload = {
             "sub": self.user_id,
             "permissions": self.permissions,
@@ -190,7 +191,7 @@ class MockJWTManager:
     
     def __init__(self, secret_key: str = "test_secret", use_real_jwt: bool = False):
         # Environment guard - prevent usage in production
-        current_env = os.getenv("NETRA_ENV", "development")
+        current_env = get_env().get("NETRA_ENV", "development")
         if current_env == "production":
             raise ValueError("Mock JWT manager is not allowed in production environment")
             
@@ -639,14 +640,14 @@ def create_real_jwt_token(user_id: str, permissions: List[str] = None,
     Raises:
         ValueError: If JWT library is not available or in production environment
     """
-    current_env = os.getenv("NETRA_ENV", "development")
+    current_env = get_env().get("NETRA_ENV", "development")
     if current_env == "production":
         raise ValueError("Real JWT creation is not allowed in production environment")
         
     if not JWT_AVAILABLE:
         raise ValueError("JWT library not available. Install with: pip install pyjwt")
     
-    secret = os.getenv("JWT_SECRET", "test_secret_key")
+    secret = get_env().get("JWT_SECRET", "test_secret_key")
     payload = {
         "sub": user_id,
         "permissions": permissions or [],

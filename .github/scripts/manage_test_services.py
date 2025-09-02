@@ -319,17 +319,17 @@ class TestServiceManager:
             # Stop all services and remove volumes
             self.stop_services()
             
-            # Remove any dangling test containers
+            # Remove any dangling test containers - SAFE: Interactive mode (NO -f flag)
             subprocess.run([
-                "docker", "container", "prune", "-f",
+                "docker", "container", "prune", 
                 "--filter", "label=com.docker.compose.project=netra-test"
-            ], capture_output=True)
+            ], input="y\n", text=True, capture_output=True)
             
-            # Remove test volumes  
+            # Remove test volumes - SAFE: Interactive mode (NO -f flag)
             subprocess.run([
-                "docker", "volume", "prune", "-f",
+                "docker", "volume", "prune",
                 "--filter", "label=com.docker.compose.project=netra-test"
-            ], capture_output=True)
+            ], input="y\n", text=True, capture_output=True)
             
             logger.info("✅ Cleanup completed")
             

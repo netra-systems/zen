@@ -1,3 +1,4 @@
+from shared.isolated_environment import get_env
 #!/usr/bin/env python3
 """
 Comprehensive test for Redis session management flow:
@@ -26,9 +27,9 @@ import aiohttp
 import pytest
 import redis.asyncio as redis
 
-BACKEND_URL = os.getenv("BACKEND_URL", "http://localhost:8000")
-REDIS_URL = os.getenv("REDIS_URL", "redis://localhost:6379")
-REDIS_CLUSTER_URLS = os.getenv("REDIS_CLUSTER_URLS", "redis://localhost:6379,redis://localhost:6380,redis://localhost:6381").split(",")
+BACKEND_URL = get_env().get("BACKEND_URL", "http://localhost:8000")
+REDIS_URL = get_env().get("REDIS_URL", "redis://localhost:6379")
+REDIS_CLUSTER_URLS = get_env().get("REDIS_CLUSTER_URLS", "redis://localhost:6379,redis://localhost:6380,redis://localhost:6381").split(",")
 
 class RedisSessionTester:
     """Test Redis session management flow."""

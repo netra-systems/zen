@@ -1,3 +1,4 @@
+from shared.isolated_environment import get_env
 #!/usr/bin/env python3
 """
 Example usage of the Grafana Analytics Service
@@ -151,17 +152,17 @@ def validate_environment_variables():
     logger.info("Validating environment variables...")
     
     for var in required_vars:
-        if not os.getenv(var):
+        if not get_env().get(var):
             logger.warning(f"Required environment variable {var} not set, using default")
     
     for var in optional_vars:
-        if not os.getenv(var):
+        if not get_env().get(var):
             logger.info(f"Optional environment variable {var} not set, using default")
     
     # Log current configuration (without sensitive info)
-    logger.info(f"Grafana URL: {os.getenv('GRAFANA_API_URL', 'http://localhost:3000')}")
-    logger.info(f"ClickHouse URL: {os.getenv('CLICKHOUSE_ANALYTICS_URL', 'clickhouse://localhost:8123/analytics')}")
-    logger.info(f"Redis URL: {os.getenv('REDIS_ANALYTICS_URL', 'redis://localhost:6379/2')}")
+    logger.info(f"Grafana URL: {get_env().get('GRAFANA_API_URL', 'http://localhost:3000')}")
+    logger.info(f"ClickHouse URL: {get_env().get('CLICKHOUSE_ANALYTICS_URL', 'clickhouse://localhost:8123/analytics')}")
+    logger.info(f"Redis URL: {get_env().get('REDIS_ANALYTICS_URL', 'redis://localhost:6379/2')}")
 
 
 async def main():
@@ -211,7 +212,7 @@ async def main():
     
     print("\n" + "=" * 60)
     print("You can now access your dashboards in Grafana:")
-    grafana_url = os.getenv('GRAFANA_API_URL', 'http://localhost:3000')
+    grafana_url = get_env().get('GRAFANA_API_URL', 'http://localhost:3000')
     print(f"  - Executive Overview: {grafana_url}/d/executive_overview_001")
     print(f"  - Prompt Analytics: {grafana_url}/d/prompt_analytics_001")
     print(f"  - User Behavior: {grafana_url}/d/user_behavior_001")

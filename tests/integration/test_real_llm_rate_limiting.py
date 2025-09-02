@@ -6,6 +6,7 @@ import pytest
 # NOTE: Assuming the agent implementation lives in a path like this.
 # This will likely need to be adjusted.
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
+from shared.isolated_environment import get_env
 
 
 @pytest.mark.slow
@@ -15,7 +16,7 @@ class TestRealLlmRateLimiting:
     @pytest.fixture
     def llm_api_key(self):
         """Fixture to get a real LLM API key from environment variables."""
-        api_key = os.getenv("REAL_LLM_API_KEY")
+        api_key = get_env().get("REAL_LLM_API_KEY")
         if not api_key:
             pytest.skip("REAL_LLM_API_KEY environment variable not set.")
         return api_key

@@ -1,3 +1,4 @@
+from shared.isolated_environment import get_env
 """
 UNIFIED TEST CONFIGURATION
 ==========================
@@ -132,16 +133,16 @@ ENVIRONMENTS = {
     },
     "dev": {
         "name": "Development Environment",
-        "database_url": os.getenv("DEV_DATABASE_URL"),
-        "redis_url": os.getenv("DEV_REDIS_URL"),
+        "database_url": get_env().get("DEV_DATABASE_URL"),
+        "redis_url": get_env().get("DEV_REDIS_URL"),
         "use_mocks": False,
         "real_llm": False,
         "api_base": "https://dev.netra.systems"
     },
     "staging": {
         "name": "Staging Environment",
-        "database_url": os.getenv("STAGING_DATABASE_URL"),
-        "redis_url": os.getenv("STAGING_REDIS_URL"),
+        "database_url": get_env().get("STAGING_DATABASE_URL"),
+        "redis_url": get_env().get("STAGING_REDIS_URL"),
         "use_mocks": False,
         "real_llm": True,
         "api_base": "https://staging.netra.systems"

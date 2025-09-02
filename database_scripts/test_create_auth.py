@@ -1,3 +1,4 @@
+from shared.isolated_environment import get_env
 # Create test_staging_cross_service_auth_propagation.py
 content = """\"\"\"
 Staging Cross-Service Authentication Propagation Tests

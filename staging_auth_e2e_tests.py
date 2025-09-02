@@ -1,3 +1,4 @@
+from shared.isolated_environment import get_env
 #!/usr/bin/env python3
 """
 Critical Authentication Cross-System E2E Tests for GCP Staging Environment

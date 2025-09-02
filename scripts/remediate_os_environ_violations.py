@@ -1,3 +1,4 @@
+from shared.isolated_environment import get_env
 #!/usr/bin/env python3
 """
 AUTOMATED OS.ENVIRON VIOLATIONS REMEDIATION SCRIPT

@@ -1,3 +1,4 @@
+from shared.isolated_environment import get_env
 """Dev Login Cold Start Integration Tests (L3)
 
 Tests dev login functionality during cold start scenarios.

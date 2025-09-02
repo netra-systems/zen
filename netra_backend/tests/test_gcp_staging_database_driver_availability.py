@@ -1,3 +1,4 @@
+from shared.isolated_environment import get_env
 """
 GCP Staging Database Driver Availability Tests
 Failing tests that replicate database driver availability issues found in staging logs
@@ -187,7 +188,7 @@ class TestDatabaseDriverVersionCompatibility:
     def _is_production_environment(self) -> bool:
         """Check if running in production environment"""
         import os
-        return os.getenv('ENVIRONMENT') in ['staging', 'production']
+        return get_env().get('ENVIRONMENT') in ['staging', 'production']
 
 
 class TestDatabaseDriverDeploymentIssues:

@@ -1,3 +1,4 @@
+from shared.isolated_environment import get_env
 #!/usr/bin/env python
 """
 Seed staging environment with test data for comprehensive testing.
@@ -42,7 +43,7 @@ class StagingDataSeeder:
     """Seed staging environment with test data"""
     
     def __init__(self, pr_number: str = None):
-        self.pr_number = pr_number or os.getenv("PR_NUMBER", "test")
+        self.pr_number = pr_number or get_env().get("PR_NUMBER", "test")
         self.user_repo = UserRepository()
         self.thread_repo = ThreadRepository()
         self.message_repo = MessageRepository()

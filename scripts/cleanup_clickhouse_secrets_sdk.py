@@ -1,3 +1,4 @@
+from shared.isolated_environment import get_env
 #!/usr/bin/env python3
 """Clean up duplicate/incorrect ClickHouse secrets from GCP Secret Manager using SDK.
 

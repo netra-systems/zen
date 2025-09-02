@@ -1,5 +1,6 @@
 import os
 import sys
+from shared.isolated_environment import get_env
 
 # Change CWD to project root directory
 project_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))

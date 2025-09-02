@@ -1,3 +1,4 @@
+from shared.isolated_environment import get_env
 #!/usr/bin/env python
 """MINIMAL WebSocket Bridge Lifecycle Test
 

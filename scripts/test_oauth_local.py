@@ -1,3 +1,4 @@
+from shared.isolated_environment import get_env
 #!/usr/bin/env python3
 """
 Local OAuth Testing Script with Enhanced Debugging
@@ -57,11 +58,11 @@ class OAuthLocalTester:
         console.print("\n[bold cyan]1. Checking Environment Configuration[/bold cyan]")
         
         env_vars = {
-            'OAUTH_GOOGLE_CLIENT_ID_ENV': os.getenv('OAUTH_GOOGLE_CLIENT_ID_ENV'),
-            'OAUTH_GOOGLE_CLIENT_SECRET_ENV': os.getenv('OAUTH_GOOGLE_CLIENT_SECRET_ENV'),
-            'JWT_SECRET_KEY': os.getenv('JWT_SECRET_KEY'),
-            'AUTH_SERVICE_URL': os.getenv('AUTH_SERVICE_URL'),
-            'FRONTEND_URL': os.getenv('FRONTEND_URL')
+            'OAUTH_GOOGLE_CLIENT_ID_ENV': get_env().get('OAUTH_GOOGLE_CLIENT_ID_ENV'),
+            'OAUTH_GOOGLE_CLIENT_SECRET_ENV': get_env().get('OAUTH_GOOGLE_CLIENT_SECRET_ENV'),
+            'JWT_SECRET_KEY': get_env().get('JWT_SECRET_KEY'),
+            'AUTH_SERVICE_URL': get_env().get('AUTH_SERVICE_URL'),
+            'FRONTEND_URL': get_env().get('FRONTEND_URL')
         }
         
         config_table = Table(show_header=True, header_style="bold magenta")
@@ -237,7 +238,7 @@ class OAuthLocalTester:
         console.print("\n[bold cyan]5. Testing Token Generation[/bold cyan]")
         
         # Try dev login if available
-        if os.getenv('ALLOW_DEV_LOGIN') == 'true':
+        if get_env().get('ALLOW_DEV_LOGIN') == 'true':
             try:
                 response = await self.session.post(
                     f"{self.backend_url}/auth/dev_login",

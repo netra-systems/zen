@@ -211,7 +211,7 @@ def main():
         print("\nTo fix these violations:")
         print("1. Import: from shared.isolated_environment import get_env")
         print("2. Replace os.environ['KEY'] = 'value' with get_env().set('KEY', 'value', 'source')")
-        print("3. Replace os.getenv('KEY') with get_env().get('KEY')")
+        print("3. Replace get_env().get('KEY') with get_env().get('KEY')")
         print("4. For test files, use test_framework.environment_isolation fixtures")
         
         if args.strict:

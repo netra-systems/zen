@@ -1,3 +1,4 @@
+from shared.isolated_environment import get_env
 #!/usr/bin/env python3
 """
 Test Service Monitor
@@ -27,33 +28,33 @@ class TestServiceMonitor:
         self.postgres_url = self._build_postgres_url()
         self.redis_url = self._build_redis_url()
         self.clickhouse_config = self._build_clickhouse_config()
-        self.check_interval = int(os.getenv("CHECK_INTERVAL", "5"))  # seconds
+        self.check_interval = int(get_env().get("CHECK_INTERVAL", "5"))  # seconds
         self.service_status = {}
         self.last_check = {}
         
     def _build_postgres_url(self) -> str:
         """Build PostgreSQL connection URL."""
-        host = os.getenv("POSTGRES_HOST", "test-postgres")
-        port = os.getenv("POSTGRES_PORT", "5432") 
-        user = os.getenv("POSTGRES_USER", "test_user")
-        password = os.getenv("POSTGRES_PASSWORD", "test_pass")
-        db = os.getenv("POSTGRES_DB", "netra_test")
+        host = get_env().get("POSTGRES_HOST", "test-postgres")
+        port = get_env().get("POSTGRES_PORT", "5432") 
+        user = get_env().get("POSTGRES_USER", "test_user")
+        password = get_env().get("POSTGRES_PASSWORD", "test_pass")
+        db = get_env().get("POSTGRES_DB", "netra_test")
         return f"postgresql://{user}:{password}@{host}:{port}/{db}"
     
     def _build_redis_url(self) -> str:
         """Build Redis connection URL."""
-        host = os.getenv("REDIS_HOST", "test-redis")
-        port = os.getenv("REDIS_PORT", "6379")
+        host = get_env().get("REDIS_HOST", "test-redis")
+        port = get_env().get("REDIS_PORT", "6379")
         return f"redis://{host}:{port}/0"
     
     def _build_clickhouse_config(self) -> Dict:
         """Build ClickHouse connection config."""
         return {
-            "host": os.getenv("CLICKHOUSE_HOST", "test-clickhouse"),
-            "port": int(os.getenv("CLICKHOUSE_PORT", "8123")),
-            "user": os.getenv("CLICKHOUSE_USER", "test_user"),
-            "password": os.getenv("CLICKHOUSE_PASSWORD", "test_pass"),
-            "database": os.getenv("CLICKHOUSE_DB", "netra_test_analytics")
+            "host": get_env().get("CLICKHOUSE_HOST", "test-clickhouse"),
+            "port": int(get_env().get("CLICKHOUSE_PORT", "8123")),
+            "user": get_env().get("CLICKHOUSE_USER", "test_user"),
+            "password": get_env().get("CLICKHOUSE_PASSWORD", "test_pass"),
+            "database": get_env().get("CLICKHOUSE_DB", "netra_test_analytics")
         }
     
     async def check_postgres_health(self) -> Dict:
@@ -298,7 +299,7 @@ class TestServiceMonitor:
         runner = web.AppRunner(app)
         await runner.setup()
         
-        port = int(os.getenv("PORT", "8080"))
+        port = int(get_env().get("PORT", "8080"))
         site = web.TCPSite(runner, "0.0.0.0", port)
         await site.start()
         

@@ -1,3 +1,4 @@
+from shared.isolated_environment import get_env
 """Unit Tests for Unified Configuration System
 
 These tests validate the core functionality of the unified configuration system

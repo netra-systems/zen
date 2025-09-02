@@ -1,3 +1,4 @@
+from shared.isolated_environment import get_env
 """
 Critical ClickHouse Reliability Tests - Cycles 16-20
 Tests revenue-critical ClickHouse operations and failure scenarios.
@@ -34,7 +35,7 @@ class TestClickHouseReliability:
     async def clickhouse_manager(self):
         """Create isolated ClickHouse manager for testing."""
         # Skip if ClickHouse is disabled in testing environment
-        if os.getenv("CLICKHOUSE_ENABLED", "false").lower() == "false":
+        if get_env().get("CLICKHOUSE_ENABLED", "false").lower() == "false":
             pytest.skip("ClickHouse disabled for testing environment")
         
         manager = ClickHouseManager()

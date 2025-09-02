@@ -1,3 +1,4 @@
+from shared.isolated_environment import get_env
 """
 Isolated conftest for WebSocket bridge tests that don't require real services.
 This allows us to test the bridge functionality without Docker dependencies.

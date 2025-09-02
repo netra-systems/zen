@@ -1,3 +1,4 @@
+from shared.isolated_environment import get_env
 """
 Central Configuration Validator - Single Source of Truth
 

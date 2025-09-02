@@ -1,3 +1,4 @@
+from shared.isolated_environment import get_env
 """
 Test Auth Service Staging URL Configuration
 Tests to prevent regression of localhost:3000 URLs in staging environment

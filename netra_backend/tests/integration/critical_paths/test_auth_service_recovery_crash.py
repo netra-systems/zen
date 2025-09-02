@@ -1,3 +1,4 @@
+from shared.isolated_environment import get_env
 """Auth Service Recovery After Crash L3 Integration Tests
 
 Tests auth service resilience and recovery mechanisms after unexpected crashes,

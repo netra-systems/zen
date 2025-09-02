@@ -1,3 +1,4 @@
+from shared.isolated_environment import get_env
 """Migrate all hardcoded LLM model references to use centralized configuration.
 
 This script updates all test files and source code to use the standardized
@@ -49,8 +50,8 @@ class LLMModelMigrator:
             r"'OPENAI_API_KEY'": "'GOOGLE_API_KEY'",
             r'os\.environ\.get\("OPENAI_API_KEY"': 'os.environ.get("GOOGLE_API_KEY"',
             r"os\.environ\.get\('OPENAI_API_KEY'": "os.environ.get('GOOGLE_API_KEY'",
-            r'os\.getenv\("OPENAI_API_KEY"': 'os.getenv("GOOGLE_API_KEY"',
-            r"os\.getenv\('OPENAI_API_KEY'": "os.getenv('GOOGLE_API_KEY'",
+            r'os\.getenv\("OPENAI_API_KEY"': 'get_env().get("GOOGLE_API_KEY"',
+            r"os\.getenv\('OPENAI_API_KEY'": "get_env().get('GOOGLE_API_KEY'",
         }
         
         # Files to skip (already migrated or special cases)

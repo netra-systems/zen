@@ -58,8 +58,8 @@ class OSEnvironAnalyzer(ast.NodeVisitor):
         self.generic_visit(node)
         
     def visit_Call(self, node):
-        """Detect os.getenv() and os.environ.get() patterns."""
-        # Check for os.getenv()
+        """Detect get_env().get() and os.environ.get() patterns."""
+        # Check for get_env().get()
         if isinstance(node.func, ast.Attribute):
             if isinstance(node.func.value, ast.Name) and node.func.value.id == 'os':
                 if node.func.attr == 'getenv':
@@ -67,13 +67,13 @@ class OSEnvironAnalyzer(ast.NodeVisitor):
                     if self._has_justification_marker(line_no):
                         self.justified_calls.append({
                             'line': line_no,
-                            'type': 'os.getenv()',
+                            'type': 'get_env().get()',
                             'justified': True
                         })
                     else:
                         self.getenv_violations.append({
                             'line': line_no,
-                            'type': 'os.getenv()',
+                            'type': 'get_env().get()',
                             'code': self._get_line_content(line_no)
                         })
                         
@@ -214,7 +214,7 @@ class TestOSEnvironViolations:
         )
         
     def test_no_os_getenv_usage(self, project_root, allowed_files):
-        """Test 2: No os.getenv() usage outside config system."""
+        """Test 2: No get_env().get() usage outside config system."""
         violations = []
         
         for root, dirs, files in os.walk(project_root):
@@ -249,7 +249,7 @@ class TestOSEnvironViolations:
                     continue
                     
         assert len(violations) == 0, (
-            f"Found {len(violations)} os.getenv() violations:\n" +
+            f"Found {len(violations)} get_env().get() violations:\n" +
             "\n".join([f"  {v['file']}:{v['line']}\n    {v['code']}" 
                       for v in violations[:10]])
         )
@@ -351,7 +351,7 @@ class TestOSEnvironViolations:
         access_patterns = {
             'subscript': [],  # env.get('KEY')
             'get': [],        # env.get('KEY')
-            'getenv': [],     # os.getenv('KEY')
+            'getenv': [],     # get_env().get('KEY')
             'config': []      # Proper config usage
         }
         

@@ -1,3 +1,4 @@
+from shared.isolated_environment import get_env
 """
 Integration test for frontend startup issues during dev launcher.
 Tests frontend service configuration, build process, and startup dependencies.
@@ -238,7 +239,7 @@ class TestFrontendStartupIssues:
         
         found_vars = {}
         for var in frontend_env_vars:
-            value = os.getenv(var)
+            value = get_env().get(var)
             if value:
                 found_vars[var] = value
         

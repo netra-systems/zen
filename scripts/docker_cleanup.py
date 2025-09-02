@@ -13,6 +13,11 @@ import argparse
 from datetime import datetime, timedelta
 import re
 import os
+
+
+class SecurityError(Exception):
+    """Critical security exception for Docker force flag violations."""
+    pass
 from pathlib import Path
 
 # Add project root to path
@@ -28,6 +33,19 @@ try:
 except ImportError:
     CENTRALIZED_MANAGER_AVAILABLE = False
     UnifiedDockerManager = None
+
+# CRITICAL SECURITY: Import Docker Force Flag Guardian
+try:
+    from test_framework.docker_force_flag_guardian import (
+        DockerForceFlagGuardian,
+        DockerForceFlagViolation,
+        validate_docker_command
+    )
+    FORCE_FLAG_GUARDIAN_AVAILABLE = True
+except ImportError:
+    print("WARNING: Docker Force Flag Guardian not available - force flags will not be validated")
+    FORCE_FLAG_GUARDIAN_AVAILABLE = False
+    validate_docker_command = lambda x: None
 
 
 class DockerCleaner:
@@ -64,18 +82,34 @@ class DockerCleaner:
                 print(f"[WARNING] Could not initialize centralized manager: {e}")
                 self.use_centralized = False
     
-    def run_command(self, cmd: List[str], capture_output: bool = True) -> Optional[str]:
+    def run_command(self, cmd: List[str], capture_output: bool = True, input_data: str = None) -> Optional[str]:
         """
-        Execute a Docker command.
+        Execute a Docker command with CRITICAL force flag protection.
         
         Args:
             cmd: Command to execute
             capture_output: Whether to capture output
+            input_data: Input to send to command (for interactive confirmations)
             
         Returns:
             Command output if captured, None otherwise
+            
+        Raises:
+            SecurityError: If force flags detected (CRITICAL PROTECTION)
         """
         try:
+            # 🚨 CRITICAL SECURITY: Validate command for force flags using centralized guardian
+            cmd_str = ' '.join(cmd)
+            if FORCE_FLAG_GUARDIAN_AVAILABLE:
+                try:
+                    validate_docker_command(cmd_str)
+                except DockerForceFlagViolation as e:
+                    raise SecurityError(f"CRITICAL DOCKER SECURITY VIOLATION: {e}")
+            else:
+                # Fallback protection if guardian unavailable
+                if any(flag in cmd_str for flag in ['-f', '--force']):
+                    raise SecurityError(f"FORBIDDEN: Force flag detected in command: {cmd_str}")
+                
             if self.dry_run and any(action in cmd for action in ['rm', 'rmi', 'prune', 'remove']):
                 print(f"[DRY RUN] Would execute: {' '.join(cmd)}")
                 return None
@@ -84,6 +118,7 @@ class DockerCleaner:
                 cmd,
                 capture_output=capture_output,
                 text=True,
+                input=input_data,
                 check=True
             )
             return result.stdout if capture_output else None
@@ -237,13 +272,17 @@ class DockerCleaner:
         print(f"Found {len(images_to_remove)} old unused images")
         for image in images_to_remove:
             print(f"  Removing: {image['repo']}:{image['tag']} ({image['id'][:12]})")
-            # Try graceful removal first, then force if needed
-            result = self.run_command(['docker', 'rmi', image['id']], capture_output=True)
-            if result and result.returncode != 0:
-                # If graceful removal fails, use force (needed for images with dependencies)
-                print(f"    Graceful removal failed, using force removal")
-                self.run_command(['docker', 'rmi', '-f', image['id']])
-            self.stats['images_removed'] += 1
+            # CRITICAL: Use safe removal without force flags to prevent daemon crashes
+            try:
+                result = self.run_command(['docker', 'rmi', image['id']], capture_output=True)
+                self.stats['images_removed'] += 1
+                print(f"    Successfully removed image {image['id'][:12]}")
+            except (subprocess.CalledProcessError, SecurityError) as e:
+                # SAFE: Skip image removal if it fails rather than forcing
+                print(f"    Warning: Could not remove image {image['id'][:12]} - possibly still in use")
+                print(f"    Reason: {e}")
+                print(f"    SAFE: Skipping to prevent Docker daemon crash")
+                continue
     
     def clean_unused_volumes(self) -> None:
         """Remove unused volumes."""
@@ -323,9 +362,10 @@ class DockerCleaner:
             print("[DRY RUN] Would clean build cache")
         else:
             print("Cleaning build cache...")
+            # SAFE: Interactive confirmation (NO --force flag)
             output = self.run_command([
-                'docker', 'builder', 'prune', '--force', '--all'
-            ])
+                'docker', 'builder', 'prune', '--all'
+            ], input_data='y\n')
             if output:
                 # Extract reclaimed space from output
                 match = re.search(r'reclaimed:\s*([\d.]+\s*[KMGT]?B)', output, re.IGNORECASE)
@@ -341,7 +381,8 @@ class DockerCleaner:
         """
         print("\n=== System Prune ===")
         
-        cmd = ['docker', 'system', 'prune', '--force']
+        # SAFE: Interactive confirmation (NO --force flag)
+        cmd = ['docker', 'system', 'prune']
         if all_images:
             cmd.append('--all')
         cmd.append('--volumes')
@@ -350,7 +391,8 @@ class DockerCleaner:
             print(f"[DRY RUN] Would execute: {' '.join(cmd)}")
         else:
             print("Running system prune...")
-            output = self.run_command(cmd)
+            # SAFE: Provide interactive confirmation automatically
+            output = self.run_command(cmd, input_data='y\n')
             if output:
                 print(output)
     

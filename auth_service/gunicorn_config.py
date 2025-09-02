@@ -15,7 +15,7 @@ except ImportError:
     def get_env():
         class FallbackEnv:
             def get(self, key, default=None):
-                return os.getenv(key, default)
+                return get_env().get(key, default)
         return FallbackEnv()
 
 # Server socket

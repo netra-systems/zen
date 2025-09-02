@@ -1,3 +1,4 @@
+from shared.isolated_environment import get_env
 """Test to reproduce and fix the database health checker sslmode issue.
 
 This test recreates the exact issue seen in GCP staging where the health checker

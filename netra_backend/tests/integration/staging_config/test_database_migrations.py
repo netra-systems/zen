@@ -1,3 +1,4 @@
+from shared.isolated_environment import get_env
 """
 Test Database Migrations
 
@@ -113,7 +114,7 @@ class TestDatabaseMigrations(StagingConfigTestBase):
         self.skip_if_not_staging()
         
         # This test is dangerous in staging, skip if not explicitly enabled
-        if not os.getenv('TEST_MIGRATION_ROLLBACK'):
+        if not get_env().get('TEST_MIGRATION_ROLLBACK'):
             self.skipTest("Migration rollback test disabled for safety")
             
         try:

@@ -2029,9 +2029,21 @@ class UnifiedDockerManager:
             # Wait for containers to be fully killed
             await asyncio.sleep(3)
             
-            # Remove containers (safer after kill + delay)
+            # Remove containers safely (CRITICAL: NO force flag to prevent daemon crashes)
+            # First ensure containers are fully stopped
+            cmd_stop = ["docker-compose", "-f", self._get_compose_file(),
+                       "-p", self._get_project_name(), "stop", "--timeout", "5"]
+            if services:
+                cmd_stop.extend(services)
+            
+            subprocess.run(cmd_stop, capture_output=True, text=True, timeout=30)
+            
+            # Wait additional time for cleanup
+            await asyncio.sleep(2)
+            
+            # Then remove safely without force flag
             cmd_rm = ["docker-compose", "-f", self._get_compose_file(),
-                      "-p", self._get_project_name(), "rm", "-f"]
+                      "-p", self._get_project_name(), "rm", "--timeout", "10"]
             if services:
                 cmd_rm.extend(services)
             

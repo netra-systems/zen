@@ -1,3 +1,4 @@
+from shared.isolated_environment import get_env
 """
 Test endpoints for development - bypasses authentication
 ONLY enabled in development environment
@@ -15,7 +16,7 @@ logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/test", tags=["test"])
 
 # Only enable in development
-ENVIRONMENT = os.getenv("ENVIRONMENT", "development").lower()
+ENVIRONMENT = get_env().get("ENVIRONMENT", "development").lower()
 
 @router.post("/threads")
 async def create_test_thread(request: Dict[str, Any]) -> Dict[str, Any]:

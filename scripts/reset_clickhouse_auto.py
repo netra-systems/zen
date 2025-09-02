@@ -1,3 +1,4 @@
+from shared.isolated_environment import get_env
 """Auto-reset ClickHouse script - drops all tables without prompts."""
 
 import os

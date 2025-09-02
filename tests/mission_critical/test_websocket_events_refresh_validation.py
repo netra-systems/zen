@@ -1,3 +1,4 @@
+from shared.isolated_environment import get_env
 """
 MISSION CRITICAL: WebSocket Event Validation During Page Refresh
 
@@ -61,8 +62,8 @@ class WebSocketEventValidation:
     }
     
     def __init__(self):
-        self.frontend_url = os.getenv('FRONTEND_URL', 'http://localhost:3000')
-        self.jwt_secret = os.getenv('JWT_SECRET', 'test-secret-key')
+        self.frontend_url = get_env().get('FRONTEND_URL', 'http://localhost:3000')
+        self.jwt_secret = get_env().get('JWT_SECRET', 'test-secret-key')
         self.test_results: Dict[str, Any] = {
             'total': 0,
             'passed': 0,

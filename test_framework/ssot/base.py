@@ -92,7 +92,7 @@ class TestExecutionMetrics:
         }
 
 
-class BaseTestCase(ABC):
+class BaseTestCase(TestCase):
     """
     Single Source of Truth (SSOT) base test class for ALL tests in the system.
     

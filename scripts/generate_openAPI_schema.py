@@ -1,5 +1,6 @@
 import json
 import os
+from shared.isolated_environment import get_env
 
 # Set an environment variable to indicate that the application is being run
 # for schema generation. This must be done *before* importing any application

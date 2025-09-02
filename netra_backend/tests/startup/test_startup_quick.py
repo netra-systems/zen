@@ -1,3 +1,4 @@
+from shared.isolated_environment import get_env
 #!/usr/bin/env python
 """
 Quick Startup Validation Tests
@@ -27,7 +28,7 @@ async def test_clickhouse_configuration():
     )
     
     # In testing environment, should use mock
-    if os.getenv("ENVIRONMENT") == "testing":
+    if get_env().get("ENVIRONMENT") == "testing":
         assert use_mock_clickhouse() == True, "Should use mock in testing"
     
     # Check config is available
@@ -61,7 +62,7 @@ async def test_clickhouse_service_initialization():
 @pytest.mark.asyncio
 async def test_auth_service_config():
     """Test auth service configuration is accessible"""
-    auth_url = os.getenv("AUTH_SERVICE_URL", "http://localhost:3002")
+    auth_url = get_env().get("AUTH_SERVICE_URL", "http://localhost:3002")
     assert auth_url, "Auth service URL should be configured"
     
     # Validate URL format
@@ -70,7 +71,7 @@ async def test_auth_service_config():
 @pytest.mark.asyncio
 async def test_redis_configuration():
     """Test Redis configuration"""
-    redis_url = os.getenv("REDIS_URL", "")
+    redis_url = get_env().get("REDIS_URL", "")
     
     # Redis is optional but if configured, should be valid
     if redis_url:
@@ -110,7 +111,7 @@ async def test_environment_variables():
     missing_vars = []
     
     for var in required_vars:
-        if not os.getenv(var):
+        if not get_env().get(var):
             missing_vars.append(var)
     
     assert len(missing_vars) == 0, f"Missing environment variables: {missing_vars}"

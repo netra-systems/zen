@@ -1,3 +1,4 @@
+from shared.isolated_environment import get_env
 #!/usr/bin/env python3
 """
 Audit and validate OAuth secrets configuration in GCP staging.

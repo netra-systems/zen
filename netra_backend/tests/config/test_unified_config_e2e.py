@@ -1,3 +1,4 @@
+from shared.isolated_environment import get_env
 """End-to-End Tests for Unified Configuration System
 
 These tests validate the complete configuration flow from environment

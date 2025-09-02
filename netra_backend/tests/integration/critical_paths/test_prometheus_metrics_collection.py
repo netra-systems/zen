@@ -1,3 +1,4 @@
+from shared.isolated_environment import get_env
 #!/usr/bin/env python3
 """
 Comprehensive test for Prometheus metrics collection:
@@ -24,8 +25,8 @@ import aiohttp
 import pytest
 from prometheus_client.parser import text_string_to_metric_families
 
-BACKEND_URL = os.getenv("BACKEND_URL", "http://localhost:8000")
-METRICS_URL = os.getenv("METRICS_URL", f"{BACKEND_URL}/metrics")
+BACKEND_URL = get_env().get("BACKEND_URL", "http://localhost:8000")
+METRICS_URL = get_env().get("METRICS_URL", f"{BACKEND_URL}/metrics")
 
 class PrometheusMetricsTester:
     """Test Prometheus metrics collection."""

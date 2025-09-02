@@ -1,3 +1,4 @@
+from shared.isolated_environment import get_env
 #!/usr/bin/env python
 """
 Comprehensive Startup Tests - Elite Implementation
@@ -135,7 +136,7 @@ class AuthServiceValidator:
     """Validates auth service connectivity and configuration"""
     
     def __init__(self):
-        self.auth_url = os.getenv("AUTH_SERVICE_URL", "http://localhost:3002")
+        self.auth_url = get_env().get("AUTH_SERVICE_URL", "http://localhost:3002")
         self.timeout = aiohttp.ClientTimeout(total=5)
     
     async def validate_connectivity(self) -> "ValidationResult":
@@ -189,9 +190,9 @@ class ClickHouseValidator:
     """Validates ClickHouse connectivity and authentication"""
     
     def __init__(self):
-        self.host = os.getenv("CLICKHOUSE_HOST", "")
-        self.user = os.getenv("CLICKHOUSE_USER", "")
-        self.password = os.getenv("CLICKHOUSE_PASSWORD", "")
+        self.host = get_env().get("CLICKHOUSE_HOST", "")
+        self.user = get_env().get("CLICKHOUSE_USER", "")
+        self.password = get_env().get("CLICKHOUSE_PASSWORD", "")
     
     async def validate_authentication(self) -> "ValidationResult":
         """Validate ClickHouse authentication"""
@@ -250,7 +251,7 @@ class RedisValidator:
     """Validates Redis connectivity"""
     
     def __init__(self):
-        self.redis_url = os.getenv("REDIS_URL", "")
+        self.redis_url = get_env().get("REDIS_URL", "")
     
     async def validate_connection(self) -> "ValidationResult":
         """Validate Redis connection"""

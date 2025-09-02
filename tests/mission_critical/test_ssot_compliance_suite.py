@@ -522,7 +522,7 @@ class SSotComplianceSuite:
                 forbidden_patterns = [
                     'os.environ[',
                     'env.get(',
-                    'os.getenv(',
+                    'get_env().get(',
                     'environ['
                 ]
                 

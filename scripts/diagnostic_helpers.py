@@ -1,3 +1,4 @@
+from shared.isolated_environment import get_env
 """
 Diagnostic Helpers Module
 Support functions for startup diagnostics - separated to maintain 450-line limit

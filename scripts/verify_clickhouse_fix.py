@@ -1,3 +1,4 @@
+from shared.isolated_environment import get_env
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """Verify ClickHouse configuration fix for staging deployment.

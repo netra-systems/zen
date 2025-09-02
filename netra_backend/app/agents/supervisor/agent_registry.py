@@ -268,8 +268,7 @@ class AgentRegistry:
     
     def _register_reporting_agent(self) -> None:
         """Register reporting agent."""
-        self.register("reporting", ReportingSubAgent(
-            self.llm_manager, self.tool_dispatcher))
+        self.register("reporting", ReportingSubAgent())
     
     def _register_goals_triage_agent(self) -> None:
         """Register goals triage agent."""

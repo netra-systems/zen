@@ -1,3 +1,4 @@
+from shared.isolated_environment import get_env
 """L4 Compliance Audit Trail Critical Path Test
 
 Business Value Justification (BVJ):
@@ -88,12 +89,12 @@ class L4ComplianceAuditTrailTest(L4StagingCriticalPathTestBase):
         import os
         
         # Check if we're in mock mode for local testing
-        if os.getenv("L4_MOCK_MODE", "false").lower() == "true":
+        if get_env().get("L4_MOCK_MODE", "false").lower() == "true":
             print("L4_MOCK_MODE enabled - skipping staging connectivity validation")
             return
             
         # In local environment, use relaxed validation
-        if os.getenv("ENVIRONMENT") in ["local", "development", None]:
+        if get_env().get("ENVIRONMENT") in ["local", "development", None]:
             print("Local environment detected - using relaxed connectivity validation")
             # Only check auth service since it's typically running
             try:
@@ -278,7 +279,7 @@ class L4ComplianceAuditTrailTest(L4StagingCriticalPathTestBase):
         import os
         
         # In local/mock mode, create mock users
-        if os.getenv("L4_MOCK_MODE", "false").lower() == "true" or os.getenv("ENVIRONMENT") in ["local", "development", None]:
+        if get_env().get("L4_MOCK_MODE", "false").lower() == "true" or get_env().get("ENVIRONMENT") in ["local", "development", None]:
             return self._create_mock_test_users()
         
         test_users = []
@@ -341,7 +342,7 @@ class L4ComplianceAuditTrailTest(L4StagingCriticalPathTestBase):
         import os
         
         # In local/mock mode, skip endpoint validation
-        if os.getenv("L4_MOCK_MODE", "false").lower() == "true" or os.getenv("ENVIRONMENT") in ["local", "development", None]:
+        if get_env().get("L4_MOCK_MODE", "false").lower() == "true" or get_env().get("ENVIRONMENT") in ["local", "development", None]:
             print("Local mode: Skipping audit trail monitoring endpoint validation")
             return
         
@@ -370,7 +371,7 @@ class L4ComplianceAuditTrailTest(L4StagingCriticalPathTestBase):
         }
         
         # In local/mock mode, skip endpoint validation
-        if os.getenv("L4_MOCK_MODE", "false").lower() == "true" or os.getenv("ENVIRONMENT") in ["local", "development", None]:
+        if get_env().get("L4_MOCK_MODE", "false").lower() == "true" or get_env().get("ENVIRONMENT") in ["local", "development", None]:
             print("Local mode: Skipping compliance reporting endpoint validation")
             return
         

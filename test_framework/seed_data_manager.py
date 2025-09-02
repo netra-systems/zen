@@ -1,3 +1,4 @@
+from shared.isolated_environment import get_env
 """
 Seed Data Management for Real LLM Testing
 
@@ -681,18 +682,18 @@ async def get_seed_data_manager(config: Optional[TestEnvironmentConfig] = None) 
         if config is None:
             # Use environment-specific test configuration
             database_url = (
-                os.getenv('TEST_DATABASE_URL') or 
-                os.getenv('DATABASE_URL', 'postgresql://localhost/netra_test')
+                get_env().get('TEST_DATABASE_URL') or 
+                get_env().get('DATABASE_URL', 'postgresql://localhost/netra_test')
             )
             
             redis_url = (
-                os.getenv('TEST_REDIS_URL') or 
-                os.getenv('REDIS_URL')
+                get_env().get('TEST_REDIS_URL') or 
+                get_env().get('REDIS_URL')
             )
             
             clickhouse_url = (
-                os.getenv('TEST_CLICKHOUSE_URL') or 
-                os.getenv('CLICKHOUSE_URL')
+                get_env().get('TEST_CLICKHOUSE_URL') or 
+                get_env().get('CLICKHOUSE_URL')
             )
             
             config = TestEnvironmentConfig(

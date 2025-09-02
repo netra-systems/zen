@@ -1,3 +1,4 @@
+from shared.isolated_environment import get_env
 """Route module imports for FastAPI application factory."""
 
 def import_basic_route_modules() -> dict:
@@ -139,7 +140,7 @@ def _import_test_routers() -> dict:
     """Import test routers for development environment."""
     import os
     # Only import in development environment
-    if os.getenv("ENVIRONMENT", "development").lower() == "development":
+    if get_env().get("ENVIRONMENT", "development").lower() == "development":
         try:
             from netra_backend.app.api.test_endpoints import router as test_router
             return {"test_router": test_router}

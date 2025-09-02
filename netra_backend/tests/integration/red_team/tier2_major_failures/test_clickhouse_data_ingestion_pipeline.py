@@ -1,3 +1,4 @@
+from shared.isolated_environment import get_env
 """
 RED TEAM TEST 17: ClickHouse Data Ingestion Pipeline
 
@@ -88,7 +89,7 @@ class TestClickHouseDataIngestionPipeline:
         try:
             # Only run if ClickHouse is enabled
             import os
-            if os.getenv("CLICKHOUSE_ENABLED", "false").lower() == "false":
+            if get_env().get("CLICKHOUSE_ENABLED", "false").lower() == "false":
                 pytest.skip("ClickHouse disabled for testing environment")
             
             clickhouse_manager = ClickHouseManager()

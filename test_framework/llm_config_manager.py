@@ -1,3 +1,4 @@
+from shared.isolated_environment import get_env
 """Unified LLM Configuration Manager for Netra Test Framework.
 
 This is the SINGLE SOURCE OF TRUTH for all LLM test configuration.
@@ -152,12 +153,12 @@ class LLMConfigManager:
         
         config = LLMTestConfig(
             mode=mode,
-            timeout_seconds=int(os.getenv("TEST_LLM_TIMEOUT", "30")),
-            max_retries=int(os.getenv("TEST_LLM_RETRIES", "3")),
-            cost_budget_per_run=float(os.getenv("TEST_LLM_BUDGET", "50.0")),
-            rate_limit_per_minute=int(os.getenv("TEST_LLM_RATE_LIMIT", "60")),
-            parallel_execution=int(os.getenv("TEST_LLM_PARALLEL", "3")),
-            use_dedicated_env=os.getenv("TEST_USE_DEDICATED_ENV", "true").lower() == "true"
+            timeout_seconds=int(get_env().get("TEST_LLM_TIMEOUT", "30")),
+            max_retries=int(get_env().get("TEST_LLM_RETRIES", "3")),
+            cost_budget_per_run=float(get_env().get("TEST_LLM_BUDGET", "50.0")),
+            rate_limit_per_minute=int(get_env().get("TEST_LLM_RATE_LIMIT", "60")),
+            parallel_execution=int(get_env().get("TEST_LLM_PARALLEL", "3")),
+            use_dedicated_env=get_env().get("TEST_USE_DEDICATED_ENV", "true").lower() == "true"
         )
         
         # Validate configuration if real LLM is enabled
@@ -173,7 +174,7 @@ class LLMConfigManager:
         Mocks are forbidden in dev/staging/production.
         """
         # Check explicit mode setting first
-        explicit_mode = os.getenv(self.TEST_LLM_MODE_VAR)
+        explicit_mode = get_env().get(self.TEST_LLM_MODE_VAR)
         if explicit_mode:
             try:
                 return LLMTestMode(explicit_mode.lower())
@@ -181,7 +182,7 @@ class LLMConfigManager:
                 logger.warning(f"Invalid LLM test mode: {explicit_mode}, defaulting to real")
         
         # Check primary control variable (NETRA_REAL_LLM_ENABLED)
-        primary_setting = os.getenv(self.PRIMARY_LLM_VAR, "true").lower()  # Default to "true"
+        primary_setting = get_env().get(self.PRIMARY_LLM_VAR, "true").lower()  # Default to "true"
         if primary_setting == "false":
             logger.warning(
                 "Real LLM testing disabled via NETRA_REAL_LLM_ENABLED=false. "
@@ -192,9 +193,9 @@ class LLMConfigManager:
         # Check other environment variables for backward compatibility
         # Real LLM is enabled if ANY of these are true, or by default if none specified
         if (primary_setting == "true" or
-            os.getenv(self.ENABLE_REAL_LLM_VAR, "true").lower() == "true" or 
-            os.getenv("USE_REAL_LLM", "true").lower() == "true" or
-            os.getenv("TEST_USE_REAL_LLM", "true").lower() == "true"):  # Legacy support
+            get_env().get(self.ENABLE_REAL_LLM_VAR, "true").lower() == "true" or 
+            get_env().get("USE_REAL_LLM", "true").lower() == "true" or
+            get_env().get("TEST_USE_REAL_LLM", "true").lower() == "true"):  # Legacy support
             return LLMTestMode.REAL
         
         # Default to REAL mode (per CLAUDE.md - no mocks allowed)
@@ -214,7 +215,7 @@ class LLMConfigManager:
         
         for provider, key_options in key_mappings.items():
             for key in key_options:
-                value = os.getenv(key)
+                value = get_env().get(key)
                 if value:
                     api_keys[provider] = value
                     if not key.startswith('TEST_'):
@@ -306,17 +307,17 @@ class LLMConfigManager:
     def _configure_dedicated_test_environment(self):
         """Configure dedicated test environment with isolated resources."""
         # Database configuration for test environment
-        test_db_url = os.getenv("TEST_DATABASE_URL")
+        test_db_url = get_env().get("TEST_DATABASE_URL")
         if not test_db_url:
             # Fallback to main database with test schema
-            main_db_url = os.getenv("DATABASE_URL", "postgresql://localhost/netra_main")
+            main_db_url = get_env().get("DATABASE_URL", "postgresql://localhost/netra_main")
             test_db_url = main_db_url.replace("/netra_main", "/netra_test")
             os.environ["TEST_DATABASE_URL"] = test_db_url
         
         # Redis configuration with test namespace
-        test_redis_url = os.getenv("TEST_REDIS_URL")
+        test_redis_url = get_env().get("TEST_REDIS_URL")
         if not test_redis_url:
-            main_redis_url = os.getenv("REDIS_URL", "redis://localhost:6379/0")
+            main_redis_url = get_env().get("REDIS_URL", "redis://localhost:6379/0")
             # Use database index 1 for tests
             test_redis_url = main_redis_url.replace("/0", "/1")
             os.environ["TEST_REDIS_URL"] = test_redis_url
@@ -325,9 +326,9 @@ class LLMConfigManager:
         os.environ["TEST_REDIS_NAMESPACE"] = "test:"
         
         # ClickHouse configuration with test database
-        test_clickhouse_url = os.getenv("TEST_CLICKHOUSE_URL")
+        test_clickhouse_url = get_env().get("TEST_CLICKHOUSE_URL")
         if not test_clickhouse_url:
-            main_clickhouse_url = os.getenv("CLICKHOUSE_URL", "clickhouse://localhost:8123/netra_main")
+            main_clickhouse_url = get_env().get("CLICKHOUSE_URL", "clickhouse://localhost:8123/netra_main")
             test_clickhouse_url = main_clickhouse_url.replace("/netra_main", "/netra_test")
             os.environ["TEST_CLICKHOUSE_URL"] = test_clickhouse_url
         

@@ -1,3 +1,4 @@
+from shared.isolated_environment import get_env
 """
 Service-related test fixtures.
 Consolidates service mocks and fixtures from across the project.
@@ -250,10 +251,10 @@ async def isolated_redis_client():
         return
     
     # Configuration for Redis connection
-    redis_host = os.getenv("REDIS_HOST", "localhost")
-    redis_port = int(os.getenv("REDIS_PORT", "6379"))
-    redis_username = os.getenv("REDIS_USERNAME", "")
-    redis_password = os.getenv("REDIS_PASSWORD", "")
+    redis_host = get_env().get("REDIS_HOST", "localhost")
+    redis_port = int(get_env().get("REDIS_PORT", "6379"))
+    redis_username = get_env().get("REDIS_USERNAME", "")
+    redis_password = get_env().get("REDIS_PASSWORD", "")
     
     # Use database 15 for isolated testing to avoid conflicts
     test_database = 15

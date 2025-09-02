@@ -164,7 +164,7 @@ def test_environment_variables():
     
     print("Setting test environment variables...")
     for var in env_vars:
-        if not os.getenv(var):
+        if not get_env().get(var):
             os.environ[var] = "test_value"
     
     # Verify they're used
@@ -173,7 +173,7 @@ def test_environment_variables():
         cascade = ModelCascade()
         
         # Check if env vars are being read
-        if os.getenv("NACIS_TIER1_MODEL") == "test_value":
+        if get_env().get("NACIS_TIER1_MODEL") == "test_value":
             print("✅ NACIS_TIER1_MODEL: Recognized")
         
         from netra_backend.app.guardrails.input_filters import InputFilters

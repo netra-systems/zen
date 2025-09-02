@@ -1,3 +1,4 @@
+from shared.isolated_environment import get_env
 """
 Test Observability Pipeline
 
@@ -188,7 +189,7 @@ class TestObservabilityPipeline(StagingConfigTestBase):
         self.skip_if_not_staging()
         
         # Check if Grafana endpoint is configured
-        grafana_url = os.getenv('GRAFANA_URL', f"{self.staging_url}/grafana")
+        grafana_url = get_env().get('GRAFANA_URL', f"{self.staging_url}/grafana")
         
         async with httpx.AsyncClient() as client:
             try:
