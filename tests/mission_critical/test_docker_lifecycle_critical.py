@@ -945,10 +945,13 @@ class TestDockerLifecycleCritical:
         ], timeout=10)
         assert volume_result.returncode == 0, "Should create test volume"
         
-        # Simulate orphaning by removing container externally
+        # Simulate orphaning by removing container externally using safe method
         subprocess.run([
-            "docker", "rm", "-f", container_name
-        ], capture_output=True)
+            "docker", "stop", "-t", "10", container_name
+        ], capture_output=True, timeout=15)
+        subprocess.run([
+            "docker", "rm", container_name
+        ], capture_output=True, timeout=10)
         
         # Test our cleanup can handle orphaned resources
         container_cleanup = self.docker_manager.safe_container_remove(container_name, timeout=5)

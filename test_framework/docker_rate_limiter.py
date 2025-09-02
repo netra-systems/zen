@@ -19,6 +19,13 @@ from typing import List, Dict, Any, Optional
 from dataclasses import dataclass
 from contextlib import contextmanager
 
+# CRITICAL SECURITY IMPORT: Force flag guardian
+from test_framework.docker_force_flag_guardian import (
+    DockerForceFlagGuardian, 
+    DockerForceFlagViolation,
+    validate_docker_command
+)
+
 logger = logging.getLogger(__name__)
 
 
@@ -41,7 +48,7 @@ class DockerRateLimiter:
                  max_retries: int = 3,
                  base_backoff: float = 1.0):
         """
-        Initialize Docker rate limiter.
+        Initialize Docker rate limiter with CRITICAL security enforcement.
         
         Args:
             min_interval: Minimum seconds between operations
@@ -54,6 +61,11 @@ class DockerRateLimiter:
         self.max_retries = max_retries
         self.base_backoff = base_backoff
         
+        # CRITICAL SECURITY: Initialize force flag guardian
+        self.force_flag_guardian = DockerForceFlagGuardian(
+            audit_log_path="logs/docker_force_violations_rate_limiter.log"
+        )
+        
         # Thread synchronization
         self._lock = threading.RLock()
         self._last_operation_time = 0
@@ -64,16 +76,19 @@ class DockerRateLimiter:
         self._total_operations = 0
         self._failed_operations = 0
         self._rate_limited_operations = 0
+        self._force_flag_violations = 0
         
-        logger.info(f"Docker rate limiter initialized: min_interval={min_interval}s, "
-                   f"max_concurrent={max_concurrent}, max_retries={max_retries}")
+        logger.info(f"Docker rate limiter initialized with FORCE FLAG PROTECTION: "
+                   f"min_interval={min_interval}s, max_concurrent={max_concurrent}, "
+                   f"max_retries={max_retries}")
+        logger.critical("🛡️  FORCE FLAG GUARDIAN ACTIVE - Zero tolerance for -f/--force flags")
     
     def execute_docker_command(self, 
                              cmd: List[str], 
                              timeout: Optional[float] = 30,
                              **kwargs) -> DockerCommandResult:
         """
-        Execute Docker command with rate limiting and exponential backoff.
+        Execute Docker command with CRITICAL force flag validation, rate limiting and exponential backoff.
         
         Args:
             cmd: Docker command as list of strings
@@ -84,9 +99,20 @@ class DockerRateLimiter:
             DockerCommandResult with execution details
             
         Raises:
+            DockerForceFlagViolation: If force flags are detected (CRITICAL SECURITY)
             subprocess.TimeoutExpired: If command times out
             RuntimeError: If all retries fail
         """
+        # 🚨 CRITICAL SECURITY CHECK FIRST - NO EXCEPTIONS
+        try:
+            command_str = ' '.join(cmd) if isinstance(cmd, list) else str(cmd)
+            self.force_flag_guardian.validate_command(command_str)
+        except DockerForceFlagViolation as e:
+            self._force_flag_violations += 1
+            logger.critical(f"🚨 FORCE FLAG VIOLATION BLOCKED: {command_str}")
+            # Re-raise with no possibility of bypass
+            raise e
+        
         start_time = time.time()
         last_exception = None
         
@@ -203,12 +229,13 @@ class DockerRateLimiter:
             self.min_interval = original_interval
     
     def get_statistics(self) -> Dict[str, Any]:
-        """Get rate limiter statistics."""
+        """Get rate limiter statistics including CRITICAL force flag violations."""
         with self._lock:
             return {
                 "total_operations": self._total_operations,
                 "failed_operations": self._failed_operations,
                 "rate_limited_operations": self._rate_limited_operations,
+                "force_flag_violations": self._force_flag_violations,
                 "success_rate": (
                     (self._total_operations - self._failed_operations) / self._total_operations * 100
                     if self._total_operations > 0 else 0
@@ -218,7 +245,9 @@ class DockerRateLimiter:
                 "rate_limit_percentage": (
                     self._rate_limited_operations / self._total_operations * 100
                     if self._total_operations > 0 else 0
-                )
+                ),
+                "force_flag_guardian_status": "ACTIVE - ZERO TOLERANCE ENFORCED",
+                "guardian_audit_report": self.force_flag_guardian.audit_report()
             }
     
     def reset_statistics(self):
@@ -227,6 +256,7 @@ class DockerRateLimiter:
             self._total_operations = 0
             self._failed_operations = 0
             self._rate_limited_operations = 0
+            self._force_flag_violations = 0
     
     def health_check(self) -> bool:
         """
@@ -270,7 +300,7 @@ def get_docker_rate_limiter() -> DockerRateLimiter:
 
 def execute_docker_command(cmd: List[str], **kwargs) -> DockerCommandResult:
     """
-    Convenience function to execute Docker command with rate limiting.
+    Convenience function to execute Docker command with CRITICAL force flag validation and rate limiting.
     
     Args:
         cmd: Docker command as list of strings
@@ -278,6 +308,9 @@ def execute_docker_command(cmd: List[str], **kwargs) -> DockerCommandResult:
         
     Returns:
         DockerCommandResult with execution details
+        
+    Raises:
+        DockerForceFlagViolation: If force flags detected (CRITICAL SECURITY)
     """
     rate_limiter = get_docker_rate_limiter()
     return rate_limiter.execute_docker_command(cmd, **kwargs)
@@ -297,9 +330,9 @@ def docker_health_check() -> bool:
 # Legacy compatibility for direct subprocess usage
 def safe_subprocess_run(cmd: List[str], **kwargs) -> subprocess.CompletedProcess:
     """
-    Legacy compatibility wrapper for subprocess.run with Docker rate limiting.
+    Legacy compatibility wrapper for subprocess.run with CRITICAL Docker force flag validation.
     
-    This function maintains backward compatibility while adding rate limiting.
+    This function maintains backward compatibility while adding CRITICAL security enforcement.
     
     Args:
         cmd: Command as list of strings
@@ -307,9 +340,12 @@ def safe_subprocess_run(cmd: List[str], **kwargs) -> subprocess.CompletedProcess
         
     Returns:
         subprocess.CompletedProcess result
+        
+    Raises:
+        DockerForceFlagViolation: If Docker command contains force flags (CRITICAL SECURITY)
     """
     if len(cmd) > 0 and cmd[0] in ['docker', 'docker-compose']:
-        # Use rate limiter for Docker commands
+        # 🚨 CRITICAL: Use rate limiter with force flag protection for Docker commands
         result = execute_docker_command(cmd, **kwargs)
         
         # Convert to subprocess.CompletedProcess for compatibility

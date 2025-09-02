@@ -195,21 +195,52 @@ class DockerServiceManager:
         return False
     
     def _start_docker_compose(self) -> None:
-        """Start Docker Compose services."""
+        """Start Docker Compose services using SSOT UnifiedDockerManager."""
         try:
-            logger.info("Starting Docker Compose services...")
-            result = subprocess.run(
-                ["docker", "compose", "-f", "docker-compose.alpine.yml", "up", "-d", "postgres", "redis", "clickhouse"],
-                capture_output=True,
-                text=True,
-                timeout=60
-            )
-            if result.returncode != 0:
-                logger.error(f"Failed to start services: {result.stderr}")
-            else:
-                logger.info("Docker Compose services started")
+            logger.info("Starting Docker Compose services via UnifiedDockerManager...")
+            
+            # Import SSOT Docker management
+            from test_framework.unified_docker_manager import UnifiedDockerManager
+            
+            # Use UnifiedDockerManager to start services
+            docker_manager = UnifiedDockerManager()
+            
+            # Start required services synchronously
+            services = ["postgres", "redis", "clickhouse"]
+            
+            # This is a synchronous wrapper - in ideal case we'd make this async
+            import asyncio
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+            
+            try:
+                success = loop.run_until_complete(
+                    docker_manager.start_services_smart(services, wait_healthy=True)
+                )
+                
+                if success:
+                    logger.info("Docker Compose services started via UnifiedDockerManager")
+                else:
+                    logger.error("Failed to start services via UnifiedDockerManager")
+            finally:
+                loop.close()
+                
         except Exception as e:
-            logger.error(f"Failed to start Docker Compose: {e}")
+            logger.error(f"Failed to start Docker Compose via UnifiedDockerManager: {e}")
+            # Fallback to legacy behavior for now
+            try:
+                result = subprocess.run(
+                    ["docker", "compose", "-f", "docker-compose.alpine.yml", "up", "-d", "postgres", "redis", "clickhouse"],
+                    capture_output=True,
+                    text=True,
+                    timeout=60
+                )
+                if result.returncode != 0:
+                    logger.error(f"Fallback failed to start services: {result.stderr}")
+                else:
+                    logger.info("Docker Compose services started (fallback method)")
+            except Exception as fallback_e:
+                logger.error(f"Both UnifiedDockerManager and fallback failed: {fallback_e}")
 
 
 class RealServiceError(Exception):

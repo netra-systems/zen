@@ -301,14 +301,38 @@ class DockerServiceManager:
             return False
     
     def _remove_container_if_exists(self, container_name: str):
-        """Remove a container if it exists (ignores errors)."""
+        """Remove a container if it exists using safe removal method."""
         try:
-            subprocess.run(
-                ["docker", "rm", "-f", container_name],
-                capture_output=True, timeout=30
-            )
-        except Exception:
-            pass  # Ignore errors - container might not exist
+            # Import and use the safe container removal method
+            import sys
+            import os
+            sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'test_framework'))
+            from unified_docker_manager import UnifiedDockerManager
+            
+            manager = UnifiedDockerManager()
+            manager.safe_container_remove(container_name)
+        except Exception as e:
+            # Fallback to safe manual removal if import fails
+            try:
+                # First check if container exists
+                inspect_result = subprocess.run(
+                    ["docker", "inspect", container_name],
+                    capture_output=True, timeout=5
+                )
+                
+                if inspect_result.returncode == 0:
+                    # Stop gracefully first
+                    subprocess.run(
+                        ["docker", "stop", "-t", "10", container_name],
+                        capture_output=True, timeout=15
+                    )
+                    # Then remove without force
+                    subprocess.run(
+                        ["docker", "rm", container_name],
+                        capture_output=True, timeout=10
+                    )
+            except Exception:
+                pass  # Ignore errors - container might not exist
     
     def _wait_for_redis_ready(self, timeout: int = 30) -> bool:
         """Wait for Redis container to be ready to accept connections."""

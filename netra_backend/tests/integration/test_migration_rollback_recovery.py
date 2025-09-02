@@ -74,8 +74,12 @@ class TestMigrationRollbackRecovery:
             }
             
         finally:
-            # Cleanup container
-            subprocess.run(["docker", "rm", "-f", container_name], capture_output=True)
+            # Cleanup container using safe removal
+            try:
+                subprocess.run(["docker", "stop", "-t", "10", container_name], capture_output=True, timeout=15)
+                subprocess.run(["docker", "rm", container_name], capture_output=True, timeout=10)
+            except Exception:
+                pass
 
     @pytest.fixture
     def migration_config(self, postgres_container):

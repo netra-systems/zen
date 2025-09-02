@@ -19,6 +19,9 @@ from contextlib import contextmanager
 from datetime import datetime, timedelta
 import subprocess
 
+# CRITICAL: Import Docker rate limiter to prevent daemon crashes
+from test_framework.docker_rate_limiter import execute_docker_command
+
 logger = logging.getLogger(__name__)
 
 
@@ -192,17 +195,15 @@ class DockerPortManager:
                 for service, (port, _) in self.allocated_ports.items():
                     env[f"{service.upper()}_PORT"] = str(port)
                 
-                # Start services
-                result = subprocess.run(
+                # Start services using rate-limited execution
+                docker_result = execute_docker_command(
                     ["docker-compose", "-f", compose_file, "up", "-d"],
-                    env=env,
-                    capture_output=True,
-                    text=True,
-                    timeout=60
+                    timeout=60,
+                    env=env
                 )
                 
-                if result.returncode != 0:
-                    raise RuntimeError(f"Docker start failed: {result.stderr}")
+                if docker_result.returncode != 0:
+                    raise RuntimeError(f"Docker start failed: {docker_result.stderr}")
                 
             else:
                 # Start individual containers
@@ -221,15 +222,13 @@ class DockerPortManager:
                         if 'image' in config:
                             docker_cmd.append(config['image'])
                         
-                        result = subprocess.run(
+                        docker_result = execute_docker_command(
                             docker_cmd,
-                            capture_output=True,
-                            text=True,
                             timeout=30
                         )
                         
-                        if result.returncode != 0:
-                            raise RuntimeError(f"Failed to start {service}: {result.stderr}")
+                        if docker_result.returncode != 0:
+                            raise RuntimeError(f"Failed to start {service}: {docker_result.stderr}")
             
             # Wait a moment for Docker to bind
             time.sleep(2)
@@ -314,30 +313,28 @@ class PortConflictResolver:
             Number of containers cleaned up
         """
         try:
-            # List all containers with the prefix
-            result = subprocess.run(
+            # List all containers with the prefix using rate-limited execution
+            docker_result = execute_docker_command(
                 ["docker", "ps", "-a", "--format", "{{.Names}}"],
-                capture_output=True,
-                text=True
+                timeout=30
             )
             
-            if result.returncode != 0:
+            if docker_result.returncode != 0:
                 return 0
             
             cleaned = 0
-            for container_name in result.stdout.strip().split('\n'):
+            for container_name in docker_result.stdout.strip().split('\n'):
                 if container_name.startswith(prefix):
-                    # Check if container is old (> 1 hour)
-                    inspect_result = subprocess.run(
+                    # Check if container is old (> 1 hour) using rate-limited execution
+                    inspect_result = execute_docker_command(
                         ["docker", "inspect", container_name, "--format", "{{.State.FinishedAt}}"],
-                        capture_output=True,
-                        text=True
+                        timeout=30
                     )
                     
                     if inspect_result.returncode == 0:
-                        # Stop and remove old container
-                        subprocess.run(["docker", "stop", container_name], capture_output=True)
-                        subprocess.run(["docker", "rm", container_name], capture_output=True)
+                        # Stop and remove old container using rate-limited execution
+                        execute_docker_command(["docker", "stop", container_name], timeout=30)
+                        execute_docker_command(["docker", "rm", container_name], timeout=30)
                         cleaned += 1
                         logger.info(f"Cleaned up stale container: {container_name}")
             

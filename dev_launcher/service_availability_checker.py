@@ -541,7 +541,7 @@ def check_and_configure_services(config: ServicesConfiguration,
 
 def _start_docker_services_if_needed(config: ServicesConfiguration, 
                                    results: Dict[str, ServiceAvailabilityResult]) -> List[str]:
-    """Start Docker services if they are configured to use Docker fallback."""
+    """Start Docker services if they are configured to use Docker fallback - SSOT UnifiedDockerManager."""
     warnings = []
     
     # Check if any services need Docker containers started
@@ -554,33 +554,62 @@ def _start_docker_services_if_needed(config: ServicesConfiguration,
     
     if docker_services_needed:
         try:
-            from dev_launcher.docker_services import DockerServiceManager
-            docker_manager = DockerServiceManager()
+            # Import SSOT Docker management
+            from test_framework.unified_docker_manager import UnifiedDockerManager
+            import asyncio
             
-            for service_name in docker_services_needed:
-                if service_name == 'redis':
-                    success, message = docker_manager.start_redis_container()
-                    if success:
-                        warnings.append(f"✅ Started Redis Docker container")
-                    else:
-                        warnings.append(f"❌ Failed to start Redis Docker container: {message}")
+            # Use UnifiedDockerManager for all Docker operations
+            docker_manager = UnifiedDockerManager()
+            
+            # Start services using async manager
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+            
+            try:
+                success = loop.run_until_complete(
+                    docker_manager.start_services_smart(docker_services_needed, wait_healthy=True)
+                )
                 
-                elif service_name == 'clickhouse':
-                    success, message = docker_manager.start_clickhouse_container()
-                    if success:
-                        warnings.append(f"✅ Started ClickHouse Docker container")
-                    else:
-                        warnings.append(f"❌ Failed to start ClickHouse Docker container: {message}")
+                if success:
+                    for service_name in docker_services_needed:
+                        warnings.append(f"✅ Started {service_name} Docker container via UnifiedDockerManager")
+                else:
+                    warnings.append(f"❌ Failed to start some Docker services: {docker_services_needed}")
+                    
+            finally:
+                loop.close()
                 
-                elif service_name == 'postgres':
-                    success, message = docker_manager.start_postgres_container()
-                    if success:
-                        warnings.append(f"✅ Started PostgreSQL Docker container")
-                    else:
-                        warnings.append(f"❌ Failed to start PostgreSQL Docker container: {message}")
-        
-        except ImportError:
-            warnings.append("⚠️  Docker services module not available")
+        except ImportError as e:
+            warnings.append(f"❌ Could not import UnifiedDockerManager: {e}")
+            # Fallback to legacy Docker management
+            try:
+                from dev_launcher.docker_services import DockerServiceManager
+                docker_manager = DockerServiceManager()
+                
+                for service_name in docker_services_needed:
+                    if service_name == 'redis':
+                        success, message = docker_manager.start_redis_container()
+                        if success:
+                            warnings.append(f"✅ Started Redis Docker container (legacy)")
+                        else:
+                            warnings.append(f"❌ Failed to start Redis Docker container: {message}")
+                    
+                    elif service_name == 'clickhouse':
+                        success, message = docker_manager.start_clickhouse_container()
+                        if success:
+                            warnings.append(f"✅ Started ClickHouse Docker container (legacy)")
+                        else:
+                            warnings.append(f"❌ Failed to start ClickHouse Docker container: {message}")
+                    
+                    elif service_name == 'postgres':
+                        success, message = docker_manager.start_postgres_container()
+                        if success:
+                            warnings.append(f"✅ Started PostgreSQL Docker container (legacy)")
+                        else:
+                            warnings.append(f"❌ Failed to start PostgreSQL Docker container: {message}")
+            
+            except ImportError:
+                warnings.append("⚠️  Docker services module not available")
         except Exception as e:
             warnings.append(f"⚠️  Error starting Docker services: {str(e)}")
     

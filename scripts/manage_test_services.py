@@ -24,104 +24,111 @@ from typing import List, Optional
 parent_dir = Path(__file__).parent.parent.resolve()
 sys.path.insert(0, str(parent_dir))
 
-from test_framework.docker_test_manager import DockerTestManager, ServiceMode
+# SSOT Docker Management - Use DockerTestUtility exclusively
+from test_framework.ssot.docker import (
+    DockerTestUtility,
+    DockerTestEnvironmentType,
+    create_docker_test_utility
+)
 
 
 class TestServiceCLI:
     """Command-line interface for managing test services."""
     
     def __init__(self):
-        self.manager = DockerTestManager()
-        
-    async def start_services(self, e2e: bool = False, clickhouse: bool = False):
-        """Start test services."""
-        print("[INFO] Starting test services...")
-        
-        # Configure environment
-        self.manager.configure_mock_environment()
-        
-        # Determine services and profiles
-        services = ["postgres-test", "redis-test"]
-        profiles = []
-        
-        if e2e:
-            services.extend(["backend-test", "auth-test"])
-            profiles.append("e2e")
-            print("[INFO] Starting E2E service stack...")
-        
-        if clickhouse:
-            profiles.append("clickhouse")
-            print("[INFO] Including ClickHouse service...")
-        
-        # Start services
-        success = await self.manager.start_services(
-            services=services,
-            profiles=profiles,
-            wait_healthy=True,
-            timeout=120
+        # Use SSOT DockerTestUtility for all Docker operations
+        self.docker_utility = create_docker_test_utility(
+            environment_type=DockerTestEnvironmentType.SHARED
         )
         
-        if success:
-            print("[SUCCESS] Test services started successfully!")
-            await self.show_status()
-        else:
-            print("[ERROR] Failed to start test services")
-            sys.exit(1)
+    async def start_services(self, e2e: bool = False, clickhouse: bool = False):
+        """Start test services using SSOT DockerTestUtility."""
+        print("[INFO] Starting test services...")
+        
+        # Initialize Docker utility
+        async with self.docker_utility as docker:
+            # Determine services to start
+            services = ["postgres", "redis"]
+            
+            if e2e:
+                services.extend(["backend", "auth"])
+                print("[INFO] Starting E2E service stack...")
+            
+            if clickhouse:
+                services.append("clickhouse")
+                print("[INFO] Including ClickHouse service...")
+            
+            # Start services
+            result = await docker.start_services(
+                services=services,
+                wait_for_health=True,
+                timeout=120.0
+            )
+            
+            if result["success"]:
+                print("[SUCCESS] Test services started successfully!")
+                await self.show_status()
+            else:
+                print(f"[ERROR] Failed to start test services: {result.get('errors')}")
+                sys.exit(1)
     
     async def stop_services(self, clean: bool = False):
-        """Stop test services."""
+        """Stop test services using SSOT DockerTestUtility."""
         print("[INFO] Stopping test services...")
         
-        success = await self.manager.stop_services(cleanup_volumes=clean)
-        
-        if success:
-            if clean:
-                print("[SUCCESS] Test services stopped and data cleaned!")
+        async with self.docker_utility as docker:
+            # Stop all running services
+            result = await docker.stop_services()
+            
+            if result["success"]:
+                if clean:
+                    print("[SUCCESS] Test services stopped and data cleaned!")
+                else:
+                    print("[SUCCESS] Test services stopped!")
             else:
-                print("[SUCCESS] Test services stopped!")
-        else:
-            print("[ERROR] Failed to stop test services")
-            sys.exit(1)
+                print(f"[ERROR] Failed to stop test services: {result}")
+                sys.exit(1)
     
     async def show_status(self):
-        """Show status of test services."""
+        """Show status of test services using SSOT DockerTestUtility."""
         print("\n[TEST SERVICE STATUS]")
         print("-" * 50)
         
-        # Check Docker availability
-        if not self.manager.is_docker_available():
-            print("[ERROR] Docker is not available")
-            return
-        
-        # Get container status
-        result = subprocess.run(
-            [
-                "docker", "compose",
-                "-f", "docker-compose.test.yml",
-                "-p", "netra-test",
-                "ps", "--format", "table"
-            ],
-            capture_output=True,
-            text=True
-        )
-        
-        if result.returncode == 0:
-            print(result.stdout)
-        else:
-            print("[INFO] No test services are running")
-        
-        # Show service URLs
-        print("\n[SERVICE URLS]")
-        print("-" * 50)
-        
-        mode = self.manager.get_effective_mode()
-        if mode == ServiceMode.DOCKER:
-            print(f"PostgreSQL:  {self.manager.get_service_url('postgres')}")
-            print(f"Redis:       {self.manager.get_service_url('redis')}")
-            print(f"Backend:     {self.manager.get_service_url('backend')}")
-            print(f"Auth:        {self.manager.get_service_url('auth')}")
-        else:
-            print(f"Mode: {mode.value}")
+        async with self.docker_utility as docker:
+            # Generate health report
+            report = await docker.generate_health_report()
+            
+            if "error" in report:
+                print(f"[ERROR] {report['error']}")
+                return
+            
+            print(f"Environment: {report.get('environment', 'Unknown')}")
+            print(f"Overall Health: {'✓ Healthy' if report.get('overall_health') else '✗ Unhealthy'}")
+            print()
+            
+            # Show service details
+            services = report.get('services', {})
+            if services:
+                for service_name, service_data in services.items():
+                    health = service_data.get('health', {})
+                    status_icon = "✓" if health.get('is_healthy') else "✗"
+                    port = health.get('port', 'N/A')
+                    response_time = health.get('response_time_ms', 0.0)
+                    
+                    print(f"{status_icon} {service_name:12} Port: {port:5} Response: {response_time:6.1f}ms")
+                    
+                    if health.get('error_message'):
+                        print(f"   Error: {health['error_message']}")
+                
+                # Show service URLs
+                print("\n[SERVICE URLS]")
+                print("-" * 50)
+                
+                urls = docker.get_all_service_urls()
+                for service_name, url in urls.items():
+                    print(f"{service_name:12}: {url}")
+            else:
+                print("[INFO] No services are currently running")
     
     async def run_tests(self, pattern: Optional[str] = None):
         """Run tests using the Docker infrastructure."""
@@ -131,12 +138,12 @@ class TestServiceCLI:
         await self.start_services()
         
         # Build test command
-        cmd = ["python", "unified_test_runner.py"]
+        cmd = ["python", "tests/unified_test_runner.py"]
         
         if pattern:
             cmd.extend(["--pattern", pattern])
         else:
-            cmd.extend(["--level", "integration", "--no-coverage", "--fast-fail"])
+            cmd.extend(["--categories", "integration", "--no-coverage", "--fast-fail"])
         
         print(f"[INFO] Executing: {' '.join(cmd)}")
         

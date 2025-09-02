@@ -33,6 +33,9 @@ from enum import Enum
 from pathlib import Path
 from typing import Dict, List, Optional, Set, Tuple, Any
 
+# CRITICAL: Import Docker rate limiter to prevent daemon crashes
+from test_framework.docker_rate_limiter import execute_docker_command
+
 # Windows Unicode fix
 if sys.platform == 'win32':
     import io
@@ -299,14 +302,17 @@ class DockerIntrospector:
             cmd.extend(services)
         
         try:
-            result = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
+            # Use rate-limited Docker execution to prevent daemon overload
+            docker_result = execute_docker_command(cmd, timeout=30)
             
-            if result.returncode != 0:
-                logger.warning(f"Failed to get service status: {result.stderr}")
+            if docker_result.returncode != 0:
+                logger.warning(f"Failed to get service status: {docker_result.stderr}")
                 return {}
             
+            result_stdout = docker_result.stdout
+            
             status = {}
-            for line in result.stdout.strip().split('\\n'):
+            for line in result_stdout.strip().split('\\n'):
                 if line:
                     try:
                         data = json.loads(line)
@@ -343,13 +349,14 @@ class DockerIntrospector:
             cmd.extend(services)
         
         try:
-            result = subprocess.run(cmd, capture_output=True, text=True, timeout=60)
+            # Use rate-limited Docker execution to prevent daemon overload
+            docker_result = execute_docker_command(cmd, timeout=60)
             
-            if result.returncode != 0:
-                logger.warning(f"Failed to collect logs: {result.stderr}")
+            if docker_result.returncode != 0:
+                logger.warning(f"Failed to collect logs: {docker_result.stderr}")
                 return []
             
-            return self._parse_log_lines(result.stdout)
+            return self._parse_log_lines(docker_result.stdout)
             
         except subprocess.TimeoutExpired:
             logger.error("Timeout collecting logs")
@@ -515,12 +522,12 @@ class DockerIntrospector:
         usage = {}
         
         try:
-            # Get container stats
+            # Get container stats using rate-limited execution
             cmd = ["docker", "stats", "--no-stream", "--format", "json"]
-            result = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
+            docker_result = execute_docker_command(cmd, timeout=30)
             
-            if result.returncode == 0:
-                for line in result.stdout.strip().split('\\n'):
+            if docker_result.returncode == 0:
+                for line in docker_result.stdout.strip().split('\\n'):
                     if line:
                         try:
                             data = json.loads(line)
@@ -631,26 +638,23 @@ class DockerIntrospector:
         cleanup_results = {}
         
         try:
-            # Remove orphaned containers
+            # Remove orphaned containers using rate-limited execution
             cmd = ["docker-compose", "-f", str(self.compose_file), "-p", self.project_name, 
                    "down", "--remove-orphans"]
-            result = subprocess.run(cmd, capture_output=True, text=True, timeout=60)
-            cleanup_results['containers'] = result.returncode == 0
+            docker_result = execute_docker_command(cmd, timeout=60)
+            cleanup_results['containers'] = docker_result.returncode == 0
             
-            # Prune unused networks
-            result = subprocess.run(["docker", "network", "prune", "-f"], 
-                                  capture_output=True, text=True, timeout=30)
-            cleanup_results['networks'] = result.returncode == 0
+            # Prune unused networks using rate-limited execution
+            docker_result = execute_docker_command(["docker", "network", "prune", "-f"], timeout=30)
+            cleanup_results['networks'] = docker_result.returncode == 0
             
-            # Prune unused volumes
-            result = subprocess.run(["docker", "volume", "prune", "-f"],
-                                  capture_output=True, text=True, timeout=30)
-            cleanup_results['volumes'] = result.returncode == 0
+            # Prune unused volumes using rate-limited execution
+            docker_result = execute_docker_command(["docker", "volume", "prune", "-f"], timeout=30)
+            cleanup_results['volumes'] = docker_result.returncode == 0
             
-            # Get cleanup statistics
-            result = subprocess.run(["docker", "system", "df"], 
-                                  capture_output=True, text=True, timeout=30)
-            cleanup_results['disk_usage'] = result.stdout if result.returncode == 0 else "Unknown"
+            # Get cleanup statistics using rate-limited execution
+            docker_result = execute_docker_command(["docker", "system", "df"], timeout=30)
+            cleanup_results['disk_usage'] = docker_result.stdout if docker_result.returncode == 0 else "Unknown"
             
         except Exception as e:
             logger.error(f"Error during cleanup: {e}")

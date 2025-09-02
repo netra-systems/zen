@@ -378,7 +378,7 @@ class MockFactory:
     
     # ========== Agent Mocks ==========
     
-    def create_agent_mock(self, agent_type: str = "generic") -> AsyncMock:
+    def create_agent_mock(self, agent_type: str = "generic", agent_id: str = None, user_id: str = None) -> AsyncMock:
         """Create agent mock with standard interface."""
         agent_mock = AsyncMock()
         
@@ -386,6 +386,8 @@ class MockFactory:
         agent_mock.initialize = AsyncMock()
         agent_mock.process_request = AsyncMock(return_value=self._create_test_agent_response())
         agent_mock.cleanup = AsyncMock()
+        agent_mock.run = AsyncMock(return_value=self._create_test_agent_response())
+        agent_mock.recover = AsyncMock(return_value=True)
         
         # State management
         agent_mock.get_state = AsyncMock(return_value={})
@@ -397,13 +399,80 @@ class MockFactory:
         agent_mock.execute_tool = AsyncMock(return_value={"result": "tool_executed"})
         agent_mock.list_tools = Mock(return_value=["tool1", "tool2"])
         
-        # Properties
+        # Properties with configurable values
         agent_mock.agent_type = agent_type
+        agent_mock.agent_id = agent_id or f"test_agent_{uuid.uuid4().hex[:8]}"
+        agent_mock.user_id = user_id
+        agent_mock.thread_id = None
+        agent_mock.db_session = None
         agent_mock.is_busy = False
         agent_mock.last_activity = datetime.now()
+        agent_mock.error_count = 0
+        agent_mock.last_error = None
+        agent_mock.should_fail = False
+        agent_mock.failure_message = "Test failure"
+        agent_mock.execution_time = 0.1
+        
+        # Agent state enum simulation
+        from enum import Enum
+        class AgentState(Enum):
+            IDLE = "idle"
+            ACTIVE = "active"
+            RUNNING = "running"
+            ERROR = "error"
+            RECOVERING = "recovering"
+        
+        agent_mock.state = AgentState.IDLE
+        agent_mock.AgentState = AgentState
         
         self.registry.register_mock(f"agent_{agent_type}", agent_mock)
         return agent_mock
+    
+    def create_orchestrator_mock(self) -> AsyncMock:
+        """Create agent orchestrator mock."""
+        orchestrator_mock = AsyncMock()
+        
+        # Orchestrator properties
+        orchestrator_mock.agents = {}
+        orchestrator_mock.agent_pool = []
+        orchestrator_mock.error_threshold = 3
+        orchestrator_mock.recovery_timeout = 5.0
+        orchestrator_mock.retry_delay = 0.1
+        orchestrator_mock.execution_timeout = 0.5
+        orchestrator_mock.max_concurrent_agents = 10
+        orchestrator_mock.max_pool_size = 5
+        orchestrator_mock.metrics = {
+            "agents_created": 0,
+            "tasks_executed": 0, 
+            "errors_handled": 0,
+            "total_executions": 0,
+            "failed_executions": 0,
+            "total_execution_time": 0.0,
+            "concurrent_peak": 0,
+        }
+        orchestrator_mock._active_agents_override = None
+        
+        # Orchestrator methods
+        orchestrator_mock.get_or_create_agent = AsyncMock(return_value=self.create_agent_mock())
+        orchestrator_mock.execute_agent_task = AsyncMock(return_value={"status": "completed"})
+        orchestrator_mock.handle_agent_error = AsyncMock(return_value=True)
+        orchestrator_mock.release_agent = AsyncMock()
+        orchestrator_mock.get_orchestration_metrics = Mock(return_value=orchestrator_mock.metrics)
+        
+        # Active agents property simulation
+        def get_active_agents():
+            if orchestrator_mock._active_agents_override is not None:
+                return orchestrator_mock._active_agents_override
+            return len(orchestrator_mock.agents)
+        
+        def set_active_agents(value):
+            orchestrator_mock._active_agents_override = value
+            
+        orchestrator_mock.active_agents = property(get_active_agents)
+        orchestrator_mock.orchestration_metrics = property(lambda: orchestrator_mock.metrics)
+        
+        self.registry.register_mock("orchestrator", orchestrator_mock)
+        return orchestrator_mock
     
     def create_tool_executor_mock(self) -> AsyncMock:
         """Create tool executor mock."""
@@ -470,6 +539,163 @@ class MockFactory:
         
         self.registry.register_mock("http_client", http_mock)
         return http_mock
+    
+    # ========== WebSocket Mocks ==========
+    
+    def create_websocket_connection_mock(self) -> AsyncMock:
+        """Create WebSocket connection mock."""
+        ws_mock = AsyncMock()
+        
+        # Connection state
+        ws_mock.connected = True
+        ws_mock.closed = False
+        ws_mock.user_id = None
+        ws_mock.thread_id = None
+        ws_mock.connection_id = f"ws_{uuid.uuid4().hex[:8]}"
+        
+        # Connection methods
+        ws_mock.connect = AsyncMock()
+        ws_mock.disconnect = AsyncMock()
+        ws_mock.close = AsyncMock()
+        ws_mock.ping = AsyncMock()
+        ws_mock.pong = AsyncMock()
+        
+        # Message methods
+        ws_mock.send = AsyncMock()
+        ws_mock.send_text = AsyncMock()
+        ws_mock.send_json = AsyncMock()
+        ws_mock.receive = AsyncMock()
+        ws_mock.receive_text = AsyncMock()
+        ws_mock.receive_json = AsyncMock()
+        
+        # Context manager support
+        ws_mock.__aenter__ = AsyncMock(return_value=ws_mock)
+        ws_mock.__aexit__ = AsyncMock(return_value=None)
+        
+        self.registry.register_mock("websocket_connection", ws_mock)
+        return ws_mock
+    
+    def create_websocket_server_mock(self) -> AsyncMock:
+        """Create WebSocket server mock for testing high-volume scenarios."""
+        server_mock = AsyncMock()
+        
+        # Server properties
+        server_mock.connections = {}
+        server_mock.message_queue = []
+        server_mock.is_running = True
+        server_mock.port = 8765
+        server_mock.host = "localhost"
+        
+        # Server methods
+        server_mock.start = AsyncMock()
+        server_mock.stop = AsyncMock()
+        server_mock.broadcast = AsyncMock()
+        server_mock.send_to_connection = AsyncMock()
+        server_mock.get_connection = AsyncMock()
+        server_mock.add_connection = AsyncMock()
+        server_mock.remove_connection = AsyncMock()
+        
+        self.registry.register_mock("websocket_server", server_mock)
+        return server_mock
+    
+    # ========== Service Manager Mocks ==========
+    
+    def create_service_manager_mock(self) -> AsyncMock:
+        """Create service manager mock."""
+        manager_mock = AsyncMock()
+        
+        # Service tracking
+        manager_mock.services = {}
+        manager_mock.health_status = {}
+        manager_mock.service_configs = {}
+        
+        # Service management methods
+        manager_mock.start_service = AsyncMock(return_value=True)
+        manager_mock.stop_service = AsyncMock(return_value=True)
+        manager_mock.restart_service = AsyncMock(return_value=True)
+        manager_mock.get_service_status = AsyncMock(return_value="running")
+        manager_mock.list_services = Mock(return_value=[])
+        manager_mock.health_check = AsyncMock(return_value={"status": "healthy"})
+        
+        # Service discovery
+        manager_mock.register_service = AsyncMock()
+        manager_mock.discover_service = AsyncMock()
+        manager_mock.get_service_endpoint = Mock(return_value="http://localhost:8000")
+        
+        self.registry.register_mock("service_manager", manager_mock)
+        return manager_mock
+    
+    def create_service_factory_mock(self) -> Mock:
+        """Create service factory mock."""
+        factory_mock = Mock()
+        
+        # Factory methods
+        factory_mock.create_service = Mock(return_value=self.create_service_manager_mock())
+        factory_mock.get_service = Mock(return_value=self.create_service_manager_mock())
+        factory_mock.create_database_service = Mock(return_value=self.create_database_session_mock())
+        factory_mock.create_auth_service = Mock(return_value=self.create_auth_service_mock())
+        factory_mock.create_websocket_service = Mock(return_value=self.create_websocket_manager_mock())
+        
+        # Service registry
+        factory_mock.registered_services = {}
+        factory_mock.register = Mock()
+        factory_mock.unregister = Mock()
+        factory_mock.list_registered = Mock(return_value=[])
+        
+        self.registry.register_mock("service_factory", factory_mock)
+        return factory_mock
+    
+    # ========== Environment and Configuration Mocks ==========
+    
+    def create_config_loader_mock(self) -> Mock:
+        """Create configuration loader mock."""
+        config_mock = Mock()
+        
+        # Configuration data
+        config_mock.config_data = {}
+        config_mock.environment = "test"
+        config_mock.config_file_path = "/test/config.yaml"
+        
+        # Configuration methods
+        config_mock.load = Mock(return_value=config_mock.config_data)
+        config_mock.get = Mock(side_effect=lambda key, default=None: config_mock.config_data.get(key, default))
+        config_mock.set = Mock(side_effect=lambda key, value: config_mock.config_data.update({key: value}))
+        config_mock.reload = Mock()
+        config_mock.save = Mock()
+        
+        # Environment-specific methods
+        config_mock.load_environment = Mock(return_value=config_mock.config_data)
+        config_mock.get_database_url = Mock(return_value="postgresql://test:test@localhost:5432/test_db")
+        config_mock.get_redis_url = Mock(return_value="redis://localhost:6379/0")
+        
+        self.registry.register_mock("config_loader", config_mock)
+        return config_mock
+    
+    def create_environment_mock(self) -> Mock:
+        """Create environment mock for testing."""
+        env_mock = Mock()
+        
+        # Environment variables
+        env_mock.env_vars = {
+            "ENVIRONMENT": "test",
+            "DEBUG": "true",
+            "DATABASE_URL": "postgresql://test:test@localhost:5432/test_db",
+            "REDIS_URL": "redis://localhost:6379/0"
+        }
+        
+        # Environment methods
+        env_mock.get = Mock(side_effect=lambda key, default=None: env_mock.env_vars.get(key, default))
+        env_mock.set = Mock(side_effect=lambda key, value: env_mock.env_vars.update({key: value}))
+        env_mock.get_bool = Mock(side_effect=lambda key, default=False: str(env_mock.env_vars.get(key, default)).lower() == "true")
+        env_mock.get_int = Mock(side_effect=lambda key, default=0: int(env_mock.env_vars.get(key, default)))
+        env_mock.get_float = Mock(side_effect=lambda key, default=0.0: float(env_mock.env_vars.get(key, default)))
+        
+        # Environment validation
+        env_mock.validate_required = Mock(return_value=True)
+        env_mock.get_missing_vars = Mock(return_value=[])
+        
+        self.registry.register_mock("environment", env_mock)
+        return env_mock
     
     # ========== Specialized Mock Utilities ==========
     
