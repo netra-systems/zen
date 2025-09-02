@@ -15,12 +15,51 @@ PROJECT_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))
 
 from scripts.compliance import ArchitectureEnforcer, CLIHandler, OutputHandler
+from scripts.compliance.mro_auditor import MROAuditor
+
+
+def _run_mro_audit(args):
+    """Run standalone MRO complexity audit"""
+    auditor = MROAuditor(Path(args.path))
+    
+    # Audit agent modules
+    agent_paths = [
+        Path(args.path) / "netra_backend" / "app" / "agents",
+        Path(args.path) / "auth_service" / "app" / "agents"
+    ]
+    
+    all_results = []
+    for agent_path in agent_paths:
+        if agent_path.exists():
+            audit_result = auditor.audit_module(agent_path)
+            all_results.extend(audit_result.get("results", []))
+    
+    # Generate and print report
+    report = auditor.generate_report(all_results)
+    print(report)
+    
+    # Exit with appropriate code
+    violations = sum(len(r.violations) for r in all_results)
+    critical = sum(1 for r in all_results for v in r.violations if v.severity == "critical")
+    
+    if critical > 0:
+        sys.exit(2)  # Critical violations
+    elif violations > 0:
+        sys.exit(1)  # Has violations
+    else:
+        sys.exit(0)  # Clean
 
 
 def main() -> None:
     """Main entry point with enhanced CI/CD features"""
     parser = CLIHandler.create_argument_parser()
     args = parser.parse_args()
+    
+    # Handle MRO audit specifically if requested
+    if getattr(args, 'mro_audit', False):
+        _run_mro_audit(args)
+        return
+    
     enforcer = _create_enforcer(args)
     results = enforcer.run_all_checks()
     OutputHandler.process_output(args, enforcer, results)

@@ -78,6 +78,8 @@ Examples:
                            help='Disable smart limit detection')
         parser.add_argument('--no-emoji', action='store_true',
                            help='Disable emoji severity markers')
+        parser.add_argument('--mro-audit', action='store_true',
+                           help='Run MRO (Method Resolution Order) complexity audit')
     
     @staticmethod
     def _add_output_arguments(parser: argparse.ArgumentParser) -> None:
