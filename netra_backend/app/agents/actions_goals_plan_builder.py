@@ -28,7 +28,7 @@ class ActionPlanBuilder:
         llm_response: str, run_id: str
     ) -> ActionPlanResult:
         """Process LLM response to ActionPlanResult."""
-        action_plan_dict = llm_parser.extract_json_from_response(llm_response, max_retries=5)
+        action_plan_dict = extract_json_from_response(llm_response)
         if not action_plan_dict:
             action_plan_dict = await ActionPlanBuilder._handle_extraction_failure(
                 llm_response, run_id
@@ -58,12 +58,12 @@ class ActionPlanBuilder:
     def _create_plan_step(step_data) -> PlanStep:
         """Create PlanStep from data."""
         if isinstance(step_data, str):
-            return PlanStep(step_id=str(len(step_data)), description=step_data)
+            return PlanStep(step_id="1", description=step_data)
         elif isinstance(step_data, dict):
-            return PlanStep(
-                step_id=step_data.get('step_id', '1'),
-                description=step_data.get('description', 'No description')
-            )
+            # Handle different data structures that might come from LLM
+            step_id = step_data.get('step_id', step_data.get('id', '1'))
+            description = step_data.get('description', step_data.get('step', step_data.get('action', 'No description')))
+            return PlanStep(step_id=str(step_id), description=str(description))
         return PlanStep(step_id='1', description='Default step')
     
     @staticmethod
@@ -72,7 +72,7 @@ class ActionPlanBuilder:
     ) -> dict:
         """Handle JSON extraction failure."""
         logger.debug(f"JSON extraction failed for {run_id}")
-        partial = llm_parser.extract_partial_json(llm_response, required_fields=None)
+        partial = extract_partial_json(llm_response)
         if partial:
             return ActionPlanBuilder._build_from_partial(partial).model_dump()
         return ActionPlanBuilder.get_default_action_plan().model_dump()
