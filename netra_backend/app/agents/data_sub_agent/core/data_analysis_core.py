@@ -17,7 +17,6 @@ import asyncio
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional, Union
 
-from netra_backend.app.db.clickhouse import get_clickhouse_service
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.database.session_manager import DatabaseSessionManager
 
@@ -25,13 +24,30 @@ logger = central_logger.get_logger(__name__)
 
 
 class DataAnalysisCore:
-    """Core data analysis engine consolidating all business logic."""
+    """Core data analysis engine consolidating all business logic.
     
-    def __init__(self, session_manager: DatabaseSessionManager):
-        """Initialize with DatabaseSessionManager for proper session isolation."""
-        self.clickhouse_client = get_clickhouse_service()
+    Updated to use user-scoped data access patterns from UserExecutionEngine.
+    Instead of direct ClickHouse service access, uses data access capabilities
+    provided by UserExecutionEngine for complete user isolation.
+    """
+    
+    def __init__(self, session_manager: DatabaseSessionManager, data_access_capabilities=None):
+        """Initialize with DatabaseSessionManager and data access capabilities.
+        
+        Args:
+            session_manager: DatabaseSessionManager for proper session isolation
+            data_access_capabilities: DataAccessCapabilities from UserExecutionEngine
+                                    providing user-scoped ClickHouse and Redis access
+        """
         self.session_manager = session_manager
+        self.data_access = data_access_capabilities
         self.cache_ttl = 300  # 5 minutes default cache
+        
+        # Log initialization mode
+        if data_access_capabilities:
+            logger.debug("DataAnalysisCore initialized with user-scoped data access capabilities")
+        else:
+            logger.warning("DataAnalysisCore initialized without data access capabilities - falling back to legacy mode")
         
     async def analyze_performance(self, request: Dict[str, Any]) -> Dict[str, Any]:
         """Analyze performance metrics with comprehensive analysis."""
@@ -237,12 +253,21 @@ class DataAnalysisCore:
         return base_query
     
     async def _fetch_data_with_cache(self, query: str, cache_key: str) -> List[Dict[str, Any]]:
-        """Fetch data from ClickHouse (caching removed for UserExecutionContext pattern)."""
-        # Fetch from ClickHouse directly - per-request isolation means no shared caching
+        """Fetch data from ClickHouse using user-scoped data access capabilities."""
         try:
-            data = await self.clickhouse_client.execute_query(query)
-            logger.debug(f"Fetched {len(data or [])} rows for cache key: {cache_key}")
-            return data or []
+            if self.data_access:
+                # Use user-scoped data access capabilities for complete isolation
+                data = await self.data_access.execute_analytics_query(query)
+                logger.debug(f"Fetched {len(data or [])} rows via user-scoped data access for cache key: {cache_key}")
+                return data or []
+            else:
+                # Legacy fallback mode (not recommended for production)
+                logger.warning(f"Using legacy ClickHouse access for {cache_key} - consider upgrading to UserExecutionEngine pattern")
+                from netra_backend.app.db.clickhouse import get_clickhouse_service
+                clickhouse_client = get_clickhouse_service()
+                data = await clickhouse_client.execute_query(query)
+                logger.debug(f"Fetched {len(data or [])} rows via legacy access for cache key: {cache_key}")
+                return data or []
         except Exception as e:
             logger.error(f"ClickHouse query failed for {cache_key}: {e}")
             return []

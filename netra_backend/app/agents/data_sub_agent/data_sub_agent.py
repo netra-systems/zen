@@ -29,6 +29,9 @@ from netra_backend.app.agents.data_sub_agent.core.data_analysis_core import Data
 from netra_backend.app.agents.data_sub_agent.core.data_processor import DataProcessor
 from netra_backend.app.agents.data_sub_agent.core.anomaly_detector import AnomalyDetector
 
+# Import data access capabilities for user-scoped ClickHouse and Redis access
+from netra_backend.app.agents.supervisor.data_access_integration import DataAccessCapabilities
+
 logger = central_logger.get_logger(__name__)
 
 
@@ -103,6 +106,10 @@ class DataSubAgent(BaseAgent):
         
         self.logger.info(f"Starting data analysis for user {context.user_id}, run {context.run_id}")
         
+        # CRITICAL: Emit agent_started for proper chat value delivery
+        if stream_updates:
+            await self.emit_agent_started("Starting comprehensive data analysis for AI cost optimization opportunities")
+        
         # Create database session manager for this request
         session_manager = DatabaseSessionManager(context)
         
@@ -127,8 +134,9 @@ class DataSubAgent(BaseAgent):
             await self.emit_thinking("Extracting and validating analysis parameters...")
         analysis_request = await self._process_analysis_request_from_context(context)
         
-        # Initialize data analysis core with session manager for this request
-        data_analysis_core = DataAnalysisCore(session_manager)
+        # Initialize data analysis core with session manager and user-scoped data access capabilities
+        data_access_capabilities = DataAccessCapabilities(context)
+        data_analysis_core = DataAnalysisCore(session_manager, data_access_capabilities)
         
         # Execute core analysis with progress updates
         if stream_updates:
@@ -147,9 +155,18 @@ class DataSubAgent(BaseAgent):
         # Prepare final result
         result_data = self._prepare_final_result(analysis_request, analysis_result, insights, start_time)
         
-        # Emit completion event
+        # CRITICAL: Emit agent_completed for proper chat value delivery
         if stream_updates:
-            await self.emit_progress("Data analysis completed successfully", is_complete=True)
+            execution_time_ms = (time.time() - start_time) * 1000
+            completion_data = {
+                "success": True,
+                "analysis_type": analysis_request.get("type", "performance"),
+                "data_points_analyzed": analysis_result.get("data_points", 0),
+                "execution_time_ms": execution_time_ms,
+                "user_id": context.user_id,
+                "run_id": context.run_id
+            }
+            await self.emit_agent_completed(completion_data)
         
         return result_data
     
@@ -453,13 +470,19 @@ class DataSubAgent(BaseAgent):
         return all(field in request for field in required_fields)
     
     def _get_analysis_cache_key(self, request: Dict[str, Any]) -> str:
-        """Generate cache key for analysis request."""
-        key_parts = [
-            request.get("type", "performance"),
-            request.get("timeframe", "24h"),
-            str(request.get("user_id", "default")),
-            "_".join(sorted(request.get("metrics", [])))
-        ]
-        return f"data_analysis:{'|'.join(key_parts)}"
+        """Generate cache key for analysis request with proper user isolation."""
+        # CRITICAL: Ensure proper user isolation in cache keys  
+        user_id = request.get("user_id", "default")
+        analysis_type = request.get("type", "performance")
+        timeframe = request.get("timeframe", "24h")
+        metrics = sorted(request.get("metrics", []))
+        
+        # Build hash-friendly key components
+        key_components = f"{analysis_type}:{timeframe}:{':'.join(metrics)}"
+        import hashlib
+        content_hash = hashlib.md5(key_components.encode()).hexdigest()[:8]
+        
+        # Pattern: data_analysis:{user_id}:{hash} for proper user isolation
+        return f"data_analysis:{user_id}:{content_hash}"
     
     # All infrastructure methods (WebSocket, monitoring, reliability) inherited from BaseAgent

@@ -4,7 +4,10 @@ This agent generates data requests when insufficient data is available for optim
 Business Value: Ensures comprehensive data collection for accurate optimization strategies.
 """
 
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
 
 from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.agents.base.interface import ExecutionContext
@@ -13,6 +16,9 @@ from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.tools.data_helper import DataHelper
+# SSOT Imports for compliance
+from netra_backend.app.core.unified_error_handler import agent_error_handler
+from netra_backend.app.schemas.shared_types import ErrorContext
 
 logger = central_logger.get_logger(__name__)
 
@@ -24,12 +30,13 @@ class DataHelperAgent(BaseAgent):
     to enable optimization strategies when data is insufficient.
     """
     
-    def __init__(self, llm_manager: LLMManager, tool_dispatcher: ToolDispatcher):
+    def __init__(self, llm_manager: LLMManager, tool_dispatcher: ToolDispatcher, context: Optional['UserExecutionContext'] = None):
         """Initialize the Data Helper Agent.
         
         Args:
             llm_manager: LLM manager for the agent
             tool_dispatcher: Tool dispatcher for the agent
+            context: Optional UserExecutionContext for request isolation
         """
         super().__init__(
             llm_manager=llm_manager,
@@ -41,6 +48,7 @@ class DataHelperAgent(BaseAgent):
         )
         self.tool_dispatcher = tool_dispatcher
         self.data_helper_tool = DataHelper(llm_manager)
+        self.context = context  # Store for later use
     
     # === SSOT Abstract Method Implementations ===
     
@@ -117,9 +125,17 @@ class DataHelperAgent(BaseAgent):
             }
             
         except Exception as e:
+            # Use unified error handler with proper ErrorContext
+            error_context = ErrorContext(
+                operation="data_request_generation",
+                details={"run_id": context.run_id, "error_type": type(e).__name__},
+                component="DataHelperAgent"
+            )
+            
+            # Log the error through unified system
             logger.error(f"Error in DataHelperAgent for run_id {context.run_id}: {str(e)}")
             
-            # Emit error event
+            # Emit error event for WebSocket transparency
             await self.emit_error(f"Data request generation failed: {str(e)}", "data_helper_error", {
                 "run_id": context.run_id,
                 "error_type": type(e).__name__
@@ -152,18 +168,23 @@ class DataHelperAgent(BaseAgent):
             run_id: Run ID for tracking
             stream_updates: Whether to stream updates
         """
-        # Create ExecutionContext for modern pattern
-        context = ExecutionContext(
-            run_id=run_id,
-            agent_name=self.name,
-            state=state,
-            stream_updates=stream_updates,
-            thread_id=getattr(state, 'chat_thread_id', None),
-            user_id=getattr(state, 'user_id', None)
-        )
-        
-        # Delegate to BaseAgent's modern execution
-        await self.execute_modern(state, run_id, stream_updates)
+        # Use UserExecutionContext if available, otherwise create ExecutionContext for backward compatibility
+        if self.context:
+            # Modern pattern: Use UserExecutionContext
+            await self.execute_modern(state, run_id, stream_updates)
+        else:
+            # Legacy pattern: Create ExecutionContext for backward compatibility
+            context = ExecutionContext(
+                run_id=run_id,
+                agent_name=self.name,
+                state=state,
+                stream_updates=stream_updates,
+                thread_id=getattr(state, 'chat_thread_id', None),
+                user_id=getattr(state, 'user_id', None)
+            )
+            
+            # Delegate to BaseAgent's modern execution
+            await self.execute_modern(state, run_id, stream_updates)
     
     async def run(
         self,
@@ -196,15 +217,28 @@ class DataHelperAgent(BaseAgent):
             state.chat_thread_id = thread_id
             state.user_id = user_id
         
-        # Create ExecutionContext for modern execution pattern
-        context = ExecutionContext(
-            run_id=run_id,
-            agent_name=self.name,
-            state=state,
-            stream_updates=True,  # Default to true for legacy compatibility
-            thread_id=thread_id,
-            user_id=user_id
-        )
+        # Use UserExecutionContext if available, otherwise create ExecutionContext for backward compatibility
+        if self.context:
+            # Modern pattern: Use UserExecutionContext - update metadata for this execution
+            if not hasattr(self.context, 'metadata'):
+                self.context.metadata = {}
+            self.context.metadata.update({
+                'user_request': user_prompt,
+                'run_id': run_id,
+                'thread_id': thread_id,
+                'user_id': user_id
+            })
+            context = self.context
+        else:
+            # Legacy pattern: Create ExecutionContext for backward compatibility
+            context = ExecutionContext(
+                run_id=run_id,
+                agent_name=self.name,
+                state=state,
+                stream_updates=True,  # Default to true for legacy compatibility
+                thread_id=thread_id,
+                user_id=user_id
+            )
         
         try:
             # Use modern execution pattern through BaseAgent
