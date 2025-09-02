@@ -1,3 +1,4 @@
+from shared.isolated_environment import get_env
 """
 Test Execution Engine - Core test execution logic for different test types
 
@@ -107,7 +108,7 @@ def configure_real_llm_if_requested(args, level: str, config: Dict):
         print("[INFO] Validating test environment...")
         
         # Check database configuration
-        database_url = os.getenv('TEST_DATABASE_URL') or os.getenv('DATABASE_URL', '')
+        database_url = get_env().get('TEST_DATABASE_URL') or get_env().get('DATABASE_URL', '')
         if not database_url:
             print("[ERROR] No database URL configured. Set TEST_DATABASE_URL or DATABASE_URL")
             return None
@@ -220,8 +221,8 @@ def print_dedicated_environment_info():
     print(f"[INFO] Test environment configuration:")
     
     # Database configuration with enhanced details
-    test_db = os.getenv('TEST_DATABASE_URL')
-    prod_db = os.getenv('DATABASE_URL')
+    test_db = get_env().get('TEST_DATABASE_URL')
+    prod_db = get_env().get('DATABASE_URL')
     
     if test_db:
         db_name = test_db.split('/')[-1] if '/' in test_db else 'unknown'
@@ -233,12 +234,12 @@ def print_dedicated_environment_info():
         print(f"  - Database: not configured")
     
     # Redis configuration
-    test_redis = os.getenv('TEST_REDIS_URL')
-    prod_redis = os.getenv('REDIS_URL')
+    test_redis = get_env().get('TEST_REDIS_URL')
+    prod_redis = get_env().get('REDIS_URL')
     
     if test_redis:
         redis_db = test_redis.split('/')[-1] if '/' in test_redis else 'default'
-        namespace = os.getenv('TEST_REDIS_NAMESPACE', 'test:')
+        namespace = get_env().get('TEST_REDIS_NAMESPACE', 'test:')
         print(f"  - Redis: DB {redis_db} with namespace '{namespace}' (dedicated)")
     elif prod_redis:
         redis_db = prod_redis.split('/')[-1] if '/' in prod_redis else 'default'
@@ -247,12 +248,12 @@ def print_dedicated_environment_info():
         print(f"  - Redis: not configured")
     
     # ClickHouse configuration  
-    test_clickhouse = os.getenv('TEST_CLICKHOUSE_URL')
-    prod_clickhouse = os.getenv('CLICKHOUSE_URL')
+    test_clickhouse = get_env().get('TEST_CLICKHOUSE_URL')
+    prod_clickhouse = get_env().get('CLICKHOUSE_URL')
     
     if test_clickhouse:
         ch_db = test_clickhouse.split('/')[-1] if '/' in test_clickhouse else 'unknown'
-        prefix = os.getenv('TEST_CLICKHOUSE_TABLES_PREFIX', 'test_')
+        prefix = get_env().get('TEST_CLICKHOUSE_TABLES_PREFIX', 'test_')
         print(f"  - ClickHouse: {ch_db} with prefix '{prefix}' (dedicated)")
     elif prod_clickhouse:
         ch_db = prod_clickhouse.split('/')[-1] if '/' in prod_clickhouse else 'unknown'
@@ -265,8 +266,8 @@ def print_dedicated_environment_info():
     prod_keys = []
     
     for provider in ['ANTHROPIC', 'GOOGLE', 'OPENAI']:
-        test_key = os.getenv(f'TEST_{provider}_API_KEY')
-        prod_key = os.getenv(f'{provider}_API_KEY')
+        test_key = get_env().get(f'TEST_{provider}_API_KEY')
+        prod_key = get_env().get(f'{provider}_API_KEY')
         
         if test_key:
             test_keys.append(provider.lower())
@@ -283,8 +284,8 @@ def print_dedicated_environment_info():
         print(f"  - API keys: none configured")
     
     # Environment isolation status
-    isolation = os.getenv('USE_TEST_ISOLATION', 'true')
-    schema_isolation = os.getenv('TEST_SCHEMA_ISOLATION', 'true')
+    isolation = get_env().get('USE_TEST_ISOLATION', 'true')
+    schema_isolation = get_env().get('TEST_SCHEMA_ISOLATION', 'true')
     
     print(f"  - Transaction isolation: {'enabled' if isolation.lower() == 'true' else 'disabled'}")
     print(f"  - Schema isolation: {'enabled' if schema_isolation.lower() == 'true' else 'disabled'}")

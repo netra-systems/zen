@@ -414,7 +414,7 @@ class TestRepositoryFactoryIntegration:
             assert secret.user_id == user.id
     
     @pytest.mark.skipif(
-        os.getenv("SKIP_DATABASE_TESTS") == "true",
+        get_env().get("SKIP_DATABASE_TESTS") == "true",
         reason="Database tests skipped via environment variable"
     )
     async def test_real_database_connectivity(self):

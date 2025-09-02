@@ -1,3 +1,4 @@
+from shared.isolated_environment import get_env
 """
 Resource-Aware Test Monitoring and Optimization
 

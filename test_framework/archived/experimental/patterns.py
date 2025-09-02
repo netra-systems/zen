@@ -1,3 +1,4 @@
+from shared.isolated_environment import get_env
 """
 Test patterns for L3/L4 integration tests.
 
@@ -28,10 +29,10 @@ class BaseIntegrationTest:
     def _setup_backend_url(self):
         """Setup backend URL based on environment."""
         # Check for staging environment
-        if os.getenv("ENVIRONMENT") == "staging":
-            self.backend_url = os.getenv("STAGING_API_URL", "https://api.staging.netrasystems.ai")
-        elif os.getenv("DEV_MODE") == "true":
-            self.backend_url = os.getenv("BACKEND_URL", "http://localhost:8001")
+        if get_env().get("ENVIRONMENT") == "staging":
+            self.backend_url = get_env().get("STAGING_API_URL", "https://api.staging.netrasystems.ai")
+        elif get_env().get("DEV_MODE") == "true":
+            self.backend_url = get_env().get("BACKEND_URL", "http://localhost:8001")
         else:
             # Default test environment
             self.backend_url = "http://localhost:8001"
@@ -75,7 +76,7 @@ class BaseIntegrationTest:
         }
         
         # Use test secret
-        secret = os.getenv("JWT_SECRET_KEY", "test-jwt-secret-key-for-testing-only-must-be-32-chars")
+        secret = get_env().get("JWT_SECRET_KEY", "test-jwt-secret-key-for-testing-only-must-be-32-chars")
         token = jwt.encode(payload, secret, algorithm="HS256")
         
         return token
@@ -458,7 +459,7 @@ def require_environment(env_name: str):
     """Decorator to skip tests if required environment is not available."""
     def decorator(test_func):
         def wrapper(*args, **kwargs):
-            if os.getenv("ENVIRONMENT") != env_name:
+            if get_env().get("ENVIRONMENT") != env_name:
                 pytest.skip(f"Test requires {env_name} environment")
             return test_func(*args, **kwargs)
         return wrapper
@@ -469,7 +470,7 @@ def require_real_services():
     """Decorator to skip tests if real services are not available."""
     def decorator(test_func):
         def wrapper(*args, **kwargs):
-            if os.getenv("ENABLE_REAL_LLM_TESTING") != "true":
+            if get_env().get("ENABLE_REAL_LLM_TESTING") != "true":
                 pytest.skip("Test requires real services (ENABLE_REAL_LLM_TESTING=true)")
             return test_func(*args, **kwargs)
         return wrapper

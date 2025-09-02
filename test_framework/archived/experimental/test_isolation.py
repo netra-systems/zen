@@ -146,8 +146,8 @@ class TestIsolationManager:
             'JWT_SECRET': f"test-jwt-secret-{self.test_id}",
             'JWT_SECRET_KEY': f"test-jwt-secret-key-for-testing-only-must-be-32-chars-{self.test_id[:8]}",
             'FERNET_KEY': "iZAG-Kz661gRuJXEGzxgghUFnFRamgDrjDXZE6HdJkw=",
-            'ANTHROPIC_API_KEY': os.getenv("ANTHROPIC_API_KEY", "test-api-key"),
-            'GOOGLE_API_KEY': os.getenv("GOOGLE_API_KEY", "test-api-key"),
+            'ANTHROPIC_API_KEY': get_env().get("ANTHROPIC_API_KEY", "test-api-key"),
+            'GOOGLE_API_KEY': get_env().get("GOOGLE_API_KEY", "test-api-key"),
             'GOOGLE_CLIENT_ID': "test-google-client", 'GOOGLE_CLIENT_SECRET': "test-google-secret",
         }
 
