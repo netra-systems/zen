@@ -1,3 +1,4 @@
+from shared.isolated_environment import get_env
 #!/usr/bin/env python3
 """
 Comprehensive test for webhook delivery reliability:
@@ -28,8 +29,8 @@ import aiohttp
 import pytest
 from aiohttp import web
 
-BACKEND_URL = os.getenv("BACKEND_URL", "http://localhost:8000")
-WEBHOOK_SERVICE_URL = os.getenv("WEBHOOK_SERVICE_URL", "http://localhost:8085")
+BACKEND_URL = get_env().get("BACKEND_URL", "http://localhost:8000")
+WEBHOOK_SERVICE_URL = get_env().get("WEBHOOK_SERVICE_URL", "http://localhost:8085")
 TEST_WEBHOOK_PORT = 9999
 
 class WebhookReliabilityTester:

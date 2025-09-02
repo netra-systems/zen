@@ -1,3 +1,4 @@
+from shared.isolated_environment import get_env
 #!/usr/bin/env python3
 """
 Comprehensive test for agent collaboration workflow:
@@ -32,10 +33,10 @@ import pytest
 import websockets
 
 # Configuration
-BACKEND_URL = os.getenv("BACKEND_URL", "http://localhost:8000")
-AUTH_SERVICE_URL = os.getenv("AUTH_SERVICE_URL", "http://localhost:8081")
-WEBSOCKET_URL = os.getenv("WEBSOCKET_URL", "ws://localhost:8000/websocket")
-AGENT_SERVICE_URL = os.getenv("AGENT_SERVICE_URL", "http://localhost:8083")
+BACKEND_URL = get_env().get("BACKEND_URL", "http://localhost:8000")
+AUTH_SERVICE_URL = get_env().get("AUTH_SERVICE_URL", "http://localhost:8081")
+WEBSOCKET_URL = get_env().get("WEBSOCKET_URL", "ws://localhost:8000/websocket")
+AGENT_SERVICE_URL = get_env().get("AGENT_SERVICE_URL", "http://localhost:8083")
 
 
 async def check_service_availability(url: str) -> bool:

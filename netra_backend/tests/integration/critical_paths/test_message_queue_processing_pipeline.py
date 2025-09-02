@@ -1,3 +1,4 @@
+from shared.isolated_environment import get_env
 #!/usr/bin/env python3
 """
 Comprehensive test for message queue processing pipeline:
@@ -25,8 +26,8 @@ from typing import Any, Dict, List, Optional
 import aiohttp
 import pytest
 
-BACKEND_URL = os.getenv("BACKEND_URL", "http://localhost:8000")
-QUEUE_SERVICE_URL = os.getenv("QUEUE_SERVICE_URL", "http://localhost:8084")
+BACKEND_URL = get_env().get("BACKEND_URL", "http://localhost:8000")
+QUEUE_SERVICE_URL = get_env().get("QUEUE_SERVICE_URL", "http://localhost:8084")
 
 class MessageQueueTester:
     """Test message queue processing pipeline."""

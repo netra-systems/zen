@@ -1,3 +1,4 @@
+from shared.isolated_environment import get_env
 """OAuth-to-JWT-to-WebSocket Authentication Flow L3 Integration Test
 
 Business Value Justification (BVJ):
@@ -167,7 +168,7 @@ class OAuthJWTWebSocketTestManager:
             # Real Redis connection for L3 testing - defer initialization
             # to avoid event loop mismatch issues
             import os
-            self._redis_url = os.getenv("REDIS_URL", "redis://localhost:6379")
+            self._redis_url = get_env().get("REDIS_URL", "redis://localhost:6379")
             self.redis_client = None
             
             logger.info("L3 OAuth→JWT→WebSocket services initialized with real connections")

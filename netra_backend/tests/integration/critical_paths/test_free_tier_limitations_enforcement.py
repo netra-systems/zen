@@ -1,3 +1,4 @@
+from shared.isolated_environment import get_env
 #!/usr/bin/env python3
 """
 Comprehensive test for free tier limitations enforcement:
@@ -33,9 +34,9 @@ import pytest
 import websockets
 
 # Configuration
-BACKEND_URL = os.getenv("BACKEND_URL", "http://localhost:8000")
-AUTH_SERVICE_URL = os.getenv("AUTH_SERVICE_URL", "http://localhost:8081")
-WEBSOCKET_URL = os.getenv("WEBSOCKET_URL", "ws://localhost:8000/websocket")
+BACKEND_URL = get_env().get("BACKEND_URL", "http://localhost:8000")
+AUTH_SERVICE_URL = get_env().get("AUTH_SERVICE_URL", "http://localhost:8081")
+WEBSOCKET_URL = get_env().get("WEBSOCKET_URL", "ws://localhost:8000/websocket")
 
 # Free tier limits (should match config)
 FREE_TIER_LIMITS = {
