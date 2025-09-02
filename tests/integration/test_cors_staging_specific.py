@@ -1,3 +1,4 @@
+from shared.isolated_environment import get_env
 """
 Staging-Specific CORS Tests
 

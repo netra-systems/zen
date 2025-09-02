@@ -241,7 +241,7 @@ class TestEnvironmentConfigurationIssues:
         
         # All database URLs should use same environment variable
         settings = Settings()
-        assert settings.database_url == os.getenv('DATABASE_URL', settings.database_url)
+        assert settings.database_url == get_env().get('DATABASE_URL', settings.database_url)
     
     def test_no_hardcoded_development_values(self):
         """Test that no development values are hardcoded in production code."""

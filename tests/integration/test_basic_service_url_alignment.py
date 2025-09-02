@@ -1,3 +1,4 @@
+from shared.isolated_environment import get_env
 """
 Basic Service URL Alignment Tests
 
@@ -48,11 +49,11 @@ class ServiceURLAlignmentTester:
         
     def get_current_environment(self) -> str:
         """Detect current environment from environment variables."""
-        if os.getenv("TESTING") == "true":
+        if get_env().get("TESTING") == "true":
             return "development"  # Test environment uses dev URLs
-        elif os.getenv("ENVIRONMENT") == "staging":
+        elif get_env().get("ENVIRONMENT") == "staging":
             return "staging"
-        elif os.getenv("ENVIRONMENT") == "production":
+        elif get_env().get("ENVIRONMENT") == "production":
             return "production"
         else:
             return "development"  # Default
@@ -66,7 +67,7 @@ class ServiceURLAlignmentTester:
         
         try:
             # Test 1: Check environment variable configuration
-            auth_service_url = os.getenv("AUTH_SERVICE_URL")
+            auth_service_url = get_env().get("AUTH_SERVICE_URL")
             if auth_service_url:
                 url_matches = auth_service_url.rstrip('/') == expected_auth_url.rstrip('/')
                 results["environment_variable_match"] = url_matches
@@ -111,7 +112,7 @@ class ServiceURLAlignmentTester:
             
             backend_url = None
             for var_name in backend_url_vars:
-                backend_url = os.getenv(var_name)
+                backend_url = get_env().get(var_name)
                 if backend_url:
                     break
                     
@@ -154,14 +155,14 @@ class ServiceURLAlignmentTester:
             configured_urls = {}
             
             # Auth service URL (used by backend)
-            auth_url = os.getenv("AUTH_SERVICE_URL")
+            auth_url = get_env().get("AUTH_SERVICE_URL")
             if auth_url:
                 configured_urls["auth_service"] = auth_url
                 
             # Backend URL (used by frontend)
             backend_url_vars = ["REACT_APP_API_URL", "API_URL", "BACKEND_URL", "NEXT_PUBLIC_API_URL"]
             for var_name in backend_url_vars:
-                backend_url = os.getenv(var_name)
+                backend_url = get_env().get(var_name)
                 if backend_url:
                     configured_urls["netra_backend"] = backend_url
                     break
@@ -169,7 +170,7 @@ class ServiceURLAlignmentTester:
             # Frontend URL (used for CORS, redirects, etc.)
             frontend_url_vars = ["FRONTEND_URL", "APP_URL", "CLIENT_URL"]
             for var_name in frontend_url_vars:
-                frontend_url = os.getenv(var_name)
+                frontend_url = get_env().get(var_name)
                 if frontend_url:
                     configured_urls["frontend"] = frontend_url
                     break
@@ -261,7 +262,7 @@ class TestBasicServiceURLAlignment:
         
         # In development/test environment, check if AUTH_SERVICE_URL is set
         current_env = url_tester.get_current_environment()
-        auth_service_url = os.getenv("AUTH_SERVICE_URL")
+        auth_service_url = get_env().get("AUTH_SERVICE_URL")
         
         if current_env == "development" and auth_service_url:
             # If AUTH_SERVICE_URL is set, it should match expected format
@@ -347,7 +348,7 @@ class TestBasicServiceURLAlignment:
         )
         
         # In test context, should detect development
-        if os.getenv("TESTING") == "true":
+        if get_env().get("TESTING") == "true":
             assert detected_env == "development", (
                 f"Should detect 'development' environment in test context, got '{detected_env}'"
             )

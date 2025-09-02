@@ -1,3 +1,4 @@
+from shared.isolated_environment import get_env
 """
 Test suite to expose health route duplication and legacy issues.
 

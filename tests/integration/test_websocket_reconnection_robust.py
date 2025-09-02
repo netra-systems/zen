@@ -1,3 +1,4 @@
+from shared.isolated_environment import get_env
 """
 MISSION CRITICAL: WebSocket Reconnection Integration Tests
 
@@ -43,7 +44,7 @@ class WebSocketReconnectionTests:
     def __init__(self):
         self.settings = get_settings()
         self.ws_url = f"ws://localhost:8000/ws"
-        self.jwt_secret = os.getenv('JWT_SECRET', 'test-secret-key')
+        self.jwt_secret = get_env().get('JWT_SECRET', 'test-secret-key')
         self.test_results: Dict[str, Any] = {
             'total': 0,
             'passed': 0,

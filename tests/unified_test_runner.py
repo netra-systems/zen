@@ -1032,6 +1032,10 @@ class UnifiedTestRunner:
         """Determine which categories to run based on arguments."""
         categories = []
         
+        # Handle service-specific selection (legacy compatibility)
+        if hasattr(args, 'service') and args.service:
+            categories.extend(self._get_categories_for_service(args.service))
+        
         # Handle specific category selection
         if args.category:
             categories.append(args.category)
@@ -1055,6 +1059,21 @@ class UnifiedTestRunner:
                 print(f"Warning: Categories not found: {missing}")
         
         return valid_categories
+    
+    def _get_categories_for_service(self, service: str) -> List[str]:
+        """Get categories relevant to a specific service (legacy compatibility)."""
+        service_category_mapping = {
+            "backend": ["unit", "integration", "api", "database", "agent", "websocket", "security"],
+            "frontend": ["unit", "integration", "e2e", "cypress", "performance"],
+            "auth": ["unit", "integration", "auth", "security"],
+            "auth_service": ["unit", "integration", "auth", "security"],
+            "all": ["smoke", "unit", "integration", "api", "e2e", "database", "agent", "websocket", "security"]
+        }
+        
+        categories = service_category_mapping.get(service, ["unit", "integration"])
+        print(f"[LEGACY SERVICE MODE] Service '{service}' mapped to categories: {', '.join(categories)}")
+        print("[DEPRECATION WARNING] --service flag is deprecated. Use --category or --categories instead.")
+        return categories
     
     def _handle_resume(self, categories: List[str], resume_from: str) -> List[str]:
         """Handle resume functionality by skipping already completed categories."""
@@ -2036,6 +2055,13 @@ def main():
         epilog=__doc__
     )
     
+    # Service selection (for compatibility with legacy scripts)
+    parser.add_argument(
+        "--service",
+        choices=["backend", "frontend", "auth", "auth_service", "all"],
+        help="Run tests for specific service (legacy compatibility mode)"
+    )
+    
     # Category selection
     parser.add_argument(
         "--category",
@@ -2093,6 +2119,20 @@ def main():
         help="Disable coverage reporting"
     )
     
+    parser.add_argument(
+        "--coverage",
+        "--cov",
+        action="store_true",
+        help="Enable coverage reporting (legacy compatibility)"
+    )
+    
+    parser.add_argument(
+        "--min-coverage",
+        type=int,
+        default=70,
+        help="Minimum coverage percentage required (default: 70)"
+    )
+    
     # Execution options
     parser.add_argument(
         "--parallel",
@@ -2122,6 +2162,122 @@ def main():
     parser.add_argument(
         "--pattern",
         help="Run tests matching pattern"
+    )
+    
+    # Legacy compatibility arguments from frontend/backend runners
+    parser.add_argument(
+        "--markers",
+        "-m",
+        help="Only run tests matching given mark expression (pytest backend)"
+    )
+    
+    parser.add_argument(
+        "--keyword",
+        "-k", 
+        help="Only run tests matching the given keyword expression"
+    )
+    
+    parser.add_argument(
+        "--lint",
+        "-l",
+        action="store_true",
+        help="Run linting checks (frontend: ESLint)"
+    )
+    
+    parser.add_argument(
+        "--fix",
+        action="store_true",
+        help="Auto-fix linting issues"
+    )
+    
+    parser.add_argument(
+        "--build",
+        "-b", 
+        action="store_true",
+        help="Build frontend for production"
+    )
+    
+    parser.add_argument(
+        "--type-check",
+        "-t",
+        action="store_true", 
+        help="Run TypeScript type checking (frontend)"
+    )
+    
+    parser.add_argument(
+        "--watch",
+        "-w",
+        action="store_true",
+        help="Run in watch mode (frontend Jest)"
+    )
+    
+    parser.add_argument(
+        "--update-snapshots",
+        "-u",
+        action="store_true",
+        help="Update Jest snapshots (frontend)"
+    )
+    
+    parser.add_argument(
+        "--cypress-open",
+        action="store_true",
+        help="Open Cypress interactive runner (frontend)"
+    )
+    
+    parser.add_argument(
+        "--e2e",
+        action="store_true",
+        help="Run E2E tests with Cypress (frontend)"
+    )
+    
+    parser.add_argument(
+        "--check-deps",
+        action="store_true",
+        help="Check test dependencies before running"
+    )
+    
+    parser.add_argument(
+        "--install-deps",
+        action="store_true",
+        help="Install dependencies if missing (frontend)"
+    )
+    
+    parser.add_argument(
+        "--failed-first",
+        "--ff",
+        action="store_true",
+        help="Run previously failed tests first (pytest backend)"
+    )
+    
+    parser.add_argument(
+        "--json-output",
+        action="store_true",
+        help="Generate JSON test report"
+    )
+    
+    parser.add_argument(
+        "--html-output",
+        action="store_true", 
+        help="Generate HTML test report"
+    )
+    
+    parser.add_argument(
+        "--profile",
+        action="store_true",
+        help="Show slowest tests"
+    )
+    
+    parser.add_argument(
+        "--quiet",
+        "-q",
+        action="store_true",
+        help="Minimal output"
+    )
+    
+    parser.add_argument(
+        "--show-warnings",
+        action="store_true",
+        help="Show warning messages (backend pytest)"
     )
     
     # Enhanced features

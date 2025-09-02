@@ -100,7 +100,7 @@ class NACISTestHarness:
                 from netra_backend.app.llm.llm_manager import LLMManager
                 from netra_backend.app.config import settings
                 
-                if not os.getenv("OPENAI_API_KEY"):
+                if not get_env().get("OPENAI_API_KEY"):
                     print("❌ OPENAI_API_KEY not set. Use --mock or set the key.")
                     return False
                     
@@ -324,8 +324,8 @@ async def main():
         # If argument parsing fails (e.g., when run via pytest), use environment variables
         args = argparse.Namespace()
         # Check both new and legacy variable names
-        args.real_llm = (os.getenv("USE_REAL_LLM", "false").lower() == "true" or
-                         os.getenv("TEST_USE_REAL_LLM", "false").lower() == "true")
+        args.real_llm = (get_env().get("USE_REAL_LLM", "false").lower() == "true" or
+                         get_env().get("TEST_USE_REAL_LLM", "false").lower() == "true")
     
     print("""
 ╔══════════════════════════════════════════════════════════════╗

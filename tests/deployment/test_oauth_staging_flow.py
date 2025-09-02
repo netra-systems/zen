@@ -1,3 +1,4 @@
+from shared.isolated_environment import get_env
 """
 Deployment test for OAuth flow in staging environment.
 This test verifies the complete OAuth flow works correctly when deployed.
@@ -13,13 +14,13 @@ class OAuthStagingTester:
     """Tests OAuth flow in staging environment"""
 
     def __init__(self):
-        self.auth_service_url = os.getenv(
+        self.auth_service_url = get_env().get(
             "AUTH_SERVICE_URL", "https://auth.staging.netrasystems.ai"
         )
-        self.frontend_url = os.getenv(
+        self.frontend_url = get_env().get(
             "FRONTEND_URL", "https://app.staging.netrasystems.ai"
         )
-        self.api_url = os.getenv("API_URL", "https://api.staging.netrasystems.ai")
+        self.api_url = get_env().get("API_URL", "https://api.staging.netrasystems.ai")
 
     async def test_auth_service_health(self) -> bool:
         """Test that auth service is healthy"""

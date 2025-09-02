@@ -119,6 +119,6 @@ def test_auth_service_startup_with_all_configs():
     assert jwt_secret == 'test-jwt-secret-key'
     
     # Test that the service can access all required configs
-    assert os.getenv('DATABASE_URL') is not None
-    assert os.getenv('OAUTH_GOOGLE_CLIENT_ID_ENV') is not None
-    assert os.getenv('OAUTH_GOOGLE_CLIENT_SECRET_ENV') is not None
+    assert get_env().get('DATABASE_URL') is not None
+    assert get_env().get('OAUTH_GOOGLE_CLIENT_ID_ENV') is not None
+    assert get_env().get('OAUTH_GOOGLE_CLIENT_SECRET_ENV') is not None

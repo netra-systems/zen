@@ -67,11 +67,11 @@ class StagingTestRunner:
         issues = []
         
         # Check E2E bypass key
-        if not os.getenv("E2E_OAUTH_SIMULATION_KEY"):
+        if not get_env().get("E2E_OAUTH_SIMULATION_KEY"):
             issues.append("E2E_OAUTH_SIMULATION_KEY not set - required for OAUTH SIMULATION")
             
         # Check environment setting
-        if os.getenv("ENVIRONMENT") != "staging":
+        if get_env().get("ENVIRONMENT") != "staging":
             logger.warning("ENVIRONMENT not set to 'staging', setting it now")
             env.set("ENVIRONMENT", "staging", "test")
         

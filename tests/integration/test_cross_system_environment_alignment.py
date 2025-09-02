@@ -90,11 +90,11 @@ class CrossSystemEnvironmentAlignmentTester:
     
     def get_current_environment(self) -> str:
         """Detect current environment from environment variables."""
-        if os.getenv("TESTING") == "true":
+        if get_env().get("TESTING") == "true":
             return "development"
-        elif os.getenv("ENVIRONMENT") == "staging":
+        elif get_env().get("ENVIRONMENT") == "staging":
             return "staging"  
-        elif os.getenv("ENVIRONMENT") == "production":
+        elif get_env().get("ENVIRONMENT") == "production":
             return "production"
         else:
             return "development"
@@ -202,7 +202,7 @@ class CrossSystemEnvironmentAlignmentTester:
                 env = IsolatedEnvironment()
                 return env.get(config_name)
             except:
-                return os.getenv(config_name)
+                return get_env().get(config_name)
                 
         except Exception as e:
             logger.warning(f"Could not get {config_name} for service {service}: {e}")
@@ -278,7 +278,7 @@ class CrossSystemEnvironmentAlignmentTester:
                 }
                 
                 for service, var_name in service_url_vars.items():
-                    value = os.getenv(var_name)
+                    value = get_env().get(var_name)
                     results["service_urls"][service] = value
                     if not value:
                         results["issues"].append(f"Missing {var_name} for {service}")
@@ -600,7 +600,7 @@ class TestCrossSystemEnvironmentAlignment:
         missing_vars = []
         
         for var_name in required_vars:
-            value = os.getenv(var_name)
+            value = get_env().get(var_name)
             if not value:
                 missing_vars.append(var_name)
         
@@ -635,7 +635,7 @@ class TestCrossSystemEnvironmentAlignment:
             # Get CORS-related configurations
             cors_vars = ["CORS_ORIGINS", "ALLOWED_ORIGINS", "FRONTEND_URL"]
             for var_name in cors_vars:
-                value = os.getenv(var_name)
+                value = get_env().get(var_name)
                 if value:
                     results["cors_origins"].append({
                         "variable": var_name,

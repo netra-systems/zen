@@ -1,3 +1,4 @@
+from shared.isolated_environment import get_env
 """Core_2 Tests - Split from test_cross_service_integration.py"""
 
 import asyncio
