@@ -406,6 +406,30 @@ class GCPDeployer:
         print("✅ All required APIs enabled")
         return True
     
+    def configure_docker_auth(self) -> bool:
+        """Configure Docker authentication for Google Container Registry."""
+        try:
+            print("  Configuring Docker authentication for GCR...")
+            auth_cmd = [self.gcloud_cmd, "auth", "configure-docker", "gcr.io", "--quiet"]
+            result = subprocess.run(
+                auth_cmd, 
+                capture_output=True,
+                text=True,
+                check=False,
+                shell=self.use_shell
+            )
+            
+            if result.returncode == 0:
+                print("  ✅ Docker authentication configured successfully")
+                return True
+            else:
+                print(f"  ❌ Failed to configure Docker authentication: {result.stderr}")
+                return False
+                
+        except Exception as e:
+            print(f"  ❌ Docker authentication error: {e}")
+            return False
+    
     def create_dockerfile(self, service: ServiceConfig) -> bool:
         """Create Dockerfile for the service if it doesn't exist."""
         dockerfile_path = self.project_root / service.dockerfile
@@ -547,8 +571,8 @@ CMD ["npm", "start"]
             print(f"  ✅ Built successfully, now pushing to registry...")
             
             # Configure docker for GCR
-            auth_cmd = [self.gcloud_cmd, "auth", "configure-docker", "gcr.io", "--quiet"]
-            subprocess.run(auth_cmd, check=True, shell=self.use_shell)
+            if not self.configure_docker_auth():
+                return False
             
             # Push to registry
             push_cmd = [self.docker_cmd, "push", image_tag]
