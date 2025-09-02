@@ -1,3 +1,4 @@
+from shared.isolated_environment import get_env
 """
 STDIO transport client for MCP using asyncio.subprocess.
 Handles JSON-RPC communication over stdin/stdout with external processes.

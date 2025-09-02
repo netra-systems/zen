@@ -75,7 +75,7 @@ async def get_system_info(
     import socket
     
     # Try to get git commit from environment or file
-    git_commit = os.getenv("GIT_COMMIT")
+    git_commit = get_env().get("GIT_COMMIT")
     if not git_commit and os.path.exists(".git/HEAD"):
         try:
             with open(".git/HEAD", "r") as f:
@@ -101,14 +101,14 @@ async def get_system_info(
         pass
     
     return SystemInfo(
-        version=os.getenv("SERVICE_VERSION", "1.0.0"),
-        environment=os.getenv("ENVIRONMENT", "development"),
+        version=get_env().get("SERVICE_VERSION", "1.0.0"),
+        environment=get_env().get("ENVIRONMENT", "development"),
         python_version=sys.version.split()[0],
         platform=f"{platform.system()} {platform.release()}",
         hostname=socket.gethostname(),
         started_at=started_at,
         git_commit=git_commit,
-        build_time=os.getenv("BUILD_TIME")
+        build_time=get_env().get("BUILD_TIME")
     )
 
 
@@ -157,8 +157,8 @@ async def validate_configuration(
             config_sources[".env"] = "Found"
         if os.path.exists(".env.staging"):
             config_sources[".env.staging"] = "Found"
-        if os.getenv("ENVIRONMENT"):
-            config_sources["ENVIRONMENT"] = os.getenv("ENVIRONMENT")
+        if get_env().get("ENVIRONMENT"):
+            config_sources["ENVIRONMENT"] = get_env().get("ENVIRONMENT")
         
         # Validate database URL format
         db_url = env.get("DATABASE_URL")
@@ -227,7 +227,7 @@ async def check_dependencies(
         overall_healthy = False
     
     # Check Redis (if configured)
-    redis_url = os.getenv("REDIS_URL")
+    redis_url = get_env().get("REDIS_URL")
     if redis_url:
         try:
             import redis.asyncio as redis
@@ -265,7 +265,7 @@ async def check_dependencies(
         async with httpx.AsyncClient() as client:
             response = await client.get(
                 "https://api.openai.com/v1/models",
-                headers={"Authorization": f"Bearer {os.getenv('OPENAI_API_KEY')}"},
+                headers={"Authorization": f"Bearer {get_env().get('OPENAI_API_KEY')}"},
                 timeout=5.0
             )
         latency = (time.time() - start) * 1000
@@ -296,7 +296,7 @@ async def check_dependencies(
         overall_healthy = False
     
     # Check Auth Service (if separate)
-    auth_service_url = os.getenv("AUTH_SERVICE_URL")
+    auth_service_url = get_env().get("AUTH_SERVICE_URL")
     if auth_service_url:
         try:
             import httpx
