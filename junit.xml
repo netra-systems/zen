@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="1" failures="0" skipped="0" tests="1" time="0.934" timestamp="2025-09-01T19:24:03.077986-07:00" hostname="Anthony"><testcase classname="" name="tests.test_auth_real_services_comprehensive" time="0.000"><error message="collection failure">ImportError while importing test module 'C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\auth_service\tests\test_auth_real_services_comprehensive.py'.
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="1" failures="0" skipped="0" tests="1" time="0.524" timestamp="2025-09-01T19:39:49.395015-07:00" hostname="Anthony"><testcase classname="" name="tests.test_auth_real_services_comprehensive" time="0.000"><error message="collection failure">ImportError while importing test module 'C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\auth_service\tests\test_auth_real_services_comprehensive.py'.
 Hint: make sure your test modules/packages have valid Python names.
 Traceback:
 ..\..\..\..\miniconda3\Lib\importlib\__init__.py:90: in import_module
