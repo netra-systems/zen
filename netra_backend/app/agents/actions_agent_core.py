@@ -41,7 +41,7 @@ class ActionsToMeetGoalsSubAgent(BaseSubAgent):
             name="ActionsToMeetGoalsSubAgent", 
             description="This agent creates a plan of action."
         )
-        # Set properties for BaseExecutionInterface compatibility
+        # Set properties for standardized execution patterns
         self.agent_name = "ActionsToMeetGoalsSubAgent"
         self.websocket_manager = None  # Will be set by registry if needed
 

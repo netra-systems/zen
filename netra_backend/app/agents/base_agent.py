@@ -5,7 +5,8 @@ Main base agent class that composes functionality from focused modular component
 """
 
 from abc import ABC, abstractmethod
-from typing import Dict, Optional, Any, List
+from typing import Dict, Optional, Any, List, Callable, Awaitable
+import time
 
 # Remove mixin imports since we're using single inheritance now
 # from netra_backend.app.agents.agent_communication import AgentCommunicationMixin
@@ -23,6 +24,24 @@ from netra_backend.app.schemas.agent import SubAgentLifecycle
 
 # Import timing components
 from netra_backend.app.agents.base.timing_collector import ExecutionTimingCollector
+
+# Import reliability and execution infrastructure
+from netra_backend.app.agents.base.reliability_manager import ReliabilityManager
+from netra_backend.app.agents.base.executor import BaseExecutionEngine
+from netra_backend.app.agents.base.monitoring import ExecutionMonitor
+from netra_backend.app.agents.base.interface import ExecutionContext, ExecutionResult
+from netra_backend.app.schemas.core_enums import ExecutionStatus
+from netra_backend.app.agents.base.circuit_breaker import CircuitBreakerConfig
+from netra_backend.app.schemas.shared_types import RetryConfig
+from netra_backend.app.core.reliability import (
+    CircuitBreakerConfig as LegacyCircuitConfig,
+    RetryConfig as LegacyRetryConfig,
+    get_reliability_wrapper,
+)
+from netra_backend.app.core.unified_error_handler import agent_error_handler
+from netra_backend.app.redis_manager import RedisManager
+from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
+from netra_backend.app.agents.config import agent_config
 
 
 class BaseSubAgent(ABC):
@@ -46,7 +65,13 @@ class BaseSubAgent(ABC):
     - Observability features
     """
     
-    def __init__(self, llm_manager: Optional[LLMManager] = None, name: str = "BaseSubAgent", description: str = "This is the base sub-agent.", agent_id: Optional[str] = None, user_id: Optional[str] = None):
+    def __init__(self, 
+                 llm_manager: Optional[LLMManager] = None, 
+                 name: str = "BaseSubAgent", 
+                 description: str = "This is the base sub-agent.", 
+                 agent_id: Optional[str] = None, 
+                 user_id: Optional[str] = None):
+        
         # Initialize with simple single inheritance pattern
         super().__init__()
         

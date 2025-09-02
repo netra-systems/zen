@@ -17,8 +17,8 @@ from typing import TYPE_CHECKING, Any, Callable, Dict, Optional
 if TYPE_CHECKING:
     from typing import Protocol
     
-    class BaseExecutionInterface(Protocol):
-        """Protocol for agent execution interface."""
+    class AgentExecutionProtocol(Protocol):
+        """Protocol for agent execution methods."""
         async def validate_preconditions(self, context: 'ExecutionContext') -> bool: ...
         async def execute_core_logic(self, context: 'ExecutionContext') -> Dict[str, Any]: ...
         async def send_status_update(self, context: 'ExecutionContext', status: str, message: str) -> None: ...
@@ -56,7 +56,7 @@ class BaseExecutionEngine:
         self.monitor = monitor or ExecutionMonitor()
         self.error_handler = ExecutionErrorHandler
         
-    async def execute(self, agent: 'BaseExecutionInterface', 
+    async def execute(self, agent: 'AgentExecutionProtocol', 
                      context: ExecutionContext) -> ExecutionResult:
         """Execute agent with full orchestration workflow."""
         await self._initialize_execution(context)
@@ -69,7 +69,7 @@ class BaseExecutionEngine:
         context.start_time = time.time()
         self.monitor.start_execution(context)
         
-    async def _execute_with_monitoring(self, agent: 'BaseExecutionInterface',
+    async def _execute_with_monitoring(self, agent: 'AgentExecutionProtocol',
                                      context: ExecutionContext) -> ExecutionResult:
         """Execute with comprehensive monitoring."""
         try:
@@ -77,21 +77,21 @@ class BaseExecutionEngine:
         except Exception as e:
             return await self._handle_execution_failure(context, e)
     
-    async def _execute_core_workflow(self, agent: 'BaseExecutionInterface',
+    async def _execute_core_workflow(self, agent: 'AgentExecutionProtocol',
                                    context: ExecutionContext) -> ExecutionResult:
         """Execute core workflow with reliability patterns."""
         if self.reliability_manager:
             return await self._execute_with_reliability(agent, context)
         return await self._execute_direct(agent, context)
     
-    async def _execute_with_reliability(self, agent: 'BaseExecutionInterface',
+    async def _execute_with_reliability(self, agent: 'AgentExecutionProtocol',
                                       context: ExecutionContext) -> ExecutionResult:
         """Execute with reliability manager (circuit breaker, retry)."""
         async def execute_func():
             return await self._execute_direct(agent, context)
         return await self.reliability_manager.execute_with_reliability(context, execute_func)
     
-    async def _execute_direct(self, agent: 'BaseExecutionInterface',
+    async def _execute_direct(self, agent: 'AgentExecutionProtocol',
                             context: ExecutionContext) -> ExecutionResult:
         """Execute agent directly with basic error handling."""
         try:
@@ -105,21 +105,21 @@ class BaseExecutionEngine:
                 return self._create_error_result(context, error.message)
             return self._create_error_result(context, str(error))
     
-    async def _execute_agent_workflow(self, agent: 'BaseExecutionInterface',
+    async def _execute_agent_workflow(self, agent: 'AgentExecutionProtocol',
                                     context: ExecutionContext) -> ExecutionResult:
         """Execute complete agent workflow."""
         await self._validate_and_notify(agent, context)
         result_data = await self._execute_and_measure(agent, context)
         return self._create_success_result(context, result_data)
     
-    async def _validate_and_notify(self, agent: 'BaseExecutionInterface',
+    async def _validate_and_notify(self, agent: 'AgentExecutionProtocol',
                                  context: ExecutionContext) -> None:
         """Validate preconditions and send status update."""
         if not await agent.validate_preconditions(context):
             raise AgentExecutionError("Preconditions not met")
         await agent.send_status_update(context, "executing", "Starting execution")
     
-    async def _execute_and_measure(self, agent: 'BaseExecutionInterface',
+    async def _execute_and_measure(self, agent: 'AgentExecutionProtocol',
                                  context: ExecutionContext) -> Dict[str, Any]:
         """Execute core logic with performance measurement."""
         start_time = time.time()

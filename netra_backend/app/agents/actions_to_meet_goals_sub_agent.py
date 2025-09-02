@@ -2,7 +2,7 @@
 # ================================
 # Timestamp: 2025-08-18T10:30:00.000000+00:00
 # Agent: Claude Opus 4.1 claude-opus-4-1-20250805
-# Context: Modernize with BaseExecutionInterface pattern
+# Context: Modernize with standardized execution patterns
 # Git: v6 | 2c55fb99 | dirty (27 uncommitted)
 # Change: Feature | Scope: Component | Risk: High
 # Session: modernization-session | Seq: 1
@@ -52,7 +52,7 @@ from netra_backend.app.schemas.shared_types import RetryConfig
 
 
 class ActionsToMeetGoalsSubAgent(BaseSubAgent):
-    """Modernized agent implementing BaseExecutionInterface pattern via composition."""
+    """Modernized agent implementing standardized execution patterns via composition."""
     
     def __init__(self, llm_manager: LLMManager, tool_dispatcher: ToolDispatcher):
         """Initialize with modern execution patterns."""
@@ -68,7 +68,7 @@ class ActionsToMeetGoalsSubAgent(BaseSubAgent):
             name="ActionsToMeetGoalsSubAgent", 
             description="This agent creates a plan of action."
         )
-        # Store agent name for BaseExecutionInterface compatibility
+        # Store agent name for standardized execution patterns
         self.agent_name = "ActionsToMeetGoalsSubAgent"
 
     def _setup_modern_execution_infrastructure(self) -> None:
@@ -194,7 +194,7 @@ class ActionsToMeetGoalsSubAgent(BaseSubAgent):
         self, state: DeepAgentState, 
         run_id: str, stream_updates: bool
     ) -> None:
-        """Modernized execute using BaseExecutionEngine."""
+        """Modernized execute using modern execution engine."""
         await self._execute_with_logging(state, run_id, stream_updates)
 
     async def _execute_with_logging(self, state: DeepAgentState, run_id: str, stream_updates: bool) -> None:

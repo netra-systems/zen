@@ -1,4 +1,4 @@
-"""Modernized Supervisor Agent with BaseExecutionInterface pattern (<300 lines).
+"""Modernized Supervisor Agent with standardized execution patterns (<300 lines).
 
 Business Value: Standardized execution patterns for 40+ agents,
 improved reliability, and comprehensive monitoring.
@@ -91,7 +91,7 @@ class SupervisorAgent(BaseSubAgent):
         """Initialize base agent with modern execution interface."""
         BaseSubAgent.__init__(self, llm_manager, name="Supervisor", 
                             description="The supervisor agent that orchestrates sub-agents")
-        # Set properties for BaseExecutionInterface compatibility
+        # Set properties for standardized execution patterns
         self.agent_name = "Supervisor"
         self.websocket_manager = websocket_bridge
     
