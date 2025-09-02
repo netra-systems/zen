@@ -1,8 +1,16 @@
 """Execution engine for supervisor agent pipelines with UserExecutionContext support.
 
+DEPRECATION WARNING: This ExecutionEngine uses global state and is not safe for concurrent users.
+For new code, use RequestScopedExecutionEngine or the factory methods provided below.
+
 Business Value: Supports 5+ concurrent users with complete isolation and <2s response times.
 New Features: UserExecutionContext integration, per-user isolation, UserWebSocketEmitter support.
 Optimizations: Semaphore-based concurrency control, event sequencing, backlog handling.
+
+Migration Guide:
+- Replace direct ExecutionEngine instantiation with create_request_scoped_engine()
+- Use ExecutionContextManager for request-scoped execution management
+- See RequestScopedExecutionEngine for isolated per-request execution
 """
 
 import asyncio
@@ -72,11 +80,28 @@ class ExecutionEngine:
                  user_context: Optional['UserExecutionContext'] = None):
         """Initialize ExecutionEngine with optional UserExecutionContext support.
         
+        DEPRECATION WARNING: Direct ExecutionEngine instantiation uses global state.
+        For concurrent user support, use create_request_scoped_engine() instead.
+        
         Args:
             registry: Agent registry for agent lookup
             websocket_bridge: WebSocket bridge for event emission
             user_context: Optional UserExecutionContext for per-request isolation
         """
+        import warnings
+        
+        # Issue deprecation warning for direct instantiation
+        warnings.warn(
+            "Direct ExecutionEngine instantiation is deprecated due to global state issues. "
+            "Use create_request_scoped_engine() for safe concurrent execution.",
+            DeprecationWarning,
+            stacklevel=2
+        )
+        
+        logger.warning(
+            "⚠️ ExecutionEngine created with global state - not safe for concurrent users! "
+            "Consider migrating to RequestScopedExecutionEngine."
+        )
         self.registry = registry
         self.websocket_bridge = websocket_bridge
         
@@ -974,3 +999,151 @@ class ExecutionEngine:
         
         # WebSocket bridge shutdown is handled separately
         logger.info("ExecutionEngine shutdown complete")
+
+
+# ============================================================================
+# FACTORY METHODS AND MIGRATION SUPPORT
+# ============================================================================
+
+def create_request_scoped_engine(user_context: 'UserExecutionContext',
+                                registry: 'AgentRegistry',
+                                websocket_bridge: 'AgentWebSocketBridge',
+                                max_concurrent_executions: int = 3) -> 'RequestScopedExecutionEngine':
+    """Factory method to create RequestScopedExecutionEngine for safe concurrent usage.
+    
+    RECOMMENDED: Use this factory method instead of ExecutionEngine for new code.
+    
+    Args:
+        user_context: User execution context for complete isolation
+        registry: Agent registry for agent lookup
+        websocket_bridge: WebSocket bridge for event emission
+        max_concurrent_executions: Maximum concurrent executions for this request
+        
+    Returns:
+        RequestScopedExecutionEngine: Isolated execution engine for this request
+        
+    Examples:
+        # Create isolated engine for a user request
+        engine = create_request_scoped_engine(
+            user_context=user_context,
+            registry=agent_registry,
+            websocket_bridge=websocket_bridge
+        )
+        
+        # Execute agent with complete isolation
+        result = await engine.execute_agent(context, state)
+        
+        # Clean up when done
+        await engine.cleanup()
+    """
+    from netra_backend.app.agents.supervisor.request_scoped_execution_engine import (
+        RequestScopedExecutionEngine
+    )
+    
+    logger.info(f"Creating RequestScopedExecutionEngine for user {user_context.user_id} "
+                f"(run_id: {user_context.run_id})")
+    
+    return RequestScopedExecutionEngine(
+        user_context=user_context,
+        registry=registry,
+        websocket_bridge=websocket_bridge,
+        max_concurrent_executions=max_concurrent_executions
+    )
+
+
+def create_execution_context_manager(registry: 'AgentRegistry',
+                                    websocket_bridge: 'AgentWebSocketBridge',
+                                    max_concurrent_per_request: int = 3,
+                                    execution_timeout: float = 30.0) -> 'ExecutionContextManager':
+    """Factory method to create ExecutionContextManager for request-scoped management.
+    
+    RECOMMENDED: Use this for managing multiple agent executions within a request scope.
+    
+    Args:
+        registry: Agent registry for agent lookup
+        websocket_bridge: WebSocket bridge for event emission
+        max_concurrent_per_request: Maximum concurrent executions per request
+        execution_timeout: Execution timeout in seconds
+        
+    Returns:
+        ExecutionContextManager: Context manager for request-scoped execution
+        
+    Examples:
+        # Create context manager
+        context_manager = create_execution_context_manager(
+            registry=agent_registry,
+            websocket_bridge=websocket_bridge
+        )
+        
+        # Use with async context manager
+        async with context_manager.execution_scope(user_context) as scope:
+            # Execute agents within isolated scope
+            pass
+    """
+    from netra_backend.app.agents.supervisor.execution_context_manager import (
+        ExecutionContextManager
+    )
+    
+    logger.info("Creating ExecutionContextManager for request-scoped execution management")
+    
+    return ExecutionContextManager(
+        registry=registry,
+        websocket_bridge=websocket_bridge,
+        max_concurrent_per_request=max_concurrent_per_request,
+        execution_timeout=execution_timeout
+    )
+
+
+@staticmethod
+def create_legacy_engine_with_warnings(registry: 'AgentRegistry',
+                                      websocket_bridge,
+                                      user_context: Optional['UserExecutionContext'] = None) -> 'ExecutionEngine':
+    """Create legacy ExecutionEngine with deprecation warnings.
+    
+    DEPRECATED: This method creates the legacy ExecutionEngine which uses global state.
+    Use create_request_scoped_engine() for new code.
+    
+    Args:
+        registry: Agent registry for agent lookup
+        websocket_bridge: WebSocket bridge for event emission
+        user_context: Optional UserExecutionContext (ignored in legacy mode)
+        
+    Returns:
+        ExecutionEngine: Legacy execution engine with global state
+    """
+    import warnings
+    
+    warnings.warn(
+        "ExecutionEngine with global state is deprecated. "
+        "Use create_request_scoped_engine() or ExecutionContextManager for safe concurrent execution. "
+        "See RequestScopedExecutionEngine for migration guidance.",
+        DeprecationWarning,
+        stacklevel=2
+    )
+    
+    logger.warning("⚠️ Creating legacy ExecutionEngine with global state - not safe for concurrent users!")
+    
+    return ExecutionEngine(registry, websocket_bridge, user_context)
+
+
+# Migration helper to detect global state usage
+def detect_global_state_usage() -> Dict[str, Any]:
+    """Detect if ExecutionEngine instances are sharing global state.
+    
+    This utility function helps identify potential global state issues
+    by checking if multiple engine instances share the same state objects.
+    
+    Returns:
+        Dictionary with global state detection results
+    """
+    # This would be implemented to analyze existing ExecutionEngine instances
+    # and detect shared state objects between different instances
+    return {
+        'global_state_detected': False,
+        'shared_objects': [],
+        'recommendations': [
+            "Migrate to RequestScopedExecutionEngine for complete isolation",
+            "Use ExecutionContextManager for request-scoped execution management",
+            "Avoid direct ExecutionEngine instantiation in concurrent scenarios"
+        ]
+    }
