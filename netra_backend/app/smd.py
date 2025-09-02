@@ -582,8 +582,7 @@ class StartupOrchestrator:
                 critical_failures = report.get('critical_failures', 0)
                 if critical_failures > 0:
                     # Allow bypass for development remediation work
-                    import os
-                    if os.getenv('BYPASS_STARTUP_VALIDATION', '').lower() == 'true':
+                    if get_env('BYPASS_STARTUP_VALIDATION', '').lower() == 'true':
                         self.logger.warning(
                             f"⚠️ BYPASSING STARTUP VALIDATION FOR DEVELOPMENT - "
                             f"{critical_failures} critical failures ignored"
@@ -635,8 +634,7 @@ class StartupOrchestrator:
                 
                 # In deterministic mode, chat-breaking failures are FATAL
                 # Allow bypass for development remediation work
-                import os
-                if os.getenv('BYPASS_STARTUP_VALIDATION', '').lower() == 'true':
+                if get_env('BYPASS_STARTUP_VALIDATION', '').lower() == 'true':
                     self.logger.warning(
                         f"⚠️ BYPASSING CRITICAL PATH VALIDATION FOR DEVELOPMENT - "
                         f"{chat_breaking_count} chat-breaking failures ignored"

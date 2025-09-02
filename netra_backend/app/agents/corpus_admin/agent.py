@@ -56,8 +56,8 @@ class CorpusAdminSubAgent(BaseAgent):
     
     def _init_base_agents(self, llm_manager: LLMManager, websocket_manager: Optional['WebSocketManager']) -> None:
         """Initialize base agent components."""
-        BaseAgent.__init__(self, llm_manager, name="CorpusAdminSubAgent",
-                            description="Agent specialized in corpus management and administration")
+        super().__init__(llm_manager, name="CorpusAdminSubAgent",
+                        description="Agent specialized in corpus management and administration")
         # Store agent name for standardized execution patterns
         self.agent_name = "CorpusAdminSubAgent"
         self.websocket_manager = websocket_manager

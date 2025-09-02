@@ -14,32 +14,37 @@ from typing import Any, Dict, Optional
 
 # Import JSON utilities from unified handler
 from netra_backend.app.core.serialization.unified_json_handler import (
-    comprehensive_json_fix,
+    LLMResponseParser,
+    JSONErrorFixer,
     safe_json_loads,
     safe_json_dumps,
 )
 
-# Create compatibility shims for old function names
+# Create compatibility shims for old function names using proper SSOT handlers
 def extract_json_from_response(response: str) -> Optional[Dict[str, Any]]:
-    """Extract JSON from LLM response."""
-    return safe_json_loads(response)
+    """Extract JSON from LLM response using SSOT handler."""
+    parser = LLMResponseParser()
+    result = parser.safe_json_parse(response, None)
+    return result if isinstance(result, dict) else None
 
 def extract_partial_json(response: str) -> Optional[Dict[str, Any]]:
-    """Extract partial JSON from response."""
-    return safe_json_loads(response)
+    """Extract partial JSON from response using SSOT recovery mechanisms."""
+    error_fixer = JSONErrorFixer()
+    return error_fixer.recover_truncated_json(response)
 
 def fix_common_json_errors(json_str: str) -> str:
-    """Fix common JSON errors."""
-    fixed = comprehensive_json_fix(json_str)
-    return safe_json_dumps(fixed) if fixed else json_str
+    """Fix common JSON errors using SSOT handler."""
+    error_fixer = JSONErrorFixer()
+    return error_fixer.fix_common_json_errors(json_str)
 
 def preprocess_llm_response(response: str) -> str:
     """Preprocess LLM response for JSON extraction."""
     return response.strip()
 
 def recover_truncated_json(json_str: str) -> Optional[Dict[str, Any]]:
-    """Attempt to recover truncated JSON."""
-    return safe_json_loads(json_str)
+    """Attempt to recover truncated JSON using SSOT handler."""
+    error_fixer = JSONErrorFixer()
+    return error_fixer.recover_truncated_json(json_str)
 
 # Re-export for backward compatibility
 __all__ = [

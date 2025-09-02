@@ -21,6 +21,15 @@ def configure_cloud_run_logging():
     env = IsolatedEnvironment.get_instance()
     
     # Disable colored output in environment variables
+    # Note: These need to be set in os.environ for subprocess compatibility
+    # They control color output for child processes
+    env.set('NO_COLOR', '1')
+    env.set('FORCE_COLOR', '0')
+    env.set('PY_COLORS', '0')
+    
+    # Also set in os.environ for child processes that don't use IsolatedEnvironment
+    # This is required for subprocess color control
+    import os
     os.environ['NO_COLOR'] = '1'
     os.environ['FORCE_COLOR'] = '0'
     os.environ['PY_COLORS'] = '0'

@@ -101,8 +101,16 @@ def is_test_environment() -> bool:
             
         except ImportError:
             # Final fallback - should only occur in emergency situations
-            # This violates the unified environment principle but prevents system breakage
+            # This should never happen with properly configured imports
+            # Using direct access as absolute last resort for system stability
             import os
+            import warnings
+            warnings.warn(
+                "CRITICAL: Unable to import IsolatedEnvironment - using direct os.environ access. "
+                "This violates SSOT principles and should be investigated immediately.",
+                RuntimeWarning,
+                stacklevel=2
+            )
             return (
                 os.environ.get('PYTEST_CURRENT_TEST') is not None or
                 os.environ.get('TESTING') == '1' or
