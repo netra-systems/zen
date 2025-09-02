@@ -1,3 +1,4 @@
+from shared.isolated_environment import get_env
 """
 Critical test suite for staging configuration and logging circular dependency.
 

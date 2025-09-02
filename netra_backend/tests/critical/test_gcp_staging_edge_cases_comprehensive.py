@@ -1,3 +1,4 @@
+from shared.isolated_environment import get_env
 """
 Test-Driven Correction (TDC) Tests for Comprehensive Edge Cases of GCP Staging Issues
 Critical staging issues: Additional edge cases and combinations
