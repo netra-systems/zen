@@ -23,7 +23,7 @@ from typing import Any, Dict, List, Optional
 import pytest
 
 from test_framework.environment_isolation import get_env
-from netra_backend.app.agents.base_agent import BaseSubAgent
+from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
 from netra_backend.app.config import get_config

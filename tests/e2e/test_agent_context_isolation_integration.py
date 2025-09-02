@@ -16,7 +16,7 @@ from typing import Any, Dict, List, Optional
 
 import pytest
 
-from netra_backend.app.agents.base_agent import BaseSubAgent
+from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
 from netra_backend.app.config import get_config
@@ -26,7 +26,7 @@ from tests.e2e.agent_response_test_utilities import (
 )
 
 
-class TestContextAgent(BaseSubAgent):
+class TestContextAgent(BaseAgent):
     """Simple test agent for context isolation testing."""
     
     def __init__(self, llm_manager, name="TestAgent", description="Test agent", **kwargs):

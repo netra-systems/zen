@@ -19,7 +19,7 @@ from typing import Any, Dict, List
 
 import pytest
 
-from netra_backend.app.agents.base_agent import BaseSubAgent
+from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
 from netra_backend.app.config import get_config
 from netra_backend.app.llm.llm_manager import LLMManager
@@ -39,11 +39,11 @@ class MultiAgentPerformanceBenchmarkCore:
         self.performance_metrics = []
         self.benchmark_results = {}
     
-    async def create_agent_pool(self, agent_count: int = 5) -> List[BaseSubAgent]:
+    async def create_agent_pool(self, agent_count: int = 5) -> List[BaseAgent]:
         """Create pool of agents for performance testing."""
         agents = []
         for i in range(agent_count):
-            agent = BaseSubAgent(
+            agent = BaseAgent(
                 llm_manager=self.llm_manager,
                 name=f"PerfAgent{i:03d}",
                 description=f"Performance test agent {i}"
@@ -53,7 +53,7 @@ class MultiAgentPerformanceBenchmarkCore:
             self.active_agents.append(agent)
         return agents
     
-    async def measure_agent_response_latency(self, agent: BaseSubAgent, 
+    async def measure_agent_response_latency(self, agent: BaseAgent, 
                                            query: str) -> Dict[str, Any]:
         """Measure single agent response latency."""
         start_time = time.time()
@@ -68,7 +68,7 @@ class MultiAgentPerformanceBenchmarkCore:
             "query_length": len(query)
         }
     
-    async def benchmark_concurrent_agents(self, agents: List[BaseSubAgent], 
+    async def benchmark_concurrent_agents(self, agents: List[BaseAgent], 
                                         query: str) -> Dict[str, Any]:
         """Benchmark concurrent agent performance."""
         start_time = time.time()

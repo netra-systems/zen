@@ -19,7 +19,7 @@ from unittest.mock import AsyncMock
 
 import pytest
 
-from netra_backend.app.agents.base_agent import BaseSubAgent
+from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.config import get_config
@@ -28,8 +28,8 @@ from netra_backend.app.schemas.agent import SubAgentLifecycle
 
 
 @pytest.mark.e2e
-class MockSubAgent(BaseSubAgent):
-    """Concrete test implementation of BaseSubAgent for testing."""
+class MockSubAgent(BaseAgent):
+    """Concrete test implementation of BaseAgent for testing."""
     
     async def execute(self, state: DeepAgentState, run_id: str, stream_updates: bool = True) -> None:
         """Simple test execute method."""

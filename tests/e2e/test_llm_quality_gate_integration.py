@@ -16,7 +16,7 @@ from typing import Any, Dict, List, Optional
 
 import pytest
 
-from netra_backend.app.agents.base_agent import BaseSubAgent
+from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
 from netra_backend.app.config import get_config
 from netra_backend.app.llm.llm_manager import LLMManager
@@ -207,7 +207,7 @@ class TestLLMQualityGateIntegration:
         quality_validator = quality_setup["quality_validator"]
         
         # Create agent with quality gate
-        quality_agent = BaseSubAgent(
+        quality_agent = BaseAgent(
             llm_manager=quality_setup["llm_manager"],
             name="QualityGateAgent",
             description="Agent with quality gate validation"
@@ -297,7 +297,7 @@ class TestLLMQualityGateIntegration:
         }
     
     async def _test_agent_quality_integration(self, supervisor: SupervisorAgent,
-                                            agent: BaseSubAgent,
+                                            agent: BaseAgent,
                                             quality_validator: QualityMetricValidator) -> Dict[str, Any]:
         """Test quality gate integration with agent execution."""
         # Simulate agent execution

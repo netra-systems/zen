@@ -23,7 +23,7 @@ from typing import Any, Dict
 
 import pytest
 
-from netra_backend.app.agents.base_agent import BaseSubAgent
+from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.config import get_config
 from netra_backend.app.llm.llm_manager import LLMManager
@@ -209,7 +209,7 @@ class TestRealLLMCore:
     @pytest.mark.asyncio
     @pytest.mark.e2e
     async def test_agent_real_llm_integration(self, llm_test_manager):
-        """Test BaseSubAgent with real LLM."""
+        """Test BaseAgent with real LLM."""
         # Validate API key is available - FAIL if not configured
         from netra_backend.app.config import get_config
         from shared.isolated_environment import get_env

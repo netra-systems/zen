@@ -18,7 +18,7 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import Any, Dict, List, Optional
 
-from netra_backend.app.agents.base_agent import BaseSubAgent
+from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.config import get_config
 from netra_backend.app.llm.llm_manager import LLMManager
@@ -53,7 +53,7 @@ class AgentResponseSimulator:
         self.use_mock_llm = use_mock_llm
         self.simulation_history = []
     
-    async def simulate_agent_response(self, agent: BaseSubAgent, 
+    async def simulate_agent_response(self, agent: BaseAgent, 
                                     query: str, 
                                     response_type: ResponseTestType = ResponseTestType.BASIC) -> ResponseTestResult:
         """Simulate agent response generation."""
@@ -93,7 +93,7 @@ class AgentResponseSimulator:
         self.simulation_history.append(result)
         return result
     
-    async def simulate_multi_agent_responses(self, agents: List[BaseSubAgent], 
+    async def simulate_multi_agent_responses(self, agents: List[BaseAgent], 
                                            query: str) -> List[ResponseTestResult]:
         """Simulate responses from multiple agents."""
         tasks = [
@@ -116,7 +116,7 @@ class AgentResponseSimulator:
             "estimated_quality": min(1.0, len(content) / 200.0)
         }
     
-    async def _generate_simulated_response(self, agent: BaseSubAgent, query: str, 
+    async def _generate_simulated_response(self, agent: BaseAgent, query: str, 
                                          response_type: ResponseTestType) -> Dict[str, Any]:
         """Generate simulated response based on type."""
         base_response = f"Simulated {response_type.value} response from {agent.name}: {query[:50]}"
@@ -245,7 +245,7 @@ class ErrorScenarioTester:
         self.error_scenarios = []
         self.recovery_results = []
     
-    async def test_agent_failure_scenario(self, agent: BaseSubAgent, 
+    async def test_agent_failure_scenario(self, agent: BaseAgent, 
                                         failure_type: str) -> Dict[str, Any]:
         """Test agent failure and recovery scenario."""
         scenario_start = time.time()
@@ -274,7 +274,7 @@ class ErrorScenarioTester:
         self.error_scenarios.append(error_result)
         return error_result
     
-    async def test_multiple_error_scenarios(self, agent: BaseSubAgent, 
+    async def test_multiple_error_scenarios(self, agent: BaseAgent, 
                                           scenarios: List[str]) -> Dict[str, Any]:
         """Test multiple error scenarios."""
         results = [await self.test_agent_failure_scenario(agent, scenario) for scenario in scenarios]
@@ -283,7 +283,7 @@ class ErrorScenarioTester:
             "recoveries_successful": sum(1 for r in results if r["recovery_successful"]), "scenario_results": results
         }
     
-    async def _trigger_failure_scenario(self, agent: BaseSubAgent, failure_type: str):
+    async def _trigger_failure_scenario(self, agent: BaseAgent, failure_type: str):
         """Trigger specific failure scenario."""
         await asyncio.sleep(0.01)  # Simulate failure trigger
         if failure_type == "timeout":
@@ -291,7 +291,7 @@ class ErrorScenarioTester:
         elif failure_type == "llm_error":
             raise Exception("Simulated LLM error")
     
-    async def _test_error_recovery(self, agent: BaseSubAgent, failure_type: str) -> bool:
+    async def _test_error_recovery(self, agent: BaseAgent, failure_type: str) -> bool:
         """Test error recovery mechanisms."""
         await asyncio.sleep(0.05)  # Simulate recovery attempt
         return True  # Simulate successful recovery

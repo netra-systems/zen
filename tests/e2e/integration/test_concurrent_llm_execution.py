@@ -28,7 +28,7 @@ from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
 
 import pytest
 
-from netra_backend.app.agents.base_agent import BaseSubAgent
+from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.config import get_config
 from netra_backend.app.llm.llm_manager import LLMManager
 
@@ -189,7 +189,7 @@ class TestConcurrentLLMExecution:
         
         agents = []
         for i in range(5):
-            agent = BaseSubAgent(
+            agent = BaseAgent(
                 llm_manager=llm_manager,
                 name=f"ConcurrentAgent{i:03d}",
                 description=f"Concurrent test agent {i}"
@@ -257,7 +257,7 @@ class TestConcurrentLLMExecution:
         import os
         return get_env().get("TEST_USE_REAL_LLM", "false").lower() == "true"
     
-    async def _execute_agent_task(self, agent: BaseSubAgent, task: str) -> Dict[str, Any]:
+    async def _execute_agent_task(self, agent: BaseAgent, task: str) -> Dict[str, Any]:
         """Execute task with agent."""
         try:
             # Simplified agent task execution
