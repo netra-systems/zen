@@ -16,8 +16,6 @@ environments:
       clickhouse_user: netra
       clickhouse_password: netra123
       clickhouse_db: netra_analytics
-      rabbitmq_user: netra
-      rabbitmq_password: netra123
       
     ports:
       backend: 8000
@@ -67,8 +65,6 @@ environments:
       clickhouse_user: test_user
       clickhouse_password: test_pass
       clickhouse_db: netra_test_analytics
-      rabbitmq_user: test_user
-      rabbitmq_password: test_pass
       
     ports:
       backend: 8001
@@ -78,8 +74,6 @@ environments:
       redis: 6381
       clickhouse_http: 8125
       clickhouse_tcp: 9002
-      rabbitmq: 5673
-      rabbitmq_mgmt: 15673
       monitor: 9090
       
     health_check:
@@ -95,7 +89,6 @@ environments:
       postgres: 512m
       redis: 512m
       clickhouse: 512m
-      rabbitmq: 512m
       
     cpu_limits:
       backend: '0.4'
@@ -104,7 +97,6 @@ environments:
       postgres: '0.3'
       redis: '0.1'
       clickhouse: '0.2'
-      rabbitmq: '0.1'
       
     environment_variables:
       log_level: ERROR

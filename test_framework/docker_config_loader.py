@@ -40,8 +40,6 @@ class CredentialsConfig:
     clickhouse_user: Optional[str] = None
     clickhouse_password: Optional[str] = None
     clickhouse_db: Optional[str] = None
-    rabbitmq_user: Optional[str] = None
-    rabbitmq_password: Optional[str] = None
     redis_password: Optional[str] = None
 
 
@@ -55,8 +53,6 @@ class PortsConfig:
     redis: int
     clickhouse_http: Optional[int] = None
     clickhouse_tcp: Optional[int] = None
-    rabbitmq: Optional[int] = None
-    rabbitmq_mgmt: Optional[int] = None
     monitor: Optional[int] = None
 
 

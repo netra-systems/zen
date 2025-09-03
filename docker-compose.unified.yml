@@ -1,0 +1,734 @@
+# Netra Unified Docker Compose Configuration
+# Single Source of Truth for all Docker environments
+# Environment selection via COMPOSE_PROFILES environment variable
+#
+# Usage:
+#   Development:  docker-compose -f docker-compose.unified.yml up
+#   Test:         COMPOSE_PROFILES=test docker-compose -f docker-compose.unified.yml up
+#   Alpine Test:  COMPOSE_PROFILES=alpine-test docker-compose -f docker-compose.unified.yml up
+#   CI:           COMPOSE_PROFILES=ci docker-compose -f docker-compose.unified.yml up
+#
+# Port allocation strategy ensures no conflicts in parallel runs
+# Resource limits optimized for each environment
+
+version: '3.8'
+
+x-common-healthcheck: &common-healthcheck
+  interval: ${HEALTH_CHECK_INTERVAL:-10s}
+  timeout: ${HEALTH_CHECK_TIMEOUT:-5s}
+  retries: ${HEALTH_CHECK_RETRIES:-10}
+  start_period: ${HEALTH_CHECK_START_PERIOD:-30s}
+
+x-postgres-base: &postgres-base
+  image: postgres:15-alpine
+  environment:
+    POSTGRES_USER: ${POSTGRES_USER}
+    POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    POSTGRES_DB: ${POSTGRES_DB}
+    POSTGRES_HOST_AUTH_METHOD: ${POSTGRES_AUTH_METHOD:-md5}
+    POSTGRES_INITDB_ARGS: "--encoding=UTF8 --data-checksums"
+  healthcheck:
+    <<: *common-healthcheck
+    test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+
+x-redis-base: &redis-base
+  image: redis:7-alpine
+  command: |
+    redis-server
+      --appendonly ${REDIS_AOF:-no}
+      --save "${REDIS_SAVE:-}"
+      --maxmemory ${REDIS_MAX_MEMORY:-200mb}
+      --maxmemory-policy ${REDIS_POLICY:-allkeys-lru}
+      --tcp-keepalive 60
+      --timeout 300
+  healthcheck:
+    <<: *common-healthcheck
+    test: ["CMD", "redis-cli", "ping"]
+
+x-clickhouse-base: &clickhouse-base
+  image: clickhouse/clickhouse-server:23-alpine
+  environment:
+    CLICKHOUSE_DB: ${CLICKHOUSE_DB}
+    CLICKHOUSE_USER: ${CLICKHOUSE_USER}
+    CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD}
+    CLICKHOUSE_DEFAULT_ACCESS_MANAGEMENT: 1
+    CLICKHOUSE_LOG_LEVEL: ${CLICKHOUSE_LOG_LEVEL:-warning}
+  healthcheck:
+    <<: *common-healthcheck
+    test: ["CMD", "clickhouse-client", "--query", "SELECT 1"]
+    interval: 15s
+    timeout: 10s
+    retries: 30
+    start_period: 60s
+
+x-backend-base: &backend-base
+  image: ${BACKEND_IMAGE}
+  build:
+    context: .
+    dockerfile: ${BACKEND_DOCKERFILE}
+    args:
+      BUILD_ENV: ${BUILD_ENV}
+    cache_from:
+      - python:3.11-alpine3.19
+  environment:
+    ENVIRONMENT: ${ENVIRONMENT}
+    LOG_LEVEL: ${LOG_LEVEL}
+    # Database
+    POSTGRES_HOST: ${POSTGRES_HOST}
+    POSTGRES_PORT: 5432
+    POSTGRES_USER: ${POSTGRES_USER}
+    POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    POSTGRES_DB: ${POSTGRES_DB}
+    # Redis
+    REDIS_HOST: ${REDIS_HOST}
+    REDIS_PORT: 6379
+    # ClickHouse
+    CLICKHOUSE_HOST: ${CLICKHOUSE_HOST}
+    CLICKHOUSE_PORT: ${CLICKHOUSE_PORT:-9000}
+    CLICKHOUSE_USER: ${CLICKHOUSE_USER}
+    CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD}
+    CLICKHOUSE_DB: ${CLICKHOUSE_DB}
+    # Auth
+    AUTH_SERVICE_URL: ${AUTH_SERVICE_URL}
+    # Secrets
+    JWT_SECRET_KEY: ${JWT_SECRET_KEY}
+    SERVICE_SECRET: ${SERVICE_SECRET}
+    FERNET_KEY: ${FERNET_KEY:-iZAG-Kz661gRuJXEGzxgghUFnFRamgDrjDXZE6HdJkw=}
+    SECRET_KEY: ${SECRET_KEY:-dev-secret-key}
+    # Test mode
+    TEST_MODE: ${TEST_MODE:-false}
+    TESTING: ${TESTING:-0}
+    # Performance
+    WORKERS: ${BACKEND_WORKERS:-2}
+    WEB_CONCURRENCY: ${WEB_CONCURRENCY:-2}
+    # Memory monitoring
+    ENABLE_MEMORY_MONITORING: ${ENABLE_MEMORY_MONITORING:-true}
+    MEMORY_CHECK_INTERVAL: ${MEMORY_CHECK_INTERVAL:-30}
+    MEMORY_WARNING_THRESHOLD: ${MEMORY_WARNING_THRESHOLD:-80}
+    MEMORY_CRITICAL_THRESHOLD: ${MEMORY_CRITICAL_THRESHOLD:-90}
+  healthcheck:
+    <<: *common-healthcheck
+    test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+
+x-auth-base: &auth-base
+  image: ${AUTH_IMAGE}
+  build:
+    context: .
+    dockerfile: ${AUTH_DOCKERFILE}
+    args:
+      BUILD_ENV: ${BUILD_ENV}
+    cache_from:
+      - python:3.11-alpine3.19
+  environment:
+    ENVIRONMENT: ${ENVIRONMENT}
+    LOG_LEVEL: ${LOG_LEVEL}
+    # Database
+    POSTGRES_HOST: ${POSTGRES_HOST}
+    POSTGRES_PORT: 5432
+    POSTGRES_USER: ${POSTGRES_USER}
+    POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    POSTGRES_DB: ${POSTGRES_DB}
+    # Redis
+    REDIS_HOST: ${REDIS_HOST}
+    REDIS_PORT: 6379
+    # Server config
+    PORT: 8081
+    HOST: 0.0.0.0
+    # Secrets
+    JWT_SECRET_KEY: ${JWT_SECRET_KEY}
+    SERVICE_SECRET: ${SERVICE_SECRET}
+    SERVICE_ID: ${AUTH_SERVICE_ID:-auth-service}
+    # Test mode
+    TEST_MODE: ${TEST_MODE:-false}
+    TESTING: ${TESTING:-0}
+    # OAuth (optional)
+    GOOGLE_OAUTH_CLIENT_ID_DEVELOPMENT: ${GOOGLE_OAUTH_CLIENT_ID_DEVELOPMENT:-}
+    GOOGLE_OAUTH_CLIENT_SECRET_DEVELOPMENT: ${GOOGLE_OAUTH_CLIENT_SECRET_DEVELOPMENT:-}
+    E2E_OAUTH_SIMULATION_KEY: ${E2E_OAUTH_SIMULATION_KEY:-}
+  healthcheck:
+    <<: *common-healthcheck
+    test: ["CMD", "curl", "-f", "http://localhost:8081/health"]
+
+x-frontend-base: &frontend-base
+  image: ${FRONTEND_IMAGE}
+  build:
+    context: .
+    dockerfile: ${FRONTEND_DOCKERFILE}
+    args:
+      BUILD_ENV: ${BUILD_ENV}
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL}
+      NEXT_PUBLIC_AUTH_URL: ${NEXT_PUBLIC_AUTH_URL}
+      NEXT_PUBLIC_WS_URL: ${NEXT_PUBLIC_WS_URL}
+      NEXT_PUBLIC_ENVIRONMENT: ${ENVIRONMENT}
+    cache_from:
+      - node:20-alpine3.19
+  environment:
+    NODE_ENV: ${NODE_ENV}
+    PORT: 3000
+    NODE_OPTIONS: ${NODE_OPTIONS:-}
+  healthcheck:
+    <<: *common-healthcheck
+    test: ["CMD", "curl", "-f", "http://localhost:3000/api/health"]
+
+services:
+  # ============================================
+  # DEVELOPMENT SERVICES (default profile)
+  # ============================================
+  
+  dev-postgres:
+    <<: *postgres-base
+    container_name: netra-dev-postgres
+    ports:
+      - "${DEV_POSTGRES_PORT:-5433}:5432"
+    volumes:
+      - postgres_dev_data:/var/lib/postgresql/data
+      - ./scripts/init_db.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
+    command: |
+      postgres
+        -c shared_buffers=128MB
+        -c effective_cache_size=512MB
+        -c maintenance_work_mem=64MB
+        -c checkpoint_completion_target=0.9
+        -c wal_buffers=16MB
+        -c work_mem=4MB
+        -c max_connections=200
+    networks:
+      - netra_network
+    deploy:
+      resources:
+        limits:
+          memory: ${DEV_POSTGRES_MEMORY:-512M}
+          cpus: '${DEV_POSTGRES_CPU:-0.25}'
+        reservations:
+          memory: 256M
+
+  dev-redis:
+    <<: *redis-base
+    container_name: netra-dev-redis
+    ports:
+      - "${DEV_REDIS_PORT:-6380}:6379"
+    volumes:
+      - redis_dev_data:/data
+    networks:
+      - netra_network
+    deploy:
+      resources:
+        limits:
+          memory: ${DEV_REDIS_MEMORY:-256M}
+          cpus: '${DEV_REDIS_CPU:-0.1}'
+        reservations:
+          memory: 128M
+
+  dev-clickhouse:
+    <<: *clickhouse-base
+    container_name: netra-dev-clickhouse
+    ports:
+      - "${DEV_CLICKHOUSE_HTTP_PORT:-8124}:8123"
+      - "${DEV_CLICKHOUSE_TCP_PORT:-9001}:9000"
+    volumes:
+      - clickhouse_dev_data:/var/lib/clickhouse
+    networks:
+      - netra_network
+    deploy:
+      resources:
+        limits:
+          memory: ${DEV_CLICKHOUSE_MEMORY:-1G}
+          cpus: '${DEV_CLICKHOUSE_CPU:-0.2}'
+        reservations:
+          memory: 512M
+
+  dev-auth:
+    <<: *auth-base
+    container_name: netra-dev-auth
+    ports:
+      - "${DEV_AUTH_PORT:-8081}:8081"
+    volumes:
+      - auth_dev_data:/app/data
+    depends_on:
+      dev-postgres:
+        condition: service_healthy
+      dev-redis:
+        condition: service_healthy
+    networks:
+      - netra_network
+    deploy:
+      resources:
+        limits:
+          memory: ${DEV_AUTH_MEMORY:-1G}
+          cpus: '${DEV_AUTH_CPU:-0.25}'
+        reservations:
+          memory: 512M
+
+  dev-backend:
+    <<: *backend-base
+    container_name: netra-dev-backend
+    ports:
+      - "${DEV_BACKEND_PORT:-8000}:8000"
+    volumes:
+      - backend_dev_data:/app/data
+    depends_on:
+      dev-postgres:
+        condition: service_healthy
+      dev-redis:
+        condition: service_healthy
+      dev-clickhouse:
+        condition: service_healthy
+      dev-auth:
+        condition: service_healthy
+    networks:
+      - netra_network
+    deploy:
+      resources:
+        limits:
+          memory: ${DEV_BACKEND_MEMORY:-2G}
+          cpus: '${DEV_BACKEND_CPU:-0.4}'
+        reservations:
+          memory: 1G
+
+  dev-frontend:
+    <<: *frontend-base
+    container_name: netra-dev-frontend
+    ports:
+      - "${DEV_FRONTEND_PORT:-3000}:3000"
+    depends_on:
+      dev-backend:
+        condition: service_healthy
+      dev-auth:
+        condition: service_healthy
+    networks:
+      - netra_network
+    deploy:
+      resources:
+        limits:
+          memory: ${DEV_FRONTEND_MEMORY:-1G}
+          cpus: '${DEV_FRONTEND_CPU:-0.3}'
+        reservations:
+          memory: 512M
+
+  # ============================================
+  # TEST SERVICES (test profile)
+  # ============================================
+  
+  test-postgres:
+    <<: *postgres-base
+    container_name: netra-test-postgres
+    profiles: ["test"]
+    ports:
+      - "${TEST_POSTGRES_PORT:-5434}:5432"
+    volumes:
+      - postgres_test_data:/var/lib/postgresql/data
+      - ./scripts/test_init_db.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
+    command: |
+      postgres
+        -c shared_buffers=128MB
+        -c fsync=${POSTGRES_FSYNC:-off}
+        -c synchronous_commit=${POSTGRES_SYNC_COMMIT:-off}
+        -c full_page_writes=${POSTGRES_FULL_PAGE_WRITES:-off}
+        -c checkpoint_completion_target=0.9
+        -c wal_buffers=16MB
+        -c max_connections=100
+    networks:
+      - netra_network
+    deploy:
+      resources:
+        limits:
+          memory: ${TEST_POSTGRES_MEMORY:-256M}
+          cpus: '${TEST_POSTGRES_CPU:-0.3}'
+        reservations:
+          memory: 128M
+
+  test-redis:
+    <<: *redis-base
+    container_name: netra-test-redis
+    profiles: ["test"]
+    ports:
+      - "${TEST_REDIS_PORT:-6381}:6379"
+    volumes:
+      - redis_test_data:/data
+    networks:
+      - netra_network
+    deploy:
+      resources:
+        limits:
+          memory: ${TEST_REDIS_MEMORY:-512M}
+          cpus: '${TEST_REDIS_CPU:-0.1}'
+        reservations:
+          memory: 256M
+
+  test-clickhouse:
+    <<: *clickhouse-base
+    container_name: netra-test-clickhouse
+    profiles: ["test"]
+    ports:
+      - "${TEST_CLICKHOUSE_HTTP_PORT:-8125}:8123"
+      - "${TEST_CLICKHOUSE_TCP_PORT:-9002}:9000"
+    volumes:
+      - clickhouse_test_data:/var/lib/clickhouse
+    networks:
+      - netra_network
+    deploy:
+      resources:
+        limits:
+          memory: ${TEST_CLICKHOUSE_MEMORY:-512M}
+          cpus: '${TEST_CLICKHOUSE_CPU:-0.2}'
+        reservations:
+          memory: 256M
+
+  test-auth:
+    <<: *auth-base
+    container_name: netra-test-auth
+    profiles: ["test"]
+    ports:
+      - "${TEST_AUTH_PORT:-8082}:8081"
+    depends_on:
+      test-postgres:
+        condition: service_healthy
+      test-redis:
+        condition: service_healthy
+    networks:
+      - netra_network
+    deploy:
+      resources:
+        limits:
+          memory: ${TEST_AUTH_MEMORY:-1G}
+          cpus: '${TEST_AUTH_CPU:-0.25}'
+        reservations:
+          memory: 512M
+
+  test-backend:
+    <<: *backend-base
+    container_name: netra-test-backend
+    profiles: ["test"]
+    ports:
+      - "${TEST_BACKEND_PORT:-8001}:8000"
+    depends_on:
+      test-postgres:
+        condition: service_healthy
+      test-redis:
+        condition: service_healthy
+      test-clickhouse:
+        condition: service_healthy
+      test-auth:
+        condition: service_healthy
+    networks:
+      - netra_network
+    deploy:
+      resources:
+        limits:
+          memory: ${TEST_BACKEND_MEMORY:-2G}
+          cpus: '${TEST_BACKEND_CPU:-0.4}'
+        reservations:
+          memory: 1G
+
+  test-frontend:
+    <<: *frontend-base
+    container_name: netra-test-frontend
+    profiles: ["test"]
+    ports:
+      - "${TEST_FRONTEND_PORT:-3001}:3000"
+    depends_on:
+      test-backend:
+        condition: service_healthy
+      test-auth:
+        condition: service_healthy
+    networks:
+      - netra_network
+    deploy:
+      resources:
+        limits:
+          memory: ${TEST_FRONTEND_MEMORY:-1G}
+          cpus: '${TEST_FRONTEND_CPU:-0.3}'
+        reservations:
+          memory: 512M
+
+  # ============================================
+  # ALPINE TEST SERVICES (alpine-test profile)
+  # ============================================
+  
+  alpine-test-postgres:
+    <<: *postgres-base
+    container_name: netra-alpine-test-postgres
+    profiles: ["alpine-test"]
+    ports:
+      - "${ALPINE_TEST_POSTGRES_PORT:-5435}:5432"
+    volumes:
+      - postgres_alpine_test_data:/var/lib/postgresql/data
+    command: |
+      postgres
+        -c shared_buffers=128MB
+        -c fsync=off
+        -c synchronous_commit=off
+        -c full_page_writes=off
+        -c checkpoint_completion_target=0.9
+        -c wal_buffers=16MB
+        -c max_connections=100
+    networks:
+      - netra_network
+    deploy:
+      resources:
+        limits:
+          memory: ${ALPINE_TEST_POSTGRES_MEMORY:-1G}
+          cpus: '${ALPINE_TEST_POSTGRES_CPU:-0.5}'
+        reservations:
+          memory: 512M
+
+  alpine-test-redis:
+    <<: *redis-base
+    container_name: netra-alpine-test-redis
+    profiles: ["alpine-test"]
+    ports:
+      - "${ALPINE_TEST_REDIS_PORT:-6382}:6379"
+    volumes:
+      - redis_alpine_test_data:/data
+    networks:
+      - netra_network
+    deploy:
+      resources:
+        limits:
+          memory: ${ALPINE_TEST_REDIS_MEMORY:-512M}
+          cpus: '${ALPINE_TEST_REDIS_CPU:-0.25}'
+        reservations:
+          memory: 256M
+
+  alpine-test-clickhouse:
+    <<: *clickhouse-base
+    container_name: netra-alpine-test-clickhouse
+    profiles: ["alpine-test"]
+    ports:
+      - "${ALPINE_TEST_CLICKHOUSE_HTTP_PORT:-8126}:8123"
+      - "${ALPINE_TEST_CLICKHOUSE_TCP_PORT:-9003}:9000"
+    volumes:
+      - clickhouse_alpine_test_data:/var/lib/clickhouse
+    networks:
+      - netra_network
+    deploy:
+      resources:
+        limits:
+          memory: ${ALPINE_TEST_CLICKHOUSE_MEMORY:-1G}
+          cpus: '${ALPINE_TEST_CLICKHOUSE_CPU:-0.5}'
+        reservations:
+          memory: 512M
+
+  alpine-test-auth:
+    <<: *auth-base
+    container_name: netra-alpine-test-auth
+    profiles: ["alpine-test"]
+    ports:
+      - "${ALPINE_TEST_AUTH_PORT:-8083}:8081"
+    depends_on:
+      alpine-test-postgres:
+        condition: service_healthy
+      alpine-test-redis:
+        condition: service_healthy
+    networks:
+      - netra_network
+    deploy:
+      resources:
+        limits:
+          memory: ${ALPINE_TEST_AUTH_MEMORY:-2G}
+          cpus: '${ALPINE_TEST_AUTH_CPU:-1.0}'
+        reservations:
+          memory: 1G
+
+  alpine-test-backend:
+    <<: *backend-base
+    container_name: netra-alpine-test-backend
+    profiles: ["alpine-test"]
+    ports:
+      - "${ALPINE_TEST_BACKEND_PORT:-8002}:8000"
+    depends_on:
+      alpine-test-postgres:
+        condition: service_healthy
+      alpine-test-redis:
+        condition: service_healthy
+      alpine-test-clickhouse:
+        condition: service_healthy
+      alpine-test-auth:
+        condition: service_healthy
+    networks:
+      - netra_network
+    deploy:
+      resources:
+        limits:
+          memory: ${ALPINE_TEST_BACKEND_MEMORY:-2G}
+          cpus: '${ALPINE_TEST_BACKEND_CPU:-1.0}'
+        reservations:
+          memory: 1G
+
+  alpine-test-frontend:
+    <<: *frontend-base
+    container_name: netra-alpine-test-frontend
+    profiles: ["alpine-test"]
+    ports:
+      - "${ALPINE_TEST_FRONTEND_PORT:-3002}:3000"
+    depends_on:
+      alpine-test-backend:
+        condition: service_healthy
+      alpine-test-auth:
+        condition: service_healthy
+    networks:
+      - netra_network
+    deploy:
+      resources:
+        limits:
+          memory: ${ALPINE_TEST_FRONTEND_MEMORY:-512M}
+          cpus: '${ALPINE_TEST_FRONTEND_CPU:-0.3}'
+        reservations:
+          memory: 256M
+
+  # ============================================
+  # CI SERVICES (ci profile)
+  # ============================================
+  
+  ci-postgres:
+    <<: *postgres-base
+    container_name: netra-ci-postgres
+    profiles: ["ci"]
+    ports:
+      - "${CI_POSTGRES_PORT:-5436}:5432"
+    # CI uses ephemeral storage
+    tmpfs:
+      - /var/lib/postgresql/data:size=512M
+    command: |
+      postgres
+        -c shared_buffers=64MB
+        -c fsync=off
+        -c synchronous_commit=off
+        -c full_page_writes=off
+        -c checkpoint_segments=10
+        -c checkpoint_completion_target=0.9
+        -c wal_buffers=8MB
+        -c max_connections=50
+    networks:
+      - netra_network
+    deploy:
+      resources:
+        limits:
+          memory: ${CI_POSTGRES_MEMORY:-512M}
+          cpus: '${CI_POSTGRES_CPU:-0.5}'
+
+  ci-redis:
+    <<: *redis-base
+    container_name: netra-ci-redis
+    profiles: ["ci"]
+    ports:
+      - "${CI_REDIS_PORT:-6383}:6379"
+    # CI uses ephemeral storage
+    tmpfs:
+      - /data:size=256M
+    networks:
+      - netra_network
+    deploy:
+      resources:
+        limits:
+          memory: ${CI_REDIS_MEMORY:-256M}
+          cpus: '${CI_REDIS_CPU:-0.25}'
+
+  ci-clickhouse:
+    <<: *clickhouse-base
+    container_name: netra-ci-clickhouse
+    profiles: ["ci"]
+    ports:
+      - "${CI_CLICKHOUSE_HTTP_PORT:-8127}:8123"
+      - "${CI_CLICKHOUSE_TCP_PORT:-9004}:9000"
+    # CI uses ephemeral storage
+    tmpfs:
+      - /var/lib/clickhouse:size=512M
+    networks:
+      - netra_network
+    deploy:
+      resources:
+        limits:
+          memory: ${CI_CLICKHOUSE_MEMORY:-512M}
+          cpus: '${CI_CLICKHOUSE_CPU:-0.5}'
+
+  ci-auth:
+    <<: *auth-base
+    container_name: netra-ci-auth
+    profiles: ["ci"]
+    ports:
+      - "${CI_AUTH_PORT:-8084}:8081"
+    depends_on:
+      ci-postgres:
+        condition: service_healthy
+      ci-redis:
+        condition: service_healthy
+    networks:
+      - netra_network
+    deploy:
+      resources:
+        limits:
+          memory: ${CI_AUTH_MEMORY:-1G}
+          cpus: '${CI_AUTH_CPU:-0.5}'
+
+  ci-backend:
+    <<: *backend-base
+    container_name: netra-ci-backend
+    profiles: ["ci"]
+    ports:
+      - "${CI_BACKEND_PORT:-8003}:8000"
+    depends_on:
+      ci-postgres:
+        condition: service_healthy
+      ci-redis:
+        condition: service_healthy
+      ci-clickhouse:
+        condition: service_healthy
+      ci-auth:
+        condition: service_healthy
+    networks:
+      - netra_network
+    deploy:
+      resources:
+        limits:
+          memory: ${CI_BACKEND_MEMORY:-2G}
+          cpus: '${CI_BACKEND_CPU:-1.0}'
+
+  ci-frontend:
+    <<: *frontend-base
+    container_name: netra-ci-frontend
+    profiles: ["ci"]
+    ports:
+      - "${CI_FRONTEND_PORT:-3003}:3000"
+    depends_on:
+      ci-backend:
+        condition: service_healthy
+      ci-auth:
+        condition: service_healthy
+    networks:
+      - netra_network
+    deploy:
+      resources:
+        limits:
+          memory: ${CI_FRONTEND_MEMORY:-1G}
+          cpus: '${CI_FRONTEND_CPU:-0.5}'
+
+# ============================================
+# NETWORKS
+# ============================================
+networks:
+  netra_network:
+    driver: bridge
+    driver_opts:
+      com.docker.network.driver.mtu: 1500
+
+# ============================================
+# VOLUMES (Maximum 10 for Docker Desktop stability)
+# ============================================
+volumes:
+  # Development volumes
+  postgres_dev_data:
+  redis_dev_data:
+  clickhouse_dev_data:
+  backend_dev_data:
+  auth_dev_data:
+  
+  # Test volumes
+  postgres_test_data:
+  redis_test_data:
+  clickhouse_test_data:
+  
+  # Alpine test volumes
+  postgres_alpine_test_data:
+  redis_alpine_test_data:
+  clickhouse_alpine_test_data:

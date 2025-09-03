@@ -1102,8 +1102,7 @@ class UnifiedDockerManager:
                 "clickhouse": "test-clickhouse",
                 "backend": "test-backend",
                 "auth": "test-auth",
-                "frontend": "test-frontend",
-                "rabbitmq": "test-rabbitmq"
+                "frontend": "test-frontend"
             }
             return service_map.get(service, service)
         elif self.environment_type == EnvironmentType.DEVELOPMENT:
@@ -1114,8 +1113,7 @@ class UnifiedDockerManager:
                 "clickhouse": "dev-clickhouse",
                 "backend": "dev-backend",
                 "auth": "dev-auth",
-                "frontend": "dev-frontend",
-                "rabbitmq": "dev-rabbitmq"
+                "frontend": "dev-frontend"
             }
             return service_map.get(service, service)
         
@@ -2808,8 +2806,7 @@ class UnifiedDockerManager:
             "python:3.11-alpine3.19",
             "node:18-alpine",
             "postgres:15-alpine",
-            "redis:7-alpine", 
-            "rabbitmq:3-alpine",
+            "redis:7-alpine",
             "clickhouse/clickhouse-server:23-alpine"
         ]
         
