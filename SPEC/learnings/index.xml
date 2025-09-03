@@ -50,6 +50,30 @@
         </related-learnings>
     </learning>
     
+    <learning id="websocket-thread-association-critical-2025-09-03">
+        <title>CRITICAL: WebSocket Thread Association Timing Issue</title>
+        <category>WebSocket/Threading/Critical</category>
+        <keywords>websocket, thread, message-routing, connection-lifecycle, timing-issue</keywords>
+        <path>websocket_thread_association_critical_20250903.xml</path>
+        <critical-takeaway>
+            WebSocket connections MUST support dynamic thread assignment because thread context 
+            is not available at connection time. Connections start with thread_id=None and must 
+            be updated when thread context arrives via message. This is fundamental architecture,
+            not a bug. All message handlers processing thread_id MUST call update_connection_thread.
+        </critical-takeaway>
+        <severity>CRITICAL</severity>
+        <business-impact>Breaks thread-specific message routing, preventing agent events from reaching users</business-impact>
+        <prevention>
+            Never assume thread context at connection time. Always allow thread_id=None initially.
+            Update thread association dynamically when messages arrive. Test with real WebSockets.
+        </prevention>
+        <related-learnings>
+            <learning>websocket_agent_integration_critical.xml</learning>
+            <learning>../../USER_CONTEXT_ARCHITECTURE.md</learning>
+            <learning>../../docs/AGENT_ARCHITECTURE_DISAMBIGUATION_GUIDE.md</learning>
+        </related-learnings>
+    </learning>
+    
     <learning id="golden-agent-index-2025-09-02">
         <title>Golden Agent Index - Comprehensive Agent Implementation Guide</title>
         <category>Agent/Implementation/SSOT</category>
