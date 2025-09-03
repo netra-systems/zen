@@ -18,6 +18,38 @@
         </workflow>
     </retrieval-protocol>
     
+    <learning id="clickhouse-mock-package-structure-2025-09-02">
+        <title>ClickHouse Mock Package Structure Fix</title>
+        <category>Testing/Mocking/Package-Structure</category>
+        <keywords>clickhouse, mock, sys.modules, package-structure, import-error, magicmock, test-framework</keywords>
+        <path>clickhouse_mock_package_structure_fix.xml</path>
+        <critical-takeaway>
+            When mocking packages with submodules, the mock must replicate the full package hierarchy.
+            Simply replacing a package with MagicMock() in sys.modules causes ModuleNotFoundError for
+            submodule imports. Mock structure must include all levels: package, submodules, and classes.
+            Registration in sys.modules required for each level of the hierarchy.
+        </critical-takeaway>
+        <severity>CRITICAL</severity>
+        <business-impact>Blocks all test execution when package mocking is incorrect</business-impact>
+        <prevention>
+            Create full mock hierarchy matching package structure. Register all levels in sys.modules.
+            Test imports after mocking. Consider using unittest.mock.patch() instead when possible.
+        </prevention>
+        <implementation-patterns>
+            <pattern>Create mock objects for each submodule level</pattern>
+            <pattern>Link submodules as attributes on parent mocks</pattern>
+            <pattern>Register each level separately in sys.modules</pattern>
+        </implementation-patterns>
+        <testing-strategies>
+            <strategy>Verify all expected imports work after mocking</strategy>
+            <strategy>Use Five Whys analysis for import errors</strategy>
+            <strategy>Test both direct and nested imports</strategy>
+        </testing-strategies>
+        <related-learnings>
+            <learning-ref>None - First occurrence of this pattern</learning-ref>
+        </related-learnings>
+    </learning>
+    
     <learning id="golden-agent-index-2025-09-02">
         <title>Golden Agent Index - Comprehensive Agent Implementation Guide</title>
         <category>Agent/Implementation/SSOT</category>

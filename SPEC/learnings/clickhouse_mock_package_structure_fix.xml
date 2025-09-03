@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learning>
+    <title>ClickHouse Mock Package Structure Fix</title>
+    <date>2025-09-02</date>
+    <category>testing</category>
+    <subcategory>mocking</subcategory>
+    <severity>critical</severity>
+    
+    <problem>
+        <description>
+            ModuleNotFoundError: No module named 'clickhouse_connect.driver'; 'clickhouse_connect' is not a package
+        </description>
+        <root_cause>
+            The test conftest.py was replacing clickhouse_connect with a simple MagicMock object,
+            which doesn't behave like a proper Python package with submodules. When code tried to
+            import from clickhouse_connect.driver.client, Python couldn't find the submodule structure.
+        </root_cause>
+        <impact>
+            - All tests importing clickhouse_connect.driver.client would fail
+            - Smoke tests couldn't even begin collecting test items
+            - Blocked all testing workflows
+        </impact>
+    </problem>
+    
+    <five_whys_analysis>
+        <why level="1">
+            <question>Why did the test fail?</question>
+            <answer>ModuleNotFoundError: No module named 'clickhouse_connect.driver'; 'clickhouse_connect' is not a package</answer>
+        </why>
+        <why level="2">
+            <question>Why wasn't clickhouse_connect seen as a package?</question>
+            <answer>Because clickhouse_connect was replaced with a MagicMock object in sys.modules</answer>
+        </why>
+        <why level="3">
+            <question>Why was it mocked?</question>
+            <answer>The conftest.py file in netra_backend/tests/agents/ was mocking it for unit tests</answer>
+        </why>
+        <why level="4">
+            <question>Why did the mock cause this error?</question>
+            <answer>The mock wasn't structured to behave like a proper package with driver.client submodules</answer>
+        </why>
+        <why level="5">
+            <question>Why didn't the mock have proper structure?</question>
+            <answer>It was created as a simple MagicMock() without considering the package's internal module structure</answer>
+        </why>
+    </five_whys_analysis>
+    
+    <solution>
+        <file>netra_backend/tests/agents/conftest.py</file>
+        <approach>Create a properly structured mock that mimics the package hierarchy</approach>
+        <implementation>
+            <![CDATA[
+# Create a mock Client class
+mock_client_class = MagicMock()
+mock_client_class.return_value = mock_clickhouse_client
+
+# Create mock driver.client module with Client class
+mock_driver_client = MagicMock()
+mock_driver_client.Client = mock_client_class
+
+# Create mock driver module
+mock_driver = MagicMock()
+mock_driver.client = mock_driver_client
+
+# Create mock clickhouse_connect package with proper structure
+mock_clickhouse_connect = MagicMock()
+mock_clickhouse_connect.get_client = MagicMock(return_value=mock_clickhouse_client)
+mock_clickhouse_connect.driver = mock_driver
+
+# Register all the modules in sys.modules
+sys.modules['clickhouse_connect'] = mock_clickhouse_connect
+sys.modules['clickhouse_connect.driver'] = mock_driver
+sys.modules['clickhouse_connect.driver.client'] = mock_driver_client
+            ]]>
+        </implementation>
+    </solution>
+    
+    <pattern>
+        <name>Proper Package Mocking Pattern</name>
+        <description>
+            When mocking packages that have submodules, you must:
+            1. Create the full module hierarchy as mock objects
+            2. Register each level in sys.modules
+            3. Ensure all expected attributes and classes exist at each level
+        </description>
+        <example_structure>
+            <![CDATA[
+For a package structure like:
+    package_name/
+        __init__.py
+        submodule/
+            __init__.py
+            module.py (contains MyClass)
+
+The mock must be:
+    mock_module = MagicMock()
+    mock_module.MyClass = MagicMock()
+    
+    mock_submodule = MagicMock()
+    mock_submodule.module = mock_module
+    
+    mock_package = MagicMock()
+    mock_package.submodule = mock_submodule
+    
+    sys.modules['package_name'] = mock_package
+    sys.modules['package_name.submodule'] = mock_submodule
+    sys.modules['package_name.submodule.module'] = mock_module
+            ]]>
+        </example_structure>
+    </pattern>
+    
+    <prevention>
+        <guideline>Always check if a package has submodules before mocking</guideline>
+        <guideline>When mocking external packages, create the full module hierarchy</guideline>
+        <guideline>Test the mock structure by trying imports in the test file</guideline>
+        <guideline>Consider using unittest.mock.patch() instead of sys.modules replacement when possible</guideline>
+    </prevention>
+    
+    <related_files>
+        <file>netra_backend/tests/agents/conftest.py</file>
+        <file>netra_backend/app/db/clickhouse_base.py</file>
+        <file>netra_backend/app/db/clickhouse.py</file>
+    </related_files>
+    
+    <tags>
+        <tag>mocking</tag>
+        <tag>testing</tag>
+        <tag>clickhouse</tag>
+        <tag>import-errors</tag>
+        <tag>sys.modules</tag>
+        <tag>package-structure</tag>
+    </tags>
+</learning>
