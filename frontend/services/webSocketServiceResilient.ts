@@ -6,10 +6,11 @@ import { logger } from '@/lib/logger';
 // Re-export types for compatibility
 export type { WebSocketStatus, WebSocketState, WebSocketServiceError } from '../types/domains/websocket';
 
+import { CircuitBreakerStateValue } from '@/lib/circuit-breaker';
+
 /**
  * Circuit breaker states for connection management
  */
-type CircuitBreakerState = 'closed' | 'open' | 'half-open';
 
 interface CircuitBreakerConfig {
   failureThreshold: number;
@@ -97,7 +98,7 @@ class ResilientWebSocketService {
   private url: string = '';
   
   // Circuit breaker
-  private circuitBreakerState: CircuitBreakerState = 'closed';
+  private circuitBreakerState: CircuitBreakerStateValue = 'closed';
   private circuitBreakerFailures: number = 0;
   private circuitBreakerResetTimer: NodeJS.Timeout | null = null;
   private circuitBreakerConfig: CircuitBreakerConfig = {

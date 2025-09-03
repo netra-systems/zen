@@ -109,7 +109,7 @@ class UserJourneyTestHarness(AnalyticsE2ETestHarness):
         await self.record_journey_event(journey_id, "milestone_completed", {
             "milestone": milestone,
             "elapsed_seconds": elapsed_time,
-            **milestone_data or {}
+            **(milestone_data or {})
         })
     
     async def finish_user_journey(self, journey_id: str, outcome: str = "completed") -> Dict[str, Any]:

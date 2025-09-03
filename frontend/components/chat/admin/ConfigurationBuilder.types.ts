@@ -5,6 +5,8 @@
  * Single source of truth for all configuration-related types.
  */
 
+import { ConfigConfigValidationResult } from '@/types/shared/validation';
+
 // Core type definitions
 export type ComplexityLevel = 'low' | 'medium' | 'high';
 export type DistributionType = 'normal' | 'uniform' | 'exponential';
@@ -27,11 +29,6 @@ export interface GenerationParams {
   concurrency: number;
 }
 
-// Validation result
-export interface ValidationResult {
-  readonly valid: boolean;
-  readonly errors: readonly string[];
-}
 
 // Main configuration interface
 export interface CorpusConfiguration {

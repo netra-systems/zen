@@ -7,6 +7,7 @@
  */
 
 import React, { useState, useCallback, useEffect } from 'react';
+import { ConfigConfigValidationResult } from '@/types/shared/validation';
 import { Settings, Save, AlertCircle, CheckCircle, Zap } from 'lucide-react';
 import { generateUniqueId } from '../../../lib/utils';
 import { useWebSocket } from '../../../hooks/useWebSocket';
@@ -32,10 +33,6 @@ interface GenerationParams {
   concurrency: number;
 }
 
-interface ValidationResult {
-  readonly valid: boolean;
-  readonly errors: readonly string[];
-}
 
 interface CorpusConfiguration {
   name: string;
@@ -66,7 +63,7 @@ const ConfigurationBuilder: React.FC<ConfigurationBuilderProps> = ({
     optimizationFocus: 'balanced'
   });
   
-  const [validation, setValidation] = useState<ValidationResult>({
+  const [validation, setValidation] = useState<ConfigValidationResult>({
     valid: true,
     errors: []
   });

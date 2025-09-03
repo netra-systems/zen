@@ -22,8 +22,13 @@ from langchain_core.tools import BaseTool
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from netra_backend.app.agents.admin_tool_dispatcher import AdminToolDispatcher
+from netra_backend.app.agents.admin_tool_dispatcher.migration_helper import (
+    AdminToolDispatcherMigrationHelper,
+    upgrade_admin_dispatcher_creation
+)
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
+from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
 from netra_backend.app.db.models_postgres import User
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.logging_config import central_logger
@@ -55,29 +60,66 @@ def _determine_admin_access(db: Optional[AsyncSession], user: Optional[User]) ->
     return PermissionService.is_developer_or_higher(user)
 
 
-def _create_admin_tool_dispatcher(tools: List[BaseTool], db: AsyncSession, user: User) -> AdminToolDispatcher:
-    """Create admin tool dispatcher and log information."""
+async def _create_admin_tool_dispatcher(
+    tools: List[BaseTool], 
+    db: AsyncSession, 
+    user: User,
+    user_context: Optional[UserExecutionContext] = None
+) -> AdminToolDispatcher:
+    """Create admin tool dispatcher with modern request-scoped pattern.
+    
+    Args:
+        tools: List of tools to register
+        db: Database session
+        user: Admin user
+        user_context: Optional UserExecutionContext (recommended for proper isolation)
+        
+    Returns:
+        AdminToolDispatcher: Modern request-scoped admin dispatcher
+    """
     logger.info(f"Creating supervisor with admin tools for user {user.email}")
-    # AdminToolDispatcher expects: llm_manager, tool_dispatcher, tools, db, user, websocket_manager
-    tool_dispatcher = AdminToolDispatcher(
-        llm_manager=None, 
-        tool_dispatcher=None, 
-        tools=tools, 
-        db=db, 
-        user=user, 
-        websocket_manager=None
+    
+    # Use migration helper to upgrade to modern pattern
+    tool_dispatcher = await upgrade_admin_dispatcher_creation(
+        admin_user=user,
+        db_session=db,
+        tools=tools,
+        llm_manager=None,
+        websocket_manager=None,
+        user_context=user_context  # Pass context if available
     )
+    
+    # Log migration status
+    AdminToolDispatcherMigrationHelper.log_migration_status(tool_dispatcher)
+    
     admin_tools = tool_dispatcher.list_all_tools()
     logger.info(f"Total tools available (including admin): {len(admin_tools)}")
     return tool_dispatcher
 
 
-def _create_standard_tool_dispatcher(tools: List[BaseTool]) -> ToolDispatcher:
-    """Create standard tool dispatcher."""
+def _create_standard_tool_dispatcher(
+    tools: List[BaseTool],
+    user_context: Optional[UserExecutionContext] = None
+) -> ToolDispatcher:
+    """Create standard tool dispatcher with optional request-scoped context.
+    
+    Args:
+        tools: List of tools to register
+        user_context: Optional UserExecutionContext for request-scoped isolation
+        
+    Returns:
+        ToolDispatcher: Tool dispatcher (request-scoped if context provided)
+    """
     logger.info("Creating supervisor with standard tools only")
-    # UnifiedToolDispatcher (aliased as ToolDispatcher) expects:
-    # user_context, tools, websocket_emitter, websocket_bridge, permission_service
-    return ToolDispatcher(user_context=None, tools=tools)
+    
+    if user_context:
+        logger.info("✅ Creating request-scoped standard tool dispatcher")
+        # Modern request-scoped pattern
+        return ToolDispatcher(user_context=user_context, tools=tools)
+    else:
+        logger.warning("⚠️ Creating global tool dispatcher - consider providing UserExecutionContext")
+        # Legacy global pattern with warning
+        return ToolDispatcher(user_context=None, tools=tools)
 
 
 def _determine_supervisor_mode(has_admin_access: bool, enable_quality_gates: bool) -> SupervisorMode:
@@ -121,14 +163,15 @@ def _create_supervisor_instance(
     )
 
 
-def create_supervisor_with_admin_support(
+async def create_supervisor_with_admin_support(
     llm_manager: LLMManager,
     tools: List[BaseTool],
     db: Optional[AsyncSession] = None,
     user: Optional[User] = None,
     websocket_manager=None,
     thread_id: Optional[str] = None,
-    enable_quality_gates: bool = False
+    enable_quality_gates: bool = False,
+    user_context: Optional[UserExecutionContext] = None
 ) -> SupervisorAgent:
     """
     Create a supervisor agent with admin tool support based on user permissions
@@ -140,20 +183,39 @@ def create_supervisor_with_admin_support(
         user: Current user
         websocket_manager: WebSocket manager for real-time updates
         thread_id: Thread ID for context
+        enable_quality_gates: Whether to enable quality gates
+        user_context: Optional UserExecutionContext for request isolation (RECOMMENDED)
         
     Returns:
         Configured SupervisorAgent instance
     """
     has_admin_access = _determine_admin_access(db, user)
-    tool_dispatcher = _setup_tool_dispatcher(tools, db, user, has_admin_access)
+    tool_dispatcher = await _setup_tool_dispatcher(tools, db, user, has_admin_access, user_context)
     supervisor_config = _setup_supervisor_configuration(has_admin_access, enable_quality_gates)
     return _create_supervisor_instance(db, llm_manager, websocket_manager, tool_dispatcher, supervisor_config, user, thread_id)
 
-def _setup_tool_dispatcher(tools: List[BaseTool], db: Optional[AsyncSession], user: Optional[User], has_admin_access: bool):
-    """Setup appropriate tool dispatcher based on admin access."""
+async def _setup_tool_dispatcher(
+    tools: List[BaseTool], 
+    db: Optional[AsyncSession], 
+    user: Optional[User], 
+    has_admin_access: bool,
+    user_context: Optional[UserExecutionContext] = None
+):
+    """Setup appropriate tool dispatcher based on admin access.
+    
+    Args:
+        tools: List of tools to register
+        db: Database session
+        user: Current user
+        has_admin_access: Whether user has admin access
+        user_context: Optional UserExecutionContext for request isolation
+        
+    Returns:
+        Tool dispatcher (admin or standard)
+    """
     if has_admin_access:
-        return _create_admin_tool_dispatcher(tools, db, user)
-    return _create_standard_tool_dispatcher(tools)
+        return await _create_admin_tool_dispatcher(tools, db, user, user_context)
+    return _create_standard_tool_dispatcher(tools, user_context)
 
 def _setup_supervisor_configuration(has_admin_access: bool, enable_quality_gates: bool) -> SupervisorConfig:
     """Setup supervisor configuration based on access level."""

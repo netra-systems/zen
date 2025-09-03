@@ -276,7 +276,7 @@ class WebSocketBridgeFactory:
             
             # Create or get UserWebSocketConnection wrapper
             if connection_info:
-                # Wrap the actual WebSocket in our UserWebSocketConnection
+                # Wrap the connection info in UserWebSocketConnection
                 connection = UserWebSocketConnection(
                     user_id=user_id,
                     connection_id=connection_id,
@@ -352,7 +352,12 @@ class WebSocketBridgeFactory:
         async with self._context_lock:
             if context_key in self._user_contexts:
                 context = self._user_contexts[context_key]
-                await context.cleanup()
+                
+                # Don't call context.cleanup() here to avoid circular cleanup
+                # The emitter already handles its own cleanup, just clean up the factory state
+                context._is_cleaned = True
+                context.connection_status = ConnectionStatus.CLOSED
+                
                 del self._user_contexts[context_key]
                 self._factory_metrics['emitters_active'] -= 1
                 self._factory_metrics['emitters_cleaned'] += 1
@@ -769,6 +774,11 @@ class UserWebSocketEmitter:
         """Clean up emitter resources."""
         from netra_backend.app.monitoring.websocket_metrics import record_factory_event
         
+        # Prevent duplicate cleanup
+        if hasattr(self, '_cleanup_in_progress'):
+            return
+        self._cleanup_in_progress = True
+        
         try:
             # Signal shutdown
             self._shutdown = True
@@ -791,8 +801,8 @@ class UserWebSocketEmitter:
             if self._batch_timer and not self._batch_timer.done():
                 self._batch_timer.cancel()
                 try:
-                    await self._batch_timer
-                except asyncio.CancelledError:
+                    await asyncio.wait_for(self._batch_timer, timeout=1.0)
+                except (asyncio.CancelledError, asyncio.TimeoutError):
                     pass
                     
             # Clear pending events
@@ -802,7 +812,7 @@ class UserWebSocketEmitter:
             # Record factory destruction
             record_factory_event("destroyed")
             
-            # Notify factory of cleanup
+            # Notify factory of cleanup (but avoid circular cleanup)
             await self.factory.cleanup_user_context(
                 self.user_context.user_id, 
                 self.user_context.connection_id

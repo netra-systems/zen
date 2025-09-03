@@ -529,16 +529,16 @@ class TestAgentFailureHandlingE2E:
         print(f"   Deaths detected by tracker: {deaths_detected}/{failed_agents}")
         
         # Assertions
-        assert deaths_detected >= failed_agents * 0.8, \\
+        assert deaths_detected >= failed_agents * 0.8, \
             f"Most agent deaths should be detected: {deaths_detected}/{failed_agents}"
             
-        assert len(death_notifications_received) >= failed_agents * 0.8, \\
+        assert len(death_notifications_received) >= failed_agents * 0.8, \
             f"Most users should receive death notifications: {len(death_notifications_received)}/{failed_agents}"
             
-        assert len(completion_messages) > 0, \\
+        assert len(completion_messages) > 0, \
             "Successful agent should complete normally"
         
-        print("\\n✅ MULTIPLE USERS E2E TEST PASSED!")
+        print("\n✅ MULTIPLE USERS E2E TEST PASSED!")
         print("   - Multiple agent deaths detected")
         print("   - Users received appropriate notifications")
         print("   - Successful agents completed normally")
@@ -838,17 +838,17 @@ class TestAgentFailureHandlingE2E:
         expected_failures = sum(1 for s in test_scenarios if s["should_fail"])
         
         # Allow some tolerance for timing
-        assert successful_agents >= expected_successes * 0.8, \\
+        assert successful_agents >= expected_successes * 0.8, \
             f"Most expected successes should work: {successful_agents} >= {expected_successes * 0.8}"
             
-        assert failed_agents >= expected_failures * 0.8, \\
+        assert failed_agents >= expected_failures * 0.8, \
             f"Most expected failures should be detected: {failed_agents} >= {expected_failures * 0.8}"
         
         # User should have received notifications for most events
         total_expected_notifications = len(test_scenarios)
         total_received_notifications = len(completion_messages) + len(death_messages)
         
-        assert total_received_notifications >= total_expected_notifications * 0.8, \\
+        assert total_received_notifications >= total_expected_notifications * 0.8, \
             f"User should receive most notifications: {total_received_notifications} >= {total_expected_notifications * 0.8}"
         
         # WebSocket should still be connected

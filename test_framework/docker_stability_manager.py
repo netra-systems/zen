@@ -61,6 +61,11 @@ class DockerStabilityManager:
         Returns:
             Project prefix (e.g., 'netra-apex')
         """
+        # Try to get from environment variable first
+        project_name = os.environ.get('COMPOSE_PROJECT_NAME')
+        if project_name:
+            return project_name
+        
         # Dynamically determine project prefix from directory or existing containers
         try:
             # Try to get project name from Git repo root directory name

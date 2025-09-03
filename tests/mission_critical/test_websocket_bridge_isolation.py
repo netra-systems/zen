@@ -184,16 +184,17 @@ class IsolationTestManager:
 # ISOLATION VALIDATION TESTS
 # ============================================================================
 
+@pytest.fixture
+async def isolation_manager():
+    """Isolation test manager fixture."""
+    manager = IsolationTestManager()
+    await manager.initialize()
+    yield manager
+    await manager.cleanup_all()
+
+
 class TestWebSocketBridgeIsolation:
     """Test suite validating WebSocket Bridge user isolation."""
-    
-    @pytest.fixture
-    async def isolation_manager(self):
-        """Isolation test manager fixture."""
-        manager = IsolationTestManager()
-        await manager.initialize()
-        yield manager
-        await manager.cleanup_all()
     
     @pytest.mark.asyncio
     @pytest.mark.critical

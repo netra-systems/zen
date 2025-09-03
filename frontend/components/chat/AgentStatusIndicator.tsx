@@ -9,6 +9,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Brain, Cpu, Zap, CheckCircle, AlertCircle, Loader } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { agentUpdateStream, type AgentUpdate, type StreamBatch } from '@/services/agent-update-stream';
+import { PerformanceMetrics } from '@/types/performance-metrics';
 
 interface AgentStatusIndicatorProps {
   agentId?: string;
@@ -26,11 +27,6 @@ interface VisualState {
   isAnimating: boolean;
 }
 
-interface PerformanceMetrics {
-  frameRate: number;
-  updateLatency: number;
-  renderTime: number;
-}
 
 const AgentStatusIndicator: React.FC<AgentStatusIndicatorProps> = ({
   agentId,
@@ -128,8 +124,15 @@ const AgentStatusIndicator: React.FC<AgentStatusIndicatorProps> = ({
     const updateLatency = timestamp - (updateBuffer.current[0]?.timestamp || timestamp);
     
     setMetrics({
-      frameRate,
-      updateLatency,
+      renderCount: 0,
+      lastRenderTime: timestamp,
+      averageResponseTime: 0,
+      wsLatency: updateLatency,
+      memoryUsage: 0,
+      fps: frameRate,
+      componentRenderTimes: new Map<string, number>(),
+      errorCount: 0,
+      cacheHitRate: 0,
       renderTime
     });
   };
@@ -272,7 +275,7 @@ const MetricsFooter: React.FC<{
   return (
     <div className="mt-3 pt-2 border-t border-gray-100">
       <div className="flex justify-between text-xs text-gray-500">
-        <span>{metrics.frameRate}fps</span>
+        <span>{metrics.fps}fps</span>
         <span>{metrics.renderTime.toFixed(1)}ms</span>
       </div>
     </div>
@@ -339,9 +342,15 @@ const createInitialState = (): VisualState => ({
 });
 
 const createInitialMetrics = (): PerformanceMetrics => ({
-  frameRate: 60,
-  updateLatency: 0,
-  renderTime: 0
+  renderCount: 0,
+  lastRenderTime: 0,
+  averageResponseTime: 0,
+  wsLatency: 0,
+  memoryUsage: 0,
+  fps: 60,
+  componentRenderTimes: new Map<string, number>(),
+  errorCount: 0,
+  cacheHitRate: 0
 });
 
 export default AgentStatusIndicator;
