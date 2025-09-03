@@ -1,4 +1,4 @@
-"""WebSocket Quality Manager - Main coordinator for quality-enhanced WebSocket handling"""
+"""Quality Message Handler - Main coordinator for quality-enhanced WebSocket message handling"""
 
 from typing import Any, Dict
 
@@ -28,8 +28,8 @@ manager = get_websocket_manager()
 logger = central_logger.get_logger(__name__)
 
 
-class WebSocketQualityManager:
-    """Manager for quality-enhanced WebSocket handling"""
+class QualityMessageHandler:
+    """Handler for quality-enhanced WebSocket message processing"""
     
     def __init__(self, supervisor, db_session_factory):
         self.supervisor = supervisor

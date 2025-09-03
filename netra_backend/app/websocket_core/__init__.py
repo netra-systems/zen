@@ -22,7 +22,14 @@ All imports should use this package, not the legacy /websocket/ directory.
 from netra_backend.app.websocket_core.manager import (
     WebSocketManager,
     get_websocket_manager,
-    websocket_context
+    websocket_context,
+    # Heartbeat compatibility (integrated functionality)
+    HeartbeatConfig,
+    WebSocketHeartbeatManager,
+    get_heartbeat_manager,
+    register_connection_heartbeat,
+    unregister_connection_heartbeat,
+    check_connection_heartbeat
 )
 
 # Type Definitions
@@ -129,16 +136,8 @@ from netra_backend.app.websocket_core.utils import (
     websocket_heartbeat_context
 )
 
-# Modern WebSocket abstraction
-from netra_backend.app.websocket_core.modern_websocket_abstraction import (
-    ModernWebSocketWrapper,
-    ModernWebSocketManager,
-    ModernWebSocketProtocol,
-    get_modern_websocket_manager,
-    websocket_connection_context,
-    WebSocketClientProtocol,
-    WebSocketServerProtocol
-)
+# Modern WebSocket compatibility (features merged into canonical WebSocketManager)
+# These imports are maintained for backward compatibility during migration
 
 # Version info
 __version__ = "1.0.0"
@@ -181,13 +180,13 @@ __all__ = [
     "create_standard_message",
     "create_error_message",
     
-    # Modern WebSocket abstraction
-    "ModernWebSocketWrapper",
-    "ModernWebSocketManager",
-    "get_modern_websocket_manager",
-    "websocket_connection_context",
-    "WebSocketClientProtocol",
-    "WebSocketServerProtocol"
+    # Heartbeat compatibility (integrated into WebSocketManager)
+    "HeartbeatConfig",
+    "WebSocketHeartbeatManager",
+    "get_heartbeat_manager",
+    "register_connection_heartbeat",
+    "unregister_connection_heartbeat",
+    "check_connection_heartbeat"
 ]
 
 # Legacy compatibility - these will be removed in future versions

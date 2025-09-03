@@ -26,8 +26,8 @@ from dataclasses import dataclass, field
 from enum import Enum
 
 from netra_backend.app.logging_config import central_logger
-from netra_backend.app.monitoring.websocket_notification_monitor import get_websocket_notification_monitor
-from netra_backend.app.monitoring.websocket_health_checks import get_websocket_health_checker
+from netra_backend.app.monitoring.websocket_notification_monitor import get_websocket_notification_monitor, WebSocketNotificationMonitor
+from netra_backend.app.monitoring.websocket_health_checks import get_websocket_health_checker, WebSocketHealthChecker
 
 logger = central_logger.get_logger(__name__)
 
@@ -127,7 +127,7 @@ class DashboardConfig:
         }
 
 
-class WebSocketDashboardConfigManager:
+class DashboardConfigManager:
     """Manages configuration for WebSocket monitoring dashboards."""
     
     def __init__(self):
@@ -825,14 +825,14 @@ class WebSocketDashboardConfigManager:
 
 
 # Global dashboard config manager
-_dashboard_config_manager: Optional[WebSocketDashboardConfigManager] = None
+_dashboard_config_manager: Optional[DashboardConfigManager] = None
 
 
-def get_dashboard_config_manager() -> WebSocketDashboardConfigManager:
+def get_dashboard_config_manager() -> DashboardConfigManager:
     """Get or create the global dashboard config manager."""
     global _dashboard_config_manager
     if _dashboard_config_manager is None:
-        _dashboard_config_manager = WebSocketDashboardConfigManager()
+        _dashboard_config_manager = DashboardConfigManager()
     return _dashboard_config_manager
 
 
