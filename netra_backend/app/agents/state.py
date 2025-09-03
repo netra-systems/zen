@@ -1,6 +1,11 @@
-"""Agent state management models with immutable patterns."""
+"""Agent state management models with immutable patterns.
+
+DEPRECATION NOTICE: DeepAgentState is deprecated and will be removed in v3.0.0.
+Use UserExecutionContext pattern for new agent implementations.
+"""
 from datetime import datetime, timezone
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
+import warnings
 
 from pydantic import BaseModel, Field, field_validator
 
@@ -157,7 +162,19 @@ class SupplyResearchResult(BaseModel):
 
 
 class DeepAgentState(BaseModel):
-    """Strongly typed state for the deep agent system."""
+    """DEPRECATED: Strongly typed state for the deep agent system.
+    
+    🚨 CRITICAL DEPRECATION WARNING: DeepAgentState creates user isolation risks
+    and will be REMOVED in v3.0.0 (Q1 2025).
+    
+    📋 MIGRATION REQUIRED:
+    - Replace with UserExecutionContext pattern for complete user isolation
+    - Use context.metadata for request-specific data instead of global state
+    - Access database via context.db_session instead of global sessions
+    
+    📖 Migration Guide: See EXECUTION_PATTERN_TECHNICAL_DESIGN.md
+    ⚠️  USER DATA AT RISK: This pattern may cause data leakage between users
+    """
     user_request: str = "default_request"  # Default for backward compatibility
     chat_thread_id: Optional[str] = None
     user_id: Optional[str] = None
@@ -181,6 +198,26 @@ class DeepAgentState(BaseModel):
     metadata: AgentMetadata = Field(default_factory=AgentMetadata)
     quality_metrics: Dict[str, Any] = Field(default_factory=dict)
     context_tracking: Dict[str, Any] = Field(default_factory=dict)  # Added for E2E test compatibility
+    
+    def __init__(self, **data):
+        """Initialize DeepAgentState with deprecation warning."""
+        # Issue comprehensive deprecation warning
+        warnings.warn(
+            f"🚨 CRITICAL DEPRECATION: DeepAgentState usage creates user isolation risks. "
+            f"This pattern will be REMOVED in v3.0.0 (Q1 2025). "
+            f"\n"
+            f"📋 IMMEDIATE MIGRATION REQUIRED:"
+            f"\n1. Replace with UserExecutionContext pattern"
+            f"\n2. Use 'context.metadata' for request data instead of DeepAgentState fields"
+            f"\n3. Access database via 'context.db_session' instead of global sessions"
+            f"\n4. Use 'context.user_id', 'context.thread_id', 'context.run_id' for identifiers"
+            f"\n"
+            f"📖 Migration Guide: See EXECUTION_PATTERN_TECHNICAL_DESIGN.md"
+            f"\n⚠️  CRITICAL: Multiple users may see each other's data with this pattern",
+            DeprecationWarning,
+            stacklevel=2
+        )
+        super().__init__(**data)
     
     @field_validator('step_count')
     @classmethod

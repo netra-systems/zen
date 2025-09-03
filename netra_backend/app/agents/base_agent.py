@@ -15,8 +15,9 @@ import time
 # from netra_backend.app.agents.agent_state import AgentStateMixin
 from netra_backend.app.agents.mixins.websocket_bridge_adapter import WebSocketBridgeAdapter
 from netra_backend.app.agents.interfaces import BaseAgentProtocol
-# Temporary import for DeepAgentState - needed until all agents migrate to UserExecutionContext
+# DEPRECATED: DeepAgentState import for migration compatibility only - will be removed in v3.0.0
 from netra_backend.app.schemas.agent_models import DeepAgentState
+import warnings
 from netra_backend.app.core.config import get_config
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.llm.observability import generate_llm_correlation_id
@@ -306,28 +307,71 @@ class BaseAgent(ABC):
             
         Returns:
             Execution result
+            
+        Raises:
+            NotImplementedError: If agent doesn't implement UserExecutionContext pattern
+            DeprecationWarning: If agent falls back to legacy patterns
         """
-        # Default implementation delegates to execute_core_logic if available
+        # Check if agent has modern implementation first
+        if hasattr(self, '_execute_with_user_context') and callable(getattr(self, '_execute_with_user_context')):
+            # Modern UserExecutionContext pattern
+            return await self._execute_with_user_context(context, stream_updates)
+        
+        # DEPRECATED: Legacy fallback using execute_core_logic with DeepAgentState bridge
         if hasattr(self, 'execute_core_logic'):
-            # Create temporary DeepAgentState for backward compatibility
+            # Issue comprehensive deprecation warning
+            warnings.warn(
+                f"🚨 CRITICAL DEPRECATION: Agent '{self.name}' is using legacy DeepAgentState bridge pattern. "
+                f"This creates user isolation risks and will be REMOVED in v3.0.0 (Q1 2025). "
+                f"\n"
+                f"📋 IMMEDIATE ACTION REQUIRED:"
+                f"\n1. Implement '_execute_with_user_context(context, stream_updates)' method"
+                f"\n2. Remove 'execute_core_logic' method"  
+                f"\n3. Use 'context.metadata.get(\"user_request\", \"\")' instead of DeepAgentState.user_request"
+                f"\n4. Access database via 'context.db_session' instead of global sessions"
+                f"\n"
+                f"📖 Migration Guide: See EXECUTION_PATTERN_TECHNICAL_DESIGN.md"
+                f"\n⚠️  USER ISOLATION AT RISK: Multiple users may see each other's data",
+                DeprecationWarning,
+                stacklevel=3  # Point to the calling code, not this method
+            )
+            
+            # Log critical warning
+            self.logger.critical(f"🚨 AGENT MIGRATION REQUIRED: {self.name} using deprecated DeepAgentState pattern")
+            self.logger.warning(f"📋 MIGRATION: Implement '_execute_with_user_context()' method in {self.__class__.__module__}.{self.__class__.__name__}")
+            self.logger.error(f"⚠️  USER DATA AT RISK: Agent {self.name} may cause data leakage between users")
+            
+            # Create temporary DeepAgentState bridge (DEPRECATED - will be removed)
             temp_state = DeepAgentState(
-                user_request=getattr(context, 'user_request', 'default_request'),
+                user_request=context.metadata.get('user_request', 'default_request'),
                 chat_thread_id=context.thread_id,
-                user_id=context.user_id
+                user_id=context.user_id,
+                run_id=context.run_id
             )
             execution_context = ExecutionContext(
                 run_id=context.run_id,
                 agent_name=self.name,
-                state=temp_state,  # Temporarily using DeepAgentState until migration complete
+                state=temp_state,  # DEPRECATED: Bridge pattern only
                 stream_updates=stream_updates,
                 thread_id=context.thread_id,
                 user_id=context.user_id,
                 start_time=time.time(),
                 correlation_id=self.correlation_id
             )
+            
+            # Execute with deprecated bridge
             return await self.execute_core_logic(execution_context)
         
-        raise NotImplementedError(f"Agent {self.name} must implement execute_with_context() or execute_core_logic()")
+        # No implementation found - agent must be migrated
+        raise NotImplementedError(
+            f"🚨 AGENT MIGRATION REQUIRED: Agent '{self.name}' must implement UserExecutionContext pattern.\n"
+            f"\n📋 REQUIRED IMPLEMENTATION:"
+            f"\n1. Add '_execute_with_user_context(context, stream_updates)' method"
+            f"\n2. Use 'context.metadata.get(\"user_request\", \"\")' for user request data"
+            f"\n3. Use 'context.db_session' for database operations" 
+            f"\n4. Use 'context.user_id', 'context.thread_id', 'context.run_id' for identifiers"
+            f"\n\n📖 Migration Guide: See EXECUTION_PATTERN_TECHNICAL_DESIGN.md"
+        )
     
 # _convert_context_to_state method removed - legacy support removed
     
@@ -686,3 +730,246 @@ class BaseAgent(ABC):
         else:
             update["message"] = "Operation completed with fallback method"
         await self._send_update(run_id, update)
+    
+    # === Factory Methods for Modern Agent Creation ===
+    
+    @classmethod
+    def create_with_context(
+        cls, 
+        context: 'UserExecutionContext',
+        agent_config: Optional[Dict[str, Any]] = None
+    ) -> 'BaseAgent':
+        """MODERN: Factory method for creating context-aware agent instances.
+        
+        This is the recommended way to create agents in the UserExecutionContext pattern.
+        Agents created this way are guaranteed to have proper user isolation.
+        
+        Args:
+            context: User execution context for complete isolation
+            agent_config: Optional agent-specific configuration
+            
+        Returns:
+            BaseAgent configured for UserExecutionContext pattern
+            
+        Raises:
+            ValueError: If context is invalid or agent doesn't support pattern
+        """
+        # Import dynamically to avoid circular dependency
+        from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
+        
+        if not isinstance(context, UserExecutionContext):
+            raise ValueError(f"Expected UserExecutionContext, got {type(context)}")
+        
+        # Create agent instance without singleton dependencies
+        agent = cls()
+        
+        # Inject context-scoped dependencies (following factory pattern from design doc)
+        agent._user_context = context
+        
+        # Apply agent-specific configuration
+        if agent_config:
+            for key, value in agent_config.items():
+                if hasattr(agent, key):
+                    setattr(agent, key, value)
+        
+        # Validate agent implements modern pattern
+        if not hasattr(agent, '_execute_with_user_context') and not hasattr(agent, 'execute_core_logic'):
+            raise ValueError(
+                f"Agent {cls.__name__} must implement either '_execute_with_user_context()' "
+                f"or provide 'execute_core_logic()' for legacy bridge support"
+            )
+        
+        return agent
+    
+    @classmethod
+    def create_legacy_with_warnings(
+        cls,
+        llm_manager: Optional[LLMManager] = None,
+        tool_dispatcher: Optional['ToolDispatcher'] = None,
+        redis_manager: Optional['RedisManager'] = None,
+        **kwargs
+    ) -> 'BaseAgent':
+        """DEPRECATED: Legacy factory method with comprehensive warnings.
+        
+        This method creates agents using legacy patterns and issues warnings
+        about user isolation risks. Use create_with_context() instead.
+        
+        Args:
+            llm_manager: LLM manager (creates global state risks)
+            tool_dispatcher: Tool dispatcher (creates global state risks)  
+            redis_manager: Redis manager (creates global state risks)
+            **kwargs: Additional legacy parameters
+            
+        Returns:
+            BaseAgent with legacy initialization
+            
+        Raises:
+            DeprecationWarning: Always - this pattern is deprecated
+        """
+        warnings.warn(
+            f"🚨 DEPRECATED: BaseAgent.create_legacy_with_warnings() creates global state risks. "
+            f"Use BaseAgent.create_with_context() instead. "
+            f"Legacy support will be removed in v3.0.0 (Q1 2025).",
+            DeprecationWarning,
+            stacklevel=2
+        )
+        
+        return cls(
+            llm_manager=llm_manager,
+            tool_dispatcher=tool_dispatcher,
+            redis_manager=redis_manager,
+            **kwargs
+        )
+    
+    # === UserExecutionContext Compatibility Validation ===
+    
+    def validate_modern_implementation(self) -> Dict[str, Any]:
+        """Validate agent implements modern UserExecutionContext pattern properly.
+        
+        This method checks agent compliance with the modern execution pattern
+        and provides detailed feedback for migration requirements.
+        
+        Returns:
+            Dictionary with validation results and recommendations
+        """
+        validation_result = {
+            "compliant": False,
+            "pattern": "unknown",
+            "warnings": [],
+            "errors": [],
+            "recommendations": []
+        }
+        
+        # Check for modern implementation
+        has_modern_method = hasattr(self, '_execute_with_user_context') and callable(
+            getattr(self, '_execute_with_user_context')
+        )
+        
+        # Check for legacy implementation
+        has_legacy_method = hasattr(self, 'execute_core_logic') and callable(
+            getattr(self, 'execute_core_logic')
+        )
+        
+        if has_modern_method:
+            validation_result["pattern"] = "modern"
+            validation_result["compliant"] = True
+            
+            # Additional modern pattern validations
+            if has_legacy_method:
+                validation_result["warnings"].append(
+                    "Agent has both modern '_execute_with_user_context()' and legacy 'execute_core_logic()' methods. "
+                    "Remove 'execute_core_logic()' for full modernization."
+                )
+            
+            # Check for session isolation compliance
+            if hasattr(self, 'db_session') or hasattr(self, '_db_session'):
+                validation_result["errors"].append(
+                    "CRITICAL: Agent stores database session as instance variable. "
+                    "This violates user isolation requirements. Use context.db_session instead."
+                )
+                validation_result["compliant"] = False
+            
+            # Check for user_id storage (isolation violation)
+            if hasattr(self, 'user_id') or hasattr(self, '_user_id'):
+                validation_result["warnings"].append(
+                    "Agent stores user_id as instance variable. "
+                    "Use context.user_id for proper user isolation."
+                )
+            
+        elif has_legacy_method:
+            validation_result["pattern"] = "legacy_bridge"
+            validation_result["compliant"] = False
+            validation_result["warnings"].append(
+                "🚨 DEPRECATED: Agent uses legacy 'execute_core_logic()' pattern. "
+                "This creates user isolation risks and will be removed in v3.0.0."
+            )
+            validation_result["recommendations"].extend([
+                "1. Implement '_execute_with_user_context(context, stream_updates)' method",
+                "2. Use 'context.metadata.get(\"user_request\", \"\")' for request data",
+                "3. Use 'context.db_session' for database operations",
+                "4. Use 'context.user_id', 'context.thread_id', 'context.run_id' for identifiers",
+                "5. Remove 'execute_core_logic()' method after migration"
+            ])
+        
+        else:
+            validation_result["pattern"] = "none"
+            validation_result["compliant"] = False
+            validation_result["errors"].append(
+                f"MIGRATION REQUIRED: Agent '{self.name}' has no execution implementation. "
+                f"Must implement '_execute_with_user_context()' method."
+            )
+            validation_result["recommendations"].extend([
+                "1. Add '_execute_with_user_context(context, stream_updates)' method",
+                "2. Follow patterns in EXECUTION_PATTERN_TECHNICAL_DESIGN.md",
+                "3. Test with concurrent user scenarios",
+                "4. Validate user isolation with compatibility tests"
+            ])
+        
+        # Check factory usage patterns
+        if hasattr(self, 'tool_dispatcher') and self.tool_dispatcher is not None:
+            validation_result["warnings"].append(
+                "Agent initialized with tool_dispatcher parameter. "
+                "Use create_with_context() factory for better isolation."
+            )
+        
+        return validation_result
+    
+    def assert_user_execution_context_pattern(self) -> None:
+        """Assert that agent implements UserExecutionContext pattern correctly.
+        
+        This method performs runtime validation and raises exceptions for
+        critical compliance violations that could cause user data issues.
+        
+        Raises:
+            RuntimeError: If agent has critical compliance violations
+            DeprecationWarning: If agent uses deprecated patterns
+        """
+        validation = self.validate_modern_implementation()
+        
+        # Fail hard on critical errors
+        if validation["errors"]:
+            error_details = "\n".join([f"- {error}" for error in validation["errors"]])
+            raise RuntimeError(
+                f"CRITICAL COMPLIANCE VIOLATIONS in agent '{self.name}':\n"
+                f"{error_details}\n"
+                f"\nThese violations create user data contamination risks and must be fixed immediately."
+            )
+        
+        # Issue warnings for deprecated patterns
+        if validation["warnings"]:
+            for warning in validation["warnings"]:
+                if "DEPRECATED" in warning:
+                    warnings.warn(warning, DeprecationWarning, stacklevel=2)
+                else:
+                    self.logger.warning(f"Agent '{self.name}': {warning}")
+        
+        # Log compliance status
+        if validation["compliant"]:
+            self.logger.info(f"✅ Agent '{self.name}' complies with UserExecutionContext pattern")
+        else:
+            self.logger.warning(f"⚠️ Agent '{self.name}' needs migration to UserExecutionContext pattern")
+            
+            if validation["recommendations"]:
+                rec_details = "\n".join([f"  {rec}" for rec in validation["recommendations"]])
+                self.logger.info(f"📋 Migration recommendations for '{self.name}':\n{rec_details}")
+    
+    def get_migration_status(self) -> Dict[str, Any]:
+        """Get detailed migration status for monitoring and reporting.
+        
+        Returns:
+            Dictionary with migration progress and status information
+        """
+        validation = self.validate_modern_implementation()
+        
+        return {
+            "agent_name": self.name,
+            "agent_class": f"{self.__class__.__module__}.{self.__class__.__name__}",
+            "migration_status": "compliant" if validation["compliant"] else "needs_migration",
+            "execution_pattern": validation["pattern"],
+            "user_isolation_safe": validation["compliant"] and not validation["errors"],
+            "warnings_count": len(validation["warnings"]),
+            "errors_count": len(validation["errors"]),
+            "recommendations_count": len(validation["recommendations"]),
+            "validation_timestamp": time.time(),
+            "compliance_details": validation
+        }
