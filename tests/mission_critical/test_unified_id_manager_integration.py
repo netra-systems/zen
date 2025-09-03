@@ -14,7 +14,7 @@ from netra_backend.app.core.unified_id_manager import UnifiedIDManager
 from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
 from netra_backend.app.websocket_core.agent_handler import AgentMessageHandler
 from netra_backend.app.services.message_handlers import MessageHandlerService
-from netra_backend.app.agents.supervisor import SupervisorAgent
+from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
 from netra_backend.app.websocket_core.types import WebSocketMessage, MessageType
 
 

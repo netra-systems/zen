@@ -90,7 +90,7 @@ class UnifiedIDManager:
     
     # SSOT: Compiled regex patterns for performance
     CANONICAL_PATTERN = re.compile(
-        r'^thread_(.+?)_run_(\d+)_([a-f0-9A-F]{8})$'
+        r'^thread_(.*?)_run_(\d+)_([a-f0-9A-F]{8})$'
     )
     LEGACY_IDMANAGER_PATTERN = re.compile(
         r'^run_(.+)_([a-f0-9A-F]{8})$'
@@ -232,16 +232,25 @@ class UnifiedIDManager:
                 potential_uuid = parts[-1]
                 if len(potential_uuid) == 8 and re.match(r'^[a-f0-9A-F]+$', potential_uuid):
                     # Everything between "run_" and the UUID is the thread_id
-                    thread_id = '_'.join(parts[1:-1])
-                    if thread_id:  # Ensure thread_id is not empty
-                        logger.debug(f"Parsed legacy IDManager format run_id: {run_id}")
-                        return ParsedRunID(
-                            thread_id=thread_id,
-                            timestamp=None,  # Legacy format doesn't have timestamp
-                            uuid_suffix=potential_uuid,
-                            format_version=IDFormat.LEGACY_IDMANAGER,
-                            original_run_id=run_id
-                        )
+                    # Handle consecutive underscores after "run_" prefix
+                    thread_parts = parts[1:-1]  # All parts between run_ and uuid
+                    
+                    # Remove leading empty strings (caused by consecutive underscores after run_)
+                    while thread_parts and thread_parts[0] == "":
+                        thread_parts.pop(0)
+                    
+                    # Join remaining parts, preserving internal consecutive underscores
+                    thread_id = '_'.join(thread_parts)
+                    
+                    # Allow empty thread_id (edge case handling)
+                    logger.debug(f"Parsed legacy IDManager format run_id: {run_id}")
+                    return ParsedRunID(
+                        thread_id=thread_id,
+                        timestamp=None,  # Legacy format doesn't have timestamp
+                        uuid_suffix=potential_uuid,
+                        format_version=IDFormat.LEGACY_IDMANAGER,
+                        original_run_id=run_id
+                    )
         
         # Unknown format
         logger.warning(f"Unknown run_id format: {run_id}")

@@ -222,7 +222,7 @@ class TestUnifiedIDManagerValidation:
             "invalid_format", 
             "thread_only_prefix",
             "run_incomplete",
-            "thread__run_1693430400000_a1b2c3d4",  # Double underscore
+            # Note: "thread__run_1693430400000_a1b2c3d4" is now VALID (empty thread_id case)
             "thread_user_run_",  # Missing timestamp and uuid
             "thread_user_run_timestamp",  # Missing uuid
             None
@@ -341,6 +341,92 @@ class TestUnifiedIDManagerFallbackExtraction:
         # No sources available
         result = UnifiedIDManager.extract_thread_id_with_fallback()
         assert result is None
+
+
+class TestUnifiedIDManagerDoubleUnderscoreEdgeCases:
+    """Test edge cases with double underscores that were causing parsing failures."""
+    
+    def test_legacy_format_double_underscore_parsing(self):
+        """Test parsing legacy format IDs with double underscores."""
+        test_cases = [
+            # Double underscore after run_ (empty prefix)
+            ("run__empty_prefix_a1b2c3d4", "empty_prefix"),
+            
+            # Multiple consecutive underscores
+            ("run___triple_underscore_b2c3d4e5", "triple_underscore"),
+            
+            # Double underscores in middle of thread_id
+            ("run_user__double_middle_c3d4e5f6", "user__double_middle"),
+            
+            # Complex case with multiple double underscores
+            ("run_complex__user__session_d4e5f6a7", "complex__user__session"),
+            
+            # Edge case: only double underscores between run_ and uuid
+            ("run___e5f6a7b8", ""),  # Should result in empty thread_id
+        ]
+        
+        for run_id, expected_thread_id in test_cases:
+            parsed = UnifiedIDManager.parse_run_id(run_id)
+            assert parsed is not None, f"Should parse successfully: {run_id}"
+            assert parsed.thread_id == expected_thread_id, f"Expected '{expected_thread_id}', got '{parsed.thread_id}' for {run_id}"
+            assert parsed.format_version == IDFormat.LEGACY_IDMANAGER
+            
+            # Test extraction method directly
+            extracted = UnifiedIDManager.extract_thread_id(run_id)
+            assert extracted == expected_thread_id, f"extract_thread_id failed for {run_id}"
+    
+    def test_canonical_format_double_underscore_parsing(self):
+        """Test parsing canonical format IDs with double underscores."""
+        test_cases = [
+            # Empty thread_id (double underscore after thread_)
+            ("thread__run_1693430400000_a1b2c3d4", ""),
+            
+            # Double underscore in middle of thread_id
+            ("thread_user__session_run_1693430400000_b2c3d4e5", "user__session"),
+            
+            # Multiple double underscores
+            ("thread_complex__user__session_run_1693430400000_c3d4e5f6", "complex__user__session"),
+            
+            # Triple underscore edge case - actually results in single underscore thread_id
+            ("thread___run_1693430400000_d4e5f6a7", "_"),  # thread_id is single underscore
+        ]
+        
+        for run_id, expected_thread_id in test_cases:
+            parsed = UnifiedIDManager.parse_run_id(run_id)
+            assert parsed is not None, f"Should parse successfully: {run_id}"
+            assert parsed.thread_id == expected_thread_id, f"Expected '{expected_thread_id}', got '{parsed.thread_id}' for {run_id}"
+            assert parsed.format_version == IDFormat.CANONICAL
+            
+            # Test extraction method directly
+            extracted = UnifiedIDManager.extract_thread_id(run_id)
+            assert extracted == expected_thread_id, f"extract_thread_id failed for {run_id}"
+    
+    def test_validate_double_underscore_edge_cases(self):
+        """Test that double underscore edge cases are considered valid."""
+        valid_edge_cases = [
+            "run__empty_prefix_a1b2c3d4",
+            "run___triple_underscore_b2c3d4e5", 
+            "thread__run_1693430400000_c3d4e5f6",
+            "thread_user__session_run_1693430400000_d4e5f6a7"
+        ]
+        
+        for run_id in valid_edge_cases:
+            assert UnifiedIDManager.validate_run_id(run_id), f"Should be valid: {run_id}"
+    
+    def test_empty_thread_id_handling(self):
+        """Test proper handling of empty thread_id results."""
+        empty_thread_id_cases = [
+            "run___a1b2c3d4",  # Legacy format, only underscores - results in empty after filtering
+            "thread__run_1693430400000_b2c3d4e5",  # Canonical format, truly empty thread_id
+        ]
+        
+        for run_id in empty_thread_id_cases:
+            extracted = UnifiedIDManager.extract_thread_id(run_id)
+            assert extracted == "", f"Should extract empty string for {run_id}, got '{extracted}'"
+            
+            parsed = UnifiedIDManager.parse_run_id(run_id)
+            assert parsed is not None, f"Should parse successfully: {run_id}"
+            assert parsed.thread_id == "", f"Should have empty thread_id for {run_id}"
 
 
 class TestUnifiedIDManagerErrorHandling:
