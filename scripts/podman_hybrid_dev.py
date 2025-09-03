@@ -94,11 +94,11 @@ class HybridPodmanEnvironment:
         os.environ.setdefault('FERNET_KEY', 'iZAG-Kz661gRuJXEGzxgghUFnFRamgDrjDXZE6HdJkw=')
         os.environ.setdefault('SECRET_KEY', 'dev-secret-key-for-development')
         
-        print("✅ Environment variables configured")
+        print("[OK] Environment variables configured")
     
     async def start_infrastructure(self) -> bool:
         """Start infrastructure services with Podman."""
-        print("\n🚀 Starting infrastructure services with Podman...")
+        print("\nStarting infrastructure services with Podman...")
         
         try:
             # Start only infrastructure services
@@ -118,20 +118,20 @@ class HybridPodmanEnvironment:
                     # Continue anyway - service might already be running
             
             # Wait for services to be healthy
-            print("\n⏳ Waiting for infrastructure services to be healthy...")
+            print("\nWaiting for infrastructure services to be healthy...")
             await asyncio.sleep(10)
             
             # Check service health
             healthy = await self.check_infrastructure_health()
             if healthy:
-                print("✅ All infrastructure services are healthy!")
+                print("[OK] All infrastructure services are healthy!")
                 return True
             else:
-                print("⚠️  Some services may not be fully ready")
+                print("[WARNING] Some services may not be fully ready")
                 return True  # Continue anyway
                 
         except Exception as e:
-            print(f"❌ Error starting infrastructure: {e}")
+            print(f"[ERROR] Error starting infrastructure: {e}")
             return False
     
     async def check_infrastructure_health(self) -> bool:
@@ -147,12 +147,12 @@ class HybridPodmanEnvironment:
                 timeout=5
             )
             if result.returncode == 0:
-                print("   ✅ PostgreSQL is healthy")
+                print("   [OK] PostgreSQL is healthy")
             else:
-                print("   ⚠️  PostgreSQL not ready")
+                print("   [WARNING] PostgreSQL not ready")
                 all_healthy = False
         except:
-            print("   ⚠️  PostgreSQL check failed")
+            print("   [WARNING] PostgreSQL check failed")
             all_healthy = False
         
         # Check Redis
@@ -164,12 +164,12 @@ class HybridPodmanEnvironment:
                 timeout=5
             )
             if result.returncode == 0:
-                print("   ✅ Redis is healthy")
+                print("   [OK] Redis is healthy")
             else:
-                print("   ⚠️  Redis not ready")
+                print("   [WARNING] Redis not ready")
                 all_healthy = False
         except:
-            print("   ⚠️  Redis check failed")
+            print("   [WARNING] Redis check failed")
             all_healthy = False
         
         # Check ClickHouse
@@ -181,12 +181,12 @@ class HybridPodmanEnvironment:
                 timeout=5
             )
             if result.returncode == 0:
-                print("   ✅ ClickHouse is healthy")
+                print("   [OK] ClickHouse is healthy")
             else:
-                print("   ⚠️  ClickHouse not ready")
+                print("   [WARNING] ClickHouse not ready")
                 all_healthy = False
         except:
-            print("   ⚠️  ClickHouse check failed")
+            print("   [WARNING] ClickHouse check failed")
             all_healthy = False
         
         return all_healthy
@@ -194,38 +194,38 @@ class HybridPodmanEnvironment:
     def display_instructions(self):
         """Display instructions for running application services locally."""
         print("\n" + "="*60)
-        print("🎯 Hybrid Development Environment Ready!")
+        print("Hybrid Development Environment Ready!")
         print("="*60)
-        print("\n📦 Infrastructure Services (Running in Podman):")
+        print("\nInfrastructure Services (Running in Podman):")
         print(f"  PostgreSQL:  localhost:{self.ports['postgres']} (user: netra, db: netra_dev)")
         print(f"  Redis:       localhost:{self.ports['redis']}")
         print(f"  ClickHouse:  http://localhost:{self.ports['clickhouse_http']}")
         
-        print("\n🚀 To start application services locally:")
-        print("\n1️⃣  Auth Service (Terminal 1):")
+        print("\nTo start application services locally:")
+        print("\n1. Auth Service (Terminal 1):")
         print("   cd auth_service")
         print("   python -m uvicorn auth_service.app:app --reload --port 8081")
         
-        print("\n2️⃣  Backend Service (Terminal 2):")
+        print("\n2. Backend Service (Terminal 2):")
         print("   cd netra_backend")
         print("   python -m uvicorn netra_backend.app:app --reload --port 8000")
         
-        print("\n3️⃣  Frontend Service (Terminal 3):")
+        print("\n3. Frontend Service (Terminal 3):")
         print("   cd frontend")
         print("   npm install  # if not done already")
         print("   npm run dev")
         
-        print("\n📝 Environment variables are already configured!")
+        print("\nEnvironment variables are already configured!")
         print("   Just run the commands above in separate terminals.")
         
-        print("\n🛑 To stop infrastructure services:")
+        print("\nTo stop infrastructure services:")
         print(f"   podman-compose -f {self.compose_file} down")
         
         print("="*60)
     
     async def stop_infrastructure(self) -> bool:
         """Stop infrastructure services."""
-        print("\n🛑 Stopping infrastructure services...")
+        print("\nStopping infrastructure services...")
         
         try:
             result = subprocess.run(
@@ -236,19 +236,19 @@ class HybridPodmanEnvironment:
             )
             
             if result.returncode == 0:
-                print("✅ Infrastructure services stopped")
+                print("[OK] Infrastructure services stopped")
                 return True
             else:
-                print(f"⚠️  Some issues stopping services: {result.stderr}")
+                print(f"[WARNING] Some issues stopping services: {result.stderr}")
                 return False
                 
         except Exception as e:
-            print(f"❌ Error stopping services: {e}")
+            print(f"[ERROR] Error stopping services: {e}")
             return False
     
     def check_status(self):
         """Check status of Podman containers."""
-        print("\n📊 Container Status:")
+        print("\nContainer Status:")
         print("-" * 60)
         
         try:
@@ -299,7 +299,7 @@ async def main():
         sys.exit(0 if success else 1)
         
     elif args.action == "restart":
-        print("♻️  Restarting infrastructure services...")
+        print("Restarting infrastructure services...")
         await env.stop_infrastructure()
         await asyncio.sleep(2)
         env.setup_environment_variables()
