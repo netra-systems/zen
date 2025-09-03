@@ -83,6 +83,7 @@ class TestCriticalWiring:
         mock_registry.get_agent = Mock(return_value=None)
         mock_registry.register_agent = Mock()
         mock_registry.set_websocket_manager = Mock()
+        mock_registry.agents = {}  # Registry expects iterable agents dict for integration
         mock_supervisor.registry = mock_registry
         
         # Wire bridge to supervisor
