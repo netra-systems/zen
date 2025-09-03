@@ -174,7 +174,7 @@ services:
       REDIS_HOST: alpine-test-redis
       REDIS_PORT: 6379
       TEST_MODE: "true"
-      JWT_SECRET_KEY: test_jwt_secret_key
+      JWT_SECRET_KEY: rsWwwvq8X6mCSuNv-TMXHDCfb96Xc-Dbay9MZy6EDCU
       SERVICE_SECRET: test_service_secret
     ports:
       - "${ALPINE_TEST_AUTH_PORT:-8083}:8081"
