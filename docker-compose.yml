@@ -26,8 +26,9 @@ services:
       POSTGRES_USER: ${POSTGRES_USER:-netra}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-netra123}
       POSTGRES_DB: ${POSTGRES_DB:-netra_dev}
-      # Removed POSTGRES_HOST_AUTH_METHOD: trust for better security practice
-      POSTGRES_INITDB_ARGS: "--data-checksums"
+      # Allow connections from any host in development (secured by password)
+      POSTGRES_HOST_AUTH_METHOD: md5
+      POSTGRES_INITDB_ARGS: "--data-checksums --auth-host=md5"
     ports:
       - "${DEV_POSTGRES_PORT:-5433}:5432"
     volumes:
