@@ -169,13 +169,13 @@ class LogFormatter:
         
         # Create GCP-compatible log entry
         gcp_entry = {
-            'severity': severity_mapping.get(record["level"].name, 'DEFAULT'),
-            'message': self._filter.filter_message(record["message"]),
-            'timestamp': record["time"].isoformat(),
+            'severity': severity_mapping.get(record.get("level", {}).get("name", "DEFAULT"), 'DEFAULT'),
+            'message': self._filter.filter_message(record.get("message", "")),
+            'timestamp': record.get("time", {}).isoformat() if hasattr(record.get("time", {}), 'isoformat') else str(record.get("time", "")),
             'labels': {
-                'module': record["name"],
-                'function': record["function"],
-                'line': str(record["line"])
+                'module': record.get("name", ""),
+                'function': record.get("function", ""),
+                'line': str(record.get("line", ""))
             }
         }
         
@@ -194,15 +194,15 @@ class LogFormatter:
                 gcp_entry['context'] = filtered_extra
         
         # Add exception info if present
-        if record["exception"]:
-            exc_info = record["exception"]
-            gcp_entry['error'] = {
-                'type': exc_info.type.__name__ if exc_info.type else None,
-                'value': str(exc_info.value) if exc_info.value else None,
-                'traceback': exc_info.traceback if exc_info.traceback else None
-            }
+        if exc := record.get("exception"):
+            if exc and hasattr(exc, 'type'):
+                gcp_entry['error'] = {
+                    'type': exc.type.__name__ if hasattr(exc, 'type') and exc.type else None,
+                    'value': str(exc.value) if hasattr(exc, 'value') and exc.value else None,
+                    'traceback': str(exc.traceback) if hasattr(exc, 'traceback') and exc.traceback else None
+                }
         
-        return json.dumps(gcp_entry) + "\n"
+        return json.dumps(gcp_entry)
     
     def _create_log_entry(self, record) -> LogEntry:
         """Create a LogEntry from a loguru record."""
@@ -288,22 +288,33 @@ class LogHandlerConfig:
         
         if is_gcp:
             # Use GCP-compatible JSON formatter
-            formatter = self.formatter.gcp_json_formatter
+            def gcp_format(record):
+                """Format log record for GCP Cloud Logging."""
+                return self.formatter.gcp_json_formatter(record) + "\n"
+            
+            logger.add(
+                sys.stderr,
+                format=gcp_format,
+                level=self.level,
+                filter=should_log_func,
+                enqueue=True,
+                backtrace=True,
+                diagnose=False,
+                catch=True
+            )
         else:
-            # Use standard JSON formatter
-            formatter = self.formatter.json_formatter
-        
-        logger.add(
-            sys.stderr,
-            format="{message}",  # Simple format, JSON serialization happens in serialize
-            serialize=formatter,
-            level=self.level,
-            filter=should_log_func,
-            enqueue=True,
-            backtrace=True,
-            diagnose=False,
-            catch=True  # Catch exceptions to prevent I/O errors from breaking tests
-        )
+            # Use standard JSON formatter  
+            logger.add(
+                sys.stderr,
+                format="{message}",
+                serialize=self.formatter.json_formatter,
+                level=self.level,
+                filter=should_log_func,
+                enqueue=True,
+                backtrace=True,
+                diagnose=False,
+                catch=True
+            )
     
     def _add_readable_console_handler(self, should_log_func):
         """Add human-readable console handler with proper color mapping."""

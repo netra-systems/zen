@@ -67,10 +67,16 @@ class UnifiedLogger:
                 loaded_config = self._get_fallback_config()
             else:
                 config = unified_config_manager.get_config()
+                # Check if running in GCP Cloud Run or staging/production
+                is_cloud_run = get_env().get('K_SERVICE') is not None
+                environment = get_env().get('ENVIRONMENT', 'development').lower()
+                is_gcp = is_cloud_run or environment in ['staging', 'production']
+                
                 loaded_config = {
                     'log_level': getattr(config, 'log_level', 'INFO').upper(),
                     'enable_file_logging': getattr(config, 'enable_file_logging', False),
-                    'enable_json_logging': getattr(config, 'enable_json_logging', False),
+                    # Force JSON logging for GCP environments
+                    'enable_json_logging': is_gcp or getattr(config, 'enable_json_logging', False),
                     'log_file_path': getattr(config, 'log_file_path', 'logs/netra.log')
                 }
         except (ImportError, Exception):
@@ -86,10 +92,15 @@ class UnifiedLogger:
         """Get fallback configuration for bootstrap phase."""
         # Disable file logging completely during testing
         is_testing = get_env().get('TESTING') == '1' or get_env().get('ENVIRONMENT') == 'testing'
+        # Check if running in GCP Cloud Run or staging/production
+        is_cloud_run = get_env().get('K_SERVICE') is not None
+        environment = get_env().get('ENVIRONMENT', 'development').lower()
+        is_gcp = is_cloud_run or environment in ['staging', 'production']
+        
         return {
             'log_level': get_env().get('LOG_LEVEL', 'INFO').upper(),
             'enable_file_logging': False,  # Never enable file logging in fallback
-            'enable_json_logging': False,
+            'enable_json_logging': is_gcp,  # Enable JSON for GCP environments
             'log_file_path': 'logs/netra.log'
         }
     
