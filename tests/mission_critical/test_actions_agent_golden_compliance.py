@@ -39,6 +39,18 @@ if project_root not in sys.path:
 
 from loguru import logger
 
+# Import unified WebSocket mock for consistent testing
+from test_framework.fixtures.websocket_manager_mock import (
+    create_compliance_mock,
+    MockConfiguration,
+    MockBehaviorMode
+)
+from test_framework.fixtures.websocket_test_helpers import (
+    WebSocketAssertions,
+    simulate_agent_execution_flow,
+    quick_compliance_test
+)
+
 # Import test infrastructure (REAL SERVICES ONLY)
 from test_framework.unified_docker_manager import UnifiedDockerManager
 from shared.isolated_environment import IsolatedEnvironment
@@ -94,63 +106,17 @@ class GoldenComplianceMetrics:
         return total_score
 
 
-class MockWebSocketManager:
-    """Mock WebSocket manager that captures ALL events for validation."""
-    
-    def __init__(self):
-        self.messages: List[Dict] = []
-        self.connections: Dict[str, Any] = {}
-        self.event_timeline: List[tuple] = []  # (timestamp, event_type, data)
-        self._lock = threading.Lock()
-    
-    async def send_to_thread(self, thread_id: str, message: Dict[str, Any]) -> bool:
-        """Record message with precise timing for compliance validation."""
-        with self._lock:
-            timestamp = time.time()
-            event_record = {
-                'thread_id': thread_id,
-                'message': message,
-                'event_type': message.get('type', 'unknown'),
-                'timestamp': timestamp,
-                'sequence': len(self.messages)
-            }
-            self.messages.append(event_record)
-            self.event_timeline.append((timestamp, event_record['event_type'], message))
-        return True
-    
-    async def connect_user(self, user_id: str, websocket, thread_id: str):
-        """Mock user connection."""
-        self.connections[thread_id] = {'user_id': user_id, 'connected': True}
-    
-    async def disconnect_user(self, user_id: str, websocket, thread_id: str):
-        """Mock user disconnection."""
-        if thread_id in self.connections:
-            self.connections[thread_id]['connected'] = False
-    
-    def get_events_for_thread(self, thread_id: str) -> List[Dict]:
-        """Get all events for a specific thread in chronological order."""
-        return [msg for msg in self.messages if msg['thread_id'] == thread_id]
-    
-    def get_required_event_compliance(self, thread_id: str) -> Dict[str, bool]:
-        """Check for all 5 REQUIRED WebSocket events."""
-        events = self.get_events_for_thread(thread_id)
-        event_types = {event['event_type'] for event in events}
-        
-        required_events = {
-            "agent_started",
-            "agent_thinking", 
-            "tool_executing",
-            "tool_completed",
-            "agent_completed"
-        }
-        
-        return {event: event in event_types for event in required_events}
-    
-    def clear_messages(self):
-        """Clear all recorded messages."""
-        with self._lock:
-            self.messages.clear()
-            self.event_timeline.clear()
+# Use unified MockWebSocketManager - this replaces the local implementation
+def MockWebSocketManager():
+    """Factory for unified mock configured for golden compliance testing."""
+    config = MockConfiguration(
+        mode=MockBehaviorMode.NORMAL,
+        enforce_event_order=True,
+        validate_message_format=True,
+        strict_threading=True,
+        enable_metrics=True
+    )
+    return create_compliance_mock.create_for_scenario("compliance", **config.__dict__)
 
 
 class ActionsAgentGoldenComplianceValidator:

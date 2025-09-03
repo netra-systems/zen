@@ -189,7 +189,7 @@ class MockAuthService:
 class MockJWTManager:
     """Mock JWT token manager."""
     
-    def __init__(self, secret_key: str = "test_secret", use_real_jwt: bool = False):
+    def __init__(self, secret_key: str = "test_secret_minimum_20_characters_long", use_real_jwt: bool = False):
         # Environment guard - prevent usage in production
         current_env = get_env().get("NETRA_ENV", "development")
         if current_env == "production":

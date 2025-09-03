@@ -29,6 +29,14 @@ if project_root not in sys.path:
 
 from loguru import logger
 
+# Import unified WebSocket mock for consistency
+from test_framework.fixtures.websocket_manager_mock import create_compliance_mock
+from test_framework.fixtures.websocket_test_helpers import (
+    WebSocketAssertions,
+    simulate_agent_execution_flow,
+    reset_mock_for_test
+)
+
 # Import production components
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
@@ -44,46 +52,13 @@ from netra_backend.app.agents.state import DeepAgentState
 
 
 # ============================================================================
-# TEST UTILITIES
+# UNIFIED WEBSOCKET MOCK - REPLACES LOCAL IMPLEMENTATION
 # ============================================================================
 
-class MockWebSocketManager:
-    """Mock WebSocket manager that captures events for validation."""
-    
-    def __init__(self):
-        self.messages: List[Dict] = []
-        self.connections: Dict[str, Any] = {}
-    
-    async def send_to_thread(self, thread_id: str, message: Dict[str, Any]) -> bool:
-        """Record message and simulate successful delivery."""
-        self.messages.append({
-            'thread_id': thread_id,
-            'message': message,
-            'event_type': message.get('type', 'unknown'),
-            'timestamp': time.time()
-        })
-        return True
-    
-    async def connect_user(self, user_id: str, websocket, thread_id: str):
-        """Mock user connection."""
-        self.connections[thread_id] = {'user_id': user_id, 'connected': True}
-    
-    async def disconnect_user(self, user_id: str, websocket, thread_id: str):
-        """Mock user disconnection."""
-        if thread_id in self.connections:
-            self.connections[thread_id]['connected'] = False
-    
-    def get_events_for_thread(self, thread_id: str) -> List[Dict]:
-        """Get all events for a specific thread."""
-        return [msg for msg in self.messages if msg['thread_id'] == thread_id]
-    
-    def get_event_types_for_thread(self, thread_id: str) -> List[str]:
-        """Get event types for a thread in order."""
-        return [msg['event_type'] for msg in self.messages if msg['thread_id'] == thread_id]
-    
-    def clear_messages(self):
-        """Clear all recorded messages."""
-        self.messages.clear()
+# Use unified mock instead of local implementation
+def MockWebSocketManager():
+    """Factory function for backward compatibility - returns unified compliance mock."""
+    return create_compliance_mock()
 
 
 class MissionCriticalEventValidator:

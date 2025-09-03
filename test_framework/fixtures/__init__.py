@@ -9,6 +9,10 @@ from test_framework.fixtures.service_fixtures import *
 from test_framework.fixtures.health import *
 from test_framework.fixtures.real_services import *
 
+# Import unified WebSocket mock fixtures
+from test_framework.fixtures.websocket_manager_mock import *
+from test_framework.fixtures.websocket_test_helpers import *
+
 # Import additional classes and functions
 from test_framework.fixtures.service_fixtures import _ConfigManagerHelper as ConfigManagerHelper, create_test_app
 

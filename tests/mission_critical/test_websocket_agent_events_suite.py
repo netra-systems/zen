@@ -50,6 +50,16 @@ from netra_backend.app.websocket_core.manager import WebSocketManager
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.llm.llm_manager import LLMManager
 
+# Import unified WebSocket mock
+from test_framework.fixtures.websocket_manager_mock import (
+    create_compliance_mock,
+    MockWebSocketManager as UnifiedMockWebSocketManager
+)
+from test_framework.fixtures.websocket_test_helpers import (
+    WebSocketAssertions,
+    simulate_agent_execution_flow
+)
+
 # Import staging test utilities if staging mode enabled
 if STAGING_MODE:
     try:
@@ -65,46 +75,58 @@ else:
 
 
 # ============================================================================
-# MOCK WEBSOCKET MANAGER FOR TESTING
+# UNIFIED WEBSOCKET MOCK - CONSOLIDATED FROM 67+ IMPLEMENTATIONS
 # ============================================================================
 
-class MockWebSocketManager:
-    """Mock WebSocket manager that captures events for validation."""
+# Use the unified MockWebSocketManager for consistency across all tests
+def MockWebSocketManager():
+    """Factory function for backward compatibility - returns unified compliance mock."""
+    return create_compliance_mock()
+
+# Legacy compatibility wrapper
+class LegacyMockWebSocketManager:
+    """Legacy wrapper for tests that expect the old interface."""
     
     def __init__(self):
-        self.messages: List[Dict] = []
-        self.connections: Dict[str, Any] = {}
+        self._unified_mock = create_compliance_mock()
+        # Backward compatibility attributes
+        self.messages = []
+        self.connections = {}
     
     async def send_to_thread(self, thread_id: str, message: Dict[str, Any]) -> bool:
-        """Record message and simulate successful delivery."""
-        self.messages.append({
-            'thread_id': thread_id,
-            'message': message,
-            'event_type': message.get('type', 'unknown'),
-            'timestamp': time.time()
-        })
-        return True
+        """Send message using unified mock and maintain legacy interface."""
+        result = await self._unified_mock.send_to_thread(thread_id, message)
+        
+        # Update legacy attributes for backward compatibility
+        self.messages = self._unified_mock.messages
+        self.connections = self._unified_mock.connections
+        
+        return result
     
     async def connect_user(self, user_id: str, websocket, thread_id: str):
-        """Mock user connection."""
-        self.connections[thread_id] = {'user_id': user_id, 'connected': True}
+        """Connect user using unified mock."""
+        await self._unified_mock.connect_user(user_id, websocket, thread_id)
+        self.connections = self._unified_mock.connections
     
     async def disconnect_user(self, user_id: str, websocket, thread_id: str):
-        """Mock user disconnection."""
-        if thread_id in self.connections:
-            self.connections[thread_id]['connected'] = False
+        """Disconnect user using unified mock."""
+        await self._unified_mock.disconnect_user(user_id, websocket, thread_id)
+        self.connections = self._unified_mock.connections
     
     def get_events_for_thread(self, thread_id: str) -> List[Dict]:
-        """Get all events for a specific thread."""
-        return [msg for msg in self.messages if msg['thread_id'] == thread_id]
+        """Get events using unified mock."""
+        return self._unified_mock.get_events_for_thread(thread_id)
     
     def get_event_types_for_thread(self, thread_id: str) -> List[str]:
         """Get event types for a thread in order."""
-        return [msg['event_type'] for msg in self.messages if msg['thread_id'] == thread_id]
+        events = self.get_events_for_thread(thread_id)
+        return [event['event_type'] for event in events]
     
     def clear_messages(self):
         """Clear all recorded messages."""
-        self.messages.clear()
+        self._unified_mock.clear_messages()
+        self.messages = []
+        self.connections = {}
 
 
 # ============================================================================
