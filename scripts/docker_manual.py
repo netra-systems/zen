@@ -23,6 +23,7 @@ import subprocess
 import time
 import logging
 import shutil
+import platform
 from pathlib import Path
 from typing import Optional, List, Tuple
 import argparse
@@ -70,6 +71,16 @@ class ContainerManualControl:
         Returns:
             Tuple of (runtime_command, compose_command)
         """
+        # Windows: Prefer Podman if available for better performance
+        if platform.system() == 'Windows' and not preferred:
+            if shutil.which("podman"):
+                logger.info("🐧 Windows detected - preferring Podman for better performance")
+                if shutil.which("podman-compose"):
+                    return "podman", "podman-compose"
+                elif shutil.which("docker-compose"):
+                    logger.info("Using docker-compose with Podman backend")
+                    return "podman", "docker-compose"
+        
         if preferred:
             if preferred == "docker" and shutil.which("docker"):
                 if shutil.which("docker-compose"):
@@ -85,7 +96,7 @@ class ContainerManualControl:
                         logger.info("Falling back to docker-compose with Podman backend")
                         return "podman", "docker-compose"
         
-        # Auto-detect
+        # Auto-detect (non-Windows or no Podman)
         if shutil.which("docker"):
             if shutil.which("docker-compose"):
                 return "docker", "docker-compose"

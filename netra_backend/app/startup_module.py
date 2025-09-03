@@ -605,7 +605,36 @@ async def initialize_clickhouse(logger: logging.Logger) -> None:
     
     # CRITICAL FIX: Check if ClickHouse is explicitly required
     from shared.isolated_environment import get_env
+    import subprocess
     clickhouse_required = get_env().get("CLICKHOUSE_REQUIRED", "false").lower() == "true"
+    
+    # Check if ClickHouse container is running (for better error reporting)
+    try:
+        # Try podman first, then docker
+        for cmd in ['podman', 'docker']:
+            try:
+                result = subprocess.run(
+                    [cmd, 'ps', '--format', '{{.Names}}'],
+                    capture_output=True,
+                    text=True,
+                    timeout=2
+                )
+                if result.returncode == 0:
+                    running_containers = result.stdout.strip().split('\n')
+                    clickhouse_running = any('clickhouse' in name.lower() for name in running_containers)
+                    if not clickhouse_running:
+                        logger.warning("=" * 80)
+                        logger.warning("CLICKHOUSE CONTAINER NOT RUNNING")
+                        logger.warning("=" * 80)
+                        logger.warning(f"No ClickHouse container found. To start:")
+                        logger.warning(f"  {cmd} start <clickhouse-container-name>")
+                        logger.warning(f"Or use: python scripts/docker_manual.py start")
+                        logger.warning("=" * 80)
+                    break
+            except (subprocess.TimeoutExpired, FileNotFoundError):
+                continue
+    except Exception:
+        pass  # Ignore container check errors
     
     # CRITICAL FIX: Make ClickHouse optional in development when not explicitly required
     if config.environment == "development" and not clickhouse_required:

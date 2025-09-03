@@ -33,6 +33,8 @@ from contextlib import contextmanager
 import socket
 import yaml
 import warnings
+import platform
+import shutil
 from shared.isolated_environment import get_env
 
 # Use IsolatedEnvironment for all environment access
@@ -318,6 +320,12 @@ class UnifiedDockerManager:
         self.rebuild_backend_only = rebuild_backend_only
         self.pull_policy = pull_policy  # Control Docker Hub access
         self.no_cache_app_code = no_cache_app_code  # Smart caching strategy
+        
+        # Windows Podman support: Auto-detect and use Podman builds on Windows
+        self.is_windows = platform.system() == 'Windows'
+        self.use_podman_build = self.is_windows and shutil.which('podman') is not None
+        if self.use_podman_build:
+            logger.info("🐧 Windows detected with Podman available - will use Podman build helper")
         
         # Port discovery and allocation
         self.port_discovery = DockerPortDiscovery(use_test_services=True)
@@ -2097,20 +2105,40 @@ class UnifiedDockerManager:
                 # Build backend services
                 services_to_build = [s for s in service_names if s in backend_services]
                 if services_to_build:
-                    build_cmd = ["docker", "compose", "-f", compose_file, "-p", self._get_project_name(), "build"] + no_cache_flag + services_to_build
-                    logger.info(f"🔨 Building backend services: {services_to_build} (no-cache={self.no_cache_app_code})")
+                    if self.use_podman_build:
+                        # Use Windows Podman build helper
+                        build_success = await self._build_with_podman(services_to_build)
+                        if not build_success:
+                            logger.warning("⚠️ Podman build failed, falling back to docker-compose")
+                            build_cmd = ["docker", "compose", "-f", compose_file, "-p", self._get_project_name(), "build"] + no_cache_flag + services_to_build
+                            result = subprocess.run(build_cmd, capture_output=True, text=True, timeout=300, env=env)
+                            if result.returncode != 0:
+                                logger.warning(f"⚠️ Failed to build services: {result.stderr}")
+                    else:
+                        build_cmd = ["docker", "compose", "-f", compose_file, "-p", self._get_project_name(), "build"] + no_cache_flag + services_to_build
+                        logger.info(f"🔨 Building backend services: {services_to_build} (no-cache={self.no_cache_app_code})")
+                        
+                        result = subprocess.run(build_cmd, capture_output=True, text=True, timeout=300, env=env)
+                        if result.returncode != 0:
+                            logger.warning(f"⚠️ Failed to build services: {result.stderr}")
+            elif not self.rebuild_backend_only:
+                # Build all requested services
+                if self.use_podman_build:
+                    # Use Windows Podman build helper
+                    build_success = await self._build_with_podman(service_names)
+                    if not build_success:
+                        logger.warning("⚠️ Podman build failed, falling back to docker-compose")
+                        build_cmd = ["docker", "compose", "-f", compose_file, "-p", self._get_project_name(), "build"] + no_cache_flag + service_names
+                        result = subprocess.run(build_cmd, capture_output=True, text=True, timeout=300, env=env)
+                        if result.returncode != 0:
+                            logger.warning(f"⚠️ Failed to build services: {result.stderr}")
+                else:
+                    build_cmd = ["docker", "compose", "-f", compose_file, "-p", self._get_project_name(), "build"] + no_cache_flag + service_names
+                    logger.info(f"🔨 Building all requested services: {service_names} (no-cache={self.no_cache_app_code})")
                     
                     result = subprocess.run(build_cmd, capture_output=True, text=True, timeout=300, env=env)
                     if result.returncode != 0:
                         logger.warning(f"⚠️ Failed to build services: {result.stderr}")
-            elif not self.rebuild_backend_only:
-                # Build all requested services
-                build_cmd = ["docker", "compose", "-f", compose_file, "-p", self._get_project_name(), "build"] + no_cache_flag + service_names
-                logger.info(f"🔨 Building all requested services: {service_names} (no-cache={self.no_cache_app_code})")
-                
-                result = subprocess.run(build_cmd, capture_output=True, text=True, timeout=300, env=env)
-                if result.returncode != 0:
-                    logger.warning(f"⚠️ Failed to build services: {result.stderr}")
         
         cmd = ["docker", "compose", "-f", compose_file, "-p", self._get_project_name(), "up", "-d"] + service_names
         logger.info(f"🚀 Executing: {' '.join(cmd)}")
@@ -2275,6 +2303,47 @@ class UnifiedDockerManager:
         except Exception:
             return False
 
+    async def _build_with_podman(self, services: List[str]) -> bool:
+        """Build services using Podman on Windows for better context handling.
+        
+        Args:
+            services: List of service names to build
+            
+        Returns:
+            True if all builds succeeded
+        """
+        try:
+            # Import the Podman builder
+            sys.path.insert(0, str(Path(__file__).parent.parent))
+            from scripts.podman_windows_build import PodmanWindowsBuilder
+            
+            logger.info(f"🐧 Using Podman Windows builder for services: {services}")
+            builder = PodmanWindowsBuilder()
+            
+            success = True
+            for service in services:
+                # Map service names to appropriate image names
+                if self.use_alpine:
+                    image_name = f"netra-alpine-test-{service}:latest"
+                else:
+                    image_name = f"netra-test-{service}:latest"
+                
+                logger.info(f"🔨 Building {service} with Podman as {image_name}")
+                if not builder.build_service(
+                    service_name=f"test-{service}",
+                    image_name=image_name,
+                    no_cache=self.no_cache_app_code
+                ):
+                    logger.error(f"❌ Failed to build {service} with Podman")
+                    success = False
+            
+            builder.cleanup()
+            return success
+            
+        except Exception as e:
+            logger.warning(f"⚠️ Podman build helper failed: {e}")
+            return False
+    
     async def _check_http_health(self, url: str, timeout: float) -> bool:
         """Check HTTP health endpoint."""
         try:
