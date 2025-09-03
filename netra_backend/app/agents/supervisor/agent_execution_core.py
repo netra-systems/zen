@@ -218,7 +218,7 @@ class AgentExecutionCore:
         context: AgentExecutionContext,
         state: DeepAgentState,
         exec_id: UUID,
-        heartbeat: AgentHeartbeat,
+        heartbeat: Optional[Any],  # Disabled - was AgentHeartbeat, see AGENT_RELIABILITY_ERROR_SUPPRESSION_ANALYSIS_20250903.md
         timeout: Optional[float],
         trace_context: UnifiedTraceContext
     ) -> AgentExecutionResult:
