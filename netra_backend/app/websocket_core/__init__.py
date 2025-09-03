@@ -189,45 +189,5 @@ __all__ = [
     "check_connection_heartbeat"
 ]
 
-# Legacy compatibility - these will be removed in future versions
-# Warn users about deprecated imports
-import warnings
-from typing import Dict
-
-class LegacyWebSocketImportWarning(UserWarning):
-    """Warning for deprecated WebSocket imports."""
-    pass
-
-def _warn_legacy_import(old_path: str, new_path: str) -> None:
-    """Warn about legacy import usage."""
-    warnings.warn(
-        f"Import from '{old_path}' is deprecated. "
-        f"Use 'from netra_backend.app.websocket_core import {new_path}' instead.",
-        LegacyWebSocketImportWarning,
-        stacklevel=3
-    )
-
-# Backward compatibility aliases (DEPRECATED)
-UnifiedWebSocketManager = WebSocketManager  # Legacy name
-
-def get_unified_manager() -> WebSocketManager:
-    """Get WebSocket manager (legacy compatibility)."""
-    _warn_legacy_import(
-        "netra_backend.app.websocket.unified.manager.get_unified_manager",
-        "get_websocket_manager"
-    )
-    return get_websocket_manager()
-
-# Migration helper
-def migrate_from_legacy_websocket() -> Dict[str, str]:
-    """Return migration mapping for legacy imports."""
-    return {
-        "netra_backend.app.websocket.unified.manager.UnifiedWebSocketManager": "netra_backend.app.websocket_core.WebSocketManager",
-        "netra_backend.app.websocket.unified.manager.get_unified_manager": "netra_backend.app.websocket_core.get_websocket_manager", 
-        "netra_backend.app.websocket.connection.ConnectionInfo": "netra_backend.app.websocket_core.ConnectionInfo",
-        "netra_backend.app.websocket.connection.ConnectionManager": "netra_backend.app.websocket_core.WebSocketManager",
-        "netra_backend.app.websocket.unified_websocket_manager": "netra_backend.app.websocket_core",
-        "netra_backend.app.websocket.rate_limiter.RateLimiter": "netra_backend.app.websocket_core.RateLimiter",
-        "netra_backend.app.websocket.error_handler.WebSocketErrorHandler": "netra_backend.app.websocket_core.ErrorHandler",
-        "netra_backend.app.websocket.room_manager.RoomManager": "netra_backend.app.websocket_core.WebSocketManager.join_room/leave_room"
-    }
+# Legacy compatibility layers have been removed to streamline WebSocket architecture
+# All imports should use the modern websocket_core package directly
