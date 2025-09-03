@@ -16,7 +16,10 @@ import '@testing-library/jest-dom';
 // Mock Next.js navigation
 jest.mock('next/navigation', () => ({
   useRouter: jest.fn(),
-  useSearchParams: jest.fn(),
+  useSearchParams: jest.fn(() => {
+    const params = new URLSearchParams();
+    return params;
+  }),
   usePathname: jest.fn(),
 }));
 
@@ -158,9 +161,8 @@ describe('New Chat URL Race Condition Bug', () => {
       prefetch: jest.fn(),
     };
     
-    mockSearchParams = {
-      get: jest.fn().mockReturnValue('existing-thread-123'),
-    };
+    mockSearchParams = new URLSearchParams();
+    mockSearchParams.set('threadId', 'existing-thread-123');
     
     (useRouter as jest.Mock).mockReturnValue(mockRouter);
     (useSearchParams as jest.Mock).mockReturnValue(mockSearchParams);

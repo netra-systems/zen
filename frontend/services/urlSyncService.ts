@@ -67,7 +67,7 @@ export const useURLSync = (config: Partial<urlSyncTypes.UrlSyncConfig> = {}): ur
     validateThreadId,
     // Aliases for backward compatibility
     updateUrl: syncStoreToUrl,
-    currentThreadId: searchParams.get(fullConfig.paramName),
+    currentThreadId: searchParams?.get(fullConfig.paramName) ?? null,
     navigateToThread: (threadId: string) => syncStoreToUrl(threadId),
     navigateToChat: () => syncStoreToUrl(null)
   };

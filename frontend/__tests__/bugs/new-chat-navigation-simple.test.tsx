@@ -14,9 +14,10 @@ import { useRouter } from 'next/navigation';
 // Mock dependencies
 jest.mock('next/navigation', () => ({
   useRouter: jest.fn(),
-  useSearchParams: jest.fn(() => ({
-    get: jest.fn().mockReturnValue(null),
-  })),
+  useSearchParams: jest.fn(() => {
+    const params = new URLSearchParams();
+    return params;
+  }),
   usePathname: jest.fn(() => '/chat'),
 }));
 
