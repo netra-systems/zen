@@ -1,5 +1,12 @@
 # Complete Visual Test Architecture Overview
 
+## Related Documentation
+
+- **[User Context Architecture](../USER_CONTEXT_ARCHITECTURE.md)** - Factory patterns and user isolation
+- **[Agent Architecture Disambiguation Guide](../docs/AGENT_ARCHITECTURE_DISAMBIGUATION_GUIDE.md)** - Agent component relationships
+- **[Docker Orchestration](../docs/docker_orchestration.md)** - Docker management and Alpine containers
+- **[Documentation Hub](../docs/index.md)** - Central documentation index
+
 ## 1. Test Layer Hierarchy
 
 ```mermaid
@@ -506,3 +513,9 @@ graph LR
 3. **Automatic Docker Management**: UnifiedDockerManager handles conflicts and health checks
 4. **User Context Isolation**: Factory pattern ensures complete user isolation
 5. **WebSocket Events are Critical**: All 5 agent events must be sent for business value
+
+## See Also
+
+- **[CLAUDE.md](../CLAUDE.md)** - Complete development guidelines and testing requirements
+- **[Unified Test Runner](./unified_test_runner.py)** - Central test execution script
+- **[Mission Critical Tests](./mission_critical/)** - Business-critical test suites

@@ -167,6 +167,7 @@ Before coding, conduct a rigorous analysis.
   * **Isolation (The "Firewall" Technique):** **CRITICAL:** When delegating, provide agents ONLY with the necessary interfaces of dependencies, not their full implementation context. This enforces contracts and prevents context bleed.
   * **Testing Focus:** Focuse on as real tests as possible by default. Most tests must assume inter-service nature by default. **Real Everything (LLM, Services) E2E \> E2E \> Integration \> Unit.**
   CRITICAL: Mocks = Abomination
+  * **Test Architecture:** See [`tests/TEST_ARCHITECTURE_VISUAL_OVERVIEW.md`](tests/TEST_ARCHITECTURE_VISUAL_OVERVIEW.md) for complete test infrastructure guide
   * **Integration and Reporting:** You are responsible for integrating all artifacts and reporting on overall success.
 
 ### 3.4. Multi-Environment Validation
@@ -441,6 +442,8 @@ python scripts/refresh_dev_services.py logs --services backend -f
 
 IMPORTANT: Use real services, real llm, docker compose etc. whenever possible for testing.
 MOCKS are FORBIDDEN in dev, staging or production.
+
+**See [`tests/TEST_ARCHITECTURE_VISUAL_OVERVIEW.md`](tests/TEST_ARCHITECTURE_VISUAL_OVERVIEW.md) for complete visual guide to test infrastructure, layers, and execution flows.**
 
 **The test runner automatically starts Docker when needed:**
 

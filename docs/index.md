@@ -33,6 +33,11 @@
 - [Actions Agent WebSocket Flow](./actions_agent_websocket_flow.md) - WebSocket event patterns
 - [WebSocket Bridge State Handling](./websocket_bridge_state_handling.md) - State management
 
+#### Testing Infrastructure
+- **[Test Architecture Visual Overview](../tests/TEST_ARCHITECTURE_VISUAL_OVERVIEW.md)** - Complete test infrastructure guide
+- [Docker Orchestration](./docker_orchestration.md) - Docker management and Alpine containers
+- [Unified Test Runner](../tests/unified_test_runner.py) - Central test execution
+
 ### 🔒 Security & Compliance
 
 - **[Critical Security Implementation](../CRITICAL_SECURITY_IMPLEMENTATION_SUMMARY.md)** - Security boundaries and isolation
@@ -41,6 +46,7 @@
 
 ### 🧪 Testing & Quality
 
+- **[Test Architecture Visual Overview](../tests/TEST_ARCHITECTURE_VISUAL_OVERVIEW.md)** 📊 - **COMPREHENSIVE**: Complete visual guide to test infrastructure, layers, and execution flows
 - [Agent Testing Root Cause Summary](./agents/AGENT_TESTING_ROOT_CAUSE_SUMMARY.md)
 - [Phase 0 Completion Report](../PHASE_0_COMPLETION_REPORT.md)
 - [Docker Backend Five Whys Report](../DOCKER_BACKEND_FIVE_WHYS_BUG_REPORT.md)
