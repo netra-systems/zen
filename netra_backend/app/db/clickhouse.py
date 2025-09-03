@@ -533,23 +533,51 @@ def _create_intercepted_client(config, use_secure: bool):
     return ClickHouseQueryInterceptor(base_client)
 
 def _handle_connection_error(e: Exception):
-    """Handle ClickHouse connection error with environment-aware handling."""
+    """Handle ClickHouse connection error with LOUD, CLEAR error messages per CLAUDE.md."""
     from shared.isolated_environment import get_env
     
     environment = get_env().get("ENVIRONMENT", "development").lower()
+    error_str = str(e).lower()
     
-    logger.error(f"[ClickHouse] REAL connection failed in {environment}: {str(e)}")
+    # LOUD ERROR DIFFERENTIATION - Make errors super obvious per CLAUDE.md
+    if "error code 60" in error_str or "unknown_table" in error_str or "table does not exist" in error_str:
+        logger.error("=" * 80)
+        logger.error("CLICKHOUSE TABLE MISSING ERROR - NOT AUTHENTICATION!")
+        logger.error("=" * 80)
+        logger.error(f"ERROR CODE 60: Required tables do not exist in ClickHouse database!")
+        logger.error(f"This is NOT an authentication issue - credentials are working.")
+        logger.error(f"ACTION REQUIRED: Run table initialization to create missing tables.")
+        logger.error(f"Environment: {environment}")
+        logger.error(f"Full error: {str(e)}")
+        logger.error("=" * 80)
+    elif "error code 516" in error_str or "authentication failed" in error_str:
+        logger.error("=" * 80)
+        logger.error("CLICKHOUSE AUTHENTICATION ERROR")
+        logger.error("=" * 80)
+        logger.error(f"ERROR CODE 516: Authentication failed!")
+        logger.error(f"ACTION REQUIRED: Check credentials in Secret Manager")
+        logger.error(f"Environment: {environment}")
+        logger.error(f"Full error: {str(e)}")
+        logger.error("=" * 80)
+    else:
+        logger.error("=" * 80)
+        logger.error("CLICKHOUSE CONNECTION ERROR")
+        logger.error("=" * 80)
+        logger.error(f"Environment: {environment}")
+        logger.error(f"Error type: {type(e).__name__}")
+        logger.error(f"Full error: {str(e)}")
+        logger.error("=" * 80)
     
     # CRITICAL FIX: ClickHouse is always optional in staging - never block startup
     if environment == "staging":
-        logger.warning("[ClickHouse] Connection failed in staging (optional service) - using graceful degradation")
+        logger.warning("[ClickHouse] Continuing without ClickHouse in staging - analytics features disabled")
         return  # Never raise in staging - ClickHouse is always optional
     
     # In development, ClickHouse is also optional unless explicitly required
     if environment == "development":
         clickhouse_required = get_env().get("CLICKHOUSE_REQUIRED", "false").lower() == "true"
         if not clickhouse_required:
-            logger.warning("[ClickHouse] Connection failed in development but not required - graceful degradation")
+            logger.warning("[ClickHouse] Continuing without ClickHouse in development - analytics features disabled")
             return
     
     # Only raise in production or when explicitly required
