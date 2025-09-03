@@ -181,7 +181,12 @@ class CentralConfigurationValidator:
         Args:
             env_getter_func: Function to get environment variables (defaults to os.environ.get)
         """
-        self.env_getter = env_getter_func or (lambda key, default=None: os.environ.get(key, default))
+        # CRITICAL FIX: Use IsolatedEnvironment instead of direct os.environ access
+        if env_getter_func is None:
+            env = get_env()
+            self.env_getter = lambda key, default=None: env.get(key, default)
+        else:
+            self.env_getter = env_getter_func
         self._current_environment = None
         
     def get_environment(self) -> Environment:

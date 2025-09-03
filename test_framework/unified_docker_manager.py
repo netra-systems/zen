@@ -33,6 +33,10 @@ from contextlib import contextmanager
 import socket
 import yaml
 import warnings
+from shared.isolated_environment import get_env
+
+# Use IsolatedEnvironment for all environment access
+env = get_env()
 
 if os.name != 'nt':
     import fcntl
@@ -197,8 +201,8 @@ class UnifiedDockerManager:
     Combines orchestration capabilities with rate limiting and environment management.
     """
     
-    # Class-level configuration
-    LOCK_DIR = Path("/tmp/netra_docker_locks") if os.name != 'nt' else Path(os.environ.get('TEMP', '.')) / "netra_docker_locks"
+    # Class-level configuration - using IsolatedEnvironment for cross-platform temp directory
+    LOCK_DIR = Path("/tmp/netra_docker_locks") if os.name != 'nt' else Path(env.get('TEMP', '.')) / "netra_docker_locks"
     STATE_FILE = LOCK_DIR / "docker_state.json"
     RESTART_COOLDOWN = 30  # seconds between restart attempts
     MAX_RESTART_ATTEMPTS = 3
@@ -554,30 +558,27 @@ class UnifiedDockerManager:
             
         logger.info(f"Allocating dynamic ports for environment {self._get_project_name()}")
         
-        # Allocate ports for each service
-        service_ports = {}
-        for service_name, service_config in self.SERVICES.items():
-            try:
-                # Allocate a port for this service
-                result = self.port_allocator.allocate_port(
-                    service_name=service_name,
-                    preferred_port=service_config['default_port']
-                )
-                
-                if result.success:
-                    service_ports[service_name] = result.port
-                    logger.debug(f"Allocated port {result.port} for {service_name}")
-                else:
-                    # Fall back to finding a random available port
+        # Allocate ports for all services at once using allocate_ports
+        service_names = list(self.SERVICES.keys())
+        result = self.port_allocator.allocate_ports(services=service_names)
+        
+        if result.success:
+            service_ports = result.ports
+            for service_name, port in service_ports.items():
+                logger.debug(f"Allocated port {port} for {service_name}")
+        else:
+            # Fall back to allocating ports individually
+            logger.warning(f"Batch allocation failed: {result.error_message}. Using fallback.")
+            service_ports = {}
+            for service_name, service_config in self.SERVICES.items():
+                try:
                     fallback_port = self._find_available_port()
                     service_ports[service_name] = fallback_port
                     logger.warning(f"Using fallback port {fallback_port} for {service_name}")
-                    
-            except Exception as e:
-                logger.error(f"Failed to allocate port for {service_name}: {e}")
-                # Use a fallback port
-                fallback_port = self._find_available_port()
-                service_ports[service_name] = fallback_port
+                except Exception as e:
+                    logger.error(f"Failed to allocate fallback port for {service_name}: {e}")
+                    # Use default port as last resort
+                    service_ports[service_name] = service_config['default_port']
         
         self.allocated_ports = service_ports
         return service_ports
