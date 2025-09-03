@@ -65,7 +65,7 @@ def generate_run_id(thread_id: str, context: str = "") -> str:
         
     Example:
         >>> generate_run_id("thread_user123_session456", "agent_execution")
-        'thread_thread_user123_session456_run_1693430400000_a1b2c3d4'
+        'thread_user123_session456_run_1693430400000_a1b2c3d4'
         
         >>> generate_run_id("abc123", "admin_tool")  
         'thread_abc123_run_1693430400123_e5f6g7h8'
@@ -91,14 +91,26 @@ def generate_run_id(thread_id: str, context: str = "") -> str:
     if RUN_ID_SEPARATOR in thread_id:
         raise ValueError(f"thread_id cannot contain reserved sequence '{RUN_ID_SEPARATOR}'")
     
+    # CRITICAL FIX: Strip existing "thread_" prefix if present to prevent duplication
+    # This handles the case where generate_thread_id() returns "thread_xyz" 
+    # and prevents "thread_thread_xyz" in the final run_id
+    clean_thread_id = thread_id
+    if thread_id.startswith(RUN_ID_PREFIX):
+        clean_thread_id = thread_id[len(RUN_ID_PREFIX):]
+        logger.debug(f"Stripped existing thread_ prefix from '{thread_id}' -> '{clean_thread_id}'")
+    
+    # Validate cleaned thread_id is not empty after stripping
+    if not clean_thread_id:
+        raise ValueError("thread_id cannot be empty after removing prefix")
+    
     # Generate timestamp (milliseconds since epoch for ordering)
     timestamp = int(time.time() * 1000)
     
     # Generate unique ID (8 chars from UUID4 hex)
     unique_id = uuid.uuid4().hex[:UNIQUE_ID_LENGTH]
     
-    # Build standardized run ID
-    run_id = f"{RUN_ID_PREFIX}{thread_id}{RUN_ID_SEPARATOR}{timestamp}_{unique_id}"
+    # Build standardized run ID with clean thread_id (no double prefix)
+    run_id = f"{RUN_ID_PREFIX}{clean_thread_id}{RUN_ID_SEPARATOR}{timestamp}_{unique_id}"
     
     # Log generation for audit trail
     context_info = f" (context: {context})" if context else ""
