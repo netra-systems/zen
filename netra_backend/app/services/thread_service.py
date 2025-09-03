@@ -12,6 +12,7 @@ from netra_backend.app.core.exceptions_database import (
     DatabaseError,
     RecordNotFoundError,
 )
+from netra_backend.app.core.unified_id_manager import UnifiedIDManager
 from netra_backend.app.db.models_postgres import Assistant, Message, Run, Thread
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.services.database.unit_of_work import (
