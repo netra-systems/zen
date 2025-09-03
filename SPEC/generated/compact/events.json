@@ -12,6 +12,7 @@
     "def\\s+process_event",
     "disconnect",
     "emit:",
+    "emit_agent_event",
     "error",
     "filtered_by_event",
     "first_event",

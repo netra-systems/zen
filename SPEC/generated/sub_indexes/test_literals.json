@@ -2,9 +2,9 @@
   "metadata": {
     "version": "3.0.0",
     "category": "test_literals",
-    "generated_at": "2025-09-02T20:16:53.892197",
-    "root_directory": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1",
-    "total_literals": 13180
+    "generated_at": "2025-09-03T07:26:23.685821",
+    "root_directory": "/Users/anthony/Documents/GitHub/netra-apex",
+    "total_literals": 13114
   },
   "literals": {
     "\u001b[0m": {
@@ -1825,13 +1825,6 @@
         "auth_service/tests/test_refresh_loop_prevention_comprehensive.py:183"
       ]
     },
-    "' should be valid": {
-      "value": "' should be valid",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:155"
-      ]
-    },
     "' spans": {
       "value": "' spans",
       "category": "test_literals",
@@ -2700,8 +2693,8 @@
         "scripts/compliance/real_test_linter.py:264",
         "scripts/compliance/real_test_requirements_enforcer.py:530",
         "scripts/remove_test_stubs.py:113",
-        "scripts/test_backend_optimized.py:367",
         "scripts/test_backend_ORIGINAL.py:484",
+        "scripts/test_backend_optimized.py:367",
         "scripts/test_cors.py:214"
       ]
     },
@@ -5639,8 +5632,8 @@
         "scripts/continuous_e2e_test_runner.py:27",
         "scripts/frontend_iterative_test_runner.py:191",
         "scripts/run_all_test_categories.py:21",
-        "scripts/test_backend_optimized.py:368",
         "scripts/test_backend_ORIGINAL.py:485",
+        "scripts/test_backend_optimized.py:368",
         "scripts/test_comprehensive_scanner.py:127",
         "scripts/test_failure_analyzer.py:339",
         "scripts/test_failure_tracker.py:75",
@@ -6794,8 +6787,8 @@
       "locations": [
         "scripts/autonomous_review/test_reviewer.py:113",
         "scripts/ci/check_test_stubs.py:107",
-        "scripts/test_backend_optimized.py:390",
         "scripts/test_backend_ORIGINAL.py:506",
+        "scripts/test_backend_optimized.py:390",
         "scripts/test_collection_audit.py:105"
       ]
     },
@@ -7191,8 +7184,8 @@
       "locations": [
         "scripts/compliance/fake_test_scanner.py:388",
         "scripts/frontend_iterative_test_runner.py:284",
-        "scripts/test_backend_optimized.py:388",
         "scripts/test_backend_ORIGINAL.py:505",
+        "scripts/test_backend_optimized.py:388",
         "scripts/test_clickhouse_startup_fix.py:398",
         "scripts/test_cors.py:442",
         "scripts/test_dashboard.py:105",
@@ -7379,10 +7372,10 @@
         "auth_service/tests/test_environment_loading.py:231",
         "auth_service/tests/test_environment_loading.py:276",
         "auth_service/tests/test_environment_loading.py:321",
-        "scripts/test_backend_optimized.py:368",
         "scripts/test_backend_ORIGINAL.py:196",
         "scripts/test_backend_ORIGINAL.py:198",
-        "scripts/test_backend_ORIGINAL.py:485"
+        "scripts/test_backend_ORIGINAL.py:485",
+        "scripts/test_backend_optimized.py:368"
       ]
     },
     "-d": {
@@ -7509,8 +7502,8 @@
       "value": "-q",
       "category": "test_literals",
       "locations": [
-        "scripts/test_backend_optimized.py:390",
         "scripts/test_backend_ORIGINAL.py:506",
+        "scripts/test_backend_optimized.py:390",
         "scripts/test_failure_scanner.py:101",
         "scripts/unified_test_config.py:388"
       ]
@@ -10928,17 +10921,6 @@
       "locations": [
         "scripts/test_seed_data.py:250",
         "scripts/test_seed_data.py:255"
-      ]
-    },
-    "24h": {
-      "value": "24h",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:71",
-        "scripts/test_data_validator_backup.py:83",
-        "scripts/test_data_validator_backup.py:106",
-        "scripts/test_data_validator_backup.py:135",
-        "scripts/test_data_validator_backup.py:151"
       ]
     },
     "2G": {
@@ -15404,18 +15386,6 @@
         "scripts/test_failure_analyzer.py:50"
       ]
     },
-    "Analysis completed": {
-      "value": "Analysis completed",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:344",
-        "scripts/test_data_validator_backup.py:357",
-        "scripts/test_data_validator_backup.py:370",
-        "scripts/test_data_validator_backup.py:383",
-        "scripts/test_data_validator_backup.py:396",
-        "scripts/test_data_validator_backup.py:413"
-      ]
-    },
     "Analysis completed successfully": {
       "value": "Analysis completed successfully",
       "category": "test_literals",
@@ -15435,27 +15405,6 @@
       "category": "test_literals",
       "locations": [
         "scripts/compliance/test_refactor_helper.py:705"
-      ]
-    },
-    "Analysis should produce at least one finding": {
-      "value": "Analysis should produce at least one finding",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:378"
-      ]
-    },
-    "Analysis type '": {
-      "value": "Analysis type '",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:155"
-      ]
-    },
-    "Analysis type is required": {
-      "value": "Analysis type is required",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:89"
       ]
     },
     "Analytics Data Consistency": {
@@ -17143,13 +17092,6 @@
       "category": "test_literals",
       "locations": [
         "scripts/test_intensive_serialization.py:203"
-      ]
-    },
-    "Average latency increased by 15%": {
-      "value": "Average latency increased by 15%",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:321"
       ]
     },
     "Average per object:": {
@@ -18895,9 +18837,9 @@
       "category": "test_literals",
       "locations": [
         "scripts/analyze_test_mocks.py:179",
+        "scripts/test_backend_ORIGINAL.py:368",
         "scripts/test_backend_optimized.py:126",
         "scripts/test_backend_optimized.py:424",
-        "scripts/test_backend_ORIGINAL.py:368",
         "scripts/test_triage_flow.py:157"
       ]
     },
@@ -20023,13 +19965,6 @@
         "scripts/comprehensive_test_fixer.py:2"
       ]
     },
-    "Comprehensive Unit Tests for DataValidator\n\nTests all data validation operations including request validation,\nraw data quality checks, analysis result validation, and quality scoring.\n\nBusiness Value Justification (BVJ):\n- Segment: Platform/Internal  \n- Business Goal: Data quality assurance and reliable analytics\n- Value Impact: Prevents incorrect insights that could impact revenue\n- Strategic Impact: Critical for data integrity and trustworthy analysis": {
-      "value": "Comprehensive Unit Tests for DataValidator\n\nTests all data validation operations including request validation,\nraw data quality checks, analysis result validation, and quality scoring.\n\nBusiness Value Justification (BVJ):\n- Segment: Platform/Internal  \n- Business Goal: Data quality assurance and reliable analytics\n- Value Impact: Prevents incorrect insights that could impact revenue\n- Strategic Impact: Critical for data integrity and trustworthy analysis",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:1"
-      ]
-    },
     "Comprehensive WebSocket CORS Test Script\n\nThis script tests WebSocket connectivity in various scenarios to ensure CORS is properly configured\nfor Docker development environment. It tests connections with different origins and validates\nthat the development OAUTH SIMULATION works properly.\n\nBusiness Value Justification (BVJ):\n- Segment: Platform/Internal\n- Business Goal: Ensure WebSocket reliability in development\n- Value Impact: Prevents connection issues that block development\n- Strategic Impact: Foundation for real-time features": {
       "value": "Comprehensive WebSocket CORS Test Script\n\nThis script tests WebSocket connectivity in various scenarios to ensure CORS is properly configured\nfor Docker development environment. It tests connections with different origins and validates\nthat the development OAUTH SIMULATION works properly.\n\nBusiness Value Justification (BVJ):\n- Segment: Platform/Internal\n- Business Goal: Ensure WebSocket reliability in development\n- Value Impact: Prevents connection issues that block development\n- Strategic Impact: Foundation for real-time features",
       "category": "test_literals",
@@ -20686,13 +20621,6 @@
         "scripts/test_cors.py:352"
       ]
     },
-    "Consider optimizing slow queries": {
-      "value": "Consider optimizing slow queries",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:325"
-      ]
-    },
     "Consistently Failing Tests:": {
       "value": "Consistently Failing Tests:",
       "category": "test_literals",
@@ -20836,13 +20764,6 @@
       "category": "test_literals",
       "locations": [
         "scripts/test_triage_flow.py:31"
-      ]
-    },
-    "Cost optimization opportunities identified": {
-      "value": "Cost optimization opportunities identified",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:322"
       ]
     },
     "Cost savings of $1,200/month achieved.": {
@@ -24125,8 +24046,8 @@
       "category": "test_literals",
       "locations": [
         "scripts/manage_test_services.py:105",
-        "scripts/test_backend_auth_config.py:33",
         "scripts/test_backend_ORIGINAL.py:372",
+        "scripts/test_backend_auth_config.py:33",
         "scripts/test_cors.py:459",
         "scripts/test_database_url_builder_comprehensive.py:272",
         "scripts/test_staging_auth.py:170",
@@ -24172,20 +24093,6 @@
         "scripts/add_pytest_markers.py:154",
         "scripts/apply_fast_test_decorators.py:178",
         "scripts/frontend_iterative_test_runner.py:527"
-      ]
-    },
-    "Error 1": {
-      "value": "Error 1",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:452"
-      ]
-    },
-    "Error 2": {
-      "value": "Error 2",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:452"
       ]
     },
     "Error Details:": {
@@ -27177,13 +27084,6 @@
         "scripts/test_execution_tracker.py:777"
       ]
     },
-    "Findings must be a list": {
-      "value": "Findings must be a list",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:365"
-      ]
-    },
     "First Time User Critical Paths": {
       "value": "First Time User Critical Paths",
       "category": "test_literals",
@@ -29840,13 +29740,6 @@
         "scripts/test_backend_optimized.py:345"
       ]
     },
-    "Implement caching for frequent requests": {
-      "value": "Implement caching for frequent requests",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:326"
-      ]
-    },
     "Implement memory monitoring and alerting": {
       "value": "Implement memory monitoring and alerting",
       "category": "test_literals",
@@ -30237,13 +30130,6 @@
         "scripts/test_adaptive_workflow_direct.py:174"
       ]
     },
-    "Insufficient timestamps": {
-      "value": "Insufficient timestamps",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:584"
-      ]
-    },
     "Integration Tests": {
       "value": "Integration Tests",
       "category": "test_literals",
@@ -30397,13 +30283,6 @@
         "auth_service/tests/utils/assertion_helpers.py:31"
       ]
     },
-    "Invalid analysis type": {
-      "value": "Invalid analysis type",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:112"
-      ]
-    },
     "Invalid auth provider:": {
       "value": "Invalid auth provider:",
       "category": "test_literals",
@@ -30455,25 +30334,11 @@
         "scripts/test_websocket_dev_mode.py:132"
       ]
     },
-    "Invalid latency_ms value": {
-      "value": "Invalid latency_ms value",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:286"
-      ]
-    },
     "Invalid max-age value:": {
       "value": "Invalid max-age value:",
       "category": "test_literals",
       "locations": [
         "scripts/test_cors.py:243"
-      ]
-    },
-    "Invalid metrics: ['invalid_metric']": {
-      "value": "Invalid metrics: ['invalid_metric']",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:142"
       ]
     },
     "Invalid permission format:": {
@@ -31611,13 +31476,6 @@
         "scripts/test_failure_scanner.py:47"
       ]
     },
-    "Low data point count": {
-      "value": "Low data point count",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:218"
-      ]
-    },
     "M": {
       "value": "M",
       "category": "test_literals",
@@ -32402,8 +32260,8 @@
       "value": "Minimal output",
       "category": "test_literals",
       "locations": [
-        "scripts/test_backend_optimized.py:391",
-        "scripts/test_backend_ORIGINAL.py:506"
+        "scripts/test_backend_ORIGINAL.py:506",
+        "scripts/test_backend_optimized.py:391"
       ]
     },
     "Minimal output for CI logs": {
@@ -32569,20 +32427,6 @@
       "locations": [
         "auth_service/tests/utils/assertion_helpers.py:95",
         "auth_service/tests/utils/assertion_helpers.py:114"
-      ]
-    },
-    "Missing required field: findings": {
-      "value": "Missing required field: findings",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:351"
-      ]
-    },
-    "Missing required field: recommendations": {
-      "value": "Missing required field: recommendations",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:352"
       ]
     },
     "Missing required permission:": {
@@ -33690,13 +33534,6 @@
         "scripts/analyze_test_overlap.py:542"
       ]
     },
-    "No data provided for validation": {
-      "value": "No data provided for validation",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:200"
-      ]
-    },
     "No deprecation warnings detected": {
       "value": "No deprecation warnings detected",
       "category": "test_literals",
@@ -34177,14 +34014,6 @@
       "category": "test_literals",
       "locations": [
         "scripts/test_oauth_local.py:84"
-      ]
-    },
-    "Not a list": {
-      "value": "Not a list",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:358",
-        "scripts/test_data_validator_backup.py:385"
       ]
     },
     "Not in a git repository or git not available": {
@@ -35902,13 +35731,6 @@
         "netra_backend/app/services/realistic_test_data/performance_simulator.py:1"
       ]
     },
-    "Performance analysis completed": {
-      "value": "Performance analysis completed",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:319"
-      ]
-    },
     "Performance and SLA validation tests": {
       "value": "Performance and SLA validation tests",
       "category": "test_literals",
@@ -37579,13 +37401,6 @@
       "category": "test_literals",
       "locations": [
         "scripts/optimize_test_performance.py:406"
-      ]
-    },
-    "Recommendations must be a list": {
-      "value": "Recommendations must be a list",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:391"
       ]
     },
     "Recommendations:": {
@@ -40569,13 +40384,6 @@
         "scripts/setup_staging_test_account.py:304"
       ]
     },
-    "Savings percentage must be between 0-50%": {
-      "value": "Savings percentage must be between 0-50%",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:408"
-      ]
-    },
     "Scale horizontally to reduce CPU load": {
       "value": "Scale horizontally to reduce CPU load",
       "category": "test_literals",
@@ -41649,14 +41457,6 @@
         "scripts/remove_test_stubs.py:331"
       ]
     },
-    "Short time span": {
-      "value": "Short time span",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:304",
-        "scripts/test_data_validator_backup.py:574"
-      ]
-    },
     "Should accept JSON output format": {
       "value": "Should accept JSON output format",
       "category": "test_literals",
@@ -42250,24 +42050,6 @@
       "category": "test_literals",
       "locations": [
         "scripts/test_adaptive_workflow.py:284"
-      ]
-    },
-    "Some finding": {
-      "value": "Some finding",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:384",
-        "scripts/test_data_validator_backup.py:397",
-        "scripts/test_data_validator_backup.py:414"
-      ]
-    },
-    "Some recommendation": {
-      "value": "Some recommendation",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:372",
-        "scripts/test_data_validator_backup.py:398",
-        "scripts/test_data_validator_backup.py:415"
       ]
     },
     "Some requests should succeed": {
@@ -49776,13 +49558,6 @@
         "scripts/test_ga4_connection.py:60"
       ]
     },
-    "Timeframe is required": {
-      "value": "Timeframe is required",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:100"
-      ]
-    },
     "Timeout": {
       "value": "Timeout",
       "category": "test_literals",
@@ -50735,13 +50510,6 @@
         "scripts/test_parallel_docker_manager.py:150"
       ]
     },
-    "Total savings must be non-negative": {
-      "value": "Total savings must be non-negative",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:425"
-      ]
-    },
     "Total send time:": {
       "value": "Total send time:",
       "category": "test_literals",
@@ -51272,8 +51040,8 @@
       "value": "Unknown category:",
       "category": "test_literals",
       "locations": [
-        "scripts/test_backend_optimized.py:296",
-        "scripts/test_backend_ORIGINAL.py:220"
+        "scripts/test_backend_ORIGINAL.py:220",
+        "scripts/test_backend_optimized.py:296"
       ]
     },
     "Unknown error": {
@@ -52338,8 +52106,8 @@
       "category": "test_literals",
       "locations": [
         "scripts/compliance/fake_test_scanner.py:389",
-        "scripts/test_backend_optimized.py:389",
         "scripts/test_backend_ORIGINAL.py:505",
+        "scripts/test_backend_optimized.py:389",
         "scripts/test_clickhouse_startup_fix.py:398",
         "scripts/test_cors.py:443",
         "scripts/test_example_message_flow.py:434",
@@ -52806,27 +52574,6 @@
       "locations": [
         "scripts/start_test_services.py:114",
         "scripts/test_seed_data.py:59"
-      ]
-    },
-    "Warning 1": {
-      "value": "Warning 1",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:466"
-      ]
-    },
-    "Warning 2": {
-      "value": "Warning 2",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:466"
-      ]
-    },
-    "Warning 3": {
-      "value": "Warning 3",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:466"
       ]
     },
     "Warning:": {
@@ -60097,13 +59844,6 @@
         "auth_service/tests/unit/test_refresh_endpoint.py:307"
       ]
     },
-    "also_not_a_number": {
-      "value": "also_not_a_number",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:276"
-      ]
-    },
     "alternation_score": {
       "value": "alternation_score",
       "category": "test_literals",
@@ -65041,22 +64781,6 @@
         "scripts/test_triage_flow.py:62"
       ]
     },
-    "cost_cents": {
-      "value": "cost_cents",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:46",
-        "scripts/test_data_validator_backup.py:72",
-        "scripts/test_data_validator_backup.py:136",
-        "scripts/test_data_validator_backup.py:176",
-        "scripts/test_data_validator_backup.py:184",
-        "scripts/test_data_validator_backup.py:257",
-        "scripts/test_data_validator_backup.py:262",
-        "scripts/test_data_validator_backup.py:267",
-        "scripts/test_data_validator_backup.py:621",
-        "scripts/test_data_validator_backup.py:625"
-      ]
-    },
     "cost_data": {
       "value": "cost_data",
       "category": "test_literals",
@@ -65072,8 +64796,7 @@
         "scripts/business_value_test_index.py:99",
         "scripts/business_value_test_index.py:422",
         "scripts/business_value_test_index.py:471",
-        "scripts/business_value_test_index.py:493",
-        "scripts/test_data_validator_backup.py:146"
+        "scripts/business_value_test_index.py:493"
       ]
     },
     "cost_per_1k_input": {
@@ -65133,15 +64856,6 @@
       "category": "test_literals",
       "locations": [
         "scripts/test_triage_flow.py:48"
-      ]
-    },
-    "cost_savings": {
-      "value": "cost_savings",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:328",
-        "scripts/test_data_validator_backup.py:399",
-        "scripts/test_data_validator_backup.py:416"
       ]
     },
     "cost_usd": {
@@ -65833,18 +65547,6 @@
         "scripts/test_gtm_loading.py:20",
         "scripts/test_gtm_loading.py:51",
         "scripts/test_gtm_loading.py:123"
-      ]
-    },
-    "data_points": {
-      "value": "data_points",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:190",
-        "scripts/test_data_validator_backup.py:201",
-        "scripts/test_data_validator_backup.py:441",
-        "scripts/test_data_validator_backup.py:454",
-        "scripts/test_data_validator_backup.py:467",
-        "scripts/test_data_validator_backup.py:480"
       ]
     },
     "data_quality": {
@@ -69875,18 +69577,6 @@
         "netra_backend/app/services/factory_status/test_coverage_calculator.py:71"
       ]
     },
-    "findings": {
-      "value": "findings",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:320",
-        "scripts/test_data_validator_backup.py:358",
-        "scripts/test_data_validator_backup.py:371",
-        "scripts/test_data_validator_backup.py:384",
-        "scripts/test_data_validator_backup.py:397",
-        "scripts/test_data_validator_backup.py:414"
-      ]
-    },
     "fingerprint_mismatch": {
       "value": "fingerprint_mismatch",
       "category": "test_literals",
@@ -70147,14 +69837,6 @@
         "scripts/team_updates_test_analyzer.py:147",
         "scripts/team_updates_test_analyzer.py:157",
         "scripts/test_execution_tracker.py:699"
-      ]
-    },
-    "float": {
-      "value": "float",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:53",
-        "scripts/test_data_validator_backup.py:503"
       ]
     },
     "flow_duration": {
@@ -72439,14 +72121,6 @@
         "netra_backend/app/services/realistic_test_data/performance_simulator.py:163"
       ]
     },
-    "high_null_fields": {
-      "value": "high_null_fields",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:247",
-        "scripts/test_data_validator_backup.py:248"
-      ]
-    },
     "high_risk": {
       "value": "high_risk",
       "category": "test_literals",
@@ -74056,13 +73730,6 @@
         "scripts/test_adaptive_workflow_local.py:106"
       ]
     },
-    "int": {
-      "value": "int",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:503"
-      ]
-    },
     "integration": {
       "value": "integration",
       "category": "test_literals",
@@ -74265,13 +73932,6 @@
         "scripts/test_verify_workflow_status_corrected.py:104"
       ]
     },
-    "invalid_metric": {
-      "value": "invalid_metric",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:136"
-      ]
-    },
     "invalid_run_id": {
       "value": "invalid_run_id",
       "category": "test_literals",
@@ -74286,13 +73946,6 @@
         "auth_service/tests/test_auth_comprehensive.py:227"
       ]
     },
-    "invalid_timestamp": {
-      "value": "invalid_timestamp",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:592"
-      ]
-    },
     "invalid_token": {
       "value": "invalid_token",
       "category": "test_literals",
@@ -74302,13 +73955,6 @@
         "scripts/test_verify_workflow_status.py:113",
         "scripts/test_verify_workflow_status_corrected.py:126",
         "scripts/test_verify_workflow_status_corrected.py:128"
-      ]
-    },
-    "invalid_type": {
-      "value": "invalid_type",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:105"
       ]
     },
     "invalid_url": {
@@ -75109,11 +74755,7 @@
         "netra_backend/app/services/realistic_test_data/performance_simulator.py:306",
         "netra_backend/app/services/realistic_test_data/performance_simulator.py:307",
         "netra_backend/app/services/realistic_test_data/performance_simulator.py:349",
-        "netra_backend/app/services/realistic_test_data/performance_simulator.py:403",
-        "scripts/test_data_validator_backup.py:45",
-        "scripts/test_data_validator_backup.py:50",
-        "scripts/test_data_validator_backup.py:72",
-        "scripts/test_data_validator_backup.py:136"
+        "netra_backend/app/services/realistic_test_data/performance_simulator.py:403"
       ]
     },
     "latency_p50_ms": {
@@ -76061,11 +75703,7 @@
       "category": "test_literals",
       "locations": [
         "scripts/real_service_test_metrics.py:95",
-        "scripts/real_service_test_metrics.py:187",
-        "scripts/test_data_validator_backup.py:52",
-        "scripts/test_data_validator_backup.py:501",
-        "scripts/test_data_validator_backup.py:505",
-        "scripts/test_data_validator_backup.py:506"
+        "scripts/real_service_test_metrics.py:187"
       ]
     },
     "max_age": {
@@ -76130,20 +75768,6 @@
         "scripts/test_secret_manager_builder_critical.py:165",
         "scripts/test_secret_manager_builder_critical.py:177",
         "scripts/test_secret_manager_builder_critical.py:462"
-      ]
-    },
-    "max_null_percentage": {
-      "value": "max_null_percentage",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:40"
-      ]
-    },
-    "max_outlier_percentage": {
-      "value": "max_outlier_percentage",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:42"
       ]
     },
     "max_time_ms": {
@@ -76551,10 +76175,6 @@
         "scripts/team_updates_test_analyzer.py:18",
         "scripts/test_backend_optimized.py:219",
         "scripts/test_clickhouse_startup_fix.py:66",
-        "scripts/test_data_validator_backup.py:72",
-        "scripts/test_data_validator_backup.py:136",
-        "scripts/test_data_validator_backup.py:264",
-        "scripts/test_data_validator_backup.py:284",
         "scripts/test_intensive_serialization.py:102"
       ]
     },
@@ -76660,18 +76280,7 @@
       "category": "test_literals",
       "locations": [
         "scripts/real_service_test_metrics.py:94",
-        "scripts/real_service_test_metrics.py:186",
-        "scripts/test_data_validator_backup.py:51",
-        "scripts/test_data_validator_backup.py:500",
-        "scripts/test_data_validator_backup.py:504",
-        "scripts/test_data_validator_backup.py:506"
-      ]
-    },
-    "min_data_points": {
-      "value": "min_data_points",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:39"
+        "scripts/real_service_test_metrics.py:186"
       ]
     },
     "min_time_ms": {
@@ -76681,13 +76290,6 @@
         "scripts/test_secret_manager_builder_critical.py:588",
         "scripts/test_secret_manager_builder_critical.py:611",
         "scripts/test_secret_manager_builder_critical.py:626"
-      ]
-    },
-    "min_time_span_hours": {
-      "value": "min_time_span_hours",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:41"
       ]
     },
     "minimal_validation": {
@@ -76861,14 +76463,6 @@
       "category": "test_literals",
       "locations": [
         "scripts/test_staging_websocket_comprehensive.py:162"
-      ]
-    },
-    "missing_fields": {
-      "value": "missing_fields",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:231",
-        "scripts/test_data_validator_backup.py:231"
       ]
     },
     "missing_imports": {
@@ -78993,13 +78587,6 @@
         "scripts/test_ssl_certificates_staging.py:82"
       ]
     },
-    "not_a_number": {
-      "value": "not_a_number",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:275"
-      ]
-    },
     "not_configured": {
       "value": "not_configured",
       "category": "test_literals",
@@ -79659,17 +79246,6 @@
       "category": "test_literals",
       "locations": [
         "scripts/pytest_plugins.py:81"
-      ]
-    },
-    "outliers": {
-      "value": "outliers",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:265",
-        "scripts/test_data_validator_backup.py:266",
-        "scripts/test_data_validator_backup.py:267",
-        "scripts/test_data_validator_backup.py:532",
-        "scripts/test_data_validator_backup.py:537"
       ]
     },
     "output": {
@@ -82184,19 +81760,7 @@
       "category": "test_literals",
       "locations": [
         "scripts/business_value_test_index.py:629",
-        "scripts/business_value_test_index.py:746",
-        "scripts/test_data_validator_backup.py:229",
-        "scripts/test_data_validator_backup.py:246",
-        "scripts/test_data_validator_backup.py:264",
-        "scripts/test_data_validator_backup.py:284",
-        "scripts/test_data_validator_backup.py:302"
-      ]
-    },
-    "quality_score": {
-      "value": "quality_score",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:191"
+        "scripts/business_value_test_index.py:746"
       ]
     },
     "quality_scores": {
@@ -84199,15 +83763,6 @@
         "scripts/test_agent_pipeline_simple.py:86"
       ]
     },
-    "savings_percentage": {
-      "value": "savings_percentage",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:329",
-        "scripts/test_data_validator_backup.py:400",
-        "scripts/test_data_validator_backup.py:417"
-      ]
-    },
     "scaling_service.py": {
       "value": "scaling_service.py",
       "category": "test_literals",
@@ -85688,8 +85243,8 @@
         "scripts/iterative_test_fix_loop.py:31",
         "scripts/run_all_test_categories.py:98",
         "scripts/simple_test_fix_loop.py:18",
-        "scripts/test_backend_optimized.py:83",
         "scripts/test_backend_ORIGINAL.py:37",
+        "scripts/test_backend_optimized.py:83",
         "scripts/test_execution_tracker.py:106",
         "scripts/test_frontend_ORIGINAL.py:39",
         "scripts/test_frontend_simple.py:36"
@@ -86610,9 +86165,7 @@
       "value": "structure",
       "category": "test_literals",
       "locations": [
-        "auth_service/tests/test_auth_comprehensive.py:479",
-        "scripts/test_data_validator_backup.py:229",
-        "scripts/test_data_validator_backup.py:246"
+        "auth_service/tests/test_auth_comprehensive.py:479"
       ]
     },
     "stub": {
@@ -90577,15 +90130,7 @@
       "category": "test_literals",
       "locations": [
         "netra_backend/app/services/realistic_test_data/models.py:101",
-        "scripts/test_data_validator_backup.py:47",
-        "scripts/test_data_validator_backup.py:177",
-        "scripts/test_data_validator_backup.py:184",
-        "scripts/test_data_validator_backup.py:622",
-        "scripts/test_data_validator_backup.py:625",
-        "scripts/test_data_validator_backup.py:641",
-        "scripts/test_data_validator_backup.py:645",
-        "scripts/test_data_validator_backup.py:663",
-        "scripts/test_data_validator_backup.py:664"
+        "scripts/test_staging_websocket_comprehensive.py:216"
       ]
     },
     "throughput_rps": {
@@ -90716,21 +90261,6 @@
         "scripts/test_triage_flow.py:39"
       ]
     },
-    "time_span": {
-      "value": "time_span",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:302"
-      ]
-    },
-    "time_span_hours": {
-      "value": "time_span_hours",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:559",
-        "scripts/test_data_validator_backup.py:599"
-      ]
-    },
     "time_utilities": {
       "value": "time_utilities",
       "category": "test_literals",
@@ -90744,17 +90274,6 @@
       "category": "test_literals",
       "locations": [
         "scripts/test_example_message_flow.py:121"
-      ]
-    },
-    "timeframe": {
-      "value": "timeframe",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:71",
-        "scripts/test_data_validator_backup.py:83",
-        "scripts/test_data_validator_backup.py:106",
-        "scripts/test_data_validator_backup.py:135",
-        "scripts/test_data_validator_backup.py:151"
       ]
     },
     "timeout": {
@@ -91077,16 +90596,6 @@
       "category": "test_literals",
       "locations": [
         "auth_service/test_auth_direct.py:83"
-      ]
-    },
-    "tokens_input": {
-      "value": "tokens_input",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:276",
-        "scripts/test_data_validator_backup.py:281",
-        "scripts/test_data_validator_backup.py:516",
-        "scripts/test_data_validator_backup.py:517"
       ]
     },
     "too": {
@@ -91504,15 +91013,6 @@
         "scripts/optimize_test_performance.py:99"
       ]
     },
-    "total_potential_savings_cents": {
-      "value": "total_potential_savings_cents",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:330",
-        "scripts/test_data_validator_backup.py:401",
-        "scripts/test_data_validator_backup.py:418"
-      ]
-    },
     "total_requests": {
       "value": "total_requests",
       "category": "test_literals",
@@ -91665,13 +91165,6 @@
       "category": "test_literals",
       "locations": [
         "netra_backend/app/services/realistic_test_data/workload_simulator.py:72"
-      ]
-    },
-    "trend_analysis": {
-      "value": "trend_analysis",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:146"
       ]
     },
     "triage": {
@@ -92320,26 +91813,6 @@
         "scripts/frontend_iterative_test_runner.py:663"
       ]
     },
-    "user_": {
-      "value": "user_",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:173",
-        "scripts/test_data_validator_backup.py:239",
-        "scripts/test_data_validator_backup.py:294",
-        "scripts/test_data_validator_backup.py:618",
-        "scripts/test_data_validator_backup.py:670"
-      ]
-    },
-    "user_1": {
-      "value": "user_1",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:208",
-        "scripts/test_data_validator_backup.py:255",
-        "scripts/test_data_validator_backup.py:274"
-      ]
-    },
     "user_789": {
       "value": "user_789",
       "category": "test_literals",
@@ -92567,12 +92040,7 @@
         "auth_service/test_staging_db_connection.py:270",
         "scripts/compliance/test_refactor_helper.py:612",
         "scripts/compliance/test_refactor_helper.py:732",
-        "scripts/test_auth_client_debug.py:84",
-        "scripts/test_data_validator_backup.py:189",
-        "scripts/test_data_validator_backup.py:199",
-        "scripts/test_data_validator_backup.py:216",
-        "scripts/test_data_validator_backup.py:230",
-        "scripts/test_data_validator_backup.py:283"
+        "scripts/test_auth_client_debug.py:84"
       ]
     },
     "valid.refresh.token": {
@@ -93088,10 +92556,7 @@
         "scripts/setup_test_environment.py:133",
         "scripts/setup_test_environment.py:168",
         "scripts/setup_test_environment.py:186",
-        "scripts/setup_test_environment.py:285",
-        "scripts/test_data_validator_backup.py:303",
-        "scripts/test_data_validator_backup.py:304",
-        "scripts/test_data_validator_backup.py:560"
+        "scripts/setup_test_environment.py:285"
       ]
     },
     "warnings": {
@@ -93437,8 +92902,8 @@
         "scripts/fix_common_test_issues.py:58",
         "scripts/setup_test_environment.py:10",
         "scripts/test/test_clickhouse_staging_fix.py:15",
-        "scripts/test_backend_optimized.py:456",
         "scripts/test_backend_ORIGINAL.py:58",
+        "scripts/test_backend_optimized.py:456",
         "scripts/test_frontend_ORIGINAL.py:524",
         "scripts/test_oauth_local.py:22",
         "scripts/test_oauth_local.py:36",
@@ -93587,25 +93052,6 @@
       "category": "test_literals",
       "locations": [
         "scripts/test_cold_start_e2e.py:54"
-      ]
-    },
-    "workload_": {
-      "value": "workload_",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:174",
-        "scripts/test_data_validator_backup.py:619",
-        "scripts/test_data_validator_backup.py:671"
-      ]
-    },
-    "workload_id": {
-      "value": "workload_id",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:174",
-        "scripts/test_data_validator_backup.py:619",
-        "scripts/test_data_validator_backup.py:638",
-        "scripts/test_data_validator_backup.py:671"
       ]
     },
     "workload_patterns": {
@@ -93835,13 +93281,6 @@
       "category": "test_literals",
       "locations": [
         "scripts/test_staging_auth_live.py:159"
-      ]
-    },
-    "wörk-löad_ñoñé": {
-      "value": "wörk-löad_ñoñé",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:638"
       ]
     },
     "x": {
@@ -99055,13 +98494,6 @@
       "category": "test_literals",
       "locations": [
         "scripts/test_blocking_analysis.py:351"
-      ]
-    },
-    "用户_测试_123": {
-      "value": "用户_测试_123",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:637"
       ]
     },
     "用户名 🚀": {
