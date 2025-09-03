@@ -9,7 +9,8 @@
 import type {
   BaseMessage,
   Message,
-  MessageType
+  MessageType,
+  StreamEvent
 } from './backend_schema_base';
 import type { ReferenceItem } from './backend_schema_tools';
 
@@ -18,7 +19,8 @@ export type {
   BaseMessage,
   Message,
   MessageType,
-  ReferenceItem
+  ReferenceItem,
+  StreamEvent
 };
 
 export interface MessageToUser {
@@ -31,13 +33,6 @@ export interface UserMessage {
   text: string;
   thread_id?: string | null;
   references?: ReferenceItem[] | null;
-}
-
-export interface StreamEvent {
-  event: string;
-  data: unknown;
-  id?: string | null;
-  retry?: number | null;
 }
 
 export interface RunComplete {

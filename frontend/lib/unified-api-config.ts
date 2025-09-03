@@ -159,11 +159,11 @@ function getEnvironmentConfig(env: Environment): UnifiedApiConfig {
       };
       
     case 'staging':
-      // Use environment variables if available, otherwise fall back to GCP URLs
-      const stagingApiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://netra-backend-staging-pnovr5vsba-uc.a.run.app';
-      const stagingWsUrl = process.env.NEXT_PUBLIC_WEBSOCKET_URL || 'wss://netra-backend-staging-pnovr5vsba-uc.a.run.app';
-      const stagingAuthUrl = process.env.NEXT_PUBLIC_AUTH_URL || 'https://netra-auth-service-pnovr5vsba-uc.a.run.app';
-      const stagingFrontendUrl = process.env.NEXT_PUBLIC_FRONTEND_URL || 'https://netra-frontend-staging-pnovr5vsba-uc.a.run.app';
+      // Use environment variables if available, otherwise fall back to static staging URLs
+      const stagingApiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://api.staging.netrasystems.ai';
+      const stagingWsUrl = process.env.NEXT_PUBLIC_WEBSOCKET_URL || 'wss://api.staging.netrasystems.ai';
+      const stagingAuthUrl = process.env.NEXT_PUBLIC_AUTH_URL || 'https://auth.staging.netrasystems.ai';
+      const stagingFrontendUrl = process.env.NEXT_PUBLIC_FRONTEND_URL || 'https://app.staging.netrasystems.ai';
       
       return {
         environment: 'staging',

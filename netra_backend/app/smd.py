@@ -806,7 +806,7 @@ class StartupOrchestrator:
     
     def _initialize_tool_registry(self) -> None:
         """Initialize tool registry and dispatcher with AgentWebSocketBridge support - CRITICAL."""
-        from netra_backend.app.services.tool_registry import ToolRegistry
+        from netra_backend.app.agents.tool_registry_unified import UnifiedToolRegistry
         from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
         
         # CRITICAL FIX: WebSocket bridge MUST be created before tool dispatcher
@@ -820,17 +820,31 @@ class StartupOrchestrator:
         websocket_bridge = self.app.state.agent_websocket_bridge
         self.logger.info("    - Using pre-created AgentWebSocketBridge for tool dispatcher")
         
-        # Create tool dispatcher with bridge support
-        tool_registry = ToolRegistry(self.app.state.db_session_factory)
+        # Create unified tool registry with default tools
+        tool_registry = UnifiedToolRegistry(registry_id="global_startup")
+        
+        # Get all registered tools by iterating through tool names
+        tool_names = tool_registry.list_tools()
+        all_tools = []
+        for tool_name in tool_names:
+            tool = tool_registry.get_tool(tool_name)
+            if tool:
+                all_tools.append(tool)
+        
+        self.logger.info(f"    - Initialized UnifiedToolRegistry with {len(all_tools)} tools")
+        
         # UnifiedToolDispatcher (aliased as ToolDispatcher) expects:
         # user_context, tools, websocket_emitter, websocket_bridge, permission_service
         self.app.state.tool_dispatcher = ToolDispatcher(
             user_context=None,  # Use legacy global mode during startup
-            tools=tool_registry.get_tools([]),
+            tools=all_tools,
             websocket_emitter=None,
             websocket_bridge=websocket_bridge,
             permission_service=None
         )
+        
+        # Store the registry for later use
+        self.app.state.tool_registry = tool_registry
         
         # Validate that the tool dispatcher has WebSocket support
         if self.app.state.tool_dispatcher is None:

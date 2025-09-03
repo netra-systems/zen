@@ -76,7 +76,7 @@ if "pytest" in sys.modules or get_env().get("PYTEST_CURRENT_TEST"):
     env.set("TESTING", "1", "test_framework_base")
     env.set("NETRA_ENV", "testing", "test_framework_base")
     env.set("ENVIRONMENT", "testing", "test_framework_base")
-    env.set("LOG_LEVEL", "ERROR", "test_framework_base")
+    env.set("LOG_LEVEL", "INFO", "test_framework_base")
     
     # Network and service configuration
     env.set("REDIS_HOST", "localhost", "test_framework_base")

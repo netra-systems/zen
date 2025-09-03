@@ -438,6 +438,53 @@ class UnifiedTestRunner:
         if not CENTRALIZED_DOCKER_AVAILABLE:
             return
         
+        # Memory pre-flight check to prevent OOM kills
+        try:
+            from test_framework.memory_guardian import MemoryGuardian, TestProfile
+            
+            # Determine test profile based on categories
+            if running_e2e or (args.categories and 'e2e' in args.categories):
+                profile = TestProfile.FULL
+            elif args.categories and 'performance' in args.categories:
+                profile = TestProfile.PERFORMANCE
+            elif args.categories and ('integration' in args.categories or 'api' in args.categories):
+                profile = TestProfile.STANDARD
+            else:
+                profile = TestProfile.MINIMAL
+            
+            guardian = MemoryGuardian(profile)
+            can_proceed, details = guardian.pre_flight_check()
+            
+            if not can_proceed:
+                print("\n" + "="*60)
+                print("⚠️  MEMORY CHECK FAILED")
+                print("="*60)
+                print(f"\n{details['message']}")
+                print(f"\nProfile: {profile.value}")
+                print(f"Required: {details['required_mb']:,} MB")
+                print(f"Available: {details['system_available_mb']:,} MB")
+                
+                if details.get('alternatives'):
+                    print("\nAlternative profiles that could work:")
+                    for alt in details['alternatives']:
+                        print(f"  - {alt['profile']}: {alt['description']} ({alt['required_mb']}MB)")
+                
+                print("\nTo proceed anyway, set: TEST_SKIP_MEMORY_CHECK=true")
+                print("="*60 + "\n")
+                
+                # Check if we should skip the check
+                if env.get('TEST_SKIP_MEMORY_CHECK', 'false').lower() != 'true':
+                    raise MemoryError(f"Insufficient memory for {profile.value} tests")
+                else:
+                    print("[WARNING] Memory check failed but continuing due to TEST_SKIP_MEMORY_CHECK=true")
+            else:
+                print(f"[INFO] Memory check passed: {details['message']}")
+                
+        except ImportError:
+            print("[WARNING] MemoryGuardian not available, skipping memory check")
+        except Exception as e:
+            print(f"[WARNING] Memory check failed with error: {e}")
+        
         # Determine environment type - default to DEDICATED for unique names
         # E2E tests should always use dedicated environments
         if (args.categories and 'e2e' in args.categories) or (hasattr(args, 'docker_dedicated') and args.docker_dedicated):

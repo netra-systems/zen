@@ -215,7 +215,7 @@ if ("pytest" in sys.modules and hasattr(sys.modules.get('pytest'), 'main') and
         # Just ensure critical test flags are set
         env.set("TESTING", "1", source="netra_backend_conftest")
         env.set("ENVIRONMENT", "testing", source="netra_backend_conftest")
-        env.set("LOG_LEVEL", "ERROR", source="netra_backend_conftest")
+        env.set("LOG_LEVEL", "INFO", source="netra_backend_conftest")
         env.set("DEV_MODE_DISABLE_CLICKHOUSE", "true", source="netra_backend_conftest")
         env.set("CLICKHOUSE_ENABLED", "false", source="netra_backend_conftest")
         # Ensure SERVICE_SECRET is set for test isolation mode
@@ -267,7 +267,7 @@ if ("pytest" in sys.modules and hasattr(sys.modules.get('pytest'), 'main') and
         env.set("GOOGLE_CLIENT_SECRET", "test-google-client-secret-for-integration-testing", source="netra_backend_conftest")
         env.set("CLICKHOUSE_PASSWORD", "test-clickhouse-password-for-integration-testing", source="netra_backend_conftest")
         env.set("ENVIRONMENT", "testing", source="netra_backend_conftest")
-        env.set("LOG_LEVEL", "ERROR", source="netra_backend_conftest")
+        env.set("LOG_LEVEL", "INFO", source="netra_backend_conftest")
         
         # Disable ClickHouse for tests
         env.set("DEV_MODE_DISABLE_CLICKHOUSE", "true", source="netra_backend_conftest")
