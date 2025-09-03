@@ -381,8 +381,20 @@ async def get_auth_config():
         raise HTTPException(status_code=500, detail="Auth config retrieval failed")
 
 
-# Compatibility router for tests expecting /auth/config
+# Compatibility router for tests expecting /auth/* endpoints
 @compat_router.get("/config")
 async def get_auth_config_compat():
     """Get authentication configuration - compatibility endpoint for tests."""
     return await get_auth_config()
+
+
+@compat_router.post("/login")
+async def login_user_compat(request: Request):
+    """Login user - compatibility endpoint for tests expecting /auth/login."""
+    return await login_user(request)
+
+
+@compat_router.post("/register") 
+async def register_user_compat(request: Request):
+    """Register user - compatibility endpoint for tests expecting /auth/register."""
+    return await register_user(request)

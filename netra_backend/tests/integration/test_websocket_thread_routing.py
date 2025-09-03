@@ -49,11 +49,11 @@ class TestWebSocketThreadRouting:
     
     def test_thread_id_extraction_from_run_id_generator_format(self):
         """Test extraction of thread_id from run_id_generator format."""
-        # Test cases with run_id_generator format
+        # Test cases with run_id_generator format (must have 8 hex char UUID suffix)
         test_cases = [
             ("thread_13679e4dcc38403a_run_1756919162904_9adf1f09", "13679e4dcc38403a"),
             ("thread_user_123_run_1693430400000_a1b2c3d4", "user_123"),
-            ("thread_session_456_run_1693430400000_xyz", "session_456"),
+            ("thread_session_456_run_1693430400000_12345678", "session_456"),  # Fixed: proper 8 hex chars
         ]
         
         bridge = AgentWebSocketBridge()
@@ -105,8 +105,8 @@ class TestWebSocketThreadRouting:
         bridge = AgentWebSocketBridge()
         
         for original_thread in thread_ids:
-            # Generate run_id
-            run_id = UnifiedIDManager.generate_run_id(original_thread, "test_context")
+            # Generate run_id (UnifiedIDManager only takes thread_id parameter)
+            run_id = UnifiedIDManager.generate_run_id(original_thread)
             
             # Extract thread_id back
             extracted = bridge._extract_thread_from_standardized_run_id(run_id)

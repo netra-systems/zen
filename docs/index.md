@@ -45,6 +45,11 @@
 - [API Dual Channel Explanation](./API_DUAL_CHANNEL_EXPLANATION.md) - API security patterns
 - [Go-Live Acceptance Criteria](./ACCEPTANCE_CRITERIA_GO_LIVE_CHECKLIST.md) - Production readiness
 
+### 🚨 Error Reporting & Monitoring
+
+- **[GCP Error Reporting Architecture](./GCP_ERROR_REPORTING_ARCHITECTURE.md)** 🆕 - **CRITICAL**: Comprehensive GCP error reporting integration for production visibility
+- [Configuration Architecture](./configuration_architecture.md) - Environment and configuration management
+
 ### 🧪 Testing & Quality
 
 - **[Test Architecture Visual Overview](../tests/TEST_ARCHITECTURE_VISUAL_OVERVIEW.md)** 📊 - **COMPREHENSIVE**: Complete visual guide to test infrastructure, layers, and execution flows
