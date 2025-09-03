@@ -1,66 +1,63 @@
-# Production Dockerfile for Backend Service
-FROM python:3.11-slim as builder
+# Multi-stage build for optimized image size
+FROM python:3.11-slim AS builder
 
-# Build arguments
-ARG BUILD_ENV=production
-
-# Install system dependencies for building
-RUN apt-get update && apt-get install -y \
+# Install system dependencies for building Python packages
+RUN apt-get update && apt-get install -y --no-install-recommends \
     gcc \
     g++ \
+    build-essential \
     libpq-dev \
     && rm -rf /var/lib/apt/lists/*
 
 # Set working directory
 WORKDIR /app
 
-# Copy requirements and install Python dependencies
+# Copy requirements first for better layer caching
 COPY requirements.txt .
-RUN pip install --no-cache-dir --user -r requirements.txt
+COPY auth_service/requirements.txt ./auth_service_requirements.txt
+
+# Install Python dependencies
+RUN pip install --no-cache-dir --upgrade pip && \
+    pip install --no-cache-dir -r requirements.txt && \
+    pip install --no-cache-dir -r auth_service_requirements.txt
 
 # Production stage
 FROM python:3.11-slim
 
 # Install runtime dependencies
-RUN apt-get update && apt-get install -y \
+RUN apt-get update && apt-get install -y --no-install-recommends \
     libpq5 \
     curl \
     && rm -rf /var/lib/apt/lists/*
 
-# Create non-root user
-RUN useradd -m -u 1000 netra && \
+# Create non-root user (check if user exists first)
+RUN (useradd -m -u 1000 netra 2>/dev/null || true) && \
     mkdir -p /app/logs && \
-    chown -R netra:netra /app
+    chown -R 1000:1000 /app
 
 # Set working directory
 WORKDIR /app
 
 # Copy Python packages from builder
-COPY --from=builder --chown=netra:netra /root/.local /home/netra/.local
+COPY --from=builder /usr/local/lib/python3.11/site-packages /usr/local/lib/python3.11/site-packages
+COPY --from=builder /usr/local/bin /usr/local/bin
 
 # Copy application code
-COPY --chown=netra:netra netra_backend /app/netra_backend
-COPY --chown=netra:netra shared /app/shared
-COPY --chown=netra:netra scripts /app/scripts
-COPY --chown=netra:netra alembic /app/alembic
-COPY --chown=netra:netra SPEC /app/SPEC
-
-# Set Python path
-ENV PATH=/home/netra/.local/bin:$PATH
-ENV PYTHONPATH=/app:$PYTHONPATH
-
-# Disable Python color output for Cloud Run logs
-ENV PYTHONDONTWRITEBYTECODE=1
-ENV PYTHONUNBUFFERED=1
-ENV NO_COLOR=1
-ENV FORCE_COLOR=0
-ENV PY_COLORS=0
-
-# Docker environment indicator
-ENV RUNNING_IN_DOCKER=true
+COPY --chown=netra:netra netra_backend/ ./netra_backend/
+COPY --chown=netra:netra shared/ ./shared/
+COPY --chown=netra:netra test_framework/ ./test_framework/
+COPY --chown=netra:netra scripts/ ./scripts/
+COPY --chown=netra:netra SPEC/ ./SPEC/
+COPY --chown=netra:netra *.py ./
+COPY --chown=netra:netra *.md ./
 
 # Switch to non-root user
 USER netra
+
+# Environment variables
+ENV PYTHONPATH=/app \
+    PYTHONUNBUFFERED=1 \
+    PYTHONIOENCODING=utf-8
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
@@ -69,5 +66,5 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
 # Expose port
 EXPOSE 8000
 
-# Default command for production with memory optimizations
-CMD ["sh", "-c", "alembic -c netra_backend/alembic.ini upgrade head && gunicorn netra_backend.app.main:app -w ${WORKERS:-2} -k uvicorn.workers.UvicornWorker --bind 0.0.0.0:8000 --timeout 600 --graceful-timeout 30 --access-logfile - --error-logfile - --log-level ${LOG_LEVEL:-info} --max-requests 500 --max-requests-jitter 50 --preload --worker-tmp-dir /dev/shm --worker-connections 100"]
+# Default command for development (with hot reload)
+CMD ["uvicorn", "netra_backend.app.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload", "--reload-dir", "/app/netra_backend"]
