@@ -5,10 +5,10 @@ CRITICAL: Runs the complete Docker stability test suite to validate our fixes wo
 
 This script runs the enhanced Docker stability test suite that includes:
 1. Resource Cleanup Tests - Verify no orphaned containers/networks
-2. Memory Usage Tests - Verify < 4GB RAM usage (no tmpfs bloat)
+2. Memory Usage Tests - Verify < 4GB RAM usage (tmpfs removed to prevent crashes)
 3. Parallel Execution Tests - Run 5 parallel test suites
 4. Health Check Tests - Verify services become healthy within timeout
-5. Configuration Validation Tests - PostgreSQL conservative settings, no tmpfs
+5. Configuration Validation Tests - PostgreSQL conservative settings, named volumes only
 6. Recovery Tests - Kill containers mid-test and verify cleanup
 7. Force Flag Prohibition Tests - Zero tolerance for --force usage
 8. Rate Limiting Tests - Prevent Docker daemon overload
@@ -116,7 +116,7 @@ Test Suites Available:
   rate            - Rate limiting tests (prevent daemon overload)
   memory          - Memory pressure tests (< 4GB usage validation)
   parallel        - Parallel execution tests (5 concurrent test suites)
-  config          - Configuration validation (PostgreSQL settings, no tmpfs)
+  config          - Configuration validation (PostgreSQL settings, named volumes)
   recovery        - Recovery scenario tests (kill containers, daemon restart)
   cleanup         - Cleanup validation tests (orphaned resource removal)
   health          - Health check tests (services become healthy in time)
@@ -278,7 +278,7 @@ Examples:
             
             if any("memory" in test for suite in all_results.values() for test in suite.keys() 
                    if suite[test]['status'] == 'FAILED'):
-                logger.info("   5. CRITICAL: Memory issues detected - check tmpfs usage")
+                logger.info("   5. CRITICAL: Memory issues detected - check volume usage")
                 logger.info("   6. Run: docker system df -v to check volume usage")
             
             if any("parallel" in test for suite in all_results.values() for test in suite.keys()
