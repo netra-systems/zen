@@ -2,7 +2,7 @@
   "metadata": {
     "version": "3.0.0",
     "category": "database",
-    "generated_at": "2025-09-02T19:49:01.963542",
+    "generated_at": "2025-09-02T20:16:53.470261",
     "root_directory": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1",
     "total_literals": 307
   },
@@ -578,7 +578,7 @@
       "category": "database",
       "locations": [
         "netra_backend/app/core/auth_constants.py:167",
-        "netra_backend/app/core/configuration/secrets.py:130",
+        "netra_backend/app/core/configuration/secrets.py:131",
         "netra_backend/app/middleware/rate_limit_middleware.py:248",
         "netra_backend/app/routes/websocket.py:852",
         "netra_backend/app/routes/websocket.py:857",
@@ -1249,7 +1249,7 @@
       "value": "gcp_project_id",
       "category": "database",
       "locations": [
-        "netra_backend/app/core/configuration/secrets.py:703",
+        "netra_backend/app/core/configuration/secrets.py:705",
         "scripts/diagnose_secret_manager.py:46"
       ]
     },

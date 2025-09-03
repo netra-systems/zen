@@ -2,7 +2,7 @@
   "metadata": {
     "version": "3.0.0",
     "category": "metrics",
-    "generated_at": "2025-09-02T19:49:02.476621",
+    "generated_at": "2025-09-02T20:16:53.882563",
     "root_directory": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1",
     "total_literals": 247
   },
@@ -1554,7 +1554,7 @@
       "value": "rotation_enabled_count",
       "category": "metrics",
       "locations": [
-        "netra_backend/app/core/configuration/secrets.py:700"
+        "netra_backend/app/core/configuration/secrets.py:702"
       ]
     },
     "routes_count": {

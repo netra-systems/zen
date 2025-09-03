@@ -2,9 +2,9 @@
   "metadata": {
     "version": "3.0.0",
     "category": "paths",
-    "generated_at": "2025-09-02T19:49:02.479837",
+    "generated_at": "2025-09-02T20:16:53.885314",
     "root_directory": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1",
-    "total_literals": 1243
+    "total_literals": 1250
   },
   "literals": {
     "\"\n\n# Default to local build with checks\ncommand = [\n    sys.executable,\n    \"scripts/deploy_to_gcp.py\",\n    \"--project\", \"netra-staging\",\n    \"--build-local\",\n    \"--service-account\", SERVICE_ACCOUNT_KEY\n]\n\n# Add any additional arguments passed to this script\nif len(sys.argv) > 1:\n    command.extend(sys.argv[1:])\nelse:\n    # Default to running checks\n    command.append(\"--run-checks\")\n\n# Execute deployment\nsys.exit(subprocess.call(command))": {
@@ -449,6 +449,13 @@
       "locations": [
         "scripts/fast_100_iterations.py:67",
         "scripts/fast_100_iterations.py:68"
+      ]
+    },
+    "/100 -": {
+      "value": "/100 -",
+      "category": "paths",
+      "locations": [
+        "scripts/business_health_check.py:273"
       ]
     },
     "/100 ---": {
@@ -1824,7 +1831,7 @@
         "netra_backend/app/core/configuration/database.py:207",
         "netra_backend/app/core/configuration/database.py:223",
         "netra_backend/app/core/configuration/database.py:600",
-        "netra_backend/app/core/configuration/staging_validator.py:199",
+        "netra_backend/app/core/configuration/staging_validator.py:200",
         "netra_backend/app/core/configuration/validator_database.py:98",
         "netra_backend/app/core/network_constants.py:148",
         "netra_backend/app/core/network_constants.py:370",
@@ -3512,7 +3519,7 @@
       "value": "/secrets/",
       "category": "paths",
       "locations": [
-        "netra_backend/app/core/configuration/secrets.py:539",
+        "netra_backend/app/core/configuration/secrets.py:541",
         "netra_backend/app/core/secret_manager.py:395",
         "auth_service/auth_core/secret_loader.py:72",
         "scripts/cleanup_clickhouse_secrets_sdk.py:129",
@@ -4321,7 +4328,7 @@
       "value": "/versions/latest",
       "category": "paths",
       "locations": [
-        "netra_backend/app/core/configuration/secrets.py:539",
+        "netra_backend/app/core/configuration/secrets.py:541",
         "auth_service/auth_core/secret_loader.py:72",
         "scripts/update_staging_clickhouse_secrets.py:166",
         "scripts/validate_oauth_deployment.py:134",
@@ -4899,6 +4906,13 @@
         "scripts/check_docker_files.py:2"
       ]
     },
+    "Docker Health Manager - DEPRECATED\n\n⚠️  DEPRECATION NOTICE ⚠️ \nThis script is DEPRECATED and should NOT be used for new code.\n\nALL Docker operations must now go through UnifiedDockerManager per CLAUDE.md Section 7.1.\n\nUse instead:\n- test_framework.unified_docker_manager.UnifiedDockerManager\n- scripts/docker_manual.py (uses UnifiedDockerManager)\n\nThis file remains only for legacy compatibility and will be removed in a future version.": {
+      "value": "Docker Health Manager - DEPRECATED\n\n⚠️  DEPRECATION NOTICE ⚠️ \nThis script is DEPRECATED and should NOT be used for new code.\n\nALL Docker operations must now go through UnifiedDockerManager per CLAUDE.md Section 7.1.\n\nUse instead:\n- test_framework.unified_docker_manager.UnifiedDockerManager\n- scripts/docker_manual.py (uses UnifiedDockerManager)\n\nThis file remains only for legacy compatibility and will be removed in a future version.",
+      "category": "paths",
+      "locations": [
+        "scripts/docker_health_manager.py:2"
+      ]
+    },
     "Duplicate Code Detection Script\nPrevents regression of duplicate code patterns identified in WebSocket consolidation\n\nUsage:\n    python scripts/detect_duplicate_code.py [--threshold 0.8] [--report-only]\n    \nThis script detects:\n- Duplicate class names across files\n- Similar function implementations\n- Multiple wrappers for same functionality\n- Parallel implementations of same feature": {
       "value": "Duplicate Code Detection Script\nPrevents regression of duplicate code patterns identified in WebSocket consolidation\n\nUsage:\n    python scripts/detect_duplicate_code.py [--threshold 0.8] [--report-only]\n    \nThis script detects:\n- Duplicate class names across files\n- Similar function implementations\n- Multiple wrappers for same functionality\n- Parallel implementations of same feature",
       "category": "paths",
@@ -5137,6 +5151,13 @@
         "scripts/monitor_oauth_health.py:2"
       ]
     },
+    "OR run: python scripts/docker_manual.py start": {
+      "value": "OR run: python scripts/docker_manual.py start",
+      "category": "paths",
+      "locations": [
+        "scripts/business_health_check.py:323"
+      ]
+    },
     "Output file path (default: SPEC/generated/string_literals.json)": {
       "value": "Output file path (default: SPEC/generated/string_literals.json)",
       "category": "paths",
@@ -5149,6 +5170,13 @@
       "category": "paths",
       "locations": [
         "scripts/deploy_to_gcp.py:1434"
+      ]
+    },
+    "Please run directly: python scripts/docker_manual.py start --environment dev": {
+      "value": "Please run directly: python scripts/docker_manual.py start --environment dev",
+      "category": "paths",
+      "locations": [
+        "scripts/launch_dev_env.py:45"
       ]
     },
     "Pre-Deployment Audit Script\nImplements SPEC/pre_deployment_audit.xml to catch LLM coding errors before deployment\nFocuses on RECENT changes and NEW issues, not pre-existing violations": {
@@ -7796,6 +7824,28 @@
       "category": "paths",
       "locations": [
         "scripts/docker_log_monitor.py:433"
+      ]
+    },
+    "python scripts/docker_manual.py start --environment dev": {
+      "value": "python scripts/docker_manual.py start --environment dev",
+      "category": "paths",
+      "locations": [
+        "scripts/launch_dev_env.py:28"
+      ]
+    },
+    "python scripts/docker_manual.py status": {
+      "value": "python scripts/docker_manual.py status",
+      "category": "paths",
+      "locations": [
+        "scripts/business_health_check.py:327",
+        "scripts/launch_dev_env.py:30"
+      ]
+    },
+    "python scripts/docker_manual.py stop --environment dev": {
+      "value": "python scripts/docker_manual.py stop --environment dev",
+      "category": "paths",
+      "locations": [
+        "scripts/launch_dev_env.py:29"
       ]
     },
     "python scripts/docker_services.py logs netra      # View Netra logs": {
