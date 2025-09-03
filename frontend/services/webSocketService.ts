@@ -53,6 +53,8 @@ class WebSocketService {
   private tokenExpiryCheckTimer: NodeJS.Timeout | null = null;
   private isRefreshingToken: boolean = false;
   private pendingMessages: (WebSocketMessage | UnifiedWebSocketEvent | AuthMessage | PingMessage | PongMessage)[] = [];
+  private isConnecting: boolean = false;  // Prevent multiple simultaneous connections
+  private isIntentionalDisconnect: boolean = false;  // Track manual disconnections
   
   // Enhanced refresh handling
   private reconnectAttempts: number = 0;
@@ -846,18 +848,45 @@ class WebSocketService {
   }
 
   public connect(url: string, options: WebSocketOptions = {}) {
+    // Prevent multiple simultaneous connections
+    if (this.isConnecting) {
+      logger.warn('Connection already in progress, ignoring duplicate connect call', undefined, {
+        component: 'WebSocketService',
+        action: 'duplicate_connect_prevented',
+        state: this.state
+      });
+      return;
+    }
+    
+    // If already connected, don't reconnect
+    if (this.state === 'connected') {
+      logger.debug('Already connected, ignoring connect call', undefined, {
+        component: 'WebSocketService',
+        action: 'already_connected'
+      });
+      return;
+    }
+    
+    // Close existing connection if in unexpected state
+    if (this.ws && this.ws.readyState === WebSocket.CONNECTING) {
+      logger.warn('Closing stale connecting WebSocket', undefined, {
+        component: 'WebSocketService',
+        action: 'close_stale_connecting'
+      });
+      this.ws.close();
+      this.ws = null;
+    }
+    
     this.url = url;
     this.options = options;
     this.currentToken = options.token || null;
+    this.isIntentionalDisconnect = false;  // Reset on new connection
+    this.isConnecting = true;
     
     // Register page unload handler for graceful disconnect
     if (!this.beforeUnloadHandler && typeof window !== 'undefined') {
       this.beforeUnloadHandler = () => this.handlePageUnload();
       window.addEventListener('beforeunload', this.beforeUnloadHandler);
-    }
-    
-    if (this.state === 'connected' || this.state === 'connecting') {
-      return;
     }
 
     this.state = 'connecting';
@@ -874,6 +903,7 @@ class WebSocketService {
       this.ws = this.createSecureWebSocket(url, options);
 
       this.ws.onopen = () => {
+        this.isConnecting = false;  // Connection established
         this.handleConnectionOpen(url, options);
         
         // Handle both authenticated and development mode connections
@@ -935,6 +965,7 @@ class WebSocketService {
       };
 
       this.ws.onclose = (event) => {
+        this.isConnecting = false;  // No longer connecting
         this.state = 'disconnected';
         this.status = 'CLOSED';
         clearTimeout(this.statusChangeTimer);
@@ -983,6 +1014,7 @@ class WebSocketService {
       };
 
       this.ws.onerror = (error) => {
+        this.isConnecting = false;  // Connection failed
         // Only log as error if we're not in a known disconnection state
         const isExpectedError = this.state === 'disconnecting' || this.state === 'disconnected';
         if (!isExpectedError) {
@@ -1063,6 +1095,24 @@ class WebSocketService {
   }
   
   private scheduleReconnect() {
+    // Prevent reconnect if intentionally disconnected
+    if (this.isIntentionalDisconnect) {
+      logger.debug('Skipping reconnect - intentional disconnect', undefined, {
+        component: 'WebSocketService',
+        action: 'skip_reconnect'
+      });
+      return;
+    }
+    
+    // Prevent if already connecting
+    if (this.isConnecting) {
+      logger.debug('Already connecting, skipping reconnect', undefined, {
+        component: 'WebSocketService',
+        action: 'skip_reconnect_already_connecting'  
+      });
+      return;
+    }
+    
     if (this.reconnectTimer) return;
     
     // Check if we've exceeded max reconnect attempts
@@ -1150,6 +1200,10 @@ class WebSocketService {
   }
 
   public disconnect() {
+    // Mark as intentional disconnect to prevent auto-reconnect
+    this.isIntentionalDisconnect = true;
+    this.isConnecting = false;
+    
     if (this.reconnectTimer) {
       clearTimeout(this.reconnectTimer);
       this.reconnectTimer = null;
