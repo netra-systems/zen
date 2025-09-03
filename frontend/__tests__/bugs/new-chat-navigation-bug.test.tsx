@@ -75,9 +75,10 @@ jest.mock('@/components/chat/ChatSidebarHooks', () => ({
 
 // Mock the thread switching hook
 const mockSwitchToThread = jest.fn().mockImplementation(async (threadId, options) => {
-  // Simulate what the real hook does - call store methods
-  const { useUnifiedChatStore } = require('@/store/unified-chat');
-  const storeState = useUnifiedChatStore.getState();
+  // Since the store is mocked, we need to get it directly
+  // Import at call time to avoid module loading issues
+  const mockStore = require('../../__mocks__/store/unified-chat');
+  const storeState = mockStore.useUnifiedChatStore.getState();
   
   if (options?.clearMessages && storeState.clearMessages) {
     storeState.clearMessages();
@@ -169,6 +170,11 @@ describe('New Chat Navigation Bug', () => {
     await act(async () => {
       fireEvent.click(newChatButton);
     });
+    
+    // Debug: log all mocks to see what's happening
+    console.log('CreateThread mock calls:', mockCreateThread.mock.calls.length);
+    console.log('SwitchToThread mock calls:', mockSwitchToThread.mock.calls.length);
+    console.log('Store setActiveThread calls:', useUnifiedChatStore.getState().setActiveThread.mock.calls.length);
     
     // Assert
     await waitFor(() => {
