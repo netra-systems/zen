@@ -67,11 +67,12 @@ export const AuthGuard: React.FC<AuthGuardProps> = ({
         router.push(redirectTo);
       } else {
         // Token exists but user not set yet - wait for auth context to process it
-        logger.debug('Token exists but user not set - waiting for auth processing', {
+        logger.debug('Token exists but user not set - waiting for auth processing', undefined, {
           component: 'AuthGuard',
           currentPath
         });
-        hasPerformedAuthCheck.current = false; // Reset to allow re-check
+        // DO NOT reset hasPerformedAuthCheck - this causes infinite loops
+        // The auth context will update and trigger a re-render naturally
       }
     } else {
       trackPageView(currentPath, 'Protected Page Access');
