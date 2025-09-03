@@ -12,7 +12,7 @@ BVJ: ALL segments | Platform Stability | Complete user isolation for production 
 """
 
 import asyncio
-from typing import Any, Dict, Optional, List
+from typing import Any, Dict, Optional, List, Set
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from netra_backend.app.agents.base_agent import BaseAgent
@@ -425,6 +425,33 @@ class SupervisorAgent(BaseAgent):
         logger.info("🔄 Using fallback WebSocket bridge factory")
         return lambda: self.websocket_bridge
 
+    # Define agent dependencies
+    AGENT_DEPENDENCIES = {
+        "triage": [],
+        "data": ["triage"],
+        "optimization": ["triage", "data"],
+        "actions": ["triage", "data"],  # Actions can run after triage and data
+        "reporting": ["triage", "data"]  # Reporting only needs triage and data
+    }
+    
+    def _can_execute_agent(self, agent_name: str, completed_agents: Set[str]) -> bool:
+        """Check if an agent can be executed based on its dependencies.
+        
+        Args:
+            agent_name: Name of the agent to check
+            completed_agents: Set of successfully completed agents
+            
+        Returns:
+            True if all dependencies are met
+        """
+        required_deps = self.AGENT_DEPENDENCIES.get(agent_name, [])
+        missing_deps = [dep for dep in required_deps if dep not in completed_agents]
+        
+        if missing_deps:
+            logger.warning(f"Agent {agent_name} cannot execute: missing dependencies {missing_deps}")
+            return False
+        return True
+    
     async def _execute_workflow_with_isolated_agents(self, 
                                                    agent_instances: Dict[str, BaseAgent],
                                                    context: UserExecutionContext,
@@ -441,43 +468,100 @@ class SupervisorAgent(BaseAgent):
         Returns:
             Dictionary with workflow execution results
         """
+        import time
         logger.info(f"Executing workflow with {len(agent_instances)} isolated agents for user {context.user_id}")
         
         results = {}
+        completed_agents = set()
+        failed_agents = set()
         execution_order = ["triage", "data", "optimization", "actions", "reporting"]
         
         for agent_name in execution_order:
-            if agent_name in agent_instances:
-                try:
-                    await self._emit_thinking(context, f"Running {agent_name} with isolated instance...")
+            # Skip if agent not available
+            if agent_name not in agent_instances:
+                logger.debug(f"Agent {agent_name} not in available instances, skipping")
+                continue
+                
+            # Check dependencies before execution
+            if not self._can_execute_agent(agent_name, completed_agents):
+                logger.error(f"Cannot execute {agent_name}: dependencies not met. Completed: {completed_agents}")
+                results[agent_name] = {
+                    "error": "Dependencies not met",
+                    "status": "skipped",
+                    "missing_deps": [dep for dep in self.AGENT_DEPENDENCIES.get(agent_name, []) 
+                                    if dep not in completed_agents]
+                }
+                failed_agents.add(agent_name)
+                # For critical agents, stop the workflow
+                if agent_name in ["triage", "data"]:
+                    logger.error(f"Critical agent {agent_name} failed. Stopping workflow.")
+                    break
+                continue
+                
+            try:
+                start_time = time.time()
+                await self._emit_thinking(context, f"Running {agent_name} with isolated instance...")
+                
+                # Create child context for sub-agent
+                child_context = context.create_child_context(
+                    operation_name=f"{agent_name}_execution",
+                    additional_metadata={
+                        "agent_name": agent_name,
+                        "flow_id": flow_id
+                    }
+                )
+                
+                # Execute agent with child context
+                agent_result = await self._execute_agent_with_context(
+                    agent_instances[agent_name], child_context, agent_name
+                )
+                
+                execution_time = time.time() - start_time
+                logger.info(f"⏱️ Agent {agent_name} executed in {execution_time:.2f}s for user {context.user_id}")
+                
+                # Validate result is not an error
+                if isinstance(agent_result, dict) and agent_result.get("status") == "failed":
+                    raise RuntimeError(f"Agent returned failure status: {agent_result.get('error', 'Unknown error')}")
+                
+                results[agent_name] = agent_result
+                completed_agents.add(agent_name)
+                
+                # CRITICAL: Propagate metadata from child context back to parent context
+                # This ensures results like triage_result, data_result, etc. are available for reporting
+                self._merge_child_metadata_to_parent(context, child_context, agent_name)
+                
+                logger.info(f"✅ Agent {agent_name} completed successfully for user {context.user_id}")
+                
+                # Add small delay between agents to prevent overwhelming the system
+                # Only if execution was very fast (< 0.5s)
+                if execution_time < 0.5:
+                    delay = 0.5 - execution_time
+                    logger.debug(f"Adding {delay:.2f}s delay after fast execution")
+                    await asyncio.sleep(delay)
                     
-                    # Create child context for sub-agent
-                    child_context = context.create_child_context(
-                        operation_name=f"{agent_name}_execution",
-                        additional_metadata={
-                            "agent_name": agent_name,
-                            "flow_id": flow_id
-                        }
-                    )
+            except Exception as e:
+                logger.error(f"Agent {agent_name} failed for user {context.user_id}: {e}", exc_info=True)
+                results[agent_name] = {"error": str(e), "status": "failed"}
+                failed_agents.add(agent_name)
+                
+                # For critical agents (triage, data), stop the entire workflow
+                if agent_name in ["triage", "data"]:
+                    logger.error(f"Critical agent {agent_name} failed. Stopping workflow execution.")
+                    break
                     
-                    # Execute agent with child context
-                    agent_result = await self._execute_agent_with_context(
-                        agent_instances[agent_name], child_context, agent_name
-                    )
-                    
-                    results[agent_name] = agent_result
-                    
-                    # CRITICAL: Propagate metadata from child context back to parent context
-                    # This ensures results like triage_result, data_result, etc. are available for reporting
-                    self._merge_child_metadata_to_parent(context, child_context, agent_name)
-                    
-                    logger.info(f"✅ Agent {agent_name} completed for user {context.user_id}")
-                    
-                except Exception as e:
-                    logger.error(f"Agent {agent_name} failed for user {context.user_id}: {e}")
-                    results[agent_name] = {"error": str(e), "status": "failed"}
-                    # Continue with other agents
-                    continue
+                # For non-critical agents, continue but log the impact
+                logger.warning(f"Non-critical agent {agent_name} failed. Continuing with degraded results.")
+        
+        # Log workflow summary
+        logger.info(f"Workflow completed. Successful: {completed_agents}, Failed: {failed_agents}")
+        
+        # Add workflow metadata to results
+        results["_workflow_metadata"] = {
+            "completed_agents": list(completed_agents),
+            "failed_agents": list(failed_agents),
+            "total_agents": len(execution_order),
+            "success_rate": len(completed_agents) / len(execution_order) if execution_order else 0
+        }
         
         return results
     

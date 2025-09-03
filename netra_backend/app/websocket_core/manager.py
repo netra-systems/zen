@@ -1035,6 +1035,17 @@ class WebSocketManager:
             return True
         return False
 
+    async def send_message(self, user_id: str, 
+                          message: Union[WebSocketMessage, ServerMessage, Dict[str, Any]],
+                          retry: bool = True, priority: BufferPriority = BufferPriority.NORMAL,
+                          require_confirmation: bool = False) -> bool:
+        """Backward compatibility alias for send_to_user.
+        
+        Some legacy code and tests expect send_message method.
+        This alias ensures compatibility without breaking existing integrations.
+        """
+        return await self.send_to_user(user_id, message, retry, priority, require_confirmation)
+    
     async def send_to_thread(self, thread_id: str, 
                             message: Union[WebSocketMessage, Dict[str, Any]]) -> bool:
         """Send message to all users in a thread with robust error handling."""
