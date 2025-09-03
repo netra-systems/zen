@@ -299,7 +299,7 @@ class ToolDispatcher:
         )
     
     @staticmethod
-    async def create_scoped_dispatcher_context(
+    def create_scoped_dispatcher_context(
         user_context,  # UserExecutionContext type hint avoided
         tools: List[BaseTool] = None,
         websocket_manager = None  # WebSocketManager type hint avoided

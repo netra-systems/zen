@@ -50,9 +50,12 @@ async def execute_and_persist(
     supervisor, user_id: str, text: str, thread: Optional[Thread],
     run: Optional[Run], db_session: Optional[AsyncSession], thread_service
 ) -> Any:
-    """Execute supervisor and persist response"""
+    """Execute supervisor and persist response using UserExecutionContext pattern"""
     run_id = run.id if run else user_id
     thread_id = thread.id if thread else user_id
+    
+    logger.info(f"🔧 execute_and_persist called for user={user_id}, thread={thread_id}, run={run_id}")
+    logger.info(f"🔍 db_session type: {type(db_session)}, is None: {db_session is None}")
     
     # CRITICAL: Register run-thread mapping for WebSocket routing
     # This ensures all agent events reach the correct user
@@ -76,11 +79,54 @@ async def execute_and_persist(
         else:
             logger.warning(f"⚠️ Failed to register run-thread mapping for run_id={run_id}")
             
+        # Set WebSocket bridge on supervisor if possible
+        if hasattr(supervisor, 'set_websocket_bridge'):
+            supervisor.set_websocket_bridge(bridge, run_id)
+            logger.info(f"✅ Set WebSocket bridge on supervisor for run_id={run_id}")
+        else:
+            logger.warning(f"⚠️ Supervisor doesn't have set_websocket_bridge method")
+            
     except Exception as e:
         logger.error(f"🚨 Error registering run-thread mapping: {e}")
         # Continue execution even if registration fails
     
-    response = await supervisor.run(text, thread_id, user_id, run_id)
+    # Create UserExecutionContext for the new pattern
+    from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
+    
+    try:
+        # Create context with proper metadata using db_session
+        context = UserExecutionContext(
+            user_id=user_id,
+            thread_id=thread_id,
+            run_id=run_id,
+            db_session=db_session,
+            metadata={
+                "user_request": text,
+                "timestamp": run.created_at if run else None
+            }
+        )
+        logger.info(f"✅ Created UserExecutionContext for user={user_id}, thread={thread_id}, run={run_id}")
+        
+        # Check if supervisor has execute method
+        if not hasattr(supervisor, 'execute'):
+            logger.error(f"🚨 CRITICAL: SupervisorAgent does not have 'execute' method!")
+            logger.error(f"🚨 Available methods: {[m for m in dir(supervisor) if not m.startswith('_')]}")
+            # Fall back to old run method if available
+            if hasattr(supervisor, 'run'):
+                logger.warning(f"⚠️ Falling back to supervisor.run() method")
+                response = await supervisor.run(text, thread_id, user_id, run_id)
+            else:
+                raise AttributeError("SupervisorAgent missing both execute and run methods")
+        else:
+            # Execute the supervisor with the new UserExecutionContext pattern
+            logger.info(f"🚀 Calling supervisor.execute() with context for run_id={run_id}")
+            response = await supervisor.execute(context, stream_updates=True)
+            logger.info(f"✅ SupervisorAgent executed successfully for run_id={run_id}")
+        
+    except Exception as e:
+        logger.error(f"❌ Error executing supervisor: {e}", exc_info=True)
+        raise
+    
     if db_session and response and thread:
         await persist_response(thread, run, response, db_session, thread_service)
     return response

@@ -140,7 +140,11 @@ class SupervisorAgent(BaseAgent):
             RuntimeError: If execution fails
         """
         # Validate context at entry
+        logger.info(f"🚀 SupervisorAgent.execute() called for user={context.user_id}, run_id={context.run_id}")
+        logger.info(f"📊 Context details: thread_id={context.thread_id}, has_db_session={context.db_session is not None}")
+        
         context = validate_user_context(context)
+        logger.info(f"✅ Context validated successfully for user={context.user_id}")
         
         if not context.db_session:
             raise ValueError("UserExecutionContext must contain a database session")
@@ -163,11 +167,16 @@ class SupervisorAgent(BaseAgent):
                 )
                 
                 # Create request-scoped tool dispatcher with proper emitter
+                logger.info(f"🔧 Creating ToolDispatcher with websocket_emitter type: {type(websocket_emitter)}")
+                logger.info(f"🔧 User tools available: {len(self._get_user_tools(context)) if self._get_user_tools(context) else 0}")
+                
                 async with ToolDispatcher.create_scoped_dispatcher_context(
                     user_context=context,
                     tools=self._get_user_tools(context),
-                    websocket_emitter=websocket_emitter  # Use emitter instead of manager
+                    websocket_manager=websocket_emitter  # Pass as websocket_manager parameter
                 ) as tool_dispatcher:
+                    logger.info(f"✅ ToolDispatcher created successfully for user {context.user_id}")
+                    
                     # Store request-scoped dispatcher for this execution
                     self.tool_dispatcher = tool_dispatcher
                     
@@ -184,11 +193,15 @@ class SupervisorAgent(BaseAgent):
                             self.registry.set_websocket_manager(websocket_manager)
                     
                     # Create session manager for database operations
+                    logger.info(f"📂 Creating managed session for user {context.user_id}")
                     async with managed_session(context) as session_manager:
+                        logger.info(f"✅ Managed session created, starting agent orchestration")
+                        
                         # Execute supervisor orchestration
                         result = await self._orchestrate_agents(context, session_manager, stream_updates)
                         
-                        logger.info(f"SupervisorAgent.execute() completed for user {context.user_id}")
+                        logger.info(f"🎯 SupervisorAgent.execute() completed successfully for user {context.user_id}")
+                        logger.info(f"📊 Result type: {type(result)}, has_content: {bool(result)}")
                         return result
                     
             except Exception as e:
