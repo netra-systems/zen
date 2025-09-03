@@ -213,8 +213,23 @@ async def websocket_endpoint(websocket: WebSocket):
                 agent_handler = AgentMessageHandler(message_handler_service, websocket)
                 
                 # Register agent handler with message router
-                message_router.add_handler(agent_handler)
-                logger.info(f"Registered real AgentMessageHandler for production agent pipeline")
+                # CRITICAL FIX: Check if handler already exists before adding to prevent accumulation
+                existing_agent_handler = None
+                for handler in message_router.handlers:
+                    if isinstance(handler, AgentMessageHandler):
+                        existing_agent_handler = handler
+                        break
+                
+                if existing_agent_handler:
+                    # Update existing handler with new service/websocket instead of adding duplicate
+                    existing_agent_handler.message_handler_service = message_handler_service
+                    existing_agent_handler.websocket = websocket
+                    logger.info(f"Updated existing AgentMessageHandler for production agent pipeline")
+                else:
+                    # Add new handler only if none exists
+                    message_router.add_handler(agent_handler)
+                    logger.info(f"Registered new AgentMessageHandler for production agent pipeline")
+                
                 logger.info(f"Total handlers after registration: {len(message_router.handlers)}")
             except Exception as e:
                 # CRITICAL: NO FALLBACK IN STAGING/PRODUCTION
@@ -224,9 +239,20 @@ async def websocket_endpoint(websocket: WebSocket):
                 else:
                     logger.warning(f"Failed to register real AgentMessageHandler: {e}, using fallback for {environment}")
                     # Create fallback agent handler only for testing/development
-                    fallback_handler = _create_fallback_agent_handler()
-                    message_router.add_handler(fallback_handler)
-                    logger.info(f"Registered fallback AgentMessageHandler for {environment} environment")
+                    # CRITICAL FIX: Check if fallback handler already exists before adding
+                    existing_fallback = None
+                    for handler in message_router.handlers:
+                        if handler.__class__.__name__ == 'FallbackAgentHandler':
+                            existing_fallback = handler
+                            break
+                    
+                    if not existing_fallback:
+                        fallback_handler = _create_fallback_agent_handler()
+                        message_router.add_handler(fallback_handler)
+                        logger.info(f"Registered new fallback AgentMessageHandler for {environment} environment")
+                    else:
+                        logger.info(f"Fallback AgentMessageHandler already registered for {environment} environment")
+                    
                     logger.info(f"Total handlers after fallback registration: {len(message_router.handlers)}")
         else:
             # CRITICAL: NO FALLBACK IN STAGING/PRODUCTION - CHAT IS KING
@@ -256,10 +282,21 @@ async def websocket_endpoint(websocket: WebSocket):
             else:
                 logger.warning(f"WebSocket dependencies not available in {environment} - creating fallback agent handler")
                 # Create fallback agent handler only for testing/development
-                fallback_handler = _create_fallback_agent_handler()
-                message_router.add_handler(fallback_handler)
-                logger.info(f"🤖 Registered fallback AgentMessageHandler for {environment} - will handle CHAT messages!")
-                logger.info(f"🤖 Fallback handler can handle: {fallback_handler.supported_types}")
+                # CRITICAL FIX: Check if fallback handler already exists before adding
+                existing_fallback = None
+                for handler in message_router.handlers:
+                    if handler.__class__.__name__ == 'FallbackAgentHandler':
+                        existing_fallback = handler
+                        break
+                
+                if not existing_fallback:
+                    fallback_handler = _create_fallback_agent_handler()
+                    message_router.add_handler(fallback_handler)
+                    logger.info(f"🤖 Registered new fallback AgentMessageHandler for {environment} - will handle CHAT messages!")
+                    logger.info(f"🤖 Fallback handler can handle: {fallback_handler.supported_types}")
+                else:
+                    logger.info(f"🤖 Fallback AgentMessageHandler already registered for {environment}")
+                
                 logger.info(f"🤖 Total handlers registered: {len(message_router.handlers)}")
                 
                 # List all registered handlers for debugging
