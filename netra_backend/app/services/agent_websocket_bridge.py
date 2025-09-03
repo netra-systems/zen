@@ -1980,7 +1980,13 @@ class AgentWebSocketBridge(MonitorableComponent):
                 return run_id
             
             # PRIORITY 2: Use UnifiedIDManager for SSOT extraction
-            extracted_thread_id = UnifiedIDManager.extract_thread_id(run_id)
+            # Defensive import check to prevent runtime errors
+            try:
+                extracted_thread_id = UnifiedIDManager.extract_thread_id(run_id)
+            except NameError as e:
+                logger.critical(f"🚨 CRITICAL: UnifiedIDManager not available: {e}")
+                # Fallback to legacy extraction pattern
+                return self._legacy_thread_extraction(run_id) if hasattr(self, '_legacy_thread_extraction') else None
             
             if extracted_thread_id:
                 # UnifiedIDManager returns normalized thread_id (without "thread_" prefix)
@@ -1988,8 +1994,12 @@ class AgentWebSocketBridge(MonitorableComponent):
                 thread_id_with_prefix = f"thread_{extracted_thread_id}" if not extracted_thread_id.startswith("thread_") else extracted_thread_id
                 
                 # Get format info for detailed logging
-                format_info = UnifiedIDManager.get_format_info(run_id)
-                format_version = format_info.get('format_version', 'unknown')
+                try:
+                    format_info = UnifiedIDManager.get_format_info(run_id)
+                    format_version = format_info.get('format_version', 'unknown')
+                except (NameError, AttributeError) as e:
+                    logger.warning(f"Could not get format info: {e}")
+                    format_version = 'unknown'
                 
                 logger.debug(
                     f"✅ UNIFIED_ID_MANAGER SUCCESS: run_id={run_id} → thread_id={thread_id_with_prefix} "

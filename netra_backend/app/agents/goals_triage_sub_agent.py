@@ -95,7 +95,7 @@ class GoalsTriageSubAgent(BaseAgent):
         super().__init__(
             name="GoalsTriageSubAgent", 
             description="Triages and prioritizes business goals for strategic planning",
-            enable_reliability=True,      # Get circuit breaker + retry
+            enable_reliability=False,  # DISABLED: Was hiding errors - see AGENT_RELIABILITY_ERROR_SUPPRESSION_ANALYSIS_20250903.md
             enable_execution_engine=True, # Get modern execution patterns
             enable_caching=True,          # Enable caching for goal analysis
         )

@@ -91,7 +91,7 @@ class BaseAgent(ABC):
                  description: str = "This is the base sub-agent.", 
                  agent_id: Optional[str] = None, 
                  user_id: Optional[str] = None,
-                 enable_reliability: bool = True,
+                 enable_reliability: bool = False,  # DISABLED: See AGENT_RELIABILITY_ERROR_SUPPRESSION_ANALYSIS_20250903.md
                  enable_execution_engine: bool = True,
                  enable_caching: bool = False,
                  tool_dispatcher: Optional[ToolDispatcher] = None,  # DEPRECATED: Use create_agent_with_context() factory
@@ -183,9 +183,21 @@ class BaseAgent(ABC):
             self._reliability_manager_instance.circuit_breaker = self.circuit_breaker._circuit_breaker
         
         # Initialize unified reliability management (SSOT pattern with UnifiedRetryHandler)
+        # WARNING: Reliability features DISABLED by default due to error suppression issues
+        # See AGENT_RELIABILITY_ERROR_SUPPRESSION_ANALYSIS_20250903.md for details
+        # These features were found to hide critical errors rather than handle them properly:
+        # - Silent retry failures logged at DEBUG level
+        # - Fallback results masquerading as success
+        # - Heartbeat loops that continue after agent death
+        # DO NOT RE-ENABLE without addressing the error visibility issues documented in the analysis
         self._enable_reliability = enable_reliability
         self._unified_reliability_handler = None
         if enable_reliability:
+            logger.warning(
+                f"⚠️ RELIABILITY FEATURES ENABLED for {name} - "
+                "These features may suppress critical errors. "
+                "See AGENT_RELIABILITY_ERROR_SUPPRESSION_ANALYSIS_20250903.md"
+            )
             self._init_unified_reliability_infrastructure()
         
         # Initialize execution engine (unified SSOT)

@@ -470,7 +470,10 @@ async def _handle_websocket_messages(
                 # Route message to appropriate handler
                 logger.info(f"Routing message type '{message_data.get('type')}' from {user_id}: {str(message_data)[:200]}")
                 success = await message_router.route_message(user_id, websocket, message_data)
-                logger.info(f"Message routing result: {success} for user {user_id}")
+                if not success:
+                    logger.error(f"Message routing failed for user {user_id}")
+                else:
+                    logger.info(f"Message routing successful for user {user_id}")
                 
                 if success:
                     error_count = 0  # Reset error count on success
@@ -479,7 +482,7 @@ async def _handle_websocket_messages(
                     logger.debug(f"Successfully processed message for {connection_id}")
                 else:
                     error_count += 1
-                    logger.warning(f"Message routing failed for {connection_id}, error_count: {error_count}")
+                    logger.error(f"Message routing failed for {connection_id}, error_count: {error_count}")
                     await asyncio.sleep(min(backoff_delay, max_backoff))
                     backoff_delay = min(backoff_delay * 2, max_backoff)
                 

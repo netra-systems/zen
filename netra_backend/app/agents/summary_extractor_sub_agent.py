@@ -54,7 +54,7 @@ class SummaryExtractorSubAgent(BaseAgent):
         super().__init__(
             name="SummaryExtractorSubAgent", 
             description="Summary extraction agent using UserExecutionContext pattern",
-            enable_reliability=True,
+            enable_reliability=False,  # DISABLED: Was hiding errors - see AGENT_RELIABILITY_ERROR_SUPPRESSION_ANALYSIS_20250903.md
             enable_execution_engine=True,
             enable_caching=True,
         )

@@ -140,7 +140,22 @@ class AgentMessageHandler(BaseMessageHandler):
             return True
             
         except Exception as e:
-            logger.error(f"Error handling start_agent for {user_id}: {e}", exc_info=True)
+            error_msg = f"Error handling start_agent for {user_id}: {e}"
+            logger.error(error_msg, exc_info=True)
+            
+            # Send error to user via WebSocket if possible
+            try:
+                from netra_backend.app.websocket_core import get_websocket_manager
+                manager = get_websocket_manager()
+                await manager.send_error(user_id, "Failed to start agent. Please try again.")
+            except:
+                pass  # Best effort to notify user
+            
+            # Re-raise critical errors for visibility
+            if any(critical in str(e) for critical in ["UnifiedIDManager", "import", "ImportError", "ModuleNotFoundError"]):
+                logger.critical(f"CRITICAL ERROR - Import/Module issue detected: {e}")
+                raise  # Re-raise import errors for visibility
+            
             return False
     
     async def _handle_user_message(self, user_id: str, message: WebSocketMessage,
@@ -167,7 +182,22 @@ class AgentMessageHandler(BaseMessageHandler):
             return True
             
         except Exception as e:
-            logger.error(f"Error handling user_message for {user_id}: {e}", exc_info=True)
+            error_msg = f"Error handling user_message for {user_id}: {e}"
+            logger.error(error_msg, exc_info=True)
+            
+            # Send error to user via WebSocket if possible
+            try:
+                from netra_backend.app.websocket_core import get_websocket_manager
+                manager = get_websocket_manager()
+                await manager.send_error(user_id, "Failed to process message. Please try again.")
+            except:
+                pass  # Best effort to notify user
+            
+            # Re-raise critical errors for visibility
+            if any(critical in str(e) for critical in ["UnifiedIDManager", "import", "ImportError", "ModuleNotFoundError"]):
+                logger.critical(f"CRITICAL ERROR - Import/Module issue detected: {e}")
+                raise  # Re-raise import errors for visibility
+            
             return False
     
     def _update_processing_stats(self, message_type: MessageType) -> None:

@@ -80,7 +80,7 @@ class SupervisorAgent(BaseAgent):
             llm_manager=llm_manager,
             name="Supervisor",
             description="Orchestrates sub-agents with complete user isolation",
-            enable_reliability=True,      # Get circuit breaker + retry
+            enable_reliability=False,  # DISABLED: Was hiding errors - see AGENT_RELIABILITY_ERROR_SUPPRESSION_ANALYSIS_20250903.md
             enable_execution_engine=True, # Get modern execution patterns
             enable_caching=False         # Disable caching for isolation
             # NO tool_dispatcher parameter - created per-request

@@ -19,7 +19,8 @@ from netra_backend.app.agents.supervisor.execution_context import (
     AgentExecutionResult,
 )
 from netra_backend.app.core.execution_tracker import get_execution_tracker, ExecutionState
-from netra_backend.app.core.agent_heartbeat import AgentHeartbeat
+# DISABLED: Heartbeat hidden errors - see AGENT_RELIABILITY_ERROR_SUPPRESSION_ANALYSIS_20250903.md
+# from netra_backend.app.core.agent_heartbeat import AgentHeartbeat
 from netra_backend.app.core.trace_persistence import get_execution_persistence
 from netra_backend.app.core.unified_trace_context import (
     UnifiedTraceContext,
@@ -88,13 +89,19 @@ class AgentExecutionCore:
             timeout_seconds=timeout or self.DEFAULT_TIMEOUT
         )
         
-        # Create heartbeat context
-        heartbeat = AgentHeartbeat(
-            exec_id=exec_id,
-            agent_name=context.agent_name,
-            interval=self.HEARTBEAT_INTERVAL,
-            websocket_callback=self._create_websocket_callback(context, trace_context)
-        )
+        # DISABLED: Heartbeat feature suppresses errors - see AGENT_RELIABILITY_ERROR_SUPPRESSION_ANALYSIS_20250903.md
+        # The heartbeat system was found to:
+        # 1. Continue running even when agents are dead (zombie heartbeats)
+        # 2. Hide critical failures behind "monitoring" that doesn't actually monitor
+        # 3. Create false positives in health checks
+        # DO NOT RE-ENABLE without fixing the error visibility issues
+        heartbeat = None  # Disabled - was hiding errors
+        # heartbeat = AgentHeartbeat(
+        #     exec_id=exec_id,
+        #     agent_name=context.agent_name,
+        #     interval=self.HEARTBEAT_INTERVAL,
+        #     websocket_callback=self._create_websocket_callback(context, trace_context)
+        # )
         
         # Execute within trace context
         async with TraceContextManager(trace_context):
@@ -129,10 +136,17 @@ class AgentExecutionCore:
                         )
                     return agent
                 
-                # Execute with heartbeat monitoring
-                async with heartbeat:
+                # Execute without heartbeat monitoring (heartbeat disabled - was hiding errors)
+                # See AGENT_RELIABILITY_ERROR_SUPPRESSION_ANALYSIS_20250903.md
+                if heartbeat:  # This will be False since heartbeat is disabled
+                    async with heartbeat:
+                        result = await self._execute_with_protection(
+                            agent, context, state, exec_id, heartbeat, timeout, trace_context
+                        )
+                else:
+                    # Direct execution without heartbeat wrapper
                     result = await self._execute_with_protection(
-                        agent, context, state, exec_id, heartbeat, timeout, trace_context
+                        agent, context, state, exec_id, None, timeout, trace_context
                     )
             
                 # Collect and persist metrics
