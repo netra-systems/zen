@@ -27,6 +27,7 @@ import random
 import psutil
 import json
 import signal
+import os
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass
 from typing import List, Dict, Any, Optional, Set
@@ -85,9 +86,17 @@ class DockerDaemonMonitor:
         """Get Docker daemon process ID."""
         try:
             for proc in psutil.process_iter(['pid', 'name', 'cmdline']):
-                if 'dockerd' in proc.info['name'] or \
-                   (proc.info['cmdline'] and any('dockerd' in cmd for cmd in proc.info['cmdline'])):
+                proc_name = proc.info['name'].lower() if proc.info['name'] else ''
+                proc_cmdline = proc.info['cmdline'] if proc.info['cmdline'] else []
+                
+                # Check for Linux dockerd process
+                if 'dockerd' in proc_name or any('dockerd' in cmd for cmd in proc_cmdline):
                     return proc.info['pid']
+                
+                # Check for Windows Docker Desktop processes
+                if os.name == 'nt' and ('com.docker.backend.exe' in proc_name or 'docker desktop.exe' in proc_name):
+                    return proc.info['pid']
+                    
         except (psutil.NoSuchProcess, psutil.AccessDenied):
             pass
         return None
@@ -167,7 +176,7 @@ class TestDockerLifecycleCritical:
             except Exception as e:
                 logger.error(f"Error during container cleanup {container_name}: {e}")
     
-    def _create_test_container(self, name_suffix: str, image: str = "alpine:latest", 
+    def _create_test_container(self, name_suffix: str, image: str = "redis:7-alpine", 
                              memory_limit: Optional[str] = None,
                              command: Optional[List[str]] = None) -> str:
         """Create a test container with tracking."""
@@ -184,7 +193,7 @@ class TestDockerLifecycleCritical:
         if command:
             cmd.extend(command)
         else:
-            cmd.extend(["sleep", "300"])  # Default: sleep for 5 minutes
+            cmd.extend(["sh", "-c", "sleep 300"])  # Default: sleep for 5 minutes with shell
             
         result = execute_docker_command(cmd, timeout=30)
         if result.returncode != 0:
@@ -568,7 +577,7 @@ class TestDockerLifecycleCritical:
                 start_time = time.time()
                 create_result = execute_docker_command([
                     "docker", "run", "-d", "--name", container_name,
-                    "--memory", "64m", "alpine:latest", "sleep", "10"
+                    "--memory", "64m", "redis:7-alpine", "sleep", "10"
                 ], timeout=30)
                 
                 if create_result.returncode != 0:
@@ -803,7 +812,7 @@ class TestDockerLifecycleCritical:
             # Create database container
             db_container = self._create_test_container(
                 "postgres-dep",
-                image="postgres:15-alpine",
+                image="redis:7-alpine",
                 command=None  # Use default postgres command
             )
             
@@ -1043,7 +1052,7 @@ class TestDockerLifecycleCritical:
                     assert daemon_pre['stable'], f"Daemon unstable before acquisition {i}"
                     
                     start_time = time.time()
-                    result = self.manager.acquire_environment(
+                    result = self.docker_manager.acquire_environment(
                         env_name,
                         use_alpine=True,
                         timeout=60
@@ -1056,12 +1065,12 @@ class TestDockerLifecycleCritical:
                         critical_metrics['successful_acquisitions'] += 1
                         
                         # Verify health immediately
-                        health = self.manager.get_health_report(env_name)
+                        health = self.docker_manager.get_health_report(env_name)
                         assert health.get('all_healthy', False), f"Environment {env_name} unhealthy immediately"
                         
                         # Check resource usage
-                        if hasattr(self.manager, '_get_environment_containers'):
-                            containers = self.manager._get_environment_containers(env_name)
+                        if hasattr(self.docker_manager, '_get_environment_containers'):
+                            containers = self.docker_manager._get_environment_containers(env_name)
                             for container in containers:
                                 stats = container.stats(stream=False)
                                 memory_mb = stats['memory_stats']['usage'] / (1024 * 1024)
@@ -1106,7 +1115,7 @@ class TestDockerLifecycleCritical:
             # Critical cleanup - must not fail
             for env_name in stress_environments:
                 try:
-                    self.manager.release_environment(env_name)
+                    self.docker_manager.release_environment(env_name)
                 except Exception as e:
                     logger.error(f"CRITICAL cleanup failure for {env_name}: {e}")
     
@@ -1119,7 +1128,7 @@ class TestDockerLifecycleCritical:
         alpine_env = f"critical_alpine_{int(time.time())}"
         try:
             alpine_start = time.time()
-            alpine_result = self.manager.acquire_environment(
+            alpine_result = self.docker_manager.acquire_environment(
                 alpine_env,
                 use_alpine=True,
                 timeout=30
@@ -1130,8 +1139,8 @@ class TestDockerLifecycleCritical:
             assert alpine_time < 30, f"CRITICAL: Alpine startup {alpine_time:.2f}s > 30s"
             
             # Monitor Alpine resource usage
-            if hasattr(self.manager, '_get_environment_containers'):
-                containers = self.manager._get_environment_containers(alpine_env)
+            if hasattr(self.docker_manager, '_get_environment_containers'):
+                containers = self.docker_manager._get_environment_containers(alpine_env)
                 total_alpine_memory = 0
                 
                 for container in containers:
@@ -1148,7 +1157,7 @@ class TestDockerLifecycleCritical:
                 # CRITICAL Alpine requirements
                 assert total_alpine_memory < 800, f"CRITICAL: Alpine using {total_alpine_memory:.2f}MB > 800MB"
             
-            self.manager.release_environment(alpine_env)
+            self.docker_manager.release_environment(alpine_env)
             
         except Exception as e:
             logger.error(f"CRITICAL Alpine test failed: {e}")
@@ -1158,7 +1167,7 @@ class TestDockerLifecycleCritical:
         regular_env = f"critical_regular_{int(time.time())}"
         try:
             regular_start = time.time()
-            regular_result = self.manager.acquire_environment(
+            regular_result = self.docker_manager.acquire_environment(
                 regular_env,
                 use_alpine=False,
                 timeout=60
@@ -1166,8 +1175,8 @@ class TestDockerLifecycleCritical:
             regular_time = time.time() - regular_start
             
             if regular_result:
-                if hasattr(self.manager, '_get_environment_containers'):
-                    containers = self.manager._get_environment_containers(regular_env)
+                if hasattr(self.docker_manager, '_get_environment_containers'):
+                    containers = self.docker_manager._get_environment_containers(regular_env)
                     total_regular_memory = 0
                     
                     for container in containers:
@@ -1181,7 +1190,7 @@ class TestDockerLifecycleCritical:
                         'container_count': len(containers)
                     }
                 
-                self.manager.release_environment(regular_env)
+                self.docker_manager.release_environment(regular_env)
             
         except Exception as e:
             logger.warning(f"Regular container test failed (not critical): {e}")
@@ -1207,7 +1216,7 @@ class TestDockerLifecycleCritical:
             env_name = f"isolation_test_{index}_{int(time.time())}"
             try:
                 # Create environment with unique identifier
-                result = self.manager.acquire_environment(
+                result = self.docker_manager.acquire_environment(
                     env_name,
                     use_alpine=True,
                     timeout=60
@@ -1217,8 +1226,8 @@ class TestDockerLifecycleCritical:
                     parallel_environments.append(env_name)
                     
                     # Create a unique file in each environment to test isolation
-                    if hasattr(self.manager, '_get_environment_containers'):
-                        containers = self.manager._get_environment_containers(env_name)
+                    if hasattr(self.docker_manager, '_get_environment_containers'):
+                        containers = self.docker_manager._get_environment_containers(env_name)
                         for container in containers:
                             try:
                                 # Create unique test file
@@ -1249,12 +1258,12 @@ class TestDockerLifecycleCritical:
             # Test isolation between environments
             for i, (env1, idx1) in enumerate(successful_envs[:4]):  # Test first 4 to avoid timeout
                 # Verify environment health
-                health1 = self.manager.get_health_report(env1)
+                health1 = self.docker_manager.get_health_report(env1)
                 assert health1.get('all_healthy', False), f"CRITICAL: Environment {env1} not healthy"
                 
                 # Test file isolation
-                if hasattr(self.manager, '_get_environment_containers'):
-                    containers1 = self.manager._get_environment_containers(env1)
+                if hasattr(self.docker_manager, '_get_environment_containers'):
+                    containers1 = self.docker_manager._get_environment_containers(env1)
                     
                     for container1 in containers1:
                         try:
@@ -1289,7 +1298,7 @@ class TestDockerLifecycleCritical:
             # Critical cleanup
             for env_name in parallel_environments:
                 try:
-                    self.manager.release_environment(env_name)
+                    self.docker_manager.release_environment(env_name)
                 except Exception as e:
                     logger.error(f"CRITICAL cleanup failure for isolation test {env_name}: {e}")
     
@@ -1383,7 +1392,7 @@ class TestDockerLifecycleCritical:
                 env_name = f"memory_pressure_{i}_{int(time.time())}"
                 
                 try:
-                    result = self.manager.acquire_environment(
+                    result = self.docker_manager.acquire_environment(
                         env_name,
                         use_alpine=True,  # Use Alpine for efficiency
                         timeout=45
@@ -1394,8 +1403,8 @@ class TestDockerLifecycleCritical:
                         pressure_metrics['environments_created'] += 1
                         
                         # Monitor container memory usage
-                        if hasattr(self.manager, '_get_environment_containers'):
-                            containers = self.manager._get_environment_containers(env_name)
+                        if hasattr(self.docker_manager, '_get_environment_containers'):
+                            containers = self.docker_manager._get_environment_containers(env_name)
                             total_container_memory = 0
                             
                             for container in containers:
@@ -1425,7 +1434,7 @@ class TestDockerLifecycleCritical:
                         )
                         
                         # Verify health under pressure
-                        health = self.manager.get_health_report(env_name)
+                        health = self.docker_manager.get_health_report(env_name)
                         assert health.get('all_healthy', False), f"CRITICAL: Environment {env_name} unhealthy under memory pressure"
                     
                 except Exception as e:
@@ -1454,7 +1463,7 @@ class TestDockerLifecycleCritical:
             # Critical cleanup to release memory pressure
             for env_name in memory_pressure_environments:
                 try:
-                    self.manager.release_environment(env_name)
+                    self.docker_manager.release_environment(env_name)
                 except Exception as e:
                     logger.error(f"CRITICAL memory pressure cleanup failed for {env_name}: {e}")
             
@@ -1536,7 +1545,7 @@ class TestDockerLifecycleCritical:
                 
                 result = execute_docker_command([
                     "docker", "run", "-d", "--name", container_name,
-                    "alpine:latest", "sleep", "60"
+                    "redis:7-alpine", "sleep", "60"
                 ], timeout=20)
                 
                 if result.returncode == 0:
@@ -1589,7 +1598,7 @@ class TestDockerLifecycleCritical:
                 try:
                     result = execute_docker_command([
                         "docker", "run", "-d", "--name", container_name,
-                        "-p", f"{port}:{port}", "alpine:latest",
+                        "-p", f"{port}:{port}", "redis:7-alpine",
                         "sh", "-c", f"nc -l -p {port} || sleep 60"
                     ], timeout=15)
                     

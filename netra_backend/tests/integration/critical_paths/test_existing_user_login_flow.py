@@ -1,7 +1,5 @@
-from shared.isolated_environment import get_env
 """Existing User Login Flow Integration Tests (L3)
 
-env = get_env()
 Tests complete login flow for existing users including authentication,
 session management, token refresh, and logout.
 
@@ -30,7 +28,10 @@ import pytest
 from fastapi.testclient import TestClient
 from httpx import ASGITransport, AsyncClient
 
+from shared.isolated_environment import get_env
+
 # Set test environment before imports
+env = get_env()
 env.set("ENVIRONMENT", "testing", "test")
 env.set("TESTING", "true", "test")
 env.set("SKIP_STARTUP_CHECKS", "true", "test")

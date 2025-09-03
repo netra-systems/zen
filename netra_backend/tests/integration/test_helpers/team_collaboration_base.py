@@ -1,4 +1,3 @@
-from shared.isolated_environment import get_env
 """Team Collaboration Test Base Classes and Utilities
 
 Shared utilities for team collaboration integration tests.
@@ -13,14 +12,15 @@ from datetime import datetime, timedelta, timezone
 from enum import Enum
 from typing import Any, Dict, List, Optional, Set, Tuple
 
+from shared.isolated_environment import get_env
+
 # Essential test environment setup
+env = get_env()
 env.update({
     "TESTING": "1", "DATABASE_URL": "sqlite+aiosqlite:///:memory:",
     "GEMINI_API_KEY": "test-key", "GOOGLE_CLIENT_ID": "test-id", 
     "GOOGLE_CLIENT_SECRET": "test-secret", "CLICKHOUSE_PASSWORD": "test-pass"
 }, "test")
-
-env = get_env()
 class TeamRole(Enum):
     """Team role definitions for permissions testing."""
     OWNER = "owner"

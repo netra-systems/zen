@@ -18,8 +18,7 @@ from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 
-from test_framework import setup_test_path
-setup_test_path()
+# Test framework already available via normal imports
 
 from netra_backend.app.agents.state import (
     DeepAgentState,

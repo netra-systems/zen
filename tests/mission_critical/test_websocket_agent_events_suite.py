@@ -400,12 +400,13 @@ class TestRealWebSocketComponents:
     @pytest.mark.critical
     async def test_agent_registry_websocket_integration(self):
         """Test that AgentRegistry properly integrates WebSocket."""
-        class MockLLM:
-            pass
+        from netra_backend.app.websocket_core import get_websocket_manager
         
+        # Use real LLM manager instead of mock
+        llm_manager = LLMManager()
         tool_dispatcher = ToolDispatcher()
-        registry = AgentRegistry(MockLLM(), tool_dispatcher)
-        ws_manager = WebSocketManager()
+        registry = AgentRegistry(llm_manager, tool_dispatcher)
+        ws_manager = get_websocket_manager()
         
         # Set WebSocket manager
         registry.set_websocket_manager(ws_manager)
@@ -450,7 +451,7 @@ class TestIndividualWebSocketEvents:
         """
         validator = MissionCriticalEventValidator(strict_mode=True)
         
-        # Create mock agent_started event
+        # Create test agent_started event data
         agent_started_event = {
             "type": "agent_started",
             "user_id": self.test_context.user_context.user_id,
