@@ -103,6 +103,12 @@ class GCPDeployer:
                     "CLICKHOUSE_USER": "default",
                     "CLICKHOUSE_DB": "default",
                     "CLICKHOUSE_SECURE": "true",
+                    # CRITICAL FIX: WebSocket timeout configuration for GCP staging
+                    "WEBSOCKET_CONNECTION_TIMEOUT": "900",  # 15 minutes for GCP load balancer
+                    "WEBSOCKET_HEARTBEAT_INTERVAL": "25",   # Send heartbeat every 25s
+                    "WEBSOCKET_HEARTBEAT_TIMEOUT": "75",    # Wait 75s for heartbeat response  
+                    "WEBSOCKET_CLEANUP_INTERVAL": "180",    # Cleanup every 3 minutes
+                    "WEBSOCKET_STALE_TIMEOUT": "900",       # 15 minutes before marking connection stale
                 }
             ),
             ServiceConfig(
