@@ -17,7 +17,7 @@ from typing import Any, Dict, List, Optional
 from fastapi import WebSocket
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from netra_backend.app.dependencies import get_db_dependency
+from netra_backend.app.dependencies import get_request_scoped_db_session
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.services.message_handlers import MessageHandlerService
 from netra_backend.app.websocket_core.handlers import BaseMessageHandler
@@ -69,7 +69,7 @@ class AgentMessageHandler(BaseMessageHandler):
             
             # Get database session using async context manager
             # CRITICAL: Do NOT manually close the session - let the context manager handle it
-            async for db_session in get_db_dependency():
+            async for db_session in get_request_scoped_db_session():
                 try:
                     # Route message to appropriate handler
                     success = await self._route_agent_message(

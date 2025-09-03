@@ -183,30 +183,16 @@ class AgentRegistry:
             logger.debug(f"Agent {name} already registered, skipping")
             return
             
-        # CRITICAL ISSUE: Setting WebSocket bridge with None run_id
-        # This causes placeholder 'registry' run_id and breaks user isolation
-        if self.websocket_bridge and hasattr(agent, 'set_websocket_bridge'):
-            logger.warning(
-                f"⚠️ DEPRECATED: Setting WebSocket bridge on {name} with None run_id - "
-                f"this breaks user isolation! Use AgentInstanceFactory instead."
-            )
-            # Note: This is the problematic line that uses placeholder run_id
-            try:
-                agent.set_websocket_bridge(self.websocket_bridge, None)
-            except Exception as e:
-                logger.error(f"Failed to set WebSocket bridge on agent {name}: {e}")
-                # Try to ensure agent has proper WebSocket adapter initialization
-                if hasattr(agent, '_websocket_adapter') and agent._websocket_adapter is None:
-                    try:
-                        from netra_backend.app.agents.base.websocket_adapter import WebSocketEventAdapter
-                        agent._websocket_adapter = WebSocketEventAdapter()
-                        agent.set_websocket_bridge(self.websocket_bridge, None)
-                        logger.info(f"Successfully recovered WebSocket bridge for agent {name}")
-                    except Exception as recovery_error:
-                        logger.error(f"Failed to recover WebSocket bridge for agent {name}: {recovery_error}")
-        elif hasattr(agent, 'set_websocket_bridge'):
-            # Agent supports WebSocket but no bridge available - log for debugging
-            logger.warning(f"Agent {name} supports WebSocket bridge but no bridge is available in registry")
+        # CRITICAL FIX: Do not set WebSocket bridge with None run_id at registration time
+        # The bridge will be set with a proper run_id when the agent is created 
+        # through AgentInstanceFactory for a specific request
+        if hasattr(agent, 'set_websocket_bridge'):
+            if self.websocket_bridge:
+                logger.info(
+                    f"✅ Agent {name} supports WebSocket bridge - will be configured with run_id during request execution"
+                )
+            else:
+                logger.warning(f"Agent {name} supports WebSocket bridge but no bridge is available in registry")
         
         self.agents[name] = agent
         
@@ -249,10 +235,10 @@ class AgentRegistry:
                 **kwargs
             )
             
-            # Set websocket bridge if available and agent supports it
+            # CRITICAL FIX: Do not set WebSocket bridge at registration time
+            # The bridge will be set with proper run_id during request execution
             if self.websocket_bridge and hasattr(agent, 'set_websocket_bridge'):
-                # Note: run_id will be set dynamically during execution, not during registration
-                agent.set_websocket_bridge(self.websocket_bridge, None)
+                logger.debug(f"Agent {name} WebSocket bridge will be configured during request execution")
                 
             # Store the agent
             self.agents[name] = agent
@@ -501,8 +487,8 @@ class AgentRegistry:
         for agent_name, agent in self.agents.items():
             try:
                 if hasattr(agent, 'set_websocket_bridge'):
-                    # Note: run_id will be set dynamically during execution, not during registration
-                    agent.set_websocket_bridge(bridge, None)
+                    # CRITICAL FIX: Do not set WebSocket bridge at registration time
+                    # Bridge will be set with proper run_id during request execution  
                     agent_count += 1
                 else:
                     logger.debug(f"Agent {agent_name} does not support WebSocket bridge pattern")
