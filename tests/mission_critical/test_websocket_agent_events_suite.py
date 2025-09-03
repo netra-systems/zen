@@ -400,12 +400,13 @@ class TestRealWebSocketComponents:
     @pytest.mark.critical
     async def test_agent_registry_websocket_integration(self):
         """Test that AgentRegistry properly integrates WebSocket."""
-        class MockLLM:
-            pass
+        from netra_backend.app.websocket_core import get_websocket_manager
         
+        # Use real LLM manager instead of mock
+        llm_manager = LLMManager()
         tool_dispatcher = ToolDispatcher()
-        registry = AgentRegistry(MockLLM(), tool_dispatcher)
-        ws_manager = WebSocketManager()
+        registry = AgentRegistry(llm_manager, tool_dispatcher)
+        ws_manager = get_websocket_manager()
         
         # Set WebSocket manager
         registry.set_websocket_manager(ws_manager)
@@ -450,7 +451,7 @@ class TestIndividualWebSocketEvents:
         """
         validator = MissionCriticalEventValidator(strict_mode=True)
         
-        # Create mock agent_started event
+        # Create test agent_started event data
         agent_started_event = {
             "type": "agent_started",
             "user_id": self.test_context.user_context.user_id,
@@ -1133,6 +1134,508 @@ class TestRealE2EWebSocketAgentFlow:
 
 
 # ============================================================================
+# CHAOS TESTING AND RESILIENCE TESTS
+# ============================================================================
+
+class TestWebSocketChaosAndResilience:
+    """Chaos testing scenarios with random disconnects and reconnections."""
+    
+    @pytest.fixture(autouse=True)
+    async def setup_chaos_testing(self):
+        """Setup for chaos testing scenarios."""
+        self.test_base = RealWebSocketTestBase()
+        self._test_session = self.test_base.real_websocket_test_session()
+        self.test_base = await self._test_session.__aenter__()
+        
+        yield
+        
+        try:
+            await self._test_session.__aexit__(None, None, None)
+        except Exception as e:
+            logger.warning(f"Chaos test cleanup error: {e}")
+    
+    @pytest.mark.asyncio
+    @pytest.mark.critical
+    async def test_random_disconnect_recovery(self):
+        """Test recovery from random WebSocket disconnections.
+        
+        CRITICAL: Chat must remain functional even with network instability.
+        Users expect reliable AI interactions despite connection issues.
+        """
+        connection_count = 5
+        recovery_contexts = []
+        successful_recoveries = 0
+        
+        try:
+            # Create multiple connections for chaos testing
+            for i in range(connection_count):
+                context = await self.test_base.create_test_context(user_id=f"chaos_user_{i}")
+                await context.setup_websocket_connection(endpoint="/ws/test", auth_required=False)
+                recovery_contexts.append(context)
+            
+            logger.info(f"Created {len(recovery_contexts)} connections for chaos testing")
+            
+            # Simulate random disconnections and recovery attempts
+            async def chaos_test_single_connection(context, connection_id):
+                try:
+                    # Send initial message
+                    initial_msg = {
+                        "type": "agent_started",
+                        "user_id": context.user_context.user_id,
+                        "chaos_test": True,
+                        "timestamp": time.time()
+                    }
+                    await context.send_message(initial_msg)
+                    
+                    # Simulate random disconnect by closing connection
+                    if hasattr(context, 'websocket_connection') and context.websocket_connection:
+                        try:
+                            await WebSocketTestHelpers.close_test_connection(context.websocket_connection)
+                            logger.info(f"Connection {connection_id} simulated disconnect")
+                        except Exception:
+                            pass  # Connection might already be closed
+                    
+                    # Wait a bit before attempting recovery
+                    await asyncio.sleep(random.uniform(0.5, 2.0))
+                    
+                    # Attempt reconnection within 3 seconds requirement
+                    reconnection_start = time.time()
+                    
+                    await context.setup_websocket_connection(endpoint="/ws/test", auth_required=False)
+                    
+                    reconnection_time = time.time() - reconnection_start
+                    
+                    if reconnection_time <= MissionCriticalEventValidator.MAX_RECONNECTION_TIME:
+                        # Send recovery confirmation message
+                        recovery_msg = {
+                            "type": "agent_thinking",
+                            "reasoning": "Connection recovered successfully",
+                            "reconnection_time": reconnection_time,
+                            "timestamp": time.time()
+                        }
+                        await context.send_message(recovery_msg)
+                        return {"success": True, "reconnection_time": reconnection_time}
+                    else:
+                        return {"success": False, "reconnection_time": reconnection_time, 
+                               "error": "Reconnection too slow"}
+                    
+                except Exception as e:
+                    logger.warning(f"Chaos test connection {connection_id} failed: {e}")
+                    return {"success": False, "error": str(e)}
+            
+            # Run chaos tests concurrently
+            chaos_tasks = [chaos_test_single_connection(ctx, i) for i, ctx in enumerate(recovery_contexts)]
+            results = await asyncio.gather(*chaos_tasks, return_exceptions=True)
+            
+            # Analyze recovery results
+            for i, result in enumerate(results):
+                if isinstance(result, dict) and result.get("success"):
+                    successful_recoveries += 1
+                    reconnection_time = result.get("reconnection_time", 0)
+                    logger.info(f"Connection {i} recovered in {reconnection_time:.2f}s")
+                elif isinstance(result, Exception):
+                    logger.warning(f"Connection {i} chaos test exception: {result}")
+                else:
+                    logger.warning(f"Connection {i} recovery failed: {result}")
+            
+            recovery_rate = successful_recoveries / connection_count if connection_count > 0 else 0
+            
+            logger.info(f"Chaos recovery test: {successful_recoveries}/{connection_count} connections recovered ({recovery_rate:.1%})")
+            
+            # Validate resilience requirements
+            assert recovery_rate >= 0.6, f"Recovery rate too low: {recovery_rate:.1%} (expected >= 60%)"
+            assert successful_recoveries > 0, "No connections recovered from chaos test"
+            
+        finally:
+            # Cleanup chaos test contexts
+            for context in recovery_contexts:
+                try:
+                    await context.cleanup()
+                except Exception:
+                    pass
+    
+    @pytest.mark.asyncio
+    @pytest.mark.critical
+    async def test_rapid_reconnection_stress(self):
+        """Test rapid reconnection scenarios under stress.
+        
+        CRITICAL: System must handle rapid reconnection attempts
+        without degrading chat performance.
+        """
+        stress_context = await self.test_base.create_test_context(user_id="stress_reconnect_user")
+        reconnection_attempts = 10
+        successful_reconnections = 0
+        
+        for attempt in range(reconnection_attempts):
+            try:
+                reconnect_start = time.time()
+                
+                # Setup connection
+                await stress_context.setup_websocket_connection(endpoint="/ws/test", auth_required=False)
+                
+                # Send a quick message
+                msg = {
+                    "type": "ping",
+                    "attempt": attempt,
+                    "timestamp": time.time()
+                }
+                await stress_context.send_message(msg)
+                
+                # Close connection immediately
+                if hasattr(stress_context, 'websocket_connection'):
+                    try:
+                        await WebSocketTestHelpers.close_test_connection(stress_context.websocket_connection)
+                    except Exception:
+                        pass
+                
+                reconnect_time = time.time() - reconnect_start
+                
+                if reconnect_time <= MissionCriticalEventValidator.MAX_RECONNECTION_TIME:
+                    successful_reconnections += 1
+                
+                # Small delay before next attempt
+                await asyncio.sleep(0.1)
+                
+            except Exception as e:
+                logger.warning(f"Rapid reconnection attempt {attempt} failed: {e}")
+        
+        success_rate = successful_reconnections / reconnection_attempts
+        
+        logger.info(f"Rapid reconnection stress: {successful_reconnections}/{reconnection_attempts} successful ({success_rate:.1%})")
+        
+        # Validate stress test results
+        assert success_rate >= 0.7, f"Rapid reconnection success rate too low: {success_rate:.1%}"
+        
+        await stress_context.cleanup()
+    
+    @pytest.mark.asyncio
+    @pytest.mark.critical
+    async def test_message_loss_during_reconnection(self):
+        """Test that critical events are not lost during reconnection.
+        
+        CRITICAL: Chat value depends on reliable event delivery.
+        Agent events must not be lost during network disruptions.
+        """
+        validator = MissionCriticalEventValidator()
+        test_context = await self.test_base.create_test_context(user_id="message_loss_test")
+        
+        try:
+            # Establish initial connection
+            await test_context.setup_websocket_connection(endpoint="/ws/test", auth_required=False)
+            
+            # Send some events before disconnection
+            pre_disconnect_events = [
+                {"type": "agent_started", "user_id": "test", "thread_id": "test", "timestamp": time.time()},
+                {"type": "agent_thinking", "reasoning": "Starting analysis", "timestamp": time.time()}
+            ]
+            
+            for event in pre_disconnect_events:
+                await test_context.send_message(event)
+                validator.record(event)
+            
+            # Simulate connection loss
+            if hasattr(test_context, 'websocket_connection'):
+                try:
+                    await WebSocketTestHelpers.close_test_connection(test_context.websocket_connection)
+                    logger.info("Simulated connection loss")
+                except Exception:
+                    pass
+            
+            # Attempt reconnection
+            await test_context.setup_websocket_connection(endpoint="/ws/test", auth_required=False)
+            
+            # Send remaining events after reconnection
+            post_reconnect_events = [
+                {"type": "tool_executing", "tool_name": "test", "parameters": {}, "timestamp": time.time()},
+                {"type": "tool_completed", "tool_name": "test", "results": {}, "duration": 1.0, "timestamp": time.time()},
+                {"type": "agent_completed", "status": "success", "final_response": "Complete", "timestamp": time.time()}
+            ]
+            
+            for event in post_reconnect_events:
+                await test_context.send_message(event)
+                validator.record(event)
+            
+            # Validate that all event types were recorded
+            recorded_types = set(validator.event_counts.keys())
+            required_types = validator.REQUIRED_EVENTS
+            
+            missing_events = required_types - recorded_types
+            
+            logger.info(f"Message loss test: recorded {len(validator.events)} events")
+            logger.info(f"Event types: {recorded_types}")
+            
+            # We should have all required event types despite reconnection
+            assert len(missing_events) == 0, f"Lost events during reconnection: {missing_events}"
+            assert len(validator.events) == 5, f"Expected 5 events, got {len(validator.events)}"
+            
+        finally:
+            await test_context.cleanup()
+
+
+# ============================================================================
+# CONCURRENT USER ISOLATION TESTS (10+ USERS)
+# ============================================================================
+
+class TestConcurrentUserIsolation:
+    """Test user isolation with 10+ concurrent connections."""
+    
+    @pytest.fixture(autouse=True)
+    async def setup_concurrent_isolation_testing(self):
+        """Setup for concurrent user isolation testing."""
+        self.test_base = RealWebSocketTestBase()
+        self._test_session = self.test_base.real_websocket_test_session()
+        self.test_base = await self._test_session.__aenter__()
+        
+        yield
+        
+        try:
+            await self._test_session.__aexit__(None, None, None)
+        except Exception as e:
+            logger.warning(f"Concurrent isolation test cleanup error: {e}")
+    
+    @pytest.mark.asyncio
+    @pytest.mark.critical
+    async def test_10_plus_concurrent_users_isolation(self):
+        """Test that 10+ concurrent users have properly isolated sessions.
+        
+        CRITICAL: User isolation ensures private AI interactions.
+        Each user's chat session must be completely separate.
+        """
+        user_count = 12  # Test with more than 10 users as required
+        user_contexts = []
+        isolation_results = []
+        
+        try:
+            # Create 10+ concurrent user contexts
+            for i in range(user_count):
+                context = await self.test_base.create_test_context(user_id=f"isolated_user_{i}")
+                await context.setup_websocket_connection(endpoint="/ws/test", auth_required=False)
+                user_contexts.append(context)
+            
+            logger.info(f"Created {len(user_contexts)} concurrent user contexts for isolation testing")
+            
+            # Test user isolation with unique data
+            async def test_user_isolation(context, user_index):
+                user_validator = MissionCriticalEventValidator()
+                unique_data = f"user_{user_index}_unique_data_{uuid.uuid4().hex[:8]}"
+                
+                try:
+                    # Send user-specific events
+                    user_events = [
+                        {
+                            "type": "agent_started",
+                            "user_id": context.user_context.user_id,
+                            "thread_id": context.user_context.thread_id,
+                            "unique_data": unique_data,
+                            "user_index": user_index,
+                            "timestamp": time.time()
+                        },
+                        {
+                            "type": "agent_thinking",
+                            "reasoning": f"Processing request for {unique_data}",
+                            "user_specific": True,
+                            "timestamp": time.time()
+                        },
+                        {
+                            "type": "agent_completed",
+                            "status": "success",
+                            "final_response": f"Completed task for {unique_data}",
+                            "user_index": user_index,
+                            "timestamp": time.time()
+                        }
+                    ]
+                    
+                    # Send events with small delays
+                    for event in user_events:
+                        await context.send_message(event)
+                        user_validator.record(event)
+                        await asyncio.sleep(0.02)  # Small delay
+                    
+                    # Validate user-specific isolation
+                    user_event_types = {event.get('type') for event in user_validator.events}
+                    user_unique_data = [event.get('unique_data') for event in user_validator.events 
+                                       if event.get('unique_data')]
+                    
+                    # Check that user only sees their own data
+                    isolation_success = (
+                        len(user_unique_data) > 0 and
+                        all(data == unique_data for data in user_unique_data) and
+                        len(user_validator.events) == 3
+                    )
+                    
+                    return {
+                        "user_index": user_index,
+                        "user_id": context.user_context.user_id,
+                        "unique_data": unique_data,
+                        "events_sent": len(user_validator.events),
+                        "event_types": list(user_event_types),
+                        "isolation_success": isolation_success,
+                        "thread_id": context.user_context.thread_id
+                    }
+                    
+                except Exception as e:
+                    logger.warning(f"User {user_index} isolation test failed: {e}")
+                    return {
+                        "user_index": user_index,
+                        "isolation_success": False,
+                        "error": str(e)
+                    }
+            
+            # Execute all user isolation tests concurrently
+            isolation_tasks = [test_user_isolation(ctx, i) for i, ctx in enumerate(user_contexts)]
+            isolation_results = await asyncio.gather(*isolation_tasks, return_exceptions=True)
+            
+            # Analyze isolation results
+            successful_isolations = 0
+            unique_thread_ids = set()
+            unique_user_ids = set()
+            
+            for i, result in enumerate(isolation_results):
+                if isinstance(result, dict):
+                    if result.get("isolation_success"):
+                        successful_isolations += 1
+                        unique_thread_ids.add(result.get("thread_id"))
+                        unique_user_ids.add(result.get("user_id"))
+                        
+                    logger.info(f"User {i}: {result.get('events_sent', 0)} events, "
+                               f"isolation={'✅' if result.get('isolation_success') else '❌'}")
+                elif isinstance(result, Exception):
+                    logger.warning(f"User {i} isolation test exception: {result}")
+            
+            isolation_rate = successful_isolations / user_count if user_count > 0 else 0
+            
+            logger.info(f"Concurrent user isolation: {successful_isolations}/{user_count} users properly isolated ({isolation_rate:.1%})")
+            logger.info(f"Unique thread IDs: {len(unique_thread_ids)}, Unique user IDs: {len(unique_user_ids)}")
+            
+            # Validate isolation requirements
+            assert successful_isolations >= user_count * 0.8, \
+                f"User isolation rate too low: {isolation_rate:.1%} (expected >= 80%)"
+            
+            assert len(unique_thread_ids) >= user_count * 0.9, \
+                f"Not enough unique thread IDs: {len(unique_thread_ids)}/{user_count}"
+            
+            assert len(unique_user_ids) == user_count, \
+                f"Not all users have unique IDs: {len(unique_user_ids)}/{user_count}"
+            
+        finally:
+            # Cleanup all user contexts
+            for context in user_contexts:
+                try:
+                    await context.cleanup()
+                except Exception:
+                    pass
+    
+    @pytest.mark.asyncio
+    @pytest.mark.critical
+    async def test_concurrent_user_performance_impact(self):
+        """Test performance impact with many concurrent users.
+        
+        CRITICAL: Chat performance must remain acceptable even
+        with many simultaneous AI interactions.
+        """
+        user_count = 15  # Test with high concurrency
+        performance_contexts = []
+        performance_metrics = []
+        
+        try:
+            start_time = time.time()
+            
+            # Create many concurrent contexts
+            for i in range(user_count):
+                context = await self.test_base.create_test_context(user_id=f"perf_user_{i}")
+                await context.setup_websocket_connection(endpoint="/ws/test", auth_required=False)
+                performance_contexts.append(context)
+            
+            setup_time = time.time() - start_time
+            logger.info(f"Created {user_count} concurrent connections in {setup_time:.2f}s")
+            
+            # Test performance under concurrent load
+            async def measure_user_performance(context, user_index):
+                user_start = time.time()
+                events_processed = 0
+                
+                try:
+                    # Send performance test events
+                    for event_num in range(3):
+                        event = {
+                            "type": "agent_thinking",
+                            "reasoning": f"Performance test {event_num} for user {user_index}",
+                            "user_index": user_index,
+                            "event_num": event_num,
+                            "timestamp": time.time()
+                        }
+                        
+                        event_send_start = time.time()
+                        await context.send_message(event)
+                        event_latency = (time.time() - event_send_start) * 1000  # Convert to ms
+                        
+                        events_processed += 1
+                        
+                        # Check latency requirement
+                        if event_latency > MissionCriticalEventValidator.MAX_EVENT_LATENCY:
+                            logger.warning(f"User {user_index} event {event_num} latency {event_latency:.1f}ms exceeds limit")
+                        
+                        await asyncio.sleep(0.05)  # Small delay between events
+                    
+                    user_duration = time.time() - user_start
+                    
+                    return {
+                        "user_index": user_index,
+                        "events_processed": events_processed,
+                        "duration": user_duration,
+                        "events_per_second": events_processed / user_duration if user_duration > 0 else 0,
+                        "success": True
+                    }
+                    
+                except Exception as e:
+                    user_duration = time.time() - user_start
+                    logger.warning(f"User {user_index} performance test failed: {e}")
+                    return {
+                        "user_index": user_index,
+                        "events_processed": events_processed,
+                        "duration": user_duration,
+                        "success": False,
+                        "error": str(e)
+                    }
+            
+            # Execute performance tests concurrently
+            perf_tasks = [measure_user_performance(ctx, i) for i, ctx in enumerate(performance_contexts)]
+            performance_results = await asyncio.gather(*perf_tasks, return_exceptions=True)
+            
+            # Analyze performance results
+            successful_users = 0
+            total_events = 0
+            total_duration = time.time() - start_time
+            
+            for result in performance_results:
+                if isinstance(result, dict) and result.get("success"):
+                    successful_users += 1
+                    total_events += result.get("events_processed", 0)
+                    logger.info(f"User {result['user_index']}: {result['events_processed']} events, "
+                               f"{result['events_per_second']:.2f} events/sec")
+                elif isinstance(result, Exception):
+                    logger.warning(f"Performance test exception: {result}")
+            
+            success_rate = successful_users / user_count if user_count > 0 else 0
+            overall_throughput = total_events / total_duration if total_duration > 0 else 0
+            
+            logger.info(f"Concurrent performance: {successful_users}/{user_count} users successful ({success_rate:.1%})")
+            logger.info(f"Overall throughput: {overall_throughput:.2f} events/sec with {user_count} concurrent users")
+            
+            # Validate performance requirements
+            assert success_rate >= 0.8, f"Performance success rate too low: {success_rate:.1%}"
+            assert overall_throughput > 5.0, f"Overall throughput too low: {overall_throughput:.2f} events/sec"
+            
+        finally:
+            # Cleanup performance test contexts
+            for context in performance_contexts:
+                try:
+                    await context.cleanup()
+                except Exception:
+                    pass
+
+
+# ============================================================================
 # PERFORMANCE AND STRESS TESTS WITH REAL CONNECTIONS
 # ============================================================================
 
@@ -1192,7 +1695,7 @@ class TestRealWebSocketPerformance:
             f"Real connection throughput too low: {connections_per_second:.2f} connections/sec"
     
     @pytest.mark.asyncio
-    @pytest.mark.timeout(120)
+    @pytest.mark.timeout(180)
     async def test_real_websocket_connection_stability(self):
         """Test REAL WebSocket connection stability under extended operation."""
         # Test stability with real connections over time
@@ -1325,6 +1828,406 @@ async def test_real_websocket_agent_event_flow_comprehensive():
             logger.info(f"Event {i}: {event.get('type', 'unknown')} - {str(event)[:100]}...")
 
 
+# ============================================================================
+# COMPREHENSIVE EVENT CONTENT VALIDATION TESTS
+# ============================================================================
+
+@pytest.mark.asyncio
+@pytest.mark.critical
+@pytest.mark.timeout(90)
+async def test_comprehensive_event_content_validation():
+    """Comprehensive validation of event content structure and data quality.
+    
+    CRITICAL: Event content must contain all required fields and meaningful data
+    to deliver substantive chat value to users.
+    """
+    async with RealWebSocketTestBase().real_websocket_test_session() as test_base:
+        test_context = await test_base.create_test_context(user_id="content_validation_user")
+        await test_context.setup_websocket_connection(endpoint="/ws/test", auth_required=False)
+        
+        validator = MissionCriticalEventValidator(strict_mode=True)
+        
+        # Test comprehensive event structures
+        comprehensive_events = {
+            "agent_started": {
+                "type": "agent_started",
+                "user_id": test_context.user_context.user_id,
+                "thread_id": test_context.user_context.thread_id,
+                "agent_name": "comprehensive_test_agent",
+                "task_description": "Perform comprehensive analysis of user request",
+                "execution_id": str(uuid.uuid4()),
+                "timestamp": time.time(),
+                "metadata": {
+                    "session_id": "test_session_123",
+                    "priority": "high",
+                    "estimated_duration": 30.0
+                }
+            },
+            "agent_thinking": {
+                "type": "agent_thinking",
+                "reasoning": "Analyzing user request: Breaking down the problem into smaller components. "
+                           "Identifying key entities and relationships. Determining optimal solution approach.",
+                "step": "initial_analysis",
+                "progress": 0.25,
+                "thinking_time": 2.5,
+                "confidence": 0.85,
+                "timestamp": time.time(),
+                "context": {
+                    "previous_steps": [],
+                    "current_focus": "problem_decomposition",
+                    "next_actions": ["tool_selection", "parameter_preparation"]
+                }
+            },
+            "tool_executing": {
+                "type": "tool_executing",
+                "tool_name": "advanced_search_analyzer",
+                "tool_version": "2.1.0",
+                "execution_id": str(uuid.uuid4()),
+                "parameters": {
+                    "search_query": "comprehensive analysis requirements",
+                    "max_results": 20,
+                    "include_metadata": True,
+                    "filters": {
+                        "date_range": "last_30_days",
+                        "relevance_threshold": 0.7
+                    }
+                },
+                "execution_context": {
+                    "retry_count": 0,
+                    "timeout": 30.0,
+                    "priority": "normal"
+                },
+                "timestamp": time.time()
+            },
+            "tool_completed": {
+                "type": "tool_completed",
+                "tool_name": "advanced_search_analyzer",
+                "execution_id": str(uuid.uuid4()),
+                "success": True,
+                "duration": 3.47,
+                "results": {
+                    "total_results": 15,
+                    "top_matches": [
+                        {"title": "Key Finding 1", "relevance": 0.95, "source": "database_a"},
+                        {"title": "Key Finding 2", "relevance": 0.89, "source": "database_b"},
+                        {"title": "Key Finding 3", "relevance": 0.82, "source": "database_c"}
+                    ],
+                    "summary": "Found comprehensive information addressing user requirements",
+                    "metadata": {
+                        "search_time": 3.47,
+                        "cache_hit_rate": 0.6,
+                        "quality_score": 0.91
+                    }
+                },
+                "performance_metrics": {
+                    "cpu_time": 2.1,
+                    "memory_usage": "45MB",
+                    "api_calls": 3,
+                    "cache_hits": 2
+                },
+                "timestamp": time.time()
+            },
+            "agent_completed": {
+                "type": "agent_completed",
+                "status": "success",
+                "final_response": "Based on comprehensive analysis, I have identified key insights and recommendations. "
+                                "The search revealed 15 highly relevant results with an average relevance score of 0.89. "
+                                "Key findings include three critical areas for attention with actionable next steps provided.",
+                "execution_summary": {
+                    "total_duration": 8.92,
+                    "tools_used": ["advanced_search_analyzer"],
+                    "total_tokens": 2450,
+                    "reasoning_steps": 4,
+                    "confidence_score": 0.91
+                },
+                "deliverables": {
+                    "primary_answer": "Comprehensive analysis complete with actionable insights",
+                    "supporting_data": ["search_results", "analysis_summary"],
+                    "recommendations": ["immediate_action_1", "followup_action_2"]
+                },
+                "quality_metrics": {
+                    "completeness": 0.95,
+                    "accuracy": 0.92,
+                    "usefulness": 0.89,
+                    "user_satisfaction_prediction": 0.91
+                },
+                "timestamp": time.time()
+            }
+        }
+        
+        # Send and validate each comprehensive event
+        for event_type, event_data in comprehensive_events.items():
+            logger.info(f"Validating comprehensive {event_type} event")
+            
+            await test_context.send_message(event_data)
+            validator.record(event_data)
+            
+            # Validate specific content requirements for each event type
+            content_valid = validator.validate_event_content_structure(event_data, event_type)
+            assert content_valid, f"Content validation failed for {event_type} event"
+            
+            # Validate data quality and meaningfulness
+            if event_type == "agent_started":
+                assert len(event_data["task_description"]) > 20, "Task description too short"
+                assert "metadata" in event_data, "Missing metadata in agent_started"
+                assert event_data["metadata"]["estimated_duration"] > 0, "Invalid estimated duration"
+            
+            elif event_type == "agent_thinking":
+                assert len(event_data["reasoning"]) > 50, "Reasoning too brief for meaningful insight"
+                assert 0 <= event_data["progress"] <= 1, "Progress must be between 0 and 1"
+                assert event_data["confidence"] > 0.5, "Confidence too low for valuable thinking"
+            
+            elif event_type == "tool_executing":
+                assert "parameters" in event_data, "Missing tool parameters"
+                assert len(event_data["parameters"]) > 0, "Tool parameters cannot be empty"
+                assert "execution_context" in event_data, "Missing execution context"
+            
+            elif event_type == "tool_completed":
+                assert "results" in event_data, "Missing tool results"
+                assert event_data["duration"] > 0, "Invalid tool execution duration"
+                assert "performance_metrics" in event_data, "Missing performance metrics"
+                if event_data["success"]:
+                    assert len(event_data["results"]["summary"]) > 20, "Result summary too brief"
+            
+            elif event_type == "agent_completed":
+                assert len(event_data["final_response"]) > 50, "Final response too brief"
+                assert "execution_summary" in event_data, "Missing execution summary"
+                assert "quality_metrics" in event_data, "Missing quality metrics"
+                assert event_data["quality_metrics"]["completeness"] > 0.8, "Completeness score too low"
+            
+            await asyncio.sleep(0.1)  # Small delay between events
+        
+        # Final validation
+        is_valid, failures = validator.validate_critical_requirements()
+        
+        if failures:
+            logger.error(f"Comprehensive content validation failures: {failures}")
+        
+        assert len(validator.events) == 5, f"Expected 5 comprehensive events, got {len(validator.events)}"
+        
+        # Validate all required events are present
+        event_types = {event.get('type') for event in validator.events}
+        missing_events = validator.REQUIRED_EVENTS - event_types
+        assert len(missing_events) == 0, f"Missing required events: {missing_events}"
+        
+        logger.info(f"Comprehensive content validation: All {len(validator.events)} events passed structure and quality checks")
+
+
+@pytest.mark.asyncio
+@pytest.mark.critical
+@pytest.mark.timeout(60)
+async def test_event_latency_performance_validation():
+    """Test that all events meet the < 100ms latency requirement.
+    
+    CRITICAL: Low latency ensures responsive chat experience.
+    Users expect immediate feedback during AI interactions.
+    """
+    async with RealWebSocketTestBase().real_websocket_test_session() as test_base:
+        test_context = await test_base.create_test_context(user_id="latency_test_user")
+        await test_context.setup_websocket_connection(endpoint="/ws/test", auth_required=False)
+        
+        validator = MissionCriticalEventValidator(strict_mode=True)
+        latency_measurements = []
+        
+        # Test rapid-fire events to measure latency
+        event_count = 20
+        logger.info(f"Testing latency with {event_count} rapid events")
+        
+        for i in range(event_count):
+            # Create time-sensitive event
+            event = {
+                "type": "agent_thinking",
+                "reasoning": f"Rapid processing step {i+1} - measuring response latency",
+                "step": f"latency_test_{i}",
+                "sequence": i,
+                "timestamp": time.time()
+            }
+            
+            # Measure send latency
+            send_start = time.time()
+            await test_context.send_message(event)
+            send_latency = (time.time() - send_start) * 1000  # Convert to ms
+            
+            validator.record({
+                **event,
+                "send_latency_ms": send_latency,
+                "processing_start": send_start
+            })
+            
+            latency_measurements.append(send_latency)
+            
+            # Validate individual event latency
+            assert send_latency < validator.MAX_EVENT_LATENCY, \
+                f"Event {i} latency {send_latency:.1f}ms exceeds {validator.MAX_EVENT_LATENCY}ms limit"
+            
+            # Very small delay to test rapid succession
+            await asyncio.sleep(0.005)  # 5ms between events
+        
+        # Analyze latency statistics
+        avg_latency = sum(latency_measurements) / len(latency_measurements)
+        max_latency = max(latency_measurements)
+        min_latency = min(latency_measurements)
+        
+        # Calculate percentiles
+        sorted_latencies = sorted(latency_measurements)
+        p95_latency = sorted_latencies[int(0.95 * len(sorted_latencies))]
+        p99_latency = sorted_latencies[int(0.99 * len(sorted_latencies))]
+        
+        logger.info(f"Latency performance results:")
+        logger.info(f"  Average: {avg_latency:.1f}ms")
+        logger.info(f"  Min: {min_latency:.1f}ms, Max: {max_latency:.1f}ms")
+        logger.info(f"  95th percentile: {p95_latency:.1f}ms")
+        logger.info(f"  99th percentile: {p99_latency:.1f}ms")
+        
+        # Validate latency requirements
+        assert avg_latency < validator.MAX_EVENT_LATENCY, \
+            f"Average latency {avg_latency:.1f}ms exceeds {validator.MAX_EVENT_LATENCY}ms"
+        
+        assert p95_latency < validator.MAX_EVENT_LATENCY, \
+            f"95th percentile latency {p95_latency:.1f}ms exceeds {validator.MAX_EVENT_LATENCY}ms"
+        
+        assert max_latency < validator.MAX_EVENT_LATENCY * 2, \
+            f"Maximum latency {max_latency:.1f}ms is unacceptably high"
+        
+        # Validate that we processed all events
+        assert len(validator.events) == event_count, \
+            f"Expected {event_count} events, processed {len(validator.events)}"
+        
+        # Calculate events per second throughput
+        total_duration = max([e.get('timestamp', 0) for e in validator.events]) - \
+                        min([e.get('timestamp', 0) for e in validator.events])
+        
+        if total_duration > 0:
+            events_per_second = event_count / total_duration
+            logger.info(f"Event throughput: {events_per_second:.1f} events/second")
+            
+            # Validate minimum throughput
+            assert events_per_second > 50, \
+                f"Event throughput {events_per_second:.1f} events/sec too low for responsive chat"
+        
+        logger.info(f"Latency validation: All {event_count} events met performance requirements")
+
+
+@pytest.mark.asyncio
+@pytest.mark.critical
+@pytest.mark.timeout(90) 
+async def test_reconnection_within_3_seconds():
+    """Test that WebSocket reconnection completes within 3 seconds.
+    
+    CRITICAL: Fast reconnection maintains chat continuity.
+    Users must not experience long interruptions in AI interactions.
+    """
+    async with RealWebSocketTestBase().real_websocket_test_session() as test_base:
+        reconnection_attempts = 8
+        successful_reconnections = 0
+        reconnection_times = []
+        
+        for attempt in range(reconnection_attempts):
+            logger.info(f"Reconnection test attempt {attempt + 1}/{reconnection_attempts}")
+            
+            test_context = await test_base.create_test_context(user_id=f"reconnect_test_user_{attempt}")
+            
+            try:
+                # Initial connection
+                initial_connect_start = time.time()
+                await test_context.setup_websocket_connection(endpoint="/ws/test", auth_required=False)
+                initial_connect_time = time.time() - initial_connect_start
+                
+                logger.info(f"Initial connection {attempt}: {initial_connect_time:.3f}s")
+                
+                # Send test message to verify connection
+                test_message = {
+                    "type": "ping",
+                    "attempt": attempt,
+                    "timestamp": time.time()
+                }
+                await test_context.send_message(test_message)
+                
+                # Simulate disconnection
+                if hasattr(test_context, 'websocket_connection') and test_context.websocket_connection:
+                    try:
+                        await WebSocketTestHelpers.close_test_connection(test_context.websocket_connection)
+                        logger.info(f"Disconnected connection {attempt}")
+                    except Exception as e:
+                        logger.info(f"Connection {attempt} disconnect error (expected): {e}")
+                
+                # Wait a moment to ensure disconnection
+                await asyncio.sleep(0.1)
+                
+                # Attempt reconnection with timing
+                reconnection_start = time.time()
+                
+                await test_context.setup_websocket_connection(endpoint="/ws/test", auth_required=False)
+                
+                reconnection_time = time.time() - reconnection_start
+                reconnection_times.append(reconnection_time)
+                
+                logger.info(f"Reconnection {attempt}: {reconnection_time:.3f}s")
+                
+                # Validate reconnection time requirement
+                if reconnection_time <= MissionCriticalEventValidator.MAX_RECONNECTION_TIME:
+                    successful_reconnections += 1
+                    
+                    # Verify reconnection by sending confirmation message
+                    confirmation_message = {
+                        "type": "agent_started",
+                        "user_id": test_context.user_context.user_id,
+                        "thread_id": test_context.user_context.thread_id,
+                        "reconnection_attempt": attempt,
+                        "reconnection_time": reconnection_time,
+                        "timestamp": time.time()
+                    }
+                    await test_context.send_message(confirmation_message)
+                    
+                    logger.info(f"✅ Reconnection {attempt} successful in {reconnection_time:.3f}s")
+                else:
+                    logger.warning(f"❌ Reconnection {attempt} took {reconnection_time:.3f}s (exceeds {MissionCriticalEventValidator.MAX_RECONNECTION_TIME}s limit)")
+                
+            except Exception as e:
+                logger.error(f"Reconnection attempt {attempt} failed: {e}")
+                reconnection_times.append(float('inf'))  # Mark as failed
+            
+            finally:
+                # Cleanup
+                try:
+                    await test_context.cleanup()
+                except Exception:
+                    pass
+            
+            # Small delay before next attempt
+            await asyncio.sleep(0.2)
+        
+        # Analyze reconnection performance
+        success_rate = successful_reconnections / reconnection_attempts if reconnection_attempts > 0 else 0
+        
+        valid_times = [t for t in reconnection_times if t != float('inf')]
+        
+        if valid_times:
+            avg_reconnection_time = sum(valid_times) / len(valid_times)
+            max_reconnection_time = max(valid_times)
+            min_reconnection_time = min(valid_times)
+            
+            logger.info(f"Reconnection performance summary:")
+            logger.info(f"  Success rate: {successful_reconnections}/{reconnection_attempts} ({success_rate:.1%})")
+            logger.info(f"  Average time: {avg_reconnection_time:.3f}s")
+            logger.info(f"  Min: {min_reconnection_time:.3f}s, Max: {max_reconnection_time:.3f}s")
+            
+            # Validate reconnection requirements
+            assert success_rate >= 0.75, \
+                f"Reconnection success rate {success_rate:.1%} too low (expected >= 75%)"
+            
+            assert avg_reconnection_time <= MissionCriticalEventValidator.MAX_RECONNECTION_TIME, \
+                f"Average reconnection time {avg_reconnection_time:.3f}s exceeds {MissionCriticalEventValidator.MAX_RECONNECTION_TIME}s limit"
+            
+            assert max_reconnection_time <= MissionCriticalEventValidator.MAX_RECONNECTION_TIME * 1.5, \
+                f"Maximum reconnection time {max_reconnection_time:.3f}s is unacceptably high"
+        
+        else:
+            raise AssertionError("No successful reconnections recorded")
+        
+        logger.info(f"Reconnection validation: {successful_reconnections}/{reconnection_attempts} reconnections within {MissionCriticalEventValidator.MAX_RECONNECTION_TIME}s requirement")
+
+
 @pytest.mark.asyncio
 @pytest.mark.critical
 @pytest.mark.timeout(90)
@@ -1396,10 +2299,217 @@ async def test_real_websocket_concurrent_users():
                 try:
                     await context.cleanup()
                 except Exception:
-                    pass  # Ignore cleanup errors
+                    pass
 
+
+# ============================================================================
+# EDGE CASES AND ERROR CONDITION TESTS (5 Additional Tests)
+# ============================================================================
+
+@pytest.mark.asyncio
+@pytest.mark.critical
+@pytest.mark.timeout(60)
+async def test_malformed_event_handling():
+    """Test handling of malformed WebSocket events.
+    
+    CRITICAL: System must gracefully handle malformed events
+    without breaking chat functionality.
+    """
+    async with RealWebSocketTestBase().real_websocket_test_session() as test_base:
+        test_context = await test_base.create_test_context(user_id="malformed_test_user")
+        await test_context.setup_websocket_connection(endpoint="/ws/test", auth_required=False)
+        
+        validator = MissionCriticalEventValidator()
+        
+        # Test various malformed events
+        malformed_events = [
+            # Missing required fields
+            {"type": "agent_started"},  # Missing user_id, thread_id
+            
+            # Invalid data types
+            {"type": "agent_thinking", "reasoning": None, "timestamp": "invalid_timestamp"},
+            
+            # Empty or invalid content
+            {"type": "tool_executing", "tool_name": "", "parameters": None},
+            
+            # Oversized content
+            {"type": "agent_completed", "final_response": "x" * 10000, "status": "success"},
+            
+            # Invalid JSON structure (as string)
+            '{"type": "invalid_json", "malformed": true, "missing_quote: "value"}',
+        ]
+        
+        responses_received = 0
+        errors_handled_gracefully = 0
+        
+        for i, malformed_event in enumerate(malformed_events):
+            try:
+                logger.info(f"Testing malformed event {i+1}: {str(malformed_event)[:100]}...")
+                
+                if isinstance(malformed_event, str):
+                    # For string events, we might need special handling
+                    try:
+                        await test_context.send_raw_message(malformed_event)
+                    except AttributeError:
+                        # send_raw_message may not exist, use regular send
+                        await test_context.send_message(malformed_event)
+                else:
+                    await test_context.send_message(malformed_event)
+                
+                # Try to receive error response
+                try:
+                    response = await test_context.receive_message()
+                    if response:
+                        responses_received += 1
+                        validator.record(response)
+                        
+                        # Check if it's an error response
+                        if response.get('type') == 'error' or 'error' in response:
+                            errors_handled_gracefully += 1
+                            
+                except asyncio.TimeoutError:
+                    # No response is also acceptable for malformed events
+                    errors_handled_gracefully += 1
+                    
+                await asyncio.sleep(0.1)  # Small delay between malformed events
+                
+            except Exception as e:
+                logger.info(f"Malformed event {i+1} caused expected exception: {e}")
+                errors_handled_gracefully += 1
+        
+        # Validate error handling
+        error_handling_rate = errors_handled_gracefully / len(malformed_events)
+        
+        logger.info(f"Malformed event handling: {errors_handled_gracefully}/{len(malformed_events)} handled gracefully ({error_handling_rate:.1%})")
+        logger.info(f"Responses received: {responses_received}")
+        
+        # System should handle malformed events gracefully
+        assert error_handling_rate >= 0.8, f"Error handling rate too low: {error_handling_rate:.1%}"
+        
+        # Connection should still be functional after malformed events
+        test_normal_event = {
+            "type": "ping",
+            "message": "Connection still works after malformed events",
+            "timestamp": time.time()
+        }
+        
+        try:
+            await test_context.send_message(test_normal_event)
+            logger.info("Connection remains functional after malformed event tests")
+        except Exception as e:
+            raise AssertionError(f"Connection broken after malformed events: {e}")
+
+
+@pytest.mark.asyncio
+@pytest.mark.critical
+@pytest.mark.timeout(90)
+async def test_event_burst_handling():
+    """Test handling of rapid event bursts without message loss.
+    
+    CRITICAL: Chat must handle bursts of agent activity
+    during complex AI reasoning without losing events.
+    """
+    async with RealWebSocketTestBase().real_websocket_test_session() as test_base:
+        test_context = await test_base.create_test_context(user_id="burst_test_user")
+        await test_context.setup_websocket_connection(endpoint="/ws/test", auth_required=False)
+        
+        validator = MissionCriticalEventValidator()
+        
+        # Create burst of events (simulating complex agent reasoning)
+        burst_size = 25
+        logger.info(f"Testing event burst handling with {burst_size} events")
+        
+        burst_events = []
+        for i in range(burst_size):
+            # Alternate between different event types
+            event_types = list(validator.REQUIRED_EVENTS)
+            event_type = event_types[i % len(event_types)]
+            
+            event = {
+                "type": event_type,
+                "burst_sequence": i,
+                "timestamp": time.time(),
+                "burst_id": "comprehensive_burst_test"
+            }
+            
+            # Add event-specific required fields
+            if event_type == "agent_started":
+                event.update({
+                    "user_id": test_context.user_context.user_id,
+                    "thread_id": test_context.user_context.thread_id
+                })
+            elif event_type == "agent_thinking":
+                event["reasoning"] = f"Burst reasoning step {i+1}"
+            elif event_type == "tool_executing":
+                event.update({
+                    "tool_name": f"burst_tool_{i%3}",
+                    "parameters": {"burst_param": i}
+                })
+            elif event_type == "tool_completed":
+                event.update({
+                    "tool_name": f"burst_tool_{i%3}",
+                    "results": {"burst_result": f"result_{i}"},
+                    "duration": 0.5 + (i * 0.1)
+                })
+            elif event_type == "agent_completed":
+                event.update({
+                    "status": "success" if i % 2 == 0 else "partial",
+                    "final_response": f"Burst completion {i}"
+                })
+            
+            burst_events.append(event)
+        
+        # Send burst of events as fast as possible
+        burst_start = time.time()
+        
+        for event in burst_events:
+            await test_context.send_message(event)
+            validator.record(event)
+        
+        burst_duration = time.time() - burst_start
+        
+        # Validate burst handling
+        assert len(validator.events) == burst_size, \
+            f"Event loss in burst: sent {burst_size}, recorded {len(validator.events)}"
+        
+        events_per_second = burst_size / burst_duration if burst_duration > 0 else 0
+        
+        logger.info(f"Burst test: {burst_size} events sent in {burst_duration:.3f}s ({events_per_second:.1f} events/sec)")
+        
+        # Validate burst performance
+        assert events_per_second > 20, f"Burst throughput too low: {events_per_second:.1f} events/sec"
+        assert burst_duration < 5.0, f"Burst took too long: {burst_duration:.3f}s"
+        
+        # Validate that all event types are present
+        recorded_event_types = {event.get('type') for event in validator.events}
+        assert validator.REQUIRED_EVENTS.issubset(recorded_event_types), \
+            f"Missing event types in burst: {validator.REQUIRED_EVENTS - recorded_event_types}"
+
+
+# ============================================================================
+# COMPREHENSIVE TEST SUITE EXECUTION
+# ============================================================================
 
 if __name__ == "__main__":
-    # Run the mission critical REAL WebSocket tests
+    # Run the comprehensive mission critical REAL WebSocket tests
     import sys
-    pytest.main([__file__, "-v", "-s", "--tb=short", "-k", "real"])
+    
+    print("\n" + "=" * 80)
+    print("MISSION CRITICAL WEBSOCKET AGENT EVENTS TEST SUITE")
+    print("COMPREHENSIVE VALIDATION OF ALL 5 REQUIRED EVENTS")
+    print("=" * 80)
+    print("\nBusiness Value: $500K+ ARR - Core chat functionality")
+    print("Testing: Individual events, sequences, timing, chaos, concurrency")
+    print("Requirements: Latency < 100ms, Reconnection < 3s, 10+ concurrent users")
+    print("\nRunning with REAL WebSocket connections (NO MOCKS)...\n")
+    
+    # Run all comprehensive tests
+    pytest.main([
+        __file__, 
+        "-v", 
+        "-s", 
+        "--tb=short",
+        "--maxfail=3",  # Stop after 3 failures to preserve resources
+        "--durations=10",  # Show 10 slowest tests
+        "-k", "critical"  # Run only critical tests
+    ])

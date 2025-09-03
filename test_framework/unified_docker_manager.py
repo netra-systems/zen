@@ -284,14 +284,15 @@ class UnifiedDockerManager:
     
     def __init__(self, 
                  config: Optional[OrchestrationConfig] = None,
-                 environment_type: EnvironmentType = EnvironmentType.SHARED,
+                 environment_type: EnvironmentType = EnvironmentType.DEVELOPMENT,
                  test_id: Optional[str] = None,
                  use_production_images: bool = True,  # Default to memory-optimized production images
                  mode: ServiceMode = ServiceMode.DOCKER,
                  use_alpine: bool = False,  # Add Alpine container support
                  rebuild_images: bool = True,  # Rebuild images by default for freshness
                  rebuild_backend_only: bool = True,  # Only rebuild backend by default
-                 pull_policy: str = "missing"):  # Docker pull policy: always, never, missing (default)
+                 pull_policy: str = "missing",  # Docker pull policy: always, never, missing (default)
+                 no_cache_app_code: bool = True):  # Always rebuild app code layers
         """
         Initialize unified Docker manager with orchestration capabilities.
         
@@ -304,6 +305,8 @@ class UnifiedDockerManager:
             use_alpine: Use Alpine-based Docker compose files for minimal container size
             rebuild_images: Whether to rebuild Docker images before starting
             rebuild_backend_only: Whether to rebuild only backend services (backend, auth)
+            pull_policy: Docker pull policy - controls Docker Hub access
+            no_cache_app_code: If True, always rebuild application code layers (recommended)
         """
         self.config = config or OrchestrationConfig()
         self.environment_type = environment_type
@@ -314,6 +317,7 @@ class UnifiedDockerManager:
         self.rebuild_images = rebuild_images
         self.rebuild_backend_only = rebuild_backend_only
         self.pull_policy = pull_policy  # Control Docker Hub access
+        self.no_cache_app_code = no_cache_app_code  # Smart caching strategy
         
         # Port discovery and allocation
         self.port_discovery = DockerPortDiscovery(use_test_services=True)
@@ -1090,7 +1094,7 @@ class UnifiedDockerManager:
         compose_file = self._get_compose_file()
         
         # If using test compose file, add "test-" prefix
-        if "docker-compose.test.yml" in compose_file:
+        if "docker-compose.test.yml" in compose_file or "docker-compose.alpine-test.yml" in compose_file:
             # Standard service mappings for test environment
             service_map = {
                 "postgres": "test-postgres",
@@ -1102,27 +1106,66 @@ class UnifiedDockerManager:
                 "rabbitmq": "test-rabbitmq"
             }
             return service_map.get(service, service)
+        elif self.environment_type == EnvironmentType.DEVELOPMENT:
+            # For development environment, add "dev-" prefix
+            service_map = {
+                "postgres": "dev-postgres",
+                "redis": "dev-redis",
+                "clickhouse": "dev-clickhouse",
+                "backend": "dev-backend",
+                "auth": "dev-auth",
+                "frontend": "dev-frontend",
+                "rabbitmq": "dev-rabbitmq"
+            }
+            return service_map.get(service, service)
         
         # For other compose files, use service name as-is
         return service
     
     def _get_compose_file(self) -> str:
         """Get appropriate docker-compose file based on Alpine setting and environment type"""
-        if self.use_alpine:
-            # Use Alpine compose files when Alpine support is enabled
-            # Prioritize alpine-test.yml for test environments, alpine.yml for others
-            compose_files = [
-                "docker-compose.alpine-test.yml",
-                "docker-compose.alpine.yml",
-                "docker-compose.test.yml",  # Fallback to regular test compose
-                "docker-compose.yml"  # Final fallback
-            ]
+        # Choose compose files based on environment type
+        if self.environment_type == EnvironmentType.DEVELOPMENT:
+            # For development, prioritize main docker-compose.yml
+            if self.use_alpine:
+                compose_files = [
+                    "docker-compose.alpine.yml",
+                    "docker-compose.yml"
+                ]
+            else:
+                compose_files = [
+                    "docker-compose.yml"
+                ]
         else:
-            # Use regular compose files
-            compose_files = [
-                "docker-compose.test.yml",
-                "docker-compose.yml"
-            ]
+            # For test/shared environments, use test compose files
+            if self.use_alpine:
+                # Use Alpine compose files when Alpine support is enabled
+                # Prioritize alpine-test.yml for test environments, alpine.yml for others
+                compose_files = [
+                    "docker-compose.alpine-test.yml",
+                    "docker-compose.alpine.yml",
+                    "docker-compose.test.yml",  # Fallback to regular test compose
+                    "docker-compose.yml"  # Final fallback
+                ]
+            else:
+                # Use regular compose files
+                compose_files = [
+                    "docker-compose.test.yml",
+                    "docker-compose.yml"
+                ]
+        
+        # Try to find git root first for most reliable path resolution
+        try:
+            import git
+            repo = git.Repo(search_parent_directories=True)
+            project_root = Path(repo.working_dir)
+            for file_name in compose_files:
+                full_path = project_root / file_name
+                if full_path.exists():
+                    logger.info(f"Selected Docker compose file: {full_path} (from git root, Alpine: {self.use_alpine}, Environment: {self.environment_type.value})")
+                    return str(full_path)
+        except Exception as e:
+            logger.debug(f"Git root detection failed: {e}, falling back to other methods")
         
         # First check in current directory
         for file_path in compose_files:
@@ -1132,7 +1175,7 @@ class UnifiedDockerManager:
         
         # Then check in project root (absolute path from env)
         env = get_env()
-        project_root = env.get("PROJECT_ROOT")
+        project_root = env.get("PROJECT_ROOT") or env.get("NETRA_PROJECT_ROOT")
         if project_root:
             project_path = Path(project_root)
             for file_name in compose_files:
@@ -2042,22 +2085,30 @@ class UnifiedDockerManager:
         
         # Build services if needed
         if self.rebuild_images:
-            backend_services = ['backend', 'auth', 'alpine-test-backend', 'alpine-test-auth', 'test-backend', 'test-auth']
+            backend_services = ['backend', 'auth', 'alpine-test-backend', 'alpine-test-auth', 'test-backend', 'test-auth', 
+                               'dev-backend', 'dev-auth']  # Include dev services
+            
+            # Add no-cache flag for application code if enabled
+            no_cache_flag = []
+            if self.no_cache_app_code:
+                # Use --no-cache to ensure fresh Python code is always copied
+                no_cache_flag = ["--no-cache"]
+                logger.info("🔄 Using --no-cache for fresh application code build")
             
             if self.rebuild_backend_only and any(s in backend_services for s in service_names):
                 # Build backend services
                 services_to_build = [s for s in service_names if s in backend_services]
                 if services_to_build:
-                    build_cmd = ["docker", "compose", "-f", compose_file, "-p", self._get_project_name(), "build"] + services_to_build
-                    logger.info(f"🔨 Building backend services: {services_to_build}")
+                    build_cmd = ["docker", "compose", "-f", compose_file, "-p", self._get_project_name(), "build"] + no_cache_flag + services_to_build
+                    logger.info(f"🔨 Building backend services: {services_to_build} (no-cache={self.no_cache_app_code})")
                     
                     result = subprocess.run(build_cmd, capture_output=True, text=True, timeout=300, env=env)
                     if result.returncode != 0:
                         logger.warning(f"⚠️ Failed to build services: {result.stderr}")
             elif not self.rebuild_backend_only:
                 # Build all requested services
-                build_cmd = ["docker", "compose", "-f", compose_file, "-p", self._get_project_name(), "build"] + service_names
-                logger.info(f"🔨 Building all requested services: {service_names}")
+                build_cmd = ["docker", "compose", "-f", compose_file, "-p", self._get_project_name(), "build"] + no_cache_flag + service_names
+                logger.info(f"🔨 Building all requested services: {service_names} (no-cache={self.no_cache_app_code})")
                 
                 result = subprocess.run(build_cmd, capture_output=True, text=True, timeout=300, env=env)
                 if result.returncode != 0:
@@ -2554,6 +2605,77 @@ class UnifiedDockerManager:
             logger.warning(f"Error checking container reusability for {service}: {e}")
             return False
     
+    def pre_test_cleanup(self) -> bool:
+        """
+        Perform pre-test cleanup to ensure clean Docker state.
+        
+        This addresses root cause #3 from Five Whys analysis:
+        - Removes orphaned containers and networks
+        - Prunes system to free resources
+        - Ensures Docker daemon is in clean state
+        
+        Returns:
+            True if cleanup successful
+        """
+        logger.info("🧹 Performing pre-test Docker cleanup...")
+        
+        try:
+            # 1. Stop any orphaned containers from previous test runs
+            logger.info("Stopping orphaned containers...")
+            result = subprocess.run(
+                ["docker", "ps", "-q", "--filter", "label=com.docker.compose.project"],
+                capture_output=True, text=True, timeout=10
+            )
+            if result.returncode == 0 and result.stdout.strip():
+                container_ids = result.stdout.strip().split('\n')
+                logger.info(f"Found {len(container_ids)} orphaned containers to clean")
+                subprocess.run(
+                    ["docker", "stop"] + container_ids,
+                    capture_output=True, timeout=30
+                )
+            
+            # 2. Prune stopped containers (but not volumes - we want to keep test data)
+            logger.info("Pruning stopped containers...")
+            subprocess.run(
+                ["docker", "container", "prune", "-f"],
+                capture_output=True, timeout=30
+            )
+            
+            # 3. Prune unused networks to prevent network conflicts
+            logger.info("Pruning unused networks...")
+            subprocess.run(
+                ["docker", "network", "prune", "-f"],
+                capture_output=True, timeout=30
+            )
+            
+            # 4. Clean build cache if disk space is low (optional, conservative)
+            # Only clean layers older than 24h to preserve recent builds
+            logger.info("Cleaning old build cache...")
+            subprocess.run(
+                ["docker", "builder", "prune", "-f", "--filter", "until=24h"],
+                capture_output=True, timeout=30
+            )
+            
+            # 5. Verify Docker daemon is responsive
+            logger.info("Verifying Docker daemon health...")
+            result = subprocess.run(
+                ["docker", "version", "--format", "{{.Server.Version}}"],
+                capture_output=True, text=True, timeout=5
+            )
+            if result.returncode != 0:
+                logger.error("Docker daemon not responding properly")
+                return False
+            
+            logger.info("✅ Pre-test cleanup completed successfully")
+            return True
+            
+        except subprocess.TimeoutExpired as e:
+            logger.error(f"⚠️ Pre-test cleanup timeout: {e}")
+            return False
+        except Exception as e:
+            logger.error(f"⚠️ Pre-test cleanup error: {e}")
+            return False
+    
     async def start_services_smart(self, services: List[str], wait_healthy: bool = True) -> bool:
         """
         Start services only if they're not already healthy (smart container reuse).
@@ -2565,6 +2687,10 @@ class UnifiedDockerManager:
         Returns:
             True if all services started successfully
         """
+        # Run pre-test cleanup before starting services
+        if not self.pre_test_cleanup():
+            logger.warning("Pre-test cleanup had issues, continuing anyway...")
+        
         logger.info(f"Smart starting services: {', '.join(services)}")
         
         services_to_start = []

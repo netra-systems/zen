@@ -1,14 +1,17 @@
 #!/usr/bin/env python3
 """
-Docker Environment Manager
+Docker Environment Manager - UPDATED to use UnifiedDockerManager
 
 Unified management script for TEST and DEV Docker environments.
-Allows running both environments simultaneously for different purposes.
+Now uses UnifiedDockerManager as the SSOT for all Docker operations.
+
+CRITICAL: This script now delegates all Docker operations to UnifiedDockerManager
+per CLAUDE.md Section 7.1 requirements.
 """
 
 import os
 import sys
-import subprocess
+import asyncio
 import argparse
 import json
 from pathlib import Path
@@ -17,19 +20,24 @@ from typing import Dict, List
 # Add parent directory to path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
+# SSOT import - all Docker operations go through UnifiedDockerManager
+from test_framework.unified_docker_manager import UnifiedDockerManager, get_default_manager
+
 
 class DockerEnvironmentManager:
-    """Manage Docker TEST and DEV environments."""
+    """Manage Docker TEST and DEV environments using UnifiedDockerManager."""
     
     def __init__(self):
         self.root_dir = Path(__file__).parent.parent
+        # Get SSOT Docker manager instance
+        self.docker_manager = get_default_manager()
+        
         self.environments = {
             "test": {
-                "compose_files": ["docker-compose.test.yml"],
-                "env_file": ".env.test",
+                "environment_type": "test",
                 "ports": {
-                    "PostgreSQL": 5433,
-                    "Redis": 6380,
+                    "PostgreSQL": 5434,
+                    "Redis": 6381,
                     "ClickHouse HTTP": 8124,
                     "ClickHouse TCP": 9001,
                     "Backend": 8001,
@@ -39,8 +47,7 @@ class DockerEnvironmentManager:
                 "description": "Automated testing with real services"
             },
             "dev": {
-                "compose_files": ["docker-compose.dev.yml", "docker-compose.override.yml"],
-                "env_file": ".env.dev",
+                "environment_type": "dev", 
                 "ports": {
                     "PostgreSQL": 5432,
                     "Redis": 6379,
@@ -55,13 +62,11 @@ class DockerEnvironmentManager:
         }
     
     def check_docker(self) -> bool:
-        """Check if Docker is installed and running."""
+        """Check if Docker is installed and running via UnifiedDockerManager."""
         try:
-            subprocess.run(["docker", "--version"], capture_output=True, check=True)
-            subprocess.run(["docker-compose", "--version"], capture_output=True, check=True)
-            return True
-        except (subprocess.CalledProcessError, FileNotFoundError):
-            print("Error: Docker or docker-compose is not installed or not running.")
+            return asyncio.run(self.docker_manager.is_docker_available())
+        except Exception as e:
+            print(f"Error: Docker check failed: {e}")
             return False
     
     def check_port(self, port: int) -> bool:
@@ -73,28 +78,23 @@ class DockerEnvironmentManager:
         return result != 0
     
     def get_running_containers(self) -> Dict[str, List[str]]:
-        """Get list of running containers by environment."""
+        """Get list of running containers by environment via UnifiedDockerManager."""
         result = {"test": [], "dev": [], "other": []}
         
         try:
-            output = subprocess.run(
-                ["docker", "ps", "--format", "{{.Names}}"],
-                capture_output=True,
-                text=True,
-                check=True
-            ).stdout.strip()
+            # Use UnifiedDockerManager to get container status
+            status = self.docker_manager.get_enhanced_container_status()
             
-            if output:
-                containers = output.split('\n')
-                for container in containers:
-                    if "test" in container:
-                        result["test"].append(container)
-                    elif "dev" in container:
-                        result["dev"].append(container)
-                    else:
-                        result["other"].append(container)
-        except subprocess.CalledProcessError:
-            pass
+            for service, container_info in status.items():
+                container_name = container_info.get("name", service)
+                if "test" in container_name:
+                    result["test"].append(container_name)
+                elif "dev" in container_name:
+                    result["dev"].append(container_name)
+                else:
+                    result["other"].append(container_name)
+        except Exception as e:
+            print(f"Warning: Could not get container status: {e}")
         
         return result
     
@@ -134,74 +134,72 @@ class DockerEnvironmentManager:
         
         print("\n" + "=" * 60)
     
-    def start_environment(self, env_name: str, detached: bool = True, services: List[str] = None):
-        """Start a specific environment."""
+    async def start_environment(self, env_name: str, detached: bool = True, services: List[str] = None):
+        """Start a specific environment using UnifiedDockerManager."""
         if env_name not in self.environments:
             print(f"Error: Unknown environment '{env_name}'")
             return False
         
         env_config = self.environments[env_name]
         
-        # Build docker-compose command
-        cmd = ["docker-compose"]
-        for compose_file in env_config["compose_files"]:
-            if os.path.exists(self.root_dir / compose_file):
-                cmd.extend(["-f", compose_file])
+        print(f"Starting {env_name.upper()} environment via UnifiedDockerManager...")
         
-        cmd.extend(["--env-file", env_config["env_file"], "up"])
-        
-        if detached:
-            cmd.append("-d")
-        
-        if services:
-            cmd.extend(services)
-        elif env_name == "dev":
-            cmd.extend(["--profile", "full"])
-        
-        print(f"Starting {env_name.upper()} environment...")
-        result = subprocess.run(cmd, cwd=self.root_dir)
-        
-        if result.returncode == 0:
-            print(f"\n{env_name.upper()} environment started successfully!")
-            self._print_environment_info(env_name)
-            return True
-        else:
-            print(f"Error: Failed to start {env_name.upper()} environment")
+        try:
+            # Default services if none specified
+            if services is None:
+                services = ["postgres", "redis", "backend", "auth"]
+            
+            # Start services using UnifiedDockerManager
+            success = await self.docker_manager.start_services_smart(
+                services=services,
+                wait_healthy=True,
+                environment_name=env_config["environment_type"]
+            )
+            
+            if success:
+                print(f"\n{env_name.upper()} environment started successfully!")
+                self._print_environment_info(env_name)
+                return True
+            else:
+                print(f"Error: Failed to start {env_name.upper()} environment")
+                return False
+                
+        except Exception as e:
+            print(f"Error starting {env_name.upper()} environment: {e}")
             return False
     
-    def stop_environment(self, env_name: str, remove_volumes: bool = False):
-        """Stop a specific environment."""
+    async def stop_environment(self, env_name: str, remove_volumes: bool = False):
+        """Stop a specific environment using UnifiedDockerManager."""
         if env_name not in self.environments:
             print(f"Error: Unknown environment '{env_name}'")
             return False
         
         env_config = self.environments[env_name]
         
-        # Build docker-compose command
-        cmd = ["docker-compose"]
-        for compose_file in env_config["compose_files"]:
-            if os.path.exists(self.root_dir / compose_file):
-                cmd.extend(["-f", compose_file])
+        print(f"Stopping {env_name.upper()} environment via UnifiedDockerManager...")
         
-        cmd.extend(["--env-file", env_config["env_file"], "down"])
-        
-        if remove_volumes:
-            cmd.append("-v")
-        
-        print(f"Stopping {env_name.upper()} environment...")
-        result = subprocess.run(cmd, cwd=self.root_dir)
-        
-        if result.returncode == 0:
-            print(f"{env_name.upper()} environment stopped.")
-            return True
-        else:
-            print(f"Error: Failed to stop {env_name.upper()} environment")
+        try:
+            # Stop environment using UnifiedDockerManager
+            success = await self.docker_manager.graceful_shutdown(
+                timeout=30,
+                cleanup_volumes=remove_volumes
+            )
+            
+            if success:
+                print(f"{env_name.upper()} environment stopped.")
+                return True
+            else:
+                print(f"Error: Failed to stop {env_name.upper()} environment")
+                return False
+                
+        except Exception as e:
+            print(f"Error stopping {env_name.upper()} environment: {e}")
             return False
     
-    def restart_environment(self, env_name: str):
+    async def restart_environment(self, env_name: str):
         """Restart a specific environment."""
-        self.stop_environment(env_name)
-        return self.start_environment(env_name)
+        await self.stop_environment(env_name)
+        return await self.start_environment(env_name)
     
     def _print_environment_info(self, env_name: str):
         """Print environment access information."""
@@ -215,15 +213,15 @@ class DockerEnvironmentManager:
         print(f"  Auth Service: http://localhost:{env_config['ports']['Auth']}")
         print(f"  Frontend: http://localhost:{env_config['ports']['Frontend']}")
     
-    def start_both(self):
+    async def start_both(self):
         """Start both TEST and DEV environments."""
         print("Starting both TEST and DEV environments...\n")
         
         # Start TEST environment first (usually for background testing)
-        test_success = self.start_environment("test", detached=True)
+        test_success = await self.start_environment("test", detached=True)
         
         # Start DEV environment
-        dev_success = self.start_environment("dev", detached=True)
+        dev_success = await self.start_environment("dev", detached=True)
         
         if test_success and dev_success:
             print("\n" + "=" * 60)
@@ -238,23 +236,26 @@ class DockerEnvironmentManager:
         
         return False
     
-    def stop_all(self):
+    async def stop_all(self):
         """Stop all environments."""
         print("Stopping all environments...\n")
-        self.stop_environment("test")
-        self.stop_environment("dev")
+        await self.stop_environment("test")
+        await self.stop_environment("dev")
         print("\nAll environments stopped.")
     
-    def clean_all(self):
+    async def clean_all(self):
         """Stop all environments and remove volumes."""
         print("Cleaning all environments (including volumes)...\n")
-        self.stop_environment("test", remove_volumes=True)
-        self.stop_environment("dev", remove_volumes=True)
+        await self.stop_environment("test", remove_volumes=True)
+        await self.stop_environment("dev", remove_volumes=True)
         
-        # Also prune unused Docker resources
-        print("\nPruning unused Docker resources...")
-        subprocess.run(["docker", "system", "prune", "-f"])
-        print("\nCleanup complete.")
+        # Use UnifiedDockerManager for system cleanup
+        print("\nPruning unused Docker resources via UnifiedDockerManager...")
+        try:
+            await self.docker_manager.cleanup_orphaned_containers()
+            print("Cleanup complete.")
+        except Exception as e:
+            print(f"Warning: Cleanup had issues: {e}")
 
 
 def main():
@@ -333,40 +334,39 @@ def main():
         parser.print_help()
         sys.exit(0)
     
-    if args.command == "status":
-        manager.status()
-    
-    elif args.command == "start":
-        if args.environment == "both":
-            manager.start_both()
+    async def run_command():
+        """Run the appropriate command with async support."""
+        if args.command == "status":
+            manager.status()
+        
+        elif args.command == "start":
+            if args.environment == "both":
+                await manager.start_both()
+            else:
+                await manager.start_environment(
+                    args.environment,
+                    detached=args.detach,
+                    services=args.services
+                )
+        
+        elif args.command == "stop":
+            if args.environment == "all":
+                await manager.stop_all()
+            else:
+                await manager.stop_environment(args.environment, remove_volumes=args.volumes)
+        
+        elif args.command == "restart":
+            await manager.restart_environment(args.environment)
+        
+        elif args.command == "clean":
+            await manager.clean_all()
+            
         else:
-            manager.start_environment(
-                args.environment,
-                detached=args.detach,
-                services=args.services
-            )
-    
-    elif args.command == "stop":
-        if args.environment == "all":
-            manager.stop_all()
-        else:
-            manager.stop_environment(args.environment, remove_volumes=args.volumes)
-    
-    elif args.command == "restart":
-        manager.restart_environment(args.environment)
-    
-    elif args.command == "clean":
-        manager.clean_all()
-    
-    elif args.command == "logs":
-        env_config = manager.environments[args.environment]
-        cmd = ["docker-compose"]
-        for compose_file in env_config["compose_files"]:
-            cmd.extend(["-f", compose_file])
-        cmd.extend(["logs", "-f"])
-        if args.service:
-            cmd.append(args.service)
-        subprocess.run(cmd, cwd=manager.root_dir)
+            print(f"Unknown command: {args.command}")
+            parser.print_help()
+            
+    # Run the async command
+    asyncio.run(run_command())
 
 
 if __name__ == "__main__":

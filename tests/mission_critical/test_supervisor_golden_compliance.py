@@ -1143,10 +1143,8 @@ if __name__ == "__main__":
             # Patch the register_default_agents method to avoid dependency issues during creation
             with patch.object(AgentRegistry, 'register_default_agents', return_value=None):
                 supervisor = SupervisorAgent(
-                    db_session=mock_db_session,
                     llm_manager=llm_manager,
-                    websocket_bridge=mock_bridge,
-                    tool_dispatcher=tool_dispatcher
+                    websocket_bridge=mock_bridge
                 )
                 
                 # Mock validation to allow tests to run without registered agents

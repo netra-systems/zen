@@ -3,6 +3,7 @@
 import os
 import pytest
 import logging
+from unittest.mock import patch
 from shared.isolated_environment import get_env
 
 logger = logging.getLogger(__name__)
@@ -12,7 +13,13 @@ async def test_staging_auth_config_no_dev_login():
     """Verify that staging auth config does not expose dev login endpoint"""
     
     # Simulate staging environment
-        
+    staging_env = {
+        "ENVIRONMENT": "staging",
+        "AUTH_SERVICE_URL": "https://auth.staging.netrasystems.ai",
+        "FRONTEND_URL": "https://staging.netrasystems.ai"
+    }
+    
+    with patch.dict(os.environ, staging_env):
         # Import after setting environment to ensure proper initialization
         from auth_service.auth_core.routes.auth_routes import _detect_environment
         from auth_service.auth_core.config import AuthConfig
@@ -65,19 +72,17 @@ async def test_staging_auth_config_no_dev_login():
             # Config might fail due to missing OAuth credentials, but that's ok
             # The important thing is that dev_mode is False
             logger.warning(f"Auth config returned error (expected in test): {e}")
-    
-    finally:
-        # Restore original environment
-        if original_env:
-        else:
-            env.delete("ENVIRONMENT", "test")
 
 @pytest.mark.asyncio
 async def test_dev_login_blocked_in_staging():
     """Verify that dev login endpoint returns 403 in staging"""
     
     # Simulate staging environment
-        
+    staging_env = {
+        "ENVIRONMENT": "staging"
+    }
+    
+    with patch.dict(os.environ, staging_env):
         from auth_service.auth_core.routes.auth_routes import dev_login, get_client_info
         from fastapi import Request, HTTPException
         
@@ -104,19 +109,17 @@ async def test_dev_login_blocked_in_staging():
         assert "staging" in str(exc_info.value.detail).lower()
         
         logger.info("✓ Dev login correctly blocked in staging environment")
-    
-    finally:
-        # Restore original environment
-        if original_env:
-        else:
-            env.delete("ENVIRONMENT", "test")
 
 @pytest.mark.asyncio
 async def test_production_auth_config_no_dev_login():
     """Verify that production auth config does not expose dev login endpoint"""
     
     # Simulate production environment
-        
+    production_env = {
+        "ENVIRONMENT": "production"
+    }
+    
+    with patch.dict(os.environ, production_env):
         # Import after setting environment
         from auth_service.auth_core.routes.auth_routes import _detect_environment
         from auth_service.auth_core.config import AuthConfig
@@ -133,12 +136,6 @@ async def test_production_auth_config_no_dev_login():
         assert frontend_url == "https://netrasystems.ai", f"Frontend URL should be production, got {frontend_url}"
         
         logger.info("✓ Production environment correctly detected")
-        
-    finally:
-        # Restore original environment
-        if original_env:
-        else:
-            env.delete("ENVIRONMENT", "test")
 
 if __name__ == "__main__":
     import asyncio

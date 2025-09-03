@@ -12,7 +12,7 @@ CRITICAL BUSINESS VALUE: Infrastructure never fails under production load
 P1 REMEDIATION VALIDATION COVERAGE:
 1. ✅ Environment Lock Mechanism Testing (5 tests)
 2. ✅ Resource Monitor Functionality Testing (5 tests)
-3. ✅ tmpfs Volume Fixes - No RAM Exhaustion (5 tests)
+3. ✅ Volume Storage - Using Named Volumes Only (5 tests)
 4. ✅ Parallel Execution Stability Testing (5 tests)
 5. ✅ Cleanup Mechanism Testing (5 tests)
 6. ✅ Resource Limit Enforcement Testing (5 tests)
@@ -1740,8 +1740,8 @@ class TestDockerInfrastructureSecurityValidation:
                     name=f"fs_security_{i}_{int(time.time())}",
                     detach=True,
                     remove=True,
-                    read_only=True,  # Read-only filesystem
-                    tmpfs={'/tmp': 'size=100m'}
+                    read_only=True  # Read-only filesystem
+                    # tmpfs removed - causes system crashes from RAM exhaustion
                 )
                 containers.append(container)
             
@@ -1752,9 +1752,7 @@ class TestDockerInfrastructureSecurityValidation:
                     write_result = container.exec_run("echo 'test' > /test_file")
                     assert write_result.exit_code != 0, "Filesystem not read-only"
                     
-                    # Should be able to write to tmpfs
-                    tmp_result = container.exec_run("echo 'test' > /tmp/test_file")
-                    assert tmp_result.exit_code == 0, "tmpfs not writable"
+                    # tmpfs test removed - tmpfs causes system crashes from RAM exhaustion
                     
                 except Exception as e:
                     logger.warning(f"Filesystem test failed: {e}")

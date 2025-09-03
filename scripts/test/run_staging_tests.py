@@ -36,17 +36,11 @@ class StagingTestRunner:
         env["ENVIRONMENT"] = "staging"
         env["PYTHONPATH"] = str(self.project_root)
         
-        # Load .env.staging file if it exists
-        env_staging_path = self.project_root / ".env.staging"
-        if env_staging_path.exists():
-            print(f"[OK] Loading staging environment from {env_staging_path}")
-            self._load_env_file(env_staging_path, env)
-        else:
-            print("[WARNING] .env.staging file not found, using default values")
-            # Set critical values if .env.staging doesn't exist
-            env["E2E_OAUTH_SIMULATION_KEY"] = "25006a4abd79f48e8e7a62c2b1b87245a449348ac0a01ac69a18521c7e140444"
-            env["REDIS_REQUIRED"] = "false"
-            env["REDIS_FALLBACK_ENABLED"] = "true"
+        # Set default staging test values (no .env.staging file should exist)
+        print("[INFO] Setting default staging test environment values")
+        env["E2E_OAUTH_SIMULATION_KEY"] = "25006a4abd79f48e8e7a62c2b1b87245a449348ac0a01ac69a18521c7e140444"
+        env["REDIS_REQUIRED"] = "false"
+        env["REDIS_FALLBACK_ENABLED"] = "true"
         
         # Ensure critical staging URLs are set
         env.setdefault("API_BASE_URL", "https://api.staging.netrasystems.ai")

@@ -100,9 +100,9 @@ class TestExecutionEngineConsistency:
         # Create test state for execution
         test_state = DeepAgentState(
             user_id="test_user",
-            thread_id="test_thread",
+            chat_thread_id="test_thread",
             run_id="test_run_123",
-            last_message="Test execution pattern"
+            user_request="Test execution pattern"
         )
         
         # Create agents with different execution capabilities
@@ -125,12 +125,23 @@ class TestExecutionEngineConsistency:
         legacy_agent.execute_core_logic = mock_core_logic
         
         try:
-            # Execute using modern pattern
-            modern_result = await modern_agent.execute(test_state, "test_run_123", stream_updates=True)
+            # Execute using modern pattern - using context-based signature
+            from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
+            modern_context = UserExecutionContext(
+                user_id=test_state.user_id,
+                thread_id=test_state.chat_thread_id or "test_thread",
+                run_id="test_run_123"
+            )
+            modern_result = await modern_agent.execute(modern_context, stream_updates=True)
             
             # Execute using legacy pattern (should fall back gracefully)
             try:
-                legacy_result = await legacy_agent.execute(test_state, "test_run_123", stream_updates=True)
+                legacy_context = UserExecutionContext(
+                    user_id=test_state.user_id,
+                    thread_id=test_state.chat_thread_id or "test_thread",
+                    run_id="test_run_123"
+                )
+                legacy_result = await legacy_agent.execute(legacy_context, stream_updates=True)
             except NotImplementedError:
                 # This is expected for legacy agents without modern execution
                 execution_patterns.append("LegacyExecAgent_fallback_to_not_implemented")
@@ -172,9 +183,9 @@ class TestExecutionEngineConsistency:
         # Create test state
         test_state = DeepAgentState(
             user_id="result_test_user",
-            thread_id="result_test_thread", 
+            chat_thread_id="result_test_thread", 
             run_id="result_test_run",
-            last_message="Test result consistency"
+            user_request="Test result consistency"
         )
         
         # Execute operations through both agents
@@ -194,7 +205,13 @@ class TestExecutionEngineConsistency:
             agent.execute_core_logic = test_core_logic
             
             try:
-                result = await agent.execute(test_state, f"test_run_{agent.name}", stream_updates=False)
+                from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
+                context = UserExecutionContext(
+                    user_id=test_state.user_id,
+                    thread_id=test_state.chat_thread_id or "test_thread",
+                    run_id=f"test_run_{agent.name}"
+                )
+                result = await agent.execute(context, stream_updates=False)
                 execution_results.append((agent.name, type(result), result))
             finally:
                 agent.execute_core_logic = original_method
@@ -247,54 +264,44 @@ class TestExecutionContextConsistency:
         # Create test state for context creation
         test_state = DeepAgentState(
             user_id="context_test_user",
-            thread_id="context_test_thread",
+            chat_thread_id="context_test_thread",
             run_id="context_test_run",
-            last_message="Test context creation"
+            user_request="Test context creation"
         )
         
         # Track execution contexts created
         captured_contexts = []
         
-        # Intercept execution context creation
+        # Intercept execution context creation by overriding execute_core_logic
         for agent in agents:
-            original_execute_modern = agent.execute_modern
+            async def capture_core_logic(context):
+                captured_contexts.append({
+                    'agent_name': context.agent_name if hasattr(context, 'agent_name') else agent.name,
+                    'run_id': context.run_id if hasattr(context, 'run_id') else 'unknown',
+                    'state_type': type(context.state).__name__ if hasattr(context, 'state') else 'unknown',
+                    'stream_updates': context.stream_updates if hasattr(context, 'stream_updates') else False,
+                    'has_thread_id': hasattr(context, 'thread_id'),
+                    'has_user_id': hasattr(context, 'user_id'),
+                    'has_correlation_id': hasattr(context, 'correlation_id')
+                })
+                # Return a mock successful result
+                return {"mock": "success", "agent": agent.name}
             
-            async def capture_context_execute_modern(state, run_id, stream_updates=False):
-                # This will call the original method which creates ExecutionContext
-                # We capture it by checking what gets passed to the execution engine
-                execution_engine = agent.execution_engine
-                original_execute = execution_engine.execute
-                
-                async def capture_execute(agent_obj, context):
-                    captured_contexts.append({
-                        'agent_name': context.agent_name,
-                        'run_id': context.run_id,
-                        'state_type': type(context.state).__name__,
-                        'stream_updates': context.stream_updates,
-                        'has_thread_id': hasattr(context, 'thread_id'),
-                        'has_user_id': hasattr(context, 'user_id'),
-                        'has_correlation_id': hasattr(context, 'correlation_id')
-                    })
-                    # Return a mock successful result
-                    from netra_backend.app.agents.base.interface import ExecutionResult
-                    return ExecutionResult(success=True, result={"mock": "success"})
-                
-                execution_engine.execute = capture_execute
-                
-                try:
-                    return await original_execute_modern(state, run_id, stream_updates)
-                finally:
-                    execution_engine.execute = original_execute
-            
-            agent.execute_modern = capture_context_execute_modern
+            agent.execute_core_logic = capture_core_logic
         
         # Execute operations to capture contexts
-        try:
-            for agent in agents:
-                await agent.execute(test_state, f"context_run_{agent.name}", stream_updates=True)
-        except Exception as e:
-            # Expected since we're intercepting execution
-            pass
+        from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
+        for agent in agents:
+            try:
+                context = UserExecutionContext(
+                    user_id=test_state.user_id,
+                    thread_id=test_state.chat_thread_id or "test_thread",
+                    run_id=f"context_run_{agent.name}"
+                )
+                await agent.execute(context, stream_updates=True)
+            except Exception as e:
+                # Expected since we're intercepting execution
+                pass
         
         # ASSERTION: Should have captured contexts from all agents
         assert len(captured_contexts) == len(agents), (
@@ -348,9 +355,9 @@ class TestExecutionContextConsistency:
         # Test state for execution
         test_state = DeepAgentState(
             user_id="hook_test_user",
-            thread_id="hook_test_thread",
+            chat_thread_id="hook_test_thread",
             run_id="hook_test_run",
-            last_message="Test execution hooks"
+            user_request="Test execution hooks"
         )
         
         # Override hook methods to track calls
@@ -447,9 +454,9 @@ class TestExecutionTimingAndMonitoring:
         # Test timing collection functionality
         test_state = DeepAgentState(
             user_id="timing_test_user",
-            thread_id="timing_test_thread",
+            chat_thread_id="timing_test_thread",
             run_id="timing_test_run",
-            last_message="Test timing collection"
+            user_request="Test timing collection"
         )
         
         # Execute operations and check timing is collected
@@ -558,9 +565,9 @@ class TestExecutionErrorHandlingConsistency:
         # Test state for error scenarios
         test_state = DeepAgentState(
             user_id="error_test_user",
-            thread_id="error_test_thread",
+            chat_thread_id="error_test_thread",
             run_id="error_test_run", 
-            last_message="Test error handling"
+            user_request="Test error handling"
         )
         
         # Test different types of errors
@@ -624,9 +631,9 @@ class TestExecutionErrorHandlingConsistency:
         # Test execution fallback when modern execution is unavailable
         test_state = DeepAgentState(
             user_id="fallback_test_user",
-            thread_id="fallback_test_thread",
+            chat_thread_id="fallback_test_thread",
             run_id="fallback_test_run",
-            last_message="Test fallback patterns"
+            user_request="Test fallback patterns"
         )
         
         # Test fallback by temporarily disabling execution engine

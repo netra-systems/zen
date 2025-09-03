@@ -48,7 +48,10 @@ class AdminToolDispatcher(ToolDispatcher):
                  db: Optional[AsyncSession] = None, user: Optional[User] = None, 
                  websocket_manager=None) -> None:
         """Initialize with modern agent architecture components."""
-        ToolDispatcher.__init__(self, tools or [])
+        # UnifiedToolDispatcher (aliased as ToolDispatcher) expects:
+        # user_context, tools, websocket_emitter, websocket_bridge, permission_service
+        # For now, pass None for user_context to use legacy global mode
+        ToolDispatcher.__init__(self, user_context=None, tools=tools or [])
         self._setup_dispatcher_components(llm_manager, tool_dispatcher, db, user)
         self._initialize_modern_components()
     

@@ -121,9 +121,13 @@ class SessionResourceTracker:
 _session_tracker = SessionResourceTracker()
 
 
-@pytest.fixture(scope="session", autouse=True)
+@pytest.fixture(scope="function", autouse=False)
 async def enhanced_session_cleanup():
-    """Enhanced session cleanup fixture."""
+    """Enhanced session cleanup fixture.
+    
+    FIXED: Changed from session scope with autouse=True to function scope with autouse=False
+    to resolve fixture conflicts. Tests that need this functionality should explicitly request it.
+    """
     global _session_tracker
     logger.info("Starting enhanced session cleanup tracking")
     

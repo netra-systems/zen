@@ -86,11 +86,11 @@ services:
     volumes:
       - alpine-test-clickhouse-data:/var/lib/clickhouse
     healthcheck:
-      test: ["CMD", "wget", "-q", "-O-", "http://localhost:8123/ping"]
-      interval: 10s
+      test: ["CMD", "clickhouse-client", "--query", "SELECT 1"]
+      interval: 15s
       timeout: 10s
-      retries: 20
-      start_period: 60s
+      retries: 30
+      start_period: 90s
     networks:
       - default
     deploy:
@@ -115,7 +115,7 @@ services:
       cache_from:
         - python:3.11-alpine3.19
     environment:
-      ENVIRONMENT: testing
+      ENVIRONMENT: test
       LOG_LEVEL: ERROR
       POSTGRES_HOST: alpine-test-postgres
       POSTGRES_PORT: 5432
@@ -129,6 +129,10 @@ services:
       AUTH_SERVICE_URL: http://alpine-test-auth:8081
       TEST_MODE: "true"
       WORKERS: 2
+      SERVICE_ID: backend-test-alpine
+      JWT_SECRET_KEY: rsWwwvq8X6mCSuNv-TMXHDCfb96Xc-Dbay9MZy6EDCU
+      SERVICE_SECRET: test_service_secret
+      FERNET_KEY: hMT-Xu0HfnNhKf-J5sKXMJLnCfCiSUQnVdE1yc6Xqzg=
     ports:
       - "${ALPINE_TEST_BACKEND_PORT:-8002}:8000"
     depends_on:
@@ -149,10 +153,10 @@ services:
     deploy:
       resources:
         limits:
-          memory: 4G
+          memory: 2G
           cpus: '1.0'
         reservations:
-          memory: 2G
+          memory: 1G
 
   alpine-test-auth:
     image: netra-alpine-test-auth:latest
@@ -164,7 +168,7 @@ services:
       cache_from:
         - python:3.11-alpine3.19
     environment:
-      ENVIRONMENT: testing
+      ENVIRONMENT: test
       LOG_LEVEL: ERROR
       POSTGRES_HOST: alpine-test-postgres
       POSTGRES_PORT: 5432
@@ -174,8 +178,9 @@ services:
       REDIS_HOST: alpine-test-redis
       REDIS_PORT: 6379
       TEST_MODE: "true"
-      JWT_SECRET_KEY: test_jwt_secret_key
+      JWT_SECRET_KEY: rsWwwvq8X6mCSuNv-TMXHDCfb96Xc-Dbay9MZy6EDCU
       SERVICE_SECRET: test_service_secret
+      SERVICE_ID: auth-test-alpine
     ports:
       - "${ALPINE_TEST_AUTH_PORT:-8083}:8081"
     depends_on:

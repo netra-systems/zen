@@ -18,11 +18,11 @@ ENV NODE_OPTIONS="--max-old-space-size=4096"
 # Set staging environment variables for build time
 # These NEXT_PUBLIC vars are baked into the build
 ENV NEXT_PUBLIC_ENVIRONMENT=staging
-ENV NEXT_PUBLIC_API_URL=https://netra-backend-staging-pnovr5vsba-uc.a.run.app
-ENV NEXT_PUBLIC_WS_URL=wss://netra-backend-staging-pnovr5vsba-uc.a.run.app
-ENV NEXT_PUBLIC_WEBSOCKET_URL=wss://netra-backend-staging-pnovr5vsba-uc.a.run.app
-ENV NEXT_PUBLIC_AUTH_URL=https://netra-auth-service-pnovr5vsba-uc.a.run.app
-ENV NEXT_PUBLIC_FRONTEND_URL=https://netra-frontend-staging-pnovr5vsba-uc.a.run.app
+ENV NEXT_PUBLIC_API_URL=https://api.staging.netrasystems.ai
+ENV NEXT_PUBLIC_WS_URL=wss://api.staging.netrasystems.ai
+ENV NEXT_PUBLIC_WEBSOCKET_URL=wss://api.staging.netrasystems.ai
+ENV NEXT_PUBLIC_AUTH_URL=https://auth.staging.netrasystems.ai
+ENV NEXT_PUBLIC_FRONTEND_URL=https://app.staging.netrasystems.ai
 
 # Build the application (creates standalone build)
 RUN npm run build

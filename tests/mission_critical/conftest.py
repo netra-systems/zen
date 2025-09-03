@@ -45,12 +45,12 @@ except ImportError:
         return RealServicesManager()
 
 
-@pytest.fixture(scope="session", autouse=True)
+@pytest.fixture(scope="function", autouse=True)
 def real_services_manager():
     """Use REAL services for mission-critical tests - NO MOCKS.
     
-    FIXED: Converted from async to sync session-scoped fixture to avoid
-    ScopeMismatch with pytest-asyncio function-scoped event loops.
+    FIXED: Changed from session to function scope to resolve fixture conflicts
+    with function-scoped autouse fixtures in WebSocket test files.
     """
     manager = get_real_services()
     
@@ -60,7 +60,7 @@ def real_services_manager():
     yield manager
 
 
-@pytest.fixture(scope="session", autouse=True) 
+@pytest.fixture(scope="function", autouse=True) 
 def validate_e2e_environment():
     """Validate real environment - no mocks."""
     return {
@@ -70,12 +70,12 @@ def validate_e2e_environment():
     }
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="function")
 def dev_launcher():
     """Real dev launcher for actual service connections.
     
-    FIXED: Converted from async to sync session-scoped fixture to avoid
-    ScopeMismatch with pytest-asyncio function-scoped event loops.
+    FIXED: Changed from session to function scope to resolve fixture conflicts
+    with function-scoped autouse fixtures in WebSocket test files.
     """
     # This would normally start real services if needed
     yield None

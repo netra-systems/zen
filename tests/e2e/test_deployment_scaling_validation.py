@@ -55,7 +55,9 @@ class TestDeploymentScalingValidation:
         try:
             # Step 1: Set new configuration value
             new_value = f"updated_config_{int(time.time())}"
-            get_env().get(test_config_key) = new_value
+            # Cannot directly assign to get() result, use environment setting
+            import os
+            os.environ[test_config_key] = new_value
             
             # Step 2: Test hot reload (should detect environment change)
             # This should fail initially - no hot reload mechanism implemented
@@ -95,7 +97,7 @@ class TestDeploymentScalingValidation:
         finally:
             # Cleanup
             if original_value is not None:
-                get_env().get(test_config_key) = original_value
+                os.environ[test_config_key] = original_value
             else:
                 os.environ.pop(test_config_key, None)
 

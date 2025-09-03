@@ -256,8 +256,10 @@ class TestSecretKeyValidation:
         
         try:
             # Remove SECRET_KEY environment variable
+            import os
             if get_env().get("SECRET_KEY") is not None:
-                del get_env().get("SECRET_KEY")
+                if "SECRET_KEY" in os.environ:
+                    del os.environ["SECRET_KEY"]
             
             # Test what happens with missing SECRET_KEY
             missing_key_issues = []

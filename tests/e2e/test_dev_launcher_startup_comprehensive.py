@@ -131,6 +131,9 @@ class TestDevLauncherStartuper:
         ]
         
         for var in test_env_vars:
+            # Store original value for restoration
+            if var in os.environ:
+                original_env_values[var] = os.environ[var]
             
         # Set test-specific environment variables
         # NOTE: Using potentially problematic values to expose issues
@@ -166,7 +169,7 @@ class TestDevLauncherStartuper:
             if original_value is None:
                 os.environ.pop(var, None)
             else:
-                get_env().get(var) = original_value
+                os.environ[var] = original_value
                 
         self.original_env.clear()
         

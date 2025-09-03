@@ -227,10 +227,12 @@ class TestDeploymentConfigurationFailures:
             
             # Check database URL
             db_url = manager._get_postgres_url()
+            if "localhost" in db_url or "127.0.0.1" in db_url:
                 precedence_issues.append("DATABASE_URL using local override in staging")
             
             # Check ClickHouse config
             ch_config = manager._get_clickhouse_configuration()
+            if ch_config.get("host") == "localhost":
                 precedence_issues.append("CLICKHOUSE_HOST using local override in staging")
             
             assert not precedence_issues, \

@@ -289,7 +289,8 @@ class ClickHouseConnectionManager:
             from netra_backend.app.db.clickhouse import get_clickhouse_client
             
             # Test connection with a simple query
-            async with get_clickhouse_client() as client:
+            # CRITICAL FIX: Use bypass_manager=True to prevent recursion
+            async with get_clickhouse_client(bypass_manager=True) as client:
                 result = await client.execute("SELECT 1")
                 if result and len(result) > 0:
                     logger.debug("[ClickHouse Connection Manager] Connection test query successful")
@@ -343,7 +344,8 @@ class ClickHouseConnectionManager:
         try:
             from netra_backend.app.db.clickhouse import get_clickhouse_client
             
-            async with get_clickhouse_client() as client:
+            # CRITICAL FIX: Use bypass_manager=True to prevent recursion
+            async with get_clickhouse_client(bypass_manager=True) as client:
                 # Simple health query with timeout
                 result = await asyncio.wait_for(
                     client.execute("SELECT 1"),
@@ -393,8 +395,9 @@ class ClickHouseConnectionManager:
             if connection is None:
                 from netra_backend.app.db.clickhouse import get_clickhouse_client
                 
-                # Use the get_clickhouse_client which has its own retry logic
-                async with get_clickhouse_client() as client:
+                # CRITICAL FIX: Use bypass_manager=True to prevent recursion
+                # The connection manager should create direct connections, not recursive ones
+                async with get_clickhouse_client(bypass_manager=True) as client:
                     connection = client
                     created_new = True
                     setattr(connection, '_created_at', time.time())

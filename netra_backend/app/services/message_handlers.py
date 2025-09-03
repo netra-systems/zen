@@ -1,3 +1,4 @@
+import asyncio
 from datetime import datetime
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, TypedDict, Union
 from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
@@ -7,7 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from starlette.websockets import WebSocketDisconnect
 from fastapi import WebSocket
 
-from netra_backend.app.db.models_postgres import Run, Thread
+from netra_backend.app.db.models_postgres import Message, Run, Thread
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.services.service_interfaces import IMessageHandlerService
 
@@ -96,6 +97,16 @@ class MessageHandlerService(IMessageHandlerService):
         thread = await self._get_or_validate_thread(user_id, payload, db_session)
         if not thread:
             return
+        
+        # CRITICAL FIX: Ensure thread association before agent processing
+        if thread and self.websocket_manager and websocket:
+            connection_id = self.websocket_manager.get_connection_id_by_websocket(websocket)
+            if connection_id:
+                success = self.websocket_manager.update_connection_thread(connection_id, thread.id)
+                if success:
+                    logger.info(f"✅ Thread association set for start_agent: connection={connection_id}, thread={thread.id}")
+                    await asyncio.sleep(0.01)  # Small delay to ensure propagation
+        
         await self._process_agent_request(user_id, user_request, thread, db_session)
     
     def _extract_user_request(self, payload: StartAgentPayloadTyped) -> str:
@@ -133,13 +144,37 @@ class MessageHandlerService(IMessageHandlerService):
         self, user_id: str, user_request: str, thread: Thread, db_session: AsyncSession
     ) -> None:
         """Process the agent request"""
+        logger.info(f"🎯 Starting agent request processing for user={user_id}, thread={thread.id}")
+        logger.info(f"📊 db_session status at start: {type(db_session)}, is None: {db_session is None}")
+        
+        # CRITICAL FIX: Ensure thread association is established before processing
+        # This prevents WebSocket emission failures during agent execution
+        if self.websocket_manager:
+            # Force thread association update and verify it worked
+            success = self.websocket_manager.update_connection_thread(user_id, thread.id)
+            if success:
+                logger.info(f"✅ Thread association confirmed for user={user_id}, thread={thread.id}")
+                # Small delay to ensure association propagates through all internal structures
+                await asyncio.sleep(0.01)
+            else:
+                logger.warning(f"⚠️ No WebSocket connections found for user={user_id} - agent events may not be delivered")
+                # Continue anyway - agent can still execute without WebSocket events
+        
         await self._create_user_message(thread, user_request, user_id, db_session)
         run = await self._create_run(thread, db_session)
+        
+        logger.info(f"📝 Configuring supervisor for user={user_id}")
         self._configure_supervisor(user_id, thread, db_session)
-        response = await self._execute_supervisor(user_request, thread, user_id, run)
+        
+        logger.info(f"🚀 Executing supervisor for run={run.id}")
+        response = await self._execute_supervisor(user_request, thread, user_id, run, db_session)
+        
+        logger.info(f"💾 Saving response for run={run.id}")
         await self._save_response(thread, response, run, db_session)
         await self._complete_run(run, db_session)
         await self._send_completion(user_id, response)
+        
+        logger.info(f"✅ Agent request processing completed for user={user_id}, thread={thread.id}")
     
     async def _create_user_message(
         self, thread: Thread, content: str, user_id: str, db_session: AsyncSession
@@ -173,7 +208,7 @@ class MessageHandlerService(IMessageHandlerService):
             logger.warning(f"Supervisor missing agent_registry - WebSocket events may not work for user {user_id}")
     
     async def _execute_supervisor(
-        self, user_request: str, thread: Thread, user_id: str, run: Run
+        self, user_request: str, thread: Thread, user_id: str, run: Run, db_session: AsyncSession
     ) -> Any:
         """Execute supervisor run"""
         # CRITICAL: Register run-thread mapping for WebSocket routing
@@ -210,8 +245,65 @@ class MessageHandlerService(IMessageHandlerService):
             logger.error(f"🚨 Error registering run-thread mapping: {e}")
             # Continue execution even if registration fails
         
-        # Execute the supervisor
-        return await self.supervisor.run(user_request, thread.id, user_id, run.id)
+        # Create UserExecutionContext for the new pattern
+        from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
+        
+        # CRITICAL DEBUG: Log the db_session status
+        logger.info(f"🔍 DEBUG: db_session type: {type(db_session)}, is None: {db_session is None}")
+        if db_session is None:
+            logger.error(f"🚨 CRITICAL: db_session is None! This will cause UserExecutionContext validation to fail")
+            logger.error(f"🚨 Stack trace for debugging:")
+            import traceback
+            logger.error(traceback.format_stack())
+        
+        # Create context with proper metadata using the passed db_session
+        logger.info(f"📝 Creating UserExecutionContext with: user_id={user_id}, thread_id={thread.id}, run_id={run.id}, db_session={type(db_session)}")
+        
+        try:
+            context = UserExecutionContext(
+                user_id=user_id,
+                thread_id=thread.id,
+                run_id=run.id,
+                db_session=db_session,
+                metadata={
+                    "user_request": user_request,
+                    "timestamp": run.created_at
+                }
+            )
+            logger.info(f"✅ Successfully created UserExecutionContext for user={user_id}, thread={thread.id}, run={run.id}")
+        except Exception as e:
+            logger.error(f"🚨 Failed to create UserExecutionContext: {e}")
+            logger.error(f"🚨 Parameters were: user_id={user_id}, thread_id={thread.id}, run_id={run.id}, db_session={type(db_session)}")
+            raise
+        
+        # Execute the supervisor with the new UserExecutionContext pattern
+        try:
+            logger.info(f"🚀 Attempting to execute SupervisorAgent.execute() with context for run_id={run.id}")
+            
+            # Double-check the supervisor has execute method
+            if not hasattr(self.supervisor, 'execute'):
+                logger.error(f"🚨 CRITICAL: SupervisorAgent does not have 'execute' method!")
+                logger.error(f"🚨 Available methods: {[m for m in dir(self.supervisor) if not m.startswith('_')]}")
+                raise AttributeError("SupervisorAgent missing execute method")
+            
+            result = await self.supervisor.execute(context, stream_updates=True)
+            logger.info(f"✅ SupervisorAgent executed successfully for run_id={run.id}")
+            logger.info(f"📊 Result type: {type(result)}, has content: {result is not None}")
+            return result
+        except AttributeError as e:
+            logger.error(f"🚨 AttributeError in SupervisorAgent execution for run_id={run.id}: {e}")
+            logger.error(f"🚨 This likely means the supervisor is missing a required method")
+            logger.error(f"🚨 Supervisor type: {type(self.supervisor)}")
+            raise
+        except ValueError as e:
+            logger.error(f"🚨 ValueError in SupervisorAgent execution for run_id={run.id}: {e}")
+            logger.error(f"🚨 This likely means UserExecutionContext validation failed")
+            logger.error(f"🚨 Context details: user_id={context.user_id}, thread_id={context.thread_id}, run_id={context.run_id}")
+            raise
+        except Exception as e:
+            logger.error(f"❌ SupervisorAgent execution failed for run_id={run.id}: {e}", exc_info=True)
+            logger.error(f"❌ Exception type: {type(e).__name__}")
+            raise
     
     async def _save_response(
         self, thread: Thread, response: Any, run: Run, db_session: AsyncSession
@@ -249,6 +341,22 @@ class MessageHandlerService(IMessageHandlerService):
             return
         
         thread, run = await self._setup_thread_and_run(user_id, text, references, thread_id, db_session)
+        
+        # CRITICAL FIX: Ensure thread association before processing
+        if thread and thread_id and self.websocket_manager and websocket:
+            # Get connection_id from the websocket instance
+            connection_id = self.websocket_manager.get_connection_id_by_websocket(websocket)
+            if connection_id:
+                # Update thread association BEFORE any agent processing
+                success = self.websocket_manager.update_connection_thread(connection_id, thread_id)
+                if success:
+                    logger.info(f"✅ Thread association confirmed for connection={connection_id}, user={user_id}, thread={thread_id}")
+                    await asyncio.sleep(0.01)  # Small delay to ensure propagation
+                else:
+                    logger.warning(f"⚠️ Failed to update thread for connection={connection_id}")
+            else:
+                logger.warning(f"⚠️ No connection found for websocket of user={user_id}")
+        
         # Join user to thread room for WebSocket broadcasts
         if thread and thread_id:
             await manager.broadcasting.join_room(user_id, thread_id)
@@ -300,7 +408,7 @@ class MessageHandlerService(IMessageHandlerService):
         self, user_id: str, thread_id: str, db_session: AsyncSession
     ) -> Optional[Thread]:
         """Validate existing thread ownership"""
-        thread = await self.thread_service.get_thread(thread_id, db_session)
+        thread = await self.thread_service.get_thread(thread_id, user_id=user_id, db=db_session)
         if thread and thread.metadata_.get("user_id") != user_id:
             await manager.send_error(user_id, "Access denied to thread")
             return None
@@ -384,14 +492,51 @@ class MessageHandlerService(IMessageHandlerService):
         self,
         user_id: str,
         payload: SwitchThreadPayload,
-        db_session: Optional[AsyncSession]
+        db_session: Optional[AsyncSession],
+        websocket: Optional[WebSocket] = None
     ) -> None:
-        """Handle switch_thread message type - join user to thread room"""
+        """Handle switch_thread message type - join room AND load thread data"""
         thread_id = payload.get("thread_id")
         if not thread_id:
             await manager.send_error(user_id, "Thread ID required")
             return
+        
+        # Validate thread access and load data if database session available
+        if db_session:
+            thread = await self._validate_existing_thread(user_id, thread_id, db_session)
+            if not thread:
+                # Error already sent by _validate_existing_thread
+                return
+            
+            # Load thread messages
+            try:
+                messages = await self.thread_service.get_thread_messages(thread_id, db=db_session)
+                
+                # Send thread data to client
+                thread_data = {
+                    "type": "thread_data",
+                    "payload": {
+                        "thread_id": thread_id,
+                        "messages": [self._format_message_for_client(msg) for msg in messages],
+                        "metadata": thread.metadata_
+                    }
+                }
+                await manager.send_message(user_id, thread_data)
+                logger.info(f"Sent {len(messages)} messages to user {user_id} for thread {thread_id}")
+            except Exception as e:
+                logger.error(f"Error loading thread messages: {e}")
+                # Continue with thread switch even if message loading fails
+        
+        # Execute room switch
         await self._execute_thread_switch(user_id, thread_id)
+        
+        # Update WebSocket connection thread association if available
+        if self.websocket_manager and websocket:
+            connection_id = self.websocket_manager.get_connection_id_by_websocket(websocket)
+            if connection_id:
+                success = self.websocket_manager.update_connection_thread(connection_id, thread_id)
+                if success:
+                    logger.info(f"✅ Thread association updated for connection={connection_id}, thread={thread_id}")
     
     async def _execute_thread_switch(self, user_id: str, thread_id: str) -> None:
         """Execute the thread switch operation"""
@@ -399,6 +544,25 @@ class MessageHandlerService(IMessageHandlerService):
         await manager.broadcasting.leave_all_rooms(user_id)
         await manager.broadcasting.join_room(user_id, thread_id)
         logger.info(f"User {user_id} switched to thread {thread_id}")
+    
+    def _format_message_for_client(self, message: Message) -> Dict[str, Any]:
+        """Format database message for client consumption"""
+        # Extract content from the structured format
+        content_value = ""
+        if message.content and isinstance(message.content, list) and len(message.content) > 0:
+            first_content = message.content[0]
+            if isinstance(first_content, dict) and "text" in first_content:
+                text_obj = first_content["text"]
+                if isinstance(text_obj, dict) and "value" in text_obj:
+                    content_value = text_obj["value"]
+        
+        return {
+            "id": str(message.id),
+            "role": message.role,
+            "content": content_value,
+            "timestamp": message.created_at if hasattr(message, 'created_at') else None,
+            "metadata": message.metadata_ if hasattr(message, 'metadata_') else {}
+        }
 
     # Interface implementation methods
     async def handle_message(self, user_id: str, message: Dict[str, Any]):

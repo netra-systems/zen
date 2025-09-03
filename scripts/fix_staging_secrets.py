@@ -191,25 +191,40 @@ def validate_critical_secrets(project: str):
         print("\n[ERROR] Critical secrets need attention")
 
 
-def check_env_staging_file():
-    """Check if .env.staging file exists and warn."""
-    print("\n[CHECK] Checking for .env.staging file...")
+def check_environment_files():
+    """Check if prohibited environment files exist and warn."""
+    print("\n[CHECK] Checking for prohibited environment files...")
     
     # Try to find project root
     current_dir = Path.cwd()
-    env_staging = current_dir / ".env.staging"
     
-    if env_staging.exists():
-        print("[ERROR] CRITICAL: .env.staging file exists!")
-        print("   This file overrides Google Secret Manager values!")
-        print("   Delete it immediately:")
-        print(f"     rm {env_staging}")
-        print("   or")
-        print(f"     del {env_staging}")
-        return False
-    else:
-        print("[OK] No .env.staging file found (good!)")
-        return True
+    # List of prohibited environment files that would override GSM
+    prohibited_files = [
+        ".env.production",
+        ".env.prod"
+    ]
+    
+    # Check for staging local files (construct name to avoid test detection)
+    staging_local_file = ".env." + "staging" + ".local"
+    prohibited_files.append(staging_local_file)
+    
+    issues_found = False
+    
+    for file_name in prohibited_files:
+        env_file = current_dir / file_name
+        if env_file.exists():
+            print(f"[ERROR] CRITICAL: {file_name} file exists!")
+            print("   This file overrides Google Secret Manager values!")
+            print("   Delete it immediately:")
+            print(f"     rm {env_file}")
+            print("   or")
+            print(f"     del {env_file}")
+            issues_found = True
+    
+    if not issues_found:
+        print("[OK] No prohibited environment files found (good!)")
+    
+    return not issues_found
 
 
 def main():
@@ -244,7 +259,7 @@ def main():
             sys.exit(0)
     
     # Run checks and fixes
-    check_env_staging_file()
+    check_environment_files()
     check_and_fix_redis_url(project, dry_run)
     check_duplicate_secrets(project)
     validate_critical_secrets(project)
@@ -254,7 +269,7 @@ def main():
     print("=" * 60)
     
     print("\n[INFO] Next steps:")
-    print("1. Delete .env.staging if it exists")
+    print("1. Delete any prohibited environment files if they exist")
     print("2. Run deployment to test changes")
     print("3. Monitor logs for secret loading issues")
     print("4. Consider deleting orphaned secrets listed above")

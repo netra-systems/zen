@@ -2,9 +2,9 @@
   "metadata": {
     "version": "3.0.0",
     "category": "test_literals",
-    "generated_at": "2025-09-02T18:16:22.054256",
-    "root_directory": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1",
-    "total_literals": 13213
+    "generated_at": "2025-09-03T07:26:23.685821",
+    "root_directory": "/Users/anthony/Documents/GitHub/netra-apex",
+    "total_literals": 13114
   },
   "literals": {
     "\u001b[0m": {
@@ -1825,13 +1825,6 @@
         "auth_service/tests/test_refresh_loop_prevention_comprehensive.py:183"
       ]
     },
-    "' should be valid": {
-      "value": "' should be valid",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:155"
-      ]
-    },
     "' spans": {
       "value": "' spans",
       "category": "test_literals",
@@ -2700,8 +2693,8 @@
         "scripts/compliance/real_test_linter.py:264",
         "scripts/compliance/real_test_requirements_enforcer.py:530",
         "scripts/remove_test_stubs.py:113",
-        "scripts/test_backend_optimized.py:367",
         "scripts/test_backend_ORIGINAL.py:484",
+        "scripts/test_backend_optimized.py:367",
         "scripts/test_cors.py:214"
       ]
     },
@@ -3313,7 +3306,6 @@
       "value": "+",
       "category": "test_literals",
       "locations": [
-        "scripts/launch_test_env.py:175",
         "scripts/test_auth_database_sessions.py:50"
       ]
     },
@@ -4241,13 +4233,6 @@
         "scripts/test_auth_service_integration_fix.py:169"
       ]
     },
-    "- Auth Service: http://localhost:8082": {
-      "value": "- Auth Service: http://localhost:8082",
-      "category": "test_literals",
-      "locations": [
-        "scripts/launch_test_env.py:114"
-      ]
-    },
     "- Auth middleware processes ALL non-excluded paths": {
       "value": "- Auth middleware processes ALL non-excluded paths",
       "category": "test_literals",
@@ -4281,13 +4266,6 @@
       "category": "test_literals",
       "locations": [
         "scripts/analyze_test_overlap.py:563"
-      ]
-    },
-    "- Backend API: http://localhost:8001": {
-      "value": "- Backend API: http://localhost:8001",
-      "category": "test_literals",
-      "locations": [
-        "scripts/launch_test_env.py:113"
       ]
     },
     "- Backend: AUTH_SERVICE_ENABLED=true": {
@@ -4429,13 +4407,6 @@
       "category": "test_literals",
       "locations": [
         "scripts/test_environment_validation_clean.py:173"
-      ]
-    },
-    "- ClickHouse: localhost:8124": {
-      "value": "- ClickHouse: localhost:8124",
-      "category": "test_literals",
-      "locations": [
-        "scripts/launch_test_env.py:112"
       ]
     },
     "- Clock skew handling": {
@@ -4718,13 +4689,6 @@
         "scripts/test_staging.py:49"
       ]
     },
-    "- Frontend: http://localhost:3001": {
-      "value": "- Frontend: http://localhost:3001",
-      "category": "test_literals",
-      "locations": [
-        "scripts/launch_test_env.py:115"
-      ]
-    },
     "- Full customer journey validation": {
       "value": "- Full customer journey validation",
       "category": "test_literals",
@@ -4961,27 +4925,6 @@
       "category": "test_literals",
       "locations": [
         "scripts/auto_fix_test_violations.py:902"
-      ]
-    },
-    "- Port": {
-      "value": "- Port",
-      "category": "test_literals",
-      "locations": [
-        "scripts/launch_test_env.py:71"
-      ]
-    },
-    "- PostgreSQL: localhost:5433": {
-      "value": "- PostgreSQL: localhost:5433",
-      "category": "test_literals",
-      "locations": [
-        "scripts/launch_test_env.py:110"
-      ]
-    },
-    "- Redis: localhost:6380": {
-      "value": "- Redis: localhost:6380",
-      "category": "test_literals",
-      "locations": [
-        "scripts/launch_test_env.py:111"
       ]
     },
     "- Risk of false positive test results hiding real bugs": {
@@ -5595,13 +5538,6 @@
         "scripts/test_backend_ORIGINAL.py:288"
       ]
     },
-    "--attach": {
-      "value": "--attach",
-      "category": "test_literals",
-      "locations": [
-        "scripts/launch_test_env.py:169"
-      ]
-    },
     "--auth-url": {
       "value": "--auth-url",
       "category": "test_literals",
@@ -5695,13 +5631,13 @@
         "scripts/batch_fix_and_test.py:69",
         "scripts/continuous_e2e_test_runner.py:27",
         "scripts/frontend_iterative_test_runner.py:191",
-        "scripts/launch_test_env.py:156",
         "scripts/run_all_test_categories.py:21",
-        "scripts/test_backend_optimized.py:368",
         "scripts/test_backend_ORIGINAL.py:485",
+        "scripts/test_backend_optimized.py:368",
         "scripts/test_comprehensive_scanner.py:127",
         "scripts/test_failure_analyzer.py:339",
-        "scripts/test_failure_tracker.py:75"
+        "scripts/test_failure_tracker.py:75",
+        "scripts/test_frontend_ORIGINAL.py:390"
       ]
     },
     "--check-deps": {
@@ -6071,23 +6007,16 @@
       "category": "test_literals",
       "locations": [
         "scripts/continuous_e2e_test_runner.py:30",
-        "scripts/test_docker_manager.py:209",
+        "scripts/test_docker_manager.py:223",
         "scripts/test_failure_analyzer.py:341",
         "scripts/test_staging.py:58"
-      ]
-    },
-    "--env-file": {
-      "value": "--env-file",
-      "category": "test_literals",
-      "locations": [
-        "scripts/launch_test_env.py:47",
-        "scripts/launch_test_env.py:87"
       ]
     },
     "--environment": {
       "value": "--environment",
       "category": "test_literals",
       "locations": [
+        "scripts/launch_test_env.py:41",
         "scripts/test_cors.py:421"
       ]
     },
@@ -6151,11 +6080,11 @@
         "scripts/continuous_e2e_test_runner.py:29",
         "scripts/frontend_iterative_test_runner.py:192",
         "scripts/iterative_test_fix_loop.py:35",
-        "scripts/launch_test_env.py:158",
         "scripts/manage_test_services.py:146",
         "scripts/run_all_test_categories.py:23",
         "scripts/simple_test_fix_loop.py:18",
-        "scripts/test_comprehensive_scanner.py:129"
+        "scripts/test_comprehensive_scanner.py:129",
+        "scripts/test_failure_tracker.py:76"
       ]
     },
     "--ff": {
@@ -6200,7 +6129,7 @@
       "category": "test_literals",
       "locations": [
         "scripts/cleanup_test_processes.py:149",
-        "scripts/test_docker_manager.py:212",
+        "scripts/test_docker_manager.py:226",
         "scripts/test_frontend_ORIGINAL.py:530"
       ]
     },
@@ -6656,7 +6585,6 @@
         "scripts/batch_fix_and_test.py:69",
         "scripts/frontend_iterative_test_runner.py:193",
         "scripts/iterative_test_fix_loop.py:34",
-        "scripts/launch_test_env.py:157",
         "scripts/manage_test_services.py:146",
         "scripts/run_all_test_categories.py:22",
         "scripts/simple_test_fix_loop.py:18",
@@ -6859,8 +6787,8 @@
       "locations": [
         "scripts/autonomous_review/test_reviewer.py:113",
         "scripts/ci/check_test_stubs.py:107",
-        "scripts/test_backend_optimized.py:390",
         "scripts/test_backend_ORIGINAL.py:506",
+        "scripts/test_backend_optimized.py:390",
         "scripts/test_collection_audit.py:105"
       ]
     },
@@ -6920,13 +6848,6 @@
         "scripts/test_cors.py:436"
       ]
     },
-    "--restart": {
-      "value": "--restart",
-      "category": "test_literals",
-      "locations": [
-        "scripts/launch_test_env.py:184"
-      ]
-    },
     "--resume": {
       "value": "--resume",
       "category": "test_literals",
@@ -6949,13 +6870,6 @@
         "scripts/test_verify_workflow_status.py:155",
         "scripts/test_verify_workflow_status_corrected.py:106",
         "scripts/test_verify_workflow_status_corrected.py:150"
-      ]
-    },
-    "--run-tests": {
-      "value": "--run-tests",
-      "category": "test_literals",
-      "locations": [
-        "scripts/launch_test_env.py:189"
       ]
     },
     "--runners": {
@@ -7008,8 +6922,7 @@
       "value": "--services",
       "category": "test_literals",
       "locations": [
-        "scripts/launch_test_env.py:174",
-        "scripts/test_docker_manager.py:211",
+        "scripts/test_docker_manager.py:225",
         "scripts/test_log_introspection.py:263"
       ]
     },
@@ -7061,13 +6974,6 @@
       "category": "test_literals",
       "locations": [
         "scripts/frontend_iterative_test_runner.py:924"
-      ]
-    },
-    "--stop": {
-      "value": "--stop",
-      "category": "test_literals",
-      "locations": [
-        "scripts/launch_test_env.py:179"
       ]
     },
     "--strategy": {
@@ -7137,13 +7043,6 @@
         "scripts/test_cors.py:438"
       ]
     },
-    "--test-category": {
-      "value": "--test-category",
-      "category": "test_literals",
-      "locations": [
-        "scripts/launch_test_env.py:194"
-      ]
-    },
     "--test-dir": {
       "value": "--test-dir",
       "category": "test_literals",
@@ -7204,7 +7103,7 @@
       "value": "--timeout",
       "category": "test_literals",
       "locations": [
-        "scripts/test_docker_manager.py:213"
+        "scripts/test_docker_manager.py:227"
       ]
     },
     "--timeout=": {
@@ -7285,8 +7184,8 @@
       "locations": [
         "scripts/compliance/fake_test_scanner.py:388",
         "scripts/frontend_iterative_test_runner.py:284",
-        "scripts/test_backend_optimized.py:388",
         "scripts/test_backend_ORIGINAL.py:505",
+        "scripts/test_backend_optimized.py:388",
         "scripts/test_clickhouse_startup_fix.py:398",
         "scripts/test_cors.py:442",
         "scripts/test_dashboard.py:105",
@@ -7299,8 +7198,6 @@
       "value": "--version",
       "category": "test_literals",
       "locations": [
-        "scripts/launch_test_env.py:23",
-        "scripts/launch_test_env.py:24",
         "scripts/test_frontend_ORIGINAL.py:82",
         "scripts/test_frontend_ORIGINAL.py:89",
         "scripts/test_frontend_simple.py:29",
@@ -7313,7 +7210,6 @@
       "value": "--wait",
       "category": "test_literals",
       "locations": [
-        "scripts/launch_test_env.py:199",
         "scripts/setup_e2e_test_ports.py:56"
       ]
     },
@@ -7390,43 +7286,43 @@
       "value": "-DOCKER] Ensuring",
       "category": "test_literals",
       "locations": [
-        "scripts/test_docker_manager.py:52"
+        "scripts/test_docker_manager.py:66"
       ]
     },
     "-DOCKER] Force cleanup requested": {
       "value": "-DOCKER] Force cleanup requested",
       "category": "test_literals",
       "locations": [
-        "scripts/test_docker_manager.py:80"
+        "scripts/test_docker_manager.py:94"
       ]
     },
     "-DOCKER] Found": {
       "value": "-DOCKER] Found",
       "category": "test_literals",
       "locations": [
-        "scripts/test_docker_manager.py:64"
+        "scripts/test_docker_manager.py:78"
       ]
     },
     "-DOCKER] Graceful cleanup (containers preserved)": {
       "value": "-DOCKER] Graceful cleanup (containers preserved)",
       "category": "test_literals",
       "locations": [
-        "scripts/test_docker_manager.py:85"
+        "scripts/test_docker_manager.py:99"
       ]
     },
     "-DOCKER] ✓ All": {
       "value": "-DOCKER] ✓ All",
       "category": "test_literals",
       "locations": [
-        "scripts/test_docker_manager.py:61",
-        "scripts/test_docker_manager.py:70"
+        "scripts/test_docker_manager.py:75",
+        "scripts/test_docker_manager.py:84"
       ]
     },
     "-DOCKER] ✗ Failed to start": {
       "value": "-DOCKER] ✗ Failed to start",
       "category": "test_literals",
       "locations": [
-        "scripts/test_docker_manager.py:72"
+        "scripts/test_docker_manager.py:86"
       ]
     },
     "-P": {
@@ -7441,7 +7337,7 @@
       "value": "-U",
       "category": "test_literals",
       "locations": [
-        "scripts/test_docker_manager.py:98"
+        "scripts/test_docker_manager.py:112"
       ]
     },
     "-W": {
@@ -7450,13 +7346,6 @@
       "locations": [
         "scripts/test_workflows_with_act.py:114",
         "scripts/test_workflows_with_act.py:153"
-      ]
-    },
-    "-a": {
-      "value": "-a",
-      "category": "test_literals",
-      "locations": [
-        "scripts/launch_test_env.py:169"
       ]
     },
     "-agent-": {
@@ -7483,19 +7372,18 @@
         "auth_service/tests/test_environment_loading.py:231",
         "auth_service/tests/test_environment_loading.py:276",
         "auth_service/tests/test_environment_loading.py:321",
-        "scripts/test_backend_optimized.py:368",
         "scripts/test_backend_ORIGINAL.py:196",
         "scripts/test_backend_ORIGINAL.py:198",
-        "scripts/test_backend_ORIGINAL.py:485"
+        "scripts/test_backend_ORIGINAL.py:485",
+        "scripts/test_backend_optimized.py:368"
       ]
     },
     "-d": {
       "value": "-d",
       "category": "test_literals",
       "locations": [
-        "scripts/launch_test_env.py:92",
         "scripts/start_test_services.py:48",
-        "scripts/test_docker_manager.py:98"
+        "scripts/test_docker_manager.py:112"
       ]
     },
     "-e": {
@@ -7511,8 +7399,6 @@
       "locations": [
         "scripts/cleanup_test_processes.py:149",
         "scripts/compliance/fake_test_scanner.py:386",
-        "scripts/launch_test_env.py:46",
-        "scripts/launch_test_env.py:86",
         "scripts/start_test_services.py:46",
         "scripts/test_docker_config.py:11"
       ]
@@ -7616,8 +7502,8 @@
       "value": "-q",
       "category": "test_literals",
       "locations": [
-        "scripts/test_backend_optimized.py:390",
         "scripts/test_backend_ORIGINAL.py:506",
+        "scripts/test_backend_optimized.py:390",
         "scripts/test_failure_scanner.py:101",
         "scripts/unified_test_config.py:388"
       ]
@@ -7633,7 +7519,6 @@
       "value": "-s",
       "category": "test_literals",
       "locations": [
-        "scripts/launch_test_env.py:174",
         "scripts/pytest_plugins.py:248",
         "scripts/run_agent_pipeline_test.py:83",
         "scripts/test_jwt_critical.py:44",
@@ -8119,8 +8004,6 @@
       "value": ".env.test",
       "category": "test_literals",
       "locations": [
-        "scripts/launch_test_env.py:47",
-        "scripts/launch_test_env.py:87",
         "scripts/test/verify_test_ports.py:70",
         "scripts/test_backend_ORIGINAL.py:65"
       ]
@@ -8460,7 +8343,7 @@
       "value": "/1",
       "category": "test_literals",
       "locations": [
-        "scripts/test_docker_manager.py:177"
+        "scripts/test_docker_manager.py:191"
       ]
     },
     "/10 successful": {
@@ -9264,7 +9147,7 @@
       "value": "/netra",
       "category": "test_literals",
       "locations": [
-        "scripts/test_docker_manager.py:148"
+        "scripts/test_docker_manager.py:162"
       ]
     },
     "/netra-apex/": {
@@ -9286,7 +9169,7 @@
       "value": "/netra_test",
       "category": "test_literals",
       "locations": [
-        "scripts/test_docker_manager.py:176"
+        "scripts/test_docker_manager.py:190"
       ]
     },
     "/postgres": {
@@ -9919,13 +9802,6 @@
       "category": "test_literals",
       "locations": [
         "scripts/compliance/test_size_validator.py:369"
-      ]
-    },
-    "1. Stop the conflicting services": {
-      "value": "1. Stop the conflicting services",
-      "category": "test_literals",
-      "locations": [
-        "scripts/launch_test_env.py:78"
       ]
     },
     "1. Test Size Validator - scans for violations": {
@@ -10608,13 +10484,6 @@
         "scripts/test/verify_test_ports.py:87"
       ]
     },
-    "2. Run: docker ps": {
-      "value": "2. Run: docker ps",
-      "category": "test_literals",
-      "locations": [
-        "scripts/launch_test_env.py:79"
-      ]
-    },
     "2. Scanning test files for deprecated models...": {
       "value": "2. Scanning test files for deprecated models...",
       "category": "test_literals",
@@ -11054,17 +10923,6 @@
         "scripts/test_seed_data.py:255"
       ]
     },
-    "24h": {
-      "value": "24h",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:71",
-        "scripts/test_data_validator_backup.py:83",
-        "scripts/test_data_validator_backup.py:106",
-        "scripts/test_data_validator_backup.py:135",
-        "scripts/test_data_validator_backup.py:151"
-      ]
-    },
     "2G": {
       "value": "2G",
       "category": "test_literals",
@@ -11121,13 +10979,6 @@
       "category": "test_literals",
       "locations": [
         "scripts/test_staging_clickhouse.py:233"
-      ]
-    },
-    "3. Check if DEV environment is using these ports": {
-      "value": "3. Check if DEV environment is using these ports",
-      "category": "test_literals",
-      "locations": [
-        "scripts/launch_test_env.py:80"
       ]
     },
     "3. Checking Registry WebSocket Integration...": {
@@ -12084,8 +11935,8 @@
       "value": "5433",
       "category": "test_literals",
       "locations": [
-        "scripts/test_docker_manager.py:144",
-        "scripts/test_docker_manager.py:158"
+        "scripts/test_docker_manager.py:158",
+        "scripts/test_docker_manager.py:172"
       ]
     },
     "5434": {
@@ -12093,8 +11944,8 @@
       "category": "test_literals",
       "locations": [
         "auth_service/tests/conftest.py:66",
-        "scripts/test_docker_manager.py:172",
-        "scripts/test_docker_manager.py:186"
+        "scripts/test_docker_manager.py:186",
+        "scripts/test_docker_manager.py:200"
       ]
     },
     "550e8400-e29b-41d4-a716-44665544000": {
@@ -12194,8 +12045,8 @@
       "category": "test_literals",
       "locations": [
         "scripts/test/test_clickhouse_staging_fix.py:135",
-        "scripts/test_docker_manager.py:141",
-        "scripts/test_docker_manager.py:169",
+        "scripts/test_docker_manager.py:155",
+        "scripts/test_docker_manager.py:183",
         "scripts/test_seed_data.py:44",
         "scripts/test_service_monitor.py:47"
       ]
@@ -12205,16 +12056,16 @@
       "category": "test_literals",
       "locations": [
         "auth_service/tests/conftest.py:74",
-        "scripts/test_docker_manager.py:145",
-        "scripts/test_docker_manager.py:159"
+        "scripts/test_docker_manager.py:159",
+        "scripts/test_docker_manager.py:173"
       ]
     },
     "6381": {
       "value": "6381",
       "category": "test_literals",
       "locations": [
-        "scripts/test_docker_manager.py:173",
-        "scripts/test_docker_manager.py:187"
+        "scripts/test_docker_manager.py:187",
+        "scripts/test_docker_manager.py:201"
       ]
     },
     "660e8400-e29b-41d4-a716-44665544000": {
@@ -15535,18 +15386,6 @@
         "scripts/test_failure_analyzer.py:50"
       ]
     },
-    "Analysis completed": {
-      "value": "Analysis completed",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:344",
-        "scripts/test_data_validator_backup.py:357",
-        "scripts/test_data_validator_backup.py:370",
-        "scripts/test_data_validator_backup.py:383",
-        "scripts/test_data_validator_backup.py:396",
-        "scripts/test_data_validator_backup.py:413"
-      ]
-    },
     "Analysis completed successfully": {
       "value": "Analysis completed successfully",
       "category": "test_literals",
@@ -15566,27 +15405,6 @@
       "category": "test_literals",
       "locations": [
         "scripts/compliance/test_refactor_helper.py:705"
-      ]
-    },
-    "Analysis should produce at least one finding": {
-      "value": "Analysis should produce at least one finding",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:378"
-      ]
-    },
-    "Analysis type '": {
-      "value": "Analysis type '",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:155"
-      ]
-    },
-    "Analysis type is required": {
-      "value": "Analysis type is required",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:89"
       ]
     },
     "Analytics Data Consistency": {
@@ -16271,13 +16089,6 @@
         "auth_service/tests/factories/__init__.py:20"
       ]
     },
-    "Auth": {
-      "value": "Auth",
-      "category": "test_literals",
-      "locations": [
-        "scripts/launch_test_env.py:63"
-      ]
-    },
     "Auth Database Engine Creation": {
       "value": "Auth Database Engine Creation",
       "category": "test_literals",
@@ -16732,13 +16543,6 @@
       "category": "test_literals",
       "locations": [
         "scripts/test_auth_integration.py:35"
-      ]
-    },
-    "Auth service is healthy!": {
-      "value": "Auth service is healthy!",
-      "category": "test_literals",
-      "locations": [
-        "scripts/launch_test_env.py:138"
       ]
     },
     "Auth service is healthy:": {
@@ -17290,13 +17094,6 @@
         "scripts/test_intensive_serialization.py:203"
       ]
     },
-    "Average latency increased by 15%": {
-      "value": "Average latency increased by 15%",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:321"
-      ]
-    },
     "Average per object:": {
       "value": "Average per object:",
       "category": "test_literals",
@@ -17486,7 +17283,6 @@
       "value": "Backend",
       "category": "test_literals",
       "locations": [
-        "scripts/launch_test_env.py:62",
         "scripts/test_staging_auth_live.py:210"
       ]
     },
@@ -17653,13 +17449,6 @@
       "category": "test_literals",
       "locations": [
         "scripts/test_staging_env.py:35"
-      ]
-    },
-    "Backend is healthy!": {
-      "value": "Backend is healthy!",
-      "category": "test_literals",
-      "locations": [
-        "scripts/launch_test_env.py:133"
       ]
     },
     "Backend must start before frontend": {
@@ -19048,9 +18837,9 @@
       "category": "test_literals",
       "locations": [
         "scripts/analyze_test_mocks.py:179",
+        "scripts/test_backend_ORIGINAL.py:368",
         "scripts/test_backend_optimized.py:126",
         "scripts/test_backend_optimized.py:424",
-        "scripts/test_backend_ORIGINAL.py:368",
         "scripts/test_triage_flow.py:157"
       ]
     },
@@ -19355,13 +19144,6 @@
         "scripts/test_windows_process_cleanup.py:145"
       ]
     },
-    "Checking port availability...": {
-      "value": "Checking port availability...",
-      "category": "test_literals",
-      "locations": [
-        "scripts/launch_test_env.py:67"
-      ]
-    },
     "Checking service independence...": {
       "value": "Checking service independence...",
       "category": "test_literals",
@@ -19608,7 +19390,6 @@
       "value": "ClickHouse HTTP",
       "category": "test_literals",
       "locations": [
-        "scripts/launch_test_env.py:60",
         "scripts/setup_test_environment.py:67"
       ]
     },
@@ -19651,7 +19432,6 @@
       "value": "ClickHouse TCP",
       "category": "test_literals",
       "locations": [
-        "scripts/launch_test_env.py:61",
         "scripts/test/verify_test_ports.py:28"
       ]
     },
@@ -19911,8 +19691,7 @@
       "category": "test_literals",
       "locations": [
         "scripts/continuous_e2e_test_runner.py:214",
-        "scripts/final_test_status_check.py:17",
-        "scripts/launch_test_env.py:99"
+        "scripts/final_test_status_check.py:17"
       ]
     },
     "Command: python": {
@@ -20184,13 +19963,6 @@
       "category": "test_literals",
       "locations": [
         "scripts/comprehensive_test_fixer.py:2"
-      ]
-    },
-    "Comprehensive Unit Tests for DataValidator\n\nTests all data validation operations including request validation,\nraw data quality checks, analysis result validation, and quality scoring.\n\nBusiness Value Justification (BVJ):\n- Segment: Platform/Internal  \n- Business Goal: Data quality assurance and reliable analytics\n- Value Impact: Prevents incorrect insights that could impact revenue\n- Strategic Impact: Critical for data integrity and trustworthy analysis": {
-      "value": "Comprehensive Unit Tests for DataValidator\n\nTests all data validation operations including request validation,\nraw data quality checks, analysis result validation, and quality scoring.\n\nBusiness Value Justification (BVJ):\n- Segment: Platform/Internal  \n- Business Goal: Data quality assurance and reliable analytics\n- Value Impact: Prevents incorrect insights that could impact revenue\n- Strategic Impact: Critical for data integrity and trustworthy analysis",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:1"
       ]
     },
     "Comprehensive WebSocket CORS Test Script\n\nThis script tests WebSocket connectivity in various scenarios to ensure CORS is properly configured\nfor Docker development environment. It tests connections with different origins and validates\nthat the development OAUTH SIMULATION works properly.\n\nBusiness Value Justification (BVJ):\n- Segment: Platform/Internal\n- Business Goal: Ensure WebSocket reliability in development\n- Value Impact: Prevents connection issues that block development\n- Strategic Impact: Foundation for real-time features": {
@@ -20849,13 +20621,6 @@
         "scripts/test_cors.py:352"
       ]
     },
-    "Consider optimizing slow queries": {
-      "value": "Consider optimizing slow queries",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:325"
-      ]
-    },
     "Consistently Failing Tests:": {
       "value": "Consistently Failing Tests:",
       "category": "test_literals",
@@ -20999,13 +20764,6 @@
       "category": "test_literals",
       "locations": [
         "scripts/test_triage_flow.py:31"
-      ]
-    },
-    "Cost optimization opportunities identified": {
-      "value": "Cost optimization opportunities identified",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:322"
       ]
     },
     "Cost savings of $1,200/month achieved.": {
@@ -22057,6 +21815,13 @@
         "scripts/validate_llm_test_models.py:77"
       ]
     },
+    "DEPRECATION NOTICE: launch_test_env.py is deprecated": {
+      "value": "DEPRECATION NOTICE: launch_test_env.py is deprecated",
+      "category": "test_literals",
+      "locations": [
+        "scripts/launch_test_env.py:24"
+      ]
+    },
     "DEPRECATION WARNINGS:": {
       "value": "DEPRECATION WARNINGS:",
       "category": "test_literals",
@@ -22132,16 +21897,16 @@
       "value": "DEV_POSTGRES_PORT",
       "category": "test_literals",
       "locations": [
-        "scripts/test_docker_manager.py:150",
-        "scripts/test_docker_manager.py:158"
+        "scripts/test_docker_manager.py:164",
+        "scripts/test_docker_manager.py:172"
       ]
     },
     "DEV_REDIS_PORT": {
       "value": "DEV_REDIS_PORT",
       "category": "test_literals",
       "locations": [
-        "scripts/test_docker_manager.py:151",
-        "scripts/test_docker_manager.py:159"
+        "scripts/test_docker_manager.py:165",
+        "scripts/test_docker_manager.py:173"
       ]
     },
     "DEV_REDIS_URL": {
@@ -22176,7 +21941,7 @@
       "value": "DO $$ \n                    DECLARE \n                        r RECORD;\n                    BEGIN\n                        FOR r IN (SELECT tablename FROM pg_tables WHERE schemaname = 'public') \n                        LOOP\n                            EXECUTE 'TRUNCATE TABLE ' || quote_ident(r.tablename) || ' RESTART IDENTITY CASCADE';\n                        END LOOP;\n                    END $$;",
       "category": "test_literals",
       "locations": [
-        "scripts/test_docker_manager.py:99"
+        "scripts/test_docker_manager.py:113"
       ]
     },
     "DOCKER COMPOSE LOG INTROSPECTION REPORT": {
@@ -22190,7 +21955,7 @@
       "value": "DOCKER ENVIRONMENT STATUS",
       "category": "test_literals",
       "locations": [
-        "scripts/test_docker_manager.py:194"
+        "scripts/test_docker_manager.py:208"
       ]
     },
     "DOCKER WEBSOCKET CONFIGURATION TEST RESULTS": {
@@ -24238,7 +24003,7 @@
       "value": "Environment to manage (test or dev)",
       "category": "test_literals",
       "locations": [
-        "scripts/test_docker_manager.py:210"
+        "scripts/test_docker_manager.py:224"
       ]
     },
     "Environment to test (default: development)": {
@@ -24281,8 +24046,8 @@
       "category": "test_literals",
       "locations": [
         "scripts/manage_test_services.py:105",
-        "scripts/test_backend_auth_config.py:33",
         "scripts/test_backend_ORIGINAL.py:372",
+        "scripts/test_backend_auth_config.py:33",
         "scripts/test_cors.py:459",
         "scripts/test_database_url_builder_comprehensive.py:272",
         "scripts/test_staging_auth.py:170",
@@ -24328,20 +24093,6 @@
         "scripts/add_pytest_markers.py:154",
         "scripts/apply_fast_test_decorators.py:178",
         "scripts/frontend_iterative_test_runner.py:527"
-      ]
-    },
-    "Error 1": {
-      "value": "Error 1",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:452"
-      ]
-    },
-    "Error 2": {
-      "value": "Error 2",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:452"
       ]
     },
     "Error Details:": {
@@ -24954,18 +24705,11 @@
         "scripts/fix_e2e_test_imports.py:226"
       ]
     },
-    "Error: Docker or docker-compose is not installed or not running.": {
-      "value": "Error: Docker or docker-compose is not installed or not running.",
+    "Error: Failed to launch test environment:": {
+      "value": "Error: Failed to launch test environment:",
       "category": "test_literals",
       "locations": [
-        "scripts/launch_test_env.py:27"
-      ]
-    },
-    "Error: Failed to start TEST environment": {
-      "value": "Error: Failed to start TEST environment",
-      "category": "test_literals",
-      "locations": [
-        "scripts/launch_test_env.py:104"
+        "scripts/launch_test_env.py:50"
       ]
     },
     "Error: File": {
@@ -25002,13 +24746,6 @@
       "locations": [
         "scripts/apply_fast_test_decorators.py:143",
         "scripts/optimize_test_performance.py:354"
-      ]
-    },
-    "Error: The following TEST environment ports are already in use:": {
-      "value": "Error: The following TEST environment ports are already in use:",
-      "category": "test_literals",
-      "locations": [
-        "scripts/launch_test_env.py:74"
       ]
     },
     "Error: test_categorization.json not found. Run categorize_tests.py first.": {
@@ -26437,7 +26174,7 @@
       "value": "FLUSHALL",
       "category": "test_literals",
       "locations": [
-        "scripts/test_docker_manager.py:121"
+        "scripts/test_docker_manager.py:135"
       ]
     },
     "FORCE_REAL_SERVICES": {
@@ -27347,13 +27084,6 @@
         "scripts/test_execution_tracker.py:777"
       ]
     },
-    "Findings must be a list": {
-      "value": "Findings must be a list",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:365"
-      ]
-    },
     "First Time User Critical Paths": {
       "value": "First Time User Critical Paths",
       "category": "test_literals",
@@ -27864,6 +27594,13 @@
         "scripts/compliance/fake_test_scanner.py:313"
       ]
     },
+    "For full Docker management features, please use:": {
+      "value": "For full Docker management features, please use:",
+      "category": "test_literals",
+      "locations": [
+        "scripts/launch_test_env.py:27"
+      ]
+    },
     "For migrations:": {
       "value": "For migrations:",
       "category": "test_literals",
@@ -27889,7 +27626,7 @@
       "value": "Force cleanup",
       "category": "test_literals",
       "locations": [
-        "scripts/test_docker_manager.py:212"
+        "scripts/test_docker_manager.py:226"
       ]
     },
     "Force kill without confirmation": {
@@ -27996,7 +27733,6 @@
       "value": "Frontend",
       "category": "test_literals",
       "locations": [
-        "scripts/launch_test_env.py:64",
         "scripts/test_staging_login_automated.py:180"
       ]
     },
@@ -30004,13 +29740,6 @@
         "scripts/test_backend_optimized.py:345"
       ]
     },
-    "Implement caching for frequent requests": {
-      "value": "Implement caching for frequent requests",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:326"
-      ]
-    },
     "Implement memory monitoring and alerting": {
       "value": "Implement memory monitoring and alerting",
       "category": "test_literals",
@@ -30401,13 +30130,6 @@
         "scripts/test_adaptive_workflow_direct.py:174"
       ]
     },
-    "Insufficient timestamps": {
-      "value": "Insufficient timestamps",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:584"
-      ]
-    },
     "Integration Tests": {
       "value": "Integration Tests",
       "category": "test_literals",
@@ -30561,13 +30283,6 @@
         "auth_service/tests/utils/assertion_helpers.py:31"
       ]
     },
-    "Invalid analysis type": {
-      "value": "Invalid analysis type",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:112"
-      ]
-    },
     "Invalid auth provider:": {
       "value": "Invalid auth provider:",
       "category": "test_literals",
@@ -30619,25 +30334,11 @@
         "scripts/test_websocket_dev_mode.py:132"
       ]
     },
-    "Invalid latency_ms value": {
-      "value": "Invalid latency_ms value",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:286"
-      ]
-    },
     "Invalid max-age value:": {
       "value": "Invalid max-age value:",
       "category": "test_literals",
       "locations": [
         "scripts/test_cors.py:243"
-      ]
-    },
-    "Invalid metrics: ['invalid_metric']": {
-      "value": "Invalid metrics: ['invalid_metric']",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:142"
       ]
     },
     "Invalid permission format:": {
@@ -31474,18 +31175,11 @@
         "scripts/frontend_iterative_test_runner.py:771"
       ]
     },
-    "Launch TEST Environment for Automated Testing\n\nThis script starts the TEST environment Docker Compose stack with proper configuration\nfor running automated tests with real services.": {
-      "value": "Launch TEST Environment for Automated Testing\n\nThis script starts the TEST environment Docker Compose stack with proper configuration\nfor running automated tests with real services.",
+    "Launch TEST Environment for Automated Testing - DEPRECATED\n\nThis script is now a lightweight wrapper around docker_manual.py which uses\nUnifiedDockerManager as the SSOT for all Docker operations.\n\nCRITICAL: All Docker operations now go through UnifiedDockerManager via docker_manual.py.": {
+      "value": "Launch TEST Environment for Automated Testing - DEPRECATED\n\nThis script is now a lightweight wrapper around docker_manual.py which uses\nUnifiedDockerManager as the SSOT for all Docker operations.\n\nCRITICAL: All Docker operations now go through UnifiedDockerManager via docker_manual.py.",
       "category": "test_literals",
       "locations": [
         "scripts/launch_test_env.py:2"
-      ]
-    },
-    "Launch TEST environment for automated testing": {
-      "value": "Launch TEST environment for automated testing",
-      "category": "test_literals",
-      "locations": [
-        "scripts/launch_test_env.py:166"
       ]
     },
     "Learning Documentation:": {
@@ -31780,13 +31474,6 @@
       "category": "test_literals",
       "locations": [
         "scripts/test_failure_scanner.py:47"
-      ]
-    },
-    "Low data point count": {
-      "value": "Low data point count",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:218"
       ]
     },
     "M": {
@@ -32573,8 +32260,8 @@
       "value": "Minimal output",
       "category": "test_literals",
       "locations": [
-        "scripts/test_backend_optimized.py:391",
-        "scripts/test_backend_ORIGINAL.py:506"
+        "scripts/test_backend_ORIGINAL.py:506",
+        "scripts/test_backend_optimized.py:391"
       ]
     },
     "Minimal output for CI logs": {
@@ -32740,20 +32427,6 @@
       "locations": [
         "auth_service/tests/utils/assertion_helpers.py:95",
         "auth_service/tests/utils/assertion_helpers.py:114"
-      ]
-    },
-    "Missing required field: findings": {
-      "value": "Missing required field: findings",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:351"
-      ]
-    },
-    "Missing required field: recommendations": {
-      "value": "Missing required field: recommendations",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:352"
       ]
     },
     "Missing required permission:": {
@@ -33861,13 +33534,6 @@
         "scripts/analyze_test_overlap.py:542"
       ]
     },
-    "No data provided for validation": {
-      "value": "No data provided for validation",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:200"
-      ]
-    },
     "No deprecation warnings detected": {
       "value": "No deprecation warnings detected",
       "category": "test_literals",
@@ -34348,14 +34014,6 @@
       "category": "test_literals",
       "locations": [
         "scripts/test_oauth_local.py:84"
-      ]
-    },
-    "Not a list": {
-      "value": "Not a list",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:358",
-        "scripts/test_data_validator_backup.py:385"
       ]
     },
     "Not in a git repository or git not available": {
@@ -35149,7 +34807,6 @@
       "value": "Options:",
       "category": "test_literals",
       "locations": [
-        "scripts/launch_test_env.py:77",
         "scripts/standardize_l3_test_names.py:300"
       ]
     },
@@ -36074,13 +35731,6 @@
         "netra_backend/app/services/realistic_test_data/performance_simulator.py:1"
       ]
     },
-    "Performance analysis completed": {
-      "value": "Performance analysis completed",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:319"
-      ]
-    },
     "Performance and SLA validation tests": {
       "value": "Performance and SLA validation tests",
       "category": "test_literals",
@@ -36264,13 +35914,6 @@
         "scripts/test_websocket_injection_fix_complete.py:33"
       ]
     },
-    "Please install Docker and ensure it's running.": {
-      "value": "Please install Docker and ensure it's running.",
-      "category": "test_literals",
-      "locations": [
-        "scripts/launch_test_env.py:28"
-      ]
-    },
     "Please install: pip install websockets aiohttp": {
       "value": "Please install: pip install websockets aiohttp",
       "category": "test_literals",
@@ -36304,6 +35947,13 @@
       "category": "test_literals",
       "locations": [
         "scripts/remove_test_stubs.py:388"
+      ]
+    },
+    "Please run directly: python scripts/docker_manual.py start --environment test": {
+      "value": "Please run directly: python scripts/docker_manual.py start --environment test",
+      "category": "test_literals",
+      "locations": [
+        "scripts/launch_test_env.py:51"
       ]
     },
     "Please start PostgreSQL with:": {
@@ -36444,7 +36094,6 @@
       "value": "PostgreSQL",
       "category": "test_literals",
       "locations": [
-        "scripts/launch_test_env.py:58",
         "scripts/setup_test_environment.py:65",
         "scripts/test/test_docker_stability.py:79",
         "scripts/test/verify_test_ports.py:26"
@@ -37754,13 +37403,6 @@
         "scripts/optimize_test_performance.py:406"
       ]
     },
-    "Recommendations must be a list": {
-      "value": "Recommendations must be a list",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:391"
-      ]
-    },
     "Recommendations:": {
       "value": "Recommendations:",
       "category": "test_literals",
@@ -37832,7 +37474,6 @@
       "value": "Redis",
       "category": "test_literals",
       "locations": [
-        "scripts/launch_test_env.py:59",
         "scripts/setup_test_environment.py:66",
         "scripts/test/test_docker_stability.py:80",
         "scripts/test/verify_test_ports.py:27"
@@ -38526,13 +38167,6 @@
         "scripts/test_parallel_docker_manager.py:79"
       ]
     },
-    "Restart the TEST environment": {
-      "value": "Restart the TEST environment",
-      "category": "test_literals",
-      "locations": [
-        "scripts/launch_test_env.py:186"
-      ]
-    },
     "Result": {
       "value": "Result",
       "category": "test_literals",
@@ -39024,13 +38658,6 @@
         "scripts/test_staging_websocket_comprehensive.py:339"
       ]
     },
-    "Run in attached mode (see logs)": {
-      "value": "Run in attached mode (see logs)",
-      "category": "test_literals",
-      "locations": [
-        "scripts/launch_test_env.py:171"
-      ]
-    },
     "Run integration tests separately with proper services running": {
       "value": "Run integration tests separately with proper services running",
       "category": "test_literals",
@@ -39129,13 +38756,6 @@
         "scripts/manage_test_services.py:189"
       ]
     },
-    "Run tests after starting environment": {
-      "value": "Run tests after starting environment",
-      "category": "test_literals",
-      "locations": [
-        "scripts/launch_test_env.py:191"
-      ]
-    },
     "Run tests against staging environment": {
       "value": "Run tests against staging environment",
       "category": "test_literals",
@@ -39225,7 +38845,6 @@
       "value": "Running",
       "category": "test_literals",
       "locations": [
-        "scripts/launch_test_env.py:152",
         "scripts/run_all_test_categories.py:17"
       ]
     },
@@ -40765,13 +40384,6 @@
         "scripts/setup_staging_test_account.py:304"
       ]
     },
-    "Savings percentage must be between 0-50%": {
-      "value": "Savings percentage must be between 0-50%",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:408"
-      ]
-    },
     "Scale horizontally to reduce CPU load": {
       "value": "Scale horizontally to reduce CPU load",
       "category": "test_literals",
@@ -41517,13 +41129,6 @@
         "scripts/start_test_services.py:207"
       ]
     },
-    "Services available at:": {
-      "value": "Services available at:",
-      "category": "test_literals",
-      "locations": [
-        "scripts/launch_test_env.py:109"
-      ]
-    },
     "Services got same port - conflict not prevented": {
       "value": "Services got same port - conflict not prevented",
       "category": "test_literals",
@@ -41542,7 +41147,7 @@
       "value": "Services:",
       "category": "test_literals",
       "locations": [
-        "scripts/test_docker_manager.py:197"
+        "scripts/test_docker_manager.py:211"
       ]
     },
     "Session": {
@@ -41850,14 +41455,6 @@
       "category": "test_literals",
       "locations": [
         "scripts/remove_test_stubs.py:331"
-      ]
-    },
-    "Short time span": {
-      "value": "Short time span",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:304",
-        "scripts/test_data_validator_backup.py:574"
       ]
     },
     "Should accept JSON output format": {
@@ -42424,7 +42021,7 @@
       "value": "Smart Docker Manager for Test and Dev environments",
       "category": "test_literals",
       "locations": [
-        "scripts/test_docker_manager.py:205"
+        "scripts/test_docker_manager.py:219"
       ]
     },
     "Solution: SecretManagerBuilder with unified pattern": {
@@ -42453,24 +42050,6 @@
       "category": "test_literals",
       "locations": [
         "scripts/test_adaptive_workflow.py:284"
-      ]
-    },
-    "Some finding": {
-      "value": "Some finding",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:384",
-        "scripts/test_data_validator_backup.py:397",
-        "scripts/test_data_validator_backup.py:414"
-      ]
-    },
-    "Some recommendation": {
-      "value": "Some recommendation",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:372",
-        "scripts/test_data_validator_backup.py:398",
-        "scripts/test_data_validator_backup.py:415"
       ]
     },
     "Some requests should succeed": {
@@ -42547,14 +42126,7 @@
       "value": "Specific services",
       "category": "test_literals",
       "locations": [
-        "scripts/test_docker_manager.py:211"
-      ]
-    },
-    "Specific services to start (e.g., postgres-test redis-test)": {
-      "value": "Specific services to start (e.g., postgres-test redis-test)",
-      "category": "test_literals",
-      "locations": [
-        "scripts/launch_test_env.py:176"
+        "scripts/test_docker_manager.py:225"
       ]
     },
     "Specific test files or directories": {
@@ -42983,11 +42555,11 @@
         "scripts/pytest_resource_monitor.py:294"
       ]
     },
-    "Starting TEST environment containers...": {
-      "value": "Starting TEST environment containers...",
+    "Starting TEST environment via docker_manual.py...": {
+      "value": "Starting TEST environment via docker_manual.py...",
       "category": "test_literals",
       "locations": [
-        "scripts/launch_test_env.py:98"
+        "scripts/launch_test_env.py:38"
       ]
     },
     "Starting Tool Execution Events Test...": {
@@ -43444,25 +43016,11 @@
         "scripts/manage_test_services.py:76"
       ]
     },
-    "Stop the TEST environment": {
-      "value": "Stop the TEST environment",
-      "category": "test_literals",
-      "locations": [
-        "scripts/launch_test_env.py:181"
-      ]
-    },
     "Stopping development server...": {
       "value": "Stopping development server...",
       "category": "test_literals",
       "locations": [
         "scripts/test_websocket_dev_mode.py:239"
-      ]
-    },
-    "Stopping existing TEST environment containers...": {
-      "value": "Stopping existing TEST environment containers...",
-      "category": "test_literals",
-      "locations": [
-        "scripts/launch_test_env.py:43"
       ]
     },
     "Strategies:": {
@@ -44276,20 +43834,6 @@
         "scripts/test_discovery_report.py:113"
       ]
     },
-    "TEST environment started successfully!": {
-      "value": "TEST environment started successfully!",
-      "category": "test_literals",
-      "locations": [
-        "scripts/launch_test_env.py:108"
-      ]
-    },
-    "TEST environment stopped.": {
-      "value": "TEST environment stopped.",
-      "category": "test_literals",
-      "locations": [
-        "scripts/launch_test_env.py:211"
-      ]
-    },
     "TEST-ONLY-SECRET-NOT-FOR-PRODUCTION-": {
       "value": "TEST-ONLY-SECRET-NOT-FOR-PRODUCTION-",
       "category": "test_literals",
@@ -44651,16 +44195,16 @@
       "value": "TEST_POSTGRES_PORT",
       "category": "test_literals",
       "locations": [
-        "scripts/test_docker_manager.py:178",
-        "scripts/test_docker_manager.py:186"
+        "scripts/test_docker_manager.py:192",
+        "scripts/test_docker_manager.py:200"
       ]
     },
     "TEST_REDIS_PORT": {
       "value": "TEST_REDIS_PORT",
       "category": "test_literals",
       "locations": [
-        "scripts/test_docker_manager.py:179",
-        "scripts/test_docker_manager.py:187"
+        "scripts/test_docker_manager.py:193",
+        "scripts/test_docker_manager.py:201"
       ]
     },
     "TEST_SECRET": {
@@ -45140,8 +44684,8 @@
         "scripts/test_collection_audit.py:331"
       ]
     },
-    "Test Docker Manager - Intelligent Docker management for tests\n\nThis script prevents Docker Compose brittleness by:\n1. Reusing healthy containers across test runs\n2. Only restarting containers when necessary\n3. Proper cleanup without affecting unrelated services\n4. Fast startup through container reuse": {
-      "value": "Test Docker Manager - Intelligent Docker management for tests\n\nThis script prevents Docker Compose brittleness by:\n1. Reusing healthy containers across test runs\n2. Only restarting containers when necessary\n3. Proper cleanup without affecting unrelated services\n4. Fast startup through container reuse",
+    "Test Docker Manager - DEPRECATED\n\n⚠️  DEPRECATION NOTICE ⚠️ \nThis script is DEPRECATED and should NOT be used for new code.\n\nALL Docker operations must now go through UnifiedDockerManager per CLAUDE.md Section 7.1.\n\nUse instead:\n- test_framework.unified_docker_manager.UnifiedDockerManager\n- scripts/docker_manual.py (uses UnifiedDockerManager)\n- tests/unified_test_runner.py --real-services (automatic Docker management)\n\nThis file remains only for legacy compatibility and will be removed in a future version.": {
+      "value": "Test Docker Manager - DEPRECATED\n\n⚠️  DEPRECATION NOTICE ⚠️ \nThis script is DEPRECATED and should NOT be used for new code.\n\nALL Docker operations must now go through UnifiedDockerManager per CLAUDE.md Section 7.1.\n\nUse instead:\n- test_framework.unified_docker_manager.UnifiedDockerManager\n- scripts/docker_manual.py (uses UnifiedDockerManager)\n- tests/unified_test_runner.py --real-services (automatic Docker management)\n\nThis file remains only for legacy compatibility and will be removed in a future version.",
       "category": "test_literals",
       "locations": [
         "scripts/test_docker_manager.py:2"
@@ -46065,13 +45609,6 @@
       "category": "test_literals",
       "locations": [
         "scripts/test_backend_optimized.py:370"
-      ]
-    },
-    "Test category to run (default: integration)": {
-      "value": "Test category to run (default: integration)",
-      "category": "test_literals",
-      "locations": [
-        "scripts/launch_test_env.py:196"
       ]
     },
     "Test centralized Docker manager with parallel execution": {
@@ -48271,6 +47808,13 @@
         "auth_service/tests/test_session_security_cycles_36_40.py:226"
       ]
     },
+    "TestDockerManager is deprecated. Use test_framework.unified_docker_manager.UnifiedDockerManager instead.": {
+      "value": "TestDockerManager is deprecated. Use test_framework.unified_docker_manager.UnifiedDockerManager instead.",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_docker_manager.py:32"
+      ]
+    },
     "TestPassword123!": {
       "value": "TestPassword123!",
       "category": "test_literals",
@@ -49782,6 +49326,13 @@
         "scripts/auto_fix_test_violations.py:857"
       ]
     },
+    "This script now uses docker_manual.py with UnifiedDockerManager.": {
+      "value": "This script now uses docker_manual.py with UnifiedDockerManager.",
+      "category": "test_literals",
+      "locations": [
+        "scripts/launch_test_env.py:26"
+      ]
+    },
     "This should match across all environments": {
       "value": "This should match across all environments",
       "category": "test_literals",
@@ -50007,19 +49558,12 @@
         "scripts/test_ga4_connection.py:60"
       ]
     },
-    "Timeframe is required": {
-      "value": "Timeframe is required",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:100"
-      ]
-    },
     "Timeout": {
       "value": "Timeout",
       "category": "test_literals",
       "locations": [
         "scripts/iterative_test_fix_loop.py:60",
-        "scripts/test_docker_manager.py:213"
+        "scripts/test_docker_manager.py:227"
       ]
     },
     "Timeout during test": {
@@ -50157,11 +49701,11 @@
         "scripts/test_discovery_report.py:83"
       ]
     },
-    "To stop: docker-compose -f docker-compose.test.yml down": {
-      "value": "To stop: docker-compose -f docker-compose.test.yml down",
+    "To run tests with this environment:": {
+      "value": "To run tests with this environment:",
       "category": "test_literals",
       "locations": [
-        "scripts/launch_test_env.py:117"
+        "scripts/launch_test_env.py:45"
       ]
     },
     "To use development-specific OAuth credentials:": {
@@ -50169,13 +49713,6 @@
       "category": "test_literals",
       "locations": [
         "scripts/test_oauth_dev_config.py:110"
-      ]
-    },
-    "To view logs: docker-compose -f docker-compose.test.yml logs -f": {
-      "value": "To view logs: docker-compose -f docker-compose.test.yml logs -f",
-      "category": "test_literals",
-      "locations": [
-        "scripts/launch_test_env.py:116"
       ]
     },
     "Token": {
@@ -50973,13 +50510,6 @@
         "scripts/test_parallel_docker_manager.py:150"
       ]
     },
-    "Total savings must be non-negative": {
-      "value": "Total savings must be non-negative",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:425"
-      ]
-    },
     "Total send time:": {
       "value": "Total send time:",
       "category": "test_literals",
@@ -51510,8 +51040,8 @@
       "value": "Unknown category:",
       "category": "test_literals",
       "locations": [
-        "scripts/test_backend_optimized.py:296",
-        "scripts/test_backend_ORIGINAL.py:220"
+        "scripts/test_backend_ORIGINAL.py:220",
+        "scripts/test_backend_optimized.py:296"
       ]
     },
     "Unknown error": {
@@ -52576,8 +52106,8 @@
       "category": "test_literals",
       "locations": [
         "scripts/compliance/fake_test_scanner.py:389",
-        "scripts/test_backend_optimized.py:389",
         "scripts/test_backend_ORIGINAL.py:505",
+        "scripts/test_backend_optimized.py:389",
         "scripts/test_clickhouse_startup_fix.py:398",
         "scripts/test_cors.py:443",
         "scripts/test_example_message_flow.py:434",
@@ -52989,13 +52519,6 @@
         "scripts/setup_e2e_test_ports.py:57"
       ]
     },
-    "Wait for services to be healthy": {
-      "value": "Wait for services to be healthy",
-      "category": "test_literals",
-      "locations": [
-        "scripts/launch_test_env.py:201"
-      ]
-    },
     "Waiting 2 seconds before next iteration...": {
       "value": "Waiting 2 seconds before next iteration...",
       "category": "test_literals",
@@ -53045,47 +52568,12 @@
         "scripts/setup_e2e_test_ports.py:99"
       ]
     },
-    "Waiting for services to be healthy...": {
-      "value": "Waiting for services to be healthy...",
-      "category": "test_literals",
-      "locations": [
-        "scripts/launch_test_env.py:124"
-      ]
-    },
     "Waiting for services to be ready...": {
       "value": "Waiting for services to be ready...",
       "category": "test_literals",
       "locations": [
         "scripts/start_test_services.py:114",
         "scripts/test_seed_data.py:59"
-      ]
-    },
-    "Waiting... (": {
-      "value": "Waiting... (",
-      "category": "test_literals",
-      "locations": [
-        "scripts/launch_test_env.py:144"
-      ]
-    },
-    "Warning 1": {
-      "value": "Warning 1",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:466"
-      ]
-    },
-    "Warning 2": {
-      "value": "Warning 2",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:466"
-      ]
-    },
-    "Warning 3": {
-      "value": "Warning 3",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:466"
       ]
     },
     "Warning:": {
@@ -53142,13 +52630,6 @@
       "category": "test_literals",
       "locations": [
         "scripts/validate_llm_test_models.py:91"
-      ]
-    },
-    "Warning: Services may not be fully ready": {
-      "value": "Warning: Services may not be fully ready",
-      "category": "test_literals",
-      "locations": [
-        "scripts/launch_test_env.py:146"
       ]
     },
     "Warning: python-dotenv not installed, using default test environment": {
@@ -54157,7 +53638,7 @@
       "value": "[DEV-DOCKER] Warning: Could not discover ports:",
       "category": "test_literals",
       "locations": [
-        "scripts/test_docker_manager.py:154"
+        "scripts/test_docker_manager.py:168"
       ]
     },
     "[DIR]": {
@@ -57735,42 +57216,42 @@
       "value": "[TEST-DOCKER] Resetting test data without container restart",
       "category": "test_literals",
       "locations": [
-        "scripts/test_docker_manager.py:92"
+        "scripts/test_docker_manager.py:106"
       ]
     },
     "[TEST-DOCKER] Warning: Could not discover ports:": {
       "value": "[TEST-DOCKER] Warning: Could not discover ports:",
       "category": "test_literals",
       "locations": [
-        "scripts/test_docker_manager.py:182"
+        "scripts/test_docker_manager.py:196"
       ]
     },
     "[TEST-DOCKER] ✓ PostgreSQL data reset": {
       "value": "[TEST-DOCKER] ✓ PostgreSQL data reset",
       "category": "test_literals",
       "locations": [
-        "scripts/test_docker_manager.py:113"
+        "scripts/test_docker_manager.py:127"
       ]
     },
     "[TEST-DOCKER] ✓ Redis data reset": {
       "value": "[TEST-DOCKER] ✓ Redis data reset",
       "category": "test_literals",
       "locations": [
-        "scripts/test_docker_manager.py:125"
+        "scripts/test_docker_manager.py:139"
       ]
     },
     "[TEST-DOCKER] ✗ Failed to reset PostgreSQL:": {
       "value": "[TEST-DOCKER] ✗ Failed to reset PostgreSQL:",
       "category": "test_literals",
       "locations": [
-        "scripts/test_docker_manager.py:115"
+        "scripts/test_docker_manager.py:129"
       ]
     },
     "[TEST-DOCKER] ✗ Failed to reset Redis:": {
       "value": "[TEST-DOCKER] ✗ Failed to reset Redis:",
       "category": "test_literals",
       "locations": [
-        "scripts/test_docker_manager.py:127"
+        "scripts/test_docker_manager.py:141"
       ]
     },
     "[TEST]": {
@@ -60361,13 +59842,6 @@
       "locations": [
         "auth_service/tests/unit/test_refresh_endpoint.py:305",
         "auth_service/tests/unit/test_refresh_endpoint.py:307"
-      ]
-    },
-    "also_not_a_number": {
-      "value": "also_not_a_number",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:276"
       ]
     },
     "alternation_score": {
@@ -63698,8 +63172,8 @@
       "category": "test_literals",
       "locations": [
         "scripts/test_coordination_fixes.py:48",
-        "scripts/test_docker_manager.py:207",
-        "scripts/test_docker_manager.py:235",
+        "scripts/test_docker_manager.py:221",
+        "scripts/test_docker_manager.py:249",
         "scripts/test_websocket_dev_mode.py:44",
         "scripts/test_websocket_dev_mode.py:253"
       ]
@@ -65307,22 +64781,6 @@
         "scripts/test_triage_flow.py:62"
       ]
     },
-    "cost_cents": {
-      "value": "cost_cents",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:46",
-        "scripts/test_data_validator_backup.py:72",
-        "scripts/test_data_validator_backup.py:136",
-        "scripts/test_data_validator_backup.py:176",
-        "scripts/test_data_validator_backup.py:184",
-        "scripts/test_data_validator_backup.py:257",
-        "scripts/test_data_validator_backup.py:262",
-        "scripts/test_data_validator_backup.py:267",
-        "scripts/test_data_validator_backup.py:621",
-        "scripts/test_data_validator_backup.py:625"
-      ]
-    },
     "cost_data": {
       "value": "cost_data",
       "category": "test_literals",
@@ -65338,8 +64796,7 @@
         "scripts/business_value_test_index.py:99",
         "scripts/business_value_test_index.py:422",
         "scripts/business_value_test_index.py:471",
-        "scripts/business_value_test_index.py:493",
-        "scripts/test_data_validator_backup.py:146"
+        "scripts/business_value_test_index.py:493"
       ]
     },
     "cost_per_1k_input": {
@@ -65399,15 +64856,6 @@
       "category": "test_literals",
       "locations": [
         "scripts/test_triage_flow.py:48"
-      ]
-    },
-    "cost_savings": {
-      "value": "cost_savings",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:328",
-        "scripts/test_data_validator_backup.py:399",
-        "scripts/test_data_validator_backup.py:416"
       ]
     },
     "cost_usd": {
@@ -66099,18 +65547,6 @@
         "scripts/test_gtm_loading.py:20",
         "scripts/test_gtm_loading.py:51",
         "scripts/test_gtm_loading.py:123"
-      ]
-    },
-    "data_points": {
-      "value": "data_points",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:190",
-        "scripts/test_data_validator_backup.py:201",
-        "scripts/test_data_validator_backup.py:441",
-        "scripts/test_data_validator_backup.py:454",
-        "scripts/test_data_validator_backup.py:467",
-        "scripts/test_data_validator_backup.py:480"
       ]
     },
     "data_quality": {
@@ -66805,9 +66241,9 @@
       "category": "test_literals",
       "locations": [
         "scripts/test_docker_config.py:11",
-        "scripts/test_docker_manager.py:33",
-        "scripts/test_docker_manager.py:133",
-        "scripts/test_docker_manager.py:209",
+        "scripts/test_docker_manager.py:47",
+        "scripts/test_docker_manager.py:147",
+        "scripts/test_docker_manager.py:223",
         "scripts/test_frontend_ORIGINAL.py:291",
         "scripts/test_oauth_local.py:247",
         "scripts/unified_test_config.py:96",
@@ -66825,7 +66261,7 @@
       "value": "dev-auth",
       "category": "test_literals",
       "locations": [
-        "scripts/test_docker_manager.py:38"
+        "scripts/test_docker_manager.py:52"
       ]
     },
     "dev-backend": {
@@ -66834,14 +66270,14 @@
       "locations": [
         "scripts/test_docker_config.py:128",
         "scripts/test_docker_config.py:159",
-        "scripts/test_docker_manager.py:38"
+        "scripts/test_docker_manager.py:52"
       ]
     },
     "dev-clickhouse": {
       "value": "dev-clickhouse",
       "category": "test_literals",
       "locations": [
-        "scripts/test_docker_manager.py:37"
+        "scripts/test_docker_manager.py:51"
       ]
     },
     "dev-client-id": {
@@ -66888,14 +66324,14 @@
       "locations": [
         "auth_service/tests/integration/test_database_connection.py:48",
         "auth_service/tests/integration/test_database_connection.py:143",
-        "scripts/test_docker_manager.py:36"
+        "scripts/test_docker_manager.py:50"
       ]
     },
     "dev-redis": {
       "value": "dev-redis",
       "category": "test_literals",
       "locations": [
-        "scripts/test_docker_manager.py:36"
+        "scripts/test_docker_manager.py:50"
       ]
     },
     "dev-secret-key": {
@@ -67130,15 +66566,15 @@
       "category": "test_literals",
       "locations": [
         "scripts/business_value_test_index.py:375",
-        "scripts/launch_test_env.py:23",
         "scripts/pytest_resource_monitor.py:118",
         "scripts/pytest_resource_monitor.py:261",
         "scripts/setup_e2e_test_ports.py:33",
         "scripts/setup_e2e_test_ports.py:50",
         "scripts/start_test_services.py:24",
-        "scripts/test_docker_manager.py:97",
-        "scripts/test_docker_manager.py:120",
-        "scripts/test_docker_manager.py:137"
+        "scripts/test_docker_manager.py:111",
+        "scripts/test_docker_manager.py:134",
+        "scripts/test_docker_manager.py:151",
+        "scripts/test_docker_manager.py:155"
       ]
     },
     "docker exec netra-dev-auth cat /app/auth_service/test_hot_reload_marker.py 2>/dev/null": {
@@ -67229,9 +66665,6 @@
       "value": "docker-compose",
       "category": "test_literals",
       "locations": [
-        "scripts/launch_test_env.py:24",
-        "scripts/launch_test_env.py:45",
-        "scripts/launch_test_env.py:85",
         "scripts/start_test_services.py:45",
         "scripts/test_docker_config.py:11"
       ]
@@ -67290,10 +66723,8 @@
       "value": "docker-compose.test.yml",
       "category": "test_literals",
       "locations": [
-        "scripts/launch_test_env.py:46",
-        "scripts/launch_test_env.py:86",
         "scripts/start_test_services.py:37",
-        "scripts/test_docker_manager.py:40"
+        "scripts/test_docker_manager.py:54"
       ]
     },
     "docker-compose.windows.yml": {
@@ -67309,7 +66740,14 @@
       "locations": [
         "scripts/test_docker_config.py:122",
         "scripts/test_docker_config.py:153",
-        "scripts/test_docker_manager.py:34"
+        "scripts/test_docker_manager.py:48"
+      ]
+    },
+    "docker_manual.py": {
+      "value": "docker_manual.py",
+      "category": "test_literals",
+      "locations": [
+        "scripts/launch_test_env.py:35"
       ]
     },
     "docs/testing": {
@@ -67378,13 +66816,6 @@
       "locations": [
         "scripts/test_websocket_chat_simple.py:210",
         "scripts/test_websocket_chat_standalone.py:206"
-      ]
-    },
-    "down": {
-      "value": "down",
-      "category": "test_literals",
-      "locations": [
-        "scripts/launch_test_env.py:48"
       ]
     },
     "dry_run": {
@@ -68651,8 +68082,8 @@
       "value": "exec",
       "category": "test_literals",
       "locations": [
-        "scripts/test_docker_manager.py:97",
-        "scripts/test_docker_manager.py:120"
+        "scripts/test_docker_manager.py:111",
+        "scripts/test_docker_manager.py:134"
       ]
     },
     "execute": {
@@ -70146,18 +69577,6 @@
         "netra_backend/app/services/factory_status/test_coverage_calculator.py:71"
       ]
     },
-    "findings": {
-      "value": "findings",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:320",
-        "scripts/test_data_validator_backup.py:358",
-        "scripts/test_data_validator_backup.py:371",
-        "scripts/test_data_validator_backup.py:384",
-        "scripts/test_data_validator_backup.py:397",
-        "scripts/test_data_validator_backup.py:414"
-      ]
-    },
     "fingerprint_mismatch": {
       "value": "fingerprint_mismatch",
       "category": "test_literals",
@@ -70418,14 +69837,6 @@
         "scripts/team_updates_test_analyzer.py:147",
         "scripts/team_updates_test_analyzer.py:157",
         "scripts/test_execution_tracker.py:699"
-      ]
-    },
-    "float": {
-      "value": "float",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:53",
-        "scripts/test_data_validator_backup.py:503"
       ]
     },
     "flow_duration": {
@@ -72583,7 +71994,7 @@
       "value": "healthy services, starting missing ones",
       "category": "test_literals",
       "locations": [
-        "scripts/test_docker_manager.py:64"
+        "scripts/test_docker_manager.py:78"
       ]
     },
     "heap size": {
@@ -72708,14 +72119,6 @@
       "locations": [
         "netra_backend/app/services/realistic_test_data/performance_simulator.py:24",
         "netra_backend/app/services/realistic_test_data/performance_simulator.py:163"
-      ]
-    },
-    "high_null_fields": {
-      "value": "high_null_fields",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:247",
-        "scripts/test_data_validator_backup.py:248"
       ]
     },
     "high_risk": {
@@ -73160,7 +72563,6 @@
       "value": "http://localhost:8001/health",
       "category": "test_literals",
       "locations": [
-        "scripts/launch_test_env.py:131",
         "scripts/test_agent_recovery_simple.py:16"
       ]
     },
@@ -73207,13 +72609,6 @@
       "category": "test_literals",
       "locations": [
         "scripts/test/verify_test_ports.py:29"
-      ]
-    },
-    "http://localhost:8082/health": {
-      "value": "http://localhost:8082/health",
-      "category": "test_literals",
-      "locations": [
-        "scripts/launch_test_env.py:136"
       ]
     },
     "http://localhost:8083": {
@@ -74335,13 +73730,6 @@
         "scripts/test_adaptive_workflow_local.py:106"
       ]
     },
-    "int": {
-      "value": "int",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:503"
-      ]
-    },
     "integration": {
       "value": "integration",
       "category": "test_literals",
@@ -74544,13 +73932,6 @@
         "scripts/test_verify_workflow_status_corrected.py:104"
       ]
     },
-    "invalid_metric": {
-      "value": "invalid_metric",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:136"
-      ]
-    },
     "invalid_run_id": {
       "value": "invalid_run_id",
       "category": "test_literals",
@@ -74565,13 +73946,6 @@
         "auth_service/tests/test_auth_comprehensive.py:227"
       ]
     },
-    "invalid_timestamp": {
-      "value": "invalid_timestamp",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:592"
-      ]
-    },
     "invalid_token": {
       "value": "invalid_token",
       "category": "test_literals",
@@ -74581,13 +73955,6 @@
         "scripts/test_verify_workflow_status.py:113",
         "scripts/test_verify_workflow_status_corrected.py:126",
         "scripts/test_verify_workflow_status_corrected.py:128"
-      ]
-    },
-    "invalid_type": {
-      "value": "invalid_type",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:105"
       ]
     },
     "invalid_url": {
@@ -75388,11 +74755,7 @@
         "netra_backend/app/services/realistic_test_data/performance_simulator.py:306",
         "netra_backend/app/services/realistic_test_data/performance_simulator.py:307",
         "netra_backend/app/services/realistic_test_data/performance_simulator.py:349",
-        "netra_backend/app/services/realistic_test_data/performance_simulator.py:403",
-        "scripts/test_data_validator_backup.py:45",
-        "scripts/test_data_validator_backup.py:50",
-        "scripts/test_data_validator_backup.py:72",
-        "scripts/test_data_validator_backup.py:136"
+        "netra_backend/app/services/realistic_test_data/performance_simulator.py:403"
       ]
     },
     "latency_p50_ms": {
@@ -76340,11 +75703,7 @@
       "category": "test_literals",
       "locations": [
         "scripts/real_service_test_metrics.py:95",
-        "scripts/real_service_test_metrics.py:187",
-        "scripts/test_data_validator_backup.py:52",
-        "scripts/test_data_validator_backup.py:501",
-        "scripts/test_data_validator_backup.py:505",
-        "scripts/test_data_validator_backup.py:506"
+        "scripts/real_service_test_metrics.py:187"
       ]
     },
     "max_age": {
@@ -76409,20 +75768,6 @@
         "scripts/test_secret_manager_builder_critical.py:165",
         "scripts/test_secret_manager_builder_critical.py:177",
         "scripts/test_secret_manager_builder_critical.py:462"
-      ]
-    },
-    "max_null_percentage": {
-      "value": "max_null_percentage",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:40"
-      ]
-    },
-    "max_outlier_percentage": {
-      "value": "max_outlier_percentage",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:42"
       ]
     },
     "max_time_ms": {
@@ -76830,10 +76175,6 @@
         "scripts/team_updates_test_analyzer.py:18",
         "scripts/test_backend_optimized.py:219",
         "scripts/test_clickhouse_startup_fix.py:66",
-        "scripts/test_data_validator_backup.py:72",
-        "scripts/test_data_validator_backup.py:136",
-        "scripts/test_data_validator_backup.py:264",
-        "scripts/test_data_validator_backup.py:284",
         "scripts/test_intensive_serialization.py:102"
       ]
     },
@@ -76939,18 +76280,7 @@
       "category": "test_literals",
       "locations": [
         "scripts/real_service_test_metrics.py:94",
-        "scripts/real_service_test_metrics.py:186",
-        "scripts/test_data_validator_backup.py:51",
-        "scripts/test_data_validator_backup.py:500",
-        "scripts/test_data_validator_backup.py:504",
-        "scripts/test_data_validator_backup.py:506"
-      ]
-    },
-    "min_data_points": {
-      "value": "min_data_points",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:39"
+        "scripts/real_service_test_metrics.py:186"
       ]
     },
     "min_time_ms": {
@@ -76960,13 +76290,6 @@
         "scripts/test_secret_manager_builder_critical.py:588",
         "scripts/test_secret_manager_builder_critical.py:611",
         "scripts/test_secret_manager_builder_critical.py:626"
-      ]
-    },
-    "min_time_span_hours": {
-      "value": "min_time_span_hours",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:41"
       ]
     },
     "minimal_validation": {
@@ -77140,14 +76463,6 @@
       "category": "test_literals",
       "locations": [
         "scripts/test_staging_websocket_comprehensive.py:162"
-      ]
-    },
-    "missing_fields": {
-      "value": "missing_fields",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:231",
-        "scripts/test_data_validator_backup.py:231"
       ]
     },
     "missing_imports": {
@@ -78062,7 +77377,7 @@
       "category": "test_literals",
       "locations": [
         "scripts/test_docker_hot_reload.py:192",
-        "scripts/test_docker_manager.py:34"
+        "scripts/test_docker_manager.py:48"
       ]
     },
     "netra-dev-auth": {
@@ -78095,14 +77410,14 @@
       "value": "netra-dev-postgres",
       "category": "test_literals",
       "locations": [
-        "scripts/test_docker_manager.py:137"
+        "scripts/test_docker_manager.py:151"
       ]
     },
     "netra-dev-redis": {
       "value": "netra-dev-redis",
       "category": "test_literals",
       "locations": [
-        "scripts/test_docker_manager.py:141"
+        "scripts/test_docker_manager.py:155"
       ]
     },
     "netra-frontend": {
@@ -78159,7 +77474,7 @@
       "category": "test_literals",
       "locations": [
         "scripts/start_test_services.py:47",
-        "scripts/test_docker_manager.py:40",
+        "scripts/test_docker_manager.py:54",
         "scripts/test_staging_jwt.py:26"
       ]
     },
@@ -78182,16 +77497,16 @@
       "category": "test_literals",
       "locations": [
         "scripts/setup_e2e_test_ports.py:40",
-        "scripts/test_docker_manager.py:97",
-        "scripts/test_docker_manager.py:165"
+        "scripts/test_docker_manager.py:111",
+        "scripts/test_docker_manager.py:179"
       ]
     },
     "netra-test-redis": {
       "value": "netra-test-redis",
       "category": "test_literals",
       "locations": [
-        "scripts/test_docker_manager.py:120",
-        "scripts/test_docker_manager.py:169"
+        "scripts/test_docker_manager.py:134",
+        "scripts/test_docker_manager.py:183"
       ]
     },
     "netra.test.agent@gmail.com": {
@@ -78767,7 +78082,7 @@
       "category": "test_literals",
       "locations": [
         "scripts/setup_test_environment.py:217",
-        "scripts/test_docker_manager.py:98",
+        "scripts/test_docker_manager.py:112",
         "scripts/test_seed_data.py:38",
         "scripts/test_service_monitor.py:41"
       ]
@@ -79270,13 +78585,6 @@
       "category": "test_literals",
       "locations": [
         "scripts/test_ssl_certificates_staging.py:82"
-      ]
-    },
-    "not_a_number": {
-      "value": "not_a_number",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:275"
       ]
     },
     "not_configured": {
@@ -79938,17 +79246,6 @@
       "category": "test_literals",
       "locations": [
         "scripts/pytest_plugins.py:81"
-      ]
-    },
-    "outliers": {
-      "value": "outliers",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:265",
-        "scripts/test_data_validator_backup.py:266",
-        "scripts/test_data_validator_backup.py:267",
-        "scripts/test_data_validator_backup.py:532",
-        "scripts/test_data_validator_backup.py:537"
       ]
     },
     "output": {
@@ -81109,7 +80406,7 @@
       "value": "postgres-test",
       "category": "test_literals",
       "locations": [
-        "scripts/test_docker_manager.py:95"
+        "scripts/test_docker_manager.py:109"
       ]
     },
     "postgres-user-staging": {
@@ -81243,14 +80540,14 @@
       "value": "postgresql://netra:netra123@localhost:",
       "category": "test_literals",
       "locations": [
-        "scripts/test_docker_manager.py:148"
+        "scripts/test_docker_manager.py:162"
       ]
     },
     "postgresql://netra:netra123@localhost:5433/netra": {
       "value": "postgresql://netra:netra123@localhost:5433/netra",
       "category": "test_literals",
       "locations": [
-        "scripts/test_docker_manager.py:156"
+        "scripts/test_docker_manager.py:170"
       ]
     },
     "postgresql://netra_dev:netra_dev@dev-postgres:5432/netra_dev": {
@@ -81293,14 +80590,14 @@
       "value": "postgresql://test_user:test_pass@localhost:",
       "category": "test_literals",
       "locations": [
-        "scripts/test_docker_manager.py:176"
+        "scripts/test_docker_manager.py:190"
       ]
     },
     "postgresql://test_user:test_pass@localhost:5434/netra_test": {
       "value": "postgresql://test_user:test_pass@localhost:5434/netra_test",
       "category": "test_literals",
       "locations": [
-        "scripts/test_docker_manager.py:184"
+        "scripts/test_docker_manager.py:198"
       ]
     },
     "postgresql://user:pass@/db?host=/cloudsql/project:region:instance": {
@@ -81944,7 +81241,7 @@
       "value": "psql",
       "category": "test_literals",
       "locations": [
-        "scripts/test_docker_manager.py:98"
+        "scripts/test_docker_manager.py:112"
       ]
     },
     "psycopg": {
@@ -82261,8 +81558,8 @@
         "scripts/continuous_e2e_test_runner.py:26",
         "scripts/continuous_e2e_test_runner.py:108",
         "scripts/e2e_test_fixer.py:311",
-        "scripts/launch_test_env.py:155",
-        "scripts/manage_test_services.py:141"
+        "scripts/manage_test_services.py:141",
+        "scripts/run_all_test_categories.py:20"
       ]
     },
     "python -m pytest netra_backend/tests/integration/test_adaptive_workflow.py -v --tb=short": {
@@ -82321,6 +81618,27 @@
         "scripts/compliance/demo_test_size_enforcement.py:181"
       ]
     },
+    "python scripts/docker_manual.py start --environment test": {
+      "value": "python scripts/docker_manual.py start --environment test",
+      "category": "test_literals",
+      "locations": [
+        "scripts/launch_test_env.py:28"
+      ]
+    },
+    "python scripts/docker_manual.py status": {
+      "value": "python scripts/docker_manual.py status",
+      "category": "test_literals",
+      "locations": [
+        "scripts/launch_test_env.py:30"
+      ]
+    },
+    "python scripts/docker_manual.py stop --environment test": {
+      "value": "python scripts/docker_manual.py stop --environment test",
+      "category": "test_literals",
+      "locations": [
+        "scripts/launch_test_env.py:29"
+      ]
+    },
     "python scripts/migrate_test_ids.py --apply": {
       "value": "python scripts/migrate_test_ids.py --apply",
       "category": "test_literals",
@@ -82355,6 +81673,14 @@
       "category": "test_literals",
       "locations": [
         "scripts/test_discovery_report.py:158"
+      ]
+    },
+    "python tests/unified_test_runner.py --real-services": {
+      "value": "python tests/unified_test_runner.py --real-services",
+      "category": "test_literals",
+      "locations": [
+        "scripts/launch_test_env.py:31",
+        "scripts/launch_test_env.py:46"
       ]
     },
     "python tests/unified_test_runner.py --service backend [your args]": {
@@ -82434,19 +81760,7 @@
       "category": "test_literals",
       "locations": [
         "scripts/business_value_test_index.py:629",
-        "scripts/business_value_test_index.py:746",
-        "scripts/test_data_validator_backup.py:229",
-        "scripts/test_data_validator_backup.py:246",
-        "scripts/test_data_validator_backup.py:264",
-        "scripts/test_data_validator_backup.py:284",
-        "scripts/test_data_validator_backup.py:302"
-      ]
-    },
-    "quality_score": {
-      "value": "quality_score",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:191"
+        "scripts/business_value_test_index.py:746"
       ]
     },
     "quality_scores": {
@@ -83042,14 +82356,14 @@
       "value": "redis-cli",
       "category": "test_literals",
       "locations": [
-        "scripts/test_docker_manager.py:121"
+        "scripts/test_docker_manager.py:135"
       ]
     },
     "redis-test": {
       "value": "redis-test",
       "category": "test_literals",
       "locations": [
-        "scripts/test_docker_manager.py:118"
+        "scripts/test_docker_manager.py:132"
       ]
     },
     "redis.Redis.get": {
@@ -83086,8 +82400,8 @@
       "value": "redis://localhost:",
       "category": "test_literals",
       "locations": [
-        "scripts/test_docker_manager.py:149",
-        "scripts/test_docker_manager.py:177"
+        "scripts/test_docker_manager.py:163",
+        "scripts/test_docker_manager.py:191"
       ]
     },
     "redis://localhost:6379": {
@@ -83120,7 +82434,7 @@
       "category": "test_literals",
       "locations": [
         "scripts/start_test_services.py:158",
-        "scripts/test_docker_manager.py:157"
+        "scripts/test_docker_manager.py:171"
       ]
     },
     "redis://localhost:6380/0": {
@@ -83141,7 +82455,7 @@
       "value": "redis://localhost:6381/1",
       "category": "test_literals",
       "locations": [
-        "scripts/test_docker_manager.py:185"
+        "scripts/test_docker_manager.py:199"
       ]
     },
     "redis://localhost:6381/3": {
@@ -83693,8 +83007,8 @@
       "value": "reset",
       "category": "test_literals",
       "locations": [
-        "scripts/test_docker_manager.py:207",
-        "scripts/test_docker_manager.py:228"
+        "scripts/test_docker_manager.py:221",
+        "scripts/test_docker_manager.py:242"
       ]
     },
     "resilience": {
@@ -84447,15 +83761,6 @@
       "category": "test_literals",
       "locations": [
         "scripts/test_agent_pipeline_simple.py:86"
-      ]
-    },
-    "savings_percentage": {
-      "value": "savings_percentage",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:329",
-        "scripts/test_data_validator_backup.py:400",
-        "scripts/test_data_validator_backup.py:417"
       ]
     },
     "scaling_service.py": {
@@ -85238,21 +84543,21 @@
         "scripts/test_collection_audit.py:400",
         "scripts/test_collection_audit.py:404",
         "scripts/test_docker_config.py:26",
-        "scripts/test_docker_manager.py:72"
+        "scripts/test_docker_manager.py:86"
       ]
     },
     "services already healthy, reusing containers": {
       "value": "services already healthy, reusing containers",
       "category": "test_literals",
       "locations": [
-        "scripts/test_docker_manager.py:61"
+        "scripts/test_docker_manager.py:75"
       ]
     },
     "services ready": {
       "value": "services ready",
       "category": "test_literals",
       "locations": [
-        "scripts/test_docker_manager.py:70"
+        "scripts/test_docker_manager.py:84"
       ]
     },
     "services/test_synthetic_data_service_v3.py": {
@@ -85266,7 +84571,7 @@
       "value": "services:",
       "category": "test_literals",
       "locations": [
-        "scripts/test_docker_manager.py:52"
+        "scripts/test_docker_manager.py:66"
       ]
     },
     "session": {
@@ -85938,8 +85243,8 @@
         "scripts/iterative_test_fix_loop.py:31",
         "scripts/run_all_test_categories.py:98",
         "scripts/simple_test_fix_loop.py:18",
-        "scripts/test_backend_optimized.py:83",
         "scripts/test_backend_ORIGINAL.py:37",
+        "scripts/test_backend_optimized.py:83",
         "scripts/test_execution_tracker.py:106",
         "scripts/test_frontend_ORIGINAL.py:39",
         "scripts/test_frontend_simple.py:36"
@@ -86577,10 +85882,11 @@
       "value": "start",
       "category": "test_literals",
       "locations": [
+        "scripts/launch_test_env.py:41",
         "scripts/manage_test_services.py:164",
         "scripts/manage_test_services.py:201",
-        "scripts/test_docker_manager.py:207",
-        "scripts/test_docker_manager.py:219",
+        "scripts/test_docker_manager.py:221",
+        "scripts/test_docker_manager.py:233",
         "scripts/test_websocket_chat_simple.py:390",
         "scripts/test_websocket_chat_standalone.py:375"
       ]
@@ -86776,8 +86082,8 @@
         "netra_backend/app/services/realistic_test_data/llm_response_generator.py:115",
         "scripts/manage_test_services.py:177",
         "scripts/manage_test_services.py:203",
-        "scripts/test_docker_manager.py:207",
-        "scripts/test_docker_manager.py:224"
+        "scripts/test_docker_manager.py:221",
+        "scripts/test_docker_manager.py:238"
       ]
     },
     "store": {
@@ -86859,9 +86165,7 @@
       "value": "structure",
       "category": "test_literals",
       "locations": [
-        "auth_service/tests/test_auth_comprehensive.py:479",
-        "scripts/test_data_validator_backup.py:229",
-        "scripts/test_data_validator_backup.py:246"
+        "auth_service/tests/test_auth_comprehensive.py:479"
       ]
     },
     "stub": {
@@ -87738,7 +87042,7 @@
       "value": "test-auth",
       "category": "test_literals",
       "locations": [
-        "scripts/test_docker_manager.py:44"
+        "scripts/test_docker_manager.py:58"
       ]
     },
     "test-auth-code-12345": {
@@ -87759,7 +87063,7 @@
       "value": "test-backend",
       "category": "test_literals",
       "locations": [
-        "scripts/test_docker_manager.py:44"
+        "scripts/test_docker_manager.py:58"
       ]
     },
     "test-branch": {
@@ -87780,7 +87084,7 @@
       "value": "test-clickhouse",
       "category": "test_literals",
       "locations": [
-        "scripts/test_docker_manager.py:43",
+        "scripts/test_docker_manager.py:57",
         "scripts/test_service_monitor.py:53"
       ]
     },
@@ -87938,7 +87242,7 @@
       "value": "test-postgres",
       "category": "test_literals",
       "locations": [
-        "scripts/test_docker_manager.py:42",
+        "scripts/test_docker_manager.py:56",
         "scripts/test_service_monitor.py:37"
       ]
     },
@@ -87960,7 +87264,7 @@
       "value": "test-redis",
       "category": "test_literals",
       "locations": [
-        "scripts/test_docker_manager.py:42",
+        "scripts/test_docker_manager.py:56",
         "scripts/test_service_monitor.py:46"
       ]
     },
@@ -90138,13 +89442,6 @@
         "scripts/business_value_test_index.py:742"
       ]
     },
-    "tests...": {
-      "value": "tests...",
-      "category": "test_literals",
-      "locations": [
-        "scripts/launch_test_env.py:152"
-      ]
-    },
     "tests.e2e.": {
       "value": "tests.e2e.",
       "category": "test_literals",
@@ -90833,15 +90130,7 @@
       "category": "test_literals",
       "locations": [
         "netra_backend/app/services/realistic_test_data/models.py:101",
-        "scripts/test_data_validator_backup.py:47",
-        "scripts/test_data_validator_backup.py:177",
-        "scripts/test_data_validator_backup.py:184",
-        "scripts/test_data_validator_backup.py:622",
-        "scripts/test_data_validator_backup.py:625",
-        "scripts/test_data_validator_backup.py:641",
-        "scripts/test_data_validator_backup.py:645",
-        "scripts/test_data_validator_backup.py:663",
-        "scripts/test_data_validator_backup.py:664"
+        "scripts/test_staging_websocket_comprehensive.py:216"
       ]
     },
     "throughput_rps": {
@@ -90972,21 +90261,6 @@
         "scripts/test_triage_flow.py:39"
       ]
     },
-    "time_span": {
-      "value": "time_span",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:302"
-      ]
-    },
-    "time_span_hours": {
-      "value": "time_span_hours",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:559",
-        "scripts/test_data_validator_backup.py:599"
-      ]
-    },
     "time_utilities": {
       "value": "time_utilities",
       "category": "test_literals",
@@ -91000,17 +90274,6 @@
       "category": "test_literals",
       "locations": [
         "scripts/test_example_message_flow.py:121"
-      ]
-    },
-    "timeframe": {
-      "value": "timeframe",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:71",
-        "scripts/test_data_validator_backup.py:83",
-        "scripts/test_data_validator_backup.py:106",
-        "scripts/test_data_validator_backup.py:135",
-        "scripts/test_data_validator_backup.py:151"
       ]
     },
     "timeout": {
@@ -91333,16 +90596,6 @@
       "category": "test_literals",
       "locations": [
         "auth_service/test_auth_direct.py:83"
-      ]
-    },
-    "tokens_input": {
-      "value": "tokens_input",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:276",
-        "scripts/test_data_validator_backup.py:281",
-        "scripts/test_data_validator_backup.py:516",
-        "scripts/test_data_validator_backup.py:517"
       ]
     },
     "too": {
@@ -91760,15 +91013,6 @@
         "scripts/optimize_test_performance.py:99"
       ]
     },
-    "total_potential_savings_cents": {
-      "value": "total_potential_savings_cents",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:330",
-        "scripts/test_data_validator_backup.py:401",
-        "scripts/test_data_validator_backup.py:418"
-      ]
-    },
     "total_requests": {
       "value": "total_requests",
       "category": "test_literals",
@@ -91921,13 +91165,6 @@
       "category": "test_literals",
       "locations": [
         "netra_backend/app/services/realistic_test_data/workload_simulator.py:72"
-      ]
-    },
-    "trend_analysis": {
-      "value": "trend_analysis",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:146"
       ]
     },
     "triage": {
@@ -92139,11 +91376,11 @@
         "scripts/continuous_e2e_test_runner.py:26",
         "scripts/frontend_iterative_test_runner.py:190",
         "scripts/iterative_test_fix_loop.py:30",
-        "scripts/launch_test_env.py:155",
         "scripts/run_all_test_categories.py:20",
         "scripts/simple_test_fix_loop.py:18",
         "scripts/test_comprehensive_scanner.py:126",
-        "scripts/test_failure_analyzer.py:338"
+        "scripts/test_failure_analyzer.py:338",
+        "scripts/test_failure_tracker.py:75"
       ]
     },
     "unique tokens - no infinite loop": {
@@ -92272,7 +91509,6 @@
       "value": "up",
       "category": "test_literals",
       "locations": [
-        "scripts/launch_test_env.py:88",
         "scripts/start_test_services.py:48"
       ]
     },
@@ -92334,8 +91570,8 @@
       "category": "test_literals",
       "locations": [
         "scripts/setup_e2e_test_ports.py:94",
-        "scripts/test_docker_manager.py:207",
-        "scripts/test_docker_manager.py:239",
+        "scripts/test_docker_manager.py:221",
+        "scripts/test_docker_manager.py:253",
         "scripts/test_service_health_simple.py:44"
       ]
     },
@@ -92577,26 +91813,6 @@
         "scripts/frontend_iterative_test_runner.py:663"
       ]
     },
-    "user_": {
-      "value": "user_",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:173",
-        "scripts/test_data_validator_backup.py:239",
-        "scripts/test_data_validator_backup.py:294",
-        "scripts/test_data_validator_backup.py:618",
-        "scripts/test_data_validator_backup.py:670"
-      ]
-    },
-    "user_1": {
-      "value": "user_1",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:208",
-        "scripts/test_data_validator_backup.py:255",
-        "scripts/test_data_validator_backup.py:274"
-      ]
-    },
     "user_789": {
       "value": "user_789",
       "category": "test_literals",
@@ -92824,12 +92040,7 @@
         "auth_service/test_staging_db_connection.py:270",
         "scripts/compliance/test_refactor_helper.py:612",
         "scripts/compliance/test_refactor_helper.py:732",
-        "scripts/test_auth_client_debug.py:84",
-        "scripts/test_data_validator_backup.py:189",
-        "scripts/test_data_validator_backup.py:199",
-        "scripts/test_data_validator_backup.py:216",
-        "scripts/test_data_validator_backup.py:230",
-        "scripts/test_data_validator_backup.py:283"
+        "scripts/test_auth_client_debug.py:84"
       ]
     },
     "valid.refresh.token": {
@@ -93345,10 +92556,7 @@
         "scripts/setup_test_environment.py:133",
         "scripts/setup_test_environment.py:168",
         "scripts/setup_test_environment.py:186",
-        "scripts/setup_test_environment.py:285",
-        "scripts/test_data_validator_backup.py:303",
-        "scripts/test_data_validator_backup.py:304",
-        "scripts/test_data_validator_backup.py:560"
+        "scripts/setup_test_environment.py:285"
       ]
     },
     "warnings": {
@@ -93694,8 +92902,8 @@
         "scripts/fix_common_test_issues.py:58",
         "scripts/setup_test_environment.py:10",
         "scripts/test/test_clickhouse_staging_fix.py:15",
-        "scripts/test_backend_optimized.py:456",
         "scripts/test_backend_ORIGINAL.py:58",
+        "scripts/test_backend_optimized.py:456",
         "scripts/test_frontend_ORIGINAL.py:524",
         "scripts/test_oauth_local.py:22",
         "scripts/test_oauth_local.py:36",
@@ -93844,25 +93052,6 @@
       "category": "test_literals",
       "locations": [
         "scripts/test_cold_start_e2e.py:54"
-      ]
-    },
-    "workload_": {
-      "value": "workload_",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:174",
-        "scripts/test_data_validator_backup.py:619",
-        "scripts/test_data_validator_backup.py:671"
-      ]
-    },
-    "workload_id": {
-      "value": "workload_id",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:174",
-        "scripts/test_data_validator_backup.py:619",
-        "scripts/test_data_validator_backup.py:638",
-        "scripts/test_data_validator_backup.py:671"
       ]
     },
     "workload_patterns": {
@@ -94092,13 +93281,6 @@
       "category": "test_literals",
       "locations": [
         "scripts/test_staging_auth_live.py:159"
-      ]
-    },
-    "wörk-löad_ñoñé": {
-      "value": "wörk-löad_ñoñé",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:638"
       ]
     },
     "x": {
@@ -99312,13 +98494,6 @@
       "category": "test_literals",
       "locations": [
         "scripts/test_blocking_analysis.py:351"
-      ]
-    },
-    "用户_测试_123": {
-      "value": "用户_测试_123",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:637"
       ]
     },
     "用户名 🚀": {

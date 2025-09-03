@@ -750,38 +750,8 @@ def pytest_mock_performance():
     return create_performance_mock()
 
 
-# Legacy compatibility - maps old mock patterns to new unified mock
-class LegacyMockWebSocketManager(MockWebSocketManager):
-    """
-    Compatibility wrapper for legacy test code.
-    
-    Provides the same interface as old mocks while using the new unified implementation.
-    """
-    
-    def __init__(self, strict_mode: bool = True, **kwargs):
-        """Legacy constructor interface."""
-        config = MockConfiguration(
-            validate_message_format=strict_mode,
-            enforce_event_order=strict_mode,
-            **kwargs
-        )
-        super().__init__(config)
-        
-        # Legacy attributes for backward compatibility
-        self.strict_mode = strict_mode
-        self.events = self.messages  # Alias
-        self.event_counts = defaultdict(int)
-        self.errors = []
-        self.warnings = []
-        self.start_time = time.time()
-    
-    def record(self, event: Dict) -> None:
-        """Legacy record method for compatibility."""
-        thread_id = event.get('thread_id', 'legacy_thread')
-        asyncio.create_task(self.send_to_thread(thread_id, event))
-        
-        event_type = event.get('type', 'unknown')
-        self.event_counts[event_type] += 1
+# Legacy compatibility layers have been removed to streamline WebSocket test infrastructure
+# All tests should use the modern MockWebSocketManager with factory methods
 
 
 # Export the main class and convenience functions
@@ -797,6 +767,5 @@ __all__ = [
     'create_concurrency_mock',
     'create_resource_limits_mock',
     'create_slow_network_mock',
-    'create_auth_testing_mock',
-    'LegacyMockWebSocketManager'
+    'create_auth_testing_mock'
 ]

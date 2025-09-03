@@ -2485,10 +2485,25 @@ async def get_agent_websocket_bridge() -> AgentWebSocketBridge:
     global _bridge_instance
     _bridge_lock = asyncio.Lock()
     
-    if _bridge_instance is None:
-        async with _bridge_lock:
-            if _bridge_instance is None:
-                _bridge_instance = AgentWebSocketBridge()
-                logger.warning("⚠️  Created singleton AgentWebSocketBridge - consider migrating to per-user emitters!")
-    
-    return _bridge_instance
+    try:
+        if _bridge_instance is None:
+            async with _bridge_lock:
+                if _bridge_instance is None:
+                    logger.info("Creating singleton AgentWebSocketBridge instance...")
+                    _bridge_instance = AgentWebSocketBridge()
+                    logger.warning("⚠️  Created singleton AgentWebSocketBridge - consider migrating to per-user emitters!")
+        
+        # Verify the instance is properly initialized
+        if not hasattr(_bridge_instance, '_initialized') or not _bridge_instance._initialized:
+            logger.error("AgentWebSocketBridge instance created but not properly initialized!")
+            raise RuntimeError("AgentWebSocketBridge initialization incomplete")
+        
+        logger.debug("Returning singleton AgentWebSocketBridge instance")
+        return _bridge_instance
+        
+    except Exception as e:
+        logger.error(f"Failed to create AgentWebSocketBridge singleton: {e}")
+        logger.error(f"Exception type: {type(e).__name__}")
+        # Reset instance to None to allow retry on next call
+        _bridge_instance = None
+        raise RuntimeError(f"AgentWebSocketBridge singleton creation failed: {e}") from e

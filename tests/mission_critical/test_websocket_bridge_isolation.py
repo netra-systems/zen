@@ -184,16 +184,17 @@ class IsolationTestManager:
 # ISOLATION VALIDATION TESTS
 # ============================================================================
 
+@pytest.fixture
+async def isolation_manager():
+    """Isolation test manager fixture."""
+    manager = IsolationTestManager()
+    await manager.initialize()
+    yield manager
+    await manager.cleanup_all()
+
+
 class TestWebSocketBridgeIsolation:
     """Test suite validating WebSocket Bridge user isolation."""
-    
-    @pytest.fixture
-    async def isolation_manager(self):
-        """Isolation test manager fixture."""
-        manager = IsolationTestManager()
-        await manager.initialize()
-        yield manager
-        await manager.cleanup_all()
     
     @pytest.mark.asyncio
     @pytest.mark.critical
@@ -234,7 +235,7 @@ class TestWebSocketBridgeIsolation:
         await emitter1.cleanup()
         await emitter2.cleanup()
         
-        logger.info("✅ Basic user isolation test passed")
+        logger.info("[CHECK] Basic user isolation test passed")
     
     @pytest.mark.asyncio
     @pytest.mark.critical
@@ -287,7 +288,7 @@ class TestWebSocketBridgeIsolation:
         assert contamination_report['contamination_count'] == 0, \
             f"Cross-contamination under load: {contamination_report}"
         
-        logger.info(f"✅ Concurrent isolation test: {len(successful_users)} users properly isolated")
+        logger.info(f"[CHECK] Concurrent isolation test: {len(successful_users)} users properly isolated")
     
     @pytest.mark.asyncio
     async def test_user_context_memory_isolation(self, isolation_manager):
@@ -329,7 +330,7 @@ class TestWebSocketBridgeIsolation:
         await emitter1.cleanup()
         await emitter2.cleanup()
         
-        logger.info("✅ User context memory isolation test passed")
+        logger.info("[CHECK] User context memory isolation test passed")
     
     @pytest.mark.asyncio
     async def test_isolation_after_user_cleanup(self, isolation_manager):
@@ -376,7 +377,7 @@ class TestWebSocketBridgeIsolation:
         for i in range(1, 3):
             await emitters[i].cleanup()
         
-        logger.info("✅ Isolation after cleanup test passed")
+        logger.info("[CHECK] Isolation after cleanup test passed")
     
     @pytest.mark.asyncio
     async def test_isolation_with_identical_thread_ids(self, isolation_manager):
@@ -413,7 +414,7 @@ class TestWebSocketBridgeIsolation:
         await emitter1.cleanup()
         await emitter2.cleanup()
         
-        logger.info("✅ Isolation with identical thread IDs test passed")
+        logger.info("[CHECK] Isolation with identical thread IDs test passed")
 
 
 # ============================================================================
@@ -433,15 +434,15 @@ class TestWebSocketBridgeIsolationComprehensive:
         logger.info("Factory-Based WebSocket User Isolation")
         logger.info("="*80)
         
-        logger.info("\n✅ WebSocket Bridge Isolation Test Suite is operational")
-        logger.info("✅ All isolation patterns are covered:")
-        logger.info("  - Basic user isolation: ✅")
-        logger.info("  - Concurrent user isolation under load: ✅")
-        logger.info("  - User context memory isolation: ✅")
-        logger.info("  - Isolation after user cleanup: ✅")
-        logger.info("  - Isolation with identical thread IDs: ✅")
+        logger.info("\n[CHECK] WebSocket Bridge Isolation Test Suite is operational")
+        logger.info("[CHECK] All isolation patterns are covered:")
+        logger.info("  - Basic user isolation: [CHECK]")
+        logger.info("  - Concurrent user isolation under load: [CHECK]")
+        logger.info("  - User context memory isolation: [CHECK]")
+        logger.info("  - Isolation after user cleanup: [CHECK]")
+        logger.info("  - Isolation with identical thread IDs: [CHECK]")
         
-        logger.info("\n🚀 Run individual tests with:")
+        logger.info("\n[ROCKET] Run individual tests with:")
         logger.info("pytest tests/mission_critical/test_websocket_bridge_isolation.py::TestWebSocketBridgeIsolation -v")
         
         logger.info("="*80)
@@ -459,12 +460,12 @@ if __name__ == "__main__":
     print("5. Isolation with identical thread IDs")
     print("=" * 80)
     print()
-    print("🚀 EXECUTION METHODS:")
+    print("[ROCKET] EXECUTION METHODS:")
     print()
     print("Run all tests:")
     print("  python -m pytest tests/mission_critical/test_websocket_bridge_isolation.py -v")
     print()
-    print("✅ Factory-based WebSocket patterns from USER_CONTEXT_ARCHITECTURE.md")
-    print("✅ Complete user isolation validation")
-    print("✅ Cross-contamination detection and prevention")
+    print("[CHECK] Factory-based WebSocket patterns from USER_CONTEXT_ARCHITECTURE.md")
+    print("[CHECK] Complete user isolation validation")
+    print("[CHECK] Cross-contamination detection and prevention")
     print("=" * 80)

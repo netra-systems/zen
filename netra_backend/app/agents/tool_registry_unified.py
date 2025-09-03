@@ -354,6 +354,12 @@ class UnifiedToolRegistry(ToolRegistryInterface):
         with self._lock:
             return len(self._tools)
     
+    @property
+    def tools(self) -> Dict[str, Any]:
+        """Expose tools for compatibility with tool dispatcher."""
+        with self._lock:
+            return {name: metadata.tool for name, metadata in self._tools.items()}
+    
     # ===================== ADVANCED OPERATIONS =====================
     
     def create_snapshot(self) -> 'ToolRegistrySnapshot':

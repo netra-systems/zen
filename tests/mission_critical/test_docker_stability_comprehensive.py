@@ -2346,20 +2346,23 @@ class TestDockerInfrastructurePerformance:
             logger.info(f"Concurrent cleanup completed in {cleanup_time:.1f}s")
     
     def test_io_performance_optimization(self, docker_stability_metrics):
-        """Test I/O performance with tmpfs and optimization."""
+        """Test I/O performance optimization.
+        
+        WARNING: tmpfs removed - causes system crashes from RAM exhaustion.
+        """
         io_test_containers = []
         
         try:
             with docker_daemon_health_monitor(docker_stability_metrics):
-                # Test I/O performance with tmpfs optimization
-                for test_type in ['regular', 'tmpfs']:
+                # Test I/O performance (tmpfs removed - causes crashes)
+                for test_type in ['regular', 'volume']:
                     container_name = f"io_test_{test_type}_{int(time.time())}"
                     
-                    if test_type == 'tmpfs':
-                        # Create container with tmpfs for performance
+                    if test_type == 'volume':
+                        # Create container with volume mount for performance
                         cmd = [
                             "docker", "run", "-d", f"--name={container_name}",
-                            "--memory=200m", "--tmpfs=/tmp:size=100m",
+                            "--memory=200m", "-v", "test_vol:/tmp",
                             "alpine:latest", "sleep", "60"
                         ]
                     else:
@@ -2403,7 +2406,7 @@ class TestDockerInfrastructurePerformance:
                         logger.info(f"I/O performance ({test_type}): Write={io_tests[0][1]:.2f}s, Read={io_tests[1][1]:.2f}s")
                 
                 # Verify I/O performance requirements
-                # (Performance comparison between regular and tmpfs would be analyzed here)
+                # tmpfs comparison removed - tmpfs causes system crashes
                 assert len(io_test_containers) >= 1, "No I/O test containers created successfully"
         
         finally:

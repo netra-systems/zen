@@ -33,6 +33,10 @@ from netra_backend.app.agents.supervisor.agent_class_registry import AgentClassR
 from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
 from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
 from netra_backend.app.websocket_core.manager import WebSocketManager
+from netra_backend.app.core.websocket_exceptions import (
+    AgentCommunicationFailureError,
+    WebSocketSendFailureError
+)
 from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
@@ -78,12 +82,32 @@ class UserWebSocketEmitter:
             if success:
                 logger.debug(f"✅ Agent started notification sent for user {self.user_id}: {agent_name}")
             else:
-                logger.error(f"❌ Agent started notification failed for user {self.user_id}: {agent_name}")
+                error_msg = f"Agent started notification failed for user {self.user_id}: {agent_name}"
+                logger.error(f"❌ {error_msg}")
+                
+                # LOUD FAILURE: Raise exception for failed notifications
+                raise WebSocketSendFailureError(
+                    reason="WebSocket bridge returned failure",
+                    event_type="agent_started",
+                    user_id=self.user_id,
+                    thread_id=self.thread_id
+                )
             
             return success
+        except WebSocketSendFailureError:
+            # Re-raise our custom exception
+            raise
         except Exception as e:
-            logger.error(f"Exception in notify_agent_started for user {self.user_id}: {e}")
-            return False
+            error_msg = f"Exception in notify_agent_started for user {self.user_id}: {e}"
+            logger.error(f"🚨 AGENT COMMUNICATION FAILURE: {error_msg}")
+            
+            # LOUD FAILURE: Convert generic exceptions to specific ones
+            raise AgentCommunicationFailureError(
+                from_agent="UserWebSocketEmitter",
+                to_agent=agent_name,
+                reason=str(e),
+                user_id=self.user_id
+            )
     
     async def notify_agent_thinking(self, agent_name: str, reasoning: str, 
                                    step_number: Optional[int] = None,
@@ -104,12 +128,30 @@ class UserWebSocketEmitter:
             if success:
                 logger.debug(f"✅ Agent thinking notification sent for user {self.user_id}: {agent_name}")
             else:
-                logger.error(f"❌ Agent thinking notification failed for user {self.user_id}: {agent_name}")
+                error_msg = f"Agent thinking notification failed for user {self.user_id}: {agent_name}"
+                logger.error(f"❌ {error_msg}")
+                
+                # LOUD FAILURE: Raise exception
+                raise WebSocketSendFailureError(
+                    reason="WebSocket bridge returned failure",
+                    event_type="agent_thinking",
+                    user_id=self.user_id,
+                    thread_id=self.thread_id
+                )
             
             return success
+        except WebSocketSendFailureError:
+            raise
         except Exception as e:
-            logger.error(f"Exception in notify_agent_thinking for user {self.user_id}: {e}")
-            return False
+            error_msg = f"Exception in notify_agent_thinking for user {self.user_id}: {e}"
+            logger.error(f"🚨 AGENT COMMUNICATION FAILURE: {error_msg}")
+            
+            raise AgentCommunicationFailureError(
+                from_agent="UserWebSocketEmitter",
+                to_agent=agent_name,
+                reason=str(e),
+                user_id=self.user_id
+            )
     
     async def notify_tool_executing(self, agent_name: str, tool_name: str, 
                                    parameters: Optional[Dict[str, Any]] = None) -> bool:
@@ -128,12 +170,27 @@ class UserWebSocketEmitter:
             if success:
                 logger.debug(f"✅ Tool executing notification sent for user {self.user_id}: {tool_name}")
             else:
-                logger.error(f"❌ Tool executing notification failed for user {self.user_id}: {tool_name}")
+                error_msg = f"Tool executing notification failed for user {self.user_id}: {tool_name}"
+                logger.error(f"❌ {error_msg}")
+                
+                raise WebSocketSendFailureError(
+                    reason="WebSocket bridge returned failure",
+                    event_type="tool_executing",
+                    user_id=self.user_id,
+                    thread_id=self.thread_id
+                )
             
             return success
+        except WebSocketSendFailureError:
+            raise
         except Exception as e:
-            logger.error(f"Exception in notify_tool_executing for user {self.user_id}: {e}")
-            return False
+            logger.error(f"🚨 TOOL NOTIFICATION FAILURE: Exception in notify_tool_executing for user {self.user_id}: {e}")
+            raise AgentCommunicationFailureError(
+                from_agent="UserWebSocketEmitter",
+                to_agent=agent_name,
+                reason=str(e),
+                user_id=self.user_id
+            )
     
     async def notify_tool_completed(self, agent_name: str, tool_name: str, 
                                    result: Optional[Dict[str, Any]] = None,
@@ -154,12 +211,27 @@ class UserWebSocketEmitter:
             if success:
                 logger.debug(f"✅ Tool completed notification sent for user {self.user_id}: {tool_name}")
             else:
-                logger.error(f"❌ Tool completed notification failed for user {self.user_id}: {tool_name}")
+                error_msg = f"Tool completed notification failed for user {self.user_id}: {tool_name}"
+                logger.error(f"❌ {error_msg}")
+                
+                raise WebSocketSendFailureError(
+                    reason="WebSocket bridge returned failure",
+                    event_type="tool_completed",
+                    user_id=self.user_id,
+                    thread_id=self.thread_id
+                )
             
             return success
+        except WebSocketSendFailureError:
+            raise
         except Exception as e:
-            logger.error(f"Exception in notify_tool_completed for user {self.user_id}: {e}")
-            return False
+            logger.error(f"🚨 TOOL NOTIFICATION FAILURE: Exception in notify_tool_completed for user {self.user_id}: {e}")
+            raise AgentCommunicationFailureError(
+                from_agent="UserWebSocketEmitter",
+                to_agent=agent_name,
+                reason=str(e),
+                user_id=self.user_id
+            )
     
     async def notify_agent_completed(self, agent_name: str, result: Optional[Dict[str, Any]] = None,
                                     execution_time_ms: Optional[float] = None) -> bool:
@@ -178,12 +250,27 @@ class UserWebSocketEmitter:
             if success:
                 logger.debug(f"✅ Agent completed notification sent for user {self.user_id}: {agent_name}")
             else:
-                logger.error(f"❌ Agent completed notification failed for user {self.user_id}: {agent_name}")
+                error_msg = f"Agent completed notification failed for user {self.user_id}: {agent_name}"
+                logger.error(f"❌ {error_msg}")
+                
+                raise WebSocketSendFailureError(
+                    reason="WebSocket bridge returned failure",
+                    event_type="agent_completed",
+                    user_id=self.user_id,
+                    thread_id=self.thread_id
+                )
             
             return success
+        except WebSocketSendFailureError:
+            raise
         except Exception as e:
-            logger.error(f"Exception in notify_agent_completed for user {self.user_id}: {e}")
-            return False
+            logger.error(f"🚨 AGENT COMPLETION FAILURE: Exception in notify_agent_completed for user {self.user_id}: {e}")
+            raise AgentCommunicationFailureError(
+                from_agent="UserWebSocketEmitter",
+                to_agent=agent_name,
+                reason=str(e),
+                user_id=self.user_id
+            )
     
     async def notify_agent_error(self, agent_name: str, error: str,
                                 error_context: Optional[Dict[str, Any]] = None) -> bool:
@@ -308,7 +395,10 @@ class AgentInstanceFactory:
             websocket_manager: Optional WebSocket manager for direct access
         """
         if not websocket_bridge:
+            logger.error("❌ CRITICAL: Attempting to configure AgentInstanceFactory with None websocket_bridge!")
             raise ValueError("AgentWebSocketBridge cannot be None")
+        
+        logger.info(f"🔧 Configuring AgentInstanceFactory with WebSocket bridge type: {type(websocket_bridge).__name__}")
         
         # Prefer AgentClassRegistry but fallback to AgentRegistry for compatibility
         if agent_class_registry:
@@ -328,7 +418,10 @@ class AgentInstanceFactory:
         self._websocket_bridge = websocket_bridge
         self._websocket_manager = websocket_manager
         
-        logger.info("✅ AgentInstanceFactory configured with infrastructure components")
+        logger.info(f"✅ AgentInstanceFactory configured successfully:")
+        logger.info(f"   - WebSocket bridge: {type(websocket_bridge).__name__}")
+        logger.info(f"   - WebSocket manager: {type(websocket_manager).__name__ if websocket_manager else 'None'}")
+        logger.info(f"   - Registry type: {'AgentClassRegistry' if self._agent_class_registry else 'AgentRegistry' if self._agent_registry else 'Unknown'}")
     
     async def create_user_execution_context(self, 
                                            user_id: str,
@@ -448,10 +541,18 @@ class AgentInstanceFactory:
         if not user_context:
             raise ValueError("UserExecutionContext is required")
         
+        # CRITICAL: Validate WebSocket bridge is configured
+        if not self._websocket_bridge:
+            logger.error(f"❌ CRITICAL: AgentInstanceFactory._websocket_bridge is None when creating {agent_name}!")
+            logger.error(f"   This will cause ALL WebSocket events from {agent_name} to fail silently!")
+            logger.error(f"   Factory must be configured with websocket_bridge before creating agents.")
+            raise RuntimeError(f"AgentInstanceFactory not configured: websocket_bridge is None. Call configure() first!")
+        
         start_time = time.time()
         
         try:
             logger.debug(f"Creating agent instance: {agent_name} for user {user_context.user_id}")
+            logger.debug(f"Factory has websocket_bridge: {self._websocket_bridge is not None}, type: {type(self._websocket_bridge).__name__ if self._websocket_bridge else 'None'}")
             
             # Get agent class from registries or use provided class
             if agent_class:
@@ -485,28 +586,106 @@ class AgentInstanceFactory:
                     raise ValueError("No agent registry configured")
             
             # Create fresh agent instance with request-scoped dependencies
-            if llm_manager and tool_dispatcher:
-                agent = AgentClass(
-                    llm_manager=llm_manager,
-                    tool_dispatcher=tool_dispatcher,
-                    name=agent_name,
-                    user_id=user_context.user_id  # Bind to specific user
-                )
-            else:
-                # For provided agent class, try basic initialization
-                agent = AgentClass(name=agent_name, user_id=user_context.user_id)
+            # CRITICAL: Prefer factory methods to avoid deprecated global tool_dispatcher warnings
+            
+            logger.info(f"🔧 Creating agent instance for {agent_name} with class {AgentClass.__name__}")
+            
+            # Map agent names to their class names for consistency
+            agent_class_name = AgentClass.__name__
+            
+            try:
+                # FIRST: Check if agent has create_agent_with_context factory method (preferred)
+                if hasattr(AgentClass, 'create_agent_with_context'):
+                    logger.info(f"✅ Using create_agent_with_context factory for {agent_name} ({agent_class_name})")
+                    agent = AgentClass.create_agent_with_context(user_context)
+                else:
+                    # FALLBACK: Use legacy constructor patterns (may trigger deprecation warnings)
+                    logger.debug(f"⚠️ No factory method found for {agent_class_name}, using legacy constructor")
+                    
+                    # Agents that don't take any parameters
+                    no_param_agents = [
+                        'TriageSubAgent', 'GoalsTriageSubAgent', 'ReportingSubAgent'
+                    ]
+                    
+                    # Agents that take llm_manager and tool_dispatcher (may trigger deprecation)
+                    llm_tool_only_agents = [
+                        'DataSubAgent', 'OptimizationsCoreSubAgent', 
+                        'ActionsToMeetGoalsSubAgent', 'DataHelperAgent',
+                        'SyntheticDataSubAgent'
+                    ]
+                    
+                    # Check by class name for consistency
+                    if agent_class_name in no_param_agents:
+                        logger.info(f"✅ Creating {agent_name} ({agent_class_name}) with no parameters")
+                        agent = AgentClass()
+                    elif agent_class_name in llm_tool_only_agents:
+                        if llm_manager and tool_dispatcher:
+                            logger.warning(f"⚠️ Creating {agent_name} ({agent_class_name}) with tool_dispatcher (may trigger deprecation warning)")
+                            agent = AgentClass(
+                                llm_manager=llm_manager,
+                                tool_dispatcher=tool_dispatcher
+                            )
+                        else:
+                            logger.warning(f"⚠️ {agent_name} ({agent_class_name}) requires llm_manager and tool_dispatcher, attempting no-param init")
+                            agent = AgentClass()
+                    else:
+                        # Try different parameter combinations based on what the agent accepts
+                        logger.info(f"🔧 Trying parameter combinations for {agent_name} ({agent_class_name})")
+                        
+                        # First try no parameters (simpler agents)
+                        try:
+                            logger.debug(f"   Trying: no parameters")
+                            agent = AgentClass()
+                            logger.info(f"✅ Created {agent_name} with no parameters")
+                        except TypeError as e1:
+                            # Then try with llm_manager and tool_dispatcher
+                            if llm_manager and tool_dispatcher:
+                                try:
+                                    logger.debug(f"   Trying: llm_manager + tool_dispatcher")
+                                    agent = AgentClass(
+                                        llm_manager=llm_manager,
+                                        tool_dispatcher=tool_dispatcher
+                                    )
+                                    logger.info(f"✅ Created {agent_name} with llm_manager and tool_dispatcher")
+                                except TypeError as e2:
+                                    # Log detailed error for debugging
+                                    logger.error(f"❌ Could not instantiate {agent_name}:")
+                                    logger.error(f"   No params error: {e1}")
+                                    logger.error(f"   LLM+tool error: {e2}") 
+                                    raise RuntimeError(f"Could not instantiate {agent_name}: tried no params ({e1}), tried llm+tool ({e2})")
+                            else:
+                                raise RuntimeError(f"Could not instantiate {agent_name} without params and no llm/tool available: {e1}")
+                        else:
+                            # No llm_manager/tool_dispatcher available, try no parameters
+                            try:
+                                agent = AgentClass()
+                                logger.info(f"✅ Created {agent_name} with no parameters")
+                            except TypeError:
+                                raise RuntimeError(f"Could not instantiate {agent_name} without llm_manager/tool_dispatcher")
+                                
+            except Exception as e:
+                logger.error(f"❌ Failed to instantiate {agent_name}: {e}")
+                raise RuntimeError(f"Could not instantiate {agent_name}: {e}")
             
             # CRITICAL: Set WebSocket bridge on agent with REAL run_id (not placeholder)
             if hasattr(agent, 'set_websocket_bridge'):
                 try:
+                    # Validate bridge exists before setting
+                    if not self._websocket_bridge:
+                        raise RuntimeError(f"Cannot set WebSocket bridge on {agent_name}: factory bridge is None")
+                    
                     # Use the WebSocketBridgeAdapter pattern from BaseAgent
                     if hasattr(agent, '_websocket_adapter'):
+                        logger.info(f"🔧 Setting WebSocket bridge on {agent_name} via adapter")
+                        logger.info(f"   Bridge type: {type(self._websocket_bridge).__name__}")
+                        logger.info(f"   Run ID: {user_context.run_id}")
+                        
                         agent._websocket_adapter.set_websocket_bridge(
                             self._websocket_bridge, 
                             user_context.run_id,  # REAL run_id from UserExecutionContext
                             agent_name
                         )
-                        logger.debug(f"✅ WebSocket bridge set via adapter for {agent_name} (run_id: {user_context.run_id})")
+                        logger.info(f"✅ WebSocket bridge set via adapter for {agent_name} (run_id: {user_context.run_id})")
                     else:
                         # Fallback for older agent implementations
                         agent.set_websocket_bridge(self._websocket_bridge, user_context.run_id)

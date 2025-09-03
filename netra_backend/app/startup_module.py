@@ -781,8 +781,8 @@ def _create_agent_supervisor(app: FastAPI) -> None:
         if hasattr(supervisor, 'websocket_bridge') and supervisor.websocket_bridge:
             logger.info("✅ SupervisorAgent has WebSocket bridge - agent events will be enabled")
             
-            # Validate WebSocket bridge has required methods
-            required_methods = ['emit_agent_thinking', 'emit_user_notification']
+            # Validate WebSocket bridge has required method
+            required_methods = ['emit_agent_event']
             missing_methods = [method for method in required_methods if not hasattr(supervisor.websocket_bridge, method)]
             if missing_methods:
                 logger.error(f"🚨 WebSocket bridge missing required methods: {missing_methods}")

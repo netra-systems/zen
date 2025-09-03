@@ -140,7 +140,12 @@ class AgentRegistry:
         """Register core workflow agents."""
         # Lazy import to avoid circular dependency
         from netra_backend.app.agents.triage_sub_agent.agent import TriageSubAgent
-        self.register("triage", TriageSubAgent())
+        try:
+            # Try to create with parameters if constructor accepts them
+            self.register("triage", TriageSubAgent(self.llm_manager, self.tool_dispatcher))
+        except TypeError:
+            # Fallback to no-parameter constructor if it doesn't accept them (current behavior)
+            self.register("triage", TriageSubAgent())
         self.register("data", DataSubAgent(
             self.llm_manager, self.tool_dispatcher))
     
@@ -186,7 +191,22 @@ class AgentRegistry:
                 f"this breaks user isolation! Use AgentInstanceFactory instead."
             )
             # Note: This is the problematic line that uses placeholder run_id
-            agent.set_websocket_bridge(self.websocket_bridge, None)
+            try:
+                agent.set_websocket_bridge(self.websocket_bridge, None)
+            except Exception as e:
+                logger.error(f"Failed to set WebSocket bridge on agent {name}: {e}")
+                # Try to ensure agent has proper WebSocket adapter initialization
+                if hasattr(agent, '_websocket_adapter') and agent._websocket_adapter is None:
+                    try:
+                        from netra_backend.app.agents.base.websocket_adapter import WebSocketEventAdapter
+                        agent._websocket_adapter = WebSocketEventAdapter()
+                        agent.set_websocket_bridge(self.websocket_bridge, None)
+                        logger.info(f"Successfully recovered WebSocket bridge for agent {name}")
+                    except Exception as recovery_error:
+                        logger.error(f"Failed to recover WebSocket bridge for agent {name}: {recovery_error}")
+        elif hasattr(agent, 'set_websocket_bridge'):
+            # Agent supports WebSocket but no bridge available - log for debugging
+            logger.warning(f"Agent {name} supports WebSocket bridge but no bridge is available in registry")
         
         self.agents[name] = agent
         
@@ -337,13 +357,23 @@ class AgentRegistry:
         """Register reporting agent."""
         # Lazy import to avoid circular dependency
         from netra_backend.app.agents.reporting_sub_agent import ReportingSubAgent
-        self.register("reporting", ReportingSubAgent())
+        try:
+            # Try to create with parameters if constructor accepts them
+            self.register("reporting", ReportingSubAgent(self.llm_manager, self.tool_dispatcher))
+        except TypeError:
+            # Fallback to no-parameter constructor if it doesn't accept them
+            self.register("reporting", ReportingSubAgent())
     
     def _register_goals_triage_agent(self) -> None:
         """Register goals triage agent."""
         # Lazy import to avoid circular dependency
         from netra_backend.app.agents.goals_triage_sub_agent import GoalsTriageSubAgent
-        self.register("goals_triage", GoalsTriageSubAgent())
+        try:
+            # Try to create with parameters if constructor accepts them
+            self.register("goals_triage", GoalsTriageSubAgent(self.llm_manager, self.tool_dispatcher))
+        except TypeError:
+            # Fallback to no-parameter constructor if it doesn't accept them
+            self.register("goals_triage", GoalsTriageSubAgent())
     
     def _register_synthetic_data_agent(self) -> None:
         """Register synthetic data agent."""

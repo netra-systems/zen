@@ -97,8 +97,10 @@ class DockerServiceController:
 
 
 env = get_env()
+
 @pytest.fixture(scope="module")
-    
+def docker_controller():
+    """Fixture to provide DockerServiceController"""
     controller = DockerServiceController()
     yield controller
     

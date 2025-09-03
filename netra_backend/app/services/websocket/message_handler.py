@@ -126,7 +126,7 @@ class StartAgentHandler(BaseMessageHandler):
     
     async def _send_agent_completion(self, user_id: str, response) -> None:
         """Send agent completion message to user"""
-        await manager.send_message(user_id, {
+        await manager.send_to_user(user_id, {
             "type": "agent_completed",
             "payload": response
         })
@@ -226,7 +226,7 @@ class UserMessageHandler(BaseMessageHandler):
     
     async def _send_user_message_completion(self, user_id: str, response) -> None:
         """Send user message completion to user"""
-        await manager.send_message(user_id, {
+        await manager.send_to_user(user_id, {
             "type": "agent_completed",
             "payload": response
         })
@@ -234,7 +234,7 @@ class UserMessageHandler(BaseMessageHandler):
     async def _handle_user_message_error(self, user_id: str, error: Exception) -> None:
         """Handle user message processing errors"""
         logger.error(f"Error processing user message: {error}")
-        await manager.send_message(user_id, {
+        await manager.send_to_user(user_id, {
             "type": "error", "payload": {"error": str(error)}
         })
 
@@ -289,7 +289,7 @@ class ThreadHistoryHandler(BaseMessageHandler):
 
     async def _send_thread_history_response(self, user_id: str, thread_id: str, history: list) -> None:
         """Send formatted thread history response."""
-        await manager.send_message(user_id, {
+        await manager.send_to_user(user_id, {
             "type": "thread_history",
             "payload": {"thread_id": thread_id, "messages": history}
         })
@@ -307,7 +307,7 @@ class StopAgentHandler(BaseMessageHandler):
         """Handle stop_agent message"""
         logger.info(f"Stopping agent for user {user_id}")
         
-        await manager.send_message(
+        await manager.send_to_user(
             user_id,
             {
                 "type": "agent_stopped",

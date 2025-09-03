@@ -33,7 +33,7 @@ def setup_e2e_environment():
     # Set basic test environment configuration
     env.set("TESTING", "1", source="e2e_conftest")
     env.set("ENVIRONMENT", "testing", source="e2e_conftest")
-    env.set("LOG_LEVEL", "ERROR", source="e2e_conftest")
+    env.set("LOG_LEVEL", "INFO", source="e2e_conftest")
     
     # Database configuration - use default localhost ports for development containers
     # These will work with existing netra-dev containers or fallback gracefully

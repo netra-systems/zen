@@ -45,10 +45,20 @@ class WebSocketBridgeAdapter:
             run_id: The execution run ID
             agent_name: The name of the agent
         """
+        if not bridge:
+            logger.error(f"❌ CRITICAL: Attempting to set None bridge on WebSocketBridgeAdapter for {agent_name}!")
+            logger.error(f"   This will cause ALL WebSocket events from {agent_name} to fail silently!")
+        if not run_id:
+            logger.error(f"❌ CRITICAL: Attempting to set None run_id on WebSocketBridgeAdapter for {agent_name}!")
+            
         self._bridge = bridge
         self._run_id = run_id
         self._agent_name = agent_name
-        logger.debug(f"WebSocket bridge configured for {agent_name} (run_id: {run_id})")
+        
+        if bridge and run_id:
+            logger.info(f"✅ WebSocket bridge configured for {agent_name} (run_id: {run_id}, bridge_type: {type(bridge).__name__})")
+        else:
+            logger.error(f"❌ WebSocket bridge configuration FAILED for {agent_name} - bridge={bridge is not None}, run_id={run_id is not None}")
     
     def has_websocket_bridge(self) -> bool:
         """Check if WebSocket bridge is available."""
@@ -57,7 +67,7 @@ class WebSocketBridgeAdapter:
     async def emit_agent_started(self, message: Optional[str] = None) -> None:
         """Emit agent started event."""
         if not self.has_websocket_bridge():
-            logger.debug(f"No WebSocket bridge available for {self._agent_name}")
+            logger.warning(f"❌ No WebSocket bridge for agent_started event - agent={self._agent_name}, bridge={self._bridge is not None}, run_id={self._run_id}")
             return
         
         try:
@@ -120,6 +130,7 @@ class WebSocketBridgeAdapter:
     async def emit_agent_completed(self, result: Optional[Dict[str, Any]] = None) -> None:
         """Emit agent completed event."""
         if not self.has_websocket_bridge():
+            logger.warning(f"❌ No WebSocket bridge for agent_completed event - agent={self._agent_name}, bridge={self._bridge is not None}, run_id={self._run_id}")
             return
         
         try:

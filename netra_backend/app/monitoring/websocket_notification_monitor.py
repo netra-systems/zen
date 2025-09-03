@@ -816,15 +816,18 @@ class WebSocketNotificationMonitor:
         """Send alert for bridge initialization failure."""
         if self._should_send_alert("bridge_init_failed"):
             alert = Alert(
+                alert_id=f"bridge_init_failed_{event.correlation_id}",
+                rule_id="websocket_bridge_init_failure",
                 title="WebSocket Bridge Initialization Failed",
                 message=f"Bridge initialization failed for user {event.user_id}: {event.error_message}",
                 level=AlertLevel.CRITICAL,
-                component="websocket_monitor",
                 agent_name="WebSocketBridgeFactory",
+                timestamp=datetime.now(timezone.utc),
                 metadata={
                     "user_id": event.user_id,
                     "error": event.error_message,
-                    "correlation_id": event.correlation_id
+                    "correlation_id": event.correlation_id,
+                    "component": "websocket_monitor"
                 }
             )
             
@@ -836,15 +839,18 @@ class WebSocketNotificationMonitor:
         alert_key = f"silent_failure_{event.user_id}"
         if self._should_send_alert(alert_key):
             alert = Alert(
+                alert_id=f"silent_failure_{event.user_id}_{uuid.uuid4().hex[:8]}",
+                rule_id="websocket_silent_failure",
                 title="Silent WebSocket Notification Failure",
                 message=f"Silent failure detected for user {event.user_id}: {event.error_message}",
                 level=AlertLevel.CRITICAL,
-                component="websocket_monitor",
                 agent_name="SilentFailureDetector",
+                timestamp=datetime.now(timezone.utc),
                 metadata={
                     "user_id": event.user_id,
                     "thread_id": event.thread_id,
-                    "context": event.error_message
+                    "context": event.error_message,
+                    "component": "websocket_monitor"
                 }
             )
             
@@ -856,16 +862,19 @@ class WebSocketNotificationMonitor:
         alert_key = "isolation_violation"
         if self._should_send_alert(alert_key):
             alert = Alert(
+                alert_id=f"isolation_violation_{event.user_id}_{uuid.uuid4().hex[:8]}",
+                rule_id="websocket_isolation_violation",
                 title="User Isolation Violation Detected",
                 message=f"Cross-user event detected: {event.error_message}",
                 level=AlertLevel.CRITICAL,
-                component="websocket_monitor", 
                 agent_name="IsolationMonitor",
+                timestamp=datetime.now(timezone.utc),
                 metadata={
                     "source_user": event.user_id,
                     "target_user": event.metadata.get("target_user"),
                     "violation_type": event.metadata.get("violation_type"),
-                    "context": event.metadata.get("context")
+                    "context": event.metadata.get("context"),
+                    "component": "websocket_monitor"
                 }
             )
             
@@ -878,12 +887,17 @@ class WebSocketNotificationMonitor:
             alert_key = "memory_leak"
             if self._should_send_alert(alert_key):
                 alert = Alert(
+                    alert_id=f"memory_leak_{uuid.uuid4().hex[:8]}",
+                    rule_id="websocket_memory_leak",
                     title="Memory Leak Detected in WebSocket System",
                     message=f"Significant memory growth detected: {growth_mb:.1f}MB increase",
                     level=AlertLevel.WARNING,
-                    component="websocket_monitor",
                     agent_name="MemoryMonitor",
-                    metadata={"memory_growth_mb": growth_mb}
+                    timestamp=datetime.now(timezone.utc),
+                    metadata={
+                        "memory_growth_mb": growth_mb,
+                        "component": "websocket_monitor"
+                    }
                 )
                 
                 await self._send_alert(alert)
@@ -897,16 +911,19 @@ class WebSocketNotificationMonitor:
             self._should_send_alert(alert_key)):
             
             alert = Alert(
+                alert_id=f"user_notification_failures_{user_metrics.user_id}_{uuid.uuid4().hex[:8]}",
+                rule_id="websocket_user_notification_failures",
                 title="User Notification Failures",
                 message=f"User {user_metrics.user_id} has {user_metrics.consecutive_failures} consecutive notification failures",
                 level=AlertLevel.ERROR,
-                component="websocket_monitor",
                 agent_name="UserMetricsMonitor",
+                timestamp=datetime.now(timezone.utc),
                 metadata={
                     "user_id": user_metrics.user_id,
                     "consecutive_failures": user_metrics.consecutive_failures,
                     "success_rate": user_metrics.success_rate,
-                    "health_status": user_metrics.health_status.value
+                    "health_status": user_metrics.health_status.value,
+                    "component": "websocket_monitor"
                 }
             )
             

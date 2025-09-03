@@ -193,7 +193,7 @@ class TestAgentDeathRecoveryIntegration:
         self, execution_tracker, websocket_bridge
     ):
         """Test that agent death is detected and WebSocket notifications are sent"""
-        print("\\n" + "="*80)
+        print("\n" + "="*80)
         print("INTEGRATION TEST: Agent Death Detection with WebSocket")
         print("="*80)
         
@@ -290,7 +290,7 @@ class TestAgentDeathRecoveryIntegration:
     @pytest.mark.asyncio
     async def test_multiple_agent_death_scenarios(self, execution_tracker, websocket_bridge):
         """Test multiple agents dying in different ways"""
-        print("\\n" + "="*80)
+        print("\n" + "="*80)
         print("INTEGRATION TEST: Multiple Agent Death Scenarios")
         print("="*80)
         
@@ -387,7 +387,7 @@ class TestAgentDeathRecoveryIntegration:
     @pytest.mark.asyncio
     async def test_agent_recovery_after_death_detection(self, execution_tracker, websocket_bridge):
         """Test recovery mechanisms after agent death is detected"""
-        print("\\n" + "="*80)
+        print("\n" + "="*80)
         print("INTEGRATION TEST: Agent Recovery After Death Detection")
         print("="*80)
         
@@ -488,7 +488,7 @@ class TestAgentDeathRecoveryIntegration:
     @pytest.mark.asyncio
     async def test_health_monitoring_integration(self, execution_tracker, websocket_bridge):
         """Test health monitoring integration with execution tracking"""
-        print("\\n" + "="*80)
+        print("\n" + "="*80)
         print("INTEGRATION TEST: Health Monitoring Integration")
         print("="*80)
         
@@ -572,7 +572,7 @@ class TestAgentDeathRecoveryIntegration:
     @pytest.mark.asyncio
     async def test_execution_metrics_during_death_scenarios(self, execution_tracker, websocket_bridge):
         """Test that execution metrics are accurate during death scenarios"""
-        print("\\n" + "="*80)
+        print("\n" + "="*80)
         print("INTEGRATION TEST: Execution Metrics During Death Scenarios")
         print("="*80)
         
@@ -666,7 +666,7 @@ class TestAgentDeathRecoveryIntegration:
         actual_rate = tracker_metrics['success_rate']
         
         # Allow some tolerance for timing
-        assert abs(actual_rate - expected_rate) < 0.2, \\
+        assert abs(actual_rate - expected_rate) < 0.2, \
             f"Success rate mismatch: expected ~{expected_rate:.2%}, got {actual_rate:.2%}"
         
         print("✅ METRICS TEST PASSED - All metrics accurate during death scenarios")
@@ -675,7 +675,7 @@ class TestAgentDeathRecoveryIntegration:
     @pytest.mark.asyncio 
     async def test_concurrent_agent_deaths(self, execution_tracker, websocket_bridge):
         """Test handling of multiple simultaneous agent deaths"""
-        print("\\n" + "="*80)
+        print("\n" + "="*80)
         print("INTEGRATION TEST: Concurrent Agent Deaths")
         print("="*80)
         
@@ -769,7 +769,7 @@ class TestAgentDeathRecoveryIntegration:
         
         # We should detect most deaths (allow some tolerance for timing)
         detection_rate = final_deaths_detected / kill_count
-        assert detection_rate >= 0.8, \\
+        assert detection_rate >= 0.8, \
             f"Poor death detection rate: {detection_rate:.1%} (detected {final_deaths_detected}/{kill_count})"
         
         # Check WebSocket notifications
@@ -780,7 +780,7 @@ class TestAgentDeathRecoveryIntegration:
         print(f"   Death notifications sent: {total_death_notifications}")
         
         # Should have notifications for most/all deaths
-        assert total_death_notifications >= final_deaths_detected, \\
+        assert total_death_notifications >= final_deaths_detected, \
             f"Missing death notifications: got {total_death_notifications}, expected >= {final_deaths_detected}"
         
         print("✅ CONCURRENT DEATH TEST PASSED")
@@ -791,11 +791,11 @@ if __name__ == "__main__":
     # Run integration tests
     import sys
     
-    print("\\n" + "="*80)
+    print("\n" + "="*80)
     print("AGENT DEATH RECOVERY INTEGRATION TEST SUITE")
     print("="*80)
     print("Testing integration of execution tracking with agent death recovery")
     print("These tests verify end-to-end agent failure handling")
-    print("="*80 + "\\n")
+    print("="*80 + "\n")
     
     pytest.main([__file__, "-v", "--tb=short", "-s"])

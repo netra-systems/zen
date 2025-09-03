@@ -58,11 +58,15 @@ class UnifiedDatabaseManager:
             yield session
     
     @staticmethod
-    def clickhouse_client():
-        """Get ClickHouse client - single source of truth."""
+    def clickhouse_client(bypass_manager: bool = False):
+        """Get ClickHouse client - single source of truth.
+        
+        Args:
+            bypass_manager: If True, bypasses the connection manager to avoid recursion
+        """
         if not _CLICKHOUSE_AVAILABLE or not _get_clickhouse_client:
             raise RuntimeError("ClickHouse client not available")
-        return _get_clickhouse_client()
+        return _get_clickhouse_client(bypass_manager)
 
 # Create singleton instance
 _db_manager = UnifiedDatabaseManager()
@@ -103,14 +107,17 @@ async def get_db() -> AsyncGenerator[AsyncSession, None]:
         yield session
 
 # SINGLE SOURCE OF TRUTH for ClickHouse connections
-def get_clickhouse_client():
+def get_clickhouse_client(bypass_manager: bool = False):
     """Primary ClickHouse client provider for netra_backend service.
     
     This is the SINGLE source of truth for ClickHouse connections in netra_backend.
     All imports should use this function instead of individual module imports.
     Returns an async context manager for ClickHouse client access.
+    
+    Args:
+        bypass_manager: If True, bypasses the connection manager to avoid recursion
     """
-    return _db_manager.clickhouse_client()
+    return _db_manager.clickhouse_client(bypass_manager)
 
 # ClickHouse configuration for compatibility
 def get_clickhouse_config():

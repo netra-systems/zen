@@ -12,7 +12,7 @@ BVJ: ALL segments | Platform Stability | Complete user isolation for production 
 """
 
 import asyncio
-from typing import Any, Dict, Optional, List
+from typing import Any, Dict, Optional, List, Set
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from netra_backend.app.agents.base_agent import BaseAgent
@@ -87,10 +87,31 @@ class SupervisorAgent(BaseAgent):
         )
         
         # Core infrastructure (NO user-specific data)
+        if not websocket_bridge:
+            raise ValueError("SupervisorAgent requires websocket_bridge to be provided")
+        
         self.websocket_bridge = websocket_bridge
+        logger.info(f"✅ SupervisorAgent initialized with WebSocket bridge type: {type(websocket_bridge).__name__}")
+        
         self.agent_instance_factory = get_agent_instance_factory()
         self.agent_class_registry = get_agent_class_registry()
         self.flow_logger = get_supervisor_flow_logger()
+        
+        # CRITICAL FIX: Pre-configure the factory with WebSocket bridge IMMEDIATELY
+        # This ensures sub-agents created later will have WebSocket events working
+        # We'll configure again with registries in execute(), but at least bridge is set now
+        logger.info(f"🔧 Pre-configuring agent instance factory with WebSocket bridge in supervisor init")
+        try:
+            # Pre-configure with just the websocket bridge (registries will be added in execute())
+            # This is critical to prevent None bridge errors when creating sub-agents
+            self.agent_instance_factory.configure(
+                websocket_bridge=websocket_bridge,
+                websocket_manager=getattr(websocket_bridge, 'websocket_manager', None),
+                agent_class_registry=self.agent_class_registry  # Use the class registry we just got
+            )
+            logger.info(f"✅ Factory pre-configured with WebSocket bridge to prevent sub-agent event failures")
+        except Exception as e:
+            logger.warning(f"⚠️ Could not pre-configure factory in init (will configure in execute): {e}")
         
         # Store LLM manager for creating request-scoped registries
         self._llm_manager = llm_manager
@@ -99,8 +120,14 @@ class SupervisorAgent(BaseAgent):
         # This registry is used for startup validation and will be replaced per-request
         # in execute() for complete user isolation
         # Note: We create with a temporary tool dispatcher that will NOT be used for actual requests
-        from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
-        startup_tool_dispatcher = ToolDispatcher(llm_manager=llm_manager)
+        from netra_backend.app.agents.tool_dispatcher import ToolDispatcher, create_legacy_tool_dispatcher
+        # Use legacy tool dispatcher for startup validation (avoids global state warnings) 
+        # create_legacy_tool_dispatcher is the proper startup method without warnings
+        startup_tool_dispatcher = create_legacy_tool_dispatcher(
+            tools=None,
+            websocket_bridge=websocket_bridge,
+            permission_service=None
+        )
         self.registry = AgentRegistry(llm_manager, startup_tool_dispatcher)
         self.registry.register_default_agents()
         self.registry.set_websocket_bridge(websocket_bridge)
@@ -132,7 +159,11 @@ class SupervisorAgent(BaseAgent):
             RuntimeError: If execution fails
         """
         # Validate context at entry
+        logger.info(f"🚀 SupervisorAgent.execute() called for user={context.user_id}, run_id={context.run_id}")
+        logger.info(f"📊 Context details: thread_id={context.thread_id}, has_db_session={context.db_session is not None}")
+        
         context = validate_user_context(context)
+        logger.info(f"✅ Context validated successfully for user={context.user_id}")
         
         if not context.db_session:
             raise ValueError("UserExecutionContext must contain a database session")
@@ -154,34 +185,71 @@ class SupervisorAgent(BaseAgent):
                     websocket_manager=self.websocket_bridge.websocket_manager if hasattr(self.websocket_bridge, 'websocket_manager') else None
                 )
                 
-                # Create request-scoped tool dispatcher with proper emitter
-                async with ToolDispatcher.create_scoped_dispatcher_context(
-                    user_context=context,
-                    tools=self._get_user_tools(context),
-                    websocket_emitter=websocket_emitter  # Use emitter instead of manager
-                ) as tool_dispatcher:
-                    # Store request-scoped dispatcher for this execution
-                    self.tool_dispatcher = tool_dispatcher
+                # Get the actual WebSocketManager to pass to ToolDispatcher
+                actual_websocket_manager = self.websocket_bridge.websocket_manager if hasattr(self.websocket_bridge, 'websocket_manager') else None
+                logger.info(f"🔍 WebSocket bridge type: {type(self.websocket_bridge)}")
+                logger.info(f"🔍 Has websocket_manager: {hasattr(self.websocket_bridge, 'websocket_manager')}")
+                logger.info(f"🔍 WebSocketManager type: {type(actual_websocket_manager) if actual_websocket_manager else 'None'}")
+                
+                # 🚀 NEW: Use UserContext-based tool factory for complete isolation
+                logger.info(f"🔧 Creating UserContext-based tool system for {context.user_id}")
+                
+                # Get tool classes from app state (configured at startup) or use fallback
+                tool_classes = self._get_tool_classes_from_context(context)
+                websocket_bridge_factory = self._get_websocket_bridge_factory(context)
+                
+                logger.info(f"🔧 Available tool classes: {len(tool_classes)}")
+                
+                # Create completely isolated tool system for this user
+                from netra_backend.app.agents.user_context_tool_factory import UserContextToolFactory
+                
+                tool_system = await UserContextToolFactory.create_user_tool_system(
+                    context=context,
+                    tool_classes=tool_classes,
+                    websocket_bridge_factory=websocket_bridge_factory
+                )
+                
+                logger.info(f"✅ UserContext-based tool system created for {context.user_id}")
+                logger.info(f"   - Registry: {tool_system['registry'].registry_id}")
+                logger.info(f"   - Tools: {len(tool_system['tools'])}")
+                logger.info(f"   - Dispatcher: {tool_system['dispatcher'].dispatcher_id}")
+                
+                # Store isolated components for this execution
+                self.tool_dispatcher = tool_system['dispatcher']
+                self.user_tool_registry = tool_system['registry']
+                self.user_tools = tool_system['tools']
+                
+                # Create request-scoped registry for this user
+                self.registry = AgentRegistry(self._llm_manager, self.tool_dispatcher)
+                self.registry.register_default_agents()
+                self.registry.set_websocket_bridge(self.websocket_bridge)
+                
+                # CRITICAL: Configure agent instance factory with the registry
+                logger.info(f"🔧 Configuring agent instance factory with registry for user {context.user_id}")
+                self.agent_instance_factory.configure(
+                    agent_registry=self.registry,
+                    websocket_bridge=self.websocket_bridge,
+                    websocket_manager=getattr(self.websocket_bridge, 'websocket_manager', None)
+                )
+                
+                # CRITICAL: Enhance tool dispatcher with WebSocket notifications
+                if hasattr(self.registry, 'set_websocket_manager'):
+                    # Use websocket_manager from bridge if available
+                    websocket_manager = getattr(self.websocket_bridge, 'websocket_manager', None)
+                    if websocket_manager:
+                        self.registry.set_websocket_manager(websocket_manager)
+                
+                # Create session manager for database operations
+                logger.info(f"📂 Creating managed session for user {context.user_id}")
+                async with managed_session(context) as session_manager:
+                    logger.info(f"✅ Managed session created, starting agent orchestration")
                     
-                    # Create request-scoped registry for this user
-                    self.registry = AgentRegistry(self._llm_manager, tool_dispatcher)
-                    self.registry.register_default_agents()
-                    self.registry.set_websocket_bridge(self.websocket_bridge)
+                    # Execute supervisor orchestration
+                    result = await self._orchestrate_agents(context, session_manager, stream_updates)
                     
-                    # CRITICAL: Enhance tool dispatcher with WebSocket notifications
-                    if hasattr(self.registry, 'set_websocket_manager'):
-                        # Use websocket_manager from bridge if available
-                        websocket_manager = getattr(self.websocket_bridge, 'websocket_manager', None)
-                        if websocket_manager:
-                            self.registry.set_websocket_manager(websocket_manager)
-                    
-                    # Create session manager for database operations
-                    async with managed_session(context) as session_manager:
-                        # Execute supervisor orchestration
-                        result = await self._orchestrate_agents(context, session_manager, stream_updates)
-                        
-                        logger.info(f"SupervisorAgent.execute() completed for user {context.user_id}")
-                        return result
+                    logger.info(f"🎯 SupervisorAgent.execute() completed successfully for user {context.user_id}")
+                    logger.info(f"📊 Result type: {type(result)}, has_content: {bool(result)}")
+                    return result
                     
             except Exception as e:
                 logger.error(f"SupervisorAgent.execute() failed for user {context.user_id}: {e}")
@@ -233,7 +301,11 @@ class SupervisorAgent(BaseAgent):
             }
             
         except Exception as e:
-            self.flow_logger.fail_flow(flow_id, str(e))
+            # Handle missing fail_flow method gracefully
+            if hasattr(self.flow_logger, 'fail_flow'):
+                self.flow_logger.fail_flow(flow_id, str(e))
+            else:
+                logger.error(f"🚨 Flow {flow_id} failed (no fail_flow method): {e}")
             logger.error(f"Agent orchestration failed for user {context.user_id}: {e}")
             raise
     
@@ -306,28 +378,101 @@ class SupervisorAgent(BaseAgent):
         # Registry will be created per-request, so we don't check it here
         return True
     
-    def _get_user_tools(self, context: UserExecutionContext) -> Dict[str, Any]:
+    def _get_user_tools(self, context: UserExecutionContext) -> list:
         """Get user-specific tools based on context.
         
         Args:
             context: User execution context
             
         Returns:
-            Dictionary of tools available to this user
+            List of BaseTool instances available to this user
         """
-        # Import tools here to avoid circular dependencies
-        from netra_backend.app.tools import get_standard_tools
+        logger.info(f"🔨 Getting tools for user {context.user_id}")
         
-        # Get standard tools available to all users
-        tools = get_standard_tools()
+        # Import the proper LangChain tool wrappers
+        from netra_backend.app.agents.tools.langchain_wrappers import (
+            create_langchain_tools
+        )
         
-        # Add user-specific tools based on permissions/subscription
-        if context.metadata.get('premium_user'):
-            # Add premium tools if applicable
-            pass
+        # Create tools with LLM manager if available
+        llm_manager = getattr(self, 'llm_manager', None)
+        
+        logger.info(f"🔧 Creating LangChain-wrapped tools with llm_manager={llm_manager is not None}")
+        
+        tools = create_langchain_tools(
+            llm_manager=llm_manager,
+            deep_research_api_key=None,  # Will use env defaults
+            deep_research_base_url=None,  # Will use env defaults
+            sandbox_docker_image=None  # Will use env defaults
+        )
+        
+        logger.info(f"✅ Created {len(tools)} tools for user {context.user_id}")
+        logger.info(f"📦 Tools registered: {[tool.name for tool in tools]}")
         
         return tools
+    
+    def _get_tool_classes_from_context(self, context: UserExecutionContext) -> List:
+        """Get available tool classes from app state or use fallback."""
+        try:
+            # Try to get from FastAPI app state if available
+            from netra_backend.app.smd import app
+            if hasattr(app, 'state') and hasattr(app.state, 'tool_classes'):
+                tool_classes = app.state.tool_classes
+                if tool_classes:
+                    logger.info(f"✅ Retrieved {len(tool_classes)} tool classes from app state")
+                    return tool_classes
+        except Exception as e:
+            logger.warning(f"Could not access app state tool classes: {e}")
+        
+        # Fallback to default tool classes
+        from netra_backend.app.agents.user_context_tool_factory import get_app_tool_classes
+        tool_classes = get_app_tool_classes()
+        logger.info(f"🔄 Using fallback tool classes: {len(tool_classes)}")
+        return tool_classes
+    
+    def _get_websocket_bridge_factory(self, context: UserExecutionContext):
+        """Get WebSocket bridge factory from app state or use fallback."""
+        try:
+            # Try to get from FastAPI app state if available
+            from netra_backend.app.smd import app
+            if hasattr(app, 'state') and hasattr(app.state, 'websocket_bridge_factory'):
+                factory = app.state.websocket_bridge_factory
+                logger.info("✅ Retrieved WebSocket bridge factory from app state")
+                return factory
+        except Exception as e:
+            logger.warning(f"Could not access app state WebSocket bridge factory: {e}")
+        
+        # Fallback - return the existing bridge for this supervisor
+        logger.info("🔄 Using fallback WebSocket bridge factory")
+        return lambda: self.websocket_bridge
 
+    # Define agent dependencies
+    AGENT_DEPENDENCIES = {
+        "triage": [],
+        "data": ["triage"],
+        "optimization": ["triage", "data"],
+        "actions": ["triage", "data"],  # Actions can run after triage and data
+        "reporting": ["triage", "data"]  # Reporting only needs triage and data
+    }
+    
+    def _can_execute_agent(self, agent_name: str, completed_agents: Set[str]) -> bool:
+        """Check if an agent can be executed based on its dependencies.
+        
+        Args:
+            agent_name: Name of the agent to check
+            completed_agents: Set of successfully completed agents
+            
+        Returns:
+            True if all dependencies are met
+        """
+        required_deps = self.AGENT_DEPENDENCIES.get(agent_name, [])
+        missing_deps = [dep for dep in required_deps if dep not in completed_agents]
+        
+        if missing_deps:
+            logger.warning(f"Agent {agent_name} cannot execute: missing dependencies {missing_deps}")
+            return False
+        return True
+    
     async def _execute_workflow_with_isolated_agents(self, 
                                                    agent_instances: Dict[str, BaseAgent],
                                                    context: UserExecutionContext,
@@ -344,38 +489,100 @@ class SupervisorAgent(BaseAgent):
         Returns:
             Dictionary with workflow execution results
         """
+        import time
         logger.info(f"Executing workflow with {len(agent_instances)} isolated agents for user {context.user_id}")
         
         results = {}
+        completed_agents = set()
+        failed_agents = set()
         execution_order = ["triage", "data", "optimization", "actions", "reporting"]
         
         for agent_name in execution_order:
-            if agent_name in agent_instances:
-                try:
-                    await self._emit_thinking(context, f"Running {agent_name} with isolated instance...")
+            # Skip if agent not available
+            if agent_name not in agent_instances:
+                logger.debug(f"Agent {agent_name} not in available instances, skipping")
+                continue
+                
+            # Check dependencies before execution
+            if not self._can_execute_agent(agent_name, completed_agents):
+                logger.error(f"Cannot execute {agent_name}: dependencies not met. Completed: {completed_agents}")
+                results[agent_name] = {
+                    "error": "Dependencies not met",
+                    "status": "skipped",
+                    "missing_deps": [dep for dep in self.AGENT_DEPENDENCIES.get(agent_name, []) 
+                                    if dep not in completed_agents]
+                }
+                failed_agents.add(agent_name)
+                # For critical agents, stop the workflow
+                if agent_name in ["triage", "data"]:
+                    logger.error(f"Critical agent {agent_name} failed. Stopping workflow.")
+                    break
+                continue
+                
+            try:
+                start_time = time.time()
+                await self._emit_thinking(context, f"Running {agent_name} with isolated instance...")
+                
+                # Create child context for sub-agent
+                child_context = context.create_child_context(
+                    operation_name=f"{agent_name}_execution",
+                    additional_metadata={
+                        "agent_name": agent_name,
+                        "flow_id": flow_id
+                    }
+                )
+                
+                # Execute agent with child context
+                agent_result = await self._execute_agent_with_context(
+                    agent_instances[agent_name], child_context, agent_name
+                )
+                
+                execution_time = time.time() - start_time
+                logger.info(f"⏱️ Agent {agent_name} executed in {execution_time:.2f}s for user {context.user_id}")
+                
+                # Validate result is not an error
+                if isinstance(agent_result, dict) and agent_result.get("status") == "failed":
+                    raise RuntimeError(f"Agent returned failure status: {agent_result.get('error', 'Unknown error')}")
+                
+                results[agent_name] = agent_result
+                completed_agents.add(agent_name)
+                
+                # CRITICAL: Propagate metadata from child context back to parent context
+                # This ensures results like triage_result, data_result, etc. are available for reporting
+                self._merge_child_metadata_to_parent(context, child_context, agent_name)
+                
+                logger.info(f"✅ Agent {agent_name} completed successfully for user {context.user_id}")
+                
+                # Add small delay between agents to prevent overwhelming the system
+                # Only if execution was very fast (< 0.5s)
+                if execution_time < 0.5:
+                    delay = 0.5 - execution_time
+                    logger.debug(f"Adding {delay:.2f}s delay after fast execution")
+                    await asyncio.sleep(delay)
                     
-                    # Create child context for sub-agent
-                    child_context = context.create_child_context(
-                        operation_name=f"{agent_name}_execution",
-                        additional_metadata={
-                            "agent_name": agent_name,
-                            "flow_id": flow_id
-                        }
-                    )
+            except Exception as e:
+                logger.error(f"Agent {agent_name} failed for user {context.user_id}: {e}", exc_info=True)
+                results[agent_name] = {"error": str(e), "status": "failed"}
+                failed_agents.add(agent_name)
+                
+                # For critical agents (triage, data), stop the entire workflow
+                if agent_name in ["triage", "data"]:
+                    logger.error(f"Critical agent {agent_name} failed. Stopping workflow execution.")
+                    break
                     
-                    # Execute agent with child context
-                    agent_result = await self._execute_agent_with_context(
-                        agent_instances[agent_name], child_context, agent_name
-                    )
-                    
-                    results[agent_name] = agent_result
-                    logger.info(f"✅ Agent {agent_name} completed for user {context.user_id}")
-                    
-                except Exception as e:
-                    logger.error(f"Agent {agent_name} failed for user {context.user_id}: {e}")
-                    results[agent_name] = {"error": str(e), "status": "failed"}
-                    # Continue with other agents
-                    continue
+                # For non-critical agents, continue but log the impact
+                logger.warning(f"Non-critical agent {agent_name} failed. Continuing with degraded results.")
+        
+        # Log workflow summary
+        logger.info(f"Workflow completed. Successful: {completed_agents}, Failed: {failed_agents}")
+        
+        # Add workflow metadata to results
+        results["_workflow_metadata"] = {
+            "completed_agents": list(completed_agents),
+            "failed_agents": list(failed_agents),
+            "total_agents": len(execution_order),
+            "success_rate": len(completed_agents) / len(execution_order) if execution_order else 0
+        }
         
         return results
     
@@ -423,27 +630,65 @@ class SupervisorAgent(BaseAgent):
             message: Thinking message to emit
         """
         try:
-            # Use websocket_connection_id if available for targeted emission
-            if context.websocket_connection_id:
-                await self.websocket_bridge.emit_agent_thinking(
-                    connection_id=context.websocket_connection_id,
-                    agent_name="Supervisor",
-                    message=message
-                )
-            else:
-                # Fallback to user-based emission
-                await self.websocket_bridge.emit_user_notification(
-                    user_id=context.user_id,
-                    notification_type="agent_thinking",
-                    data={
-                        "agent_name": "Supervisor",
-                        "message": message,
-                        "run_id": context.run_id
-                    }
-                )
+            # Use the core emit_agent_event method with proper parameters
+            await self.websocket_bridge.emit_agent_event(
+                event_type="agent_thinking",
+                data={
+                    "agent_name": "Supervisor",
+                    "message": message,
+                    "connection_id": context.websocket_connection_id,
+                    "user_id": context.user_id
+                },
+                run_id=context.run_id,
+                agent_name="Supervisor"
+            )
         except Exception as e:
             logger.debug(f"Failed to emit thinking message: {e}")
             # Don't fail execution for WebSocket errors
+    
+    def _merge_child_metadata_to_parent(self, parent_context: UserExecutionContext, 
+                                        child_context: UserExecutionContext, 
+                                        agent_name: str) -> None:
+        """Merge child context metadata back to parent context.
+        
+        This ensures that agent results (triage_result, data_result, optimizations_result, 
+        action_plan_result) are available in the parent context for the reporting agent.
+        
+        Args:
+            parent_context: Parent execution context
+            child_context: Child execution context with updated metadata
+            agent_name: Name of the agent that was executed
+        """
+        # Map agent names to their expected metadata keys
+        agent_metadata_mapping = {
+            "triage": ["triage_result", "goal_triage_results"],
+            "data": ["data_result", "data_analysis_result"],
+            "optimization": ["optimizations_result", "optimization_strategies"],
+            "actions": ["action_plan_result", "actions_result"],
+            "data_helper": ["data_helper_result"],
+            "synthetic_data": ["synthetic_data_result"]
+        }
+        
+        # Get expected keys for this agent
+        expected_keys = agent_metadata_mapping.get(agent_name, [])
+        
+        # Also check for the generic pattern {agent_name}_result
+        generic_key = f"{agent_name}_result"
+        if generic_key not in expected_keys:
+            expected_keys.append(generic_key)
+        
+        # Merge specific keys from child to parent
+        for key in expected_keys:
+            if key in child_context.metadata:
+                parent_context.metadata[key] = child_context.metadata[key]
+                logger.debug(f"Propagated metadata key '{key}' from {agent_name} to parent context")
+        
+        # Also propagate any keys that match common result patterns
+        for key, value in child_context.metadata.items():
+            if key.endswith("_result") or key.endswith("_results"):
+                if key not in parent_context.metadata:
+                    parent_context.metadata[key] = value
+                    logger.debug(f"Propagated additional result key '{key}' from {agent_name} to parent context")
     
     # === Utility Methods ===
     

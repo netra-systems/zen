@@ -21,4 +21,4 @@ ENV PYTHONPATH=/app
 
 # Run the application 
 # Cloud Run sets PORT environment variable automatically
-CMD ["sh", "-c", "uvicorn netra_backend.app.main:app --host 0.0.0.0 --port ${PORT:-8000}"]
+CMD ["sh", "-c", "uvicorn netra_backend.app.main:app --host 0.0.0.0 --port ${PORT:-8000} --timeout-keep-alive 75 --timeout-graceful-shutdown 30"]

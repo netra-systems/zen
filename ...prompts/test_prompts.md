@@ -1,6 +1,15 @@
 
 ## Example prompts for running tests with Claude Code
 
+
+
+- USING UNIFIED TEST RUNNER (Docker test env): Run E2E tests with fast fail. spawn a new sub agent. Run the test. Fix the System under test. 
+
+USING UNIFIED TEST RUNNER (Docker test env): Run critical tests with fast fail. spawn a new sub agent. Run the test. Fix the System under test.
+
+USING UNIFIED TEST RUNNER (Docker test env): Run real LLM tests with fast fail. spawn a new sub agent. Run the test. Fix the System under test.
+
+
 - USING UNIFIED TEST RUNNER: One at a time, step through each cypress test. spawn a new sub agent. upgrade the test to refect current SUT.
 - USING UNIFIED TEST RUNNER: One at a time, step through each e2e test. spawn a new sub agent. Update test to reflect current claude.md standards and the SUT. Run the test. Fix the SUT. 
 - USING UNIFIED TEST RUNNER: One at a time, step through each e2e test. spawn a new sub agent. Run the test. Fix the SUT.  MOST LIKELY TO FAIL first. 

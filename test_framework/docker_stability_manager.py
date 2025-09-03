@@ -16,6 +16,7 @@ from typing import Dict, List, Optional, Tuple
 from dataclasses import dataclass
 import os
 import signal
+from pathlib import Path
 
 logger = logging.getLogger(__name__)
 
@@ -39,16 +40,104 @@ class DockerStabilityManager:
     """
     
     def __init__(self, required_containers: Optional[List[str]] = None):
+        # Dynamically determine the project prefix
+        self.project_prefix = self._get_project_prefix()
         self.required_containers = required_containers or [
-            'netra-apex-test-backend-1',
-            'netra-apex-test-auth-1', 
-            'netra-apex-test-postgres-1',
-            'netra-apex-test-redis-1',
-            'netra-apex-test-clickhouse-1'
+            f'{self.project_prefix}-test-backend-1',
+            f'{self.project_prefix}-test-auth-1', 
+            f'{self.project_prefix}-test-postgres-1',
+            f'{self.project_prefix}-test-redis-1',
+            f'{self.project_prefix}-test-clickhouse-1'
         ]
-        self.compose_file = '/Users/anthony/Documents/GitHub/netra-apex/docker-compose.test.yml'
+        # Dynamically find compose file relative to current working directory
+        self.compose_file = self._find_compose_file()
         self.max_restart_attempts = 3
         self.restart_delay = 10  # seconds
+    
+    def _get_project_prefix(self) -> str:
+        """
+        Get the project prefix for Docker container names.
+        
+        Returns:
+            Project prefix (e.g., 'netra-apex')
+        """
+        # Try to get from environment variable first
+        project_name = os.environ.get('COMPOSE_PROJECT_NAME')
+        if project_name:
+            return project_name
+        
+        # Dynamically determine project prefix from directory or existing containers
+        try:
+            # Try to get project name from Git repo root directory name
+            import git
+            repo = git.Repo(search_parent_directories=True)
+            project_name = Path(repo.working_dir).name
+            return project_name
+        except Exception:
+            pass
+        
+        # Fall back to current directory name
+        try:
+            current_dir = Path.cwd()
+            # Find the root project directory by looking for docker-compose files
+            for parent in [current_dir] + list(current_dir.parents)[:3]:
+                if (parent / 'docker-compose.test.yml').exists():
+                    return parent.name
+            # If no compose file found, use current directory name
+            return current_dir.name
+        except Exception:
+            pass
+        
+        # Final fallback to detect from existing containers
+        try:
+            result = subprocess.run(
+                ['docker', 'ps', '--format', '{{.Names}}'],
+                capture_output=True, text=True, timeout=5
+            )
+            if result.returncode == 0:
+                container_names = result.stdout.strip().split('\n')
+                for name in container_names:
+                    if '-test-' in name:
+                        # Extract project prefix (everything before -test-)
+                        return name.split('-test-')[0]
+        except Exception:
+            pass
+            
+        # Ultimate fallback
+        return 'netra-apex'
+    
+    def _find_compose_file(self) -> str:
+        """
+        Find the docker-compose.test.yml file relative to current directory.
+        
+        Returns:
+            Path to the compose file
+        """
+        # Try to find git root first
+        try:
+            import git
+            repo = git.Repo(search_parent_directories=True)
+            compose_path = Path(repo.working_dir) / 'docker-compose.test.yml'
+            if compose_path.exists():
+                return str(compose_path)
+        except Exception:
+            pass
+        
+        # Fall back to searching from current directory
+        current_path = Path.cwd()
+        
+        # Check current directory
+        if (current_path / 'docker-compose.test.yml').exists():
+            return str(current_path / 'docker-compose.test.yml')
+        
+        # Check parent directories (up to 3 levels)
+        for parent in [current_path.parent, current_path.parent.parent, current_path.parent.parent.parent]:
+            compose_path = parent / 'docker-compose.test.yml'
+            if compose_path.exists():
+                return str(compose_path)
+        
+        # Default fallback
+        return 'docker-compose.test.yml'
         
     def check_docker_health(self, timeout: float = 5.0) -> DockerHealth:
         """

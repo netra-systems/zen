@@ -51,144 +51,19 @@ try:
         create_test_context,
         create_isolated_test_contexts
     )
+    # Import real WebSocket manager - NO MOCKS per CLAUDE.md
+    from test_framework.real_websocket_manager import RealWebSocketManager
 except ImportError as e:
     pytest.skip(f"Could not import required WebSocket components: {e}", allow_module_level=True)
 
 
 # ============================================================================
-# ROBUST TEST UTILITIES FOR FACTORY PATTERN
+# CRITICAL: MOCKS REMOVED per CLAUDE.md "MOCKS = Abomination"
+# Using RealWebSocketManager for authentic WebSocket testing
 # ============================================================================
 
-class RobustMockWebSocketConnection:
-    """Robust mock WebSocket connection for factory pattern testing."""
-    
-    def __init__(self, user_id: str, connection_id: str, should_fail: bool = False, failure_pattern: str = None):
-        self.user_id = user_id
-        self.connection_id = connection_id
-        self.messages_sent: List[Dict] = []
-        self.messages_received: List[Dict] = []
-        self.should_fail = should_fail
-        self.failure_pattern = failure_pattern
-        self.send_count = 0
-        self.error_count = 0
-        self.latency_ms = 0  # Simulated network latency
-        self.packet_loss_rate = 0.0  # Simulated packet loss
-        self.is_closed = False
-        self.created_at = datetime.now(timezone.utc)
-        self.last_activity = self.created_at
-        
-    async def send_event(self, event: WebSocketEvent) -> None:
-        """Send event through mock connection (factory pattern)."""
-        if self.is_closed:
-            raise ConnectionError(f"Connection closed for user {self.user_id}")
-            
-        self.send_count += 1
-        
-        # Simulate network latency
-        if self.latency_ms > 0:
-            await asyncio.sleep(self.latency_ms / 1000.0)
-        
-        # Simulate packet loss
-        if random.random() < self.packet_loss_rate:
-            self.error_count += 1
-            raise ConnectionError(f"Simulated packet loss for user {self.user_id}")
-        
-        # Simulate specific failure patterns
-        if self.should_fail:
-            if self.failure_pattern == "intermittent" and self.send_count % 3 == 0:
-                self.error_count += 1
-                raise ConnectionError(f"Intermittent connection failure for user {self.user_id}")
-            elif self.failure_pattern == "timeout" and self.send_count > 5:
-                self.error_count += 1
-                raise asyncio.TimeoutError(f"Connection timeout for user {self.user_id}")
-            elif self.failure_pattern == "disconnect":
-                self.is_closed = True
-                raise ConnectionError(f"Connection disconnected for user {self.user_id}")
-        
-        # Store successful event
-        event_data = {
-            'event_type': event.event_type,
-            'event_id': event.event_id,
-            'user_id': event.user_id,
-            'thread_id': event.thread_id,
-            'data': event.data,
-            'timestamp': event.timestamp.isoformat(),
-            'retry_count': event.retry_count,
-            'send_count': self.send_count
-        }
-        
-        self.messages_sent.append(event_data)
-        self.last_activity = datetime.now(timezone.utc)
-    
-    async def ping(self) -> bool:
-        """Ping connection health."""
-        return not self.is_closed
-        
-    async def close(self) -> None:
-        """Close the connection."""
-        self.is_closed = True
-    
-    def inject_message(self, message: Dict[str, Any]) -> None:
-        """Inject a message to be received."""
-        self.messages_received.append(message)
-
-
-class BulletproofMockConnectionPool:
-    """Mock connection pool for factory pattern testing with isolation."""
-    
-    def __init__(self):
-        self.connections: Dict[str, RobustMockWebSocketConnection] = {}
-        self.connection_lock = asyncio.Lock()
-        
-    async def get_connection(self, connection_id: str, user_id: str) -> Any:
-        """Get or create mock connection with proper isolation."""
-        connection_key = f"{user_id}:{connection_id}"
-        
-        async with self.connection_lock:
-            if connection_key not in self.connections:
-                self.connections[connection_key] = RobustMockWebSocketConnection(
-                    user_id, connection_id
-                )
-            
-            # Return connection info object
-            return type('MockConnectionInfo', (), {
-                'websocket': self.connections[connection_key],
-                'user_id': user_id,
-                'connection_id': connection_id
-            })()
-    
-    def configure_connection_issues(self, user_id: str, connection_id: str = "default", 
-                                  should_fail: bool = False, failure_pattern: str = None,
-                                  latency_ms: int = 0, packet_loss_rate: float = 0.0):
-        """Configure connection issues for testing."""
-        connection_key = f"{user_id}:{connection_id}"
-        if connection_key in self.connections:
-            conn = self.connections[connection_key]
-            conn.should_fail = should_fail
-            conn.failure_pattern = failure_pattern
-            conn.latency_ms = latency_ms
-            conn.packet_loss_rate = packet_loss_rate
-    
-    def get_user_messages(self, user_id: str, connection_id: str = "default") -> List[Dict]:
-        """Get all messages for a specific user."""
-        connection_key = f"{user_id}:{connection_id}"
-        if connection_key in self.connections:
-            return self.connections[connection_key].messages_sent.copy()
-        return []
-    
-    def get_connection_stats(self, user_id: str, connection_id: str = "default") -> Dict:
-        """Get connection statistics for testing."""
-        connection_key = f"{user_id}:{connection_id}"
-        if connection_key in self.connections:
-            conn = self.connections[connection_key]
-            return {
-                'send_count': conn.send_count,
-                'error_count': conn.error_count,
-                'message_count': len(conn.messages_sent),
-                'is_closed': conn.is_closed,
-                'last_activity': conn.last_activity
-            }
-        return {}
+# ALL MOCK CLASSES REMOVED per CLAUDE.md "MOCKS = Abomination"
+# Using RealWebSocketManager for authentic WebSocket testing
 
 
 class BulletproofEventValidator:
@@ -401,9 +276,13 @@ class TestBulletproofWebSocketChat:
     @pytest.fixture(autouse=True)
     async def setup_robust_environment(self):
         """Setup robust test environment with factory pattern components."""
-        # Create factory and mock connection pool
+        # Create factory and real WebSocket manager
         self.factory = WebSocketBridgeFactory()
-        self.mock_pool = BulletproofMockConnectionPool()
+        self.real_websocket_manager = RealWebSocketManager()
+        
+        # Initialize real WebSocket session
+        self._websocket_session = self.real_websocket_manager.real_websocket_session()
+        await self._websocket_session.__aenter__()
         
         # Configure factory with mocked components
         self.factory.configure(

@@ -419,18 +419,10 @@ class MockMigrationHelper:
 
 
 # ============================================================================
-# COMPATIBILITY FIXTURES FOR LEGACY TESTS
+# LEGACY COMPATIBILITY FIXTURES REMOVED
 # ============================================================================
-
-@pytest.fixture
-def legacy_mock_websocket_manager():
-    """Legacy compatibility fixture - redirects to unified mock."""
-    return create_basic_mock()
-
-@pytest.fixture  
-def strict_mock_websocket_manager():
-    """Legacy compatibility fixture for strict mode - redirects to compliance mock."""
-    return create_compliance_mock()
+# Legacy compatibility fixtures have been removed to streamline WebSocket test architecture
+# Use modern fixtures: mock_websocket_manager, mock_websocket_compliance, mock_websocket_performance
 
 
 # ============================================================================

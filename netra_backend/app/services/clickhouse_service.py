@@ -38,8 +38,10 @@ class ClickHouseService:
     async def execute_health_check(self) -> bool:
         """Execute ClickHouse health check."""
         try:
-            # get_clickhouse_client returns an async context manager
-            async with get_clickhouse_client() as client:
+            # CRITICAL FIX: Use direct ClickHouse client creation to avoid circular dependency
+            # Don't use get_clickhouse_client() which may call back to connection manager
+            from netra_backend.app.db.clickhouse import _create_real_client
+            async for client in _create_real_client():
                 await client.execute("SELECT 1")
                 return True
         except Exception as e:

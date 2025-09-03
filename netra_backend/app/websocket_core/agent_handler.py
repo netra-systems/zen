@@ -51,6 +51,22 @@ class AgentMessageHandler(BaseMessageHandler):
                            message: WebSocketMessage) -> bool:
         """Handle agent-related WebSocket messages with database session."""
         try:
+            # CRITICAL FIX: Update thread association when we receive a message with thread_id
+            # This ensures agent events can be routed back to the correct WebSocket connection
+            thread_id = message.payload.get("thread_id") or message.thread_id
+            if thread_id:
+                # Get WebSocket manager and update thread association
+                from netra_backend.app.websocket_core import get_websocket_manager
+                ws_manager = get_websocket_manager()
+                if ws_manager:
+                    # Get connection ID from the WebSocket instance
+                    connection_id = ws_manager.get_connection_id_by_websocket(websocket)
+                    if connection_id:
+                        ws_manager.update_connection_thread(connection_id, thread_id)
+                        logger.debug(f"Updated thread association for connection {connection_id} (user {user_id}) to thread {thread_id}")
+                    else:
+                        logger.warning(f"Could not find connection ID for websocket of user {user_id}")
+            
             # Get database session using async context manager
             # CRITICAL: Do NOT manually close the session - let the context manager handle it
             async for db_session in get_db_dependency():

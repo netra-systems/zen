@@ -202,8 +202,8 @@ class TestDeploymentConfiguration:
         gsm_secrets = [
             'POSTGRES_PASSWORD=postgres-password-staging',
             'JWT_SECRET_KEY=jwt-secret-key-staging',
-            'GOOGLE_CLIENT_ID=google-client-id-staging',
-            'GOOGLE_CLIENT_SECRET=google-client-secret-staging',
+            'GOOGLE_CLIENT_ID=google-oauth-client-id-staging',
+            'GOOGLE_CLIENT_SECRET=google-oauth-client-secret-staging',
         ]
         
         for secret in gsm_secrets:

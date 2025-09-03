@@ -175,7 +175,7 @@ export const MessageItem: React.FC<MessageProps> = React.memo(({ message }) => {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3, ease: 'easeOut' }}
-      className={`mb-4 flex ${type === 'user' ? 'justify-end' : 'justify-start'}`}>
+      className={`mb-2 flex ${type === 'user' ? 'justify-end' : 'justify-start'}`}>
       <Card role="article" className={`w-full max-w-3xl shadow-sm hover:shadow-md transition-shadow duration-200 ${
         type === 'user' 
           ? 'bg-white/95 backdrop-blur-sm border-emerald-200' 
@@ -183,7 +183,7 @@ export const MessageItem: React.FC<MessageProps> = React.memo(({ message }) => {
           ? 'bg-red-50 border-red-200'
           : 'bg-white border-gray-200'
       }`}>
-        <CardHeader className="pb-3 pt-4 px-5">
+        <CardHeader className="pb-2 pt-3 px-4">
           <div className="flex items-start justify-between">
             <div className="flex items-center space-x-3">
               <Avatar className="w-9 h-9 border-2 border-white shadow-sm">
@@ -214,7 +214,7 @@ export const MessageItem: React.FC<MessageProps> = React.memo(({ message }) => {
           </div>
         </CardHeader>
         
-        <CardContent className="px-5 pb-4">
+        <CardContent className="px-4 pb-3">
           {renderContent()}
           
           {raw_data && (

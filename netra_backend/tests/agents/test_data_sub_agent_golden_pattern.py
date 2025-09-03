@@ -14,11 +14,18 @@ Business Value: Ensures reliable data analysis with 15-30% cost savings identifi
 import sys
 from unittest.mock import MagicMock
 
-# Mock ClickHouse dependencies before importing
+# Mock ClickHouse dependencies with proper package structure
 if 'clickhouse_connect' not in sys.modules:
-    sys.modules['clickhouse_connect'] = MagicMock()
-    sys.modules['clickhouse_connect.driver'] = MagicMock()
-    sys.modules['clickhouse_connect.driver.client'] = MagicMock()
+    mock_clickhouse_driver_client = MagicMock()
+    mock_clickhouse_driver = MagicMock()
+    mock_clickhouse_driver.client = mock_clickhouse_driver_client
+    
+    mock_clickhouse_connect = MagicMock()
+    mock_clickhouse_connect.driver = mock_clickhouse_driver
+    
+    sys.modules['clickhouse_connect'] = mock_clickhouse_connect
+    sys.modules['clickhouse_connect.driver'] = mock_clickhouse_driver
+    sys.modules['clickhouse_connect.driver.client'] = mock_clickhouse_driver_client
 
 import asyncio
 import json
@@ -31,7 +38,7 @@ import pytest
 import pytest_asyncio
 from contextlib import asynccontextmanager
 
-from netra_backend.app.agents.data_sub_agent.agent import DataSubAgent
+from netra_backend.app.agents.data_sub_agent import DataSubAgent
 from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.agents.base.interface import ExecutionContext, ExecutionResult
 from netra_backend.app.agents.state import DeepAgentState

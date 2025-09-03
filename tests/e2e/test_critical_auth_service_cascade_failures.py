@@ -259,7 +259,7 @@ class TestCriticalAuthServiceCascadeFailures(BaseE2ETest):
             # Clear OAuth secrets
             for oauth_var in ['GOOGLE_CLIENT_ID', 'GOOGLE_CLIENT_SECRET', 'OAUTH_HMAC_SECRET']:
                 if oauth_var in os.environ:
-                    del get_env().get(oauth_var)
+                    del os.environ[oauth_var]
             
             http_client = HTTPClient()
             

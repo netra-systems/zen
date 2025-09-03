@@ -13,10 +13,17 @@ Business Value: Ensures reliable data analysis with 15-30% cost savings identifi
 import sys
 from unittest.mock import MagicMock, Mock, AsyncMock, patch
 
-# Mock clickhouse modules
-sys.modules['clickhouse_connect'] = MagicMock()
-sys.modules['clickhouse_connect.driver'] = MagicMock()
-sys.modules['clickhouse_connect.driver.client'] = MagicMock()
+# Mock clickhouse modules with proper package structure
+mock_clickhouse_driver_client = MagicMock()
+mock_clickhouse_driver = MagicMock()
+mock_clickhouse_driver.client = mock_clickhouse_driver_client
+
+mock_clickhouse_connect = MagicMock()
+mock_clickhouse_connect.driver = mock_clickhouse_driver
+
+sys.modules['clickhouse_connect'] = mock_clickhouse_connect
+sys.modules['clickhouse_connect.driver'] = mock_clickhouse_driver
+sys.modules['clickhouse_connect.driver.client'] = mock_clickhouse_driver_client
 
 # Mock other problematic modules
 sys.modules['netra_backend.app.db.clickhouse'] = MagicMock()

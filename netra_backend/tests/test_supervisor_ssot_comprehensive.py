@@ -352,14 +352,15 @@ async def create_test_db_session(real_database_manager):
 @pytest.fixture
 async def mock_llm_manager():
     """Mock LLM manager for testing."""
-    manager = AsyncMock(spec=LLMManager)
+    manager = AsyncMock()
     
     # Configure realistic responses
-    manager.generate_text.return_value = "Mock LLM response"
-    manager.generate_structured.return_value = {
+    manager.generate_text = AsyncMock(return_value="Mock LLM response")
+    manager.generate_structured = AsyncMock(return_value={
         "analysis": "Mock analysis",
         "recommendation": "Mock recommendation"
-    }
+    })
+    manager.invoke = AsyncMock(return_value=MagicMock(content="Mock LLM response"))
     
     return manager
 
@@ -370,23 +371,15 @@ async def mock_websocket_bridge():
     bridge = AsyncMock(spec=AgentWebSocketBridge)
     event_capture = WebSocketEventCapture()
     
-    async def capture_thinking(connection_id=None, user_id=None, agent_name=None, message=None):
+    async def capture_agent_event(event_type=None, data=None, run_id=None, agent_name=None):
         await event_capture.capture_event(
-            'agent_thinking',
-            user_id=user_id,
-            connection_id=connection_id,
-            data={'agent_name': agent_name, 'message': message}
-        )
-    
-    async def capture_notification(user_id=None, notification_type=None, data=None):
-        await event_capture.capture_event(
-            notification_type,
-            user_id=user_id,
+            event_type,
+            run_id=run_id,
+            agent_name=agent_name,
             data=data
         )
     
-    bridge.emit_agent_thinking.side_effect = capture_thinking
-    bridge.emit_user_notification.side_effect = capture_notification
+    bridge.emit_agent_event.side_effect = capture_agent_event
     bridge.event_capture = event_capture  # Attach for test access
     
     return bridge
@@ -395,14 +388,14 @@ async def mock_websocket_bridge():
 @pytest.fixture
 async def mock_tool_dispatcher():
     """Mock tool dispatcher for testing."""
-    dispatcher = AsyncMock(spec=ToolDispatcher)
+    dispatcher = AsyncMock()
     
     # Configure realistic tool execution responses
-    dispatcher.execute_tool.return_value = {
+    dispatcher.execute_tool = AsyncMock(return_value={
         "tool_result": "Mock tool execution result",
         "status": "success",
         "execution_time": 0.1
-    }
+    })
     
     return dispatcher
 
@@ -412,8 +405,7 @@ async def supervisor_agent(mock_llm_manager, mock_websocket_bridge, mock_tool_di
     """Create SupervisorAgent instance for testing."""
     supervisor = SupervisorAgent.create(
         llm_manager=mock_llm_manager,
-        websocket_bridge=mock_websocket_bridge,
-        tool_dispatcher=mock_tool_dispatcher
+        websocket_bridge=mock_websocket_bridge
     )
     
     # Validate no session storage
@@ -856,8 +848,7 @@ class TestWebSocketIntegration:
         result = await supervisor_agent.execute(context, stream_updates=True)
         
         # Verify WebSocket bridge was called
-        assert mock_websocket_bridge.emit_agent_thinking.called
-        assert mock_websocket_bridge.emit_user_notification.called or mock_websocket_bridge.emit_agent_thinking.called
+        assert mock_websocket_bridge.emit_agent_event.called
         
         # Verify events were captured
         event_capture = mock_websocket_bridge.event_capture
@@ -1008,8 +999,7 @@ class TestErrorHandlingAndEdgeCases:
         """Test that WebSocket failures don't break agent execution."""
         # Create WebSocket bridge that fails
         failing_bridge = AsyncMock(spec=AgentWebSocketBridge)
-        failing_bridge.emit_agent_thinking.side_effect = Exception("WebSocket failed")
-        failing_bridge.emit_user_notification.side_effect = Exception("WebSocket failed")
+        failing_bridge.emit_agent_event.side_effect = Exception("WebSocket failed")
         
         # Create supervisor with failing WebSocket
         supervisor = SupervisorAgent.create(
@@ -1334,7 +1324,7 @@ class TestRaceConditionsAndNegativeTests:
                 session = loop.run_until_complete(create_test_db_session())
                 context = UserExecutionContext(
                     user_id=f"thread_user_{user_index}",
-                    thread_id=f"thread_thread_{user_index}",
+                    thread_id=f"thread_{user_index}",
                     run_id=f"thread_run_{user_index}",
                     db_session=session,
                     metadata={'thread_index': user_index}

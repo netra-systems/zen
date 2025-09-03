@@ -17,6 +17,10 @@
 
 // Import base types for consistency
 import { BaseWebSocketPayload } from '../shared/base';
+import { ReferenceItem } from '../backend_schema_tools';
+
+// Re-export ReferenceItem for consumers of this module
+export { ReferenceItem };
 
 // ============================================================================
 // CORE TOOL ENUMS AND TYPES
@@ -62,19 +66,6 @@ export interface ToolResult {
   end_time?: number | null;
 }
 
-/**
- * Reference item for tool results and documentation.
- * Used in corpus management and tool result references.
- */
-export interface ReferenceItem {
-  id: string;
-  title: string;
-  content: string;
-  type: string;
-  metadata?: {
-    [k: string]: unknown;
-  } | null;
-}
 
 // ============================================================================
 // WEBSOCKET TOOL PAYLOADS - Real-time tool communication

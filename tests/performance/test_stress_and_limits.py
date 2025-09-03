@@ -511,6 +511,8 @@ class TestRecoveryAndResilience:
                     if recent_errors >= 3:
                         logger.info("Resource exhaustion detected, stopping creation")
                         break
+        finally:
+            pass  # Resources will be cleaned up in Phase 2
         
         exhaustion_memory = psutil.Process().memory_info().rss / 1024 / 1024
         logger.info(f"Resource exhaustion phase: {len(engines_created)} engines created, "

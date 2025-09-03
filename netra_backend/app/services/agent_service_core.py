@@ -187,12 +187,12 @@ class AgentService(IAgentService):
                 status = await self._bridge.get_status()
                 if status["dependencies"]["websocket_manager_available"]:
                     websocket_manager = get_websocket_manager()
-                    await websocket_manager.send_message(user_id, {"type": "agent_stopped"})
+                    await websocket_manager.send_to_user(user_id, {"type": "agent_stopped"})
                     return True
             
             # Fallback to direct manager access (preserve existing behavior)
             websocket_manager = get_websocket_manager()
-            await websocket_manager.send_message(user_id, {"type": "agent_stopped"})
+            await websocket_manager.send_to_user(user_id, {"type": "agent_stopped"})
             return True
         except Exception as e:
             logger.error(f"Failed to stop agent for user {user_id}: {e}")

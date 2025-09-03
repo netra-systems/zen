@@ -207,7 +207,7 @@ const MainChat: React.FC = () => {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -20 }}
                   transition={{ duration: 0.3 }}
-                  className="flex flex-col h-full px-6 py-6"
+                  className="flex flex-col h-full px-4 py-4"
                 >
                   {/* Welcome Header - only show for empty state (no thread) */}
                   {shouldShowEmptyState && (
@@ -301,7 +301,7 @@ const MainChat: React.FC = () => {
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
-                className="px-6 py-2"
+                className="px-4 py-2"
                 data-testid="agent-processing"
               >
                 <div className="flex items-center gap-2 text-sm text-gray-600">
@@ -319,7 +319,7 @@ const MainChat: React.FC = () => {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -20 }}
                   transition={{ duration: 0.3 }}
-                  className="px-6 py-4 max-w-5xl mx-auto"
+                  className="px-4 py-3 max-w-3xl mx-auto"
                 >
                   <PersistentResponseCard
                     fastLayerData={fastLayerData}
@@ -342,7 +342,7 @@ const MainChat: React.FC = () => {
           transition={{ delay: 0.2 }}
           className="border-t bg-white/95 backdrop-blur-sm shadow-lg"
         >
-          <div className="px-6 py-4 max-w-5xl mx-auto w-full">
+          <div className="px-6 py-4 max-w-3xl mx-auto w-full">
             <MessageInput ref={messageInputRef} />
           </div>
         </motion.div>

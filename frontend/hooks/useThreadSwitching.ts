@@ -11,7 +11,7 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { useUnifiedChatStore } from '@/store/unified-chat';
 import type { UnifiedChatState } from '@/types/store-types';
-import { threadLoadingService } from '@/services/threadLoadingService';
+import { threadLoadingService, type ThreadLoadingResult } from '@/services/threadLoadingService';
 import { 
   threadEventHandler,
   createThreadLoadingEvent,
@@ -20,7 +20,8 @@ import {
 import { createThreadTimeoutManager } from '@/utils/threadTimeoutManager';
 import { executeWithRetry } from '@/lib/retry-manager';
 import { globalCleanupManager } from '@/lib/operation-cleanup';
-import type { ThreadError, createThreadError } from '@/types/thread-error-types';
+import type { ThreadError } from '@/types/thread-error-types';
+import { createThreadError } from '@/types/thread-error-types';
 import { useURLSync, useBrowserHistorySync } from '@/services/urlSyncService';
 import { logger } from '@/lib/logger';
 
@@ -222,7 +223,7 @@ const cleanupCurrentOperation = async (
   }
   
   // Reset thread loading state in store
-  if (storeActions) {
+  if (storeActions?.setThreadLoading) {
     storeActions.setThreadLoading(false);
   }
   
@@ -270,9 +271,15 @@ const startLoadingState = (
   globalCleanupManager.registerAbortController(operationId, controller);
   
   // Use startThreadLoading for coordinated state management
-  storeActions.startThreadLoading(threadId);
+  if (storeActions.startThreadLoading) {
+    storeActions.startThreadLoading(threadId);
+  } else {
+    // Fallback to basic state updates
+    storeActions.setActiveThread?.(threadId);
+    storeActions.setThreadLoading?.(true);
+  }
   
-  if (options.clearMessages) {
+  if (options.clearMessages && storeActions.clearMessages) {
     storeActions.clearMessages();
   }
   
@@ -282,7 +289,9 @@ const startLoadingState = (
   }
   
   const loadingEvent = createThreadLoadingEvent(threadId);
-  storeActions.handleWebSocketEvent(loadingEvent);
+  if (storeActions.handleWebSocketEvent) {
+    storeActions.handleWebSocketEvent(loadingEvent);
+  }
   
   return controller;
 };
@@ -291,7 +300,7 @@ const startLoadingState = (
  * Handles successful loading result
  */
 const handleLoadingResult = (
-  result: any,
+  result: ThreadLoadingResult,
   threadId: string,
   operationId: string,
   setState: (state: ThreadSwitchingState) => void,
@@ -301,7 +310,7 @@ const handleLoadingResult = (
   options?: Required<ThreadSwitchingOptions>,
   updateUrl?: (threadId: string | null) => void
 ): boolean => {
-  if (result.success) {
+  if (result && result.success) {
     // Clear timeout and cleanup on success
     if (timeoutManager) {
       timeoutManager.clearTimeout(threadId);
@@ -310,14 +319,27 @@ const handleLoadingResult = (
     globalCleanupManager.cleanupThread(operationId);
     
     // Use completeThreadLoading for coordinated state management
-    storeActions.completeThreadLoading(threadId, result.messages);
+    if (storeActions.completeThreadLoading) {
+      storeActions.completeThreadLoading(threadId, result.messages);
+    } else {
+      // Fallback to basic state updates
+      storeActions.setActiveThread?.(threadId);
+      storeActions.loadMessages?.(result.messages);
+      storeActions.setThreadLoading?.(false);
+    }
     
     const loadedEvent = createThreadLoadedEvent(threadId, result.messages);
-    storeActions.handleWebSocketEvent(loadedEvent);
+    if (storeActions.handleWebSocketEvent) {
+      storeActions.handleWebSocketEvent(loadedEvent);
+    }
     
     // Update URL if enabled and not skipped
+    // Use setTimeout to ensure store update completes first
     if (options?.updateUrl && !options?.skipUrlUpdate && updateUrl) {
-      updateUrl(threadId);
+      // Delay URL update slightly to avoid race with store-triggered update
+      setTimeout(() => {
+        updateUrl(threadId);
+      }, 50);
     }
     
     setState(prev => ({
@@ -330,7 +352,9 @@ const handleLoadingResult = (
     
     return true;
   } else {
-    return handleLoadingError(result.error, threadId, operationId, setState, lastFailedThreadRef, storeActions, timeoutManager);
+    // Handle the case where the result indicates failure
+    const errorMessage = result?.error || 'Thread loading failed';
+    return handleLoadingError(errorMessage, threadId, operationId, setState, lastFailedThreadRef, storeActions, timeoutManager);
   }
 };
 
@@ -355,9 +379,12 @@ const handleLoadingError = (
   
   globalCleanupManager.cleanupThread(operationId);
   
-  // Reset thread loading state in store
-  if (storeActions) {
+  // Reset thread loading state in store and clear active thread on error
+  if (storeActions?.setThreadLoading) {
     storeActions.setThreadLoading(false);
+  }
+  if (storeActions?.setActiveThread) {
+    storeActions.setActiveThread(null);
   }
   
   setState(prev => ({
@@ -387,7 +414,7 @@ const performCancelLoading = (
   }
   
   // Reset thread loading state in store
-  if (storeActions) {
+  if (storeActions?.setThreadLoading) {
     storeActions.setThreadLoading(false);
   }
   

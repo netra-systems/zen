@@ -193,7 +193,8 @@ def test_env():
     })
     
     for key, value in test_env.items():
-        get_env().get(key) = value
+        import os
+        os.environ[key] = value
     
     yield test_env
     
@@ -224,17 +225,18 @@ async def dev_launcher():
 @contextmanager
 def temporary_env_var(key: str, value: Optional[str]):
     """Temporarily set or unset an environment variable"""
+    original = os.environ.get(key)
     if value is None:
         os.environ.pop(key, None)
     else:
-        get_env().get(key) = value
+        os.environ[key] = value
     try:
         yield
     finally:
         if original is None:
             os.environ.pop(key, None)
         else:
-            get_env().get(key) = original
+            os.environ[key] = original
 
 
 @contextmanager
@@ -475,6 +477,7 @@ async def test_postgresql_authentication_failure_recovery(test_env):
                 if retry_count < max_retries:
                     # Fix password for last retry
                     if retry_count == max_retries - 1:
+                        os.environ["DATABASE_PASSWORD"] = "netra_test"
                     await asyncio.sleep(1)
         
         assert retry_count > 0, "Should have had authentication failures"

@@ -21,6 +21,11 @@ from typing import TYPE_CHECKING, Any, Dict, List, Optional
 
 from netra_backend.app.core.exceptions_base import NetraException
 from netra_backend.app.core.tool_models import ToolExecutionResult, UnifiedTool
+from netra_backend.app.core.websocket_exceptions import (
+    WebSocketBridgeUnavailableError,
+    WebSocketContextValidationError,
+    WebSocketSendFailureError
+)
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.monitoring.websocket_notification_monitor import get_websocket_notification_monitor
 from shared.isolated_environment import IsolatedEnvironment
@@ -76,7 +81,8 @@ async def enhance_tool_dispatcher_with_notifications(
     websocket_bridge = None
     if websocket_manager and enable_notifications:
         websocket_bridge = AgentWebSocketBridge()
-        websocket_bridge.websocket_manager = websocket_manager
+        # CRITICAL FIX: Use the correct private member name
+        websocket_bridge._websocket_manager = websocket_manager
     
     # Replace executor with enhanced version
     enhanced_executor = UnifiedToolExecutionEngine(
@@ -533,31 +539,40 @@ class UnifiedToolExecutionEngine:
         """Send tool executing notification via AgentWebSocketBridge."""
         # CRITICAL: Always attempt to notify, with fallback
         if not context:
-            logger.critical(f"🚨 SILENT FAILURE ALERT: Tool {tool_name} executing without context")
-            logger.critical("🚨 USER WILL NOT SEE TOOL PROGRESS - This breaks chat transparency!")
-            logger.critical(f"🚨 Call stack shows missing context during tool execution")
+            error_msg = f"Tool {tool_name} executing without context - USER WILL NOT SEE PROGRESS"
+            logger.critical(f"🚨 CONTEXT VALIDATION FAILURE: {error_msg}")
             
-            # MONITORING: Track silent failure - no context
+            # MONITORING: Track failure
             self.notification_monitor.track_silent_failure_detected(
                 user_id="unknown",
                 thread_id="unknown", 
-                context=f"Tool {tool_name} executing without context - breaks chat transparency"
+                context=error_msg
             )
-            return
+            
+            # LOUD FAILURE: Raise exception instead of silent return
+            raise WebSocketContextValidationError(
+                validation_error="Missing execution context",
+                user_id="unknown"
+            )
             
         if not self.websocket_bridge:
-            # CRITICAL: Log when bridge unavailable so we know events are lost
-            logger.critical(f"🚨 BRIDGE UNAVAILABLE: Tool {tool_name} executing for run_id {context.run_id}")
-            logger.critical(f"🚨 Thread {context.thread_id} will not see tool progress - WebSocket events LOST")
-            logger.critical("🚨 This indicates WebSocket bridge was not properly initialized in tool dispatcher")
+            error_msg = f"Tool {tool_name} executing for run_id {context.run_id} - EVENTS WILL BE LOST"
+            logger.critical(f"🚨 WEBSOCKET BRIDGE UNAVAILABLE: {error_msg}")
+            logger.critical(f"🚨 Thread {context.thread_id} will not receive any tool progress notifications")
             
-            # MONITORING: Track silent failure - bridge unavailable
+            # MONITORING: Track failure
             self.notification_monitor.track_silent_failure_detected(
                 user_id=context.user_id,
                 thread_id=context.thread_id,
-                context=f"Tool {tool_name} - WebSocket bridge unavailable, events LOST"
+                context=error_msg
             )
-            return
+            
+            # LOUD FAILURE: Raise exception instead of silent return
+            raise WebSocketBridgeUnavailableError(
+                operation=f"tool_executing({tool_name})",
+                user_id=context.user_id,
+                thread_id=context.thread_id
+            )
         
         # MONITORING: Track notification attempt
         correlation_id = self.notification_monitor.track_notification_attempted(
@@ -625,30 +640,40 @@ class UnifiedToolExecutionEngine:
         """Send tool completed notification via AgentWebSocketBridge."""
         # CRITICAL: Always attempt to notify, with fallback
         if not context:
-            logger.critical(f"🚨 SILENT FAILURE ALERT: Tool {tool_name} completed without context")
-            logger.critical("🚨 USER WILL NOT SEE TOOL RESULTS - This breaks chat completeness!")
+            error_msg = f"Tool {tool_name} completed without context - USER WILL NOT SEE RESULTS"
+            logger.critical(f"🚨 CONTEXT VALIDATION FAILURE: {error_msg}")
             
-            # MONITORING: Track silent failure - no context
+            # MONITORING: Track failure
             self.notification_monitor.track_silent_failure_detected(
                 user_id="unknown",
                 thread_id="unknown",
-                context=f"Tool {tool_name} completed without context - breaks chat completeness"
+                context=error_msg
             )
-            return
+            
+            # LOUD FAILURE: Raise exception
+            raise WebSocketContextValidationError(
+                validation_error="Missing execution context for tool completion",
+                user_id="unknown"
+            )
             
         if not self.websocket_bridge:
-            # CRITICAL: Log when bridge unavailable so we know events are lost
-            logger.critical(f"🚨 BRIDGE UNAVAILABLE: Tool {tool_name} completed for run_id {context.run_id}")
+            error_msg = f"Tool {tool_name} completed for run_id {context.run_id} - RESULTS WILL BE LOST"
+            logger.critical(f"🚨 WEBSOCKET BRIDGE UNAVAILABLE: {error_msg}")
             logger.critical(f"🚨 Thread {context.thread_id} status: {status}, duration: {duration_ms:.0f}ms")
-            logger.critical("🚨 USER WILL NOT SEE TOOL RESULTS - WebSocket events LOST")
             
-            # MONITORING: Track silent failure - bridge unavailable
+            # MONITORING: Track failure
             self.notification_monitor.track_silent_failure_detected(
                 user_id=context.user_id,
                 thread_id=context.thread_id,
-                context=f"Tool {tool_name} completion - WebSocket bridge unavailable, results LOST"
+                context=error_msg
             )
-            return
+            
+            # LOUD FAILURE: Raise exception
+            raise WebSocketBridgeUnavailableError(
+                operation=f"tool_completed({tool_name})",
+                user_id=context.user_id,
+                thread_id=context.thread_id
+            )
         
         # MONITORING: Track notification attempt  
         correlation_id = self.notification_monitor.track_notification_attempted(

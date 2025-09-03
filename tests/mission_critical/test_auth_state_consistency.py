@@ -1474,6 +1474,489 @@ class PerformanceUnderLoadTest(unittest.TestCase):
                        f"Excessive memory growth: {memory_growth:.2f} MB (max {max_acceptable_growth} MB)")
         self.assertLess(growth_rate_per_auth, max_growth_per_auth,
                        f"Memory leak per auth: {growth_rate_per_auth:.6f} MB (max {max_growth_per_auth} MB)")
+    
+    def test_enterprise_sso_integration_load(self):
+        """Test enterprise SSO authentication under load with multiple providers."""
+        print("\nTesting enterprise SSO integration under load...")
+        
+        sso_providers = ['okta', 'azure', 'google_workspace', 'onelogin', 'auth0']
+        concurrent_auths = 20
+        successful_auths = 0
+        
+        def sso_auth_test(provider):
+            nonlocal successful_auths
+            try:
+                # Simulate SSO authentication flow
+                sso_initiation = self.simulate_sso_init(provider)
+                self.assertTrue(sso_initiation['success'], f"SSO init failed for {provider}")
+                
+                # Simulate SAML/OIDC response
+                auth_response = self.simulate_sso_callback(provider, sso_initiation['auth_id'])
+                self.assertTrue(auth_response['success'], f"SSO callback failed for {provider}")
+                
+                # Test token validation
+                token = auth_response.get('access_token')
+                if token:
+                    decoded = jwt.decode(token, options={"verify_signature": False})
+                    self.assertIn('sso_provider', decoded)
+                    self.assertEqual(decoded['sso_provider'], provider)
+                    successful_auths += 1
+                    
+            except Exception as e:
+                print(f"SSO auth failed for {provider}: {e}")
+        
+        # Run concurrent SSO authentications
+        import threading
+        threads = []
+        start_time = time.time()
+        
+        for provider in sso_providers:
+            for _ in range(concurrent_auths // len(sso_providers)):
+                thread = threading.Thread(target=sso_auth_test, args=(provider,))
+                threads.append(thread)
+                thread.start()
+        
+        # Wait for all threads to complete
+        for thread in threads:
+            thread.join()
+        
+        total_time = time.time() - start_time
+        
+        print(f"SSO Load Test Results:")
+        print(f"  Total authentications: {len(threads)}")
+        print(f"  Successful authentications: {successful_auths}")
+        print(f"  Total time: {total_time:.2f}s")
+        print(f"  Average time per auth: {total_time/len(threads):.3f}s")
+        
+        # Assertions
+        self.assertGreater(successful_auths, len(threads) * 0.8, "SSO success rate too low")
+        self.assertLess(total_time, 30, f"SSO load test too slow: {total_time:.2f}s")
+    
+    def test_mobile_app_token_management_under_load(self):
+        """Test mobile app token management with high concurrency and refresh patterns."""
+        print("\nTesting mobile app token management under load...")
+        
+        mobile_users = []
+        concurrent_sessions = 25
+        token_refresh_cycles = 5
+        
+        # Create mobile users
+        for i in range(concurrent_sessions):
+            user_data = {
+                'email': f'mobile_user_{i}@load-test.com',
+                'password': f'MobilePassword{i}!',
+                'full_name': f'Mobile User {i}',
+                'device_type': 'ios' if i % 2 == 0 else 'android',
+                'app_version': '2.1.3'
+            }
+            mobile_users.append(user_data)
+        
+        successful_operations = 0
+        
+        def mobile_session_test(user_data):
+            nonlocal successful_operations
+            try:
+                # Sign up mobile user
+                signup = self.simulate_mobile_signup(user_data)
+                self.assertTrue(signup.get('success', False))
+                
+                # Login and get initial tokens
+                login = self.simulate_mobile_login(user_data['email'], user_data['password'])
+                self.assertTrue(login.get('success', False))
+                
+                access_token = login.get('access_token')
+                refresh_token = login.get('refresh_token')
+                
+                if access_token and refresh_token:
+                    # Simulate token refresh cycles
+                    for cycle in range(token_refresh_cycles):
+                        refresh_result = self.simulate_token_refresh(refresh_token)
+                        self.assertTrue(refresh_result.get('success', False))
+                        
+                        # Update tokens
+                        access_token = refresh_result.get('new_access_token', access_token)
+                        refresh_token = refresh_result.get('new_refresh_token', refresh_token)
+                        
+                        # Simulate API calls with new token
+                        api_test = self.simulate_mobile_api_call(access_token)
+                        self.assertTrue(api_test.get('success', False))
+                        
+                        time.sleep(0.1)  # Brief delay between refresh cycles
+                    
+                    successful_operations += 1
+                    
+            except Exception as e:
+                print(f"Mobile session test failed: {e}")
+        
+        # Run concurrent mobile sessions
+        import threading
+        threads = []
+        start_time = time.time()
+        
+        for user_data in mobile_users:
+            thread = threading.Thread(target=mobile_session_test, args=(user_data,))
+            threads.append(thread)
+            thread.start()
+        
+        # Wait for completion
+        for thread in threads:
+            thread.join()
+        
+        total_time = time.time() - start_time
+        total_operations = len(mobile_users) * (1 + token_refresh_cycles)  # signup + refresh cycles
+        
+        print(f"Mobile Token Management Results:")
+        print(f"  Concurrent sessions: {concurrent_sessions}")
+        print(f"  Token refresh cycles per session: {token_refresh_cycles}")
+        print(f"  Total operations: {total_operations}")
+        print(f"  Successful operations: {successful_operations}")
+        print(f"  Total time: {total_time:.2f}s")
+        print(f"  Operations per second: {successful_operations/total_time:.2f}")
+        
+        # Assertions
+        self.assertGreater(successful_operations, total_operations * 0.85, "Mobile operation success rate too low")
+        self.assertLess(total_time, 45, f"Mobile token management test too slow: {total_time:.2f}s")
+    
+    def test_cross_region_authentication_latency(self):
+        """Test authentication performance across simulated geographic regions."""
+        print("\nTesting cross-region authentication latency...")
+        
+        regions = ['us-east', 'us-west', 'eu-central', 'asia-pacific', 'australia']
+        users_per_region = 10
+        latency_simulations = {
+            'us-east': 0.02,    # 20ms
+            'us-west': 0.08,    # 80ms
+            'eu-central': 0.12, # 120ms
+            'asia-pacific': 0.15, # 150ms
+            'australia': 0.18   # 180ms
+        }
+        
+        regional_results = {}
+        
+        def region_auth_test(region):
+            regional_results[region] = {
+                'successful_auths': 0,
+                'failed_auths': 0,
+                'total_time': 0,
+                'auth_times': []
+            }
+            
+            for i in range(users_per_region):
+                try:
+                    user_data = {
+                        'email': f'user_{region}_{i}@region-test.com',
+                        'password': f'RegionPassword{i}!',
+                        'region': region
+                    }
+                    
+                    # Simulate regional latency
+                    time.sleep(latency_simulations[region])
+                    
+                    start_time = time.time()
+                    
+                    # Simulate signup
+                    signup = self.simulate_regional_signup(user_data, region)
+                    if not signup.get('success', False):
+                        regional_results[region]['failed_auths'] += 1
+                        continue
+                    
+                    # Simulate login
+                    login = self.simulate_regional_login(user_data['email'], user_data['password'], region)
+                    
+                    auth_time = time.time() - start_time
+                    regional_results[region]['auth_times'].append(auth_time)
+                    regional_results[region]['total_time'] += auth_time
+                    
+                    if login.get('success', False):
+                        regional_results[region]['successful_auths'] += 1
+                        
+                        # Test token validation across regions
+                        token = login.get('access_token')
+                        if token:
+                            cross_region_validation = self.simulate_cross_region_token_validation(token, regions)
+                            self.assertTrue(cross_region_validation.get('valid_in_all_regions', False))
+                    else:
+                        regional_results[region]['failed_auths'] += 1
+                        
+                except Exception as e:
+                    print(f"Regional auth failed for {region}: {e}")
+                    regional_results[region]['failed_auths'] += 1
+        
+        # Run regional tests in parallel
+        import threading
+        threads = []
+        start_time = time.time()
+        
+        for region in regions:
+            thread = threading.Thread(target=region_auth_test, args=(region,))
+            threads.append(thread)
+            thread.start()
+        
+        for thread in threads:
+            thread.join()
+        
+        total_time = time.time() - start_time
+        
+        # Analyze results
+        print(f"Cross-Region Authentication Results:")
+        total_auths = 0
+        total_successful = 0
+        
+        for region, results in regional_results.items():
+            total_auths += results['successful_auths'] + results['failed_auths']
+            total_successful += results['successful_auths']
+            
+            avg_time = sum(results['auth_times']) / len(results['auth_times']) if results['auth_times'] else 0
+            success_rate = results['successful_auths'] / (results['successful_auths'] + results['failed_auths']) * 100
+            
+            print(f"  {region}: {results['successful_auths']}/{users_per_region} successful, "
+                  f"avg time: {avg_time:.3f}s, success rate: {success_rate:.1f}%")
+        
+        overall_success_rate = total_successful / total_auths if total_auths > 0 else 0
+        print(f"Overall success rate: {overall_success_rate*100:.1f}%")
+        print(f"Total time: {total_time:.2f}s")
+        
+        # Assertions
+        self.assertGreater(overall_success_rate, 0.9, "Cross-region success rate too low")
+        self.assertLess(total_time, 60, f"Cross-region test too slow: {total_time:.2f}s")
+    
+    def test_api_key_rotation_under_load(self):
+        """Test API key rotation and validation under high load."""
+        print("\nTesting API key rotation under load...")
+        
+        api_users = []
+        concurrent_rotations = 15
+        rotation_cycles = 3
+        
+        # Create API users
+        for i in range(concurrent_rotations):
+            user_data = {
+                'email': f'api_user_{i}@rotation-test.com',
+                'password': f'ApiPassword{i}!',
+                'full_name': f'API User {i}',
+                'account_type': 'developer'
+            }
+            api_users.append(user_data)
+        
+        successful_rotations = 0
+        
+        def api_rotation_test(user_data):
+            nonlocal successful_rotations
+            try:
+                # Create user and get initial API key
+                signup = self.simulate_developer_signup(user_data)
+                self.assertTrue(signup.get('success', False))
+                
+                login = self.simulate_user_login(user_data['email'], user_data['password'])
+                self.assertTrue(login.get('success', False))
+                
+                access_token = login.get('access_token')
+                api_key = self.simulate_api_key_generation(access_token)
+                self.assertIsNotNone(api_key)
+                
+                current_api_key = api_key
+                
+                # Perform rotation cycles
+                for cycle in range(rotation_cycles):
+                    # Test current API key
+                    validation = self.simulate_api_key_validation(current_api_key)
+                    self.assertTrue(validation.get('valid', False))
+                    
+                    # Rotate API key
+                    rotation_result = self.simulate_api_key_rotation(access_token, current_api_key)
+                    self.assertTrue(rotation_result.get('success', False))
+                    
+                    new_api_key = rotation_result.get('new_api_key')
+                    self.assertIsNotNone(new_api_key)
+                    self.assertNotEqual(new_api_key, current_api_key)
+                    
+                    # Test new API key works
+                    new_validation = self.simulate_api_key_validation(new_api_key)
+                    self.assertTrue(new_validation.get('valid', False))
+                    
+                    # Test old API key is revoked
+                    old_validation = self.simulate_api_key_validation(current_api_key)
+                    self.assertFalse(old_validation.get('valid', True))
+                    
+                    current_api_key = new_api_key
+                    time.sleep(0.1)  # Brief delay between rotations
+                
+                successful_rotations += 1
+                
+            except Exception as e:
+                print(f"API rotation test failed: {e}")
+        
+        # Run concurrent API key rotations
+        import threading
+        threads = []
+        start_time = time.time()
+        
+        for user_data in api_users:
+            thread = threading.Thread(target=api_rotation_test, args=(user_data,))
+            threads.append(thread)
+            thread.start()
+        
+        for thread in threads:
+            thread.join()
+        
+        total_time = time.time() - start_time
+        total_expected_rotations = len(api_users) * rotation_cycles
+        
+        print(f"API Key Rotation Results:")
+        print(f"  Concurrent users: {concurrent_rotations}")
+        print(f"  Rotation cycles per user: {rotation_cycles}")
+        print(f"  Expected rotations: {total_expected_rotations}")
+        print(f"  Successful rotations: {successful_rotations}")
+        print(f"  Total time: {total_time:.2f}s")
+        
+        # Assertions
+        self.assertGreater(successful_rotations, total_expected_rotations * 0.8, "API rotation success rate too low")
+        self.assertLess(total_time, 30, f"API rotation test too slow: {total_time:.2f}s")
+    
+    def test_session_cleanup_and_garbage_collection(self):
+        """Test session cleanup and memory garbage collection under sustained load."""
+        print("\nTesting session cleanup and garbage collection...")
+        
+        session_waves = 5
+        sessions_per_wave = 20
+        total_sessions = session_waves * sessions_per_wave
+        
+        active_sessions = []
+        cleaned_sessions = []
+        memory_snapshots = []
+        
+        def create_session_wave(wave_number):
+            """Create a wave of user sessions."""
+            wave_sessions = []
+            
+            for i in range(sessions_per_wave):
+                user_data = {
+                    'email': f'cleanup_user_{wave_number}_{i}@session-test.com',
+                    'password': f'CleanupPassword{i}!',
+                    'full_name': f'Cleanup User {wave_number}-{i}'
+                }
+                
+                try:
+                    # Create user session
+                    signup = self.simulate_user_signup(user_data)
+                    if signup.get('success', False):
+                        login = self.simulate_user_login(user_data['email'], user_data['password'])
+                        if login.get('success', False):
+                            session_data = {
+                                'session_id': login.get('session_id'),
+                                'access_token': login.get('access_token'),
+                                'refresh_token': login.get('refresh_token'),
+                                'user_id': login.get('user', {}).get('id'),
+                                'created_at': time.time(),
+                                'wave': wave_number
+                            }
+                            wave_sessions.append(session_data)
+                            
+                except Exception as e:
+                    print(f"Failed to create session {wave_number}-{i}: {e}")
+            
+            return wave_sessions
+        
+        def cleanup_session_wave(sessions_to_cleanup):
+            """Cleanup a wave of sessions."""
+            for session in sessions_to_cleanup:
+                try:
+                    # Simulate session cleanup
+                    cleanup_result = self.simulate_session_cleanup(session['session_id'])
+                    if cleanup_result.get('success', False):
+                        cleaned_sessions.append(session)
+                        
+                    # Simulate token revocation
+                    revocation = self.simulate_token_revocation(session['access_token'])
+                    
+                except Exception as e:
+                    print(f"Failed to cleanup session {session['session_id']}: {e}")
+        
+        # Memory monitoring
+        def take_memory_snapshot():
+            try:
+                import psutil
+                import os
+                process = psutil.Process(os.getpid())
+                memory_info = process.memory_info()
+                return {
+                    'rss_mb': memory_info.rss / 1024 / 1024,
+                    'vms_mb': memory_info.vms / 1024 / 1024,
+                    'timestamp': time.time()
+                }
+            except ImportError:
+                return {
+                    'rss_mb': 50.0,  # Simulated baseline
+                    'vms_mb': 100.0,
+                    'timestamp': time.time()
+                }
+        
+        start_time = time.time()
+        memory_snapshots.append(take_memory_snapshot())
+        
+        # Create and cleanup session waves
+        for wave in range(session_waves):
+            print(f"Creating session wave {wave + 1}/{session_waves}...")
+            
+            # Create sessions
+            wave_sessions = create_session_wave(wave)
+            active_sessions.extend(wave_sessions)
+            
+            memory_snapshots.append(take_memory_snapshot())
+            
+            # Wait for sessions to be used
+            time.sleep(0.5)
+            
+            # Cleanup older sessions (keep last 2 waves active)
+            if wave >= 2:
+                old_wave = wave - 2
+                sessions_to_cleanup = [s for s in active_sessions if s.get('wave') == old_wave]
+                cleanup_session_wave(sessions_to_cleanup)
+                active_sessions = [s for s in active_sessions if s.get('wave') != old_wave]
+                
+                memory_snapshots.append(take_memory_snapshot())
+                
+                # Force garbage collection
+                import gc
+                gc.collect()
+                
+                memory_snapshots.append(take_memory_snapshot())
+        
+        # Final cleanup
+        cleanup_session_wave(active_sessions)
+        memory_snapshots.append(take_memory_snapshot())
+        
+        total_time = time.time() - start_time
+        
+        # Analyze results
+        print(f"Session Cleanup Results:")
+        print(f"  Total sessions created: {len(active_sessions) + len(cleaned_sessions)}")
+        print(f"  Sessions cleaned up: {len(cleaned_sessions)}")
+        print(f"  Remaining active sessions: {len(active_sessions)}")
+        print(f"  Total time: {total_time:.2f}s")
+        
+        # Memory analysis
+        if len(memory_snapshots) >= 3:
+            initial_memory = memory_snapshots[0]['rss_mb']
+            peak_memory = max(s['rss_mb'] for s in memory_snapshots)
+            final_memory = memory_snapshots[-1]['rss_mb']
+            
+            print(f"  Initial memory: {initial_memory:.2f} MB")
+            print(f"  Peak memory: {peak_memory:.2f} MB")
+            print(f"  Final memory: {final_memory:.2f} MB")
+            print(f"  Memory recovered: {peak_memory - final_memory:.2f} MB")
+        
+        # Assertions
+        cleanup_rate = len(cleaned_sessions) / (len(active_sessions) + len(cleaned_sessions)) if (len(active_sessions) + len(cleaned_sessions)) > 0 else 0
+        self.assertGreater(cleanup_rate, 0.7, "Session cleanup rate too low")
+        self.assertLess(total_time, 40, f"Session cleanup test too slow: {total_time:.2f}s")
+        
+        # Memory leak check
+        if len(memory_snapshots) >= 3:
+            memory_growth = final_memory - initial_memory
+            acceptable_growth = 30.0  # MB
+            self.assertLess(memory_growth, acceptable_growth, 
+                           f"Excessive memory growth: {memory_growth:.2f} MB")
 
 
 # =============================================================================
@@ -1866,6 +2349,131 @@ class AuthTestManager:
         
         access_token = self.create_test_token(user_data)
         return {'success': True, 'access_token': access_token}
+    
+    # =============================================================================
+    # NEW HELPER METHODS FOR COMPREHENSIVE TESTING
+    # =============================================================================
+    
+    def simulate_sso_init(self, provider):
+        """Simulate SSO initialization."""
+        auth_id = f"sso_auth_{provider}_{int(time.time())}"
+        return {
+            'success': True,
+            'auth_id': auth_id,
+            'redirect_url': f'https://{provider}.com/sso/auth?id={auth_id}'
+        }
+    
+    def simulate_sso_callback(self, provider, auth_id):
+        """Simulate SSO callback."""
+        user_data = {
+            'user_id': f'sso_{provider}_{int(time.time())}',
+            'email': f'sso_user@{provider}-company.com',
+            'sso_provider': provider,
+            'tier': 'enterprise'
+        }
+        access_token = self.create_test_token(user_data)
+        return {'success': True, 'access_token': access_token}
+    
+    def simulate_mobile_signup(self, user_data):
+        """Simulate mobile app signup."""
+        return self.simulate_user_signup(user_data)
+    
+    def simulate_mobile_login(self, email, password):
+        """Simulate mobile app login."""
+        return self.simulate_user_login(email, password, device_type="mobile")
+    
+    def simulate_token_refresh(self, refresh_token):
+        """Simulate token refresh."""
+        try:
+            # Extract user info from refresh token (simulated)
+            if refresh_token.startswith("refresh_"):
+                parts = refresh_token.split("_")
+                if len(parts) >= 2:
+                    user_id = parts[1]
+                    new_access_token = self.create_test_token({'user_id': user_id})
+                    new_refresh_token = f"refresh_{user_id}_{int(time.time())}"
+                    return {
+                        'success': True,
+                        'new_access_token': new_access_token,
+                        'new_refresh_token': new_refresh_token
+                    }
+            
+            return {'success': False, 'error': 'Invalid refresh token'}
+        except Exception as e:
+            return {'success': False, 'error': str(e)}
+    
+    def simulate_mobile_api_call(self, access_token):
+        """Simulate mobile API call."""
+        validation = self.cross_service_token_validation(access_token)
+        return {'success': validation['valid']}
+    
+    def simulate_regional_signup(self, user_data, region):
+        """Simulate regional signup."""
+        result = self.simulate_user_signup(user_data)
+        if result.get('success'):
+            result['region'] = region
+        return result
+    
+    def simulate_regional_login(self, email, password, region):
+        """Simulate regional login."""
+        result = self.simulate_user_login(email, password, region=region)
+        return result
+    
+    def simulate_cross_region_token_validation(self, token, regions):
+        """Simulate cross-region token validation."""
+        validation = self.cross_service_token_validation(token)
+        return {'valid_in_all_regions': validation['valid']}
+    
+    def simulate_developer_signup(self, user_data):
+        """Simulate developer account signup."""
+        result = self.simulate_user_signup(user_data)
+        if result.get('success'):
+            result['account_type'] = 'developer'
+        return result
+    
+    def simulate_api_key_generation(self, access_token):
+        """Simulate API key generation."""
+        validation = self.cross_service_token_validation(access_token)
+        if not validation['valid']:
+            return None
+        
+        api_key = f"netra_api_{validation['user_id']}_{int(time.time())}"
+        return api_key
+    
+    def simulate_api_key_validation(self, api_key):
+        """Simulate API key validation."""
+        # Simulate validation logic
+        if api_key and api_key.startswith("netra_api_"):
+            return {'valid': True}
+        return {'valid': False}
+    
+    def simulate_api_key_rotation(self, access_token, old_api_key):
+        """Simulate API key rotation."""
+        validation = self.cross_service_token_validation(access_token)
+        if not validation['valid']:
+            return {'success': False, 'error': 'Invalid access token'}
+        
+        new_api_key = f"netra_api_{validation['user_id']}_{int(time.time())}_rotated"
+        return {'success': True, 'new_api_key': new_api_key}
+    
+    def simulate_session_cleanup(self, session_id):
+        """Simulate session cleanup."""
+        try:
+            # Remove from active sessions
+            if session_id in self.active_sessions:
+                del self.active_sessions[session_id]
+                return {'success': True}
+            return {'success': True, 'already_cleaned': True}
+        except Exception as e:
+            return {'success': False, 'error': str(e)}
+    
+    def simulate_token_revocation(self, access_token):
+        """Simulate token revocation."""
+        try:
+            # In real implementation, this would blacklist the token
+            return {'success': True, 'revoked': True}
+        except Exception as e:
+            return {'success': False, 'error': str(e)}
 
 
 def run_comprehensive_bulletproof_tests():

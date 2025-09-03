@@ -2804,19 +2804,22 @@ class DockerInfrastructurePerformanceTests(unittest.TestCase):
                              f"Concurrent throughput {operations_per_sec:.2f} ops/sec too low")
     
     def test_io_performance_with_volume_mounts(self):
-        """Test I/O performance with volume mounts and tmpfs optimization."""
+        """Test I/O performance with volume mounts.
+        
+        WARNING: tmpfs removed - causes system crashes from RAM exhaustion.
+        """
         test_id = f"{self.test_project_prefix}_io_{int(time.time())}"
         
         # Test different I/O scenarios
+        # tmpfs removed - causes system crashes from RAM exhaustion
         io_scenarios = [
             ('regular', None, None),
-            ('volume', f"{test_id}_vol", None),
-            ('tmpfs', None, '/tmp:size=100m')
+            ('volume', f"{test_id}_vol", None)
         ]
         
         io_results = {}
         
-        for scenario_name, volume_name, tmpfs_mount in io_scenarios:
+        for scenario_name, volume_name, _ in io_scenarios:  # Third param was for tmpfs (removed)
             container_name = f"{test_id}_{scenario_name}"
             
             # Create volume if needed
@@ -2833,8 +2836,7 @@ class DockerInfrastructurePerformanceTests(unittest.TestCase):
             
             if volume_name:
                 create_cmd.extend(['-v', f'{volume_name}:/data'])
-            elif tmpfs_mount:
-                create_cmd.extend(['--tmpfs', tmpfs_mount])
+            # tmpfs mount removed - causes system crashes
             
             create_cmd.extend([
                 'alpine:latest',
@@ -2897,15 +2899,7 @@ class DockerInfrastructurePerformanceTests(unittest.TestCase):
                 read_time = results['read_duration']
                 self.assertLess(read_time, 10, f"{scenario} read took {read_time:.2f}s > 10s")
         
-        # Compare tmpfs vs regular I/O (if both available)
-        if 'tmpfs' in io_results and 'regular' in io_results:
-            tmpfs_write = io_results['tmpfs']['write_duration']
-            regular_write = io_results['regular']['write_duration']
-            
-            if io_results['tmpfs']['write_success'] and io_results['regular']['write_success']:
-                # tmpfs should be faster or similar to regular filesystem
-                self.assertLessEqual(tmpfs_write, regular_write + 2, 
-                                   f"tmpfs write not optimized: {tmpfs_write:.2f}s vs {regular_write:.2f}s")
+        # tmpfs comparison removed - tmpfs causes system crashes from RAM exhaustion
     
     def test_alpine_optimization_performance_gains(self):
         """Test Alpine container optimization provides performance gains."""

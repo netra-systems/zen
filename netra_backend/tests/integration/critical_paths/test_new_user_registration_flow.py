@@ -1,7 +1,5 @@
-from shared.isolated_environment import get_env
 """New User Registration Flow Integration Tests (L3)
 
-env = get_env()
 Tests complete new user registration journey from initial signup to first login.
 Validates user creation, email verification, initial permissions, and onboarding.
 
@@ -29,7 +27,10 @@ import pytest
 from fastapi.testclient import TestClient
 from httpx import ASGITransport, AsyncClient
 
+from shared.isolated_environment import get_env
+
 # Set test environment before imports
+env = get_env()
 env.set("ENVIRONMENT", "testing", "test")
 env.set("TESTING", "true", "test")
 env.set("SKIP_STARTUP_CHECKS", "true", "test")

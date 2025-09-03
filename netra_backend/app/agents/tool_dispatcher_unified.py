@@ -113,7 +113,8 @@ class UnifiedToolDispatcher:
         tools: List[BaseTool] = None,
         websocket_emitter: Optional[WebSocketEventEmitter] = None,
         websocket_bridge: Optional['AgentWebSocketBridge'] = None,  # Legacy support
-        permission_service = None
+        permission_service = None,
+        registry: Optional['UnifiedToolRegistry'] = None  # Optional registry to reuse
     ):
         """Initialize unified tool dispatcher.
         
@@ -143,7 +144,7 @@ class UnifiedToolDispatcher:
         self._is_active = True
         
         # Initialize core components
-        self._init_components(websocket_emitter, websocket_bridge, permission_service)
+        self._init_components(websocket_emitter, websocket_bridge, permission_service, registry)
         self._register_initial_tools(tools)
         
         # Metrics tracking
@@ -172,11 +173,18 @@ class UnifiedToolDispatcher:
         self,
         websocket_emitter: Optional[WebSocketEventEmitter],
         websocket_bridge: Optional['AgentWebSocketBridge'],
-        permission_service
+        permission_service,
+        registry: Optional['UnifiedToolRegistry'] = None
     ) -> None:
         """Initialize dispatcher components."""
         # Core components with clean separation of concerns
-        self.registry = UnifiedToolRegistry(f"registry_{self.dispatcher_id}")
+        # CRITICAL FIX: Reuse existing registry to prevent duplicates
+        if registry is not None:
+            self.registry = registry
+            logger.info(f"🔄 Reusing existing registry {registry.registry_id} to prevent duplicates")
+        else:
+            self.registry = UnifiedToolRegistry(f"registry_{self.dispatcher_id}")
+            logger.info(f"🆕 Created new registry registry_{self.dispatcher_id}")
         self.validator = ToolValidator()
         
         # Permission layer
@@ -221,8 +229,17 @@ class UnifiedToolDispatcher:
     
     def _register_initial_tools(self, tools: List[BaseTool]) -> None:
         """Register initial tools if provided."""
+        logger.info(f"🔧 UnifiedToolDispatcher._register_initial_tools called with {len(tools) if tools else 0} tools")
         if tools:
-            self.registry.register_tools(tools)
+            logger.info(f"🔧 Registering {len(tools)} tools in registry {self.registry.registry_id}")
+            registered_count = self.registry.register_tools(tools)
+            logger.info(f"✅ Successfully registered {registered_count}/{len(tools)} tools")
+            
+            # Log current state of registry
+            current_tools = self.registry.list_tools()
+            logger.info(f"📦 Registry now contains {len(current_tools)} tools: {current_tools[:5]}...")
+        else:
+            logger.warning("⚠️ No tools provided to _register_initial_tools")
     
     def _init_metrics(self) -> None:
         """Initialize metrics tracking."""
@@ -241,7 +258,9 @@ class UnifiedToolDispatcher:
     @property
     def tools(self) -> Dict[str, Any]:
         """Expose tools registry for compatibility."""
-        return self.registry.tools
+        tools_dict = self.registry.tools
+        logger.debug(f"🔍 UnifiedToolDispatcher.tools property called - returning {len(tools_dict)} tools from registry {self.registry.registry_id}")
+        return tools_dict
     
     @property
     def has_websocket_support(self) -> bool:
@@ -453,6 +472,34 @@ class UnifiedToolDispatcher:
     def get_websocket_bridge(self) -> Optional['AgentWebSocketBridge']:
         """Get current WebSocket bridge from executor."""
         return getattr(self, 'websocket_bridge', None)
+    
+    def set_websocket_manager(self, websocket_manager: Optional['WebSocketManager']) -> None:
+        """Set WebSocket manager for compatibility with legacy AgentRegistry integration.
+        
+        This method provides compatibility with the AgentRegistry.set_websocket_manager()
+        integration pattern. It converts the WebSocketManager to an AgentWebSocketBridge
+        and delegates to set_websocket_bridge().
+        
+        Args:
+            websocket_manager: WebSocket manager instance or None to clear
+        """
+        if websocket_manager is None:
+            self.set_websocket_bridge(None)
+            logger.info(f"✅ Cleared WebSocket manager for {self._get_log_prefix()}")
+        else:
+            try:
+                # Convert WebSocketManager to AgentWebSocketBridge
+                from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
+                # Create a bridge that wraps the manager
+                bridge = AgentWebSocketBridge()  # Use default initialization
+                self.set_websocket_bridge(bridge)
+                logger.info(f"✅ Set WebSocket manager via bridge conversion for {self._get_log_prefix()}")
+            except ImportError as e:
+                logger.error(f"Failed to import AgentWebSocketBridge for WebSocket manager conversion: {e}")
+                self.set_websocket_bridge(None)
+            except Exception as e:
+                logger.error(f"Failed to convert WebSocket manager to bridge for {self._get_log_prefix()}: {e}")
+                self.set_websocket_bridge(None)
     
     def diagnose_websocket_wiring(self) -> Dict[str, Any]:
         """Diagnose WebSocket wiring for debugging silent failures."""
@@ -797,7 +844,8 @@ class UnifiedToolDispatcherFactory:
     def create_legacy_global(
         tools: List[BaseTool] = None,
         websocket_bridge: Optional['AgentWebSocketBridge'] = None,
-        permission_service = None
+        permission_service = None,
+        registry: Optional['UnifiedToolRegistry'] = None
     ) -> UnifiedToolDispatcher:
         """Create legacy global dispatcher (DEPRECATED).
         
@@ -808,6 +856,7 @@ class UnifiedToolDispatcherFactory:
             tools: Optional list of tools to register initially
             websocket_bridge: Optional AgentWebSocketBridge for events
             permission_service: Optional permission service for security
+            registry: Optional existing registry to reuse (prevents duplicate registrations)
             
         Returns:
             UnifiedToolDispatcher: Global dispatcher (DEPRECATED)
@@ -816,7 +865,8 @@ class UnifiedToolDispatcherFactory:
             user_context=None,  # This triggers the global state warning
             tools=tools,
             websocket_bridge=websocket_bridge,
-            permission_service=permission_service
+            permission_service=permission_service,
+            registry=registry  # Pass existing registry to prevent duplicates
         )
         
         logger.warning(f"⚠️ Created LEGACY GLOBAL UnifiedToolDispatcher {dispatcher.dispatcher_id}")
@@ -852,11 +902,16 @@ async def request_scoped_tool_dispatcher_context(
 def create_legacy_tool_dispatcher(
     tools: List[BaseTool] = None,
     websocket_bridge: Optional['AgentWebSocketBridge'] = None,
-    permission_service = None
+    permission_service = None,
+    registry: Optional['UnifiedToolRegistry'] = None
 ) -> UnifiedToolDispatcher:
-    """Convenience function to create legacy global dispatcher (DEPRECATED)."""
+    """Convenience function to create legacy global dispatcher (DEPRECATED).
+    
+    Args:
+        registry: Optional existing registry to reuse (prevents duplicate registrations)
+    """
     return UnifiedToolDispatcherFactory.create_legacy_global(
-        tools, websocket_bridge, permission_service
+        tools, websocket_bridge, permission_service, registry
     )
 
 

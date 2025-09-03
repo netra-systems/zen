@@ -152,6 +152,7 @@ class ActionsAgentGoldenComplianceValidator:
             'send_status_update', 'get_health_status'
         ]
         
+        for method in required_methods:
             if hasattr(agent_instance, method):
                 method_obj = getattr(agent_instance, method)
                 if callable(method_obj):

@@ -22,8 +22,8 @@ class TestColdStartFixesValidation:
     async def test_jwt_secret_compatibility(self):
         """Test that JWT secret accepts both JWT_SECRET and JWT_SECRET_KEY."""
         # Set different JWT secrets to test backward compatibility
-        get_env().set("JWT_SECRET",  )"test_secret_123"
-        get_env().set("JWT_SECRET_KEY",  )"test_secret_123"
+        get_env().set("JWT_SECRET", "test_secret_123")
+        get_env().set("JWT_SECRET_KEY", "test_secret_123")
         
         # Import after setting env vars
         from auth_service.auth_core.secret_loader import AuthSecretLoader
@@ -34,15 +34,15 @@ class TestColdStartFixesValidation:
         assert jwt_secret == "test_secret_123", "JWT secret should be loaded"
         
         # Test with only JWT_SECRET_KEY
-        del get_env().get("JWT_SECRET")
+        get_env().delete("JWT_SECRET")
         secret_loader2 = AuthSecretLoader()
         jwt_secret2 = secret_loader2.get_jwt_secret()
         
         assert jwt_secret2 == "test_secret_123", "Should work with JWT_SECRET_KEY alone"
         
         # Test with only JWT_SECRET
-        del get_env().get("JWT_SECRET_KEY")
-        get_env().set("JWT_SECRET",  )"test_secret_456"
+        get_env().delete("JWT_SECRET_KEY")
+        get_env().set("JWT_SECRET", "test_secret_456")
         secret_loader3 = AuthSecretLoader()
         jwt_secret3 = secret_loader3.get_jwt_secret()
         
@@ -52,7 +52,7 @@ class TestColdStartFixesValidation:
     @pytest.mark.e2e
     async def test_jwt_issuer_claim_present(self):
         """Test that JWT tokens include the required 'iss' claim."""
-        get_env().set("JWT_SECRET_KEY",  )"test_secret"
+        get_env().set("JWT_SECRET_KEY", "test_secret")
         
         from auth_service.auth_core.core.jwt_handler import JWTHandler
         
@@ -75,9 +75,9 @@ class TestColdStartFixesValidation:
     async def test_clickhouse_port_configuration(self):
         """Test that ClickHouse uses correct port for HTTP connections."""
         # Set environment for local development
-        get_env().set("ENVIRONMENT",  )"local"
-        get_env().set("CLICKHOUSE_HTTP_PORT",  )"8123"
-        get_env().set("CLICKHOUSE_HTTPS_PORT",  )"8443"
+        get_env().set("ENVIRONMENT", "local")
+        get_env().set("CLICKHOUSE_HTTP_PORT", "8123")
+        get_env().set("CLICKHOUSE_HTTPS_PORT", "8443")
         
         from netra_backend.app.schemas.config import ClickHouseHTTPConfig
         
@@ -89,8 +89,8 @@ class TestColdStartFixesValidation:
     async def test_redis_local_fallback(self):
         """Test that Redis falls back to local when remote fails."""
         # Set remote Redis that will fail
-        get_env().set("REDIS_URL",  )"redis://nonexistent.example.com:6379"
-        get_env().set("REDIS_MODE",  )"auto"  # Should try remote then fallback
+        get_env().set("REDIS_URL", "redis://nonexistent.example.com:6379")
+        get_env().set("REDIS_MODE", "auto")  # Should try remote then fallback
         
         from netra_backend.app.redis_manager import RedisManager
         
@@ -169,7 +169,7 @@ class TestColdStartFixesValidation:
     async def test_environment_variable_compatibility(self):
         """Test that environment variables support both old and new names."""
         # Test ClickHouse password configuration
-        get_env().set("CLICKHOUSE_PASSWORD",  )"password1"
+        get_env().set("CLICKHOUSE_PASSWORD", "password1")
         
         from netra_backend.app.core.configuration.database import get_clickhouse_password
         

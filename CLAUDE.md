@@ -38,9 +38,15 @@ CRUCIAL: ULTRA THINK DEEPLY.
 
 ### Related Architecture Documents:
 - **[User Context Architecture](./USER_CONTEXT_ARCHITECTURE.md)** - Factory patterns and execution isolation (START HERE)
+- **[Agent Architecture Disambiguation Guide](./docs/AGENT_ARCHITECTURE_DISAMBIGUATION_GUIDE.md)** - Clarifies complex agent workflow architecture and relationships
 - [Tool Dispatcher Migration Guide](./TOOL_DISPATCHER_MIGRATION_GUIDE.md) - Migration from singleton to request-scoped
 - [WebSocket Modernization Report](./WEBSOCKET_MODERNIZATION_REPORT.md) - WebSocket isolation implementation
 - [Documentation Hub](./docs/index.md) - Central documentation index
+
+Expect everything to fail. Add conditional error logging by default whenever possible.
+Success is "quiet" and summarized. ANTHING that's not what's expected must be super obvious in logs.
+Make all errors loud.
+Protect against silent errors. Avoid "fallbacks" unless expressly part of named design and class.
 
 -----
 
@@ -166,6 +172,7 @@ Before coding, conduct a rigorous analysis.
   * **Isolation (The "Firewall" Technique):** **CRITICAL:** When delegating, provide agents ONLY with the necessary interfaces of dependencies, not their full implementation context. This enforces contracts and prevents context bleed.
   * **Testing Focus:** Focuse on as real tests as possible by default. Most tests must assume inter-service nature by default. **Real Everything (LLM, Services) E2E \> E2E \> Integration \> Unit.**
   CRITICAL: Mocks = Abomination
+  * **Test Architecture:** See [`tests/TEST_ARCHITECTURE_VISUAL_OVERVIEW.md`](tests/TEST_ARCHITECTURE_VISUAL_OVERVIEW.md) for complete test infrastructure guide
   * **Integration and Reporting:** You are responsible for integrating all artifacts and reporting on overall success.
 
 ### 3.4. Multi-Environment Validation
@@ -193,7 +200,9 @@ At every opportunity spawn new subagent with dedicated focus mission and context
 
 **CRITICAL: For any refactoring involving inheritance, multiple classes, or SSOT consolidation:**
 
-**See Also:** [`docs/GOLDEN_AGENT_INDEX.md`](docs/GOLDEN_AGENT_INDEX.md) for comprehensive agent implementation patterns and migration guidance.
+**See Also:** 
+- [`docs/GOLDEN_AGENT_INDEX.md`](docs/GOLDEN_AGENT_INDEX.md) for comprehensive agent implementation patterns and migration guidance.
+- [`docs/AGENT_ARCHITECTURE_DISAMBIGUATION_GUIDE.md`](docs/AGENT_ARCHITECTURE_DISAMBIGUATION_GUIDE.md) for clarification on agent components and relationships.
 
 1.  **MRO (Method Resolution Order) Analysis:** Generate a comprehensive MRO report BEFORE refactoring:
     - Document current inheritance hierarchy using `inspect.getmro()` or equivalent
@@ -340,6 +349,7 @@ The following events MUST be sent during agent execution to enable meaningful AI
 
 **For Complete Agent Implementation Patterns:**
 - See [`docs/GOLDEN_AGENT_INDEX.md`](docs/GOLDEN_AGENT_INDEX.md) - The definitive guide to agent implementation
+- See [`docs/AGENT_ARCHITECTURE_DISAMBIGUATION_GUIDE.md`](docs/AGENT_ARCHITECTURE_DISAMBIGUATION_GUIDE.md) - Comprehensive clarification of agent architecture
 
 -----
 
@@ -402,7 +412,7 @@ python scripts/docker_manual.py status --alpine
 ```
 
 **Alpine Compose Files:**
-- `docker-compose.alpine-test.yml` - Test environment with tmpfs storage
+- `docker-compose.alpine-test.yml` - Test environment with named volumes (stable storage)
 - `docker-compose.alpine.yml` - Development environment
 - Alpine Dockerfiles: `docker/backend.alpine.Dockerfile`, `docker/auth.alpine.Dockerfile`, `docker/frontend.alpine.Dockerfile`
 
@@ -411,7 +421,10 @@ python scripts/docker_manual.py status --alpine
 - **✓ CI/CD pipelines** (faster builds, lower resource usage)
 - **✓ Development** (when memory is constrained)
 
-Docker tmpfs storage = bad crashes
+**⚠️ CRITICAL WARNING: tmpfs Storage Removed**
+Docker tmpfs storage has been completely removed from the codebase as it causes system crashes due to RAM exhaustion. 
+ALL Docker configurations now use named volumes for persistent, stable storage that doesn't consume system RAM.
+Never re-introduce tmpfs mounts - they will crash the system.
 
 **Performance Optimizations in Alpine:**
 - **Minimal base images** (python:3.11-alpine3.19)
@@ -437,6 +450,8 @@ python scripts/refresh_dev_services.py logs --services backend -f
 
 IMPORTANT: Use real services, real llm, docker compose etc. whenever possible for testing.
 MOCKS are FORBIDDEN in dev, staging or production.
+
+**See [`tests/TEST_ARCHITECTURE_VISUAL_OVERVIEW.md`](tests/TEST_ARCHITECTURE_VISUAL_OVERVIEW.md) for complete visual guide to test infrastructure, layers, and execution flows.**
 
 **The test runner automatically starts Docker when needed:**
 

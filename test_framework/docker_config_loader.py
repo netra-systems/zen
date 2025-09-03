@@ -78,9 +78,13 @@ class ResourceLimitsConfig:
 
 @dataclass(frozen=True)
 class VolumeConfig:
-    """Docker volume configuration."""
-    use_tmpfs: Optional[bool] = None
-    tmpfs_size: Optional[Dict[str, str]] = None
+    """Docker volume configuration.
+    
+    WARNING: tmpfs volumes removed - they cause system crashes due to RAM exhaustion.
+    Always use named Docker volumes for persistent storage.
+    """
+    # tmpfs removed - causes crashes from RAM exhaustion
+    pass
 
 
 @dataclass(frozen=True)

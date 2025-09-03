@@ -228,7 +228,7 @@ def main():
     print(f"  export E2E_OAUTH_SIMULATION_KEY='{bypass_key}'")
     print(f"  export ENVIRONMENT=staging")
     print(f"  export STAGING_AUTH_URL=https://api.staging.netrasystems.ai")
-    print("\nOr add to your .env.staging file:")
+    print("\nOr add to your .env file:")
     print(f"  E2E_OAUTH_SIMULATION_KEY={bypass_key}")
     print("\nTest the OAUTH SIMULATION:")
     print(f"  python tests/e2e/staging_auth_bypass.py")

@@ -1,20 +1,17 @@
 "use client";
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import { useUnifiedChatStore } from '@/store/unified-chat';
 import { useAuthStore } from '@/store/authStore';
 import { useAuthState } from '@/hooks/useAuthState';
 import { useWebSocket } from '@/hooks/useWebSocket';
+import { useThreadSwitching } from '@/hooks/useThreadSwitching';
 import { AuthGate } from '@/components/auth/AuthGate';
 import { 
   useChatSidebarState, 
   useThreadLoader, 
   useThreadFiltering 
 } from './ChatSidebarHooks';
-import { 
-  createNewChatHandler, 
-  createThreadClickHandler 
-} from './ChatSidebarHandlers';
 import {
   NewChatButton,
   AdminControls,
@@ -45,12 +42,30 @@ export const ChatSidebar: React.FC = () => {
 
 
 
-  // Create event handlers
-  const handleThreadClick = createThreadClickHandler(
-    activeThreadId, 
-    isProcessing, 
-    { sendMessage }
-  );
+  // Use the proper thread switching hook
+  const { switchToThread, state: threadSwitchState } = useThreadSwitching();
+
+  // Create thread click handler using the hook
+  const handleThreadClick = useCallback(async (threadId: string) => {
+    // Prevent switching if already switching, processing, or same thread
+    if (threadId === activeThreadId || isProcessing || threadSwitchState.isLoading) {
+      return;
+    }
+    
+    // Send WebSocket message for thread switch notification
+    sendMessage({
+      type: 'switch_thread',
+      payload: { thread_id: threadId }
+    });
+    
+    // Use the hook to perform the actual thread switch
+    // The hook handles all state management, loading, and cleanup
+    await switchToThread(threadId, {
+      clearMessages: true,
+      showLoadingIndicator: true,
+      updateUrl: true
+    });
+  }, [activeThreadId, isProcessing, threadSwitchState.isLoading, sendMessage, switchToThread]);
   
   const { threads, isLoadingThreads, loadError, loadThreads } = useThreadLoader(
     showAllThreads,
@@ -59,10 +74,37 @@ export const ChatSidebar: React.FC = () => {
     handleThreadClick
   );
   
-  const handleNewChat = createNewChatHandler(
-    setIsCreatingThread,
-    loadThreads
-  );
+  // Handle new chat creation with proper thread switching
+  const handleNewChat = useCallback(async () => {
+    // Prevent double-clicks and concurrent creation
+    if (isCreatingThread || isProcessing || threadSwitchState.isLoading) {
+      return;
+    }
+    
+    setIsCreatingThread(true);
+    try {
+      // Create the new thread
+      const { ThreadService } = await import('@/services/threadService');
+      const newThread = await ThreadService.createThread();
+      
+      // Use the thread switching hook to properly navigate to the new thread
+      // This ensures URL is updated and all state is properly managed
+      await switchToThread(newThread.id, {
+        clearMessages: true,
+        showLoadingIndicator: false, // We're already showing creation state
+        updateUrl: true // Critical: ensures URL is updated
+      });
+      
+      // Reload the thread list to show the new thread
+      await loadThreads();
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      const errorObj = error instanceof Error ? error : new Error(errorMessage);
+      console.error('Failed to create thread:', errorObj);
+    } finally {
+      setIsCreatingThread(false);
+    }
+  }, [isCreatingThread, isProcessing, threadSwitchState.isLoading, switchToThread, loadThreads]);
   
   const { sortedThreads, paginatedThreads, totalPages } = useThreadFiltering(
     threads,

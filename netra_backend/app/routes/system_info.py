@@ -155,8 +155,6 @@ async def validate_configuration(
         # Check configuration sources
         if os.path.exists(".env"):
             config_sources[".env"] = "Found"
-        if os.path.exists(".env.staging"):
-            config_sources[".env.staging"] = "Found"
         if get_env().get("ENVIRONMENT"):
             config_sources["ENVIRONMENT"] = get_env().get("ENVIRONMENT")
         

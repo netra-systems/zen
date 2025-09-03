@@ -40,6 +40,7 @@ class TestSessionIsolation:
             mock_session = Mock(spec=AsyncSession)
             mock_session.__aenter__ = AsyncMock(return_value=mock_session)
             mock_session.__aexit__ = AsyncMock()
+            mock_session.info = {}  # Session needs info dict for request-scoped tracking
             sessions_created.append(mock_session)
             yield mock_session
         
@@ -60,6 +61,7 @@ class TestSessionIsolation:
     async def test_session_not_globally_stored(self):
         """Test that sessions are never stored globally."""
         mock_session = Mock(spec=AsyncSession)
+        mock_session.info = {}  # Session needs info dict
         
         # Test validation of non-global session
         validate_session_is_request_scoped(mock_session, "test_context")
@@ -99,6 +101,7 @@ class TestSessionIsolation:
         mock_request.app.state.agent_supervisor.tool_dispatcher = Mock()
         
         mock_session = Mock(spec=AsyncSession)
+        mock_session.info = {}  # Session needs info dict
         mock_llm_manager = Mock()
         
         context = RequestScopedContext(
@@ -156,6 +159,7 @@ class TestSessionIsolation:
             mock_session = Mock(spec=AsyncSession)
             mock_session.__aenter__ = AsyncMock(return_value=mock_session)
             mock_session.__aexit__ = AsyncMock()
+            mock_session.info = {}  # Session needs info dict for request-scoped tracking
             sessions_created.append(mock_session)
             yield mock_session
         

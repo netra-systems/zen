@@ -326,8 +326,27 @@ async def isolated_database_with_schema(
     Yields:
         DatabaseTestResource with loaded schema
     """
-    # Load test schema if available
-    schema_path = "/Users/anthony/Documents/GitHub/netra-apex/scripts/test_init_db.sql"
+    # Load test schema if available - dynamically find the file
+    from pathlib import Path
+    
+    # Try to find the schema file relative to current directory
+    schema_path = None
+    current_path = Path.cwd()
+    
+    # Check common locations
+    possible_paths = [
+        current_path / "scripts" / "test_init_db.sql",
+        current_path.parent / "scripts" / "test_init_db.sql",
+        current_path.parent.parent / "scripts" / "test_init_db.sql",
+    ]
+    
+    for path in possible_paths:
+        if path.exists():
+            schema_path = str(path)
+            break
+    
+    if not schema_path:
+        schema_path = "scripts/test_init_db.sql"  # Fallback to relative path
     
     try:
         with open(schema_path, 'r') as f:
