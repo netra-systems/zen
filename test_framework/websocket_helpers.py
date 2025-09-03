@@ -503,6 +503,128 @@ async def throughput_client(high_volume_server):
         pass  # Ignore cleanup errors
 
 # =============================================================================
+# TEST CONNECTION POOL UTILITIES
+# =============================================================================
+
+async def create_test_connection_pool():
+    """
+    Create a WebSocket connection pool suitable for testing.
+    
+    This creates a real WebSocketConnectionPool instance that can be used
+    in tests to verify WebSocket functionality. It follows the real interface
+    but is configured for test environments.
+    
+    Returns:
+        WebSocketConnectionPool: A connection pool for testing
+        
+    Raises:
+        ImportError: If WebSocketConnectionPool cannot be imported
+    """
+    try:
+        # Import the real WebSocketConnectionPool for authentic testing
+        from netra_backend.app.services.websocket_connection_pool import WebSocketConnectionPool
+        
+        # Create and return a real connection pool instance
+        # This ensures tests run against the actual implementation
+        connection_pool = WebSocketConnectionPool()
+        
+        # The WebSocketConnectionPool is ready to use immediately after instantiation
+        return connection_pool
+        
+    except ImportError:
+        # Fallback: Use the WebSocketConnectionPool from websocket_bridge_factory
+        # if the main one isn't available
+        try:
+            from netra_backend.app.services.websocket_bridge_factory import WebSocketConnectionPool
+            
+            connection_pool = WebSocketConnectionPool()
+            
+            # Start health monitoring if available
+            if hasattr(connection_pool, 'start_health_monitoring'):
+                await connection_pool.start_health_monitoring()
+                
+            return connection_pool
+            
+        except ImportError as e:
+            raise ImportError(f"Cannot import WebSocketConnectionPool for testing: {e}")
+
+class TestWebSocketConnectionPool:
+    """
+    Minimal test-focused WebSocket connection pool implementation.
+    
+    Only used as last resort if real implementations aren't available.
+    Provides the minimal interface needed for WebSocketBridgeFactory testing.
+    """
+    
+    def __init__(self):
+        self._connections = {}
+        self._connection_lock = asyncio.Lock()
+        self._health_monitor_task = None
+        
+    async def get_user_connection(self, user_id: str, connection_id: str):
+        """Get or create user-specific WebSocket connection for testing."""
+        from netra_backend.app.services.websocket_bridge_factory import UserWebSocketConnection
+        
+        connection_key = f"{user_id}:{connection_id}"
+        
+        async with self._connection_lock:
+            if connection_key not in self._connections:
+                # Create test connection
+                self._connections[connection_key] = UserWebSocketConnection(
+                    user_id=user_id,
+                    connection_id=connection_id,
+                    websocket=MockWebSocket(user_id)  # Use our test WebSocket
+                )
+            return self._connections[connection_key]
+    
+    async def add_user_connection(self, user_id: str, connection_id: str, websocket):
+        """Add new user connection to test pool."""
+        from netra_backend.app.services.websocket_bridge_factory import UserWebSocketConnection
+        
+        connection_key = f"{user_id}:{connection_id}"
+        
+        async with self._connection_lock:
+            if connection_key in self._connections:
+                # Close existing connection
+                old_connection = self._connections[connection_key]
+                if hasattr(old_connection, 'close'):
+                    await old_connection.close()
+                    
+            self._connections[connection_key] = UserWebSocketConnection(
+                user_id=user_id,
+                connection_id=connection_id,
+                websocket=websocket
+            )
+    
+    async def remove_user_connection(self, user_id: str, connection_id: str):
+        """Remove user connection from test pool."""
+        connection_key = f"{user_id}:{connection_id}"
+        
+        async with self._connection_lock:
+            if connection_key in self._connections:
+                connection = self._connections.pop(connection_key)
+                if hasattr(connection, 'close'):
+                    await connection.close()
+    
+    async def start_health_monitoring(self):
+        """Start health monitoring for test pool."""
+        pass  # No-op for tests
+    
+    async def stop_health_monitoring(self):
+        """Stop health monitoring for test pool."""
+        if self._health_monitor_task:
+            self._health_monitor_task.cancel()
+            self._health_monitor_task = None
+    
+    async def cleanup(self):
+        """Clean up all test connections."""
+        async with self._connection_lock:
+            for connection in self._connections.values():
+                if hasattr(connection, 'close'):
+                    await connection.close()
+            self._connections.clear()
+
+# =============================================================================
 # VALIDATION UTILITIES
 # =============================================================================
 

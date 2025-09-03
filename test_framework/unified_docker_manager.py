@@ -1085,6 +1085,27 @@ class UnifiedDockerManager:
         
         self.docker_rate_limiter.execute_docker_command(cmd, timeout=60)
     
+    def _map_service_name(self, service: str) -> str:
+        """Map service name based on the compose file being used."""
+        compose_file = self._get_compose_file()
+        
+        # If using test compose file, add "test-" prefix
+        if "docker-compose.test.yml" in compose_file:
+            # Standard service mappings for test environment
+            service_map = {
+                "postgres": "test-postgres",
+                "redis": "test-redis",
+                "clickhouse": "test-clickhouse",
+                "backend": "test-backend",
+                "auth": "test-auth",
+                "frontend": "test-frontend",
+                "rabbitmq": "test-rabbitmq"
+            }
+            return service_map.get(service, service)
+        
+        # For other compose files, use service name as-is
+        return service
+    
     def _get_compose_file(self) -> str:
         """Get appropriate docker-compose file based on Alpine setting and environment type"""
         if self.use_alpine:
@@ -2510,8 +2531,9 @@ class UnifiedDockerManager:
         """
         try:
             # Get container status using docker-compose ps
+            mapped_service = self._map_service_name(service)
             cmd = ["docker-compose", "-f", self._get_compose_file(), 
-                   "-p", self._get_project_name(), "ps", "--format", "json", service]
+                   "-p", self._get_project_name(), "ps", "--format", "json", mapped_service]
             
             result = subprocess.run(cmd, capture_output=True, text=True, timeout=10)
             
@@ -2624,8 +2646,11 @@ class UnifiedDockerManager:
                             return False
                         logger.error(f"Build failed: {result.stderr}")
             
+            # Map service names for the compose file
+            mapped_services = [self._map_service_name(s) for s in services_to_start]
+            
             cmd = ["docker-compose", "-f", compose_file,
-                   "-p", self._get_project_name(), "up", "-d"] + services_to_start
+                   "-p", self._get_project_name(), "up", "-d"] + mapped_services
             
             try:
                 result = subprocess.run(cmd, capture_output=True, text=True, timeout=120, env=env)
