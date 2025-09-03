@@ -55,11 +55,7 @@ try:
         create_standard_message,
         MessageType
     )
-    from netra_backend.app.utils.run_id_generator import (
-        generate_run_id,
-        extract_thread_id_from_run_id,
-        validate_run_id_format
-    )
+    from netra_backend.app.core.unified_id_manager import UnifiedIDManager
     from test_framework.test_context import (
         TestContext,
         TestUserContext,
@@ -253,7 +249,7 @@ class WebSocketTestHarness:
         try:
             context = await self.create_test_context(user_id)
             thread_id = context.user_context.thread_id
-            run_id = generate_run_id(thread_id, "comprehensive_test")
+            run_id = UnifiedIDManager.generate_run_id(thread_id, "comprehensive_test")
             
             # Send agent events in sequence
             success = await self.send_agent_event_with_validation(
@@ -556,7 +552,7 @@ class TestWebSocketEventTypes:
         user_id = "agent_started_test_user"
         context = await self.test_harness.create_test_context(user_id)
         thread_id = context.user_context.thread_id
-        run_id = generate_run_id(thread_id, "agent_started_test")
+        run_id = UnifiedIDManager.generate_run_id(thread_id, "agent_started_test")
         
         # Test agent_started event with required fields
         success = await self.test_harness.send_agent_event_with_validation(
@@ -588,7 +584,7 @@ class TestWebSocketEventTypes:
         user_id = "tool_pairing_test_user"
         context = await self.test_harness.create_test_context(user_id)
         thread_id = context.user_context.thread_id
-        run_id = generate_run_id(thread_id, "tool_pairing_test")
+        run_id = UnifiedIDManager.generate_run_id(thread_id, "tool_pairing_test")
         
         tool_name = "validation_tool"
         agent_name = "ToolTestAgent"
@@ -635,7 +631,7 @@ class TestWebSocketEventTypes:
         user_id = "sequence_test_user"
         context = await self.test_harness.create_test_context(user_id)
         thread_id = context.user_context.thread_id
-        run_id = generate_run_id(thread_id, "sequence_test")
+        run_id = UnifiedIDManager.generate_run_id(thread_id, "sequence_test")
         agent_name = "SequenceTestAgent"
         
         # Send all required events in proper sequence

@@ -13,8 +13,7 @@ from unittest.mock import Mock, AsyncMock, MagicMock, patch
 from datetime import datetime, timezone
 
 from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
-from netra_backend.app.utils.run_id_generator import generate_run_id, extract_thread_id_from_run_id
-from netra_backend.app.core.id_manager import IDManager
+from netra_backend.app.core.unified_id_manager import UnifiedIDManager
 from netra_backend.app.websocket_core.manager import WebSocketManager, get_websocket_manager
 
 
@@ -61,7 +60,7 @@ class TestWebSocketThreadRouting:
         
         for run_id, expected_raw in test_cases:
             # Test standard extraction
-            extracted_raw = extract_thread_id_from_run_id(run_id)
+            extracted_raw = UnifiedIDManager.extract_thread_id(run_id)
             assert extracted_raw == expected_raw, f"Failed to extract raw thread_id from {run_id}"
             
             # Test bridge extraction (should add "thread_" prefix)
@@ -69,9 +68,9 @@ class TestWebSocketThreadRouting:
             expected_full = f"thread_{expected_raw}"
             assert extracted_bridge == expected_full, f"Failed to extract full thread_id from {run_id}"
     
-    def test_thread_id_extraction_from_id_manager_format(self):
-        """Test extraction of thread_id from IDManager format."""
-        # Test cases with IDManager format (requires 8 hex chars at end)
+    def test_thread_id_extraction_from_unified_id_manager_format(self):
+        """Test extraction of thread_id from UnifiedIDManager format."""
+        # Test cases with UnifiedIDManager format (requires 8 hex chars at end)
         test_cases = [
             ("run_user_123_abc12345", "user_123"),
             ("run_session_456_def67890", "session_456"),
@@ -81,11 +80,11 @@ class TestWebSocketThreadRouting:
         bridge = AgentWebSocketBridge()
         
         for run_id, expected_raw in test_cases:
-            # Test IDManager extraction
-            extracted_raw = IDManager.extract_thread_id(run_id)
+            # Test UnifiedIDManager extraction
+            extracted_raw = UnifiedIDManager.extract_thread_id(run_id)
             assert extracted_raw == expected_raw, f"Failed to extract raw thread_id from {run_id}"
             
-            # Test bridge extraction with IDManager format
+            # Test bridge extraction with UnifiedIDManager format
             extracted_bridge = bridge._extract_thread_from_standardized_run_id(run_id)
             # Should add "thread_" prefix if not present
             if not expected_raw.startswith("thread_"):
@@ -107,7 +106,7 @@ class TestWebSocketThreadRouting:
         
         for original_thread in thread_ids:
             # Generate run_id
-            run_id = generate_run_id(original_thread, "test_context")
+            run_id = UnifiedIDManager.generate_run_id(original_thread, "test_context")
             
             # Extract thread_id back
             extracted = bridge._extract_thread_from_standardized_run_id(run_id)
@@ -233,7 +232,7 @@ class TestWebSocketThreadRouting:
             assert thread_id_used == expected_thread
     
     def test_both_id_formats_supported(self):
-        """Test that both run_id_generator and IDManager formats are supported."""
+        """Test that both run_id_generator and UnifiedIDManager formats are supported."""
         bridge = AgentWebSocketBridge()
         
         # Test run_id_generator format
@@ -241,7 +240,7 @@ class TestWebSocketThreadRouting:
         extracted_gen = bridge._extract_thread_from_standardized_run_id(run_id_gen)
         assert extracted_gen == "thread_user123"
         
-        # Test IDManager format (requires 8 hex chars at end)
-        run_id_mgr = "run_user456_a1b2c3d4"  # Proper IDManager format
+        # Test UnifiedIDManager format (requires 8 hex chars at end)
+        run_id_mgr = "run_user456_a1b2c3d4"  # Proper UnifiedIDManager format
         extracted_mgr = bridge._extract_thread_from_standardized_run_id(run_id_mgr)
         assert extracted_mgr == "thread_user456"  # Should add thread_ prefix

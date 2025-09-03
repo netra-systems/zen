@@ -29,6 +29,7 @@ from fastapi.websockets import WebSocketState
 
 from netra_backend.app.core.tracing import TracingManager
 from netra_backend.app.logging_config import central_logger
+from netra_backend.app.services.monitoring.gcp_error_reporter import gcp_reportable, set_request_context, clear_request_context
 from netra_backend.app.websocket_core import (
     WebSocketManager,
     MessageRouter,
@@ -126,6 +127,7 @@ HEARTBEAT_TIMEOUT_SECONDS = _timeout_config["heartbeat_timeout_seconds"]
 
 
 @router.websocket("/ws")
+@gcp_reportable(reraise=True)
 async def websocket_endpoint(websocket: WebSocket):
     """
     Main WebSocket endpoint - handles all WebSocket connections.
@@ -272,6 +274,16 @@ async def websocket_endpoint(websocket: WebSocket):
                 user_id = auth_info.user_id
                 authenticated = True
                 
+                # Set GCP error reporting context
+                set_request_context(
+                    user_id=user_id,
+                    http_context={
+                        'method': 'WEBSOCKET',
+                        'url': '/ws',
+                        'userAgent': websocket.headers.get('user-agent', '') if hasattr(websocket, 'headers') else '',
+                    }
+                )
+                
                 connection_start_time = time.time()
                 logger.info(f"WebSocket authenticated for user: {user_id} at {datetime.now(timezone.utc).isoformat()}")
                 
@@ -364,6 +376,9 @@ async def websocket_endpoint(websocket: WebSocket):
             await safe_websocket_close(websocket, code=1011, reason="Internal error")
     
     finally:
+        # Clear GCP error reporting context
+        clear_request_context()
+        
         # Cleanup resources - only if authentication was successful
         if heartbeat:
             await heartbeat.stop()
