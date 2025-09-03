@@ -16,7 +16,6 @@ jest.mock('@/store/unified-chat', () => require('../../__mocks__/store/unified-c
 
 // Import the mocked store
 import { useUnifiedChatStore, resetMockState } from '@/store/unified-chat';
-
 // Mock modules
 jest.mock('@/services/threadLoadingService');
 jest.mock('@/lib/retry-manager', () => ({

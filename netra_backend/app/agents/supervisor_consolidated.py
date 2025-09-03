@@ -99,13 +99,11 @@ class SupervisorAgent(BaseAgent):
         # This registry is used for startup validation and will be replaced per-request
         # in execute() for complete user isolation
         # Note: We create with a temporary tool dispatcher that will NOT be used for actual requests
-        from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
-        # UnifiedToolDispatcher (aliased as ToolDispatcher) expects:
-        # user_context, tools, websocket_emitter, websocket_bridge, permission_service
-        startup_tool_dispatcher = ToolDispatcher(
-            user_context=None,  # Use legacy global mode for startup validation
+        from netra_backend.app.agents.tool_dispatcher import ToolDispatcher, create_legacy_tool_dispatcher
+        # Use legacy tool dispatcher for startup validation (avoids global state warnings) 
+        # create_legacy_tool_dispatcher is the proper startup method without warnings
+        startup_tool_dispatcher = create_legacy_tool_dispatcher(
             tools=None,
-            websocket_emitter=None,
             websocket_bridge=websocket_bridge,
             permission_service=None
         )
@@ -172,54 +170,65 @@ class SupervisorAgent(BaseAgent):
                 logger.info(f"🔍 Has websocket_manager: {hasattr(self.websocket_bridge, 'websocket_manager')}")
                 logger.info(f"🔍 WebSocketManager type: {type(actual_websocket_manager) if actual_websocket_manager else 'None'}")
                 
-                # Create request-scoped tool dispatcher with actual WebSocketManager
-                logger.info(f"🔧 Creating ToolDispatcher with websocket_manager type: {type(actual_websocket_manager) if actual_websocket_manager else 'None'}")
-                logger.info(f"🔧 User tools available: {len(self._get_user_tools(context)) if self._get_user_tools(context) else 0}")
+                # 🚀 NEW: Use UserContext-based tool factory for complete isolation
+                logger.info(f"🔧 Creating UserContext-based tool system for {context.user_id}")
                 
-                # CRITICAL: create_scoped_dispatcher_context returns a function, we need to call it
-                from netra_backend.app.agents.tool_executor_factory import isolated_tool_dispatcher_scope
+                # Get tool classes from app state (configured at startup) or use fallback
+                tool_classes = self._get_tool_classes_from_context(context)
+                websocket_bridge_factory = self._get_websocket_bridge_factory(context)
                 
-                async with isolated_tool_dispatcher_scope(
-                    user_context=context,
-                    tools=self._get_user_tools(context),
-                    websocket_manager=actual_websocket_manager  # Pass actual WebSocketManager, not emitter
-                ) as tool_dispatcher:
-                    logger.info(f"✅ ToolDispatcher created successfully for user {context.user_id}")
+                logger.info(f"🔧 Available tool classes: {len(tool_classes)}")
+                
+                # Create completely isolated tool system for this user
+                from netra_backend.app.agents.user_context_tool_factory import UserContextToolFactory
+                
+                tool_system = await UserContextToolFactory.create_user_tool_system(
+                    context=context,
+                    tool_classes=tool_classes,
+                    websocket_bridge_factory=websocket_bridge_factory
+                )
+                
+                logger.info(f"✅ UserContext-based tool system created for {context.user_id}")
+                logger.info(f"   - Registry: {tool_system['registry'].registry_id}")
+                logger.info(f"   - Tools: {len(tool_system['tools'])}")
+                logger.info(f"   - Dispatcher: {tool_system['dispatcher'].dispatcher_id}")
+                
+                # Store isolated components for this execution
+                self.tool_dispatcher = tool_system['dispatcher']
+                self.user_tool_registry = tool_system['registry']
+                self.user_tools = tool_system['tools']
+                
+                # Create request-scoped registry for this user
+                self.registry = AgentRegistry(self._llm_manager, self.tool_dispatcher)
+                self.registry.register_default_agents()
+                self.registry.set_websocket_bridge(self.websocket_bridge)
+                
+                # CRITICAL: Configure agent instance factory with the registry
+                logger.info(f"🔧 Configuring agent instance factory with registry for user {context.user_id}")
+                self.agent_instance_factory.configure(
+                    agent_registry=self.registry,
+                    websocket_bridge=self.websocket_bridge,
+                    websocket_manager=getattr(self.websocket_bridge, 'websocket_manager', None)
+                )
+                
+                # CRITICAL: Enhance tool dispatcher with WebSocket notifications
+                if hasattr(self.registry, 'set_websocket_manager'):
+                    # Use websocket_manager from bridge if available
+                    websocket_manager = getattr(self.websocket_bridge, 'websocket_manager', None)
+                    if websocket_manager:
+                        self.registry.set_websocket_manager(websocket_manager)
+                
+                # Create session manager for database operations
+                logger.info(f"📂 Creating managed session for user {context.user_id}")
+                async with managed_session(context) as session_manager:
+                    logger.info(f"✅ Managed session created, starting agent orchestration")
                     
-                    # Store request-scoped dispatcher for this execution
-                    self.tool_dispatcher = tool_dispatcher
+                    # Execute supervisor orchestration
+                    result = await self._orchestrate_agents(context, session_manager, stream_updates)
                     
-                    # Create request-scoped registry for this user
-                    self.registry = AgentRegistry(self._llm_manager, tool_dispatcher)
-                    self.registry.register_default_agents()
-                    self.registry.set_websocket_bridge(self.websocket_bridge)
-                    
-                    # CRITICAL: Configure agent instance factory with the registry
-                    logger.info(f"🔧 Configuring agent instance factory with registry for user {context.user_id}")
-                    self.agent_instance_factory.configure(
-                        agent_registry=self.registry,
-                        websocket_bridge=self.websocket_bridge,
-                        websocket_manager=getattr(self.websocket_bridge, 'websocket_manager', None)
-                    )
-                    
-                    # CRITICAL: Enhance tool dispatcher with WebSocket notifications
-                    if hasattr(self.registry, 'set_websocket_manager'):
-                        # Use websocket_manager from bridge if available
-                        websocket_manager = getattr(self.websocket_bridge, 'websocket_manager', None)
-                        if websocket_manager:
-                            self.registry.set_websocket_manager(websocket_manager)
-                    
-                    # Create session manager for database operations
-                    logger.info(f"📂 Creating managed session for user {context.user_id}")
-                    async with managed_session(context) as session_manager:
-                        logger.info(f"✅ Managed session created, starting agent orchestration")
-                        
-                        # Execute supervisor orchestration
-                        result = await self._orchestrate_agents(context, session_manager, stream_updates)
-                        
-                        logger.info(f"🎯 SupervisorAgent.execute() completed successfully for user {context.user_id}")
-                        logger.info(f"📊 Result type: {type(result)}, has_content: {bool(result)}")
-                        return result
+                    logger.info(f"🎯 SupervisorAgent.execute() completed successfully for user {context.user_id}")
+                    logger.info(f"📊 Result type: {type(result)}, has_content: {bool(result)}")
+                    return result
                     
             except Exception as e:
                 logger.error(f"SupervisorAgent.execute() failed for user {context.user_id}: {e}")
@@ -380,6 +389,41 @@ class SupervisorAgent(BaseAgent):
         logger.info(f"📦 Tools registered: {[tool.name for tool in tools]}")
         
         return tools
+    
+    def _get_tool_classes_from_context(self, context: UserExecutionContext) -> List:
+        """Get available tool classes from app state or use fallback."""
+        try:
+            # Try to get from FastAPI app state if available
+            from netra_backend.app.smd import app
+            if hasattr(app, 'state') and hasattr(app.state, 'tool_classes'):
+                tool_classes = app.state.tool_classes
+                if tool_classes:
+                    logger.info(f"✅ Retrieved {len(tool_classes)} tool classes from app state")
+                    return tool_classes
+        except Exception as e:
+            logger.warning(f"Could not access app state tool classes: {e}")
+        
+        # Fallback to default tool classes
+        from netra_backend.app.agents.user_context_tool_factory import get_app_tool_classes
+        tool_classes = get_app_tool_classes()
+        logger.info(f"🔄 Using fallback tool classes: {len(tool_classes)}")
+        return tool_classes
+    
+    def _get_websocket_bridge_factory(self, context: UserExecutionContext):
+        """Get WebSocket bridge factory from app state or use fallback."""
+        try:
+            # Try to get from FastAPI app state if available
+            from netra_backend.app.smd import app
+            if hasattr(app, 'state') and hasattr(app.state, 'websocket_bridge_factory'):
+                factory = app.state.websocket_bridge_factory
+                logger.info("✅ Retrieved WebSocket bridge factory from app state")
+                return factory
+        except Exception as e:
+            logger.warning(f"Could not access app state WebSocket bridge factory: {e}")
+        
+        # Fallback - return the existing bridge for this supervisor
+        logger.info("🔄 Using fallback WebSocket bridge factory")
+        return lambda: self.websocket_bridge
 
     async def _execute_workflow_with_isolated_agents(self, 
                                                    agent_instances: Dict[str, BaseAgent],

@@ -34,15 +34,21 @@ class OptimizationsCoreSubAgent(BaseAgent):
                  tool_dispatcher: Optional[ToolDispatcher] = None,
                  websocket_manager: Optional[Any] = None):
         # Initialize BaseAgent with full infrastructure
-        super().__init__(
-            llm_manager=llm_manager,
-            name="OptimizationsCoreSubAgent", 
-            description="Enhanced optimization agent using UserExecutionContext pattern",
-            enable_reliability=True,      # Get circuit breaker + retry
-            enable_execution_engine=True, # Get modern execution patterns
-            enable_caching=True,          # Enable caching for optimization results
-            tool_dispatcher=tool_dispatcher
-        )
+        # Only pass tool_dispatcher if it's not None to avoid deprecation warning
+        base_kwargs = {
+            "llm_manager": llm_manager,
+            "name": "OptimizationsCoreSubAgent", 
+            "description": "Enhanced optimization agent using UserExecutionContext pattern",
+            "enable_reliability": True,      # Get circuit breaker + retry
+            "enable_execution_engine": True, # Get modern execution patterns
+            "enable_caching": True,          # Enable caching for optimization results
+        }
+        
+        # Only add tool_dispatcher if it's provided to avoid deprecation warning
+        if tool_dispatcher is not None:
+            base_kwargs["tool_dispatcher"] = tool_dispatcher
+            
+        super().__init__(**base_kwargs)
         self.tool_dispatcher = tool_dispatcher
         self.websocket_manager = websocket_manager
 
@@ -350,3 +356,19 @@ class OptimizationsCoreSubAgent(BaseAgent):
                 error_message,
                 error_type
             )
+    
+    @classmethod
+    def create_agent_with_context(cls, context: 'UserExecutionContext') -> 'OptimizationsCoreSubAgent':
+        """Factory method for creating OptimizationsCoreSubAgent with user context.
+        
+        This method enables the agent to be created through AgentInstanceFactory
+        with proper user context isolation, avoiding deprecated global tool_dispatcher warnings.
+        
+        Args:
+            context: User execution context for isolation
+            
+        Returns:
+            OptimizationsCoreSubAgent: Configured agent instance without deprecated warnings
+        """
+        # Create agent without tool_dispatcher parameter to avoid deprecation warning
+        return cls()

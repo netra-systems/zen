@@ -189,8 +189,8 @@ describe('Thread Switching Basic Tests', () => {
       await result.current.switchToThread('thread-1', { clearMessages: true });
     });
 
-    const storeState = useUnifiedChatStore.getState();
-    expect(storeState.clearMessages).toHaveBeenCalled();
+    const clearMessages = useUnifiedChatStore.getState().clearMessages as jest.Mock;
+    expect(clearMessages).toHaveBeenCalled();
   });
 
   it('should update URL when enabled', async () => {

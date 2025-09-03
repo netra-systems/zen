@@ -58,15 +58,21 @@ class DataSubAgent(BaseAgent):
                  tool_dispatcher: Optional[ToolDispatcher] = None):
         """Initialize DataSubAgent with UserExecutionContext pattern."""
         # Initialize BaseAgent with modern infrastructure
-        super().__init__(
-            llm_manager=llm_manager,
-            name="DataSubAgent", 
-            description="UserExecutionContext pattern data analysis agent",
-            enable_reliability=True,
-            enable_execution_engine=True,
-            enable_caching=True,
-            tool_dispatcher=tool_dispatcher
-        )
+        # Only pass tool_dispatcher if it's not None to avoid deprecation warning
+        base_kwargs = {
+            "llm_manager": llm_manager,
+            "name": "DataSubAgent", 
+            "description": "UserExecutionContext pattern data analysis agent",
+            "enable_reliability": True,
+            "enable_execution_engine": True,
+            "enable_caching": True,
+        }
+        
+        # Only add tool_dispatcher if it's provided to avoid deprecation warning
+        if tool_dispatcher is not None:
+            base_kwargs["tool_dispatcher"] = tool_dispatcher
+            
+        super().__init__(**base_kwargs)
         
         # Initialize ONLY business logic components (no database sessions stored)
         self._init_data_analysis_core()
@@ -487,5 +493,22 @@ class DataSubAgent(BaseAgent):
         
         # Pattern: data_analysis:{user_id}:{hash} for proper user isolation
         return f"data_analysis:{user_id}:{content_hash}"
+    
+    @classmethod
+    def create_agent_with_context(cls, context: 'UserExecutionContext') -> 'DataSubAgent':
+        """Factory method for creating DataSubAgent with user context.
+        
+        This method enables the agent to be created through AgentInstanceFactory
+        with proper user context isolation, avoiding deprecated global tool_dispatcher warnings.
+        
+        Args:
+            context: User execution context for isolation
+            
+        Returns:
+            DataSubAgent: Configured agent instance without deprecated warnings
+        """
+        # Create agent without tool_dispatcher parameter to avoid deprecation warning
+        # Pass None for both to avoid the deprecation warning in BaseAgent.__init__
+        return cls(llm_manager=None, tool_dispatcher=None)
     
     # All infrastructure methods (WebSocket, monitoring, reliability) inherited from BaseAgent

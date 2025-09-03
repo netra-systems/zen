@@ -268,9 +268,6 @@ class IsolatedWebSocketEventEmitter:
                     user_id=self.user_id,
                     message=message  
                 )
-            elif hasattr(self.websocket_manager, 'send_message'):
-                # Legacy WebSocket manager
-                await self.websocket_manager.send_message(message)
             else:
                 logger.error(f"WebSocket manager has no send method for user {self.user_id}")
                 return False

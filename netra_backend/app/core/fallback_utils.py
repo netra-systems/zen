@@ -57,7 +57,7 @@ async def safe_websocket_send(
         return False
     
     try:
-        await websocket_manager.send_message(user_id, message_data)
+        await websocket_manager.send_to_user(user_id, message_data)
         return True
     except Exception as e:
         logger.debug(f"WebSocket {operation_description} failed: {e}")

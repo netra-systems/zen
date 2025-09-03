@@ -365,3 +365,20 @@ class DataHelperAgent(BaseAgent):
             'state': updated_state,
             'data_request': agent_output
         }
+    
+    @classmethod
+    def create_agent_with_context(cls, context) -> 'DataHelperAgent':
+        """Factory method for creating DataHelperAgent with user context.
+        
+        This method enables the agent to be created through AgentInstanceFactory
+        with proper user context isolation.
+        
+        Args:
+            context: User execution context for isolation
+            
+        Returns:
+            DataHelperAgent: Configured agent instance
+        """
+        # DataHelperAgent requires LLMManager and ToolDispatcher but doesn't pass tool_dispatcher to BaseAgent
+        # so no deprecation warning is triggered
+        return cls(llm_manager=None, tool_dispatcher=None, context=context)

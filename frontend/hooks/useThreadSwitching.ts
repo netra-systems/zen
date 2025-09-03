@@ -310,7 +310,6 @@ const handleLoadingResult = (
   options?: Required<ThreadSwitchingOptions>,
   updateUrl?: (threadId: string | null) => void
 ): boolean => {
-  // executeWithRetry returns the ThreadLoadingResult directly
   if (result && result.success) {
     // Clear timeout and cleanup on success
     if (timeoutManager) {
