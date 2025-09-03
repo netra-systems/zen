@@ -174,7 +174,8 @@ export const handleAgentThinking = (
   set: (partial: Partial<UnifiedChatState>) => void,
   get: () => UnifiedChatState
 ): void => {
-  const thinkingData = extractThinkingData(event.payload as any);
+  // Pass the entire event as the backend sends data at different levels
+  const thinkingData = extractThinkingData(event as any);
   createThinkingMessage(thinkingData, get);
   updateMediumLayerWithThinking(thinkingData, state, set);
 };
