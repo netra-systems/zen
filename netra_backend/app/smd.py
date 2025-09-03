@@ -316,9 +316,13 @@ class StartupOrchestrator:
         await self._start_connection_monitoring()
         self.logger.info("  ✓ Step 22: Connection monitoring started")
         
-        # Step 23: Comprehensive startup validation
+        # Step 23a: Apply startup validation fixes before validation
+        await self._apply_startup_validation_fixes()
+        self.logger.info("  ✓ Step 23a: Startup validation fixes applied")
+        
+        # Step 23b: Comprehensive startup validation
         await self._run_comprehensive_validation()
-        self.logger.info("  ✓ Step 23: Comprehensive validation completed")
+        self.logger.info("  ✓ Step 23b: Comprehensive validation completed")
         
         # Step 24: Critical path validation (CHAT FUNCTIONALITY)
         await self._run_critical_path_validation()
@@ -587,6 +591,13 @@ class StartupOrchestrator:
             if not success:
                 critical_failures = report.get('critical_failures', 0)
                 if critical_failures > 0:
+                    # Log detailed failure information
+                    self.logger.error("🚨 CRITICAL STARTUP VALIDATION FAILURES DETECTED:")
+                    for category, components in report.get('categories', {}).items():
+                        for component in components:
+                            if component['critical'] and component['status'] in ['critical', 'failed']:
+                                self.logger.error(f"  ❌ {component['name']} ({category}): {component['message']}")
+                    
                     # Allow bypass for development remediation work
                     if get_env('BYPASS_STARTUP_VALIDATION', '').lower() == 'true':
                         self.logger.warning(
@@ -1253,6 +1264,37 @@ class StartupOrchestrator:
         """Start database connection monitoring - optional."""
         from netra_backend.app.services.database.connection_monitor import start_connection_monitoring
         await start_connection_monitoring()
+    
+    async def _apply_startup_validation_fixes(self) -> None:
+        """Apply startup validation fixes to prevent common failures."""
+        try:
+            from netra_backend.app.core.startup_validation_fix import apply_startup_validation_fixes
+            
+            self.logger.info("Applying startup validation fixes...")
+            results = apply_startup_validation_fixes(self.app)
+            
+            if results['overall_success']:
+                total_fixes = results.get('total_fixes_applied', 0)
+                if total_fixes > 0:
+                    self.logger.info(f"✅ Applied {total_fixes} startup validation fixes")
+                else:
+                    self.logger.info("✅ No startup validation fixes needed")
+            else:
+                # Log detailed error information but don't fail startup
+                self.logger.warning("⚠️ Some startup validation fixes failed:")
+                if results.get('websocket_fix'):
+                    websocket_results = results['websocket_fix']
+                    for error in websocket_results.get('errors', []):
+                        self.logger.warning(f"  - WebSocket fix error: {error}")
+                
+                if results.get('critical_error'):
+                    self.logger.warning(f"  - Critical error: {results['critical_error']}")
+            
+        except ImportError:
+            self.logger.warning("Startup validation fix module not available - skipping fixes")
+        except Exception as e:
+            # Don't fail startup for fix errors, just log them
+            self.logger.warning(f"Failed to apply startup validation fixes: {e}")
     
     async def _initialize_health_service(self) -> None:
         """Initialize health service registry - optional."""
