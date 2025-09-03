@@ -864,17 +864,35 @@ class StartupOrchestrator:
     
     async def _initialize_agent_websocket_bridge_basic(self) -> None:
         """Create AgentWebSocketBridge instance - CRITICAL (Integration happens in Phase 4)."""
-        from netra_backend.app.services.agent_websocket_bridge import get_agent_websocket_bridge
-        
-        # Get bridge instance (singleton) - just create it, don't integrate yet
-        bridge = await get_agent_websocket_bridge()
-        if bridge is None:
-            raise DeterministicStartupError("Failed to get AgentWebSocketBridge instance")
-        
-        # Store bridge in app state for later integration
-        self.app.state.agent_websocket_bridge = bridge
-        
-        self.logger.info(f"  ✓ AgentWebSocketBridge instance created (integration pending)")
+        try:
+            from netra_backend.app.services.agent_websocket_bridge import get_agent_websocket_bridge
+            
+            # Get bridge instance (singleton) - just create it, don't integrate yet
+            self.logger.info("  Creating AgentWebSocketBridge instance...")
+            bridge = await get_agent_websocket_bridge()
+            if bridge is None:
+                self.logger.error("  ❌ get_agent_websocket_bridge() returned None")
+                raise DeterministicStartupError("Failed to get AgentWebSocketBridge instance - factory returned None")
+            
+            # Store bridge in app state for later integration
+            self.app.state.agent_websocket_bridge = bridge
+            
+            # Verify the bridge has required methods for validation
+            required_methods = ['notify_agent_started', 'notify_agent_completed', 'notify_tool_executing']
+            missing_methods = [m for m in required_methods if not hasattr(bridge, m)]
+            if missing_methods:
+                self.logger.error(f"  ❌ AgentWebSocketBridge missing methods: {missing_methods}")
+                raise DeterministicStartupError(f"AgentWebSocketBridge missing required methods: {missing_methods}")
+            
+            self.logger.info(f"  ✓ AgentWebSocketBridge instance created with all required methods (integration pending)")
+            
+        except Exception as e:
+            self.logger.error(f"  ❌ Failed to initialize AgentWebSocketBridge: {e}")
+            self.logger.error(f"  Exception type: {type(e).__name__}")
+            if hasattr(e, '__traceback__'):
+                import traceback
+                self.logger.error(f"  Traceback: {traceback.format_exception(type(e), e, e.__traceback__)}")
+            raise DeterministicStartupError(f"Critical failure in AgentWebSocketBridge initialization: {e}") from e
     
     async def _initialize_agent_supervisor(self) -> None:
         """Initialize agent supervisor - CRITICAL FOR CHAT (Uses AgentWebSocketBridge for notifications)."""
