@@ -116,10 +116,14 @@ class SecretManager:
         }
     
     def _get_oauth_secret_mappings(self) -> Dict[str, dict]:
-        """Get OAuth-related secret mappings."""
-        google_client_id = self._get_google_client_id_mapping()
-        google_client_secret = self._get_google_client_secret_mapping()
-        return {"GOOGLE_CLIENT_ID": google_client_id, "GOOGLE_CLIENT_SECRET": google_client_secret}
+        """Get OAuth-related secret mappings.
+        
+        Note: OAuth is handled by the auth service, not the backend.
+        These are not required for backend operation.
+        """
+        # Backend doesn't handle OAuth - auth service does
+        # Return empty mappings as these aren't needed
+        return {}
     
     def _get_google_client_id_mapping(self) -> Dict[str, Any]:
         """Get Google Client ID mapping."""

@@ -48,8 +48,9 @@ class StagingConfigurationValidator:
         'REDIS_HOST',
         'CLICKHOUSE_HOST',
         'CLICKHOUSE_PASSWORD',
-        'GOOGLE_CLIENT_ID',
-        'GOOGLE_CLIENT_SECRET',
+        # OAuth handled by auth service, not backend
+        # 'GOOGLE_CLIENT_ID',
+        # 'GOOGLE_CLIENT_SECRET',
         'ANTHROPIC_API_KEY',
         'OPENAI_API_KEY',
         'GEMINI_API_KEY',
