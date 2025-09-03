@@ -160,7 +160,7 @@ class TestWebSocketIntegration:
             # Check for WebSocket emission methods
             assert "_emit_thinking" in content, "Should have _emit_thinking method"
             assert "websocket_bridge" in content, "Should use websocket_bridge"
-            assert "emit_agent_thinking" in content or "emit_user_notification" in content
+            assert "emit_agent_event" in content
             
             # Check that context is used for user isolation
             assert "context.websocket_connection_id" in content or "context.user_id" in content
