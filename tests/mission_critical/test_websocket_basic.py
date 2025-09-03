@@ -20,10 +20,8 @@ def test_imports():
         from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier
         print("OK WebSocketNotifier import successful")
         
-        from netra_backend.app.agents.unified_tool_execution import (
-            UnifiedToolExecutionEngine,
-            enhance_tool_dispatcher_with_notifications
-        )
+        from netra_backend.app.agents.unified_tool_execution import UnifiedToolExecutionEngine
+        from netra_backend.app.agents.websocket_tool_enhancement import enhance_tool_dispatcher_with_notifications
         print("OK UnifiedToolExecutionEngine import successful")
         
         from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
@@ -85,10 +83,8 @@ def test_tool_dispatcher_enhancement():
     """Test that tool dispatcher enhancement works."""
     try:
         from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
-        from netra_backend.app.agents.unified_tool_execution import (
-            UnifiedToolExecutionEngine,
-            enhance_tool_dispatcher_with_notifications
-        )
+        from netra_backend.app.agents.unified_tool_execution import UnifiedToolExecutionEngine
+        from netra_backend.app.agents.websocket_tool_enhancement import enhance_tool_dispatcher_with_notifications
         from netra_backend.app.websocket_core.manager import WebSocketManager
         
         dispatcher = ToolDispatcher()
@@ -169,12 +165,17 @@ async def test_unified_tool_execution():
         # Mock to avoid real WebSocket calls
         ws_manager.send_to_thread = AsyncMock(return_value=True)
         
-        enhanced_executor = UnifiedToolExecutionEngine(ws_manager)
+        # Create WebSocket bridge properly
+        from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
+        websocket_bridge = AgentWebSocketBridge()
+        websocket_bridge._websocket_manager = ws_manager
         
-        # Create test context
+        enhanced_executor = UnifiedToolExecutionEngine(websocket_bridge=websocket_bridge)
+        
+        # Create test context with proper thread format
         context = AgentExecutionContext(
-            run_id="test-run",
-            thread_id="test-thread", 
+            run_id="thread_test_user_session_123",
+            thread_id="thread_test_user_session", 
             user_id="test-user",
             agent_name="test",
             retry_count=0,
@@ -188,14 +189,14 @@ async def test_unified_tool_execution():
         
         # Create state
         state = DeepAgentState(
-            chat_thread_id="test-thread",
+            chat_thread_id="thread_test_user_session",
             user_id="test-user",
-            run_id="test-run"
+            run_id="thread_test_user_session_123"
         )
         
         # Execute tool
         result = await enhanced_executor.execute_with_state(
-            test_tool, "test_tool", {}, state, "test-run"
+            test_tool, "test_tool", {}, state, "thread_test_user_session_123"
         )
         
         if not result:
