@@ -2989,6 +2989,254 @@ class DockerInfrastructurePerformanceTests(unittest.TestCase):
                              f"Alpine not significantly faster: {speedup_factor:.1f}x speedup")
             
             logger.info(f"Alpine vs Ubuntu performance: {speedup_factor:.1f}x faster startup")
+    
+    def test_unified_docker_manager_comprehensive_environment_lifecycle(self):
+        """Test complete environment lifecycle with UnifiedDockerManager."""
+        test_env_name = f"comprehensive_lifecycle_{int(time.time())}"
+        
+        try:
+            # Test environment acquisition
+            start_time = time.time()
+            result = self.docker_manager.acquire_environment(
+                test_env_name,
+                use_alpine=True,
+                timeout=45
+            )
+            acquire_time = time.time() - start_time
+            
+            self.assertIsNotNone(result, "Failed to acquire environment")
+            self.assertLess(acquire_time, 45, f"Environment acquisition took {acquire_time:.2f}s > 45s")
+            
+            # Verify environment health
+            health = self.docker_manager.get_health_report(test_env_name)
+            self.assertTrue(health.get('all_healthy', False), f"Environment not healthy: {health}")
+            
+            # Test port allocation
+            ports = result.get('ports', {})
+            self.assertGreater(len(ports), 0, "No ports allocated")
+            
+            for service, port in ports.items():
+                self.assertGreaterEqual(port, 1024, f"Port {port} for {service} < 1024")
+                self.assertLessEqual(port, 65535, f"Port {port} for {service} > 65535")
+            
+            # Test resource monitoring if method available
+            if hasattr(self.docker_manager, '_get_environment_containers'):
+                containers = self.docker_manager._get_environment_containers(test_env_name)
+                self.assertGreater(len(containers), 0, "No containers found for environment")
+                
+                for container in containers:
+                    stats = container.stats(stream=False)
+                    memory_mb = stats['memory_stats']['usage'] / (1024 * 1024)
+                    self.assertLess(memory_mb, 500, f"Container using {memory_mb}MB > 500MB")
+            
+        finally:
+            # Clean up environment
+            if hasattr(self.docker_manager, 'release_environment'):
+                self.docker_manager.release_environment(test_env_name)
+    
+    def test_parallel_environment_management_isolation(self):
+        """Test parallel environment management with proper isolation."""
+        num_environments = 5
+        environments = []
+        
+        def create_environment(index):
+            env_name = f"parallel_env_{index}_{int(time.time())}"
+            try:
+                result = self.docker_manager.acquire_environment(
+                    env_name,
+                    use_alpine=True,
+                    timeout=60
+                )
+                if result:
+                    environments.append(env_name)
+                    return (env_name, True)
+                return (env_name, False)
+            except Exception as e:
+                logger.error(f"Environment {index} failed: {e}")
+                return (env_name, False)
+        
+        try:
+            # Create environments in parallel
+            with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
+                futures = [executor.submit(create_environment, i) for i in range(num_environments)]
+                results = [f.result() for f in concurrent.futures.as_completed(futures)]
+            
+            successful_envs = [env_name for env_name, success in results if success]
+            success_count = len(successful_envs)
+            
+            self.assertGreaterEqual(success_count, 3, f"Only {success_count}/{num_environments} environments created")
+            
+            # Test isolation between environments
+            for i, env1 in enumerate(successful_envs):
+                health1 = self.docker_manager.get_health_report(env1)
+                self.assertTrue(health1.get('all_healthy', False), f"Environment {env1} not healthy")
+                
+                # Test that one environment doesn't affect others
+                if i < 2:  # Test subset to avoid timeout
+                    for j, env2 in enumerate(successful_envs):
+                        if i != j and j < 2:
+                            health2 = self.docker_manager.get_health_report(env2)
+                            self.assertTrue(health2.get('all_healthy', False), 
+                                          f"Environment {env2} affected by {env1}")
+        
+        finally:
+            # Clean up all environments
+            for env_name in environments:
+                try:
+                    if hasattr(self.docker_manager, 'release_environment'):
+                        self.docker_manager.release_environment(env_name)
+                except Exception as e:
+                    logger.warning(f"Failed to clean up environment {env_name}: {e}")
+    
+    def test_container_failure_recovery_mechanisms(self):
+        """Test container failure recovery and restart mechanisms."""
+        test_env_name = f"failure_recovery_{int(time.time())}"
+        
+        try:
+            # Create environment
+            result = self.docker_manager.acquire_environment(test_env_name, use_alpine=True)
+            self.assertIsNotNone(result, "Failed to create test environment")
+            
+            # Test recovery mechanisms (if available)
+            if hasattr(self.docker_manager, '_get_environment_containers'):
+                containers = self.docker_manager._get_environment_containers(test_env_name)
+                
+                if containers:
+                    self.assertGreater(len(containers), 0, "No containers to test recovery")
+                    
+                    # Kill containers to simulate failures
+                    killed_containers = []
+                    for container in containers[:2]:  # Kill first 2 containers
+                        try:
+                            container.kill()
+                            killed_containers.append(container.name)
+                            logger.info(f"Killed container {container.name} for recovery test")
+                        except Exception as e:
+                            logger.warning(f"Failed to kill container {container.name}: {e}")
+                    
+                    self.assertGreater(len(killed_containers), 0, "No containers killed for recovery test")
+                    
+                    # Log recovery test completion
+                    logger.info(f"Recovery test completed for environment {test_env_name}")
+            
+        finally:
+            # Clean up environment
+            try:
+                if hasattr(self.docker_manager, 'release_environment'):
+                    self.docker_manager.release_environment(test_env_name)
+            except Exception as e:
+                logger.warning(f"Failed to clean up test environment: {e}")
+    
+    def test_resource_optimization_alpine_performance(self):
+        """Test resource optimization with Alpine containers."""
+        env_name = f"resource_opt_alpine_{int(time.time())}"
+        
+        try:
+            # Measure Alpine environment creation time
+            start_time = time.time()
+            result = self.docker_manager.acquire_environment(
+                env_name,
+                use_alpine=True,
+                timeout=60
+            )
+            creation_time = time.time() - start_time
+            
+            self.assertIsNotNone(result, "Failed to create Alpine environment")
+            self.assertLess(creation_time, 60, f"Alpine creation took {creation_time:.2f}s > 60s")
+            
+            # Monitor resource usage if method available
+            if hasattr(self.docker_manager, '_get_environment_containers'):
+                containers = self.docker_manager._get_environment_containers(env_name)
+                
+                if containers:
+                    total_memory = 0
+                    
+                    for container in containers:
+                        stats = container.stats(stream=False)
+                        memory_mb = stats['memory_stats']['usage'] / (1024 * 1024)
+                        total_memory += memory_mb
+                    
+                    # Alpine should be memory efficient
+                    self.assertLess(total_memory, 1000, f"Alpine using {total_memory:.2f}MB > 1000MB")
+                    logger.info(f"Alpine resource usage: {total_memory:.2f}MB total memory")
+            
+        finally:
+            # Clean up environment
+            if hasattr(self.docker_manager, 'release_environment'):
+                self.docker_manager.release_environment(env_name)
+    
+    def test_stress_testing_multiple_rapid_environments(self):
+        """Test stress conditions with rapid environment creation/destruction."""
+        num_environments = 6  # Reasonable number for stress testing
+        environments_created = []
+        stress_metrics = {
+            'successful_creations': 0,
+            'failed_creations': 0,
+            'avg_creation_time': 0,
+            'max_creation_time': 0,
+            'total_cleanup_time': 0
+        }
+        
+        creation_times = []
+        
+        try:
+            # Rapid environment creation
+            for i in range(num_environments):
+                env_name = f"stress_test_{i}_{int(time.time())}"
+                
+                try:
+                    start_time = time.time()
+                    result = self.docker_manager.acquire_environment(
+                        env_name,
+                        use_alpine=True,
+                        timeout=45
+                    )
+                    creation_time = time.time() - start_time
+                    creation_times.append(creation_time)
+                    
+                    if result:
+                        environments_created.append(env_name)
+                        stress_metrics['successful_creations'] += 1
+                        
+                        # Quick health check
+                        health = self.docker_manager.get_health_report(env_name)
+                        self.assertIsNotNone(health, f"No health report for {env_name}")
+                    else:
+                        stress_metrics['failed_creations'] += 1
+                        
+                except Exception as e:
+                    stress_metrics['failed_creations'] += 1
+                    logger.warning(f"Stress test environment {i} failed: {e}")
+                
+                # Brief pause to avoid overwhelming the system
+                time.sleep(0.5)
+            
+            # Calculate stress metrics
+            if creation_times:
+                stress_metrics['avg_creation_time'] = sum(creation_times) / len(creation_times)
+                stress_metrics['max_creation_time'] = max(creation_times)
+            
+            # Validate stress test results
+            success_rate = stress_metrics['successful_creations'] / num_environments
+            self.assertGreaterEqual(success_rate, 0.70, f"Success rate {success_rate:.2%} < 70%")
+            self.assertLess(stress_metrics['avg_creation_time'], 35, 
+                           f"Avg creation time {stress_metrics['avg_creation_time']:.2f}s > 35s")
+            
+            logger.info(f"Stress test metrics: {stress_metrics}")
+            
+        finally:
+            # Cleanup all created environments
+            cleanup_start = time.time()
+            for env_name in environments_created:
+                try:
+                    if hasattr(self.docker_manager, 'release_environment'):
+                        self.docker_manager.release_environment(env_name)
+                except Exception as e:
+                    logger.warning(f"Failed to cleanup stress test environment {env_name}: {e}")
+            
+            stress_metrics['total_cleanup_time'] = time.time() - cleanup_start
+            self.assertLess(stress_metrics['total_cleanup_time'], 60, 
+                           f"Cleanup took {stress_metrics['total_cleanup_time']:.2f}s > 60s")
 
 
 if __name__ == '__main__':

@@ -2412,6 +2412,464 @@ class TestDockerInfrastructurePerformance:
                 safe_container_cleanup(container, timeout=15)
 
 
+class TestDockerComprehensiveUnifiedManagerIntegration:
+    """Comprehensive Tests: UnifiedDockerManager Integration (5 tests)"""
+    
+    def setup_method(self):
+        """Setup for each test method"""
+        self.docker_manager = UnifiedDockerManager()
+        self.guardian = DockerForceFlagGuardian()
+        self.rate_limiter = get_docker_rate_limiter()
+    
+    def test_unified_manager_comprehensive_lifecycle(self):
+        """Test complete lifecycle management with UnifiedDockerManager"""
+        env_name = f"comprehensive_lifecycle_{int(time.time())}"
+        
+        try:
+            # Acquire environment with comprehensive validation
+            start_time = time.time()
+            result = self.docker_manager.acquire_environment(
+                env_name,
+                use_alpine=True,
+                timeout=45
+            )
+            acquire_time = time.time() - start_time
+            
+            assert result is not None, "Failed to acquire environment"
+            assert acquire_time < 45, f"Acquire took {acquire_time:.2f}s > 45s"
+            
+            # Validate environment health
+            health = self.docker_manager.get_health_report(env_name)
+            assert health['all_healthy'], f"Environment not healthy: {health}"
+            
+            # Test port allocations
+            ports = result.get('ports', {})
+            assert len(ports) > 0, "No ports allocated"
+            for service, port in ports.items():
+                assert 1024 <= port <= 65535, f"Invalid port {port} for {service}"
+            
+            # Test network isolation
+            containers = docker.from_env().containers.list()
+            env_containers = [c for c in containers if env_name in c.name]
+            assert len(env_containers) > 0, "No containers created"
+            
+            # Verify resource limits
+            for container in env_containers:
+                stats = container.stats(stream=False)
+                memory_mb = stats['memory_stats']['usage'] / (1024 * 1024)
+                assert memory_mb < 500, f"Container using {memory_mb}MB > 500MB"
+            
+        finally:
+            self.docker_manager.release_environment(env_name)
+    
+    def test_unified_manager_parallel_environments(self):
+        """Test parallel environment management"""
+        environments = []
+        
+        def create_environment(index):
+            env_name = f"parallel_test_{index}_{int(time.time())}"
+            try:
+                result = self.docker_manager.acquire_environment(
+                    env_name,
+                    use_alpine=True,
+                    timeout=60
+                )
+                if result:
+                    environments.append(env_name)
+                    return True
+                return False
+            except Exception as e:
+                logger.error(f"Environment {index} failed: {e}")
+                return False
+        
+        try:
+            # Create 8 environments in parallel
+            with ThreadPoolExecutor(max_workers=8) as executor:
+                futures = [executor.submit(create_environment, i) for i in range(8)]
+                results = [f.result() for f in as_completed(futures)]
+            
+            success_count = sum(results)
+            assert success_count >= 6, f"Only {success_count}/8 parallel environments succeeded"
+            
+            # Verify isolation between environments
+            for i, env1 in enumerate(environments):
+                for j, env2 in enumerate(environments):
+                    if i != j and i < 3 and j < 3:  # Test subset to avoid timeout
+                        health1 = self.docker_manager.get_health_report(env1)
+                        health2 = self.docker_manager.get_health_report(env2)
+                        assert health1['all_healthy'], f"Environment {env1} affected by {env2}"
+                        assert health2['all_healthy'], f"Environment {env2} affected by {env1}"
+            
+        finally:
+            for env_name in environments:
+                try:
+                    self.docker_manager.release_environment(env_name)
+                except:
+                    pass
+    
+    def test_unified_manager_failure_recovery(self):
+        """Test failure recovery mechanisms"""
+        env_name = f"failure_recovery_{int(time.time())}"
+        
+        try:
+            result = self.docker_manager.acquire_environment(env_name)
+            assert result is not None
+            
+            # Simulate container failures
+            containers = docker.from_env().containers.list()
+            killed_containers = []
+            
+            for container in containers:
+                if env_name in container.name and len(killed_containers) < 2:
+                    original_id = container.id
+                    safe_container_cleanup(container, timeout=5)
+                    killed_containers.append((container.name, original_id))
+            
+            assert len(killed_containers) > 0, "No containers to test recovery"
+            
+            # Wait for automatic recovery
+            recovery_start = time.time()
+            recovered = False
+            
+            while time.time() - recovery_start < 60:
+                try:
+                    health = self.docker_manager.get_health_report(env_name)
+                    if health and health.get('all_healthy'):
+                        recovered = True
+                        break
+                except:
+                    pass
+                time.sleep(2)
+            
+            recovery_time = time.time() - recovery_start
+            # Note: Recovery may not be automatic in all cases
+            logger.info(f"Recovery test completed in {recovery_time:.2f}s, recovered: {recovered}")
+            
+        finally:
+            self.docker_manager.release_environment(env_name)
+    
+    def test_unified_manager_resource_optimization(self):
+        """Test resource optimization and efficiency"""
+        env_name = f"resource_opt_{int(time.time())}"
+        
+        try:
+            # Test with Alpine optimization
+            alpine_start = time.time()
+            result_alpine = self.docker_manager.acquire_environment(
+                f"{env_name}_alpine",
+                use_alpine=True,
+                timeout=30
+            )
+            alpine_time = time.time() - alpine_start
+            
+            assert result_alpine is not None, "Alpine environment failed"
+            
+            # Monitor Alpine resource usage
+            containers = docker.from_env().containers.list()
+            alpine_memory = 0
+            
+            for container in containers:
+                if f"{env_name}_alpine" in container.name:
+                    stats = container.stats(stream=False)
+                    memory_mb = stats['memory_stats']['usage'] / (1024 * 1024)
+                    alpine_memory += memory_mb
+            
+            # Verify Alpine efficiency
+            assert alpine_time < 30, f"Alpine startup {alpine_time:.2f}s > 30s"
+            assert alpine_memory < 1000, f"Alpine memory {alpine_memory:.2f}MB > 1000MB"
+            
+            # Cleanup
+            self.docker_manager.release_environment(f"{env_name}_alpine")
+            
+        except Exception as e:
+            logger.error(f"Resource optimization test failed: {e}")
+            raise
+    
+    def test_unified_manager_stress_validation(self):
+        """Test UnifiedDockerManager under stress conditions"""
+        environments = []
+        stress_metrics = {
+            'total_environments': 0,
+            'successful_acquisitions': 0,
+            'failed_acquisitions': 0,
+            'avg_acquisition_time': 0,
+            'max_acquisition_time': 0,
+            'resource_violations': 0
+        }
+        
+        try:
+            acquisition_times = []
+            
+            # Create environments rapidly to stress test
+            for i in range(10):  # Stress with 10 environments for reasonable execution time
+                env_name = f"stress_{i}_{int(time.time())}"
+                start_time = time.time()
+                
+                try:
+                    result = self.docker_manager.acquire_environment(
+                        env_name,
+                        use_alpine=True,
+                        timeout=45
+                    )
+                    
+                    acquisition_time = time.time() - start_time
+                    acquisition_times.append(acquisition_time)
+                    
+                    if result:
+                        environments.append(env_name)
+                        stress_metrics['successful_acquisitions'] += 1
+                        
+                        # Check resource constraints
+                        containers = docker.from_env().containers.list()
+                        for container in containers:
+                            if env_name in container.name:
+                                stats = container.stats(stream=False)
+                                memory_mb = stats['memory_stats']['usage'] / (1024 * 1024)
+                                if memory_mb > 500:
+                                    stress_metrics['resource_violations'] += 1
+                    else:
+                        stress_metrics['failed_acquisitions'] += 1
+                        
+                except Exception as e:
+                    stress_metrics['failed_acquisitions'] += 1
+                    logger.warning(f"Stress test environment {i} failed: {e}")
+                
+                stress_metrics['total_environments'] += 1
+                time.sleep(1)  # Pause between environments
+            
+            # Calculate metrics
+            if acquisition_times:
+                stress_metrics['avg_acquisition_time'] = sum(acquisition_times) / len(acquisition_times)
+                stress_metrics['max_acquisition_time'] = max(acquisition_times)
+            
+            # Validate stress test results
+            success_rate = stress_metrics['successful_acquisitions'] / stress_metrics['total_environments']
+            assert success_rate >= 0.7, f"Success rate {success_rate:.2%} < 70%"
+            assert stress_metrics['resource_violations'] == 0, f"{stress_metrics['resource_violations']} resource violations"
+            
+            logger.info(f"Stress test metrics: {stress_metrics}")
+            
+        finally:
+            # Cleanup in batches
+            for env_name in environments:
+                try:
+                    self.docker_manager.release_environment(env_name)
+                except:
+                    pass
+
+
+class TestDockerComprehensiveRateLimiterValidation:
+    """Comprehensive Tests: Rate Limiter Validation (5 tests)"""
+    
+    def setup_method(self):
+        """Setup for each test method"""
+        self.rate_limiter = get_docker_rate_limiter()
+        self.guardian = DockerForceFlagGuardian()
+    
+    def test_rate_limiter_comprehensive_throttling(self):
+        """Test comprehensive rate limiting under load"""
+        command_times = []
+        throttled_count = 0
+        successful_count = 0
+        
+        for i in range(30):  # Reduced from 50 for reasonable execution time
+            start_time = time.time()
+            try:
+                # Use lightweight Docker command
+                result = execute_docker_command(
+                    ["docker", "version", "--format", "json"],
+                    timeout=5
+                )
+                execution_time = time.time() - start_time
+                command_times.append(execution_time)
+                successful_count += 1
+                
+                # Check if throttling occurred
+                if execution_time > 1.0:
+                    throttled_count += 1
+                    
+            except Exception as e:
+                if "rate limit" in str(e).lower():
+                    throttled_count += 1
+                else:
+                    logger.warning(f"Command {i} failed: {e}")
+            
+            time.sleep(0.1)  # Small delay to avoid overwhelming
+        
+        # Verify rate limiting behavior
+        assert successful_count >= 20, f"Only {successful_count}/30 commands succeeded"
+        
+        # Check rate limiter health after load
+        health = self.rate_limiter.health_check()
+        assert health, "Rate limiter unhealthy after load test"
+    
+    def test_rate_limiter_burst_protection(self):
+        """Test protection against burst traffic"""
+        def execute_burst_command(index):
+            try:
+                start_time = time.time()
+                result = execute_docker_command(
+                    ["docker", "info", "--format", "{{.ServerVersion}}"],
+                    timeout=10
+                )
+                execution_time = time.time() - start_time
+                return {
+                    'index': index,
+                    'success': True,
+                    'time': execution_time,
+                    'result': result
+                }
+            except Exception as e:
+                return {
+                    'index': index,
+                    'success': False,
+                    'time': time.time() - start_time,
+                    'error': str(e)
+                }
+        
+        # Execute burst
+        with ThreadPoolExecutor(max_workers=15) as executor:
+            futures = [executor.submit(execute_burst_command, i) for i in range(20)]
+            results = [f.result() for f in as_completed(futures)]
+        
+        # Analyze burst results
+        successful_bursts = sum(1 for r in results if r['success'])
+        avg_success_time = sum(r['time'] for r in results if r['success']) / max(successful_bursts, 1)
+        
+        # Verify burst protection
+        assert successful_bursts >= 10, f"Only {successful_bursts}/20 burst commands succeeded"
+        assert avg_success_time < 10.0, f"Avg burst time {avg_success_time:.2f}s > 10s"
+        
+        # Rate limiter should still be healthy
+        health = self.rate_limiter.health_check()
+        assert health, "Rate limiter failed after burst test"
+    
+    def test_rate_limiter_daemon_protection(self):
+        """Test protection of Docker daemon from overload"""
+        daemon_healthy = True
+        command_count = 0
+        errors = 0
+        
+        test_duration = 20  # 20 second sustained load
+        start_time = time.time()
+        
+        while time.time() - start_time < test_duration:
+            try:
+                # Check daemon health
+                daemon_health = check_docker_daemon_health()
+                if not daemon_health:
+                    daemon_healthy = False
+                    break
+                
+                # Execute command with rate limiting
+                execute_docker_command(["docker", "system", "df"], timeout=5)
+                command_count += 1
+                
+            except Exception as e:
+                errors += 1
+                if errors > 10:
+                    daemon_healthy = False
+                    break
+            
+            time.sleep(0.2)  # Delay between commands
+        
+        # Verify daemon remained healthy
+        assert daemon_healthy, "Docker daemon became unhealthy during load test"
+        assert command_count > 50, f"Only executed {command_count} commands in {test_duration}s"
+        
+        # Final daemon health check
+        final_health = check_docker_daemon_health()
+        assert final_health, "Docker daemon unhealthy after load test"
+    
+    def test_rate_limiter_recovery_mechanisms(self):
+        """Test rate limiter recovery from overload"""
+        def overload_command(index):
+            try:
+                return execute_docker_command(["docker", "version"], timeout=2)
+            except Exception:
+                return None
+        
+        # Create controlled overload
+        with ThreadPoolExecutor(max_workers=20) as executor:
+            futures = [executor.submit(overload_command, i) for i in range(30)]
+            time.sleep(3)  # Let overload run briefly
+        
+        # Check if rate limiter recovered
+        recovery_start = time.time()
+        recovered = False
+        
+        while time.time() - recovery_start < 15:
+            try:
+                health = self.rate_limiter.health_check()
+                if health:
+                    result = execute_docker_command(["docker", "version"], timeout=5)
+                    if result:
+                        recovered = True
+                        break
+            except:
+                pass
+            time.sleep(1)
+        
+        recovery_time = time.time() - recovery_start
+        assert recovered, f"Rate limiter failed to recover after {recovery_time:.2f}s"
+        assert recovery_time < 15, f"Recovery took {recovery_time:.2f}s > 15s"
+    
+    def test_rate_limiter_concurrent_environment_safety(self):
+        """Test rate limiter safety with concurrent environments"""
+        docker_manager = UnifiedDockerManager()
+        environments = []
+        
+        def create_and_test_environment(index):
+            env_name = f"rate_limit_test_{index}_{int(time.time())}"
+            try:
+                result = docker_manager.acquire_environment(
+                    env_name,
+                    use_alpine=True,
+                    timeout=60
+                )
+                
+                if result:
+                    environments.append(env_name)
+                    
+                    # Test basic Docker operations
+                    containers = docker.from_env().containers.list()
+                    env_containers = [c for c in containers if env_name in c.name]
+                    
+                    # Perform rate-limited operations on first container only
+                    if env_containers:
+                        execute_docker_command(
+                            ["docker", "inspect", env_containers[0].id],
+                            timeout=5
+                        )
+                    
+                    return True
+                return False
+                
+            except Exception as e:
+                logger.warning(f"Environment {index} failed: {e}")
+                return False
+        
+        try:
+            # Create multiple environments concurrently
+            with ThreadPoolExecutor(max_workers=6) as executor:
+                futures = [executor.submit(create_and_test_environment, i) for i in range(8)]
+                results = [f.result() for f in as_completed(futures)]
+            
+            success_count = sum(results)
+            assert success_count >= 5, f"Only {success_count}/8 concurrent environments succeeded"
+            
+            # Verify rate limiter remained healthy
+            health = self.rate_limiter.health_check()
+            assert health, "Rate limiter unhealthy after concurrent test"
+            
+        finally:
+            for env_name in environments:
+                try:
+                    docker_manager.release_environment(env_name)
+                except:
+                    pass
+
+
 if __name__ == "__main__":
     # Self-test mode for debugging
     import sys

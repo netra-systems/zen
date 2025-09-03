@@ -1013,6 +1013,456 @@ class TestDockerLifecycleCritical:
                        f"success={metrics['success_rate']:.1%}")
     
     # ==========================================
+    # COMPREHENSIVE CRITICAL INFRASTRUCTURE TESTS
+    # ==========================================
+    
+    def test_critical_unified_docker_manager_extreme_stress(self):
+        """CRITICAL: Test UnifiedDockerManager under extreme stress conditions."""
+        stress_environments = []
+        critical_metrics = {
+            'total_attempts': 0,
+            'successful_acquisitions': 0,
+            'failed_acquisitions': 0,
+            'daemon_crashes': 0,
+            'memory_violations': 0,
+            'timeout_failures': 0,
+            'avg_acquisition_time': 0
+        }
+        
+        acquisition_times = []
+        
+        try:
+            # Create extreme load with 15 concurrent environments
+            for i in range(15):
+                env_name = f"critical_stress_{i}_{int(time.time())}"
+                critical_metrics['total_attempts'] += 1
+                
+                try:
+                    # Monitor daemon before acquisition
+                    daemon_pre = self.daemon_monitor.check_daemon_stability()
+                    assert daemon_pre['stable'], f"Daemon unstable before acquisition {i}"
+                    
+                    start_time = time.time()
+                    result = self.manager.acquire_environment(
+                        env_name,
+                        use_alpine=True,
+                        timeout=60
+                    )
+                    acquisition_time = time.time() - start_time
+                    acquisition_times.append(acquisition_time)
+                    
+                    if result:
+                        stress_environments.append(env_name)
+                        critical_metrics['successful_acquisitions'] += 1
+                        
+                        # Verify health immediately
+                        health = self.manager.get_health_report(env_name)
+                        assert health.get('all_healthy', False), f"Environment {env_name} unhealthy immediately"
+                        
+                        # Check resource usage
+                        if hasattr(self.manager, '_get_environment_containers'):
+                            containers = self.manager._get_environment_containers(env_name)
+                            for container in containers:
+                                stats = container.stats(stream=False)
+                                memory_mb = stats['memory_stats']['usage'] / (1024 * 1024)
+                                if memory_mb > 500:
+                                    critical_metrics['memory_violations'] += 1
+                    else:
+                        critical_metrics['failed_acquisitions'] += 1
+                        
+                    # Monitor daemon after acquisition
+                    daemon_post = self.daemon_monitor.check_daemon_stability()
+                    if not daemon_post['stable'] or daemon_post['restarts_count'] > 0:
+                        critical_metrics['daemon_crashes'] += 1
+                        
+                except Exception as e:
+                    critical_metrics['failed_acquisitions'] += 1
+                    if "timeout" in str(e).lower():
+                        critical_metrics['timeout_failures'] += 1
+                    logger.error(f"Critical stress environment {i} failed: {e}")
+                
+                # Brief pause between acquisitions
+                time.sleep(0.3)
+            
+            # Calculate final metrics
+            if acquisition_times:
+                critical_metrics['avg_acquisition_time'] = sum(acquisition_times) / len(acquisition_times)
+            
+            # CRITICAL ASSERTIONS - Zero tolerance for failures
+            assert critical_metrics['daemon_crashes'] == 0, f"CRITICAL: {critical_metrics['daemon_crashes']} daemon crashes detected"
+            assert critical_metrics['memory_violations'] == 0, f"CRITICAL: {critical_metrics['memory_violations']} memory violations"
+            
+            # High success rate required for critical infrastructure
+            success_rate = critical_metrics['successful_acquisitions'] / critical_metrics['total_attempts']
+            assert success_rate >= 0.80, f"CRITICAL: Success rate {success_rate:.2%} < 80%"
+            
+            # Performance requirements
+            assert critical_metrics['avg_acquisition_time'] < 45, \
+                f"CRITICAL: Avg acquisition time {critical_metrics['avg_acquisition_time']:.2f}s > 45s"
+            
+            logger.info(f"CRITICAL stress test PASSED: {critical_metrics}")
+            
+        finally:
+            # Critical cleanup - must not fail
+            for env_name in stress_environments:
+                try:
+                    self.manager.release_environment(env_name)
+                except Exception as e:
+                    logger.error(f"CRITICAL cleanup failure for {env_name}: {e}")
+    
+    def test_critical_alpine_optimization_performance_validation(self):
+        """CRITICAL: Validate Alpine optimization provides required performance gains."""
+        alpine_performance = {}
+        regular_performance = {}
+        
+        # Test Alpine containers
+        alpine_env = f"critical_alpine_{int(time.time())}"
+        try:
+            alpine_start = time.time()
+            alpine_result = self.manager.acquire_environment(
+                alpine_env,
+                use_alpine=True,
+                timeout=30
+            )
+            alpine_time = time.time() - alpine_start
+            
+            assert alpine_result is not None, "CRITICAL: Alpine environment creation failed"
+            assert alpine_time < 30, f"CRITICAL: Alpine startup {alpine_time:.2f}s > 30s"
+            
+            # Monitor Alpine resource usage
+            if hasattr(self.manager, '_get_environment_containers'):
+                containers = self.manager._get_environment_containers(alpine_env)
+                total_alpine_memory = 0
+                
+                for container in containers:
+                    stats = container.stats(stream=False)
+                    memory_mb = stats['memory_stats']['usage'] / (1024 * 1024)
+                    total_alpine_memory += memory_mb
+                
+                alpine_performance = {
+                    'startup_time': alpine_time,
+                    'total_memory_mb': total_alpine_memory,
+                    'container_count': len(containers)
+                }
+                
+                # CRITICAL Alpine requirements
+                assert total_alpine_memory < 800, f"CRITICAL: Alpine using {total_alpine_memory:.2f}MB > 800MB"
+            
+            self.manager.release_environment(alpine_env)
+            
+        except Exception as e:
+            logger.error(f"CRITICAL Alpine test failed: {e}")
+            raise
+        
+        # Test regular containers for comparison
+        regular_env = f"critical_regular_{int(time.time())}"
+        try:
+            regular_start = time.time()
+            regular_result = self.manager.acquire_environment(
+                regular_env,
+                use_alpine=False,
+                timeout=60
+            )
+            regular_time = time.time() - regular_start
+            
+            if regular_result:
+                if hasattr(self.manager, '_get_environment_containers'):
+                    containers = self.manager._get_environment_containers(regular_env)
+                    total_regular_memory = 0
+                    
+                    for container in containers:
+                        stats = container.stats(stream=False)
+                        memory_mb = stats['memory_stats']['usage'] / (1024 * 1024)
+                        total_regular_memory += memory_mb
+                    
+                    regular_performance = {
+                        'startup_time': regular_time,
+                        'total_memory_mb': total_regular_memory,
+                        'container_count': len(containers)
+                    }
+                
+                self.manager.release_environment(regular_env)
+            
+        except Exception as e:
+            logger.warning(f"Regular container test failed (not critical): {e}")
+        
+        # Validate Alpine advantages
+        if alpine_performance and regular_performance:
+            time_improvement = regular_performance['startup_time'] / alpine_performance['startup_time']
+            memory_improvement = regular_performance['total_memory_mb'] / alpine_performance['total_memory_mb']
+            
+            # CRITICAL: Alpine must be significantly better
+            assert time_improvement >= 1.3, f"CRITICAL: Alpine only {time_improvement:.2f}x faster, need 1.3x+"
+            assert memory_improvement >= 1.2, f"CRITICAL: Alpine only {memory_improvement:.2f}x memory efficient, need 1.2x+"
+            
+            logger.info(f"CRITICAL Alpine validation PASSED: {time_improvement:.2f}x faster, {memory_improvement:.2f}x memory efficient")
+    
+    def test_critical_parallel_environment_isolation_verification(self):
+        """CRITICAL: Verify complete isolation between parallel environments."""
+        num_parallel_envs = 8
+        parallel_environments = []
+        isolation_violations = []
+        
+        def create_isolated_environment(index):
+            env_name = f"isolation_test_{index}_{int(time.time())}"
+            try:
+                # Create environment with unique identifier
+                result = self.manager.acquire_environment(
+                    env_name,
+                    use_alpine=True,
+                    timeout=60
+                )
+                
+                if result:
+                    parallel_environments.append(env_name)
+                    
+                    # Create a unique file in each environment to test isolation
+                    if hasattr(self.manager, '_get_environment_containers'):
+                        containers = self.manager._get_environment_containers(env_name)
+                        for container in containers:
+                            try:
+                                # Create unique test file
+                                test_content = f"isolation_test_{index}_{env_name}"
+                                container.exec_run(f'sh -c "echo {test_content} > /tmp/isolation_test"')
+                            except Exception as e:
+                                logger.warning(f"Failed to create test file in {container.name}: {e}")
+                    
+                    return (env_name, True, index)
+                return (env_name, False, index)
+                
+            except Exception as e:
+                logger.error(f"Isolation test environment {index} failed: {e}")
+                return (env_name, False, index)
+        
+        try:
+            # Create environments in parallel
+            with ThreadPoolExecutor(max_workers=8) as executor:
+                futures = [executor.submit(create_isolated_environment, i) for i in range(num_parallel_envs)]
+                results = [f.result() for f in as_completed(futures)]
+            
+            successful_envs = [(name, idx) for name, success, idx in results if success]
+            success_count = len(successful_envs)
+            
+            # CRITICAL: High success rate required
+            assert success_count >= 6, f"CRITICAL: Only {success_count}/{num_parallel_envs} parallel environments succeeded"
+            
+            # Test isolation between environments
+            for i, (env1, idx1) in enumerate(successful_envs[:4]):  # Test first 4 to avoid timeout
+                # Verify environment health
+                health1 = self.manager.get_health_report(env1)
+                assert health1.get('all_healthy', False), f"CRITICAL: Environment {env1} not healthy"
+                
+                # Test file isolation
+                if hasattr(self.manager, '_get_environment_containers'):
+                    containers1 = self.manager._get_environment_containers(env1)
+                    
+                    for container1 in containers1:
+                        try:
+                            # Read the test file from this environment
+                            result = container1.exec_run('cat /tmp/isolation_test 2>/dev/null || echo "MISSING"')
+                            content = result.output.decode().strip()
+                            
+                            if content == "MISSING":
+                                continue
+                            
+                            # Verify this environment only has its own data
+                            expected_content = f"isolation_test_{idx1}_{env1}"
+                            if expected_content not in content:
+                                isolation_violations.append(f"Environment {env1} has incorrect content: {content}")
+                            
+                            # Check that other environments' data is not present
+                            for j, (env2, idx2) in enumerate(successful_envs):
+                                if i != j:
+                                    other_content = f"isolation_test_{idx2}_{env2}"
+                                    if other_content in content:
+                                        isolation_violations.append(f"Environment {env1} contaminated with {env2} data")
+                                        
+                        except Exception as e:
+                            logger.warning(f"Isolation test failed for container {container1.name}: {e}")
+            
+            # CRITICAL: Zero tolerance for isolation violations
+            assert len(isolation_violations) == 0, f"CRITICAL: Isolation violations detected: {isolation_violations}"
+            
+            logger.info(f"CRITICAL isolation test PASSED: {success_count} environments fully isolated")
+            
+        finally:
+            # Critical cleanup
+            for env_name in parallel_environments:
+                try:
+                    self.manager.release_environment(env_name)
+                except Exception as e:
+                    logger.error(f"CRITICAL cleanup failure for isolation test {env_name}: {e}")
+    
+    def test_critical_rate_limiter_daemon_protection_extreme(self):
+        """CRITICAL: Test rate limiter protects daemon under extreme load."""
+        daemon_pre_test = self.daemon_monitor.check_daemon_stability()
+        assert daemon_pre_test['stable'], f"CRITICAL: Daemon unstable at test start: {daemon_pre_test}"
+        
+        extreme_load_metrics = {
+            'commands_attempted': 0,
+            'commands_successful': 0,
+            'commands_rate_limited': 0,
+            'commands_failed': 0,
+            'daemon_crashes': 0,
+            'max_concurrent': 0
+        }
+        
+        def execute_extreme_load_command(index):
+            try:
+                extreme_load_metrics['commands_attempted'] += 1
+                
+                # Execute rate-limited Docker command
+                result = execute_docker_command(
+                    ["docker", "version", "--format", "json"],
+                    timeout=10
+                )
+                
+                if result.returncode == 0:
+                    extreme_load_metrics['commands_successful'] += 1
+                else:
+                    extreme_load_metrics['commands_failed'] += 1
+                
+                return {'index': index, 'success': True, 'duration': result.duration}
+                
+            except Exception as e:
+                if "rate limit" in str(e).lower():
+                    extreme_load_metrics['commands_rate_limited'] += 1
+                else:
+                    extreme_load_metrics['commands_failed'] += 1
+                
+                return {'index': index, 'success': False, 'error': str(e)}
+        
+        try:
+            # Generate extreme concurrent load
+            with ThreadPoolExecutor(max_workers=25) as executor:
+                # Submit 100 concurrent commands
+                futures = [executor.submit(execute_extreme_load_command, i) for i in range(100)]
+                extreme_load_metrics['max_concurrent'] = 25
+                
+                # Collect results
+                results = [f.result() for f in as_completed(futures)]
+            
+            # Check daemon stability after extreme load
+            daemon_post_test = self.daemon_monitor.check_daemon_stability()
+            
+            # CRITICAL: Daemon must remain stable
+            assert daemon_post_test['stable'], f"CRITICAL: Daemon became unstable after extreme load: {daemon_post_test}"
+            assert daemon_post_test['restarts_count'] == 0, f"CRITICAL: Daemon restarted {daemon_post_test['restarts_count']} times"
+            
+            # Rate limiter must have protected the daemon
+            successful_rate = extreme_load_metrics['commands_successful'] / extreme_load_metrics['commands_attempted']
+            assert successful_rate >= 0.70, f"CRITICAL: Success rate {successful_rate:.2%} < 70% under extreme load"
+            
+            # Some rate limiting should have occurred to protect daemon
+            if extreme_load_metrics['commands_rate_limited'] > 0:
+                logger.info(f"CRITICAL: Rate limiter protected daemon by limiting {extreme_load_metrics['commands_rate_limited']} commands")
+            
+            logger.info(f"CRITICAL extreme load test PASSED: Daemon protected, metrics: {extreme_load_metrics}")
+            
+        except Exception as e:
+            extreme_load_metrics['daemon_crashes'] += 1
+            logger.error(f"CRITICAL extreme load test failed: {e}")
+            raise
+    
+    def test_critical_memory_pressure_resilience_validation(self):
+        """CRITICAL: Validate system resilience under extreme memory pressure."""
+        memory_pressure_environments = []
+        initial_memory = psutil.virtual_memory()
+        
+        pressure_metrics = {
+            'environments_created': 0,
+            'memory_violations': 0,
+            'oom_kills': 0,
+            'system_memory_peak_mb': 0,
+            'container_memory_peak_mb': 0
+        }
+        
+        try:
+            # Create memory-intensive environments
+            for i in range(8):  # Reduced for safety
+                env_name = f"memory_pressure_{i}_{int(time.time())}"
+                
+                try:
+                    result = self.manager.acquire_environment(
+                        env_name,
+                        use_alpine=True,  # Use Alpine for efficiency
+                        timeout=45
+                    )
+                    
+                    if result:
+                        memory_pressure_environments.append(env_name)
+                        pressure_metrics['environments_created'] += 1
+                        
+                        # Monitor container memory usage
+                        if hasattr(self.manager, '_get_environment_containers'):
+                            containers = self.manager._get_environment_containers(env_name)
+                            total_container_memory = 0
+                            
+                            for container in containers:
+                                stats = container.stats(stream=False)
+                                memory_mb = stats['memory_stats']['usage'] / (1024 * 1024)
+                                total_container_memory += memory_mb
+                                
+                                # Check for memory violations
+                                if memory_mb > 400:  # Lower threshold for Alpine
+                                    pressure_metrics['memory_violations'] += 1
+                                    
+                                # Check if container was OOM killed
+                                if stats.get('memory_stats', {}).get('limit', 0) > 0:
+                                    if memory_mb >= (stats['memory_stats']['limit'] / (1024 * 1024)) * 0.95:
+                                        pressure_metrics['oom_kills'] += 1
+                            
+                            pressure_metrics['container_memory_peak_mb'] = max(
+                                pressure_metrics['container_memory_peak_mb'],
+                                total_container_memory
+                            )
+                        
+                        # Monitor system memory
+                        current_memory = psutil.virtual_memory()
+                        pressure_metrics['system_memory_peak_mb'] = max(
+                            pressure_metrics['system_memory_peak_mb'],
+                            current_memory.used / (1024 * 1024)
+                        )
+                        
+                        # Verify health under pressure
+                        health = self.manager.get_health_report(env_name)
+                        assert health.get('all_healthy', False), f"CRITICAL: Environment {env_name} unhealthy under memory pressure"
+                    
+                except Exception as e:
+                    logger.error(f"Memory pressure environment {i} failed: {e}")
+                
+                # Brief pause between creations
+                time.sleep(0.5)
+            
+            # CRITICAL memory pressure validations
+            assert pressure_metrics['environments_created'] >= 6, \
+                f"CRITICAL: Only {pressure_metrics['environments_created']}/8 environments survived memory pressure"
+            
+            # No memory violations allowed in critical infrastructure
+            assert pressure_metrics['memory_violations'] == 0, \
+                f"CRITICAL: {pressure_metrics['memory_violations']} memory violations detected"
+            
+            # System should remain stable
+            final_memory = psutil.virtual_memory()
+            memory_increase_mb = (final_memory.used - initial_memory.used) / (1024 * 1024)
+            assert memory_increase_mb < 4000, \
+                f"CRITICAL: System memory increased by {memory_increase_mb:.2f}MB > 4000MB"
+            
+            logger.info(f"CRITICAL memory pressure test PASSED: {pressure_metrics}")
+            
+        finally:
+            # Critical cleanup to release memory pressure
+            for env_name in memory_pressure_environments:
+                try:
+                    self.manager.release_environment(env_name)
+                except Exception as e:
+                    logger.error(f"CRITICAL memory pressure cleanup failed for {env_name}: {e}")
+            
+            # Force garbage collection
+            import gc
+            gc.collect()
+    
+    # ==========================================
     # FINAL VALIDATION TESTS
     # ==========================================
     
