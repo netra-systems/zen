@@ -525,24 +525,18 @@ class SupervisorAgent(BaseAgent):
             message: Thinking message to emit
         """
         try:
-            # Use websocket_connection_id if available for targeted emission
-            if context.websocket_connection_id:
-                await self.websocket_bridge.emit_agent_thinking(
-                    connection_id=context.websocket_connection_id,
-                    agent_name="Supervisor",
-                    message=message
-                )
-            else:
-                # Fallback to user-based emission
-                await self.websocket_bridge.emit_user_notification(
-                    user_id=context.user_id,
-                    notification_type="agent_thinking",
-                    data={
-                        "agent_name": "Supervisor",
-                        "message": message,
-                        "run_id": context.run_id
-                    }
-                )
+            # Use the core emit_agent_event method with proper parameters
+            await self.websocket_bridge.emit_agent_event(
+                event_type="agent_thinking",
+                data={
+                    "agent_name": "Supervisor",
+                    "message": message,
+                    "connection_id": context.websocket_connection_id,
+                    "user_id": context.user_id
+                },
+                run_id=context.run_id,
+                agent_name="Supervisor"
+            )
         except Exception as e:
             logger.debug(f"Failed to emit thinking message: {e}")
             # Don't fail execution for WebSocket errors
