@@ -8,7 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from starlette.websockets import WebSocketDisconnect
 from fastapi import WebSocket
 
-from netra_backend.app.db.models_postgres import Run, Thread
+from netra_backend.app.db.models_postgres import Message, Run, Thread
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.services.service_interfaces import IMessageHandlerService
 
@@ -408,7 +408,7 @@ class MessageHandlerService(IMessageHandlerService):
         self, user_id: str, thread_id: str, db_session: AsyncSession
     ) -> Optional[Thread]:
         """Validate existing thread ownership"""
-        thread = await self.thread_service.get_thread(thread_id, db_session)
+        thread = await self.thread_service.get_thread(thread_id, user_id=user_id, db=db_session)
         if thread and thread.metadata_.get("user_id") != user_id:
             await manager.send_error(user_id, "Access denied to thread")
             return None
@@ -492,14 +492,51 @@ class MessageHandlerService(IMessageHandlerService):
         self,
         user_id: str,
         payload: SwitchThreadPayload,
-        db_session: Optional[AsyncSession]
+        db_session: Optional[AsyncSession],
+        websocket: Optional[WebSocket] = None
     ) -> None:
-        """Handle switch_thread message type - join user to thread room"""
+        """Handle switch_thread message type - join room AND load thread data"""
         thread_id = payload.get("thread_id")
         if not thread_id:
             await manager.send_error(user_id, "Thread ID required")
             return
+        
+        # Validate thread access and load data if database session available
+        if db_session:
+            thread = await self._validate_existing_thread(user_id, thread_id, db_session)
+            if not thread:
+                # Error already sent by _validate_existing_thread
+                return
+            
+            # Load thread messages
+            try:
+                messages = await self.thread_service.get_thread_messages(thread_id, db=db_session)
+                
+                # Send thread data to client
+                thread_data = {
+                    "type": "thread_data",
+                    "payload": {
+                        "thread_id": thread_id,
+                        "messages": [self._format_message_for_client(msg) for msg in messages],
+                        "metadata": thread.metadata_
+                    }
+                }
+                await manager.send_message(user_id, thread_data)
+                logger.info(f"Sent {len(messages)} messages to user {user_id} for thread {thread_id}")
+            except Exception as e:
+                logger.error(f"Error loading thread messages: {e}")
+                # Continue with thread switch even if message loading fails
+        
+        # Execute room switch
         await self._execute_thread_switch(user_id, thread_id)
+        
+        # Update WebSocket connection thread association if available
+        if self.websocket_manager and websocket:
+            connection_id = self.websocket_manager.get_connection_id_by_websocket(websocket)
+            if connection_id:
+                success = self.websocket_manager.update_connection_thread(connection_id, thread_id)
+                if success:
+                    logger.info(f"✅ Thread association updated for connection={connection_id}, thread={thread_id}")
     
     async def _execute_thread_switch(self, user_id: str, thread_id: str) -> None:
         """Execute the thread switch operation"""
@@ -507,6 +544,25 @@ class MessageHandlerService(IMessageHandlerService):
         await manager.broadcasting.leave_all_rooms(user_id)
         await manager.broadcasting.join_room(user_id, thread_id)
         logger.info(f"User {user_id} switched to thread {thread_id}")
+    
+    def _format_message_for_client(self, message: Message) -> Dict[str, Any]:
+        """Format database message for client consumption"""
+        # Extract content from the structured format
+        content_value = ""
+        if message.content and isinstance(message.content, list) and len(message.content) > 0:
+            first_content = message.content[0]
+            if isinstance(first_content, dict) and "text" in first_content:
+                text_obj = first_content["text"]
+                if isinstance(text_obj, dict) and "value" in text_obj:
+                    content_value = text_obj["value"]
+        
+        return {
+            "id": str(message.id),
+            "role": message.role,
+            "content": content_value,
+            "timestamp": message.created_at if hasattr(message, 'created_at') else None,
+            "metadata": message.metadata_ if hasattr(message, 'metadata_') else {}
+        }
 
     # Interface implementation methods
     async def handle_message(self, user_id: str, message: Dict[str, Any]):

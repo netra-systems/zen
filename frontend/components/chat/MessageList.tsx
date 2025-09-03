@@ -156,7 +156,7 @@ export const MessageList: React.FC = () => {
   }));
 
   return (
-    <ScrollArea ref={scrollAreaRef} className="h-[calc(100vh-250px)] px-6 py-4 overflow-y-auto">
+    <ScrollArea ref={scrollAreaRef} className="h-[calc(100vh-180px)] px-4 py-2 overflow-y-auto">
       <AnimatePresence initial={false}>
         {displayedMessages.length === 0 && (
           <motion.div

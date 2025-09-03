@@ -334,8 +334,12 @@ const handleLoadingResult = (
     }
     
     // Update URL if enabled and not skipped
+    // Use setTimeout to ensure store update completes first
     if (options?.updateUrl && !options?.skipUrlUpdate && updateUrl) {
-      updateUrl(threadId);
+      // Delay URL update slightly to avoid race with store-triggered update
+      setTimeout(() => {
+        updateUrl(threadId);
+      }, 50);
     }
     
     setState(prev => ({

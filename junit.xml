@@ -1,9 +1,1 @@
-<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="1" failures="0" skipped="0" tests="1" time="0.070" timestamp="2025-09-03T07:34:57.832796-07:00" hostname="Shivanginis-MacBook-Pro.local"><testcase classname="" name="tests.integration.test_database_connection" time="0.000"><error message="collection failure">ImportError while importing test module '/Users/anthony/Documents/GitHub/netra-apex/auth_service/tests/integration/test_database_connection.py'.
-Hint: make sure your test modules/packages have valid Python names.
-Traceback:
-/opt/homebrew/Cellar/python@3.12/3.12.3/Frameworks/Python.framework/Versions/3.12/lib/python3.12/importlib/__init__.py:90: in import_module
-    return _bootstrap._gcd_import(name[level:], package, level)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-auth_service/tests/integration/test_database_connection.py:15: in &lt;module&gt;
-    from test_framework import setup_test_path
-E   ImportError: cannot import name 'setup_test_path' from 'test_framework' (/Users/anthony/Documents/GitHub/netra-apex/test_framework/__init__.py)</error></testcase></testsuite></testsuites>
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="0" skipped="0" tests="0" time="0.101" timestamp="2025-09-03T09:17:33.678805-07:00" hostname="Anthony" /></testsuites>

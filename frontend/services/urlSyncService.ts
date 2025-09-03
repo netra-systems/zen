@@ -32,10 +32,13 @@ export const useURLSync = (config: Partial<urlSyncTypes.UrlSyncConfig> = {}): ur
   
   const lastSyncedRef = useRef<string | null>(null);
   const isUpdatingRef = useRef(false);
+  const isManualUpdateRef = useRef(false);
 
-  // Listen to store changes and update URL
+  // Listen to store changes and update URL (skip during manual updates)
   useEffect(() => {
-    urlSyncHandlers.handleStoreToUrlSync(activeThreadId, fullConfig, pathname, router, lastSyncedRef, isUpdatingRef);
+    if (!isManualUpdateRef.current) {
+      urlSyncHandlers.handleStoreToUrlSync(activeThreadId, fullConfig, pathname, router, lastSyncedRef, isUpdatingRef);
+    }
   }, [activeThreadId, pathname, router]);
 
   const syncUrlToStore = useCallback(async (url: string, switchToThread?: urlSyncTypes.ThreadSwitchFunction): Promise<boolean> => {
@@ -44,7 +47,13 @@ export const useURLSync = (config: Partial<urlSyncTypes.UrlSyncConfig> = {}): ur
   }, []);
 
   const syncStoreToUrl = useCallback((threadId: string | null): void => {
+    // Set manual update flag to prevent auto-sync race condition
+    isManualUpdateRef.current = true;
     urlSyncHandlers.performStoreToUrlSync(threadId, fullConfig, router, lastSyncedRef);
+    // Clear flag after a short delay to re-enable auto-sync
+    setTimeout(() => {
+      isManualUpdateRef.current = false;
+    }, 100);
   }, [router]);
 
   const validateThreadId = useCallback(async (threadId: string): Promise<boolean> => {
