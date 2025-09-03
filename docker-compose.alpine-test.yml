@@ -115,7 +115,7 @@ services:
       cache_from:
         - python:3.11-alpine3.19
     environment:
-      ENVIRONMENT: testing
+      ENVIRONMENT: test
       LOG_LEVEL: ERROR
       POSTGRES_HOST: alpine-test-postgres
       POSTGRES_PORT: 5432
@@ -129,6 +129,10 @@ services:
       AUTH_SERVICE_URL: http://alpine-test-auth:8081
       TEST_MODE: "true"
       WORKERS: 2
+      SERVICE_ID: backend-test-alpine
+      JWT_SECRET_KEY: rsWwwvq8X6mCSuNv-TMXHDCfb96Xc-Dbay9MZy6EDCU
+      SERVICE_SECRET: test_service_secret
+      FERNET_KEY: hMT-Xu0HfnNhKf-J5sKXMJLnCfCiSUQnVdE1yc6Xqzg=
     ports:
       - "${ALPINE_TEST_BACKEND_PORT:-8002}:8000"
     depends_on:
@@ -164,7 +168,7 @@ services:
       cache_from:
         - python:3.11-alpine3.19
     environment:
-      ENVIRONMENT: testing
+      ENVIRONMENT: test
       LOG_LEVEL: ERROR
       POSTGRES_HOST: alpine-test-postgres
       POSTGRES_PORT: 5432
@@ -176,6 +180,7 @@ services:
       TEST_MODE: "true"
       JWT_SECRET_KEY: rsWwwvq8X6mCSuNv-TMXHDCfb96Xc-Dbay9MZy6EDCU
       SERVICE_SECRET: test_service_secret
+      SERVICE_ID: auth-test-alpine
     ports:
       - "${ALPINE_TEST_AUTH_PORT:-8083}:8081"
     depends_on:

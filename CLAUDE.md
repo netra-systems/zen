@@ -407,7 +407,7 @@ python scripts/docker_manual.py status --alpine
 ```
 
 **Alpine Compose Files:**
-- `docker-compose.alpine-test.yml` - Test environment with tmpfs storage
+- `docker-compose.alpine-test.yml` - Test environment with named volumes (stable storage)
 - `docker-compose.alpine.yml` - Development environment
 - Alpine Dockerfiles: `docker/backend.alpine.Dockerfile`, `docker/auth.alpine.Dockerfile`, `docker/frontend.alpine.Dockerfile`
 
@@ -416,7 +416,10 @@ python scripts/docker_manual.py status --alpine
 - **✓ CI/CD pipelines** (faster builds, lower resource usage)
 - **✓ Development** (when memory is constrained)
 
-Docker tmpfs storage = bad crashes
+**⚠️ CRITICAL WARNING: tmpfs Storage Removed**
+Docker tmpfs storage has been completely removed from the codebase as it causes system crashes due to RAM exhaustion. 
+ALL Docker configurations now use named volumes for persistent, stable storage that doesn't consume system RAM.
+Never re-introduce tmpfs mounts - they will crash the system.
 
 **Performance Optimizations in Alpine:**
 - **Minimal base images** (python:3.11-alpine3.19)
