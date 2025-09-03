@@ -122,8 +122,8 @@ class TestWebSocketThreadRouting:
     @pytest.mark.asyncio
     async def test_websocket_notification_with_correct_thread_id(self, bridge, websocket_manager):
         """Test that WebSocket notifications use the correct thread_id."""
-        # Test run_id with expected thread extraction
-        run_id = "thread_user123_run_1756919162904_abc123"
+        # Test run_id with expected thread extraction (8 hex chars for UUID)
+        run_id = "thread_user123_run_1756919162904_abc12345"
         agent_name = "TestAgent"
         
         # Send agent_started notification
@@ -147,7 +147,7 @@ class TestWebSocketThreadRouting:
     @pytest.mark.asyncio  
     async def test_thread_resolution_priority_chain(self, bridge, websocket_manager, thread_registry):
         """Test the 5-priority resolution chain for thread_id."""
-        run_id = "thread_test_priority_run_123456_xyz"
+        run_id = "thread_test_priority_run_123456_12345678"  # Fixed: 8 hex chars
         
         # Priority 1: Registry returns None (not found)
         thread_registry.get_thread.return_value = None
@@ -206,7 +206,7 @@ class TestWebSocketThreadRouting:
     @pytest.mark.asyncio
     async def test_all_notification_types_use_correct_thread(self, bridge, websocket_manager):
         """Test that all notification types properly route to thread_id."""
-        run_id = "thread_notification_test_run_123_abc"
+        run_id = "thread_notification_test_run_123_abc12345"  # Fixed: 8 hex chars
         expected_thread = "thread_notification_test"
         
         # Test agent_started
@@ -236,7 +236,7 @@ class TestWebSocketThreadRouting:
         bridge = AgentWebSocketBridge()
         
         # Test run_id_generator format
-        run_id_gen = "thread_user123_run_1756919162904_abc"
+        run_id_gen = "thread_user123_run_1756919162904_abc12345"  # Fixed: 8 hex chars
         extracted_gen = bridge._extract_thread_from_standardized_run_id(run_id_gen)
         assert extracted_gen == "thread_user123"
         
