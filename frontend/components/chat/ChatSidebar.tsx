@@ -14,9 +14,6 @@ import {
   useThreadLoader, 
   useThreadFiltering 
 } from './ChatSidebarHooks';
-import { 
-  createNewChatHandler
-} from './ChatSidebarHandlers';
 import {
   NewChatButton,
   AdminControls,
