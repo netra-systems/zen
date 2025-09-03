@@ -412,29 +412,22 @@ class StartupOrchestrator:
         self.logger.info(f"    - Registry: {'✓' if health_status.registry_healthy else '✗'}")
     
     async def _verify_tool_dispatcher_websocket_support(self) -> None:
-        """Verify tool dispatcher has AgentWebSocketBridge support."""
-        # Get tool dispatcher
-        tool_dispatcher = self.app.state.tool_dispatcher
-        if not tool_dispatcher:
-            raise DeterministicStartupError("Tool dispatcher not available for verification")
+        """Verify tool dispatcher configuration for UserContext-based creation."""
+        # In UserContext-based architecture, tool_dispatcher is intentionally None
+        # Verify that we have the configuration needed for per-user creation instead
+        if not hasattr(self.app.state, 'tool_classes') or not self.app.state.tool_classes:
+            raise DeterministicStartupError("Tool classes not available for UserContext-based tool dispatcher creation")
         
-        # Connect tool dispatcher to bridge if not already connected
+        if not hasattr(self.app.state, 'websocket_bridge_factory'):
+            raise DeterministicStartupError("WebSocket bridge factory not available for UserContext-based creation")
+        
+        # Verify bridge is available for factory
         bridge = self.app.state.agent_websocket_bridge
-        if bridge and hasattr(tool_dispatcher, 'executor'):
-            if not hasattr(tool_dispatcher.executor, 'websocket_bridge') or not tool_dispatcher.executor.websocket_bridge:
-                # Connect the bridge to tool dispatcher
-                tool_dispatcher.executor.websocket_bridge = bridge
-                self.logger.info("    - AgentWebSocketBridge connected to tool dispatcher")
+        if not bridge:
+            raise DeterministicStartupError("AgentWebSocketBridge not available for UserContext-based creation")
         
-        # Check if it has WebSocket support through bridge
-        if hasattr(tool_dispatcher, 'has_websocket_support'):
-            if tool_dispatcher.has_websocket_support:
-                self.logger.info("    - Tool dispatcher has WebSocket support through AgentWebSocketBridge")
-            else:
-                self.logger.warning("    - Tool dispatcher lacks WebSocket support - events may not work")
-        else:
-            # Legacy check for older versions
-            self.logger.info("    - Tool dispatcher doesn't expose WebSocket support status (legacy)")
+        self.logger.info("    - Tool dispatcher configuration verified for UserContext-based creation")
+        self.logger.info("    - WebSocket support will be provided through per-user bridges")
         
         # Also ensure registry has WebSocket bridge connection for agents
         supervisor = self.app.state.agent_supervisor
