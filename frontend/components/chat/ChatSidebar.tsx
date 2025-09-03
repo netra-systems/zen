@@ -1,12 +1,10 @@
 "use client";
 
 import React, { useCallback } from 'react';
-import React, { useCallback } from 'react';
 import { useUnifiedChatStore } from '@/store/unified-chat';
 import { useAuthStore } from '@/store/authStore';
 import { useAuthState } from '@/hooks/useAuthState';
 import { useWebSocket } from '@/hooks/useWebSocket';
-import { useThreadSwitching } from '@/hooks/useThreadSwitching';
 import { useThreadSwitching } from '@/hooks/useThreadSwitching';
 import { AuthGate } from '@/components/auth/AuthGate';
 import { 
