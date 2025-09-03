@@ -1279,7 +1279,8 @@ CMD ["npm", "start"]
             print(f"\nTesting {environment} environment...")
             
             # Set environment variables for the test using proper environment management
-            env = get_env()
+            from shared.isolated_environment import IsolatedEnvironment
+            env = IsolatedEnvironment.get_instance()
             env.set("AUTH_SERVICE_URL", service_urls.get("auth", ""), "deploy_gcp_post_deployment_test")
             env.set("BACKEND_URL", service_urls.get("backend", ""), "deploy_gcp_post_deployment_test")
             
