@@ -15,8 +15,8 @@ def enhance_tool_dispatcher_with_notifications(tool_dispatcher: Any, websocket_m
     """
     Enhance a tool dispatcher with WebSocket notification capabilities.
     
-    This function wraps the tool dispatcher's execute method to send WebSocket
-    notifications during tool execution.
+    This function replaces the tool dispatcher's executor with a 
+    UnifiedToolExecutionEngine that has WebSocket notification capabilities.
     
     Args:
         tool_dispatcher: The tool dispatcher to enhance
@@ -31,66 +31,31 @@ def enhance_tool_dispatcher_with_notifications(tool_dispatcher: Any, websocket_m
         logger.debug("Tool dispatcher already enhanced with WebSocket notifications")
         return
     
-    # Store the original execute method
-    original_execute = getattr(tool_dispatcher, 'execute', None)
-    if not original_execute:
-        logger.warning("Tool dispatcher has no execute method to enhance")
-        return
+    # Import required components
+    from netra_backend.app.agents.unified_tool_execution import UnifiedToolExecutionEngine
+    from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
     
-    async def enhanced_execute(tool_name: str, *args, **kwargs):
-        """Enhanced execute method with WebSocket notifications"""
-        thread_id = kwargs.get('thread_id')
-        
-        # Send tool executing notification
-        if websocket_manager and thread_id:
-            try:
-                await websocket_manager.send_message({
-                    'type': 'tool_executing',
-                    'tool': tool_name,
-                    'thread_id': thread_id
-                })
-            except Exception as e:
-                logger.error(f"Failed to send tool_executing notification: {e}")
-        
-        # Execute the original tool
-        try:
-            result = await original_execute(tool_name, *args, **kwargs)
-            
-            # Send tool completed notification
-            if websocket_manager and thread_id:
-                try:
-                    await websocket_manager.send_message({
-                        'type': 'tool_completed',
-                        'tool': tool_name,
-                        'thread_id': thread_id,
-                        'success': True
-                    })
-                except Exception as e:
-                    logger.error(f"Failed to send tool_completed notification: {e}")
-            
-            return result
-            
-        except Exception as e:
-            # Send tool failed notification
-            if websocket_manager and thread_id:
-                try:
-                    await websocket_manager.send_message({
-                        'type': 'tool_completed',
-                        'tool': tool_name,
-                        'thread_id': thread_id,
-                        'success': False,
-                        'error': str(e)
-                    })
-                except Exception as e2:
-                    logger.error(f"Failed to send tool_failed notification: {e2}")
-            raise
+    # Create WebSocket bridge
+    websocket_bridge = AgentWebSocketBridge()
+    websocket_bridge.websocket_manager = websocket_manager
     
-    # Replace the execute method with the enhanced version
-    tool_dispatcher.execute = enhanced_execute
+    # Replace executor with enhanced version
+    enhanced_executor = UnifiedToolExecutionEngine(
+        websocket_bridge=websocket_bridge,
+        permission_service=getattr(tool_dispatcher.executor, 'permission_service', None) if hasattr(tool_dispatcher, 'executor') else None
+    )
+    
+    # Store reference to websocket manager for compatibility
+    enhanced_executor.websocket_manager = websocket_manager
+    
+    # Replace the executor
+    tool_dispatcher.executor = enhanced_executor
+    
+    # Mark as enhanced to prevent double enhancement
     tool_dispatcher._websocket_enhanced = True
     tool_dispatcher._websocket_manager = websocket_manager
     
-    logger.info("Successfully enhanced tool dispatcher with WebSocket notifications")
+    logger.info("✅ Tool dispatcher enhanced with UnifiedToolExecutionEngine and WebSocket notifications")
 
 
 # For backward compatibility, also export from unified_tool_execution
