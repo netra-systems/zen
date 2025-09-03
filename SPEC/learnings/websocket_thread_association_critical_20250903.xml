@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learning>
+  <metadata>
+    <title>CRITICAL: WebSocket Thread Association Timing Issue</title>
+    <date>2025-09-03</date>
+    <severity>CRITICAL</severity>
+    <category>websocket,threading,message-routing</category>
+    <impact>High - Affects all WebSocket message routing to threads</impact>
+  </metadata>
+
+  <problem>
+    <description>
+      WebSocket connections were failing to route messages to specific threads because
+      thread_id was None at connection time. The system expected thread association
+      at connection establishment, but thread context only becomes available after
+      the first message is received.
+    </description>
+    
+    <symptoms>
+      <symptom>WARNING: No connections found for thread thread_374579bdba3c41b8</symptom>
+      <symptom>DEBUG: Sample connection thread_ids: [None]</symptom>
+      <symptom>Agent events not reaching WebSocket clients</symptom>
+      <symptom>Thread-specific messages lost</symptom>
+    </symptoms>
+    
+    <root_cause>
+      Fundamental timing mismatch in WebSocket connection lifecycle:
+      1. Connection established without thread context (thread_id=None)
+      2. Thread context arrives later via message payload
+      3. System attempts to route to thread-specific connections
+      4. No connections match because all have thread_id=None
+    </root_cause>
+  </problem>
+
+  <solution>
+    <approach>Dynamic Thread Association</approach>
+    <implementation>
+      <change file="netra_backend/app/websocket_core/manager.py">
+        <method>update_connection_thread(connection_id, thread_id)</method>
+        <purpose>Allow thread association after connection establishment</purpose>
+        <lines>732-755</lines>
+      </change>
+      
+      <change file="netra_backend/app/websocket_core/manager.py">
+        <method>get_connection_id_by_websocket(websocket)</method>
+        <purpose>Find connection ID from WebSocket instance</purpose>
+        <lines>757-770</lines>
+      </change>
+      
+      <change file="netra_backend/app/websocket_core/agent_handler.py">
+        <location>handle_message method</location>
+        <purpose>Update thread association when messages arrive</purpose>
+        <lines>54-68</lines>
+      </change>
+    </implementation>
+  </solution>
+
+  <critical_insights>
+    <insight>
+      WebSocket connections MUST support dynamic thread assignment because
+      thread context is not available at connection time. This is a fundamental
+      architectural requirement, not a bug.
+    </insight>
+    <insight>
+      The pattern of "establish connection first, assign context later" appears
+      throughout the codebase and must be respected in all WebSocket handling.
+    </insight>
+    <insight>
+      Thread switching during active connections is a valid use case that must
+      be supported for chat continuity.
+    </insight>
+  </critical_insights>
+
+  <related_components>
+    <component>WebSocketManager - Central connection management</component>
+    <component>AgentMessageHandler - Processes agent messages</component>
+    <component>MessageRouter - Routes messages to handlers</component>
+    <component>ThreadService - Manages thread lifecycle</component>
+    <component>ExecutionEngine - Sends WebSocket notifications</component>
+  </related_components>
+
+  <testing>
+    <test_file>tests/mission_critical/test_websocket_thread_association.py</test_file>
+    <test_scenarios>
+      <scenario>Connection without initial thread_id</scenario>
+      <scenario>Dynamic thread association on message</scenario>
+      <scenario>Thread-specific message routing</scenario>
+      <scenario>Multiple connections per thread</scenario>
+      <scenario>Thread switching during connection</scenario>
+    </test_scenarios>
+  </testing>
+
+  <cross_references>
+    <ref>WEBSOCKET_THREAD_CONNECTION_BUG_FIX_20250903.md</ref>
+    <ref>SPEC/learnings/websocket_agent_integration_critical.xml</ref>
+    <ref>docs/AGENT_ARCHITECTURE_DISAMBIGUATION_GUIDE.md</ref>
+    <ref>USER_CONTEXT_ARCHITECTURE.md</ref>
+  </cross_references>
+
+  <action_items>
+    <action status="completed">Add update_connection_thread method</action>
+    <action status="completed">Update AgentMessageHandler</action>
+    <action status="pending">Audit other message handlers for thread updates</action>
+    <action status="pending">Update WebSocket documentation</action>
+    <action status="pending">Add thread lifecycle monitoring</action>
+  </action_items>
+
+  <prevention>
+    <guideline>
+      ALWAYS allow connections without thread_id and update dynamically
+    </guideline>
+    <guideline>
+      NEVER assume thread context exists at connection time
+    </guideline>
+    <guideline>
+      ALL message handlers processing thread_id must call update_connection_thread
+    </guideline>
+    <guideline>
+      Test thread association with real WebSocket connections, not mocks
+    </guideline>
+  </prevention>
+</learning>
