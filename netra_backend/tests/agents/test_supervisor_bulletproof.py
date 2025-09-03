@@ -34,7 +34,7 @@ from netra_backend.app.agents.supervisor.execution_context import (
 from netra_backend.app.schemas.core_enums import ExecutionStatus
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
-from netra_backend.app.websocket_core import UnifiedWebSocketManager
+from netra_backend.app.websocket_core import WebSocketManager
 from netra_backend.app.schemas.websocket_models import WebSocketMessage
 from netra_backend.app.agents.base_agent import BaseAgent
 

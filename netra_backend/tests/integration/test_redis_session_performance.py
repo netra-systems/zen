@@ -1,6 +1,8 @@
 from shared.isolated_environment import get_env
-"""
+
 env = get_env()
+
+"""
 Redis Session Performance Tests
 
 Business Value Justification (BVJ):

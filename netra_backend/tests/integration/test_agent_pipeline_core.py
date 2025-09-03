@@ -1,6 +1,8 @@
 from shared.isolated_environment import get_env
-"""
+
 env = get_env()
+
+"""
 Agent Response Pipeline Core Tests - REAL SERVICES
 
 Business Value Justification (BVJ):
