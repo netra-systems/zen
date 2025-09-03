@@ -952,7 +952,7 @@ async def run_single_test(test_name: str):
 
 
     # =============================================================================
-    # NEW COMPREHENSIVE AUTHENTICATION FLOW VALIDATION TESTS
+    # NEW COMPREHENSIVE AUTHENTICATION FLOW VALIDATION TESTS (25+ TESTS)
     # =============================================================================
     
     async def test_09_complete_signup_to_chat_flow(self):
@@ -2121,8 +2121,282 @@ async def run_single_test(test_name: str):
         # Re-encode with wrong secret
         return jwt.encode(decoded, "wrong_secret", algorithm="HS256")
     
-    # Additional helper methods would be implemented for all the test scenarios...
-    # (Truncated for space, but would include all methods referenced in tests)
+    # Additional comprehensive helper methods for all test scenarios
+    
+    async def _test_oauth_init(self, provider: str, scope: str, redirect_uri: str = None) -> Dict:
+        """Test OAuth initialization flow."""
+        try:
+            oauth_data = {
+                "provider": provider,
+                "scope": scope,
+                "redirect_uri": redirect_uri or f"https://staging.netra.ai/auth/{provider}/callback"
+            }
+            
+            async with httpx.AsyncClient(timeout=10.0) as client:
+                response = await client.post(
+                    f"{self.staging_auth_url}/oauth/{provider}/init",
+                    json=oauth_data
+                )
+                return {"status": response.status_code, "data": response.json()}
+        except Exception as e:
+            return {"status": 500, "error": str(e)}
+    
+    async def _test_oauth_callback(self, provider: str, authorization_code: str, state: str) -> Dict:
+        """Test OAuth callback handling."""
+        try:
+            callback_data = {
+                "code": authorization_code,
+                "state": state
+            }
+            
+            async with httpx.AsyncClient(timeout=10.0) as client:
+                response = await client.post(
+                    f"{self.staging_auth_url}/oauth/{provider}/callback",
+                    json=callback_data
+                )
+                return {"status": response.status_code, "data": response.json()}
+        except Exception as e:
+            return {"status": 500, "error": str(e)}
+    
+    async def _test_oauth_profile_access(self, token: str) -> Dict:
+        """Test OAuth profile access."""
+        try:
+            headers = {"Authorization": f"Bearer {token}"}
+            
+            async with httpx.AsyncClient(timeout=10.0) as client:
+                response = await client.get(
+                    f"{self.staging_backend_url}/api/user/oauth/profile",
+                    headers=headers
+                )
+                return {"status": response.status_code, "data": response.json()}
+        except Exception as e:
+            return {"status": 500, "error": str(e)}
+    
+    async def _test_mfa_setup(self, token: str, method: str) -> Dict:
+        """Test MFA setup process."""
+        try:
+            headers = {"Authorization": f"Bearer {token}"}
+            mfa_data = {"method": method}
+            
+            async with httpx.AsyncClient(timeout=10.0) as client:
+                response = await client.post(
+                    f"{self.staging_auth_url}/mfa/setup",
+                    headers=headers,
+                    json=mfa_data
+                )
+                return {"status": response.status_code, "data": response.json()}
+        except Exception as e:
+            return {"status": 500, "error": str(e)}
+    
+    async def _test_mfa_enable(self, token: str, secret: str, code: str) -> Dict:
+        """Test MFA enable process."""
+        try:
+            headers = {"Authorization": f"Bearer {token}"}
+            mfa_data = {"secret": secret, "code": code}
+            
+            async with httpx.AsyncClient(timeout=10.0) as client:
+                response = await client.post(
+                    f"{self.staging_auth_url}/mfa/enable",
+                    headers=headers,
+                    json=mfa_data
+                )
+                return {"status": response.status_code, "data": response.json()}
+        except Exception as e:
+            return {"status": 500, "error": str(e)}
+    
+    async def _test_mfa_login(self, email: str, password: str, mfa_code: str) -> Dict:
+        """Test MFA login process."""
+        try:
+            login_data = {
+                "email": email,
+                "password": password,
+                "mfa_code": mfa_code
+            }
+            
+            async with httpx.AsyncClient(timeout=10.0) as client:
+                response = await client.post(
+                    f"{self.staging_auth_url}/auth/login-mfa",
+                    json=login_data
+                )
+                return {"status": response.status_code, "data": response.json()}
+        except Exception as e:
+            return {"status": 500, "error": str(e)}
+    
+    async def _test_password_reset_request(self, email: str) -> Dict:
+        """Test password reset request."""
+        try:
+            reset_data = {"email": email}
+            
+            async with httpx.AsyncClient(timeout=10.0) as client:
+                response = await client.post(
+                    f"{self.staging_auth_url}/auth/password-reset/request",
+                    json=reset_data
+                )
+                return {"status": response.status_code, "data": response.json()}
+        except Exception as e:
+            return {"status": 500, "error": str(e)}
+    
+    async def _test_password_reset_confirm(self, reset_token: str, new_password: str) -> Dict:
+        """Test password reset confirmation."""
+        try:
+            confirm_data = {
+                "reset_token": reset_token,
+                "new_password": new_password
+            }
+            
+            async with httpx.AsyncClient(timeout=10.0) as client:
+                response = await client.post(
+                    f"{self.staging_auth_url}/auth/password-reset/confirm",
+                    json=confirm_data
+                )
+                return {"status": response.status_code, "data": response.json()}
+        except Exception as e:
+            return {"status": 500, "error": str(e)}
+    
+    async def _test_account_unlock(self, email: str) -> Dict:
+        """Test account unlock process."""
+        try:
+            unlock_data = {"email": email}
+            
+            async with httpx.AsyncClient(timeout=10.0) as client:
+                response = await client.post(
+                    f"{self.staging_auth_url}/admin/unlock-account",
+                    json=unlock_data
+                )
+                return {"status": response.status_code, "data": response.json()}
+        except Exception as e:
+            return {"status": 500, "error": str(e)}
+    
+    async def _test_api_key_generation(self, token: str, name: str) -> Dict:
+        """Test API key generation."""
+        try:
+            headers = {"Authorization": f"Bearer {token}"}
+            key_data = {"name": name}
+            
+            async with httpx.AsyncClient(timeout=10.0) as client:
+                response = await client.post(
+                    f"{self.staging_backend_url}/api/keys/generate",
+                    headers=headers,
+                    json=key_data
+                )
+                return {"status": response.status_code, "data": response.json()}
+        except Exception as e:
+            return {"status": 500, "error": str(e)}
+    
+    async def _test_api_key_authentication(self, api_key: str) -> Dict:
+        """Test API key authentication."""
+        try:
+            headers = {"X-API-Key": api_key}
+            
+            async with httpx.AsyncClient(timeout=10.0) as client:
+                response = await client.get(
+                    f"{self.staging_backend_url}/api/auth/validate-key",
+                    headers=headers
+                )
+                return {"status": response.status_code, "data": response.json()}
+        except Exception as e:
+            return {"status": 500, "error": str(e)}
+    
+    async def _test_api_call_with_key(self, api_key: str, endpoint: str) -> Dict:
+        """Test API call with API key."""
+        try:
+            headers = {"X-API-Key": api_key}
+            
+            async with httpx.AsyncClient(timeout=10.0) as client:
+                response = await client.get(
+                    f"{self.staging_backend_url}{endpoint}",
+                    headers=headers
+                )
+                return {"status": response.status_code, "data": response.json()}
+        except Exception as e:
+            return {"status": 500, "error": str(e)}
+    
+    async def _test_api_key_revocation(self, token: str, api_key: str) -> Dict:
+        """Test API key revocation."""
+        try:
+            headers = {"Authorization": f"Bearer {token}"}
+            revoke_data = {"api_key": api_key}
+            
+            async with httpx.AsyncClient(timeout=10.0) as client:
+                response = await client.post(
+                    f"{self.staging_backend_url}/api/keys/revoke",
+                    headers=headers,
+                    json=revoke_data
+                )
+                return {"status": response.status_code, "data": response.json()}
+        except Exception as e:
+            return {"status": 500, "error": str(e)}
+    
+    async def _test_websocket_authentication(self, token: str) -> Dict:
+        """Test WebSocket authentication."""
+        try:
+            # Mock WebSocket authentication test
+            auth_data = {"token": token}
+            
+            async with httpx.AsyncClient(timeout=10.0) as client:
+                response = await client.post(
+                    f"{self.staging_backend_url}/ws/auth",
+                    json=auth_data
+                )
+                
+                if response.status_code == 200:
+                    return {"success": True, "data": response.json()}
+                else:
+                    return {"success": False, "error": response.text}
+        except Exception as e:
+            return {"success": False, "error": str(e)}
+    
+    async def _test_websocket_message_sending(self, token: str, message: Dict) -> Dict:
+        """Test WebSocket message sending."""
+        try:
+            headers = {"Authorization": f"Bearer {token}"}
+            
+            async with httpx.AsyncClient(timeout=10.0) as client:
+                response = await client.post(
+                    f"{self.staging_backend_url}/ws/send",
+                    headers=headers,
+                    json=message
+                )
+                
+                return {"success": response.status_code == 200, "data": response.json()}
+        except Exception as e:
+            return {"success": False, "error": str(e)}
+    
+    async def _test_websocket_token_refresh(self, old_token: str, refresh_token: str) -> Dict:
+        """Test WebSocket token refresh."""
+        try:
+            refresh_data = {"refresh_token": refresh_token}
+            
+            async with httpx.AsyncClient(timeout=10.0) as client:
+                response = await client.post(
+                    f"{self.staging_auth_url}/auth/refresh",
+                    json=refresh_data
+                )
+                
+                if response.status_code == 200:
+                    # Test new token with WebSocket
+                    new_token = response.json()["access_token"]
+                    ws_test = await self._test_websocket_authentication(new_token)
+                    return {"success": ws_test["success"], "new_token": new_token}
+                else:
+                    return {"success": False, "error": response.text}
+        except Exception as e:
+            return {"success": False, "error": str(e)}
+    
+    async def _test_websocket_disconnection(self, token: str) -> Dict:
+        """Test WebSocket disconnection."""
+        try:
+            headers = {"Authorization": f"Bearer {token}"}
+            
+            async with httpx.AsyncClient(timeout=10.0) as client:
+                response = await client.post(
+                    f"{self.staging_backend_url}/ws/disconnect",
+                    headers=headers
+                )
+                
+                return {"success": response.status_code == 200}
+        except Exception as e:
+            return {"success": False, "error": str(e)}
 
 if __name__ == "__main__":
     """
