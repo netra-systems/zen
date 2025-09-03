@@ -13,7 +13,7 @@ import { logger } from '@/lib/logger';
 /**
  * Frontend retry configuration options
  */
-export interface FrontendFrontendRetryConfig {
+export interface FrontendRetryConfig {
   readonly maxAttempts: number;
   readonly baseDelayMs: number;
   readonly maxDelayMs: number;

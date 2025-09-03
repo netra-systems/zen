@@ -11,7 +11,7 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { useUnifiedChatStore } from '@/store/unified-chat';
 import type { UnifiedChatState } from '@/types/store-types';
-import { threadLoadingService } from '@/services/threadLoadingService';
+import { threadLoadingService, type ThreadLoadingResult } from '@/services/threadLoadingService';
 import { 
   threadEventHandler,
   createThreadLoadingEvent,
@@ -300,7 +300,7 @@ const startLoadingState = (
  * Handles successful loading result
  */
 const handleLoadingResult = (
-  result: any,
+  result: ThreadLoadingResult,
   threadId: string,
   operationId: string,
   setState: (state: ThreadSwitchingState) => void,
@@ -310,6 +310,7 @@ const handleLoadingResult = (
   options?: Required<ThreadSwitchingOptions>,
   updateUrl?: (threadId: string | null) => void
 ): boolean => {
+  // executeWithRetry returns the ThreadLoadingResult directly
   if (result && result.success) {
     // Clear timeout and cleanup on success
     if (timeoutManager) {
@@ -348,7 +349,9 @@ const handleLoadingResult = (
     
     return true;
   } else {
-    return handleLoadingError(result.error, threadId, operationId, setState, lastFailedThreadRef, storeActions, timeoutManager);
+    // Handle the case where the result indicates failure
+    const errorMessage = result?.error || 'Thread loading failed';
+    return handleLoadingError(errorMessage, threadId, operationId, setState, lastFailedThreadRef, storeActions, timeoutManager);
   }
 };
 
