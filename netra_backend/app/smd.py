@@ -252,9 +252,11 @@ class StartupOrchestrator:
         
         # Step 11: Tool Registry (CRITICAL - Now can use the pre-created bridge)
         self._initialize_tool_registry()
-        if not hasattr(self.app.state, 'tool_dispatcher') or self.app.state.tool_dispatcher is None:
-            raise DeterministicStartupError("Tool dispatcher initialization failed")
-        self.logger.info("  ✓ Step 11: Tool registry created with WebSocket bridge support")
+        # NOTE: tool_dispatcher is intentionally None for UserContext-based creation
+        # Check that tool classes are configured instead
+        if not hasattr(self.app.state, 'tool_classes') or not self.app.state.tool_classes:
+            raise DeterministicStartupError("Tool classes configuration failed")
+        self.logger.info("  ✓ Step 11: Tool registry configured for UserContext-based creation")
         
         # Step 12: Agent Supervisor (CRITICAL - Create with bridge for proper WebSocket integration)
         await self._initialize_agent_supervisor()
