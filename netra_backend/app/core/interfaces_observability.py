@@ -44,10 +44,10 @@ class CoreSupervisorFlowLogger:
         if run_id:
             self.run_id = run_id
         else:
-            from netra_backend.app.utils.run_id_generator import generate_run_id
+            from netra_backend.app.core.unified_id_manager import UnifiedIDManager
             # Generate generic thread_id for observability logging
             observability_thread_id = f"observability_{str(uuid.uuid4())[:8]}"
-            self.run_id = generate_run_id(observability_thread_id, "observability_logging")
+            self.run_id = UnifiedIDManager.generate_run_id(observability_thread_id, "observability_logging")
         self.enabled = enabled
         self.flow_state = FlowState.PENDING
         self.start_time = time.time()

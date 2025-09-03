@@ -242,11 +242,11 @@ class UnifiedToolExecutionEngine:
         if not tool_name:
             raise ValueError("Tool name is required for execution")
         if not run_id:
-            from netra_backend.app.utils.run_id_generator import generate_run_id
+            from netra_backend.app.core.unified_id_manager import UnifiedIDManager
             import uuid
             # Generate fallback thread_id for tool execution without context
             fallback_thread_id = f"tool_execution_{tool_name}_{uuid.uuid4().hex[:8]}"
-            run_id = generate_run_id(fallback_thread_id, f"unified_tool_fallback_{tool_name}")
+            run_id = UnifiedIDManager.generate_run_id(fallback_thread_id)
             logger.warning(f"No run_id provided for {tool_name}, generated: {run_id}")
         
         start_time = time.time()

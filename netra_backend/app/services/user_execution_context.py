@@ -32,7 +32,7 @@ from typing import Any, Dict, Optional, Union, TYPE_CHECKING
 import logging
 from contextlib import asynccontextmanager
 
-from netra_backend.app.core.id_manager import IDManager
+from netra_backend.app.core.unified_id_manager import UnifiedIDManager
 from netra_backend.app.logging_config import central_logger
 
 if TYPE_CHECKING:
@@ -182,17 +182,17 @@ class UserExecutionContext:
     
     def _validate_id_consistency(self) -> None:
         """Validate ID consistency and format compliance."""
-        # Validate run_id format if using IDManager
-        if hasattr(IDManager, 'validate_run_id'):
-            if not IDManager.validate_run_id(self.run_id):
+        # Validate run_id format using UnifiedIDManager
+        if hasattr(UnifiedIDManager, 'validate_run_id'):
+            if not UnifiedIDManager.validate_run_id(self.run_id):
                 logger.warning(
                     f"run_id '{self.run_id}' does not follow expected format. "
-                    "Consider using IDManager.generate_run_id() for consistency."
+                    "Consider using UnifiedIDManager.generate_run_id() for consistency."
                 )
         
         # Validate thread_id consistency with run_id if extractable
-        if hasattr(IDManager, 'extract_thread_id'):
-            extracted_thread_id = IDManager.extract_thread_id(self.run_id)
+        if hasattr(UnifiedIDManager, 'extract_thread_id'):
+            extracted_thread_id = UnifiedIDManager.extract_thread_id(self.run_id)
             if extracted_thread_id and extracted_thread_id != self.thread_id:
                 logger.warning(
                     f"Thread ID mismatch: run_id contains '{extracted_thread_id}' "

@@ -14,7 +14,7 @@ from typing import Any, Callable, Coroutine, Dict, Optional, Protocol, Union, ru
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.schemas.agent_result_types import TypedAgentResult
 from netra_backend.app.schemas.core_enums import ExecutionStatus
-from netra_backend.app.core.id_manager import IDManager
+from netra_backend.app.core.unified_id_manager import UnifiedIDManager
 # Note: Direct bridge imports removed for SSOT compliance
 # Use emit_* methods from BaseAgent's WebSocketBridgeAdapter instead
 
@@ -52,15 +52,15 @@ class ExecutionContext:
         self._explicit_thread_id = self.thread_id
         
         # Validate run_id format
-        if not IDManager.validate_run_id(self.run_id):
+        if not UnifiedIDManager.validate_run_id(self.run_id):
             # For backwards compatibility, allow invalid run_ids but log warning
             # This allows gradual migration of existing code
             import logging
-            logging.warning(f"Invalid run_id format: '{self.run_id}'. Should be 'run_{{thread_id}}_{{uuid8}}'")
+            logging.warning(f"Invalid run_id format: '{self.run_id}'. Should be 'thread_{{thread_id}}_run_{{timestamp}}_{{uuid8}}'")
         
         # If explicit thread_id was provided, validate consistency
         if self._explicit_thread_id:
-            extracted = IDManager.extract_thread_id(self.run_id)
+            extracted = UnifiedIDManager.extract_thread_id(self.run_id)
             if extracted and extracted != self._explicit_thread_id:
                 import logging
                 logging.warning(
@@ -76,7 +76,7 @@ class ExecutionContext:
         """Get thread_id, deriving from run_id if needed (SSOT pattern)."""
         if self._cached_thread_id is None:
             # Try to extract from run_id first (SSOT priority)
-            extracted = IDManager.extract_thread_id(self.run_id)
+            extracted = UnifiedIDManager.extract_thread_id(self.run_id)
             if extracted:
                 self._cached_thread_id = extracted
             elif self._explicit_thread_id:
@@ -93,7 +93,7 @@ class ExecutionContext:
         """Set thread_id with validation warning."""
         if value:
             # Check consistency with run_id
-            extracted = IDManager.extract_thread_id(self.run_id)
+            extracted = UnifiedIDManager.extract_thread_id(self.run_id)
             if extracted and extracted != value:
                 import logging
                 logging.warning(
