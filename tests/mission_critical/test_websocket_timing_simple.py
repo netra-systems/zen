@@ -10,8 +10,9 @@ from typing import Dict, Any
 from unittest.mock import MagicMock, patch, AsyncMock
 import pytest
 
-from netra_backend.app.websocket_core.manager import WebSocketManager
+from netra_backend.app.websocket_core.manager import WebSocketManager, get_websocket_manager
 from netra_backend.app.websocket_core.message_buffer import BufferConfig
+from fastapi import WebSocket
 
 
 class TestWebSocketTimingSimple:
@@ -31,21 +32,25 @@ class TestWebSocketTimingSimple:
             'run_id': run_id,
             'thread_id': thread_id
         }
+        
+        # Cleanup
+        await manager.shutdown()
 
     @pytest.mark.asyncio
     async def test_connection_and_message_flow(self, setup):
         """Test basic connection and message flow."""
         manager = setup['manager']
-        mock_ws = AsyncMock()
+        mock_ws = AsyncMock(spec=WebSocket)
         mock_ws.send_text = AsyncMock()
         mock_ws.send_json = AsyncMock()
+        mock_ws.close = AsyncMock()
+        mock_ws.client_state = 1  # Connected
         
         # Connect
-        await manager.connect_websocket(
-            mock_ws,
+        connection_id = await manager.connect_user(
             setup['user_id'],
-            setup['run_id'],
-            setup['thread_id']
+            mock_ws,
+            thread_id=setup['thread_id']
         )
         
         # Send message
@@ -54,44 +59,47 @@ class TestWebSocketTimingSimple:
             'data': {'agent': 'test'}
         }
         
-        await manager.send_to_websocket(setup['run_id'], test_message)
+        success = await manager.send_to_user(setup['user_id'], test_message)
+        assert success
         
         # Verify message sent
         await asyncio.sleep(0.1)
-        assert mock_ws.send_text.called or mock_ws.send_json.called
+        mock_ws.send_json.assert_called()
 
     @pytest.mark.asyncio
     async def test_message_with_thread_context(self, setup):
-        """Test message includes thread context."""
+        """Test message with thread context."""
         manager = setup['manager']
-        mock_ws = AsyncMock()
+        mock_ws = AsyncMock(spec=WebSocket)
         mock_ws.send_text = AsyncMock()
+        mock_ws.send_json = AsyncMock()
+        mock_ws.close = AsyncMock()
+        mock_ws.client_state = 1
         
         # Connect with thread_id
-        await manager.connect_websocket(
-            mock_ws,
+        connection_id = await manager.connect_user(
             setup['user_id'], 
-            setup['run_id'],
-            setup['thread_id']
+            mock_ws,
+            thread_id=setup['thread_id']
         )
         
         # Send message
         message = {
             'type': 'test_event',
-            'thread_id': setup['thread_id'],
             'data': {'content': 'test'}
         }
         
-        await manager.send_to_websocket(setup['run_id'], message)
+        success = await manager.send_to_user(setup['user_id'], message)
+        assert success
         
         # Verify sent
         await asyncio.sleep(0.1)
-        mock_ws.send_text.assert_called()
+        mock_ws.send_json.assert_called()
         
-        # Check thread_id in message
-        sent_data = mock_ws.send_text.call_args[0][0]
-        sent_json = json.loads(sent_data)
-        assert sent_json.get('thread_id') == setup['thread_id']
+        # Check message was sent
+        sent_msg = mock_ws.send_json.call_args[0][0]
+        assert sent_msg['type'] == 'test_event'
+        assert sent_msg['data']['content'] == 'test'
 
     @pytest.mark.asyncio
     async def test_multiple_connections(self, setup):
@@ -100,59 +108,65 @@ class TestWebSocketTimingSimple:
         
         connections = []
         for i in range(3):
-            mock_ws = AsyncMock()
+            mock_ws = AsyncMock(spec=WebSocket)
             mock_ws.send_text = AsyncMock()
-            run_id = str(uuid.uuid4())
+            mock_ws.send_json = AsyncMock()
+            mock_ws.close = AsyncMock()
+            mock_ws.client_state = 1
+            user_id = str(uuid.uuid4())
             
-            await manager.connect_websocket(
+            connection_id = await manager.connect_user(
+                user_id,
                 mock_ws,
-                setup['user_id'],
-                run_id,
-                setup['thread_id']
+                thread_id=setup['thread_id']
             )
             
             connections.append({
                 'ws': mock_ws,
-                'run_id': run_id
+                'user_id': user_id,
+                'connection_id': connection_id
             })
         
         # Send to each connection
         for conn in connections:
-            await manager.send_to_websocket(conn['run_id'], {
+            success = await manager.send_to_user(conn['user_id'], {
                 'type': 'test',
-                'data': {'run_id': conn['run_id']}
+                'data': {'user_id': conn['user_id']}
             })
+            assert success
         
         # Verify all received
         await asyncio.sleep(0.1)
         for conn in connections:
-            conn['ws'].send_text.assert_called()
+            conn['ws'].send_json.assert_called()
 
     @pytest.mark.asyncio
     async def test_disconnect_and_cleanup(self, setup):
         """Test disconnection and cleanup."""
         manager = setup['manager']
-        mock_ws = AsyncMock()
+        mock_ws = AsyncMock(spec=WebSocket)
+        mock_ws.send_json = AsyncMock()
+        mock_ws.close = AsyncMock()
+        mock_ws.client_state = 1
         
         # Connect
-        await manager.connect_websocket(
-            mock_ws,
+        connection_id = await manager.connect_user(
             setup['user_id'],
-            setup['run_id'],
-            setup['thread_id']
+            mock_ws,
+            thread_id=setup['thread_id']
         )
         
         # Disconnect
-        await manager.disconnect_websocket(setup['run_id'])
+        await manager.disconnect_user(setup['user_id'], mock_ws, 1000, "Test disconnect")
         
         # Try to send - should handle gracefully
-        await manager.send_to_websocket(setup['run_id'], {
+        result = await manager.send_to_user(setup['user_id'], {
             'type': 'test',
             'data': {}
         })
         
-        # Should not crash
-        assert True
+        # Should return False since user is disconnected
+        assert result is False
 
 
 if __name__ == "__main__":

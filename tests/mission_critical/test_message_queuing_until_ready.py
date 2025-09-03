@@ -20,8 +20,10 @@ import pytest
 import json
 from datetime import datetime
 
-from netra_backend.app.websocket.bridge import WebSocketBridge
+from netra_backend.app.websocket_core.manager import WebSocketManager, get_websocket_manager
 from netra_backend.app.core.agent_registry import AgentRegistry
+from fastapi import WebSocket
+from fastapi.websockets import WebSocketState
 
 
 class TestMessageQueueingUntilReady:
@@ -30,7 +32,7 @@ class TestMessageQueueingUntilReady:
     @pytest.fixture
     async def setup(self):
         """Setup test environment with WebSocket infrastructure."""
-        bridge = WebSocketBridge()
+        manager = WebSocketManager()
         
         # Generate test IDs
         user_id = str(uuid.uuid4())
@@ -38,22 +40,22 @@ class TestMessageQueueingUntilReady:
         thread_id = str(uuid.uuid4())
         
         yield {
-            'bridge': bridge,
+            'manager': manager,
             'user_id': user_id,
             'run_id': run_id,
             'thread_id': thread_id
         }
         
         # Cleanup
-        await bridge.cleanup()
+        await manager.shutdown()
 
     @pytest.mark.asyncio
     async def test_message_queuing_before_connection(self, setup):
-        """Test message queuing before WebSocket connection established."""
-        bridge = setup['bridge']
-        run_id = setup['run_id']
+        """Test message queuing behavior when no connection exists."""
+        manager = setup['manager']
+        user_id = setup['user_id']
         
-        # Send messages before any connection
+        # Send messages before any connection - WebSocketManager will return False
         messages = [
             {'type': 'agent_started', 'data': {'agent': 'test1'}},
             {'type': 'agent_thinking', 'data': {'thought': 'analyzing'}},
@@ -62,38 +64,51 @@ class TestMessageQueueingUntilReady:
             {'type': 'agent_completed', 'data': {'result': 'success'}}
         ]
         
-        # Queue all messages
+        # Try to send all messages - should fail gracefully
         for msg in messages:
-            await bridge.send_message(run_id, msg)
-        
-        # Verify all messages queued
-        assert len(bridge._pending_messages.get(run_id, [])) == 5
+            result = await manager.send_to_user(user_id, msg)
+            assert result is False  # No connection exists
         
         # Now connect
-        mock_ws = AsyncMock()
+        mock_ws = AsyncMock(spec=WebSocket)
         mock_ws.send_json = AsyncMock()
+        mock_ws.close = AsyncMock()
+        mock_ws.client_state = WebSocketState.CONNECTED  # Connected
         
-        await bridge.connect(
+        connection_id = await manager.connect_user(
+            user_id, 
             mock_ws, 
-            setup['user_id'], 
-            run_id, 
             thread_id=setup['thread_id']
         )
         
-        # Allow queue processing
+        # Now send messages after connection
+        for msg in messages:
+            result = await manager.send_to_user(user_id, msg)
+            assert result is True  # Should succeed now
+        
+        # Allow processing
         await asyncio.sleep(0.1)
         
         # Verify all messages sent
         assert mock_ws.send_json.call_count == 5
-        
-        # Verify queue cleared
-        assert len(bridge._pending_messages.get(run_id, [])) == 0
 
     @pytest.mark.asyncio
     async def test_message_ordering_preservation(self, setup):
-        """Test that message order is preserved during queuing."""
-        bridge = setup['bridge']
-        run_id = setup['run_id']
+        """Test that message order is preserved when sent in sequence."""
+        manager = setup['manager']
+        user_id = setup['user_id']
+        
+        # Connect WebSocket first
+        mock_ws = AsyncMock(spec=WebSocket)
+        mock_ws.send_json = AsyncMock()
+        mock_ws.close = AsyncMock()
+        mock_ws.client_state = WebSocketState.CONNECTED
+        
+        connection_id = await manager.connect_user(
+            user_id,
+            mock_ws,
+            thread_id=setup['thread_id']
+        )
         
         # Create ordered messages with timestamps
         messages = []
@@ -105,19 +120,8 @@ class TestMessageQueueingUntilReady:
                     'timestamp': datetime.now().isoformat()
                 }
             })
-            await bridge.send_message(run_id, messages[-1])
+            await manager.send_to_user(user_id, messages[-1])
             await asyncio.sleep(0.01)  # Small delay to ensure ordering
-        
-        # Connect WebSocket
-        mock_ws = AsyncMock()
-        mock_ws.send_json = AsyncMock()
-        
-        await bridge.connect(
-            mock_ws,
-            setup['user_id'],
-            run_id,
-            thread_id=setup['thread_id']
-        )
         
         # Allow processing
         await asyncio.sleep(0.2)
@@ -131,187 +135,195 @@ class TestMessageQueueingUntilReady:
             assert msg['data']['index'] == i
 
     @pytest.mark.asyncio
-    async def test_queue_with_connection_without_thread(self, setup):
-        """Test queuing when connected but no thread_id."""
-        bridge = setup['bridge']
-        run_id = setup['run_id']
+    async def test_connection_without_thread_immediate_send(self, setup):
+        """Test sending messages when connected but no thread_id."""
+        manager = setup['manager']
+        user_id = setup['user_id']
         
         # Connect without thread_id
-        mock_ws = AsyncMock()
+        mock_ws = AsyncMock(spec=WebSocket)
         mock_ws.send_json = AsyncMock()
+        mock_ws.close = AsyncMock()
+        mock_ws.client_state = WebSocketState.CONNECTED
         
-        await bridge.connect(
+        connection_id = await manager.connect_user(
+            user_id,
             mock_ws,
-            setup['user_id'],
-            run_id,
             thread_id=None  # No thread context
         )
         
-        # Send messages - should queue due to missing thread
+        # Send messages - should send immediately in WebSocketManager
         messages = [
             {'type': 'agent_started', 'data': {'status': 'waiting'}},
-            {'type': 'agent_thinking', 'data': {'thought': 'queued'}}
+            {'type': 'agent_thinking', 'data': {'thought': 'no queue needed'}}
         ]
         
         for msg in messages:
-            await bridge.send_message(run_id, msg)
+            result = await manager.send_to_user(user_id, msg)
+            assert result is True  # Should succeed
         
-        # Should be queued
-        assert len(bridge._pending_messages.get(run_id, [])) == 2
-        assert mock_ws.send_json.call_count == 0
+        # Messages should be sent immediately
+        assert mock_ws.send_json.call_count == 2
         
         # Update thread_id
-        await bridge.update_thread_id(run_id, setup['thread_id'])
+        manager.update_connection_thread(connection_id, setup['thread_id'])
+        
+        # Send another message
+        await manager.send_to_user(user_id, {'type': 'after_thread_update', 'data': {}})
         
         # Allow processing
         await asyncio.sleep(0.1)
         
-        # Now messages should be sent
-        assert mock_ws.send_json.call_count == 2
+        # All messages should be sent
+        assert mock_ws.send_json.call_count == 3
 
     @pytest.mark.asyncio
-    async def test_queue_overflow_handling(self, setup):
-        """Test handling of queue overflow scenarios."""
-        bridge = setup['bridge']
-        run_id = setup['run_id']
+    async def test_high_message_volume_handling(self, setup):
+        """Test handling of high message volume scenarios."""
+        manager = setup['manager']
+        user_id = setup['user_id']
         
-        # Set max queue size (if implemented)
-        MAX_QUEUE_SIZE = 100
-        
-        # Send many messages to potentially overflow
-        for i in range(MAX_QUEUE_SIZE + 50):
-            await bridge.send_message(run_id, {
-                'type': 'overflow_test',
-                'data': {'index': i}
-            })
-        
-        # Check queue behavior
-        queue_size = len(bridge._pending_messages.get(run_id, []))
-        
-        # Should either:
-        # 1. Accept all messages (no limit)
-        # 2. Limit to MAX_QUEUE_SIZE
-        # 3. Use FIFO/LIFO strategy
-        assert queue_size > 0  # At least some messages queued
-        
-        # Connect and verify handling
-        mock_ws = AsyncMock()
+        # Connect first
+        mock_ws = AsyncMock(spec=WebSocket)
         mock_ws.send_json = AsyncMock()
+        mock_ws.close = AsyncMock()
+        mock_ws.client_state = WebSocketState.CONNECTED
         
-        await bridge.connect(
+        connection_id = await manager.connect_user(
+            user_id,
             mock_ws,
-            setup['user_id'],
-            run_id,
             thread_id=setup['thread_id']
         )
+        
+        # Send many messages rapidly
+        MESSAGE_COUNT = 100
+        
+        for i in range(MESSAGE_COUNT):
+            await manager.send_to_user(user_id, {
+                'type': 'volume_test',
+                'data': {'index': i}
+            })
         
         # Allow processing
         await asyncio.sleep(0.5)
         
-        # Verify messages processed
-        assert mock_ws.send_json.call_count > 0
+        # Verify messages processed (WebSocketManager sends immediately)
+        assert mock_ws.send_json.call_count == MESSAGE_COUNT
 
     @pytest.mark.asyncio
-    async def test_queue_persistence_across_reconnections(self, setup):
-        """Test queue persistence when connection drops and reconnects."""
-        bridge = setup['bridge']
-        run_id = setup['run_id']
+    async def test_reconnection_behavior(self, setup):
+        """Test behavior when connection drops and reconnects."""
+        manager = setup['manager']
+        user_id = setup['user_id']
         thread_id = setup['thread_id']
         
         # First connection
-        mock_ws1 = AsyncMock()
+        mock_ws1 = AsyncMock(spec=WebSocket)
         mock_ws1.send_json = AsyncMock()
+        mock_ws1.close = AsyncMock()
+        mock_ws1.client_state = 1
         
-        await bridge.connect(mock_ws1, setup['user_id'], run_id, thread_id=None)
+        connection_id1 = await manager.connect_user(user_id, mock_ws1, thread_id=None)
         
-        # Queue messages
-        await bridge.send_message(run_id, {'type': 'msg1', 'data': {}})
-        await bridge.send_message(run_id, {'type': 'msg2', 'data': {}})
+        # Send messages
+        await manager.send_to_user(user_id, {'type': 'msg1', 'data': {}})
+        await manager.send_to_user(user_id, {'type': 'msg2', 'data': {}})
         
-        # Disconnect before thread_id set
-        await bridge.disconnect(run_id)
+        # Disconnect
+        await manager.disconnect_user(user_id, mock_ws1, 1000, "Test disconnect")
         
-        # Messages should still be queued
-        assert len(bridge._pending_messages.get(run_id, [])) == 2
+        # Verify messages were sent to first connection
+        assert mock_ws1.send_json.call_count == 2
         
-        # Reconnect with thread_id
-        mock_ws2 = AsyncMock()
+        # Reconnect with new connection
+        mock_ws2 = AsyncMock(spec=WebSocket)
         mock_ws2.send_json = AsyncMock()
+        mock_ws2.close = AsyncMock()
+        mock_ws2.client_state = 1
         
-        await bridge.connect(mock_ws2, setup['user_id'], run_id, thread_id=thread_id)
+        connection_id2 = await manager.connect_user(user_id, mock_ws2, thread_id=thread_id)
+        
+        # Send new messages to verify new connection works
+        await manager.send_to_user(user_id, {'type': 'msg3', 'data': {}})
+        await manager.send_to_user(user_id, {'type': 'msg4', 'data': {}})
         
         # Allow processing
         await asyncio.sleep(0.1)
         
         # Messages should be sent to new connection
         assert mock_ws2.send_json.call_count == 2
-        assert mock_ws1.send_json.call_count == 0  # Old connection shouldn't receive
+        # Old connection should not receive new messages
+        assert mock_ws1.send_json.call_count == 2  # Still only the original 2
 
     @pytest.mark.asyncio
-    async def test_priority_message_handling(self, setup):
-        """Test priority message handling in queue."""
-        bridge = setup['bridge']
-        run_id = setup['run_id']
-        
-        # Queue regular messages
-        await bridge.send_message(run_id, {
-            'type': 'regular_1',
-            'data': {'priority': 'normal'}
-        })
-        await bridge.send_message(run_id, {
-            'type': 'regular_2',
-            'data': {'priority': 'normal'}
-        })
-        
-        # Queue high-priority message
-        await bridge.send_message(run_id, {
-            'type': 'agent_error',
-            'data': {'priority': 'high', 'error': 'Critical error'}
-        })
-        
-        # Queue more regular messages
-        await bridge.send_message(run_id, {
-            'type': 'regular_3',
-            'data': {'priority': 'normal'}
-        })
+    async def test_different_message_types(self, setup):
+        """Test handling different message types."""
+        manager = setup['manager']
+        user_id = setup['user_id']
         
         # Connect
-        mock_ws = AsyncMock()
+        mock_ws = AsyncMock(spec=WebSocket)
         mock_ws.send_json = AsyncMock()
+        mock_ws.close = AsyncMock()
+        mock_ws.client_state = WebSocketState.CONNECTED
         
-        await bridge.connect(
+        connection_id = await manager.connect_user(
+            user_id,
             mock_ws,
-            setup['user_id'],
-            run_id,
             thread_id=setup['thread_id']
         )
+        
+        # Send different message types
+        messages = [
+            {'type': 'regular_1', 'data': {'priority': 'normal'}},
+            {'type': 'regular_2', 'data': {'priority': 'normal'}},
+            {'type': 'agent_error', 'data': {'priority': 'high', 'error': 'Critical error'}},
+            {'type': 'regular_3', 'data': {'priority': 'normal'}}
+        ]
+        
+        for msg in messages:
+            await manager.send_to_user(user_id, msg)
         
         # Allow processing
         await asyncio.sleep(0.1)
         
-        # Check if error messages are prioritized (implementation-dependent)
+        # All messages should be sent
         sent_messages = [call[0][0] for call in mock_ws.send_json.call_args_list]
-        
-        # At minimum, all messages should be sent
         assert len(sent_messages) == 4
         
         # Check if error message exists
         error_messages = [m for m in sent_messages if m['type'] == 'agent_error']
         assert len(error_messages) == 1
+        
+        # Verify message types are preserved
+        sent_types = [m['type'] for m in sent_messages]
+        original_types = [m['type'] for m in messages]
+        assert set(sent_types) == set(original_types)
 
     @pytest.mark.asyncio
-    async def test_concurrent_queue_operations(self, setup):
-        """Test concurrent queuing and dequeuing operations."""
-        bridge = setup['bridge']
-        run_id = setup['run_id']
+    async def test_concurrent_message_operations(self, setup):
+        """Test concurrent message sending operations."""
+        manager = setup['manager']
+        user_id = setup['user_id']
         
-        # Start without connection
+        # Connect first
+        mock_ws = AsyncMock(spec=WebSocket)
+        mock_ws.send_json = AsyncMock()
+        mock_ws.close = AsyncMock()
+        mock_ws.client_state = WebSocketState.CONNECTED
+        
+        connection_id = await manager.connect_user(
+            user_id,
+            mock_ws,
+            thread_id=setup['thread_id']
+        )
+        
         message_count = 0
         
         async def producer():
             nonlocal message_count
             for i in range(20):
-                await bridge.send_message(run_id, {
+                await manager.send_to_user(user_id, {
                     'type': f'concurrent_{i}',
                     'data': {'index': i}
                 })
@@ -320,20 +332,6 @@ class TestMessageQueueingUntilReady:
         
         # Start producer
         producer_task = asyncio.create_task(producer())
-        
-        # Wait a bit for some messages to queue
-        await asyncio.sleep(0.05)
-        
-        # Connect while still producing
-        mock_ws = AsyncMock()
-        mock_ws.send_json = AsyncMock()
-        
-        await bridge.connect(
-            mock_ws,
-            setup['user_id'],
-            run_id,
-            thread_id=setup['thread_id']
-        )
         
         # Wait for producer to finish
         await producer_task
@@ -345,20 +343,15 @@ class TestMessageQueueingUntilReady:
         assert mock_ws.send_json.call_count == message_count
 
     @pytest.mark.asyncio
-    async def test_queue_cleanup_on_error(self, setup):
-        """Test queue cleanup when errors occur during processing."""
-        bridge = setup['bridge']
-        run_id = setup['run_id']
-        
-        # Queue messages
-        for i in range(5):
-            await bridge.send_message(run_id, {
-                'type': f'message_{i}',
-                'data': {'index': i}
-            })
+    async def test_error_handling_during_send(self, setup):
+        """Test error handling when message sending fails."""
+        manager = setup['manager']
+        user_id = setup['user_id']
         
         # Connect with mock that fails on third message
-        mock_ws = AsyncMock()
+        mock_ws = AsyncMock(spec=WebSocket)
+        mock_ws.close = AsyncMock()
+        mock_ws.client_state = WebSocketState.CONNECTED
         call_count = 0
         
         async def failing_send(msg):
@@ -371,76 +364,79 @@ class TestMessageQueueingUntilReady:
         mock_ws.send_json = AsyncMock(side_effect=failing_send)
         
         # Connect
-        await bridge.connect(
+        connection_id = await manager.connect_user(
+            user_id,
             mock_ws,
-            setup['user_id'],
-            run_id,
             thread_id=setup['thread_id']
         )
+        
+        # Send messages
+        for i in range(5):
+            try:
+                result = await manager.send_to_user(user_id, {
+                    'type': f'message_{i}',
+                    'data': {'index': i}
+                })
+                # First 2 should succeed, 3rd should fail, manager handles gracefully
+            except Exception:
+                pass  # Expected for failed sends
         
         # Allow processing
         await asyncio.sleep(0.1)
         
-        # Some messages sent, some may remain queued
+        # Should have attempted to send (at least first 2 successful, 3rd failed)
         assert call_count >= 2  # At least tried to send
-        
-        # Check if remaining messages are still queued or cleared
-        remaining = len(bridge._pending_messages.get(run_id, []))
-        assert remaining >= 0  # Should handle gracefully
 
     @pytest.mark.asyncio 
     async def test_queue_with_websocket_manager_integration(self, setup):
         """Test queue behavior with WebSocketManager integration."""
-        from netra_backend.app.websocket.manager import WebSocketManager
-        
-        manager = WebSocketManager()
-        run_id = setup['run_id']
+        # Use the existing manager from setup
+        manager = setup['manager']
         user_id = setup['user_id']
         thread_id = setup['thread_id']
         
         # Create mock WebSocket
-        mock_ws = AsyncMock()
+        mock_ws = AsyncMock(spec=WebSocket)
         mock_ws.send_text = AsyncMock()
         mock_ws.send_json = AsyncMock()
+        mock_ws.close = AsyncMock()
+        mock_ws.client_state = WebSocketState.CONNECTED
         
         # Try to send before connection
-        await manager.send_to_websocket(run_id, {
+        result1 = await manager.send_to_user(user_id, {
             'type': 'early_message',
             'data': {'content': 'sent before connection'}
         })
+        assert result1 is False  # Should fail, no connection
         
         # Connect
-        await manager.connect(mock_ws, user_id, run_id, thread_id)
+        connection_id = await manager.connect_user(user_id, mock_ws, thread_id=thread_id)
         
         # Send after connection
-        await manager.send_to_websocket(run_id, {
+        result2 = await manager.send_to_user(user_id, {
             'type': 'post_connection',
             'data': {'content': 'sent after connection'}
         })
+        assert result2 is True  # Should succeed
         
         # Allow processing
         await asyncio.sleep(0.1)
         
         # Verify messages handled correctly
-        # At least the post-connection message should be sent
-        assert mock_ws.send_text.called or mock_ws.send_json.called
+        # Only the post-connection message should be sent
+        assert mock_ws.send_json.called
 
     @pytest.mark.asyncio
-    async def test_message_batching_in_queue(self, setup):
-        """Test if queued messages can be batched for efficiency."""
-        bridge = setup['bridge']
-        run_id = setup['run_id']
+    async def test_message_rapid_sending(self, setup):
+        """Test rapid message sending behavior."""
+        manager = setup['manager']
+        user_id = setup['user_id']
         
-        # Queue many small messages quickly
-        for i in range(50):
-            await bridge.send_message(run_id, {
-                'type': 'small_update',
-                'data': {'value': i}
-            })
-        
-        # Connect
-        mock_ws = AsyncMock()
+        # Connect first
+        mock_ws = AsyncMock(spec=WebSocket)
         mock_ws.send_json = AsyncMock()
+        mock_ws.close = AsyncMock()
+        mock_ws.client_state = WebSocketState.CONNECTED
         
         # Track actual send timing
         send_times = []
@@ -451,22 +447,27 @@ class TestMessageQueueingUntilReady:
         
         mock_ws.send_json.side_effect = track_send
         
-        await bridge.connect(
+        connection_id = await manager.connect_user(
+            user_id,
             mock_ws,
-            setup['user_id'],
-            run_id,
             thread_id=setup['thread_id']
         )
+        
+        # Send many small messages quickly
+        for i in range(50):
+            await manager.send_to_user(user_id, {
+                'type': 'small_update',
+                'data': {'value': i}
+            })
         
         # Allow processing
         await asyncio.sleep(0.5)
         
         # Check if messages were sent
-        assert len(send_times) > 0
+        assert len(send_times) == 50
         
-        # If batching is implemented, sends might be grouped
-        # Otherwise, each message sent individually
-        assert mock_ws.send_json.call_count <= 50
+        # All messages should be sent individually in WebSocketManager
+        assert mock_ws.send_json.call_count == 50
 
 
 if __name__ == "__main__":

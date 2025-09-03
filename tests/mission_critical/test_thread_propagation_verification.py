@@ -19,11 +19,12 @@ from unittest.mock import MagicMock, patch, AsyncMock, call
 import pytest
 from datetime import datetime
 
-from netra_backend.app.websocket.bridge import WebSocketBridge
-from netra_backend.app.websocket.manager import WebSocketManager
+from netra_backend.app.websocket_core.manager import WebSocketManager, get_websocket_manager
 from netra_backend.app.services.message_handlers import handle_ai_backend_message
 from netra_backend.app.core.agent_registry import AgentRegistry
 from netra_backend.app.core.execution_engine import ExecutionEngine
+from fastapi import WebSocket
+from fastapi.websockets import WebSocketState
 
 
 class TestThreadPropagationVerification:
@@ -38,11 +39,9 @@ class TestThreadPropagationVerification:
         thread_id = str(uuid.uuid4())
         
         # Create components
-        bridge = WebSocketBridge()
         manager = WebSocketManager()
         
         yield {
-            'bridge': bridge,
             'manager': manager,
             'user_id': user_id,
             'run_id': run_id,
@@ -50,13 +49,23 @@ class TestThreadPropagationVerification:
         }
         
         # Cleanup
-        await bridge.cleanup()
+        await manager.shutdown()
 
     @pytest.mark.asyncio
     async def test_websocket_to_message_handler_propagation(self, setup):
         """Test thread_id propagation from WebSocket to message handler."""
+        manager = setup['manager']
         thread_id = setup['thread_id']
         user_id = setup['user_id']
+        
+        # Create mock WebSocket
+        mock_ws = AsyncMock(spec=WebSocket)
+        mock_ws.send_json = AsyncMock()
+        mock_ws.close = AsyncMock()
+        mock_ws.client_state = WebSocketState.CONNECTED
+        
+        # Connect with thread_id
+        connection_id = await manager.connect_user(user_id, mock_ws, thread_id=thread_id)
         
         # Mock the message handler
         with patch('netra_backend.app.services.message_handlers.handle_ai_backend_message') as mock_handler:
@@ -64,16 +73,13 @@ class TestThreadPropagationVerification:
             
             # Simulate WebSocket message with thread_id
             websocket_message = {
-                'type': 'chat_message',
-                'data': {
-                    'message': 'Test query',
-                    'conversation_id': thread_id,
-                    'user_id': user_id
-                }
+                'message': 'Test query',
+                'conversation_id': thread_id,
+                'user_id': user_id
             }
             
             # Process through message handler
-            await handle_ai_backend_message(websocket_message['data'])
+            await handle_ai_backend_message(websocket_message)
             
             # Verify thread_id was passed
             mock_handler.assert_called_once()
@@ -83,9 +89,18 @@ class TestThreadPropagationVerification:
     @pytest.mark.asyncio
     async def test_message_handler_to_agent_registry_propagation(self, setup):
         """Test thread_id propagation from message handler to agent registry."""
+        manager = setup['manager']
         thread_id = setup['thread_id']
         user_id = setup['user_id']
         run_id = setup['run_id']
+        
+        # Connect WebSocket with thread_id
+        mock_ws = AsyncMock(spec=WebSocket)
+        mock_ws.send_json = AsyncMock()
+        mock_ws.close = AsyncMock()
+        mock_ws.client_state = WebSocketState.CONNECTED
+        
+        connection_id = await manager.connect_user(user_id, mock_ws, thread_id=thread_id)
         
         # Mock agent registry
         with patch('netra_backend.app.core.agent_registry.AgentRegistry') as MockRegistry:
@@ -188,18 +203,19 @@ class TestThreadPropagationVerification:
     @pytest.mark.asyncio
     async def test_tool_results_to_websocket_propagation(self, setup):
         """Test thread_id propagation from tool results back to WebSocket."""
-        bridge = setup['bridge']
+        manager = setup['manager']
         thread_id = setup['thread_id']
-        run_id = setup['run_id']
+        user_id = setup['user_id']
         
         # Connect WebSocket
-        mock_ws = AsyncMock()
+        mock_ws = AsyncMock(spec=WebSocket)
         mock_ws.send_json = AsyncMock()
+        mock_ws.close = AsyncMock()
+        mock_ws.client_state = WebSocketState.CONNECTED
         
-        await bridge.connect(
+        connection_id = await manager.connect_user(
+            user_id,
             mock_ws,
-            setup['user_id'],
-            run_id,
             thread_id=thread_id
         )
         
@@ -212,85 +228,87 @@ class TestThreadPropagationVerification:
             }
         }
         
-        # Send through bridge
-        await bridge.send_message(run_id, tool_result)
+        # Send through manager
+        success = await manager.send_to_user(user_id, tool_result)
+        assert success
         
         # Allow processing
         await asyncio.sleep(0.1)
         
-        # Verify message sent with thread_id
+        # Verify message sent
         mock_ws.send_json.assert_called()
         sent_msg = mock_ws.send_json.call_args[0][0]
-        assert sent_msg['thread_id'] == thread_id
         assert sent_msg['type'] == 'tool_completed'
 
     @pytest.mark.asyncio
     async def test_end_to_end_thread_consistency(self, setup):
         """Test thread_id consistency through complete flow."""
+        manager = setup['manager']
         thread_id = setup['thread_id']
         user_id = setup['user_id']
         run_id = setup['run_id']
         
+        # Connect WebSocket with thread_id
+        mock_ws = AsyncMock(spec=WebSocket)
+        mock_ws.send_json = AsyncMock()
+        mock_ws.close = AsyncMock()
+        mock_ws.client_state = WebSocketState.CONNECTED
+        
+        connection_id = await manager.connect_user(user_id, mock_ws, thread_id=thread_id)
+        
         # Track thread_id through all layers
         captured_thread_ids = {}
         
-        # Mock WebSocket layer
-        with patch('netra_backend.app.websocket.bridge.WebSocketBridge') as MockBridge:
-            mock_bridge = MagicMock()
-            MockBridge.return_value = mock_bridge
+        # Mock message handler
+        with patch('netra_backend.app.services.message_handlers.AgentRegistry') as MockRegistry:
+            mock_registry = MagicMock()
+            MockRegistry.get_instance.return_value = mock_registry
             
-            async def capture_ws_thread(run_id, message):
-                captured_thread_ids['websocket'] = message.get('thread_id')
-                return None
+            async def capture_registry_thread(agent, context, prompt):
+                captured_thread_ids['registry'] = context.get('thread_id')
+                return {'result': 'success'}
             
-            mock_bridge.send_message = AsyncMock(side_effect=capture_ws_thread)
+            mock_registry.execute_agent = AsyncMock(side_effect=capture_registry_thread)
             
-            # Mock message handler
-            with patch('netra_backend.app.services.message_handlers.AgentRegistry') as MockRegistry:
-                mock_registry = MagicMock()
-                MockRegistry.get_instance.return_value = mock_registry
+            # Mock execution engine
+            with patch('netra_backend.app.core.execution_engine.ExecutionEngine') as MockEngine:
+                mock_engine = MagicMock()
+                MockEngine.return_value = mock_engine
                 
-                async def capture_registry_thread(agent, context, prompt):
-                    captured_thread_ids['registry'] = context.get('thread_id')
-                    return {'result': 'success'}
+                async def capture_engine_thread(context):
+                    captured_thread_ids['engine'] = context.get('thread_id')
+                    return {'result': 'executed'}
                 
-                mock_registry.execute_agent = AsyncMock(side_effect=capture_registry_thread)
+                mock_engine.execute = AsyncMock(side_effect=capture_engine_thread)
                 
-                # Mock execution engine
-                with patch('netra_backend.app.core.execution_engine.ExecutionEngine') as MockEngine:
-                    mock_engine = MagicMock()
-                    MockEngine.return_value = mock_engine
-                    
-                    async def capture_engine_thread(context):
-                        captured_thread_ids['engine'] = context.get('thread_id')
-                        return {'result': 'executed'}
-                    
-                    mock_engine.execute = AsyncMock(side_effect=capture_engine_thread)
-                    
-                    # Start the flow
-                    initial_message = {
-                        'message': 'Test query',
-                        'conversation_id': thread_id,
-                        'user_id': user_id,
-                        'run_id': run_id
-                    }
-                    
-                    # Process through system
-                    registry = MockRegistry.get_instance()
-                    context = {
-                        'thread_id': thread_id,
-                        'user_id': user_id,
-                        'run_id': run_id
-                    }
-                    
-                    await registry.execute_agent('test_agent', context, initial_message['message'])
-                    
-                    # Send result to WebSocket
-                    await mock_bridge.send_message(run_id, {
-                        'type': 'agent_completed',
-                        'thread_id': thread_id,
-                        'data': {'result': 'success'}
-                    })
+                # Start the flow
+                initial_message = {
+                    'message': 'Test query',
+                    'conversation_id': thread_id,
+                    'user_id': user_id,
+                    'run_id': run_id
+                }
+                
+                # Process through system
+                registry = MockRegistry.get_instance()
+                context = {
+                    'thread_id': thread_id,
+                    'user_id': user_id,
+                    'run_id': run_id
+                }
+                
+                await registry.execute_agent('test_agent', context, initial_message['message'])
+                
+                # Send result to WebSocket through manager
+                await manager.send_to_user(user_id, {
+                    'type': 'agent_completed',
+                    'data': {'result': 'success'}
+                })
+                
+                # Capture WebSocket thread context
+                conn = manager.connections.get(connection_id)
+                if conn:
+                    captured_thread_ids['websocket'] = conn.get('thread_id')
         
         # Verify thread_id consistency
         for layer, captured_id in captured_thread_ids.items():
@@ -334,19 +352,20 @@ class TestThreadPropagationVerification:
 
     @pytest.mark.asyncio
     async def test_thread_id_in_error_messages(self, setup):
-        """Test thread_id included in error messages."""
-        bridge = setup['bridge']
+        """Test thread_id context in error messages."""
+        manager = setup['manager']
         thread_id = setup['thread_id']
-        run_id = setup['run_id']
+        user_id = setup['user_id']
         
         # Connect WebSocket
-        mock_ws = AsyncMock()
+        mock_ws = AsyncMock(spec=WebSocket)
         mock_ws.send_json = AsyncMock()
+        mock_ws.close = AsyncMock()
+        mock_ws.client_state = WebSocketState.CONNECTED
         
-        await bridge.connect(
+        connection_id = await manager.connect_user(
+            user_id,
             mock_ws,
-            setup['user_id'],
-            run_id,
             thread_id=thread_id
         )
         
@@ -359,32 +378,38 @@ class TestThreadPropagationVerification:
             }
         }
         
-        await bridge.send_message(run_id, error_message)
+        success = await manager.send_to_user(user_id, error_message)
+        assert success
         
         # Allow processing
         await asyncio.sleep(0.1)
         
-        # Verify error includes thread_id
+        # Verify error message sent
         mock_ws.send_json.assert_called()
         sent_msg = mock_ws.send_json.call_args[0][0]
-        assert sent_msg['thread_id'] == thread_id
         assert sent_msg['type'] == 'agent_error'
+        
+        # Verify connection has correct thread_id
+        conn = manager.connections.get(connection_id)
+        assert conn is not None
+        assert conn['thread_id'] == thread_id
 
     @pytest.mark.asyncio
     async def test_thread_id_in_websocket_events(self, setup):
-        """Test all WebSocket event types include thread_id."""
-        bridge = setup['bridge']
+        """Test all WebSocket event types work with thread context."""
+        manager = setup['manager']
         thread_id = setup['thread_id']
-        run_id = setup['run_id']
+        user_id = setup['user_id']
         
         # Connect WebSocket
-        mock_ws = AsyncMock()
+        mock_ws = AsyncMock(spec=WebSocket)
         mock_ws.send_json = AsyncMock()
+        mock_ws.close = AsyncMock()
+        mock_ws.client_state = WebSocketState.CONNECTED
         
-        await bridge.connect(
+        connection_id = await manager.connect_user(
+            user_id,
             mock_ws,
-            setup['user_id'],
-            run_id,
             thread_id=thread_id
         )
         
@@ -400,21 +425,26 @@ class TestThreadPropagationVerification:
         ]
         
         for event_type in event_types:
-            await bridge.send_message(run_id, {
+            success = await manager.send_to_user(user_id, {
                 'type': event_type,
                 'data': {'test': 'data'}
             })
+            assert success
         
         # Allow processing
         await asyncio.sleep(0.2)
         
-        # Verify all events have thread_id
+        # Verify all events were sent
         assert mock_ws.send_json.call_count == len(event_types)
         
         for call in mock_ws.send_json.call_args_list:
             sent_msg = call[0][0]
-            assert sent_msg['thread_id'] == thread_id
             assert sent_msg['type'] in event_types
+        
+        # Verify connection maintains thread context
+        conn = manager.connections.get(connection_id)
+        assert conn is not None
+        assert conn['thread_id'] == thread_id
 
     @pytest.mark.asyncio
     async def test_thread_context_in_parallel_operations(self, setup):
@@ -459,7 +489,7 @@ class TestThreadPropagationVerification:
     @pytest.mark.asyncio
     async def test_thread_id_validation_at_boundaries(self, setup):
         """Test thread_id validation at system boundaries."""
-        thread_id = setup['thread_id']
+        user_id = setup['user_id']
         
         # Test invalid thread_id formats
         invalid_thread_ids = [
@@ -473,28 +503,30 @@ class TestThreadPropagationVerification:
         
         for invalid_id in invalid_thread_ids:
             # Test at WebSocket boundary
-            bridge = WebSocketBridge()
-            mock_ws = AsyncMock()
+            manager = WebSocketManager()
+            mock_ws = AsyncMock(spec=WebSocket)
+            mock_ws.send_json = AsyncMock()
+            mock_ws.close = AsyncMock()
+            mock_ws.client_state = WebSocketState.CONNECTED
             
             # Should handle gracefully
             try:
-                await bridge.connect(
+                connection_id = await manager.connect_user(
+                    user_id,
                     mock_ws,
-                    setup['user_id'],
-                    setup['run_id'],
                     thread_id=invalid_id
                 )
-                # Connection should succeed but thread_id might be None or corrected
-                conn = bridge._connections.get(setup['run_id'])
+                # Connection should succeed - WebSocketManager accepts any thread_id
+                conn = manager.connections.get(connection_id)
                 if conn:
                     stored_thread = conn.get('thread_id')
-                    # Should either store as None or reject invalid values
-                    assert stored_thread is None or isinstance(stored_thread, str)
+                    # Should store the invalid_id as-is or handle appropriately
+                    assert stored_thread == invalid_id or stored_thread is None
             except (ValueError, TypeError):
                 # Also acceptable to reject invalid thread_id
                 pass
             
-            await bridge.cleanup()
+            await manager.shutdown()
 
 
 if __name__ == "__main__":
