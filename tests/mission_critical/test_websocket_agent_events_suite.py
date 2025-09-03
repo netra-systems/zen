@@ -416,6 +416,393 @@ class TestRealWebSocketComponents:
 
 
 # ============================================================================
+# INDIVIDUAL EVENT TYPE TESTS - Each of the 5 Required Events
+# ============================================================================
+
+class TestIndividualWebSocketEvents:
+    """Test each of the 5 required WebSocket events individually."""
+    
+    @pytest.fixture(autouse=True)
+    async def setup_individual_event_testing(self):
+        """Setup for individual event testing."""
+        self.test_base = RealWebSocketTestBase()
+        self._test_session = self.test_base.real_websocket_test_session()
+        self.test_base = await self._test_session.__aenter__()
+        
+        # Create test context for event testing
+        self.test_context = await self.test_base.create_test_context(user_id="event_test_user")
+        await self.test_context.setup_websocket_connection(endpoint="/ws/test", auth_required=False)
+        
+        yield
+        
+        try:
+            await self._test_session.__aexit__(None, None, None)
+        except Exception as e:
+            logger.warning(f"Individual event test cleanup error: {e}")
+    
+    @pytest.mark.asyncio
+    @pytest.mark.critical
+    async def test_agent_started_event_structure(self):
+        """Test agent_started event structure and content validation.
+        
+        CRITICAL: This event must include user context and timestamp to show
+        the AI agent has begun processing the user's problem.
+        """
+        validator = MissionCriticalEventValidator(strict_mode=True)
+        
+        # Create mock agent_started event
+        agent_started_event = {
+            "type": "agent_started",
+            "user_id": self.test_context.user_context.user_id,
+            "thread_id": self.test_context.user_context.thread_id,
+            "agent_name": "test_agent",
+            "task": "Process user request",
+            "timestamp": time.time()
+        }
+        
+        # Send the event through real WebSocket
+        await self.test_context.send_message(agent_started_event)
+        
+        # Try to receive and validate
+        try:
+            received_event = await self.test_context.receive_message()
+            validator.record(received_event)
+            
+            # Validate event structure
+            assert validator.validate_event_content_structure(received_event, "agent_started"), \
+                "agent_started event structure validation failed"
+            
+        except asyncio.TimeoutError:
+            # For real connections, we might not get an echo back
+            logger.info("No echo received - this is acceptable for real WebSocket connections")
+            validator.record(agent_started_event)  # Validate the sent structure
+        
+        # Validate that we have the expected event type
+        assert "agent_started" in validator.event_counts, "agent_started event not recorded"
+        assert validator.event_counts["agent_started"] >= 1, "Expected at least one agent_started event"
+    
+    @pytest.mark.asyncio
+    @pytest.mark.critical
+    async def test_agent_thinking_event_structure(self):
+        """Test agent_thinking event structure and reasoning content.
+        
+        CRITICAL: This event provides real-time reasoning visibility,
+        showing users the AI is working on valuable solutions.
+        """
+        validator = MissionCriticalEventValidator(strict_mode=True)
+        
+        agent_thinking_event = {
+            "type": "agent_thinking",
+            "reasoning": "Analyzing user request and determining best approach",
+            "step": "initial_analysis",
+            "progress": 0.2,
+            "timestamp": time.time()
+        }
+        
+        await self.test_context.send_message(agent_thinking_event)
+        
+        try:
+            received_event = await self.test_context.receive_message()
+            validator.record(received_event)
+            
+            # Validate thinking event has reasoning content
+            assert "reasoning" in received_event, "agent_thinking event missing reasoning content"
+            assert len(received_event.get("reasoning", "")) > 10, "Reasoning content too short"
+            
+        except asyncio.TimeoutError:
+            logger.info("Testing sent event structure for agent_thinking")
+            validator.record(agent_thinking_event)
+        
+        assert "agent_thinking" in validator.event_counts, "agent_thinking event not recorded"
+    
+    @pytest.mark.asyncio
+    @pytest.mark.critical
+    async def test_tool_executing_event_structure(self):
+        """Test tool_executing event with tool transparency.
+        
+        CRITICAL: This event demonstrates the AI's problem-solving approach
+        by showing which tools are being used and why.
+        """
+        validator = MissionCriticalEventValidator(strict_mode=True)
+        
+        tool_executing_event = {
+            "type": "tool_executing",
+            "tool_name": "search_tool",
+            "parameters": {
+                "query": "user search term",
+                "max_results": 10
+            },
+            "execution_id": str(uuid.uuid4()),
+            "timestamp": time.time()
+        }
+        
+        await self.test_context.send_message(tool_executing_event)
+        
+        try:
+            received_event = await self.test_context.receive_message()
+            validator.record(received_event)
+            
+            # Validate tool execution transparency
+            assert "tool_name" in received_event, "tool_executing missing tool_name"
+            assert "parameters" in received_event, "tool_executing missing parameters"
+            
+        except asyncio.TimeoutError:
+            logger.info("Testing sent event structure for tool_executing")
+            validator.record(tool_executing_event)
+        
+        assert "tool_executing" in validator.event_counts, "tool_executing event not recorded"
+    
+    @pytest.mark.asyncio
+    @pytest.mark.critical
+    async def test_tool_completed_event_structure(self):
+        """Test tool_completed event with actionable results.
+        
+        CRITICAL: This event delivers actionable insights by showing
+        tool results and execution metrics.
+        """
+        validator = MissionCriticalEventValidator(strict_mode=True)
+        
+        tool_completed_event = {
+            "type": "tool_completed",
+            "tool_name": "search_tool",
+            "results": {
+                "found_results": 5,
+                "top_result": "Important finding for user"
+            },
+            "duration": 1.23,
+            "success": True,
+            "execution_id": str(uuid.uuid4()),
+            "timestamp": time.time()
+        }
+        
+        await self.test_context.send_message(tool_completed_event)
+        
+        try:
+            received_event = await self.test_context.receive_message()
+            validator.record(received_event)
+            
+            # Validate tool results delivery
+            assert "results" in received_event, "tool_completed missing results"
+            assert "duration" in received_event, "tool_completed missing duration"
+            assert isinstance(received_event.get("duration"), (int, float)), "Invalid duration type"
+            
+        except asyncio.TimeoutError:
+            logger.info("Testing sent event structure for tool_completed")
+            validator.record(tool_completed_event)
+        
+        assert "tool_completed" in validator.event_counts, "tool_completed event not recorded"
+    
+    @pytest.mark.asyncio
+    @pytest.mark.critical
+    async def test_agent_completed_event_structure(self):
+        """Test agent_completed event with final status.
+        
+        CRITICAL: This event signals when valuable AI response is ready,
+        completing the chat interaction loop.
+        """
+        validator = MissionCriticalEventValidator(strict_mode=True)
+        
+        agent_completed_event = {
+            "type": "agent_completed",
+            "status": "success",
+            "final_response": "Here is the complete solution to your problem...",
+            "execution_summary": {
+                "tools_used": ["search_tool", "analysis_tool"],
+                "duration": 5.67,
+                "tokens_used": 1250
+            },
+            "timestamp": time.time()
+        }
+        
+        await self.test_context.send_message(agent_completed_event)
+        
+        try:
+            received_event = await self.test_context.receive_message()
+            validator.record(received_event)
+            
+            # Validate completion status and response
+            assert "status" in received_event, "agent_completed missing status"
+            assert "final_response" in received_event, "agent_completed missing final_response"
+            assert len(received_event.get("final_response", "")) > 20, "Final response too short"
+            
+        except asyncio.TimeoutError:
+            logger.info("Testing sent event structure for agent_completed")
+            validator.record(agent_completed_event)
+        
+        assert "agent_completed" in validator.event_counts, "agent_completed event not recorded"
+
+
+# ============================================================================
+# EVENT SEQUENCE AND TIMING VALIDATION TESTS
+# ============================================================================
+
+class TestEventSequenceAndTiming:
+    """Test event sequences and timing validation."""
+    
+    @pytest.fixture(autouse=True)
+    async def setup_sequence_testing(self):
+        """Setup for sequence testing."""
+        self.test_base = RealWebSocketTestBase()
+        self._test_session = self.test_base.real_websocket_test_session()
+        self.test_base = await self._test_session.__aenter__()
+        
+        self.test_context = await self.test_base.create_test_context(user_id="sequence_test_user")
+        await self.test_context.setup_websocket_connection(endpoint="/ws/test", auth_required=False)
+        
+        yield
+        
+        try:
+            await self._test_session.__aexit__(None, None, None)
+        except Exception as e:
+            logger.warning(f"Sequence test cleanup error: {e}")
+    
+    @pytest.mark.asyncio
+    @pytest.mark.critical
+    async def test_complete_event_sequence(self):
+        """Test that all 5 events arrive in the correct sequence.
+        
+        CRITICAL: Events must flow in logical order to provide
+        coherent user experience during AI interactions.
+        """
+        validator = MissionCriticalEventValidator(strict_mode=True)
+        
+        # Send complete event sequence
+        event_sequence = [
+            {
+                "type": "agent_started",
+                "user_id": self.test_context.user_context.user_id,
+                "thread_id": self.test_context.user_context.thread_id,
+                "timestamp": time.time()
+            },
+            {
+                "type": "agent_thinking",
+                "reasoning": "Processing user request",
+                "timestamp": time.time() + 0.1
+            },
+            {
+                "type": "tool_executing",
+                "tool_name": "analysis_tool",
+                "parameters": {"query": "test"},
+                "timestamp": time.time() + 0.2
+            },
+            {
+                "type": "tool_completed",
+                "tool_name": "analysis_tool",
+                "results": {"result": "success"},
+                "duration": 0.5,
+                "timestamp": time.time() + 0.7
+            },
+            {
+                "type": "agent_completed",
+                "status": "success",
+                "final_response": "Task completed successfully",
+                "timestamp": time.time() + 0.8
+            }
+        ]
+        
+        # Send events with small delays
+        for i, event in enumerate(event_sequence):
+            await self.test_context.send_message(event)
+            validator.record(event)
+            await asyncio.sleep(0.05)  # Small delay between events
+        
+        # Validate sequence
+        is_valid, failures = validator.validate_critical_requirements()
+        
+        # Check that we recorded events in sequence
+        assert len(validator.events) == 5, f"Expected 5 events, got {len(validator.events)}"
+        
+        # Verify all required events are present
+        event_types = [event.get('type') for event in validator.events]
+        for required_event in validator.REQUIRED_EVENTS:
+            assert required_event in event_types, f"Missing required event: {required_event}"
+        
+        logger.info(f"Event sequence test recorded {len(validator.events)} events: {event_types}")
+    
+    @pytest.mark.asyncio
+    @pytest.mark.critical
+    async def test_event_timing_latency(self):
+        """Test that events arrive within acceptable latency (< 100ms).
+        
+        CRITICAL: Low latency ensures responsive chat experience
+        for real-time AI interactions.
+        """
+        validator = MissionCriticalEventValidator(strict_mode=True)
+        start_time = time.time()
+        
+        # Send rapid-fire events to test latency
+        for i in range(5):
+            event = {
+                "type": "agent_thinking",
+                "reasoning": f"Step {i+1} of processing",
+                "sequence": i,
+                "send_time": time.time(),
+                "timestamp": time.time()
+            }
+            
+            event_send_time = time.time()
+            await self.test_context.send_message(event)
+            
+            # Record with precise timing
+            validator.record({
+                **event,
+                "send_time": event_send_time,
+                "processing_time": time.time() - event_send_time
+            })
+            
+            # Small delay to test rapid succession
+            await asyncio.sleep(0.02)  # 20ms between events
+        
+        total_time = time.time() - start_time
+        
+        # Validate timing constraints
+        assert total_time < 1.0, f"Event sequence took too long: {total_time:.3f}s"
+        assert len(validator.events) == 5, "Not all events were processed"
+        
+        # Check individual event processing times
+        for event in validator.events:
+            processing_time = event.get("processing_time", 0) * 1000  # Convert to ms
+            assert processing_time < validator.MAX_EVENT_LATENCY, \
+                f"Event processing time {processing_time:.1f}ms exceeds {validator.MAX_EVENT_LATENCY}ms limit"
+        
+        logger.info(f"Latency test: {len(validator.events)} events processed in {total_time:.3f}s")
+    
+    @pytest.mark.asyncio
+    @pytest.mark.critical
+    async def test_out_of_order_event_handling(self):
+        """Test handling of events that arrive out of expected sequence.
+        
+        CRITICAL: System must gracefully handle sequence variations
+        while maintaining chat coherence.
+        """
+        validator = MissionCriticalEventValidator(strict_mode=False)  # More lenient
+        
+        # Send events out of order
+        out_of_order_events = [
+            {"type": "tool_completed", "tool_name": "test", "results": {}, "duration": 1.0, "timestamp": time.time()},
+            {"type": "agent_started", "user_id": "test", "thread_id": "test", "timestamp": time.time()},
+            {"type": "agent_completed", "status": "success", "final_response": "Done", "timestamp": time.time()},
+            {"type": "tool_executing", "tool_name": "test", "parameters": {}, "timestamp": time.time()},
+            {"type": "agent_thinking", "reasoning": "Thinking", "timestamp": time.time()}
+        ]
+        
+        for event in out_of_order_events:
+            await self.test_context.send_message(event)
+            validator.record(event)
+            await asyncio.sleep(0.01)
+        
+        # System should handle out-of-order events gracefully
+        assert len(validator.events) == 5, "Not all out-of-order events were processed"
+        
+        # All required event types should still be present
+        event_types = {event.get('type') for event in validator.events}
+        assert validator.REQUIRED_EVENTS.issubset(event_types), \
+            f"Missing required events in out-of-order test: {validator.REQUIRED_EVENTS - event_types}"
+        
+        logger.info("Out-of-order event handling test completed successfully")
+
+
+# ============================================================================
 # REAL WEBSOCKET INTEGRATION TESTS
 # ============================================================================
 

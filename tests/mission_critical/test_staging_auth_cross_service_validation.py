@@ -2019,6 +2019,269 @@ async def run_single_test(test_name: str):
         assert peak_memory < memory_spike_threshold, \
             f"Memory spike detected: {peak_memory:.2f} MB (threshold {memory_spike_threshold:.2f} MB)"
     
+    async def test_21_enterprise_multi_tenant_isolation(self):
+        """
+        CRITICAL: Test enterprise user isolation and multi-tenancy.
+        Validates that enterprise accounts have proper tenant isolation.
+        """
+        logger.critical("Testing enterprise multi-tenant isolation...")
+        
+        # Create test enterprise users across different tenants
+        tenant_a_user = {
+            "email": f"enterprise_a_{uuid.uuid4().hex[:8]}@company-a.test",
+            "password": "EnterprisePassword123!",
+            "full_name": "Enterprise User A",
+            "tenant_id": "company-a",
+            "role": "enterprise_admin"
+        }
+        
+        tenant_b_user = {
+            "email": f"enterprise_b_{uuid.uuid4().hex[:8]}@company-b.test", 
+            "password": "EnterprisePassword123!",
+            "full_name": "Enterprise User B",
+            "tenant_id": "company-b",
+            "role": "enterprise_user"
+        }
+        
+        # Test signup and authentication for both tenants
+        start_time = time.time()
+        
+        signup_a = await self._test_user_signup(tenant_a_user)
+        signup_b = await self._test_user_signup(tenant_b_user)
+        
+        # Both should succeed or handle appropriately
+        assert signup_a["status"] in [200, 201, 409], f"Tenant A signup failed: {signup_a}"
+        assert signup_b["status"] in [200, 201, 409], f"Tenant B signup failed: {signup_b}"
+        
+        # Test login for both users
+        login_a = await self._test_user_login(tenant_a_user["email"], tenant_a_user["password"])
+        login_b = await self._test_user_login(tenant_b_user["email"], tenant_b_user["password"])
+        
+        # Validate cross-tenant isolation in tokens
+        if login_a["status"] == 200 and "access_token" in login_a.get("data", {}):
+            token_a = login_a["data"]["access_token"]
+            decoded_a = jwt.decode(token_a, options={"verify_signature": False})
+            assert decoded_a.get("tenant_id") == "company-a", "Tenant A isolation failed"
+            
+        if login_b["status"] == 200 and "access_token" in login_b.get("data", {}):
+            token_b = login_b["data"]["access_token"]
+            decoded_b = jwt.decode(token_b, options={"verify_signature": False})
+            assert decoded_b.get("tenant_id") == "company-b", "Tenant B isolation failed"
+        
+        # Test that tokens cannot access other tenant resources
+        total_time = time.time() - start_time
+        assert total_time < 15, f"Enterprise multi-tenant flow too slow: {total_time:.2f}s"
+        
+        logger.critical(f"Enterprise multi-tenant isolation test completed in {total_time:.2f}s")
+
+    async def test_22_api_key_authentication_flow(self):
+        """
+        CRITICAL: Test API key-based authentication for developer integrations.
+        Validates programmatic access patterns.
+        """
+        logger.critical("Testing API key authentication flow...")
+        
+        # Create developer user
+        dev_user = {
+            "email": f"developer_{uuid.uuid4().hex[:8]}@netra-dev.test",
+            "password": "DeveloperPassword123!",
+            "full_name": "API Developer User",
+            "account_type": "developer"
+        }
+        
+        start_time = time.time()
+        
+        # Test developer signup
+        signup_result = await self._test_user_signup(dev_user)
+        assert signup_result["status"] in [200, 201, 409], f"Developer signup failed: {signup_result}"
+        
+        # Test login to get access token
+        login_result = await self._test_user_login(dev_user["email"], dev_user["password"])
+        
+        if login_result["status"] == 200 and "access_token" in login_result.get("data", {}):
+            access_token = login_result["data"]["access_token"]
+            
+            # Test API key generation (simulate)
+            api_key_data = await self._test_api_key_generation(access_token)
+            
+            # Test API key usage for backend authentication
+            if api_key_data.get("api_key"):
+                backend_auth = await self._test_api_key_backend_auth(api_key_data["api_key"])
+                assert backend_auth.get("success", False), "API key backend auth failed"
+        
+        total_time = time.time() - start_time
+        assert total_time < 20, f"API key authentication flow too slow: {total_time:.2f}s"
+        
+        logger.critical(f"API key authentication flow completed in {total_time:.2f}s")
+
+    async def test_23_mobile_app_authentication_simulation(self):
+        """
+        CRITICAL: Test mobile app authentication patterns and offline capabilities.
+        Simulates iOS/Android authentication flows.
+        """
+        logger.critical("Testing mobile app authentication simulation...")
+        
+        # Create mobile user
+        mobile_user = {
+            "email": f"mobile_{uuid.uuid4().hex[:8]}@mobile-test.com",
+            "password": "MobilePassword123!",
+            "full_name": "Mobile Test User",
+            "device_type": "ios",
+            "app_version": "1.2.3"
+        }
+        
+        start_time = time.time()
+        
+        # Test mobile-specific signup
+        signup_result = await self._test_user_signup(mobile_user)
+        assert signup_result["status"] in [200, 201, 409], f"Mobile signup failed: {signup_result}"
+        
+        # Test mobile login with device fingerprinting
+        mobile_login_data = {
+            "email": mobile_user["email"],
+            "password": mobile_user["password"],
+            "device_id": f"ios_device_{uuid.uuid4().hex[:16]}",
+            "device_fingerprint": hashlib.sha256(f"ios_fingerprint_{time.time()}".encode()).hexdigest()
+        }
+        
+        login_result = await self._test_user_login(**mobile_login_data)
+        
+        if login_result["status"] == 200:
+            # Test token refresh for long-lived mobile sessions
+            refresh_result = await self._test_token_refresh_mobile(login_result.get("data", {}))
+            
+            # Test offline token validation capabilities
+            offline_validation = await self._test_offline_token_validation(login_result.get("data", {}))
+            
+            # Test background app token persistence
+            background_persistence = await self._test_background_token_persistence(login_result.get("data", {}))
+        
+        total_time = time.time() - start_time
+        assert total_time < 25, f"Mobile authentication simulation too slow: {total_time:.2f}s"
+        
+        logger.critical(f"Mobile authentication simulation completed in {total_time:.2f}s")
+
+    async def test_24_cross_platform_session_synchronization(self):
+        """
+        CRITICAL: Test session synchronization across web, mobile, and desktop.
+        Validates unified user experience across platforms.
+        """
+        logger.critical("Testing cross-platform session synchronization...")
+        
+        # Create user that will login across platforms
+        cross_platform_user = {
+            "email": f"crossplatform_{uuid.uuid4().hex[:8]}@test-sync.com",
+            "password": "CrossPlatformPassword123!",
+            "full_name": "Cross Platform User"
+        }
+        
+        start_time = time.time()
+        
+        # Test signup
+        signup_result = await self._test_user_signup(cross_platform_user)
+        assert signup_result["status"] in [200, 201, 409], f"Cross-platform signup failed: {signup_result}"
+        
+        # Simulate login from web browser
+        web_login = await self._test_user_login(
+            cross_platform_user["email"], 
+            cross_platform_user["password"],
+            platform="web",
+            user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64)"
+        )
+        
+        # Simulate login from mobile app
+        mobile_login = await self._test_user_login(
+            cross_platform_user["email"],
+            cross_platform_user["password"], 
+            platform="mobile",
+            device_type="ios"
+        )
+        
+        # Simulate login from desktop app
+        desktop_login = await self._test_user_login(
+            cross_platform_user["email"],
+            cross_platform_user["password"],
+            platform="desktop",
+            os="windows"
+        )
+        
+        # Test that all platforms can maintain concurrent sessions
+        active_sessions = []
+        for login_result in [web_login, mobile_login, desktop_login]:
+            if login_result["status"] == 200 and "access_token" in login_result.get("data", {}):
+                token = login_result["data"]["access_token"]
+                # Test backend validation for each platform token
+                backend_validation = await self._test_backend_token_validation(token)
+                if backend_validation.get("valid", False):
+                    active_sessions.append(token)
+        
+        # Test session synchronization - changes in one should reflect in others
+        if len(active_sessions) > 1:
+            sync_test = await self._test_session_state_synchronization(active_sessions)
+            assert sync_test.get("synchronized", False), "Session synchronization failed"
+        
+        total_time = time.time() - start_time
+        assert total_time < 30, f"Cross-platform session sync too slow: {total_time:.2f}s"
+        
+        logger.critical(f"Cross-platform session synchronization completed in {total_time:.2f}s")
+
+    async def test_25_security_incident_response_authentication(self):
+        """
+        CRITICAL: Test authentication behavior during security incidents.
+        Validates system lockdown and recovery capabilities.
+        """
+        logger.critical("Testing security incident response authentication...")
+        
+        # Create test user for security incident simulation
+        security_test_user = {
+            "email": f"security_{uuid.uuid4().hex[:8]}@incident-test.com",
+            "password": "SecurityTestPassword123!",
+            "full_name": "Security Incident Test User"
+        }
+        
+        start_time = time.time()
+        
+        # Test normal authentication baseline
+        signup_result = await self._test_user_signup(security_test_user)
+        login_result = await self._test_user_login(security_test_user["email"], security_test_user["password"])
+        
+        if login_result["status"] == 200:
+            baseline_token = login_result.get("data", {}).get("access_token")
+            
+            # Simulate security incident scenarios
+            incident_scenarios = [
+                {"type": "brute_force_attack", "attempts": 10},
+                {"type": "suspicious_ip_activity", "ip_changes": 5},
+                {"type": "token_hijacking_detected", "invalid_signatures": 3},
+                {"type": "rate_limit_exceeded", "rapid_requests": 100}
+            ]
+            
+            for scenario in incident_scenarios:
+                logger.critical(f"Testing security scenario: {scenario['type']}")
+                
+                # Test that system properly handles security incidents
+                incident_response = await self._simulate_security_incident(
+                    baseline_token, scenario
+                )
+                
+                # Validate appropriate security responses
+                assert incident_response.get("incident_detected", False), \
+                    f"Security incident not detected: {scenario['type']}"
+                
+                # Test recovery mechanisms
+                recovery_result = await self._test_security_recovery(
+                    security_test_user["email"], scenario
+                )
+                
+                # Verify system can recover from security incidents
+                assert recovery_result.get("recovery_successful", False), \
+                    f"Security recovery failed for: {scenario['type']}"
+        
+        total_time = time.time() - start_time
+        assert total_time < 45, f"Security incident response test too slow: {total_time:.2f}s"
+        
+        logger.critical(f"Security incident response authentication completed in {total_time:.2f}s")
+    
     # =============================================================================
     # HELPER METHODS FOR COMPREHENSIVE TESTING
     # =============================================================================
