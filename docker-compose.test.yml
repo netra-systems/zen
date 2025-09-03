@@ -110,11 +110,11 @@ services:
         soft: 262144
         hard: 262144
     healthcheck:
-      test: ["CMD", "wget", "--spider", "-q", "http://127.0.0.1:8123/ping"]
-      interval: 10s
+      test: ["CMD", "clickhouse-client", "--query", "SELECT 1"]
+      interval: 15s
       timeout: 10s
-      retries: 20
-      start_period: 60s
+      retries: 30
+      start_period: 90s
     networks:
       - default
     restart: no  # Changed from unless-stopped to prevent unwanted auto-restarts
