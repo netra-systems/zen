@@ -14,12 +14,10 @@ WORKDIR /app
 
 # Copy requirements first for better layer caching
 COPY requirements.txt .
-COPY auth_service/requirements.txt ./auth_service_requirements.txt
 
 # Install Python dependencies
 RUN pip install --no-cache-dir --upgrade pip && \
-    pip install --no-cache-dir -r requirements.txt && \
-    pip install --no-cache-dir -r auth_service_requirements.txt
+    pip install --no-cache-dir -r requirements.txt
 
 # Production stage
 FROM python:3.11-slim
