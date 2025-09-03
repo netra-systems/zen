@@ -1,0 +1,259 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learning>
+    <metadata>
+        <title>Podman Integration with Dynamic Port Allocation</title>
+        <date>2025-09-03</date>
+        <category>Infrastructure</category>
+        <tags>
+            <tag>containers</tag>
+            <tag>podman</tag>
+            <tag>docker-alternative</tag>
+            <tag>testing</tag>
+            <tag>dynamic-ports</tag>
+        </tags>
+    </metadata>
+
+    <problem_statement>
+        <description>
+            Need to support Podman as an alternative to Docker for container management in test infrastructure,
+            with dynamic port allocation to prevent conflicts and enable parallel test execution.
+        </description>
+        <constraints>
+            <constraint>Must maintain compatibility with existing Docker-based infrastructure</constraint>
+            <constraint>Must support parallel test execution without port conflicts</constraint>
+            <constraint>Must work on Windows, macOS, and Linux</constraint>
+            <constraint>Must integrate seamlessly with existing test runner</constraint>
+        </constraints>
+    </problem_statement>
+
+    <solution_overview>
+        <approach>
+            Implemented a multi-layered solution with container runtime detection, dynamic port allocation,
+            and a compatibility wrapper to provide Docker-like interface for Podman.
+        </approach>
+        <components>
+            <component name="ContainerRuntimeDetector">
+                Detects available runtime (Docker/Podman) with environment variable override
+            </component>
+            <component name="PodmanDynamicPortManager">
+                Allocates ports dynamically in predefined ranges for each service
+            </component>
+            <component name="PodmanDockerCompatWrapper">
+                Provides UnifiedDockerManager-compatible interface for Podman
+            </component>
+        </components>
+    </solution_overview>
+
+    <implementation_details>
+        <runtime_detection>
+            <file>test_framework/container_runtime.py</file>
+            <changes>
+                - Added CONTAINER_RUNTIME environment variable check
+                - Prioritizes env var over auto-detection
+                - Falls back to Docker then Podman if not specified
+            </changes>
+            <code_snippet><![CDATA[
+# Check environment variable first
+container_runtime = os.environ.get('CONTAINER_RUNTIME', '').lower()
+
+if container_runtime == 'podman':
+    # User explicitly wants Podman
+    podman_info = self._check_podman()
+    if podman_info:
+        logger.info("Using Podman runtime (from CONTAINER_RUNTIME env)")
+        return podman_info
+            ]]></code_snippet>
+        </runtime_detection>
+
+        <dynamic_ports>
+            <file>test_framework/podman_dynamic_ports.py</file>
+            <port_ranges>
+                <range service="postgres" start="30000" end="30099"/>
+                <range service="redis" start="30100" end="30199"/>
+                <range service="clickhouse" start="30200" end="30299"/>
+                <range service="backend" start="30300" end="30399"/>
+                <range service="auth" start="30400" end="30499"/>
+                <range service="frontend" start="30500" end="30599"/>
+            </port_ranges>
+            <features>
+                <feature>Random port selection within ranges</feature>
+                <feature>Port availability checking before allocation</feature>
+                <feature>Automatic cleanup of containers</feature>
+                <feature>Health checking for started services</feature>
+            </features>
+        </dynamic_ports>
+
+        <compatibility_wrapper>
+            <file>test_framework/podman_docker_compat.py</file>
+            <purpose>
+                Wraps Podman functionality to provide Docker-compatible interface for test runner
+            </purpose>
+            <methods>
+                <method name="acquire_environment">Starts containers with dynamic ports</method>
+                <method name="wait_for_services">Verifies service health</method>
+                <method name="release_environment">Cleans up containers</method>
+                <method name="get_service_status">Checks container status</method>
+            </methods>
+        </compatibility_wrapper>
+
+        <test_runner_integration>
+            <file>tests/unified_test_runner.py</file>
+            <changes>
+                - Loads .env file early to get CONTAINER_RUNTIME
+                - Conditionally uses PodmanDockerCompatWrapper or UnifiedDockerManager
+                - Configures test environment with dynamically allocated ports
+            </changes>
+        </test_runner_integration>
+    </implementation_details>
+
+    <challenges_and_solutions>
+        <challenge>
+            <issue>podman-compose has compatibility issues with complex compose files</issue>
+            <solution>
+                Bypassed podman-compose and used direct podman commands for container management
+            </solution>
+        </challenge>
+
+        <challenge>
+            <issue>Port conflicts when running tests in parallel</issue>
+            <solution>
+                Implemented dynamic port allocation with non-overlapping ranges and availability checking
+            </solution>
+        </challenge>
+
+        <challenge>
+            <issue>Container naming conflicts in parallel execution</issue>
+            <solution>
+                Added test_id to container names for uniqueness: test-{service}-{test_id}
+            </solution>
+        </challenge>
+
+        <challenge>
+            <issue>Windows Unicode encoding issues with emoji in output</issue>
+            <solution>
+                Replaced emoji with ASCII indicators ([OK], [FAIL], etc.) for Windows compatibility
+            </solution>
+        </challenge>
+
+        <challenge>
+            <issue>Test runner expected specific Docker interface methods</issue>
+            <solution>
+                Created compatibility wrapper implementing all required methods
+            </solution>
+        </challenge>
+    </challenges_and_solutions>
+
+    <lessons_learned>
+        <lesson>
+            <title>Environment Variable Priority</title>
+            <description>
+                Checking environment variables before auto-detection gives users explicit control
+                over runtime selection, preventing unexpected behavior.
+            </description>
+        </lesson>
+
+        <lesson>
+            <title>Dynamic Port Allocation is Essential</title>
+            <description>
+                Fixed ports cause conflicts in CI/CD and parallel testing. Dynamic allocation
+                with proper ranges prevents conflicts and enables scaling.
+            </description>
+        </lesson>
+
+        <lesson>
+            <title>Compatibility Layers Enable Migration</title>
+            <description>
+                By providing a Docker-compatible interface, existing code doesn't need changes,
+                making migration seamless and reducing risk.
+            </description>
+        </lesson>
+
+        <lesson>
+            <title>Direct Container Commands vs Compose</title>
+            <description>
+                For test environments, direct container commands offer more control and fewer
+                compatibility issues than compose files across different runtimes.
+            </description>
+        </lesson>
+
+        <lesson>
+            <title>Health Checks are Critical</title>
+            <description>
+                Services need time to start. Proper health checking prevents test failures
+                due to services not being ready.
+            </description>
+        </lesson>
+
+        <lesson>
+            <title>Container Cleanup Must Be Reliable</title>
+            <description>
+                Orphaned containers consume resources. Robust cleanup with proper error handling
+                prevents resource leaks.
+            </description>
+        </lesson>
+    </lessons_learned>
+
+    <best_practices>
+        <practice>
+            Always use dynamic ports for test environments to enable parallel execution
+        </practice>
+        <practice>
+            Include test ID in container names for debugging and preventing conflicts
+        </practice>
+        <practice>
+            Implement health checks with timeouts for all services
+        </practice>
+        <practice>
+            Provide compatibility layers when migrating between technologies
+        </practice>
+        <practice>
+            Use environment variables for runtime configuration with clear precedence
+        </practice>
+        <practice>
+            Clean up resources in finally blocks to ensure cleanup even on errors
+        </practice>
+        <practice>
+            Log allocated ports and container names for debugging
+        </practice>
+    </best_practices>
+
+    <impact>
+        <benefit>Eliminates Docker Desktop licensing requirements</benefit>
+        <benefit>Enables parallel test execution without conflicts</benefit>
+        <benefit>Provides seamless migration path from Docker</benefit>
+        <benefit>Improves test reliability with proper health checking</benefit>
+        <benefit>Reduces resource usage with automatic cleanup</benefit>
+        <benefit>Supports all major operating systems</benefit>
+    </impact>
+
+    <future_improvements>
+        <improvement>
+            Add support for docker-compose.yml parsing to extract service definitions
+        </improvement>
+        <improvement>
+            Implement port range configuration via environment variables
+        </improvement>
+        <improvement>
+            Add metrics collection for container startup times and resource usage
+        </improvement>
+        <improvement>
+            Create GUI tool for managing test containers
+        </improvement>
+        <improvement>
+            Add support for container networking and inter-service communication
+        </improvement>
+    </future_improvements>
+
+    <related_files>
+        <file>test_framework/container_runtime.py</file>
+        <file>test_framework/podman_dynamic_ports.py</file>
+        <file>test_framework/podman_docker_compat.py</file>
+        <file>test_framework/podman_adapter.py</file>
+        <file>test_framework/unified_container_manager.py</file>
+        <file>tests/unified_test_runner.py</file>
+        <file>docs/PODMAN_USER_GUIDE.md</file>
+        <file>docs/PODMAN_TESTING_GUIDE.md</file>
+        <file>scripts/test_podman_setup.py</file>
+        <file>scripts/podman_quick_start.py</file>
+    </related_files>
+</learning>

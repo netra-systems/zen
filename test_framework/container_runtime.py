@@ -51,14 +51,40 @@ class ContainerRuntimeDetector:
     def detect_runtime(self) -> RuntimeInfo:
         """
         Detect available container runtime with preference order:
-        1. Docker (if available and licensed)
-        2. Podman (free alternative)
-        3. None (no runtime available)
+        1. Environment variable CONTAINER_RUNTIME (if set)
+        2. Docker (if available and licensed)
+        3. Podman (free alternative)
+        4. None (no runtime available)
         """
         if self._cached and self._runtime_info:
             return self._runtime_info
         
-        # Check for Docker first
+        # Check environment variable first
+        container_runtime = os.environ.get('CONTAINER_RUNTIME', '').lower()
+        
+        if container_runtime == 'podman':
+            # User explicitly wants Podman
+            podman_info = self._check_podman()
+            if podman_info:
+                self._runtime_info = podman_info
+                self._cached = True
+                logger.info("Using Podman runtime (from CONTAINER_RUNTIME env)")
+                return podman_info
+            else:
+                logger.warning("CONTAINER_RUNTIME=podman but Podman not available")
+        
+        elif container_runtime == 'docker':
+            # User explicitly wants Docker
+            docker_info = self._check_docker()
+            if docker_info:
+                self._runtime_info = docker_info
+                self._cached = True
+                logger.info("Using Docker runtime (from CONTAINER_RUNTIME env)")
+                return docker_info
+            else:
+                logger.warning("CONTAINER_RUNTIME=docker but Docker not available")
+        
+        # Auto-detect: Check for Docker first
         docker_info = self._check_docker()
         if docker_info:
             self._runtime_info = docker_info

@@ -147,6 +147,46 @@
         </related-learnings>
     </learning>
     
+    <learning id="podman-integration-dynamic-ports-2025-09-03">
+        <title>Podman Integration with Dynamic Port Allocation</title>
+        <category>Infrastructure/Containers/Testing</category>
+        <keywords>podman, docker-alternative, dynamic-ports, parallel-testing, container-runtime, test-infrastructure</keywords>
+        <path>podman_integration_20250903.xml</path>
+        <critical-takeaway>
+            Successful integration of Podman as Docker alternative with dynamic port allocation enables
+            parallel test execution without conflicts. Key insights: (1) Environment variable override
+            for runtime selection, (2) Dynamic ports in non-overlapping ranges prevent conflicts,
+            (3) Compatibility wrapper enables seamless migration, (4) Direct container commands more
+            reliable than compose for test environments, (5) Unique container naming with test_id
+            prevents parallel execution conflicts.
+        </critical-takeaway>
+        <severity>HIGH</severity>
+        <business-impact>Eliminates Docker Desktop licensing costs, enables parallel CI/CD pipelines</business-impact>
+        <prevention>
+            Always use dynamic ports for test environments. Include test_id in container names.
+            Implement proper health checks with timeouts. Clean up containers in finally blocks.
+            Use environment variables for runtime configuration.
+        </prevention>
+        <implementation-patterns>
+            <pattern>Container runtime detection with env var override</pattern>
+            <pattern>Dynamic port allocation with availability checking</pattern>
+            <pattern>Compatibility wrapper for seamless migration</pattern>
+            <pattern>Direct container commands instead of compose</pattern>
+            <pattern>Test ID in container names for uniqueness</pattern>
+        </implementation-patterns>
+        <testing-strategies>
+            <strategy>Test with both Docker and Podman runtimes</strategy>
+            <strategy>Verify parallel execution with dynamic ports</strategy>
+            <strategy>Test container cleanup on error scenarios</strategy>
+            <strategy>Validate health checks for all services</strategy>
+        </testing-strategies>
+        <related-learnings>
+            <learning>test_framework/podman_dynamic_ports.py</learning>
+            <learning>test_framework/podman_docker_compat.py</learning>
+            <learning>docs/PODMAN_USER_GUIDE.md</learning>
+        </related-learnings>
+    </learning>
+    
     <learning id="circular-import-supervisor-fix-2025-09-03">
         <title>Supervisor Module Circular Import Fix - Critical System Recovery</title>
         <category>Import-Management/Circular-Import/SSOT</category>

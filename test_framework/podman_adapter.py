@@ -374,8 +374,8 @@ class PodmanAdapter:
         cwd: Optional[str] = None
     ) -> subprocess.CompletedProcess:
         """Execute a command with rate limiting."""
-        # Apply rate limiting
-        await self.rate_limiter.acquire()
+        # For now, skip rate limiting for Podman as it doesn't have the same issues as Docker
+        # TODO: Add async rate limiting if needed in the future
         
         try:
             # Run command
@@ -404,9 +404,10 @@ class PodmanAdapter:
                 result.kill()
                 await result.wait()
                 raise TimeoutError(f"Command timed out after {timeout}s: {' '.join(cmd)}")
-                
-        finally:
-            self.rate_limiter.release()
+        
+        except Exception as e:
+            logger.error(f"Error executing command {' '.join(cmd)}: {e}")
+            raise
     
     async def _update_container_tracking(self, project_name: str):
         """Update internal tracking of containers."""

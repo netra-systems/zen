@@ -60,6 +60,7 @@ NEW ORCHESTRATION EXAMPLES:
 
 import argparse
 import json
+import logging
 import os
 import subprocess
 import sys
@@ -68,11 +69,22 @@ from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 from datetime import timedelta
 
+logger = logging.getLogger(__name__)
+
 # Project root - script is now in scripts/ directory
 PROJECT_ROOT = Path(__file__).parent.parent.absolute()
 
 # Add project root to path for absolute imports
 sys.path.insert(0, str(PROJECT_ROOT))
+
+# Load environment variables from .env file to ensure CONTAINER_RUNTIME is set
+try:
+    from dotenv import load_dotenv
+    env_file = PROJECT_ROOT / '.env'
+    if env_file.exists():
+        load_dotenv(env_file, override=False)
+except ImportError:
+    pass  # dotenv not available, will rely on system environment
 
 # Use centralized environment management
 try:
@@ -199,13 +211,17 @@ except ImportError:
     SafePortAllocator = None
     
 try:
+    from test_framework.unified_container_manager import (
+        UnifiedContainerManager, ContainerManagerMode
+    )
     from test_framework.unified_docker_manager import (
-        UnifiedDockerManager, EnvironmentType, ServiceStatus
+        EnvironmentType, ServiceStatus
     )
     CENTRALIZED_DOCKER_AVAILABLE = True
 except ImportError:
     CENTRALIZED_DOCKER_AVAILABLE = False
-    UnifiedDockerManager = None
+    UnifiedContainerManager = None
+    ContainerManagerMode = None
     EnvironmentType = None
     ServiceStatus = None
 
@@ -514,14 +530,29 @@ class UnifiedTestRunner:
         rebuild_images = not (hasattr(args, 'no_rebuild') and args.no_rebuild)
         rebuild_backend_only = not (hasattr(args, 'rebuild_all') and args.rebuild_all)
         
-        self.docker_manager = UnifiedDockerManager(
-            environment_type=env_type,
-            test_id=f"test_run_{int(time.time())}_{os.getpid()}",  # More unique ID
-            use_production_images=use_production,
-            use_alpine=use_alpine,  # Use Alpine images by default for minimal size
-            rebuild_images=rebuild_images,  # Rebuild images by default for freshness
-            rebuild_backend_only=rebuild_backend_only  # Only rebuild backend by default since that's where most changes are
-        )
+        # Check if we should use Podman or Docker
+        container_runtime = os.environ.get('CONTAINER_RUNTIME', '').lower()
+        
+        if container_runtime == 'podman':
+            # Use Podman with Docker compatibility wrapper
+            from test_framework.podman_docker_compat import PodmanDockerCompatWrapper
+            self.docker_manager = PodmanDockerCompatWrapper(
+                environment_type=env_type,
+                test_id=f"test_run_{int(time.time())}_{os.getpid()}",
+                use_alpine=use_alpine
+            )
+            print("[INFO] Using Podman runtime for container management")
+        else:
+            # Use Docker (existing UnifiedDockerManager)
+            from test_framework.unified_docker_manager import UnifiedDockerManager
+            self.docker_manager = UnifiedDockerManager(
+                environment_type=env_type,
+                test_id=f"test_run_{int(time.time())}_{os.getpid()}",
+                use_production_images=use_production,
+                use_alpine=use_alpine,
+                rebuild_images=rebuild_images,
+                rebuild_backend_only=rebuild_backend_only
+            )
         
         print(f"[INFO] Using Docker environment: type={env_type.value}, alpine={use_alpine}, "
               f"rebuild={rebuild_images}, backend_only={rebuild_backend_only}, production={use_production}")
@@ -799,7 +830,20 @@ class UnifiedTestRunner:
         # Configure services
         if args.env == "staging":
             # For staging, don't use Docker port discovery - use remote staging services
-            configure_test_environment()
+            # Configure test environment with discovered ports
+            env = get_env()
+            if self.docker_ports:
+                # Set discovered PostgreSQL URL
+                postgres_port = self.docker_ports.get('postgres', 5434)
+                env.set('TEST_POSTGRES_PORT', str(postgres_port), 'docker_manager')
+                env.set('DATABASE_URL', f'postgresql://test:test@localhost:{postgres_port}/netra_test', 'docker_manager')
+                
+                # Set discovered Redis URL
+                redis_port = self.docker_ports.get('redis', 6381)
+                env.set('TEST_REDIS_PORT', str(redis_port), 'docker_manager')
+                env.set('REDIS_URL', f'redis://localhost:{redis_port}/0', 'docker_manager')
+                
+                logger.info(f"Configured test environment with dynamic ports - Postgres: {postgres_port}, Redis: {redis_port}")
             env = get_env()
             env.set('USE_REAL_SERVICES', 'true', 'test_runner')
             # Import SSOT for staging URLs
@@ -819,7 +863,20 @@ class UnifiedTestRunner:
             env.set('AUTH_SERVICE_URL', env.get('AUTH_SERVICE_URL', 'http://localhost:8081'), 'test_runner')
             env.set('WEBSOCKET_URL', env.get('WEBSOCKET_URL', 'ws://localhost:8000'), 'test_runner')
         elif args.real_services or running_e2e:
-            configure_test_environment()
+            # Configure test environment with discovered ports
+            env = get_env()
+            if self.docker_ports:
+                # Set discovered PostgreSQL URL
+                postgres_port = self.docker_ports.get('postgres', 5434)
+                env.set('TEST_POSTGRES_PORT', str(postgres_port), 'docker_manager')
+                env.set('DATABASE_URL', f'postgresql://test:test@localhost:{postgres_port}/netra_test', 'docker_manager')
+                
+                # Set discovered Redis URL
+                redis_port = self.docker_ports.get('redis', 6381)
+                env.set('TEST_REDIS_PORT', str(redis_port), 'docker_manager')
+                env.set('REDIS_URL', f'redis://localhost:{redis_port}/0', 'docker_manager')
+                
+                logger.info(f"Configured test environment with dynamic ports - Postgres: {postgres_port}, Redis: {redis_port}")
             # Use appropriate services based on environment
             # For dev environment, use dev services; for test environment, use test services
             use_test_services = (args.env != 'dev')
