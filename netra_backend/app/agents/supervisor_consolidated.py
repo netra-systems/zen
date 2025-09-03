@@ -422,6 +422,11 @@ class SupervisorAgent(BaseAgent):
                     )
                     
                     results[agent_name] = agent_result
+                    
+                    # CRITICAL: Propagate metadata from child context back to parent context
+                    # This ensures results like triage_result, data_result, etc. are available for reporting
+                    self._merge_child_metadata_to_parent(context, child_context, agent_name)
+                    
                     logger.info(f"✅ Agent {agent_name} completed for user {context.user_id}")
                     
                 except Exception as e:
@@ -497,6 +502,50 @@ class SupervisorAgent(BaseAgent):
         except Exception as e:
             logger.debug(f"Failed to emit thinking message: {e}")
             # Don't fail execution for WebSocket errors
+    
+    def _merge_child_metadata_to_parent(self, parent_context: UserExecutionContext, 
+                                        child_context: UserExecutionContext, 
+                                        agent_name: str) -> None:
+        """Merge child context metadata back to parent context.
+        
+        This ensures that agent results (triage_result, data_result, optimizations_result, 
+        action_plan_result) are available in the parent context for the reporting agent.
+        
+        Args:
+            parent_context: Parent execution context
+            child_context: Child execution context with updated metadata
+            agent_name: Name of the agent that was executed
+        """
+        # Map agent names to their expected metadata keys
+        agent_metadata_mapping = {
+            "triage": ["triage_result", "goal_triage_results"],
+            "data": ["data_result", "data_analysis_result"],
+            "optimization": ["optimizations_result", "optimization_strategies"],
+            "actions": ["action_plan_result", "actions_result"],
+            "data_helper": ["data_helper_result"],
+            "synthetic_data": ["synthetic_data_result"]
+        }
+        
+        # Get expected keys for this agent
+        expected_keys = agent_metadata_mapping.get(agent_name, [])
+        
+        # Also check for the generic pattern {agent_name}_result
+        generic_key = f"{agent_name}_result"
+        if generic_key not in expected_keys:
+            expected_keys.append(generic_key)
+        
+        # Merge specific keys from child to parent
+        for key in expected_keys:
+            if key in child_context.metadata:
+                parent_context.metadata[key] = child_context.metadata[key]
+                logger.debug(f"Propagated metadata key '{key}' from {agent_name} to parent context")
+        
+        # Also propagate any keys that match common result patterns
+        for key, value in child_context.metadata.items():
+            if key.endswith("_result") or key.endswith("_results"):
+                if key not in parent_context.metadata:
+                    parent_context.metadata[key] = value
+                    logger.debug(f"Propagated additional result key '{key}' from {agent_name} to parent context")
     
     # === Utility Methods ===
     

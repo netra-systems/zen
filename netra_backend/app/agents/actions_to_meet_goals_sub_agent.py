@@ -111,6 +111,9 @@ class ActionsToMeetGoalsSubAgent(BaseAgent):
         }
         await self.emit_agent_completed(result_data)
         
+        # CRITICAL: Store action plan result in context metadata for other agents
+        context.metadata['action_plan_result'] = action_plan_result
+        
         return {"action_plan_result": action_plan_result}
 
     async def _generate_action_plan(self, context: 'UserExecutionContext') -> ActionPlanResult:
@@ -222,6 +225,9 @@ class ActionsToMeetGoalsSubAgent(BaseAgent):
                 "steps_generated": len(fallback_plan.plan_steps) if fallback_plan.plan_steps else 0,
                 "message": "Action plan created using fallback method"
             })
+            
+        # CRITICAL: Store fallback action plan in context metadata for other agents
+        context.metadata['action_plan_result'] = fallback_plan
             
         return {"action_plan_result": fallback_plan}
 
