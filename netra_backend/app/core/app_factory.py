@@ -153,6 +153,9 @@ def create_app() -> FastAPI:
     _configure_app_handlers(app)
     _configure_app_routes(app)
     
+    # Install GCP error reporting handlers if available
+    _install_gcp_error_handlers(app)
+    
     # Return the FastAPI app instance
     # The middleware stack including CORS is already configured on the app
     return app
@@ -169,3 +172,22 @@ def _configure_app_routes(app: FastAPI) -> None:
     """Configure application routes."""
     register_api_routes(app)
     setup_root_endpoint(app)
+
+
+def _install_gcp_error_handlers(app: FastAPI) -> None:
+    """Install GCP error reporting handlers if running in GCP."""
+    try:
+        from netra_backend.app.services.monitoring.gcp_error_reporter import install_exception_handlers
+        from netra_backend.app.core.unified_logging import get_logger
+        
+        logger = get_logger(__name__)
+        install_exception_handlers(app)
+        logger.info("GCP error reporting handlers installed")
+    except ImportError:
+        # GCP libraries not available, skip installation
+        pass
+    except Exception as e:
+        # Don't let error reporting setup break the app
+        from netra_backend.app.core.unified_logging import get_logger
+        logger = get_logger(__name__)
+        logger.warning(f"Could not install GCP error handlers: {e}")
