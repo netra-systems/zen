@@ -112,9 +112,6 @@ class TestDatabaseConnectioner:
         self.pool_stats: Dict[str, Any] = {}
 
 
-# Alias for backward compatibility (fixing typo)
-DatabaseConnectionTester = TestDatabaseConnectioner
-    
     @pytest.mark.e2e
     async def test_connection_acquisition_speed(self) -> Tuple[float, bool]:
         """Test connection acquisition speed"""
@@ -146,6 +143,10 @@ DatabaseConnectionTester = TestDatabaseConnectioner
                     await conn.close()
             except Exception:
                 pass
+
+
+# Alias for backward compatibility (fixing typo)
+DatabaseConnectionTester = TestDatabaseConnectioner
 
 
 class StorageMonitor:

@@ -80,7 +80,8 @@ class TestEnvironmentManager:
         """Set temporary environment variable."""
         if key not in self._temp_env_vars:
             self._temp_env_vars[key] = get_env().get(key, "")
-        get_env().get(key) = value
+        import os
+        os.environ[key] = value
     
     def cleanup(self) -> None:
         """Cleanup test environment."""

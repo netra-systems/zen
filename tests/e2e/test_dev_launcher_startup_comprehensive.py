@@ -131,6 +131,9 @@ class TestDevLauncherStartuper:
         ]
         
         for var in test_env_vars:
+            # Store original value for restoration
+            if var in os.environ:
+                original_env_values[var] = os.environ[var]
             
         # Set test-specific environment variables
         # NOTE: Using potentially problematic values to expose issues

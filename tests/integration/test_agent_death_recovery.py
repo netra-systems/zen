@@ -666,7 +666,7 @@ class TestAgentDeathRecoveryIntegration:
         actual_rate = tracker_metrics['success_rate']
         
         # Allow some tolerance for timing
-        assert abs(actual_rate - expected_rate) < 0.2, \\
+        assert abs(actual_rate - expected_rate) < 0.2, \
             f"Success rate mismatch: expected ~{expected_rate:.2%}, got {actual_rate:.2%}"
         
         print("✅ METRICS TEST PASSED - All metrics accurate during death scenarios")

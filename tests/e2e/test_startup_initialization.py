@@ -193,7 +193,8 @@ def test_env():
     })
     
     for key, value in test_env.items():
-        get_env().get(key) = value
+        import os
+        os.environ[key] = value
     
     yield test_env
     

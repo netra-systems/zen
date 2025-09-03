@@ -24,9 +24,14 @@ class TestOAuthGoogleLogin500Error:
     def auth_service_url(self) -> str:
         """Get auth service URL from environment or use default"""
         # Check multiple possible sources for the auth service URL
-                url = "http://127.0.0.1:8001"
-            else:
-                url = "http://localhost:8081"
+        from shared.isolated_environment import get_env
+        auth_url = get_env().get("AUTH_SERVICE_URL")
+        if auth_url:
+            url = auth_url
+        elif get_env().get("ENVIRONMENT") == "test":
+            url = "http://127.0.0.1:8001"
+        else:
+            url = "http://localhost:8081"
         return url
     
     @pytest.fixture

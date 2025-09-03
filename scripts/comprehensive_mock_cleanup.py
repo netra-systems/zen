@@ -86,8 +86,7 @@ def cleanup_mock_imports(file_path: Path) -> Tuple[bool, List[str]]:
             '# Removed mock import - using real service testing per CLAUDE.md "MOCKS = Abomination"\nfrom test_framework.real_services import get_real_services\n',
             content
         )
-        if '# Removed mock import - using real service testing per CLAUDE.md "MOCKS = Abomination"
-from test_framework.real_services import get_real_services
+        if '# Removed mock import - using real service testing per CLAUDE.md "MOCKS = Abomination"' in content:
             changes.append("Replaced test_framework.mocks imports")
         
         # 3. Replace WebSocket mock imports 

@@ -311,6 +311,12 @@ print("Server ready")
         Business Impact: Services can't find dependencies, configuration issues
         """
         # Test custom environment variable
+        import os
+        custom_env = os.environ.copy()
+        custom_env["WINDOWS_TEST_VAR"] = "windows_test_value"
+        
+        result = subprocess.run(
+            ['echo', '%WINDOWS_TEST_VAR%'],
             capture_output=True,
             text=True,
             timeout=5,

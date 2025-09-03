@@ -3,6 +3,7 @@
 import os
 import pytest
 import logging
+from unittest.mock import patch
 from shared.isolated_environment import get_env
 
 logger = logging.getLogger(__name__)
@@ -12,7 +13,13 @@ async def test_staging_auth_config_no_dev_login():
     """Verify that staging auth config does not expose dev login endpoint"""
     
     # Simulate staging environment
-        
+    staging_env = {
+        "ENVIRONMENT": "staging",
+        "AUTH_SERVICE_URL": "https://auth.staging.netrasystems.ai",
+        "FRONTEND_URL": "https://staging.netrasystems.ai"
+    }
+    
+    with patch.dict(os.environ, staging_env):
         # Import after setting environment to ensure proper initialization
         from auth_service.auth_core.routes.auth_routes import _detect_environment
         from auth_service.auth_core.config import AuthConfig

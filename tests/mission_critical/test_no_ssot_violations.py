@@ -36,7 +36,7 @@ from unittest.mock import patch as mock_patch  # FORBIDDEN - for detection only
 # Real service imports - NO MOCKS
 from test_framework.environment_isolation import isolated_test_env, get_test_env_manager
 from shared.isolated_environment import IsolatedEnvironment
-from netra_backend.app.core.database_url_builder import DatabaseURLBuilder
+from shared.database_url_builder import DatabaseURLBuilder
 from netra_backend.app.services.database_manager import DatabaseManager
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.services.websocket_manager import WebSocketManager
