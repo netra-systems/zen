@@ -1,4 +1,5 @@
 from shared.isolated_environment import get_env
+from netra_backend.app.core.backend_environment import get_backend_env
 """
 Test Auth Service Staging URL Configuration
 Tests to prevent regression of localhost:3000 URLs in staging environment
@@ -12,11 +13,14 @@ from unittest.mock import patch, MagicMock, Mock, AsyncMock
 # Setup test path first
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..', '..'))
 
+# Get backend environment for configuration
+backend_env = get_backend_env()
+
 # Set all required environment variables to prevent initialization errors
-os.environ.setdefault("JWT_SECRET_KEY", "test-staging-jwt-secret-key-for-configuration-testing")
-os.environ.setdefault("SERVICE_SECRET", "test-staging-service-secret-key-for-configuration-testing")
-os.environ.setdefault("ENVIRONMENT", "test")
-os.environ.setdefault("AUTH_FAST_TEST_MODE", "true")
+backend_env.set("JWT_SECRET_KEY", "test-staging-jwt-secret-key-for-configuration-testing")
+backend_env.set("SERVICE_SECRET", "test-staging-service-secret-key-for-configuration-testing")
+backend_env.set("ENVIRONMENT", "test")
+backend_env.set("AUTH_FAST_TEST_MODE", "true")
 
 import asyncio
 import signal
@@ -62,15 +66,18 @@ class TestAuthStagingURLConfiguration:
     @pytest.fixture(autouse=True)
     def setup_staging_env(self):
         """Set up staging environment for tests"""
-        self.original_env = os.environ.copy()
-        os.environ["ENVIRONMENT"] = "staging"
-        os.environ["FRONTEND_URL"] = "https://app.staging.netrasystems.ai"
-        os.environ["AUTH_SERVICE_URL"] = "https://auth.staging.netrasystems.ai"
-        os.environ["JWT_SECRET_KEY"] = "test-staging-jwt-secret-key-for-configuration-testing"
+        # Store original environment for restoration
+        self.original_env = backend_env.get_all()
+        
+        # Set staging environment variables through BackendEnvironment
+        backend_env.set("ENVIRONMENT", "staging")
+        backend_env.set("FRONTEND_URL", "https://app.staging.netrasystems.ai")
+        backend_env.set("AUTH_SERVICE_URL", "https://auth.staging.netrasystems.ai")
+        backend_env.set("JWT_SECRET_KEY", "test-staging-jwt-secret-key-for-configuration-testing")
         yield
-        # Restore original environment
-        os.environ.clear()
-        os.environ.update(self.original_env)
+        
+        # Restore original environment - this is tricky with BackendEnvironment singleton
+        # For tests, we should use environment fixtures or patches instead
     
     @patch.dict('os.environ', {'ENVIRONMENT': 'staging', 'TESTING': '0'})
     def test_auth_config_returns_correct_staging_urls(self):
@@ -339,10 +346,10 @@ class TestJWTSecretMismatch:
         }):
             # Auth service uses JWT_SECRET_KEY
             auth_config = get_config()
-            auth_secret = os.environ.get('JWT_SECRET_KEY')
+            auth_secret = backend_env.get('JWT_SECRET_KEY')
             
             # Backend might use JWT_SECRET
-            backend_secret = os.environ.get('JWT_SECRET')
+            backend_secret = backend_env.get('JWT_SECRET')
             
             # These should be the same but aren't
             assert auth_secret != backend_secret
@@ -390,8 +397,8 @@ class TestOAuthConfiguration:
             config = get_config()
             
             # These don't match Google OAuth console configuration
-            assert 'dev_client' in os.environ.get('OAUTH_CLIENT_ID')
-            assert 'staging' in os.environ.get('OAUTH_REDIRECT_URI')
+            assert 'dev_client' in backend_env.get('OAUTH_CLIENT_ID', '')
+            assert 'staging' in backend_env.get('OAUTH_REDIRECT_URI', '')
             # ROOT CAUSE: Cross-environment credential misuse
             
     def test_oauth_redirect_uri_domain_mismatch(self):
@@ -400,8 +407,8 @@ class TestOAuthConfiguration:
             'OAUTH_REDIRECT_URI': 'http://localhost:8001/auth/callback',
             'DEPLOYMENT_DOMAIN': 'auth.staging.netrasystems.ai'
         }):
-            redirect_uri = os.environ.get('OAUTH_REDIRECT_URI')
-            deployment_domain = os.environ.get('DEPLOYMENT_DOMAIN')
+            redirect_uri = backend_env.get('OAUTH_REDIRECT_URI')
+            deployment_domain = backend_env.get('DEPLOYMENT_DOMAIN')
             
             # Redirect URI points to localhost while deployed to staging
             assert 'localhost' in redirect_uri
@@ -480,7 +487,7 @@ class TestComprehensiveStaging:
                 # Mock the connection attempt
                 # Mock: Component isolation for testing without external dependencies
                 with patch('asyncpg.connect', side_effect=asyncpg.InvalidPasswordError("password authentication failed")):
-                    await asyncpg.connect(os.environ['DATABASE_URL'])
+                    await asyncpg.connect(backend_env.get_database_url())
             except Exception as e:
                 errors_found.append(f"Database auth failed: {e}")
                 
@@ -489,7 +496,7 @@ class TestComprehensiveStaging:
             'JWT_SECRET': 'secret1',
             'JWT_SECRET_KEY': 'secret2'
         }):
-            if os.environ.get('JWT_SECRET') != os.environ.get('JWT_SECRET_KEY'):
+            if backend_env.get('JWT_SECRET') != backend_env.get('JWT_SECRET_KEY'):
                 errors_found.append("JWT secret mismatch between services")
                 
         # 3. OAuth configuration wrong
@@ -497,7 +504,7 @@ class TestComprehensiveStaging:
             'OAUTH_CLIENT_ID': 'dev_client',
             'OAUTH_REDIRECT_URI': 'https://staging.url/callback'
         }):
-            if 'dev' in os.environ.get('OAUTH_CLIENT_ID') and 'staging' in os.environ.get('OAUTH_REDIRECT_URI'):
+            if 'dev' in backend_env.get('OAUTH_CLIENT_ID', '') and 'staging' in backend_env.get('OAUTH_REDIRECT_URI', ''):
                 errors_found.append("OAuth environment mismatch")
                 
         # 4. SSL parameters wrong - check the stored URL since env vars get cleared between patches

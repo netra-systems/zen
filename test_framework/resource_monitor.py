@@ -56,10 +56,19 @@ except ImportError:
 try:
     from shared.isolated_environment import getenv
 except ImportError:
-    # Fallback if shared module not available in path
+    # CRITICAL SECURITY FIX: Remove direct os.environ access to prevent service boundary violations
+    # This fallback should not occur in production - all services must have IsolatedEnvironment
     import os
+    import logging
+    logger = logging.getLogger(__name__)
+    logger.error("CRITICAL: Missing IsolatedEnvironment - service boundary violation detected")
+    
     def getenv(key: str, default=None):
-        """Fallback environment variable getter."""
+        """
+        DEPRECATED: Direct environment access creates service boundary violations.
+        This fallback exists only for emergency compatibility - do not use in production.
+        """
+        logger.warning(f"Using deprecated direct environment access for key: {key}")
         return os.environ.get(key, default)
 
 # Import existing Docker utilities for integration

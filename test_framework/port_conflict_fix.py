@@ -351,7 +351,8 @@ class PortConflictResolver:
         # This is now just for cleaning up old state files from the previous implementation
         state_file = Path("/tmp/netra_port_state/port_allocations.json")
         if os.name == 'nt':
-            state_file = Path(os.environ.get('TEMP', '.')) / "netra_port_state" / "port_allocations.json"
+            env = get_env()
+            state_file = Path(env.get('TEMP', '.')) / "netra_port_state" / "port_allocations.json"
         
         if state_file.exists():
             try:
