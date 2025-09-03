@@ -62,100 +62,19 @@ try:
         create_test_context,
         create_isolated_test_contexts
     )
+    # Import real WebSocket manager - NO MOCKS per CLAUDE.md
+    from test_framework.real_websocket_manager import RealWebSocketManager
 except ImportError as e:
     pytest.skip(f"Could not import required WebSocket components: {e}", allow_module_level=True)
 
 
 # ============================================================================
-# ULTRA COMPREHENSIVE MOCK FRAMEWORK FOR NEW ARCHITECTURE
+# CRITICAL: MOCKS REMOVED per CLAUDE.md "MOCKS = Abomination"
+# Using RealWebSocketManager for authentic WebSocket testing
 # ============================================================================
 
-class UltraReliableMockWebSocketConnection:
-    """Ultra-reliable mock WebSocket connection for factory pattern testing."""
-    
-    def __init__(self, user_id: str, connection_id: str):
-        self.user_id = user_id
-        self.connection_id = connection_id
-        self.messages: List[Dict] = []
-        self.is_closed = False
-        self.latency_ms = 0
-        self.failure_rate = 0.0
-        self.created_at = datetime.now(timezone.utc)
-        self.last_activity = self.created_at
-        
-    async def send_event(self, event: WebSocketEvent) -> None:
-        """Send event through mock connection."""
-        if self.is_closed:
-            raise ConnectionError(f"Connection closed for user {self.user_id}")
-            
-        # Simulate network latency
-        if self.latency_ms > 0:
-            await asyncio.sleep(self.latency_ms / 1000.0)
-            
-        # Simulate failures
-        if random.random() < self.failure_rate:
-            raise ConnectionError(f"Simulated connection failure for user {self.user_id}")
-        
-        # Record the event
-        event_data = {
-            'event_type': event.event_type,
-            'event_id': event.event_id,
-            'user_id': event.user_id,
-            'thread_id': event.thread_id,
-            'data': event.data,
-            'timestamp': event.timestamp.isoformat(),
-            'retry_count': event.retry_count
-        }
-        
-        self.messages.append(event_data)
-        self.last_activity = datetime.now(timezone.utc)
-        
-    async def ping(self) -> bool:
-        """Ping connection health."""
-        return not self.is_closed
-        
-    async def close(self) -> None:
-        """Close the connection."""
-        self.is_closed = True
-
-
-class UltraReliableMockWebSocketPool:
-    """Mock WebSocket connection pool for factory pattern testing."""
-    
-    def __init__(self):
-        self.connections: Dict[str, UltraReliableMockWebSocketConnection] = {}
-        self.connection_lock = asyncio.Lock()
-        
-    async def get_connection(self, connection_id: str, user_id: str) -> Any:
-        """Get or create mock connection."""
-        connection_key = f"{user_id}:{connection_id}"
-        
-        async with self.connection_lock:
-            if connection_key not in self.connections:
-                self.connections[connection_key] = UltraReliableMockWebSocketConnection(
-                    user_id, connection_id
-                )
-            return type('MockConnectionInfo', (), {
-                'websocket': self.connections[connection_key],
-                'user_id': user_id,
-                'connection_id': connection_id
-            })()
-    
-    def get_user_messages(self, user_id: str, connection_id: str = "default") -> List[Dict]:
-        """Get all messages for a specific user."""
-        connection_key = f"{user_id}:{connection_id}"
-        if connection_key in self.connections:
-            return self.connections[connection_key].messages.copy()
-        return []
-    
-    def configure_connection_issues(self, user_id: str, connection_id: str = "default", 
-                                  latency_ms: int = 0, failure_rate: float = 0.0):
-        """Configure connection issues for testing."""
-        connection_key = f"{user_id}:{connection_id}"
-        if connection_key in self.connections:
-            conn = self.connections[connection_key]
-            conn.latency_ms = latency_ms
-            conn.failure_rate = failure_rate
+# UltraReliableMockWebSocketConnection and UltraReliableMockWebSocketPool REMOVED
+# Using real WebSocket connections for authentic testing per CLAUDE.md
 
 
 class ComprehensiveEventValidator:
@@ -295,10 +214,10 @@ class WebSocketFactoryTestHarness:
     
     def __init__(self):
         self.factory = WebSocketBridgeFactory()
-        self.mock_pool = UltraReliableMockWebSocketPool()
+        self.real_websocket_manager = RealWebSocketManager()
         self.validator = ComprehensiveEventValidator()
         
-        # Configure factory with mocked pool
+        # Configure factory with real WebSocket manager
         self.factory.configure(
             connection_pool=self.mock_pool,
             agent_registry=Mock(),  # Mock registry
@@ -413,8 +332,12 @@ class TestUltraComprehensiveWebSocketValidation:
     
     @pytest.fixture(autouse=True)
     async def setup_test_environment(self):
-        """Setup ultra-comprehensive test environment."""
+        """Setup ultra-comprehensive test environment with real WebSocket connections."""
         self.test_harness = WebSocketFactoryTestHarness()
+        
+        # Initialize real WebSocket session
+        self._websocket_session = self.test_harness.real_websocket_manager.real_websocket_session()
+        await self._websocket_session.__aenter__()
         
         try:
             yield
@@ -662,8 +585,13 @@ class TestFactoryPatternRegressionPrevention:
     
     @pytest.fixture(autouse=True)
     async def setup_regression_testing(self):
-        """Setup for regression testing."""
+        """Setup for regression testing with real WebSocket connections."""
         self.factory = get_websocket_bridge_factory()
+        self.real_websocket_manager = RealWebSocketManager()
+        
+        # Initialize real WebSocket session
+        self._websocket_session = self.real_websocket_manager.real_websocket_session()
+        await self._websocket_session.__aenter__()
         
         try:
             yield
