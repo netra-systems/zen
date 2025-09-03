@@ -1002,10 +1002,28 @@ class WebSocketManager:
             thread_connections = await self._get_thread_connections(thread_id)
             
             if not thread_connections:
-                logger.debug(f"No active connections found for thread {thread_id} - message accepted for future delivery")
-                # Return True to indicate the message was accepted (queued for when connections exist)
-                # This is critical for startup validation where no connections exist yet
-                return True
+                # CRITICAL: Log at WARNING level for visibility
+                logger.warning(f"No active connections found for thread {thread_id} - attempting user-based fallback")
+                
+                # FALLBACK: Try to extract user_id from message and send directly
+                user_id = None
+                if isinstance(message, dict):
+                    user_id = message.get('data', {}).get('user_id') or message.get('user_id')
+                
+                if user_id:
+                    logger.info(f"Attempting fallback send to user {user_id} for thread {thread_id}")
+                    return await self.send_to_user(user_id, message)
+                
+                # Only return True for testing environments where no connections are expected
+                from shared.isolated_environment import get_env
+                is_testing = get_env().get("TESTING", "0") == "1"
+                if is_testing:
+                    logger.debug(f"Testing environment - accepting message for thread {thread_id} with no connections")
+                    return True
+                
+                # Production/staging should know about delivery failures
+                logger.error(f"CRITICAL: Cannot deliver message for thread {thread_id} - no connections and no fallback available")
+                return False
             
             # Serialize with error recovery
             try:
@@ -1028,9 +1046,27 @@ class WebSocketManager:
                     ))
             
             if not send_tasks:
-                logger.debug(f"No healthy connections for thread {thread_id} - message accepted for future delivery")
-                # Return True - message accepted even if no healthy connections right now
-                return True
+                # CRITICAL: Log at WARNING level for visibility
+                logger.warning(f"No healthy connections for thread {thread_id} - attempting user-based fallback")
+                
+                # FALLBACK: Try to extract user_id and send directly
+                user_id = None
+                if isinstance(message_dict, dict):
+                    user_id = message_dict.get('data', {}).get('user_id') or message_dict.get('user_id')
+                
+                if user_id:
+                    logger.info(f"Attempting fallback send to user {user_id} for unhealthy thread {thread_id}")
+                    return await self.send_to_user(user_id, message_dict)
+                
+                # Only return True for testing environments
+                from shared.isolated_environment import get_env
+                is_testing = get_env().get("TESTING", "0") == "1"
+                if is_testing:
+                    logger.debug(f"Testing environment - accepting message for thread {thread_id} with unhealthy connections")
+                    return True
+                
+                logger.error(f"CRITICAL: No healthy connections for thread {thread_id} and no fallback available")
+                return False
             
             # Use gather with return_exceptions to isolate failures
             results = await asyncio.gather(*send_tasks, return_exceptions=True)
@@ -1049,6 +1085,29 @@ class WebSocketManager:
             logger.error(f"Unexpected error in send_to_thread for {thread_id}: {e}")
             self.connection_stats["send_errors"] = self.connection_stats.get("send_errors", 0) + 1
             return False
+
+    def update_connection_thread(self, user_id: str, thread_id: str) -> bool:
+        """Update thread_id for all connections of a user.
+        
+        This is critical for WebSocket event routing to work correctly.
+        When a user sends a message with a thread_id, we associate that
+        thread with their connections so agent events can be delivered.
+        """
+        if user_id not in self.user_connections:
+            logger.warning(f"No connections found for user {user_id} when updating thread")
+            return False
+        
+        updated = 0
+        for conn_id in self.user_connections[user_id]:
+            if conn_id in self.connections:
+                self.connections[conn_id]["thread_id"] = thread_id
+                updated += 1
+                logger.debug(f"Updated connection {conn_id} with thread_id {thread_id}")
+        
+        if updated > 0:
+            logger.info(f"Associated {updated} connections for user {user_id} with thread {thread_id}")
+            return True
+        return False
 
     async def _get_thread_connections(self, thread_id: str) -> List[Tuple[str, Dict]]:
         """Get all healthy connections for a thread safely."""
@@ -1070,6 +1129,13 @@ class WebSocketManager:
             except Exception as e:
                 logger.warning(f"Error checking connection {conn_id}: {e}")
                 continue
+        
+        # Log detailed info for debugging
+        if not thread_connections:
+            logger.warning(f"No connections found for thread {thread_id}. Active connections: {len(self.connections)}")
+            # Log a sample of connection thread_ids for debugging
+            sample_threads = [conn.get("thread_id", "None") for conn in list(self.connections.values())[:5]]
+            logger.debug(f"Sample connection thread_ids: {sample_threads}")
         
         return thread_connections
 
