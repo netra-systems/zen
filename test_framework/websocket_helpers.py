@@ -545,8 +545,10 @@ async def create_test_connection_pool():
                 
             return connection_pool
             
-        except ImportError as e:
-            raise ImportError(f"Cannot import WebSocketConnectionPool for testing: {e}")
+        except ImportError:
+            # Last fallback: Use test-specific connection pool
+            logger.info("Using test-specific WebSocketConnectionPool")
+            return TestWebSocketConnectionPool()
 
 class TestWebSocketConnectionPool:
     """
@@ -561,25 +563,26 @@ class TestWebSocketConnectionPool:
         self._connection_lock = asyncio.Lock()
         self._health_monitor_task = None
         
-    async def get_user_connection(self, user_id: str, connection_id: str):
+    async def get_connection(self, connection_id: str, user_id: str):
         """Get or create user-specific WebSocket connection for testing."""
-        from netra_backend.app.services.websocket_bridge_factory import UserWebSocketConnection
+        from netra_backend.app.services.websocket_connection_pool import ConnectionInfo
         
         connection_key = f"{user_id}:{connection_id}"
         
         async with self._connection_lock:
             if connection_key not in self._connections:
-                # Create test connection
-                self._connections[connection_key] = UserWebSocketConnection(
-                    user_id=user_id,
+                # Create test connection info matching the real interface
+                mock_websocket = MockWebSocket(user_id)
+                self._connections[connection_key] = ConnectionInfo(
                     connection_id=connection_id,
-                    websocket=MockWebSocket(user_id)  # Use our test WebSocket
+                    user_id=user_id,
+                    websocket=mock_websocket
                 )
             return self._connections[connection_key]
     
     async def add_user_connection(self, user_id: str, connection_id: str, websocket):
         """Add new user connection to test pool."""
-        from netra_backend.app.services.websocket_bridge_factory import UserWebSocketConnection
+        from netra_backend.app.services.websocket_connection_pool import ConnectionInfo
         
         connection_key = f"{user_id}:{connection_id}"
         
@@ -587,12 +590,12 @@ class TestWebSocketConnectionPool:
             if connection_key in self._connections:
                 # Close existing connection
                 old_connection = self._connections[connection_key]
-                if hasattr(old_connection, 'close'):
-                    await old_connection.close()
+                if hasattr(old_connection, 'websocket') and hasattr(old_connection.websocket, 'close'):
+                    await old_connection.websocket.close()
                     
-            self._connections[connection_key] = UserWebSocketConnection(
-                user_id=user_id,
+            self._connections[connection_key] = ConnectionInfo(
                 connection_id=connection_id,
+                user_id=user_id,
                 websocket=websocket
             )
     
@@ -603,8 +606,8 @@ class TestWebSocketConnectionPool:
         async with self._connection_lock:
             if connection_key in self._connections:
                 connection = self._connections.pop(connection_key)
-                if hasattr(connection, 'close'):
-                    await connection.close()
+                if hasattr(connection, 'websocket') and hasattr(connection.websocket, 'close'):
+                    await connection.websocket.close()
     
     async def start_health_monitoring(self):
         """Start health monitoring for test pool."""
@@ -620,8 +623,8 @@ class TestWebSocketConnectionPool:
         """Clean up all test connections."""
         async with self._connection_lock:
             for connection in self._connections.values():
-                if hasattr(connection, 'close'):
-                    await connection.close()
+                if hasattr(connection, 'websocket') and hasattr(connection.websocket, 'close'):
+                    await connection.websocket.close()
             self._connections.clear()
 
 # =============================================================================

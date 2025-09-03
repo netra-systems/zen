@@ -22,8 +22,8 @@ class TestColdStartFixesValidation:
     async def test_jwt_secret_compatibility(self):
         """Test that JWT secret accepts both JWT_SECRET and JWT_SECRET_KEY."""
         # Set different JWT secrets to test backward compatibility
-        get_env().set("JWT_SECRET",  )"test_secret_123"
-        get_env().set("JWT_SECRET_KEY",  )"test_secret_123"
+        get_env().set("JWT_SECRET", "test_secret_123")
+        get_env().set("JWT_SECRET_KEY", "test_secret_123")
         
         # Import after setting env vars
         from auth_service.auth_core.secret_loader import AuthSecretLoader

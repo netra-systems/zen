@@ -50,6 +50,7 @@ if get_env().get('DATABASE_URL') == 'sqlite+aiosqlite:///:memory:':
                     break
     
     if real_database_url:
+        pass
 
 from dev_launcher.config import LauncherConfig
 from dev_launcher.service_startup import ServiceStartupCoordinator

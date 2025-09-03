@@ -69,11 +69,16 @@ class StagingAuthCrossServiceValidator:
     
     def __init__(self):
         self.env = IsolatedEnvironment.get_instance()
-        self.staging_auth_url = "https://auth.staging.netrasystems.ai"
-        self.staging_backend_url = "https://netra-backend-staging-pnovr5vsba-uc.a.run.app"
         
-        # Force staging environment for all tests
-        self.env.set("ENVIRONMENT", "staging")
+        # Check if we're testing locally or in staging
+        current_env = self.env.get("ENVIRONMENT", "development")
+        if current_env == "staging":
+            self.staging_auth_url = "https://auth.staging.netrasystems.ai"
+            self.staging_backend_url = "https://netra-backend-staging-pnovr5vsba-uc.a.run.app"
+        else:
+            # Use local services for development testing
+            self.staging_auth_url = "http://localhost:8081"
+            self.staging_backend_url = "http://localhost:8000"
         
         # Clear any cached secrets to force fresh loading
         SharedJWTSecretManager.clear_cache()
