@@ -429,6 +429,16 @@ class UnifiedTestRunner:
         if env.get('TEST_NO_DOCKER', 'false').lower() == 'true':
             print("[INFO] Docker disabled via TEST_NO_DOCKER environment variable")
             return
+        
+        # Determine if Docker is actually needed based on test categories
+        if not self._docker_required_for_tests(args, running_e2e):
+            print("[INFO] Docker not required for selected test categories")
+            return
+        
+        # Determine if Docker is actually needed based on test categories
+        if not self._docker_required_for_tests(args, running_e2e):
+            print("[INFO] Docker not required for selected test categories")
+            return
             
         # First, try to use the simple Docker manager for automatic startup
         print("\n" + "="*60)
@@ -572,6 +582,11 @@ class UnifiedTestRunner:
         - Removes orphaned networks with name pattern "netra-test-"
         - Logs all cleanup actions
         """
+        # Skip cleanup if Docker was not initialized
+        if not hasattr(self, 'docker_manager') or self.docker_manager is None:
+            print("[INFO] Skipping Docker cleanup - Docker was not initialized")
+            return
+        
         print("[INFO] Starting comprehensive test environment cleanup...")
         
         try:
@@ -1097,6 +1112,79 @@ class UnifiedTestRunner:
         except Exception as e:
             print(f"⚠️  Unexpected error during service availability check: {e}")
             print("Continuing with tests, but failures may occur if services are unavailable...")
+    
+    def _docker_required_for_tests(self, args: argparse.Namespace, running_e2e: bool) -> bool:
+        """Determine if Docker is required for the selected test categories.
+        
+        Returns True if Docker is needed, False if tests can run without Docker.
+        """
+        # Skip Docker if explicitly disabled via command line
+        if hasattr(args, 'no_docker') and args.no_docker:
+            print("[INFO] Docker explicitly disabled via --no-docker flag")
+            return False
+        
+        # Always require Docker if explicitly requested
+        if args.real_services:
+            return True
+        
+        # E2E tests always need Docker
+        if running_e2e:
+            return True
+        
+        # Dev/staging environments need real services per CLAUDE.md
+        if args.env in ['dev', 'staging']:
+            return True
+        
+        # Get categories to run
+        categories_to_run = self._determine_categories_to_run(args)
+        
+        # Categories that require Docker/real services
+        docker_required_categories = {
+            'e2e', 'e2e_critical', 'cypress',  # E2E tests
+            'database',  # Database tests need PostgreSQL
+            'api',  # API tests typically need backend services
+            'websocket',  # WebSocket tests need backend
+            'integration',  # Integration tests often need services
+            'post_deployment',  # Post-deployment tests need services
+        }
+        
+        # Categories that DON'T require Docker
+        docker_optional_categories = {
+            'smoke',  # Quick validation tests
+            'unit',  # Unit tests should be isolated
+            'frontend',  # Frontend component tests can run without backend
+            'agent',  # Agent tests can use mock LLM if needed
+            'performance',  # Performance tests can run on mock data
+            'security',  # Security tests can run on static analysis
+            'startup',  # Startup tests are about service initialization
+        }
+        
+        # Check if any of the selected categories require Docker
+        for category in categories_to_run:
+            if category in docker_required_categories:
+                print(f"[INFO] Docker required for category: {category}")
+                return True
+        
+        # If only running categories that don't need Docker, skip it
+        if all(cat in docker_optional_categories for cat in categories_to_run if cat):
+            print(f"[INFO] Running only Docker-optional categories: {categories_to_run}")
+            return False
+        
+        # Check for specific test patterns that indicate Docker is not needed
+        test_pattern = getattr(args, 'pattern', '') or ''
+        if test_pattern:
+            # Unit test patterns
+            if any(pattern in test_pattern for pattern in ['test_unit', 'unit_test', '/unit/', '_unit_']):
+                print(f"[INFO] Unit test pattern detected, Docker not required: {test_pattern}")
+                return False
+            # Mock test patterns
+            if any(pattern in test_pattern for pattern in ['mock', 'fake', 'stub']):
+                print(f"[INFO] Mock test pattern detected, Docker not required: {test_pattern}")
+                return False
+        
+        # Default to requiring Docker for safety if we can't determine
+        print(f"[INFO] Unable to determine Docker requirement, defaulting to required for categories: {categories_to_run}")
+        return True
     
     def _determine_categories_to_run(self, args: argparse.Namespace) -> List[str]:
         """Determine which categories to run based on arguments."""
@@ -2174,6 +2262,13 @@ def main():
         "--real-services",
         action="store_true",
         help="Use real backend services (Docker or local) for frontend tests"
+    )
+    
+    parser.add_argument(
+        "--no-docker",
+        "--skip-docker",
+        action="store_true",
+        help="Skip Docker initialization for tests that don't need it (e.g., unit tests)"
     )
     
     parser.add_argument(
