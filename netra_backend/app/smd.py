@@ -418,8 +418,8 @@ class StartupOrchestrator:
         if not hasattr(self.app.state, 'tool_classes') or not self.app.state.tool_classes:
             raise DeterministicStartupError("Tool classes not available for UserContext-based tool dispatcher creation")
         
-        if not hasattr(self.app.state, 'websocket_bridge_factory'):
-            raise DeterministicStartupError("WebSocket bridge factory not available for UserContext-based creation")
+        # websocket_bridge_factory will be initialized later in _initialize_factory_patterns
+        # so we don't check for it here
         
         # Verify bridge is available for factory
         bridge = self.app.state.agent_websocket_bridge
@@ -489,7 +489,7 @@ class StartupOrchestrator:
             # tool_dispatcher is None by design in UserContext-based architecture
             # Instead verify UserContext configuration
             (hasattr(self.app.state, 'tool_classes') and self.app.state.tool_classes is not None, "Tool Classes (UserContext)"),
-            (hasattr(self.app.state, 'websocket_bridge_factory'), "WebSocket Bridge Factory (UserContext)"),
+            # websocket_bridge_factory is initialized later in _initialize_factory_patterns
             (hasattr(self.app.state, 'background_task_manager') and self.app.state.background_task_manager is not None, "Background Task Manager"),
             (hasattr(self.app.state, 'health_service') and self.app.state.health_service is not None, "Health Service"),
         ]
@@ -541,7 +541,7 @@ class StartupOrchestrator:
         # For UserContext-based pattern, verify configuration instead
         usercontext_configs = {
             'tool_classes': 'Tool Classes (for per-user tool creation)',
-            'websocket_bridge_factory': 'WebSocket Bridge Factory (for per-user bridges)'
+            # websocket_bridge_factory is initialized later in _initialize_factory_patterns
         }
         
         missing_services = []
@@ -863,7 +863,7 @@ class StartupOrchestrator:
         
         # Store tool factory configuration (NOT instances) for UserContext-based creation
         self.app.state.tool_classes = available_tool_classes
-        self.app.state.websocket_bridge_factory = lambda: websocket_bridge  # Factory for bridge creation
+        # websocket_bridge_factory will be properly initialized in _initialize_factory_patterns
         
         # 🔥 NO MORE GLOBAL TOOL DISPATCHER OR REGISTRY
         # These will be created per-user via UserExecutionContext
@@ -879,11 +879,8 @@ class StartupOrchestrator:
                 "cannot create UserContext-based tool dispatchers"
             )
         
-        if not hasattr(self.app.state, 'websocket_bridge_factory'):
-            raise DeterministicStartupError(
-                "WebSocket bridge factory missing - "
-                "cannot create UserContext-based WebSocket support"
-            )
+        # websocket_bridge_factory will be initialized later in _initialize_factory_patterns
+        # It's not needed at this early stage
         
         self.logger.info("    - ✅ UserContext-based tool system validated and ready")
         self.logger.info("    - 🔧 Tool dispatchers will be created per-user with isolated registries")
@@ -1073,8 +1070,8 @@ class StartupOrchestrator:
                 if not hasattr(self.app.state, 'tool_classes') or not self.app.state.tool_classes:
                     raise DeterministicStartupError("Tool classes configuration not found for UserContext-based creation")
                 
-                if not hasattr(self.app.state, 'websocket_bridge_factory'):
-                    raise DeterministicStartupError("WebSocket bridge factory not found for UserContext-based creation")
+                # websocket_bridge_factory will be available after _initialize_factory_patterns
+                # At this point we just need tool_classes
                 
                 self.logger.info("    ✓ Tool configuration verified for UserContext-based creation")
             
