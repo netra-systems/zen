@@ -106,7 +106,7 @@ class TestUnifiedIDManagerLegacySupport:
         test_cases = [
             # Legacy IDManager format
             ("run_simple_user_a1b2c3d4", "simple_user"),
-            ("run_user_with_underscores_e5f6g7h8", "user_with_underscores"),
+            ("run_user_with_underscores_e5f6a7b8", "user_with_underscores"),
             ("run_complex_user_session_123_b2c3d4e5", "complex_user_session_123"),
         ]
         
@@ -118,7 +118,7 @@ class TestUnifiedIDManagerLegacySupport:
         """Test validation of legacy format run_ids."""
         valid_legacy_ids = [
             "run_user123_a1b2c3d4",
-            "run_session_with_underscores_e5f6g7h8", 
+            "run_session_with_underscores_e5f6a7b8", 
             "run_complex_user_session_123_b2c3d4e5"
         ]
         
@@ -489,13 +489,13 @@ class TestWebSocketCriticalIntegration:
             ("thread_user_session_abc123_run_1693430400000_a1b2c3d4", "user_session_abc123"),
             
             # Legacy IDManager format  
-            ("run_legacy_user_session_xyz_b2c3d4e5", "legacy_user_session_xyz"),
+            ("run_legacy_user_session_abc_b2c3d4e5", "legacy_user_session_abc"),
             
             # Complex thread_ids with multiple underscores
             ("thread_user_123_session_456_conversation_789_run_1693430400000_c3d4e5f6", "user_123_session_456_conversation_789"),
             
             # Thread IDs that were already prefixed (double prefix prevention)
-            ("thread_already_prefixed_user_run_1693430400000_d4e5f6g7", "already_prefixed_user")
+            ("thread_already_prefixed_user_run_1693430400000_d4e5f6a7", "already_prefixed_user")
         ]
         
         for run_id, expected_thread_id in production_scenarios:

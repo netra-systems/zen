@@ -90,10 +90,10 @@ class UnifiedIDManager:
     
     # SSOT: Compiled regex patterns for performance
     CANONICAL_PATTERN = re.compile(
-        r'^thread_(.+?)_run_(\d+)_([a-f0-9]{8})$'
+        r'^thread_(.+?)_run_(\d+)_([a-f0-9A-F]{8})$'
     )
     LEGACY_IDMANAGER_PATTERN = re.compile(
-        r'^run_(.+)_([a-f0-9]{8})$'
+        r'^run_(.+)_([a-f0-9A-F]{8})$'
     )
     THREAD_ID_VALIDATION_PATTERN = re.compile(
         r'^[a-zA-Z0-9][a-zA-Z0-9_\-]*$'
@@ -131,16 +131,20 @@ class UnifiedIDManager:
         if not isinstance(thread_id, str):
             raise ValueError(f"thread_id must be string, got {type(thread_id)}")
         
+        # Check for forbidden sequences before normalization
+        if UnifiedIDManager.RUN_SEPARATOR in thread_id:
+            raise ValueError(f"thread_id cannot contain reserved sequence '{UnifiedIDManager.RUN_SEPARATOR}'")
+        
         # Normalize thread_id (prevent double prefixing)
         normalized_thread_id = UnifiedIDManager.normalize_thread_id(thread_id)
         
-        # Validate normalized thread_id
+        # Check if empty after prefix removal
+        if not normalized_thread_id:
+            raise ValueError("thread_id cannot be empty after removing prefix")
+        
+        # Validate normalized thread_id format
         if not UnifiedIDManager.validate_thread_id(normalized_thread_id):
             raise ValueError(f"Invalid thread_id format after normalization: '{normalized_thread_id}'")
-        
-        # Check for forbidden sequences
-        if UnifiedIDManager.RUN_SEPARATOR in normalized_thread_id:
-            raise ValueError(f"thread_id cannot contain reserved sequence '{UnifiedIDManager.RUN_SEPARATOR}'")
         
         # Generate timestamp (milliseconds for ordering)
         timestamp = int(time.time() * 1000)
@@ -220,18 +224,24 @@ class UnifiedIDManager:
                 original_run_id=run_id
             )
         
-        # Try legacy IDManager format
-        legacy_match = UnifiedIDManager.LEGACY_IDMANAGER_PATTERN.match(run_id)
-        if legacy_match:
-            thread_id, uuid_suffix = legacy_match.groups()
-            logger.debug(f"Parsed legacy IDManager format run_id: {run_id}")
-            return ParsedRunID(
-                thread_id=thread_id,
-                timestamp=None,  # Legacy format doesn't have timestamp
-                uuid_suffix=uuid_suffix,
-                format_version=IDFormat.LEGACY_IDMANAGER,
-                original_run_id=run_id
-            )
+        # Try legacy IDManager format using flexible parsing
+        if run_id.startswith('run_') and len(run_id) > 13:  # "run_" + at least 1 char + "_" + 8 char UUID
+            parts = run_id.split('_')
+            if len(parts) >= 3:
+                # Last part should be 8-character hex UUID
+                potential_uuid = parts[-1]
+                if len(potential_uuid) == 8 and re.match(r'^[a-f0-9A-F]+$', potential_uuid):
+                    # Everything between "run_" and the UUID is the thread_id
+                    thread_id = '_'.join(parts[1:-1])
+                    if thread_id:  # Ensure thread_id is not empty
+                        logger.debug(f"Parsed legacy IDManager format run_id: {run_id}")
+                        return ParsedRunID(
+                            thread_id=thread_id,
+                            timestamp=None,  # Legacy format doesn't have timestamp
+                            uuid_suffix=potential_uuid,
+                            format_version=IDFormat.LEGACY_IDMANAGER,
+                            original_run_id=run_id
+                        )
         
         # Unknown format
         logger.warning(f"Unknown run_id format: {run_id}")
