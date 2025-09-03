@@ -29,13 +29,19 @@ from typing import Any, Dict, Optional, TYPE_CHECKING
 from contextlib import asynccontextmanager
 
 from netra_backend.app.logging_config import central_logger
-from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
 from netra_backend.app.websocket_core.manager import WebSocketManager
 
 if TYPE_CHECKING:
-    pass
+    # Import UserExecutionContext under TYPE_CHECKING to break circular imports
+    from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
 
 logger = central_logger.get_logger(__name__)
+
+# Runtime import function to break circular dependencies
+def get_user_execution_context_class():
+    """Import UserExecutionContext at runtime to break circular imports."""
+    from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
+    return UserExecutionContext
 
 
 class WebSocketEventEmitter:
@@ -63,7 +69,7 @@ class WebSocketEventEmitter:
     
     def __init__(
         self,
-        user_context: UserExecutionContext,
+        user_context: 'UserExecutionContext',
         websocket_manager: WebSocketManager
     ):
         """
@@ -76,7 +82,8 @@ class WebSocketEventEmitter:
         Raises:
             ValueError: If user_context or websocket_manager is invalid
         """
-        # Validate inputs with comprehensive error handling
+        # Validate inputs with comprehensive error handling using runtime import
+        UserExecutionContext = get_user_execution_context_class()
         if not isinstance(user_context, UserExecutionContext):
             raise ValueError(f"user_context must be UserExecutionContext, got {type(user_context)}")
         
@@ -592,7 +599,7 @@ class WebSocketEventEmitter:
             'disposed': self._disposed
         }
     
-    def get_context(self) -> UserExecutionContext:
+    def get_context(self) -> 'UserExecutionContext':
         """Get the bound user execution context."""
         return self._user_context
     
@@ -642,7 +649,7 @@ class WebSocketEventEmitterFactory:
     
     @staticmethod
     async def create_emitter(
-        user_context: UserExecutionContext,
+        user_context: 'UserExecutionContext',
         websocket_manager: Optional[WebSocketManager] = None
     ) -> WebSocketEventEmitter:
         """
@@ -681,7 +688,7 @@ class WebSocketEventEmitterFactory:
     @staticmethod
     @asynccontextmanager
     async def create_scoped_emitter(
-        user_context: UserExecutionContext,
+        user_context: 'UserExecutionContext',
         websocket_manager: Optional[WebSocketManager] = None
     ):
         """
@@ -718,7 +725,7 @@ class WebSocketEventEmitterFactory:
 # ===================== CONVENIENCE FUNCTIONS =====================
 
 async def create_websocket_event_emitter(
-    user_context: UserExecutionContext,
+    user_context: 'UserExecutionContext',
     websocket_manager: Optional[WebSocketManager] = None
 ) -> WebSocketEventEmitter:
     """
@@ -738,7 +745,7 @@ async def create_websocket_event_emitter(
 
 @asynccontextmanager
 async def websocket_event_emitter_scope(
-    user_context: UserExecutionContext,
+    user_context: 'UserExecutionContext',
     websocket_manager: Optional[WebSocketManager] = None
 ):
     """
