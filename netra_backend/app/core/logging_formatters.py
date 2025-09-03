@@ -168,10 +168,18 @@ class LogFormatter:
         }
         
         # Create GCP-compatible log entry
+        # Loguru provides level as a namedtuple with .name, .no, .icon attributes
+        level = record.get("level", {})
+        level_name = level.name if hasattr(level, 'name') else 'DEFAULT'
+        
+        # Get timestamp - Loguru provides datetime object
+        time_obj = record.get("time")
+        timestamp = time_obj.isoformat() if hasattr(time_obj, 'isoformat') else str(time_obj)
+        
         gcp_entry = {
-            'severity': severity_mapping.get(record.get("level", {}).get("name", "DEFAULT"), 'DEFAULT'),
+            'severity': severity_mapping.get(level_name, 'DEFAULT'),
             'message': self._filter.filter_message(record.get("message", "")),
-            'timestamp': record.get("time", {}).isoformat() if hasattr(record.get("time", {}), 'isoformat') else str(record.get("time", "")),
+            'timestamp': timestamp,
             'labels': {
                 'module': record.get("name", ""),
                 'function': record.get("function", ""),
@@ -196,13 +204,20 @@ class LogFormatter:
         # Add exception info if present
         if exc := record.get("exception"):
             if exc and hasattr(exc, 'type'):
+                # Format traceback as single line for GCP
+                traceback_str = None
+                if hasattr(exc, 'traceback') and exc.traceback:
+                    # Replace newlines with \n to keep JSON on single line
+                    traceback_str = str(exc.traceback).replace('\n', '\\n').replace('\r', '')
+                
                 gcp_entry['error'] = {
                     'type': exc.type.__name__ if hasattr(exc, 'type') and exc.type else None,
                     'value': str(exc.value) if hasattr(exc, 'value') and exc.value else None,
-                    'traceback': str(exc.traceback) if hasattr(exc, 'traceback') and exc.traceback else None
+                    'traceback': traceback_str
                 }
         
-        return json.dumps(gcp_entry)
+        # Use separators to minimize JSON size and ensure single line
+        return json.dumps(gcp_entry, separators=(',', ':'), ensure_ascii=False)
     
     def _create_log_entry(self, record) -> LogEntry:
         """Create a LogEntry from a loguru record."""
@@ -290,7 +305,18 @@ class LogHandlerConfig:
             # Use GCP-compatible JSON formatter
             def gcp_format(record):
                 """Format log record for GCP Cloud Logging."""
-                return self.formatter.gcp_json_formatter(record) + "\n"
+                try:
+                    return self.formatter.gcp_json_formatter(record) + "\n"
+                except Exception as e:
+                    # Fallback to ensure logging doesn't fail completely
+                    import json
+                    fallback_entry = {
+                        'severity': 'ERROR',
+                        'message': f"Logging formatter error: {str(e)} | Original message: {record.get('message', 'N/A')}",
+                        'timestamp': str(record.get('time', 'N/A')),
+                        'error_type': 'LogFormatterError'
+                    }
+                    return json.dumps(fallback_entry, separators=(',', ':')) + "\n"
             
             logger.add(
                 sys.stderr,
