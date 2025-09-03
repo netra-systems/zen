@@ -54,6 +54,53 @@ class DockerStabilityManager:
         self.max_restart_attempts = 3
         self.restart_delay = 10  # seconds
     
+    def _get_project_prefix(self) -> str:
+        """
+        Get the project prefix for Docker container names.
+        
+        Returns:
+            Project prefix (e.g., 'netra-apex')
+        """
+        # Dynamically determine project prefix from directory or existing containers
+        try:
+            # Try to get project name from Git repo root directory name
+            import git
+            repo = git.Repo(search_parent_directories=True)
+            project_name = Path(repo.working_dir).name
+            return project_name
+        except Exception:
+            pass
+        
+        # Fall back to current directory name
+        try:
+            current_dir = Path.cwd()
+            # Find the root project directory by looking for docker-compose files
+            for parent in [current_dir] + list(current_dir.parents)[:3]:
+                if (parent / 'docker-compose.test.yml').exists():
+                    return parent.name
+            # If no compose file found, use current directory name
+            return current_dir.name
+        except Exception:
+            pass
+        
+        # Final fallback to detect from existing containers
+        try:
+            result = subprocess.run(
+                ['docker', 'ps', '--format', '{{.Names}}'],
+                capture_output=True, text=True, timeout=5
+            )
+            if result.returncode == 0:
+                container_names = result.stdout.strip().split('\n')
+                for name in container_names:
+                    if '-test-' in name:
+                        # Extract project prefix (everything before -test-)
+                        return name.split('-test-')[0]
+        except Exception:
+            pass
+            
+        # Ultimate fallback
+        return 'netra-apex'
+    
     def _find_compose_file(self) -> str:
         """
         Find the docker-compose.test.yml file relative to current directory.
