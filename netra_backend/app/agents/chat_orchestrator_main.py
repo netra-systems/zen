@@ -47,7 +47,13 @@ class ChatOrchestrator(SupervisorAgent):
                  tool_dispatcher: ToolDispatcher,
                  cache_manager=None,
                  semantic_cache_enabled: bool = True):
-        super().__init__(db_session, llm_manager, websocket_manager, tool_dispatcher)
+        # SupervisorAgent uses UserExecutionContext pattern - only needs llm_manager and websocket_bridge
+        super().__init__(llm_manager, websocket_manager)
+        
+        # Store additional ChatOrchestrator-specific dependencies
+        self.db_session = db_session
+        self.tool_dispatcher = tool_dispatcher
+        
         self._init_naof_components(cache_manager, semantic_cache_enabled)
         self._init_helper_modules()
     
@@ -61,11 +67,35 @@ class ChatOrchestrator(SupervisorAgent):
     
     def _init_helper_modules(self) -> None:
         """Initialize helper modules for orchestration."""
+        from netra_backend.app.services.llm.model_selector import ModelSelector
+        from netra_backend.app.agents.chat_orchestrator.quality_evaluator import QualityEvaluator
+        from netra_backend.app.services.analytics.cost_tracker import CostTracker
+        from netra_backend.app.services.monitoring.metrics_service import MetricsService
+        
         self.intent_classifier = IntentClassifier(self.llm_manager)
         self.confidence_manager = ConfidenceManager()
-        self.model_cascade = ModelCascade()
+        
+        # Initialize ModelCascade dependencies
+        model_selector = ModelSelector()
+        quality_evaluator = QualityEvaluator(self.llm_manager)
+        cost_tracker = CostTracker()
+        metrics_service = MetricsService()
+        
+        self.model_cascade = ModelCascade(
+            llm_manager=self.llm_manager,
+            model_selector=model_selector,
+            quality_evaluator=quality_evaluator,
+            cost_tracker=cost_tracker,
+            metrics_service=metrics_service
+        )
+        
         self.execution_planner = ExecutionPlanner()
-        self.trace_logger = TraceLogger(self.websocket_manager)
+        self.trace_logger = TraceLogger(self.websocket_bridge)
+        
+        # Create alias for PipelineExecutor compatibility
+        # PipelineExecutor expects agent_registry but SupervisorAgent provides registry
+        self.agent_registry = self.registry
+        
         self.pipeline_executor = PipelineExecutor(self)
     
     async def execute_core_logic(self, context: ExecutionContext) -> Dict[str, Any]:

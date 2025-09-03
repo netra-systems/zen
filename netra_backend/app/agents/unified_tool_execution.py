@@ -76,7 +76,8 @@ async def enhance_tool_dispatcher_with_notifications(
     websocket_bridge = None
     if websocket_manager and enable_notifications:
         websocket_bridge = AgentWebSocketBridge()
-        websocket_bridge.websocket_manager = websocket_manager
+        # CRITICAL FIX: Use the correct private member name
+        websocket_bridge._websocket_manager = websocket_manager
     
     # Replace executor with enhanced version
     enhanced_executor = UnifiedToolExecutionEngine(
