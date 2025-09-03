@@ -96,7 +96,7 @@
     <smoke-test id="agent-system" critical="true">
       <title>Agent System Health Check</title>
       <commands>
-        <command>python -c "from netra_backend.app.agents.supervisor import SupervisorAgent; print('✓ Supervisor agent loads')"</command>
+        <command>python -c "from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent; print('✓ Supervisor agent loads')"</command>
         <command>python -c "from netra_backend.app.services.agent_service import AgentService; print('✓ Agent service available')"</command>
         <command>python -c "from netra_backend.app.agents.tool_dispatcher import ToolDispatcher; print('✓ Tool dispatcher functional')"</command>
       </commands>
