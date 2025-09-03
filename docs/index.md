@@ -34,6 +34,10 @@
 - [Actions Agent WebSocket Flow](./actions_agent_websocket_flow.md) - WebSocket event patterns
 - [WebSocket Bridge State Handling](./websocket_bridge_state_handling.md) - State management
 
+#### Frontend Architecture
+- **[Frontend Architecture Diagrams](../frontend/docs/FRONTEND_ARCHITECTURE_DIAGRAMS.md)** 📊 - Comprehensive Mermaid diagrams of frontend components, loading flows, and state management
+- [Frontend README](../frontend/README.md) - Frontend setup and structure
+
 #### Testing Infrastructure
 - **[Test Architecture Visual Overview](../tests/TEST_ARCHITECTURE_VISUAL_OVERVIEW.md)** - Complete test infrastructure guide
 - **[Podman User Guide](./PODMAN_USER_GUIDE.md)** 🆕 - Complete guide for using Podman with dynamic ports

@@ -2,6 +2,17 @@
 
 Modern, real-time chat interface for the Netra AI Optimization Platform built with Next.js 14, TypeScript, and TailwindCSS.
 
+## 📊 Architecture Documentation
+
+For comprehensive visual documentation of the frontend architecture, see:
+- **[Frontend Architecture Diagrams](./docs/FRONTEND_ARCHITECTURE_DIAGRAMS.md)** - Complete Mermaid diagrams including:
+  - Key components architecture and relationships
+  - Loading flow state machine  
+  - WebSocket event processing pipeline
+  - Authentication and token refresh flows
+  - Store relationships and state management
+  - Fix documentation for the 100% loading issue
+
 ## 🚀 Quick Start
 
 ```bash

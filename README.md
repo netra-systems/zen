@@ -68,6 +68,7 @@ docker-compose up
 
 ### Architecture & Design
 - **[User Context Architecture](./USER_CONTEXT_ARCHITECTURE.md)** - Factory patterns and user isolation (START HERE)
+- **[Frontend Architecture Diagrams](./frontend/docs/FRONTEND_ARCHITECTURE_DIAGRAMS.md)** - Complete frontend architecture with loading flows, WebSocket events, and state management
 - [Agent System Architecture](./docs/AGENT_SYSTEM_ARCHITECTURE.md) - Agent execution pipeline
 - [Agent Architecture Diagrams](./docs/agent_architecture_mermaid.md) - Visual architecture guides
 
