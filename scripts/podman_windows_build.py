@@ -109,6 +109,8 @@ class PodmanWindowsBuilder:
                     shutil.copy2(src_req, temp_dir / "requirements.txt")
                     logger.debug("Copied requirements.txt to root")
                 
+                # Each service is independent - no cross-service requirements needed
+                
                 # Also copy service-specific requirements if different
                 service_req = source_dir / "requirements.txt"
                 if service_req.exists() and service_req != src_req:
