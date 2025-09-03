@@ -84,9 +84,9 @@ class TestWebSocketTimingSimple:
             thread_id=setup['thread_id']
         )
         
-        # Send message
+        # Send message - use a recognized agent event type
         message = {
-            'type': 'test_event',
+            'type': 'agent_started',
             'data': {'content': 'test'}
         }
         
@@ -99,7 +99,7 @@ class TestWebSocketTimingSimple:
         
         # Check message was sent
         sent_msg = mock_ws.send_json.call_args[0][0]
-        assert sent_msg['type'] == 'test_event'
+        assert sent_msg['type'] == 'agent_started'
         assert sent_msg['data']['content'] == 'test'
 
     @pytest.mark.asyncio
