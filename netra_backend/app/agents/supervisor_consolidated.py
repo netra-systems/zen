@@ -166,14 +166,20 @@ class SupervisorAgent(BaseAgent):
                     websocket_manager=self.websocket_bridge.websocket_manager if hasattr(self.websocket_bridge, 'websocket_manager') else None
                 )
                 
-                # Create request-scoped tool dispatcher with proper emitter
-                logger.info(f"🔧 Creating ToolDispatcher with websocket_emitter type: {type(websocket_emitter)}")
+                # Get the actual WebSocketManager to pass to ToolDispatcher
+                actual_websocket_manager = self.websocket_bridge.websocket_manager if hasattr(self.websocket_bridge, 'websocket_manager') else None
+                logger.info(f"🔍 WebSocket bridge type: {type(self.websocket_bridge)}")
+                logger.info(f"🔍 Has websocket_manager: {hasattr(self.websocket_bridge, 'websocket_manager')}")
+                logger.info(f"🔍 WebSocketManager type: {type(actual_websocket_manager) if actual_websocket_manager else 'None'}")
+                
+                # Create request-scoped tool dispatcher with actual WebSocketManager
+                logger.info(f"🔧 Creating ToolDispatcher with websocket_manager type: {type(actual_websocket_manager) if actual_websocket_manager else 'None'}")
                 logger.info(f"🔧 User tools available: {len(self._get_user_tools(context)) if self._get_user_tools(context) else 0}")
                 
                 async with ToolDispatcher.create_scoped_dispatcher_context(
                     user_context=context,
                     tools=self._get_user_tools(context),
-                    websocket_manager=websocket_emitter  # Pass as websocket_manager parameter
+                    websocket_manager=actual_websocket_manager  # Pass actual WebSocketManager, not emitter
                 ) as tool_dispatcher:
                     logger.info(f"✅ ToolDispatcher created successfully for user {context.user_id}")
                     
@@ -184,6 +190,14 @@ class SupervisorAgent(BaseAgent):
                     self.registry = AgentRegistry(self._llm_manager, tool_dispatcher)
                     self.registry.register_default_agents()
                     self.registry.set_websocket_bridge(self.websocket_bridge)
+                    
+                    # CRITICAL: Configure agent instance factory with the registry
+                    logger.info(f"🔧 Configuring agent instance factory with registry for user {context.user_id}")
+                    self.agent_instance_factory.configure(
+                        agent_registry=self.registry,
+                        websocket_bridge=self.websocket_bridge,
+                        websocket_manager=getattr(self.websocket_bridge, 'websocket_manager', None)
+                    )
                     
                     # CRITICAL: Enhance tool dispatcher with WebSocket notifications
                     if hasattr(self.registry, 'set_websocket_manager'):
@@ -254,7 +268,11 @@ class SupervisorAgent(BaseAgent):
             }
             
         except Exception as e:
-            self.flow_logger.fail_flow(flow_id, str(e))
+            # Handle missing fail_flow method gracefully
+            if hasattr(self.flow_logger, 'fail_flow'):
+                self.flow_logger.fail_flow(flow_id, str(e))
+            else:
+                logger.error(f"🚨 Flow {flow_id} failed (no fail_flow method): {e}")
             logger.error(f"Agent orchestration failed for user {context.user_id}: {e}")
             raise
     
@@ -327,25 +345,36 @@ class SupervisorAgent(BaseAgent):
         # Registry will be created per-request, so we don't check it here
         return True
     
-    def _get_user_tools(self, context: UserExecutionContext) -> Dict[str, Any]:
+    def _get_user_tools(self, context: UserExecutionContext) -> list:
         """Get user-specific tools based on context.
         
         Args:
             context: User execution context
             
         Returns:
-            Dictionary of tools available to this user
+            List of BaseTool instances available to this user
         """
-        # Import tools here to avoid circular dependencies
-        from netra_backend.app.tools import get_standard_tools
+        logger.info(f"🔨 Getting tools for user {context.user_id}")
         
-        # Get standard tools available to all users
-        tools = get_standard_tools()
+        # Import the proper LangChain tool wrappers
+        from netra_backend.app.agents.tools.langchain_wrappers import (
+            create_langchain_tools
+        )
         
-        # Add user-specific tools based on permissions/subscription
-        if context.metadata.get('premium_user'):
-            # Add premium tools if applicable
-            pass
+        # Create tools with LLM manager if available
+        llm_manager = getattr(self, 'llm_manager', None)
+        
+        logger.info(f"🔧 Creating LangChain-wrapped tools with llm_manager={llm_manager is not None}")
+        
+        tools = create_langchain_tools(
+            llm_manager=llm_manager,
+            deep_research_api_key=None,  # Will use env defaults
+            deep_research_base_url=None,  # Will use env defaults
+            sandbox_docker_image=None  # Will use env defaults
+        )
+        
+        logger.info(f"✅ Created {len(tools)} tools for user {context.user_id}")
+        logger.info(f"📦 Tools registered: {[tool.name for tool in tools]}")
         
         return tools
 
