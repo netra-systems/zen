@@ -87,6 +87,12 @@ const loadMessagesIntoStore = (convertedMessages: ConvertedMessage[]) => {
   loadMessages(convertedMessages);
 };
 
+/**
+ * @deprecated Use inline implementation in ChatSidebar with useThreadSwitching hook
+ * This handler violates SSOT by directly manipulating store without URL sync.
+ * Migration: Create thread then call switchToThread from useThreadSwitching hook.
+ * See ChatSidebar.tsx handleNewChat for proper implementation.
+ */
 export const createNewChatHandler = (
   setIsCreatingThread: (creating: boolean) => void,
   loadThreads: () => Promise<void>
