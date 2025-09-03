@@ -580,7 +580,7 @@ async def check_token_blacklist(request: TokenRequest):
         return {"blacklisted": False, "token_blacklisted": False, "user_blacklisted": False}
 
 @router.post("/refresh")
-async def refresh_tokens(request: Request):
+async def refresh_tokens(request: Request, db: AsyncSession = Depends(get_db)):
     """Refresh access and refresh tokens"""
     try:
         # Get the raw body to handle multiple formats
@@ -615,6 +615,9 @@ async def refresh_tokens(request: Request):
                 status_code=422,
                 detail="Invalid JSON body"
             )
+        
+        # Set database session for the auth service
+        auth_service.db_session = db
         
         # Now call the auth service to refresh the tokens
         result = await auth_service.refresh_tokens(refresh_token)

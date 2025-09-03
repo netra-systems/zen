@@ -21,11 +21,14 @@ STAGING_SECRET_MAPPINGS = {
     "redis-port-staging": "REDIS_PORT",
     
     # ClickHouse Secrets
-    "clickhouse-password-staging": "CLICKHOUSE_PASSWORD",
-    "clickhouse-host-staging": "CLICKHOUSE_HOST",
-    "clickhouse-port-staging": "CLICKHOUSE_PORT",
-    "clickhouse-user-staging": "CLICKHOUSE_USER",
-    "clickhouse-db-staging": "CLICKHOUSE_DB",
+    # CRITICAL: In staging, ClickHouse is a REMOTE service hosted on ClickHouse Cloud
+    # The full connection URL with credentials is stored as a single secret
+    "clickhouse-url-staging": "CLICKHOUSE_URL",  # Remote ClickHouse Cloud URL
+    "clickhouse-password-staging": "CLICKHOUSE_PASSWORD",  # Legacy/backup
+    "clickhouse-host-staging": "CLICKHOUSE_HOST",  # Legacy/backup
+    "clickhouse-port-staging": "CLICKHOUSE_PORT",  # Legacy/backup
+    "clickhouse-user-staging": "CLICKHOUSE_USER",  # Legacy/backup
+    "clickhouse-db-staging": "CLICKHOUSE_DB",  # Legacy/backup
     
     # Authentication Secrets (environment-specific)
     "jwt-secret-key-staging": "JWT_SECRET_KEY",
@@ -83,11 +86,14 @@ PRODUCTION_SECRET_MAPPINGS = {
     "redis-port-prod": "REDIS_PORT",
     
     # ClickHouse Secrets
-    "clickhouse-password-prod": "CLICKHOUSE_PASSWORD",
-    "clickhouse-host-prod": "CLICKHOUSE_HOST",
-    "clickhouse-port-prod": "CLICKHOUSE_PORT",
-    "clickhouse-user-prod": "CLICKHOUSE_USER",
-    "clickhouse-db-prod": "CLICKHOUSE_DB",
+    # CRITICAL: In production, ClickHouse is a REMOTE service hosted on ClickHouse Cloud
+    # The full connection URL with credentials is stored as a single secret
+    "clickhouse-url-production": "CLICKHOUSE_URL",  # Remote ClickHouse Cloud URL
+    "clickhouse-password-prod": "CLICKHOUSE_PASSWORD",  # Legacy/backup
+    "clickhouse-host-prod": "CLICKHOUSE_HOST",  # Legacy/backup
+    "clickhouse-port-prod": "CLICKHOUSE_PORT",  # Legacy/backup
+    "clickhouse-user-prod": "CLICKHOUSE_USER",  # Legacy/backup
+    "clickhouse-db-prod": "CLICKHOUSE_DB",  # Legacy/backup
     
     # Authentication Secrets (environment-specific)
     "jwt-secret-key-production": "JWT_SECRET_KEY",

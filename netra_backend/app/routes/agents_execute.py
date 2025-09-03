@@ -18,8 +18,9 @@ from netra_backend.app.core.circuit_breaker import (
     unified_circuit_breaker,
     get_unified_circuit_breaker_manager
 )
+from netra_backend.app.dependencies import get_agent_service
 from netra_backend.app.logging_config import central_logger
-from netra_backend.app.services.agent_service import AgentService, get_agent_service
+from netra_backend.app.services.agent_service import AgentService
 
 logger = central_logger.get_logger(__name__)
 router = APIRouter()

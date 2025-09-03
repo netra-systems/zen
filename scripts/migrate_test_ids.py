@@ -11,10 +11,10 @@ import sys
 from pathlib import Path
 from typing import List, Tuple, Dict, Set
 
-# Add parent directory to path to import IDManager
+# Add parent directory to path to import UnifiedIDManager
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from netra_backend.app.core.id_manager import IDManager
+from netra_backend.app.core.unified_id_manager import UnifiedIDManager
 
 
 class TestIDMigrator:
@@ -96,13 +96,13 @@ class TestIDMigrator:
                 old_id = match.group(1)
                 # Clean up the old ID to make a valid thread_id
                 thread_id = old_id.replace('-', '_').replace('run_', '')
-                if not thread_id or not IDManager.validate_thread_id(thread_id):
+                if not thread_id or not UnifiedIDManager.validate_thread_id(thread_id):
                     thread_id = "migrated_test"
             else:
                 thread_id = "migrated_test"
         
         # Generate valid run_id
-        valid_run_id = IDManager.generate_run_id(thread_id)
+        valid_run_id = UnifiedIDManager.generate_run_id(thread_id)
         
         # Replace in the original string
         if 'run_id' in original:

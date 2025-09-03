@@ -36,6 +36,12 @@ from contextlib import asynccontextmanager
 if TYPE_CHECKING:
     from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
     from netra_backend.app.websocket_core.manager import WebSocketManager
+    # Import UserExecutionContext under TYPE_CHECKING to break circular imports
+    # This breaks the chain: tool_dispatcher_unified → supervisor → base_agent → tool_dispatcher
+    from netra_backend.app.agents.supervisor.user_execution_context import (
+        UserExecutionContext as UserExecutionContextType,
+        validate_user_context as validate_user_context_func
+    )
 
 from langchain_core.tools import BaseTool
 from pydantic import BaseModel, Field
@@ -54,10 +60,7 @@ from netra_backend.app.agents.tool_event_bus import (
 )
 from netra_backend.app.agents.tool_dispatcher_validation import ToolValidator
 from netra_backend.app.agents.unified_tool_execution import UnifiedToolExecutionEngine
-from netra_backend.app.agents.supervisor.user_execution_context import (
-    UserExecutionContext,
-    validate_user_context
-)
+# UserExecutionContext imports moved to TYPE_CHECKING to break circular imports
 from netra_backend.app.services.websocket_event_emitter import (
     WebSocketEventEmitter,
     WebSocketEventEmitterFactory
@@ -71,6 +74,15 @@ from netra_backend.app.schemas.tool import (
 )
 
 logger = central_logger.get_logger(__name__)
+
+# Runtime import functions to break circular dependencies
+def get_user_execution_context_module():
+    """Import UserExecutionContext module at runtime to break circular imports."""
+    from netra_backend.app.agents.supervisor.user_execution_context import (
+        UserExecutionContext,
+        validate_user_context
+    )
+    return UserExecutionContext, validate_user_context
 
 # Typed models for tool dispatch
 class ToolDispatchRequest(BaseModel):
@@ -109,7 +121,7 @@ class UnifiedToolDispatcher:
     
     def __init__(
         self,
-        user_context: Optional[UserExecutionContext] = None,
+        user_context: Optional['UserExecutionContextType'] = None,
         tools: List[BaseTool] = None,
         websocket_emitter: Optional[WebSocketEventEmitter] = None,
         websocket_bridge: Optional['AgentWebSocketBridge'] = None,  # Legacy support
@@ -135,6 +147,8 @@ class UnifiedToolDispatcher:
             self.user_context = None
             self.dispatcher_id = f"global_{int(time.time() * 1000)}"
         else:
+            # Use runtime import to break circular dependency
+            _, validate_user_context = get_user_execution_context_module()
             self.user_context = validate_user_context(user_context)
             self.is_request_scoped = True
             self.dispatcher_id = f"{user_context.user_id}_{user_context.run_id}_{int(time.time()*1000)}"
@@ -355,7 +369,28 @@ class UnifiedToolDispatcher:
         
         try:
             tool = self.registry.get_tool(tool_name)
-            result = await self.executor.execute_tool_with_input(tool_input, tool, kwargs)
+            
+            # Create execution context for WebSocket notifications if we have user context
+            if self.user_context and self.websocket_bridge:
+                from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
+                
+                # Create context for tool execution to enable WebSocket notifications
+                execution_context = AgentExecutionContext(
+                    agent_name="ToolDispatcher",
+                    run_id=self.user_context.run_id,
+                    thread_id=self.user_context.thread_id,
+                    user_id=self.user_context.user_id,
+                    retry_count=0,
+                    max_retries=3
+                )
+                
+                # Add context to kwargs for the executor
+                kwargs_with_context = {**kwargs, 'context': execution_context}
+                logger.debug(f"Added execution context for {tool_name} to enable WebSocket notifications")
+            else:
+                kwargs_with_context = kwargs
+                
+            result = await self.executor.execute_tool_with_input(tool_input, tool, kwargs_with_context)
             
             # Update success metrics
             execution_time_ms = (time.time() - start_time) * 1000
@@ -427,6 +462,24 @@ class UnifiedToolDispatcher:
         
         try:
             tool = self.registry.get_tool(tool_name)
+            
+            # Ensure state has WebSocket context if we have user context and bridge
+            if self.user_context and self.websocket_bridge:
+                # Check if state already has WebSocket context
+                if not hasattr(state, '_websocket_context') or state._websocket_context is None:
+                    from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
+                    
+                    # Add WebSocket context to state for tool execution
+                    state._websocket_context = AgentExecutionContext(
+                        agent_name="ToolDispatcher",
+                        run_id=self.user_context.run_id,
+                        thread_id=self.user_context.thread_id,
+                        user_id=self.user_context.user_id,
+                        retry_count=0,
+                        max_retries=3
+                    )
+                    logger.debug(f"Added WebSocket context to state for {tool_name}")
+            
             result = await self.executor.execute_with_state(tool, tool_name, parameters, state, run_id)
             
             # Update metrics
@@ -662,7 +715,7 @@ class WebSocketBridgeAdapter:
     WebSocketEventEmitter while maintaining backward compatibility.
     """
     
-    def __init__(self, websocket_emitter: WebSocketEventEmitter, user_context: Optional[UserExecutionContext]):
+    def __init__(self, websocket_emitter: WebSocketEventEmitter, user_context: Optional['UserExecutionContextType']):
         self.websocket_emitter = websocket_emitter
         self.user_context = user_context
     
@@ -770,7 +823,7 @@ class UnifiedToolDispatcherFactory:
     
     @staticmethod
     async def create_request_scoped(
-        user_context: UserExecutionContext,
+        user_context: 'UserExecutionContextType',
         tools: List[BaseTool] = None,
         websocket_manager: Optional['WebSocketManager'] = None,
         permission_service = None
@@ -788,7 +841,8 @@ class UnifiedToolDispatcherFactory:
         Returns:
             UnifiedToolDispatcher: Isolated dispatcher for this request
         """
-        # Validate user context
+        # Validate user context using runtime import to break circular dependency
+        _, validate_user_context = get_user_execution_context_module()
         user_context = validate_user_context(user_context)
         
         # Create WebSocket emitter if manager provided
@@ -812,7 +866,7 @@ class UnifiedToolDispatcherFactory:
     @staticmethod
     @asynccontextmanager
     async def create_scoped_context(
-        user_context: UserExecutionContext,
+        user_context: 'UserExecutionContextType',
         tools: List[BaseTool] = None,
         websocket_manager: Optional['WebSocketManager'] = None,
         permission_service = None
@@ -876,7 +930,7 @@ class UnifiedToolDispatcherFactory:
 # ===================== CONVENIENCE FUNCTIONS FOR COMPATIBILITY =====================
 
 async def create_request_scoped_tool_dispatcher(
-    user_context: UserExecutionContext,
+    user_context: 'UserExecutionContextType',
     tools: List[BaseTool] = None,
     websocket_manager: Optional['WebSocketManager'] = None,
     permission_service = None
@@ -888,7 +942,7 @@ async def create_request_scoped_tool_dispatcher(
 
 @asynccontextmanager
 async def request_scoped_tool_dispatcher_context(
-    user_context: UserExecutionContext,
+    user_context: 'UserExecutionContextType',
     tools: List[BaseTool] = None,
     websocket_manager: Optional['WebSocketManager'] = None,
     permission_service = None

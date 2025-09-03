@@ -53,15 +53,32 @@ class WebSocketService {
   private tokenExpiryCheckTimer: NodeJS.Timeout | null = null;
   private isRefreshingToken: boolean = false;
   private pendingMessages: (WebSocketMessage | UnifiedWebSocketEvent | AuthMessage | PingMessage | PongMessage)[] = [];
+  private isConnecting: boolean = false;  // Prevent multiple simultaneous connections
+  private isIntentionalDisconnect: boolean = false;  // Track manual disconnections
+  
+  // Connection deduplication and throttling
+  private connectionAttemptId: string | null = null;
+  private lastConnectionAttempt: number = 0;
+  private readonly MIN_CONNECTION_INTERVAL = 1000; // 1 second minimum between attempts
   
   // Enhanced refresh handling
   private reconnectAttempts: number = 0;
   private maxReconnectAttempts: number = 10;
   private baseReconnectDelay: number = 100;  // Start with 100ms for faster initial reconnect
   private maxReconnectDelay: number = 10000;  // Cap at 10s instead of 30s
+  
+  // Auth refresh coordination to prevent spam
+  private lastRefreshAttempt: number = 0;
+  private readonly MIN_REFRESH_INTERVAL_MS = 2000; // Same as auth service
   private lastSuccessfulConnection: number = 0;
   private connectionId: string = '';
   private beforeUnloadHandler: (() => void) | null = null;
+  
+  // Auth failure handling
+  private authRetryCount: number = 0;
+  private readonly MAX_AUTH_RETRIES = 3;
+  private readonly AUTH_COOLDOWN_MS = 5000; // 5 seconds cooldown after auth failures
+  private lastAuthFailure: number = 0;
   
   // Large message handling
   private messageAssemblies: Map<string, {
@@ -245,8 +262,10 @@ class WebSocketService {
     this.state = 'connected';
     this.status = 'OPEN';
     
-    // Reset reconnect attempts on successful connection
+    // Reset all retry attempts on successful connection
     this.reconnectAttempts = 0;
+    this.authRetryCount = 0;
+    this.lastAuthFailure = 0;
     this.lastSuccessfulConnection = Date.now();
     this.connectionId = this.generateConnectionId();
     
@@ -842,18 +861,84 @@ class WebSocketService {
   }
 
   public connect(url: string, options: WebSocketOptions = {}) {
+    // Generate unique ID for this connection attempt
+    const attemptId = `attempt_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    
+    // Check minimum interval between connection attempts
+    const timeSinceLastAttempt = Date.now() - this.lastConnectionAttempt;
+    if (timeSinceLastAttempt < this.MIN_CONNECTION_INTERVAL) {
+      logger.debug('Connection attempt throttled due to minimum interval', undefined, {
+        component: 'WebSocketService',
+        action: 'connection_throttled',
+        metadata: { 
+          timeSinceLastAttempt, 
+          minInterval: this.MIN_CONNECTION_INTERVAL,
+          attemptId,
+          rejectedReason: 'min_interval_violation'
+        }
+      });
+      return;
+    }
+    
+    // Check if another connection is in progress
+    if (this.connectionAttemptId && this.isConnecting) {
+      logger.debug('Connection already in progress, rejecting duplicate attempt', undefined, {
+        component: 'WebSocketService',
+        action: 'duplicate_connect_prevented',
+        metadata: { 
+          currentAttemptId: this.connectionAttemptId,
+          rejectedAttemptId: attemptId,
+          state: this.state
+        }
+      });
+      return;
+    }
+    
+    // If already connected, don't reconnect
+    if (this.state === 'connected') {
+      logger.debug('Already connected, ignoring connect call', undefined, {
+        component: 'WebSocketService',
+        action: 'already_connected',
+        metadata: { attemptId }
+      });
+      return;
+    }
+    
+    // Set connection attempt tracking
+    this.connectionAttemptId = attemptId;
+    this.lastConnectionAttempt = Date.now();
+    
+    logger.info('Starting WebSocket connection attempt', undefined, {
+      component: 'WebSocketService',
+      action: 'connection_attempt_start',
+      metadata: { 
+        attemptId,
+        url,
+        hasToken: !!options.token,
+        currentState: this.state
+      }
+    });
+    
+    // Close existing connection if in unexpected state
+    if (this.ws && this.ws.readyState === WebSocket.CONNECTING) {
+      logger.warn('Closing stale connecting WebSocket', undefined, {
+        component: 'WebSocketService',
+        action: 'close_stale_connecting'
+      });
+      this.ws.close();
+      this.ws = null;
+    }
+    
     this.url = url;
     this.options = options;
     this.currentToken = options.token || null;
+    this.isIntentionalDisconnect = false;  // Reset on new connection
+    this.isConnecting = true;
     
     // Register page unload handler for graceful disconnect
     if (!this.beforeUnloadHandler && typeof window !== 'undefined') {
       this.beforeUnloadHandler = () => this.handlePageUnload();
       window.addEventListener('beforeunload', this.beforeUnloadHandler);
-    }
-    
-    if (this.state === 'connected' || this.state === 'connecting') {
-      return;
     }
 
     this.state = 'connecting';
@@ -870,6 +955,20 @@ class WebSocketService {
       this.ws = this.createSecureWebSocket(url, options);
 
       this.ws.onopen = () => {
+        this.isConnecting = false;  // Connection established
+        const currentAttemptId = this.connectionAttemptId;
+        this.connectionAttemptId = null; // Clear attempt tracking
+        
+        logger.info('WebSocket connection established successfully', undefined, {
+          component: 'WebSocketService',
+          action: 'connection_success',
+          metadata: { 
+            attemptId: currentAttemptId,
+            hasToken: !!options.token,
+            connectionDuration: Date.now() - this.lastConnectionAttempt
+          }
+        });
+        
         this.handleConnectionOpen(url, options);
         
         // Handle both authenticated and development mode connections
@@ -931,61 +1030,60 @@ class WebSocketService {
       };
 
       this.ws.onclose = (event) => {
+        this.isConnecting = false;  // No longer connecting
+        const currentAttemptId = this.connectionAttemptId;
+        this.connectionAttemptId = null; // Clear attempt tracking
+        
         this.state = 'disconnected';
         this.status = 'CLOSED';
         clearTimeout(this.statusChangeTimer);
         this.onStatusChange?.(this.status);
         this.stopHeartbeat();
         
+        logger.info('WebSocket connection closed', undefined, {
+          component: 'WebSocketService',
+          action: 'connection_closed',
+          metadata: { 
+            attemptId: currentAttemptId,
+            code: event.code,
+            reason: event.reason,
+            wasIntentional: this.isIntentionalDisconnect
+          }
+        });
+        
         // Handle authentication errors appropriately based on environment
         if (event.code === 1008) {
-          logger.error('WebSocket authentication failed', undefined, {
-            component: 'WebSocketService',
-            action: 'auth_rejection',
-            metadata: { code: event.code, reason: event.reason }
-          });
+          this.handleAuthFailure(event, options);
+        } else {
+          // Reset auth retry count on non-auth errors
+          this.authRetryCount = 0;
           
-          // In development mode without token, don't treat auth errors as fatal
-          if (!this.currentToken) {
-            logger.debug('WebSocket auth error in development mode (no token), ignoring');
-          } else {
-            // Check if this is a token expiry issue
-            const isTokenExpired = event.reason && (
-              event.reason.includes('Token expired') ||
-              event.reason.includes('token has expired') ||
-              event.reason.includes('JWT expired')
-            );
-            
-            if (isTokenExpired && !this.isRefreshingToken) {
-              logger.debug('WebSocket closed due to token expiry, attempting refresh');
-              this.performTokenRefresh().catch(error => {
-                logger.error('Token refresh after auth error failed', error as Error);
-              });
-            } else {
-              this.handleAuthError({
-                code: event.code,
-                reason: event.reason || 'Authentication failed'
-              });
-            }
+          options.onClose?.();
+          
+          // Only attempt reconnection for non-auth errors
+          if (this.options.onReconnect && !this.isIntentionalDisconnect) {
+            this.scheduleReconnect();
           }
-        }
-        
-        options.onClose?.();
-        
-        // Only attempt reconnection for non-auth errors
-        if (this.options.onReconnect && event.code !== 1008) {
-          this.scheduleReconnect();
         }
       };
 
       this.ws.onerror = (error) => {
+        this.isConnecting = false;  // Connection failed
+        const currentAttemptId = this.connectionAttemptId;
+        this.connectionAttemptId = null; // Clear attempt tracking
+        
         // Only log as error if we're not in a known disconnection state
         const isExpectedError = this.state === 'disconnecting' || this.state === 'disconnected';
         if (!isExpectedError) {
           logger.error('WebSocket error occurred', undefined, {
             component: 'WebSocketService',
             action: 'websocket_error',
-            metadata: { error, state: this.state, hasToken: !!this.currentToken }
+            metadata: { 
+              attemptId: currentAttemptId,
+              error, 
+              state: this.state, 
+              hasToken: !!this.currentToken 
+            }
           });
         }
         
@@ -1016,6 +1114,9 @@ class WebSocketService {
         });
       };
     } catch (error) {
+      this.isConnecting = false;
+      this.connectionAttemptId = null; // Clear attempt tracking
+      
       logger.error('Failed to connect to WebSocket', error as Error, {
         component: 'WebSocketService',
         action: 'connection_failed'
@@ -1059,6 +1160,40 @@ class WebSocketService {
   }
   
   private scheduleReconnect() {
+    // Prevent reconnect if intentionally disconnected
+    if (this.isIntentionalDisconnect) {
+      logger.debug('Skipping reconnect - intentional disconnect', undefined, {
+        component: 'WebSocketService',
+        action: 'skip_reconnect'
+      });
+      return;
+    }
+    
+    // Prevent if already connecting
+    if (this.isConnecting) {
+      logger.debug('Already connecting, skipping reconnect', undefined, {
+        component: 'WebSocketService',
+        action: 'skip_reconnect_already_connecting'  
+      });
+      return;
+    }
+    
+    // Check auth failure cooldown period
+    const timeSinceLastAuthFailure = Date.now() - this.lastAuthFailure;
+    if (this.lastAuthFailure > 0 && timeSinceLastAuthFailure < this.AUTH_COOLDOWN_MS) {
+      const waitTime = this.AUTH_COOLDOWN_MS - timeSinceLastAuthFailure;
+      logger.debug('Delaying reconnect due to auth failure cooldown', undefined, {
+        component: 'WebSocketService',
+        action: 'reconnect_auth_cooldown',
+        metadata: { waitTime, timeSinceLastAuthFailure }
+      });
+      
+      setTimeout(() => {
+        this.scheduleReconnect();
+      }, waitTime);
+      return;
+    }
+    
     if (this.reconnectTimer) return;
     
     // Check if we've exceeded max reconnect attempts
@@ -1146,6 +1281,10 @@ class WebSocketService {
   }
 
   public disconnect() {
+    // Mark as intentional disconnect to prevent auto-reconnect
+    this.isIntentionalDisconnect = true;
+    this.isConnecting = false;
+    
     if (this.reconnectTimer) {
       clearTimeout(this.reconnectTimer);
       this.reconnectTimer = null;
@@ -1191,6 +1330,12 @@ class WebSocketService {
     this.isRefreshingToken = false;
     this.pendingMessages = [];
     this.reconnectAttempts = 0;
+    
+    // Reset connection tracking
+    this.connectionAttemptId = null;
+    this.lastConnectionAttempt = 0;
+    this.authRetryCount = 0;
+    this.lastAuthFailure = 0;
     
     // Clean up large message assemblies
     this.messageAssemblies.clear();
@@ -1534,7 +1679,124 @@ class WebSocketService {
   }
 
   /**
-   * Handle authentication errors from the server
+   * Handle authentication failures with exponential backoff and retry limits
+   */
+  private handleAuthFailure(event: CloseEvent, options: WebSocketOptions): void {
+    this.lastAuthFailure = Date.now();
+    this.authRetryCount++;
+    
+    logger.error('WebSocket authentication failed', undefined, {
+      component: 'WebSocketService',
+      action: 'auth_failure',
+      metadata: { 
+        code: event.code,
+        reason: event.reason,
+        authRetryCount: this.authRetryCount,
+        maxRetries: this.MAX_AUTH_RETRIES
+      }
+    });
+
+    // In development mode without token, don't treat auth errors as fatal
+    if (!this.currentToken) {
+      logger.debug('WebSocket auth error in development mode (no token), ignoring');
+      options.onClose?.();
+      return;
+    }
+
+    // Check if we've exceeded max auth retries
+    if (this.authRetryCount >= this.MAX_AUTH_RETRIES) {
+      logger.error('Maximum auth retry attempts exceeded, giving up', undefined, {
+        component: 'WebSocketService',
+        action: 'auth_max_retries_exceeded',
+        metadata: { 
+          authRetryCount: this.authRetryCount,
+          maxRetries: this.MAX_AUTH_RETRIES
+        }
+      });
+      
+      this.options.onError?.({
+        code: event.code,
+        message: 'Authentication failed: Maximum retry attempts exceeded. Please re-authenticate.',
+        timestamp: Date.now(),
+        type: 'auth',
+        recoverable: false
+      });
+      
+      options.onClose?.();
+      return;
+    }
+
+    // Check if this is a token expiry issue
+    const isTokenExpired = event.reason && (
+      event.reason.includes('Token expired') ||
+      event.reason.includes('token has expired') ||
+      event.reason.includes('JWT expired')
+    );
+    
+    if (isTokenExpired && !this.isRefreshingToken) {
+      logger.debug('WebSocket closed due to token expiry, attempting refresh');
+      this.performTokenRefresh().catch(error => {
+        logger.error('Token refresh after auth error failed', error as Error);
+        this.scheduleAuthRetry(options);
+      });
+    } else {
+      // Handle other auth failures with exponential backoff
+      this.scheduleAuthRetry(options);
+    }
+  }
+
+  /**
+   * Schedule auth retry with exponential backoff and cooldown period
+   */
+  private scheduleAuthRetry(options: WebSocketOptions): void {
+    // Calculate exponential backoff delay
+    const baseDelay = this.AUTH_COOLDOWN_MS;
+    const backoffMultiplier = Math.pow(2, this.authRetryCount - 1);
+    const jitter = Math.random() * 1000; // Add jitter to prevent thundering herd
+    const delay = Math.min(baseDelay * backoffMultiplier + jitter, 30000); // Cap at 30 seconds
+    
+    logger.info('Scheduling auth retry with exponential backoff', undefined, {
+      component: 'WebSocketService',
+      action: 'schedule_auth_retry',
+      metadata: {
+        attempt: this.authRetryCount,
+        maxRetries: this.MAX_AUTH_RETRIES,
+        delayMs: delay,
+        baseDelay,
+        backoffMultiplier
+      }
+    });
+    
+    // Use reconnect timer for auth retries
+    if (this.reconnectTimer) {
+      clearTimeout(this.reconnectTimer);
+    }
+    
+    this.reconnectTimer = setTimeout(() => {
+      this.reconnectTimer = null;
+      
+      if (this.authRetryCount < this.MAX_AUTH_RETRIES) {
+        logger.debug('Attempting auth retry', undefined, {
+          component: 'WebSocketService',
+          action: 'auth_retry_attempt',
+          metadata: { attempt: this.authRetryCount }
+        });
+        
+        // Attempt token refresh first, then reconnect
+        if (this.options.refreshToken) {
+          this.attemptTokenRefreshAndReconnect();
+        } else {
+          // No refresh capability, try reconnecting with existing token
+          this.connect(this.url, this.options);
+        }
+      }
+    }, delay);
+    
+    options.onClose?.();
+  }
+
+  /**
+   * Handle authentication errors from the server (legacy method)
    */
   private handleAuthError(error: any): void {
     logger.error('WebSocket authentication failed', undefined, {
@@ -1573,6 +1835,28 @@ class WebSocketService {
    * Attempt to refresh token and reconnect on auth failure
    */
   private async attemptTokenRefreshAndReconnect(): Promise<void> {
+    const now = Date.now();
+    const timeSinceLastRefresh = now - this.lastRefreshAttempt;
+    
+    // Respect the auth service's cooldown period to prevent spam
+    if (timeSinceLastRefresh < this.MIN_REFRESH_INTERVAL_MS) {
+      const waitTime = this.MIN_REFRESH_INTERVAL_MS - timeSinceLastRefresh;
+      logger.debug(`WebSocket: Waiting ${waitTime}ms before token refresh (cooldown)`, {
+        component: 'WebSocketService',
+        action: 'refresh_cooldown',
+        waitTime,
+        timeSinceLastRefresh
+      });
+      
+      // Schedule a delayed retry instead of immediate failure
+      setTimeout(() => {
+        this.attemptTokenRefreshAndReconnect();
+      }, waitTime);
+      return;
+    }
+    
+    this.lastRefreshAttempt = now;
+    
     try {
       const newToken = await this.options.refreshToken!();
       if (newToken) {
@@ -1580,13 +1864,54 @@ class WebSocketService {
         this.currentToken = newToken;
         const newOptions = { ...this.options, token: newToken };
         
+        // Reset reconnect attempts on successful refresh
+        this.reconnectAttempts = 0;
+        
         // Wait a bit before reconnecting
         setTimeout(() => {
           this.connect(this.url, newOptions);
         }, 1000);
       }
     } catch (error) {
-      logger.error('Failed to refresh token for auth error recovery', error as Error);
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      
+      // Handle auth loop protection error specifically
+      if (errorMessage.includes('preventing auth loop') || errorMessage.includes('too soon')) {
+        logger.warn('WebSocket: Auth loop protection triggered, backing off', {
+          component: 'WebSocketService',
+          action: 'auth_loop_protection',
+          error: errorMessage
+        });
+        
+        // Exponential backoff for reconnection
+        this.reconnectAttempts++;
+        const backoffDelay = Math.min(
+          this.baseReconnectDelay * Math.pow(2, this.reconnectAttempts),
+          this.maxReconnectDelay
+        );
+        
+        logger.debug(`WebSocket: Scheduling retry in ${backoffDelay}ms (attempt ${this.reconnectAttempts})`, {
+          component: 'WebSocketService',
+          action: 'schedule_retry',
+          delay: backoffDelay,
+          attempt: this.reconnectAttempts
+        });
+        
+        // Schedule a retry with exponential backoff
+        setTimeout(() => {
+          if (this.reconnectAttempts < this.maxReconnectAttempts) {
+            this.attemptTokenRefreshAndReconnect();
+          } else {
+            logger.error('WebSocket: Max reconnection attempts reached, giving up', {
+              component: 'WebSocketService',
+              action: 'max_attempts_exceeded'
+            });
+          }
+        }, backoffDelay);
+      } else {
+        // Other errors - log and don't retry immediately
+        logger.error('Failed to refresh token for auth error recovery', error as Error);
+      }
     }
   }
 

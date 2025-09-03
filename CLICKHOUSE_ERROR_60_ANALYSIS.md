@@ -1,5 +1,12 @@
 # ClickHouse Error Code 60 Analysis - Five Whys Root Cause
 
+## IMPORTANT: ClickHouse in Staging Environment
+**⚠️ CRITICAL:** In staging environment, ClickHouse is a REMOTE service hosted on ClickHouse Cloud.
+- **Connection URL:** Stored in Google Secret Manager as `CLICKHOUSE_URL`
+- **Location:** Remote ClickHouse Cloud instance (NOT a local container)
+- **Access:** Retrieved from Google Secret Manager at runtime
+- **Format:** `https://[cluster-id].us-central1.gcp.clickhouse.cloud:8443`
+
 ## Problem Statement
 ClickHouse is returning error code 60 in GCP staging deployment despite having proper credentials configured.
 
@@ -54,10 +61,11 @@ graph TD
 
 ## Evidence
 1. Error message: `ClickHouse error code 60` 
-2. Connection URL shows valid host: `https://xedvrr4c3r.us-central1.gcp.clickhouse.cloud:8443`
-3. Password exists in Secret Manager: `6a_z1t0qQ1.ET`
-4. Multiple `CREATE TABLE IF NOT EXISTS` statements exist in codebase
-5. No logs showing successful table creation
+2. Connection URL shows valid REMOTE host: `https://xedvrr4c3r.us-central1.gcp.clickhouse.cloud:8443` (Remote ClickHouse Cloud instance)
+3. Password exists in Google Secret Manager: `6a_z1t0qQ1.ET`
+4. Full connection URL stored in Google Secret Manager as `CLICKHOUSE_URL` secret
+5. Multiple `CREATE TABLE IF NOT EXISTS` statements exist in codebase
+6. No logs showing successful table creation on the remote ClickHouse Cloud instance
 
 ## Solution Options
 

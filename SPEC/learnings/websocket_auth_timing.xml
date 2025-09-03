@@ -150,4 +150,25 @@
     <keyword>CORS</keyword>
     <keyword>Origin None</keyword>
   </keywords>
+
+  <related_learnings>
+    <critical_update date="2025-01-03">
+      IMPORTANT: This timing issue was a precursor to a more severe bug discovered later.
+      When auth was fixed to work correctly, it exposed a connection loop bug caused by
+      duplicate React effects. See: websocket_connection_loop_ssot_fix.xml
+    </critical_update>
+    <learning>
+      <ref>websocket_connection_loop_ssot_fix.xml</ref>
+      <description>SSOT fix for connection loops caused by multiple React effects</description>
+      <relationship>The auth timing fix enabled proper auth flow, which exposed the connection loop bug</relationship>
+    </learning>
+    <learning>
+      <ref>websocket_auth_race_condition.xml</ref>
+      <description>Race condition between auth initialization and WebSocket connection</description>
+    </learning>
+    <learning>
+      <ref>auth_race_conditions_critical.xml</ref>
+      <description>Critical auth race conditions affecting multiple components</description>
+    </learning>
+  </related_learnings>
 </learnings>

@@ -140,12 +140,25 @@ def _import_test_routers() -> dict:
     """Import test routers for development environment."""
     import os
     # Only import in development environment
-    if get_env().get("ENVIRONMENT", "development").lower() == "development":
+    environment = get_env().get("ENVIRONMENT", "development").lower()
+    if environment in ["development", "staging", "testing"]:
+        routers = {}
+        
+        # Import existing test endpoints
         try:
             from netra_backend.app.api.test_endpoints import router as test_router
-            return {"test_router": test_router}
+            routers["test_router"] = test_router
         except ImportError:
             pass
+        
+        # Import GCP error test endpoints
+        try:
+            from netra_backend.app.routes.test_gcp_errors import router as test_gcp_errors_router
+            routers["test_gcp_errors_router"] = test_gcp_errors_router
+        except ImportError:
+            pass
+        
+        return routers
     return {}
 
 

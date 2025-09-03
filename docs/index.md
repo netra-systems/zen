@@ -36,6 +36,8 @@
 
 #### Testing Infrastructure
 - **[Test Architecture Visual Overview](../tests/TEST_ARCHITECTURE_VISUAL_OVERVIEW.md)** - Complete test infrastructure guide
+- **[Podman User Guide](./PODMAN_USER_GUIDE.md)** 🆕 - Complete guide for using Podman with dynamic ports
+- [Podman Testing Guide](./PODMAN_TESTING_GUIDE.md) - Podman installation and configuration
 - [Docker Orchestration](./docker_orchestration.md) - Docker management and Alpine containers
 - [Unified Test Runner](../tests/unified_test_runner.py) - Central test execution
 
@@ -44,6 +46,11 @@
 - **[Critical Security Implementation](../CRITICAL_SECURITY_IMPLEMENTATION_SUMMARY.md)** - Security boundaries and isolation
 - [API Dual Channel Explanation](./API_DUAL_CHANNEL_EXPLANATION.md) - API security patterns
 - [Go-Live Acceptance Criteria](./ACCEPTANCE_CRITERIA_GO_LIVE_CHECKLIST.md) - Production readiness
+
+### 🚨 Error Reporting & Monitoring
+
+- **[GCP Error Reporting Architecture](./GCP_ERROR_REPORTING_ARCHITECTURE.md)** 🆕 - **CRITICAL**: Comprehensive GCP error reporting integration for production visibility
+- [Configuration Architecture](./configuration_architecture.md) - Environment and configuration management
 
 ### 🧪 Testing & Quality
 
@@ -55,6 +62,7 @@
 
 ### 🚀 Performance & Optimization
 
+- **[Performance Metrics User Guide](./PERFORMANCE_METRICS_USER_GUIDE.md)** 📊 - **NEW**: Comprehensive guide to performance timing and metrics collection
 - [Agent Performance Dependencies](./AGENT_PERFORMANCE_DEPENDENCIES_EXPLAINED.md)
 - [Agent Performance Real Issues](./AGENT_PERFORMANCE_REAL_ISSUES.md)
 - [Alpine Containers Guide](./alpine_containers.md) - Container optimization

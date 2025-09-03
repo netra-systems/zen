@@ -262,32 +262,6 @@ services:
           memory: 512M
 
   # ============================================
-  # SUPPORTING TEST SERVICES
-  # ============================================
-
-  # Test Message Queue (RabbitMQ) - If needed for async testing
-  test-rabbitmq:
-    image: rabbitmq:3-alpine
-    environment:
-      RABBITMQ_DEFAULT_USER: test_user
-      RABBITMQ_DEFAULT_PASS: test_pass
-    ports:
-      - "${TEST_RABBITMQ_PORT:-5673}:5672"
-      - "${TEST_RABBITMQ_MGMT_PORT:-15673}:15672"
-    volumes:
-      # Use regular Docker volume for RabbitMQ (stable, no RAM consumption)
-      - test_rabbitmq_data:/var/lib/rabbitmq
-    healthcheck:
-      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 20s
-    networks:
-      - default
-    restart: no  # Changed from unless-stopped to prevent unwanted auto-restarts
-
-  # ============================================
   # TEST UTILITIES
   # ============================================
 
@@ -357,8 +331,6 @@ volumes:
   test_redis_data:
     driver: local
   test_clickhouse_data:
-    driver: local
-  test_rabbitmq_data:
     driver: local
   test_postgres_logs:
     driver: local

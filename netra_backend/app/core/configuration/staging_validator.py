@@ -40,6 +40,7 @@ class StagingConfigurationValidator:
         'GCP_PROJECT_ID',
         'SERVICE_SECRET',
         'SERVICE_ID',
+        'CLICKHOUSE_URL',  # CRITICAL: Remote ClickHouse Cloud URL from Google Secret Manager
     ]
     
     # Important variables that should be present

@@ -1,6 +1,8 @@
 from shared.isolated_environment import get_env
-"""
+
 env = get_env()
+
+"""
 Complete Real Pipeline E2E Test Suite
 Tests the complete agent pipeline with real LLM calls and proper error handling.
 Maximum 300 lines, functions ≤8 lines.

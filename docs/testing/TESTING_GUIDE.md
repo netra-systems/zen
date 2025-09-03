@@ -346,7 +346,7 @@ tests/
 ```python
 # tests/agents/test_supervisor_agent.py
 import pytest
-from netra_backend.app.agents.supervisor import SupervisorAgent
+from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
 from netra_backend.app.schemas.Agent import AgentRequest
 
 @pytest.mark.asyncio

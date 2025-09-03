@@ -108,6 +108,7 @@ class ExecutionTracker:
         self.monitoring_task: Optional[asyncio.Task] = None
         self.recovery_callbacks: List[Any] = []
         self._lock = asyncio.Lock()
+        self._persistence = None  # Lazy loaded to avoid circular imports
         
     async def start_monitoring(self):
         """Start the monitoring task that checks for dead/timeout agents."""
@@ -117,6 +118,9 @@ class ExecutionTracker:
             
         self.monitoring_task = asyncio.create_task(self._monitor_executions())
         logger.info("Started execution monitoring")
+        
+        # Initialize persistence if not already done
+        await self._ensure_persistence()
         
     async def stop_monitoring(self):
         """Stop the monitoring task."""
@@ -128,6 +132,12 @@ class ExecutionTracker:
                 pass
             self.monitoring_task = None
             logger.info("Stopped execution monitoring")
+        
+        # Shutdown persistence
+        if self._persistence:
+            from netra_backend.app.core.trace_persistence import get_execution_persistence
+            persistence = get_execution_persistence()
+            await persistence.shutdown()
     
     async def _monitor_executions(self):
         """Monitor all executions for timeouts and deaths."""
@@ -191,6 +201,16 @@ class ExecutionTracker:
             self.active_executions.add(exec_id)
             
         logger.info(f"Registered execution: agent={agent_name}, exec_id={exec_id}, timeout={timeout_seconds}s")
+        
+        # Persist execution start
+        await self._persist_execution_start(exec_id, {
+            'agent_name': agent_name,
+            'correlation_id': correlation_id,
+            'thread_id': thread_id,
+            'user_id': user_id,
+            'timeout_seconds': timeout_seconds
+        })
+        
         return exec_id
     
     async def start_execution(self, exec_id: UUID):
@@ -200,6 +220,9 @@ class ExecutionTracker:
                 self.executions[exec_id].state = ExecutionState.RUNNING
                 self.executions[exec_id].last_heartbeat = time.time()
                 logger.debug(f"Started execution: {exec_id}")
+                
+        # Persist state change
+        await self._persist_state_update(exec_id, ExecutionState.RUNNING.value)
     
     async def heartbeat(self, exec_id: UUID) -> bool:
         """
@@ -252,6 +275,9 @@ class ExecutionTracker:
                 f"exec_id={exec_id}, duration={execution.duration():.2f}s, "
                 f"state={execution.state.value}"
             )
+            
+        # Persist execution completion
+        await self._persist_execution_complete(exec_id, execution)
     
     async def _handle_timeout(self, execution: ExecutionRecord):
         """Handle a timed-out execution."""
@@ -261,6 +287,9 @@ class ExecutionTracker:
         
         self.active_executions.discard(execution.execution_id)
         self.failed_executions.append(execution.execution_id)
+        
+        # Persist timeout event
+        await self._persist_execution_complete(execution.execution_id, execution)
         
         # Trigger recovery callbacks
         for callback in self.recovery_callbacks:
@@ -277,6 +306,9 @@ class ExecutionTracker:
         
         self.active_executions.discard(execution.execution_id)
         self.failed_executions.append(execution.execution_id)
+        
+        # Persist death event
+        await self._persist_execution_complete(execution.execution_id, execution)
         
         # Trigger recovery callbacks
         for callback in self.recovery_callbacks:
@@ -345,6 +377,102 @@ class ExecutionTracker:
                 self.active_executions.discard(exec_id)
                 self.failed_executions.append(exec_id)
                 logger.info(f"Killed execution: {exec_id}")
+                
+                # Persist kill event
+                await self._persist_execution_complete(exec_id, execution)
+    
+    async def _ensure_persistence(self):
+        """Ensure persistence is initialized."""
+        if not self._persistence:
+            try:
+                from netra_backend.app.core.trace_persistence import get_execution_persistence
+                self._persistence = get_execution_persistence()
+                await self._persistence.ensure_started()
+            except Exception as e:
+                logger.warning(f"Failed to initialize persistence: {e}")
+                self._persistence = None
+    
+    async def _persist_execution_start(self, exec_id: UUID, context: Dict[str, Any]):
+        """Persist execution start event."""
+        if not self._persistence:
+            await self._ensure_persistence()
+        
+        if self._persistence:
+            try:
+                await self._persistence.write_execution_start(exec_id, context)
+            except Exception as e:
+                logger.error(f"Failed to persist execution start: {e}")
+    
+    async def _persist_state_update(self, exec_id: UUID, state: str):
+        """Persist state update."""
+        if not self._persistence:
+            await self._ensure_persistence()
+        
+        if self._persistence:
+            try:
+                execution = self.executions.get(exec_id)
+                metadata = {}
+                if execution:
+                    metadata = {
+                        'agent_name': execution.agent_name,
+                        'user_id': execution.user_id,
+                        'thread_id': execution.thread_id
+                    }
+                await self._persistence.write_execution_update(exec_id, state, metadata)
+            except Exception as e:
+                logger.error(f"Failed to persist state update: {e}")
+    
+    async def _persist_execution_complete(self, exec_id: UUID, execution: ExecutionRecord):
+        """Persist execution completion."""
+        if not self._persistence:
+            await self._ensure_persistence()
+        
+        if self._persistence:
+            try:
+                # Persist the full execution record
+                await self._persistence.persist_execution_record(execution)
+                
+                # Also persist completion event
+                result = {
+                    'agent_name': execution.agent_name,
+                    'user_id': execution.user_id,
+                    'thread_id': execution.thread_id,
+                    'state': execution.state.value,
+                    'duration': execution.duration(),
+                    'error': execution.error,
+                    'heartbeat_count': execution.heartbeat_count,
+                    'websocket_updates_sent': execution.websocket_updates_sent
+                }
+                await self._persistence.write_execution_complete(exec_id, result)
+                
+                # Persist performance metrics
+                metrics = {
+                    'agent_name': execution.agent_name,
+                    'user_id': execution.user_id,
+                    'duration_seconds': execution.duration(),
+                    'heartbeat_count': execution.heartbeat_count,
+                    'websocket_updates_sent': execution.websocket_updates_sent
+                }
+                await self._persistence.write_performance_metrics(exec_id, metrics)
+            except Exception as e:
+                logger.error(f"Failed to persist execution completion: {e}")
+    
+    async def collect_metrics(self, exec_id: UUID) -> Optional[Dict[str, Any]]:
+        """Collect performance metrics for an execution."""
+        execution = self.get_execution(exec_id)
+        if not execution:
+            return None
+        
+        return {
+            'execution_id': str(exec_id),
+            'agent_name': execution.agent_name,
+            'duration_seconds': execution.duration(),
+            'state': execution.state.value,
+            'heartbeat_count': execution.heartbeat_count,
+            'websocket_updates_sent': execution.websocket_updates_sent,
+            'is_timeout': execution.is_timeout(),
+            'is_dead': execution.is_dead()
+        }
 
 
 # Global instance for easy access

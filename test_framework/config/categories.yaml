@@ -200,3 +200,24 @@ categories:
     - performance
     - load
     - stress
+  startup:
+    description: System startup and initialization tests
+    priority: CRITICAL
+    category_type: technical
+    timeout_seconds: 180
+    estimated_duration_minutes: 3.0
+    database_dependent: true
+    tags:
+    - startup
+    - initialization
+  security:
+    description: Security and authentication tests
+    priority: HIGH
+    category_type: security
+    timeout_seconds: 300
+    estimated_duration_minutes: 5.0
+    database_dependent: true
+    tags:
+    - security
+    - auth
+    - validation

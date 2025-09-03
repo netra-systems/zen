@@ -173,7 +173,7 @@ class ComprehensiveImportFixerV2:
             if 'from netra_backend.app.agents.supervisor import SupervisorAgent' in content:
                 content = re.sub(
                     r'^from netra_backend\.app\.agents\.supervisor import SupervisorAgent.*$',
-                    r'# FIXME: SupervisorAgent not exported from supervisor\n# \g<0>',
+                    r'from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent',
                     content,
                     flags=re.MULTILINE
                 )

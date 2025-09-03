@@ -19,7 +19,18 @@ from netra_backend.app.agents.supervisor.execution_context import (
     AgentExecutionResult,
 )
 from netra_backend.app.core.execution_tracker import get_execution_tracker, ExecutionState
-from netra_backend.app.core.agent_heartbeat import AgentHeartbeat
+# DISABLED: Heartbeat hidden errors - see AGENT_RELIABILITY_ERROR_SUPPRESSION_ANALYSIS_20250903.md
+# from netra_backend.app.core.agent_heartbeat import AgentHeartbeat
+from netra_backend.app.core.trace_persistence import get_execution_persistence
+from netra_backend.app.core.unified_trace_context import (
+    UnifiedTraceContext,
+    get_current_trace_context,
+    TraceContextManager
+)
+from netra_backend.app.core.logging_context import (
+    get_unified_trace_context,
+    create_child_trace_context
+)
 from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
@@ -36,6 +47,7 @@ class AgentExecutionCore:
         self.registry = registry
         self.websocket_bridge = websocket_bridge
         self.execution_tracker = get_execution_tracker()
+        self.persistence = get_execution_persistence()
         
     async def execute_agent(
         self, 
@@ -45,102 +57,160 @@ class AgentExecutionCore:
     ) -> AgentExecutionResult:
         """Execute agent with full lifecycle tracking and death detection."""
         
+        # Get or create trace context
+        parent_trace = get_unified_trace_context()
+        if parent_trace:
+            # Create child context for this agent
+            trace_context = parent_trace.propagate_to_child()
+        else:
+            # Create new root context
+            trace_context = UnifiedTraceContext(
+                user_id=getattr(state, 'user_id', None),
+                thread_id=getattr(state, 'thread_id', None),
+                correlation_id=getattr(context, 'correlation_id', None)
+            )
+        
+        # Start span for this agent execution
+        span = trace_context.start_span(
+            operation_name=f"agent.{context.agent_name}",
+            attributes={
+                "agent.name": context.agent_name,
+                "agent.run_id": str(context.run_id),
+                "user.id": getattr(state, 'user_id', None)
+            }
+        )
+        
         # Register execution with tracker
         exec_id = await self.execution_tracker.register_execution(
             agent_name=context.agent_name,
-            correlation_id=getattr(context, 'correlation_id', None),
+            correlation_id=trace_context.correlation_id,
             thread_id=getattr(state, 'thread_id', None),
             user_id=getattr(state, 'user_id', None),
             timeout_seconds=timeout or self.DEFAULT_TIMEOUT
         )
         
-        # Create heartbeat context
-        heartbeat = AgentHeartbeat(
-            exec_id=exec_id,
-            agent_name=context.agent_name,
-            interval=self.HEARTBEAT_INTERVAL,
-            websocket_callback=self._create_websocket_callback(context)
-        )
+        # DISABLED: Heartbeat feature suppresses errors - see AGENT_RELIABILITY_ERROR_SUPPRESSION_ANALYSIS_20250903.md
+        # The heartbeat system was found to:
+        # 1. Continue running even when agents are dead (zombie heartbeats)
+        # 2. Hide critical failures behind "monitoring" that doesn't actually monitor
+        # 3. Create false positives in health checks
+        # DO NOT RE-ENABLE without fixing the error visibility issues
+        heartbeat = None  # Disabled - was hiding errors
+        # heartbeat = AgentHeartbeat(
+        #     exec_id=exec_id,
+        #     agent_name=context.agent_name,
+        #     interval=self.HEARTBEAT_INTERVAL,
+        #     websocket_callback=self._create_websocket_callback(context, trace_context)
+        # )
         
-        try:
-            # Start execution tracking
-            await self.execution_tracker.start_execution(exec_id)
+        # Execute within trace context
+        async with TraceContextManager(trace_context):
+            try:
+                # Start execution tracking
+                await self.execution_tracker.start_execution(exec_id)
+                
+                # Add trace event
+                trace_context.add_event("agent.started")
+                
+                # Send agent started notification with trace context
+                if self.websocket_bridge:
+                    await self.websocket_bridge.notify_agent_started(
+                        run_id=context.run_id,
+                        agent_name=context.agent_name,
+                        trace_context=trace_context.to_websocket_context()
+                    )
+                
+                # Get agent from registry
+                agent = self._get_agent_or_error(context.agent_name)
+                if isinstance(agent, AgentExecutionResult):
+                    # Agent not found - mark as failed
+                    await self.execution_tracker.complete_execution(
+                        exec_id, 
+                        error=f"Agent {context.agent_name} not found"
+                    )
+                    if self.websocket_bridge:
+                        await self.websocket_bridge.notify_agent_error(
+                            run_id=context.run_id,
+                            agent_name=context.agent_name,
+                            error=agent.error or "Agent not found"
+                        )
+                    return agent
+                
+                # Execute without heartbeat monitoring (heartbeat disabled - was hiding errors)
+                # See AGENT_RELIABILITY_ERROR_SUPPRESSION_ANALYSIS_20250903.md
+                if heartbeat:  # This will be False since heartbeat is disabled
+                    async with heartbeat:
+                        result = await self._execute_with_protection(
+                            agent, context, state, exec_id, heartbeat, timeout, trace_context
+                        )
+                else:
+                    # Direct execution without heartbeat wrapper
+                    result = await self._execute_with_protection(
+                        agent, context, state, exec_id, None, timeout, trace_context
+                    )
             
-            # Send agent started notification
-            if self.websocket_bridge:
-                await self.websocket_bridge.notify_agent_started(
-                    run_id=context.run_id,
-                    agent_name=context.agent_name
-                )
+                # Collect and persist metrics
+                metrics = await self._collect_metrics(exec_id, result, state, heartbeat)
+                await self._persist_metrics(exec_id, metrics, context.agent_name, state)
+                
+                # Mark execution complete
+                if result.success:
+                    trace_context.add_event("agent.completed")
+                    await self.execution_tracker.complete_execution(exec_id, result=result)
+                else:
+                    trace_context.add_event("agent.error", {"error": result.error})
+                    await self.execution_tracker.complete_execution(
+                        exec_id, 
+                        error=result.error or "Unknown error"
+                    )
+                
+                # Finish the span
+                trace_context.finish_span(span)
+                
+                # Send completion notification with trace context
+                if self.websocket_bridge:
+                    if result.success:
+                        await self.websocket_bridge.notify_agent_completed(
+                            run_id=context.run_id,
+                            agent_name=context.agent_name,
+                            result={"success": True, "agent_name": context.agent_name},
+                            execution_time_ms=(result.duration * 1000) if result.duration else 0,
+                            trace_context=trace_context.to_websocket_context()
+                        )
+                    else:
+                        await self.websocket_bridge.notify_agent_error(
+                            run_id=context.run_id,
+                            agent_name=context.agent_name,
+                            error=result.error or "Unknown error",
+                            trace_context=trace_context.to_websocket_context()
+                        )
+                
+                return result
             
-            # Get agent from registry
-            agent = self._get_agent_or_error(context.agent_name)
-            if isinstance(agent, AgentExecutionResult):
-                # Agent not found - mark as failed
+            except Exception as e:
+                # Add error event and finish span
+                trace_context.add_event("agent.exception", {"error": str(e)})
+                trace_context.finish_span(span)
+                
+                # Ensure execution is marked as failed
                 await self.execution_tracker.complete_execution(
-                    exec_id, 
-                    error=f"Agent {context.agent_name} not found"
+                    exec_id,
+                    error=f"Unexpected error: {str(e)}"
                 )
+                
+                # Send error notification with trace context
                 if self.websocket_bridge:
                     await self.websocket_bridge.notify_agent_error(
                         run_id=context.run_id,
                         agent_name=context.agent_name,
-                        error=agent.error or "Agent not found"
+                        error=str(e),
+                        trace_context=trace_context.to_websocket_context()
                     )
-                return agent
-            
-            # Execute with heartbeat monitoring
-            async with heartbeat:
-                result = await self._execute_with_protection(
-                    agent, context, state, exec_id, heartbeat, timeout
+                
+                return AgentExecutionResult(
+                    success=False,
+                    error=f"Agent execution failed: {str(e)}"
                 )
-            
-            # Mark execution complete
-            if result.success:
-                await self.execution_tracker.complete_execution(exec_id, result=result)
-            else:
-                await self.execution_tracker.complete_execution(
-                    exec_id, 
-                    error=result.error or "Unknown error"
-                )
-            
-            # Send completion notification
-            if self.websocket_bridge:
-                if result.success:
-                    await self.websocket_bridge.notify_agent_completed(
-                        run_id=context.run_id,
-                        agent_name=context.agent_name,
-                        result={"success": True, "agent_name": context.agent_name},
-                        execution_time_ms=(result.duration * 1000) if result.duration else 0
-                    )
-                else:
-                    await self.websocket_bridge.notify_agent_error(
-                        run_id=context.run_id,
-                        agent_name=context.agent_name,
-                        error=result.error or "Unknown error"
-                    )
-            
-            return result
-            
-        except Exception as e:
-            # Ensure execution is marked as failed
-            await self.execution_tracker.complete_execution(
-                exec_id,
-                error=f"Unexpected error: {str(e)}"
-            )
-            
-            # Send error notification
-            if self.websocket_bridge:
-                await self.websocket_bridge.notify_agent_error(
-                    run_id=context.run_id,
-                    agent_name=context.agent_name,
-                    error=str(e)
-                )
-            
-            return AgentExecutionResult(
-                success=False,
-                error=f"Agent execution failed: {str(e)}"
-            )
     
     async def _execute_with_protection(
         self,
@@ -148,8 +218,9 @@ class AgentExecutionCore:
         context: AgentExecutionContext,
         state: DeepAgentState,
         exec_id: UUID,
-        heartbeat: AgentHeartbeat,
-        timeout: Optional[float]
+        heartbeat: Optional[Any],  # Disabled - was AgentHeartbeat, see AGENT_RELIABILITY_ERROR_SUPPRESSION_ANALYSIS_20250903.md
+        timeout: Optional[float],
+        trace_context: UnifiedTraceContext
     ) -> AgentExecutionResult:
         """Execute agent with multiple layers of protection."""
         
@@ -162,7 +233,7 @@ class AgentExecutionCore:
                 
                 # CRITICAL ERROR BOUNDARY 2: Result validation
                 result = await self._execute_with_result_validation(
-                    agent, context, state, heartbeat
+                    agent, context, state, heartbeat, trace_context
                 )
                 
                 # CRITICAL: Validate result is not None (agent death signature)
@@ -174,13 +245,16 @@ class AgentExecutionCore:
                 
                 # Create proper result
                 if isinstance(result, AgentExecutionResult):
+                    result.duration = duration
+                    result.metrics = self._calculate_performance_metrics(start_time, heartbeat)
                     return result
                 else:
                     # Agent didn't return proper result format
                     return AgentExecutionResult(
                         success=True,
                         state=state,
-                        duration=duration
+                        duration=duration,
+                        metrics=self._calculate_performance_metrics(start_time, heartbeat)
                     )
                     
         except asyncio.TimeoutError:
@@ -189,7 +263,8 @@ class AgentExecutionCore:
             return AgentExecutionResult(
                 success=False,
                 error=f"Agent execution timeout after {timeout_seconds}s",
-                duration=duration
+                duration=duration,
+                metrics=self._calculate_performance_metrics(start_time, heartbeat)
             )
             
         except Exception as e:
@@ -198,7 +273,8 @@ class AgentExecutionCore:
             return AgentExecutionResult(
                 success=False,
                 error=str(e),
-                duration=duration
+                duration=duration,
+                metrics=self._calculate_performance_metrics(start_time, heartbeat)
             )
     
     async def _execute_with_result_validation(
@@ -206,12 +282,13 @@ class AgentExecutionCore:
         agent: Any,
         context: AgentExecutionContext,
         state: DeepAgentState,
-        heartbeat: AgentHeartbeat
+        heartbeat: Optional[Any],  # Disabled - was AgentHeartbeat
+        trace_context: UnifiedTraceContext
     ) -> Any:
         """Execute agent and validate result."""
         
         # Set up websocket context on agent
-        await self._setup_agent_websocket(agent, context, state)
+        await self._setup_agent_websocket(agent, context, state, trace_context)
         
         # Create execution wrapper that sends heartbeats
         async def execute_with_heartbeat():
@@ -231,42 +308,87 @@ class AgentExecutionCore:
             except Exception as e:
                 # Send error heartbeat
                 await heartbeat.pulse({"status": "error", "error": str(e)})
+                # Log the error with full context for debugging
+                logger.error(f"Agent {context.agent_name} execution failed: {e}", extra={
+                    "run_id": str(context.run_id),
+                    "user_id": getattr(state, 'user_id', None),
+                    "thread_id": getattr(state, 'thread_id', None),
+                    "retry_count": context.retry_count
+                })
                 raise
         
         # Execute with heartbeat wrapper
-        return await execute_with_heartbeat()
+        result = await execute_with_heartbeat()
+        
+        # Ensure result is properly structured
+        if result is not None and not isinstance(result, (dict, AgentExecutionResult)):
+            logger.warning(f"Agent returned non-standard result type: {type(result).__name__}")
+            # Wrap in a standard format
+            result = {"success": True, "result": result, "agent_name": context.agent_name}
+        
+        return result
     
     async def _setup_agent_websocket(
         self,
         agent: Any,
         context: AgentExecutionContext,
-        state: DeepAgentState
+        state: DeepAgentState,
+        trace_context: UnifiedTraceContext
     ) -> None:
-        """Set up websocket context on agent."""
+        """Set up websocket context on agent with enhanced propagation.
+        
+        CRITICAL: This ensures WebSocket manager and context are properly
+        propagated to all child agents for complete event tracking.
+        """
         
         # Set user_id on agent if available
         if hasattr(state, 'user_id') and state.user_id:
             agent._user_id = state.user_id
         
-        # CRITICAL: Propagate WebSocket bridge to agent
+        # Set trace context on agent if it supports it
+        if hasattr(agent, 'set_trace_context'):
+            agent.set_trace_context(trace_context)
+            logger.info(f"✅ Trace context set on agent {agent.__class__.__name__}")
+        
+        # CRITICAL: Propagate WebSocket bridge to agent with multiple methods
         if self.websocket_bridge:
+            # Try multiple methods to ensure WebSocket is set
+            websocket_set = False
+            
+            # Method 1: set_websocket_bridge (preferred)
             if hasattr(agent, 'set_websocket_bridge'):
-                # CRITICAL: Pass bridge and run_id to agent
                 agent.set_websocket_bridge(self.websocket_bridge, context.run_id)
-                logger.info(f"✅ Enhanced WebSocket bridge set on agent {agent.__class__.__name__} for run_id={context.run_id}")
-            else:
-                logger.warning(f"⚠️ Agent {agent.__class__.__name__} does not support set_websocket_bridge method")
+                websocket_set = True
+                logger.info(f"✅ WebSocket bridge set via set_websocket_bridge on {agent.__class__.__name__}")
+            
+            # Method 2: Direct assignment to websocket_bridge attribute
+            if hasattr(agent, 'websocket_bridge'):
+                agent.websocket_bridge = self.websocket_bridge
+                agent._run_id = context.run_id
+                websocket_set = True
+                logger.info(f"✅ WebSocket bridge set via direct assignment on {agent.__class__.__name__}")
+            
+            # Method 3: Set on execution engine if agent has one
+            if hasattr(agent, 'execution_engine') and agent.execution_engine:
+                if hasattr(agent.execution_engine, 'set_websocket_bridge'):
+                    agent.execution_engine.set_websocket_bridge(self.websocket_bridge, context.run_id)
+                    websocket_set = True
+                    logger.info(f"✅ WebSocket bridge set on execution engine of {agent.__class__.__name__}")
+            
+            if not websocket_set:
+                logger.warning(f"⚠️ Could not set WebSocket bridge on agent {agent.__class__.__name__} - no compatible method found")
     
-    def _create_websocket_callback(self, context: AgentExecutionContext):
+    def _create_websocket_callback(self, context: AgentExecutionContext, trace_context: UnifiedTraceContext):
         """Create WebSocket callback for heartbeat updates."""
         
         async def callback(data: dict):
             if self.websocket_bridge:
-                # Send heartbeat as agent_thinking update
+                # Send heartbeat as agent_thinking update with trace context
                 await self.websocket_bridge.notify_agent_thinking(
                     run_id=context.run_id,
                     agent_name=context.agent_name,
-                    reasoning=f"Processing... (heartbeat #{data.get('pulse', 0)})"
+                    reasoning=f"Processing... (heartbeat #{data.get('pulse', 0)})",
+                    trace_context=trace_context.to_websocket_context()
                 )
         
         return callback if self.websocket_bridge else None
@@ -280,3 +402,87 @@ class AgentExecutionCore:
                 error=f"Agent {agent_name} not found"
             )
         return agent
+    
+    def _calculate_performance_metrics(
+        self, 
+        start_time: float, 
+        heartbeat: Optional[Any] = None  # Disabled - was AgentHeartbeat
+    ) -> dict:
+        """Calculate performance metrics for the execution."""
+        duration = time.time() - start_time
+        
+        metrics = {
+            'execution_time_ms': int(duration * 1000),
+            'start_timestamp': start_time,
+            'end_timestamp': time.time()
+        }
+        
+        if heartbeat:
+            metrics['heartbeat_count'] = heartbeat.pulse_count
+            
+        # Memory usage if available
+        try:
+            import psutil
+            process = psutil.Process()
+            metrics['memory_usage_mb'] = process.memory_info().rss / 1024 / 1024
+            metrics['cpu_percent'] = process.cpu_percent()
+        except:
+            pass  # psutil not available or error
+            
+        return metrics
+    
+    async def _collect_metrics(
+        self, 
+        exec_id: UUID, 
+        result: AgentExecutionResult, 
+        state: DeepAgentState, 
+        heartbeat: Optional[Any] = None  # Disabled - was AgentHeartbeat
+    ) -> dict:
+        """Collect comprehensive metrics for the execution."""
+        # Get metrics from execution tracker
+        tracker_metrics = await self.execution_tracker.collect_metrics(exec_id)
+        
+        # Combine with result metrics
+        metrics = tracker_metrics or {}
+        
+        if hasattr(result, 'metrics') and result.metrics:
+            metrics.update(result.metrics)
+        
+        # Add state information
+        metrics['state_size'] = len(str(state.__dict__)) if state else 0
+        metrics['result_success'] = result.success
+        
+        if result.duration:
+            metrics['total_duration_seconds'] = result.duration
+            
+        return metrics
+    
+    async def _persist_metrics(
+        self, 
+        exec_id: UUID, 
+        metrics: dict, 
+        agent_name: str,
+        state: DeepAgentState
+    ):
+        """Persist performance metrics to ClickHouse."""
+        try:
+            # Prepare metric record with context
+            metric_record = {
+                'execution_id': exec_id,
+                'agent_name': agent_name,
+                'user_id': getattr(state, 'user_id', None),
+            }
+            
+            # Write individual metrics
+            for metric_type, metric_value in metrics.items():
+                if isinstance(metric_value, (int, float)):
+                    await self.persistence.write_performance_metrics(
+                        exec_id, 
+                        {
+                            **metric_record,
+                            'metric_type': metric_type,
+                            'metric_value': float(metric_value)
+                        }
+                    )
+        except Exception as e:
+            logger.error(f"Failed to persist metrics for execution {exec_id}: {e}")

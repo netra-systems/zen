@@ -60,6 +60,7 @@ NEW ORCHESTRATION EXAMPLES:
 
 import argparse
 import json
+import logging
 import os
 import subprocess
 import sys
@@ -68,11 +69,22 @@ from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 from datetime import timedelta
 
+logger = logging.getLogger(__name__)
+
 # Project root - script is now in scripts/ directory
 PROJECT_ROOT = Path(__file__).parent.parent.absolute()
 
 # Add project root to path for absolute imports
 sys.path.insert(0, str(PROJECT_ROOT))
+
+# Load environment variables from .env file to ensure CONTAINER_RUNTIME is set
+try:
+    from dotenv import load_dotenv
+    env_file = PROJECT_ROOT / '.env'
+    if env_file.exists():
+        load_dotenv(env_file, override=False)
+except ImportError:
+    pass  # dotenv not available, will rely on system environment
 
 # Use centralized environment management
 try:
@@ -109,7 +121,7 @@ except ImportError:
 
 # Import test framework - using absolute imports from project root
 from test_framework.runner import UnifiedTestRunner as FrameworkRunner
-from test_framework.test_config import configure_dev_environment, configure_mock_environment, configure_test_environment
+from test_framework.test_config import configure_dev_environment, configure_mock_environment
 from test_framework.llm_config_manager import configure_llm_testing, LLMTestMode
 from test_framework.test_discovery import TestDiscovery
 from test_framework.test_validation import TestValidation
@@ -199,13 +211,17 @@ except ImportError:
     SafePortAllocator = None
     
 try:
+    from test_framework.unified_container_manager import (
+        UnifiedContainerManager, ContainerManagerMode
+    )
     from test_framework.unified_docker_manager import (
-        UnifiedDockerManager, EnvironmentType, ServiceStatus
+        EnvironmentType, ServiceStatus
     )
     CENTRALIZED_DOCKER_AVAILABLE = True
 except ImportError:
     CENTRALIZED_DOCKER_AVAILABLE = False
-    UnifiedDockerManager = None
+    UnifiedContainerManager = None
+    ContainerManagerMode = None
     EnvironmentType = None
     ServiceStatus = None
 
@@ -429,6 +445,16 @@ class UnifiedTestRunner:
         if env.get('TEST_NO_DOCKER', 'false').lower() == 'true':
             print("[INFO] Docker disabled via TEST_NO_DOCKER environment variable")
             return
+        
+        # Determine if Docker is actually needed based on test categories
+        if not self._docker_required_for_tests(args, running_e2e):
+            print("[INFO] Docker not required for selected test categories")
+            return
+        
+        # Determine if Docker is actually needed based on test categories
+        if not self._docker_required_for_tests(args, running_e2e):
+            print("[INFO] Docker not required for selected test categories")
+            return
             
         # First, try to use the simple Docker manager for automatic startup
         print("\n" + "="*60)
@@ -504,14 +530,29 @@ class UnifiedTestRunner:
         rebuild_images = not (hasattr(args, 'no_rebuild') and args.no_rebuild)
         rebuild_backend_only = not (hasattr(args, 'rebuild_all') and args.rebuild_all)
         
-        self.docker_manager = UnifiedDockerManager(
-            environment_type=env_type,
-            test_id=f"test_run_{int(time.time())}_{os.getpid()}",  # More unique ID
-            use_production_images=use_production,
-            use_alpine=use_alpine,  # Use Alpine images by default for minimal size
-            rebuild_images=rebuild_images,  # Rebuild images by default for freshness
-            rebuild_backend_only=rebuild_backend_only  # Only rebuild backend by default since that's where most changes are
-        )
+        # Check if we should use Podman or Docker
+        container_runtime = os.environ.get('CONTAINER_RUNTIME', '').lower()
+        
+        if container_runtime == 'podman':
+            # Use Podman with Docker compatibility wrapper
+            from test_framework.podman_docker_compat import PodmanDockerCompatWrapper
+            self.docker_manager = PodmanDockerCompatWrapper(
+                environment_type=env_type,
+                test_id=f"test_run_{int(time.time())}_{os.getpid()}",
+                use_alpine=use_alpine
+            )
+            print("[INFO] Using Podman runtime for container management")
+        else:
+            # Use Docker (existing UnifiedDockerManager)
+            from test_framework.unified_docker_manager import UnifiedDockerManager
+            self.docker_manager = UnifiedDockerManager(
+                environment_type=env_type,
+                test_id=f"test_run_{int(time.time())}_{os.getpid()}",
+                use_production_images=use_production,
+                use_alpine=use_alpine,
+                rebuild_images=rebuild_images,
+                rebuild_backend_only=rebuild_backend_only
+            )
         
         print(f"[INFO] Using Docker environment: type={env_type.value}, alpine={use_alpine}, "
               f"rebuild={rebuild_images}, backend_only={rebuild_backend_only}, production={use_production}")
@@ -572,6 +613,11 @@ class UnifiedTestRunner:
         - Removes orphaned networks with name pattern "netra-test-"
         - Logs all cleanup actions
         """
+        # Skip cleanup if Docker was not initialized
+        if not hasattr(self, 'docker_manager') or self.docker_manager is None:
+            print("[INFO] Skipping Docker cleanup - Docker was not initialized")
+            return
+        
         print("[INFO] Starting comprehensive test environment cleanup...")
         
         try:
@@ -784,7 +830,20 @@ class UnifiedTestRunner:
         # Configure services
         if args.env == "staging":
             # For staging, don't use Docker port discovery - use remote staging services
-            configure_test_environment()
+            # Configure test environment with discovered ports
+            env = get_env()
+            if self.docker_ports:
+                # Set discovered PostgreSQL URL
+                postgres_port = self.docker_ports.get('postgres', 5434)
+                env.set('TEST_POSTGRES_PORT', str(postgres_port), 'docker_manager')
+                env.set('DATABASE_URL', f'postgresql://test:test@localhost:{postgres_port}/netra_test', 'docker_manager')
+                
+                # Set discovered Redis URL
+                redis_port = self.docker_ports.get('redis', 6381)
+                env.set('TEST_REDIS_PORT', str(redis_port), 'docker_manager')
+                env.set('REDIS_URL', f'redis://localhost:{redis_port}/0', 'docker_manager')
+                
+                logger.info(f"Configured test environment with dynamic ports - Postgres: {postgres_port}, Redis: {redis_port}")
             env = get_env()
             env.set('USE_REAL_SERVICES', 'true', 'test_runner')
             # Import SSOT for staging URLs
@@ -804,7 +863,20 @@ class UnifiedTestRunner:
             env.set('AUTH_SERVICE_URL', env.get('AUTH_SERVICE_URL', 'http://localhost:8081'), 'test_runner')
             env.set('WEBSOCKET_URL', env.get('WEBSOCKET_URL', 'ws://localhost:8000'), 'test_runner')
         elif args.real_services or running_e2e:
-            configure_test_environment()
+            # Configure test environment with discovered ports
+            env = get_env()
+            if self.docker_ports:
+                # Set discovered PostgreSQL URL
+                postgres_port = self.docker_ports.get('postgres', 5434)
+                env.set('TEST_POSTGRES_PORT', str(postgres_port), 'docker_manager')
+                env.set('DATABASE_URL', f'postgresql://test:test@localhost:{postgres_port}/netra_test', 'docker_manager')
+                
+                # Set discovered Redis URL
+                redis_port = self.docker_ports.get('redis', 6381)
+                env.set('TEST_REDIS_PORT', str(redis_port), 'docker_manager')
+                env.set('REDIS_URL', f'redis://localhost:{redis_port}/0', 'docker_manager')
+                
+                logger.info(f"Configured test environment with dynamic ports - Postgres: {postgres_port}, Redis: {redis_port}")
             # Use appropriate services based on environment
             # For dev environment, use dev services; for test environment, use test services
             use_test_services = (args.env != 'dev')
@@ -817,7 +889,7 @@ class UnifiedTestRunner:
             env.set('WEBSOCKET_URL', env.get('WEBSOCKET_URL', 'ws://localhost:8001'), 'test_runner')
         else:
             # Only allow mock environment for pure unit tests in test environment
-            configure_test_environment()
+            configure_mock_environment()
             # Create port discovery even for mock environment to enable port discovery if Docker is available
             self.port_discovery = DockerPortDiscovery(use_test_services=True)
         
@@ -1097,6 +1169,79 @@ class UnifiedTestRunner:
         except Exception as e:
             print(f"⚠️  Unexpected error during service availability check: {e}")
             print("Continuing with tests, but failures may occur if services are unavailable...")
+    
+    def _docker_required_for_tests(self, args: argparse.Namespace, running_e2e: bool) -> bool:
+        """Determine if Docker is required for the selected test categories.
+        
+        Returns True if Docker is needed, False if tests can run without Docker.
+        """
+        # Skip Docker if explicitly disabled via command line
+        if hasattr(args, 'no_docker') and args.no_docker:
+            print("[INFO] Docker explicitly disabled via --no-docker flag")
+            return False
+        
+        # Always require Docker if explicitly requested
+        if args.real_services:
+            return True
+        
+        # E2E tests always need Docker
+        if running_e2e:
+            return True
+        
+        # Dev/staging environments need real services per CLAUDE.md
+        if args.env in ['dev', 'staging']:
+            return True
+        
+        # Get categories to run
+        categories_to_run = self._determine_categories_to_run(args)
+        
+        # Categories that require Docker/real services
+        docker_required_categories = {
+            'e2e', 'e2e_critical', 'cypress',  # E2E tests
+            'database',  # Database tests need PostgreSQL
+            'api',  # API tests typically need backend services
+            'websocket',  # WebSocket tests need backend
+            'integration',  # Integration tests often need services
+            'post_deployment',  # Post-deployment tests need services
+        }
+        
+        # Categories that DON'T require Docker
+        docker_optional_categories = {
+            'smoke',  # Quick validation tests
+            'unit',  # Unit tests should be isolated
+            'frontend',  # Frontend component tests can run without backend
+            'agent',  # Agent tests can use mock LLM if needed
+            'performance',  # Performance tests can run on mock data
+            'security',  # Security tests can run on static analysis
+            'startup',  # Startup tests are about service initialization
+        }
+        
+        # Check if any of the selected categories require Docker
+        for category in categories_to_run:
+            if category in docker_required_categories:
+                print(f"[INFO] Docker required for category: {category}")
+                return True
+        
+        # If only running categories that don't need Docker, skip it
+        if all(cat in docker_optional_categories for cat in categories_to_run if cat):
+            print(f"[INFO] Running only Docker-optional categories: {categories_to_run}")
+            return False
+        
+        # Check for specific test patterns that indicate Docker is not needed
+        test_pattern = getattr(args, 'pattern', '') or ''
+        if test_pattern:
+            # Unit test patterns
+            if any(pattern in test_pattern for pattern in ['test_unit', 'unit_test', '/unit/', '_unit_']):
+                print(f"[INFO] Unit test pattern detected, Docker not required: {test_pattern}")
+                return False
+            # Mock test patterns
+            if any(pattern in test_pattern for pattern in ['mock', 'fake', 'stub']):
+                print(f"[INFO] Mock test pattern detected, Docker not required: {test_pattern}")
+                return False
+        
+        # Default to requiring Docker for safety if we can't determine
+        print(f"[INFO] Unable to determine Docker requirement, defaulting to required for categories: {categories_to_run}")
+        return True
     
     def _determine_categories_to_run(self, args: argparse.Namespace) -> List[str]:
         """Determine which categories to run based on arguments."""
@@ -2174,6 +2319,13 @@ def main():
         "--real-services",
         action="store_true",
         help="Use real backend services (Docker or local) for frontend tests"
+    )
+    
+    parser.add_argument(
+        "--no-docker",
+        "--skip-docker",
+        action="store_true",
+        help="Skip Docker initialization for tests that don't need it (e.g., unit tests)"
     )
     
     parser.add_argument(

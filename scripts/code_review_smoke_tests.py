@@ -39,7 +39,7 @@ class CodeReviewSmokeTests:
             ("Backend Imports", "python -c \"from netra_backend.app.main import app; print('✓ FastAPI app imports successfully')\""),
             ("Database Config", "python -c \"from netra_backend.app.db.postgres import get_engine; print('✓ Database connection configured')\""),
             ("Redis Manager", "python -c \"from netra_backend.app.redis_manager import RedisManager; print('✓ Redis manager available')\""),
-            ("Supervisor Agent", "python -c \"from netra_backend.app.agents.supervisor import SupervisorAgent; print('✓ Supervisor agent loads')\""),
+            ("Supervisor Agent", "python -c \"from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent; print('✓ Supervisor agent loads')\""),
             ("Agent Service", "python -c \"from netra_backend.app.services.agent_service import AgentService; print('✓ Agent service available')\""),
             ("Tool Dispatcher", "python -c \"from netra_backend.app.agents.tool_dispatcher import ToolDispatcher; print('✓ Tool dispatcher functional')\""),
             ("WebSocket Manager", "python -c \"from netra_backend.app.websocket_core.manager import WebSocketManager; print('✓ WebSocket manager loads')\""),

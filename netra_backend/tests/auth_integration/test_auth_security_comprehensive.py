@@ -42,9 +42,13 @@ from netra_backend.app.auth_integration.auth import (
     require_admin,
     require_developer,
     require_permission,
-    create_access_token,
     validate_token_jwt,
 )
+from netra_backend.app.services.token_service import TokenService
+
+# Create instance for access to create_access_token
+_token_service = TokenService()
+create_access_token = _token_service.create_access_token
 from netra_backend.app.db.models_postgres import User
 
 

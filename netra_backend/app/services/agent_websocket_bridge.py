@@ -23,6 +23,7 @@ from netra_backend.app.logging_config import central_logger
 from netra_backend.app.orchestration.agent_execution_registry import get_agent_execution_registry
 from netra_backend.app.websocket_core import get_websocket_manager
 from netra_backend.app.services.thread_run_registry import get_thread_run_registry, ThreadRunRegistry
+from netra_backend.app.core.unified_id_manager import UnifiedIDManager
 from shared.monitoring.interfaces import MonitorableComponent
 
 if TYPE_CHECKING:
@@ -911,7 +912,8 @@ class AgentWebSocketBridge(MonitorableComponent):
         self, 
         run_id: str, 
         agent_name: str, 
-        context: Optional[Dict[str, Any]] = None
+        context: Optional[Dict[str, Any]] = None,
+        trace_context: Optional[Dict[str, Any]] = None
     ) -> bool:
         """
         Send agent started notification with guaranteed delivery.
@@ -950,6 +952,10 @@ class AgentWebSocketBridge(MonitorableComponent):
                 }
             }
             
+            # Add trace context if provided
+            if trace_context:
+                notification["trace"] = trace_context
+            
             # CRYSTAL CLEAR EMISSION: Resolve thread_id and emit
             thread_id = await self._resolve_thread_id_from_run_id(run_id)
             if not thread_id:
@@ -976,7 +982,8 @@ class AgentWebSocketBridge(MonitorableComponent):
         agent_name: str, 
         reasoning: str,
         step_number: Optional[int] = None,
-        progress_percentage: Optional[float] = None
+        progress_percentage: Optional[float] = None,
+        trace_context: Optional[Dict[str, Any]] = None
     ) -> bool:
         """
         Send agent thinking notification with progress context.
@@ -1013,6 +1020,10 @@ class AgentWebSocketBridge(MonitorableComponent):
                     "status": "thinking"
                 }
             }
+            
+            # Add trace context if provided
+            if trace_context:
+                notification["trace"] = trace_context
             
             # CRYSTAL CLEAR EMISSION: Resolve thread_id and emit
             thread_id = await self._resolve_thread_id_from_run_id(run_id)
@@ -1166,7 +1177,8 @@ class AgentWebSocketBridge(MonitorableComponent):
         run_id: str, 
         agent_name: str, 
         result: Optional[Dict[str, Any]] = None,
-        execution_time_ms: Optional[float] = None
+        execution_time_ms: Optional[float] = None,
+        trace_context: Optional[Dict[str, Any]] = None
     ) -> bool:
         """
         Send agent completion notification with final results.
@@ -1203,6 +1215,10 @@ class AgentWebSocketBridge(MonitorableComponent):
                 }
             }
             
+            # Add trace context if provided
+            if trace_context:
+                notification["trace"] = trace_context
+            
             # CRYSTAL CLEAR EMISSION: Resolve thread_id and emit
             thread_id = await self._resolve_thread_id_from_run_id(run_id)
             if not thread_id:
@@ -1228,7 +1244,8 @@ class AgentWebSocketBridge(MonitorableComponent):
         run_id: str, 
         agent_name: str, 
         error: str,
-        error_context: Optional[Dict[str, Any]] = None
+        error_context: Optional[Dict[str, Any]] = None,
+        trace_context: Optional[Dict[str, Any]] = None
     ) -> bool:
         """
         Send agent error notification with context.
@@ -1264,6 +1281,10 @@ class AgentWebSocketBridge(MonitorableComponent):
                     "message": f"{agent_name} encountered an issue processing your request"
                 }
             }
+            
+            # Add trace context if provided
+            if trace_context:
+                notification["trace"] = trace_context
             
             # CRYSTAL CLEAR EMISSION: Resolve thread_id and emit
             thread_id = await self._resolve_thread_id_from_run_id(run_id)
@@ -1929,136 +1950,84 @@ class AgentWebSocketBridge(MonitorableComponent):
     
     def _extract_thread_from_standardized_run_id(self, run_id: str) -> Optional[str]:
         """
-        Enhanced pattern extraction from standardized run_id formats.
+        UPDATED: Extract thread_id using UnifiedIDManager SSOT.
         
-        Supports multiple run_id patterns:
-        1. Direct thread format: "thread_user_123_session" 
-        2. Embedded thread format: "user_123_thread_456_run_789"
-        3. Standard SSOT format: "run_thread_user_123_session_timestamp"
-        4. Legacy embedded: "admin_tool_thread_789_execution"
+        This method now uses UnifiedIDManager to handle ALL supported formats:
+        1. Canonical: "thread_{thread_id}_run_{timestamp}_{uuid}" 
+        2. Legacy IDManager: "run_{thread_id}_{uuid}"
+        3. Direct thread format: "thread_user_123_session"
+        
+        CRITICAL: This fixes WebSocket routing failures by using the unified extraction logic
+        that handles all ID formats with backward compatibility.
         
         Returns:
-            Optional[str]: Extracted thread_id if found, None otherwise
+            Optional[str]: Extracted thread_id with "thread_" prefix if found, None otherwise
         """
         try:
             if not run_id or not isinstance(run_id, str):
+                logger.debug(f"⚠️ INVALID INPUT: run_id={run_id} is not a valid string")
                 return None
             
             run_id = run_id.strip()
             if not run_id:
+                logger.debug(f"⚠️ EMPTY INPUT: run_id is empty after strip")
                 return None
             
-            # Pattern 1: Direct thread format (run_id IS a thread_id)
-            if run_id.startswith("thread_") and self._is_valid_thread_format(run_id):
-                logger.debug(f"🔍 PATTERN 1 MATCH: run_id={run_id} is direct thread format")
+            # PRIORITY 1: Handle direct thread format (legacy compatibility)
+            # If run_id is already a thread_id format, return it directly
+            if run_id.startswith("thread_") and "_run_" not in run_id and self._is_valid_thread_format(run_id):
+                logger.debug(f"✅ DIRECT THREAD FORMAT: run_id={run_id} is already a valid thread_id")
                 return run_id
             
-            # Pattern 2: Embedded thread format (contains "thread_" with identifier)
-            if "thread_" in run_id:
-                parts = run_id.split("_")
-                
-                # Look for "thread" keyword and extract the following identifier(s)
-                for i, part in enumerate(parts):
-                    if part == "thread" and i + 1 < len(parts):
-                        # Extract thread identifier - may be single or multiple parts
-                        thread_parts = ["thread"]
-                        
-                        # Collect thread identifier parts until we hit a known separator or end
-                        j = i + 1
-                        while j < len(parts):
-                            next_part = parts[j]
-                            
-                            # Stop at known separators that indicate end of thread ID
-                            if next_part in ["run", "execution", "session", "timestamp", "step", "task"]:
-                                break
-                                
-                            thread_parts.append(next_part)
-                            j += 1
-                            
-                            # Limit thread_id length to prevent runaway collection
-                            if len(thread_parts) > 5:  # thread + up to 4 identifier parts
-                                break
-                        
-                        if len(thread_parts) > 1:  # Must have at least "thread" + one identifier
-                            extracted_thread = "_".join(thread_parts)
-                            
-                            # Validate the extracted thread format
-                            if self._is_valid_thread_format(extracted_thread):
-                                logger.debug(f"🔍 PATTERN 2 MATCH: run_id={run_id} → extracted thread_id={extracted_thread}")
-                                return extracted_thread
-                            else:
-                                logger.debug(f"⚠️ PATTERN 2 INVALID: extracted '{extracted_thread}' from run_id={run_id} failed validation")
+            # PRIORITY 2: Use UnifiedIDManager for SSOT extraction
+            # Defensive import check to prevent runtime errors
+            try:
+                extracted_thread_id = UnifiedIDManager.extract_thread_id(run_id)
+            except NameError as e:
+                logger.critical(f"🚨 CRITICAL: UnifiedIDManager not available: {e}")
+                # Fallback to legacy extraction pattern
+                return self._legacy_thread_extraction(run_id) if hasattr(self, '_legacy_thread_extraction') else None
             
-            # Pattern 3: Standard SSOT format extraction
-            # Example: "run_thread_user_123_session_20231201_12345" -> "thread_user_123_session"
-            if run_id.startswith("run_") and "thread_" in run_id:
-                # Find the thread segment
-                run_prefix_removed = run_id[4:]  # Remove "run_" prefix
+            if extracted_thread_id:
+                # UnifiedIDManager returns normalized thread_id (without "thread_" prefix)
+                # Add "thread_" prefix for WebSocket bridge compatibility
+                thread_id_with_prefix = f"thread_{extracted_thread_id}" if not extracted_thread_id.startswith("thread_") else extracted_thread_id
                 
-                if run_prefix_removed.startswith("thread_"):
-                    # Extract everything after "run_" up to timestamp-like patterns
-                    parts = run_prefix_removed.split("_")
-                    thread_parts = []
-                    
-                    for part in parts:
-                        # Stop at timestamp-like patterns (8+ digits, 6+ digits for date, or known suffixes)
-                        if ((part.isdigit() and len(part) >= 6) or 
-                            part in ["timestamp", "step", "execution", "session"] and len(thread_parts) > 2):
-                            break
-                        thread_parts.append(part)
-                    
-                    if len(thread_parts) >= 2:  # At least "thread" + identifier
-                        extracted_thread = "_".join(thread_parts)
-                        
-                        if self._is_valid_thread_format(extracted_thread) and not self._is_suspicious_thread_id(extracted_thread):
-                            logger.debug(f"🔍 PATTERN 3 MATCH: run_id={run_id} → extracted thread_id={extracted_thread}")
-                            return extracted_thread
-            
-            # Pattern 4: Legacy embedded patterns
-            # Handle cases like "admin_tool_thread_789" or "user_session_thread_abc123"
-            # But be more strict to avoid false positives
-            thread_index = run_id.find("thread_")
-            if thread_index > 0:  # Found "thread_" but not at start
-                # Extract from "thread_" to end or until known separators
-                thread_segment = run_id[thread_index:]
+                # Get format info for detailed logging
+                try:
+                    format_info = UnifiedIDManager.get_format_info(run_id)
+                    format_version = format_info.get('format_version', 'unknown')
+                except (NameError, AttributeError) as e:
+                    logger.warning(f"Could not get format info: {e}")
+                    format_version = 'unknown'
                 
-                # Split and take thread + following parts until separator
-                parts = thread_segment.split("_")
-                if len(parts) >= 2:  # At least "thread" + identifier
-                    # Take parts until we hit known separators or end
-                    thread_parts = [parts[0]]  # "thread"
-                    
-                    # Be more conservative - only take 1-2 meaningful identifier parts
-                    for j in range(1, min(len(parts), 3)):  # Limit to max 2 identifier parts
-                        part = parts[j]
-                        
-                        # Skip overly generic or suspicious parts that indicate false patterns
-                        if part.lower() in ["pattern", "no", "impossible", "anywhere", "nothing", "missing", "without", "totally", "random"]:
-                            logger.debug(f"⚠️ PATTERN 4 SKIP: Suspicious identifier '{part}' in run_id={run_id}")
-                            return None  # Immediately return None for suspicious patterns
-                            
-                        # Stop at known separators
-                        if part in ["run", "execution", "step", "task", "session"] and j > 1:
-                            break
-                            
-                        thread_parts.append(part)
-                    
-                    if len(thread_parts) >= 2:
-                        extracted_thread = "_".join(thread_parts)
-                        
-                        # Additional validation - thread_id should be meaningful
-                        if self._is_valid_thread_format(extracted_thread) and not self._is_suspicious_thread_id(extracted_thread):
-                            logger.debug(f"🔍 PATTERN 4 MATCH: run_id={run_id} → extracted thread_id={extracted_thread}")
-                            return extracted_thread
-                        else:
-                            logger.debug(f"⚠️ PATTERN 4 INVALID: extracted '{extracted_thread}' from run_id={run_id} failed validation or is suspicious")
-            
-            # No patterns matched
-            logger.debug(f"🔍 NO PATTERN MATCH: run_id={run_id} does not match any known thread extraction patterns")
-            return None
+                logger.debug(
+                    f"✅ UNIFIED_ID_MANAGER SUCCESS: run_id={run_id} → thread_id={thread_id_with_prefix} "
+                    f"(format: {format_version}, extracted: {extracted_thread_id})"
+                )
+                
+                # Validate the final thread format
+                if self._is_valid_thread_format(thread_id_with_prefix):
+                    return thread_id_with_prefix
+                else:
+                    logger.warning(
+                        f"⚠️ VALIDATION FAILED: Extracted thread_id '{thread_id_with_prefix}' from run_id='{run_id}' "
+                        f"failed validation (format: {format_version})"
+                    )
+                    return None
+            else:
+                # Log detailed failure information
+                logger.warning(
+                    f"⚠️ UNIFIED_ID_MANAGER FAILED: Could not extract thread_id from run_id='{run_id}'. "
+                    f"This may cause WebSocket routing failure."
+                )
+                return None
             
         except Exception as e:
-            logger.warning(f"⚠️ PATTERN EXTRACTION ERROR: Exception extracting thread from run_id={run_id}: {e}")
+            logger.error(
+                f"🚨 CRITICAL EXCEPTION: UnifiedIDManager extraction failed for run_id='{run_id}': {e}. "
+                f"This will cause WebSocket routing failure."
+            )
             return None
     
     def _track_resolution_success(self, resolution_source: str, resolution_time_ms: float) -> None:

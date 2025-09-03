@@ -30,12 +30,24 @@ class FallbackStrategy:
             return await fallback_operation()
     
     def create_default_fallback_result(self, operation_type: str, **kwargs: Any) -> Dict[str, Any]:
-        """Create standardized fallback result."""
+        """Create standardized fallback result.
+        
+        WARNING: This creates results that look like success but are actually failures.
+        See AGENT_RELIABILITY_ERROR_SUPPRESSION_ANALYSIS_20250903.md for why this is dangerous.
+        """
+        # Log at ERROR level so failures are visible
+        logger.error(
+            f"FALLBACK ACTIVE: {self.agent_name} using fallback for {operation_type} - "
+            f"this indicates a failure that is being masked. Original error: {kwargs.get('error', 'Unknown')}"
+        )
+        
         return {
             "fallback_used": True,
             "operation_type": operation_type,
             "agent": self.agent_name,
             "message": f"Fallback result for {operation_type}",
+            "_degraded": True,  # Make degradation explicit
+            "_error_masked": True,  # Flag that an error is being hidden
             "metadata": kwargs.get("metadata", {}),
             **kwargs
         }
@@ -60,5 +72,7 @@ async def safe_websocket_send(
         await websocket_manager.send_to_user(user_id, message_data)
         return True
     except Exception as e:
-        logger.debug(f"WebSocket {operation_description} failed: {e}")
+        # CHANGED: Elevated from DEBUG to ERROR per AGENT_RELIABILITY_ERROR_SUPPRESSION_ANALYSIS_20250903.md
+        # WebSocket failures are critical for user experience - they must be visible
+        logger.error(f"WebSocket {operation_description} failed: {e}", exc_info=True)
         return False

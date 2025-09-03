@@ -21,7 +21,6 @@ class DataSourceType(str, Enum):
     AZURE_BLOB = "azure_blob"
     GCS = "gcs"
     KAFKA = "kafka"
-    RABBITMQ = "rabbitmq"
     REDIS_STREAM = "redis_stream"
 
 

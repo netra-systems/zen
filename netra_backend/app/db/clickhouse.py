@@ -417,10 +417,10 @@ def _get_connection_config():
     config = get_clickhouse_config()
     app_config = get_configuration()
     # Never use HTTPS for localhost or Docker container connections to avoid SSL errors
-    is_local_or_docker = config.host in ["localhost", "127.0.0.1", "::1", "clickhouse", "netra-clickhouse"]
-    # Also check if we're in development environment
-    is_development = app_config.environment == "development"
-    use_secure = app_config.clickhouse_mode != "local" and not is_local_or_docker and not is_development
+    is_local_or_docker = config.host in ["localhost", "127.0.0.1", "::1", "clickhouse", "netra-clickhouse", "alpine-test-clickhouse", "test-clickhouse"]
+    # Also check if we're in development or test environment
+    is_dev_or_test = app_config.environment in ["development", "test"]
+    use_secure = app_config.clickhouse_mode != "local" and not is_local_or_docker and not is_dev_or_test
     return config, use_secure
 
 def _get_connection_details(config) -> dict:
@@ -441,7 +441,9 @@ def _add_database_and_security(details: dict, config, use_secure: bool) -> dict:
 def _build_client_params(config, use_secure: bool) -> dict:
     """Build parameters for ClickHouse client creation."""
     details = _get_connection_details(config)
-    return _add_database_and_security(details, config, use_secure)
+    params = _add_database_and_security(details, config, use_secure)
+    logger.info(f"[ClickHouse] Client params: host={params['host']}, port={params['port']}, secure={params['secure']}")
+    return params
 
 def _create_base_client(config, use_secure: bool):
     """Create base ClickHouse client instance."""
@@ -525,7 +527,9 @@ async def _test_and_yield_client(client):
 
 def _log_connection_attempt(config, use_secure: bool):
     """Log ClickHouse connection attempt."""
-    logger.info(f"[ClickHouse] Connecting to instance at {config.host}:{config.port} (secure={use_secure})")
+    from netra_backend.app.core.configuration import get_configuration
+    app_config = get_configuration()
+    logger.info(f"[ClickHouse] Connecting to instance at {config.host}:{config.port} (secure={use_secure}, environment={app_config.environment})")
 
 def _create_intercepted_client(config, use_secure: bool):
     """Create ClickHouse client with query interceptor."""
@@ -790,7 +794,7 @@ class ClickHouseService:
         # Fallback to standard circuit breaker execution
         try:
             self._metrics["queries"] += 1
-            result = await self._execute_with_circuit_breaker(query, params)
+            result = await self._execute_with_circuit_breaker(query, params, user_id=user_id)
             
             # Cache successful read results
             if query.lower().strip().startswith("select") and result:
@@ -802,8 +806,14 @@ class ClickHouseService:
             logger.error(f"ClickHouse query failed: {e}")
             raise
     
-    async def _execute_with_circuit_breaker(self, query: str, params: Optional[Dict[str, Any]] = None) -> List[Dict[str, Any]]:
-        """Execute query with circuit breaker protection."""
+    async def _execute_with_circuit_breaker(self, query: str, params: Optional[Dict[str, Any]] = None, user_id: Optional[str] = None) -> List[Dict[str, Any]]:
+        """Execute query with circuit breaker protection.
+        
+        Args:
+            query: SQL query to execute
+            params: Optional query parameters
+            user_id: Optional user identifier for cache isolation
+        """
         async def _execute():
             if not self._client:
                 await self.initialize()

@@ -408,9 +408,9 @@ class AgentExecutionRegistry:
         """Create new execution context and register it."""
         from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
         from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier
-        from netra_backend.app.utils.run_id_generator import generate_run_id
+        from netra_backend.app.core.unified_id_manager import UnifiedIDManager
         
-        run_id = generate_run_id(thread_id, "agent_execution")
+        run_id = UnifiedIDManager.generate_run_id(thread_id, "agent_execution")
         
         # Create new execution context
         exec_context = AgentExecutionContext(

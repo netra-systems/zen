@@ -193,6 +193,30 @@ graph TD
     DETECTION --> CONFIG
 ```
 
+### 3.1 ClickHouse Configuration in Staging/Production
+
+**CRITICAL:** ClickHouse in staging/production environments is a REMOTE service:
+
+```mermaid
+graph TB
+    subgraph "Staging/Production ClickHouse Configuration"
+        GCP[Google Secret Manager] -->|CLICKHOUSE_URL| SECRET[Remote ClickHouse URL<br/>https://cluster.clickhouse.cloud:8443]
+        SECRET --> ENV[Environment Variable]
+        ENV --> CONFIG[UnifiedConfigManager]
+        CONFIG --> APP[Application]
+        
+        Note1[Note: Full connection URL with credentials<br/>stored as single secret in Google Secret Manager]
+        Note2[Remote ClickHouse Cloud instance<br/>NOT a local container]
+    end
+```
+
+**Key Points:**
+- **Storage:** Complete ClickHouse URL stored in Google Secret Manager
+- **Secret Name:** `CLICKHOUSE_URL` 
+- **Format:** `https://[user]:[password]@[cluster-id].us-central1.gcp.clickhouse.cloud:8443/[database]`
+- **Access:** Retrieved at runtime via Google Secret Manager API
+- **Not Local:** This is a remote ClickHouse Cloud service, not a container
+
 ### 4. Cross-Service Configuration Flow
 
 ```mermaid

@@ -324,7 +324,7 @@ class TestAPIEndpoints:
         ]
         
         for payload in invalid_payloads:
-            response = client.post("/auth/login", json=payload)
+            response = client.post("/login", json=payload)
             assert response.status_code in [400, 422]  # Validation error
 
 class TestSecurityScenarios:
@@ -340,7 +340,7 @@ class TestSecurityScenarios:
         ]
         
         for malicious_input in malicious_inputs:
-            response = client.post("/auth/login", json={
+            response = client.post("/login", json={
                 "email": malicious_input,
                 "password": "password123"
             })
@@ -374,7 +374,7 @@ class TestSecurityScenarios:
         """Test rate limiting on authentication endpoints."""
         # Simulate multiple rapid requests
         for _ in range(10):
-            response = client.post("/auth/login", json={
+            response = client.post("/login", json={
                 "email": "test@example.com",
                 "password": "wrongpassword"
             })
@@ -397,7 +397,7 @@ class TestSecurityScenarios:
         ]
         
         for weak_password in weak_passwords:
-            response = client.post("/auth/register", json={
+            response = client.post("/register", json={
                 "email": "test@example.com",
                 "password": weak_password
             })
@@ -490,7 +490,7 @@ class TestErrorHandling:
                         headers={"Content-Type": "application/json"}
                     )
                 else:
-                    response = client.post("/auth/login", json=payload)
+                    response = client.post("/login", json=payload)
                 
                 # Should handle malformed requests gracefully
                 assert response.status_code in [400, 422]

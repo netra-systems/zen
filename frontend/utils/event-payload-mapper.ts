@@ -23,8 +23,9 @@ export const mapAgentCompletedPayload = (backendPayload: any) => {
     agent_id: backendPayload.agent_name || backendPayload.agent_id,
     agent_type: backendPayload.agent_name || backendPayload.agent_type,
     duration_ms: backendPayload.duration_ms || 0,
-    result: backendPayload.result || {},
+    result: backendPayload.payload?.result || backendPayload.result || {},
     metrics: backendPayload.metrics || {},
+    message: backendPayload.payload?.message || backendPayload.message,
     iteration: backendPayload.iteration || 1
   };
 };
@@ -33,12 +34,20 @@ export const mapAgentCompletedPayload = (backendPayload: any) => {
  * Maps backend agent_thinking payload to frontend expected structure
  */
 export const mapAgentThinkingPayload = (backendPayload: any) => {
+  // Handle different payload structures from backend
+  // Format 1: Direct message field
+  // Format 2: Nested in payload.reasoning
+  const thought = backendPayload.message || 
+                  backendPayload.payload?.reasoning || 
+                  backendPayload.thought || 
+                  'Processing...';
+  
   return {
-    thought: backendPayload.thought,
+    thought: thought,
     agent_id: backendPayload.agent_name || backendPayload.agent_id,
     agent_type: backendPayload.agent_name || backendPayload.agent_type,
-    step_number: backendPayload.step_number || 0,
-    total_steps: backendPayload.total_steps || 0
+    step_number: backendPayload.payload?.step_number || backendPayload.step_number || 0,
+    total_steps: backendPayload.payload?.total_steps || backendPayload.total_steps || 0
   };
 };
 

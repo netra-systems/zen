@@ -44,13 +44,11 @@ try:
         WebSocketMessage,
         create_standard_message
     )
-    from netra_backend.app.utils.run_id_generator import (
-        generate_run_id,
-        extract_thread_id_from_run_id,
-        validate_run_id_format,
-        RUN_ID_PREFIX,
-        RUN_ID_SEPARATOR
-    )
+    from netra_backend.app.core.unified_id_manager import UnifiedIDManager
+    # Legacy function mappings for compatibility
+    generate_run_id = lambda thread_id: UnifiedIDManager.generate_run_id(thread_id)
+    extract_thread_id_from_run_id = lambda run_id: UnifiedIDManager.extract_thread_id(run_id)
+    validate_run_id_format = lambda run_id: UnifiedIDManager.validate_run_id(run_id)
     from test_framework.test_context import (
         TestContext,
         TestUserContext,

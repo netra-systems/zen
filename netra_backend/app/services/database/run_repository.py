@@ -47,10 +47,10 @@ class RunRepository(BaseRepository[Run]):
                         instructions: Optional[str] = None,
                         metadata: Optional[Dict[str, Any]] = None) -> Optional[Run]:
         """Create a new run"""
-        from netra_backend.app.utils.run_id_generator import generate_run_id
+        from netra_backend.app.core.unified_id_manager import UnifiedIDManager
         return await self.create(
             db=db,
-            id=generate_run_id(thread_id, "run_repository_create"),
+            id=UnifiedIDManager.generate_run_id(thread_id, "run_repository_create"),
             object="thread.run",
             created_at=int(time.time()),
             thread_id=thread_id,

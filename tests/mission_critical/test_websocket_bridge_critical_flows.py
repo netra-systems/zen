@@ -71,14 +71,7 @@ try:
         ThreadRunRegistry,
         RegistryConfig
     )
-    from netra_backend.app.utils.run_id_generator import (
-        generate_run_id,
-        extract_thread_id_from_run_id,
-        validate_run_id_format,
-        is_legacy_run_id,
-        RUN_ID_PREFIX,
-        RUN_ID_SEPARATOR
-    )
+    from netra_backend.app.core.unified_id_manager import UnifiedIDManager
     from netra_backend.app.websocket_core import (
         get_websocket_manager,
         WebSocketManager
@@ -273,18 +266,18 @@ class TestRunIdSSotCompliance:
         
         for thread_id in test_thread_ids:
             # Generate run ID
-            run_id = generate_run_id(thread_id, "ssot_test")
+            run_id = UnifiedIDManager.generate_run_id(thread_id, "ssot_test")
             
             # Verify format compliance
             assert run_id.startswith(RUN_ID_PREFIX), f"Run ID missing prefix: {run_id}"
             assert RUN_ID_SEPARATOR in run_id, f"Run ID missing separator: {run_id}"
             
             # Verify thread extraction works
-            extracted_thread = extract_thread_id_from_run_id(run_id)
+            extracted_thread = UnifiedIDManager.extract_thread_id(run_id)
             assert extracted_thread == thread_id, f"Thread extraction failed: expected '{thread_id}', got '{extracted_thread}'"
             
             # Verify validation passes
-            assert validate_run_id_format(run_id, thread_id), f"Validation failed for run_id: {run_id}"
+            assert UnifiedIDManager.validate_id_pair(run_id, thread_id), f"Validation failed for run_id: {run_id}"
             
             # Verify not legacy format
             assert not is_legacy_run_id(run_id), f"Generated run_id marked as legacy: {run_id}"
@@ -381,7 +374,7 @@ class TestRunIdSSotCompliance:
             assert result is None or isinstance(result, str), f"Should handle '{legacy_run_id}' gracefully"
             
             # Extraction should return None for invalid formats
-            extracted = extract_thread_id_from_run_id(legacy_run_id) 
+            extracted = UnifiedIDManager.extract_thread_id(legacy_run_id) 
             if legacy_run_id.startswith("thread_") and "_run_" in legacy_run_id:
                 # Valid format should extract
                 assert isinstance(extracted, str) or extracted is None
@@ -561,21 +554,21 @@ class TestWebSocketEventDelivery:
                 "user_id": "user_123",
                 "session_id": "session_abc",
                 "thread_id": "thread_user_123_session_abc",
-                "run_id": generate_run_id("user_123_session_abc", "user_test"),
+                "run_id": UnifiedIDManager.generate_run_id("user_123_session_abc", "user_test"),
                 "agent_name": "ChatAgent"
             },
             {
                 "user_id": "user_456", 
                 "session_id": "session_def",
                 "thread_id": "thread_user_456_session_def",
-                "run_id": generate_run_id("user_456_session_def", "user_test"),
+                "run_id": UnifiedIDManager.generate_run_id("user_456_session_def", "user_test"),
                 "agent_name": "AnalysisAgent"
             },
             {
                 "user_id": "user_789",
                 "session_id": "session_ghi", 
                 "thread_id": "thread_user_789_session_ghi",
-                "run_id": generate_run_id("user_789_session_ghi", "user_test"),
+                "run_id": UnifiedIDManager.generate_run_id("user_789_session_ghi", "user_test"),
                 "agent_name": "SupportAgent"
             }
         ]
@@ -630,7 +623,7 @@ class TestWebSocketEventDelivery:
         """CRITICAL: Test event delivery failure handling and recovery."""
         
         # Setup test scenario  
-        run_id = generate_run_id("recovery_test_user", "failure_test")
+        run_id = UnifiedIDManager.generate_run_id("recovery_test_user", "failure_test")
         thread_id = "thread_recovery_test_user"
         agent_name = "RecoveryTestAgent"
         
@@ -699,7 +692,7 @@ class TestWebSocketEventDelivery:
     async def test_high_frequency_event_delivery(self, websocket_bridge, real_websocket_manager, test_registry):
         """CRITICAL: Test high-frequency event delivery without loss."""
         
-        run_id = generate_run_id("high_frequency_user", "performance_test")
+        run_id = UnifiedIDManager.generate_run_id("high_frequency_user", "performance_test")
         thread_id = "thread_high_frequency_user"
         agent_name = "HighFrequencyAgent"
         
@@ -900,7 +893,7 @@ class TestConcurrentOperations:
                 "agent_id": f"agent_{i}",
                 "user_id": f"user_{i}",
                 "thread_id": f"thread_user_{i}_session",
-                "run_id": generate_run_id(f"user_{i}_session", "concurrent_test"),
+                "run_id": UnifiedIDManager.generate_run_id(f"user_{i}_session", "concurrent_test"),
                 "agent_name": f"ConcurrentAgent_{i}"
             }
             agent_scenarios.append(scenario)
@@ -999,9 +992,9 @@ class TestConcurrentOperations:
         
         # Setup initial mappings
         scenarios = [
-            {"run_id": generate_run_id("user_1_session", "reconnect_test"), "thread_id": "thread_user_1_session"},
-            {"run_id": generate_run_id("user_2_chat", "reconnect_test"), "thread_id": "thread_user_2_chat"},
-            {"run_id": generate_run_id("user_3_support", "reconnect_test"), "thread_id": "thread_user_3_support"}
+            {"run_id": UnifiedIDManager.generate_run_id("user_1_session", "reconnect_test"), "thread_id": "thread_user_1_session"},
+            {"run_id": UnifiedIDManager.generate_run_id("user_2_chat", "reconnect_test"), "thread_id": "thread_user_2_chat"},
+            {"run_id": UnifiedIDManager.generate_run_id("user_3_support", "reconnect_test"), "thread_id": "thread_user_3_support"}
         ]
         
         # Register mappings
@@ -1071,7 +1064,7 @@ class TestConcurrentOperations:
         for i in range(thread_count):
             scenario = {
                 "thread_id": f"thread_load_test_{i}",
-                "run_id": generate_run_id(f"load_test_user_{i}", "extreme_load"),
+                "run_id": UnifiedIDManager.generate_run_id(f"load_test_user_{i}", "extreme_load"),
                 "agent_name": f"LoadTestAgent_{i}"
             }
             scenarios.append(scenario)
@@ -1188,7 +1181,7 @@ class TestBusinessMetrics:
             for i in range(scenario["thread_count"]):
                 thread_info = {
                     "thread_id": f"thread_{scenario['type']}_{i}",
-                    "run_id": generate_run_id(f"{scenario['type']}_{i}", "business_metrics"),
+                    "run_id": UnifiedIDManager.generate_run_id(f"{scenario['type']}_{i}", "business_metrics"),
                     "agent_name": f"Agent_{scenario['type']}_{i}"
                 }
                 threads.append(thread_info)
@@ -1318,7 +1311,7 @@ class TestBusinessMetrics:
                 else:
                     # Use generated run_id for registry/orchestrator tests
                     thread_id = f"thread_{category}_{i}"
-                    run_id = generate_run_id(f"{category}_{i}", "resolution_accuracy")
+                    run_id = UnifiedIDManager.generate_run_id(f"{category}_{i}", "resolution_accuracy")
                 
                 # Setup according to test case
                 setup_result = test_case["setup"](run_id, thread_id)

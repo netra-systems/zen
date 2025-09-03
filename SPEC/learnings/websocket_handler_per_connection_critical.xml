@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learning>
+  <metadata>
+    <title>WebSocket Handlers Must Be Per-Connection Not Global</title>
+    <date>2025-09-03</date>
+    <severity>CRITICAL</severity>
+    <category>WebSocket Architecture</category>
+    <tags>websocket, handlers, memory-leak, agent-events, chat-value</tags>
+    <related_commits>
+      <commit hash="dd02b8c2b">fix(websocket): prevent handler accumulation memory leak</commit>
+    </related_commits>
+    <cross_references>
+      <ref>websocket_agent_integration_critical.xml</ref>
+      <ref>../../BUG_FIX_AGENT_STARTED_FIVE_WHYS.md</ref>
+      <ref>../../tests/test_websocket_handler_per_connection.py</ref>
+      <ref>../../tests/test_websocket_handler_leak_fix.py</ref>
+    </cross_references>
+  </metadata>
+
+  <problem_statement>
+    Agent started events were not being sent to frontend WebSocket connections after 
+    implementing a fix for handler accumulation. The fix attempted to reuse a single 
+    handler instance across all connections, which broke WebSocket event delivery.
+  </problem_statement>
+
+  <root_cause>
+    WebSocket handlers store a reference to their specific WebSocket connection. 
+    When a single handler instance is shared across multiple connections and its 
+    websocket reference is updated, all previous connections lose their event stream.
+    Only the most recently connected client receives events.
+  </root_cause>
+
+  <critical_assumption>
+    <assumption id="ws-handler-scope">
+      <statement>
+        WebSocket handlers MUST be connection-scoped, not globally scoped.
+        Each WebSocket connection requires its own handler instance.
+      </statement>
+      <rationale>
+        Handlers maintain state specific to their connection, including the 
+        WebSocket object reference used for sending messages. Sharing handlers 
+        across connections creates a race condition where only the last connection 
+        to update the handler works.
+      </rationale>
+      <violation_impact>
+        - Agent events not delivered to clients
+        - Chat UI appears broken (no real-time feedback)
+        - 90% of business value degraded (Chat is King)
+      </violation_impact>
+    </assumption>
+  </critical_assumption>
+
+  <correct_pattern>
+    <description>Per-Connection Handler with Cleanup</description>
+    <code><![CDATA[
+# CORRECT: Each connection gets its own handler
+async def websocket_endpoint(websocket: WebSocket):
+    try:
+        # Create handler specific to this connection
+        agent_handler = AgentMessageHandler(service, websocket)
+        message_router.register_handler(agent_handler)
+        
+        # ... handle messages ...
+        
+    finally:
+        # CRITICAL: Clean up this connection's handler
+        handlers_to_remove = []
+        for handler in message_router.handlers:
+            if isinstance(handler, AgentMessageHandler) and handler.websocket == websocket:
+                handlers_to_remove.append(handler)
+        
+        for handler in handlers_to_remove:
+            message_router.handlers.remove(handler)
+    ]]></code>
+  </correct_pattern>
+
+  <incorrect_pattern>
+    <description>Global Handler Reuse (BROKEN)</description>
+    <code><![CDATA[
+# INCORRECT: Reusing handler breaks previous connections
+existing_handler = None
+for handler in message_router.handlers:
+    if isinstance(handler, AgentMessageHandler):
+        existing_handler = handler
+        break
+
+if existing_handler:
+    # THIS BREAKS ALL PREVIOUS CONNECTIONS!
+    existing_handler.websocket = websocket  
+    existing_handler.service = new_service
+else:
+    message_router.add_handler(new_handler)
+    ]]></code>
+  </incorrect_pattern>
+
+  <implementation_requirements>
+    <requirement id="handler-creation">
+      Always create a new handler instance for each WebSocket connection.
+      Never reuse handler instances across connections.
+    </requirement>
+    
+    <requirement id="handler-cleanup">
+      Implement cleanup in the finally block to remove handlers when 
+      connections close. This prevents memory leaks while maintaining 
+      per-connection isolation.
+    </requirement>
+    
+    <requirement id="handler-tracking">
+      Handlers must store their WebSocket reference to enable cleanup 
+      by matching the disconnecting WebSocket.
+    </requirement>
+  </implementation_requirements>
+
+  <testing_strategy>
+    <test name="Multiple Concurrent Connections">
+      Verify each connection receives its own events by connecting multiple 
+      clients and ensuring all receive agent_started events.
+    </test>
+    
+    <test name="Handler Cleanup Verification">
+      Connect and disconnect multiple times, verify handler count returns to 
+      zero after all disconnections.
+    </test>
+    
+    <test name="No Cross-Connection Interference">
+      Send messages from multiple connections simultaneously and verify each 
+      receives only its own response events.
+    </test>
+  </testing_strategy>
+
+  <monitoring_guidance>
+    <metric name="handler_count">
+      Monitor total handler count - should roughly equal active connections.
+      Large divergence indicates cleanup failure.
+    </metric>
+    
+    <metric name="event_delivery_rate">
+      Track percentage of connections receiving agent_started events.
+      Should be 100% for all active connections.
+    </metric>
+  </monitoring_guidance>
+
+  <lessons_learned>
+    <lesson>
+      Memory leak fixes must be tested with multiple concurrent connections 
+      to ensure the fix doesn't break connection isolation.
+    </lesson>
+    
+    <lesson>
+      Handler lifecycle must match connection lifecycle exactly. Creation at 
+      connection start, cleanup at connection end.
+    </lesson>
+    
+    <lesson>
+      Global state in WebSocket handlers is an anti-pattern. Each connection 
+      needs its own isolated context.
+    </lesson>
+  </lessons_learned>
+
+  <business_impact>
+    <impact>
+      This issue directly breaks the Chat UI real-time experience, which 
+      delivers 90% of our business value. Users don't see agent_started 
+      events, making the system appear unresponsive even though agents are 
+      working on their requests.
+    </impact>
+    
+    <value_restored>
+      Fixing this restores immediate user feedback, showing users that AI 
+      is actively working on their problems - critical for user trust and 
+      perceived system responsiveness.
+    </value_restored>
+  </business_impact>
+</learning>

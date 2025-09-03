@@ -50,7 +50,7 @@ class ReportingSubAgent(BaseAgent):
         super().__init__(
             name="ReportingSubAgent", 
             description="Golden Pattern reporting agent using BaseAgent infrastructure",
-            enable_reliability=True,      # Get circuit breaker + retry
+            enable_reliability=False,  # DISABLED: Was hiding errors - see AGENT_RELIABILITY_ERROR_SUPPRESSION_ANALYSIS_20250903.md
             enable_execution_engine=True, # Get modern execution patterns
             enable_caching=True,         # Get Redis caching
         )

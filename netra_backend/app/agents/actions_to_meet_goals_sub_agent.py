@@ -51,7 +51,7 @@ class ActionsToMeetGoalsSubAgent(BaseAgent):
             llm_manager=llm_manager,
             name="ActionsToMeetGoalsSubAgent", 
             description="Creates actionable plans from optimization strategies",
-            enable_reliability=True,      # Get circuit breaker + retry
+            enable_reliability=False,  # DISABLED: Was hiding errors - see AGENT_RELIABILITY_ERROR_SUPPRESSION_ANALYSIS_20250903.md
             enable_execution_engine=True, # Get modern execution patterns
             enable_caching=False,         # No caching needed for plan generation
         )

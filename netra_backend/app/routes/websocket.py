@@ -29,6 +29,7 @@ from fastapi.websockets import WebSocketState
 
 from netra_backend.app.core.tracing import TracingManager
 from netra_backend.app.logging_config import central_logger
+from netra_backend.app.services.monitoring.gcp_error_reporter import gcp_reportable, set_request_context, clear_request_context
 from netra_backend.app.websocket_core import (
     WebSocketManager,
     MessageRouter,
@@ -126,6 +127,7 @@ HEARTBEAT_TIMEOUT_SECONDS = _timeout_config["heartbeat_timeout_seconds"]
 
 
 @router.websocket("/ws")
+@gcp_reportable(reraise=True)
 async def websocket_endpoint(websocket: WebSocket):
     """
     Main WebSocket endpoint - handles all WebSocket connections.
@@ -211,8 +213,11 @@ async def websocket_endpoint(websocket: WebSocket):
                 agent_handler = AgentMessageHandler(message_handler_service, websocket)
                 
                 # Register agent handler with message router
-                message_router.add_handler(agent_handler)
-                logger.info(f"Registered real AgentMessageHandler for production agent pipeline")
+                # CRITICAL FIX: Each connection needs its own handler to prevent WebSocket reference conflicts
+                # The handler will be cleaned up on disconnect to prevent accumulation
+                message_router.register_handler(agent_handler)
+                logger.info(f"Registered new AgentMessageHandler for connection (will cleanup on disconnect)")
+                
                 logger.info(f"Total handlers after registration: {len(message_router.handlers)}")
             except Exception as e:
                 # CRITICAL: NO FALLBACK IN STAGING/PRODUCTION
@@ -222,9 +227,11 @@ async def websocket_endpoint(websocket: WebSocket):
                 else:
                     logger.warning(f"Failed to register real AgentMessageHandler: {e}, using fallback for {environment}")
                     # Create fallback agent handler only for testing/development
-                    fallback_handler = _create_fallback_agent_handler()
-                    message_router.add_handler(fallback_handler)
+                    # Each connection needs its own fallback handler
+                    fallback_handler = _create_fallback_agent_handler(websocket)
+                    message_router.register_handler(fallback_handler)
                     logger.info(f"Registered fallback AgentMessageHandler for {environment} environment")
+                    
                     logger.info(f"Total handlers after fallback registration: {len(message_router.handlers)}")
         else:
             # CRITICAL: NO FALLBACK IN STAGING/PRODUCTION - CHAT IS KING
@@ -254,10 +261,12 @@ async def websocket_endpoint(websocket: WebSocket):
             else:
                 logger.warning(f"WebSocket dependencies not available in {environment} - creating fallback agent handler")
                 # Create fallback agent handler only for testing/development
-                fallback_handler = _create_fallback_agent_handler()
-                message_router.add_handler(fallback_handler)
+                # Each connection needs its own fallback handler
+                fallback_handler = _create_fallback_agent_handler(websocket)
+                message_router.register_handler(fallback_handler)
                 logger.info(f"🤖 Registered fallback AgentMessageHandler for {environment} - will handle CHAT messages!")
                 logger.info(f"🤖 Fallback handler can handle: {fallback_handler.supported_types}")
+                
                 logger.info(f"🤖 Total handlers registered: {len(message_router.handlers)}")
                 
                 # List all registered handlers for debugging
@@ -271,6 +280,16 @@ async def websocket_endpoint(websocket: WebSocket):
             async with secure_websocket_context(websocket) as (auth_info, security_manager):
                 user_id = auth_info.user_id
                 authenticated = True
+                
+                # Set GCP error reporting context
+                set_request_context(
+                    user_id=user_id,
+                    http_context={
+                        'method': 'WEBSOCKET',
+                        'url': '/ws',
+                        'userAgent': websocket.headers.get('user-agent', '') if hasattr(websocket, 'headers') else '',
+                    }
+                )
                 
                 connection_start_time = time.time()
                 logger.info(f"WebSocket authenticated for user: {user_id} at {datetime.now(timezone.utc).isoformat()}")
@@ -364,6 +383,33 @@ async def websocket_endpoint(websocket: WebSocket):
             await safe_websocket_close(websocket, code=1011, reason="Internal error")
     
     finally:
+        # Clear GCP error reporting context
+        clear_request_context()
+        
+        # CRITICAL: Clean up connection-specific handlers to prevent accumulation
+        try:
+            message_router = get_message_router()
+            from netra_backend.app.websocket_core.agent_handler import AgentMessageHandler
+            
+            # Remove this connection's handler (both real and fallback)
+            handlers_to_remove = []
+            for handler in message_router.handlers:
+                # Remove AgentMessageHandler that matches this websocket
+                if isinstance(handler, AgentMessageHandler) and handler.websocket == websocket:
+                    handlers_to_remove.append(handler)
+                # Remove FallbackAgentHandler (check by class name as it's dynamically created)
+                elif handler.__class__.__name__ == 'FallbackAgentHandler' and hasattr(handler, 'websocket') and handler.websocket == websocket:
+                    handlers_to_remove.append(handler)
+            
+            for handler in handlers_to_remove:
+                message_router.handlers.remove(handler)
+                handler_type = handler.__class__.__name__
+                logger.info(f"Removed {handler_type} for disconnected WebSocket")
+            
+            logger.info(f"Handler cleanup complete. Remaining handlers: {len(message_router.handlers)}")
+        except Exception as handler_cleanup_error:
+            logger.warning(f"Error during handler cleanup: {handler_cleanup_error}")
+        
         # Cleanup resources - only if authentication was successful
         if heartbeat:
             await heartbeat.stop()
@@ -455,7 +501,10 @@ async def _handle_websocket_messages(
                 # Route message to appropriate handler
                 logger.info(f"Routing message type '{message_data.get('type')}' from {user_id}: {str(message_data)[:200]}")
                 success = await message_router.route_message(user_id, websocket, message_data)
-                logger.info(f"Message routing result: {success} for user {user_id}")
+                if not success:
+                    logger.error(f"Message routing failed for user {user_id}")
+                else:
+                    logger.info(f"Message routing successful for user {user_id}")
                 
                 if success:
                     error_count = 0  # Reset error count on success
@@ -464,7 +513,7 @@ async def _handle_websocket_messages(
                     logger.debug(f"Successfully processed message for {connection_id}")
                 else:
                     error_count += 1
-                    logger.warning(f"Message routing failed for {connection_id}, error_count: {error_count}")
+                    logger.error(f"Message routing failed for {connection_id}, error_count: {error_count}")
                     await asyncio.sleep(min(backoff_delay, max_backoff))
                     backoff_delay = min(backoff_delay * 2, max_backoff)
                 
@@ -535,7 +584,7 @@ async def _send_format_error(websocket: WebSocket, error_message: str) -> None:
     await safe_websocket_send(websocket, error_msg.model_dump())
 
 
-def _create_fallback_agent_handler():
+def _create_fallback_agent_handler(websocket: WebSocket = None):
     """Create fallback agent handler for E2E testing when real services are not available."""
     from netra_backend.app.websocket_core.handlers import BaseMessageHandler
     from netra_backend.app.websocket_core.types import MessageType, WebSocketMessage, create_server_message
@@ -543,12 +592,13 @@ def _create_fallback_agent_handler():
     class FallbackAgentHandler(BaseMessageHandler):
         """Fallback handler that generates mock agent responses for E2E testing."""
         
-        def __init__(self):
+        def __init__(self, websocket: WebSocket = None):
             super().__init__([
                 MessageType.CHAT,
                 MessageType.USER_MESSAGE,
                 MessageType.START_AGENT
             ])
+            self.websocket = websocket  # Store for cleanup tracking
         
         async def handle_message(self, user_id: str, websocket: WebSocket,
                                message: WebSocketMessage) -> bool:
@@ -592,7 +642,7 @@ def _create_fallback_agent_handler():
                 await safe_websocket_send(websocket, error_msg.model_dump())
                 return False
     
-    return FallbackAgentHandler()
+    return FallbackAgentHandler(websocket)
 
 
 # Configuration and Health Endpoints

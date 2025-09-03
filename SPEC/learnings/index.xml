@@ -50,6 +50,77 @@
         </related-learnings>
     </learning>
     
+    <learning id="websocket-handler-per-connection-critical-2025-09-03">
+        <title>WebSocket Handlers Must Be Per-Connection Not Global</title>
+        <category>WebSocket/Architecture/Handler-Lifecycle</category>
+        <keywords>websocket, handlers, memory-leak, agent-events, chat-value, per-connection, global-state, cleanup</keywords>
+        <path>websocket_handler_per_connection_critical.xml</path>
+        <critical-takeaway>
+            WebSocket handlers MUST be connection-scoped, not globally scoped. Each WebSocket 
+            connection requires its own handler instance. Reusing handlers across connections 
+            by updating their websocket reference breaks all previous connections - only the 
+            most recently connected client receives events. This directly breaks Chat UI 
+            real-time experience which delivers 90% of business value.
+        </critical-takeaway>
+        <severity>CRITICAL</severity>
+        <business-impact>Agent events not delivered, Chat UI appears broken, users don't see real-time feedback</business-impact>
+        <prevention>
+            Always create new handler instance for each connection. Implement cleanup in finally 
+            block to remove handlers when connections close. Never reuse handler instances by 
+            updating their internal references. Test with multiple concurrent connections.
+        </prevention>
+        <implementation-patterns>
+            <pattern>Create new handler for each WebSocket connection</pattern>
+            <pattern>Store websocket reference in handler for cleanup matching</pattern>
+            <pattern>Remove handlers in finally block by matching websocket reference</pattern>
+            <pattern>Track handler count to verify proper cleanup</pattern>
+        </implementation-patterns>
+        <testing-strategies>
+            <strategy>Connect multiple clients and verify all receive events</strategy>
+            <strategy>Monitor handler count equals active connection count</strategy>
+            <strategy>Test connect/disconnect cycles for accumulation</strategy>
+        </testing-strategies>
+        <related-learnings>
+            <learning-ref>websocket_agent_integration_critical.xml</learning-ref>
+            <learning-ref>../../BUG_FIX_AGENT_STARTED_FIVE_WHYS.md</learning-ref>
+        </related-learnings>
+    </learning>
+    
+    <learning id="opentelemetry-otlp-implementation-2025-01-03">
+        <title>OpenTelemetry with OTLP Export Implementation</title>
+        <category>Observability/Distributed-Tracing/Telemetry</category>
+        <keywords>opentelemetry, otlp, jaeger, distributed-tracing, spans, telemetry, observability, agent-instrumentation</keywords>
+        <path>opentelemetry_otlp_implementation.xml</path>
+        <critical-takeaway>
+            Implemented comprehensive OpenTelemetry with safe opt-in design. Telemetry is NOT auto-initialized,
+            requires explicit init_telemetry() call. All span operations safely handle null when disabled.
+            Zero performance impact when not initialized. Agent execution unaffected - proper null checks throughout.
+            Supports OTLP and Jaeger exporters with full W3C Trace Context propagation.
+        </critical-takeaway>
+        <severity>HIGH</severity>
+        <business-impact>Enables comprehensive observability for distributed systems without breaking existing functionality</business-impact>
+        <prevention>
+            Always design observability as opt-in. Use safe null handling throughout telemetry pipeline.
+            Separate configuration from implementation. Test with telemetry both enabled and disabled.
+        </prevention>
+        <implementation-patterns>
+            <pattern>Singleton TelemetryManager with lazy initialization</pattern>
+            <pattern>Safe null checks: if not self.enabled or not self.tracer: return None</pattern>
+            <pattern>Context manager for span lifecycle with exception handling</pattern>
+            <pattern>Separate TelemetryConfig for environment-based configuration</pattern>
+        </implementation-patterns>
+        <testing-strategies>
+            <strategy>Test with telemetry disabled (default state)</strategy>
+            <strategy>Test graceful degradation when packages missing</strategy>
+            <strategy>Verify no auto-initialization on startup</strategy>
+            <strategy>Ensure agent execution works with and without telemetry</strategy>
+        </testing-strategies>
+        <related-learnings>
+            <learning-ref>unified_environment_management.xml - Environment patterns used</learning-ref>
+            <learning-ref>configuration_architecture.md - Config system telemetry follows</learning-ref>
+        </related-learnings>
+    </learning>
+    
     <learning id="websocket-thread-association-critical-2025-09-03">
         <title>CRITICAL: WebSocket Thread Association Timing Issue</title>
         <category>WebSocket/Threading/Critical</category>
@@ -73,6 +144,80 @@
             <learning>../../docs/AGENT_ARCHITECTURE_DISAMBIGUATION_GUIDE.md</learning>
             <learning>../../docs/critical_bug_fixes/websocket_thread_association_audit_20250903.md</learning>
             <learning>../../tests/mission_critical/test_websocket_thread_association.py</learning>
+        </related-learnings>
+    </learning>
+    
+    <learning id="podman-integration-dynamic-ports-2025-09-03">
+        <title>Podman Integration with Dynamic Port Allocation</title>
+        <category>Infrastructure/Containers/Testing</category>
+        <keywords>podman, docker-alternative, dynamic-ports, parallel-testing, container-runtime, test-infrastructure</keywords>
+        <path>podman_integration_20250903.xml</path>
+        <critical-takeaway>
+            Successful integration of Podman as Docker alternative with dynamic port allocation enables
+            parallel test execution without conflicts. Key insights: (1) Environment variable override
+            for runtime selection, (2) Dynamic ports in non-overlapping ranges prevent conflicts,
+            (3) Compatibility wrapper enables seamless migration, (4) Direct container commands more
+            reliable than compose for test environments, (5) Unique container naming with test_id
+            prevents parallel execution conflicts.
+        </critical-takeaway>
+        <severity>HIGH</severity>
+        <business-impact>Eliminates Docker Desktop licensing costs, enables parallel CI/CD pipelines</business-impact>
+        <prevention>
+            Always use dynamic ports for test environments. Include test_id in container names.
+            Implement proper health checks with timeouts. Clean up containers in finally blocks.
+            Use environment variables for runtime configuration.
+        </prevention>
+        <implementation-patterns>
+            <pattern>Container runtime detection with env var override</pattern>
+            <pattern>Dynamic port allocation with availability checking</pattern>
+            <pattern>Compatibility wrapper for seamless migration</pattern>
+            <pattern>Direct container commands instead of compose</pattern>
+            <pattern>Test ID in container names for uniqueness</pattern>
+        </implementation-patterns>
+        <testing-strategies>
+            <strategy>Test with both Docker and Podman runtimes</strategy>
+            <strategy>Verify parallel execution with dynamic ports</strategy>
+            <strategy>Test container cleanup on error scenarios</strategy>
+            <strategy>Validate health checks for all services</strategy>
+        </testing-strategies>
+        <related-learnings>
+            <learning>test_framework/podman_dynamic_ports.py</learning>
+            <learning>test_framework/podman_docker_compat.py</learning>
+            <learning>docs/PODMAN_USER_GUIDE.md</learning>
+        </related-learnings>
+    </learning>
+    
+    <learning id="circular-import-supervisor-fix-2025-09-03">
+        <title>Supervisor Module Circular Import Fix - Critical System Recovery</title>
+        <category>Import-Management/Circular-Import/SSOT</category>
+        <keywords>circular-import, supervisor, supervisor_consolidated, __init__.py, ssot, package-exports</keywords>
+        <path>circular_import_supervisor_fix_20250903.xml</path>
+        <critical-takeaway>
+            Package __init__.py files must NEVER re-export classes that depend on package submodules.
+            SupervisorAgent circular import fixed by removing package-level re-export and requiring
+            direct imports from supervisor_consolidated.py. SSOT principle: import from source module,
+            not through convenience package exports.
+        </critical-takeaway>
+        <severity>CRITICAL</severity>
+        <business-impact>Prevents complete system initialization failure that blocks all agent functionality and chat</business-impact>
+        <prevention>
+            Never re-export complex classes in package __init__.py. Use direct imports from source modules.
+            Implement package-level circular import detection in CI/CD. Apply SSOT principle to import paths.
+        </prevention>
+        <implementation-patterns>
+            <pattern>Direct imports from source modules</pattern>
+            <pattern>Package __init__.py for utilities only</pattern>
+            <pattern>Single canonical import path per class</pattern>
+        </implementation-patterns>
+        <testing-strategies>
+            <strategy>Package initialization circular import detection</strategy>
+            <strategy>System startup validation with agent registration</strategy>
+            <strategy>Import hierarchy dependency mapping</strategy>
+        </testing-strategies>
+        <related-learnings>
+            <learning-ref>circular_import_detection.xml</learning-ref>
+            <learning-ref>import_management.xml</learning-ref>
+            <learning-ref>import_structure.xml</learning-ref>
         </related-learnings>
     </learning>
     
@@ -491,6 +636,14 @@
             <critical-takeaway>Tool dispatcher MUST be wrapped with EnhancedToolExecutionEngine to send tool_executing/tool_completed events (websocket_agent_integration_critical.xml).</critical-takeaway>
             <critical-takeaway>5 required events for chat: agent_started, agent_thinking, tool_executing, tool_completed, agent_completed (websocket_agent_integration_critical.xml).</critical-takeaway>
             <critical-takeaway>Run tests/mission_critical/test_websocket_agent_events_suite.py before ANY deployment (websocket_agent_integration_critical.xml).</critical-takeaway>
+        </category>
+        
+        <category name="WebSocket/HandlerLifecycle" path="SPEC/learnings/websocket_handler_per_connection_critical.xml" keywords="WebSocket, Handlers, Per-Connection, Global State, Memory Leak, Cleanup, Agent Events, Chat UI">
+            <critical-takeaway>CRITICAL: WebSocket handlers MUST be per-connection, NOT global - reusing handlers breaks all previous connections (websocket_handler_per_connection_critical.xml).</critical-takeaway>
+            <critical-takeaway>Each WebSocket connection needs its own handler instance with its own websocket reference (websocket_handler_per_connection_critical.xml).</critical-takeaway>
+            <critical-takeaway>Handler cleanup MUST happen in finally block by matching websocket reference to prevent accumulation (websocket_handler_per_connection_critical.xml).</critical-takeaway>
+            <critical-takeaway>Handler reuse by updating internal references is an anti-pattern that breaks event delivery (websocket_handler_per_connection_critical.xml).</critical-takeaway>
+            <critical-takeaway>Test with multiple concurrent connections to verify all receive their own events (websocket_handler_per_connection_critical.xml).</critical-takeaway>
         </category>
         
         <category name="WebSocket/DependencyInjection" path="SPEC/learnings/websocket_injection_fix_comprehensive.xml" keywords="WebSocket, Dependency Injection, MessageHandlerService, Real-time Events, Chat UI, Mission Critical, Service Creation, Graceful Fallback">

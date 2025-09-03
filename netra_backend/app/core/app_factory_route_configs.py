@@ -139,9 +139,15 @@ def _get_factory_analyzer_configs(modules: dict) -> dict:
 
 def get_test_route_configs(modules: dict) -> dict:
     """Get test route configurations for development environment."""
+    configs = {}
+    
     if "test_router" in modules:
-        return {"test": (modules["test_router"], "", ["test"])}
-    return {}
+        configs["test"] = (modules["test_router"], "", ["test"])
+    
+    if "test_gcp_errors_router" in modules:
+        configs["test_gcp_errors"] = (modules["test_gcp_errors_router"], "", ["test-gcp-errors"])
+    
+    return configs
 
 
 def get_all_route_configurations(modules: dict) -> dict:

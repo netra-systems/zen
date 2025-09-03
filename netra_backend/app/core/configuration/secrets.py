@@ -181,13 +181,41 @@ class SecretManager:
         }
     
     def _get_database_secret_mappings(self) -> Dict[str, dict]:
-        """Get database-related secret mappings."""
+        """Get database-related secret mappings.
+        
+        NOTE: In staging/production, ClickHouse uses a REMOTE ClickHouse Cloud instance.
+        The full connection URL is stored as CLICKHOUSE_URL in Google Secret Manager.
+        """
         clickhouse_mapping = self._get_clickhouse_password_mapping()
+        clickhouse_url_mapping = self._get_clickhouse_url_mapping()
         redis_mapping = self._get_redis_password_mapping()
-        return {"CLICKHOUSE_PASSWORD": clickhouse_mapping, "REDIS_PASSWORD": redis_mapping}
+        return {
+            "CLICKHOUSE_PASSWORD": clickhouse_mapping,
+            "CLICKHOUSE_URL": clickhouse_url_mapping,  # Remote ClickHouse Cloud URL for staging/prod
+            "REDIS_PASSWORD": redis_mapping
+        }
+    
+    def _get_clickhouse_url_mapping(self) -> Dict[str, Any]:
+        """Get ClickHouse URL mapping for remote ClickHouse Cloud instance.
+        
+        CRITICAL: In staging/production, ClickHouse is a REMOTE service.
+        The complete connection URL with credentials is stored in Google Secret Manager.
+        """
+        # ClickHouse URL is required in staging/production for remote connection
+        is_required = self._environment in ["production", "staging"]
+        return {
+            "target_field": "clickhouse_url",
+            "required": is_required,
+            "rotation_enabled": False,  # URL rarely changes
+            "description": "Remote ClickHouse Cloud connection URL"
+        }
     
     def _get_clickhouse_password_mapping(self) -> Dict[str, Any]:
-        """Get ClickHouse password mapping."""
+        """Get ClickHouse password mapping.
+        
+        NOTE: Used for local development. In staging/production, credentials are
+        embedded in the CLICKHOUSE_URL secret from Google Secret Manager.
+        """
         # ClickHouse password is only required in production environments
         # For development, ClickHouse containers may not require authentication
         is_required = self._environment in ["production", "staging"]
@@ -446,6 +474,9 @@ class SecretManager:
         
         NOTE: For local development, secret names match environment variable names.
         This ensures direct mapping without transformation.
+        
+        CRITICAL: In staging/production, CLICKHOUSE_URL contains the full remote
+        ClickHouse Cloud connection URL retrieved from Google Secret Manager.
         """
         return {
             "GEMINI_API_KEY": "GEMINI_API_KEY",
@@ -454,7 +485,8 @@ class SecretManager:
             "JWT_SECRET_KEY": "JWT_SECRET_KEY",
             "FERNET_KEY": "FERNET_KEY",
             "SERVICE_SECRET": "SERVICE_SECRET",
-            "CLICKHOUSE_PASSWORD": "CLICKHOUSE_PASSWORD",
+            "CLICKHOUSE_URL": "CLICKHOUSE_URL",  # Remote ClickHouse Cloud URL for staging/prod
+            "CLICKHOUSE_PASSWORD": "CLICKHOUSE_PASSWORD",  # Used in local development
             "REDIS_PASSWORD": "REDIS_PASSWORD",
             "ANTHROPIC_API_KEY": "ANTHROPIC_API_KEY",
             "GOOGLE_API_KEY": "GOOGLE_API_KEY"

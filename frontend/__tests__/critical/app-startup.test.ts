@@ -6,6 +6,14 @@
 import { render, screen } from '@testing-library/react';
 
 describe('Critical: Application Startup', () => {
+  beforeEach(() => {
+    jest.useFakeTimers();
+  });
+
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
   it('should have environment variables configured', () => {
     expect(process.env.NODE_ENV).toBeDefined();
     expect(process.env.NEXT_PUBLIC_API_URL).toBeDefined();
@@ -77,6 +85,7 @@ describe('Critical: Application Startup', () => {
       setTimeout(() => resolve('success'), 10);
     });
     
+    jest.runAllTimers();
     const result = await promise;
     expect(result).toBe('success');
   });

@@ -11,7 +11,6 @@ from typing import Dict, List, Optional, Tuple
 
 from netra_backend.app.core.unified_error_handler import agent_error_handler as ExecutionErrorHandler
 from netra_backend.app.agents.base.interface import (
-    AgentExecutionMixin,
     ExecutionContext,
     ExecutionResult,
 )
@@ -155,7 +154,7 @@ class MCPParameterExtractor:
         return params
 
 
-class MCPIntentDetector(AgentExecutionMixin):
+class MCPIntentDetector:
     """Main MCP intent detector with execution monitoring."""
     
     def __init__(self):

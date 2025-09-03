@@ -80,7 +80,7 @@ class SupervisorAgent(BaseAgent):
             llm_manager=llm_manager,
             name="Supervisor",
             description="Orchestrates sub-agents with complete user isolation",
-            enable_reliability=True,      # Get circuit breaker + retry
+            enable_reliability=False,  # DISABLED: Was hiding errors - see AGENT_RELIABILITY_ERROR_SUPPRESSION_ANALYSIS_20250903.md
             enable_execution_engine=True, # Get modern execution patterns
             enable_caching=False         # Disable caching for isolation
             # NO tool_dispatcher parameter - created per-request
@@ -446,32 +446,72 @@ class SupervisorAgent(BaseAgent):
         logger.info("🔄 Using fallback WebSocket bridge factory")
         return lambda: self.websocket_bridge
 
-    # Define agent dependencies
+    # Define agent dependencies with metadata keys (SSOT)
     AGENT_DEPENDENCIES = {
-        "triage": [],
-        "data": ["triage"],
-        "optimization": ["triage", "data"],
-        "actions": ["triage", "data"],  # Actions can run after triage and data
-        "reporting": ["triage", "data"]  # Reporting only needs triage and data
+        "triage": {
+            "required": [],
+            "optional": [],
+            "produces": ["triage_result", "goal_triage_results"]
+        },
+        "data": {
+            "required": [("triage", "triage_result")],
+            "optional": [],
+            "produces": ["data_result", "data_analysis_result"]
+        },
+        "optimization": {
+            "required": [("triage", "triage_result"), ("data", "data_result")],
+            "optional": [],
+            "produces": ["optimizations_result", "optimization_strategies"]
+        },
+        "actions": {
+            "required": [("triage", "triage_result"), ("data", "data_result")],
+            "optional": [("optimization", "optimizations_result")],
+            "produces": ["action_plan_result", "actions_result"]
+        },
+        "reporting": {
+            "required": [("triage", "triage_result")],
+            "optional": [("data", "data_result"), ("optimization", "optimizations_result"), ("actions", "action_plan_result")],
+            "produces": ["report_result", "final_report"]
+        }
     }
     
-    def _can_execute_agent(self, agent_name: str, completed_agents: Set[str]) -> bool:
+    def _can_execute_agent(self, agent_name: str, completed_agents: Set[str], context_metadata: Dict[str, Any]) -> tuple[bool, List[str]]:
         """Check if an agent can be executed based on its dependencies.
+        
+        This is the SSOT for dependency validation. Checks both agent completion
+        and metadata availability.
         
         Args:
             agent_name: Name of the agent to check
             completed_agents: Set of successfully completed agents
+            context_metadata: Current context metadata with results
             
         Returns:
-            True if all dependencies are met
+            Tuple of (can_execute, missing_dependencies)
         """
-        required_deps = self.AGENT_DEPENDENCIES.get(agent_name, [])
-        missing_deps = [dep for dep in required_deps if dep not in completed_agents]
+        dep_spec = self.AGENT_DEPENDENCIES.get(agent_name, {})
+        required_deps = dep_spec.get("required", [])
+        missing_deps = []
         
-        if missing_deps:
-            logger.warning(f"Agent {agent_name} cannot execute: missing dependencies {missing_deps}")
-            return False
-        return True
+        for dep_agent, metadata_key in required_deps:
+            # Check both: agent completion AND metadata availability
+            if dep_agent not in completed_agents:
+                missing_deps.append(f"{dep_agent} (not executed)")
+                logger.warning(f"Agent {agent_name} missing dependency: {dep_agent} not executed")
+            elif metadata_key not in context_metadata:
+                missing_deps.append(f"{dep_agent} (no {metadata_key})")
+                logger.warning(f"Agent {agent_name} missing dependency: {metadata_key} not in context")
+        
+        # Log optional dependencies for debugging
+        optional_deps = dep_spec.get("optional", [])
+        for dep_agent, metadata_key in optional_deps:
+            if dep_agent not in completed_agents:
+                logger.debug(f"Agent {agent_name} optional dependency missing: {dep_agent}")
+            elif metadata_key not in context_metadata:
+                logger.debug(f"Agent {agent_name} optional metadata missing: {metadata_key}")
+        
+        can_execute = len(missing_deps) == 0
+        return can_execute, missing_deps
     
     async def _execute_workflow_with_isolated_agents(self, 
                                                    agent_instances: Dict[str, BaseAgent],
@@ -503,14 +543,14 @@ class SupervisorAgent(BaseAgent):
                 logger.debug(f"Agent {agent_name} not in available instances, skipping")
                 continue
                 
-            # Check dependencies before execution
-            if not self._can_execute_agent(agent_name, completed_agents):
-                logger.error(f"Cannot execute {agent_name}: dependencies not met. Completed: {completed_agents}")
+            # Check dependencies before execution (SSOT validation)
+            can_execute, missing_deps = self._can_execute_agent(agent_name, completed_agents, context.metadata)
+            if not can_execute:
+                logger.error(f"Cannot execute {agent_name}: missing dependencies: {missing_deps}")
                 results[agent_name] = {
                     "error": "Dependencies not met",
                     "status": "skipped",
-                    "missing_deps": [dep for dep in self.AGENT_DEPENDENCIES.get(agent_name, []) 
-                                    if dep not in completed_agents]
+                    "missing_deps": missing_deps
                 }
                 failed_agents.add(agent_name)
                 # For critical agents, stop the workflow
@@ -532,8 +572,8 @@ class SupervisorAgent(BaseAgent):
                     }
                 )
                 
-                # Execute agent with child context
-                agent_result = await self._execute_agent_with_context(
+                # Execute agent with child context and retry logic
+                agent_result = await self._execute_agent_with_retry(
                     agent_instances[agent_name], child_context, agent_name
                 )
                 
@@ -550,6 +590,9 @@ class SupervisorAgent(BaseAgent):
                 # CRITICAL: Propagate metadata from child context back to parent context
                 # This ensures results like triage_result, data_result, etc. are available for reporting
                 self._merge_child_metadata_to_parent(context, child_context, agent_name)
+                
+                # Store agent result under expected keys (SSOT)
+                self._store_agent_result(context, agent_name, agent_result)
                 
                 logger.info(f"✅ Agent {agent_name} completed successfully for user {context.user_id}")
                 
@@ -586,6 +629,57 @@ class SupervisorAgent(BaseAgent):
         
         return results
     
+    async def _execute_agent_with_retry(self, 
+                                       agent: BaseAgent, 
+                                       context: UserExecutionContext,
+                                       agent_name: str) -> Any:
+        """Execute agent with exponential backoff retry logic.
+        
+        Args:
+            agent: Agent instance to execute
+            context: User execution context (child context)
+            agent_name: Name of agent for logging
+            
+        Returns:
+            Agent execution result
+            
+        Raises:
+            RuntimeError: If all retries are exhausted
+        """
+        max_retries = 3
+        base_delay = 1.0  # Start with 1 second
+        max_delay = 16.0  # Cap at 16 seconds
+        
+        for attempt in range(max_retries):
+            try:
+                if attempt > 0:
+                    # Calculate exponential backoff delay
+                    delay = min(base_delay * (2 ** (attempt - 1)), max_delay)
+                    logger.info(f"Retrying {agent_name} after {delay:.1f}s delay (attempt {attempt + 1}/{max_retries})")
+                    await asyncio.sleep(delay)
+                    await self._emit_thinking(context, f"Retrying {agent_name} (attempt {attempt + 1}/{max_retries})...")
+                
+                # Execute the agent
+                result = await self._execute_agent_with_context(agent, context, agent_name)
+                
+                # Success - return result
+                if attempt > 0:
+                    logger.info(f"✅ {agent_name} succeeded after {attempt + 1} attempts")
+                return result
+                
+            except Exception as e:
+                logger.warning(f"Agent {agent_name} attempt {attempt + 1} failed: {e}")
+                
+                # Check if this is a recoverable error
+                if not self._is_recoverable_error(e):
+                    logger.error(f"Non-recoverable error for {agent_name}: {e}")
+                    raise
+                
+                # Last attempt - raise the error
+                if attempt == max_retries - 1:
+                    logger.error(f"Agent {agent_name} failed after {max_retries} attempts")
+                    raise RuntimeError(f"Agent {agent_name} failed after {max_retries} retries: {e}") from e
+    
     async def _execute_agent_with_context(self, 
                                          agent: BaseAgent, 
                                          context: UserExecutionContext,
@@ -601,7 +695,7 @@ class SupervisorAgent(BaseAgent):
             Agent execution result
             
         Raises:
-            RuntimeError: If agent execution fails
+            Exception: If agent execution fails
         """
         try:
             logger.debug(f"Executing agent {agent_name} with context for user {context.user_id}")
@@ -620,7 +714,7 @@ class SupervisorAgent(BaseAgent):
             
         except Exception as e:
             logger.error(f"Agent {agent_name} execution failed for user {context.user_id}: {e}")
-            raise RuntimeError(f"Agent {agent_name} execution failed: {e}") from e
+            raise  # Re-raise for retry logic to handle
     
     async def _emit_thinking(self, context: UserExecutionContext, message: str) -> None:
         """Emit thinking message via WebSocket for user.
@@ -689,6 +783,72 @@ class SupervisorAgent(BaseAgent):
                 if key not in parent_context.metadata:
                     parent_context.metadata[key] = value
                     logger.debug(f"Propagated additional result key '{key}' from {agent_name} to parent context")
+    
+    def _store_agent_result(self, context: UserExecutionContext, agent_name: str, result: Any) -> None:
+        """Store agent result under all expected metadata keys (SSOT).
+        
+        This ensures that agent results are available under all the keys that
+        downstream agents might expect, maintaining backward compatibility.
+        
+        Args:
+            context: User execution context
+            agent_name: Name of the agent that produced the result
+            result: The agent's execution result
+        """
+        # Get the expected metadata keys from AGENT_DEPENDENCIES
+        dep_spec = self.AGENT_DEPENDENCIES.get(agent_name, {})
+        produces_keys = dep_spec.get("produces", [])
+        
+        # Store under all expected keys
+        for key in produces_keys:
+            context.metadata[key] = result
+            logger.debug(f"Stored {agent_name} result under key: {key}")
+        
+        # Always store under generic key as well
+        generic_key = f"{agent_name}_result"
+        if generic_key not in produces_keys:
+            context.metadata[generic_key] = result
+            logger.debug(f"Stored {agent_name} result under generic key: {generic_key}")
+    
+    def _is_recoverable_error(self, error: Exception) -> bool:
+        """Determine if an error is recoverable and worth retrying.
+        
+        Args:
+            error: The exception to check
+            
+        Returns:
+            True if the error is recoverable
+        """
+        # Network and timeout errors are recoverable
+        recoverable_errors = [
+            "timeout", "timed out", "connection", "network",
+            "temporary", "unavailable", "rate limit", "throttl"
+        ]
+        
+        error_str = str(error).lower()
+        
+        # Check for known recoverable patterns
+        for pattern in recoverable_errors:
+            if pattern in error_str:
+                return True
+        
+        # Check for specific exception types
+        import asyncio
+        if isinstance(error, (asyncio.TimeoutError, ConnectionError, TimeoutError)):
+            return True
+        
+        # Non-recoverable errors
+        non_recoverable = [
+            "authentication", "permission", "forbidden", "unauthorized",
+            "invalid", "not found", "does not exist", "migration required"
+        ]
+        
+        for pattern in non_recoverable:
+            if pattern in error_str:
+                return False
+        
+        # Default to recoverable for unknown errors
+        return True
     
     # === Utility Methods ===
     

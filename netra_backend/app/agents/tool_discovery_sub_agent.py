@@ -44,7 +44,7 @@ class ToolDiscoverySubAgent(BaseAgent):
         super().__init__(
             name="ToolDiscoverySubAgent", 
             description="AI-powered tool discovery and recommendation agent",
-            enable_reliability=True,      # Get circuit breaker + retry
+            enable_reliability=False,  # DISABLED: Was hiding errors - see AGENT_RELIABILITY_ERROR_SUPPRESSION_ANALYSIS_20250903.md
             enable_execution_engine=True, # Get modern execution patterns
             enable_caching=True,          # Cache tool recommendations
         )   

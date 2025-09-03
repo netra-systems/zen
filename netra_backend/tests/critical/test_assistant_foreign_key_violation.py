@@ -1,6 +1,8 @@
 from shared.isolated_environment import get_env
-"""
+
 env = get_env()
+
+"""
 Test to reproduce and fix the assistant foreign key violation error.
 
 Error: insert or update on table "runs" violates foreign key constraint "runs_assistant_id_fkey"

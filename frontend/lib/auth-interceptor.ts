@@ -25,6 +25,9 @@ class AuthInterceptor {
   private refreshTokenPromise: Promise<string | null> | null = null;
   private maxRetries = 1;
   private environment: string;
+  private refreshAttempts = new Map<string, { count: number; timestamp: number }>();
+  private readonly MAX_REFRESH_ATTEMPTS_PER_URL = 2;
+  private readonly REFRESH_ATTEMPT_WINDOW_MS = 30000; // 30 seconds
 
   constructor() {
     this.environment = unifiedApiConfig.environment;
@@ -73,16 +76,86 @@ class AuthInterceptor {
   }
 
   /**
+   * Clean up old refresh attempts from tracking map
+   */
+  private cleanupRefreshAttempts(): void {
+    const now = Date.now();
+    for (const [key, attempt] of this.refreshAttempts.entries()) {
+      if (now - attempt.timestamp > this.REFRESH_ATTEMPT_WINDOW_MS) {
+        this.refreshAttempts.delete(key);
+      }
+    }
+  }
+
+  /**
+   * Check if we're in a refresh loop for this URL
+   */
+  private isInRefreshLoop(url: string): boolean {
+    this.cleanupRefreshAttempts();
+    
+    const attempt = this.refreshAttempts.get(url);
+    if (!attempt) return false;
+    
+    const now = Date.now();
+    // If we've tried recently and hit the max attempts, we're in a loop
+    return (
+      attempt.count >= this.MAX_REFRESH_ATTEMPTS_PER_URL &&
+      (now - attempt.timestamp) < this.REFRESH_ATTEMPT_WINDOW_MS
+    );
+  }
+
+  /**
+   * Track refresh attempt for loop detection
+   */
+  private trackRefreshAttempt(url: string): void {
+    const existing = this.refreshAttempts.get(url);
+    const now = Date.now();
+    
+    if (existing && (now - existing.timestamp) < this.REFRESH_ATTEMPT_WINDOW_MS) {
+      // Increment existing attempt count
+      this.refreshAttempts.set(url, {
+        count: existing.count + 1,
+        timestamp: now
+      });
+    } else {
+      // Start new tracking
+      this.refreshAttempts.set(url, {
+        count: 1,
+        timestamp: now
+      });
+    }
+  }
+
+  /**
    * Handle 401 responses by refreshing token and retrying
    */
   private async handle401Response(
     url: string, 
     config: RequestConfig
   ): Promise<Response> {
+    // Check for refresh loop first
+    if (this.isInRefreshLoop(url)) {
+      logger.error('Detected auth refresh loop, breaking cycle', {
+        url,
+        environment: this.environment
+      });
+      this.refreshAttempts.delete(url);
+      this.redirectToLogin();
+      throw new Error('Authentication loop detected - please login again');
+    }
+
+    // Track this refresh attempt
+    this.trackRefreshAttempt(url);
+
     const retryCount = config.retryCount || 0;
     
     if (retryCount >= this.maxRetries) {
       // Max retries exceeded, redirect to login
+      logger.warn('Max auth retries exceeded', {
+        url,
+        retryCount,
+        environment: this.environment
+      });
       this.redirectToLogin();
       throw new Error('Authentication failed after retry');
     }
@@ -107,7 +180,14 @@ class AuthInterceptor {
 
       // Retry the original request
       logger.info('Retrying request with refreshed token');
-      return fetch(url, retryConfig);
+      const response = await fetch(url, retryConfig);
+      
+      // If successful, clear the refresh attempts for this URL
+      if (response.ok || response.status !== 401) {
+        this.refreshAttempts.delete(url);
+      }
+      
+      return response;
     } catch (error) {
       logger.error('Token refresh failed', error as Error);
       this.redirectToLogin();

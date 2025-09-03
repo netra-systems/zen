@@ -6,7 +6,7 @@ thread_id and run_id pairs that comply with the SSOT patterns.
 """
 import pytest
 from typing import Tuple
-from netra_backend.app.core.id_manager import IDManager, IDPair
+from netra_backend.app.core.unified_id_manager import UnifiedIDManager
 
 
 class IDFixtures:
@@ -23,21 +23,21 @@ class IDFixtures:
         Returns:
             Tuple of (thread_id, run_id)
         """
-        run_id = IDManager.generate_run_id(thread_id)
+        run_id = UnifiedIDManager.generate_run_id(thread_id)
         return thread_id, run_id
     
     @staticmethod
-    def create_id_pair(thread_id: str = "test_thread") -> IDPair:
+    def create_id_pair(thread_id: str = "test_thread") -> Tuple[str, str]:
         """
-        Create a validated IDPair for testing.
+        Create a validated ID pair for testing.
         
         Args:
             thread_id: Thread identifier (default: "test_thread")
             
         Returns:
-            IDPair with validated IDs
+            Tuple of (thread_id, run_id) with validated IDs
         """
-        return IDManager.create_test_ids(thread_id)
+        return UnifiedIDManager.create_test_ids(thread_id)
     
     @staticmethod
     def create_execution_context_ids() -> dict:
@@ -62,7 +62,7 @@ class IDFixtures:
             Dict with run_id and extracted thread_id
         """
         thread_id = "websocket_thread"
-        run_id = IDManager.generate_run_id(thread_id)
+        run_id = UnifiedIDManager.generate_run_id(thread_id)
         
         return {
             "run_id": run_id,
@@ -82,7 +82,7 @@ class IDFixtures:
             Dict with all required IDs for agent execution
         """
         thread_id = f"{agent_name}_thread"
-        run_id = IDManager.generate_run_id(thread_id)
+        run_id = UnifiedIDManager.generate_run_id(thread_id)
         
         return {
             "run_id": run_id,
@@ -100,7 +100,7 @@ def valid_ids():
 
 @pytest.fixture
 def valid_id_pair():
-    """Pytest fixture for validated IDPair."""
+    """Pytest fixture for validated ID pair."""
     return IDFixtures.create_id_pair()
 
 
@@ -139,21 +139,21 @@ class LegacyIDMigration:
         """
         # Common legacy patterns
         if old_id == "test-run":
-            return IDManager.generate_run_id("test_thread")
+            return UnifiedIDManager.generate_run_id("test_thread")
         elif old_id.startswith("test_run_"):
             # Extract any suffix and use as part of thread_id
             suffix = old_id[9:] if len(old_id) > 9 else "default"
-            return IDManager.generate_run_id(f"test_thread_{suffix}")
+            return UnifiedIDManager.generate_run_id(f"test_thread_{suffix}")
         elif old_id.startswith("test-"):
             # Convert hyphenated format
             thread_part = old_id[5:].replace("-", "_") if len(old_id) > 5 else "thread"
-            return IDManager.generate_run_id(f"test_{thread_part}")
+            return UnifiedIDManager.generate_run_id(f"test_{thread_part}")
         else:
             # For other patterns, try to extract a thread_id or use the whole thing
             thread_id = old_id.replace("-", "_").replace(" ", "_")
-            if not thread_id or not IDManager.validate_thread_id(thread_id):
+            if not thread_id or not UnifiedIDManager.validate_thread_id(thread_id):
                 thread_id = "migrated_thread"
-            return IDManager.generate_run_id(thread_id)
+            return UnifiedIDManager.generate_run_id(thread_id)
     
     @staticmethod
     def validate_and_fix_id_pair(run_id: str, thread_id: str) -> Tuple[str, str]:
@@ -168,18 +168,18 @@ class LegacyIDMigration:
             Tuple of (fixed_run_id, fixed_thread_id)
         """
         # Check if they're already consistent
-        if IDManager.validate_id_pair(run_id, thread_id):
+        if UnifiedIDManager.validate_id_pair(run_id, thread_id):
             return run_id, thread_id
         
         # If run_id is valid format, extract thread_id from it
-        if IDManager.validate_run_id(run_id):
-            extracted = IDManager.extract_thread_id(run_id)
+        if UnifiedIDManager.validate_run_id(run_id):
+            extracted = UnifiedIDManager.extract_thread_id(run_id)
             if extracted:
                 return run_id, extracted
         
         # If thread_id is valid, generate new run_id
-        if thread_id and IDManager.validate_thread_id(thread_id):
-            new_run_id = IDManager.generate_run_id(thread_id)
+        if thread_id and UnifiedIDManager.validate_thread_id(thread_id):
+            new_run_id = UnifiedIDManager.generate_run_id(thread_id)
             return new_run_id, thread_id
         
         # Both invalid, create new valid pair
