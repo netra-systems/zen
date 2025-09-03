@@ -6,7 +6,7 @@ thread_id and run_id pairs that comply with the SSOT patterns.
 """
 import pytest
 from typing import Tuple
-from netra_backend.app.core.unified_id_manager import UnifiedUnifiedIDManager
+from netra_backend.app.core.unified_id_manager import UnifiedIDManager
 
 
 class IDFixtures:

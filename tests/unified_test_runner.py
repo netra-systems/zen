@@ -109,7 +109,7 @@ except ImportError:
 
 # Import test framework - using absolute imports from project root
 from test_framework.runner import UnifiedTestRunner as FrameworkRunner
-from test_framework.test_config import configure_dev_environment, configure_mock_environment, configure_test_environment
+from test_framework.test_config import configure_dev_environment, configure_mock_environment
 from test_framework.llm_config_manager import configure_llm_testing, LLMTestMode
 from test_framework.test_discovery import TestDiscovery
 from test_framework.test_validation import TestValidation
@@ -832,7 +832,7 @@ class UnifiedTestRunner:
             env.set('WEBSOCKET_URL', env.get('WEBSOCKET_URL', 'ws://localhost:8001'), 'test_runner')
         else:
             # Only allow mock environment for pure unit tests in test environment
-            configure_test_environment()
+            configure_mock_environment()
             # Create port discovery even for mock environment to enable port discovery if Docker is available
             self.port_discovery = DockerPortDiscovery(use_test_services=True)
         

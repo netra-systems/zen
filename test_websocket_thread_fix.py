@@ -16,7 +16,7 @@ import os
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
-from netra_backend.app.utils.run_id_generator import generate_run_id, extract_thread_id_from_run_id
+from netra_backend.app.core.unified_id_manager import UnifiedIDManager
 
 
 def test_thread_id_extraction():
@@ -37,7 +37,7 @@ def test_thread_id_extraction():
         print(f"\nTesting: {run_id}")
         
         # Test standard extraction function
-        extracted_raw = extract_thread_id_from_run_id(run_id)
+        extracted_raw = UnifiedIDManager.extract_thread_id(run_id)
         print(f"  Standard extraction (raw): {extracted_raw}")
         
         # Test bridge extraction method

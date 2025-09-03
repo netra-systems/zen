@@ -317,7 +317,7 @@ class TestAgentResiliencePatterns:
                 failure_type="first_n",
                 failure_count=2,  # Fail first 2 attempts, succeed on 3rd
                 name=f"RetryTest_{failure_type}",
-                enable_reliability=True
+                enable_reliability=False  # DISABLED: Was hiding errors - see AGENT_RELIABILITY_ERROR_SUPPRESSION_ANALYSIS_20250903.md
             )
             
             if not agent.unified_reliability_handler:
@@ -626,7 +626,7 @@ class TestAgentResiliencePatterns:
                 failure_type="first_n",
                 failure_count=2,  # Fail first 2 attempts
                 name=f"RecoveryTest_{error_name}",
-                enable_reliability=True
+                enable_reliability=False  # DISABLED: Was hiding errors - see AGENT_RELIABILITY_ERROR_SUPPRESSION_ANALYSIS_20250903.md
             )
             
             # Override failure simulation to throw specific error
