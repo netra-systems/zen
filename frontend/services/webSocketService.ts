@@ -59,6 +59,10 @@ class WebSocketService {
   private maxReconnectAttempts: number = 10;
   private baseReconnectDelay: number = 100;  // Start with 100ms for faster initial reconnect
   private maxReconnectDelay: number = 10000;  // Cap at 10s instead of 30s
+  
+  // Auth refresh coordination to prevent spam
+  private lastRefreshAttempt: number = 0;
+  private readonly MIN_REFRESH_INTERVAL_MS = 2000; // Same as auth service
   private lastSuccessfulConnection: number = 0;
   private connectionId: string = '';
   private beforeUnloadHandler: (() => void) | null = null;
@@ -1573,6 +1577,28 @@ class WebSocketService {
    * Attempt to refresh token and reconnect on auth failure
    */
   private async attemptTokenRefreshAndReconnect(): Promise<void> {
+    const now = Date.now();
+    const timeSinceLastRefresh = now - this.lastRefreshAttempt;
+    
+    // Respect the auth service's cooldown period to prevent spam
+    if (timeSinceLastRefresh < this.MIN_REFRESH_INTERVAL_MS) {
+      const waitTime = this.MIN_REFRESH_INTERVAL_MS - timeSinceLastRefresh;
+      logger.debug(`WebSocket: Waiting ${waitTime}ms before token refresh (cooldown)`, {
+        component: 'WebSocketService',
+        action: 'refresh_cooldown',
+        waitTime,
+        timeSinceLastRefresh
+      });
+      
+      // Schedule a delayed retry instead of immediate failure
+      setTimeout(() => {
+        this.attemptTokenRefreshAndReconnect();
+      }, waitTime);
+      return;
+    }
+    
+    this.lastRefreshAttempt = now;
+    
     try {
       const newToken = await this.options.refreshToken!();
       if (newToken) {
@@ -1580,13 +1606,54 @@ class WebSocketService {
         this.currentToken = newToken;
         const newOptions = { ...this.options, token: newToken };
         
+        // Reset reconnect attempts on successful refresh
+        this.reconnectAttempts = 0;
+        
         // Wait a bit before reconnecting
         setTimeout(() => {
           this.connect(this.url, newOptions);
         }, 1000);
       }
     } catch (error) {
-      logger.error('Failed to refresh token for auth error recovery', error as Error);
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      
+      // Handle auth loop protection error specifically
+      if (errorMessage.includes('preventing auth loop') || errorMessage.includes('too soon')) {
+        logger.warn('WebSocket: Auth loop protection triggered, backing off', {
+          component: 'WebSocketService',
+          action: 'auth_loop_protection',
+          error: errorMessage
+        });
+        
+        // Exponential backoff for reconnection
+        this.reconnectAttempts++;
+        const backoffDelay = Math.min(
+          this.baseReconnectDelay * Math.pow(2, this.reconnectAttempts),
+          this.maxReconnectDelay
+        );
+        
+        logger.debug(`WebSocket: Scheduling retry in ${backoffDelay}ms (attempt ${this.reconnectAttempts})`, {
+          component: 'WebSocketService',
+          action: 'schedule_retry',
+          delay: backoffDelay,
+          attempt: this.reconnectAttempts
+        });
+        
+        // Schedule a retry with exponential backoff
+        setTimeout(() => {
+          if (this.reconnectAttempts < this.maxReconnectAttempts) {
+            this.attemptTokenRefreshAndReconnect();
+          } else {
+            logger.error('WebSocket: Max reconnection attempts reached, giving up', {
+              component: 'WebSocketService',
+              action: 'max_attempts_exceeded'
+            });
+          }
+        }, backoffDelay);
+      } else {
+        // Other errors - log and don't retry immediately
+        logger.error('Failed to refresh token for auth error recovery', error as Error);
+      }
     }
   }
 
