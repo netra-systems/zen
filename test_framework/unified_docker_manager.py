@@ -284,7 +284,7 @@ class UnifiedDockerManager:
     
     def __init__(self, 
                  config: Optional[OrchestrationConfig] = None,
-                 environment_type: EnvironmentType = EnvironmentType.SHARED,
+                 environment_type: EnvironmentType = EnvironmentType.DEVELOPMENT,
                  test_id: Optional[str] = None,
                  use_production_images: bool = True,  # Default to memory-optimized production images
                  mode: ServiceMode = ServiceMode.DOCKER,
@@ -1094,7 +1094,7 @@ class UnifiedDockerManager:
         compose_file = self._get_compose_file()
         
         # If using test compose file, add "test-" prefix
-        if "docker-compose.test.yml" in compose_file:
+        if "docker-compose.test.yml" in compose_file or "docker-compose.alpine-test.yml" in compose_file:
             # Standard service mappings for test environment
             service_map = {
                 "postgres": "test-postgres",
@@ -1106,27 +1106,53 @@ class UnifiedDockerManager:
                 "rabbitmq": "test-rabbitmq"
             }
             return service_map.get(service, service)
+        elif self.environment_type == EnvironmentType.DEVELOPMENT:
+            # For development environment, add "dev-" prefix
+            service_map = {
+                "postgres": "dev-postgres",
+                "redis": "dev-redis",
+                "clickhouse": "dev-clickhouse",
+                "backend": "dev-backend",
+                "auth": "dev-auth",
+                "frontend": "dev-frontend",
+                "rabbitmq": "dev-rabbitmq"
+            }
+            return service_map.get(service, service)
         
         # For other compose files, use service name as-is
         return service
     
     def _get_compose_file(self) -> str:
         """Get appropriate docker-compose file based on Alpine setting and environment type"""
-        if self.use_alpine:
-            # Use Alpine compose files when Alpine support is enabled
-            # Prioritize alpine-test.yml for test environments, alpine.yml for others
-            compose_files = [
-                "docker-compose.alpine-test.yml",
-                "docker-compose.alpine.yml",
-                "docker-compose.test.yml",  # Fallback to regular test compose
-                "docker-compose.yml"  # Final fallback
-            ]
+        # Choose compose files based on environment type
+        if self.environment_type == EnvironmentType.DEVELOPMENT:
+            # For development, prioritize main docker-compose.yml
+            if self.use_alpine:
+                compose_files = [
+                    "docker-compose.alpine.yml",
+                    "docker-compose.yml"
+                ]
+            else:
+                compose_files = [
+                    "docker-compose.yml"
+                ]
         else:
-            # Use regular compose files
-            compose_files = [
-                "docker-compose.test.yml",
-                "docker-compose.yml"
-            ]
+            # For test/shared environments, use test compose files
+            if self.use_alpine:
+                # Use Alpine compose files when Alpine support is enabled
+                # Prioritize alpine-test.yml for test environments, alpine.yml for others
+                compose_files = [
+                    "docker-compose.alpine-test.yml",
+                    "docker-compose.alpine.yml",
+                    "docker-compose.test.yml",  # Fallback to regular test compose
+                    "docker-compose.yml"  # Final fallback
+                ]
+            else:
+                # Use regular compose files
+                compose_files = [
+                    "docker-compose.test.yml",
+                    "docker-compose.yml"
+                ]
         
         # Try to find git root first for most reliable path resolution
         try:
