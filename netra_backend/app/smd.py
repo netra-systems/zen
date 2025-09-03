@@ -486,7 +486,10 @@ class StartupOrchestrator:
             (hasattr(self.app.state, 'agent_websocket_bridge') and self.app.state.agent_websocket_bridge is not None, "AgentWebSocketBridge"),
             (hasattr(self.app.state, 'agent_supervisor') and self.app.state.agent_supervisor is not None, "Agent Supervisor"),
             (hasattr(self.app.state, 'thread_service') and self.app.state.thread_service is not None, "Thread Service"),
-            (hasattr(self.app.state, 'tool_dispatcher') and self.app.state.tool_dispatcher is not None, "Tool Dispatcher"),
+            # tool_dispatcher is None by design in UserContext-based architecture
+            # Instead verify UserContext configuration
+            (hasattr(self.app.state, 'tool_classes') and self.app.state.tool_classes is not None, "Tool Classes (UserContext)"),
+            (hasattr(self.app.state, 'websocket_bridge_factory'), "WebSocket Bridge Factory (UserContext)"),
             (hasattr(self.app.state, 'background_task_manager') and self.app.state.background_task_manager is not None, "Background Task Manager"),
             (hasattr(self.app.state, 'health_service') and self.app.state.health_service is not None, "Health Service"),
         ]
@@ -530,8 +533,15 @@ class StartupOrchestrator:
             'llm_manager': 'LLM Manager (handles AI model connections)',
             'db_session_factory': 'Database Session Factory',
             'redis_manager': 'Redis Manager (handles caching)',
-            'tool_dispatcher': 'Tool Dispatcher (executes agent tools)',
+            # tool_dispatcher is now UserContext-based (None by design)
+            # 'tool_dispatcher': 'Tool Dispatcher (executes agent tools)',
             'agent_websocket_bridge': 'WebSocket Bridge (real-time events)'
+        }
+        
+        # For UserContext-based pattern, verify configuration instead
+        usercontext_configs = {
+            'tool_classes': 'Tool Classes (for per-user tool creation)',
+            'websocket_bridge_factory': 'WebSocket Bridge Factory (for per-user bridges)'
         }
         
         missing_services = []
@@ -545,12 +555,20 @@ class StartupOrchestrator:
                 if service is None:
                     none_services.append(f"{service_name} ({description})")
         
-        if missing_services or none_services:
+        # Check UserContext configurations
+        missing_configs = []
+        for config_name, description in usercontext_configs.items():
+            if not hasattr(self.app.state, config_name):
+                missing_configs.append(f"{config_name} ({description})")
+        
+        if missing_services or none_services or missing_configs:
             error_msg = "CRITICAL SERVICE VALIDATION FAILED:\n"
             if missing_services:
                 error_msg += f"  Missing services: {', '.join(missing_services)}\n"
             if none_services:
                 error_msg += f"  None services: {', '.join(none_services)}\n"
+            if missing_configs:
+                error_msg += f"  Missing UserContext configs: {', '.join(missing_configs)}\n"
             raise DeterministicStartupError(error_msg)
         
         self.logger.info("    ✓ All critical services validated")
@@ -1021,9 +1039,11 @@ class StartupOrchestrator:
                 # Message was accepted (queued or would be sent when connections exist)
                 self.logger.info("  ✓ WebSocket test message accepted by manager")
             
-            # CRITICAL FIX: Verify tool dispatcher has WebSocket support after initialization order fix
-            # Check the main tool dispatcher in app.state first
+            # CRITICAL FIX: Verify tool configuration for UserContext-based creation
+            # In UserContext-based architecture, tool_dispatcher is None by design
+            # Verify we have the configuration for per-user creation instead
             if hasattr(self.app.state, 'tool_dispatcher') and self.app.state.tool_dispatcher:
+                # Legacy path - if tool_dispatcher exists, verify it
                 main_dispatcher = self.app.state.tool_dispatcher
                 
                 # Verify the main dispatcher has WebSocket support
@@ -1049,7 +1069,14 @@ class StartupOrchestrator:
                 
                 self.logger.info("    ✓ Main tool dispatcher WebSocket integration verified")
             else:
-                raise DeterministicStartupError("Main tool dispatcher not found in app.state")
+                # UserContext-based path - verify configuration for per-user creation
+                if not hasattr(self.app.state, 'tool_classes') or not self.app.state.tool_classes:
+                    raise DeterministicStartupError("Tool classes configuration not found for UserContext-based creation")
+                
+                if not hasattr(self.app.state, 'websocket_bridge_factory'):
+                    raise DeterministicStartupError("WebSocket bridge factory not found for UserContext-based creation")
+                
+                self.logger.info("    ✓ Tool configuration verified for UserContext-based creation")
             
             # Also verify tool dispatcher in supervisor registry (if present)
             if hasattr(self.app.state, 'agent_supervisor'):
