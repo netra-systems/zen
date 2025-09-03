@@ -33,6 +33,8 @@ export class AuthServiceClient {
   private readonly endpoints: typeof unifiedApiConfig.endpoints;
   private lastConfigAttempt?: number;
   private cachedConfig?: AuthConfig;
+  private lastRefreshAttempt: number = 0;
+  private readonly MIN_REFRESH_INTERVAL_MS = 2000; // 2 seconds minimum between refresh attempts
   
   constructor() {
     const config = unifiedApiConfig;
@@ -306,6 +308,20 @@ export class AuthServiceClient {
    * Refresh access token
    */
   async refreshToken(): Promise<{ access_token: string; refresh_token?: string }> {
+    // Check for refresh loop
+    const now = Date.now();
+    const timeSinceLastRefresh = now - this.lastRefreshAttempt;
+    
+    if (timeSinceLastRefresh < this.MIN_REFRESH_INTERVAL_MS) {
+      logger.error('Refresh attempted too soon - preventing potential loop', {
+        timeSinceLastRefresh,
+        minInterval: this.MIN_REFRESH_INTERVAL_MS,
+        environment: this.environment
+      });
+      throw new Error('Token refresh attempted too soon - preventing auth loop');
+    }
+    
+    this.lastRefreshAttempt = now;
     logger.debug('Refreshing access token', { environment: this.environment });
     
     // Get refresh token from localStorage
