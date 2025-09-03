@@ -43,6 +43,18 @@ from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 from netra_backend.app.agents.config import agent_config
 from netra_backend.app.agents.utils import extract_thread_id
 
+# Import domain-specific circuit breaker and reliability manager
+from netra_backend.app.core.resilience.domain_circuit_breakers import (
+    AgentCircuitBreaker,
+    AgentCircuitBreakerConfig
+)
+from netra_backend.app.agents.base.reliability_manager import ReliabilityManager
+from netra_backend.app.schemas.shared_types import RetryConfig as SharedRetryConfig
+
+# Import telemetry components for distributed tracing
+from netra_backend.app.core.telemetry import telemetry_manager, agent_tracer
+from opentelemetry.trace import Status, StatusCode
+
 # CRITICAL: Import session management for proper per-request isolation
 # Use TYPE_CHECKING imports to avoid circular dependency
 from typing import TYPE_CHECKING
@@ -129,6 +141,47 @@ class BaseAgent(ABC):
         self.cache_ttl = 3600  # Default cache TTL
         self.max_retries = 3   # Default retry count
         
+        # Initialize circuit breaker for agent-specific reliability
+        self.circuit_breaker = AgentCircuitBreaker(
+            name=name,
+            config=AgentCircuitBreakerConfig(
+                failure_threshold=5,
+                recovery_timeout_seconds=60.0,
+                success_threshold=3,
+                task_timeout_seconds=120.0,
+                sliding_window_size=10,
+                error_rate_threshold=0.5,
+                slow_task_threshold_seconds=120.0,
+                max_backoff_seconds=300.0,
+                preserve_context_on_failure=True,
+                nested_task_support=True
+            )
+        )
+        # Store the original name for test compatibility
+        self.circuit_breaker.name = name  # Override the prefixed name for test compatibility
+        
+        # Initialize execution monitor first (needed by reliability manager)
+        self.monitor = ExecutionMonitor(max_history_size=1000)
+        # Store monitor as _execution_monitor for property access
+        self._execution_monitor = self.monitor
+        
+        # Initialize reliability manager with circuit breaker and retry config
+        self._reliability_manager_instance = ReliabilityManager(
+            circuit_breaker_config=self.circuit_breaker.config,
+            retry_config=SharedRetryConfig(
+                max_retries=3,
+                backoff_multiplier=2.0,
+                base_delay=1.0,
+                max_delay=30.0,
+                retryable_exceptions=["TimeoutError", "ConnectionError"],
+                non_retryable_exceptions=["ValueError", "TypeError"]
+            )
+        )
+        
+        # Connect circuit breaker to reliability manager
+        if hasattr(self._reliability_manager_instance, 'circuit_breaker'):
+            self._reliability_manager_instance.circuit_breaker = self.circuit_breaker._circuit_breaker
+        
         # Initialize unified reliability management (SSOT pattern with UnifiedRetryHandler)
         self._enable_reliability = enable_reliability
         self._unified_reliability_handler = None
@@ -138,7 +191,7 @@ class BaseAgent(ABC):
         # Initialize execution engine (unified SSOT)
         self._enable_execution_engine = enable_execution_engine
         self._execution_engine = None
-        self._execution_monitor = None
+        # _execution_monitor is already set above
         if enable_execution_engine:
             self._init_execution_infrastructure()
         
@@ -297,9 +350,10 @@ class BaseAgent(ABC):
         )
     
     async def execute_with_context(self, context: 'UserExecutionContext', stream_updates: bool = False) -> Any:
-        """Execute agent with proper context-based session management.
+        """Execute agent with proper context-based session management and telemetry.
         
         This is the primary execution pattern. Subclasses should override this method.
+        Includes OpenTelemetry span creation for distributed tracing.
         
         Args:
             context: User execution context with database session and user info
@@ -312,10 +366,60 @@ class BaseAgent(ABC):
             NotImplementedError: If agent doesn't implement UserExecutionContext pattern
             DeprecationWarning: If agent falls back to legacy patterns
         """
-        # Check if agent has modern implementation first
-        if hasattr(self, '_execute_with_user_context') and callable(getattr(self, '_execute_with_user_context')):
-            # Modern UserExecutionContext pattern
-            return await self._execute_with_user_context(context, stream_updates)
+        # Create telemetry span for agent execution
+        span_attributes = {
+            "agent.id": self.agent_id,
+            "agent.name": self.name,
+            "user.id": context.user_id,
+            "thread.id": context.thread_id,
+            "run.id": context.run_id,
+            "session.id": getattr(context, 'session_id', None),
+            "stream_updates": stream_updates
+        }
+        
+        # Filter out None values
+        span_attributes = {k: v for k, v in span_attributes.items() if v is not None}
+        
+        # Start span for agent execution
+        async with telemetry_manager.start_agent_span(
+            agent_name=self.name,
+            operation="execute",
+            attributes=span_attributes
+        ) as span:
+            try:
+                # Log agent execution start
+                if span:
+                    telemetry_manager.add_event(
+                        span, 
+                        "agent_started",
+                        {"message": f"Agent {self.name} execution started"}
+                    )
+                
+                # Check if agent has modern implementation first
+                if hasattr(self, '_execute_with_user_context') and callable(getattr(self, '_execute_with_user_context')):
+                    # Modern UserExecutionContext pattern
+                    result = await self._execute_with_user_context(context, stream_updates)
+                    
+                    # Record successful completion
+                    if span:
+                        telemetry_manager.add_event(
+                            span,
+                            "agent_completed",
+                            {"message": f"Agent {self.name} completed successfully"}
+                        )
+                    
+                    return result
+                
+            except Exception as e:
+                # Record exception in span
+                if span:
+                    telemetry_manager.record_exception(span, e)
+                    telemetry_manager.add_event(
+                        span,
+                        "agent_failed", 
+                        {"error": str(e), "error_type": type(e).__name__}
+                    )
+                raise
         
         # DEPRECATED: Legacy fallback using execute_core_logic with DeepAgentState bridge
         if hasattr(self, 'execute_core_logic'):
@@ -527,7 +631,7 @@ class BaseAgent(ABC):
     
     def _init_execution_infrastructure(self) -> None:
         """Initialize unified execution infrastructure (SSOT pattern)."""
-        self._execution_monitor = ExecutionMonitor(max_history_size=1000)
+        # Use the already initialized monitor from __init__
         # Note: BaseExecutionEngine will be updated separately to use UnifiedRetryHandler
         # For now, passing None to avoid breaking changes
         self._execution_engine = BaseExecutionEngine(
@@ -548,8 +652,12 @@ class BaseAgent(ABC):
         return self._unified_reliability_handler
     
     @property
-    def reliability_manager(self) -> Optional[UnifiedRetryHandler]:
-        """Get reliability manager - now delegates to unified handler for backward compatibility."""
+    def reliability_manager(self):
+        """Get reliability manager - returns the actual ReliabilityManager instance."""
+        # Return the ReliabilityManager instance if it exists
+        if hasattr(self, '_reliability_manager_instance'):
+            return self._reliability_manager_instance
+        # Fall back to unified handler for backward compatibility
         return self._unified_reliability_handler
     
     @property
@@ -643,7 +751,41 @@ class BaseAgent(ABC):
             "uses_unified_reliability": True  # Flag to indicate new architecture
         }
         
-        # Get unified reliability handler status
+        # Get circuit breaker status (primary component)
+        if hasattr(self, 'circuit_breaker') and self.circuit_breaker:
+            cb_state = self.circuit_breaker.get_state()
+            health_status["circuit_breaker"] = {
+                "state": cb_state,
+                "can_execute": self.circuit_breaker.can_execute()
+            }
+            health_status["circuit_breaker_state"] = cb_state
+        
+        # Get reliability manager status
+        if hasattr(self, '_reliability_manager_instance') and self._reliability_manager_instance:
+            rm_health = self._reliability_manager_instance.get_health_status()
+            health_status["reliability_manager"] = rm_health
+            # Extract key metrics for flat structure
+            if isinstance(rm_health, dict):
+                for key in ['total_executions', 'success_rate', 'circuit_breaker_state']:
+                    if key in rm_health:
+                        health_status[key] = rm_health[key]
+        
+        # Get monitor/execution monitor status
+        if hasattr(self, 'monitor') and self.monitor:
+            monitor_health = self.monitor.get_health_status()
+            health_status["monitor"] = monitor_health
+            # Extract key metrics for test compatibility
+            if isinstance(monitor_health, dict):
+                for key in ['total_executions', 'success_rate', 'average_execution_time']:
+                    if key in monitor_health:
+                        health_status[key] = monitor_health[key]
+        
+        # Get execution engine status
+        if hasattr(self, '_execution_engine') and self._execution_engine:
+            health_status["execution_engine"] = self._execution_engine.get_health_status()
+            health_status["modern_execution"] = self._execution_engine.get_health_status()
+        
+        # Get unified reliability handler status (if enabled)
         if self._unified_reliability_handler:
             circuit_status = self._unified_reliability_handler.get_circuit_breaker_status()
             if circuit_status:
@@ -657,32 +799,64 @@ class BaseAgent(ABC):
                     }
                 }
         
-        if self._execution_engine:
-            health_status["modern_execution"] = self._execution_engine.get_health_status()
-        
-        if self._execution_monitor:
-            health_status["monitoring"] = self._execution_monitor.get_health_status()
+        # Add aggregate metrics if not already present
+        if 'total_executions' not in health_status and hasattr(self, 'monitor'):
+            # Try to get from monitor
+            monitor_health = self.monitor.get_health_status() if hasattr(self.monitor, 'get_health_status') else {}
+            health_status['total_executions'] = monitor_health.get('total_executions', 0)
+            health_status['success_rate'] = monitor_health.get('success_rate', 0.0)
+            health_status['average_execution_time'] = monitor_health.get('average_execution_time', 0.0)
+            health_status['error_rate'] = monitor_health.get('error_rate', 0.0)
+            health_status['last_execution'] = monitor_health.get('last_execution', None)
         
         # Determine overall health
         health_status["overall_status"] = self._determine_overall_health_status(health_status)
+        health_status["status"] = health_status["overall_status"]  # Alias for compatibility
         
         return health_status
     
     def get_circuit_breaker_status(self) -> Dict[str, Any]:
         """Get circuit breaker status using unified reliability handler (SSOT pattern)."""
+        # First check primary circuit breaker
+        if hasattr(self, 'circuit_breaker') and self.circuit_breaker:
+            cb_state = self.circuit_breaker.get_state()
+            return {
+                "state": cb_state,
+                "can_execute": self.circuit_breaker.can_execute(),
+                "status": "available"
+            }
+        
+        # Fall back to unified reliability handler if available
         if self._unified_reliability_handler:
             status = self._unified_reliability_handler.get_circuit_breaker_status()
             if status:
                 return status
+        
         return {"status": "not_available", "reason": "reliability not enabled or circuit breaker disabled"}
     
     def _determine_overall_health_status(self, health_data: Dict[str, Any]) -> str:
         """Determine overall health status from component health data."""
+        # Check primary circuit breaker status
+        if "circuit_breaker" in health_data:
+            cb_state = health_data["circuit_breaker"].get("state", "").lower()
+            if "open" in cb_state:
+                return "degraded"
+            if not health_data["circuit_breaker"].get("can_execute", True):
+                return "degraded"
+        
         # Check unified reliability status
         if "unified_reliability" in health_data:
             circuit_status = health_data["unified_reliability"].get("circuit_breaker", {})
             if circuit_status.get("state") == "OPEN":
                 return "degraded"
+        
+        # Check monitor status
+        if "monitor" in health_data:
+            monitor_data = health_data["monitor"]
+            if isinstance(monitor_data, dict):
+                error_rate = monitor_data.get("error_rate", 0.0)
+                if error_rate > 0.2:  # More than 20% error rate
+                    return "degraded"
         
         if "modern_execution" in health_data:
             modern_status = health_data["modern_execution"].get("monitor", {}).get("status", "unknown")

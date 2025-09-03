@@ -85,6 +85,11 @@ class AgentHeartbeat:
             except Exception as e:
                 logger.error(f"Error in heartbeat loop: {e}")
                 
+    @property
+    def pulse_count(self) -> int:
+        """Get the number of heartbeat pulses sent."""
+        return self._pulse_count
+    
     async def pulse(self, data: Optional[Dict[str, Any]] = None):
         """Send a single heartbeat pulse."""
         try:
