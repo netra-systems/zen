@@ -1549,6 +1549,22 @@ async def enhanced_health_check(connection_id: str, manager: Optional[WebSocketM
 # Heartbeat Manager Compatibility Layer
 # These functions provide compatibility for code that previously used WebSocketHeartbeatManager
 
+@dataclass
+class ConnectionHeartbeat:
+    """Compatibility dataclass for ConnectionHeartbeat."""
+    connection_id: str
+    last_ping_sent: Optional[float] = None
+    last_pong_received: Optional[float] = None
+    missed_heartbeats: int = 0
+    is_alive: bool = True
+    last_activity: float = 0.0
+    
+    def __post_init__(self):
+        """Initialize last_activity if not set."""
+        if self.last_activity == 0.0:
+            self.last_activity = time.time()
+
+
 class HeartbeatConfig:
     """Compatibility class for HeartbeatConfig."""
     def __init__(self, heartbeat_interval_seconds: int = 30, 
@@ -1631,6 +1647,7 @@ __all__ = [
     "sync_state",
     "broadcast_message",
     # Heartbeat compatibility
+    "ConnectionHeartbeat",
     "HeartbeatConfig",
     "WebSocketHeartbeatManager",
     "get_heartbeat_manager",
