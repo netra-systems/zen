@@ -95,10 +95,15 @@ class SupervisorAgent(BaseAgent):
         # Store LLM manager for creating request-scoped registries
         self._llm_manager = llm_manager
         
-        # CRITICAL: No placeholder registry or mock dispatcher
-        # Registry is created per-request in execute() for complete isolation
-        # This follows CLAUDE.md: "Mocks = Abomination" principle
-        self.registry = None
+        # CRITICAL: Create a startup registry for validation and infrastructure setup
+        # This registry is used for startup validation and will be replaced per-request
+        # in execute() for complete user isolation
+        # Note: We create with a temporary tool dispatcher that will NOT be used for actual requests
+        from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
+        startup_tool_dispatcher = ToolDispatcher(llm_manager=llm_manager)
+        self.registry = AgentRegistry(llm_manager, startup_tool_dispatcher)
+        self.registry.register_default_agents()
+        self.registry.set_websocket_bridge(websocket_bridge)
         
         # Per-request execution lock (not global!)
         self._execution_lock = asyncio.Lock()
