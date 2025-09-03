@@ -108,6 +108,11 @@ export const createNewChatHandler = (
   };
 };
 
+/**
+ * @deprecated Use useThreadSwitching hook instead for proper SSOT compliance
+ * This handler bypasses the centralized thread switching logic
+ * Migration: Import useThreadSwitching from '@/hooks/useThreadSwitching'
+ */
 export const createThreadClickHandler = (
   activeThreadId: string | null,
   isProcessing: boolean,

@@ -1,10 +1,11 @@
 "use client";
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import { useUnifiedChatStore } from '@/store/unified-chat';
 import { useAuthStore } from '@/store/authStore';
 import { useAuthState } from '@/hooks/useAuthState';
 import { useWebSocket } from '@/hooks/useWebSocket';
+import { useThreadSwitching } from '@/hooks/useThreadSwitching';
 import { AuthGate } from '@/components/auth/AuthGate';
 import { 
   useChatSidebarState, 
@@ -12,8 +13,7 @@ import {
   useThreadFiltering 
 } from './ChatSidebarHooks';
 import { 
-  createNewChatHandler, 
-  createThreadClickHandler 
+  createNewChatHandler
 } from './ChatSidebarHandlers';
 import {
   NewChatButton,
@@ -45,12 +45,26 @@ export const ChatSidebar: React.FC = () => {
 
 
 
-  // Create event handlers
-  const handleThreadClick = createThreadClickHandler(
-    activeThreadId, 
-    isProcessing, 
-    { sendMessage }
-  );
+  // Use the proper thread switching hook
+  const { switchToThread } = useThreadSwitching();
+
+  // Create thread click handler using the hook
+  const handleThreadClick = useCallback(async (threadId: string) => {
+    if (threadId === activeThreadId || isProcessing) return;
+    
+    // Send WebSocket message for thread switch
+    sendMessage({
+      type: 'switch_thread',
+      payload: { thread_id: threadId }
+    });
+    
+    // Use the hook to perform the actual thread switch
+    await switchToThread(threadId, {
+      clearMessages: true,
+      showLoadingIndicator: true,
+      updateUrl: true
+    });
+  }, [activeThreadId, isProcessing, sendMessage, switchToThread]);
   
   const { threads, isLoadingThreads, loadError, loadThreads } = useThreadLoader(
     showAllThreads,
