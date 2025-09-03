@@ -223,7 +223,7 @@ const cleanupCurrentOperation = async (
   }
   
   // Reset thread loading state in store
-  if (storeActions) {
+  if (storeActions?.setThreadLoading) {
     storeActions.setThreadLoading(false);
   }
   
@@ -271,9 +271,15 @@ const startLoadingState = (
   globalCleanupManager.registerAbortController(operationId, controller);
   
   // Use startThreadLoading for coordinated state management
-  storeActions.startThreadLoading(threadId);
+  if (storeActions.startThreadLoading) {
+    storeActions.startThreadLoading(threadId);
+  } else {
+    // Fallback to basic state updates
+    storeActions.setActiveThread?.(threadId);
+    storeActions.setThreadLoading?.(true);
+  }
   
-  if (options.clearMessages) {
+  if (options.clearMessages && storeActions.clearMessages) {
     storeActions.clearMessages();
   }
   
@@ -283,7 +289,9 @@ const startLoadingState = (
   }
   
   const loadingEvent = createThreadLoadingEvent(threadId);
-  storeActions.handleWebSocketEvent(loadingEvent);
+  if (storeActions.handleWebSocketEvent) {
+    storeActions.handleWebSocketEvent(loadingEvent);
+  }
   
   return controller;
 };
@@ -302,7 +310,7 @@ const handleLoadingResult = (
   options?: Required<ThreadSwitchingOptions>,
   updateUrl?: (threadId: string | null) => void
 ): boolean => {
-  if (result.success) {
+  if (result && result.success) {
     // Clear timeout and cleanup on success
     if (timeoutManager) {
       timeoutManager.clearTimeout(threadId);
@@ -311,10 +319,19 @@ const handleLoadingResult = (
     globalCleanupManager.cleanupThread(operationId);
     
     // Use completeThreadLoading for coordinated state management
-    storeActions.completeThreadLoading(threadId, result.messages);
+    if (storeActions.completeThreadLoading) {
+      storeActions.completeThreadLoading(threadId, result.messages);
+    } else {
+      // Fallback to basic state updates
+      storeActions.setActiveThread?.(threadId);
+      storeActions.loadMessages?.(result.messages);
+      storeActions.setThreadLoading?.(false);
+    }
     
     const loadedEvent = createThreadLoadedEvent(threadId, result.messages);
-    storeActions.handleWebSocketEvent(loadedEvent);
+    if (storeActions.handleWebSocketEvent) {
+      storeActions.handleWebSocketEvent(loadedEvent);
+    }
     
     // Update URL if enabled and not skipped
     if (options?.updateUrl && !options?.skipUrlUpdate && updateUrl) {
@@ -357,7 +374,7 @@ const handleLoadingError = (
   globalCleanupManager.cleanupThread(operationId);
   
   // Reset thread loading state in store
-  if (storeActions) {
+  if (storeActions?.setThreadLoading) {
     storeActions.setThreadLoading(false);
   }
   
@@ -388,7 +405,7 @@ const performCancelLoading = (
   }
   
   // Reset thread loading state in store
-  if (storeActions) {
+  if (storeActions?.setThreadLoading) {
     storeActions.setThreadLoading(false);
   }
   
