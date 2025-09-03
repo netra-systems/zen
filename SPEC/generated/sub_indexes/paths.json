@@ -2,7 +2,7 @@
   "metadata": {
     "version": "3.0.0",
     "category": "paths",
-    "generated_at": "2025-09-03T10:26:39.968576",
+    "generated_at": "2025-09-03T11:36:14.940279",
     "root_directory": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1",
     "total_literals": 1255
   },
@@ -576,7 +576,7 @@
       "category": "paths",
       "locations": [
         "netra_backend/app/monitoring/websocket_logging_enhanced.py:505",
-        "netra_backend/app/services/agent_websocket_bridge.py:2336",
+        "netra_backend/app/services/agent_websocket_bridge.py:2237",
         "netra_backend/app/services/websocket_bridge_factory.py:765",
         "netra_backend/app/services/websocket_event_emitter.py:523"
       ]
@@ -1085,7 +1085,7 @@
       "value": "/api/mcp/ws (MCP-specific)",
       "category": "paths",
       "locations": [
-        "netra_backend/app/routes/websocket.py:679"
+        "netra_backend/app/routes/websocket.py:694"
       ]
     },
     "/api/metrics": {
@@ -1832,7 +1832,7 @@
         "netra_backend/app/core/configuration/database.py:207",
         "netra_backend/app/core/configuration/database.py:223",
         "netra_backend/app/core/configuration/database.py:600",
-        "netra_backend/app/core/configuration/staging_validator.py:200",
+        "netra_backend/app/core/configuration/staging_validator.py:201",
         "netra_backend/app/core/configuration/validator_database.py:98",
         "netra_backend/app/core/network_constants.py:148",
         "netra_backend/app/core/network_constants.py:370",
@@ -2638,8 +2638,8 @@
       "value": "/home/",
       "category": "paths",
       "locations": [
-        "netra_backend/app/services/agent_websocket_bridge.py:2336",
-        "netra_backend/app/services/agent_websocket_bridge.py:2336",
+        "netra_backend/app/services/agent_websocket_bridge.py:2237",
+        "netra_backend/app/services/agent_websocket_bridge.py:2237",
         "netra_backend/app/services/websocket_bridge_factory.py:765",
         "netra_backend/app/services/websocket_bridge_factory.py:765",
         "netra_backend/app/services/websocket_event_emitter.py:523",
@@ -2738,13 +2738,13 @@
         "netra_backend/app/routes/auth_proxy.py:59",
         "netra_backend/app/routes/auth_proxy.py:327",
         "netra_backend/app/routes/auth_proxy.py:322",
+        "netra_backend/app/routes/auth_proxy.py:391",
         "netra_backend/app/routes/auth_routes/router.py:67",
         "auth_service/auth_core/routes/auth_routes.py:318",
         "auth_service/auth_core/routes/auth_routes.py:319",
         "auth_service/auth_core/routes/auth_routes.py:516",
         "frontend/components/AuthGuard.tsx:24",
-        "frontend/components/NavLinks.tsx:51",
-        "scripts/audit_staging_auth_issues.py:52"
+        "frontend/components/NavLinks.tsx:51"
       ]
     },
     "/login route returns 404 - Next.js routing issue": {
@@ -3371,6 +3371,7 @@
         "netra_backend/app/routes/auth_proxy.py:53",
         "netra_backend/app/routes/auth_proxy.py:313",
         "netra_backend/app/routes/auth_proxy.py:302",
+        "netra_backend/app/routes/auth_proxy.py:397",
         "auth_service/auth_core/routes/auth_routes.py:486"
       ]
     },
@@ -3537,7 +3538,7 @@
       "value": "/secrets/",
       "category": "paths",
       "locations": [
-        "netra_backend/app/core/configuration/secrets.py:541",
+        "netra_backend/app/core/configuration/secrets.py:573",
         "netra_backend/app/core/secret_manager.py:395",
         "auth_service/auth_core/secret_loader.py:72",
         "scripts/cleanup_clickhouse_secrets_sdk.py:129",
@@ -4346,7 +4347,7 @@
       "value": "/versions/latest",
       "category": "paths",
       "locations": [
-        "netra_backend/app/core/configuration/secrets.py:541",
+        "netra_backend/app/core/configuration/secrets.py:573",
         "auth_service/auth_core/secret_loader.py:72",
         "scripts/update_staging_clickhouse_secrets.py:166",
         "scripts/validate_oauth_deployment.py:134",
@@ -4367,7 +4368,7 @@
         "netra_backend/app/core/middleware_setup.py:118",
         "netra_backend/app/core/unified_error_handler.py:1028",
         "netra_backend/app/middleware/security_response_middleware.py:96",
-        "netra_backend/app/routes/websocket.py:771",
+        "netra_backend/app/routes/websocket.py:786",
         "scripts/staging_validation_part2_corrected.py:603"
       ]
     },
@@ -4411,15 +4412,15 @@
         "netra_backend/app/middleware/security_response_middleware.py:96",
         "netra_backend/app/monitoring/websocket_dashboard.py:633",
         "netra_backend/app/routes/mcp/main.py:243",
-        "netra_backend/app/routes/websocket.py:128",
-        "netra_backend/app/routes/websocket.py:609"
+        "netra_backend/app/routes/websocket.py:282",
+        "netra_backend/app/routes/websocket.py:129"
       ]
     },
     "/ws (legacy insecure)": {
       "value": "/ws (legacy insecure)",
       "category": "paths",
       "locations": [
-        "netra_backend/app/routes/websocket.py:678"
+        "netra_backend/app/routes/websocket.py:693"
       ]
     },
     "/ws/": {
@@ -4436,7 +4437,7 @@
         "netra_backend/app/core/middleware_setup.py:118",
         "netra_backend/app/core/unified_error_handler.py:1028",
         "netra_backend/app/middleware/security_response_middleware.py:96",
-        "netra_backend/app/routes/websocket.py:645",
+        "netra_backend/app/routes/websocket.py:660",
         "scripts/staging_validation_part2_corrected.py:285",
         "scripts/staging_validation_part2_corrected.py:299",
         "scripts/staging_validation_part2_user_flows.py:328",
@@ -4458,9 +4459,9 @@
         "netra_backend/app/core/middleware_setup.py:118",
         "netra_backend/app/core/unified_error_handler.py:1028",
         "netra_backend/app/middleware/security_response_middleware.py:96",
-        "netra_backend/app/routes/websocket.py:687",
-        "netra_backend/app/routes/websocket.py:688",
-        "netra_backend/app/routes/websocket.py:689",
+        "netra_backend/app/routes/websocket.py:702",
+        "netra_backend/app/routes/websocket.py:703",
+        "netra_backend/app/routes/websocket.py:704",
         "scripts/staging_validation_part2_corrected.py:213",
         "scripts/staging_validation_part2_corrected.py:227",
         "scripts/staging_validation_part2_user_flows.py:240",
@@ -4474,7 +4475,7 @@
         "netra_backend/app/core/middleware_setup.py:118",
         "netra_backend/app/core/unified_error_handler.py:1028",
         "netra_backend/app/middleware/security_response_middleware.py:96",
-        "netra_backend/app/routes/websocket.py:925"
+        "netra_backend/app/routes/websocket.py:940"
       ]
     },
     "/ws/test": {
@@ -4484,7 +4485,7 @@
         "netra_backend/app/core/middleware_setup.py:118",
         "netra_backend/app/core/unified_error_handler.py:1028",
         "netra_backend/app/middleware/security_response_middleware.py:96",
-        "netra_backend/app/routes/websocket.py:784"
+        "netra_backend/app/routes/websocket.py:799"
       ]
     },
     "/ws/{user_id}": {
@@ -4977,7 +4978,7 @@
       "value": "Example: python scripts/deploy_to_gcp.py --project {} --build-local",
       "category": "paths",
       "locations": [
-        "scripts/deploy_to_gcp.py:1451"
+        "scripts/deploy_to_gcp.py:1452"
       ]
     },
     "Examples:\n    python scripts/staging_validation_e2e.py --all\n    python scripts/staging_validation_e2e.py --health-only\n    python scripts/staging_validation_e2e.py --auth-flow --websocket-test\n    python scripts/staging_validation_e2e.py --export results.json": {
@@ -5019,7 +5020,7 @@
       "value": "Examples:\n  Default deployment (fast, no checks):\n    python scripts/deploy_to_gcp.py --project netra-staging --build-local\n    \n  With pre-deployment checks:\n    python scripts/deploy_to_gcp.py --project netra-staging --build-local --run-checks\n    \n  Cloud Build (slower):\n    python scripts/deploy_to_gcp.py --project netra-staging\n    \nSee SPEC/gcp_deployment.xml for detailed guidelines.",
       "category": "paths",
       "locations": [
-        "scripts/deploy_to_gcp.py:1415"
+        "scripts/deploy_to_gcp.py:1416"
       ]
     },
     "Examples:\n  Default deployment (with checks):\n    python scripts/deploy_staging_with_sa.py\n    \n  Quick deployment (no checks):\n    python scripts/deploy_staging_with_sa.py --no-checks\n    \n  Specify service account key:\n    python scripts/deploy_staging_with_sa.py --key path/to/key.json": {
@@ -5208,7 +5209,7 @@
       "value": "Path to service account JSON key file (default: config/netra-staging-7a1059b7cf26.json)",
       "category": "paths",
       "locations": [
-        "scripts/deploy_to_gcp.py:1440"
+        "scripts/deploy_to_gcp.py:1441"
       ]
     },
     "Please run directly: python scripts/docker_manual.py start --environment dev": {
@@ -8048,7 +8049,7 @@
       "value": "python tests/post_deployment/test_auth_integration.py --environment",
       "category": "paths",
       "locations": [
-        "scripts/deploy_to_gcp.py:1303"
+        "scripts/deploy_to_gcp.py:1304"
       ]
     },
     "quality_gate/__init__.py": {

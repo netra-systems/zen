@@ -2,9 +2,9 @@
   "metadata": {
     "version": "3.0.0",
     "category": "test_literals",
-    "generated_at": "2025-09-03T10:26:39.978617",
+    "generated_at": "2025-09-03T11:36:14.950581",
     "root_directory": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1",
-    "total_literals": 13180
+    "total_literals": 13246
   },
   "literals": {
     "\u001b[0m": {
@@ -8845,16 +8845,15 @@
       "value": "/auth/login",
       "category": "test_literals",
       "locations": [
-        "auth_service/tests/test_auth_comprehensive.py:327",
-        "auth_service/tests/test_auth_comprehensive.py:343",
-        "auth_service/tests/test_auth_comprehensive.py:377",
         "auth_service/tests/test_auth_comprehensive.py:488",
-        "auth_service/tests/test_auth_comprehensive.py:493",
         "scripts/test_adaptive_workflow.py:148",
         "scripts/test_auth_client_debug.py:54",
         "scripts/test_auth_integration.py:113",
         "scripts/test_data_pipeline_simple.py:40",
-        "scripts/test_signup_flow_manual.py:139"
+        "scripts/test_signup_flow_manual.py:139",
+        "scripts/test_signup_flow_manual.py:156",
+        "scripts/test_staging_auth_live.py:65",
+        "scripts/test_staging_deployment.py:127"
       ]
     },
     "/auth/login/google": {
@@ -8924,7 +8923,6 @@
       "value": "/auth/register",
       "category": "test_literals",
       "locations": [
-        "auth_service/tests/test_auth_comprehensive.py:400",
         "scripts/test_adaptive_workflow.py:177",
         "scripts/test_auth_client_debug.py:38",
         "scripts/test_data_pipeline_simple.py:32",
@@ -8933,7 +8931,8 @@
         "scripts/test_signup_flow_manual.py:57",
         "scripts/test_signup_flow_manual.py:74",
         "scripts/test_signup_flow_manual.py:91",
-        "scripts/test_signup_flow_manual.py:108"
+        "scripts/test_signup_flow_manual.py:108",
+        "scripts/test_signup_flow_manual.py:122"
       ]
     },
     "/auth/status": {
@@ -9053,6 +9052,48 @@
         "scripts/test_backend_auth_config.py:98"
       ]
     },
+    "/deliberate-decorated": {
+      "value": "/deliberate-decorated",
+      "category": "test_literals",
+      "locations": [
+        "netra_backend/app/routes/test_gcp_errors.py:77"
+      ]
+    },
+    "/deliberate-decorated-no-reraise": {
+      "value": "/deliberate-decorated-no-reraise",
+      "category": "test_literals",
+      "locations": [
+        "netra_backend/app/routes/test_gcp_errors.py:90"
+      ]
+    },
+    "/deliberate-handled-reported": {
+      "value": "/deliberate-handled-reported",
+      "category": "test_literals",
+      "locations": [
+        "netra_backend/app/routes/test_gcp_errors.py:51"
+      ]
+    },
+    "/deliberate-message": {
+      "value": "/deliberate-message",
+      "category": "test_literals",
+      "locations": [
+        "netra_backend/app/routes/test_gcp_errors.py:106"
+      ]
+    },
+    "/deliberate-netra-exception": {
+      "value": "/deliberate-netra-exception",
+      "category": "test_literals",
+      "locations": [
+        "netra_backend/app/routes/test_gcp_errors.py:35"
+      ]
+    },
+    "/deliberate-unhandled": {
+      "value": "/deliberate-unhandled",
+      "category": "test_literals",
+      "locations": [
+        "netra_backend/app/routes/test_gcp_errors.py:23"
+      ]
+    },
     "/docs": {
       "value": "/docs",
       "category": "test_literals",
@@ -9128,6 +9169,16 @@
         "scripts/business_value_test_index.py:360"
       ]
     },
+    "/login": {
+      "value": "/login",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_auth_comprehensive.py:327",
+        "auth_service/tests/test_auth_comprehensive.py:343",
+        "auth_service/tests/test_auth_comprehensive.py:377",
+        "auth_service/tests/test_auth_comprehensive.py:493"
+      ]
+    },
     "/messages": {
       "value": "/messages",
       "category": "test_literals",
@@ -9200,6 +9251,13 @@
         "auth_service/tests/test_session_security_cycles_36_40.py:232"
       ]
     },
+    "/register": {
+      "value": "/register",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_auth_comprehensive.py:400"
+      ]
+    },
     "/secrets/": {
       "value": "/secrets/",
       "category": "test_literals",
@@ -9237,6 +9295,20 @@
       "category": "test_literals",
       "locations": [
         "scripts/test_backend_port_binding.py:59"
+      ]
+    },
+    "/test-cascade": {
+      "value": "/test-cascade",
+      "category": "test_literals",
+      "locations": [
+        "netra_backend/app/routes/test_gcp_errors.py:132"
+      ]
+    },
+    "/test/gcp-errors": {
+      "value": "/test/gcp-errors",
+      "category": "test_literals",
+      "locations": [
+        "netra_backend/app/routes/test_gcp_errors.py:15"
       ]
     },
     "/test_body_parse": {
@@ -9317,6 +9389,13 @@
       "category": "test_literals",
       "locations": [
         "scripts/test_cold_start_e2e.py:450"
+      ]
+    },
+    "/verify-setup": {
+      "value": "/verify-setup",
+      "category": "test_literals",
+      "locations": [
+        "netra_backend/app/routes/test_gcp_errors.py:168"
       ]
     },
     "/versions/latest": {
@@ -22224,6 +22303,7 @@
       "value": "Database connection failed",
       "category": "test_literals",
       "locations": [
+        "netra_backend/app/routes/test_gcp_errors.py:143",
         "scripts/test_log_introspection.py:184",
         "scripts/test_log_introspection.py:193"
       ]
@@ -22407,6 +22487,13 @@
       "category": "test_literals",
       "locations": [
         "scripts/iterative_test_fix_loop.py:131"
+      ]
+    },
+    "Deliberately raise an unhandled exception to test GCP error reporting.": {
+      "value": "Deliberately raise an unhandled exception to test GCP error reporting.",
+      "category": "test_literals",
+      "locations": [
+        "netra_backend/app/routes/test_gcp_errors.py:25"
       ]
     },
     "Demo failed with error:": {
@@ -22913,6 +23000,13 @@
         "scripts/test_backend_optimized.py:316"
       ]
     },
+    "Division by zero was caught and reported to GCP": {
+      "value": "Division by zero was caught and reported to GCP",
+      "category": "test_literals",
+      "locations": [
+        "netra_backend/app/routes/test_gcp_errors.py:72"
+      ]
+    },
     "Docker Compose Log Introspection Test Suite": {
       "value": "Docker Compose Log Introspection Test Suite",
       "category": "test_literals",
@@ -23238,6 +23332,7 @@
       "category": "test_literals",
       "locations": [
         "netra_backend/app/api/test_endpoints.py:19",
+        "netra_backend/app/routes/test_gcp_errors.py:19",
         "auth_service/debug_db_test.py:11",
         "auth_service/test_actual_staging_credentials.py:31",
         "auth_service/test_auth_direct.py:17",
@@ -23245,8 +23340,7 @@
         "auth_service/test_staging_db_connection.py:123",
         "auth_service/test_url_construction.py:32",
         "auth_service/test_url_construction.py:63",
-        "auth_service/test_url_construction.py:189",
-        "auth_service/tests/conftest.py:57"
+        "auth_service/test_url_construction.py:189"
       ]
     },
     "ENVIRONMENT CONFIGURATION CHECK": {
@@ -24539,6 +24633,13 @@
       "category": "test_literals",
       "locations": [
         "scripts/business_value_test_index.py:585"
+      ]
+    },
+    "Error message reported to GCP without exception": {
+      "value": "Error message reported to GCP without exception",
+      "category": "test_literals",
+      "locations": [
+        "netra_backend/app/routes/test_gcp_errors.py:128"
       ]
     },
     "Error message:": {
@@ -28216,6 +28317,13 @@
         "auth_service/test_staging_db_connection.py:228"
       ]
     },
+    "GCP error reporting validation": {
+      "value": "GCP error reporting validation",
+      "category": "test_literals",
+      "locations": [
+        "netra_backend/app/routes/test_gcp_errors.py:46"
+      ]
+    },
     "GCP_": {
       "value": "GCP_",
       "category": "test_literals",
@@ -28366,6 +28474,48 @@
       "category": "test_literals",
       "locations": [
         "scripts/test_service_monitor.py:311"
+      ]
+    },
+    "GET /test/gcp-errors/deliberate-decorated": {
+      "value": "GET /test/gcp-errors/deliberate-decorated",
+      "category": "test_literals",
+      "locations": [
+        "netra_backend/app/routes/test_gcp_errors.py:185"
+      ]
+    },
+    "GET /test/gcp-errors/deliberate-handled-reported": {
+      "value": "GET /test/gcp-errors/deliberate-handled-reported",
+      "category": "test_literals",
+      "locations": [
+        "netra_backend/app/routes/test_gcp_errors.py:184"
+      ]
+    },
+    "GET /test/gcp-errors/deliberate-message": {
+      "value": "GET /test/gcp-errors/deliberate-message",
+      "category": "test_literals",
+      "locations": [
+        "netra_backend/app/routes/test_gcp_errors.py:186"
+      ]
+    },
+    "GET /test/gcp-errors/deliberate-netra-exception": {
+      "value": "GET /test/gcp-errors/deliberate-netra-exception",
+      "category": "test_literals",
+      "locations": [
+        "netra_backend/app/routes/test_gcp_errors.py:183"
+      ]
+    },
+    "GET /test/gcp-errors/deliberate-unhandled": {
+      "value": "GET /test/gcp-errors/deliberate-unhandled",
+      "category": "test_literals",
+      "locations": [
+        "netra_backend/app/routes/test_gcp_errors.py:182"
+      ]
+    },
+    "GET /test/gcp-errors/test-cascade": {
+      "value": "GET /test/gcp-errors/test-cascade",
+      "category": "test_literals",
+      "locations": [
+        "netra_backend/app/routes/test_gcp_errors.py:187"
       ]
     },
     "GET, POST, OPTIONS": {
@@ -29170,6 +29320,13 @@
       "locations": [
         "scripts/test_service_orchestration.py:132",
         "scripts/test_service_orchestration.py:134"
+      ]
+    },
+    "Handle an exception but still report it to GCP.": {
+      "value": "Handle an exception but still report it to GCP.",
+      "category": "test_literals",
+      "locations": [
+        "netra_backend/app/routes/test_gcp_errors.py:53"
       ]
     },
     "Handled edge case scenarios": {
@@ -37247,6 +37404,13 @@
         "auth_service/tests/unit/test_docker_hostname_resolution.py:238"
       ]
     },
+    "Raise a NetraException with HIGH severity (auto-reports to GCP).": {
+      "value": "Raise a NetraException with HIGH severity (auto-reports to GCP).",
+      "category": "test_literals",
+      "locations": [
+        "netra_backend/app/routes/test_gcp_errors.py:37"
+      ]
+    },
     "Range:": {
       "value": "Range:",
       "category": "test_literals",
@@ -38093,6 +38257,13 @@
       "category": "test_literals",
       "locations": [
         "scripts/test_log_introspection.py:397"
+      ]
+    },
+    "Report an error message (not exception) to GCP.": {
+      "value": "Report an error message (not exception) to GCP.",
+      "category": "test_literals",
+      "locations": [
+        "netra_backend/app/routes/test_gcp_errors.py:108"
       ]
     },
     "Report format (default: text)": {
@@ -41279,6 +41450,13 @@
         "scripts/test_jwt_fix.py:36"
       ]
     },
+    "Service unavailable due to database connection": {
+      "value": "Service unavailable due to database connection",
+      "category": "test_literals",
+      "locations": [
+        "netra_backend/app/routes/test_gcp_errors.py:150"
+      ]
+    },
     "Service-to-service authentication secret": {
       "value": "Service-to-service authentication secret",
       "category": "test_literals",
@@ -43682,6 +43860,13 @@
         "scripts/test_system_startup.py:2"
       ]
     },
+    "System failure cascade": {
+      "value": "System failure cascade",
+      "category": "test_literals",
+      "locations": [
+        "netra_backend/app/routes/test_gcp_errors.py:158"
+      ]
+    },
     "System has API access:": {
       "value": "System has API access:",
       "category": "test_literals",
@@ -44057,6 +44242,90 @@
       "category": "test_literals",
       "locations": [
         "scripts/test_staging_auth.py:99"
+      ]
+    },
+    "TEST: About to raise NetraException with HIGH severity": {
+      "value": "TEST: About to raise NetraException with HIGH severity",
+      "category": "test_literals",
+      "locations": [
+        "netra_backend/app/routes/test_gcp_errors.py:41"
+      ]
+    },
+    "TEST: About to raise deliberate unhandled exception": {
+      "value": "TEST: About to raise deliberate unhandled exception",
+      "category": "test_literals",
+      "locations": [
+        "netra_backend/app/routes/test_gcp_errors.py:29"
+      ]
+    },
+    "TEST: About to raise exception in decorated function": {
+      "value": "TEST: About to raise exception in decorated function",
+      "category": "test_literals",
+      "locations": [
+        "netra_backend/app/routes/test_gcp_errors.py:84"
+      ]
+    },
+    "TEST: Critical system issue detected (simulated)": {
+      "value": "TEST: Critical system issue detected (simulated)",
+      "category": "test_literals",
+      "locations": [
+        "netra_backend/app/routes/test_gcp_errors.py:116"
+      ]
+    },
+    "TEST: Deliberate service unavailable exception": {
+      "value": "TEST: Deliberate service unavailable exception",
+      "category": "test_literals",
+      "locations": [
+        "netra_backend/app/routes/test_gcp_errors.py:45"
+      ]
+    },
+    "TEST: Deliberate unhandled exception for GCP error reporting test": {
+      "value": "TEST: Deliberate unhandled exception for GCP error reporting test",
+      "category": "test_literals",
+      "locations": [
+        "netra_backend/app/routes/test_gcp_errors.py:32"
+      ]
+    },
+    "TEST: Exception from decorated function": {
+      "value": "TEST: Exception from decorated function",
+      "category": "test_literals",
+      "locations": [
+        "netra_backend/app/routes/test_gcp_errors.py:87"
+      ]
+    },
+    "TEST: Handling exception but reporting to GCP": {
+      "value": "TEST: Handling exception but reporting to GCP",
+      "category": "test_literals",
+      "locations": [
+        "netra_backend/app/routes/test_gcp_errors.py:57"
+      ]
+    },
+    "TEST: Raising exception that won't be re-raised": {
+      "value": "TEST: Raising exception that won't be re-raised",
+      "category": "test_literals",
+      "locations": [
+        "netra_backend/app/routes/test_gcp_errors.py:97"
+      ]
+    },
+    "TEST: Reporting error message to GCP": {
+      "value": "TEST: Reporting error message to GCP",
+      "category": "test_literals",
+      "locations": [
+        "netra_backend/app/routes/test_gcp_errors.py:112"
+      ]
+    },
+    "TEST: Silently reported exception": {
+      "value": "TEST: Silently reported exception",
+      "category": "test_literals",
+      "locations": [
+        "netra_backend/app/routes/test_gcp_errors.py:100"
+      ]
+    },
+    "TEST: Starting error cascade test": {
+      "value": "TEST: Starting error cascade test",
+      "category": "test_literals",
+      "locations": [
+        "netra_backend/app/routes/test_gcp_errors.py:138"
       ]
     },
     "TESTING": {
@@ -45484,6 +45753,13 @@
         "scripts/test_websocket_middleware.py:87"
       ]
     },
+    "Test a cascade of errors to see how they appear in GCP.": {
+      "value": "Test a cascade of errors to see how they appear in GCP.",
+      "category": "test_literals",
+      "locations": [
+        "netra_backend/app/routes/test_gcp_errors.py:134"
+      ]
+    },
     "Test a simple WebSocket connection.\n    \n    Args:\n        url: WebSocket URL to test\n        origin: Origin header to send": {
       "value": "Test a simple WebSocket connection.\n    \n    Args:\n        url: WebSocket URL to test\n        origin: Origin header to send",
       "category": "test_literals",
@@ -46271,6 +46547,26 @@
       "category": "test_literals",
       "locations": [
         "netra_backend/app/api/test_endpoints.py:30"
+      ]
+    },
+    "Test endpoints disabled in production": {
+      "value": "Test endpoints disabled in production",
+      "category": "test_literals",
+      "locations": [
+        "netra_backend/app/routes/test_gcp_errors.py:27",
+        "netra_backend/app/routes/test_gcp_errors.py:39",
+        "netra_backend/app/routes/test_gcp_errors.py:55",
+        "netra_backend/app/routes/test_gcp_errors.py:82",
+        "netra_backend/app/routes/test_gcp_errors.py:95",
+        "netra_backend/app/routes/test_gcp_errors.py:110",
+        "netra_backend/app/routes/test_gcp_errors.py:136"
+      ]
+    },
+    "Test endpoints for GCP error reporting.\n\nCRITICAL: These endpoints are for testing GCP error reporting integration.\nThey deliberately raise exceptions to verify error reporting works in GCP Cloud Run.": {
+      "value": "Test endpoints for GCP error reporting.\n\nCRITICAL: These endpoints are for testing GCP error reporting integration.\nThey deliberately raise exceptions to verify error reporting works in GCP Cloud Run.",
+      "category": "test_literals",
+      "locations": [
+        "netra_backend/app/routes/test_gcp_errors.py:1"
       ]
     },
     "Test endpoints for development - bypasses authentication\nONLY enabled in development environment": {
@@ -47783,6 +48079,20 @@
         "scripts/test_standalone_websocket.py:54"
       ]
     },
+    "Test the @gcp_reportable decorator without re-raising.": {
+      "value": "Test the @gcp_reportable decorator without re-raising.",
+      "category": "test_literals",
+      "locations": [
+        "netra_backend/app/routes/test_gcp_errors.py:93"
+      ]
+    },
+    "Test the @gcp_reportable decorator.": {
+      "value": "Test the @gcp_reportable decorator.",
+      "category": "test_literals",
+      "locations": [
+        "netra_backend/app/routes/test_gcp_errors.py:80"
+      ]
+    },
     "Test the E2E service orchestration system.": {
       "value": "Test the E2E service orchestration system.",
       "category": "test_literals",
@@ -48061,6 +48371,7 @@
       "value": "Testing",
       "category": "test_literals",
       "locations": [
+        "netra_backend/app/routes/test_gcp_errors.py:15",
         "scripts/run_all_test_categories.py:106",
         "scripts/test_agent_recovery_simple.py:49",
         "scripts/test_cors_implementation.py:146",
@@ -49466,6 +49777,13 @@
         "scripts/compliance/demo_test_size_enforcement.py:203"
       ]
     },
+    "This error was handled but still reported": {
+      "value": "This error was handled but still reported",
+      "category": "test_literals",
+      "locations": [
+        "netra_backend/app/routes/test_gcp_errors.py:67"
+      ]
+    },
     "This file causes precedence issues with Google Secret Manager": {
       "value": "This file causes precedence issues with Google Secret Manager",
       "category": "test_literals",
@@ -49492,6 +49810,13 @@
       "category": "test_literals",
       "locations": [
         "scripts/test_blocking_analysis.py:40"
+      ]
+    },
+    "This is a test error - please ignore": {
+      "value": "This is a test error - please ignore",
+      "category": "test_literals",
+      "locations": [
+        "netra_backend/app/routes/test_gcp_errors.py:47"
       ]
     },
     "This is the [WinError 10013] permission error!": {
@@ -52365,6 +52690,13 @@
       "category": "test_literals",
       "locations": [
         "scripts/test_failure_analyzer.py:271"
+      ]
+    },
+    "Verify GCP error reporting is configured correctly.": {
+      "value": "Verify GCP error reporting is configured correctly.",
+      "category": "test_literals",
+      "locations": [
+        "netra_backend/app/routes/test_gcp_errors.py:170"
       ]
     },
     "Verify GitHub workflow status": {
@@ -62807,12 +63139,26 @@
         "scripts/frontend_iterative_test_runner.py:558"
       ]
     },
+    "cascade_complete": {
+      "value": "cascade_complete",
+      "category": "test_literals",
+      "locations": [
+        "netra_backend/app/routes/test_gcp_errors.py:162"
+      ]
+    },
     "cascade_probability": {
       "value": "cascade_probability",
       "category": "test_literals",
       "locations": [
         "netra_backend/app/services/realistic_test_data/performance_simulator.py:463",
         "netra_backend/app/services/realistic_test_data/performance_simulator.py:475"
+      ]
+    },
+    "cascade_step": {
+      "value": "cascade_step",
+      "category": "test_literals",
+      "locations": [
+        "netra_backend/app/routes/test_gcp_errors.py:145"
       ]
     },
     "cascading_failure": {
@@ -66333,6 +66679,13 @@
         "scripts/comprehensive_test_fixer.py:86"
       ]
     },
+    "deliberate-handled-reported": {
+      "value": "deliberate-handled-reported",
+      "category": "test_literals",
+      "locations": [
+        "netra_backend/app/routes/test_gcp_errors.py:66"
+      ]
+    },
     "delta": {
       "value": "delta",
       "category": "test_literals",
@@ -66698,14 +67051,14 @@
       "locations": [
         "netra_backend/app/api/test_endpoints.py:19",
         "netra_backend/app/api/test_endpoints.py:27",
+        "netra_backend/app/routes/test_gcp_errors.py:19",
+        "netra_backend/app/routes/test_gcp_errors.py:20",
         "auth_service/tests/integration/test_database_connection.py:42",
         "auth_service/tests/integration/test_database_connection.py:72",
         "auth_service/tests/integration/test_database_connection.py:88",
         "auth_service/tests/integration/test_database_connection.py:122",
         "auth_service/tests/integration/test_database_connection.py:140",
-        "auth_service/tests/integration/test_database_connection.py:148",
-        "auth_service/tests/integration/test_database_connection.py:160",
-        "auth_service/tests/integration/test_database_connection.py:199"
+        "auth_service/tests/integration/test_database_connection.py:148"
       ]
     },
     "development with fallback": {
@@ -67477,6 +67830,7 @@
       "value": "endpoint",
       "category": "test_literals",
       "locations": [
+        "netra_backend/app/routes/test_gcp_errors.py:66",
         "scripts/auto_fix_test_sizes.py:344",
         "scripts/staging_comprehensive_test.py:221",
         "scripts/staging_comprehensive_test.py:244",
@@ -67485,8 +67839,7 @@
         "scripts/test_agent_orchestration_recovery.py:216",
         "scripts/test_agent_recovery_simple.py:64",
         "scripts/test_agent_recovery_simple.py:78",
-        "scripts/test_agent_recovery_simple.py:87",
-        "scripts/test_agent_recovery_simple.py:95"
+        "scripts/test_agent_recovery_simple.py:87"
       ]
     },
     "endpoint_responses": {
@@ -67769,6 +68122,7 @@
       "category": "test_literals",
       "locations": [
         "netra_backend/app/api/test_endpoints.py:63",
+        "netra_backend/app/routes/test_gcp_errors.py:178",
         "auth_service/tests/test_auth_real_services_comprehensive.py:426",
         "auth_service/tests/test_auth_real_services_comprehensive.py:427",
         "auth_service/tests/test_redis_staging_connectivity_fixes.py:221",
@@ -67776,8 +68130,7 @@
         "scripts/manage_test_services.py:105",
         "scripts/setup_staging_test_account.py:113",
         "scripts/setup_staging_test_account.py:251",
-        "scripts/setup_test_environment.py:104",
-        "scripts/test_backend_auth_config.py:33"
+        "scripts/setup_test_environment.py:104"
       ]
     },
     "environment in ['staging', 'production', 'prod']": {
@@ -67954,6 +68307,13 @@
         "scripts/test_triage_flow.py:83"
       ]
     },
+    "error_handled": {
+      "value": "error_handled",
+      "category": "test_literals",
+      "locations": [
+        "netra_backend/app/routes/test_gcp_errors.py:71"
+      ]
+    },
     "error_handler.py": {
       "value": "error_handler.py",
       "category": "test_literals",
@@ -68064,6 +68424,13 @@
         "scripts/test_environment_validation_clean.py:85",
         "scripts/test_improved_environment_validation.py:49",
         "scripts/test_improved_environment_validation.py:86"
+      ]
+    },
+    "errors_in_cascade": {
+      "value": "errors_in_cascade",
+      "category": "test_literals",
+      "locations": [
+        "netra_backend/app/routes/test_gcp_errors.py:163"
       ]
     },
     "estimatedTime": {
@@ -71568,6 +71935,27 @@
         "scripts/test_ga4_connection.py:11"
       ]
     },
+    "gcp_available": {
+      "value": "gcp_available",
+      "category": "test_literals",
+      "locations": [
+        "netra_backend/app/routes/test_gcp_errors.py:180"
+      ]
+    },
+    "gcp_client_initialized": {
+      "value": "gcp_client_initialized",
+      "category": "test_literals",
+      "locations": [
+        "netra_backend/app/routes/test_gcp_errors.py:177"
+      ]
+    },
+    "gcp_error_reporting_enabled": {
+      "value": "gcp_error_reporting_enabled",
+      "category": "test_literals",
+      "locations": [
+        "netra_backend/app/routes/test_gcp_errors.py:176"
+      ]
+    },
     "gdpr_service.py": {
       "value": "gdpr_service.py",
       "category": "test_literals",
@@ -74047,6 +74435,13 @@
         "scripts/test_backend_port_binding.py:143"
       ]
     },
+    "instructions": {
+      "value": "instructions",
+      "category": "test_literals",
+      "locations": [
+        "netra_backend/app/routes/test_gcp_errors.py:181"
+      ]
+    },
     "insufficient": {
       "value": "insufficient",
       "category": "test_literals",
@@ -76319,16 +76714,16 @@
       "value": "message",
       "category": "test_literals",
       "locations": [
+        "netra_backend/app/routes/test_gcp_errors.py:67",
+        "netra_backend/app/routes/test_gcp_errors.py:72",
+        "netra_backend/app/routes/test_gcp_errors.py:128",
         "netra_backend/app/services/realistic_test_data/llm_response_generator.py:71",
         "netra_backend/app/services/realistic_test_data/llm_response_generator.py:71",
         "netra_backend/app/services/realistic_test_data/log_generator.py:53",
         "netra_backend/app/services/realistic_test_data/models.py:115",
         "netra_backend/app/services/realistic_test_data/models.py:121",
         "netra_backend/app/services/realistic_test_data/models.py:126",
-        "netra_backend/app/services/realistic_test_data/models.py:132",
-        "netra_backend/app/services/realistic_test_data/models.py:137",
-        "auth_service/tests/auth-service-down-critical-scenarios.py:156",
-        "auth_service/tests/auth-service-down-critical-scenarios.py:337"
+        "netra_backend/app/services/realistic_test_data/models.py:132"
       ]
     },
     "message_": {
@@ -76373,6 +76768,13 @@
       "category": "test_literals",
       "locations": [
         "scripts/websocket_performance_standalone_test.py:247"
+      ]
+    },
+    "message_reported": {
+      "value": "message_reported",
+      "category": "test_literals",
+      "locations": [
+        "netra_backend/app/routes/test_gcp_errors.py:127"
       ]
     },
     "message_send": {
@@ -76530,6 +76932,7 @@
       "value": "metric",
       "category": "test_literals",
       "locations": [
+        "netra_backend/app/routes/test_gcp_errors.py:121",
         "scripts/test_triage_flow.py:47",
         "scripts/test_triage_flow.py:48",
         "scripts/test_triage_flow.py:69"
@@ -79527,6 +79930,13 @@
         "scripts/test_cors.py:378"
       ]
     },
+    "original_error": {
+      "value": "original_error",
+      "category": "test_literals",
+      "locations": [
+        "netra_backend/app/routes/test_gcp_errors.py:151"
+      ]
+    },
     "original_file": {
       "value": "original_file",
       "category": "test_literals",
@@ -81719,6 +82129,13 @@
         "scripts/test_log_introspection.py:185"
       ]
     },
+    "purpose": {
+      "value": "purpose",
+      "category": "test_literals",
+      "locations": [
+        "netra_backend/app/routes/test_gcp_errors.py:46"
+      ]
+    },
     "push": {
       "value": "push",
       "category": "test_literals",
@@ -83213,6 +83630,13 @@
         "scripts/test_backend_optimized.py:214",
         "scripts/test_execution_tracker.py:768",
         "scripts/test_execution_tracker.py:787"
+      ]
+    },
+    "reported": {
+      "value": "reported",
+      "category": "test_literals",
+      "locations": [
+        "netra_backend/app/routes/test_gcp_errors.py:73"
       ]
     },
     "reporting": {
@@ -85484,6 +85908,13 @@
         "scripts/test_standalone_websocket.py:95"
       ]
     },
+    "simulation": {
+      "value": "simulation",
+      "category": "test_literals",
+      "locations": [
+        "netra_backend/app/routes/test_gcp_errors.py:120"
+      ]
+    },
     "single_request_performance": {
       "value": "single_request_performance",
       "category": "test_literals",
@@ -85937,6 +86368,7 @@
       "value": "staging",
       "category": "test_literals",
       "locations": [
+        "netra_backend/app/routes/test_gcp_errors.py:20",
         "auth_service/test_actual_staging_credentials.py:31",
         "auth_service/test_staging_db_connection.py:36",
         "auth_service/test_staging_db_connection.py:123",
@@ -85945,8 +86377,7 @@
         "auth_service/test_url_construction.py:189",
         "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:70",
         "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:107",
-        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:145",
-        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:197"
+        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:145"
       ]
     },
     "staging-clickhouse": {
@@ -86442,15 +86873,15 @@
       "category": "test_literals",
       "locations": [
         "netra_backend/app/api/test_endpoints.py:62",
+        "netra_backend/app/routes/test_gcp_errors.py:71",
+        "netra_backend/app/routes/test_gcp_errors.py:127",
         "auth_service/tests/auth-service-down-critical-scenarios.py:191",
         "auth_service/tests/test_auth_comprehensive.py:277",
         "auth_service/tests/test_auth_comprehensive.py:437",
         "auth_service/tests/test_auth_comprehensive_audit.py:47",
         "auth_service/tests/test_auth_comprehensive_audit.py:582",
         "auth_service/tests/test_auth_real_services_comprehensive.py:416",
-        "auth_service/tests/test_critical_bugs_real.py:117",
-        "scripts/fix_test_batch.py:248",
-        "scripts/fix_test_batch.py:250"
+        "auth_service/tests/test_critical_bugs_real.py:117"
       ]
     },
     "status-fail": {
@@ -87232,15 +87663,15 @@
       "category": "test_literals",
       "locations": [
         "netra_backend/app/api/test_endpoints.py:16",
+        "netra_backend/app/routes/test_gcp_errors.py:46",
+        "netra_backend/app/routes/test_gcp_errors.py:65",
+        "netra_backend/app/routes/test_gcp_errors.py:119",
         "netra_backend/app/services/test_environment.py:53",
         "auth_service/debug_db_test.py:11",
         "auth_service/test_auth_direct.py:17",
         "auth_service/tests/conftest.py:57",
         "auth_service/tests/integration/test_database_connection.py:54",
-        "auth_service/tests/integration/test_database_connection.py:103",
-        "auth_service/tests/integration/test_database_connection.py:237",
-        "auth_service/tests/integration/test_database_connection.py:288",
-        "auth_service/tests/test_auth_comprehensive.py:57"
+        "auth_service/tests/integration/test_database_connection.py:103"
       ]
     },
     "test agents": {
@@ -88490,6 +88921,13 @@
         "scripts/cleanup_test_processes.py:80"
       ]
     },
+    "test_cascade": {
+      "value": "test_cascade",
+      "category": "test_literals",
+      "locations": [
+        "netra_backend/app/routes/test_gcp_errors.py:187"
+      ]
+    },
     "test_categories.py": {
       "value": "test_categories.py",
       "category": "test_literals",
@@ -88644,6 +89082,13 @@
         "auth_service/tests/unit/test_docker_hostname_resolution.py:132",
         "auth_service/tests/unit/test_docker_hostname_resolution.py:159",
         "auth_service/tests/unit/test_docker_hostname_resolution.py:186"
+      ]
+    },
+    "test_decorator": {
+      "value": "test_decorator",
+      "category": "test_literals",
+      "locations": [
+        "netra_backend/app/routes/test_gcp_errors.py:185"
       ]
     },
     "test_deployment_edge_cases.py": {
@@ -88928,6 +89373,13 @@
         "scripts/apply_fast_test_decorators.py:149"
       ]
     },
+    "test_handled": {
+      "value": "test_handled",
+      "category": "test_literals",
+      "locations": [
+        "netra_backend/app/routes/test_gcp_errors.py:184"
+      ]
+    },
     "test_history.json": {
       "value": "test_history.json",
       "category": "test_literals",
@@ -89005,6 +89457,7 @@
       "value": "test_message",
       "category": "test_literals",
       "locations": [
+        "netra_backend/app/routes/test_gcp_errors.py:186",
         "scripts/test_cold_start_e2e.py:52",
         "scripts/test_cold_start_e2e.py:348"
       ]
@@ -89051,6 +89504,13 @@
         "scripts/test_agent_orchestration_recovery.py:55",
         "scripts/test_agent_orchestration_recovery.py:109",
         "scripts/test_agent_orchestration_recovery.py:167"
+      ]
+    },
+    "test_netra_exception": {
+      "value": "test_netra_exception",
+      "category": "test_literals",
+      "locations": [
+        "netra_backend/app/routes/test_gcp_errors.py:183"
       ]
     },
     "test_oauth_regression": {
@@ -89486,6 +89946,13 @@
         "scripts/business_value_test_index.py:628"
       ]
     },
+    "test_unhandled": {
+      "value": "test_unhandled",
+      "category": "test_literals",
+      "locations": [
+        "netra_backend/app/routes/test_gcp_errors.py:182"
+      ]
+    },
     "test_update_spec.xml": {
       "value": "test_update_spec.xml",
       "category": "test_literals",
@@ -89697,12 +90164,20 @@
       "value": "testing",
       "category": "test_literals",
       "locations": [
+        "netra_backend/app/routes/test_gcp_errors.py:20",
         "scripts/debug_supervisor_test.py:12",
         "scripts/remove_test_stubs.py:78",
         "scripts/run_agent_pipeline_test.py:35",
         "scripts/run_critical_test.py:35",
         "scripts/test_backend_ORIGINAL.py:82",
         "scripts/test_backend_ORIGINAL.py:372"
+      ]
+    },
+    "testing_endpoints_enabled": {
+      "value": "testing_endpoints_enabled",
+      "category": "test_literals",
+      "locations": [
+        "netra_backend/app/routes/test_gcp_errors.py:179"
       ]
     },
     "testing_strategy": {
@@ -90543,6 +91018,7 @@
       "value": "threshold",
       "category": "test_literals",
       "locations": [
+        "netra_backend/app/routes/test_gcp_errors.py:122",
         "scripts/test_triage_flow.py:69"
       ]
     },
