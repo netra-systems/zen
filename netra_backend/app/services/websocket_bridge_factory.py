@@ -570,6 +570,10 @@ class UserWebSocketEmitter:
                         timeout=self.delivery_config['heartbeat_interval']
                     )
                     
+                    # Check for sentinel value (None) indicating shutdown
+                    if event is None or self._shutdown:
+                        break
+                        
                     # Attempt delivery with retries
                     await self._deliver_event_with_retries(event)
                     
@@ -577,6 +581,7 @@ class UserWebSocketEmitter:
                     # Heartbeat - check connection health if not shutting down
                     if not self._shutdown:
                         await self._check_connection_health()
+                    # If shutting down, timeout is expected - just continue to check shutdown flag
                     
                 except Exception as e:
                     if not self._shutdown:
@@ -767,6 +772,12 @@ class UserWebSocketEmitter:
         try:
             # Signal shutdown
             self._shutdown = True
+            
+            # Wake up the event processor by putting a sentinel value
+            try:
+                self.user_context.event_queue.put_nowait(None)  # Sentinel to wake up processor
+            except asyncio.QueueFull:
+                pass  # Queue is full, processor will see shutdown flag eventually
             
             # Cancel event processor
             if self._processor_task and not self._processor_task.done():

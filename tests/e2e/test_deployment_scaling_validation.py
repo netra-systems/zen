@@ -97,7 +97,7 @@ class TestDeploymentScalingValidation:
         finally:
             # Cleanup
             if original_value is not None:
-                get_env().get(test_config_key) = original_value
+                os.environ[test_config_key] = original_value
             else:
                 os.environ.pop(test_config_key, None)
 

@@ -883,7 +883,7 @@ class TestJWTSecretHardRequirements:
         print(f"  - Token validation P95: {p95_token_validation:.6f}s")
         
         # Performance assertions for revenue-critical operations
-        assert failure_rate < 0.01, f"Failure rate too high: {failure_rate:.2%} (max 1%)")
+        assert failure_rate < 0.01, f"Failure rate too high: {failure_rate:.2%} (max 1%)"
         assert operations_per_second >= 100, f"Operations per second too low: {operations_per_second:.1f} (min 100/s)"
         assert avg_token_generation < 0.01, f"Token generation too slow: {avg_token_generation:.6f}s (max 0.01s)"
         assert avg_token_validation < 0.005, f"Token validation too slow: {avg_token_validation:.6f}s (max 0.005s)"

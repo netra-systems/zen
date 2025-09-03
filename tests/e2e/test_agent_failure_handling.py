@@ -400,10 +400,10 @@ class TestAgentFailureHandlingE2E:
             print(f"   Error details: {error_info}")
         
         # Verify the fix is working
-        assert death_detected, \\
+        assert death_detected, \
             "CRITICAL: Execution tracker did not detect agent death - bug is NOT fixed!"
             
-        assert death_notification is not None, \\
+        assert death_notification is not None, \
             "CRITICAL: User did not receive death notification - user experience is broken!"
         
         # Verify error message is user-friendly
