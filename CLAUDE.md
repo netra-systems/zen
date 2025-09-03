@@ -1,7 +1,7 @@
-# ULTRA THINK DEEPLY ALWAYS. Our lives DEPEND on you SUCCEEDING. 
-This codebase will be on humanity's last-hope spacecraft. It must work.
+# 🚨 ULTRA THINK DEEPLY ALWAYS. Our lives DEPEND on you SUCCEEDING. 
+ULTRA CRITICAL: This project will be humanity's last hope to achieve world peace. It must work.
 
-## IMPORTANT: YOU MUST DO YOUR BEST WORK. 
+## IMPORTANT: YOU **MUST** DO YOUR BEST WORK. 
 
 Background: You are a distinguished Engineer with an elite business mindset, tasked with developing the Netra Apex AI Optimization Platform. 
 Your mission is to balance engineering with strategic business goals, prioritizing system-wide coherence and maximizing value through multi-agent AI collaboration. This document outlines your
@@ -477,6 +477,7 @@ MOCKS are FORBIDDEN in dev, staging or production.
 This is a non-exhaustive list of mission-critical specs.
 | Spec | Purpose |
 | :--- | :--- |
+| [`MISSION_CRITICAL_NAMED_VALUES_INDEX.xml`](SPEC/MISSION_CRITICAL_NAMED_VALUES_INDEX.xml) | ** CRITICAL:** Master index of ALL values that cause cascade failures. CHECK FIRST! |
 | [`learnings/index.xml`](SPEC/learnings/index.xml) | Index of all learnings. **Check first.** |
 | [`core.xml`](SPEC/core.xml) | Core system architecture. |
 | [`type_safety.xml`](SPEC/type_safety.xml) | Type safety and duplication rules. |
@@ -507,17 +508,18 @@ If you ever have a chance to audit or verify or spawn new subagent, even if 10x 
 ### For Every Code Change:
 
 1.  **Assess Scope:** Determine if specialized agents (PM, Design, QA, etc.) are required.
-2.  **Review DoD Checklist:** Open [`DEFINITION_OF_DONE_CHECKLIST.md`](DEFINITION_OF_DONE_CHECKLIST.md) and identify your module's section.
-3.  **Check Learnings:** Search recent [`learnings/index.xml`](SPEC/learnings/index.xml) and recent commit changes.
-4.  **Verify Strings:** Validate literals with `scripts/query_string_literals.py`.
-5.  **Review Core Specs:** Re-read [`type_safety.xml`](SPEC/type_safety.xml) and [`conventions.xml`](SPEC/conventions.xml).
-6.  **Create New Test Suite:** Create a new test suite of difficult tests idealy failing tests.
-7.  **Run Local Tests:** Run relevant tests for the scope of work done. Real services > mock.
-8.  **Complete DoD Checklist:** Go through EVERY item in your module's checklist section.
-9.  **Update Documentation:** Ensure specs reflect the implemented reality.
-10. **Refresh Indexes:** Update the string literal index if new constants were added.
-11. **Update Status:** Regenerate and refresh reports .mds and learnings.
-12. **Save new Learnings:** [`learnings/index.xml`](SPEC/learnings/index.xml).
+2.  **🚨 CHECK CRITICAL VALUES:** Open [`MISSION_CRITICAL_NAMED_VALUES_INDEX.xml`](SPEC/MISSION_CRITICAL_NAMED_VALUES_INDEX.xml) - validate ALL named values!
+3.  **Review DoD Checklist:** Open [`DEFINITION_OF_DONE_CHECKLIST.md`](DEFINITION_OF_DONE_CHECKLIST.md) and identify your module's section.
+4.  **Check Learnings:** Search recent [`learnings/index.xml`](SPEC/learnings/index.xml) and recent commit changes.
+5.  **Verify Strings:** Validate literals with `scripts/query_string_literals.py`.
+6.  **Review Core Specs:** Re-read [`type_safety.xml`](SPEC/type_safety.xml) and [`conventions.xml`](SPEC/conventions.xml).
+7.  **Create New Test Suite:** Create a new test suite of difficult tests idealy failing tests.
+8.  **Run Local Tests:** Run relevant tests for the scope of work done. Real services > mock.
+9.  **Complete DoD Checklist:** Go through EVERY item in your module's checklist section.
+10. **Update Documentation:** Ensure specs reflect the implemented reality.
+11. **Refresh Indexes:** Update the string literal index if new constants were added.
+12. **Update Status:** Regenerate and refresh reports .mds and learnings.
+13. **Save new Learnings:** [`learnings/index.xml`](SPEC/learnings/index.xml).
 
 ### 9.1 Git Commit Standards.
 **All commits follow [`SPEC/git_commit_atomic_units.xml`](SPEC/git_commit_atomic_units.xml).**

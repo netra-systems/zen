@@ -10,11 +10,13 @@
     <retrieval-protocol>
         <title>AI Utilization Strategy</title>
         <ai-directive>AI Agents MUST consult this index before task execution to avoid known regressions.</ai-directive>
+        <critical-reference>🚨 SPEC/MISSION_CRITICAL_NAMED_VALUES_INDEX.xml - Master index of all values that cause cascade failures</critical-reference>
         <workflow>
             <step>1. Analyze the task description for relevant keywords/domains.</step>
             <step>2. Query this index for matching categories.</step>
             <step>3. Prioritize and integrate the critical-takeaway elements into the execution plan.</step>
             <step>4. If necessary, retrieve the detailed learning file using the `path` attribute.</step>
+            <step>5. ALWAYS check SPEC/MISSION_CRITICAL_NAMED_VALUES_INDEX.xml for configuration values.</step>
         </workflow>
     </retrieval-protocol>
     
