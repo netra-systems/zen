@@ -16,6 +16,7 @@
  */
 
 import { MessageType } from '../shared/enums';
+import { BaseMessage } from '../shared/base';
 
 // ============================================================================
 // UNIFIED MESSAGE HIERARCHY - Single Source of Truth
@@ -90,21 +91,7 @@ export interface MessageMetadata {
  */
 export type MessageRole = 'user' | 'assistant' | 'system';
 
-/**
- * Base message interface with core fields
- * Foundation for all message types across the system
- */
-export interface BaseMessage {
-  id: string;
-  content: string;
-  role?: MessageRole;
-  type?: MessageType;
-  created_at?: string;
-  timestamp?: number | Date; // Support both number and Date for compatibility
-  displayed_to_user?: boolean;
-  error?: string;
-  thread_id?: string | null;
-}
+// BaseMessage is now imported from shared/base.ts as the single source of truth
 
 /**
  * Comprehensive Message interface - consolidated from all sources
@@ -208,6 +195,7 @@ export function createChatMessage(
 
 // Re-export types for components that expect different names
 export { Message as ChatMessageType };
+// BaseMessage is imported from shared/base.ts and re-exported as BaseChatMessage for compatibility
 export { BaseMessage as BaseChatMessage };
 
 // ============================================================================

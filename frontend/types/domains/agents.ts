@@ -128,19 +128,23 @@ export type SubAgentLifecycle = "pending" | "running" | "completed" | "failed" |
 
 /**
  * Base message structure for agent communication.
+ * Renamed to avoid confusion with UI AgentMessage from shared/base.ts
  */
-export interface BaseMessage {
+export interface AgentMessage {
   role: "user" | "agent" | "system" | "error" | "tool";
   content: string;
   timestamp?: string;
 }
+
+// Backward compatibility alias
+export { AgentMessage as BaseMessage };
 
 /**
  * Sub-agent state for nested agent workflow management.
  * Tracks individual sub-agent execution within larger workflows.
  */
 export interface SubAgentState {
-  messages: BaseMessage[];
+  messages: AgentMessage[];
   next_node: string;
   tool_results?: { [k: string]: unknown; }[] | null;
   lifecycle?: SubAgentLifecycle;
