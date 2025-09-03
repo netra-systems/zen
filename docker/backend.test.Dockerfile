@@ -39,39 +39,10 @@ FROM system as deps
 COPY requirements.txt /app/
 COPY test_framework/requirements.txt /app/test_framework/
 
-# Create optimized test requirements
-RUN cat > /app/test_requirements.txt << 'EOF'
-# Essential testing dependencies only
-pytest>=8.4.1
-pytest-asyncio>=1.1.0
-pytest-cov>=6.0.0
-
-# Core application dependencies (minimal set)
-fastapi>=0.116.1
-starlette>=0.47.3
-uvicorn[standard]>=0.35.0
-pydantic>=2.11.7
-sqlalchemy>=2.0.43
-sqlmodel>=0.0.24
-asyncpg>=0.30.0
-
-# Authentication essentials
-PyJWT[cryptography]>=2.10.1
-bcrypt>=4.3.0
-
-# HTTP client and configuration
-httpx>=0.28.1
-python-dotenv>=1.1.1
-
-# Essential utilities
-tenacity>=9.1.2
-beartype>=0.21.0
-python-dateutil>=2.9.0.post0
-psutil>=7.0.0
-EOF
-
-# Install dependencies with memory optimization
-RUN pip install --no-cache-dir --compile -r /app/test_requirements.txt \
+# Install ALL dependencies from main requirements to ensure nothing is missing
+# This ensures the test environment matches production
+RUN pip install --no-cache-dir --compile -r /app/requirements.txt \
+    && pip install --no-cache-dir --compile -r /app/test_framework/requirements.txt \
     && python -m compileall /usr/local/lib/python3.11/site-packages \
     && find /usr/local/lib/python3.11/site-packages -name "*.pyc" -delete \
     && find /usr/local/lib/python3.11/site-packages -name "__pycache__" -type d -exec rm -rf {} + \
