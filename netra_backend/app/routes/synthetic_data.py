@@ -14,7 +14,7 @@ from sqlalchemy.orm import Session
 
 from netra_backend.app import schemas
 from netra_backend.app.auth_integration.auth import get_current_user
-from netra_backend.app.dependencies import DbDep, get_db_dependency, get_db_session, get_security_service
+from netra_backend.app.dependencies import DbDep, get_request_scoped_db_session, get_db_session, get_security_service
 from netra_backend.app.routes.utils.error_handlers import handle_service_error
 from netra_backend.app.routes.utils.validators import validate_user_active
 from netra_backend.app.routes.utils.synthetic_data_helpers import (
@@ -218,7 +218,7 @@ async def preview_synthetic_data(
 # Corpus endpoints moved to synthetic_data_corpus.py for modularity
 
 @router.get("/templates")
-async def get_templates(db: AsyncSession = Depends(get_db_dependency)):
+async def get_templates(db: AsyncSession = Depends(get_request_scoped_db_session)):
     """Get available templates"""
     return await _fetch_templates(db)
 

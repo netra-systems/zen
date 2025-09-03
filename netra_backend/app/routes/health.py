@@ -17,7 +17,7 @@ from netra_backend.app.core.health import (
     HealthLevel,
     HealthResponseBuilder,
 )
-from netra_backend.app.dependencies import get_db_dependency
+from netra_backend.app.dependencies import get_request_scoped_db_session
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.services.database_env_service import DatabaseEnvironmentValidator
 from netra_backend.app.services.schema_validation_service import SchemaValidationService
