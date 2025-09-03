@@ -1,0 +1,269 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<specification>
+    <metadata>
+        <title>Unified MessageRouter Design Specification</title>
+        <version>1.0</version>
+        <date>2025-09-03</date>
+        <status>DRAFT</status>
+        <priority>CRITICAL</priority>
+        <category>SSOT_CONSOLIDATION</category>
+    </metadata>
+
+    <problem_statement>
+        Two incompatible MessageRouter implementations violate SSOT principles,
+        causing production failures. Must consolidate into single implementation
+        that supports all current usage patterns.
+    </problem_statement>
+
+    <design_principles>
+        <principle>SSOT - Single Source of Truth for message routing</principle>
+        <principle>Backward Compatibility - Support existing code during migration</principle>
+        <principle>Performance - Maintain or improve routing performance</principle>
+        <principle>Type Safety - Support both handler interfaces safely</principle>
+        <principle>Observability - Enhanced metrics and logging</principle>
+    </design_principles>
+
+    <unified_interface>
+        <class_definition>
+            <name>UnifiedMessageRouter</name>
+            <location>netra_backend/app/websocket_core/unified_message_router.py</location>
+            
+            <methods>
+                <!-- Primary Registration (from services/websocket) -->
+                <method>
+                    <signature>register_handler(handler: Union[BaseMessageHandler, MessageHandler]) -> None</signature>
+                    <purpose>Primary handler registration - SSOT method</purpose>
+                    <behavior>
+                        - Detect handler type automatically
+                        - Store in appropriate structure
+                        - Log registration with handler type
+                    </behavior>
+                </method>
+                
+                <!-- Compatibility Registration (from websocket_core) -->
+                <method>
+                    <signature>add_handler(handler: MessageHandler) -> None</signature>
+                    <purpose>Compatibility wrapper for websocket_core pattern</purpose>
+                    <behavior>
+                        - Log deprecation warning
+                        - Delegate to register_handler
+                    </behavior>
+                </method>
+                
+                <!-- Unregistration Methods -->
+                <method>
+                    <signature>unregister_handler(identifier: Union[str, MessageHandler]) -> None</signature>
+                    <purpose>Remove handler by type or instance</purpose>
+                    <behavior>
+                        - Support both removal patterns
+                        - Clean up all internal structures
+                    </behavior>
+                </method>
+                
+                <method>
+                    <signature>remove_handler(handler: MessageHandler) -> None</signature>
+                    <purpose>Compatibility wrapper</purpose>
+                    <behavior>Delegate to unregister_handler</behavior>
+                </method>
+                
+                <!-- Message Routing - Unified -->
+                <method>
+                    <signature>route_message(user_id: str, websocket: Optional[WebSocket], message: Union[Dict, WebSocketMessage, str]) -> bool</signature>
+                    <purpose>Universal message routing</purpose>
+                    <behavior>
+                        - Normalize message format
+                        - Find appropriate handler
+                        - Execute with metrics
+                        - Handle fallback
+                    </behavior>
+                </method>
+                
+                <!-- Middleware Support -->
+                <method>
+                    <signature>add_middleware(middleware: Callable) -> None</signature>
+                    <purpose>Add processing middleware</purpose>
+                </method>
+                
+                <method>
+                    <signature>clear_middleware() -> None</signature>
+                    <purpose>Remove all middleware</purpose>
+                </method>
+                
+                <!-- Fallback Handler -->
+                <method>
+                    <signature>set_fallback_handler(handler: MessageHandler) -> None</signature>
+                    <purpose>Set handler for unmatched messages</purpose>
+                </method>
+                
+                <!-- Metrics and Stats -->
+                <method>
+                    <signature>get_routing_stats() -> Dict[str, Any]</signature>
+                    <purpose>Primary stats method</purpose>
+                </method>
+                
+                <method>
+                    <signature>get_stats() -> Dict[str, Any]</signature>
+                    <purpose>Compatibility alias</purpose>
+                </method>
+                
+                <method>
+                    <signature>reset_metrics() -> None</signature>
+                    <purpose>Clear metrics data</purpose>
+                </method>
+            </methods>
+        </class_definition>
+    </unified_interface>
+
+    <internal_architecture>
+        <storage>
+            <!-- Hybrid storage for compatibility -->
+            <structure name="_handlers_by_type" type="Dict[str, BaseMessageHandler]">
+                For type-based lookup (services pattern)
+            </structure>
+            <structure name="_handler_list" type="List[MessageHandler]">
+                For ordered processing (websocket_core pattern)
+            </structure>
+            <structure name="_handler_registry" type="Dict[str, HandlerInfo]">
+                Unified registry with metadata
+            </structure>
+        </storage>
+        
+        <handler_info>
+            <field name="handler">The handler instance</field>
+            <field name="handler_type">BaseMessageHandler or MessageHandler</field>
+            <field name="message_types">List of supported message types</field>
+            <field name="priority">Execution priority</field>
+            <field name="added_at">Timestamp for debugging</field>
+        </handler_info>
+    </internal_architecture>
+
+    <compatibility_layer>
+        <handler_adapter>
+            <!-- Adapt between handler interfaces -->
+            <adapter name="BaseToMessageHandlerAdapter">
+                Wraps BaseMessageHandler to work as MessageHandler
+            </adapter>
+            <adapter name="MessageToBaseHandlerAdapter">
+                Wraps MessageHandler to work as BaseMessageHandler
+            </adapter>
+        </handler_adapter>
+        
+        <message_normalization>
+            <!-- Convert between message formats -->
+            <normalizer>
+                - Dict -> WebSocketMessage
+                - String -> WebSocketMessage
+                - JSON-RPC -> WebSocketMessage
+            </normalizer>
+        </message_normalization>
+    </compatibility_layer>
+
+    <migration_strategy>
+        <phase number="1">
+            <name>Implementation</name>
+            <tasks>
+                - Create UnifiedMessageRouter class
+                - Implement all methods with compatibility
+                - Write comprehensive test suite
+            </tasks>
+        </phase>
+        
+        <phase number="2">
+            <name>Shadow Mode</name>
+            <tasks>
+                - Run unified router alongside existing
+                - Log differences in behavior
+                - Verify compatibility
+            </tasks>
+        </phase>
+        
+        <phase number="3">
+            <name>Gradual Migration</name>
+            <tasks>
+                - Update test files first
+                - Update production with feature flag
+                - Monitor metrics and errors
+            </tasks>
+        </phase>
+        
+        <phase number="4">
+            <name>Cleanup</name>
+            <tasks>
+                - Remove old MessageRouter classes
+                - Remove compatibility methods
+                - Update all documentation
+            </tasks>
+        </phase>
+    </migration_strategy>
+
+    <testing_requirements>
+        <unit_tests>
+            <test>Handler registration with both interfaces</test>
+            <test>Message routing with all formats</test>
+            <test>Middleware execution order</test>
+            <test>Fallback handler behavior</test>
+            <test>Metrics accuracy</test>
+            <test>Concurrent access safety</test>
+        </unit_tests>
+        
+        <integration_tests>
+            <test>WebSocket connection lifecycle</test>
+            <test>Agent message processing</test>
+            <test>Multi-user scenarios</test>
+            <test>Performance benchmarks</test>
+        </integration_tests>
+        
+        <compatibility_tests>
+            <test>All existing tests pass unchanged</test>
+            <test>Production code works without modification</test>
+            <test>Deprecation warnings logged correctly</test>
+        </compatibility_tests>
+    </testing_requirements>
+
+    <performance_requirements>
+        <requirement>Handler lookup: O(1) for type-based</requirement>
+        <requirement>Message routing: &lt; 1ms overhead</requirement>
+        <requirement>Memory: No more than 10% increase</requirement>
+        <requirement>Concurrent users: Support 100+ active connections</requirement>
+    </performance_requirements>
+
+    <monitoring>
+        <metrics>
+            <metric>Total handlers registered</metric>
+            <metric>Messages routed per second</metric>
+            <metric>Handler execution times</metric>
+            <metric>Middleware processing time</metric>
+            <metric>Fallback handler invocations</metric>
+            <metric>Routing errors</metric>
+        </metrics>
+        
+        <logging>
+            <log_event>Handler registration/removal</log_event>
+            <log_event>Compatibility method usage</log_event>
+            <log_event>Routing decisions</log_event>
+            <log_event>Performance warnings</log_event>
+        </logging>
+    </monitoring>
+
+    <rollback_plan>
+        <step>Feature flag to switch routers</step>
+        <step>Keep old implementations during migration</step>
+        <step>Automated rollback on error threshold</step>
+        <step>Manual override capability</step>
+    </rollback_plan>
+
+    <success_criteria>
+        <criterion>All existing code works without modification</criterion>
+        <criterion>No performance degradation</criterion>
+        <criterion>Zero downtime during migration</criterion>
+        <criterion>All tests pass with unified router</criterion>
+        <criterion>Reduced code complexity (single implementation)</criterion>
+    </success_criteria>
+
+    <references>
+        <reference>MESSAGE_ROUTER_SSOT_CONSOLIDATION_PLAN.md</reference>
+        <reference>MESSAGE_ROUTER_CONSUMER_ANALYSIS.md</reference>
+        <reference>AGENT_MESSAGE_HANDLER_BUG_FIX.md</reference>
+        <reference>SPEC/learnings/message_router_ssot_violation_20250903.xml</reference>
+    </references>
+</specification>
