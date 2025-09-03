@@ -291,7 +291,8 @@ class UnifiedDockerManager:
                  use_alpine: bool = False,  # Add Alpine container support
                  rebuild_images: bool = True,  # Rebuild images by default for freshness
                  rebuild_backend_only: bool = True,  # Only rebuild backend by default
-                 pull_policy: str = "missing"):  # Docker pull policy: always, never, missing (default)
+                 pull_policy: str = "missing",  # Docker pull policy: always, never, missing (default)
+                 no_cache_app_code: bool = True):  # Always rebuild app code layers
         """
         Initialize unified Docker manager with orchestration capabilities.
         
@@ -304,6 +305,8 @@ class UnifiedDockerManager:
             use_alpine: Use Alpine-based Docker compose files for minimal container size
             rebuild_images: Whether to rebuild Docker images before starting
             rebuild_backend_only: Whether to rebuild only backend services (backend, auth)
+            pull_policy: Docker pull policy - controls Docker Hub access
+            no_cache_app_code: If True, always rebuild application code layers (recommended)
         """
         self.config = config or OrchestrationConfig()
         self.environment_type = environment_type
@@ -314,6 +317,7 @@ class UnifiedDockerManager:
         self.rebuild_images = rebuild_images
         self.rebuild_backend_only = rebuild_backend_only
         self.pull_policy = pull_policy  # Control Docker Hub access
+        self.no_cache_app_code = no_cache_app_code  # Smart caching strategy
         
         # Port discovery and allocation
         self.port_discovery = DockerPortDiscovery(use_test_services=True)
@@ -2055,22 +2059,30 @@ class UnifiedDockerManager:
         
         # Build services if needed
         if self.rebuild_images:
-            backend_services = ['backend', 'auth', 'alpine-test-backend', 'alpine-test-auth', 'test-backend', 'test-auth']
+            backend_services = ['backend', 'auth', 'alpine-test-backend', 'alpine-test-auth', 'test-backend', 'test-auth', 
+                               'dev-backend', 'dev-auth']  # Include dev services
+            
+            # Add no-cache flag for application code if enabled
+            no_cache_flag = []
+            if self.no_cache_app_code:
+                # Use --no-cache to ensure fresh Python code is always copied
+                no_cache_flag = ["--no-cache"]
+                logger.info("🔄 Using --no-cache for fresh application code build")
             
             if self.rebuild_backend_only and any(s in backend_services for s in service_names):
                 # Build backend services
                 services_to_build = [s for s in service_names if s in backend_services]
                 if services_to_build:
-                    build_cmd = ["docker", "compose", "-f", compose_file, "-p", self._get_project_name(), "build"] + services_to_build
-                    logger.info(f"🔨 Building backend services: {services_to_build}")
+                    build_cmd = ["docker", "compose", "-f", compose_file, "-p", self._get_project_name(), "build"] + no_cache_flag + services_to_build
+                    logger.info(f"🔨 Building backend services: {services_to_build} (no-cache={self.no_cache_app_code})")
                     
                     result = subprocess.run(build_cmd, capture_output=True, text=True, timeout=300, env=env)
                     if result.returncode != 0:
                         logger.warning(f"⚠️ Failed to build services: {result.stderr}")
             elif not self.rebuild_backend_only:
                 # Build all requested services
-                build_cmd = ["docker", "compose", "-f", compose_file, "-p", self._get_project_name(), "build"] + service_names
-                logger.info(f"🔨 Building all requested services: {service_names}")
+                build_cmd = ["docker", "compose", "-f", compose_file, "-p", self._get_project_name(), "build"] + no_cache_flag + service_names
+                logger.info(f"🔨 Building all requested services: {service_names} (no-cache={self.no_cache_app_code})")
                 
                 result = subprocess.run(build_cmd, capture_output=True, text=True, timeout=300, env=env)
                 if result.returncode != 0:
