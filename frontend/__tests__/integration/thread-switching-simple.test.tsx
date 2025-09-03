@@ -6,7 +6,12 @@
 import React from 'react';
 import { renderHook, act, waitFor } from '@testing-library/react';
 import { useThreadSwitching } from '@/hooks/useThreadSwitching';
-import { useUnifiedChatStore } from '@/store/unified-chat';
+
+// Mock the unified chat store
+jest.mock('@/store/unified-chat', () => require('../../__mocks__/store/unified-chat'));
+
+// Import the mocked store
+import { useUnifiedChatStore, resetMockState } from '@/store/unified-chat';
 
 // Mock dependencies
 jest.mock('@/services/threadLoadingService', () => ({
@@ -56,41 +61,10 @@ describe('Thread Switching Basic Tests', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     
-    // Initialize store with required actions
-    const initialState = {
-      activeThreadId: null,
-      messages: [],
-      isProcessing: false,
-      threadLoading: false,
-      setActiveThread: jest.fn((id) => {
-        useUnifiedChatStore.setState({ activeThreadId: id });
-      }),
-      setThreadLoading: jest.fn((loading) => {
-        useUnifiedChatStore.setState({ threadLoading: loading });
-      }),
-      startThreadLoading: jest.fn((id) => {
-        useUnifiedChatStore.setState({ 
-          threadLoading: true,
-          activeThreadId: id 
-        });
-      }),
-      completeThreadLoading: jest.fn((id, messages) => {
-        useUnifiedChatStore.setState({ 
-          threadLoading: false,
-          activeThreadId: id,
-          messages 
-        });
-      }),
-      clearMessages: jest.fn(() => {
-        useUnifiedChatStore.setState({ messages: [] });
-      }),
-      loadMessages: jest.fn((messages) => {
-        useUnifiedChatStore.setState({ messages });
-      }),
-      handleWebSocketEvent: jest.fn()
-    };
-    
-    useUnifiedChatStore.setState(initialState);
+    // Reset the mock store to initial state
+    if (typeof resetMockState === 'function') {
+      resetMockState();
+    }
   });
 
   it('should switch to a thread successfully', async () => {
@@ -148,12 +122,13 @@ describe('Thread Switching Basic Tests', () => {
   it('should prevent concurrent switches', async () => {
     const { threadLoadingService } = require('@/services/threadLoadingService');
     
-    let resolveFirst: any;
-    let resolveSecond: any;
+    const resolvers: { [key: string]: any } = {};
     
-    threadLoadingService.loadThread
-      .mockImplementationOnce(() => new Promise(resolve => { resolveFirst = resolve; }))
-      .mockImplementationOnce(() => new Promise(resolve => { resolveSecond = resolve; }));
+    threadLoadingService.loadThread.mockImplementation((threadId: string) => {
+      return new Promise(resolve => { 
+        resolvers[threadId] = resolve; 
+      });
+    });
 
     const { result } = renderHook(() => useThreadSwitching());
 
@@ -165,18 +140,23 @@ describe('Thread Switching Basic Tests', () => {
     expect(result.current.state.isLoading).toBe(true);
     expect(result.current.state.loadingThreadId).toBe('thread-1');
 
-    // Try second switch while first is loading
-    act(() => {
+    // Try second switch while first is loading - this should cancel the first
+    await act(async () => {
       result.current.switchToThread('thread-2');
     });
 
+    // The loading thread should now be thread-2 
+    expect(result.current.state.loadingThreadId).toBe('thread-2');
+
     // Resolve the second switch
     await act(async () => {
-      resolveSecond({
-        success: true,
-        threadId: 'thread-2',
-        messages: []
-      });
+      if (resolvers['thread-2']) {
+        resolvers['thread-2']({
+          success: true,
+          threadId: 'thread-2',
+          messages: []
+        });
+      }
       await waitFor(() => !result.current.state.isLoading);
     });
 
@@ -209,8 +189,8 @@ describe('Thread Switching Basic Tests', () => {
       await result.current.switchToThread('thread-1', { clearMessages: true });
     });
 
-    const clearMessages = useUnifiedChatStore.getState().clearMessages as jest.Mock;
-    expect(clearMessages).toHaveBeenCalled();
+    const storeState = useUnifiedChatStore.getState();
+    expect(storeState.clearMessages).toHaveBeenCalled();
   });
 
   it('should update URL when enabled', async () => {

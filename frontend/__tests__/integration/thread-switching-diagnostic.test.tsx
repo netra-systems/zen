@@ -8,9 +8,14 @@ import React from 'react';
 import { renderHook, act, waitFor } from '@testing-library/react';
 import { render, fireEvent, screen } from '@testing-library/react';
 import { useThreadSwitching } from '@/hooks/useThreadSwitching';
-import { useUnifiedChatStore } from '@/store/unified-chat';
 import * as threadLoadingService from '@/services/threadLoadingService';
 import { ChatSidebar } from '@/components/chat/ChatSidebar';
+
+// Mock the unified chat store
+jest.mock('@/store/unified-chat', () => require('../../__mocks__/store/unified-chat'));
+
+// Import the mocked store
+import { useUnifiedChatStore, resetMockState } from '@/store/unified-chat';
 
 // Mock modules
 jest.mock('@/services/threadLoadingService');
@@ -50,13 +55,11 @@ jest.mock('@/lib/logger', () => ({
 describe('Thread Switching Diagnostics', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    // Reset store to known state
-    useUnifiedChatStore.setState({
-      activeThreadId: null,
-      messages: [],
-      isProcessing: false,
-      threadLoading: false
-    });
+    
+    // Reset the mock store to initial state
+    if (typeof resetMockState === 'function') {
+      resetMockState();
+    }
   });
 
   describe('Race Condition Detection', () => {
@@ -296,18 +299,16 @@ describe('Thread Switching Diagnostics', () => {
         messages: [{ id: 'msg-1', content: 'Test' }]
       });
 
-      const handleWebSocketEvent = jest.fn();
-      useUnifiedChatStore.setState({ handleWebSocketEvent });
-
       await act(async () => {
         await result.current.switchToThread('thread-1');
       });
 
       // Should emit loading and loaded events
-      expect(handleWebSocketEvent).toHaveBeenCalledWith(
+      const storeState = useUnifiedChatStore.getState();
+      expect(storeState.handleWebSocketEvent).toHaveBeenCalledWith(
         expect.objectContaining({ type: 'thread_loading', threadId: 'thread-1' })
       );
-      expect(handleWebSocketEvent).toHaveBeenCalledWith(
+      expect(storeState.handleWebSocketEvent).toHaveBeenCalledWith(
         expect.objectContaining({ type: 'thread_loaded', threadId: 'thread-1' })
       );
     });

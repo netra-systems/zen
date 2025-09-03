@@ -376,9 +376,12 @@ const handleLoadingError = (
   
   globalCleanupManager.cleanupThread(operationId);
   
-  // Reset thread loading state in store
+  // Reset thread loading state in store and clear active thread on error
   if (storeActions?.setThreadLoading) {
     storeActions.setThreadLoading(false);
+  }
+  if (storeActions?.setActiveThread) {
+    storeActions.setActiveThread(null);
   }
   
   setState(prev => ({
