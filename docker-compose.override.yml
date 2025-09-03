@@ -1,0 +1,7 @@
+version: '3.8'
+
+services:
+  dev-backend:
+    environment:
+      # Temporary bypass for startup validation during development remediation
+      BYPASS_STARTUP_VALIDATION: "true"

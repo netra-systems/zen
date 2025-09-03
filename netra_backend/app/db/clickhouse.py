@@ -31,23 +31,44 @@ class ClickHouseCache:
         self._hits = 0
         self._misses = 0
     
-    def _generate_key(self, query: str, params: Optional[Dict[str, Any]] = None) -> str:
-        """Generate cache key from query and parameters."""
+    def _generate_key(self, user_id: Optional[str], query: str, params: Optional[Dict[str, Any]] = None) -> str:
+        """Generate cache key from user_id, query and parameters.
+        
+        Args:
+            user_id: User identifier for cache isolation. None will use "system" for backward compatibility.
+            query: SQL query string
+            params: Optional query parameters
+            
+        Returns:
+            Cache key with format: ch:{user_id}:{query_hash}:p:{params_hash}
+        """
+        # Handle None user_id gracefully for backward compatibility
+        safe_user_id = user_id if user_id is not None else "system"
+        
         query_hash = hashlib.md5(query.encode()).hexdigest()[:16]
         if params:
             params_str = str(sorted(params.items()))
             params_hash = hashlib.md5(params_str.encode()).hexdigest()[:8]
-            return f"ch:{query_hash}:p:{params_hash}"
-        return f"ch:{query_hash}"
+            return f"ch:{safe_user_id}:{query_hash}:p:{params_hash}"
+        return f"ch:{safe_user_id}:{query_hash}"
     
-    def get(self, query: str, params: Optional[Dict[str, Any]] = None) -> Optional[List[Dict[str, Any]]]:
-        """Get cached result if not expired."""
-        key = self._generate_key(query, params)
+    def get(self, user_id: Optional[str], query: str, params: Optional[Dict[str, Any]] = None) -> Optional[List[Dict[str, Any]]]:
+        """Get cached result if not expired.
+        
+        Args:
+            user_id: User identifier for cache isolation. None will use "system" for backward compatibility.
+            query: SQL query string
+            params: Optional query parameters
+            
+        Returns:
+            Cached result if found and not expired, None otherwise
+        """
+        key = self._generate_key(user_id, query, params)
         entry = self.cache.get(key)
         
         if entry and time.time() < entry["expires_at"]:
             self._hits += 1
-            logger.debug(f"ClickHouse cache hit for query: {query[:50]}...")
+            logger.debug(f"ClickHouse cache hit for query: {query[:50]}... (user: {user_id or 'system'})")
             return entry["result"]
         elif entry:
             del self.cache[key]
@@ -55,37 +76,83 @@ class ClickHouseCache:
         self._misses += 1
         return None
     
-    def set(self, query: str, result: List[Dict[str, Any]], params: Optional[Dict[str, Any]] = None, ttl: float = 300) -> None:
-        """Cache query result with TTL."""
+    def set(self, user_id: Optional[str], query: str, result: List[Dict[str, Any]], params: Optional[Dict[str, Any]] = None, ttl: float = 300) -> None:
+        """Cache query result with TTL.
+        
+        Args:
+            user_id: User identifier for cache isolation. None will use "system" for backward compatibility.
+            query: SQL query string
+            result: Query result to cache
+            params: Optional query parameters
+            ttl: Time to live in seconds
+        """
         if len(self.cache) >= self.max_size:
             oldest_keys = sorted(self.cache.keys(), key=lambda k: self.cache[k]["created_at"])[:10]
             for k in oldest_keys:
                 del self.cache[k]
         
-        key = self._generate_key(query, params)
+        key = self._generate_key(user_id, query, params)
         self.cache[key] = {
             "result": result,
             "created_at": time.time(),
             "expires_at": time.time() + ttl
         }
-        logger.debug(f"Cached ClickHouse result for query: {query[:50]}... (TTL: {ttl}s)")
+        logger.debug(f"Cached ClickHouse result for query: {query[:50]}... (TTL: {ttl}s, user: {user_id or 'system'})")
     
-    def stats(self) -> Dict[str, Any]:
-        """Get cache statistics."""
-        total = self._hits + self._misses
-        hit_rate = (self._hits / total) if total > 0 else 0
-        return {
-            "size": len(self.cache),
-            "hits": self._hits,
-            "misses": self._misses,
-            "hit_rate": hit_rate,
-            "max_size": self.max_size
-        }
+    def stats(self, user_id: Optional[str] = None) -> Dict[str, Any]:
+        """Get cache statistics.
+        
+        Args:
+            user_id: Optional user identifier. If provided, returns stats for that user's cache entries only.
+                    If None, returns global cache statistics.
+                    
+        Returns:
+            Dictionary containing cache statistics
+        """
+        if user_id is None:
+            # Return global statistics
+            total = self._hits + self._misses
+            hit_rate = (self._hits / total) if total > 0 else 0
+            return {
+                "size": len(self.cache),
+                "hits": self._hits,
+                "misses": self._misses,
+                "hit_rate": hit_rate,
+                "max_size": self.max_size
+            }
+        else:
+            # Return user-specific statistics
+            user_prefix = f"ch:{user_id}:"
+            user_entries = sum(1 for key in self.cache.keys() if key.startswith(user_prefix))
+            
+            return {
+                "user_id": user_id,
+                "user_cache_entries": user_entries,
+                "total_cache_size": len(self.cache),
+                "max_size": self.max_size,
+                "user_cache_percentage": (user_entries / len(self.cache) * 100) if len(self.cache) > 0 else 0
+            }
     
-    def clear(self) -> None:
-        """Clear cache."""
-        self.cache.clear()
-        logger.info("ClickHouse cache cleared")
+    def clear(self, user_id: Optional[str] = None) -> None:
+        """Clear cache.
+        
+        Args:
+            user_id: Optional user identifier. If provided, clears only that user's cache entries.
+                    If None, clears the entire cache.
+        """
+        if user_id is None:
+            # Clear entire cache
+            self.cache.clear()
+            logger.info("ClickHouse cache cleared completely")
+        else:
+            # Clear only user-specific entries
+            user_prefix = f"ch:{user_id}:"
+            keys_to_remove = [key for key in self.cache.keys() if key.startswith(user_prefix)]
+            
+            for key in keys_to_remove:
+                del self.cache[key]
+                
+            logger.info(f"ClickHouse cache cleared for user {user_id} ({len(keys_to_remove)} entries removed)")
 
 
 # Global cache instance
@@ -290,7 +357,25 @@ async def get_clickhouse_client():
             yield client
             return
     
-    # Use real client in development, production, and real database tests
+    # Try to use the connection manager if available (for startup and production use)
+    try:
+        from netra_backend.app.core.clickhouse_connection_manager import get_clickhouse_connection_manager
+        
+        connection_manager = get_clickhouse_connection_manager()
+        if connection_manager and connection_manager.connection_health.state.value != "disconnected":
+            # Use connection manager's pooled connection
+            async with connection_manager.get_connection() as client:
+                yield client
+                return
+    except ImportError:
+        # Connection manager not available, fall back to direct connection
+        logger.debug("[ClickHouse] Connection manager not available, using direct connection")
+        pass
+    except Exception as e:
+        logger.warning(f"[ClickHouse] Connection manager failed, falling back to direct connection: {e}")
+        pass
+    
+    # Fallback to direct connection (backward compatibility)
     environment = get_env().get("ENVIRONMENT", "development").lower()
     
     # CRITICAL FIX: Use unified config environment for better testing support
@@ -627,21 +712,52 @@ class ClickHouseService:
             logger.error(f"[ClickHouse Service] Initialization timeout after {init_timeout}s")
             raise ConnectionError(f"ClickHouse initialization timeout after {init_timeout}s. Please ensure ClickHouse is running.") from e
     
-    async def execute(self, query: str, params: Optional[Dict[str, Any]] = None) -> List[Dict[str, Any]]:
-        """Execute query with circuit breaker protection and caching."""
+    async def execute(self, query: str, params: Optional[Dict[str, Any]] = None, user_id: Optional[str] = None) -> List[Dict[str, Any]]:
+        """Execute query with circuit breaker protection and caching.
+        
+        Args:
+            query: SQL query to execute
+            params: Optional query parameters
+            user_id: User identifier for cache isolation. If None, uses "system" namespace.
+            
+        Returns:
+            Query results as list of dictionaries
+        """
         # Check cache first for read queries
         if query.lower().strip().startswith("select"):
-            cached_result = _clickhouse_cache.get(query, params)
+            cached_result = _clickhouse_cache.get(user_id, query, params)
             if cached_result is not None:
                 return cached_result
         
+        # Try to use connection manager if available
+        try:
+            from netra_backend.app.core.clickhouse_connection_manager import get_clickhouse_connection_manager
+            
+            connection_manager = get_clickhouse_connection_manager()
+            if connection_manager and connection_manager.connection_health.state.value != "disconnected":
+                # Use connection manager's robust execute with retry
+                result = await connection_manager.execute_with_retry(query, params)
+                
+                # Cache successful read results
+                if query.lower().strip().startswith("select") and result:
+                    _clickhouse_cache.set(user_id, query, result, params, ttl=300)
+                
+                self._metrics["queries"] += 1
+                return result
+        except ImportError:
+            pass  # Fall back to standard execution
+        except Exception as e:
+            logger.warning(f"Connection manager execution failed, falling back: {e}")
+            pass
+        
+        # Fallback to standard circuit breaker execution
         try:
             self._metrics["queries"] += 1
             result = await self._execute_with_circuit_breaker(query, params)
             
             # Cache successful read results
             if query.lower().strip().startswith("select") and result:
-                _clickhouse_cache.set(query, result, params, ttl=300)
+                _clickhouse_cache.set(user_id, query, result, params, ttl=300)
             
             return result
         except Exception as e:
@@ -661,7 +777,7 @@ class ClickHouseService:
         except Exception as e:
             # Try to return cached data as fallback
             if query.lower().strip().startswith("select"):
-                cached_result = _clickhouse_cache.get(query, params)
+                cached_result = _clickhouse_cache.get(user_id, query, params)
                 if cached_result is not None:
                     logger.info("Returning cached data due to circuit breaker failure")
                     return cached_result
@@ -692,12 +808,33 @@ class ClickHouseService:
             return False
     
     async def execute_query(self, query: str, params: Optional[Dict[str, Any]] = None, 
-                          timeout: Optional[float] = None, max_memory_usage: Optional[str] = None) -> List[Dict[str, Any]]:
-        """Execute query with optional timeout and memory limits (alias for execute)."""
-        return await self.execute(query, params)
+                          timeout: Optional[float] = None, max_memory_usage: Optional[str] = None, user_id: Optional[str] = None) -> List[Dict[str, Any]]:
+        """Execute query with optional timeout and memory limits (alias for execute).
+        
+        Args:
+            query: SQL query to execute
+            params: Optional query parameters
+            timeout: Optional timeout (currently ignored, for interface compatibility)
+            max_memory_usage: Optional memory limit (currently ignored, for interface compatibility)
+            user_id: User identifier for cache isolation
+            
+        Returns:
+            Query results as list of dictionaries
+        """
+        return await self.execute(query, params, user_id=user_id)
     
-    async def execute_with_retry(self, query: str, params: Optional[Dict[str, Any]] = None, max_retries: int = 2) -> List[Dict[str, Any]]:
-        """Execute query with retry logic for critical operations."""
+    async def execute_with_retry(self, query: str, params: Optional[Dict[str, Any]] = None, max_retries: int = 2, user_id: Optional[str] = None) -> List[Dict[str, Any]]:
+        """Execute query with retry logic for critical operations.
+        
+        Args:
+            query: SQL query to execute
+            params: Optional query parameters
+            max_retries: Maximum number of retry attempts
+            user_id: User identifier for cache isolation
+            
+        Returns:
+            Query results as list of dictionaries
+        """
         last_exception = None
         
         for attempt in range(max_retries + 1):
@@ -707,7 +844,7 @@ class ClickHouseService:
                     logger.info(f"Retrying ClickHouse query (attempt {attempt + 1}/{max_retries + 1}) after {delay}s")
                     await asyncio.sleep(delay)
                 
-                result = await self.execute(query, params)
+                result = await self.execute(query, params, user_id=user_id)
                 
                 if attempt > 0:
                     logger.info(f"ClickHouse query succeeded on attempt {attempt + 1}")
@@ -755,7 +892,7 @@ class ClickHouseService:
         
         # Execute insert for each row (basic implementation)
         for row in data:
-            await self.execute(query, row)
+            await self.execute(query, row, user_id=None)  # Inserts typically don't need user-specific caching
     
     async def cleanup(self) -> None:
         """Cleanup method (alias for close) for test compatibility."""
@@ -777,13 +914,24 @@ class ClickHouseService:
         """Check if using real client."""
         return not self.is_mock and self._client is not None
     
-    def get_cache_stats(self) -> Dict[str, Any]:
-        """Get cache statistics."""
-        return _clickhouse_cache.stats()
+    def get_cache_stats(self, user_id: Optional[str] = None) -> Dict[str, Any]:
+        """Get cache statistics.
+        
+        Args:
+            user_id: Optional user identifier for user-specific stats
+            
+        Returns:
+            Cache statistics dictionary
+        """
+        return _clickhouse_cache.stats(user_id)
     
-    def clear_cache(self) -> None:
-        """Clear query cache."""
-        _clickhouse_cache.clear()
+    def clear_cache(self, user_id: Optional[str] = None) -> None:
+        """Clear query cache.
+        
+        Args:
+            user_id: Optional user identifier. If provided, clears only that user's cache.
+        """
+        _clickhouse_cache.clear(user_id)
     
     def get_metrics(self) -> Dict[str, Any]:
         """Get connection and query metrics."""
@@ -804,8 +952,8 @@ class ClickHouseService:
     async def health_check(self) -> Dict[str, Any]:
         """Comprehensive health check with circuit breaker status."""
         try:
-            # Test basic connectivity
-            result = await self.execute("SELECT 1")
+            # Test basic connectivity (using system user_id for health checks)
+            result = await self.execute("SELECT 1", user_id="system")
             
             return {
                 "status": "healthy",

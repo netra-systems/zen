@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learning>
+  <metadata>
+    <title>SupervisorAgent Initialization Parameter Mismatch Fix</title>
+    <date>2025-09-02</date>
+    <category>critical-bug-fix</category>
+    <impact>high</impact>
+    <systems>backend, supervisor, startup</systems>
+  </metadata>
+
+  <problem>
+    <description>
+      Backend service failed to start with "'NoneType' object is not callable" error during
+      SERVICES phase of deterministic startup. The application couldn't initialize critical
+      services, breaking all chat functionality.
+    </description>
+    <error_message>
+      CRITICAL STARTUP FAILURE: 'NoneType' object is not callable
+    </error_message>
+    <location>
+      netra_backend/app/smd.py:863-868
+    </location>
+  </problem>
+
+  <root_cause>
+    <analysis>
+      The SupervisorAgent was being instantiated with incorrect parameters. The startup module
+      was passing db_session_factory as the first argument, but SupervisorAgent.__init__ 
+      expects an AsyncSession instance, not a factory callable.
+    </analysis>
+    <code_before><![CDATA[
+supervisor = SupervisorAgent(
+    self.app.state.db_session_factory,  # WRONG: passing factory instead of session
+    self.app.state.llm_manager,
+    agent_websocket_bridge,
+    self.app.state.tool_dispatcher
+)
+    ]]></code_before>
+    <expected_signature><![CDATA[
+def __init__(self, 
+             db_session: AsyncSession,  # Expects session instance, not factory
+             llm_manager: LLMManager,
+             websocket_bridge,
+             tool_dispatcher: ToolDispatcher):
+    ]]></expected_signature>
+  </root_cause>
+
+  <solution>
+    <approach>
+      Pass None for db_session parameter since the golden pattern indicates that agents
+      should receive their database session from request context, not at initialization.
+      This aligns with the principle that services should be stateless and sessions
+      should be request-scoped.
+    </approach>
+    <code_after><![CDATA[
+# Create supervisor with bridge for proper WebSocket integration
+# Note: SupervisorAgent expects db_session, not factory - using None for now
+# as per golden pattern where agents get session from context
+supervisor = SupervisorAgent(
+    None,  # db_session provided per-request, not at init
+    self.app.state.llm_manager,
+    agent_websocket_bridge,
+    self.app.state.tool_dispatcher
+)
+    ]]></code_after>
+  </solution>
+
+  <verification>
+    <steps>
+      1. The fix allows SupervisorAgent to initialize without the NoneType callable error
+      2. Database sessions are properly managed per-request through context
+      3. All critical services can complete initialization
+      4. WebSocket integration remains intact for chat functionality
+    </steps>
+  </verification>
+
+  <lessons_learned>
+    <lesson>
+      Always verify constructor signatures match the arguments being passed,
+      especially when dealing with factories vs instances.
+    </lesson>
+    <lesson>
+      The golden pattern for agents is to receive database sessions from
+      request context, not store them as instance attributes.
+    </lesson>
+    <lesson>
+      Startup failures in the SERVICES phase are critical as they prevent
+      all chat functionality from working.
+    </lesson>
+  </lessons_learned>
+
+  <related_patterns>
+    <pattern>dependency-injection</pattern>
+    <pattern>request-scoped-sessions</pattern>
+    <pattern>golden-agent-pattern</pattern>
+  </related_patterns>
+
+  <prevention>
+    <recommendation>
+      Add type hints and runtime validation for critical initialization parameters
+      to catch mismatches earlier in development.
+    </recommendation>
+    <recommendation>
+      Consider using dependency injection frameworks that validate parameter types
+      at registration time rather than runtime.
+    </recommendation>
+  </prevention>
+</learning>

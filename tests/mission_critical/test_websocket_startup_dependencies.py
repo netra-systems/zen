@@ -10,8 +10,8 @@ from fastapi import FastAPI
 from fastapi.websockets import WebSocketDisconnect
 
 from netra_backend.app.startup_module import (
-    _run_startup_phase_two,
-    _run_startup_phase_three,
+    _deprecated_run_startup_phase_two,
+    _deprecated_run_startup_phase_three,
     _create_agent_supervisor,
     setup_security_services,
 )
@@ -45,7 +45,7 @@ class TestWebSocketStartupDependencies:
                             mock_fixes.run_comprehensive_verification = AsyncMock(return_value={'total_fixes': 5})
                             
                             # Run Phase 2
-                            await _run_startup_phase_two(app, logger)
+                            await _deprecated_run_startup_phase_two(app, logger)
                             
                             # Verify llm_manager is set
                             assert hasattr(app.state, 'llm_manager')
@@ -79,7 +79,7 @@ class TestWebSocketStartupDependencies:
                                 
                                 # Phase 3 should fail
                                 with pytest.raises(RuntimeError) as exc_info:
-                                    await _run_startup_phase_three(app, logger)
+                                    await _deprecated_run_startup_phase_three(app, logger)
                                 
                                 assert "missing dependencies" in str(exc_info.value).lower()
     
@@ -152,7 +152,7 @@ class TestWebSocketStartupDependencies:
                             mock_fixes.run_comprehensive_verification = AsyncMock(return_value={'total_fixes': 5})
                             
                             # Run Phase 2
-                            await _run_startup_phase_two(app, logger)
+                            await _deprecated_run_startup_phase_two(app, logger)
                             
                             # Set tool_dispatcher for Phase 3
                             app.state.tool_dispatcher = Mock()
@@ -170,7 +170,7 @@ class TestWebSocketStartupDependencies:
                                                     mock_supervisor.registry = Mock()
                                                     
                                                     # Run Phase 3
-                                                    await _run_startup_phase_three(app, logger)
+                                                    await _deprecated_run_startup_phase_three(app, logger)
                                                     
                                                     # Verify supervisor and thread_service are set
                                                     assert hasattr(app.state, 'agent_supervisor')

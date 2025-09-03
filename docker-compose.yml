@@ -226,6 +226,14 @@ services:
       
       # AI/LLM Configuration
       GEMINI_API_KEY: ${GEMINI_API_KEY}
+      
+      # Memory Monitoring Configuration
+      ENABLE_MEMORY_MONITORING: "true"
+      MEMORY_CHECK_INTERVAL: "30"
+      MEMORY_WARNING_THRESHOLD: "80"
+      MEMORY_CRITICAL_THRESHOLD: "90"
+      MEMORY_CLEANUP_ENABLED: "true"
+      MEMORY_PROFILING_ENABLED: ${MEMORY_PROFILING_ENABLED:-false}
     ports:
       - "${DEV_BACKEND_PORT:-8000}:8000"
     volumes:
@@ -253,10 +261,10 @@ services:
     deploy:
       resources:
         limits:
-          memory: 1G
+          memory: 2G
           cpus: '0.4'
         reservations:
-          memory: 512M
+          memory: 1G
 
   # Dev Frontend Service
   dev-frontend:

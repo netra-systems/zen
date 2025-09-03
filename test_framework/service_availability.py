@@ -26,10 +26,19 @@ try:
         """Get environment variable value."""
         return _env.get(key, default)
 except ImportError:
-    # Fallback for environments where dev_launcher is not available
+    # CRITICAL SECURITY FIX: Remove direct os.environ access to prevent service boundary violations
+    # This fallback should not occur in production - all services must have IsolatedEnvironment
     import os
+    import logging
+    logger = logging.getLogger(__name__)
+    logger.error("CRITICAL: Missing IsolatedEnvironment - service boundary violation detected")
+    
     def get_env(key: str, default: str = None) -> Optional[str]:
-        """Get environment variable value."""
+        """
+        DEPRECATED: Direct environment access creates service boundary violations.
+        This fallback exists only for emergency compatibility - do not use in production.
+        """
+        logger.warning(f"Using deprecated direct environment access for key: {key}")
         return os.environ.get(key, default)
 
 # Optional dependencies - import with fallbacks
@@ -484,8 +493,16 @@ class ServiceAvailabilityChecker:
         for key in ['CLICKHOUSE_URL', 'CLICKHOUSE_HOST', 'TEST_CLICKHOUSE_URL']:
             value = get_env(key)
             if value:
+                # If it's a clickhouse:// URL, convert to http://
+                if value.startswith('clickhouse://'):
+                    # Parse the URL and convert to HTTP format
+                    from urllib.parse import urlparse
+                    parsed = urlparse(value)
+                    host = parsed.hostname or 'localhost'
+                    port = parsed.port or 8123
+                    return f"http://{host}:{port}"
                 # If it's just a host, construct URL
-                if not value.startswith('http'):
+                elif not value.startswith('http'):
                     port = get_env('CLICKHOUSE_PORT', '8123')
                     value = f"http://{value}:{port}"
                 return value

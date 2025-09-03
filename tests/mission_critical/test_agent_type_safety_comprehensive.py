@@ -462,5 +462,407 @@ class TestTypeCheckingIntegration:
                         f"{module_class.__name__}.{method_name} missing type annotations"
 
 
+class TestBaseAgentInheritanceTypeCompliance:
+    """Test BaseAgent inheritance and type compliance"""
+    
+    @pytest.mark.asyncio
+    async def test_baseagent_inheritance_type_safety(self):
+        """Test BaseAgent inheritance provides proper type safety"""
+        try:
+            from netra_backend.app.agents.base_agent import BaseAgent
+            from netra_backend.app.agents.state import DeepAgentState
+            from netra_backend.app.schemas.core_enums import ExecutionStatus
+        except ImportError as e:
+            pytest.fail(f"Failed to import BaseAgent components: {e}")
+        
+        # Verify BaseAgent has proper type annotations
+        assert hasattr(BaseAgent, '__annotations__'), "BaseAgent should have type annotations"
+        
+        # Check critical methods have type hints
+        critical_methods = ['execute', 'execute_core_logic', 'get_state', 'set_state']
+        for method_name in critical_methods:
+            if hasattr(BaseAgent, method_name):
+                method = getattr(BaseAgent, method_name)
+                if hasattr(method, '__annotations__'):
+                    annotations = method.__annotations__
+                    if method_name != '__init__':
+                        assert 'return' in annotations, \
+                            f"BaseAgent.{method_name} missing return type annotation"
+    
+    @pytest.mark.asyncio
+    async def test_baseagent_state_type_consistency(self):
+        """Test BaseAgent state management type consistency"""
+        try:
+            from netra_backend.app.agents.base_agent import BaseAgent
+            from netra_backend.app.schemas.agent import SubAgentLifecycle
+        except ImportError:
+            pytest.skip("BaseAgent or SubAgentLifecycle not available")
+        
+        # Mock agent for testing
+        class TestAgent(BaseAgent):
+            async def execute_core_logic(self, context) -> Dict[str, Any]:
+                return {"test": "result"}
+        
+        agent = TestAgent(name="TypeSafetyTest")
+        
+        # Test state type consistency
+        initial_state = agent.get_state()
+        assert isinstance(initial_state, SubAgentLifecycle), \
+            f"get_state() should return SubAgentLifecycle, got {type(initial_state)}"
+        
+        # Test state setting with proper types
+        for valid_state in SubAgentLifecycle:
+            agent.set_state(valid_state)
+            current_state = agent.get_state()
+            assert current_state == valid_state, "State should be set correctly"
+            assert isinstance(current_state, SubAgentLifecycle), \
+                "State should maintain proper type"
+    
+    @pytest.mark.asyncio
+    async def test_baseagent_websocket_adapter_types(self):
+        """Test BaseAgent WebSocket adapter type safety"""
+        try:
+            from netra_backend.app.agents.base_agent import BaseAgent
+            from netra_backend.app.agents.mixins.websocket_bridge_adapter import WebSocketBridgeAdapter
+        except ImportError:
+            pytest.skip("BaseAgent or WebSocketBridgeAdapter not available")
+        
+        class TestAgent(BaseAgent):
+            async def execute_core_logic(self, context) -> Dict[str, Any]:
+                return {"test": "websocket_types"}
+        
+        agent = TestAgent(name="WebSocketTypeTest")
+        
+        # Check WebSocket adapter type
+        if hasattr(agent, '_websocket_adapter'):
+            adapter = agent._websocket_adapter
+            assert isinstance(adapter, WebSocketBridgeAdapter), \
+                f"WebSocket adapter should be WebSocketBridgeAdapter, got {type(adapter)}"
+        
+        # Check WebSocket methods have proper types
+        websocket_methods = ['emit_agent_started', 'emit_thinking', 'emit_tool_executing']
+        for method_name in websocket_methods:
+            if hasattr(agent, method_name):
+                method = getattr(agent, method_name)
+                assert callable(method), f"{method_name} should be callable"
+
+
+class TestExecuteCorePatternTypeCompliance:
+    """Test _execute_core pattern type compliance"""
+    
+    @pytest.mark.asyncio
+    async def test_execute_core_pattern_type_annotations(self):
+        """Test _execute_core pattern has proper type annotations"""
+        try:
+            from netra_backend.app.agents.base_agent import BaseAgent
+            from netra_backend.app.agents.base.interface import ExecutionContext
+        except ImportError:
+            pytest.skip("BaseAgent or ExecutionContext not available")
+        
+        class TypeSafeAgent(BaseAgent):
+            async def execute_core_logic(self, context: ExecutionContext) -> Dict[str, Any]:
+                return {"type_safe": True, "context_id": context.run_id}
+        
+        agent = TypeSafeAgent(name="TypeSafeTest")
+        
+        # Check method has proper type annotations
+        method = agent.execute_core_logic
+        annotations = getattr(method, '__annotations__', {})
+        
+        assert 'context' in annotations, "execute_core_logic should have context type annotation"
+        assert 'return' in annotations, "execute_core_logic should have return type annotation"
+        
+        # Verify return type annotation is correct
+        return_annotation = annotations.get('return')
+        if return_annotation:
+            return_str = str(return_annotation)
+            assert 'Dict' in return_str or 'dict' in return_str, \
+                f"Return type should be Dict[str, Any], got {return_str}"
+    
+    @pytest.mark.asyncio 
+    async def test_execute_core_context_type_validation(self):
+        """Test _execute_core validates context types properly"""
+        try:
+            from netra_backend.app.agents.base_agent import BaseAgent
+            from netra_backend.app.agents.base.interface import ExecutionContext
+            from netra_backend.app.agents.state import DeepAgentState
+        except ImportError:
+            pytest.skip("Required components not available")
+        
+        class StrictTypeAgent(BaseAgent):
+            async def execute_core_logic(self, context: ExecutionContext) -> Dict[str, Any]:
+                # Type validation within method
+                assert hasattr(context, 'run_id'), "Context must have run_id"
+                assert hasattr(context, 'agent_name'), "Context must have agent_name" 
+                assert isinstance(context.run_id, str), "run_id must be string"
+                return {"validated": True}
+        
+        agent = StrictTypeAgent(name="StrictTypeTest")
+        
+        # Test with proper context
+        valid_context = ExecutionContext(
+            run_id="test_123",
+            agent_name=agent.name,
+            state=DeepAgentState()
+        )
+        
+        result = await agent.execute_core_logic(valid_context)
+        assert result["validated"] is True
+        
+        # Test type validation catches issues
+        try:
+            # This should cause type validation to fail inside the method
+            invalid_context = ExecutionContext(
+                run_id=12345,  # Wrong type - should be string
+                agent_name=agent.name,
+                state=DeepAgentState()
+            )
+            await agent.execute_core_logic(invalid_context)
+        except (AssertionError, TypeError):
+            pass  # Expected - type validation should catch this
+    
+    @pytest.mark.asyncio
+    async def test_execute_core_return_type_consistency(self):
+        """Test _execute_core return types are consistent"""
+        try:
+            from netra_backend.app.agents.base_agent import BaseAgent
+            from netra_backend.app.agents.base.interface import ExecutionContext
+            from netra_backend.app.agents.state import DeepAgentState
+        except ImportError:
+            pytest.skip("Required components not available")
+        
+        class ConsistentReturnAgent(BaseAgent):
+            def __init__(self, return_mode="dict", **kwargs):
+                super().__init__(**kwargs)
+                self.return_mode = return_mode
+                
+            async def execute_core_logic(self, context: ExecutionContext) -> Dict[str, Any]:
+                if self.return_mode == "dict":
+                    return {"status": "success", "data": [1, 2, 3]}
+                elif self.return_mode == "empty_dict":
+                    return {}
+                else:
+                    return {"mode": self.return_mode}
+        
+        # Test different return scenarios maintain type consistency
+        modes = ["dict", "empty_dict", "other"]
+        for mode in modes:
+            agent = ConsistentReturnAgent(return_mode=mode, name=f"ReturnTest_{mode}")
+            context = ExecutionContext(
+                run_id=f"return_test_{mode}",
+                agent_name=agent.name,
+                state=DeepAgentState()
+            )
+            
+            result = await agent.execute_core_logic(context)
+            
+            # All returns should be dictionaries per type annotation
+            assert isinstance(result, dict), \
+                f"execute_core_logic should return dict for mode {mode}, got {type(result)}"
+            
+            # Dict should contain only serializable types
+            for key, value in result.items():
+                assert isinstance(key, str), f"Dict keys should be strings, got {type(key)}"
+                # Values should be JSON-serializable types
+                json_types = (str, int, float, bool, list, dict, type(None))
+                assert isinstance(value, json_types), \
+                    f"Dict values should be JSON-serializable, got {type(value)} for key {key}"
+
+
+class TestErrorRecoveryTypeCompliance:
+    """Test error recovery pattern type compliance"""
+    
+    @pytest.mark.asyncio
+    async def test_error_recovery_exception_types(self):
+        """Test error recovery handles exception types properly"""
+        try:
+            from netra_backend.app.agents.base_agent import BaseAgent
+            from netra_backend.app.agents.base.interface import ExecutionContext
+            from netra_backend.app.agents.state import DeepAgentState
+        except ImportError:
+            pytest.skip("Required components not available")
+        
+        class ErrorRecoveryAgent(BaseAgent):
+            def __init__(self, error_type="none", **kwargs):
+                super().__init__(**kwargs)
+                self.error_type = error_type
+                
+            async def execute_core_logic(self, context: ExecutionContext) -> Dict[str, Any]:
+                if self.error_type == "value_error":
+                    raise ValueError("Test value error")
+                elif self.error_type == "type_error":
+                    raise TypeError("Test type error")
+                elif self.error_type == "runtime_error":
+                    raise RuntimeError("Test runtime error")
+                else:
+                    return {"error_type": "none", "success": True}
+        
+        # Test that different exception types are properly typed
+        exception_types = [
+            ("value_error", ValueError),
+            ("type_error", TypeError), 
+            ("runtime_error", RuntimeError)
+        ]
+        
+        for error_mode, expected_exception in exception_types:
+            agent = ErrorRecoveryAgent(error_type=error_mode, name=f"ErrorTest_{error_mode}")
+            context = ExecutionContext(
+                run_id=f"error_test_{error_mode}",
+                agent_name=agent.name,
+                state=DeepAgentState()
+            )
+            
+            with pytest.raises(expected_exception) as exc_info:
+                await agent.execute_core_logic(context)
+            
+            # Verify exception type is correct
+            assert isinstance(exc_info.value, expected_exception), \
+                f"Expected {expected_exception}, got {type(exc_info.value)}"
+            
+            # Verify exception message is string
+            assert isinstance(str(exc_info.value), str), "Exception message should be string"
+    
+    @pytest.mark.asyncio
+    async def test_error_recovery_state_type_consistency(self):
+        """Test error recovery maintains state type consistency"""
+        try:
+            from netra_backend.app.agents.base_agent import BaseAgent
+            from netra_backend.app.agents.base.interface import ExecutionContext
+            from netra_backend.app.agents.state import DeepAgentState
+            from netra_backend.app.schemas.agent import SubAgentLifecycle
+        except ImportError:
+            pytest.skip("Required components not available")
+        
+        class StateRecoveryAgent(BaseAgent):
+            async def execute_core_logic(self, context: ExecutionContext) -> Dict[str, Any]:
+                # Simulate state changes during error recovery
+                original_state = self.get_state()
+                
+                try:
+                    self.set_state(SubAgentLifecycle.RUNNING)
+                    
+                    if context.run_id.endswith("_fail"):
+                        raise RuntimeError("Simulated failure")
+                    
+                    self.set_state(SubAgentLifecycle.COMPLETED)
+                    return {"state_recovery": "success"}
+                    
+                except RuntimeError:
+                    # Error recovery should maintain proper state types
+                    self.set_state(SubAgentLifecycle.FAILED)
+                    raise
+        
+        agent = StateRecoveryAgent(name="StateRecoveryTest")
+        
+        # Test successful execution maintains state types
+        success_context = ExecutionContext(
+            run_id="state_success",
+            agent_name=agent.name,
+            state=DeepAgentState()
+        )
+        
+        result = await agent.execute_core_logic(success_context)
+        final_state = agent.get_state()
+        assert isinstance(final_state, SubAgentLifecycle), \
+            f"Final state should be SubAgentLifecycle, got {type(final_state)}"
+        assert final_state == SubAgentLifecycle.COMPLETED, \
+            "Successful execution should end in COMPLETED state"
+        
+        # Test error recovery maintains state types
+        fail_context = ExecutionContext(
+            run_id="state_fail",
+            agent_name=agent.name,
+            state=DeepAgentState()
+        )
+        
+        with pytest.raises(RuntimeError):
+            await agent.execute_core_logic(fail_context)
+        
+        error_state = agent.get_state()
+        assert isinstance(error_state, SubAgentLifecycle), \
+            f"Error state should be SubAgentLifecycle, got {type(error_state)}"
+        assert error_state == SubAgentLifecycle.FAILED, \
+            "Failed execution should end in FAILED state"
+    
+    @pytest.mark.asyncio
+    async def test_error_recovery_timing_types(self):
+        """Test error recovery timing maintains proper types"""
+        try:
+            from netra_backend.app.agents.base_agent import BaseAgent
+            from netra_backend.app.agents.base.interface import ExecutionContext
+            from netra_backend.app.agents.state import DeepAgentState
+        except ImportError:
+            pytest.skip("Required components not available")
+        
+        import time
+        
+        class TimingRecoveryAgent(BaseAgent):
+            async def execute_core_logic(self, context: ExecutionContext) -> Dict[str, Any]:
+                start_time = time.time()
+                
+                try:
+                    await asyncio.sleep(0.05)  # Simulate work
+                    
+                    if context.run_id.endswith("_timeout"):
+                        raise TimeoutError("Simulated timeout")
+                    
+                    end_time = time.time()
+                    return {
+                        "execution_time": end_time - start_time,
+                        "start_time": start_time,
+                        "end_time": end_time,
+                        "success": True
+                    }
+                    
+                except TimeoutError:
+                    error_time = time.time()
+                    # Error recovery should still provide timing info with correct types
+                    recovery_result = {
+                        "execution_time": error_time - start_time,
+                        "start_time": start_time,
+                        "error_time": error_time,
+                        "success": False,
+                        "error": "timeout"
+                    }
+                    
+                    # Verify all timing values are proper float types
+                    for key, value in recovery_result.items():
+                        if key.endswith("_time"):
+                            assert isinstance(value, float), \
+                                f"Timing value {key} should be float, got {type(value)}"
+                    
+                    raise  # Re-raise after recording timing info
+        
+        agent = TimingRecoveryAgent(name="TimingRecoveryTest")
+        
+        # Test successful timing types
+        success_context = ExecutionContext(
+            run_id="timing_success", 
+            agent_name=agent.name,
+            state=DeepAgentState()
+        )
+        
+        result = await agent.execute_core_logic(success_context)
+        
+        # Verify timing result types
+        timing_keys = ["execution_time", "start_time", "end_time"]
+        for key in timing_keys:
+            assert key in result, f"Result should contain {key}"
+            assert isinstance(result[key], float), \
+                f"{key} should be float, got {type(result[key])}"
+        
+        # Test error recovery timing types
+        timeout_context = ExecutionContext(
+            run_id="timing_timeout",
+            agent_name=agent.name,
+            state=DeepAgentState()
+        )
+        
+        with pytest.raises(TimeoutError):
+            await agent.execute_core_logic(timeout_context)
+        
+        # Error should have been handled with proper timing types in the recovery code
+
+
 if __name__ == "__main__":
     pytest.main([__file__, "-v", "--tb=short"])

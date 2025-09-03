@@ -159,31 +159,37 @@ function getEnvironmentConfig(env: Environment): UnifiedApiConfig {
       };
       
     case 'staging':
+      // Use environment variables if available, otherwise fall back to GCP URLs
+      const stagingApiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://netra-backend-staging-pnovr5vsba-uc.a.run.app';
+      const stagingWsUrl = process.env.NEXT_PUBLIC_WEBSOCKET_URL || 'wss://netra-backend-staging-pnovr5vsba-uc.a.run.app';
+      const stagingAuthUrl = process.env.NEXT_PUBLIC_AUTH_URL || 'https://netra-auth-service-pnovr5vsba-uc.a.run.app';
+      const stagingFrontendUrl = process.env.NEXT_PUBLIC_FRONTEND_URL || 'https://netra-frontend-staging-pnovr5vsba-uc.a.run.app';
+      
       return {
         environment: 'staging',
         urls: {
-          api: 'https://api.staging.netrasystems.ai',
-          websocket: 'wss://api.staging.netrasystems.ai',
-          auth: 'https://auth.staging.netrasystems.ai',
-          frontend: 'https://app.staging.netrasystems.ai',
+          api: stagingApiUrl,
+          websocket: stagingWsUrl,
+          auth: stagingAuthUrl,
+          frontend: stagingFrontendUrl,
         },
         endpoints: {
           // Backend endpoints - direct API calls, no rewrites
-          health: 'https://api.staging.netrasystems.ai/health',
-          ready: 'https://api.staging.netrasystems.ai/health/ready',
-          threads: 'https://api.staging.netrasystems.ai/api/threads',
-          websocket: 'wss://api.staging.netrasystems.ai/ws',
+          health: `${stagingApiUrl}/health`,
+          ready: `${stagingApiUrl}/health/ready`,
+          threads: `${stagingApiUrl}/api/threads`,
+          websocket: `${stagingWsUrl}/ws`,
           
           // Auth service endpoints
-          authConfig: 'https://auth.staging.netrasystems.ai/auth/config',
-          authLogin: 'https://auth.staging.netrasystems.ai/auth/login',
-          authLogout: 'https://auth.staging.netrasystems.ai/auth/logout',
-          authCallback: 'https://auth.staging.netrasystems.ai/auth/callback',
-          authToken: 'https://auth.staging.netrasystems.ai/auth/token',
-          authRefresh: 'https://auth.staging.netrasystems.ai/auth/refresh',
-          authValidate: 'https://auth.staging.netrasystems.ai/auth/validate',
-          authSession: 'https://auth.staging.netrasystems.ai/auth/session',
-          authMe: 'https://auth.staging.netrasystems.ai/auth/me',
+          authConfig: `${stagingAuthUrl}/auth/config`,
+          authLogin: `${stagingAuthUrl}/auth/login`,
+          authLogout: `${stagingAuthUrl}/auth/logout`,
+          authCallback: `${stagingAuthUrl}/auth/callback`,
+          authToken: `${stagingAuthUrl}/auth/token`,
+          authRefresh: `${stagingAuthUrl}/auth/refresh`,
+          authValidate: `${stagingAuthUrl}/auth/validate`,
+          authSession: `${stagingAuthUrl}/auth/session`,
+          authMe: `${stagingAuthUrl}/auth/me`,
         },
         features: {
           useHttps: true,

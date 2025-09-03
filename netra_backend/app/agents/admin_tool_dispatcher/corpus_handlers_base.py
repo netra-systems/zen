@@ -40,22 +40,35 @@ class CorpusContextHelper:
     @staticmethod
     def create_context_from_request(request: CorpusToolRequest) -> ExecutionContext:
         """Create execution context from tool request."""
-        state = CorpusContextHelper._create_state_from_request(request)
-        return CorpusContextHelper._build_execution_context(request, state)
+        user_context = CorpusContextHelper._create_user_context_from_request(request)
+        return CorpusContextHelper._build_execution_context(request, user_context)
         
     @staticmethod
-    def _create_state_from_request(request: CorpusToolRequest):
-        """Create agent state from request."""
-        from netra_backend.app.agents.state import DeepAgentState
-        return DeepAgentState(user_request=request.model_dump())
+    def _create_user_context_from_request(request: CorpusToolRequest):
+        """Create UserExecutionContext from request."""
+        from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
+        import uuid
+        
+        # Extract user_id from request or use placeholder
+        user_id = getattr(request, 'user_id', None) or f"corpus_user_{uuid.uuid4().hex[:8]}"
+        thread_id = f"corpus_{request.tool_type.value}_{uuid.uuid4().hex[:8]}"
+        run_id = f"corpus_run_{uuid.uuid4().hex[:8]}"
+        
+        return UserExecutionContext.from_request(
+            user_id=user_id,
+            thread_id=thread_id,
+            run_id=run_id,
+            metadata={'user_request': request.model_dump()}
+        )
         
     @staticmethod
-    def _build_execution_context(request: CorpusToolRequest, state) -> ExecutionContext:
+    def _build_execution_context(request: CorpusToolRequest, user_context) -> ExecutionContext:
         """Build execution context with proper configuration."""
         return ExecutionContext(
-            run_id=f"corpus_tool_{request.tool_type.value}",
+            run_id=user_context.run_id,
             agent_name="corpus_tool_handler",
-            state=state,
+            state=user_context,
+            metadata=user_context.metadata,
             stream_updates=False
         )
 

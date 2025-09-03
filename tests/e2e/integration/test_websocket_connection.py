@@ -34,7 +34,7 @@ class TestWebSocketConnectioner:
     def __init__(self):
         self.harness = TestHarness()
         self.jwt_helper = JWTTestHelper()
-        self.active_connections: List[websockets.WebSocketClientProtocol] = []
+        self.active_connections: List[websockets.ClientConnection] = []
     
     async def setup(self):
         """Initialize test environment."""

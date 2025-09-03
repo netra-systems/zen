@@ -480,3 +480,732 @@ class TestBaseAgentInheritanceViolations:
             except ValueError:
                 # Expected behavior - invalid transitions should raise ValueError
                 pass
+    
+    async def test_execute_core_pattern_violation_detection(self):
+        """CRITICAL: Must detect _execute_core pattern violations."""
+        agent = TestInheritanceViolationAgent(name="ExecuteCoreTest")
+        
+        context = ExecutionContext(
+            run_id="test_execute_core",
+            agent_name=agent.name,
+            state=DeepAgentState()
+        )
+        
+        # CRITICAL CHECK: execute_core_logic must be implemented
+        assert hasattr(agent, 'execute_core_logic'), "execute_core_logic method missing"
+        assert callable(agent.execute_core_logic), "execute_core_logic must be callable"
+        
+        # Test execution
+        result = await agent.execute_core_logic(context)
+        assert result is not None, "_execute_core pattern must return result"
+        assert isinstance(result, dict), "_execute_core must return dict result"
+        
+    async def test_execute_core_context_handling_violations(self):
+        """CRITICAL: Must detect context handling violations in _execute_core."""
+        agent = TestInheritanceViolationAgent(name="ContextTest")
+        
+        # Test with None context (should handle gracefully or fail predictably)
+        try:
+            result = await agent.execute_core_logic(None)
+            pytest.fail("EXECUTE_CORE VIOLATION: Should not accept None context")
+        except (TypeError, AttributeError):
+            pass  # Expected behavior
+            
+        # Test with invalid context
+        try:
+            result = await agent.execute_core_logic("invalid_context")
+            pytest.fail("EXECUTE_CORE VIOLATION: Should not accept string context") 
+        except (TypeError, AttributeError):
+            pass  # Expected behavior
+            
+    async def test_execute_core_state_consistency_violations(self):
+        """CRITICAL: Must detect state consistency violations during _execute_core."""
+        agent = TestInheritanceViolationAgent(name="StateConsistencyTest")
+        
+        context = ExecutionContext(
+            run_id="state_consistency_test",
+            agent_name=agent.name,
+            state=DeepAgentState()
+        )
+        
+        # Set initial state
+        agent.set_state(SubAgentLifecycle.PENDING)
+        initial_state = agent.get_state()
+        
+        # Execute core logic
+        result = await agent.execute_core_logic(context)
+        
+        # State should be managed consistently
+        current_state = agent.get_state()
+        assert current_state in [SubAgentLifecycle.PENDING, SubAgentLifecycle.RUNNING, 
+                                SubAgentLifecycle.COMPLETED], \
+            f"EXECUTE_CORE VIOLATION: Invalid state after execution: {current_state}"
+            
+    async def test_execute_core_error_propagation_violations(self):
+        """CRITICAL: Must detect error propagation violations in _execute_core."""
+        
+        class ErrorAgent(BaseAgent):
+            def __init__(self, error_type="none", **kwargs):
+                super().__init__(**kwargs)
+                self.error_type = error_type
+                
+            async def execute_core_logic(self, context: ExecutionContext) -> Dict[str, Any]:
+                if self.error_type == "runtime":
+                    raise RuntimeError("Test runtime error")
+                elif self.error_type == "value":
+                    raise ValueError("Test value error")
+                elif self.error_type == "key":
+                    raise KeyError("Test key error")
+                return {"status": "success"}
+        
+        # Test different error types propagate correctly
+        error_types = ["runtime", "value", "key"]
+        for error_type in error_types:
+            agent = ErrorAgent(error_type=error_type, name=f"ErrorTest_{error_type}")
+            context = ExecutionContext(
+                run_id=f"error_test_{error_type}",
+                agent_name=agent.name,
+                state=DeepAgentState()
+            )
+            
+            with pytest.raises((RuntimeError, ValueError, KeyError)):
+                await agent.execute_core_logic(context)
+                
+    async def test_execute_core_timing_pattern_violations(self):
+        """CRITICAL: Must detect timing pattern violations in _execute_core."""
+        
+        class TimingAgent(BaseAgent):
+            async def execute_core_logic(self, context: ExecutionContext) -> Dict[str, Any]:
+                start_time = time.time()
+                await asyncio.sleep(0.05)  # 50ms processing
+                end_time = time.time()
+                return {
+                    "execution_time": end_time - start_time,
+                    "start_time": start_time,
+                    "end_time": end_time
+                }
+        
+        agent = TimingAgent(name="TimingTest")
+        context = ExecutionContext(
+            run_id="timing_test",
+            agent_name=agent.name,
+            state=DeepAgentState()
+        )
+        
+        result = await agent.execute_core_logic(context)
+        
+        # Verify timing information is reasonable
+        execution_time = result.get("execution_time", 0)
+        assert execution_time > 0.04, f"TIMING VIOLATION: Execution time too short: {execution_time}"
+        assert execution_time < 1.0, f"TIMING VIOLATION: Execution time too long: {execution_time}"
+        
+    async def test_execute_core_concurrency_violations(self):
+        """CRITICAL: Must detect concurrency violations in _execute_core."""
+        
+        class ConcurrencyAgent(BaseAgent):
+            def __init__(self, **kwargs):
+                super().__init__(**kwargs)
+                self.execution_count = 0
+                self.concurrent_executions = 0
+                self.max_concurrent = 0
+                self.lock = asyncio.Lock()
+                
+            async def execute_core_logic(self, context: ExecutionContext) -> Dict[str, Any]:
+                async with self.lock:
+                    self.concurrent_executions += 1
+                    self.execution_count += 1
+                    self.max_concurrent = max(self.max_concurrent, self.concurrent_executions)
+                
+                try:
+                    await asyncio.sleep(0.1)  # Simulate work
+                    return {
+                        "execution_id": self.execution_count,
+                        "concurrent_count": self.concurrent_executions
+                    }
+                finally:
+                    async with self.lock:
+                        self.concurrent_executions -= 1
+        
+        agent = ConcurrencyAgent(name="ConcurrencyTest")
+        
+        # Execute multiple concurrent calls
+        tasks = []
+        for i in range(10):
+            context = ExecutionContext(
+                run_id=f"concurrent_{i}",
+                agent_name=agent.name,
+                state=DeepAgentState()
+            )
+            tasks.append(agent.execute_core_logic(context))
+        
+        results = await asyncio.gather(*tasks)
+        
+        # Check for concurrency violations
+        execution_ids = [r["execution_id"] for r in results]
+        unique_ids = set(execution_ids)
+        
+        assert len(unique_ids) == len(execution_ids), \
+            f"CONCURRENCY VIOLATION: Duplicate execution IDs: {execution_ids}"
+            
+        assert agent.max_concurrent <= 10, \
+            f"CONCURRENCY VIOLATION: Too many concurrent executions: {agent.max_concurrent}"
+            
+    async def test_execute_core_resource_cleanup_violations(self):
+        """CRITICAL: Must detect resource cleanup violations in _execute_core."""
+        
+        class ResourceAgent(BaseAgent):
+            def __init__(self, **kwargs):
+                super().__init__(**kwargs)
+                self.resources_opened = 0
+                self.resources_closed = 0
+                
+            async def execute_core_logic(self, context: ExecutionContext) -> Dict[str, Any]:
+                # Simulate resource usage
+                self.resources_opened += 1
+                
+                try:
+                    # Simulate processing that might fail
+                    if context.run_id.endswith("_fail"):
+                        raise RuntimeError("Simulated failure")
+                    
+                    return {"status": "success", "resources_opened": self.resources_opened}
+                finally:
+                    # Resource cleanup
+                    self.resources_closed += 1
+        
+        agent = ResourceAgent(name="ResourceTest")
+        
+        # Test successful execution
+        success_context = ExecutionContext(
+            run_id="resource_success",
+            agent_name=agent.name,
+            state=DeepAgentState()
+        )
+        
+        result = await agent.execute_core_logic(success_context)
+        assert result["status"] == "success"
+        
+        # Test failed execution
+        fail_context = ExecutionContext(
+            run_id="resource_fail",
+            agent_name=agent.name,
+            state=DeepAgentState()
+        )
+        
+        with pytest.raises(RuntimeError):
+            await agent.execute_core_logic(fail_context)
+        
+        # CRITICAL CHECK: Resources must be cleaned up even after failure
+        assert agent.resources_opened == agent.resources_closed, \
+            f"RESOURCE CLEANUP VIOLATION: Opened {agent.resources_opened} but closed {agent.resources_closed}"
+            
+    async def test_execute_core_memory_pattern_violations(self):
+        """CRITICAL: Must detect memory pattern violations in _execute_core."""
+        
+        class MemoryAgent(BaseAgent):
+            def __init__(self, **kwargs):
+                super().__init__(**kwargs)
+                self.memory_usage = []
+                
+            async def execute_core_logic(self, context: ExecutionContext) -> Dict[str, Any]:
+                import sys
+                
+                # Simulate memory-intensive operation
+                large_data = [i for i in range(1000)]  # Small test data
+                self.memory_usage.append(sys.getsizeof(large_data))
+                
+                try:
+                    # Process data
+                    processed = sum(large_data)
+                    return {
+                        "processed_sum": processed,
+                        "memory_used": self.memory_usage[-1]
+                    }
+                finally:
+                    # Clear large data
+                    del large_data
+        
+        agent = MemoryAgent(name="MemoryTest")
+        
+        # Execute multiple times
+        for i in range(5):
+            context = ExecutionContext(
+                run_id=f"memory_test_{i}",
+                agent_name=agent.name,
+                state=DeepAgentState()
+            )
+            
+            result = await agent.execute_core_logic(context)
+            assert result["processed_sum"] == 499500  # Sum of 0-999
+            
+        # Memory usage should be relatively stable
+        avg_memory = sum(agent.memory_usage) / len(agent.memory_usage)
+        for usage in agent.memory_usage:
+            deviation = abs(usage - avg_memory) / avg_memory
+            assert deviation < 0.1, f"MEMORY VIOLATION: High memory deviation: {deviation}"
+            
+    async def test_execute_core_context_mutation_violations(self):
+        """CRITICAL: Must detect context mutation violations in _execute_core."""
+        
+        class MutatingAgent(BaseAgent):
+            async def execute_core_logic(self, context: ExecutionContext) -> Dict[str, Any]:
+                # VIOLATION: Mutating the context (should not modify input)
+                original_run_id = context.run_id
+                if hasattr(context, '_mutable_data'):
+                    context._mutable_data = "modified"
+                
+                return {
+                    "original_run_id": original_run_id,
+                    "context_type": type(context).__name__
+                }
+        
+        agent = MutatingAgent(name="MutatingTest")
+        context = ExecutionContext(
+            run_id="mutation_test",
+            agent_name=agent.name,
+            state=DeepAgentState()
+        )
+        
+        # Store original context state
+        original_run_id = context.run_id
+        original_agent_name = context.agent_name
+        
+        result = await agent.execute_core_logic(context)
+        
+        # CRITICAL CHECK: Context should not be mutated
+        assert context.run_id == original_run_id, \
+            "CONTEXT MUTATION VIOLATION: run_id was modified"
+        assert context.agent_name == original_agent_name, \
+            "CONTEXT MUTATION VIOLATION: agent_name was modified"
+            
+    async def test_execute_core_return_format_violations(self):
+        """CRITICAL: Must detect return format violations in _execute_core."""
+        
+        class FormatViolationAgent(BaseAgent):
+            def __init__(self, return_type="dict", **kwargs):
+                super().__init__(**kwargs)
+                self.return_type = return_type
+                
+            async def execute_core_logic(self, context: ExecutionContext) -> Dict[str, Any]:
+                if self.return_type == "string":
+                    return "invalid string return"  # VIOLATION
+                elif self.return_type == "list":
+                    return ["invalid", "list", "return"]  # VIOLATION  
+                elif self.return_type == "none":
+                    return None  # VIOLATION
+                else:
+                    return {"valid": "dict", "return": True}
+        
+        # Test valid return format
+        valid_agent = FormatViolationAgent(return_type="dict", name="ValidFormat")
+        context = ExecutionContext(
+            run_id="format_test_valid",
+            agent_name=valid_agent.name,
+            state=DeepAgentState()
+        )
+        
+        result = await valid_agent.execute_core_logic(context)
+        assert isinstance(result, dict), "Valid agent should return dict"
+        
+        # Test invalid return formats
+        invalid_types = ["string", "list", "none"]
+        for invalid_type in invalid_types:
+            agent = FormatViolationAgent(return_type=invalid_type, name=f"Invalid{invalid_type}")
+            context = ExecutionContext(
+                run_id=f"format_test_{invalid_type}",
+                agent_name=agent.name,
+                state=DeepAgentState()
+            )
+            
+            result = await agent.execute_core_logic(context)
+            
+            if not isinstance(result, dict):
+                pytest.fail(f"RETURN FORMAT VIOLATION: execute_core_logic returned "
+                           f"{type(result)} instead of dict for type {invalid_type}")
+                           
+    async def test_execute_core_exception_handling_violations(self):
+        """CRITICAL: Must detect exception handling violations in _execute_core."""
+        
+        class ExceptionHandlingAgent(BaseAgent):
+            def __init__(self, handling_mode="proper", **kwargs):
+                super().__init__(**kwargs)
+                self.handling_mode = handling_mode
+                
+            async def execute_core_logic(self, context: ExecutionContext) -> Dict[str, Any]:
+                try:
+                    # Simulate operation that might fail
+                    if context.run_id.endswith("_error"):
+                        raise ValueError("Simulated error")
+                    
+                    return {"status": "success"}
+                    
+                except ValueError as e:
+                    if self.handling_mode == "swallow":
+                        # VIOLATION: Swallowing exceptions silently
+                        return {"status": "error_swallowed"}
+                    elif self.handling_mode == "wrong_type":
+                        # VIOLATION: Raising wrong exception type
+                        raise RuntimeError(f"Wrong exception type: {e}")
+                    else:
+                        # Proper handling: re-raise original exception
+                        raise
+        
+        # Test proper exception handling
+        proper_agent = ExceptionHandlingAgent(handling_mode="proper", name="ProperHandling")
+        
+        success_context = ExecutionContext(
+            run_id="exception_success",
+            agent_name=proper_agent.name,
+            state=DeepAgentState()
+        )
+        
+        result = await proper_agent.execute_core_logic(success_context)
+        assert result["status"] == "success"
+        
+        # Test exception propagation
+        error_context = ExecutionContext(
+            run_id="exception_error",
+            agent_name=proper_agent.name,
+            state=DeepAgentState()
+        )
+        
+        with pytest.raises(ValueError):
+            await proper_agent.execute_core_logic(error_context)
+        
+        # Test violation: exception swallowing
+        swallow_agent = ExceptionHandlingAgent(handling_mode="swallow", name="SwallowHandling")
+        error_context.agent_name = swallow_agent.name
+        
+        result = await swallow_agent.execute_core_logic(error_context)
+        if result.get("status") == "error_swallowed":
+            pytest.fail("EXCEPTION HANDLING VIOLATION: Exception was swallowed instead of propagated")
+            
+    async def test_execute_core_async_pattern_violations(self):
+        """CRITICAL: Must detect async pattern violations in _execute_core."""
+        
+        class AsyncPatternAgent(BaseAgent):
+            def __init__(self, pattern_type="proper", **kwargs):
+                super().__init__(**kwargs)
+                self.pattern_type = pattern_type
+                
+            async def execute_core_logic(self, context: ExecutionContext) -> Dict[str, Any]:
+                if self.pattern_type == "blocking":
+                    # VIOLATION: Using blocking operations in async method
+                    import time
+                    time.sleep(0.1)  # Should use await asyncio.sleep()
+                    return {"pattern": "blocking"}
+                    
+                elif self.pattern_type == "mixed":
+                    # VIOLATION: Mixing sync and async incorrectly
+                    await asyncio.sleep(0.05)
+                    import time
+                    time.sleep(0.05)  # Should all be async
+                    return {"pattern": "mixed"}
+                    
+                else:
+                    # Proper async pattern
+                    await asyncio.sleep(0.1)
+                    return {"pattern": "proper"}
+        
+        # Test proper async pattern
+        proper_agent = AsyncPatternAgent(pattern_type="proper", name="ProperAsync")
+        context = ExecutionContext(
+            run_id="async_proper",
+            agent_name=proper_agent.name,
+            state=DeepAgentState()
+        )
+        
+        start_time = time.time()
+        result = await proper_agent.execute_core_logic(context)
+        execution_time = time.time() - start_time
+        
+        assert result["pattern"] == "proper"
+        assert execution_time >= 0.09, f"ASYNC VIOLATION: Execution too fast: {execution_time}"
+        
+        # Test blocking violation detection
+        blocking_agent = AsyncPatternAgent(pattern_type="blocking", name="BlockingAsync")
+        context.agent_name = blocking_agent.name
+        
+        start_time = time.time()
+        result = await blocking_agent.execute_core_logic(context)
+        execution_time = time.time() - start_time
+        
+        # This should still work but indicates a violation of async patterns
+        if execution_time >= 0.09:  # If it took expected time, blocking call worked
+            pytest.fail("ASYNC PATTERN VIOLATION: Used blocking operations in async method")
+            
+    async def test_execute_core_dependency_injection_violations(self):
+        """CRITICAL: Must detect dependency injection violations in _execute_core."""
+        
+        class DependencyAgent(BaseAgent):
+            def __init__(self, dependency_mode="proper", **kwargs):
+                super().__init__(**kwargs)
+                self.dependency_mode = dependency_mode
+                
+            async def execute_core_logic(self, context: ExecutionContext) -> Dict[str, Any]:
+                if self.dependency_mode == "hard_coded":
+                    # VIOLATION: Hard-coded dependencies
+                    from netra_backend.app.llm.llm_manager import LLMManager
+                    llm = LLMManager()  # Should be injected
+                    return {"dependency": "hard_coded"}
+                    
+                elif self.dependency_mode == "global_access":
+                    # VIOLATION: Accessing global state
+                    import os
+                    os.environ["TEMP_VAR"] = "violation"  # Should not modify global state
+                    return {"dependency": "global_access"}
+                    
+                else:
+                    # Proper dependency usage (via context or initialization)
+                    return {
+                        "dependency": "proper",
+                        "context_run_id": context.run_id
+                    }
+        
+        # Test proper dependency handling
+        proper_agent = DependencyAgent(dependency_mode="proper", name="ProperDeps")
+        context = ExecutionContext(
+            run_id="deps_proper",
+            agent_name=proper_agent.name,
+            state=DeepAgentState()
+        )
+        
+        result = await proper_agent.execute_core_logic(context)
+        assert result["dependency"] == "proper"
+        assert result["context_run_id"] == "deps_proper"
+        
+        # Test hard-coded dependency violation
+        hardcoded_agent = DependencyAgent(dependency_mode="hard_coded", name="HardcodedDeps")
+        context.agent_name = hardcoded_agent.name
+        
+        result = await hardcoded_agent.execute_core_logic(context)
+        if result.get("dependency") == "hard_coded":
+            # This indicates a dependency injection violation
+            # In a real system, this would be caught by architecture checks
+            pass  # We'll log this as a violation but not fail the test
+            
+        # Test global state violation
+        global_agent = DependencyAgent(dependency_mode="global_access", name="GlobalDeps")
+        context.agent_name = global_agent.name
+        
+        original_env = dict(os.environ)
+        result = await global_agent.execute_core_logic(context)
+        
+        # Check if environment was modified
+        if "TEMP_VAR" in os.environ:
+            os.environ.pop("TEMP_VAR", None)  # Clean up
+            pytest.fail("DEPENDENCY VIOLATION: Modified global environment state")
+            
+    async def test_execute_core_performance_baseline_violations(self):
+        """CRITICAL: Must detect performance baseline violations in _execute_core."""
+        
+        class PerformanceAgent(BaseAgent):
+            def __init__(self, performance_mode="optimal", **kwargs):
+                super().__init__(**kwargs)
+                self.performance_mode = performance_mode
+                
+            async def execute_core_logic(self, context: ExecutionContext) -> Dict[str, Any]:
+                start_time = time.time()
+                
+                if self.performance_mode == "inefficient":
+                    # VIOLATION: Inefficient operations
+                    result = []
+                    for i in range(10000):
+                        result.append(str(i) + "_processed")
+                    # Should use list comprehension or more efficient approach
+                    
+                elif self.performance_mode == "memory_waste":
+                    # VIOLATION: Memory wasteful operations  
+                    large_list = [i for i in range(100000)]
+                    # Process but don't clean up
+                    processed = sum(large_list)
+                    # large_list remains in memory
+                    
+                else:
+                    # Optimal performance
+                    await asyncio.sleep(0.01)  # Minimal processing time
+                
+                end_time = time.time()
+                return {
+                    "execution_time": end_time - start_time,
+                    "performance_mode": self.performance_mode
+                }
+        
+        # Test optimal performance
+        optimal_agent = PerformanceAgent(performance_mode="optimal", name="OptimalPerf")
+        context = ExecutionContext(
+            run_id="perf_optimal",
+            agent_name=optimal_agent.name,
+            state=DeepAgentState()
+        )
+        
+        result = await optimal_agent.execute_core_logic(context)
+        optimal_time = result["execution_time"]
+        
+        # Test inefficient performance
+        inefficient_agent = PerformanceAgent(performance_mode="inefficient", name="InefficientPerf")
+        context.agent_name = inefficient_agent.name
+        
+        result = await inefficient_agent.execute_core_logic(context)
+        inefficient_time = result["execution_time"]
+        
+        # Check for performance violations
+        if inefficient_time > optimal_time * 100:  # 100x slower threshold
+            pytest.fail(f"PERFORMANCE VIOLATION: Inefficient execution took "
+                       f"{inefficient_time:.4f}s vs optimal {optimal_time:.4f}s")
+                       
+    async def test_execute_core_logging_pattern_violations(self):
+        """CRITICAL: Must detect logging pattern violations in _execute_core."""
+        
+        class LoggingAgent(BaseAgent):
+            def __init__(self, logging_mode="proper", **kwargs):
+                super().__init__(**kwargs)
+                self.logging_mode = logging_mode
+                self.log_messages = []
+                
+            async def execute_core_logic(self, context: ExecutionContext) -> Dict[str, Any]:
+                if self.logging_mode == "excessive":
+                    # VIOLATION: Excessive logging
+                    for i in range(1000):
+                        self.log_messages.append(f"Processing item {i}")
+                    
+                elif self.logging_mode == "sensitive":
+                    # VIOLATION: Logging sensitive data
+                    self.log_messages.append(f"User API key: fake_api_key_12345")
+                    self.log_messages.append(f"Processing context: {context}")
+                    
+                elif self.logging_mode == "none":
+                    # VIOLATION: No logging at all (for important operations)
+                    pass
+                    
+                else:
+                    # Proper logging
+                    self.log_messages.append(f"Started execution for run_id: {context.run_id}")
+                    self.log_messages.append("Execution completed successfully")
+                
+                return {
+                    "logging_mode": self.logging_mode,
+                    "log_count": len(self.log_messages)
+                }
+        
+        # Test proper logging
+        proper_agent = LoggingAgent(logging_mode="proper", name="ProperLogging")
+        context = ExecutionContext(
+            run_id="logging_proper",
+            agent_name=proper_agent.name,
+            state=DeepAgentState()
+        )
+        
+        result = await proper_agent.execute_core_logic(context)
+        assert result["log_count"] == 2  # Should have reasonable log count
+        
+        # Test excessive logging violation
+        excessive_agent = LoggingAgent(logging_mode="excessive", name="ExcessiveLogging")
+        context.agent_name = excessive_agent.name
+        
+        result = await excessive_agent.execute_core_logic(context)
+        if result["log_count"] > 100:
+            pytest.fail(f"LOGGING VIOLATION: Excessive logging detected: {result['log_count']} messages")
+        
+        # Test sensitive data logging violation
+        sensitive_agent = LoggingAgent(logging_mode="sensitive", name="SensitiveLogging")
+        context.agent_name = sensitive_agent.name
+        
+        result = await sensitive_agent.execute_core_logic(context)
+        
+        # Check for sensitive data in logs
+        sensitive_keywords = ["api_key", "password", "token", "secret"]
+        for log_msg in sensitive_agent.log_messages:
+            for keyword in sensitive_keywords:
+                if keyword.lower() in log_msg.lower():
+                    pytest.fail(f"LOGGING VIOLATION: Sensitive data in logs: {log_msg}")
+                    
+    async def test_execute_core_transaction_pattern_violations(self):
+        """CRITICAL: Must detect transaction pattern violations in _execute_core."""
+        
+        class TransactionAgent(BaseAgent):
+            def __init__(self, transaction_mode="proper", **kwargs):
+                super().__init__(**kwargs)
+                self.transaction_mode = transaction_mode
+                self.operations_log = []
+                
+            async def execute_core_logic(self, context: ExecutionContext) -> Dict[str, Any]:
+                if self.transaction_mode == "no_rollback":
+                    # VIOLATION: No rollback on failure
+                    try:
+                        self.operations_log.append("Operation 1 started")
+                        self.operations_log.append("Operation 2 started") 
+                        
+                        if context.run_id.endswith("_fail"):
+                            raise ValueError("Simulated failure")
+                            
+                        self.operations_log.append("Operations committed")
+                        
+                    except ValueError:
+                        # VIOLATION: No cleanup/rollback
+                        self.operations_log.append("Error occurred, no rollback")
+                        raise
+                        
+                elif self.transaction_mode == "partial_commit":
+                    # VIOLATION: Partial commits without proper transaction boundaries
+                    self.operations_log.append("Partial operation 1")
+                    
+                    if context.run_id.endswith("_fail"):
+                        self.operations_log.append("Partial operation 2 - failed")
+                        raise ValueError("Partial failure")
+                        
+                    self.operations_log.append("Partial operation 2 - success")
+                    
+                else:
+                    # Proper transaction handling
+                    operations = []
+                    try:
+                        operations.append("Operation 1")
+                        operations.append("Operation 2")
+                        
+                        if context.run_id.endswith("_fail"):
+                            raise ValueError("Simulated failure")
+                        
+                        # Commit all operations
+                        self.operations_log.extend(operations)
+                        self.operations_log.append("All operations committed")
+                        
+                    except ValueError:
+                        # Proper rollback
+                        self.operations_log.append("Rolling back operations")
+                        raise
+                
+                return {
+                    "transaction_mode": self.transaction_mode,
+                    "operations_count": len(self.operations_log)
+                }
+        
+        # Test proper transaction handling - success case
+        proper_agent = TransactionAgent(transaction_mode="proper", name="ProperTransaction")
+        context = ExecutionContext(
+            run_id="transaction_success",
+            agent_name=proper_agent.name,
+            state=DeepAgentState()
+        )
+        
+        result = await proper_agent.execute_core_logic(context)
+        assert "committed" in proper_agent.operations_log[-1]
+        
+        # Test proper transaction handling - failure case
+        context.run_id = "transaction_fail"
+        with pytest.raises(ValueError):
+            await proper_agent.execute_core_logic(context)
+        
+        # Should have rollback message
+        assert "Rolling back" in proper_agent.operations_log[-1]
+        
+        # Test no rollback violation
+        no_rollback_agent = TransactionAgent(transaction_mode="no_rollback", name="NoRollback")
+        context.agent_name = no_rollback_agent.name
+        
+        with pytest.raises(ValueError):
+            await no_rollback_agent.execute_core_logic(context)
+        
+        # Check for rollback violation
+        if "no rollback" in no_rollback_agent.operations_log[-1]:
+            pytest.fail("TRANSACTION VIOLATION: No rollback performed on failure")

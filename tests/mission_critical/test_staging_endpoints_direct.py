@@ -303,6 +303,148 @@ class StagingEndpointTester:
         
         print("[INFO] Could not validate token with auth service")
         return False
+    
+    def generate_test_user_data(self) -> Dict[str, str]:
+        """Generate realistic test user data for staging."""
+        suffix = ''.join(secrets.choice(string.ascii_lowercase) for _ in range(8))
+        return {
+            "email": f"staging-test-{suffix}@example.com",
+            "password": "StagingTestPass123!",
+            "first_name": "Staging",
+            "last_name": "Tester",
+            "company": "Test Corp",
+            "role": "QA Engineer"
+        }
+    
+    async def test_complete_signup_flow(self) -> Dict[str, Any]:
+        """Test complete user signup flow in staging environment."""
+        logger.info("🧪 Testing complete signup flow...")
+        start_time = time.time()
+        
+        user_data = self.generate_test_user_data()
+        signup_endpoints = [
+            "/auth/register",
+            "/api/auth/register", 
+            "/register",
+            "/api/v1/auth/register"
+        ]
+        
+        for endpoint in signup_endpoints:
+            try:
+                url = f"{self.staging_auth_url}{endpoint}"
+                async with httpx.AsyncClient(timeout=30.0) as client:
+                    response = await client.post(url, json=user_data)
+                    
+                    if response.status_code in [200, 201, 409]:  # Success or user exists
+                        signup_time = time.time() - start_time
+                        self.business_metrics["successful_signups"] += 1
+                        
+                        result = {
+                            "success": True,
+                            "endpoint": endpoint,
+                            "status_code": response.status_code,
+                            "signup_time": signup_time,
+                            "user_data": user_data
+                        }
+                        
+                        if response.status_code in [200, 201]:
+                            try:
+                                response_data = response.json()
+                                if "access_token" in response_data:
+                                    result["access_token"] = response_data["access_token"]
+                            except Exception:
+                                pass
+                        
+                        logger.info(f"✅ Signup successful via {endpoint} in {signup_time:.2f}s")
+                        return result
+                        
+            except Exception as e:
+                logger.error(f"❌ Signup failed at {endpoint}: {e}")
+                continue
+        
+        return {"success": False, "error": "All signup endpoints failed"}
+    
+    async def test_login_with_credentials(self, email: str, password: str) -> Dict[str, Any]:
+        """Test login with provided credentials."""
+        logger.info(f"🧪 Testing login for {email}...")
+        start_time = time.time()
+        
+        login_endpoints = [
+            "/auth/login",
+            "/api/auth/login",
+            "/login",
+            "/api/v1/auth/login"
+        ]
+        
+        for endpoint in login_endpoints:
+            try:
+                url = f"{self.staging_auth_url}{endpoint}"
+                login_data = {"email": email, "password": password}
+                
+                async with httpx.AsyncClient(timeout=30.0) as client:
+                    response = await client.post(url, json=login_data)
+                    
+                    if response.status_code == 200:
+                        login_time = time.time() - start_time
+                        self.business_metrics["successful_logins"] += 1
+                        
+                        try:
+                            response_data = response.json()
+                            result = {
+                                "success": True,
+                                "endpoint": endpoint,
+                                "login_time": login_time,
+                                "access_token": response_data.get("access_token"),
+                                "refresh_token": response_data.get("refresh_token"),
+                                "user_id": response_data.get("user_id"),
+                                "token_type": response_data.get("token_type", "Bearer")
+                            }
+                            
+                            logger.info(f"✅ Login successful via {endpoint} in {login_time:.2f}s")
+                            return result
+                            
+                        except Exception as e:
+                            logger.error(f"❌ Failed to parse login response: {e}")
+                            
+            except Exception as e:
+                logger.error(f"❌ Login failed at {endpoint}: {e}")
+                continue
+        
+        return {"success": False, "error": "All login endpoints failed"}
+    
+    async def calculate_business_metrics(self) -> Dict[str, Any]:
+        """Calculate comprehensive business metrics from test results."""
+        logger.info("🧪 Calculating business metrics...")
+        
+        # Calculate conversion rate
+        total_attempts = self.business_metrics["successful_signups"] + self.business_metrics["successful_logins"]
+        if total_attempts > 0:
+            self.business_metrics["conversion_rate"] = self.business_metrics["successful_logins"] / total_attempts
+        
+        # Calculate average response time
+        if self.performance_metrics["response_times"]:
+            avg_response_time = sum(self.performance_metrics["response_times"]) / len(self.performance_metrics["response_times"])
+            self.business_metrics["time_to_first_value"] = avg_response_time
+        
+        # Calculate success rate
+        if self.performance_metrics["success_rates"]:
+            overall_success_rate = sum(self.performance_metrics["success_rates"]) / len(self.performance_metrics["success_rates"])
+            self.business_metrics["user_satisfaction_score"] = overall_success_rate * 5.0  # Convert to 5-point scale
+        
+        # Estimate revenue attribution (simplified model)
+        successful_users = self.business_metrics["successful_logins"]
+        avg_revenue_per_user = 29.99  # Assumed monthly subscription
+        conversion_to_paid = 0.15  # Assumed 15% conversion rate
+        
+        self.business_metrics["revenue_attributed"] = successful_users * avg_revenue_per_user * conversion_to_paid
+        
+        logger.info(f"📊 Business Metrics Summary:")
+        logger.info(f"   Conversion Rate: {self.business_metrics['conversion_rate']:.1%}")
+        logger.info(f"   User Satisfaction: {self.business_metrics['user_satisfaction_score']:.1f}/5.0")
+        logger.info(f"   Revenue Attribution: ${self.business_metrics['revenue_attributed']:.2f}")
+        logger.info(f"   Time to First Value: {self.business_metrics['time_to_first_value']:.2f}s")
+        
+        return self.business_metrics.copy()
 
 async def main():
     """Run comprehensive staging endpoint tests."""

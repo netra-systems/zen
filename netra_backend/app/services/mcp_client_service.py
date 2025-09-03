@@ -18,7 +18,7 @@ from netra_backend.app.services.mcp_client_connection_manager import (
     MCPConnectionManager,
 )
 from netra_backend.app.services.mcp_client_resource_manager import MCPResourceManager
-from netra_backend.app.services.mcp_client_tool_executor import MCPToolExecutor
+from netra_backend.app.services.mcp_client_tool_executor import ServiceMCPToolExecutor
 from netra_backend.app.services.service_interfaces import IMCPClientService
 
 logger = central_logger.get_logger(__name__)
@@ -30,7 +30,7 @@ class MCPClientService(IMCPClientService):
     def __init__(self):
         self.server_repo = MCPClientRepository()
         self.connection_manager = MCPConnectionManager()
-        self.tool_executor = MCPToolExecutor()
+        self.tool_executor = ServiceMCPToolExecutor()
         self.resource_manager = MCPResourceManager()
     
     async def register_server(self, server_config: Dict[str, Any]) -> bool:

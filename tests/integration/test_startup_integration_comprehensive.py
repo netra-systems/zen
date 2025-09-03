@@ -245,7 +245,7 @@ class TestStartupFailureScenarios:
     @pytest.mark.timeout(30)
     async def test_database_unavailable_startup_failure(self):
         """Test startup fails gracefully when database is unavailable."""
-        from netra_backend.app.startup_module_deterministic import (
+        from netra_backend.app.smd import (
             StartupOrchestrator,
             DeterministicStartupError
         )
@@ -270,7 +270,7 @@ class TestStartupFailureScenarios:
     @pytest.mark.timeout(30)
     async def test_redis_unavailable_startup_failure(self):
         """Test startup fails gracefully when Redis is unavailable."""
-        from netra_backend.app.startup_module_deterministic import (
+        from netra_backend.app.smd import (
             StartupOrchestrator,
             DeterministicStartupError
         )
@@ -433,7 +433,7 @@ class TestStartupPerformance:
     @pytest.mark.timeout(60)
     async def test_startup_completes_within_timeout(self):
         """Test complete startup finishes within reasonable timeout."""
-        from netra_backend.app.startup_module_deterministic import StartupOrchestrator
+        from netra_backend.app.smd import StartupOrchestrator
         from fastapi import FastAPI
         
         app = FastAPI()

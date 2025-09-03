@@ -15,6 +15,7 @@ from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.agents.synthetic_data_generator import SyntheticDataResult
 from netra_backend.app.agents.synthetic_data_presets import WorkloadProfile
 from netra_backend.app.logging_config import central_logger
+from netra_backend.app.core.serialization.unified_json_handler import safe_json_dumps
 
 logger = central_logger.get_logger(__name__)
 
@@ -92,7 +93,7 @@ class SyntheticDataWorkflowOrchestrator:
             synthetic_context.workload_profile, context.run_id, context.stream_updates,
             context.thread_id, context.user_id
         )
-        context.state.synthetic_data_result = result.model_dump()
+        context.state.synthetic_data_result = safe_json_dumps(result)
         
         return result
     
@@ -122,8 +123,8 @@ class SyntheticDataWorkflowOrchestrator:
         """Format SyntheticDataResult for standard execution result."""
         return {
             "success": result.success,
-            "workload_profile": result.workload_profile.model_dump() if result.workload_profile else None,
-            "generation_status": result.generation_status.model_dump() if result.generation_status else None,
+            "workload_profile": safe_json_dumps(result.workload_profile) if result.workload_profile else None,
+            "generation_status": safe_json_dumps(result.generation_status) if result.generation_status else None,
             "requires_approval": result.requires_approval,
             "sample_data": result.sample_data[:5] if result.sample_data else None
         }

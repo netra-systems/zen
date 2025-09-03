@@ -35,7 +35,7 @@ async def ensure_test_services_running():
     import socket
     
     services_to_check = [
-        ("localhost", 5434, "PostgreSQL"),
+        ("localhost", 5433, "PostgreSQL"),
         ("localhost", 6381, "Redis"),  
         ("http://localhost:8081/auth/health", None, "Auth Service")
     ]
@@ -115,7 +115,7 @@ async def test_oauth_callback_token_exchange():
     env.enable_isolation()
     env.set('ENVIRONMENT', 'test', 'oauth_test')
     env.set('POSTGRES_HOST', 'localhost', 'oauth_test')
-    env.set('POSTGRES_PORT', '5434', 'oauth_test')
+    env.set('POSTGRES_PORT', '5433', 'oauth_test')
     env.set('POSTGRES_USER', 'test', 'oauth_test')
     env.set('POSTGRES_PASSWORD', 'test', 'oauth_test')
     env.set('POSTGRES_DB', 'netra_test', 'oauth_test')
@@ -278,7 +278,7 @@ async def test_token_validation_after_storage():
     env.set('SERVICE_SECRET', 'test-service-secret-for-cross-service-authentication', 'oauth_test')
     env.set('SERVICE_ID', 'auth-service', 'oauth_test')
     env.set('POSTGRES_HOST', 'localhost', 'oauth_test')
-    env.set('POSTGRES_PORT', '5434', 'oauth_test')
+    env.set('POSTGRES_PORT', '5433', 'oauth_test')
     env.set('POSTGRES_USER', 'test', 'oauth_test')
     env.set('POSTGRES_PASSWORD', 'test', 'oauth_test')
     env.set('POSTGRES_DB', 'netra_test', 'oauth_test')
@@ -368,7 +368,7 @@ async def test_oauth_error_handling():
     env.enable_isolation()
     env.set('ENVIRONMENT', 'test', 'oauth_test')
     env.set('POSTGRES_HOST', 'localhost', 'oauth_test')
-    env.set('POSTGRES_PORT', '5434', 'oauth_test')
+    env.set('POSTGRES_PORT', '5433', 'oauth_test')
     env.set('POSTGRES_USER', 'test', 'oauth_test')
     env.set('POSTGRES_PASSWORD', 'test', 'oauth_test')
     env.set('POSTGRES_DB', 'netra_test', 'oauth_test')

@@ -31,6 +31,19 @@ class RedisService:
             self._manager = RedisManager(test_mode=True)
         else:
             self._manager = redis_manager
+    
+    def _namespace_key(self, user_id: Optional[str], key: str) -> str:
+        """Namespace Redis key by user for isolation.
+        
+        Args:
+            user_id: User identifier for namespacing. None uses 'system' namespace.
+            key: Original Redis key
+            
+        Returns:
+            Namespaced key in format 'user:{user_id}:{key}' or 'system:{key}'
+        """
+        namespace = user_id if user_id is not None else "system"
+        return f"user:{namespace}:{key}"
             
     async def connect(self):
         """Connect to Redis."""
@@ -44,39 +57,54 @@ class RedisService:
         """Test Redis connection."""
         return await self._manager.ping()
             
-    async def get(self, key: str) -> Optional[str]:
-        """Get value by key."""
-        return await self._manager.get(key)
+    async def get(self, key: str, user_id: Optional[str] = None) -> Optional[str]:
+        """Get value by key with optional user namespacing."""
+        namespaced_key = self._namespace_key(user_id, key)
+        return await self._manager.get(namespaced_key)
             
-    async def set(self, key: str, value: str, ex: Optional[int] = None) -> bool:
-        """Set key-value pair."""
-        result = await self._manager.set(key, value, ex=ex)
+    async def set(self, key: str, value: str, ex: Optional[int] = None, user_id: Optional[str] = None) -> bool:
+        """Set key-value pair with optional user namespacing."""
+        namespaced_key = self._namespace_key(user_id, key)
+        result = await self._manager.set(namespaced_key, value, ex=ex)
         return result is not None
             
-    async def setex(self, key: str, time: int = None, value: str = None, ttl: int = None) -> bool:
+    async def setex(self, key: str, time: int = None, value: str = None, ttl: int = None, user_id: Optional[str] = None) -> bool:
         """Set key-value pair with expiration - support multiple parameter formats."""
         # Handle different parameter patterns that tests might use
         if ttl is not None:
             time = ttl
         if time is None:
             time = 60  # default TTL
-        return await self._manager.setex(key, time, value)
+        namespaced_key = self._namespace_key(user_id, key)
+        return await self._manager.setex(namespaced_key, time, value)
             
-    async def delete(self, *keys: str) -> int:
-        """Delete keys."""
+    async def delete(self, *keys: str, **kwargs) -> int:
+        """Delete keys with optional user namespacing."""
+        user_id = kwargs.get('user_id')
+        if user_id is not None:
+            namespaced_keys = [self._namespace_key(user_id, key) for key in keys]
+            return await self._manager.delete(*namespaced_keys)
         return await self._manager.delete(*keys)
             
-    async def keys(self, pattern: str) -> List[str]:
-        """Get keys matching pattern."""
+    async def keys(self, pattern: str, user_id: Optional[str] = None) -> List[str]:
+        """Get keys matching pattern with optional user namespacing."""
+        if user_id is not None:
+            namespaced_pattern = self._namespace_key(user_id, pattern)
+            keys = await self._manager.keys(namespaced_pattern)
+            # Remove namespace prefix from returned keys
+            namespace_prefix = f"user:{user_id}:"
+            return [key.replace(namespace_prefix, "", 1) for key in keys if key.startswith(namespace_prefix)]
         return await self._manager.keys(pattern)
             
-    async def exists(self, key: str) -> bool:
-        """Check if key exists."""
-        return await self._manager.exists(key)
+    async def exists(self, key: str, user_id: Optional[str] = None) -> bool:
+        """Check if key exists with optional user namespacing."""
+        namespaced_key = self._namespace_key(user_id, key)
+        return await self._manager.exists(namespaced_key)
             
-    async def expire(self, key: str, time: int) -> bool:
-        """Set key expiration."""
-        return await self._manager.expire(key, time)
+    async def expire(self, key: str, time: int, user_id: Optional[str] = None) -> bool:
+        """Set key expiration with optional user namespacing."""
+        namespaced_key = self._namespace_key(user_id, key)
+        return await self._manager.expire(namespaced_key, time)
             
     async def acquire_leader_lock(self, instance_id: str, ttl: int = 30) -> bool:
         """
@@ -109,15 +137,17 @@ class RedisService:
         return self._manager.redis_client
         
     # Additional methods required by tests and other components
-    async def set_json(self, key: str, value: Dict[str, Any], ex: Optional[int] = None) -> bool:
-        """Set JSON value in Redis."""
+    async def set_json(self, key: str, value: Dict[str, Any], ex: Optional[int] = None, user_id: Optional[str] = None) -> bool:
+        """Set JSON value in Redis with optional user namespacing."""
+        namespaced_key = self._namespace_key(user_id, key)
         json_str = json.dumps(value)
-        result = await self._manager.set(key, json_str, ex=ex)
+        result = await self._manager.set(namespaced_key, json_str, ex=ex)
         return result is not None
         
-    async def get_json(self, key: str) -> Optional[Dict[str, Any]]:
-        """Get JSON value from Redis."""
-        json_str = await self._manager.get(key)
+    async def get_json(self, key: str, user_id: Optional[str] = None) -> Optional[Dict[str, Any]]:
+        """Get JSON value from Redis with optional user namespacing."""
+        namespaced_key = self._namespace_key(user_id, key)
+        json_str = await self._manager.get(namespaced_key)
         if json_str:
             try:
                 return json.loads(json_str)
@@ -125,115 +155,134 @@ class RedisService:
                 return None
         return None
         
-    async def incr(self, key: str) -> int:
-        """Increment key value."""
+    async def incr(self, key: str, user_id: Optional[str] = None) -> int:
+        """Increment key value with optional user namespacing."""
+        namespaced_key = self._namespace_key(user_id, key)
         client = await self._manager.get_client()
         if client:
             try:
-                return await client.incr(key)
+                return await client.incr(namespaced_key)
             except Exception as e:
-                logger.warning(f"Failed to incr {key}: {e}")
+                logger.warning(f"Failed to incr {namespaced_key}: {e}")
                 return 0
         return 0
         
-    async def decr(self, key: str) -> int:
-        """Decrement key value."""
+    async def decr(self, key: str, user_id: Optional[str] = None) -> int:
+        """Decrement key value with optional user namespacing."""
+        namespaced_key = self._namespace_key(user_id, key)
         client = await self._manager.get_client()
         if client:
             try:
-                return await client.decr(key)
+                return await client.decr(namespaced_key)
             except Exception as e:
-                logger.warning(f"Failed to decr {key}: {e}")
+                logger.warning(f"Failed to decr {namespaced_key}: {e}")
                 return 0
         return 0
         
-    async def lpush(self, key: str, *values) -> int:
-        """Push items to left side of list."""
-        return await self._manager.lpush(key, *values)
+    async def lpush(self, key: str, *values, **kwargs) -> int:
+        """Push items to left side of list with optional user namespacing."""
+        user_id = kwargs.get('user_id')
+        namespaced_key = self._namespace_key(user_id, key)
+        return await self._manager.lpush(namespaced_key, *values)
         
-    async def rpush(self, key: str, *values) -> int:
-        """Push items to right side of list."""
+    async def rpush(self, key: str, *values, **kwargs) -> int:
+        """Push items to right side of list with optional user namespacing."""
+        user_id = kwargs.get('user_id')
+        namespaced_key = self._namespace_key(user_id, key)
         client = await self._manager.get_client()
         if client:
             try:
-                return await client.rpush(key, *values)
+                return await client.rpush(namespaced_key, *values)
             except Exception as e:
-                logger.warning(f"Failed to rpush to {key}: {e}")
+                logger.warning(f"Failed to rpush to {namespaced_key}: {e}")
                 return 0
         return 0
         
-    async def lpop(self, key: str) -> Optional[str]:
-        """Pop item from left side of list."""
-        return await self._manager.lpop(key)
+    async def lpop(self, key: str, user_id: Optional[str] = None) -> Optional[str]:
+        """Pop item from left side of list with optional user namespacing."""
+        namespaced_key = self._namespace_key(user_id, key)
+        return await self._manager.lpop(namespaced_key)
         
-    async def rpop(self, key: str) -> Optional[str]:
-        """Pop item from right side of list."""
-        return await self._manager.rpop(key)
+    async def rpop(self, key: str, user_id: Optional[str] = None) -> Optional[str]:
+        """Pop item from right side of list with optional user namespacing."""
+        namespaced_key = self._namespace_key(user_id, key)
+        return await self._manager.rpop(namespaced_key)
         
-    async def llen(self, key: str) -> int:
-        """Get length of list."""
-        return await self._manager.llen(key)
+    async def llen(self, key: str, user_id: Optional[str] = None) -> int:
+        """Get length of list with optional user namespacing."""
+        namespaced_key = self._namespace_key(user_id, key)
+        return await self._manager.llen(namespaced_key)
         
-    async def lrange(self, key: str, start: int, end: int) -> List[str]:
-        """Get range of items from list."""
+    async def lrange(self, key: str, start: int, end: int, user_id: Optional[str] = None) -> List[str]:
+        """Get range of items from list with optional user namespacing."""
+        namespaced_key = self._namespace_key(user_id, key)
         client = await self._manager.get_client()
         if client:
             try:
-                return await client.lrange(key, start, end)
+                return await client.lrange(namespaced_key, start, end)
             except Exception as e:
-                logger.warning(f"Failed to lrange {key}: {e}")
+                logger.warning(f"Failed to lrange {namespaced_key}: {e}")
                 return []
         return []
         
-    async def sadd(self, key: str, *members) -> int:
-        """Add members to set."""
+    async def sadd(self, key: str, *members, **kwargs) -> int:
+        """Add members to set with optional user namespacing."""
+        user_id = kwargs.get('user_id')
+        namespaced_key = self._namespace_key(user_id, key)
         client = await self._manager.get_client()
         if client:
             try:
-                return await client.sadd(key, *members)
+                return await client.sadd(namespaced_key, *members)
             except Exception as e:
-                logger.warning(f"Failed to sadd to {key}: {e}")
+                logger.warning(f"Failed to sadd to {namespaced_key}: {e}")
                 return 0
         return 0
         
-    async def srem(self, key: str, *members) -> int:
-        """Remove members from set."""
+    async def srem(self, key: str, *members, **kwargs) -> int:
+        """Remove members from set with optional user namespacing."""
+        user_id = kwargs.get('user_id')
+        namespaced_key = self._namespace_key(user_id, key)
         client = await self._manager.get_client()
         if client:
             try:
-                return await client.srem(key, *members)
+                return await client.srem(namespaced_key, *members)
             except Exception as e:
-                logger.warning(f"Failed to srem from {key}: {e}")
+                logger.warning(f"Failed to srem from {namespaced_key}: {e}")
                 return 0
         return 0
         
-    async def smembers(self, key: str) -> List[str]:
-        """Get all members of set."""
+    async def smembers(self, key: str, user_id: Optional[str] = None) -> List[str]:
+        """Get all members of set with optional user namespacing."""
+        namespaced_key = self._namespace_key(user_id, key)
         client = await self._manager.get_client()
         if client:
             try:
-                members = await client.smembers(key)
+                members = await client.smembers(namespaced_key)
                 return [m.decode() if isinstance(m, bytes) else m for m in members]
             except Exception as e:
-                logger.warning(f"Failed to smembers {key}: {e}")
+                logger.warning(f"Failed to smembers {namespaced_key}: {e}")
                 return []
         return []
         
-    async def hset(self, key: str, field_or_mapping: Union[str, Dict[str, Any]], value: Optional[str] = None) -> int:
-        """Set hash field(s)."""
-        return await self._manager.hset(key, field_or_mapping, value)
+    async def hset(self, key: str, field_or_mapping: Union[str, Dict[str, Any]], value: Optional[str] = None, user_id: Optional[str] = None) -> int:
+        """Set hash field(s) with optional user namespacing."""
+        namespaced_key = self._namespace_key(user_id, key)
+        return await self._manager.hset(namespaced_key, field_or_mapping, value)
         
-    async def hget(self, key: str, field: str) -> Optional[str]:
-        """Get hash field value."""
-        return await self._manager.hget(key, field)
+    async def hget(self, key: str, field: str, user_id: Optional[str] = None) -> Optional[str]:
+        """Get hash field value with optional user namespacing."""
+        namespaced_key = self._namespace_key(user_id, key)
+        return await self._manager.hget(namespaced_key, field)
         
-    async def hgetall(self, key: str) -> Dict[str, Any]:
-        """Get all hash fields and values."""
-        return await self._manager.hgetall(key)
+    async def hgetall(self, key: str, user_id: Optional[str] = None) -> Dict[str, Any]:
+        """Get all hash fields and values with optional user namespacing."""
+        namespaced_key = self._namespace_key(user_id, key)
+        return await self._manager.hgetall(namespaced_key)
         
-    async def ttl(self, key: str) -> int:
-        """Get time to live for key."""
-        return await self._manager.ttl(key)
+    async def ttl(self, key: str, user_id: Optional[str] = None) -> int:
+        """Get time to live for key with optional user namespacing."""
+        namespaced_key = self._namespace_key(user_id, key)
+        return await self._manager.ttl(namespaced_key)
     
     # Compatibility aliases for tests
     async def initialize(self):

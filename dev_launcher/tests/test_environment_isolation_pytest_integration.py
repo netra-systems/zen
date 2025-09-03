@@ -37,8 +37,8 @@ class TestPytestEnvironmentIntegration:
         # Preserve pytest variables during cleanup
         pytest_vars = {}
         for key in ["PYTEST_CURRENT_TEST", "PYTEST_VERSION", "_PYTEST_RAISE"]:
-            if key in os.environ:
-                pytest_vars[key] = os.environ[key]
+            if env.exists(key):
+                pytest_vars[key] = env.get(key)
         
         # Restore original environment
         env.clear()
@@ -46,7 +46,7 @@ class TestPytestEnvironmentIntegration:
         
         # Re-add pytest variables if they were present
         for key, value in pytest_vars.items():
-            os.environ[key] = value
+            env.set(key, value)
     
     def test_pytest_current_test_isolation_compatibility(self):
         """

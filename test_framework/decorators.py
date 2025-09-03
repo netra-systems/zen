@@ -11,6 +11,9 @@ from typing import Any, Callable, Optional, Union
 
 import pytest
 
+# Get environment instance for configuration
+env = get_env()
+
 from test_framework.feature_flags import (
     FeatureStatus,
     get_feature_flag_manager,
@@ -149,7 +152,7 @@ def experimental_test(reason: Optional[str] = None):
             @functools.wraps(func)
             async def async_wrapper(*args, **kwargs):
                 # Check global experimental flag
-                if not os.environ.get("ENABLE_EXPERIMENTAL_TESTS", "").lower() == "true":
+                if not env.get("ENABLE_EXPERIMENTAL_TESTS", "").lower() == "true":
                     skip_reason = reason or "Experimental tests disabled"
                     pytest.skip(skip_reason)
                 
@@ -163,7 +166,7 @@ def experimental_test(reason: Optional[str] = None):
             @functools.wraps(func)
             def sync_wrapper(*args, **kwargs):
                 # Check global experimental flag
-                if not os.environ.get("ENABLE_EXPERIMENTAL_TESTS", "").lower() == "true":
+                if not env.get("ENABLE_EXPERIMENTAL_TESTS", "").lower() == "true":
                     skip_reason = reason or "Experimental tests disabled"
                     pytest.skip(skip_reason)
                 
@@ -233,8 +236,8 @@ def performance_test(threshold_ms: float = 1000):
             @functools.wraps(func)
             async def async_wrapper(*args, **kwargs):
                 # Skip in fast mode unless explicitly enabled
-                if os.environ.get("FAST_MODE") == "true" and \
-                   not os.environ.get("ENABLE_PERFORMANCE_TESTS") == "true":
+                if env.get("FAST_MODE") == "true" and \
+                   not env.get("ENABLE_PERFORMANCE_TESTS") == "true":
                     pytest.skip("Performance tests disabled in fast mode")
                 
                 import time
@@ -255,8 +258,8 @@ def performance_test(threshold_ms: float = 1000):
             @functools.wraps(func)
             def sync_wrapper(*args, **kwargs):
                 # Skip in fast mode unless explicitly enabled
-                if os.environ.get("FAST_MODE") == "true" and \
-                   not os.environ.get("ENABLE_PERFORMANCE_TESTS") == "true":
+                if env.get("FAST_MODE") == "true" and \
+                   not env.get("ENABLE_PERFORMANCE_TESTS") == "true":
                     pytest.skip("Performance tests disabled in fast mode")
                 
                 import time
@@ -293,7 +296,7 @@ def integration_only():
             # For async functions, create an async wrapper
             @functools.wraps(func)
             async def async_wrapper(*args, **kwargs):
-                if os.environ.get("TEST_LEVEL") not in ["integration", "comprehensive", "all"]:
+                if env.get("TEST_LEVEL") not in ["integration", "comprehensive", "all"]:
                     pytest.skip("Integration tests only")
                 return await func(*args, **kwargs)
             
@@ -303,7 +306,7 @@ def integration_only():
             # For sync functions, create a sync wrapper
             @functools.wraps(func)
             def sync_wrapper(*args, **kwargs):
-                if os.environ.get("TEST_LEVEL") not in ["integration", "comprehensive", "all"]:
+                if env.get("TEST_LEVEL") not in ["integration", "comprehensive", "all"]:
                     pytest.skip("Integration tests only")
                 return func(*args, **kwargs)
             
@@ -330,7 +333,7 @@ def unit_only():
             # For async functions, create an async wrapper
             @functools.wraps(func)
             async def async_wrapper(*args, **kwargs):
-                if os.environ.get("TEST_LEVEL") not in ["unit", "comprehensive", "all"]:
+                if env.get("TEST_LEVEL") not in ["unit", "comprehensive", "all"]:
                     pytest.skip("Unit tests only")
                 return await func(*args, **kwargs)
             
@@ -340,7 +343,7 @@ def unit_only():
             # For sync functions, create a sync wrapper
             @functools.wraps(func)
             def sync_wrapper(*args, **kwargs):
-                if os.environ.get("TEST_LEVEL") not in ["unit", "comprehensive", "all"]:
+                if env.get("TEST_LEVEL") not in ["unit", "comprehensive", "all"]:
                     pytest.skip("Unit tests only")
                 return func(*args, **kwargs)
             

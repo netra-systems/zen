@@ -88,15 +88,19 @@ class ModelCascade:
         model_selector: ModelSelector,
         quality_evaluator: QualityEvaluator,
         cost_tracker: CostTracker,
-        metrics_service: MetricsService,
-        db_session=None
+        metrics_service: MetricsService
     ):
+        """Initialize ModelCascade without global session storage.
+        
+        CRITICAL: This class no longer stores db_session as instance variable.
+        Database sessions must be passed as parameters to methods that need them.
+        """
         self.llm_manager = llm_manager
         self.model_selector = model_selector
         self.quality_evaluator = quality_evaluator
         self.cost_tracker = cost_tracker
         self.metrics_service = metrics_service
-        self.db_session = db_session
+        # REMOVED: self.db_session = db_session (global session storage removed)
         
         # Initialize policies and caches
         self.policies = CascadePolicies()

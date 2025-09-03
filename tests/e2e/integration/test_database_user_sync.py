@@ -39,6 +39,16 @@ import httpx
 import pytest
 import pytest_asyncio
 
+
+@dataclass
+class UserTestData:
+    """Test user data structure."""
+    id: str
+    email: str
+    full_name: str
+    auth_provider: str = "google"
+    is_active: bool = True
+
 # Add parent directories to sys.path for imports
 
 from tests.e2e.service_manager import (
@@ -84,11 +94,11 @@ class TestDatabaseUserSyncer:
     async def _connect_databases(self) -> None:
         """Connect to Auth and Main PostgreSQL databases."""
         # Auth database connection (same as main for now)
-        auth_db_url = "postgresql://test:test@localhost:5434/netra_test"
+        auth_db_url = "postgresql://test:test@localhost:5433/netra_test"
         self.auth_db_pool = await asyncpg.create_pool(auth_db_url, min_size=1, max_size=3)
         
         # Main database connection
-        main_db_url = "postgresql://test:test@localhost:5434/netra_test"  
+        main_db_url = "postgresql://test:test@localhost:5433/netra_test"  
         self.main_db_pool = await asyncpg.create_pool(main_db_url, min_size=1, max_size=3)
         
         logger.info("Database connections established")

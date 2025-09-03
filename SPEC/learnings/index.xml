@@ -300,6 +300,23 @@
         <prevention>Use deterministic StartupOrchestrator with strict phases. No conditional paths for critical services. No setting services to None. Fail immediately if any chat component cannot initialize.</prevention>
     </learning>
     
+    <learning id="docker-tmpfs-stability-issue-2025-01-02">
+        <title>Docker tmpfs Storage Stability Issues</title>
+        <category>Infrastructure/Docker</category>
+        <keywords>docker, tmpfs, alpine, memory, crash, stability, volumes, storage, pytest</keywords>
+        <path>docker_tmpfs_stability_issue.xml</path>
+        <critical-takeaway>
+            tmpfs volumes in Docker cause instability and crashes, particularly in Alpine containers.
+            Root cause: tmpfs consumes RAM directly, has no persistence, causes OOM conditions.
+            Solution: Replace ALL tmpfs volumes with named Docker volumes for persistent storage.
+            Affects docker-compose.alpine-test.yml, docker-compose.pytest.yml, config/docker_environments.yaml.
+            NEVER use tmpfs in production or test environments.
+        </critical-takeaway>
+        <severity>CRITICAL</severity>
+        <business-impact>System crashes, test suite failures, complete service unavailability</business-impact>
+        <prevention>Always use named volumes for database storage. Clean volumes between test runs instead of using tmpfs. Monitor container memory usage. Document in CLAUDE.md that tmpfs is forbidden.</prevention>
+    </learning>
+    
     <learning id="auth-state-race-condition-2025-08-31">
         <title>Authentication State Race Condition During Initialization</title>
         <category>Frontend Authentication</category>
@@ -2369,5 +2386,74 @@
         <severity>HIGH</severity>
         <business-impact>$2000/month CI/CD savings, 40% test maintenance reduction, 2 hours/week developer productivity gain</business-impact>
         <prevention>Adopt Playwright for new tests, port mission-critical WebSocket tests, leverage for load testing and multi-user scenarios</prevention>
+    </learning>
+
+    <learning id="ssot-orchestration-consolidation-2025-09-02">
+        <title>SSOT Orchestration Consolidation - Infrastructure SSOT Violation Remediation</title>
+        <category>SSOT/Infrastructure/Orchestration</category>
+        <keywords>ssot, orchestration, consolidation, enum-duplication, availability-configuration, test-infrastructure, mro-analysis, thread-safety, singleton-pattern</keywords>
+        <path>ssot_orchestration_consolidation_20250902.xml</path>
+        <critical-takeaway>
+            Eliminated 15+ duplicate orchestration enum definitions causing SSOT violations and maintenance overhead.
+            Created centralized OrchestrationConfig singleton with thread-safe availability caching and environment overrides.
+            Consolidated BackgroundTaskStatus, E2ETestCategory, ExecutionStrategy, ProgressOutputMode, ProgressEventType
+            and other orchestration enums into test_framework/ssot modules. 60% reduction in maintenance overhead,
+            eliminated import inconsistencies causing unpredictable test behavior. Two-module SSOT pattern:
+            orchestration.py for availability config, orchestration_enums.py for consolidated enums.
+        </critical-takeaway>
+        <severity>HIGH</severity>
+        <business-impact>60% maintenance reduction, eliminated test inconsistencies, prevented cascading failures, established SSOT pattern for infrastructure</business-impact>
+        <prevention>Always use test_framework.ssot.orchestration modules for availability and enums. Automated SSOT violation scanning. MRO analysis for complex refactoring. No try-except import patterns for infrastructure.</prevention>
+        <implementation-patterns>
+            <pattern>Centralized Availability Configuration - OrchestrationConfig singleton with caching</pattern>
+            <pattern>Consolidated Enum Imports - Single SSOT module for all orchestration enums</pattern>
+            <pattern>Thread-Safe Singleton Pattern - Lazy loading with RLock for parallel test safety</pattern>
+            <pattern>Environment Override Support - Configuration flexibility for testing scenarios</pattern>
+        </implementation-patterns>
+        <testing-strategies>
+            <strategy>SSOT Compliance Validation - Automated scanning for duplicate definitions</strategy>
+            <strategy>Thread Safety Testing - Parallel access validation for singleton configuration</strategy>
+            <strategy>Migration Integrity Testing - Comprehensive validation of functionality preservation</strategy>
+            <strategy>MRO Analysis - Method resolution order validation for inheritance changes</strategy>
+        </testing-strategies>
+        <related-learnings>
+            <learning-ref>golden-agent-index-2025-09-02</learning-ref>
+            <learning-ref>ssot_consolidation_20250825.xml</learning-ref>
+            <learning-ref>unified_agent_testing_implementation.xml</learning-ref>
+        </related-learnings>
+    </learning>
+    
+    <learning id="goals-triage-ssot-remediation-20250902">
+        <title>GoalsTriageSubAgent SSOT Remediation - Phase 2 Infrastructure</title>
+        <category>Agent/SSOT/Compliance</category>
+        <keywords>ssot, goals-triage, json-handling, error-handling, llm-response-parser, unified-patterns</keywords>
+        <path>goals_triage_ssot_remediation_20250902.xml</path>
+        <critical-takeaway>
+            Successfully remediated critical SSOT violations in GoalsTriageSubAgent. Fixed direct json.loads() 
+            usage (lines 340, 365) with LLMResponseParser. Integrated unified error handler with ErrorContext. 
+            Created comprehensive test suite. All agents parsing LLM responses must use LLMResponseParser, 
+            not direct JSON methods. Error handling must include UserExecutionContext details.
+        </critical-takeaway>
+        <severity>HIGH</severity>
+        <business-impact>Routing logic integrity, goal prioritization consistency, improved error recovery</business-impact>
+        <prevention>
+            Always use LLMResponseParser for LLM response parsing. Never use json.loads/dumps directly.
+            Always create ErrorContext with user details for error handling. Run SSOT compliance tests.
+        </prevention>
+        <implementation-patterns>
+            <pattern>LLMResponseParser.safe_json_parse() for JSON parsing with fallback</pattern>
+            <pattern>LLMResponseParser.ensure_agent_response_is_json() for LLM responses</pattern>
+            <pattern>ErrorContext with user_id, run_id, thread_id for all errors</pattern>
+        </implementation-patterns>
+        <testing-strategies>
+            <strategy>Create failing tests before fixes to ensure improvements</strategy>
+            <strategy>Test malformed JSON recovery scenarios</strategy>
+            <strategy>Verify concurrent user isolation</strategy>
+        </testing-strategies>
+        <related-learnings>
+            <learning-ref>golden-agent-index-2025-09-02</learning-ref>
+            <learning-ref>ssot_consolidation_20250825.xml</learning-ref>
+            <learning-ref>unified_agent_testing_implementation.xml</learning-ref>
+        </related-learnings>
     </learning>
 </specification>

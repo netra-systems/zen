@@ -170,3 +170,157 @@ FOR EACH sub task in item:
     2) Use multi-agent (3-7 best most relevant agents) to complete actual work.
     3) failing tests and test suite must be complete, comphrensive, and difficult
 
+
+LIFE OR DEATH CRITICAL: ACTION:
+AUDIT COMPLETION OF:
+WEBSOCKET_BRIDGE_FINAL_AUDIT_REPORT_20250902.md
+FOR EACH sub task in item:
+    1) don't believe the report fully - check latest system and think about it yourself
+    2) Use multi-agent (3-7 best most relevant agents) to complete actual work.
+    3) failing tests and test suite must be complete, comphrensive, and difficult
+
+
+LIFE OR DEATH CRITICAL: ACTION:
+TEST_INFRASTRUCTURE_SSOT_VIOLATIONS_REPORT.md
+P1 ONLY
+FOR EACH sub task in item:
+    1) don't believe the report fully - check latest system and think about it yourself
+    2) Use multi-agent (3-7 best most relevant agents) to complete actual work.
+    3) failing tests and test suite must be complete, comphrensive, and difficult
+
+LIFE OR DEATH CRITICAL: ACTION:
+DOCKER_CRASH_AUDIT_REPORT_20250902.md
+P1 ONLY
+FOR EACH sub task in item:
+    1) don't believe the report fully - check latest system and think about it yourself
+    2) Use multi-agent (3-7 best most relevant agents) to complete actual work.
+    3) failing tests and test suite must be complete, comphrensive, and difficult
+
+LIFE OR DEATH CRITICAL: ACTION:
+DOCKER_CRASH_AUDIT_REPORT_20250902.md
+P2 ONLY
+FOR EACH sub task in item:
+    1) don't believe the report fully - check latest system and think about it yourself
+    2) Use multi-agent (3-7 best most relevant agents) to complete actual work.
+    3) failing tests and test suite must be complete, comphrensive, and difficult
+
+
+LIFE OR DEATH CRITICAL: ACTION:
+DOCKER_CRASH_AUDIT_REPORT_20250902.md
+WEBSOCKET_BRIDGE_FINAL_AUDIT_REPORT_20250902.md
+FOR EACH sub task in item:
+    1) don't believe the report fully - check latest system and think about it yourself
+    2) Use multi-agent (3-7 best most relevant agents) to complete actual work.
+    3) failing tests and test suite must be complete, comphrensive, and difficult
+
+
+LIFE OR DEATH CRITICAL: ACTION:
+reports/ssot_orchestrator_violations_audit_20250902.md
+FOR EACH sub task in item:
+    1) don't believe the report fully - check latest system and think about it yourself
+    2) Use multi-agent (3-7 best most relevant agents) to complete actual work.
+    3) failing tests and test suite must be complete, comphrensive, and difficult
+
+
+
+LIFE OR DEATH CRITICAL: ACTION:
+P1 of reports/DOCKER_TEST_STABILITY_REMEDIATION_PLAN.md
+Background context DOCKER_STABILITY_AUDIT_5_WHYS_20250902.md
+FOR EACH sub task in item:
+    1) don't believe the report fully - check latest system and think about it yourself
+    2) Use multi-agent (3-7 best most relevant agents) to complete actual work.
+    3) failing tests and test suite must be complete, comphrensive, and difficult
+
+ 
+LIFE OR DEATH CRITICAL: ACTION:
+ AUDIT_REPORT_ALPINE_CONTAINERS.md
+ FOR EACH sub task in item:
+    1) don't believe the report fully - check latest system and think about it yourself
+    2) Use multi-agent (3-7 best most relevant agents) to complete actual work.
+    3) failing tests and test suite must be complete, comphrensive, and difficult
+
+
+LIFE OR DEATH CRITICAL: ACTION:
+Phase 2 Item 3:
+AUDIT_REPORT_AGENT_INFRA_USER_CONFUSION.md
+ FOR EACH sub task in item:
+    1) don't believe the report fully - check latest system and think about it yourself
+    2) Use multi-agent (3-7 best most relevant agents) to complete actual work.
+    3) failing tests and test suite must be complete, comphrensive, and difficult
+
+LIFE OR DEATH CRITICAL: ACTION:
+DOCKER_UNIFIED_AUDIT_REPORT.md P0 and P1
+ FOR EACH sub task in item:
+    1) don't believe the report fully - check latest system and think about it yourself
+    2) Use multi-agent (3-7 best most relevant agents) to complete actual work.
+    3) failing tests and test suite must be complete, comphrensive, and difficult
+
+"Design the work for Paralell agents" seems good
+
+
+LIFE OR DEATH CRITICAL: ACTION:
+DOCKER_BACKEND_FIVE_WHYS_BUG_REPORT.md
+ FOR EACH sub task in item:
+    1) don't believe the report fully - check latest system and think about it yourself
+    2) Use multi-agent (3-7 best most relevant agents) to complete actual work.
+    3) failing tests and test suite must be complete, comphrensive, and difficult
+
+LIFE OR DEATH CRITICAL: ACTION:
+PARALLEL_AGENT_UPDATE_PLAN.md Phase 0
+ FOR EACH sub task in item:
+    1) don't believe the report fully - check latest system and think about it yourself
+    2) Use multi-agent (3-7 best most relevant agents) to complete actual work.
+    3) failing tests and test suite must be complete, comphrensive, and difficult
+
+
+LIFE OR DEATH CRITICAL: ACTION:
+PARALLEL_AGENT_UPDATE_PLAN.md Phase 1
+ FOR EACH sub task in item:
+    1) don't believe the report fully - check latest system and think about it yourself
+    2) Use multi-agent (3-7 best most relevant agents) to complete actual work.
+    3) failing tests and test suite must be complete, comphrensive, and difficult
+
+LIFE OR DEATH CRITICAL: ACTION:
+PARALLEL_AGENT_UPDATE_PLAN.md Phase 2
+ FOR EACH sub task in item:
+    1) don't believe the report fully - check latest system and think about it yourself
+    2) Use multi-agent (3-7 best most relevant agents) to complete actual work.
+    3) failing tests and test suite must be complete, comphrensive, and difficult
+
+LIFE OR DEATH CRITICAL: ACTION:
+PYTEST_DOCKER_CRASH_AUDIT.md
+ FOR EACH sub task in item:
+    1) don't believe the report fully - check latest system and think about it yourself
+    2) Use multi-agent (3-7 best most relevant agents) to complete actual work.
+    3) failing tests and test suite must be complete, comphrensive, and difficult
+    
+LIFE OR DEATH CRITICAL: ACTION:
+TOOL_DISPATCHER_AUDIT_REPORT.md
+ FOR EACH sub task in item:
+    1) don't believe the report fully - check latest system and think about it yourself
+    2) Use multi-agent (3-7 best most relevant agents) to complete actual work.
+    3) failing tests and test suite must be complete, comphrensive, and difficult
+
+LIFE OR DEATH CRITICAL: ACTION:
+THREE_TIER_AUDIT_REPORT.md
+ FOR EACH sub task in item:
+    1) don't believe the report fully - check latest system and think about it yourself
+    2) Use multi-agent (3-7 best most relevant agents) to complete actual work.
+    3) failing tests and test suite must be complete, comphrensive, and difficult
+
+
+## AGENT_SSOT_AUDIT_PLAN.md
+
+LIFE OR DEATH CRITICAL: ACTION:
+Phase #2  Section 3 in AGENT_SSOT_AUDIT_PLAN.md
+ FOR EACH sub task in item:
+    1) don't believe the report fully - check latest system and think about it yourself
+    2) Use multi-agent (3-7 best most relevant agents) to complete actual work.
+    3) failing tests and test suite must be complete, comphrensive, and difficult
+
+LIFE OR DEATH CRITICAL: ACTION:
+Phase #3 in AGENT_SSOT_AUDIT_PLAN.md
+ FOR EACH sub task in item:
+    1) don't believe the report fully - check latest system and think about it yourself
+    2) Use multi-agent (3-7 best most relevant agents) to complete actual work.
+    3) failing tests and test suite must be complete, comphrensive, and difficult

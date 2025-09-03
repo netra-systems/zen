@@ -26,7 +26,7 @@
         </why>
         <why number="3">
             <question>Why is WebSocketManager being passed instead of AgentWebSocketBridge?</question>
-            <answer>Because in startup_module_deterministic.py, the supervisor is initialized with websocket_manager directly</answer>
+            <answer>Because in smd.py, the supervisor is initialized with websocket_manager directly</answer>
         </why>
         <why number="4">
             <question>Why is the supervisor initialized with WebSocketManager directly?</question>
@@ -39,19 +39,19 @@
     </root_cause_analysis>
     
     <fixes_implemented>
-        <fix file="startup_module_deterministic.py" line="132-155">
+        <fix file="smd.py" line="132-155">
             <change>Swapped Step 11 and Step 12 - Create AgentWebSocketBridge BEFORE supervisor</change>
             <before>Step 11: Agent Supervisor, Step 12: AgentWebSocketBridge</before>
             <after>Step 11: AgentWebSocketBridge, Step 12: Agent Supervisor</after>
         </fix>
         
-        <fix file="startup_module_deterministic.py" line="621-636">
+        <fix file="smd.py" line="621-636">
             <change>Modified supervisor initialization to use AgentWebSocketBridge instead of WebSocketManager</change>
             <before>websocket_manager = get_websocket_manager()</before>
             <after>agent_websocket_bridge = self.app.state.agent_websocket_bridge</after>
         </fix>
         
-        <fix file="startup_module_deterministic.py" line="696-698">
+        <fix file="smd.py" line="696-698">
             <change>Fixed tool dispatcher verification to check actual property</change>
             <before>if not getattr(dispatcher, '_websocket_enhanced', False)</before>
             <after>if not dispatcher.has_websocket_support</after>
@@ -63,7 +63,7 @@
             <after>Validate AgentWebSocketBridge is properly initialized (replaces WebSocketNotifier)</after>
         </fix>
         
-        <fix file="startup_module_deterministic.py" line="322-328">
+        <fix file="smd.py" line="322-328">
             <change>Temporarily disabled outdated validation checks</change>
             <note>Critical path and comprehensive validation have outdated checks for deprecated patterns</note>
         </fix>

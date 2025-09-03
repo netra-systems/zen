@@ -221,7 +221,7 @@ class RealServiceChatTester:
         
         # Get service endpoints
         auth_host = isolated_env.get("AUTH_SERVICE_HOST", "localhost")
-        auth_port = isolated_env.get("AUTH_SERVICE_PORT", "8001")
+        auth_port = isolated_env.get("AUTH_SERVICE_PORT", "8081")
         backend_host = isolated_env.get("BACKEND_HOST", "localhost")
         backend_port = isolated_env.get("BACKEND_PORT", "8000")
         
@@ -240,16 +240,16 @@ class RealServiceChatTester:
             email=test_user_data["email"],
             password=test_user_data["password"]
         )
-        assert register_response["success"], f"Failed to register test user: {register_response}"
+        # Check if registration was successful (auth service returns user data on success)
+        assert register_response, f"Failed to register test user: {register_response}"
+        assert "id" in register_response or "user_id" in register_response or register_response.get("success"), f"Registration response missing user ID: {register_response}"
         
-        # Login to get token
-        login_response = await self.auth_client.login(
+        # Login to get token (auth_client.login returns the token string directly)
+        self.test_user_token = await self.auth_client.login(
             email=test_user_data["email"],
             password=test_user_data["password"]
         )
-        assert login_response["success"], f"Failed to login test user: {login_response}"
-        
-        self.test_user_token = login_response["access_token"]
+        assert self.test_user_token, f"Failed to get login token"
         
         # Setup WebSocket client
         ws_url = f"ws://{backend_host}:{backend_port}/ws"

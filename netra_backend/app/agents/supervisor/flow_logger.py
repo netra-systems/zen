@@ -3,7 +3,6 @@
 Provides structured logging for supervisor execution flows with correlation tracking.
 Each function must be ≤8 lines as per architecture requirements.
 """
-import json
 import time
 from enum import Enum
 from typing import Any, Dict, List, Optional
@@ -18,6 +17,7 @@ from netra_backend.app.agents.supervisor.flow_data_builders import (
     build_spec_todo_failure_data,
     build_spec_todo_status_data,
 )
+from netra_backend.app.core.serialization.unified_json_handler import backend_json_handler
 from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
@@ -222,7 +222,7 @@ class SupervisorPipelineLogger:
     def _log_structured_data(self, event_type: str, data: Dict[str, Any]) -> None:
         """Log structured data with consistent format."""
         log_entry = self._build_base_log_entry(event_type, data)
-        logger.info(f"SupervisorFlow: {json.dumps(log_entry)}")
+        logger.info(f"SupervisorFlow: {backend_json_handler.dumps(log_entry)}")
 
     def _build_base_log_entry(self, event_type: str, data: Dict[str, Any]) -> Dict[str, Any]:
         """Build base log entry structure."""

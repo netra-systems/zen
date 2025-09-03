@@ -53,6 +53,9 @@ class TestStagingWebSocketer:
             await client.close()
         self.websocket_clients.clear()
 
+# Alias for backward compatibility
+StagingWebSocketTester = TestStagingWebSocketer
+
 @pytest.fixture
 async def staging_harness() -> UnifiedE2ETestHarness:
     """Create staging E2E test harness."""

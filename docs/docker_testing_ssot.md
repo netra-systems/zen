@@ -54,7 +54,6 @@ Services:
 - `netra-test-redis` - Redis cache
 - `netra-test-clickhouse` - ClickHouse analytics
 - `netra-test-rabbitmq` - Message queue
-- `netra-test-mailhog` - Email testing
 
 ### 3. Port Allocation
 Test services use dedicated ports to avoid conflicts:
@@ -65,8 +64,6 @@ Test services use dedicated ports to avoid conflicts:
 | Redis | 6381 | 6380 | 6379 |
 | ClickHouse | 8125 | 8124 | 8123 |
 | RabbitMQ | 5673 | 5672 | 5672 |
-| MailHog SMTP | 1026 | 1025 | N/A |
-| MailHog Web | 8026 | 8025 | N/A |
 
 ### 4. Environment Variables
 Test runner MUST set these environment variables:

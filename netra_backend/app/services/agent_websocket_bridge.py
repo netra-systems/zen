@@ -27,6 +27,8 @@ from shared.monitoring.interfaces import MonitorableComponent
 
 if TYPE_CHECKING:
     from shared.monitoring.interfaces import ComponentMonitor
+    from netra_backend.app.models.user_execution_context import UserExecutionContext
+    from netra_backend.app.services.user_websocket_emitter import UserWebSocketEmitter
 
 logger = central_logger.get_logger(__name__)
 
@@ -88,7 +90,14 @@ class IntegrationMetrics:
 
 class AgentWebSocketBridge(MonitorableComponent):
     """
-    SSOT for WebSocket-Agent service integration lifecycle.
+    REFACTORED: WebSocket-Agent service integration lifecycle manager.
+    
+    IMPORTANT: This class has been refactored to remove singleton pattern.
+    For new code, use create_user_emitter() to get per-request emitters
+    that ensure complete user isolation.
+    
+    Legacy singleton methods are preserved for backward compatibility
+    but are DEPRECATED and should be migrated to per-user emitters.
     
     Provides idempotent initialization, health monitoring, and recovery
     mechanisms for the critical WebSocket-Agent integration that enables
@@ -98,19 +107,19 @@ class AgentWebSocketBridge(MonitorableComponent):
     and health auditing while maintaining full operational independence.
     """
     
-    _instance: Optional['AgentWebSocketBridge'] = None
-    _lock = asyncio.Lock()
-    
-    def __new__(cls) -> 'AgentWebSocketBridge':
-        """Singleton pattern implementation."""
-        if cls._instance is None:
-            cls._instance = super().__new__(cls)
-        return cls._instance
+    # REMOVED: Singleton pattern implementation
+    # _instance: Optional['AgentWebSocketBridge'] = None
+    # _lock = asyncio.Lock()
     
     def __init__(self):
-        """Initialize bridge with thread-safe singleton pattern."""
-        if hasattr(self, '_initialized'):
-            return
+        """Initialize bridge WITHOUT singleton pattern.
+        
+        MIGRATION NOTE: This bridge is now non-singleton. For per-user
+        event emission, use create_user_emitter() factory method.
+        """
+        # Remove singleton initialization check
+        # if hasattr(self, '_initialized'):
+        #     return
         
         self._initialize_configuration()
         self._initialize_state()
@@ -119,7 +128,7 @@ class AgentWebSocketBridge(MonitorableComponent):
         self._initialize_monitoring_observers()
         
         self._initialized = True
-        logger.info("AgentWebSocketBridge initialized as singleton")
+        logger.info("AgentWebSocketBridge initialized (non-singleton mode)")
     
     def _initialize_configuration(self) -> None:
         """Initialize bridge configuration."""
@@ -920,6 +929,10 @@ class AgentWebSocketBridge(MonitorableComponent):
         Business Value: Users see immediate feedback that AI is working on their problem
         """
         try:
+            # CRITICAL VALIDATION: Check run_id context before emission
+            if not self._validate_event_context(run_id, "agent_started", agent_name):
+                return False
+            
             if not self._websocket_manager:
                 logger.warning(f"🚨 EMISSION BLOCKED: WebSocket manager unavailable for agent_started (run_id={run_id}, agent={agent_name})")
                 return False
@@ -1468,6 +1481,176 @@ class AgentWebSocketBridge(MonitorableComponent):
             logger.error(f"🚨 EMISSION EXCEPTION: notify_custom failed (run_id={run_id}, type={notification_type}): {e}")
             return False
     
+    # ===================== CORE EVENT EMISSION METHOD =====================
+    
+    async def emit_agent_event(
+        self,
+        event_type: str,
+        data: Dict[str, Any],
+        run_id: Optional[str] = None,
+        agent_name: Optional[str] = None
+    ) -> bool:
+        """
+        Core method for emitting agent events with context validation.
+        
+        CRITICAL SECURITY: This method validates that events are only sent with proper user context,
+        preventing events from being misrouted to wrong users.
+        
+        Args:
+            event_type: Type of event to emit
+            data: Event payload data
+            run_id: Unique execution identifier (REQUIRED for routing)
+            agent_name: Optional agent name for logging
+            
+        Returns:
+            bool: True if event was successfully queued/sent
+            
+        Raises:
+            ValueError: If run_id is invalid or context validation fails
+            
+        Business Impact: Prevents WebSocket events from being misrouted to wrong users,
+                        ensuring data privacy and security.
+        """
+        try:
+            # CRITICAL VALIDATION: Check run_id context
+            if not self._validate_event_context(run_id, event_type, agent_name):
+                return False
+            
+            if not self._websocket_manager:
+                logger.warning(f"🚨 EMISSION BLOCKED: WebSocket manager unavailable for {event_type} (run_id={run_id})")
+                return False
+            
+            # Build standardized event
+            event_payload = {
+                "type": event_type,
+                "run_id": run_id,
+                "timestamp": datetime.now(timezone.utc).isoformat(),
+                **data
+            }
+            
+            # Add agent_name if provided
+            if agent_name:
+                event_payload["agent_name"] = agent_name
+            
+            # CRYSTAL CLEAR EMISSION: Resolve thread_id and emit
+            thread_id = await self._resolve_thread_id_from_run_id(run_id)
+            if not thread_id:
+                logger.error(f"🚨 EMISSION FAILED: Cannot resolve thread_id for run_id={run_id}")
+                return False
+            
+            # EMIT TO USER CHAT
+            success = await self._websocket_manager.send_to_thread(thread_id, event_payload)
+            
+            if success:
+                logger.debug(f"✅ EMISSION SUCCESS: {event_type} → thread={thread_id} (run_id={run_id})")
+            else:
+                logger.error(f"🚨 EMISSION FAILED: {event_type} send failed (run_id={run_id})")
+            
+            return success
+            
+        except Exception as e:
+            logger.error(f"🚨 EMISSION EXCEPTION: emit_agent_event failed (event_type={event_type}, run_id={run_id}): {e}")
+            return False
+    
+    def _validate_event_context(self, run_id: Optional[str], event_type: str, agent_name: Optional[str] = None) -> bool:
+        """
+        Validate WebSocket event context to ensure proper user isolation.
+        
+        CRITICAL SECURITY: This validation prevents events from being sent without proper context,
+        which could result in events being delivered to wrong users or global broadcast.
+        
+        Args:
+            run_id: Run identifier to validate
+            event_type: Type of event being emitted (for logging)
+            agent_name: Optional agent name (for logging)
+            
+        Returns:
+            bool: True if context is valid and event should be sent
+            
+        Security Impact: Prevents cross-user data leakage and ensures WebSocket events
+                        are only sent to the correct user context.
+        """
+        try:
+            # CRITICAL CHECK: run_id cannot be None
+            if run_id is None:
+                logger.error(f"🚨 CONTEXT VALIDATION FAILED: run_id is None for {event_type} "
+                           f"(agent={agent_name or 'unknown'}). This would cause event misrouting!")
+                logger.error(f"🚨 SECURITY RISK: Events with None run_id can be delivered to wrong users!")
+                return False
+            
+            # CRITICAL CHECK: run_id cannot be 'registry' (system context)
+            if run_id == 'registry':
+                logger.error(f"🚨 CONTEXT VALIDATION FAILED: run_id='registry' for {event_type} "
+                           f"(agent={agent_name or 'unknown'}). System context cannot emit user events!")
+                logger.error(f"🚨 SECURITY RISK: Registry context events would be broadcast to all users!")
+                return False
+            
+            # VALIDATION CHECK: run_id should be a non-empty string
+            if not isinstance(run_id, str) or not run_id.strip():
+                logger.error(f"🚨 CONTEXT VALIDATION FAILED: Invalid run_id '{run_id}' for {event_type} "
+                           f"(agent={agent_name or 'unknown'}). run_id must be non-empty string!")
+                return False
+            
+            # VALIDATION CHECK: run_id should not contain suspicious patterns
+            if self._is_suspicious_run_id(run_id):
+                logger.warning(f"⚠️ CONTEXT VALIDATION WARNING: Suspicious run_id pattern '{run_id}' for {event_type} "
+                              f"(agent={agent_name or 'unknown'}). Event will be sent but flagged for monitoring.")
+                # Allow but log for monitoring - some legitimate run_ids might trigger this
+            
+            # Context validation passed
+            logger.debug(f"✅ CONTEXT VALIDATION PASSED: run_id={run_id} for {event_type} is valid")
+            return True
+            
+        except Exception as e:
+            logger.error(f"🚨 CONTEXT VALIDATION EXCEPTION: Validation failed for {event_type} "
+                        f"(run_id={run_id}, agent={agent_name or 'unknown'}): {e}")
+            return False
+    
+    def _is_suspicious_run_id(self, run_id: str) -> bool:
+        """
+        Check if a run_id contains suspicious patterns that might indicate invalid context.
+        
+        This helps detect potentially invalid run_ids that could cause security issues
+        or indicate bugs in the calling code.
+        
+        Args:
+            run_id: Run ID to check for suspicious patterns
+            
+        Returns:
+            bool: True if run_id contains suspicious patterns
+        """
+        if not run_id or not isinstance(run_id, str):
+            return True
+        
+        run_id_lower = run_id.lower()
+        
+        # Suspicious patterns that indicate invalid context
+        suspicious_patterns = [
+            # System/generic identifiers that shouldn't be user run_ids
+            "system", "global", "broadcast", "admin", "root", "default",
+            # Test artifacts that might leak into production
+            "test", "mock", "fake", "dummy", "placeholder", "example",
+            # Empty/null-like values
+            "null", "none", "undefined", "empty", "",
+            # Debug/development patterns
+            "debug", "dev", "local", "temp", "temporary"
+        ]
+        
+        # Check for exact matches or contained patterns
+        for pattern in suspicious_patterns:
+            if pattern in run_id_lower:
+                return True
+        
+        # Check for overly short identifiers (less than 3 chars)
+        if len(run_id.strip()) < 3:
+            return True
+        
+        # Check for patterns that look like system identifiers
+        if run_id_lower.startswith(('sys_', 'system_', 'global_', 'admin_')):
+            return True
+        
+        return False
+
     # ===================== HELPER METHODS =====================
     
     async def _resolve_thread_id_from_run_id(self, run_id: str) -> Optional[str]:
@@ -2145,18 +2328,167 @@ class AgentWebSocketBridge(MonitorableComponent):
         
         return sanitized
 
+    # ===================== FACTORY METHODS FOR USER ISOLATION =====================
+    # CRITICAL SECURITY: These methods create per-request emitters to prevent user data leakage
+    
+    async def create_user_emitter(self, user_context: 'UserExecutionContext') -> 'WebSocketEventEmitter':
+        """Create WebSocketEventEmitter for specific user context with complete isolation.
+        
+        SECURITY CRITICAL: Use this method for new code to prevent cross-user event leakage.
+        This replaces the singleton notification methods with per-request isolated emitters.
+        
+        Args:
+            user_context: User execution context with validated user information
+            
+        Returns:
+            WebSocketEventEmitter: Isolated emitter bound to user context
+            
+        Raises:
+            ValueError: If user_context is invalid or WebSocket manager unavailable
+            
+        Example:
+            # Create per-user emitter (RECOMMENDED)
+            emitter = await bridge.create_user_emitter(user_context)
+            
+            # Send events to specific user only - validated against context
+            await emitter.emit_agent_started("MyAgent", {"query": "user query"})
+            
+            # Automatic cleanup when emitter goes out of scope
+        """
+        if not user_context:
+            raise ValueError("user_context is required for creating user emitter")
+        
+        try:
+            from netra_backend.app.services.websocket_event_emitter import WebSocketEventEmitter
+            from netra_backend.app.agents.supervisor.user_execution_context import validate_user_context
+            
+            # Validate user context before creating emitter
+            validated_context = validate_user_context(user_context)
+            
+            # Ensure WebSocket manager is available
+            if not self._websocket_manager:
+                await self._initialize_websocket_manager()
+                if not self._websocket_manager:
+                    raise ValueError("WebSocket manager not available")
+            
+            # Create isolated emitter with connection pool reference
+            from netra_backend.app.services.websocket_connection_pool import get_websocket_connection_pool
+            connection_pool = get_websocket_connection_pool()
+            
+            emitter = WebSocketEventEmitter(validated_context, connection_pool)
+            
+            logger.info(f"✅ USER EMITTER CREATED: {user_context.get_correlation_id()} - isolated from other users")
+            return emitter
+            
+        except Exception as e:
+            logger.error(f"🚨 EMITTER CREATION FAILED: {e}")
+            raise ValueError(f"Failed to create user emitter: {e}")
+    
+    @classmethod
+    async def create_user_emitter_from_ids(
+        cls,
+        user_id: str,
+        thread_id: str, 
+        run_id: str,
+        websocket_connection_id: Optional[str] = None
+    ) -> 'WebSocketEventEmitter':
+        """Create WebSocketEventEmitter from individual IDs (convenience method).
+        
+        SECURITY CRITICAL: Creates user execution context from IDs and returns isolated emitter.
+        
+        Args:
+            user_id: User identifier
+            thread_id: Thread identifier
+            run_id: Run identifier
+            websocket_connection_id: Optional WebSocket connection ID
+            
+        Returns:
+            WebSocketEventEmitter: Isolated emitter bound to constructed user context
+            
+        Raises:
+            ValueError: If any required ID is invalid
+        """
+        if not user_id or not thread_id or not run_id:
+            raise ValueError("user_id, thread_id, and run_id are all required")
+        
+        try:
+            from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
+            
+            # Create user execution context from IDs
+            user_context = UserExecutionContext.from_request(
+                user_id=user_id,
+                thread_id=thread_id,
+                run_id=run_id,
+                websocket_connection_id=websocket_connection_id
+            )
+            
+            # Create bridge instance and return emitter
+            bridge = cls()
+            return await bridge.create_user_emitter(user_context)
+            
+        except Exception as e:
+            logger.error(f"🚨 EMITTER FROM IDS FAILED: {e}")
+            raise ValueError(f"Failed to create user emitter from IDs: {e}")
+    
+    @staticmethod
+    async def create_scoped_emitter(user_context: 'UserExecutionContext'):
+        """Create scoped WebSocketEventEmitter with automatic cleanup.
+        
+        RECOMMENDED: Use this for automatic resource management in async context.
+        
+        Args:
+            user_context: User execution context
+            
+        Yields:
+            WebSocketEventEmitter: Emitter with automatic cleanup
+            
+        Example:
+            async with AgentWebSocketBridge.create_scoped_emitter(user_context) as emitter:
+                await emitter.emit_agent_started("MyAgent")
+                # Automatic cleanup happens here
+        """
+        from netra_backend.app.services.websocket_event_emitter import websocket_event_emitter_scope
+        
+        async with websocket_event_emitter_scope(user_context) as emitter:
+            yield emitter
 
-# Singleton factory function
+
+# DEPRECATED: Legacy singleton factory function
 _bridge_instance: Optional[AgentWebSocketBridge] = None
 
 
 async def get_agent_websocket_bridge() -> AgentWebSocketBridge:
-    """Get singleton AgentWebSocketBridge instance."""
+    """DEPRECATED: Get singleton AgentWebSocketBridge instance.
+    
+    MIGRATION WARNING: This singleton pattern can cause cross-user event leakage.
+    For new code, create a non-singleton bridge and use create_user_emitter():
+    
+    # OLD (DEPRECATED)
+    bridge = await get_agent_websocket_bridge()
+    await bridge.notify_agent_started(run_id, agent_name)  # UNSAFE
+    
+    # NEW (RECOMMENDED)
+    bridge = AgentWebSocketBridge()  # Non-singleton
+    emitter = bridge.create_user_emitter(user_context)
+    await emitter.notify_agent_started(agent_name, metadata)  # SAFE
+    """
+    import warnings
+    
+    warnings.warn(
+        "get_agent_websocket_bridge() creates a singleton that can leak events "
+        "between users. Use AgentWebSocketBridge().create_user_emitter(context) "
+        "for safe per-user event emission.",
+        DeprecationWarning,
+        stacklevel=2
+    )
+    
     global _bridge_instance
+    _bridge_lock = asyncio.Lock()
     
     if _bridge_instance is None:
-        async with AgentWebSocketBridge._lock:
+        async with _bridge_lock:
             if _bridge_instance is None:
                 _bridge_instance = AgentWebSocketBridge()
+                logger.warning("⚠️  Created singleton AgentWebSocketBridge - consider migrating to per-user emitters!")
     
     return _bridge_instance

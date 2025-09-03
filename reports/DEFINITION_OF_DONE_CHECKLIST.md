@@ -180,12 +180,21 @@
 - [ ] ExecutionEngine has WebSocketNotifier
 - [ ] EnhancedToolExecutionEngine wraps tool execution
 
+**Factory Pattern Validation (CRITICAL - NEW 2025-09-02):**
+- [ ] Factory methods create unique instances (no shared singletons)
+- [ ] User execution contexts properly isolated between requests
+- [ ] No shared state between concurrent users
+- [ ] WebSocket events delivered only to correct user
+- [ ] Memory growth bounded per user (not global accumulation)
+
 **Tests:**
 - [ ] Run: `python tests/mission_critical/test_websocket_agent_events_suite.py`
+- [ ] Run: `python tests/mission_critical/test_singleton_removal_phase2.py` (NEW - CRITICAL)
 - [ ] Run E2E agent tests with real services
 
 **Learnings to Review:**
 - [ ] `SPEC/supervisor_adaptive_workflow.xml`
+- [ ] `SPEC/learnings/singleton_removal_phase2_20250902_084436.xml` (NEW - CRITICAL)
 - [ ] `SPEC/learnings/state_persistence_optimization.xml`
 
 ---
@@ -243,34 +252,91 @@ python scripts/deploy_to_gcp.py --project netra-production --run-checks
 
 ---
 
-### 🔴 TESTING MODULE
-**Primary Files:**
-- [ ] `/unified_test_runner.py` (MEGA CLASS: max 2000 lines)
-- [ ] `/test_framework/runner.py`
-- [ ] `/test_framework/test_config.py`
-- [ ] `/test_framework/service_availability.py`
+### 🔴 TESTING MODULE (SSOT INFRASTRUCTURE - CRITICAL)
+**Purpose:** Single Source of Truth test infrastructure ensuring reliable, consistent testing patterns  
+**SSOT Compliance:** 94.5% achieved - ALL P0 violations RESOLVED
 
-**Test Categories:**
-- [ ] Unit tests passing
-- [ ] Integration tests passing
-- [ ] E2E tests passing (REAL SERVICES ONLY)
-- [ ] Mission critical tests passing
+**Primary SSOT Files:**
+- [ ] `/tests/unified_test_runner.py` (SSOT TEST EXECUTION - MEGA CLASS: max 2000 lines)
+- [ ] `/test_framework/ssot/base_test_case.py` (SSOT BaseTestCase - ALL tests inherit from this)
+- [ ] `/test_framework/ssot/mock_factory.py` (SSOT Mock Generator - NO duplicate mocks)
+- [ ] `/test_framework/ssot/database_test_utility.py` (SSOT Database Testing)
+- [ ] `/test_framework/ssot/websocket_test_utility.py` (SSOT WebSocket Testing)
+- [ ] `/test_framework/ssot/docker_test_utility.py` (SSOT Docker Orchestration)
+- [ ] `/test_framework/ssot/orchestration.py` (SSOT Orchestration Configuration)
+- [ ] `/test_framework/ssot/orchestration_enums.py` (SSOT Orchestration Enums)
+- [ ] `/test_framework/unified_docker_manager.py` (ONLY Docker manager allowed)
 
-**Test Commands:**
+**SSOT Architecture Requirements:**
+- [ ] **BaseTestCase SSOT:** ALL tests inherit from `SSotBaseTestCase` or `SSotAsyncTestCase`
+- [ ] **Mock Factory SSOT:** ALL mocks created through `SSotMockFactory` - NO ad-hoc mocks
+- [ ] **Test Runner SSOT:** ALL test execution through `tests/unified_test_runner.py` - NO direct pytest
+- [ ] **Environment SSOT:** ALL environment access through `IsolatedEnvironment` - NO os.environ
+- [ ] **Docker SSOT:** ALL Docker operations through `UnifiedDockerManager` - NO custom Docker scripts
+- [ ] **Orchestration SSOT:** ALL orchestration availability from `test_framework.ssot.orchestration` - NO try-except imports
+- [ ] **Orchestration Enums SSOT:** ALL orchestration enums from `test_framework.ssot.orchestration_enums` - NO duplicates
+- [ ] **Real Services First:** MOCKS ARE FORBIDDEN in integration/E2E tests - Use real services
+
+**Test Categories (Priority Order):**
+- [ ] **Mission Critical:** Business-critical functionality (WebSocket events, agent workflows)
+- [ ] **Integration:** Real service integration with Docker orchestration  
+- [ ] **Unit:** Isolated component testing with SSOT utilities
+- [ ] **E2E:** End-to-end workflows with REAL SERVICES ONLY
+
+**Test Commands (SSOT Execution):**
 ```bash
-# Quick feedback
-python unified_test_runner.py --category integration --no-coverage --fast-fail
+# SSOT Test Runner - Quick feedback
+python tests/unified_test_runner.py --execution-mode fast_feedback
 
-# Before release
-python unified_test_runner.py --categories smoke unit integration api --real-llm --env staging
+# SSOT Test Runner - Real services integration
+python tests/unified_test_runner.py --real-services --execution-mode nightly
 
-# Mission critical
+# Mission critical with SSOT infrastructure
 python tests/mission_critical/test_websocket_agent_events_suite.py
+
+# SSOT compliance validation
+python tests/mission_critical/test_ssot_compliance_suite.py
 ```
 
-**Documentation:**
-- [ ] Review: `/TESTING.md`
-- [ ] Review: `SPEC/test_infrastructure_architecture.xml`
+**SSOT Validation Tests:**
+- [ ] Run: `python tests/mission_critical/test_ssot_compliance_suite.py`
+- [ ] Run: `python tests/mission_critical/test_mock_policy_violations.py`
+- [ ] Run: `python test_framework/tests/test_ssot_framework.py`
+- [ ] Run: `python test_framework/tests/test_ssot_orchestration.py`
+- [ ] Verify: NO direct pytest execution in scripts/CI
+- [ ] Verify: ALL tests inherit from SSOT BaseTestCase
+- [ ] Verify: NO duplicate mock implementations exist
+- [ ] Verify: NO duplicate orchestration enum definitions
+- [ ] Verify: NO try-except import patterns for orchestration availability
+- [ ] Verify: ALL orchestration modules use SSOT imports
+
+**Documentation & Specifications:**
+- [ ] **SSOT Spec:** `SPEC/test_infrastructure_ssot.xml` (Canonical architecture)
+- [ ] **Migration Guide:** `SSOT_MIGRATION_GUIDE.md` (Developer guidance)  
+- [ ] **Compliance Report:** `TEST_INFRASTRUCTURE_COMPLIANCE_REPORT_FINAL.md`
+- [ ] **Violations Resolved:** `TEST_INFRASTRUCTURE_SSOT_VIOLATIONS_REPORT.md`
+
+**Anti-Patterns (FORBIDDEN):**
+- [ ] ❌ Direct pytest execution instead of unified_test_runner.py
+- [ ] ❌ Custom mock classes instead of SSotMockFactory
+- [ ] ❌ Multiple Docker management scripts instead of UnifiedDockerManager
+- [ ] ❌ Direct os.environ access instead of IsolatedEnvironment
+- [ ] ❌ Cross-service test imports violating service boundaries
+- [ ] ❌ Integration tests using mocks instead of real services
+- [ ] ❌ Try-except import patterns for orchestration availability
+- [ ] ❌ Duplicate orchestration enum definitions
+- [ ] ❌ Direct orchestration imports bypassing SSOT modules
+
+**SSOT Migration Status:**
+- [ ] ✅ BaseTestCase consolidated (6,096 duplicate implementations eliminated)
+- [ ] ✅ Mock implementations unified (20+ MockAgent duplicates eliminated)
+- [ ] ✅ Test runners consolidated (unified_test_runner.py as SSOT)
+- [ ] ✅ Docker management unified (UnifiedDockerManager only)
+- [ ] ✅ Environment management unified (IsolatedEnvironment compliance 94.5%)
+- [ ] ✅ Orchestration availability unified (OrchestrationConfig SSOT)
+- [ ] ✅ Orchestration enums consolidated (15+ duplicate definitions eliminated)
+- [ ] ✅ Try-except import patterns eliminated from orchestration
+- [ ] ✅ Backwards compatibility maintained during transition
 
 ---
 

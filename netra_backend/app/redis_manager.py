@@ -4,7 +4,7 @@
 
 import asyncio
 import redis.asyncio as redis
-from typing import Dict
+from typing import Dict, Optional
 
 from netra_backend.app.core.configuration.base import get_unified_config
 from shared.isolated_environment import get_env
@@ -19,6 +19,19 @@ class RedisManager:
         self.test_mode = test_mode
         self.test_locks: Dict[str, str] = {}  # For test mode leader locks
         self._redis_builder = self._create_redis_builder()
+    
+    def _namespace_key(self, user_id: Optional[str], key: str) -> str:
+        """Namespace Redis key by user for isolation.
+        
+        Args:
+            user_id: User identifier for namespacing. None uses 'system' namespace.
+            key: Original Redis key
+            
+        Returns:
+            Namespaced key in format 'user:{user_id}:{key}' or 'system:{key}'
+        """
+        namespace = user_id if user_id is not None else "system"
+        return f"user:{namespace}:{key}"
 
     def reinitialize_configuration(self):
         """Reinitialize Redis configuration for environment changes (test support)."""
@@ -294,11 +307,12 @@ class RedisManager:
             return self.redis_client
         return None
     
-    async def get(self, key: str):
-        """Get a value from Redis"""
+    async def get(self, key: str, user_id: Optional[str] = None):
+        """Get a value from Redis with optional user namespacing"""
+        actual_key = self._namespace_key(user_id, key) if user_id is not None else key
         if self.redis_client:
             try:
-                return await self.redis_client.get(key)
+                return await self.redis_client.get(actual_key)
             except Exception as e:
                 # Check if this is a fallback test (test_mode=True specifically set)
                 if self.test_mode:
@@ -312,23 +326,29 @@ class RedisManager:
                     raise
                     
                 # In production, log warning and return None for graceful degradation
-                logger.warning(f"Redis get operation failed for key {key}: {e}")
+                logger.warning(f"Redis get operation failed for key {actual_key}: {e}")
                 return None
         return None
     
-    async def set(self, key: str, value: str, ex: int = None, expire: int = None):
-        """Set a value in Redis with optional expiration"""
+    async def set(self, key: str, value: str, ex: int = None, expire: int = None, user_id: Optional[str] = None):
+        """Set a value in Redis with optional expiration and user namespacing"""
+        actual_key = self._namespace_key(user_id, key) if user_id is not None else key
         if self.redis_client:
             # Support both 'ex' and 'expire' for backward compatibility
             expiration = ex or expire
-            return await self.redis_client.set(key, value, ex=expiration)
+            return await self.redis_client.set(actual_key, value, ex=expiration)
         return None
     
-    async def delete(self, *keys):
-        """Delete one or more keys from Redis"""
+    async def delete(self, *keys, **kwargs):
+        """Delete one or more keys from Redis with optional user namespacing"""
+        user_id = kwargs.get('user_id')
         if self.redis_client and keys:
             try:
-                return await self.redis_client.delete(*keys)
+                if user_id is not None:
+                    actual_keys = [self._namespace_key(user_id, key) for key in keys]
+                    return await self.redis_client.delete(*actual_keys)
+                else:
+                    return await self.redis_client.delete(*keys)
             except Exception as e:
                 logger.warning(f"Failed to delete keys {keys}: {e}")
                 return 0
@@ -375,88 +395,103 @@ class RedisManager:
         return False
 
     # Additional Redis methods needed by test files
-    async def keys(self, pattern: str = "*"):
-        """Get keys matching pattern from Redis"""
+    async def keys(self, pattern: str = "*", user_id: Optional[str] = None):
+        """Get keys matching pattern from Redis with optional user namespacing"""
         if self.redis_client:
             try:
-                return await self.redis_client.keys(pattern)
+                if user_id is not None:
+                    namespaced_pattern = self._namespace_key(user_id, pattern)
+                    keys = await self.redis_client.keys(namespaced_pattern)
+                    # Remove namespace prefix from returned keys
+                    namespace_prefix = f"user:{user_id}:"
+                    return [key.replace(namespace_prefix, "", 1) for key in keys if key.startswith(namespace_prefix)]
+                else:
+                    return await self.redis_client.keys(pattern)
             except Exception as e:
                 logger.warning(f"Failed to get keys with pattern {pattern}: {e}")
                 return []
         return []
 
-    async def lpop(self, key: str):
-        """Pop item from left side of list"""
+    async def lpop(self, key: str, user_id: Optional[str] = None):
+        """Pop item from left side of list with optional user namespacing"""
+        actual_key = self._namespace_key(user_id, key) if user_id is not None else key
         if self.redis_client:
             try:
-                return await self.redis_client.lpop(key)
+                return await self.redis_client.lpop(actual_key)
             except Exception as e:
-                logger.warning(f"Failed to lpop from {key}: {e}")
+                logger.warning(f"Failed to lpop from {actual_key}: {e}")
                 return None
         return None
 
-    async def lpush(self, key: str, *values):
-        """Push items to left side of list"""
+    async def lpush(self, key: str, *values, **kwargs):
+        """Push items to left side of list with optional user namespacing"""
+        user_id = kwargs.get('user_id')
+        actual_key = self._namespace_key(user_id, key) if user_id is not None else key
         if self.redis_client:
             try:
-                return await self.redis_client.lpush(key, *values)
+                return await self.redis_client.lpush(actual_key, *values)
             except Exception as e:
-                logger.warning(f"Failed to lpush to {key}: {e}")
+                logger.warning(f"Failed to lpush to {actual_key}: {e}")
                 return 0
         return 0
 
-    async def ttl(self, key: str):
-        """Get time to live for key"""
+    async def ttl(self, key: str, user_id: Optional[str] = None):
+        """Get time to live for key with optional user namespacing"""
+        actual_key = self._namespace_key(user_id, key) if user_id is not None else key
         if self.redis_client:
             try:
-                return await self.redis_client.ttl(key)
+                return await self.redis_client.ttl(actual_key)
             except Exception as e:
-                logger.warning(f"Failed to get ttl for {key}: {e}")
+                logger.warning(f"Failed to get ttl for {actual_key}: {e}")
                 return -1
         return -1
 
-    async def expire(self, key: str, seconds: int):
-        """Set expiration time for key"""
+    async def expire(self, key: str, seconds: int, user_id: Optional[str] = None):
+        """Set expiration time for key with optional user namespacing"""
+        actual_key = self._namespace_key(user_id, key) if user_id is not None else key
         if self.redis_client:
             try:
-                return await self.redis_client.expire(key, seconds)
+                return await self.redis_client.expire(actual_key, seconds)
             except Exception as e:
-                logger.warning(f"Failed to set expire for {key}: {e}")
+                logger.warning(f"Failed to set expire for {actual_key}: {e}")
                 return False
         return False
 
-    async def hset(self, key: str, field_or_mapping, value=None):
-        """Set hash field(s)"""
+    async def hset(self, key: str, field_or_mapping, value=None, user_id: Optional[str] = None):
+        """Set hash field(s) with optional user namespacing"""
+        actual_key = self._namespace_key(user_id, key) if user_id is not None else key
         if self.redis_client:
             try:
                 if value is not None:
                     # hset(key, field, value) format
-                    return await self.redis_client.hset(key, field_or_mapping, value)
+                    return await self.redis_client.hset(actual_key, field_or_mapping, value)
                 else:
                     # hset(key, mapping) format
-                    return await self.redis_client.hset(key, mapping=field_or_mapping)
+                    return await self.redis_client.hset(actual_key, mapping=field_or_mapping)
             except Exception as e:
-                logger.warning(f"Failed to hset {key}: {e}")
+                logger.warning(f"Failed to hset {actual_key}: {e}")
                 return 0
         return 0
 
-    async def hget(self, key: str, field: str):
-        """Get hash field value"""
+    async def hget(self, key: str, field: str, user_id: Optional[str] = None):
+        """Get hash field value with optional user namespacing"""
+        actual_key = self._namespace_key(user_id, key) if user_id is not None else key
         if self.redis_client:
             try:
-                return await self.redis_client.hget(key, field)
+                return await self.redis_client.hget(actual_key, field)
             except Exception as e:
-                logger.warning(f"Failed to hget {key} {field}: {e}")
+                logger.warning(f"Failed to hget {actual_key} {field}: {e}")
                 return None
         return None
 
-    async def hgetall(self, key: str):
-        """Get all hash fields and values"""
+    async def hgetall(self, key: str, user_id: Optional[str] = None):
+        """Get all hash fields and values with optional user namespacing"""
+        actual_key = self._namespace_key(user_id, key) if user_id is not None else key
         if self.redis_client:
             try:
-                return await self.redis_client.hgetall(key)
+                return await self.redis_client.hgetall(actual_key)
             except Exception as e:
-                logger.warning(f"Failed to hgetall {key}: {e}")
+                logger.warning(f"Failed to hgetall {actual_key}: {e}")
                 return {}
         return {}
 
@@ -480,23 +515,25 @@ class RedisManager:
                 return []
         return []
 
-    async def rpop(self, key: str):
-        """Pop item from right side of list"""
+    async def rpop(self, key: str, user_id: Optional[str] = None):
+        """Pop item from right side of list with optional user namespacing"""
+        actual_key = self._namespace_key(user_id, key) if user_id is not None else key
         if self.redis_client:
             try:
-                return await self.redis_client.rpop(key)
+                return await self.redis_client.rpop(actual_key)
             except Exception as e:
-                logger.warning(f"Failed to rpop from {key}: {e}")
+                logger.warning(f"Failed to rpop from {actual_key}: {e}")
                 return None
         return None
 
-    async def llen(self, key: str):
-        """Get length of list"""
+    async def llen(self, key: str, user_id: Optional[str] = None):
+        """Get length of list with optional user namespacing"""
+        actual_key = self._namespace_key(user_id, key) if user_id is not None else key
         if self.redis_client:
             try:
-                return await self.redis_client.llen(key)
+                return await self.redis_client.llen(actual_key)
             except Exception as e:
-                logger.warning(f"Failed to get llen of {key}: {e}")
+                logger.warning(f"Failed to get llen of {actual_key}: {e}")
                 return 0
         return 0
 
@@ -520,24 +557,26 @@ class RedisManager:
                 return []
         return []
 
-    async def setex(self, key: str, time: int, value: str) -> bool:
-        """Set key-value pair with expiration."""
+    async def setex(self, key: str, time: int, value: str, user_id: Optional[str] = None) -> bool:
+        """Set key-value pair with expiration and optional user namespacing."""
+        actual_key = self._namespace_key(user_id, key) if user_id is not None else key
         if self.redis_client:
             try:
-                await self.redis_client.setex(key, time, value)
+                await self.redis_client.setex(actual_key, time, value)
                 return True
             except Exception as e:
-                logger.warning(f"Failed to setex {key}: {e}")
+                logger.warning(f"Failed to setex {actual_key}: {e}")
                 return False
         return False
 
-    async def exists(self, key: str) -> bool:
-        """Check if key exists in Redis."""
+    async def exists(self, key: str, user_id: Optional[str] = None) -> bool:
+        """Check if key exists in Redis with optional user namespacing."""
+        actual_key = self._namespace_key(user_id, key) if user_id is not None else key
         if self.redis_client:
             try:
-                return bool(await self.redis_client.exists(key))
+                return bool(await self.redis_client.exists(actual_key))
             except Exception as e:
-                logger.warning(f"Failed to check exists for {key}: {e}")
+                logger.warning(f"Failed to check exists for {actual_key}: {e}")
                 return False
         return False
 

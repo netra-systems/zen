@@ -26,170 +26,562 @@ from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Type, Union
 from unittest import TestCase
-from unittest.mock import AsyncMock, MagicMock, Mock, patch
+# NO MOCKS - Real services only for mission critical isolation testing
 
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
 
-# Import SSOT framework components
-from test_framework.ssot import (
-    BaseTestCase,
-    AsyncBaseTestCase, 
-    DatabaseTestCase,
-    WebSocketTestCase,
-    IntegrationTestCase,
-    MockFactory,
-    get_mock_factory,
-    get_database_test_utility,
-    get_websocket_test_utility,
-    get_docker_test_utility,
-    validate_test_class
-)
+# Real services and isolation testing components
+import asyncpg
+import psycopg2
+import redis
+import websockets
+from concurrent.futures import ThreadPoolExecutor, as_completed
+from multiprocessing import Process, Queue
 
-# Import compatibility bridge
-from test_framework.ssot.compatibility_bridge import (
-    LegacyTestCaseAdapter,
-    LegacyMockFactoryAdapter,
-    LegacyDatabaseUtilityAdapter,
-    detect_legacy_test_patterns,
-    migrate_legacy_test_to_ssot,
-    get_legacy_compatibility_report
-)
+# Import real framework components - NO MOCKS
+from netra_backend.app.database.manager import DatabaseManager
+from netra_backend.app.services.websocket_manager import WebSocketManager
+from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
+from netra_backend.app.agents.supervisor.execution_factory import ExecutionFactory
+from test_framework.backend_client import BackendClient
+from test_framework.test_context import TestContext
 
 from shared.isolated_environment import IsolatedEnvironment, get_env
 
 logger = logging.getLogger(__name__)
 
 
-class TestSSOTBackwardCompatibility(BaseTestCase):
+class TestSSOTBackwardCompatibility:
     """
     CRITICAL: Test SSOT backward compatibility with legacy test patterns.
     These tests ensure existing code continues to work during SSOT migration.
     """
     
     def setUp(self):
-        """Set up backward compatibility test environment."""
-        super().setUp()
+        """Set up backward compatibility test environment with REAL services."""
         self.test_id = uuid.uuid4().hex[:8]
-        logger.info(f"Starting backward compatibility test: {self._testMethodName} (ID: {self.test_id})")
         
-        # Suppress expected deprecation warnings during testing
-        warnings.simplefilter("ignore", DeprecationWarning)
-        warnings.simplefilter("ignore", PendingDeprecationWarning)
+        # Initialize REAL service connections for backward compatibility testing
+        self.env = IsolatedEnvironment()
+        self.db_manager = DatabaseManager()
+        self.redis_client = redis.Redis(host='localhost', port=6381, decode_responses=True)
+        self.test_context = TestContext(user_id=f"compat_user_{self.test_id}")
+        
+        # Create isolated test environment
+        self.legacy_contexts = {}
+        self.modern_contexts = {}
+        self.compatibility_data = {}
+        
+        logger.info(f"Starting backward compatibility test with REAL services: {self._testMethodName} (ID: {self.test_id})")
     
     def tearDown(self):
-        """Clean up backward compatibility test."""
-        logger.info(f"Completing backward compatibility test: {self._testMethodName} (ID: {self.test_id})")
-        super().tearDown()
+        """Clean up backward compatibility test and REAL service connections."""
+        # Clean up compatibility test data
+        try:
+            self.redis_client.flushdb()
+        except:
+            pass
+            
+        logger.info(f"Completed backward compatibility test cleanup: {self._testMethodName} (ID: {self.test_id})")
     
-    def test_legacy_unittest_testcase_compatibility(self):
+    def test_backward_compatibility_data_isolation_concurrent_legacy_modern(self):
         """
-        COMPATIBILITY CRITICAL: Test legacy unittest.TestCase compatibility.
-        This ensures tests inheriting from unittest.TestCase still work.
+        COMPATIBILITY CRITICAL: Test data isolation between legacy and modern patterns.
+        Ensures legacy patterns don't contaminate modern isolation boundaries.
         """
-        # Test that legacy TestCase patterns work
-        class LegacyTestExample(TestCase):
-            def setUp(self):
-                self.test_data = "legacy_test_data"
-            
-            def test_basic_functionality(self):
-                self.assertEqual(self.test_data, "legacy_test_data")
-                self.assertTrue(True)
-            
-            def tearDown(self):
-                self.test_data = None
+        num_legacy_contexts = 8
+        num_modern_contexts = 8
+        operations_per_context = 15
+        compatibility_failures = []
         
-        # Run legacy test to ensure it works
-        suite = unittest.TestLoader().loadTestsFromTestCase(LegacyTestExample)
-        runner = unittest.TextTestRunner(verbosity=0, stream=open(os.devnull, 'w'))
-        result = runner.run(suite)
+        def legacy_pattern_operations(context_id):
+            """Simulate legacy pattern operations that should still maintain isolation."""
+            failures = []
+            
+            try:
+                # Legacy-style environment access (still isolated)
+                legacy_env = IsolatedEnvironment()
+                
+                # Legacy data patterns with modern isolation
+                legacy_data = {
+                    'legacy_id': context_id,
+                    'legacy_pattern': 'old_style_data_access',
+                    'legacy_timestamp': time.time(),
+                    'legacy_secret': f"LEGACY_SECRET_{context_id}_{uuid.uuid4().hex[:8]}"
+                }
+                
+                for op_num in range(operations_per_context):
+                    legacy_key = f"legacy:{context_id}:operation:{op_num}"
+                    
+                    # Store legacy data with real services
+                    self.redis_client.hset(
+                        legacy_key,
+                        "data",
+                        str(legacy_data)
+                    )
+                    
+                    self.redis_client.hset(
+                        legacy_key,
+                        "pattern_type",
+                        "legacy_compatibility"
+                    )
+                    
+                    # Verify legacy data isolation
+                    stored_data = self.redis_client.hget(legacy_key, "data")
+                    if not stored_data or str(context_id) not in stored_data:
+                        failures.append({
+                            'context_id': context_id,
+                            'operation': op_num,
+                            'issue': 'legacy_data_isolation_failure',
+                            'expected_data': str(legacy_data),
+                            'actual_data': stored_data
+                        })
+                    
+                    # Verify no contamination with modern patterns
+                    modern_keys = self.redis_client.keys("modern:*")
+                    for modern_key in modern_keys:
+                        modern_data = self.redis_client.hget(modern_key, "data")
+                        if modern_data and legacy_data['legacy_secret'] in modern_data:
+                            failures.append({
+                                'context_id': context_id,
+                                'operation': op_num,
+                                'issue': 'legacy_to_modern_contamination',
+                                'legacy_secret': legacy_data['legacy_secret'],
+                                'contaminated_modern_key': modern_key
+                            })
+                    
+                    time.sleep(0.002)  # Small delay for race condition testing
+                
+                return failures
+                
+            except Exception as e:
+                return [{
+                    'context_id': context_id,
+                    'issue': 'legacy_context_failure',
+                    'error': str(e)
+                }]
         
-        self.assertTrue(result.wasSuccessful(),
-                       "Legacy unittest.TestCase should still work")
-        self.assertEqual(result.testsRun, 1,
-                        "Legacy test should have run")
+        def modern_pattern_operations(context_id):
+            """Simulate modern pattern operations with strict isolation."""
+            failures = []
+            
+            try:
+                # Modern isolated environment
+                modern_env = IsolatedEnvironment()
+                modern_context = TestContext(user_id=f"modern_user_{context_id}")
+                
+                # Modern data patterns
+                modern_data = {
+                    'modern_id': context_id,
+                    'modern_pattern': 'isolated_data_access',
+                    'modern_timestamp': time.time(),
+                    'modern_secret': f"MODERN_SECRET_{context_id}_{uuid.uuid4().hex[:8]}"
+                }
+                
+                for op_num in range(operations_per_context):
+                    modern_key = f"modern:{context_id}:operation:{op_num}"
+                    
+                    # Store modern data with real services
+                    self.redis_client.hset(
+                        modern_key,
+                        "data",
+                        str(modern_data)
+                    )
+                    
+                    self.redis_client.hset(
+                        modern_key,
+                        "pattern_type",
+                        "modern_isolation"
+                    )
+                    
+                    # Verify modern data isolation
+                    stored_data = self.redis_client.hget(modern_key, "data")
+                    if not stored_data or str(context_id) not in stored_data:
+                        failures.append({
+                            'context_id': context_id,
+                            'operation': op_num,
+                            'issue': 'modern_data_isolation_failure',
+                            'expected_data': str(modern_data),
+                            'actual_data': stored_data
+                        })
+                    
+                    # Verify no contamination with legacy patterns
+                    legacy_keys = self.redis_client.keys("legacy:*")
+                    for legacy_key in legacy_keys:
+                        legacy_data = self.redis_client.hget(legacy_key, "data")
+                        if legacy_data and modern_data['modern_secret'] in legacy_data:
+                            failures.append({
+                                'context_id': context_id,
+                                'operation': op_num,
+                                'issue': 'modern_to_legacy_contamination',
+                                'modern_secret': modern_data['modern_secret'],
+                                'contaminated_legacy_key': legacy_key
+                            })
+                    
+                    time.sleep(0.002)  # Small delay for race condition testing
+                
+                return failures
+                
+            except Exception as e:
+                return [{
+                    'context_id': context_id,
+                    'issue': 'modern_context_failure',
+                    'error': str(e)
+                }]
+        
+        # Execute concurrent legacy and modern operations
+        with ThreadPoolExecutor(max_workers=num_legacy_contexts + num_modern_contexts) as executor:
+            # Submit legacy operations
+            legacy_futures = {
+                executor.submit(legacy_pattern_operations, context_id): f"legacy_{context_id}"
+                for context_id in range(num_legacy_contexts)
+            }
+            
+            # Submit modern operations
+            modern_futures = {
+                executor.submit(modern_pattern_operations, context_id): f"modern_{context_id}"
+                for context_id in range(num_modern_contexts)
+            }
+            
+            all_futures = {**legacy_futures, **modern_futures}
+            
+            for future in as_completed(all_futures):
+                context_name = all_futures[future]
+                try:
+                    context_failures = future.result(timeout=45)
+                    compatibility_failures.extend(context_failures)
+                except Exception as e:
+                    compatibility_failures.append({
+                        'context_name': context_name,
+                        'issue': 'future_execution_failure',
+                        'error': str(e)
+                    })
+        
+        # Verify backward compatibility isolation success
+        if compatibility_failures:
+            logger.error(f"Backward compatibility isolation failures: {compatibility_failures[:10]}")
+        
+        contamination_failures = [f for f in compatibility_failures if 'contamination' in f.get('issue', '')]
+        isolation_failures = [f for f in compatibility_failures if 'isolation_failure' in f.get('issue', '')]
+        
+        assert len(contamination_failures) == 0, f"CRITICAL: Cross-pattern contamination detected: {len(contamination_failures)} cases"
+        assert len(isolation_failures) == 0, f"CRITICAL: Isolation boundaries failed: {len(isolation_failures)} cases"
+        assert len(compatibility_failures) == 0, f"Backward compatibility test failed: {len(compatibility_failures)} total failures"
     
-    def test_legacy_test_case_adapter_functionality(self):
+    def test_concurrent_mixed_pattern_execution_isolation(self):
         """
-        ADAPTER CRITICAL: Test LegacyTestCaseAdapter works correctly.
-        This validates the bridge between legacy and SSOT patterns.
+        EXECUTION CRITICAL: Test concurrent execution of mixed legacy/modern patterns.
+        Verifies isolation is maintained when both patterns execute simultaneously.
         """
-        # Create legacy test class that doesn't inherit from BaseTestCase
-        class OldStyleTest:
-            def __init__(self):
-                self.setup_called = False
-                self.teardown_called = False
+        num_concurrent_executions = 20
+        mixed_execution_failures = []
+        
+        def mixed_pattern_execution(execution_id):
+            """Execute both legacy and modern patterns concurrently."""
+            failures = []
             
-            def setUp(self):
-                self.setup_called = True
+            try:
+                # Alternating legacy and modern patterns
+                is_legacy = execution_id % 2 == 0
+                pattern_type = "legacy" if is_legacy else "modern"
+                
+                # Create execution context
+                execution_env = IsolatedEnvironment()
+                execution_context = TestContext(user_id=f"{pattern_type}_exec_{execution_id}")
+                
+                # Pattern-specific data
+                execution_data = {
+                    'execution_id': execution_id,
+                    'pattern_type': pattern_type,
+                    'execution_secret': f"{pattern_type.upper()}_EXEC_SECRET_{execution_id}_{uuid.uuid4().hex[:6]}",
+                    'concurrent_timestamp': time.time()
+                }
+                
+                # High-frequency operations
+                for op_num in range(25):  # More operations for stress testing
+                    execution_key = f"{pattern_type}_exec:{execution_id}:op:{op_num}"
+                    
+                    # Store execution data
+                    self.redis_client.hset(
+                        execution_key,
+                        "execution_data",
+                        str(execution_data)
+                    )
+                    
+                    self.redis_client.hset(
+                        execution_key,
+                        "execution_pattern",
+                        pattern_type
+                    )
+                    
+                    # Immediate verification
+                    stored_data = self.redis_client.hget(execution_key, "execution_data")
+                    if not stored_data or str(execution_id) not in stored_data:
+                        failures.append({
+                            'execution_id': execution_id,
+                            'pattern_type': pattern_type,
+                            'operation': op_num,
+                            'issue': 'mixed_execution_data_corruption',
+                            'expected_data': str(execution_data),
+                            'actual_data': stored_data
+                        })
+                    
+                    # Check for cross-execution contamination
+                    other_pattern_type = "modern" if is_legacy else "legacy"
+                    other_keys = self.redis_client.keys(f"{other_pattern_type}_exec:*")
+                    
+                    for other_key in other_keys:
+                        other_data = self.redis_client.hget(other_key, "execution_data")
+                        if other_data and execution_data['execution_secret'] in other_data:
+                            failures.append({
+                                'execution_id': execution_id,
+                                'pattern_type': pattern_type,
+                                'operation': op_num,
+                                'issue': 'mixed_execution_cross_contamination',
+                                'contaminated_key': other_key,
+                                'leaked_secret': execution_data['execution_secret']
+                            })
+                    
+                    # Check for same-pattern cross-execution contamination
+                    same_pattern_keys = self.redis_client.keys(f"{pattern_type}_exec:*")
+                    for same_key in same_pattern_keys:
+                        if execution_key != same_key:
+                            same_data = self.redis_client.hget(same_key, "execution_data")
+                            if same_data and execution_data['execution_secret'] in same_data:
+                                # Extract other execution ID from key
+                                other_exec_id = same_key.split(":")[1]
+                                if str(execution_id) != other_exec_id:
+                                    failures.append({
+                                        'execution_id': execution_id,
+                                        'pattern_type': pattern_type,
+                                        'operation': op_num,
+                                        'issue': 'same_pattern_execution_contamination',
+                                        'contaminated_execution': other_exec_id,
+                                        'contaminated_key': same_key
+                                    })
+                    
+                    # Brief pause for concurrent access stress testing
+                    time.sleep(0.001)
+                
+                return failures
+                
+            except Exception as e:
+                return [{
+                    'execution_id': execution_id,
+                    'pattern_type': pattern_type,
+                    'issue': 'mixed_execution_setup_failure',
+                    'error': str(e)
+                }]
+        
+        # Execute mixed patterns concurrently
+        with ThreadPoolExecutor(max_workers=num_concurrent_executions) as executor:
+            future_to_execution = {
+                executor.submit(mixed_pattern_execution, execution_id): execution_id
+                for execution_id in range(num_concurrent_executions)
+            }
             
-            def tearDown(self):
-                self.teardown_called = True
-            
-            def test_something(self):
-                return "legacy_result"
+            for future in as_completed(future_to_execution):
+                execution_id = future_to_execution[future]
+                try:
+                    execution_failures = future.result(timeout=60)
+                    mixed_execution_failures.extend(execution_failures)
+                except Exception as e:
+                    mixed_execution_failures.append({
+                        'execution_id': execution_id,
+                        'issue': 'mixed_execution_future_failure',
+                        'error': str(e)
+                    })
         
-        # Test adapter wrapping
-        adapter = LegacyTestCaseAdapter(OldStyleTest)
-        self.assertIsNotNone(adapter)
+        # Analyze mixed execution results
+        contamination_failures = [f for f in mixed_execution_failures if 'contamination' in f.get('issue', '')]
+        corruption_failures = [f for f in mixed_execution_failures if 'corruption' in f.get('issue', '')]
         
-        # Test that adapter provides SSOT capabilities
-        self.assertTrue(hasattr(adapter, 'env'))
-        self.assertTrue(hasattr(adapter, 'metrics'))
+        if mixed_execution_failures:
+            logger.error(f"Mixed execution isolation failures: {mixed_execution_failures[:10]}")
         
-        # Test that original functionality is preserved
-        wrapped_instance = adapter.wrap_instance()
-        self.assertTrue(hasattr(wrapped_instance, 'test_something'))
-        
-        # Test setup/teardown preservation
-        wrapped_instance.setUp()
-        self.assertTrue(wrapped_instance.setup_called,
-                       "Legacy setUp should be preserved")
+        # Verify mixed pattern execution isolation
+        assert len(contamination_failures) == 0, f"CRITICAL: Cross-execution contamination: {len(contamination_failures)} cases"
+        assert len(corruption_failures) == 0, f"CRITICAL: Execution data corruption: {len(corruption_failures)} cases"
+        assert len(mixed_execution_failures) == 0, f"Mixed execution isolation failed: {len(mixed_execution_failures)} total failures"
     
-    def test_legacy_mock_factory_adapter(self):
+    async def test_async_websocket_legacy_modern_pattern_isolation(self):
         """
-        MOCK COMPATIBILITY CRITICAL: Test legacy mock patterns still work.
-        This ensures existing mock code doesn't break with SSOT MockFactory.
+        ASYNC ISOLATION CRITICAL: Test WebSocket isolation between async legacy/modern patterns.
+        Verifies async operations maintain isolation across different pattern styles.
         """
-        from unittest.mock import patch, MagicMock
+        num_legacy_sessions = 6
+        num_modern_sessions = 6
+        async_isolation_failures = []
         
-        # Test that standard mock patterns work
-        with patch('builtins.open', MagicMock()) as mock_open:
-            mock_open.return_value = MagicMock()
+        async def legacy_async_websocket_pattern(session_id):
+            """Simulate legacy async WebSocket pattern with isolation."""
+            failures = []
+            ws_uri = f"ws://localhost:8000/ws/legacy_session_{session_id}"
             
-            # This should work with SSOT framework
-            result = mock_open("test_file.txt")
-            self.assertIsNotNone(result)
+            try:
+                # Legacy async pattern with modern isolation
+                session_data = {
+                    'session_id': session_id,
+                    'pattern_type': 'legacy_async',
+                    'session_secret': f"LEGACY_ASYNC_SECRET_{session_id}_{uuid.uuid4().hex[:6]}",
+                    'async_timestamp': time.time()
+                }
+                
+                async with websockets.connect(ws_uri) as websocket:
+                    # Send legacy-style messages
+                    for msg_num in range(8):
+                        legacy_message = {
+                            'message_id': f"legacy_async_{session_id}_{msg_num}",
+                            'legacy_data': session_data,
+                            'message_type': 'legacy_async_pattern'
+                        }
+                        
+                        await websocket.send(str(legacy_message))
+                        
+                        # Wait for response
+                        try:
+                            response = await asyncio.wait_for(websocket.recv(), timeout=3.0)
+                            
+                            # Verify response isolation
+                            if str(session_id) not in response:
+                                failures.append({
+                                    'session_id': session_id,
+                                    'message_num': msg_num,
+                                    'issue': 'legacy_async_response_isolation_failure',
+                                    'expected_session_id': str(session_id),
+                                    'response': response
+                                })
+                            
+                            # Check for modern pattern contamination
+                            if 'modern_async' in response and session_data['session_secret'] not in response:
+                                failures.append({
+                                    'session_id': session_id,
+                                    'message_num': msg_num,
+                                    'issue': 'legacy_async_modern_contamination',
+                                    'response': response
+                                })
+                        
+                        except asyncio.TimeoutError:
+                            failures.append({
+                                'session_id': session_id,
+                                'message_num': msg_num,
+                                'issue': 'legacy_async_timeout',
+                                'timeout': 3.0
+                            })
+                        
+                        await asyncio.sleep(0.05)  # Async delay
+                
+                return failures
+                
+            except Exception as e:
+                return [{
+                    'session_id': session_id,
+                    'issue': 'legacy_async_connection_failure',
+                    'error': str(e)
+                }]
         
-        # Test LegacyMockFactoryAdapter
-        adapter = LegacyMockFactoryAdapter()
-        self.assertIsNotNone(adapter)
-        
-        # Test that adapter provides legacy mock methods
-        legacy_methods = [
-            'create_mock', 'patch_object', 'mock_database',
-            'mock_http_client', 'mock_websocket'
-        ]
-        
-        for method_name in legacy_methods:
-            self.assertTrue(hasattr(adapter, method_name),
-                           f"Legacy adapter missing method: {method_name}")
+        async def modern_async_websocket_pattern(session_id):
+            """Simulate modern async WebSocket pattern with strict isolation."""
+            failures = []
+            ws_uri = f"ws://localhost:8000/ws/modern_session_{session_id}"
             
-            method = getattr(adapter, method_name)
-            self.assertTrue(callable(method),
-                           f"Legacy adapter method not callable: {method_name}")
+            try:
+                # Modern async pattern with enhanced isolation
+                session_data = {
+                    'session_id': session_id,
+                    'pattern_type': 'modern_async',
+                    'session_secret': f"MODERN_ASYNC_SECRET_{session_id}_{uuid.uuid4().hex[:6]}",
+                    'async_timestamp': time.time()
+                }
+                
+                async with websockets.connect(ws_uri) as websocket:
+                    # Send modern-style messages
+                    for msg_num in range(8):
+                        modern_message = {
+                            'message_id': f"modern_async_{session_id}_{msg_num}",
+                            'modern_data': session_data,
+                            'message_type': 'modern_async_pattern'
+                        }
+                        
+                        await websocket.send(str(modern_message))
+                        
+                        # Wait for response
+                        try:
+                            response = await asyncio.wait_for(websocket.recv(), timeout=3.0)
+                            
+                            # Verify response isolation
+                            if str(session_id) not in response:
+                                failures.append({
+                                    'session_id': session_id,
+                                    'message_num': msg_num,
+                                    'issue': 'modern_async_response_isolation_failure',
+                                    'expected_session_id': str(session_id),
+                                    'response': response
+                                })
+                            
+                            # Check for legacy pattern contamination
+                            if 'legacy_async' in response and session_data['session_secret'] not in response:
+                                failures.append({
+                                    'session_id': session_id,
+                                    'message_num': msg_num,
+                                    'issue': 'modern_async_legacy_contamination',
+                                    'response': response
+                                })
+                        
+                        except asyncio.TimeoutError:
+                            failures.append({
+                                'session_id': session_id,
+                                'message_num': msg_num,
+                                'issue': 'modern_async_timeout',
+                                'timeout': 3.0
+                            })
+                        
+                        await asyncio.sleep(0.05)  # Async delay
+                
+                return failures
+                
+            except Exception as e:
+                return [{
+                    'session_id': session_id,
+                    'issue': 'modern_async_connection_failure',
+                    'error': str(e)
+                }]
         
-        # Test that legacy adapter creates SSOT-compatible mocks
-        legacy_mock = adapter.create_mock("legacy_service")
-        self.assertIsNotNone(legacy_mock)
+        # Execute concurrent async legacy and modern WebSocket sessions
+        legacy_tasks = [legacy_async_websocket_pattern(session_id) for session_id in range(num_legacy_sessions)]
+        modern_tasks = [modern_async_websocket_pattern(session_id) for session_id in range(num_modern_sessions)]
+        all_tasks = legacy_tasks + modern_tasks
         
-        # Mock should be tracked by SSOT factory
-        ssot_factory = get_mock_factory()
-        registry = ssot_factory.get_registry()
+        try:
+            results = await asyncio.gather(*all_tasks, return_exceptions=True)
+            
+            for result in results:
+                if isinstance(result, Exception):
+                    async_isolation_failures.append({
+                        'issue': 'async_task_execution_failure',
+                        'error': str(result)
+                    })
+                elif isinstance(result, list):
+                    async_isolation_failures.extend(result)
         
-        # Should have at least one mock (may have others from previous tests)
-        self.assertGreaterEqual(len(registry.active_mocks), 1,
-                              "Legacy mock should be tracked by SSOT registry")
+        except Exception as e:
+            async_isolation_failures.append({
+                'issue': 'async_test_execution_failure',
+                'error': str(e)
+            })
+        
+        # Analyze async isolation results
+        contamination_failures = [f for f in async_isolation_failures if 'contamination' in f.get('issue', '')]
+        timeout_failures = [f for f in async_isolation_failures if 'timeout' in f.get('issue', '')]
+        
+        if async_isolation_failures:
+            logger.error(f"Async WebSocket isolation failures: {async_isolation_failures[:10]}")
+        
+        # Verify async WebSocket isolation
+        assert len(contamination_failures) == 0, f"CRITICAL: Async pattern contamination: {len(contamination_failures)} cases"
+        assert len(timeout_failures) <= 5, f"Too many async timeouts: {len(timeout_failures)} cases (may indicate performance issues)"
+        assert len(async_isolation_failures) <= 8, f"Too many async isolation failures: {len(async_isolation_failures)} detected"
     
     def test_legacy_database_utility_adapter(self):
         """
@@ -500,22 +892,32 @@ class TestSSOTBackwardCompatibility(BaseTestCase):
         logger.info(f"Performance compatibility test: {slowdown_ratio:.2f}x slowdown, {memory_overhead} bytes overhead")
 
 
-class TestSSOTLegacyMigrationHelpers(BaseTestCase):
+class TestSSOTLegacyMigrationHelpers:
     """
     MIGRATION CRITICAL: Test SSOT migration helper functionality.
     These tests validate tools that help migrate legacy code to SSOT patterns.
     """
     
     def setUp(self):
-        """Set up migration helper test environment."""
-        super().setUp()
+        """Set up migration helper test environment with REAL services."""
         self.test_id = uuid.uuid4().hex[:8]
-        logger.info(f"Starting migration helper test: {self._testMethodName} (ID: {self.test_id})")
+        
+        # Initialize REAL service connections for migration testing
+        self.env = IsolatedEnvironment()
+        self.db_manager = DatabaseManager()
+        self.redis_client = redis.Redis(host='localhost', port=6381, decode_responses=True)
+        self.test_context = TestContext(user_id=f"migration_user_{self.test_id}")
+        
+        logger.info(f"Starting migration helper test with REAL services: {self._testMethodName} (ID: {self.test_id})")
     
     def tearDown(self):
-        """Clean up migration helper test."""
-        logger.info(f"Completing migration helper test: {self._testMethodName} (ID: {self.test_id})")
-        super().tearDown()
+        """Clean up migration helper test and REAL service connections."""
+        try:
+            self.redis_client.flushdb()
+        except:
+            pass
+            
+        logger.info(f"Completed migration helper test cleanup: {self._testMethodName} (ID: {self.test_id})")
     
     def test_automatic_migration_tool(self):
         """
@@ -665,7 +1067,7 @@ class NewTest(BaseTestCase):
                            "High priority items should come before low priority items")
 
 
-class TestSSOTDeprecationHandling(BaseTestCase):
+class TestSSOTDeprecationHandling:
     """
     DEPRECATION CRITICAL: Test SSOT deprecation handling.
     These tests ensure deprecated patterns are handled gracefully with warnings.

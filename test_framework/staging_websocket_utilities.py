@@ -66,7 +66,7 @@ class StagingWebSocketTester:
         )
         
         # Connection state
-        self.websocket: Optional[websockets.WebSocketClientProtocol] = None
+        self.websocket: Optional[websockets.ClientConnection] = None
         self.is_connected = False
         self.current_token: Optional[str] = None
         

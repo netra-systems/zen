@@ -45,6 +45,10 @@ class TestFailureResult:
     user_impact: bool
 
 
+# Alias for backward compatibility
+FailureTestResult = TestFailureResult
+
+
 class MockFailingService:
     """Mock service that simulates failure scenarios"""
     

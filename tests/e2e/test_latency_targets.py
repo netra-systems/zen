@@ -32,17 +32,19 @@ import pytest
 from tests.e2e.config import TestUser, UnifiedTestConfig
 
 # Import MockWebSocket from the correct location
-try:
-    # Removed WebSocket mock import - using real WebSocket connections per CLAUDE.md "MOCKS = Abomination"
-    from test_framework.real_services import get_real_services
-    # Create dummy classes for missing ones
-    class WebSocketBuilder:
-        def build(self):
-            return MockWebSocket()
-except ImportError:
-    # Fallback if even this doesn't work
-    # MockWebSocket class removed - using real WebSocket connections per CLAUDE.md "MOCKS = Abomination"
-    pass
+from test_framework.websocket_helpers import MockWebSocket
+
+# Create test token helper function
+def create_test_token(user_id: str, exp_offset: int = 900) -> str:
+    """Create test JWT token with configurable expiry offset."""
+    from tests.e2e.jwt_token_helpers import JWTTestHelper
+    jwt_helper = JWTTestHelper()
+    token = jwt_helper.create_access_token(
+        user_id=user_id,
+        email=f"{user_id}@test.com", 
+        permissions=["read", "write"]
+    )
+    return token
 
 class LatencyMeasurer:
     """High-precision latency measurement for performance validation."""
@@ -121,8 +123,9 @@ def test_config():
 @pytest.fixture
 def mock_http_client():
     """Create mock HTTP client for API latency tests."""
+    from unittest.mock import AsyncMock
     # Mock: Generic component isolation for controlled unit testing
-    mock_client = AsyncNone  # TODO: Use real service instead of Mock
+    mock_client = AsyncMock()  # TODO: Use real service instead of Mock
     # Mock: Async component isolation for testing without real async operations
     mock_client.get = AsyncMock(return_value={"status": 200, "data": "response"})
     # Mock: Async component isolation for testing without real async operations
@@ -174,8 +177,7 @@ class TestWebSocketLatency:
     
     async def _setup_websocket(self, user_id: str) -> MockWebSocket:
         """Setup WebSocket for latency testing."""
-        websocket = WebSocketBuilder().with_user_id(user_id).build()
-        await websocket.accept()
+        websocket = MockWebSocket(user_id=user_id)
         return websocket
     
     async def _run_ws_measurements(self, measurer, websocket):

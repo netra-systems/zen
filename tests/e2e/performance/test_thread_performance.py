@@ -95,6 +95,10 @@ class TestThreadPerformanceer:
             await self.service_manager.stop_all_services()
 
 
+# Alias for backward compatibility (fixing typo)
+ThreadPerformanceTester = TestThreadPerformanceer
+
+
 class TestThreadLoads:
     """Tests for thread operations under load."""
     

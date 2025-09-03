@@ -32,6 +32,18 @@ CRUCIAL: ULTRA THINK DEEPLY.
 
 -----
 
+## 🏗️ CRITICAL ARCHITECTURE DOCUMENTATION
+
+> **⚠️ MANDATORY READING**: The **[User Context Architecture](./USER_CONTEXT_ARCHITECTURE.md)** is the authoritative guide to our Factory-based isolation patterns. This document explains how we ensure complete user isolation, eliminate shared state, and enable reliable concurrent execution for 10+ users. **READ THIS FIRST** before making any changes to execution engines, WebSocket events, or tool dispatchers.
+
+### Related Architecture Documents:
+- **[User Context Architecture](./USER_CONTEXT_ARCHITECTURE.md)** - Factory patterns and execution isolation (START HERE)
+- [Tool Dispatcher Migration Guide](./TOOL_DISPATCHER_MIGRATION_GUIDE.md) - Migration from singleton to request-scoped
+- [WebSocket Modernization Report](./WEBSOCKET_MODERNIZATION_REPORT.md) - WebSocket isolation implementation
+- [Documentation Hub](./docs/index.md) - Central documentation index
+
+-----
+
 ## 1\. The Business Mandate: Value Capture and Growth
 
 Netra Apex succeeds by creating and capturing value from a customer's AI spend.
@@ -369,22 +381,42 @@ python scripts/docker_manual.py restart --services backend auth
 - **Dynamic Port Allocation**: Avoids port conflicts in parallel runs
 - **Cross-platform**: Works on Windows, macOS, and Linux
 
-#### Alpine-Based Test Orchestration
-**New optimized Alpine Docker images for faster, isolated testing:**
+#### Alpine Container Support
+**Optimized Alpine Docker images for 50% faster testing with minimal resource usage:**
+
+The platform supports Alpine-based containers for dramatic performance improvements:
+
+**Usage Examples:**
 
 ```bash
-# Run tests in isolated Alpine environment
-python test_framework/integrated_test_runner.py --mode isolated --suites unit integration
+# Enable Alpine containers for tests (DEFAULT behavior)
+python tests/unified_test_runner.py --real-services
+# Alpine automatically used via use_alpine=True
 
-# Parallel test execution with isolated environments
-python test_framework/integrated_test_runner.py --mode parallel --suites unit api e2e
+# Force regular containers (if needed)
+python tests/unified_test_runner.py --real-services --no-alpine
 
-# Refresh services and test
-python test_framework/integrated_test_runner.py --mode refresh --services backend --suites api
-
-# Continuous integration mode (watches files)
-python test_framework/integrated_test_runner.py --mode ci --watch-paths netra_backend auth_service
+# Manual Docker operations with Alpine
+python scripts/docker_manual.py start --alpine
+python scripts/docker_manual.py status --alpine
 ```
+
+**Alpine Compose Files:**
+- `docker-compose.alpine-test.yml` - Test environment with tmpfs storage
+- `docker-compose.alpine.yml` - Development environment
+- Alpine Dockerfiles: `docker/backend.alpine.Dockerfile`, `docker/auth.alpine.Dockerfile`, `docker/frontend.alpine.Dockerfile`
+
+**When to Use Alpine:**
+- **✓ Test environments** (default choice for speed)
+- **✓ CI/CD pipelines** (faster builds, lower resource usage)
+- **✓ Development** (when memory is constrained)
+
+Docker tmpfs storage = bad crashes
+
+**Performance Optimizations in Alpine:**
+- **Minimal base images** (python:3.11-alpine3.19)
+- **Resource limits** (prevents memory exhaustion)
+- **Optimized configurations** (fsync=off for test DB)
 
 #### Development Service Refresh
 ```bash

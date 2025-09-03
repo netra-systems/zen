@@ -3,6 +3,7 @@ Schedule Management
 Handles CRUD operations for research schedules
 """
 
+from datetime import datetime
 from typing import Any, Dict, List
 
 from netra_backend.app.agents.supply_researcher.models import ResearchType

@@ -1,4 +1,6 @@
 """Core dispatcher logic and initialization for tool dispatching."""
+import time
+import warnings
 from typing import TYPE_CHECKING, Any, Dict, List, Optional
 
 from langchain_core.tools import BaseTool
@@ -34,17 +36,39 @@ class ToolDispatchResponse(BaseModel):
     metadata: Dict[str, Any] = Field(default_factory=dict)
 
 class ToolDispatcher:
-    """Core tool dispatcher with modular architecture"""
+    """Core tool dispatcher with request-scoped architecture.
+    
+    REQUIRED: Use factory methods for instantiation:
+    - ToolDispatcher.create_request_scoped_dispatcher() for isolated instances
+    - ToolDispatcher.create_scoped_dispatcher_context() for automatic cleanup
+    
+    Direct instantiation is no longer supported to ensure user isolation.
+    """
     
     def __init__(self, tools: List[BaseTool] = None, websocket_bridge: Optional['AgentWebSocketBridge'] = None):
-        """Initialize tool dispatcher with optional AgentWebSocketBridge support.
+        """Private initializer - use factory methods instead.
         
-        Args:
-            tools: List of tools to register initially
-            websocket_bridge: AgentWebSocketBridge for real-time notifications (critical for chat)
+        Direct instantiation is prevented to ensure user isolation.
+        Use ToolDispatcher.create_request_scoped_dispatcher() or
+        ToolDispatcher.create_scoped_dispatcher_context() instead.
         """
-        self._init_components(websocket_bridge)
-        self._register_initial_tools(tools)
+        raise RuntimeError(
+            "Direct ToolDispatcher instantiation is no longer supported. "
+            "Use ToolDispatcher.create_request_scoped_dispatcher(user_context) or "
+            "ToolDispatcher.create_scoped_dispatcher_context(user_context) for proper user isolation."
+        )
+    
+    @classmethod
+    def _init_from_factory(cls, tools: List[BaseTool] = None, websocket_bridge: Optional['AgentWebSocketBridge'] = None):
+        """Internal factory initializer for creating request-scoped instances.
+        
+        This method bypasses the __init__ RuntimeError and is only called
+        by the factory methods to create properly isolated instances.
+        """
+        instance = cls.__new__(cls)
+        instance._init_components(websocket_bridge)
+        instance._register_initial_tools(tools)
+        return instance
     
     @property
     def tools(self) -> Dict[str, Any]:
@@ -75,7 +99,10 @@ class ToolDispatcher:
         return self.registry.has_tool(tool_name)
     
     def register_tool(self, tool_name: str, tool_func, description: str = None) -> None:
-        """Register a tool function with the dispatcher - public interface for tests."""
+        """Register a tool - only available on request-scoped instances.
+        
+        This method should only be called on instances created via factory methods.
+        """
         from langchain_core.tools import BaseTool
         
         # Create a simple tool wrapper if needed
@@ -105,7 +132,10 @@ class ToolDispatcher:
         self.registry.register_tool(tool_func)
     
     async def dispatch(self, tool_name: str, **kwargs: Any) -> ToolResult:
-        """Dispatch tool execution with proper typing"""
+        """Dispatch tool execution - only available on request-scoped instances.
+        
+        This method should only be called on instances created via factory methods.
+        """
         tool_input = self._create_tool_input(tool_name, kwargs)
         if not self.has_tool(tool_name):
             return self._create_error_result(tool_input, f"Tool {tool_name} not found")
@@ -128,7 +158,10 @@ class ToolDispatcher:
         state: DeepAgentState,
         run_id: str
     ) -> ToolDispatchResponse:
-        """Dispatch a tool with parameters - method expected by sub-agents"""
+        """Dispatch a tool with parameters - only available on request-scoped instances.
+        
+        This method should only be called on instances created via factory methods.
+        """
         if not self.has_tool(tool_name):
             return self._create_tool_not_found_response(tool_name, run_id)
         
@@ -206,4 +239,125 @@ class ToolDispatcher:
             diagnosis["critical_issues"].append("ToolDispatcher missing executor")
         
         return diagnosis
+    
+    # ===================== FACTORY METHODS FOR REQUEST-SCOPED DISPATCH =====================
+    
+    @staticmethod
+    async def create_request_scoped_dispatcher(
+        user_context,  # UserExecutionContext type hint avoided to prevent circular imports
+        tools: List[BaseTool] = None,
+        websocket_manager = None  # WebSocketManager type hint avoided
+    ):
+        """Create request-scoped tool dispatcher with complete user isolation.
+        
+        🟢 RECOMMENDED SECURE PATTERN: Use this method for new code instead of ToolDispatcher().
+        This factory method creates proper per-request isolation and eliminates global state risks.
+        
+        ✅ SECURITY BENEFITS:
+        - Complete user context isolation (no data leaks)
+        - Request-scoped tool registry (tools not shared between users)
+        - Proper WebSocket event routing (events go to correct user)
+        - Automatic cleanup on request completion
+        - Memory-safe concurrent request handling
+        
+        🔒 USER ISOLATION GUARANTEES:
+        - Each user gets their own tool dispatcher instance
+        - No shared state between concurrent requests
+        - WebSocket events are user-scoped and secure
+        - Tool execution happens in proper user context
+        
+        Args:
+            user_context: UserExecutionContext for complete isolation (REQUIRED)
+            tools: Optional list of tools to register for this user only
+            websocket_manager: Optional WebSocket manager for secure event routing
+            
+        Returns:
+            RequestScopedToolDispatcher: Isolated dispatcher for this specific request
+            
+        Raises:
+            ValueError: If user_context is invalid or dependencies are unavailable
+            
+        Example:
+            # Secure pattern - each user gets isolated dispatcher
+            dispatcher = await ToolDispatcher.create_request_scoped_dispatcher(
+                user_context=user_context,
+                tools=user_specific_tools,
+                websocket_manager=websocket_manager
+            )
+            result = await dispatcher.dispatch("my_tool", param="value")
+        """
+        # Import here to avoid circular imports
+        from netra_backend.app.agents.tool_executor_factory import create_isolated_tool_dispatcher
+        
+        logger.info(f"🏭✅ Creating SECURE request-scoped dispatcher for user {user_context.user_id}")
+        logger.info("🔒 User context isolation enabled - no global state risks")
+        
+        return await create_isolated_tool_dispatcher(
+            user_context=user_context,
+            tools=tools,
+            websocket_manager=websocket_manager
+        )
+    
+    @staticmethod
+    async def create_scoped_dispatcher_context(
+        user_context,  # UserExecutionContext type hint avoided
+        tools: List[BaseTool] = None,
+        websocket_manager = None  # WebSocketManager type hint avoided
+    ):
+        """Create scoped dispatcher context manager with automatic cleanup.
+        
+        🟢 RECOMMENDED SECURE PATTERN: Use this for request handling with guaranteed cleanup.
+        This context manager ensures proper resource cleanup and prevents memory leaks.
+        
+        ✅ AUTOMATIC SAFETY FEATURES:
+        - Guaranteed resource cleanup on context exit
+        - Exception-safe disposal of user-scoped resources
+        - WebSocket connection cleanup to prevent event leaks
+        - Memory-safe handling of tool state
+        - Database session cleanup if applicable
+        
+        🔒 SECURITY GUARANTEES:
+        - User context is automatically disposed after use
+        - No lingering references to user data
+        - WebSocket events cannot leak to other users
+        - Tool state is properly isolated and cleaned up
+        
+        Args:
+            user_context: UserExecutionContext for complete isolation (REQUIRED)
+            tools: Optional list of tools to register for this request only
+            websocket_manager: Optional WebSocket manager for secure event routing
+            
+        Returns:
+            AsyncContextManager[RequestScopedToolDispatcher]: Context manager with automatic cleanup
+            
+        Raises:
+            ValueError: If user_context is invalid
+            RuntimeError: If cleanup fails (logs warning but doesn't propagate)
+            
+        Example:
+            # RECOMMENDED PATTERN - automatic cleanup guaranteed
+            async with ToolDispatcher.create_scoped_dispatcher_context(user_context) as dispatcher:
+                # All operations are user-scoped and secure
+                result = await dispatcher.dispatch("my_tool", param="value")
+                tool_result = await dispatcher.dispatch_tool("other_tool", params, state, run_id)
+                # Automatic cleanup happens here - no memory leaks
+                
+        ⚠️ IMPORTANT: Always use this context manager for request handling to ensure:
+        - User data doesn't leak between requests
+        - WebSocket events are properly routed
+        - Resources are cleaned up even if exceptions occur
+        """
+        # Import here to avoid circular imports
+        from netra_backend.app.agents.tool_executor_factory import isolated_tool_dispatcher_scope
+        
+        logger.info(f"🏭✅ Creating SECURE scoped dispatcher context for user {user_context.user_id}")
+        logger.info("🔒 Automatic cleanup enabled - memory and security safe")
+        
+        return isolated_tool_dispatcher_scope(
+            user_context=user_context,
+            tools=tools,
+            websocket_manager=websocket_manager
+        )
+    
+    # Legacy compatibility methods removed - use factory methods only
     

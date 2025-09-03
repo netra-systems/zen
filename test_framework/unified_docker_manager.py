@@ -33,6 +33,10 @@ from contextlib import contextmanager
 import socket
 import yaml
 import warnings
+from shared.isolated_environment import get_env
+
+# Use IsolatedEnvironment for all environment access
+env = get_env()
 
 if os.name != 'nt':
     import fcntl
@@ -197,8 +201,8 @@ class UnifiedDockerManager:
     Combines orchestration capabilities with rate limiting and environment management.
     """
     
-    # Class-level configuration
-    LOCK_DIR = Path("/tmp/netra_docker_locks") if os.name != 'nt' else Path(os.environ.get('TEMP', '.')) / "netra_docker_locks"
+    # Class-level configuration - using IsolatedEnvironment for cross-platform temp directory
+    LOCK_DIR = Path("/tmp/netra_docker_locks") if os.name != 'nt' else Path(env.get('TEMP', '.')) / "netra_docker_locks"
     STATE_FILE = LOCK_DIR / "docker_state.json"
     RESTART_COOLDOWN = 30  # seconds between restart attempts
     MAX_RESTART_ATTEMPTS = 3
@@ -208,40 +212,74 @@ class UnifiedDockerManager:
     SERVICES = {
         "backend": {
             "container": "netra-backend",
-            "default_port": 8000,  # Default for reference, actual port dynamically allocated
+            "default_port": 8000,  # Internal container port
             "health_endpoint": "/health",
             "memory_limit": "2048m"
         },
         "frontend": {
             "container": "netra-frontend", 
-            "default_port": 3000,  # Default for reference
+            "default_port": 3000,  # Internal container port
             "health_endpoint": "/",
             "memory_limit": "1024m"  # Increased for better stability
         },
         "auth": {
             "container": "netra-auth",
-            "default_port": 8001,  # Default for reference
+            "default_port": 8081,  # Internal container port (corrected from 8001)
             "health_endpoint": "/health",
             "memory_limit": "1024m"  # Increased from 512m to prevent memory pressure (73% usage)
         },
         "postgres": {
             "container": "netra-postgres",
-            "default_port": 5432,  # Default for reference
+            "default_port": 5432,  # Internal container port
             "health_cmd": "pg_isready",
             "memory_limit": "1024m"  # Increased for better performance
         },
         "redis": {
             "container": "netra-redis",
-            "default_port": 6379,  # Default for reference
+            "default_port": 6379,  # Internal container port
             "health_cmd": "redis-cli ping",
             "memory_limit": "512m"  # Increased from 256m for better performance
         },
         "clickhouse": {
             "container": "netra-clickhouse",
-            "default_port": 8123,  # Default for reference
+            "default_port": 8123,  # Internal container port
             "health_endpoint": "/ping",
-            "memory_limit": "1024m"  # Increased for better analytics performance
+            "memory_limit": "1024m",  # Increased for better analytics performance
+            "health_timeout": 10,  # Increased timeout for ClickHouse startup
+            "health_retries": 20,  # More retries for slow ClickHouse initialization
+            "health_start_period": 60  # Extended start period for ClickHouse
         }
+    }
+    
+    # Environment-specific database credentials - SSOT for credential management
+    ENVIRONMENT_CREDENTIALS = {
+        EnvironmentType.DEVELOPMENT: {
+            "user": "netra",
+            "password": "netra123", 
+            "database": "netra_dev"
+        },
+        EnvironmentType.SHARED: {
+            "user": "test_user",
+            "password": "test_pass",
+            "database": "netra_test"
+        },
+        EnvironmentType.DEDICATED: {
+            "user": "test_user", 
+            "password": "test_pass",
+            "database": "netra_test"
+        },
+        EnvironmentType.PRODUCTION: {
+            "user": "netra",
+            "password": "netra123",
+            "database": "netra_production"
+        }
+    }
+    
+    # Alpine-specific credentials (when use_alpine=True)
+    ALPINE_CREDENTIALS = {
+        "user": "test",
+        "password": "test",
+        "database": "netra_test"
     }
     
     def __init__(self, 
@@ -249,7 +287,11 @@ class UnifiedDockerManager:
                  environment_type: EnvironmentType = EnvironmentType.SHARED,
                  test_id: Optional[str] = None,
                  use_production_images: bool = True,  # Default to memory-optimized production images
-                 mode: ServiceMode = ServiceMode.DOCKER):
+                 mode: ServiceMode = ServiceMode.DOCKER,
+                 use_alpine: bool = False,  # Add Alpine container support
+                 rebuild_images: bool = True,  # Rebuild images by default for freshness
+                 rebuild_backend_only: bool = True,  # Only rebuild backend by default
+                 pull_policy: str = "missing"):  # Docker pull policy: always, never, missing (default)
         """
         Initialize unified Docker manager with orchestration capabilities.
         
@@ -259,12 +301,19 @@ class UnifiedDockerManager:
             test_id: Unique test identifier for dedicated environments
             use_production_images: Use production Docker images for memory efficiency
             mode: Service execution mode (docker, local, mock)
+            use_alpine: Use Alpine-based Docker compose files for minimal container size
+            rebuild_images: Whether to rebuild Docker images before starting
+            rebuild_backend_only: Whether to rebuild only backend services (backend, auth)
         """
         self.config = config or OrchestrationConfig()
         self.environment_type = environment_type
         self.test_id = test_id or self._generate_test_id()
         self.use_production_images = use_production_images
         self.mode = mode
+        self.use_alpine = use_alpine
+        self.rebuild_images = rebuild_images
+        self.rebuild_backend_only = rebuild_backend_only
+        self.pull_policy = pull_policy  # Control Docker Hub access
         
         # Port discovery and allocation
         self.port_discovery = DockerPortDiscovery(use_test_services=True)
@@ -322,6 +371,72 @@ class UnifiedDockerManager:
         timestamp = datetime.now().isoformat()
         pid = os.getpid()
         return hashlib.md5(f"{timestamp}_{pid}".encode()).hexdigest()[:8]
+    
+    def get_database_credentials(self) -> Dict[str, str]:
+        """
+        Get environment-specific database credentials based on current configuration.
+        
+        Returns:
+            Dict containing 'user', 'password', and 'database' keys
+            
+        Business Value: Eliminates database connection failures due to hardcoded credentials
+        """
+        # Alpine containers have special credentials regardless of environment
+        if self.use_alpine:
+            return self.ALPINE_CREDENTIALS.copy()
+            
+        # Use environment-specific credentials
+        credentials = self.ENVIRONMENT_CREDENTIALS.get(self.environment_type)
+        if not credentials:
+            logger.warning(f"No credentials found for environment {self.environment_type}, falling back to SHARED")
+            credentials = self.ENVIRONMENT_CREDENTIALS[EnvironmentType.SHARED]
+            
+        return credentials.copy()
+    
+    def detect_environment(self) -> EnvironmentType:
+        """
+        Detect the current environment from running containers or compose files.
+        
+        Returns:
+            EnvironmentType based on detection logic
+            
+        Business Value: Automatic environment detection prevents credential mismatches
+        """
+        # Try to detect from running containers first
+        try:
+            result = subprocess.run(
+                ["docker", "ps", "--format", "{{.Names}}", "--filter", "status=running"],
+                capture_output=True, text=True, timeout=10
+            )
+            if result.returncode == 0:
+                container_names = result.stdout.strip().split('\n') if result.stdout.strip() else []
+                
+                # Check for Alpine test containers
+                if any('alpine' in name.lower() for name in container_names):
+                    return EnvironmentType.SHARED  # Alpine containers use SHARED environment type
+                
+                # Check for development containers (dev- prefix)
+                if any(name.startswith('dev-') for name in container_names):
+                    return EnvironmentType.DEVELOPMENT
+                    
+                # Check for test containers (test- prefix)  
+                if any(name.startswith('test-') for name in container_names):
+                    return EnvironmentType.SHARED
+                    
+        except (subprocess.TimeoutExpired, subprocess.SubprocessError) as e:
+            logger.debug(f"Could not detect environment from containers: {e}")
+        
+        # Fallback to compose file detection
+        compose_file = self._get_compose_file()
+        if 'alpine' in compose_file.lower():
+            return EnvironmentType.SHARED
+        elif 'test' in compose_file.lower():
+            return EnvironmentType.SHARED
+        elif 'docker-compose.yml' == compose_file:
+            return EnvironmentType.DEVELOPMENT
+            
+        # Final fallback to configured environment type
+        return self.environment_type
     
     def _initialize_port_allocator(self) -> DynamicPortAllocator:
         """Initialize the dynamic port allocator based on environment type."""
@@ -403,24 +518,37 @@ class UnifiedDockerManager:
                 json.dump(state, f, indent=2, default=str)
     
     def _get_environment_name(self) -> str:
-        """Get environment name based on type"""
-        if self.environment_type == EnvironmentType.SHARED:
-            return "netra_test_shared"
-        elif self.environment_type == EnvironmentType.DEDICATED:
-            return f"netra_test_{self.test_id}"
+        """Get environment name based on type and Alpine setting"""
+        # For dedicated environments, always use test_id regardless of Alpine
+        if self.environment_type == EnvironmentType.DEDICATED and self.test_id:
+            if self.use_alpine:
+                return f"netra_alpine_test_{self.test_id}"
+            else:
+                return f"netra_test_{self.test_id}"
+        # For shared environments
+        elif self.environment_type == EnvironmentType.SHARED:
+            if self.use_alpine:
+                return "netra_alpine_test_shared"
+            else:
+                return "netra_test_shared"
+        # Other environment types
         else:
-            return f"netra_{self.environment_type.value}"
+            prefix = "netra_alpine" if self.use_alpine else "netra"
+            return f"{prefix}_{self.environment_type.value}"
     
     def _get_project_name(self) -> str:
         """Get unique project name for Docker Compose isolation."""
         if not self._project_name:
             # Generate unique project name for parallel test isolation
+            # Include Alpine prefix for consistent naming
+            alpine_prefix = "alpine-" if self.use_alpine else ""
+            
             if self.environment_type == EnvironmentType.DEDICATED:
-                self._project_name = f"netra-test-{self.test_id}"
+                self._project_name = f"netra-{alpine_prefix}test-{self.test_id}"
             else:
                 # For shared environments, add a timestamp to ensure uniqueness
                 timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
-                self._project_name = f"netra-{self.environment}-{timestamp}-{self.test_id[:8]}"
+                self._project_name = f"netra-{alpine_prefix}{self.environment}-{timestamp}-{self.test_id[:8]}"
         return self._project_name
     
     def _allocate_service_ports(self) -> Dict[str, int]:
@@ -430,30 +558,27 @@ class UnifiedDockerManager:
             
         logger.info(f"Allocating dynamic ports for environment {self._get_project_name()}")
         
-        # Allocate ports for each service
-        service_ports = {}
-        for service_name, service_config in self.SERVICES.items():
-            try:
-                # Allocate a port for this service
-                result = self.port_allocator.allocate_port(
-                    service_name=service_name,
-                    preferred_port=service_config['default_port']
-                )
-                
-                if result.success:
-                    service_ports[service_name] = result.port
-                    logger.debug(f"Allocated port {result.port} for {service_name}")
-                else:
-                    # Fall back to finding a random available port
+        # Allocate ports for all services at once using allocate_ports
+        service_names = list(self.SERVICES.keys())
+        result = self.port_allocator.allocate_ports(services=service_names)
+        
+        if result.success:
+            service_ports = result.ports
+            for service_name, port in service_ports.items():
+                logger.debug(f"Allocated port {port} for {service_name}")
+        else:
+            # Fall back to allocating ports individually
+            logger.warning(f"Batch allocation failed: {result.error_message}. Using fallback.")
+            service_ports = {}
+            for service_name, service_config in self.SERVICES.items():
+                try:
                     fallback_port = self._find_available_port()
                     service_ports[service_name] = fallback_port
                     logger.warning(f"Using fallback port {fallback_port} for {service_name}")
-                    
-            except Exception as e:
-                logger.error(f"Failed to allocate port for {service_name}: {e}")
-                # Use a fallback port
-                fallback_port = self._find_available_port()
-                service_ports[service_name] = fallback_port
+                except Exception as e:
+                    logger.error(f"Failed to allocate fallback port for {service_name}: {e}")
+                    # Use default port as last resort
+                    service_ports[service_name] = service_config['default_port']
         
         self.allocated_ports = service_ports
         return service_ports
@@ -637,6 +762,16 @@ class UnifiedDockerManager:
         Acquire test environment with proper locking.
         Returns environment name and port mappings.
         """
+        # Ensure Docker stability before proceeding
+        try:
+            from test_framework.docker_stability_manager import DockerStabilityManager
+            stability_manager = DockerStabilityManager()
+            docker_stable, message = stability_manager.ensure_docker_stability()
+            if not docker_stable:
+                logger.warning(f"Docker stability issues: {message}")
+        except ImportError:
+            logger.debug("DockerStabilityManager not available, proceeding without stability check")
+        
         # First try to detect and use existing netra-dev containers
         existing_containers = self._detect_existing_dev_containers()
         if existing_containers:
@@ -726,6 +861,40 @@ class UnifiedDockerManager:
         """Create new Docker environment with automatic conflict resolution"""
         compose_file = self._get_compose_file()
         
+        # Build images first if requested
+        if self.rebuild_images:
+            project_name = self._get_project_name()
+            
+            if self.rebuild_backend_only:
+                # Determine backend service names based on compose file
+                if "alpine" in compose_file:
+                    services_to_build = ["alpine-test-backend", "alpine-test-auth"]
+                else:
+                    services_to_build = ["test-backend", "test-auth"]
+                
+                logger.info(f"🔨 Building backend services: {services_to_build}")
+                build_cmd = [
+                    "docker-compose", "-f", compose_file,
+                    "-p", project_name, "build"
+                ] + services_to_build
+            else:
+                logger.info("🔨 Building all Docker images...")
+                build_cmd = [
+                    "docker-compose", "-f", compose_file,
+                    "-p", project_name, "build"
+                ]
+            
+            try:
+                result = self.docker_rate_limiter.execute_docker_command(
+                    build_cmd, timeout=300
+                )
+                if result.returncode == 0:
+                    logger.info("✅ Successfully built Docker images")
+                else:
+                    logger.warning(f"⚠️ Failed to build images: {result.stderr}")
+            except Exception as e:
+                logger.warning(f"⚠️ Error building images: {e}")
+        
         # SSOT: Clean up any conflicting containers first
         logger.info(f"🧹 Checking for conflicting containers before creating {env_name}")
         self._cleanup_conflicting_containers(env_name)
@@ -780,6 +949,48 @@ class UnifiedDockerManager:
         else:
             # All retries failed
             raise RuntimeError(f"Failed to create environment after {max_retries} attempts: {result.stderr}")
+        
+        # Wait for containers to be created and healthy
+        logger.info(f"⏳ Waiting for containers to be created...")
+        max_wait = 30  # seconds
+        start_time = time.time()
+        containers_found = False
+        
+        while time.time() - start_time < max_wait:
+            # Check if containers exist
+            existing_containers = self._detect_existing_containers_by_project(self._get_project_name())
+            if existing_containers:
+                logger.info(f"✅ Found {len(existing_containers)} containers")
+                containers_found = True
+                break
+            
+            logger.debug(f"Waiting for containers... ({int(time.time() - start_time)}s elapsed)")
+            time.sleep(2)
+        
+        if not containers_found:
+            # Try to create them again
+            logger.warning("⚠️ Containers not found after waiting, attempting to create again...")
+            cmd = [
+                "docker-compose",
+                "-f", compose_file,
+                "-p", self._get_project_name(),
+                "up", "-d", "--force-recreate"
+            ]
+            
+            docker_result = self.docker_rate_limiter.execute_docker_command(cmd, timeout=120, env=env)
+            
+            # Wait again for containers
+            start_time = time.time()
+            while time.time() - start_time < max_wait:
+                existing_containers = self._detect_existing_containers_by_project(self._get_project_name())
+                if existing_containers:
+                    logger.info(f"✅ Found {len(existing_containers)} containers after recreation")
+                    containers_found = True
+                    break
+                time.sleep(2)
+            
+            if not containers_found:
+                raise RuntimeError(f"Failed to create containers for project {self._get_project_name()}")
         
         # Wait for services to be healthy
         self._wait_for_healthy(env_name)
@@ -874,16 +1085,49 @@ class UnifiedDockerManager:
         
         self.docker_rate_limiter.execute_docker_command(cmd, timeout=60)
     
+    def _map_service_name(self, service: str) -> str:
+        """Map service name based on the compose file being used."""
+        compose_file = self._get_compose_file()
+        
+        # If using test compose file, add "test-" prefix
+        if "docker-compose.test.yml" in compose_file:
+            # Standard service mappings for test environment
+            service_map = {
+                "postgres": "test-postgres",
+                "redis": "test-redis",
+                "clickhouse": "test-clickhouse",
+                "backend": "test-backend",
+                "auth": "test-auth",
+                "frontend": "test-frontend",
+                "rabbitmq": "test-rabbitmq"
+            }
+            return service_map.get(service, service)
+        
+        # For other compose files, use service name as-is
+        return service
+    
     def _get_compose_file(self) -> str:
-        """Get appropriate docker-compose file"""
-        compose_files = [
-            "docker-compose.test.yml",
-            "docker-compose.yml"
-        ]
+        """Get appropriate docker-compose file based on Alpine setting and environment type"""
+        if self.use_alpine:
+            # Use Alpine compose files when Alpine support is enabled
+            # Prioritize alpine-test.yml for test environments, alpine.yml for others
+            compose_files = [
+                "docker-compose.alpine-test.yml",
+                "docker-compose.alpine.yml",
+                "docker-compose.test.yml",  # Fallback to regular test compose
+                "docker-compose.yml"  # Final fallback
+            ]
+        else:
+            # Use regular compose files
+            compose_files = [
+                "docker-compose.test.yml",
+                "docker-compose.yml"
+            ]
         
         # First check in current directory
         for file_path in compose_files:
             if Path(file_path).exists():
+                logger.info(f"Selected Docker compose file: {file_path} (Alpine: {self.use_alpine}, Environment: {self.environment_type.value})")
                 return file_path
         
         # Then check in project root (absolute path from env)
@@ -894,6 +1138,7 @@ class UnifiedDockerManager:
             for file_name in compose_files:
                 full_path = project_path / file_name
                 if full_path.exists():
+                    logger.info(f"Selected Docker compose file: {full_path} (Alpine: {self.use_alpine}, Environment: {self.environment_type.value})")
                     return str(full_path)
         
         # Finally check common parent directories
@@ -902,91 +1147,377 @@ class UnifiedDockerManager:
             for file_name in compose_files:
                 full_path = parent / file_name
                 if full_path.exists():
+                    logger.info(f"Selected Docker compose file: {full_path} (Alpine: {self.use_alpine}, Environment: {self.environment_type.value})")
                     return str(full_path)
         
         raise RuntimeError(f"No docker-compose files found. Expected: {', '.join(compose_files)}")
     
-    def _detect_existing_dev_containers(self) -> Dict[str, str]:
+    def _detect_existing_containers_by_project(self, project_name: str) -> Dict[str, str]:
         """
-        Detect existing netra-dev-* containers that are currently running.
+        Detect existing containers for a specific Docker Compose project.
         
+        Args:
+            project_name: The Docker Compose project name
+            
         Returns:
             Dictionary mapping service name to container name
         """
         containers = {}
         
         try:
-            # List all running netra-dev containers
-            cmd = ["docker", "ps", "--format", "{{.Names}}", "--filter", "name=netra-dev-"]
-            docker_result = self.docker_rate_limiter.execute_docker_command(cmd, timeout=10)
-            result = subprocess.CompletedProcess(cmd, docker_result.returncode, docker_result.stdout, docker_result.stderr)
+            # List containers for this specific project
+            cmd = ["docker", "ps", "--format", "{{.Names}}", "--filter", f"label=com.docker.compose.project={project_name}"]
+            result = self.docker_rate_limiter.execute_docker_command(cmd, timeout=10)
             
-            if result.returncode == 0 and result.stdout.strip():
+            if result.returncode == 0 and result.stdout:
                 container_names = result.stdout.strip().split('\n')
-                
-                # Map container names to service names
-                for container_name in container_names:
-                    if container_name.startswith('netra-dev-'):
-                        # Extract service name from container name (e.g., netra-dev-backend -> backend)
-                        service = container_name.replace('netra-dev-', '')
-                        containers[service] = container_name
-                        logger.debug(f"🔍 Detected existing container: {service} -> {container_name}")
-                
-                logger.info(f"🔄 Found {len(containers)} existing development containers")
-            else:
-                # Check if this is a Docker connectivity issue
-                if result.returncode != 0 and ("pipe" in result.stderr or "connect" in result.stderr):
-                    logger.warning("🔄 Docker connectivity issue detected during container detection")
-                    logger.info("🔄 Assuming standard development container setup exists")
-                    
-                    # Return expected container names for development environment
-                    expected_services = ["backend", "auth", "postgres", "redis", "frontend", "clickhouse"]
-                    for service in expected_services:
-                        containers[service] = f"netra-dev-{service}"
-                    logger.info(f"🔄 Assuming {len(containers)} development containers exist")
-                else:
-                    logger.debug("No existing netra-dev containers found")
-                
-        except subprocess.TimeoutExpired:
-            logger.warning("Docker command timed out - Docker may be having connectivity issues")
-            # Try alternative approach using docker container ls
-            try:
-                cmd = ["docker", "container", "ls", "--format", "{{.Names}}", "--filter", "name=netra-dev-"]
-                result = subprocess.run(cmd, capture_output=True, text=True, timeout=5)
-                if result.returncode == 0 and result.stdout.strip():
-                    container_names = result.stdout.strip().split('\n')
-                    for container_name in container_names:
-                        if container_name.startswith('netra-dev-'):
-                            service = container_name.replace('netra-dev-', '')
-                            containers[service] = container_name
-                    logger.info(f"🔄 Found {len(containers)} containers via alternative method")
-            except Exception as alt_e:
-                logger.warning(f"Alternative docker detection also failed: {alt_e}")
-                
+                for name in container_names:
+                    if name:
+                        # Extract service name from container name
+                        # Format is usually: projectname_servicename_1
+                        parts = name.split('_')
+                        if len(parts) >= 2:
+                            service = parts[1]
+                            containers[service] = name
+                        elif '-' in name:
+                            # Alternative format: projectname-servicename-1
+                            parts = name.split('-')
+                            if len(parts) >= 2:
+                                service = parts[-2] if parts[-1].isdigit() else parts[-1]
+                                containers[service] = name
+            
+            return containers
+            
         except Exception as e:
-            logger.warning(f"Error detecting existing containers: {e}")
-            # In case of Docker connectivity issues, assume we might have the standard dev setup
-            if "http" in str(e).lower() and "pipe" in str(e).lower():
-                logger.info("🔄 Docker connectivity issue detected, checking for dev environment indicators")
+            logger.warning(f"Error detecting containers for project {project_name}: {e}")
+            return {}
+    
+    def _detect_existing_dev_containers(self) -> Dict[str, str]:
+        """
+        Detect existing netra containers that are currently running.
+        Enhanced with comprehensive pattern matching and retry logic.
+        
+        Returns:
+            Dictionary mapping service name to container name
+        """
+        containers = {}
+        max_retries = 3
+        retry_delay = 1  # seconds
+        
+        # Get all possible container name patterns
+        patterns = self._get_container_name_pattern()
+        project_dir = Path.cwd().name
+        
+        # Generate search patterns for docker ps
+        search_patterns = [
+            f"{project_dir}-dev-",
+            f"{project_dir}_dev_",
+            f"{project_dir}-test-",
+            f"{project_dir}_test_",
+            f"{project_dir}-alpine-test-",
+            "netra-dev-",
+            "netra-apex-test-",
+            "netra-test-",
+            "netra_test_shared_"
+        ]
+        
+        for attempt in range(max_retries):
+            try:
+                logger.debug(f"🔍 Container detection attempt {attempt + 1}/{max_retries}")
                 
-                # Check if we're in a development environment that likely has containers running
-                env = get_env()
-                test_env = env.get("TEST_ENV", "").lower()
-                current_env = env.get("NETRA_ENV", "").lower()
+                # Method 1: Search by patterns
+                for pattern in search_patterns:
+                    cmd = ["docker", "ps", "--format", "{{.Names}}", "--filter", f"name={pattern}"]
+                    # Use docker_rate_limiter for rate limiting
+                    docker_result = self.docker_rate_limiter.execute_docker_command(cmd, timeout=10)
+                    result = subprocess.CompletedProcess(cmd, docker_result.returncode, docker_result.stdout, docker_result.stderr)
+                    
+                    if result.returncode == 0 and result.stdout.strip():
+                        container_names = result.stdout.strip().split('\n')
+                        
+                        # Map container names to service names using new parser
+                        for container_name in container_names:
+                            if not container_name.strip():
+                                continue
+                                
+                            service = self._parse_container_name_to_service(container_name)
+                            if service and service not in containers:
+                                containers[service] = container_name
+                                logger.debug(f"🔍 Detected existing container: {service} -> {container_name}")
+            
+                # Method 2: If no containers found with patterns, try broad search
+                if not containers:
+                    logger.debug(f"🔍 No containers found with patterns, trying broad search")
+                    cmd = ["docker", "ps", "--format", "{{.Names}}"]
+                    docker_result = self.docker_rate_limiter.execute_docker_command(cmd, timeout=10)
+                    result = subprocess.CompletedProcess(cmd, docker_result.returncode, docker_result.stdout, docker_result.stderr)
+                    
+                    if result.returncode == 0 and result.stdout.strip():
+                        all_containers = result.stdout.strip().split('\n')
+                        
+                        for container_name in all_containers:
+                            if not container_name.strip():
+                                continue
+                                
+                            # Only consider netra-related containers
+                            if 'netra' in container_name.lower():
+                                service = self._parse_container_name_to_service(container_name)
+                                if service and service not in containers:
+                                    containers[service] = container_name
+                                    logger.debug(f"🔍 Detected container via broad search: {service} -> {container_name}")
                 
-                if "dev" in test_env or "dev" in current_env or self.environment == "test":
-                    logger.info("🔄 Development environment detected, assuming standard dev container setup")
-                    # Return expected container names for testing purposes
-                    expected_services = ["backend", "auth", "postgres", "redis", "frontend", "clickhouse"]
-                    for service in expected_services:
-                        containers[service] = f"netra-dev-{service}"
-                    logger.info(f"🔄 Assuming {len(containers)} development containers exist")
+                # If we found containers, return immediately
+                if containers:
+                    logger.info(f"🔄 Found {len(containers)} existing containers on attempt {attempt + 1}")
+                    for service, container_name in containers.items():
+                        logger.debug(f"  - {service}: {container_name}")
+                    return containers
+                
+                # If no containers found and not last attempt, wait and retry
+                if attempt < max_retries - 1:
+                    logger.debug(f"No containers found on attempt {attempt + 1}, retrying in {retry_delay}s...")
+                    import time
+                    time.sleep(retry_delay)
+                    continue
+                else:
+                    logger.debug("No existing netra containers found after all attempts")
+                    # Don't assume development containers exist - let orchestration handle it
+                    break
+                
+            except subprocess.TimeoutExpired:
+                logger.warning(f"Docker command timed out on attempt {attempt + 1}")
+                if attempt < max_retries - 1:
+                    logger.debug(f"Retrying in {retry_delay}s due to timeout...")
+                    import time
+                    time.sleep(retry_delay)
+                    continue
+                else:
+                    # Last attempt - try alternative approach
+                    logger.warning("Using alternative docker detection method")
+                    try:
+                        patterns = ["netra-dev-", "netra-apex-test-", "netra-test-", "netra_test_shared_"]
+                        for pattern in patterns:
+                            cmd = ["docker", "container", "ls", "--format", "{{.Names}}", "--filter", f"name={pattern}"]
+                            result = subprocess.run(cmd, capture_output=True, text=True, timeout=5)
+                            if result.returncode == 0 and result.stdout.strip():
+                                container_names = result.stdout.strip().split('\n')
+                                for container_name in container_names:
+                                    # Extract service name based on pattern
+                                    if 'netra-apex-test-' in container_name:
+                                        service = container_name.replace('netra-apex-test-', '')
+                                        if service.endswith('-1'):
+                                            service = service[:-2]  # Remove '-1' suffix properly
+                                    elif 'netra-dev-' in container_name:
+                                        service = container_name.replace('netra-dev-', '')
+                                    elif 'netra_test_shared_' in container_name:
+                                        service = container_name.replace('netra_test_shared_', '')
+                                        if service.endswith('_1'):
+                                            service = service[:-2]  # Remove '_1' suffix properly
+                                    else:
+                                        service = container_name.replace('netra-test-', '')
+                                        if service.endswith('-1'):
+                                            service = service[:-2]  # Remove '-1' suffix properly
+                                    
+                                    # Add the service to containers dict
+                                    if service and service in self.SERVICES:
+                                        containers[service] = container_name
+                    except Exception as e:
+                        logger.warning(f"Error in alternative detection method: {e}")
+                        
+            except Exception as e:
+                logger.warning(f"Error detecting existing containers on attempt {attempt + 1}: {e}")
+                
+                # Method 3: Fallback - Try alternative docker commands
+                if attempt == max_retries - 1:  # Last attempt
+                    try:
+                        logger.debug(f"🔍 Trying alternative docker detection methods")
+                        for pattern in search_patterns:
+                            cmd = ["docker", "container", "ls", "--format", "{{.Names}}", "--filter", f"name={pattern}"]
+                            result = subprocess.run(cmd, capture_output=True, text=True, timeout=5)
+                            if result.returncode == 0 and result.stdout.strip():
+                                container_names = result.stdout.strip().split('\n')
+                                for container_name in container_names:
+                                    if not container_name.strip():
+                                        continue
+                                    service = self._parse_container_name_to_service(container_name)
+                                    if service and service not in containers:
+                                        containers[service] = container_name
+                                        logger.debug(f"🔍 Found via alternative method: {service} -> {container_name}")
+                        if containers:
+                            logger.info(f"🔄 Found {len(containers)} containers via alternative method")
+                            return containers
+                    except Exception as alt_e:
+                        logger.warning(f"Alternative docker detection also failed: {alt_e}")
+                
+                if attempt < max_retries - 1:
+                    logger.debug(f"Retrying in {retry_delay}s due to error...")
+                    import time
+                    time.sleep(retry_delay)
+                    continue
+                # Don't assume any containers exist - let orchestration handle missing containers
             
         return containers
     
+    def _get_container_name_pattern(self) -> Dict[str, str]:
+        """
+        Get container name patterns based on environment type and project structure.
+        
+        Returns:
+            Dictionary mapping pattern types to their regex patterns
+        """
+        # Determine project name from current directory
+        project_dir = Path.cwd().name
+        
+        patterns = {
+            # Development containers (manual docker-compose up)
+            "dev": f"{project_dir}-dev-{{service}}-1",
+            "dev_underscore": f"{project_dir}_dev_{{service}}_1",
+            
+            # Test containers (automated)
+            "test": f"{project_dir}-test-{{service}}-1", 
+            "test_underscore": f"{project_dir}_test_{{service}}_1",
+            
+            # Alpine test containers  
+            "alpine_test": f"{project_dir}-alpine-test-{{service}}-1",
+            
+            # Legacy patterns
+            "legacy_dev": "netra-dev-{service}",
+            "legacy_apex_test": "netra-apex-test-{service}-1",
+            "legacy_test": "netra-test-{service}-1",
+            "legacy_shared": "netra_test_shared_{service}_1"
+        }
+        
+        logger.debug(f"🏷️ Container name patterns for project '{project_dir}': {list(patterns.keys())}")
+        return patterns
+    
+    def _parse_container_name_to_service(self, container_name: str) -> Optional[str]:
+        """
+        Parse container name to extract service name using all known patterns.
+        
+        Args:
+            container_name: Full container name
+            
+        Returns:
+            Service name if parsed successfully, None otherwise
+        """
+        patterns = self._get_container_name_pattern()
+        project_dir = Path.cwd().name
+        
+        # Try each pattern
+        if container_name.startswith(f'{project_dir}-dev-'):
+            service = container_name.replace(f'{project_dir}-dev-', '')
+            if service.endswith('-1'):
+                service = service[:-2]
+            return service
+        elif container_name.startswith(f'{project_dir}_dev_'):
+            service = container_name.replace(f'{project_dir}_dev_', '')
+            if service.endswith('_1'):
+                service = service[:-2] 
+            return service
+        elif container_name.startswith(f'{project_dir}-test-'):
+            service = container_name.replace(f'{project_dir}-test-', '')
+            if service.endswith('-1'):
+                service = service[:-2]
+            return service
+        elif container_name.startswith(f'{project_dir}_test_'):
+            service = container_name.replace(f'{project_dir}_test_', '')
+            if service.endswith('_1'):
+                service = service[:-2]
+            return service
+        elif container_name.startswith(f'{project_dir}-alpine-test-'):
+            service = container_name.replace(f'{project_dir}-alpine-test-', '')
+            if service.endswith('-1'):
+                service = service[:-2]
+            return service
+        # Legacy patterns
+        elif container_name.startswith('netra-dev-'):
+            return container_name.replace('netra-dev-', '')
+        elif container_name.startswith('netra-apex-test-'):
+            service = container_name.replace('netra-apex-test-', '')
+            if service.endswith('-1'):
+                service = service[:-2]
+            return service
+        elif container_name.startswith('netra-test-'):
+            service = container_name.replace('netra-test-', '')
+            if service.endswith('-1'):
+                service = service[:-2]
+            return service
+        elif container_name.startswith('netra_test_shared_'):
+            service = container_name.replace('netra_test_shared_', '')
+            if service.endswith('_1'):
+                service = service[:-2]
+            return service
+        
+        logger.debug(f"⚠️ Could not parse service name from container: {container_name}")
+        return None
+    
+    def _discover_ports_from_docker_ps(self) -> Dict[str, int]:
+        """
+        Discover ports by parsing docker ps output directly.
+        This method handles cases where containers don't match expected patterns.
+        
+        Returns:
+            Dictionary mapping service name to external port
+        """
+        ports = {}
+        
+        try:
+            # Get running containers with ports
+            cmd = ["docker", "ps", "--format", "table {{.Names}}\t{{.Ports}}"]
+            docker_result = self.docker_rate_limiter.execute_docker_command(cmd, timeout=10)
+            result = subprocess.CompletedProcess(cmd, docker_result.returncode, docker_result.stdout, docker_result.stderr)
+            
+            if result.returncode != 0 or not result.stdout.strip():
+                logger.debug("No containers found via docker ps")
+                return ports
+            
+            lines = result.stdout.strip().split('\n')
+            # Skip header line
+            container_lines = [line for line in lines[1:] if line.strip()]
+            
+            for line in container_lines:
+                parts = line.split('\t', 1)
+                if len(parts) != 2:
+                    continue
+                    
+                container_name = parts[0].strip()
+                ports_str = parts[1].strip()
+                
+                # Only process netra-related containers
+                if 'netra' not in container_name.lower():
+                    continue
+                
+                # Extract service name
+                service = self._parse_container_name_to_service(container_name)
+                if not service:
+                    continue
+                
+                # Parse ports string like "0.0.0.0:8000->8000/tcp, 0.0.0.0:5432->5432/tcp"
+                if ports_str and '->' in ports_str:
+                    port_mappings = ports_str.split(', ')
+                    for mapping in port_mappings:
+                        if '->' in mapping:
+                            # Extract host port from "0.0.0.0:HOST->CONTAINER/tcp"
+                            host_part = mapping.split('->')[0].strip()
+                            if ':' in host_part:
+                                host_port = int(host_part.split(':')[-1])
+                                # Match with known service ports to avoid wrong mappings
+                                if service in self.SERVICES:
+                                    internal_port = self.SERVICES[service].get("default_port", 8000)
+                                    container_part = mapping.split('->')[1].strip()
+                                    if container_part.startswith(str(internal_port)):
+                                        ports[service] = host_port
+                                        logger.debug(f"🔌 {service}: discovered {internal_port} -> {host_port} from docker ps")
+                                        break
+            
+        except Exception as e:
+            logger.warning(f"Error parsing docker ps output: {e}")
+        
+        return ports
+    
     def _discover_ports_from_existing_containers(self, containers: Dict[str, str]) -> Dict[str, int]:
         """
-        Discover port mappings from existing containers.
+        Discover port mappings from existing containers with enhanced fallback logic.
         
         Args:
             containers: Dictionary mapping service name to container name
@@ -996,6 +1527,7 @@ class UnifiedDockerManager:
         """
         ports = {}
         
+        # First try: Use docker port command for specific containers
         for service, container_name in containers.items():
             try:
                 # Get port mapping for this container
@@ -1018,49 +1550,132 @@ class UnifiedDockerManager:
                             ports[service] = internal_port
                             logger.debug(f"🔌 {service}: using internal port {internal_port}")
                     else:
-                        # No port mapping found, use internal port
-                        ports[service] = internal_port
-                        logger.debug(f"🔌 {service}: no mapping found, using internal port {internal_port}")
+                        logger.debug(f"🔌 {service}: no port mapping found for {container_name}")
                 else:
                     logger.warning(f"⚠️ Unknown service: {service}")
                     
             except Exception as e:
-                # Handle Docker connectivity issues gracefully
-                if "pipe" in str(e).lower() or "connect" in str(e).lower():
-                    logger.warning(f"Docker connectivity issue for {service}, using default port")
-                    if service in self.SERVICES:
-                        if service in self.allocated_ports:
-                            ports[service] = self.allocated_ports[service]
-                        else:
-                            ports[service] = self.SERVICES[service].get("default_port", 8000)
-                else:
-                    logger.warning(f"Error discovering port for {service}: {e}")
-                    # Use default port as fallback
-                    if service in self.SERVICES:
-                        if service in self.allocated_ports:
-                            ports[service] = self.allocated_ports[service]
-                        else:
-                            ports[service] = self.SERVICES[service].get("default_port", 8000)
+                logger.debug(f"Error getting port for {service} ({container_name}): {e}")
         
-        # If we have no ports discovered due to Docker issues, use default dev ports
-        if not ports and containers:
-            logger.warning("🔄 Using default development ports due to Docker connectivity issues")
-            dev_ports = {
-                "backend": 8000,
-                "auth": 8001, 
-                "frontend": 3000,
-                "postgres": 5432,
-                "redis": 6379,
-                "clickhouse": 8123
-            }
+        # Second try: Parse docker ps output if we're missing ports
+        missing_services = [s for s in containers.keys() if s not in ports]
+        if missing_services:
+            logger.info(f"🔍 Trying docker ps parsing for missing services: {missing_services}")
+            docker_ps_ports = self._discover_ports_from_docker_ps()
+            for service, port in docker_ps_ports.items():
+                if service in missing_services:
+                    ports[service] = port
+        
+        # Third try: Use environment-specific default ports
+        still_missing = [s for s in containers.keys() if s not in ports]
+        if still_missing:
+            logger.warning(f"🔄 Using environment-appropriate default ports for: {still_missing}")
             
-            for service in containers.keys():
-                if service in dev_ports:
-                    ports[service] = dev_ports[service]
-                    logger.info(f"🔌 {service}: using default dev port {dev_ports[service]}")
+            # Determine environment type from container names
+            sample_container = next(iter(containers.values()))
+            if 'dev' in sample_container:
+                default_ports = {
+                    "backend": 8000,
+                    "auth": 8081,
+                    "frontend": 3000,
+                    "postgres": 5432,
+                    "redis": 6379
+                }
+            else:  # test environment
+                default_ports = {
+                    "backend": 8000,
+                    "auth": 8081, 
+                    "frontend": 3000,
+                    "postgres": 5434,  # Test postgres typically on different port
+                    "redis": 6381
+                }
+            
+            for service in still_missing:
+                if service in default_ports:
+                    ports[service] = default_ports[service]
+                    logger.info(f"🔌 {service}: using default port {default_ports[service]}")
+                elif service in self.SERVICES:
+                    default_port = self.SERVICES[service].get("default_port", 8000)
+                    ports[service] = default_port
+                    logger.info(f"🔌 {service}: using service default port {default_port}")
         
         logger.info(f"📍 Discovered ports: {ports}")
         return ports
+    
+    def _get_actual_container_name(self, env_name: str, service_name: str) -> Optional[str]:
+        """
+        Get the actual container name for a service, handling different naming patterns.
+        Enhanced to use the new pattern-based parsing.
+        
+        Args:
+            env_name: Environment name
+            service_name: Service name
+            
+        Returns:
+            Actual container name or None if not found
+        """
+        # Get all container patterns
+        patterns = self._get_container_name_pattern()
+        project_dir = Path.cwd().name
+        
+        # Generate possible names based on environment and patterns
+        possible_names = [
+            # Standard compose formats
+            f"{env_name}_{service_name}_1",
+            f"{env_name}-{service_name}-1",
+            # Project-based patterns
+            f"{project_dir}-dev-{service_name}-1",
+            f"{project_dir}_dev_{service_name}_1",
+            f"{project_dir}-test-{service_name}-1",
+            f"{project_dir}_test_{service_name}_1",
+            f"{project_dir}-alpine-test-{service_name}-1",
+            # Legacy patterns
+            f"netra-apex-test-{service_name}-1",
+            f"netra-dev-{service_name}",
+            f"netra-test-{service_name}-1",
+            f"netra_test_shared_{service_name}_1"
+        ]
+        
+        # Method 1: Try exact name matches
+        for name in possible_names:
+            try:
+                cmd = ["docker", "ps", "-a", "--filter", f"name=^{name}$", "--format", "{{.Names}}"]
+                result = subprocess.run(cmd, capture_output=True, text=True, timeout=5)
+                if result.returncode == 0 and result.stdout.strip():
+                    actual_name = result.stdout.strip().split('\n')[0]
+                    if actual_name:
+                        logger.debug(f"Found exact container match: {actual_name} for service {service_name}")
+                        return actual_name
+            except Exception as e:
+                logger.debug(f"Error checking container name {name}: {e}")
+        
+        # Method 2: Search all containers and parse with new logic
+        try:
+            cmd = ["docker", "ps", "--format", "{{.Names}}"]
+            result = subprocess.run(cmd, capture_output=True, text=True, timeout=5)
+            if result.returncode == 0 and result.stdout.strip():
+                container_names = result.stdout.strip().split('\n')
+                for container_name in container_names:
+                    if not container_name.strip():
+                        continue
+                    
+                    # Use new parser to extract service name
+                    parsed_service = self._parse_container_name_to_service(container_name)
+                    if parsed_service == service_name:
+                        logger.debug(f"Found container {container_name} via parsing for service {service_name}")
+                        return container_name
+                        
+                    # Fallback: check if service name is in container name and it's netra-related
+                    if (service_name in container_name and 
+                        'netra' in container_name.lower() and 
+                        not parsed_service):  # Only if parsing didn't work
+                        logger.debug(f"Found container {container_name} by fallback match for service {service_name}")
+                        return container_name
+        except Exception as e:
+            logger.debug(f"Error searching containers: {e}")
+        
+        logger.debug(f"No container found for service {service_name} in environment {env_name}")
+        return None
     
     def _is_existing_container_healthy(self, container_name: str) -> bool:
         """Check if an existing container is healthy and running."""
@@ -1151,8 +1766,12 @@ class UnifiedDockerManager:
             # Record restart attempt
             self._record_restart(service_name)
             
-            # Perform restart
-            container_name = f"{env_name}_{service_name}_1"
+            # Perform restart - try to find actual container name
+            container_name = self._get_actual_container_name(env_name, service_name)
+            if not container_name:
+                logger.error(f"❌ Could not find container for service {service_name}")
+                return False
+            
             cmd = ["docker", "restart", container_name]
             
             docker_result = self.docker_rate_limiter.execute_docker_command(cmd, timeout=60)
@@ -1218,11 +1837,11 @@ class UnifiedDockerManager:
     
     def _is_service_healthy(self, env_name: str, service_name: str) -> bool:
         """Check if service is healthy"""
-        # Handle existing dev containers with different naming convention
-        if env_name == "netra-dev-existing":
-            container_name = f"netra-dev-{service_name}"
-        else:
-            container_name = f"{env_name}_{service_name}_1"
+        # Get the actual container name
+        container_name = self._get_actual_container_name(env_name, service_name)
+        if not container_name:
+            logger.warning(f"Container for service {service_name} not found")
+            return False
         
         # Check container status
         cmd = ["docker", "inspect", "--format='{{.State.Health.Status}}'", container_name]
@@ -1230,7 +1849,10 @@ class UnifiedDockerManager:
         
         if result.returncode == 0:
             status = result.stdout.strip().strip("'")
-            return status == "healthy" or status == "none"  # Some containers don't have health checks
+            # Accept healthy, starting (during startup), or none (no health checks)
+            is_healthy = status in ["healthy", "starting", "none"]
+            logger.debug(f"Service {service_name} ({container_name}) health: {status} -> {is_healthy}")
+            return is_healthy
         
         return False
     
@@ -1418,6 +2040,29 @@ class UnifiedDockerManager:
             env_key = f"{service.upper()}_MEMORY_LIMIT"
             env[env_key] = config.get("memory_limit", "512m")
         
+        # Build services if needed
+        if self.rebuild_images:
+            backend_services = ['backend', 'auth', 'alpine-test-backend', 'alpine-test-auth', 'test-backend', 'test-auth']
+            
+            if self.rebuild_backend_only and any(s in backend_services for s in service_names):
+                # Build backend services
+                services_to_build = [s for s in service_names if s in backend_services]
+                if services_to_build:
+                    build_cmd = ["docker", "compose", "-f", compose_file, "-p", self._get_project_name(), "build"] + services_to_build
+                    logger.info(f"🔨 Building backend services: {services_to_build}")
+                    
+                    result = subprocess.run(build_cmd, capture_output=True, text=True, timeout=300, env=env)
+                    if result.returncode != 0:
+                        logger.warning(f"⚠️ Failed to build services: {result.stderr}")
+            elif not self.rebuild_backend_only:
+                # Build all requested services
+                build_cmd = ["docker", "compose", "-f", compose_file, "-p", self._get_project_name(), "build"] + service_names
+                logger.info(f"🔨 Building all requested services: {service_names}")
+                
+                result = subprocess.run(build_cmd, capture_output=True, text=True, timeout=300, env=env)
+                if result.returncode != 0:
+                    logger.warning(f"⚠️ Failed to build services: {result.stderr}")
+        
         cmd = ["docker", "compose", "-f", compose_file, "-p", self._get_project_name(), "up", "-d"] + service_names
         logger.info(f"🚀 Executing: {' '.join(cmd)}")
         
@@ -1509,12 +2154,23 @@ class UnifiedDockerManager:
         """Check health of a specific service with async implementation."""
         start_time = time.time()
         
-        for attempt in range(self.config.health_check_retries):
+        # Get service-specific configuration
+        service_config = self.SERVICES.get(service, {})
+        health_timeout = service_config.get('health_timeout', self.config.health_check_timeout)
+        health_retries = service_config.get('health_retries', self.config.health_check_retries)
+        health_start_period = service_config.get('health_start_period', 20)
+        
+        # Wait for start period if this is ClickHouse (initial startup delay)
+        if service == "clickhouse":
+            logger.info(f"Waiting {health_start_period}s for ClickHouse initial startup...")
+            await asyncio.sleep(health_start_period)
+        
+        for attempt in range(health_retries):
             try:
                 if service in ["postgres", "redis", "clickhouse"]:
                     # Database services - check port connectivity
                     is_healthy = await self._check_port_connectivity(
-                        mapping.host, mapping.external_port, self.config.health_check_timeout
+                        mapping.host, mapping.external_port, health_timeout
                     )
                     if is_healthy:
                         response_time = (time.time() - start_time) * 1000
@@ -1540,9 +2196,10 @@ class UnifiedDockerManager:
                             last_check=time.time()
                         )
                 
-                # Wait before retry
-                if attempt < self.config.health_check_retries - 1:
-                    await asyncio.sleep(self.config.health_check_interval)
+                # Wait before retry (longer for ClickHouse)
+                retry_interval = 5.0 if service == "clickhouse" else self.config.health_check_interval
+                if attempt < health_retries - 1:
+                    await asyncio.sleep(retry_interval)
                     
             except Exception as e:
                 logger.debug(f"Health check attempt {attempt + 1} failed for {service}: {e}")
@@ -1554,7 +2211,7 @@ class UnifiedDockerManager:
             is_healthy=False,
             port=mapping.external_port,
             response_time_ms=response_time,
-            error_message=f"Failed after {self.config.health_check_retries} attempts",
+            error_message=f"Failed after {health_retries} attempts",
             last_check=time.time()
         )
 
@@ -1615,10 +2272,11 @@ class UnifiedDockerManager:
             auth_port = ports["auth"]
             env.set("AUTH_SERVICE_URL", f"http://localhost:{auth_port}", source="unified_docker_manager")
         
-        # Set database URLs
+        # Set database URLs using environment-specific credentials
         if "postgres" in ports:
             postgres_port = ports["postgres"]
-            db_url = f"postgresql://test:test@localhost:{postgres_port}/netra_test"
+            creds = self.get_database_credentials()
+            db_url = f"postgresql://{creds['user']}:{creds['password']}@localhost:{postgres_port}/{creds['database']}"
             env.set("DATABASE_URL", db_url, source="unified_docker_manager")
         
         if "redis" in ports:
@@ -1627,11 +2285,12 @@ class UnifiedDockerManager:
             env.set("REDIS_URL", redis_url, source="unified_docker_manager")
 
     def _build_service_url_from_port(self, service: str, port: int) -> Optional[str]:
-        """Build service URL from service name and port."""
+        """Build service URL from service name and port using environment-specific credentials."""
         if service in ["backend", "auth", "frontend"]:
             return f"http://localhost:{port}"
         elif service == "postgres":
-            return f"postgresql://test:test@localhost:{port}/netra_test"
+            creds = self.get_database_credentials()
+            return f"postgresql://{creds['user']}:{creds['password']}@localhost:{port}/{creds['database']}"
         elif service == "redis":
             return f"redis://localhost:{port}/1"
         elif service == "clickhouse":
@@ -1639,11 +2298,12 @@ class UnifiedDockerManager:
         return None
 
     def _build_service_url(self, service: str, mapping: ServicePortMapping) -> Optional[str]:
-        """Build service URL from port mapping."""
+        """Build service URL from port mapping using environment-specific credentials."""
         if service in ["backend", "auth", "frontend"]:
             return f"http://{mapping.host}:{mapping.external_port}"
         elif service == "postgres":
-            return f"postgresql://test:test@{mapping.host}:{mapping.external_port}/netra_test"
+            creds = self.get_database_credentials()
+            return f"postgresql://{creds['user']}:{creds['password']}@{mapping.host}:{mapping.external_port}/{creds['database']}"
         elif service == "redis":
             return f"redis://{mapping.host}:{mapping.external_port}/1"
         elif service == "clickhouse":
@@ -1871,8 +2531,9 @@ class UnifiedDockerManager:
         """
         try:
             # Get container status using docker-compose ps
+            mapped_service = self._map_service_name(service)
             cmd = ["docker-compose", "-f", self._get_compose_file(), 
-                   "-p", self._get_project_name(), "ps", "--format", "json", service]
+                   "-p", self._get_project_name(), "ps", "--format", "json", mapped_service]
             
             result = subprocess.run(cmd, capture_output=True, text=True, timeout=10)
             
@@ -1943,8 +2604,53 @@ class UnifiedDockerManager:
             env["DEV_BACKEND_PORT"] = str(ports.get("backend", 8000))
             env["DEV_FRONTEND_PORT"] = str(ports.get("frontend", 3000))
             
-            cmd = ["docker-compose", "-f", self._get_compose_file(),
-                   "-p", self._get_project_name(), "up", "-d"] + services_to_start
+            # Build images if requested
+            compose_file = self._get_compose_file()
+            
+            if self.rebuild_images:
+                backend_services = ['backend', 'auth', 'alpine-test-backend', 'alpine-test-auth', 'test-backend', 'test-auth']
+                
+                # Check for missing base images before building
+                if not self._check_base_images():
+                    logger.warning("⚠️ Missing base images detected. Build may fail if Docker Hub is rate limited.")
+                    logger.warning("   Consider pulling base images manually or using --pull never")
+                
+                # Add pull policy to build commands
+                pull_flag = []
+                if self.pull_policy == "never":
+                    pull_flag = ["--pull", "never"]  # Never pull from Docker Hub
+                elif self.pull_policy == "always":
+                    pull_flag = ["--pull", "always"]  # Always pull (may hit rate limits)
+                # Default "missing" - only pull if image doesn't exist locally
+                
+                if self.rebuild_backend_only:
+                    services_to_build = [s for s in services_to_start if s in backend_services]
+                    if services_to_build:
+                        build_cmd = ["docker-compose", "-f", compose_file, "-p", self._get_project_name(), "build"] + pull_flag + services_to_build
+                        logger.info(f"🔨 Building backend services with pull_policy={self.pull_policy}: {services_to_build}")
+                        result = subprocess.run(build_cmd, capture_output=True, text=True, timeout=300, env=env)
+                        if result.returncode != 0:
+                            if "429 Too Many Requests" in result.stderr or "toomanyrequests" in result.stderr.lower():
+                                logger.error("❌ Docker Hub rate limit hit! Cannot pull base images.")
+                                logger.error("   Solution: Use pull_policy='never' or wait for rate limit reset")
+                                return False
+                            logger.error(f"Build failed: {result.stderr}")
+                else:
+                    build_cmd = ["docker-compose", "-f", compose_file, "-p", self._get_project_name(), "build"] + pull_flag + services_to_start
+                    logger.info(f"🔨 Building all services with pull_policy={self.pull_policy}: {services_to_start}")
+                    result = subprocess.run(build_cmd, capture_output=True, text=True, timeout=300, env=env)
+                    if result.returncode != 0:
+                        if "429 Too Many Requests" in result.stderr or "toomanyrequests" in result.stderr.lower():
+                            logger.error("❌ Docker Hub rate limit hit! Cannot pull base images.")
+                            logger.error("   Solution: Use pull_policy='never' or wait for rate limit reset")
+                            return False
+                        logger.error(f"Build failed: {result.stderr}")
+            
+            # Map service names for the compose file
+            mapped_services = [self._map_service_name(s) for s in services_to_start]
+            
+            cmd = ["docker-compose", "-f", compose_file,
+                   "-p", self._get_project_name(), "up", "-d"] + mapped_services
             
             try:
                 result = subprocess.run(cmd, capture_output=True, text=True, timeout=120, env=env)
@@ -1961,6 +2667,57 @@ class UnifiedDockerManager:
         if wait_healthy:
             return self.wait_for_services(services, timeout=self.HEALTH_CHECK_TIMEOUT)
             
+        return True
+    
+    def _check_base_images(self) -> bool:
+        """
+        Check if required base images are available locally.
+        
+        CRITICAL: This prevents Docker Hub pulls during builds.
+        Returns True if all base images are available, False otherwise.
+        """
+        # Base images required for building our services
+        required_base_images = [
+            "python:3.11-alpine",
+            "python:3.11-alpine3.19",
+            "node:18-alpine",
+            "postgres:15-alpine",
+            "redis:7-alpine", 
+            "rabbitmq:3-alpine",
+            "clickhouse/clickhouse-server:23-alpine"
+        ]
+        
+        missing_images = []
+        available_images = []
+        
+        for image in required_base_images:
+            try:
+                # Check if image exists locally
+                cmd = ["docker", "images", "-q", image]
+                result = subprocess.run(cmd, capture_output=True, text=True, timeout=5)
+                
+                if result.returncode == 0 and result.stdout.strip():
+                    available_images.append(image)
+                else:
+                    missing_images.append(image)
+            except Exception as e:
+                logger.debug(f"Error checking image {image}: {e}")
+                missing_images.append(image)
+        
+        if missing_images:
+            logger.warning(f"⚠️ Missing {len(missing_images)} base images:")
+            for img in missing_images:
+                logger.warning(f"   - {img}")
+            
+            if self.pull_policy == "never":
+                logger.error("❌ pull_policy='never' but base images are missing!")
+                logger.error("   Build will fail without these images.")
+            elif self.pull_policy == "missing":
+                logger.info("ℹ️ Docker will try to pull missing images (may hit rate limits)")
+            
+            return False
+        
+        logger.debug(f"✅ All {len(available_images)} base images available locally")
         return True
     
     async def graceful_shutdown(self, services: Optional[List[str]] = None, timeout: int = 30) -> bool:
@@ -2561,24 +3318,24 @@ async def pytest_orchestrate_services():
 class ServiceOrchestrator(UnifiedDockerManager):
     """Legacy compatibility class - redirects to UnifiedDockerManager"""
     
-    def __init__(self, config: Optional[OrchestrationConfig] = None):
-        """Initialize with legacy ServiceOrchestrator interface"""
-        super().__init__(config=config, environment_type=EnvironmentType.SHARED, use_production_images=True)
-        logger.info("ServiceOrchestrator is deprecated - using UnifiedDockerManager")
+    def __init__(self, config: Optional[OrchestrationConfig] = None, use_alpine: bool = False,
+                 rebuild_images: bool = True, rebuild_backend_only: bool = True,
+                 pull_policy: str = "missing"):
+        """Initialize with legacy ServiceOrchestrator interface
+        
+        Args:
+            config: Orchestration configuration
+            use_alpine: Use Alpine-based containers
+            rebuild_images: Whether to rebuild images
+            rebuild_backend_only: Only rebuild backend services
+            pull_policy: Docker pull policy - 'always', 'never', or 'missing' (default)
+        """
+        super().__init__(config=config, environment_type=EnvironmentType.SHARED, 
+                        use_production_images=True, use_alpine=use_alpine,
+                        rebuild_images=rebuild_images, rebuild_backend_only=rebuild_backend_only,
+                        pull_policy=pull_policy)
+        logger.info(f"ServiceOrchestrator using pull_policy='{pull_policy}' to prevent Docker Hub rate limits")
 
 
-class UnifiedDockerManager(UnifiedDockerManager):
-    """Legacy compatibility class - redirects to UnifiedDockerManager"""
-    
-    def __init__(self, 
-                 environment_type: EnvironmentType = EnvironmentType.SHARED,
-                 test_id: Optional[str] = None,
-                 use_production_images: bool = True):
-        """Initialize with legacy UnifiedDockerManager interface"""
-        super().__init__(
-            config=OrchestrationConfig(),
-            environment_type=environment_type, 
-            test_id=test_id,
-            use_production_images=use_production_images
-        )
-        logger.info("UnifiedDockerManager is deprecated - using UnifiedDockerManager")
+# Removed duplicate UnifiedDockerManager class that was causing circular inheritance
+# The main UnifiedDockerManager class (starting at line 192) is the correct implementation

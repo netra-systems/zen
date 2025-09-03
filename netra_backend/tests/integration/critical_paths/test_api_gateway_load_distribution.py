@@ -26,8 +26,11 @@ from typing import Any, Dict, List, Optional
 
 import aiohttp
 import pytest
+from netra_backend.app.core.backend_environment import get_backend_env
 
-GATEWAY_URL = os.getenv("GATEWAY_URL", "http://localhost:8080")
+# Get backend environment for configuration
+backend_env = get_backend_env()
+GATEWAY_URL = backend_env.get("GATEWAY_URL", "http://localhost:8080")
 BACKEND_URLS = [
     "http://localhost:8001",
     "http://localhost:8002",

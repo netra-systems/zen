@@ -27,10 +27,10 @@ from tests.e2e.jwt_token_helpers import JWTTestHelper
 
 # Import proper dependencies
 from tests.e2e.config import TestTokenManager, TEST_SECRETS
-# Removed WebSocket mock import - using real WebSocket connections per CLAUDE.md "MOCKS = Abomination"
-from test_framework.real_services import get_real_services
+from test_framework.websocket_helpers import MockWebSocket
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.websocket_core.manager import get_websocket_manager
+from unittest.mock import patch, AsyncMock
 
 logger = central_logger.get_logger(__name__)
 
@@ -110,7 +110,7 @@ class MessageSimulator:
         }
 
 
-class TestWebSocketAuther:
+class WebSocketAuthTester:
     """Real WebSocket connection tester with auth validation."""
     
     def __init__(self):

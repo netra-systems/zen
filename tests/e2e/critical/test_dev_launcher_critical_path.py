@@ -69,7 +69,7 @@ class DevLauncherRealTestManager:
         self.project_root = self._detect_project_root()
         self.dev_launcher_process: Optional[subprocess.Popen] = None
         self.http_client: Optional[httpx.AsyncClient] = None
-        self.websocket: Optional[websockets.WebSocketServerProtocol] = None
+        self.websocket: Optional[websockets.ServerConnection] = None
         self.cleanup_handlers: List[callable] = []
         self.startup_logs: List[str] = []
         self._shutdown_event = threading.Event()

@@ -90,7 +90,7 @@ async def test_agent_websocket_bridge_retry_logic():
 @pytest.mark.asyncio
 async def test_deterministic_startup_websocket_retry():
     """Test deterministic startup retry logic for WebSocketManager."""
-    from netra_backend.app.startup_module_deterministic import DeterministicStartupManager
+    from netra_backend.app.smd import DeterministicStartupManager
     from fastapi import FastAPI
     
     app = FastAPI()
@@ -117,7 +117,7 @@ async def test_deterministic_startup_websocket_retry():
             return None  # Fail first 2 attempts
         return original_get_manager()  # Succeed on 3rd attempt
     
-    with patch('netra_backend.app.startup_module_deterministic.get_websocket_manager', mock_get_manager):
+    with patch('netra_backend.app.smd.get_websocket_manager', mock_get_manager):
         # This should succeed after retries
         await startup_manager._ensure_tool_dispatcher_enhancement()
         

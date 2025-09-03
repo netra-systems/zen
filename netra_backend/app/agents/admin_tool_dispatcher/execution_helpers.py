@@ -11,7 +11,8 @@ from typing import Any, Dict, Optional, Union
 
 from netra_backend.app.agents.base.interface import ExecutionContext, ExecutionResult
 from netra_backend.app.agents.base.monitoring import ExecutionMonitor
-from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
+from netra_backend.app.database.session_manager import DatabaseSessionManager
 from netra_backend.app.schemas.admin_tool_types import (
     ToolFailureResponse, ToolResponse, ToolSuccessResponse
 )
@@ -37,22 +38,37 @@ def extract_action_from_kwargs(kwargs: Dict[str, Any]) -> str:
 def create_execution_context(tool_name: str, user, db, action: str, 
                            run_id: str, kwargs: Dict[str, Any]) -> ExecutionContext:
     """Create modern ExecutionContext for tool execution"""
-    state = _create_agent_state(user, db, action, kwargs)
-    return _build_execution_context(tool_name, run_id, state, user)
+    user_context = _create_user_execution_context(user, db, action, run_id, kwargs)
+    return _build_execution_context(tool_name, user_context)
 
 
-def _create_agent_state(user, db, action: str, kwargs: Dict[str, Any]) -> DeepAgentState:
-    """Create agent state from parameters"""
-    params = {**kwargs, 'action': action, 'user': user, 'db': db}
-    return DeepAgentState(params=params)
+def _create_user_execution_context(user, db, action: str, run_id: str, kwargs: Dict[str, Any]) -> UserExecutionContext:
+    """Create UserExecutionContext from parameters"""
+    import uuid
+    user_id = getattr(user, 'id', None) if user else f"admin_user_{uuid.uuid4().hex[:8]}"
+    thread_id = f"admin_tool_{action}_{user_id}"
+    
+    metadata = {**kwargs, 'action': action, 'user': user, 'db': db}
+    
+    return UserExecutionContext.from_request(
+        user_id=user_id,
+        thread_id=thread_id,
+        run_id=run_id,
+        db_session=db,
+        metadata=metadata
+    )
 
 
-def _build_execution_context(tool_name: str, run_id: str, 
-                           state: DeepAgentState, user) -> ExecutionContext:
+def _build_execution_context(tool_name: str, user_context: UserExecutionContext) -> ExecutionContext:
     """Build ExecutionContext with modern patterns"""
-    user_id = getattr(user, 'id', None) if user else None
-    return ExecutionContext(run_id=run_id, agent_name=tool_name, 
-                          state=state, user_id=user_id, start_time=get_current_utc_time())
+    return ExecutionContext(
+        run_id=user_context.run_id, 
+        agent_name=tool_name, 
+        state=user_context, 
+        user_id=user_context.user_id, 
+        metadata=user_context.metadata,
+        start_time=get_current_utc_time()
+    )
 
 
 def create_execution_result(success: bool, result_data: Optional[Dict[str, Any]] = None,
@@ -102,40 +118,10 @@ def record_execution_metrics(context: ExecutionContext, result: ExecutionResult,
     _log_execution_completion(context, result)
 
 
-def convert_execution_result_to_tool_response(result: ExecutionResult, tool_name: str,
-                                            user_id: str) -> Union[ToolSuccessResponse, ToolFailureResponse]:
-    """Convert ExecutionResult to legacy ToolResponse format"""
-    if result.success:
-        return _create_legacy_success_response(result, tool_name, user_id)
-    return _create_legacy_failure_response(result, tool_name, user_id)
+# Legacy conversion functions removed - use ExecutionResult directly
 
 
-def _create_legacy_success_response(result: ExecutionResult, tool_name: str, 
-                                   user_id: str) -> ToolSuccessResponse:
-    """Create legacy success response from ExecutionResult"""
-    response_data = _build_success_response_data(result, tool_name, user_id)
-    return ToolSuccessResponse(**response_data)
-
-
-def _create_legacy_failure_response(result: ExecutionResult, tool_name: str,
-                                   user_id: str) -> ToolFailureResponse:
-    """Create legacy failure response from ExecutionResult"""
-    response_data = _build_failure_response_data(result, tool_name, user_id)
-    return ToolFailureResponse(**response_data)
-
-
-def _build_success_response_data(result: ExecutionResult, tool_name: str,
-                               user_id: str) -> Dict[str, Any]:
-    """Build success response data from ExecutionResult"""
-    base_data = _get_base_response_data(tool_name, user_id, result.execution_time_ms)
-    return {**base_data, "status": "COMPLETED", "result": result.result or {}}
-
-
-def _build_failure_response_data(result: ExecutionResult, tool_name: str,
-                               user_id: str) -> Dict[str, Any]:
-    """Build failure response data from ExecutionResult"""
-    base_data = _get_base_response_data(tool_name, user_id, result.execution_time_ms)
-    return {**base_data, "status": "FAILED", "error": result.error or "Unknown error"}
+# Legacy response data builders removed - use ExecutionResult directly
 
 
 def _get_base_response_data(tool_name: str, user_id: str, 
@@ -162,6 +148,15 @@ def _log_execution_completion(context: ExecutionContext, result: ExecutionResult
 def get_safe_user_id(dispatcher) -> str:
     """Safely get user ID from dispatcher"""
     return dispatcher.user.id if dispatcher.user else "unknown"
+
+
+def get_database_session_manager(context: ExecutionContext) -> DatabaseSessionManager:
+    """Get DatabaseSessionManager from UserExecutionContext"""
+    user_context = context.state
+    if not isinstance(user_context, UserExecutionContext):
+        raise ValueError(f"Expected UserExecutionContext in context.state, got {type(user_context)}")
+    
+    return DatabaseSessionManager(user_context)
 
 
 def start_execution_monitoring(context: ExecutionContext, 

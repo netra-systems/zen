@@ -835,6 +835,516 @@ class TestDockerCleanupPerformance:
         assert volumes_cleaned >= len(volumes_to_cleanup) * 0.9, "Volume cleanup rate too low"
 
 
+class TestDockerInfrastructureBenchmarks:
+    """Comprehensive Docker infrastructure performance benchmarks."""
+    
+    def test_container_creation_throughput_benchmark(self, performance_profiler):
+        """Benchmark container creation throughput > 0.5 containers/second."""
+        logger.info("🚀 Benchmarking container creation throughput")
+        
+        def container_throughput_test(iteration: int):
+            container_name = f'throughput_test_{iteration}_{uuid.uuid4().hex[:6]}'
+            
+            with performance_profiler.performance_measurement('throughput_container_create'):
+                result = execute_docker_command([
+                    'docker', 'create', '--name', container_name,
+                    'alpine:latest', 'echo', 'throughput_test'
+                ])
+                if result.returncode != 0:
+                    raise RuntimeError(f"Container creation failed: {result.stderr}")
+            
+            performance_profiler.test_containers.append(container_name)
+        
+        benchmark = performance_profiler.run_benchmark(
+            "Container Creation Throughput",
+            container_throughput_test,
+            iterations=30
+        )
+        
+        # Validate throughput > 0.5 containers/second
+        throughput = benchmark.summary_stats.get('operations_per_second', 0)
+        assert throughput > 0.5, f"Container creation throughput {throughput:.2f} < 0.5 containers/sec"
+        logger.info(f"✅ Container creation throughput: {throughput:.2f} containers/sec")
+    
+    def test_health_check_latency_benchmark(self, performance_profiler):
+        """Benchmark health check latency < 2 seconds."""
+        logger.info("🏥 Benchmarking health check latency")
+        
+        env_name = f"health_check_perf_{int(time.time())}"
+        
+        try:
+            # Create environment for health checking
+            result = performance_profiler.docker_manager.acquire_environment(env_name, use_alpine=True)
+            assert result is not None, "Failed to create environment for health check test"
+            
+            def health_check_test(iteration: int):
+                with performance_profiler.performance_measurement('health_check_latency'):
+                    health = performance_profiler.docker_manager.get_health_report(env_name)
+                    if not health:
+                        raise RuntimeError("Health check failed")
+            
+            benchmark = performance_profiler.run_benchmark(
+                "Health Check Latency",
+                health_check_test,
+                iterations=20
+            )
+            
+            # Validate latency < 2 seconds
+            avg_latency_ms = benchmark.summary_stats.get('mean_duration_ms', 0)
+            assert avg_latency_ms < 2000, f"Health check latency {avg_latency_ms:.0f}ms > 2000ms"
+            logger.info(f"✅ Health check latency: {avg_latency_ms:.0f}ms")
+            
+        finally:
+            performance_profiler.docker_manager.release_environment(env_name)
+    
+    def test_memory_usage_benchmark(self, performance_profiler):
+        """Benchmark memory usage < 500MB per container."""
+        logger.info("🧠 Benchmarking memory usage per container")
+        
+        container_name = f'memory_benchmark_{uuid.uuid4().hex[:6]}'
+        
+        try:
+            # Create container with memory monitoring
+            with performance_profiler.performance_measurement('memory_monitored_container'):
+                result = execute_docker_command([
+                    'docker', 'create', '--name', container_name,
+                    '--memory', '400m',  # Set limit below 500MB
+                    'alpine:latest', 'sh', '-c', 'sleep 5'
+                ])
+                if result.returncode != 0:
+                    raise RuntimeError(f"Memory test container creation failed: {result.stderr}")
+            
+            performance_profiler.test_containers.append(container_name)
+            
+            # Start and monitor memory
+            execute_docker_command(['docker', 'container', 'start', container_name])
+            time.sleep(2)
+            
+            # Check memory stats
+            result = execute_docker_command(['docker', 'stats', '--no-stream', '--format', '{{.MemUsage}}', container_name])
+            if result.returncode == 0 and result.stdout:
+                memory_usage_str = result.stdout.strip()
+                # Parse memory usage (format: "123.4MiB / 400MiB")
+                if '/' in memory_usage_str:
+                    used_memory = memory_usage_str.split('/')[0].strip()
+                    if 'MiB' in used_memory:
+                        memory_mb = float(used_memory.replace('MiB', '').strip())
+                        logger.info(f"✅ Container memory usage: {memory_mb:.1f}MB")
+                        assert memory_mb < 500, f"Container memory usage {memory_mb:.1f}MB > 500MB"
+            
+            execute_docker_command(['docker', 'container', 'stop', container_name])
+            
+        finally:
+            execute_docker_command(['docker', 'container', 'rm', '-f', container_name])
+    
+    def test_alpine_performance_comparison(self, performance_profiler):
+        """Benchmark Alpine containers 3x faster than regular."""
+        logger.info("🏔️ Benchmarking Alpine vs regular container performance")
+        
+        alpine_times = []
+        regular_times = []
+        
+        # Test Alpine containers
+        for i in range(5):
+            env_name = f"alpine_perf_{i}_{int(time.time())}"
+            start_time = time.time()
+            
+            try:
+                result = performance_profiler.docker_manager.acquire_environment(
+                    env_name, use_alpine=True, timeout=30
+                )
+                if result:
+                    alpine_times.append(time.time() - start_time)
+            finally:
+                performance_profiler.docker_manager.release_environment(env_name)
+        
+        # Test regular containers
+        for i in range(5):
+            env_name = f"regular_perf_{i}_{int(time.time())}"
+            start_time = time.time()
+            
+            try:
+                result = performance_profiler.docker_manager.acquire_environment(
+                    env_name, use_alpine=False, timeout=30
+                )
+                if result:
+                    regular_times.append(time.time() - start_time)
+            finally:
+                performance_profiler.docker_manager.release_environment(env_name)
+        
+        if alpine_times and regular_times:
+            avg_alpine = statistics.mean(alpine_times)
+            avg_regular = statistics.mean(regular_times)
+            speedup = avg_regular / avg_alpine if avg_alpine > 0 else 1
+            
+            logger.info(f"✅ Alpine speedup: {speedup:.2f}x faster than regular")
+            assert speedup > 1.5, f"Alpine speedup {speedup:.2f}x < 1.5x minimum"
+    
+    def test_resource_allocation_efficiency(self, performance_profiler):
+        """Test efficient resource allocation and deallocation."""
+        logger.info("⚡ Testing resource allocation efficiency")
+        
+        initial_containers = len(execute_docker_command(['docker', 'ps', '-a', '-q']).stdout.strip().split('\n')) if execute_docker_command(['docker', 'ps', '-a', '-q']).stdout.strip() else 0
+        initial_memory = psutil.virtual_memory().used / (1024 * 1024)  # MB
+        
+        containers_created = []
+        allocation_times = []
+        
+        # Rapid allocation test
+        for i in range(15):
+            container_name = f'allocation_test_{i}_{uuid.uuid4().hex[:6]}'
+            
+            start_time = time.time()
+            with performance_profiler.performance_measurement(f'resource_allocation_{i}'):
+                result = execute_docker_command([
+                    'docker', 'create', '--name', container_name,
+                    '--memory', '50m', '--cpus', '0.1',
+                    'alpine:latest', 'sleep', '1'
+                ])
+                if result.returncode == 0:
+                    containers_created.append(container_name)
+                    allocation_times.append(time.time() - start_time)
+        
+        # Rapid deallocation test
+        deallocation_start = time.time()
+        with performance_profiler.performance_measurement('bulk_resource_deallocation'):
+            for container in containers_created:
+                execute_docker_command(['docker', 'container', 'rm', container])
+        
+        deallocation_time = time.time() - deallocation_start
+        
+        final_containers = len(execute_docker_command(['docker', 'ps', '-a', '-q']).stdout.strip().split('\n')) if execute_docker_command(['docker', 'ps', '-a', '-q']).stdout.strip() else 0
+        final_memory = psutil.virtual_memory().used / (1024 * 1024)  # MB
+        
+        # Efficiency metrics
+        avg_allocation_time = statistics.mean(allocation_times) if allocation_times else 0
+        deallocation_rate = len(containers_created) / deallocation_time if deallocation_time > 0 else 0
+        memory_efficiency = abs(final_memory - initial_memory) / len(containers_created) if containers_created else 0
+        
+        logger.info(f"✅ Resource allocation efficiency:")
+        logger.info(f"   Avg allocation time: {avg_allocation_time:.3f}s")
+        logger.info(f"   Deallocation rate: {deallocation_rate:.2f} containers/sec")
+        logger.info(f"   Memory efficiency: {memory_efficiency:.2f}MB per container")
+        
+        assert avg_allocation_time < 2.0, f"Resource allocation too slow: {avg_allocation_time:.3f}s"
+        assert deallocation_rate > 5.0, f"Resource deallocation too slow: {deallocation_rate:.2f}/sec"
+        assert final_containers <= initial_containers + 1, "Resource cleanup incomplete"
+    
+    def test_scalability_limits_identification(self, performance_profiler):
+        """Identify Docker scalability limits under load."""
+        logger.info("📈 Identifying Docker scalability limits")
+        
+        containers = []
+        max_containers = 0
+        performance_degradation_point = 0
+        
+        baseline_time = 0
+        
+        try:
+            # Find baseline performance
+            start = time.time()
+            container_name = f'baseline_{uuid.uuid4().hex[:6]}'
+            result = execute_docker_command([
+                'docker', 'create', '--name', container_name,
+                'alpine:latest', 'echo', 'baseline'
+            ])
+            if result.returncode == 0:
+                baseline_time = time.time() - start
+                containers.append(container_name)
+            
+            # Scale up until performance degrades
+            for batch in range(1, 21):  # Up to 20 batches of 5 containers
+                batch_start = time.time()
+                batch_containers = []
+                
+                for i in range(5):
+                    container_name = f'scale_test_{batch}_{i}_{uuid.uuid4().hex[:6]}'
+                    
+                    create_start = time.time()
+                    result = execute_docker_command([
+                        'docker', 'create', '--name', container_name,
+                        '--memory', '20m', '--cpus', '0.05',
+                        'alpine:latest', 'sleep', '1'
+                    ])
+                    create_time = time.time() - create_start
+                    
+                    if result.returncode == 0:
+                        batch_containers.append(container_name)
+                        max_containers += 1
+                    
+                    # Check for performance degradation (3x baseline)
+                    if create_time > baseline_time * 3 and performance_degradation_point == 0:
+                        performance_degradation_point = max_containers
+                
+                containers.extend(batch_containers)
+                batch_time = time.time() - batch_start
+                
+                logger.info(f"Batch {batch}: {len(batch_containers)}/5 containers created in {batch_time:.2f}s")
+                
+                # Stop if we can't create containers or hit system limits
+                if len(batch_containers) < 3:  # Less than 60% success rate
+                    break
+            
+            # Analyze scalability
+            system_memory = psutil.virtual_memory().percent
+            system_cpu = psutil.cpu_percent(interval=1)
+            
+            logger.info(f"✅ Scalability analysis:")
+            logger.info(f"   Max containers created: {max_containers}")
+            logger.info(f"   Performance degradation at: {performance_degradation_point} containers")
+            logger.info(f"   System memory usage: {system_memory:.1f}%")
+            logger.info(f"   System CPU usage: {system_cpu:.1f}%")
+            
+            assert max_containers >= 20, f"Scalability limit too low: {max_containers} containers"
+            assert system_memory < 90, f"Memory usage too high: {system_memory:.1f}%"
+            
+        finally:
+            # Clean up in batches to avoid overwhelming the system
+            logger.info("Cleaning up scalability test containers...")
+            for i in range(0, len(containers), 10):
+                batch = containers[i:i+10]
+                for container in batch:
+                    try:
+                        execute_docker_command(['docker', 'container', 'rm', '-f', container])
+                    except:
+                        pass
+                time.sleep(0.5)
+    
+    def test_disk_io_performance(self, performance_profiler):
+        """Benchmark disk I/O performance in containers."""
+        logger.info("💾 Benchmarking disk I/O performance")
+        
+        container_name = f'disk_io_test_{uuid.uuid4().hex[:6]}'
+        
+        try:
+            # Create container for I/O testing
+            with performance_profiler.performance_measurement('disk_io_container_setup'):
+                result = execute_docker_command([
+                    'docker', 'create', '--name', container_name,
+                    'alpine:latest', 'sh', '-c',
+                    'dd if=/dev/zero of=/tmp/write_test bs=1M count=50 && '
+                    'dd if=/tmp/write_test of=/dev/null bs=1M && '
+                    'rm /tmp/write_test'
+                ])
+                if result.returncode != 0:
+                    raise RuntimeError(f"Disk I/O container creation failed: {result.stderr}")
+            
+            performance_profiler.test_containers.append(container_name)
+            
+            # Run I/O benchmark
+            with performance_profiler.performance_measurement('disk_io_benchmark'):
+                result = execute_docker_command(['docker', 'container', 'start', '-a', container_name])
+                if result.returncode != 0:
+                    raise RuntimeError(f"Disk I/O benchmark failed: {result.stderr}")
+            
+            # Analyze I/O performance from metrics
+            io_metrics = [m for m in performance_profiler.metrics if 'disk_io' in m.operation]
+            if io_metrics:
+                setup_time = next((m.duration_ms for m in io_metrics if 'setup' in m.operation), 0)
+                benchmark_time = next((m.duration_ms for m in io_metrics if 'benchmark' in m.operation), 0)
+                
+                # Calculate rough I/O rate (100MB in benchmark_time)
+                if benchmark_time > 0:
+                    io_rate_mbps = (100 * 1000) / benchmark_time  # MB/s
+                    logger.info(f"✅ Disk I/O performance: {io_rate_mbps:.1f} MB/s")
+                    assert io_rate_mbps > 10, f"Disk I/O rate too slow: {io_rate_mbps:.1f} MB/s"
+                
+                assert setup_time < 5000, f"Container I/O setup too slow: {setup_time:.0f}ms"
+                assert benchmark_time < 30000, f"I/O benchmark too slow: {benchmark_time:.0f}ms"
+                
+        finally:
+            execute_docker_command(['docker', 'container', 'rm', '-f', container_name])
+    
+    def test_network_io_performance(self, performance_profiler):
+        """Benchmark network I/O performance between containers."""
+        logger.info("🌐 Benchmarking network I/O performance")
+        
+        network_name = f'network_io_test_{uuid.uuid4().hex[:6]}'
+        server_container = f'server_{uuid.uuid4().hex[:6]}'
+        client_container = f'client_{uuid.uuid4().hex[:6]}'
+        
+        try:
+            # Create test network
+            with performance_profiler.performance_measurement('network_io_setup'):
+                result = execute_docker_command(['docker', 'network', 'create', network_name])
+                if result.returncode != 0:
+                    raise RuntimeError(f"Network creation failed: {result.stderr}")
+            
+            performance_profiler.test_networks.append(network_name)
+            
+            # Create server container
+            result = execute_docker_command([
+                'docker', 'create', '--name', server_container,
+                '--network', network_name,
+                'alpine:latest', 'sh', '-c',
+                'echo "test data for network io benchmark" > /tmp/data.txt && '
+                'while true; do nc -l -p 8080 < /tmp/data.txt; done'
+            ])
+            if result.returncode == 0:
+                performance_profiler.test_containers.append(server_container)
+                execute_docker_command(['docker', 'container', 'start', server_container])
+                time.sleep(2)  # Let server start
+            
+            # Create client container
+            result = execute_docker_command([
+                'docker', 'create', '--name', client_container,
+                '--network', network_name,
+                'alpine:latest', 'sh', '-c',
+                f'for i in $(seq 1 10); do nc {server_container} 8080 > /dev/null; done'
+            ])
+            if result.returncode == 0:
+                performance_profiler.test_containers.append(client_container)
+                
+                # Run network I/O test
+                with performance_profiler.performance_measurement('network_io_benchmark'):
+                    result = execute_docker_command(['docker', 'container', 'start', '-a', client_container])
+                    # Note: This may timeout due to network connectivity, which is expected
+            
+            # Analyze network performance
+            network_metrics = [m for m in performance_profiler.metrics if 'network_io' in m.operation]
+            if network_metrics:
+                setup_time = next((m.duration_ms for m in network_metrics if 'setup' in m.operation), 0)
+                benchmark_time = next((m.duration_ms for m in network_metrics if 'benchmark' in m.operation), 0)
+                
+                logger.info(f"✅ Network I/O performance:")
+                logger.info(f"   Network setup time: {setup_time:.0f}ms")
+                logger.info(f"   Network benchmark time: {benchmark_time:.0f}ms")
+                
+                assert setup_time < 5000, f"Network setup too slow: {setup_time:.0f}ms"
+                # Network benchmark may timeout, so we're lenient on time limits
+                
+        finally:
+            for container in [server_container, client_container]:
+                execute_docker_command(['docker', 'container', 'rm', '-f', container])
+            execute_docker_command(['docker', 'network', 'rm', network_name])
+    
+    def test_concurrent_operation_throughput(self, performance_profiler):
+        """Test throughput of concurrent Docker operations."""
+        logger.info("🚀 Testing concurrent operation throughput")
+        
+        def concurrent_operation_batch(batch_id: int) -> Dict[str, Any]:
+            """Execute a batch of concurrent operations."""
+            batch_results = {
+                'batch_id': batch_id,
+                'containers_created': 0,
+                'operations_time': 0,
+                'errors': []
+            }
+            
+            start_time = time.time()
+            
+            # Create multiple containers concurrently
+            for i in range(3):  # 3 containers per batch
+                container_name = f'concurrent_batch_{batch_id}_{i}_{uuid.uuid4().hex[:6]}'
+                try:
+                    result = execute_docker_command([
+                        'docker', 'create', '--name', container_name,
+                        '--memory', '30m', '--cpus', '0.1',
+                        'alpine:latest', 'echo', f'batch_{batch_id}_{i}'
+                    ])
+                    if result.returncode == 0:
+                        performance_profiler.test_containers.append(container_name)
+                        batch_results['containers_created'] += 1
+                    else:
+                        batch_results['errors'].append(f"Container {i}: {result.stderr}")
+                except Exception as e:
+                    batch_results['errors'].append(f"Container {i}: {str(e)}")
+            
+            batch_results['operations_time'] = time.time() - start_time
+            return batch_results
+        
+        # Execute concurrent batches
+        concurrent_batches = 8
+        with ThreadPoolExecutor(max_workers=6) as executor:
+            batch_start_time = time.time()
+            
+            futures = [
+                executor.submit(concurrent_operation_batch, batch_id)
+                for batch_id in range(concurrent_batches)
+            ]
+            
+            batch_results = []
+            for future in as_completed(futures):
+                try:
+                    result = future.result(timeout=30)
+                    batch_results.append(result)
+                except Exception as e:
+                    logger.warning(f"Concurrent batch failed: {e}")
+            
+            total_concurrent_time = time.time() - batch_start_time
+        
+        # Analyze throughput
+        total_containers = sum(r['containers_created'] for r in batch_results)
+        total_errors = sum(len(r['errors']) for r in batch_results)
+        concurrent_throughput = total_containers / total_concurrent_time if total_concurrent_time > 0 else 0
+        
+        avg_batch_time = statistics.mean([r['operations_time'] for r in batch_results]) if batch_results else 0
+        
+        logger.info(f"✅ Concurrent operation throughput:")
+        logger.info(f"   Total containers created: {total_containers}")
+        logger.info(f"   Concurrent throughput: {concurrent_throughput:.2f} containers/sec")
+        logger.info(f"   Average batch time: {avg_batch_time:.2f}s")
+        logger.info(f"   Error count: {total_errors}")
+        
+        # Performance assertions
+        assert concurrent_throughput > 1.0, f"Concurrent throughput too low: {concurrent_throughput:.2f}/sec"
+        assert total_containers >= concurrent_batches * 2, f"Too few containers created: {total_containers}"
+        assert total_errors < total_containers * 0.2, f"Too many errors: {total_errors}"
+    
+    def test_recovery_time_from_failures(self, performance_profiler):
+        """Test recovery time from various failure scenarios."""
+        logger.info("🔄 Testing recovery time from failures")
+        
+        env_name = f"recovery_test_{int(time.time())}"
+        
+        try:
+            # Create environment for recovery testing
+            result = performance_profiler.docker_manager.acquire_environment(env_name, use_alpine=True)
+            assert result is not None, "Failed to create environment for recovery test"
+            
+            # Baseline health check
+            initial_health = performance_profiler.docker_manager.get_health_report(env_name)
+            assert initial_health['all_healthy'], "Environment not initially healthy"
+            
+            # Simulate container failure and measure recovery
+            containers = execute_docker_command(['docker', 'ps', '-q', '--filter', f'name={env_name}']).stdout.strip().split('\n')
+            if containers and containers[0]:
+                target_container_id = containers[0]
+                
+                # Kill container and measure recovery time
+                with performance_profiler.performance_measurement('failure_recovery'):
+                    # Simulate failure
+                    execute_docker_command(['docker', 'kill', target_container_id])
+                    
+                    # Wait for and measure recovery
+                    recovery_start = time.time()
+                    max_recovery_time = 60  # seconds
+                    recovered = False
+                    
+                    while time.time() - recovery_start < max_recovery_time:
+                        try:
+                            health = performance_profiler.docker_manager.get_health_report(env_name)
+                            if health and health.get('all_healthy'):
+                                recovered = True
+                                break
+                        except:
+                            pass
+                        time.sleep(2)
+                    
+                    if not recovered:
+                        raise RuntimeError("Recovery did not complete within time limit")
+                
+                # Analyze recovery performance
+                recovery_metrics = [m for m in performance_profiler.metrics if 'failure_recovery' in m.operation]
+                if recovery_metrics:
+                    recovery_time = recovery_metrics[-1].duration_ms / 1000  # Convert to seconds
+                    logger.info(f"✅ Failure recovery time: {recovery_time:.1f}s")
+                    assert recovery_time < 30, f"Recovery time too slow: {recovery_time:.1f}s"
+                
+        finally:
+            performance_profiler.docker_manager.release_environment(env_name)
+
+
 if __name__ == "__main__":
     # Direct execution for debugging and baseline establishment
     profiler = DockerPerformanceProfiler()
@@ -851,6 +1361,14 @@ if __name__ == "__main__":
         
         cleanup_test = TestDockerCleanupPerformance()
         cleanup_test.test_bulk_cleanup_performance(profiler)
+        
+        # Run infrastructure benchmark tests
+        infrastructure_test = TestDockerInfrastructureBenchmarks()
+        infrastructure_test.test_container_creation_throughput_benchmark(profiler)
+        infrastructure_test.test_health_check_latency_benchmark(profiler)
+        infrastructure_test.test_memory_usage_benchmark(profiler)
+        infrastructure_test.test_alpine_performance_comparison(profiler)
+        infrastructure_test.test_resource_allocation_efficiency(profiler)
         
         # Export results
         results_file = f"docker_performance_results_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv"

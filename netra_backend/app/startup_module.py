@@ -1,4 +1,3 @@
-from shared.isolated_environment import get_env
 """
 Application startup management module.
 Handles initialization of logging, database connections, services, and health checks.
@@ -9,8 +8,27 @@ import os
 import sys
 import time
 from pathlib import Path
-from netra_backend.app.core.project_utils import get_project_root as _get_project_root
 from typing import Optional, Tuple
+
+# CRITICAL: Set up paths BEFORE any imports that depend on them
+def _setup_paths():
+    """Set up Python path and environment BEFORE importing anything else."""
+    try:
+        # Get the project root first
+        project_root = Path(__file__).parent.parent.parent
+        if str(project_root) not in sys.path:
+            sys.path.insert(0, str(project_root))
+    except Exception as e:
+        # Fallback to current working directory
+        if str(Path.cwd()) not in sys.path:
+            sys.path.insert(0, str(Path.cwd()))
+
+# Call this immediately before any other imports
+_setup_paths()
+
+# NOW import shared modules after paths are set
+from shared.isolated_environment import get_env
+from netra_backend.app.core.project_utils import get_project_root as _get_project_root
 
 from fastapi import FastAPI
 
@@ -70,49 +88,67 @@ async def _ensure_database_tables_exist(logger: logging.Logger, graceful_startup
             else:
                 raise RuntimeError(error_msg)
         
-        # Check if tables exist
-        async with engine.begin() as conn:
-            result = await conn.execute(text("""
-                SELECT table_name 
-                FROM information_schema.tables 
-                WHERE table_schema = 'public' 
-                ORDER BY table_name
-            """))
-            
-            existing_tables = set(row[0] for row in result.fetchall())
-            expected_tables = set(Base.metadata.tables.keys())
-            missing_tables = expected_tables - existing_tables
+        # Check if tables exist - use separate transaction for each operation
+        async with engine.connect() as conn:
+            # Start a new transaction for the query
+            async with conn.begin() as trans:
+                try:
+                    result = await conn.execute(text("""
+                        SELECT table_name 
+                        FROM information_schema.tables 
+                        WHERE table_schema = 'public' 
+                        ORDER BY table_name
+                    """))
+                    
+                    existing_tables = set(row[0] for row in result.fetchall())
+                    expected_tables = set(Base.metadata.tables.keys())
+                    missing_tables = expected_tables - existing_tables
+                    # Commit the transaction
+                    await trans.commit()
+                except Exception as e:
+                    # Rollback on error to clean transaction state
+                    await trans.rollback()
+                    raise e
             
             if missing_tables:
                 logger.warning(f"Missing {len(missing_tables)} database tables: {missing_tables}")
                 logger.debug("Creating missing database tables automatically...")
                 
-                # Create missing tables with error handling for duplicates
-                try:
-                    await conn.run_sync(Base.metadata.create_all)
-                except Exception as create_error:
-                    # Handle duplicate table/constraint errors gracefully
-                    error_msg = str(create_error).lower()
-                    if any(keyword in error_msg for keyword in [
-                        'already exists', 'duplicate', 'relation', 
-                        'constraint', 'violates unique'
-                    ]):
-                        logger.warning(f"Some tables already exist during creation (expected): {create_error}")
-                        logger.debug("Continuing - tables may have been created by another process")
-                    else:
-                        # Re-raise unexpected errors
-                        raise create_error
+                # Create missing tables in a separate transaction
+                async with conn.begin() as trans:
+                    try:
+                        await conn.run_sync(Base.metadata.create_all)
+                        await trans.commit()
+                    except Exception as create_error:
+                        await trans.rollback()
+                        # Handle duplicate table/constraint errors gracefully
+                        error_msg = str(create_error).lower()
+                        if any(keyword in error_msg for keyword in [
+                            'already exists', 'duplicate', 'relation', 
+                            'constraint', 'violates unique'
+                        ]):
+                            logger.warning(f"Some tables already exist during creation (expected): {create_error}")
+                            logger.debug("Continuing - tables may have been created by another process")
+                        else:
+                            # Re-raise unexpected errors
+                            raise create_error
                 
-                # Verify tables were created
-                result = await conn.execute(text("""
-                    SELECT table_name 
-                    FROM information_schema.tables 
-                    WHERE table_schema = 'public' 
-                    ORDER BY table_name
-                """))
-                
-                new_existing_tables = set(row[0] for row in result.fetchall())
-                still_missing = expected_tables - new_existing_tables
+                # Verify tables were created in a new transaction
+                async with conn.begin() as trans:
+                    try:
+                        result = await conn.execute(text("""
+                            SELECT table_name 
+                            FROM information_schema.tables 
+                            WHERE table_schema = 'public' 
+                            ORDER BY table_name
+                        """))
+                        
+                        new_existing_tables = set(row[0] for row in result.fetchall())
+                        still_missing = expected_tables - new_existing_tables
+                        await trans.commit()
+                    except Exception as e:
+                        await trans.rollback()
+                        raise e
                 
                 if still_missing:
                     error_msg = f"Failed to create tables: {still_missing}"
@@ -684,8 +720,42 @@ def _create_tool_registry(app: FastAPI):
 
 
 def _create_tool_dispatcher(tool_registry):
-    """Create tool dispatcher instance."""
+    """Create tool dispatcher instance.
+    
+    DEPRECATED WARNING: This function creates a global ToolDispatcher instance
+    that may cause user isolation issues in production environments.
+    
+    MIGRATION NEEDED: Replace with request-scoped dispatcher factory pattern:
+    - Use ToolDispatcher.create_request_scoped_dispatcher() in request handlers
+    - Use ToolDispatcher.create_scoped_dispatcher_context() for automatic cleanup
+    - Remove global dispatcher from startup module
+    
+    SECURITY RISKS:
+    - Global tool dispatcher shared between all users
+    - WebSocket events may be delivered to wrong users
+    - Tool state not isolated per request
+    - Memory leaks possible with concurrent requests
+    """
+    import warnings
     from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
+    from netra_backend.app.logging_config import central_logger
+    
+    logger = central_logger.get_logger(__name__)
+    
+    # Emit deprecation warning
+    warnings.warn(
+        "startup_module._create_tool_dispatcher() creates global state that may cause user isolation issues. "
+        "Replace with request-scoped factory patterns. "
+        "Global dispatcher will be removed in v3.0.0 (Q2 2025).",
+        DeprecationWarning,
+        stacklevel=2
+    )
+    
+    logger.warning("🚨 DEPRECATED: Creating global ToolDispatcher in startup module")
+    logger.warning("⚠️ This creates security risks and user isolation issues")
+    logger.warning("📋 MIGRATION: Remove global dispatcher, use request-scoped patterns")
+    logger.warning("📅 REMOVAL: Global startup dispatcher will be removed in v3.0.0")
+    
     return ToolDispatcher(tool_registry.get_tools([]))
 
 
@@ -705,17 +775,28 @@ def _create_agent_supervisor(app: FastAPI) -> None:
         if supervisor is None:
             raise RuntimeError("Supervisor creation returned None")
         
-        # CRITICAL: Ensure WebSocket enhancement for agent events
-        if hasattr(supervisor, 'registry') and hasattr(supervisor.registry, 'tool_dispatcher'):
-            if not getattr(supervisor.registry.tool_dispatcher, '_websocket_enhanced', False):
-                logger.warning("Tool dispatcher not enhanced with WebSocket - attempting enhancement")
-                # Try to enhance it now
-                from netra_backend.app.websocket_core import get_websocket_manager
-                ws_manager = get_websocket_manager()
-                if ws_manager:
-                    supervisor.registry.set_websocket_manager(ws_manager)
-                    if not getattr(supervisor.registry.tool_dispatcher, '_websocket_enhanced', False):
-                        raise RuntimeError("Failed to enhance tool dispatcher with WebSocket notifications")
+        # CRITICAL: Validate WebSocket infrastructure for agent events
+        # Note: SupervisorAgent using UserExecutionContext pattern creates per-request tool dispatchers
+        # so we validate that the WebSocket infrastructure is properly initialized instead
+        if hasattr(supervisor, 'websocket_bridge') and supervisor.websocket_bridge:
+            logger.info("✅ SupervisorAgent has WebSocket bridge - agent events will be enabled")
+            
+            # Validate WebSocket bridge has required methods
+            required_methods = ['emit_agent_thinking', 'emit_user_notification']
+            missing_methods = [method for method in required_methods if not hasattr(supervisor.websocket_bridge, method)]
+            if missing_methods:
+                logger.error(f"🚨 WebSocket bridge missing required methods: {missing_methods}")
+                raise RuntimeError(f"WebSocket bridge incomplete - missing methods: {missing_methods}")
+        else:
+            logger.error("🚨 CRITICAL: SupervisorAgent missing WebSocket bridge - agent events will be broken!")
+            raise RuntimeError("SupervisorAgent must have WebSocket bridge for agent event notifications")
+        
+        # Validate WebSocket manager is available for per-request enhancement
+        from netra_backend.app.websocket_core import get_websocket_manager
+        ws_manager = get_websocket_manager()
+        if not ws_manager:
+            logger.error("🚨 CRITICAL: WebSocket manager not available - per-request tool dispatcher enhancement will fail!")
+            raise RuntimeError("WebSocket manager must be available for tool dispatcher enhancement")
         
         _setup_agent_state(app, supervisor)
         
@@ -775,14 +856,17 @@ def _build_supervisor_agent(app: FastAPI):
                 logger.error(f"  {attr}: NOT SET")
         raise RuntimeError(f"Cannot create supervisor - missing dependencies: {missing}")
     
-    websocket_manager = get_websocket_manager()
-    logger.debug(f"Creating supervisor with dependencies: db_session_factory={app.state.db_session_factory}, llm_manager={app.state.llm_manager}, tool_dispatcher={app.state.tool_dispatcher}")
+    from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
     
+    # Create the proper websocket bridge instance  
+    websocket_bridge = AgentWebSocketBridge()
+    logger.debug(f"Creating supervisor with dependencies: db_session_factory={app.state.db_session_factory}, llm_manager={app.state.llm_manager}")
+    
+    # CRITICAL: No tool_dispatcher - created per-request for isolation
     return SupervisorAgent(
-        app.state.db_session_factory, 
         app.state.llm_manager, 
-        websocket_manager, 
-        app.state.tool_dispatcher
+        websocket_bridge  # Correct AgentWebSocketBridge instance
+        # NO tool_dispatcher - created per-request
     )
 
 
@@ -1137,7 +1221,7 @@ async def run_complete_startup(app: FastAPI) -> Tuple[float, logging.Logger]:
     If chat cannot work, the service MUST NOT start.
     """
     # ALWAYS use deterministic startup - this is the SSOT
-    from netra_backend.app.startup_module_deterministic import run_deterministic_startup
+    from netra_backend.app.smd import run_deterministic_startup
     return await run_deterministic_startup(app)
 
 
@@ -1197,7 +1281,7 @@ async def _deprecated_legacy_startup(app: FastAPI) -> Tuple[float, logging.Logge
             
             # DEPRECATED - Robust startup manager removed - use deterministic only
             logger.error("Robust startup manager has been removed - using deterministic startup")
-            from netra_backend.app.startup_module_deterministic import run_deterministic_startup
+            from netra_backend.app.smd import run_deterministic_startup
             return await run_deterministic_startup(app)
             
             # CRITICAL: Set startup_complete flag for health endpoint

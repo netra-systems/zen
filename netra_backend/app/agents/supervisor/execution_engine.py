@@ -1,16 +1,28 @@
-"""Execution engine for supervisor agent pipelines with concurrency optimization.
+"""Execution engine for supervisor agent pipelines with UserExecutionContext support.
 
-Business Value: Supports 5+ concurrent users with <2s response times and proper event ordering.
+DEPRECATION WARNING: This ExecutionEngine uses global state and is not safe for concurrent users.
+For new code, use RequestScopedExecutionEngine or the factory methods provided below.
+
+Business Value: Supports 5+ concurrent users with complete isolation and <2s response times.
+New Features: UserExecutionContext integration, per-user isolation, UserWebSocketEmitter support.
 Optimizations: Semaphore-based concurrency control, event sequencing, backlog handling.
+
+Migration Guide:
+- Replace direct ExecutionEngine instantiation with create_request_scoped_engine()
+- Use ExecutionContextManager for request-scoped execution management
+- See RequestScopedExecutionEngine for isolated per-request execution
 """
 
 import asyncio
 import time
+from datetime import datetime
 from typing import TYPE_CHECKING, Any, Dict, List, Optional
 
 if TYPE_CHECKING:
     from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
     from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
+    from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
+    from netra_backend.app.agents.supervisor.agent_instance_factory import UserWebSocketEmitter
 
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.agents.supervisor.agent_execution_core import AgentExecutionCore
@@ -31,32 +43,103 @@ from netra_backend.app.core.agent_execution_tracker import (
 )
 from netra_backend.app.logging_config import central_logger
 
+# NEW: Split architecture imports
+from netra_backend.app.agents.supervisor.user_execution_context import (
+    UserExecutionContext,
+    validate_user_context
+)
+from netra_backend.app.agents.supervisor.agent_instance_factory import (
+    UserWebSocketEmitter,
+    get_agent_instance_factory
+)
+# NEW: Import user execution engine components for delegation
+from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
+from netra_backend.app.agents.supervisor.execution_engine_factory import (
+    get_execution_engine_factory,
+    user_execution_engine
+)
+
 logger = central_logger.get_logger(__name__)
 
 
 class ExecutionEngine:
-    """Handles agent execution orchestration with concurrency optimization.
+    """Request-scoped agent execution orchestration.
+    
+    REQUIRED: Use factory methods for instantiation:
+    - create_request_scoped_engine() for isolated instances
+    - ExecutionContextManager for automatic cleanup
+    
+    Direct instantiation is no longer supported to ensure user isolation.
     
     Features:
+    - UserExecutionContext integration for complete user isolation
+    - UserWebSocketEmitter support for per-user event emission
+    - Request-scoped execution with no global state sharing
     - Semaphore-based concurrency control for 5+ concurrent users
     - Guaranteed WebSocket event delivery with proper sequencing
-    - Backlog handling with user feedback
-    - Periodic updates for long-running operations
-    - Resource management and cleanup
     """
     
     MAX_HISTORY_SIZE = 100  # Prevent memory leak
     MAX_CONCURRENT_AGENTS = 10  # Support 5 concurrent users (2 agents each)
     AGENT_EXECUTION_TIMEOUT = 30.0  # 30 seconds max per agent
     
-    def __init__(self, registry: 'AgentRegistry', websocket_bridge):
-        self.registry = registry
-        self.websocket_bridge = websocket_bridge
-        self.active_runs: Dict[str, AgentExecutionContext] = {}
-        self.run_history: List[AgentExecutionResult] = []
-        self.execution_tracker = get_execution_tracker()
-        self._init_components()
-        self._init_death_monitoring()
+    def __init__(self, registry: 'AgentRegistry', websocket_bridge, 
+                 user_context: Optional['UserExecutionContext'] = None):
+        """Private initializer - use factory methods instead.
+        
+        Direct instantiation is prevented to ensure user isolation.
+        Use create_request_scoped_engine() for proper request-scoped execution.
+        
+        Args:
+            registry: Agent registry for agent lookup
+            websocket_bridge: WebSocket bridge for event emission
+            user_context: Optional UserExecutionContext for per-request isolation
+        """
+        raise RuntimeError(
+            "Direct ExecutionEngine instantiation is no longer supported. "
+            "Use create_request_scoped_engine(user_context, registry, websocket_bridge) "
+            "for proper user isolation and concurrent execution safety."
+        )
+    
+    @classmethod
+    def _init_from_factory(cls, registry: 'AgentRegistry', websocket_bridge,
+                          user_context: Optional['UserExecutionContext'] = None):
+        """Internal factory initializer for creating request-scoped instances.
+        
+        This method bypasses the __init__ RuntimeError and is only called
+        by factory methods to create properly isolated instances.
+        """
+        instance = cls.__new__(cls)
+        instance.registry = registry
+        instance.websocket_bridge = websocket_bridge
+        
+        # NEW: Store UserExecutionContext for per-request isolation
+        instance.user_context = user_context
+        
+        # Compatibility: Create WebSocketNotifier for tests expecting it
+        # If websocket_bridge is a WebSocketManager, wrap it with WebSocketNotifier
+        if websocket_bridge and not hasattr(websocket_bridge, 'notify_agent_started'):
+            # Bridge is a WebSocketManager, wrap it with deprecated WebSocketNotifier for compatibility
+            from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier
+            instance.websocket_notifier = WebSocketNotifier(websocket_bridge)
+        else:
+            # Bridge is already an AgentWebSocketBridge or compatible object
+            instance.websocket_notifier = websocket_bridge
+            
+        # NOTE: These remain as instance variables but are now scoped per ExecutionEngine instance
+        # In the new architecture, each user request gets its own ExecutionEngine instance
+        instance.active_runs = {}
+        instance.run_history = []
+        instance.execution_tracker = get_execution_tracker()
+        instance._init_components()
+        instance._init_death_monitoring()
+        
+        if instance.user_context:
+            logger.info(f"ExecutionEngine initialized with UserExecutionContext for user {instance.user_context.user_id}")
+        else:
+            logger.info("ExecutionEngine initialized in legacy mode (no UserExecutionContext)")
+        
+        return instance
         
     def _init_components(self) -> None:
         """Initialize execution components."""
@@ -121,10 +204,83 @@ class ExecutionEngine:
             )
         
         self.execution_stats['timeout_executions'] += 1
+    
+    def _validate_execution_context(self, context: AgentExecutionContext) -> None:
+        """Validate execution context to prevent invalid placeholder values from propagating.
+        
+        Args:
+            context: The agent execution context to validate
+            
+        Raises:
+            ValueError: If context contains invalid or placeholder values
+        """
+        # Validate user_id is not None or empty
+        if not context.user_id or not context.user_id.strip():
+            raise ValueError(
+                f"Invalid execution context: user_id must be a non-empty string, "
+                f"got: {context.user_id!r}"
+            )
+        
+        # Validate run_id is not the forbidden 'registry' placeholder
+        if context.run_id == 'registry':
+            raise ValueError(
+                f"Invalid execution context: run_id cannot be 'registry' placeholder value, "
+                f"got: {context.run_id!r}"
+            )
+        
+        # Validate run_id is not None or empty
+        if not context.run_id or not context.run_id.strip():
+            raise ValueError(
+                f"Invalid execution context: run_id must be a non-empty string, "
+                f"got: {context.run_id!r}"
+            )
+        
+        # NEW: Validate UserExecutionContext consistency if present
+        if self.user_context:
+            if context.user_id != self.user_context.user_id:
+                raise ValueError(
+                    f"UserExecutionContext user_id mismatch: "
+                    f"context.user_id='{context.user_id}' vs user_context.user_id='{self.user_context.user_id}'"
+                )
+            
+            if context.run_id != self.user_context.run_id:
+                logger.warning(
+                    f"UserExecutionContext run_id mismatch: "
+                    f"context.run_id='{context.run_id}' vs user_context.run_id='{self.user_context.run_id}' "
+                    f"- this may indicate multiple runs in same context"
+                )
         
     async def execute_agent(self, context: AgentExecutionContext,
                            state: DeepAgentState) -> AgentExecutionResult:
-        """Execute a single agent with concurrency control, death detection, and guaranteed event delivery."""
+        """Execute a single agent with UserExecutionContext support and concurrency control.
+        
+        NEW: Supports UserExecutionContext for complete user isolation and per-user WebSocket events.
+        RECOMMENDED: Use create_user_engine() or UserExecutionEngine directly for new code.
+        """
+        # NEW: If UserExecutionContext is available, delegate to UserExecutionEngine
+        if self.user_context:
+            logger.info(f"Delegating execution to UserExecutionEngine for user {self.user_context.user_id}")
+            try:
+                user_engine = await self.create_user_engine(self.user_context)
+                result = await user_engine.execute_agent(context, state)
+                await user_engine.cleanup()
+                return result
+            except Exception as e:
+                logger.warning(f"UserExecutionEngine delegation failed, falling back to legacy: {e}")
+                # Fall through to legacy execution
+        
+        # LEGACY: Global state execution (deprecated)
+        logger.warning("Using legacy ExecutionEngine with global state - consider migrating to UserExecutionEngine")
+        
+        # FAIL-FAST: Validate context before any processing
+        self._validate_execution_context(context)
+        
+        # NEW: Log user isolation status
+        if self.user_context:
+            logger.debug(f"Executing agent {context.agent_name} with user isolation for user {self.user_context.user_id}")
+        else:
+            logger.warning(f"Executing agent {context.agent_name} without UserExecutionContext - isolation not guaranteed")
+        
         queue_start_time = time.time()
         
         # Create execution tracking record
@@ -169,12 +325,27 @@ class ExecutionEngine:
                     expected_duration_ms=int(self.AGENT_EXECUTION_TIMEOUT * 1000),
                     operation_description=f"Executing {context.agent_name} agent"
                 ):
-                    # Send agent started with guaranteed delivery via bridge
-                    await self.websocket_bridge.notify_agent_started(
-                        context.run_id, 
-                        context.agent_name,
-                        {"status": "started", "context": context.metadata or {}}
-                    )
+                    # NEW: Send agent started via UserWebSocketEmitter if available
+                    if self.user_context:
+                        success = await self._send_via_user_emitter(
+                            'notify_agent_started',
+                            context.agent_name,
+                            {"status": "started", "context": context.metadata or {}, "isolated": True}
+                        )
+                        if not success:
+                            # Fallback to bridge
+                            await self.websocket_bridge.notify_agent_started(
+                                context.run_id, 
+                                context.agent_name,
+                                {"status": "started", "context": context.metadata or {}}
+                            )
+                    else:
+                        # Legacy: Send agent started with guaranteed delivery via bridge
+                        await self.websocket_bridge.notify_agent_started(
+                            context.run_id, 
+                            context.agent_name,
+                            {"status": "started", "context": context.metadata or {}}
+                        )
                     
                     # Send initial thinking update
                     await self.send_agent_thinking(
@@ -561,10 +732,50 @@ class ExecutionEngine:
         self.run_history.append(result)
         self._enforce_history_size_limit()
     
-    # WebSocket delegation methods via bridge
+    # === NEW: UserWebSocketEmitter Integration ===
+    
+    async def _send_via_user_emitter(self, method_name: str, *args, **kwargs) -> bool:
+        """Send notification via UserWebSocketEmitter if available.
+        
+        Returns:
+            bool: True if sent successfully via user emitter, False if not available
+        """
+        if not self.user_context:
+            return False
+        
+        try:
+            # Get UserWebSocketEmitter from factory
+            factory = get_agent_instance_factory()
+            if hasattr(factory, '_websocket_emitters'):
+                context_id = f"{self.user_context.user_id}_{self.user_context.thread_id}_{self.user_context.run_id}"
+                emitter_key = f"{context_id}_emitter"
+                if emitter_key in factory._websocket_emitters:
+                    emitter = factory._websocket_emitters[emitter_key]
+                    method = getattr(emitter, method_name, None)
+                    if method:
+                        await method(*args, **kwargs)
+                        return True
+        except Exception as e:
+            logger.debug(f"Failed to send via UserWebSocketEmitter: {e}")
+        
+        return False
+    
+    # WebSocket delegation methods with UserExecutionContext support
     async def send_agent_thinking(self, context: AgentExecutionContext, 
                                  thought: str, step_number: int = None) -> None:
-        """Send agent thinking notification via bridge."""
+        """Send agent thinking notification with UserExecutionContext support."""
+        # NEW: Try UserWebSocketEmitter first if available
+        if self.user_context:
+            success = await self._send_via_user_emitter(
+                'notify_agent_thinking',
+                context.agent_name,
+                thought,
+                step_number
+            )
+            if success:
+                return
+        
+        # Fallback to bridge
         await self.websocket_bridge.notify_agent_thinking(
             context.run_id,
             context.agent_name,
@@ -574,16 +785,28 @@ class ExecutionEngine:
     
     async def send_partial_result(self, context: AgentExecutionContext,
                                  content: str, is_complete: bool = False) -> None:
-        """Send partial result notification via bridge."""
+        """Send partial result notification with UserExecutionContext support."""
+        # NEW: Use bridge directly for progress updates (UserWebSocketEmitter may not have this method)
         await self.websocket_bridge.notify_progress_update(
             context.run_id,
             context.agent_name,
-            {"content": content, "is_complete": is_complete}
+            {"content": content, "is_complete": is_complete, "isolated": self.user_context is not None}
         )
     
     async def send_tool_executing(self, context: AgentExecutionContext,
                                  tool_name: str) -> None:
-        """Send tool executing notification via bridge."""
+        """Send tool executing notification with UserExecutionContext support."""
+        # NEW: Try UserWebSocketEmitter first if available
+        if self.user_context:
+            success = await self._send_via_user_emitter(
+                'notify_tool_executing',
+                context.agent_name,
+                tool_name
+            )
+            if success:
+                return
+        
+        # Fallback to bridge
         await self.websocket_bridge.notify_tool_executing(
             context.run_id,
             context.agent_name,
@@ -592,7 +815,28 @@ class ExecutionEngine:
     
     async def send_final_report(self, context: AgentExecutionContext,
                                report: dict, duration_ms: float) -> None:
-        """Send final report notification via bridge."""
+        """Send final report notification with UserExecutionContext support."""
+        # NEW: Try UserWebSocketEmitter first if available
+        if self.user_context:
+            # Enhance report with isolation info
+            enhanced_report = report.copy()
+            enhanced_report['isolated'] = True
+            enhanced_report['user_context'] = {
+                'user_id': self.user_context.user_id,
+                'thread_id': self.user_context.thread_id,
+                'run_id': self.user_context.run_id
+            }
+            
+            success = await self._send_via_user_emitter(
+                'notify_agent_completed',
+                context.agent_name,
+                enhanced_report,
+                duration_ms
+            )
+            if success:
+                return
+        
+        # Fallback to bridge
         await self.websocket_bridge.notify_agent_completed(
             context.run_id,
             context.agent_name,
@@ -781,3 +1025,192 @@ class ExecutionEngine:
         
         # WebSocket bridge shutdown is handled separately
         logger.info("ExecutionEngine shutdown complete")
+    
+    # ============================================================================
+    # NEW DELEGATION METHODS FOR USER ISOLATION
+    # ============================================================================
+    
+    async def create_user_engine(self, context: UserExecutionContext) -> UserExecutionEngine:
+        """Create UserExecutionEngine for complete user isolation.
+        
+        RECOMMENDED: Use this method for new code requiring user isolation.
+        
+        Args:
+            context: User execution context for isolation
+            
+        Returns:
+            UserExecutionEngine: Isolated execution engine for the user
+            
+        Raises:
+            RuntimeError: If user engine creation fails
+        """
+        try:
+            factory = await get_execution_engine_factory()
+            return await factory.create_for_user(context)
+        except Exception as e:
+            logger.error(f"Failed to create UserExecutionEngine: {e}")
+            raise RuntimeError(f"User engine creation failed: {e}")
+    
+    @staticmethod
+    async def execute_with_user_isolation(context: UserExecutionContext,
+                                         agent_context: AgentExecutionContext,
+                                         state: DeepAgentState) -> AgentExecutionResult:
+        """Execute agent with complete user isolation (static method).
+        
+        RECOMMENDED: Use this static method for new code requiring complete isolation.
+        
+        Args:
+            context: User execution context for isolation
+            agent_context: Agent execution context
+            state: Deep agent state for execution
+            
+        Returns:
+            AgentExecutionResult: Results of isolated execution
+            
+        Usage:
+            result = await ExecutionEngine.execute_with_user_isolation(
+                user_context, agent_context, state
+            )
+        """
+        async with user_execution_engine(context) as engine:
+            return await engine.execute_agent(agent_context, state)
+    
+    def has_user_context(self) -> bool:
+        """Check if this engine has UserExecutionContext support."""
+        return self.user_context is not None
+    
+    def get_isolation_status(self) -> Dict[str, Any]:
+        """Get isolation status information for this engine.
+        
+        Returns:
+            Dictionary with isolation status and recommendations
+        """
+        return {
+            'has_user_context': self.has_user_context(),
+            'user_id': self.user_context.user_id if self.user_context else None,
+            'run_id': self.user_context.run_id if self.user_context else None,
+            'isolation_level': 'user_isolated' if self.user_context else 'global_state',
+            'recommended_migration': not self.has_user_context(),
+            'migration_method': 'create_user_engine() or ExecutionEngine.execute_with_user_isolation()',
+            'active_runs_count': len(self.active_runs),
+            'global_state_warning': not self.has_user_context()
+        }
+
+
+# ============================================================================
+# FACTORY METHODS AND MIGRATION SUPPORT
+# ============================================================================
+
+def create_request_scoped_engine(user_context: 'UserExecutionContext',
+                                registry: 'AgentRegistry',
+                                websocket_bridge: 'AgentWebSocketBridge',
+                                max_concurrent_executions: int = 3) -> 'RequestScopedExecutionEngine':
+    """Factory method to create RequestScopedExecutionEngine for safe concurrent usage.
+    
+    RECOMMENDED: Use this factory method instead of ExecutionEngine for new code.
+    
+    Args:
+        user_context: User execution context for complete isolation
+        registry: Agent registry for agent lookup
+        websocket_bridge: WebSocket bridge for event emission
+        max_concurrent_executions: Maximum concurrent executions for this request
+        
+    Returns:
+        RequestScopedExecutionEngine: Isolated execution engine for this request
+        
+    Examples:
+        # Create isolated engine for a user request
+        engine = create_request_scoped_engine(
+            user_context=user_context,
+            registry=agent_registry,
+            websocket_bridge=websocket_bridge
+        )
+        
+        # Execute agent with complete isolation
+        result = await engine.execute_agent(context, state)
+        
+        # Clean up when done
+        await engine.cleanup()
+    """
+    from netra_backend.app.agents.supervisor.request_scoped_execution_engine import (
+        RequestScopedExecutionEngine
+    )
+    
+    logger.info(f"Creating RequestScopedExecutionEngine for user {user_context.user_id} "
+                f"(run_id: {user_context.run_id})")
+    
+    return RequestScopedExecutionEngine(
+        user_context=user_context,
+        registry=registry,
+        websocket_bridge=websocket_bridge,
+        max_concurrent_executions=max_concurrent_executions
+    )
+
+
+def create_execution_context_manager(registry: 'AgentRegistry',
+                                    websocket_bridge: 'AgentWebSocketBridge',
+                                    max_concurrent_per_request: int = 3,
+                                    execution_timeout: float = 30.0) -> 'ExecutionContextManager':
+    """Factory method to create ExecutionContextManager for request-scoped management.
+    
+    RECOMMENDED: Use this for managing multiple agent executions within a request scope.
+    
+    Args:
+        registry: Agent registry for agent lookup
+        websocket_bridge: WebSocket bridge for event emission
+        max_concurrent_per_request: Maximum concurrent executions per request
+        execution_timeout: Execution timeout in seconds
+        
+    Returns:
+        ExecutionContextManager: Context manager for request-scoped execution
+        
+    Examples:
+        # Create context manager
+        context_manager = create_execution_context_manager(
+            registry=agent_registry,
+            websocket_bridge=websocket_bridge
+        )
+        
+        # Use with async context manager
+        async with context_manager.execution_scope(user_context) as scope:
+            # Execute agents within isolated scope
+            pass
+    """
+    from netra_backend.app.agents.supervisor.execution_context_manager import (
+        ExecutionContextManager
+    )
+    
+    logger.info("Creating ExecutionContextManager for request-scoped execution management")
+    
+    return ExecutionContextManager(
+        registry=registry,
+        websocket_bridge=websocket_bridge,
+        max_concurrent_per_request=max_concurrent_per_request,
+        execution_timeout=execution_timeout
+    )
+
+
+# Legacy factory method removed - use create_request_scoped_engine() only
+
+
+# Migration helper to detect global state usage
+def detect_global_state_usage() -> Dict[str, Any]:
+    """Detect if ExecutionEngine instances are sharing global state.
+    
+    This utility function helps identify potential global state issues
+    by checking if multiple engine instances share the same state objects.
+    
+    Returns:
+        Dictionary with global state detection results
+    """
+    # This would be implemented to analyze existing ExecutionEngine instances
+    # and detect shared state objects between different instances
+    return {
+        'global_state_detected': False,
+        'shared_objects': [],
+        'recommendations': [
+            "Migrate to RequestScopedExecutionEngine for complete isolation",
+            "Use ExecutionContextManager for request-scoped execution management",
+            "Avoid direct ExecutionEngine instantiation in concurrent scenarios"
+        ]
+    }

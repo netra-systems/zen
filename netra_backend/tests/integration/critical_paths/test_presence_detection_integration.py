@@ -31,7 +31,7 @@ from netra_backend.app.websocket_core import (
     get_websocket_manager,
     WebSocketHeartbeat
 )
-from netra_backend.app.websocket_core.heartbeat_manager import (
+from netra_backend.app.websocket_core.manager import (
     WebSocketHeartbeatManager,
     HeartbeatConfig,
     get_heartbeat_manager

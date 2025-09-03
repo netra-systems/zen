@@ -38,10 +38,13 @@ class UnitOfWork:
     async def __aenter__(self):
         """Enter async context"""
         if not self._external_session:
-            if async_session_factory is None:
-                raise RuntimeError("Database not configured - async_session_factory is None")
+            # CRITICAL FIX: Import factory at runtime to avoid module import timing issues
+            from netra_backend.app.db.postgres import async_session_factory as runtime_factory
+            
+            if runtime_factory is None:
+                raise RuntimeError("Database not configured - async_session_factory is None at runtime")
             # Properly create a session using the async session factory
-            self._session_context = async_session_factory()
+            self._session_context = runtime_factory()
             self._session = await self._session_context.__aenter__()
             if not validate_session(self._session):
                 error_msg = get_session_validation_error(self._session)
@@ -130,10 +133,13 @@ class UnitOfWork:
     async def initialize(self):
         """Initialize the UnitOfWork - for backward compatibility with tests"""
         if not self._external_session:
-            if async_session_factory is None:
-                raise RuntimeError("Database not configured - async_session_factory is None")
+            # CRITICAL FIX: Import factory at runtime to avoid module import timing issues
+            from netra_backend.app.db.postgres import async_session_factory as runtime_factory
+            
+            if runtime_factory is None:
+                raise RuntimeError("Database not configured - async_session_factory is None at runtime")
             # Properly create a session using the async session factory
-            self._session_context = async_session_factory()
+            self._session_context = runtime_factory()
             self._session = await self._session_context.__aenter__()
             if not validate_session(self._session):
                 error_msg = get_session_validation_error(self._session)

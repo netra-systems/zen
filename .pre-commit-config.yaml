@@ -131,3 +131,24 @@ repos:
         stages: [commit]
         pass_filenames: true
         description: 'Audits all Docker commands for security violations and unsafe patterns'
+        
+      # CRITICAL SYNTAX VALIDATION: Prevents syntax errors using AST parser
+      - id: python-syntax-validation
+        name: Python Syntax Validation (AST Parser)
+        entry: python scripts/validate_syntax.py
+        language: system
+        files: '\.py$'
+        pass_filenames: false
+        stages: [commit]
+        always_run: false
+        description: 'CRITICAL: Validates Python syntax using AST parser to prevent deployment failures'
+        
+      # MISSION CRITICAL SYNTAX CHECK: Special validation for mission-critical tests
+      - id: mission-critical-syntax-check
+        name: Mission Critical Test Syntax Check
+        entry: python scripts/validate_syntax.py tests/mission_critical
+        language: system
+        files: '^tests/mission_critical/.*\.py$'
+        pass_filenames: false
+        stages: [commit]
+        description: 'CRITICAL: Enhanced syntax validation for mission-critical test files'

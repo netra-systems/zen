@@ -182,9 +182,9 @@ Include specific metrics and timelines where possible."""
         """Initialize modern execution components."""
         circuit_config = self._create_circuit_breaker_config()
         retry_config = self._create_retry_config()
-        self.reliability_manager = ReliabilityManager(circuit_config, retry_config)
+        self._unified_reliability_handler = ReliabilityManager(circuit_config, retry_config)
         self.execution_monitor = ExecutionMonitor()
-        self.execution_engine = BaseExecutionEngine(self.reliability_manager, self.execution_monitor)
+        self.execution_engine = BaseExecutionEngine(self._unified_reliability_handler, self.execution_monitor)
         
     def get_executive_summary_sections(self) -> list:
         """Get standard sections for executive summary reports."""

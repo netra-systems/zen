@@ -183,12 +183,145 @@
     </check>
   </validation_checklist>
 
+  <orchestration_ssot>
+    <title>Orchestration SSOT Configuration</title>
+    <description>
+      Centralized orchestration availability and enum management system that eliminates
+      SSOT violations in orchestration infrastructure.
+    </description>
+    
+    <orchestration_modules>
+      <module name="OrchestrationConfig" file="test_framework/ssot/orchestration.py">
+        <description>Centralized orchestration availability configuration</description>
+        <replaces>
+          <pattern>Try-except import patterns for orchestration availability</pattern>
+          <pattern>Scattered availability constants across orchestration modules</pattern>
+          <pattern>Inconsistent availability determination logic</pattern>
+        </replaces>
+        <features>
+          <feature>Thread-safe availability caching with lazy loading</feature>
+          <feature>Environment-based configuration override capability</feature>
+          <feature>Comprehensive error reporting and diagnostics</feature>
+          <feature>Global singleton pattern for consistent state</feature>
+          <feature>Automated availability validation and reporting</feature>
+        </features>
+        <availability_properties>
+          <property name="orchestrator_available">TestOrchestratorAgent import availability</property>
+          <property name="master_orchestration_available">MasterOrchestrationController import availability</property>
+          <property name="background_e2e_available">BackgroundE2EAgent import availability</property>
+          <property name="all_orchestration_available">Composite availability check</property>
+        </availability_properties>
+      </module>
+      
+      <module name="OrchestrationEnums" file="test_framework/ssot/orchestration_enums.py">
+        <description>Centralized orchestration enums and data classes</description>
+        <replaces>
+          <enum>BackgroundTaskStatus (background_e2e_agent.py, background_e2e_manager.py)</enum>
+          <enum>E2ETestCategory (background_e2e_agent.py, background_e2e_manager.py)</enum>
+          <enum>ExecutionStrategy (layer_execution_agent.py, layer_execution_manager.py)</enum>
+          <enum>ProgressOutputMode (progress_streaming_agent.py, progress_streaming_manager.py)</enum>
+          <enum>ProgressEventType (progress_streaming_agent.py, progress_streaming_manager.py)</enum>
+        </replaces>
+        <features>
+          <feature>Consolidated enum definitions eliminating 15+ duplicates</feature>
+          <feature>Standard layer definitions with comprehensive configuration</feature>
+          <feature>Rich data classes for orchestration results</feature>
+          <feature>Utility functions for layer management and validation</feature>
+          <feature>Environment-based orchestration customization</feature>
+        </features>
+        <new_enums>
+          <enum name="OrchestrationMode">Master orchestration execution modes</enum>
+          <enum name="ResourceStatus">Resource management status types</enum>
+          <enum name="ServiceStatus">Service dependency status types</enum>
+          <enum name="LayerType">Standard orchestration layer types</enum>
+        </new_enums>
+      </module>
+    </orchestration_modules>
+    
+    <orchestration_migration>
+      <title>Orchestration SSOT Migration Pattern</title>
+      
+      <old_pattern name="Scattered Availability Checks">
+        <description>Try-except import patterns scattered across modules</description>
+        <example>
+          <code>try:</code>
+          <code>    from test_framework.orchestration.test_orchestrator_agent import TestOrchestratorAgent</code>
+          <code>    ORCHESTRATOR_AVAILABLE = True</code>
+          <code>except ImportError:</code>
+          <code>    ORCHESTRATOR_AVAILABLE = False</code>
+        </example>
+        <problems>
+          <problem>Inconsistent availability determination</problem>
+          <problem>Duplication across multiple modules</problem>
+          <problem>No caching leading to repeated import attempts</problem>
+          <problem>No error reporting or diagnostics</problem>
+        </problems>
+      </old_pattern>
+      
+      <new_pattern name="Centralized Orchestration Config">
+        <description>Single SSOT for orchestration availability</description>
+        <example>
+          <code>from test_framework.ssot.orchestration import orchestration_config</code>
+          <code></code>
+          <code>if orchestration_config.orchestrator_available:</code>
+          <code>    # Use orchestrator features</code>
+          <code>    from test_framework.ssot.orchestration_enums import ExecutionStrategy</code>
+        </example>
+        <benefits>
+          <benefit>Consistent availability determination across system</benefit>
+          <benefit>Thread-safe caching eliminates repeated import attempts</benefit>
+          <benefit>Comprehensive error reporting and diagnostics</benefit>
+          <benefit>Environment override capability for testing scenarios</benefit>
+          <benefit>Single update point for availability logic</benefit>
+        </benefits>
+      </new_pattern>
+      
+      <enum_consolidation>
+        <title>Orchestration Enum Consolidation</title>
+        <description>All orchestration enums consolidated into single SSOT module</description>
+        
+        <before>
+          <location>test_framework/orchestration/background_e2e_agent.py</location>
+          <location>test_framework/orchestration/background_e2e_manager.py</location>
+          <location>test_framework/orchestration/layer_execution_agent.py</location>
+          <location>test_framework/orchestration/layer_execution_manager.py</location>
+          <location>test_framework/orchestration/progress_streaming_agent.py</location>
+          <location>test_framework/orchestration/progress_streaming_manager.py</location>
+        </before>
+        
+        <after>
+          <location>test_framework/ssot/orchestration_enums.py</location>
+          <description>Single canonical source for ALL orchestration enums</description>
+        </after>
+        
+        <usage_pattern>
+          <code># OLD: Multiple import sources</code>
+          <code>from test_framework.orchestration.background_e2e_agent import BackgroundTaskStatus</code>
+          <code></code>
+          <code># NEW: Single SSOT import</code>
+          <code>from test_framework.ssot.orchestration_enums import BackgroundTaskStatus</code>
+        </usage_pattern>
+      </enum_consolidation>
+    </orchestration_migration>
+    
+    <orchestration_compliance>
+      <requirement>All orchestration availability checks use test_framework.ssot.orchestration</requirement>
+      <requirement>All orchestration enums imported from test_framework.ssot.orchestration_enums</requirement>
+      <requirement>No try-except import patterns for orchestration availability</requirement>
+      <requirement>No duplicate enum definitions across orchestration modules</requirement>
+      <requirement>All new orchestration constants added to SSOT modules</requirement>
+      <requirement>Thread-safety validated for orchestration configuration</requirement>
+      <requirement>Environment override capability tested</requirement>
+    </orchestration_compliance>
+  </orchestration_ssot>
+
   <conclusion>
     <summary>
       The SSOT Test Framework successfully eliminates 6,096+ duplicate implementations
       and provides a unified, canonical testing foundation that enforces CLAUDE.md principles.
       All tests now have consistent environment handling, metrics recording, and mock usage
-      while maintaining backwards compatibility.
+      while maintaining backwards compatibility. The orchestration SSOT consolidation
+      eliminates 15+ duplicate enum definitions and provides centralized availability configuration.
     </summary>
     
     <business_impact>
@@ -196,6 +329,7 @@
       Development velocity increased through clear, unified testing patterns.
       Maintenance burden reduced by 99.97% through elimination of duplicates.
       Code quality improved through standardized test practices.
+      Orchestration reliability enhanced through centralized configuration.
     </business_impact>
   </conclusion>
-</test_framework_ssot_architecture>
+</specification>

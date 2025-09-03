@@ -51,43 +51,39 @@ class AgentMessageHandler(BaseMessageHandler):
                            message: WebSocketMessage) -> bool:
         """Handle agent-related WebSocket messages with database session."""
         try:
-            # Get database session for this message handling
-            db_session = await self._get_database_session()
-            if not db_session:
-                logger.error(f"Failed to get database session for user {user_id}")
-                return False
-            
-            try:
-                # Route message to appropriate handler
-                success = await self._route_agent_message(
-                    user_id, message, db_session
-                )
-                
-                if success:
-                    self._update_processing_stats(message.type)
-                else:
+            # Get database session using async context manager
+            # CRITICAL: Do NOT manually close the session - let the context manager handle it
+            async for db_session in get_db_dependency():
+                try:
+                    # Route message to appropriate handler
+                    success = await self._route_agent_message(
+                        user_id, message, db_session
+                    )
+                    
+                    if success:
+                        self._update_processing_stats(message.type)
+                    else:
+                        self.processing_stats["errors"] += 1
+                    
+                    return success
+                    
+                except Exception as e:
                     self.processing_stats["errors"] += 1
-                
-                return success
-                
-            finally:
-                # Ensure database session is properly closed
-                await db_session.close()
+                    logger.error(f"Error routing agent message from {user_id}: {e}", exc_info=True)
+                    return False
+                # Session automatically closed when exiting async for loop
+            
+            # Should not reach here, but handle if no session obtained
+            logger.error(f"Failed to get database session for user {user_id}")
+            return False
                 
         except Exception as e:
             self.processing_stats["errors"] += 1
             logger.error(f"Error handling agent message from {user_id}: {e}", exc_info=True)
             return False
     
-    async def _get_database_session(self) -> Optional[AsyncSession]:
-        """Get database session using dependency injection pattern."""
-        try:
-            # Use the same dependency that FastAPI routes use
-            async for session in get_db_dependency():
-                return session
-        except Exception as e:
-            logger.error(f"Failed to get database session: {e}")
-            return None
+    # Method removed - we now use get_db_dependency() directly in handle_message
+    # This prevents incorrect session lifecycle management
     
     async def _route_agent_message(self, user_id: str, message: WebSocketMessage,
                                  db_session: AsyncSession) -> bool:

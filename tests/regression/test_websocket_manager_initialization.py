@@ -27,7 +27,7 @@ from netra_backend.app.websocket_core import get_websocket_manager
 from netra_backend.app.websocket_core.manager import WebSocketManager
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
-from netra_backend.app.startup_module_deterministic import StartupOrchestrator
+from netra_backend.app.smd import StartupOrchestrator
 from netra_backend.app.services.llm_manager import LLMManager
 from netra_backend.app.agents.tool_dispatcher_core import ToolDispatcher
 from fastapi import FastAPI

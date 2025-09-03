@@ -69,5 +69,5 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
 # Expose port
 EXPOSE 8000
 
-# Default command for production
-CMD ["sh", "-c", "alembic -c netra_backend/alembic.ini upgrade head && gunicorn netra_backend.app.main:app -w ${WORKERS:-4} -k uvicorn.workers.UvicornWorker --bind 0.0.0.0:8000 --timeout 120 --graceful-timeout 30 --access-logfile - --error-logfile - --log-level ${LOG_LEVEL:-info}"]
+# Default command for production with memory optimizations
+CMD ["sh", "-c", "alembic -c netra_backend/alembic.ini upgrade head && gunicorn netra_backend.app.main:app -w ${WORKERS:-2} -k uvicorn.workers.UvicornWorker --bind 0.0.0.0:8000 --timeout 120 --graceful-timeout 30 --access-logfile - --error-logfile - --log-level ${LOG_LEVEL:-info} --max-requests 500 --max-requests-jitter 50 --preload --worker-tmp-dir /dev/shm --worker-connections 100"]

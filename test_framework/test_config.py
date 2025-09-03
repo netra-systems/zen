@@ -139,9 +139,10 @@ def configure_mock_environment():
     
     # Database and service URLs for test environment
     # Use test-specific database to avoid conflicts with dev data
-    env.set("DATABASE_URL", "postgresql://test:test@localhost:5434/netra_test", source="mock_test_config")
+    # Updated to use correct credentials from docker-compose.test.yml
+    env.set("DATABASE_URL", "postgresql://test_user:test_pass@localhost:5433/netra_test", source="mock_test_config")
     env.set("REDIS_URL", "redis://localhost:6381/1", source="mock_test_config")  # Use DB 1 for tests
-    env.set("CLICKHOUSE_URL", "http://localhost:8123", source="mock_test_config")
+    env.set("CLICKHOUSE_URL", "http://localhost:8125", source="mock_test_config")  # Use correct test port
 
 def configure_test_environment():
     """DEPRECATED: Use configure_mock_environment() instead.

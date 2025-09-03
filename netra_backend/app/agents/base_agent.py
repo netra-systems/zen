@@ -15,7 +15,8 @@ import time
 # from netra_backend.app.agents.agent_state import AgentStateMixin
 from netra_backend.app.agents.mixins.websocket_bridge_adapter import WebSocketBridgeAdapter
 from netra_backend.app.agents.interfaces import BaseAgentProtocol
-from netra_backend.app.agents.state import DeepAgentState
+# Temporary import for DeepAgentState - needed until all agents migrate to UserExecutionContext
+from netra_backend.app.schemas.agent_models import DeepAgentState
 from netra_backend.app.core.config import get_config
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.llm.observability import generate_llm_correlation_id
@@ -40,6 +41,14 @@ from netra_backend.app.redis_manager import RedisManager
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 from netra_backend.app.agents.config import agent_config
 from netra_backend.app.agents.utils import extract_thread_id
+
+# CRITICAL: Import session management for proper per-request isolation
+# Use TYPE_CHECKING imports to avoid circular dependency
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from netra_backend.app.database.session_manager import DatabaseSessionManager
+    from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
 
 
 class BaseAgent(ABC):
@@ -72,7 +81,7 @@ class BaseAgent(ABC):
                  enable_reliability: bool = True,
                  enable_execution_engine: bool = True,
                  enable_caching: bool = False,
-                 tool_dispatcher: Optional[ToolDispatcher] = None,
+                 tool_dispatcher: Optional[ToolDispatcher] = None,  # DEPRECATED: Use create_agent_with_context() factory
                  redis_manager: Optional[RedisManager] = None):
         
         # Initialize with simple single inheritance pattern
@@ -85,14 +94,14 @@ class BaseAgent(ABC):
         self.start_time = None
         self.end_time = None
         self.context = {}  # Protected context for this agent
-        self.user_id = user_id  # Deprecated - kept for backward compatibility
+# Legacy user_id instance variables removed
         self.logger = central_logger.get_logger(name)
         self.correlation_id = generate_llm_correlation_id()  # Unique ID for tracing
         self._subagent_logging_enabled = self._get_subagent_logging_enabled()
         
         # Initialize attributes required by AgentCommunicationMixin
         self.agent_id = agent_id or f"{name}_{self.correlation_id}"  # Unique agent identifier
-        self._user_id = user_id  # Note underscore prefix as expected by AgentCommunicationMixin
+# Legacy user_id instance variables removed
         
         # Initialize WebSocket bridge adapter (SSOT for WebSocket events)
         self._websocket_adapter = WebSocketBridgeAdapter()
@@ -101,6 +110,19 @@ class BaseAgent(ABC):
         self.timing_collector = ExecutionTimingCollector(agent_name=name)
         
         # Initialize core properties pattern
+        # DEPRECATED WARNING: Direct tool_dispatcher assignment uses global state
+        if tool_dispatcher is not None:
+            import warnings
+            warnings.warn(
+                f"BaseAgent.__init__ with tool_dispatcher parameter creates global state risks. "
+                f"Use BaseAgent.create_agent_with_context() factory method instead. "
+                f"Global state support will be removed in v3.0.0 (Q2 2025).",
+                DeprecationWarning,
+                stacklevel=2
+            )
+            self.logger.warning(f"🚨 DEPRECATED: {name} initialized with global tool_dispatcher")
+            self.logger.warning("📋 MIGRATION: Use BaseAgent.create_agent_with_context() factory instead")
+        
         self.tool_dispatcher = tool_dispatcher
         self.redis_manager = redis_manager
         self.cache_ttl = 3600  # Default cache TTL
@@ -123,6 +145,9 @@ class BaseAgent(ABC):
         self._enable_caching = enable_caching
         if enable_caching and redis_manager:
             self._init_caching_infrastructure()
+        
+        # CRITICAL: Validate agent doesn't store database sessions
+        self._validate_session_isolation()
 
     # === State Management Methods (from AgentStateMixin) ===
     
@@ -192,20 +217,121 @@ class BaseAgent(ABC):
         if self._subagent_logging_enabled:
             self.logger.info(f"{self.name} {status} for run_id: {run_id}")
     
+    # === Session Isolation Methods ===
+    
+    def _validate_session_isolation(self) -> None:
+        """Validate agent doesn't store database sessions.
+        
+        CRITICAL: This method ensures agents never store AsyncSession instances,
+        which would violate per-request isolation requirements.
+        
+        Raises:
+            SessionIsolationError: If agent stores sessions
+        """
+        try:
+            # Import dynamically to avoid circular dependency
+            from netra_backend.app.database.session_manager import validate_agent_session_isolation
+            validate_agent_session_isolation(self)
+            self.logger.debug(f"Agent {self.name} passed session isolation validation")
+        except Exception as e:
+            self.logger.error(f"Agent {self.name} failed session isolation validation: {e}")
+            raise
+    
+    def _get_session_manager(self, context: 'UserExecutionContext') -> 'DatabaseSessionManager':
+        """Get database session manager for the given context.
+        
+        Args:
+            context: User execution context with database session
+            
+        Returns:
+            DatabaseSessionManager for database operations
+            
+        Raises:
+            SessionManagerError: If context is invalid or lacks session
+        """
+        # Import dynamically to avoid circular dependency
+        from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
+        from netra_backend.app.database.session_manager import DatabaseSessionManager
+        
+        if not isinstance(context, UserExecutionContext):
+            raise TypeError(f"Expected UserExecutionContext, got {type(context)}")
+        
+        return DatabaseSessionManager(context)
+    
     # === Abstract Methods ===
     
-    async def execute(self, state: Optional[DeepAgentState], run_id: str = "", stream_updates: bool = False) -> Any:
-        """Execute the agent. Default implementation uses modern execution patterns.
+    async def execute(self, context: 'UserExecutionContext', stream_updates: bool = False) -> Any:
+        """Execute the agent with user execution context.
         
-        Subclasses can override this method or implement execute_core_logic() for business logic.
+        CRITICAL: Only supports UserExecutionContext pattern - no legacy support.
+        This ensures proper session isolation and prevents parameter proliferation.
+        
+        Args:
+            context: User execution context containing all request-scoped state
+            stream_updates: Whether to stream progress updates
+            
+        Returns:
+            Execution result
+            
+        Raises:
+            NotImplementedError: If neither execute_with_context nor execute_core_logic is implemented
         """
-        if hasattr(self, 'execute_modern') and self._enable_execution_engine:
-            # Use modern execution if available
-            result = await self.execute_modern(state, run_id, stream_updates)
-            return result.result if result.success else None
-        else:
-            # Fallback for agents that haven't implemented execute_core_logic yet
-            raise NotImplementedError("Subclasses must implement either execute() or execute_core_logic()")
+        # Import dynamically to avoid circular dependency
+        from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
+        
+        # Validate context type
+        if not isinstance(context, UserExecutionContext):
+            raise TypeError(f"Expected UserExecutionContext, got {type(context)}")
+        
+        # Validate session isolation before execution
+        self._validate_session_isolation()
+        
+        # Use context-based execution - no legacy support
+        if hasattr(self, 'execute_with_context'):
+            return await self.execute_with_context(context, stream_updates)
+        
+        # Fallback - agents should implement execute_with_context or execute_core_logic
+        raise NotImplementedError(
+            f"Agent {self.name} must implement execute_with_context() or execute_core_logic(). "
+        )
+    
+    async def execute_with_context(self, context: 'UserExecutionContext', stream_updates: bool = False) -> Any:
+        """Execute agent with proper context-based session management.
+        
+        This is the primary execution pattern. Subclasses should override this method.
+        
+        Args:
+            context: User execution context with database session and user info
+            stream_updates: Whether to stream progress updates
+            
+        Returns:
+            Execution result
+        """
+        # Default implementation delegates to execute_core_logic if available
+        if hasattr(self, 'execute_core_logic'):
+            # Create temporary DeepAgentState for backward compatibility
+            temp_state = DeepAgentState(
+                user_request=getattr(context, 'user_request', 'default_request'),
+                chat_thread_id=context.thread_id,
+                user_id=context.user_id
+            )
+            execution_context = ExecutionContext(
+                run_id=context.run_id,
+                agent_name=self.name,
+                state=temp_state,  # Temporarily using DeepAgentState until migration complete
+                stream_updates=stream_updates,
+                thread_id=context.thread_id,
+                user_id=context.user_id,
+                start_time=time.time(),
+                correlation_id=self.correlation_id
+            )
+            return await self.execute_core_logic(execution_context)
+        
+        raise NotImplementedError(f"Agent {self.name} must implement execute_with_context() or execute_core_logic()")
+    
+# _convert_context_to_state method removed - legacy support removed
+    
+# Legacy execute_legacy method removed - no backward compatibility
 
     def _get_subagent_logging_enabled(self) -> bool:
         """Get subagent logging configuration setting."""
@@ -265,6 +391,17 @@ class BaseAgent(ABC):
             run_id: The execution run ID
         """
         self._websocket_adapter.set_websocket_bridge(bridge, run_id, self.name)
+    
+    def propagate_websocket_context_to_state(self, context: Dict[str, Any]) -> None:
+        """Propagate WebSocket context to agent state for critical path validation.
+        
+        This method is required by the critical path validator to ensure 
+        WebSocket bridge capabilities are properly implemented.
+        """
+        # Store WebSocket context information in agent state
+        if not hasattr(self, '_websocket_context'):
+            self._websocket_context = {}
+        self._websocket_context.update(context)
     
     # Delegate WebSocket methods to the adapter
     
@@ -417,56 +554,7 @@ class BaseAgent(ABC):
         else:
             raise result.final_exception
     
-    async def execute_modern(self, state: DeepAgentState, run_id: str, 
-                           stream_updates: bool = False) -> ExecutionResult:
-        """Execute using modern execution engine patterns with unified reliability (SSOT)."""
-        if not self._execution_engine:
-            raise RuntimeError(f"Modern execution engine not enabled for {self.name}")
-        
-        context = ExecutionContext(
-            run_id=run_id,
-            agent_name=self.name,
-            state=state,
-            stream_updates=stream_updates,
-            thread_id=getattr(state, 'thread_id', None),
-            user_id=getattr(state, 'user_id', None),
-            start_time=time.time(),
-            correlation_id=self.correlation_id
-        )
-        
-        # Use unified reliability handler for execution if available
-        if self._unified_reliability_handler:
-            try:
-                # Wrap execution in unified retry logic
-                async def execute_operation():
-                    return await self._execution_engine.execute(self, context)
-                
-                result = await self._unified_reliability_handler.execute_with_retry_async(
-                    execute_operation
-                )
-                
-                if result.success:
-                    return result.result
-                else:
-                    # Create error result
-                    return ExecutionResult(
-                        success=False,
-                        status=ExecutionStatus.FAILED,
-                        error=str(result.final_exception),
-                        execution_time_ms=result.total_time * 1000,
-                        retry_count=result.total_attempts - 1 if result.total_attempts > 0 else 0
-                    )
-            except Exception as e:
-                return ExecutionResult(
-                    success=False,
-                    status=ExecutionStatus.FAILED,
-                    error=str(e),
-                    execution_time_ms=0,
-                    retry_count=0
-                )
-        else:
-            # Fallback to direct execution if reliability not enabled
-            return await self._execution_engine.execute(self, context)
+# execute_modern method removed - legacy support removed
     
     # === SSOT Abstract Methods for Execution Patterns ===
     

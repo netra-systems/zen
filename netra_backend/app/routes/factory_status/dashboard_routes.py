@@ -1,6 +1,7 @@
 """
 Factory Status Dashboard Routes
 """
+from datetime import datetime
 from typing import Any, Dict
 
 from fastapi import Depends

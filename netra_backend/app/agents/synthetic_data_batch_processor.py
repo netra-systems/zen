@@ -9,7 +9,8 @@ import asyncio
 from datetime import datetime
 from typing import Any, Dict, List, Optional
 
-from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
+from netra_backend.app.database.session_manager import DatabaseSessionManager
 from netra_backend.app.agents.synthetic_data_presets import WorkloadProfile
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 from netra_backend.app.logging_config import central_logger
@@ -32,18 +33,16 @@ class SyntheticDataBatchProcessor:
         self,
         profile: WorkloadProfile,
         status: GenerationStatus,
-        run_id: str,
+        context: UserExecutionContext,
         stream_updates: bool,
-        batch_size: int,
-        thread_id: Optional[str] = None,
-        user_id: Optional[str] = None
+        batch_size: int
     ) -> List[Dict[str, Any]]:
-        """Process all batches for data generation"""
+        """Process all batches for data generation with user context isolation"""
         generated_data = []
         for batch_start in range(0, profile.volume, batch_size):
             await self._process_single_batch(
-                profile, status, run_id, stream_updates, batch_start, 
-                batch_size, generated_data, thread_id, user_id
+                profile, status, context, stream_updates, batch_start, 
+                batch_size, generated_data
             )
         return generated_data
     
@@ -51,22 +50,21 @@ class SyntheticDataBatchProcessor:
         self,
         profile: WorkloadProfile,
         status: GenerationStatus,
-        run_id: str,
+        context: UserExecutionContext,
         stream_updates: bool,
         batch_start: int,
         batch_size: int,
-        generated_data: List[Dict[str, Any]],
-        thread_id: Optional[str] = None,
-        user_id: Optional[str] = None
+        generated_data: List[Dict[str, Any]]
     ) -> None:
-        """Process a single batch and update progress"""
+        """Process a single batch and update progress with context isolation"""
         batch_data = await self._generate_batch(
-            profile, batch_start, batch_size, run_id
+            profile, batch_start, batch_size, context
         )
         generated_data.extend(batch_data)
         self.progress_tracker.update_progress(status, len(generated_data), profile.volume)
         await self.progress_tracker.handle_progress_update(
-            run_id, status, stream_updates, batch_start, batch_size, thread_id, user_id
+            context.run_id, status, stream_updates, batch_start, batch_size, 
+            context.thread_id, context.user_id
         )
         await asyncio.sleep(0.01)  # Prevent overwhelming
     
@@ -75,15 +73,15 @@ class SyntheticDataBatchProcessor:
         profile: WorkloadProfile,
         start_index: int,
         batch_size: int,
-        run_id: str
+        context: UserExecutionContext
     ) -> List[Dict[str, Any]]:
-        """Generate a single batch of data"""
+        """Generate a single batch of data with context isolation"""
         actual_size = self._calculate_actual_batch_size(
             batch_size, profile.volume, start_index
         )
         self._validate_tool_availability()
         return await self._generate_via_tool(
-            profile, actual_size, run_id
+            profile, actual_size, context
         )
     
     def _calculate_actual_batch_size(
@@ -104,11 +102,11 @@ class SyntheticDataBatchProcessor:
         self,
         profile: WorkloadProfile,
         batch_size: int,
-        run_id: str
+        context: UserExecutionContext
     ) -> List[Dict[str, Any]]:
-        """Generate batch using tool dispatcher"""
+        """Generate batch using tool dispatcher with context"""
         result = await self._dispatch_generation_tool(
-            profile, batch_size, run_id
+            profile, batch_size, context
         )
         return result.get("data", [])
     
@@ -116,14 +114,14 @@ class SyntheticDataBatchProcessor:
         self,
         profile: WorkloadProfile,
         batch_size: int,
-        run_id: str
+        context: UserExecutionContext
     ) -> Dict[str, Any]:
-        """Dispatch synthetic data generation tool"""
+        """Dispatch synthetic data generation tool with context"""
         return await self.tool_dispatcher.dispatch_tool(
             tool_name="generate_synthetic_data_batch",
             parameters=self._create_tool_params(profile, batch_size),
-            state=DeepAgentState(),
-            run_id=run_id
+            context=context,  # Use context instead of DeepAgentState
+            run_id=context.run_id
         )
     
     def _create_tool_params(self, profile: WorkloadProfile, batch_size: int) -> Dict[str, Any]:

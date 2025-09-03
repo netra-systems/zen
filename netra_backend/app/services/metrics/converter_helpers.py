@@ -4,6 +4,7 @@ Used for JSON export functionality
 """
 
 from typing import Any, Dict, List
+from datetime import datetime
 
 from netra_backend.app.schemas.metrics import (
     CorpusMetric,

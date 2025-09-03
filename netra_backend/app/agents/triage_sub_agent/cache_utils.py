@@ -10,13 +10,14 @@
 # ================================
 """Cache utilities - compliant with 25-line limit."""
 
-import hashlib
 import json
 import re
 from typing import Any, Dict, Optional
 
-from netra_backend.app.logging_config import central_logger as logger
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.core.serialization.unified_json_handler import safe_json_loads
 from netra_backend.app.redis_manager import RedisManager
+from netra_backend.app.services.cache.cache_helpers import CacheHelpers
 
 
 def normalize_request(request: str) -> str:
@@ -25,10 +26,20 @@ def normalize_request(request: str) -> str:
     return re.sub(r'\s+', ' ', normalized)
 
 
-def generate_request_hash(request: str) -> str:
-    """Generate hash for caching similar requests."""
+def generate_request_hash(request: str, user_context=None) -> str:
+    """Generate hash for caching similar requests using canonical CacheHelpers."""
     normalized = normalize_request(request)
-    return hashlib.md5(normalized.encode()).hexdigest()
+    
+    # Use canonical cache key generation (SSOT)
+    cache_helper = CacheHelpers(None)
+    key_data = {"request": normalized}
+    
+    # Include user context for proper isolation when available
+    if user_context:
+        key_data["user_id"] = getattr(user_context, "user_id", None)
+        key_data["thread_id"] = getattr(user_context, "thread_id", None)
+    
+    return cache_helper.hash_key_data(key_data)
 
 
 def build_cache_key(request_hash: str) -> str:
@@ -49,15 +60,15 @@ async def _safe_cache_retrieval(redis_manager: RedisManager, request_hash: str) 
         cached = await redis_manager.get(build_cache_key(request_hash))
         return _process_cached_data(cached, request_hash)
     except Exception as e:
-        logger.warning(f"Failed to retrieve from cache: {e}")
+        central_logger.warning(f"Failed to retrieve from cache: {e}")
         return None
 
 
 def _process_cached_data(cached: str, request_hash: str) -> Optional[Dict[str, Any]]:
     """Process cached data if available."""
     if cached:
-        logger.info(f"Cache hit for request hash: {request_hash}")
-        return json.loads(cached)
+        central_logger.info(f"Cache hit for request hash: {request_hash}")
+        return safe_json_loads(cached, {})
     return None
 
 
@@ -67,6 +78,6 @@ async def cache_result(redis_manager: Optional[RedisManager], request_hash: str,
         return
     try:
         await redis_manager.set(build_cache_key(request_hash), json.dumps(result), ex=ttl)
-        logger.debug(f"Cached result for request hash: {request_hash}")
+        central_logger.debug(f"Cached result for request hash: {request_hash}")
     except Exception as e:
-        logger.warning(f"Failed to cache result: {e}")
+        central_logger.warning(f"Failed to cache result: {e}")

@@ -22,6 +22,7 @@ from typing import TYPE_CHECKING, Any, Dict, List, Optional
 from netra_backend.app.core.exceptions_base import NetraException
 from netra_backend.app.core.tool_models import ToolExecutionResult, UnifiedTool
 from netra_backend.app.logging_config import central_logger
+from netra_backend.app.monitoring.websocket_notification_monitor import get_websocket_notification_monitor
 from shared.isolated_environment import IsolatedEnvironment
 
 if TYPE_CHECKING:
@@ -44,6 +45,59 @@ if TYPE_CHECKING:
 logger = central_logger.get_logger(__name__)
 
 
+async def enhance_tool_dispatcher_with_notifications(
+    tool_dispatcher,
+    websocket_manager=None,
+    enable_notifications=True
+):
+    """
+    Enhance tool dispatcher with WebSocket notifications.
+    
+    This function replaces the tool dispatcher's executor with a 
+    UnifiedToolExecutionEngine that has WebSocket notification capabilities.
+    
+    Args:
+        tool_dispatcher: The ToolDispatcher instance to enhance
+        websocket_manager: Optional WebSocket manager for notifications
+        enable_notifications: Whether to enable notifications (default True)
+    
+    Returns:
+        The enhanced tool dispatcher
+    """
+    # Check if already enhanced to prevent double enhancement
+    if hasattr(tool_dispatcher, '_websocket_enhanced') and tool_dispatcher._websocket_enhanced:
+        logger.debug("Tool dispatcher already enhanced with WebSocket notifications")
+        return tool_dispatcher
+    
+    # Create enhanced executor with WebSocket support
+    from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
+    
+    # Create WebSocket bridge if manager provided
+    websocket_bridge = None
+    if websocket_manager and enable_notifications:
+        websocket_bridge = AgentWebSocketBridge()
+        websocket_bridge.websocket_manager = websocket_manager
+    
+    # Replace executor with enhanced version
+    enhanced_executor = UnifiedToolExecutionEngine(
+        websocket_bridge=websocket_bridge,
+        permission_service=getattr(tool_dispatcher.executor, 'permission_service', None) if hasattr(tool_dispatcher, 'executor') else None
+    )
+    
+    # Store reference to websocket manager for compatibility
+    if websocket_manager:
+        enhanced_executor.websocket_manager = websocket_manager
+    
+    # Replace the executor
+    tool_dispatcher.executor = enhanced_executor
+    
+    # Mark as enhanced to prevent double enhancement
+    tool_dispatcher._websocket_enhanced = True
+    
+    logger.info("✅ Tool dispatcher enhanced with WebSocket notifications")
+    return tool_dispatcher
+
+
 class UnifiedToolExecutionEngine:
     """Single source of truth for all tool execution with WebSocket notifications.
     
@@ -61,7 +115,12 @@ class UnifiedToolExecutionEngine:
     ):
         """Initialize unified tool execution engine."""
         self.websocket_bridge = websocket_bridge
+        # Compatibility alias for tests expecting websocket_notifier
+        self.websocket_notifier = websocket_bridge
         self.permission_service = permission_service
+        
+        # Initialize monitoring system
+        self.notification_monitor = get_websocket_notification_monitor()
         
         # Security and resource management
         self.env = IsolatedEnvironment()
@@ -477,6 +536,13 @@ class UnifiedToolExecutionEngine:
             logger.critical(f"🚨 SILENT FAILURE ALERT: Tool {tool_name} executing without context")
             logger.critical("🚨 USER WILL NOT SEE TOOL PROGRESS - This breaks chat transparency!")
             logger.critical(f"🚨 Call stack shows missing context during tool execution")
+            
+            # MONITORING: Track silent failure - no context
+            self.notification_monitor.track_silent_failure_detected(
+                user_id="unknown",
+                thread_id="unknown", 
+                context=f"Tool {tool_name} executing without context - breaks chat transparency"
+            )
             return
             
         if not self.websocket_bridge:
@@ -484,7 +550,24 @@ class UnifiedToolExecutionEngine:
             logger.critical(f"🚨 BRIDGE UNAVAILABLE: Tool {tool_name} executing for run_id {context.run_id}")
             logger.critical(f"🚨 Thread {context.thread_id} will not see tool progress - WebSocket events LOST")
             logger.critical("🚨 This indicates WebSocket bridge was not properly initialized in tool dispatcher")
+            
+            # MONITORING: Track silent failure - bridge unavailable
+            self.notification_monitor.track_silent_failure_detected(
+                user_id=context.user_id,
+                thread_id=context.thread_id,
+                context=f"Tool {tool_name} - WebSocket bridge unavailable, events LOST"
+            )
             return
+        
+        # MONITORING: Track notification attempt
+        correlation_id = self.notification_monitor.track_notification_attempted(
+            user_id=context.user_id,
+            thread_id=context.thread_id, 
+            run_id=context.run_id,
+            agent_name=context.agent_name,
+            tool_name=tool_name,
+            connection_id=getattr(context, 'connection_id', None)
+        )
         
         try:
             # Extract contextual information
@@ -493,22 +576,42 @@ class UnifiedToolExecutionEngine:
             # DEFENSIVE: Validate bridge has required method before calling
             if not hasattr(self.websocket_bridge, 'notify_tool_executing'):
                 logger.critical(f"🚨 BRIDGE MISSING METHOD: notify_tool_executing not found")
+                
+                # MONITORING: Track method missing failure
+                self.notification_monitor.track_notification_failed(
+                    correlation_id, "Bridge missing notify_tool_executing method", "method_missing"
+                )
                 return
             
+            start_time = time.time()
             result = await self.websocket_bridge.notify_tool_executing(
                 run_id=context.run_id,
                 agent_name=context.agent_name,
                 tool_name=tool_name,
                 parameters={"summary": params_summary} if params_summary else None
             )
+            delivery_time_ms = (time.time() - start_time) * 1000
             
             # DEFENSIVE: Check if notification succeeded
             if result is False:
                 logger.warning(f"⚠️ Tool executing notification failed for {tool_name} (returned False)")
                 
+                # MONITORING: Track notification failure
+                self.notification_monitor.track_notification_failed(
+                    correlation_id, "WebSocket bridge returned False", "bridge_rejected"
+                )
+            else:
+                # MONITORING: Track successful delivery
+                self.notification_monitor.track_notification_delivered(correlation_id, delivery_time_ms)
+                
         except Exception as e:
             logger.error(f"🚨 EXCEPTION in tool_executing notification for {tool_name}: {e}")
             logger.error("🚨 User will not see tool execution start - check WebSocket connectivity")
+            
+            # MONITORING: Track notification exception
+            self.notification_monitor.track_notification_failed(
+                correlation_id, str(e), type(e).__name__
+            )
     
     async def _send_tool_completed(
         self,
@@ -524,6 +627,13 @@ class UnifiedToolExecutionEngine:
         if not context:
             logger.critical(f"🚨 SILENT FAILURE ALERT: Tool {tool_name} completed without context")
             logger.critical("🚨 USER WILL NOT SEE TOOL RESULTS - This breaks chat completeness!")
+            
+            # MONITORING: Track silent failure - no context
+            self.notification_monitor.track_silent_failure_detected(
+                user_id="unknown",
+                thread_id="unknown",
+                context=f"Tool {tool_name} completed without context - breaks chat completeness"
+            )
             return
             
         if not self.websocket_bridge:
@@ -531,7 +641,24 @@ class UnifiedToolExecutionEngine:
             logger.critical(f"🚨 BRIDGE UNAVAILABLE: Tool {tool_name} completed for run_id {context.run_id}")
             logger.critical(f"🚨 Thread {context.thread_id} status: {status}, duration: {duration_ms:.0f}ms")
             logger.critical("🚨 USER WILL NOT SEE TOOL RESULTS - WebSocket events LOST")
+            
+            # MONITORING: Track silent failure - bridge unavailable
+            self.notification_monitor.track_silent_failure_detected(
+                user_id=context.user_id,
+                thread_id=context.thread_id,
+                context=f"Tool {tool_name} completion - WebSocket bridge unavailable, results LOST"
+            )
             return
+        
+        # MONITORING: Track notification attempt  
+        correlation_id = self.notification_monitor.track_notification_attempted(
+            user_id=context.user_id,
+            thread_id=context.thread_id,
+            run_id=context.run_id,
+            agent_name=context.agent_name,
+            tool_name=tool_name,
+            connection_id=getattr(context, 'connection_id', None)
+        )
         
         try:
             result_dict = {
@@ -553,8 +680,14 @@ class UnifiedToolExecutionEngine:
             # DEFENSIVE: Validate bridge has required method before calling
             if not hasattr(self.websocket_bridge, 'notify_tool_completed'):
                 logger.critical(f"🚨 BRIDGE MISSING METHOD: notify_tool_completed not found")
+                
+                # MONITORING: Track method missing failure
+                self.notification_monitor.track_notification_failed(
+                    correlation_id, "Bridge missing notify_tool_completed method", "method_missing"
+                )
                 return
             
+            start_time = time.time()
             notification_result = await self.websocket_bridge.notify_tool_completed(
                 run_id=context.run_id,
                 agent_name=context.agent_name,
@@ -562,14 +695,28 @@ class UnifiedToolExecutionEngine:
                 result=result_dict,
                 execution_time_ms=duration_ms
             )
+            notification_time_ms = (time.time() - start_time) * 1000
             
             # DEFENSIVE: Check if notification succeeded
             if notification_result is False:
                 logger.warning(f"⚠️ Tool completed notification failed for {tool_name} (returned False)")
                 
+                # MONITORING: Track notification failure
+                self.notification_monitor.track_notification_failed(
+                    correlation_id, "WebSocket bridge returned False for completion", "bridge_rejected"
+                )
+            else:
+                # MONITORING: Track successful delivery
+                self.notification_monitor.track_notification_delivered(correlation_id, notification_time_ms)
+                
         except Exception as e:
             logger.error(f"🚨 EXCEPTION in tool_completed notification for {tool_name}: {e}")
             logger.error("🚨 User will not see tool completion - check WebSocket connectivity")
+            
+            # MONITORING: Track notification exception
+            self.notification_monitor.track_notification_failed(
+                correlation_id, str(e), type(e).__name__
+            )
     
     def _get_or_create_context(
         self,

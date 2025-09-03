@@ -33,7 +33,7 @@ class TestDatabaseAuthLogging:
         
         # Configure test environment with proper service URLs
         # Support multiple port configurations for different environments
-        test_postgres_port = isolated_test_env.get('TEST_POSTGRES_PORT', '5434')
+        test_postgres_port = isolated_test_env.get('TEST_POSTGRES_PORT', '5433')
         test_redis_port = isolated_test_env.get('TEST_REDIS_PORT', '6381')
         
         # Build service URLs with environment awareness
@@ -206,7 +206,7 @@ class TestDatabaseAuthLogging:
                 "postgresql://user:password@localhost/dbname",
                 "postgresql+asyncpg://user:secret@host/db?sslmode=require",
                 "postgres://admin:pass123@cloudsql/database",
-                "postgresql://test_user:test_pass@localhost:5434/netra_test",  # Match our test config
+                "postgresql://test_user:test_pass@localhost:5433/netra_test",  # Match our test config
             ]
             
             try:

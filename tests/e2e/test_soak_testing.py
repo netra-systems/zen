@@ -1,5 +1,4 @@
 """
-from shared.isolated_environment import get_env
 Long-Duration Soak Testing Suite
 ===============================
 
@@ -40,6 +39,8 @@ import tracemalloc
 import uuid
 import websockets
 from websockets import ServerConnection
+
+from shared.isolated_environment import get_env
 
 try:
     import resource
@@ -1131,6 +1132,11 @@ class TestSoakOrchestrator:
         logger.info(f"  Success rate: {self.test_results.success_rate:.2f}%")
 
         logger.info(f"  GC efficiency: {self.test_results.gc_efficiency:.2f}")
+
+# Aliases for naming consistency
+SoakTestResults = TestSoakResults
+WebSocketStressTest = TestWebSocketStress  
+DatabaseStressTest = TestDatabaseStress
 
 # Test implementations
 

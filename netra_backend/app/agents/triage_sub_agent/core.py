@@ -4,11 +4,10 @@ This module contains the core triage agent implementation.
 """
 
 import asyncio
-import hashlib
 import json
 import re
 import time
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, TYPE_CHECKING
 
 from pydantic import ValidationError
 
@@ -23,25 +22,44 @@ from netra_backend.app.agents.triage_sub_agent.models import (
 )
 from netra_backend.app.agents.triage_sub_agent.tool_recommender import ToolRecommender
 from netra_backend.app.agents.triage_sub_agent.validator import RequestValidator
-from netra_backend.app.agents.utils import extract_json_from_response
+from netra_backend.app.core.serialization.unified_json_handler import (
+    LLMResponseParser,
+    JSONErrorFixer,
+    safe_json_loads
+)
+from netra_backend.app.services.cache.cache_helpers import CacheHelpers
 from netra_backend.app.logging_config import central_logger
+
+if TYPE_CHECKING:
+    from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
 
 logger = central_logger.get_logger(__name__)
 
 
 class TriageCore:
-    """Core triage processing logic"""
+    """Core triage processing logic aligned with UserExecutionContext pattern.
     
-    def __init__(self, redis_manager=None):
-        """Initialize the triage core"""
-        self._init_core_config(redis_manager)
+    This class provides core triage functionality that can work both:
+    1. With UserExecutionContext (new pattern) - preferred
+    2. Standalone (legacy compatibility) - deprecated
+    """
+    
+    def __init__(self, context: Optional['UserExecutionContext'] = None):
+        """Initialize the triage core.
+        
+        Args:
+            context: Optional UserExecutionContext for request isolation
+        """
+        self.context = context  # Store for request-scoped operations
         self._init_core_components()
         self._init_fallback_categories()
+        
+        # Initialize cache helper for key generation (SSOT)
+        # Pass None for cache_manager since we only need the key generation
+        self._cache_helper = CacheHelpers(None)
     
-    def _init_core_config(self, redis_manager) -> None:
+    def _init_core_config(self) -> None:
         """Initialize core configuration settings."""
-        self.redis_manager = redis_manager
-        self.cache_ttl = agent_config.cache.redis_ttl
         self.max_retries = agent_config.retry.max_retries
     
     def _init_core_components(self) -> None:
@@ -76,66 +94,23 @@ class TriageCore:
         }
     
     def generate_request_hash(self, request: str) -> str:
-        """Generate a hash for caching similar requests"""
+        """Generate a hash for caching similar requests.
+        
+        Uses canonical cache key generation from CacheHelpers for SSOT.
+        """
         # Normalize the request for better cache hits
         normalized = request.lower().strip()
         normalized = re.sub(r'\s+', ' ', normalized)
-        return hashlib.sha256(normalized.encode()).hexdigest()
-    
-    async def get_cached_result(self, request_hash: str) -> Optional[Dict[str, Any]]:
-        """Retrieve cached triage result if available"""
-        if not self._is_cache_available():
-            return None
-        return await self._safe_cache_retrieval(request_hash)
+        
+        # Use canonical hash_key_data method from CacheHelpers
+        key_data = {"request": normalized}
+        if self.context:
+            # Include user context for proper isolation
+            key_data["user_id"] = self.context.user_id
+            key_data["thread_id"] = self.context.thread_id
+        
+        return self._cache_helper.hash_key_data(key_data)
 
-    def _is_cache_available(self) -> bool:
-        """Check if cache is available for use."""
-        return self.redis_manager is not None
-
-    async def _safe_cache_retrieval(self, request_hash: str) -> Optional[Dict[str, Any]]:
-        """Safely retrieve from cache with error handling."""
-        try:
-            return await self._retrieve_from_redis_cache(request_hash)
-        except Exception as e:
-            logger.warning(f"Failed to retrieve from cache: {e}")
-            return None
-    
-    async def _retrieve_from_redis_cache(self, request_hash: str) -> Optional[Dict[str, Any]]:
-        """Retrieve data from Redis cache."""
-        cache_key = self._build_cache_key(request_hash)
-        cached = await self.redis_manager.get(cache_key)
-        return self._process_cached_data(cached, request_hash)
-
-    def _build_cache_key(self, request_hash: str) -> str:
-        """Build cache key for request hash."""
-        return f"triage:cache:{request_hash}"
-
-    def _process_cached_data(self, cached: str, request_hash: str) -> Optional[Dict[str, Any]]:
-        """Process cached data if available."""
-        if cached:
-            logger.info(f"Cache hit for request hash: {request_hash}")
-            return json.loads(cached)
-        return None
-    
-    async def cache_result(self, request_hash: str, result: Dict[str, Any]) -> None:
-        """Cache triage result for future use"""
-        if not self._is_cache_available():
-            return
-        await self._safe_cache_storage(request_hash, result)
-
-    async def _safe_cache_storage(self, request_hash: str, result: Dict[str, Any]) -> None:
-        """Safely store result in cache with error handling."""
-        try:
-            await self._store_in_redis_cache(request_hash, result)
-        except Exception as e:
-            logger.warning(f"Failed to cache result: {e}")
-
-    async def _store_in_redis_cache(self, request_hash: str, result: Dict[str, Any]) -> None:
-        """Store result in Redis cache."""
-        cache_key = self._build_cache_key(request_hash)
-        serialized = json.dumps(result)
-        await self.redis_manager.set(cache_key, serialized, ex=self.cache_ttl)
-        logger.debug(f"Cached result for request hash: {request_hash}")
     
     def create_fallback_result(self, request: str) -> TriageResult:
         """Simple fallback categorization when LLM fails"""
@@ -195,91 +170,48 @@ class TriageCore:
     
     def extract_and_validate_json(self, response: str) -> Optional[Dict[str, Any]]:
         """Enhanced JSON extraction with multiple strategies and validation"""
-        strategies = [self._try_standard_extraction, self._extract_with_regex, self._extract_key_value_pairs]
-        return self._apply_extraction_strategies(response, strategies)
-
-    def _apply_extraction_strategies(self, response: str, strategies: list) -> Optional[Dict[str, Any]]:
-        """Apply extraction strategies in sequence."""
-        for strategy in strategies:
-            result = strategy(response)
-            if result:
-                return result
-        return None
-
-    def _try_standard_extraction(self, response: str) -> Optional[Dict[str, Any]]:
-        """Try standard JSON extraction method."""
-        result = llm_parser.extract_json_from_response(response)
-        return result if result and isinstance(result, dict) else None
-    
-    def _extract_with_regex(self, response: str) -> Optional[Dict[str, Any]]:
-        """Extract JSON using regex patterns"""
-        brace_match = self._find_json_braces(response)
-        if not brace_match:
-            return None
-        return self._parse_json_match(brace_match.group())
-
-    def _find_json_braces(self, response: str):
-        """Find JSON brace structure in response."""
-        return re.search(r'\{.*\}', response, re.DOTALL)
-
-    def _parse_json_match(self, match: str) -> Optional[Dict[str, Any]]:
-        """Parse matched JSON string."""
-        try:
-            repaired = self._repair_json(match)
-            result = json.loads(repaired)
-            return result if isinstance(result, dict) else None
-        except json.JSONDecodeError:
-            return None
-    
-    def _repair_json(self, json_str: str) -> str:
-        """Repair common JSON formatting issues"""
-        repaired = json_str
-        repaired = re.sub(r',\s*}', '}', repaired)  # Remove trailing commas
-        repaired = re.sub(r',\s*]', ']', repaired)  # Remove trailing commas in arrays
-        repaired = repaired.replace("'", '"')  # Replace single quotes
-        return repaired
+        # Use canonical LLMResponseParser from unified_json_handler
+        parser = LLMResponseParser()
+        result = parser.safe_json_parse(response)
+        
+        # If result is a dict, return it; otherwise try error fixing
+        if isinstance(result, dict):
+            return result
+        
+        # Try error fixing if parsing failed
+        if isinstance(result, str):
+            fixer = JSONErrorFixer()
+            fixed = fixer.fix_common_json_errors(result)
+            try:
+                parsed = safe_json_loads(fixed)
+                return parsed if isinstance(parsed, dict) else None
+            except json.JSONDecodeError:
+                # Try recovery as last resort
+                return fixer.recover_truncated_json(result)
+        
+        # Fallback to manual extraction if all else fails
+        return self._extract_key_value_pairs(response)
     
     def _extract_key_value_pairs(self, response: str) -> Optional[Dict[str, Any]]:
-        """Extract key-value pairs manually"""
+        """Extract key-value pairs manually as fallback"""
         try:
-            regex_result = self._extract_with_regex_pattern(response)
-            return regex_result if regex_result else self._extract_from_lines(response)
+            # Try regex pattern extraction
+            pattern = r'"([^"]+)"\s*:\s*"([^"]*)"'
+            matches = re.findall(pattern, response)
+            if matches:
+                return {key: value for key, value in matches}
+            
+            # Try line-based extraction
+            lines = response.split('\n')
+            result = {}
+            for line in lines:
+                if ':' not in line:
+                    continue
+                match = re.match(r'^\s*"?(\w+)"?\s*:\s*"([^"]*)"', line)
+                if match:
+                    result[match.group(1)] = match.group(2)
+            
+            return result if result else None
         except Exception as e:
             logger.debug(f"Manual extraction failed: {e}")
             return None
-
-    def _extract_with_regex_pattern(self, response: str) -> Optional[Dict[str, str]]:
-        """Extract key-value pairs using regex pattern."""
-        pattern = r'"([^"]+)"\s*:\s*"([^"]*)"'
-        matches = re.findall(pattern, response)
-        return {key: value for key, value in matches} if matches else None
-    
-    def _extract_from_lines(self, response: str) -> Dict[str, str]:
-        """Extract key-value pairs from lines"""
-        lines = response.split('\n')
-        result = {}
-        self._process_lines_for_key_values(lines, result)
-        return result if result else {}
-
-    def _process_lines_for_key_values(self, lines: list, result: dict) -> None:
-        """Process all lines for key-value extraction."""
-        for line in lines:
-            self._process_line_for_key_value(line, result)
-    
-    def _process_line_for_key_value(self, line: str, result: dict) -> None:
-        """Process a single line for key-value extraction."""
-        if ':' not in line:
-            return
-        key_match = self._extract_key_value_match(line)
-        if key_match:
-            self._store_key_value_pair(key_match, result)
-    
-    def _extract_key_value_match(self, line: str):
-        """Extract key-value match from line."""
-        return re.match(r'^\s*"?(\w+)"?\s*:\s*"([^"]*)"', line)
-    
-    def _store_key_value_pair(self, key_match, result: dict) -> None:
-        """Store extracted key-value pair in result."""
-        key = key_match.group(1)
-        value = key_match.group(2)
-        result[key] = value

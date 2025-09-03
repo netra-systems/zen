@@ -19,7 +19,8 @@ from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 from netra_backend.app.core.type_validators import agent_type_safe
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.logging_config import central_logger
-from netra_backend.app.schemas.registry import DeepAgentState
+from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext, validate_user_context
+from netra_backend.app.database.session_manager import DatabaseSessionManager
 from netra_backend.app.schemas.shared_types import ValidationResult, NestedJsonDict
 from netra_backend.app.schemas.strict_types import TypedAgentResult
 
@@ -106,28 +107,33 @@ class ValidationSubAgent(BaseAgent):
         self.logger.info("ValidationSubAgent initialized successfully")
     
     @agent_type_safe
-    async def execute(self, state: Optional[DeepAgentState], run_id: str = "", 
-                     stream_updates: bool = False) -> TypedAgentResult:
+    async def execute(self, context: UserExecutionContext, stream_updates: bool = False) -> TypedAgentResult:
         """Execute validation workflow with comprehensive WebSocket events."""
         start_time = time.time()
         
+        # Validate context
+        context = validate_user_context(context)
+        
         try:
+            # Create database session manager
+            session_mgr = DatabaseSessionManager(context)
+            
             # Emit thinking event (agent_started is handled by orchestrator)
             await self.emit_thinking("Starting comprehensive validation process")
             
-            # Validate input state
-            if not self._validate_execution_state(state):
-                await self.emit_error("Invalid execution state for validation")
-                return self._create_error_result("Invalid execution state", start_time)
+            # Validate input context
+            if not self._validate_execution_context(context):
+                await self.emit_error("Invalid execution context for validation")
+                return self._create_error_result("Invalid execution context", start_time)
             
             # Emit initial thinking
             await self.emit_thinking("Analyzing validation requirements and preparing validation suite...")
             
             # Extract validation request
-            validation_request = self._extract_validation_request(state)
+            validation_request = self._extract_validation_request(context)
             
             # Execute validation steps with progress updates
-            validation_results = await self._execute_validation_steps(validation_request, run_id)
+            validation_results = await self._execute_validation_steps(validation_request, context.run_id)
             
             # Generate validation summary
             await self.emit_progress("Generating validation summary and recommendations...")
@@ -158,28 +164,39 @@ class ValidationSubAgent(BaseAgent):
             await self.emit_error(f"ValidationSubAgent execution failed: {str(e)}")
             self.logger.error(f"ValidationSubAgent execution failed: {str(e)}")
             return self._create_error_result(str(e), start_time)
+        finally:
+            # Ensure proper cleanup
+            try:
+                if 'session_mgr' in locals():
+                    await session_mgr.cleanup()
+            except Exception as cleanup_e:
+                self.logger.error(f"Session cleanup error: {cleanup_e}")
     
     # execute_core_logic and validate_preconditions removed - single inheritance pattern
     # All execution logic is now in execute() method only
     
-    def _validate_execution_state(self, state: Optional[DeepAgentState]) -> bool:
-        """Validate execution state has required validation parameters."""
+    def _validate_execution_context(self, context: UserExecutionContext) -> bool:
+        """Validate execution context has required validation parameters."""
         return (
-            state and 
-            hasattr(state, 'agent_input') and 
-            state.agent_input is not None
+            context and 
+            context.metadata and 
+            ('agent_input' in context.metadata or 'validation_data' in context.metadata)
         )
     
-    def _extract_validation_request(self, state: DeepAgentState) -> ValidationRequest:
-        """Extract validation request parameters from state."""
-        agent_input = state.agent_input
+    def _extract_validation_request(self, context: UserExecutionContext) -> ValidationRequest:
+        """Extract validation request parameters from context."""
+        agent_input = context.metadata.get('agent_input', {})
+        validation_data = context.metadata.get('validation_data', {})
+        
+        # Merge both sources, with agent_input taking precedence
+        combined_data = {**validation_data, **agent_input}
         
         return ValidationRequest(
-            type=agent_input.get("validation_type", "comprehensive"),
-            target=agent_input.get("validation_target", "general"),
-            rules=agent_input.get("custom_rules", self.validation_rules),
-            strictness=agent_input.get("strictness_level", "standard"),
-            user_id=getattr(state, 'user_id', None)
+            type=combined_data.get("validation_type", "comprehensive"),
+            target=combined_data.get("validation_target", "general"),
+            rules=combined_data.get("custom_rules", self.validation_rules),
+            strictness=combined_data.get("strictness_level", "standard"),
+            user_id=context.user_id
         )
     
     async def _execute_validation_steps(self, request: ValidationRequest, run_id: str) -> List[ValidationRuleResult]:

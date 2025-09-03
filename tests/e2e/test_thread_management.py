@@ -93,6 +93,8 @@ class TestThreadManagementer:
             "data": data
         }
 
+# Alias for naming consistency
+ThreadManagementTester = TestThreadManagementer
 
 class ThreadBroadcastValidator:
     """Validates thread broadcast operations across connected clients."""

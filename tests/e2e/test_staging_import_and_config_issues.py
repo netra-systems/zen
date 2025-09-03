@@ -1,6 +1,5 @@
 """Additional test cases for staging deployment configuration issues.
 
-from shared.isolated_environment import get_env
 Tests for similar configuration migration problems that could cause staging failures.
 """
 
@@ -10,6 +9,9 @@ import pytest
 import asyncio
 import importlib
 from pathlib import Path
+from unittest.mock import patch
+
+from shared.isolated_environment import get_env
 
 # Setup path for imports
 from netra_backend.tests.test_utils import setup_test_path

@@ -1,10 +1,12 @@
 # Test Framework - Unified Test Infrastructure
 
-## ⚠️ IMPORTANT: Single Entry Point
+## ⚠️ IMPORTANT: Primary Test Runners
 
-**`test_runner.py`** (in the project root) is the ONLY entry point for all testing in the Netra AI Platform.
+**`tests/unified_test_runner.py`** is the PRIMARY test runner for the Netra AI Platform.
 
-DO NOT create alternative test runners. All test execution MUST go through `test_runner.py`.
+**Alternative runners for specific use cases:**
+- `test_framework/integrated_test_runner.py` - Alpine-based isolated testing
+- `scripts/docker_manual.py test` - Docker-integrated testing
 
 ## Overview
 
@@ -39,23 +41,28 @@ The Netra Test Framework provides a unified, modular testing infrastructure with
 ## Architecture
 
 ```
-test_runner.py                    # ⭐ SINGLE ENTRY POINT (project root)
+tests/
+└── unified_test_runner.py       # ⭐ PRIMARY TEST RUNNER
+
 test_framework/
 ├── __init__.py                  # Module exports
-├── runner.py                    # UnifiedTestRunner class
-├── test_runners.py              # Backend/Frontend/E2E execution
-├── test_config.py               # Test level configurations
-├── test_parser.py               # Output parsing utilities
-├── test_orchestrator.py         # Test orchestration logic
-├── test_suite_orchestrator.py   # Advanced orchestration engine
-├── unified_orchestrator.py      # ⭐ UNIFIED SERVICE ORCHESTRATOR
+├── unified_docker_manager.py    # ⭐ SSOT for Docker operations
+├── resource_monitor.py          # Resource usage monitoring
+├── environment_lock.py          # Thread-safe environment management
+├── docker_rate_limiter.py       # Docker API rate limiting
+├── docker_force_flag_guardian.py # Force flag prohibition
+├── integrated_test_runner.py    # Alpine-based isolated runner
+├── unified_orchestrator.py      # Service orchestration
+├── ssot/                        # SSOT test infrastructure
+│   ├── base_test_case.py        # Canonical base test class
+│   ├── mock_factory.py          # Single mock generator
+│   ├── database_test_utility.py # Unified database testing
+│   ├── websocket_test_utility.py # Unified WebSocket testing
+│   └── docker_test_utility.py   # Unified Docker testing
+├── test_discovery.py            # Test discovery engine
 ├── failure_pattern_analyzer.py  # Pattern recognition & analysis
 ├── report_generators.py         # Multi-format report generation
-├── report_manager.py            # Report management
-├── test_discovery.py            # Test discovery engine
-├── test_execution_engine.py     # Execution engine
-├── failing_test_runner.py       # Specialized failing test runner
-└── comprehensive_reporter.py    # Comprehensive reporting (single source of truth)
+└── comprehensive_reporter.py    # Comprehensive reporting
 ```
 
 ## Quick Start
@@ -63,38 +70,90 @@ test_framework/
 ### Basic Usage
 
 ```bash
-# Run smoke tests (quick validation) - MANDATORY before commits
-python test_runner.py --level smoke
+# Primary test runner (recommended)
+python tests/unified_test_runner.py --category unit --no-coverage --fast-fail
 
-# Run unit tests with coverage
-python test_runner.py --level unit
+# Run mission critical tests
+python tests/unified_test_runner.py --category mission_critical --real-services
 
-# Run comprehensive tests
-python test_runner.py --level comprehensive
+# Run with Docker services
+python tests/unified_test_runner.py --real-services  # Docker starts automatically
 
-# Run backend tests only
-python test_runner.py --level unit --backend-only
+# Run specific test categories
+python tests/unified_test_runner.py --categories smoke unit integration api
 
-# Run with real LLM calls
-python test_runner.py --level unit --real-llm
+# Alpine-based isolated testing
+python test_framework/integrated_test_runner.py --mode isolated --suites unit integration
 
-# Run only failing tests
-python test_runner.py --run-failing
-
-# ⭐ UNIFIED SERVICE ORCHESTRATOR - Run all tests with service startup
-python run_unified_tests.py              # Run all tests with services
-python run_unified_tests.py --sequential # Sequential execution
+# Docker manual operations
+python scripts/docker_manual.py start     # Start test environment
+python scripts/docker_manual.py test      # Run tests with Docker
+python scripts/docker_manual.py status    # Check status
 ```
 
-### Test Levels
+### Test Categories
 
-| Level | Description | Duration | Use Case |
-|-------|------------|----------|----------|
+| Category | Description | Duration | Use Case |
+|----------|------------|----------|----------|
 | `smoke` | Quick validation tests | < 30s | Pre-commit hooks |
 | `unit` | Isolated component tests | 1-2 min | Development |
 | `integration` | Component interaction tests | 3-5 min | Feature validation |
-| `comprehensive` | Full test suite | 10-15 min | Pre-release |
-| `critical` | Essential functionality | 1-2 min | Hotfixes |
+| `mission_critical` | Business-critical tests | 5-10 min | Pre-deployment |
+| `e2e` | End-to-end flows | 10-15 min | Pre-release |
+| `api` | API endpoint tests | 2-3 min | API validation |
+
+## 🚀 New Infrastructure Features (2025-09-02)
+
+### Resource Monitoring
+The framework now includes comprehensive resource monitoring to prevent system overload:
+
+```python
+from test_framework.resource_monitor import ResourceMonitor
+
+monitor = ResourceMonitor()
+monitor.start_monitoring()
+# Run tests...
+stats = monitor.get_stats()
+```
+
+**Features:**
+- Memory usage tracking and limits
+- CPU utilization monitoring  
+- Docker container resource tracking
+- Automatic test throttling when resources exceed thresholds
+
+### Environment Locking
+Thread-safe environment management prevents test conflicts:
+
+```python
+from test_framework.environment_lock import EnvironmentLock
+
+with EnvironmentLock("test_env"):
+    # Exclusive access to environment variables
+    os.environ["TEST_VAR"] = "value"
+```
+
+### Docker Rate Limiting
+Prevents Docker daemon crashes from excessive API calls:
+
+```python
+from test_framework.docker_rate_limiter import DockerRateLimiter
+
+limiter = DockerRateLimiter(max_calls_per_second=10)
+async with limiter:
+    # Docker operations are automatically rate-limited
+    pass
+```
+
+### Force Flag Guardian
+Enforces prohibition of dangerous Docker force operations:
+
+```python
+from test_framework.docker_force_flag_guardian import DockerForceGuardian
+
+guardian = DockerForceGuardian()
+guardian.validate_command(docker_cmd)  # Raises error if force flag detected
+```
 
 ## Components
 

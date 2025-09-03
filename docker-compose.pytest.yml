@@ -1,0 +1,337 @@
+# Specialized Docker Compose for PyTest Testing
+# Optimized for pytest collection and execution with enhanced resource monitoring
+# Usage: docker-compose -f docker-compose.pytest.yml up
+
+services:
+  # ============================================
+  # PYTEST-OPTIMIZED INFRASTRUCTURE
+  # ============================================
+  
+  pytest-postgres:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: pytest
+      POSTGRES_PASSWORD: pytest_pass
+      POSTGRES_DB: netra_pytest
+      POSTGRES_INITDB_ARGS: "--encoding=UTF8 --data-checksums"
+      # Pytest collection optimization
+      POSTGRES_LOG_STATEMENT: "none"
+      POSTGRES_LOG_MIN_DURATION_STATEMENT: "-1"
+    ports:
+      - "${PYTEST_POSTGRES_PORT:-5436}:5432"
+    volumes:
+      # Use named volume for persistent storage
+      - pytest-postgres-data:/var/lib/postgresql/data
+    command: |
+      postgres
+        -c shared_buffers=256MB
+        -c max_connections=200
+        -c fsync=off
+        -c synchronous_commit=off
+        -c full_page_writes=off
+        -c checkpoint_completion_target=0.9
+        -c wal_buffers=32MB
+        -c maintenance_work_mem=128MB
+        -c effective_cache_size=1GB
+        -c work_mem=8MB
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U pytest -d netra_pytest"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+      start_period: 45s
+    networks:
+      - pytest-network
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+          cpus: '1.0'
+        reservations:
+          memory: 1G
+    restart: no
+
+  pytest-redis:
+    image: redis:7-alpine
+    command: |
+      redis-server
+        --appendonly no
+        --save ""
+        --maxmemory 1gb
+        --maxmemory-policy allkeys-lru
+        --tcp-keepalive 60
+        --timeout 300
+        --databases 16
+    ports:
+      - "${PYTEST_REDIS_PORT:-6383}:6379"
+    volumes:
+      # Use named volume for persistent storage
+      - pytest-redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 15
+      start_period: 30s
+    networks:
+      - pytest-network
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+          cpus: '0.5'
+        reservations:
+          memory: 512M
+    restart: no
+
+  pytest-clickhouse:
+    image: clickhouse/clickhouse-server:23-alpine
+    environment:
+      CLICKHOUSE_DB: pytest_analytics
+      CLICKHOUSE_USER: pytest
+      CLICKHOUSE_PASSWORD: pytest_pass
+      CLICKHOUSE_DEFAULT_ACCESS_MANAGEMENT: 1
+      CLICKHOUSE_LOG_LEVEL: error
+      # Pytest-specific optimizations
+      CLICKHOUSE_MEMORY_LIMIT: "1G"
+    ports:
+      - "${PYTEST_CLICKHOUSE_HTTP:-8127}:8123"
+      - "${PYTEST_CLICKHOUSE_TCP:-9004}:9000"
+    volumes:
+      # Use named volume for persistent storage
+      - pytest-clickhouse-data:/var/lib/clickhouse
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O-", "http://localhost:8123/ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+      start_period: 60s
+    networks:
+      - pytest-network
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+          cpus: '1.0'
+        reservations:
+          memory: 1G
+    restart: no
+
+  # ============================================
+  # PYTEST APPLICATION SERVICES
+  # ============================================
+
+  pytest-backend:
+    image: netra-pytest-backend:latest
+    build:
+      context: .
+      dockerfile: docker/backend.alpine.Dockerfile
+      args:
+        BUILD_ENV: pytest
+      cache_from:
+        - python:3.11-alpine3.19
+    environment:
+      ENVIRONMENT: pytest
+      LOG_LEVEL: ERROR
+      POSTGRES_HOST: pytest-postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_USER: pytest
+      POSTGRES_PASSWORD: pytest_pass
+      POSTGRES_DB: netra_pytest
+      REDIS_HOST: pytest-redis
+      REDIS_PORT: 6379
+      CLICKHOUSE_HOST: pytest-clickhouse
+      CLICKHOUSE_PORT: 9000
+      AUTH_SERVICE_URL: http://pytest-auth:8081
+      PYTEST_MODE: "true"
+      TEST_MODE: "true"
+      WORKERS: 4
+      # Pytest collection optimizations
+      PYTEST_COLLECTION_TIMEOUT: "300"
+      PYTEST_EXECUTION_TIMEOUT: "1800"
+      # Memory optimization
+      MALLOC_ARENA_MAX: 4
+      PYTHONHASHSEED: 0
+    ports:
+      - "${PYTEST_BACKEND_PORT:-8003}:8000"
+    depends_on:
+      pytest-postgres:
+        condition: service_healthy
+      pytest-redis:
+        condition: service_healthy
+      pytest-clickhouse:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health", "||", "echo", "HEALTH_CHECK_FAILED"]
+      interval: 15s
+      timeout: 10s
+      retries: 20
+      start_period: 120s  # Extended for pytest collection
+    networks:
+      - pytest-network
+    deploy:
+      resources:
+        limits:
+          memory: 6G  # Higher for pytest collection
+          cpus: '2.0'
+        reservations:
+          memory: 3G
+    restart: no
+    # Memory monitoring
+    labels:
+      - "pytest.monitor=memory"
+      - "pytest.memory.warning=80"
+      - "pytest.memory.critical=90"
+
+  pytest-auth:
+    image: netra-pytest-auth:latest
+    build:
+      context: .
+      dockerfile: docker/auth.alpine.Dockerfile
+      args:
+        BUILD_ENV: pytest
+      cache_from:
+        - python:3.11-alpine3.19
+    environment:
+      ENVIRONMENT: pytest
+      LOG_LEVEL: ERROR
+      POSTGRES_HOST: pytest-postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_USER: pytest
+      POSTGRES_PASSWORD: pytest_pass
+      POSTGRES_DB: netra_pytest
+      REDIS_HOST: pytest-redis
+      REDIS_PORT: 6379
+      PYTEST_MODE: "true"
+      TEST_MODE: "true"
+      JWT_SECRET_KEY: pytest_jwt_secret_key
+      SERVICE_SECRET: pytest_service_secret
+      # Memory optimization
+      MALLOC_ARENA_MAX: 2
+      PYTHONHASHSEED: 0
+    ports:
+      - "${PYTEST_AUTH_PORT:-8084}:8081"
+    depends_on:
+      pytest-postgres:
+        condition: service_healthy
+      pytest-redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8081/health", "||", "echo", "HEALTH_CHECK_FAILED"]
+      interval: 15s
+      timeout: 10s
+      retries: 20
+      start_period: 120s  # Extended for pytest collection
+    networks:
+      - pytest-network
+    deploy:
+      resources:
+        limits:
+          memory: 3G  # Higher for pytest collection
+          cpus: '1.5'
+        reservations:
+          memory: 1.5G
+    restart: no
+    # Memory monitoring
+    labels:
+      - "pytest.monitor=memory"
+      - "pytest.memory.warning=80"
+      - "pytest.memory.critical=90"
+
+  pytest-frontend:
+    image: netra-pytest-frontend:latest
+    build:
+      context: .
+      dockerfile: docker/frontend.alpine.Dockerfile
+      args:
+        BUILD_ENV: pytest
+        NEXT_PUBLIC_API_URL: http://pytest-backend:8000
+        NEXT_PUBLIC_AUTH_URL: http://pytest-auth:8081
+        NEXT_PUBLIC_WS_URL: ws://pytest-backend:8000
+        NEXT_PUBLIC_ENVIRONMENT: pytest
+      cache_from:
+        - node:20-alpine3.19
+    environment:
+      NODE_ENV: test
+      PORT: 3000
+      # Pytest optimizations
+      NODE_OPTIONS: "--max-old-space-size=2048"
+    ports:
+      - "${PYTEST_FRONTEND_PORT:-3003}:3000"
+    depends_on:
+      pytest-backend:
+        condition: service_healthy
+      pytest-auth:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/api/health", "||", "echo", "HEALTH_CHECK_FAILED"]
+      interval: 20s
+      timeout: 15s
+      retries: 15
+      start_period: 180s  # Extended for pytest collection
+    networks:
+      - pytest-network
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+          cpus: '1.0'
+        reservations:
+          memory: 1G
+    restart: no
+    # Memory monitoring
+    labels:
+      - "pytest.monitor=memory"
+      - "pytest.memory.warning=80"
+      - "pytest.memory.critical=90"
+
+  # ============================================
+  # PYTEST RESOURCE MONITORING
+  # ============================================
+
+  pytest-monitor:
+    image: alpine:3.19
+    command: |
+      sh -c '
+        apk add --no-cache curl docker-cli &&
+        while true; do
+          echo "=== Memory Usage Report $(date) ==="
+          echo "Backend Memory:"
+          docker stats pytest-backend --no-stream --format "{{.MemUsage}}" || echo "N/A"
+          echo "Auth Memory:"
+          docker stats pytest-auth --no-stream --format "{{.MemUsage}}" || echo "N/A"
+          echo "Postgres Memory:"
+          docker stats pytest-postgres --no-stream --format "{{.MemUsage}}" || echo "N/A"
+          echo "=================================="
+          sleep 30
+        done
+      '
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    depends_on:
+      - pytest-backend
+      - pytest-auth
+      - pytest-postgres
+    networks:
+      - pytest-network
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+          cpus: '0.1'
+        reservations:
+          memory: 64M
+    restart: no
+
+networks:
+  pytest-network:
+    driver: bridge
+    driver_opts:
+      com.docker.network.driver.mtu: 1500
+      com.docker.network.bridge.name: pytest-br0
+
+# Named volumes for persistent storage
+volumes:
+  pytest-postgres-data:
+  pytest-redis-data:
+  pytest-clickhouse-data:

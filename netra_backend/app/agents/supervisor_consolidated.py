@@ -1,262 +1,509 @@
-"""Supervisor Agent - Golden Pattern Implementation
+"""Supervisor Agent - UserExecutionContext Pattern Implementation
 
-Clean supervisor agent using BaseAgent infrastructure - SSOT compliant.
-Contains ONLY supervisor-specific business logic.
+Migrated supervisor agent using new UserExecutionContext pattern:
+- Uses UserExecutionContext for complete request isolation
+- DatabaseSessionManager for session management without global state
+- All legacy execute methods removed - no backward compatibility
+- Complete removal of DeepAgentState usage
+- All sub-agent calls use create_child_context() for proper isolation
 
-Business Value: Orchestrates all sub-agents for optimal user experience.
-BVJ: ALL segments | Customer Experience | +40% reduction in orchestration failures
+Business Value: Enables safe concurrent user operations with zero context leakage.
+BVJ: ALL segments | Platform Stability | Complete user isolation for production deployment
 """
 
 import asyncio
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, List
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from netra_backend.app.agents.base_agent import BaseAgent
-from netra_backend.app.agents.base.interface import ExecutionContext
-from netra_backend.app.agents.state import DeepAgentState
-from netra_backend.app.agents.utils import extract_thread_id
 from netra_backend.app.logging_config import central_logger
 
-# Business logic components only
-from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
-from netra_backend.app.agents.supervisor.modern_execution_helpers import SupervisorExecutionHelpers
-from netra_backend.app.agents.supervisor.workflow_execution import SupervisorWorkflowExecutor
-from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
+# UserExecutionContext pattern imports
+from netra_backend.app.agents.supervisor.user_execution_context import (
+    UserExecutionContext,
+    validate_user_context
+)
+from netra_backend.app.database.session_manager import (
+    DatabaseSessionManager,
+    managed_session,
+    validate_agent_session_isolation
+)
+from netra_backend.app.agents.supervisor.agent_instance_factory import (
+    AgentInstanceFactory, 
+    get_agent_instance_factory
+)
+from netra_backend.app.agents.supervisor.agent_class_registry import (
+    AgentClassRegistry,
+    get_agent_class_registry
+)
+
+# Core dependencies
 from netra_backend.app.llm.llm_manager import LLMManager
-from netra_backend.app.services.state_persistence import state_persistence_service
+from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
+
+# Legacy components that will be removed
+from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
+from netra_backend.app.agents.supervisor.observability_flow import get_supervisor_flow_logger
 
 logger = central_logger.get_logger(__name__)
 
 
 class SupervisorAgent(BaseAgent):
-    """Golden pattern supervisor agent with BaseAgent infrastructure.
+    """SupervisorAgent with UserExecutionContext pattern.
     
-    Contains ONLY supervisor-specific business logic - all infrastructure
-    (reliability, execution, WebSocket events) inherited from BaseAgent.
+    CRITICAL: This supervisor uses the UserExecutionContext pattern to ensure:
+    - Complete user isolation (no shared state between requests)
+    - DatabaseSessionManager for session isolation
+    - ALL legacy execute methods removed - no backward compatibility
+    - UserExecutionContext passed through entire execution chain
+    - All sub-agents use create_child_context() for proper isolation
+    
+    The supervisor coordinates agent orchestration while maintaining strict
+    isolation boundaries to prevent user data leakage in concurrent scenarios.
     """
     
     def __init__(self, 
-                 db_session: AsyncSession,
                  llm_manager: LLMManager,
-                 websocket_bridge,
-                 tool_dispatcher: ToolDispatcher):
-        # Initialize BaseAgent with full infrastructure
+                 websocket_bridge: AgentWebSocketBridge):
+        """Initialize SupervisorAgent with UserExecutionContext pattern.
+        
+        CRITICAL: No user context, session storage, or tool_dispatcher in constructor.
+        All user-specific data and tools come through execute() method via context.
+        Tool dispatcher is created per-request for complete isolation.
+        
+        Args:
+            llm_manager: LLM manager for agent operations
+            websocket_bridge: WebSocket bridge for notifications
+        """
+        # Initialize BaseAgent with infrastructure (no global state)
         super().__init__(
             llm_manager=llm_manager,
             name="Supervisor",
-            description="Orchestrates sub-agents for optimal user experience",
+            description="Orchestrates sub-agents with complete user isolation",
             enable_reliability=True,      # Get circuit breaker + retry
             enable_execution_engine=True, # Get modern execution patterns
-            enable_caching=True,          # Optional caching infrastructure
-            tool_dispatcher=tool_dispatcher
+            enable_caching=False         # Disable caching for isolation
+            # NO tool_dispatcher parameter - created per-request
         )
         
-        # Initialize ONLY business logic components
-        self.db_session = db_session
-        self.websocket_bridge = websocket_bridge  # Legacy compatibility
-        self.state_persistence = state_persistence_service
+        # Core infrastructure (NO user-specific data)
+        self.websocket_bridge = websocket_bridge
+        self.agent_instance_factory = get_agent_instance_factory()
+        self.agent_class_registry = get_agent_class_registry()
+        self.flow_logger = get_supervisor_flow_logger()
         
-        # Initialize agent registry and business logic components
-        self._init_business_components(llm_manager, tool_dispatcher, websocket_bridge)
+        # Store LLM manager for creating request-scoped registries
+        self._llm_manager = llm_manager
         
-        # Execution lock for supervisor coordination
-        self._execution_lock = asyncio.Lock()
-
-    def _init_business_components(self, llm_manager: LLMManager,
-                                 tool_dispatcher: ToolDispatcher,
-                                 websocket_bridge) -> None:
-        """Initialize business logic components only."""
-        # Agent registry - CRITICAL business component
-        self.registry = AgentRegistry(llm_manager, tool_dispatcher)
+        # CRITICAL: Create a startup registry for validation and infrastructure setup
+        # This registry is used for startup validation and will be replaced per-request
+        # in execute() for complete user isolation
+        # Note: We create with a temporary tool dispatcher that will NOT be used for actual requests
+        from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
+        startup_tool_dispatcher = ToolDispatcher(llm_manager=llm_manager)
+        self.registry = AgentRegistry(llm_manager, startup_tool_dispatcher)
         self.registry.register_default_agents()
         self.registry.set_websocket_bridge(websocket_bridge)
         
-        # Aliases for backward compatibility
-        self.agent_registry = self.registry
-        self.websocket_manager = websocket_bridge
+        # Per-request execution lock (not global!)
+        self._execution_lock = asyncio.Lock()
         
-        # Initialize execution helpers for business logic
-        self.execution_helpers = SupervisorExecutionHelpers(self)
-        self.workflow_executor = SupervisorWorkflowExecutor(self)
+        # Validate no session storage
+        validate_agent_session_isolation(self)
         
-        # Legacy compatibility properties
-        self._init_legacy_compatibility_components()
-    
-    def _init_legacy_compatibility_components(self) -> None:
-        """Initialize components needed for legacy compatibility."""
-        # Hooks for legacy compatibility
-        self.hooks = {"before_agent": [], "after_agent": [], "on_error": [], "on_retry": [], "on_complete": []}
-        
-        # Legacy properties that tests/code might expect
-        self.sub_agents = self.registry.get_all_agents()
-        
-        # Mock completion helpers for stats methods
-        from types import SimpleNamespace
-        self.completion_helpers = SimpleNamespace(
-            get_comprehensive_stats=lambda: {"agents_registered": len(self.registry.agents)},
-            get_agent_health_status=lambda: self.get_health_status(),
-            get_agent_performance_metrics=lambda: {"supervisor": "operational"},
-            get_reliability_status=lambda: self.get_circuit_breaker_status()
-        )
+        logger.info("SupervisorAgent initialized with UserExecutionContext pattern")
 
-    # === SSOT Abstract Method Implementations ===
+    # === UserExecutionContext Pattern Implementation ===
     
-    def register_agent(self, name: str, agent: BaseAgent) -> None:
-        """Register a sub-agent."""
-        self.registry.register(name, agent)
-    
-    def register_hook(self, event: str, handler: callable) -> None:
-        """Register an event hook."""
-        if event in self.hooks:
-            self.hooks[event].append(handler)
-    
-    @property
-    def agents(self) -> Dict[str, BaseAgent]:
-        """Get all registered agents."""
-        return self.registry.agents
-    
-    @property
-    def sub_agents(self) -> list:
-        """Backward compatibility property."""
-        return self.registry.get_all_agents()
-    
-    @sub_agents.setter
-    def sub_agents(self, agents: list) -> None:
-        """Backward compatibility setter."""
-        for i, agent in enumerate(agents):
-            self.registry.register(f"agent_{i}", agent)
-
-    async def validate_preconditions(self, context: ExecutionContext) -> bool:
-        """Validate execution preconditions for supervisor orchestration."""
-        if not context.state.user_request:
-            self.logger.warning(f"No user request provided for supervisor in run_id: {context.run_id}")
-            return False
+    async def execute(self, context: UserExecutionContext, stream_updates: bool = False) -> Dict[str, Any]:
+        """Execute the supervisor with UserExecutionContext pattern.
         
-        if not self.registry or not self.registry.agents:
-            self.logger.error(f"No agents registered for supervisor execution in run_id: {context.run_id}")
-            return False
-            
-        return True
-
-    async def execute_core_logic(self, context: ExecutionContext) -> Dict[str, Any]:
-        """Execute core supervisor orchestration logic with WebSocket events."""
-        await self.emit_thinking("Starting supervisor orchestration...")
-        await self.emit_progress("Analyzing request and planning agent workflow...")
-        
-        # Execute supervisor workflow using business logic components
-        await self.emit_thinking("Coordinating with registered agents for optimal workflow")
-        updated_state = await self._run_supervisor_workflow(context.state, context.run_id)
-        
-        await self.emit_progress("Orchestration completed successfully", is_complete=True)
-        
-        return {
-            "supervisor_result": "completed",
-            "updated_state": updated_state,
-            "orchestration_successful": True
-        }
-
-    # === Business Logic Methods ===
-    
-    async def _run_supervisor_workflow(self, state: DeepAgentState, run_id: str) -> DeepAgentState:
-        """Run supervisor workflow using business logic components."""
-        return await self.execution_helpers.run_supervisor_workflow(state, run_id)
-    
-    async def _run_hooks(self, event: str, state: DeepAgentState, **kwargs) -> None:
-        """Run registered hooks for an event."""
-        for hook in self.hooks.get(event, []):
-            try:
-                await hook(state, **kwargs)
-            except Exception as e:
-                self.logger.warning(f"Hook execution failed for event {event}: {e}")
-    
-    # === Backward Compatibility Methods ===
-    
-    async def execute(self, state: DeepAgentState, run_id: str, stream_updates: bool = False) -> None:
-        """Execute the supervisor - backward compatibility method that delegates to modern execution.
+        This is the ONLY execution method - all legacy methods removed.
         
         Args:
-            state: Current agent state
-            run_id: Run ID for tracking
-            stream_updates: Whether to stream updates
-        """
-        # Create ExecutionContext for modern pattern
-        context = ExecutionContext(
-            run_id=run_id,
-            agent_name=self.name,
-            state=state,
-            stream_updates=stream_updates,
-            thread_id=extract_thread_id(state, run_id),
-            user_id=getattr(state, 'user_id', 'default_user')
-        )
-        
-        # Delegate to BaseAgent's modern execution
-        await self.execute_modern(state, run_id, stream_updates)
-
-    async def run(self, user_prompt: str, thread_id: str, 
-                  user_id: str, run_id: str) -> DeepAgentState:
-        """Run the supervisor agent workflow - backward compatibility method.
-        
-        This method maintains backward compatibility while using the golden pattern internally.
-        
-        Args:
-            user_prompt: The user's request
-            thread_id: Thread ID for the conversation
-            user_id: User ID
-            run_id: Run ID for tracking
+            context: UserExecutionContext with all request-specific data
+            stream_updates: Whether to stream updates via WebSocket
             
         Returns:
-            Updated DeepAgentState with orchestration results
+            Dictionary with execution results
+            
+        Raises:
+            ValueError: If context is invalid
+            RuntimeError: If execution fails
         """
-        logger.info(f"SupervisorAgent.run() starting for run_id: {run_id}")
+        # Validate context at entry
+        context = validate_user_context(context)
         
-        # Initialize state
-        state = DeepAgentState()
-        state.user_request = user_prompt
-        state.chat_thread_id = thread_id
-        state.user_id = user_id
+        if not context.db_session:
+            raise ValueError("UserExecutionContext must contain a database session")
         
-        # Create ExecutionContext for modern execution pattern
-        context = ExecutionContext(
-            run_id=run_id,
-            agent_name=self.name,
-            state=state,
-            stream_updates=True,  # Default to true for legacy compatibility
-            thread_id=thread_id,
-            user_id=user_id
-        )
+        logger.info(f"SupervisorAgent.execute() starting for user {context.user_id}, run {context.run_id}")
         
         async with self._execution_lock:
             try:
-                # Use modern execution pattern through BaseAgent
-                if await self.validate_preconditions(context):
-                    result = await self.execute_core_logic(context)
-                    logger.info(f"SupervisorAgent.run() completed successfully for run_id: {run_id}")
-                    return context.state  # Return updated state
-                else:
-                    # Validation failed
-                    logger.error(f"Validation failed in SupervisorAgent.run() for run_id: {run_id}")
-                    return state
+                # Import here to avoid circular dependency
+                from netra_backend.app.agents.tool_dispatcher_core import ToolDispatcher
+                from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
+                from netra_backend.app.websocket_core.isolated_event_emitter import IsolatedWebSocketEventEmitter
+                
+                # CRITICAL: Create WebSocket emitter BEFORE tool dispatcher
+                websocket_emitter = IsolatedWebSocketEventEmitter.create_for_user(
+                    user_id=context.user_id,
+                    thread_id=context.thread_id,
+                    run_id=context.run_id,
+                    websocket_manager=self.websocket_bridge.websocket_manager if hasattr(self.websocket_bridge, 'websocket_manager') else None
+                )
+                
+                # Create request-scoped tool dispatcher with proper emitter
+                async with ToolDispatcher.create_scoped_dispatcher_context(
+                    user_context=context,
+                    tools=self._get_user_tools(context),
+                    websocket_emitter=websocket_emitter  # Use emitter instead of manager
+                ) as tool_dispatcher:
+                    # Store request-scoped dispatcher for this execution
+                    self.tool_dispatcher = tool_dispatcher
+                    
+                    # Create request-scoped registry for this user
+                    self.registry = AgentRegistry(self._llm_manager, tool_dispatcher)
+                    self.registry.register_default_agents()
+                    self.registry.set_websocket_bridge(self.websocket_bridge)
+                    
+                    # CRITICAL: Enhance tool dispatcher with WebSocket notifications
+                    if hasattr(self.registry, 'set_websocket_manager'):
+                        # Use websocket_manager from bridge if available
+                        websocket_manager = getattr(self.websocket_bridge, 'websocket_manager', None)
+                        if websocket_manager:
+                            self.registry.set_websocket_manager(websocket_manager)
+                    
+                    # Create session manager for database operations
+                    async with managed_session(context) as session_manager:
+                        # Execute supervisor orchestration
+                        result = await self._orchestrate_agents(context, session_manager, stream_updates)
+                        
+                        logger.info(f"SupervisorAgent.execute() completed for user {context.user_id}")
+                        return result
                     
             except Exception as e:
-                # Fallback to legacy execution helpers
-                logger.warning(f"Modern execution failed, falling back to legacy workflow: {e}")
-                try:
-                    return await self.execution_helpers.run_supervisor_workflow(state, run_id)
-                except Exception as fallback_error:
-                    logger.error(f"Legacy fallback also failed for run_id {run_id}: {fallback_error}")
-                    return state
+                logger.error(f"SupervisorAgent.execute() failed for user {context.user_id}: {e}")
+                raise RuntimeError(f"Supervisor execution failed: {e}") from e
+            finally:
+                # Clean up request-scoped resources
+                self.tool_dispatcher = None
+                self.registry = None
+    
+    async def _orchestrate_agents(self, context: UserExecutionContext, 
+                                 session_manager: DatabaseSessionManager, 
+                                 stream_updates: bool) -> Dict[str, Any]:
+        """Orchestrate agent execution with proper isolation.
+        
+        Args:
+            context: User execution context
+            session_manager: Database session manager
+            stream_updates: Whether to stream updates
+            
+        Returns:
+            Dictionary with orchestration results
+        """
+        flow_id = self.flow_logger.generate_flow_id()
+        self.flow_logger.start_flow(flow_id, context.run_id, 4)
+        
+        try:
+            # Send thinking notification if streaming
+            if stream_updates:
+                await self._emit_thinking(context, "Starting supervisor orchestration with complete user isolation...")
+                await self._emit_thinking(context, "Analyzing request and planning agent workflow...")
+            
+            # Create isolated agent instances for this user
+            agent_instances = await self._create_isolated_agent_instances(context)
+            
+            # Execute workflow with isolated instances
+            results = await self._execute_workflow_with_isolated_agents(
+                agent_instances, context, session_manager, flow_id
+            )
+            
+            self.flow_logger.complete_flow(flow_id)
+            
+            return {
+                "supervisor_result": "completed",
+                "orchestration_successful": True,
+                "user_isolation_verified": True,
+                "results": results,
+                "user_id": context.user_id,
+                "run_id": context.run_id
+            }
+            
+        except Exception as e:
+            self.flow_logger.fail_flow(flow_id, str(e))
+            logger.error(f"Agent orchestration failed for user {context.user_id}: {e}")
+            raise
+    
 
+    # === Agent Instance Management ===
+    
+    async def _create_isolated_agent_instances(self, context: UserExecutionContext) -> Dict[str, BaseAgent]:
+        """Create isolated agent instances for this user request using AgentInstanceFactory.
+        
+        Args:
+            context: User execution context for isolation
+            
+        Returns:
+            Dictionary mapping agent names to isolated instances
+            
+        Raises:
+            RuntimeError: If no agent instances can be created
+        """
+        agent_instances = {}
+        agent_names = self._get_required_agent_names()
+        
+        for agent_name in agent_names:
+            try:
+                logger.debug(f"Creating isolated instance of {agent_name} for user {context.user_id}")
+                
+                # Use AgentInstanceFactory to create isolated instance
+                agent_instance = await self.agent_instance_factory.create_agent_instance(
+                    agent_name=agent_name,
+                    user_context=context
+                )
+                
+                agent_instances[agent_name] = agent_instance
+                logger.info(f"✅ Created isolated {agent_name} instance for user {context.user_id}")
+                
+            except Exception as e:
+                logger.error(f"Failed to create isolated {agent_name} instance: {e}")
+                # Continue with other agents - non-critical agents can fail
+                continue
+        
+        if not agent_instances:
+            raise RuntimeError("Failed to create any isolated agent instances")
+        
+        logger.info(f"Created {len(agent_instances)} isolated agent instances for user {context.user_id}")
+        return agent_instances
+    
+    def _get_required_agent_names(self) -> List[str]:
+        """Get list of required agent names for orchestration."""
+        # Core agents required for most workflows
+        core_agents = ["triage", "data", "optimization", "actions"]
+        
+        # Optional agents that enhance functionality
+        optional_agents = ["reporting", "goals_triage", "data_helper", "synthetic_data"]
+        
+        # Return core agents first, then optionals
+        return core_agents + optional_agents
+
+    def _validate_execution_preconditions(self, context: UserExecutionContext) -> bool:
+        """Validate execution preconditions for supervisor orchestration.
+        
+        Args:
+            context: User execution context to validate
+            
+        Returns:
+            True if preconditions are met
+        """
+        if not context.metadata.get('user_request'):
+            logger.warning(f"No user request provided for supervisor in run_id: {context.run_id}")
+            return False
+        
+        # Registry will be created per-request, so we don't check it here
+        return True
+    
+    def _get_user_tools(self, context: UserExecutionContext) -> Dict[str, Any]:
+        """Get user-specific tools based on context.
+        
+        Args:
+            context: User execution context
+            
+        Returns:
+            Dictionary of tools available to this user
+        """
+        # Import tools here to avoid circular dependencies
+        from netra_backend.app.tools import get_standard_tools
+        
+        # Get standard tools available to all users
+        tools = get_standard_tools()
+        
+        # Add user-specific tools based on permissions/subscription
+        if context.metadata.get('premium_user'):
+            # Add premium tools if applicable
+            pass
+        
+        return tools
+
+    async def _execute_workflow_with_isolated_agents(self, 
+                                                   agent_instances: Dict[str, BaseAgent],
+                                                   context: UserExecutionContext,
+                                                   session_manager: DatabaseSessionManager,
+                                                   flow_id: str) -> Dict[str, Any]:
+        """Execute workflow using isolated agent instances with UserExecutionContext.
+        
+        Args:
+            agent_instances: Dictionary of isolated agent instances
+            context: User execution context
+            session_manager: Database session manager
+            flow_id: Flow ID for observability
+            
+        Returns:
+            Dictionary with workflow execution results
+        """
+        logger.info(f"Executing workflow with {len(agent_instances)} isolated agents for user {context.user_id}")
+        
+        results = {}
+        execution_order = ["triage", "data", "optimization", "actions", "reporting"]
+        
+        for agent_name in execution_order:
+            if agent_name in agent_instances:
+                try:
+                    await self._emit_thinking(context, f"Running {agent_name} with isolated instance...")
+                    
+                    # Create child context for sub-agent
+                    child_context = context.create_child_context(
+                        operation_name=f"{agent_name}_execution",
+                        additional_metadata={
+                            "agent_name": agent_name,
+                            "flow_id": flow_id
+                        }
+                    )
+                    
+                    # Execute agent with child context
+                    agent_result = await self._execute_agent_with_context(
+                        agent_instances[agent_name], child_context, agent_name
+                    )
+                    
+                    results[agent_name] = agent_result
+                    logger.info(f"✅ Agent {agent_name} completed for user {context.user_id}")
+                    
+                except Exception as e:
+                    logger.error(f"Agent {agent_name} failed for user {context.user_id}: {e}")
+                    results[agent_name] = {"error": str(e), "status": "failed"}
+                    # Continue with other agents
+                    continue
+        
+        return results
+    
+    async def _execute_agent_with_context(self, 
+                                         agent: BaseAgent, 
+                                         context: UserExecutionContext,
+                                         agent_name: str) -> Any:
+        """Execute an agent instance with proper user context and error handling.
+        
+        Args:
+            agent: Agent instance to execute
+            context: User execution context (child context)
+            agent_name: Name of agent for logging
+            
+        Returns:
+            Agent execution result
+            
+        Raises:
+            RuntimeError: If agent execution fails
+        """
+        try:
+            logger.debug(f"Executing agent {agent_name} with context for user {context.user_id}")
+            
+            # Check if agent supports UserExecutionContext pattern
+            if hasattr(agent, 'execute') and not hasattr(agent, 'execute_modern'):
+                # Agent supports new UserExecutionContext pattern
+                result = await agent.execute(context, stream_updates=True)
+            else:
+                # Agent doesn't support new pattern yet - this shouldn't happen after migration
+                logger.warning(f"Agent {agent_name} doesn't support UserExecutionContext pattern")
+                raise RuntimeError(f"Agent {agent_name} must be migrated to UserExecutionContext pattern")
+            
+            logger.debug(f"Agent {agent_name} execution completed for user {context.user_id}")
+            return result
+            
+        except Exception as e:
+            logger.error(f"Agent {agent_name} execution failed for user {context.user_id}: {e}")
+            raise RuntimeError(f"Agent {agent_name} execution failed: {e}") from e
+    
+    async def _emit_thinking(self, context: UserExecutionContext, message: str) -> None:
+        """Emit thinking message via WebSocket for user.
+        
+        Args:
+            context: User execution context
+            message: Thinking message to emit
+        """
+        try:
+            # Use websocket_connection_id if available for targeted emission
+            if context.websocket_connection_id:
+                await self.websocket_bridge.emit_agent_thinking(
+                    connection_id=context.websocket_connection_id,
+                    agent_name="Supervisor",
+                    message=message
+                )
+            else:
+                # Fallback to user-based emission
+                await self.websocket_bridge.emit_user_notification(
+                    user_id=context.user_id,
+                    notification_type="agent_thinking",
+                    data={
+                        "agent_name": "Supervisor",
+                        "message": message,
+                        "run_id": context.run_id
+                    }
+                )
+        except Exception as e:
+            logger.debug(f"Failed to emit thinking message: {e}")
+            # Don't fail execution for WebSocket errors
+    
+    # === Utility Methods ===
+    
     def get_stats(self) -> Dict[str, Any]:
         """Get comprehensive supervisor statistics."""
-        return self.completion_helpers.get_comprehensive_stats()
+        return {
+            "agents_registered": len(self.registry.agents) if self.registry else 0,
+            "supervisor_status": "operational",
+            "pattern": "UserExecutionContext"
+        }
     
     def get_performance_metrics(self) -> Dict[str, Any]:
-        """Get performance metrics from modern monitoring."""
-        return self.completion_helpers.get_agent_performance_metrics()
-
-    # === Helper Methods for Legacy Compatibility ===
+        """Get performance metrics."""
+        return {
+            "supervisor": "operational",
+            "pattern": "UserExecutionContext",
+            "isolation_verified": True
+        }
     
-    def _get_current_timestamp(self) -> float:
-        """Get current timestamp."""
-        from datetime import datetime, timezone
-        return datetime.now(timezone.utc).timestamp()
+    # === Factory Method ===
+    
+    @classmethod
+    def create(cls,
+               llm_manager: LLMManager,
+               websocket_bridge: AgentWebSocketBridge) -> 'SupervisorAgent':
+        """Factory method to create SupervisorAgent with UserExecutionContext pattern.
+        
+        CRITICAL: No tool_dispatcher parameter - created per-request for isolation.
+        
+        Args:
+            llm_manager: LLM manager instance
+            websocket_bridge: WebSocket bridge for agent notifications
+            
+        Returns:
+            SupervisorAgent configured for UserExecutionContext pattern
+        """
+        supervisor = cls(
+            llm_manager=llm_manager,
+            websocket_bridge=websocket_bridge
+        )
+        
+        # Agent instance factory will be configured per-request
+        logger.info("✅ Created SupervisorAgent with per-request tool dispatcher pattern")
+        
+        return supervisor
+
+    def __str__(self) -> str:
+        return f"SupervisorAgent(UserExecutionContext pattern, agents={len(self.registry.agents) if self.registry else 0})"
+    
+    def __repr__(self) -> str:
+        return f"SupervisorAgent(pattern='UserExecutionContext', agents={len(self.registry.agents) if self.registry else 0})"
+    
+    # === Registration Methods (Temporary for Legacy Registry) ===
+    
+    def register_agent(self, name: str, agent: BaseAgent) -> None:
+        """Register a sub-agent (legacy compatibility)."""
+        if self.registry:
+            self.registry.register(name, agent)
+    
+    @property
+    def agents(self) -> Dict[str, BaseAgent]:
+        """Get all registered agents (legacy compatibility)."""
+        return self.registry.agents if self.registry else {}

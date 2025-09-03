@@ -35,7 +35,7 @@ class TestWebSocketMessaginger:
     def __init__(self):
         self.harness = TestHarness()
         self.jwt_helper = JWTTestHelper()
-        self.connections: Dict[str, websockets.WebSocketClientProtocol] = {}
+        self.connections: Dict[str, websockets.ClientConnection] = {}
         self.message_log: Dict[str, List[Dict]] = {}
         self.state_tracker: Dict[str, Any] = {}
     

@@ -903,6 +903,678 @@ class TestDockerDaemonRestart:
         assert retry_success_rate >= 70, f"Operation retry success rate too low: {retry_success_rate:.1f}%"
 
 
+class TestResourceLimitBoundaries:
+    """Test Docker resource limit boundary conditions and edge cases."""
+    
+    def test_memory_limit_boundary_conditions(self, edge_case_framework):
+        """Test memory limits at boundary conditions (very low/high values)."""
+        logger.info("🧠 Testing memory limit boundary conditions")
+        
+        boundary_tests = [
+            ('tiny_memory', '16m'),      # Very small memory limit
+            ('small_memory', '32m'),     # Small but reasonable
+            ('normal_memory', '128m'),   # Normal size
+            ('large_memory', '512m'),    # Larger allocation
+        ]
+        
+        successful_deployments = 0
+        memory_violations = 0
+        
+        for test_name, memory_limit in boundary_tests:
+            container_name = f'memory_boundary_{test_name}_{uuid.uuid4().hex[:6]}'
+            
+            try:
+                # Create container with specific memory limit
+                result = execute_docker_command([
+                    'docker', 'create', '--name', container_name,
+                    '--memory', memory_limit,
+                    '--memory-reservation', memory_limit,
+                    'alpine:latest', 'sleep', '60'
+                ])
+                
+                if result.returncode == 0:
+                    edge_case_framework.test_containers.append(container_name)
+                    successful_deployments += 1
+                    
+                    # Verify memory limit is set correctly
+                    inspect_result = execute_docker_command([
+                        'docker', 'inspect', container_name, '--format', '{{.HostConfig.Memory}}'
+                    ])
+                    
+                    if inspect_result.returncode == 0:
+                        try:
+                            memory_bytes = int(inspect_result.stdout.strip())
+                            expected_bytes = int(memory_limit.replace('m', '')) * 1024 * 1024
+                            
+                            if memory_bytes != expected_bytes:
+                                memory_violations += 1
+                                logger.warning(f"Memory limit mismatch for {test_name}: {memory_bytes} != {expected_bytes}")
+                        except ValueError:
+                            memory_violations += 1
+                            logger.warning(f"Could not parse memory limit for {test_name}")
+                    
+                    # Try to start container to test actual resource application
+                    start_result = execute_docker_command(['docker', 'start', container_name])
+                    if start_result.returncode == 0:
+                        time.sleep(2)
+                        # Stop it after brief run
+                        execute_docker_command(['docker', 'stop', container_name])
+                else:
+                    logger.warning(f"Failed to create container with {memory_limit} memory: {result.stderr}")
+                    
+            except Exception as e:
+                logger.error(f"Memory boundary test {test_name} failed: {e}")
+        
+        success_rate = successful_deployments / len(boundary_tests) * 100
+        logger.info(f"✅ Memory boundary tests: {success_rate:.1f}% success rate, {memory_violations} violations")
+        
+        assert success_rate >= 75, f"Memory boundary test success rate too low: {success_rate:.1f}%"
+        assert memory_violations == 0, f"Memory limit violations detected: {memory_violations}"
+    
+    def test_cpu_limit_boundary_conditions(self, edge_case_framework):
+        """Test CPU limits at boundary conditions."""
+        logger.info("⚙️ Testing CPU limit boundary conditions")
+        
+        cpu_tests = [
+            ('minimal_cpu', '0.1'),     # Very minimal CPU
+            ('quarter_cpu', '0.25'),    # Quarter CPU
+            ('half_cpu', '0.5'),        # Half CPU
+            ('full_cpu', '1.0'),        # Full CPU
+            ('multi_cpu', '2.0')        # Multiple CPUs
+        ]
+        
+        successful_cpu_limits = 0
+        cpu_verification_failures = 0
+        
+        for test_name, cpu_limit in cpu_tests:
+            container_name = f'cpu_boundary_{test_name}_{uuid.uuid4().hex[:6]}'
+            
+            try:
+                # Create container with specific CPU limit
+                result = execute_docker_command([
+                    'docker', 'create', '--name', container_name,
+                    '--cpus', cpu_limit,
+                    'alpine:latest', 'sh', '-c', 'while true; do echo cpu test; sleep 1; done'
+                ])
+                
+                if result.returncode == 0:
+                    edge_case_framework.test_containers.append(container_name)
+                    successful_cpu_limits += 1
+                    
+                    # Start container to test CPU limits
+                    start_result = execute_docker_command(['docker', 'start', container_name])
+                    if start_result.returncode == 0:
+                        time.sleep(3)  # Let it run briefly
+                        
+                        # Check container stats to verify CPU usage
+                        stats_result = execute_docker_command([
+                            'docker', 'stats', container_name, '--no-stream', '--format', '{{.CPUPerc}}'
+                        ])
+                        
+                        if stats_result.returncode == 0:
+                            try:
+                                cpu_percent = float(stats_result.stdout.strip().replace('%', ''))
+                                # CPU usage should be reasonable for the limits set
+                                if cpu_percent > float(cpu_limit) * 150:  # Allow 50% overhead
+                                    cpu_verification_failures += 1
+                                    logger.warning(f"CPU usage {cpu_percent}% exceeds limit {cpu_limit} for {test_name}")
+                            except ValueError:
+                                logger.warning(f"Could not parse CPU stats for {test_name}")
+                        
+                        # Stop container
+                        execute_docker_command(['docker', 'stop', container_name])
+                else:
+                    logger.warning(f"Failed to create container with {cpu_limit} CPU limit: {result.stderr}")
+                    
+            except Exception as e:
+                logger.error(f"CPU boundary test {test_name} failed: {e}")
+        
+        success_rate = successful_cpu_limits / len(cpu_tests) * 100
+        logger.info(f"✅ CPU boundary tests: {success_rate:.1f}% success rate, {cpu_verification_failures} verification issues")
+        
+        assert success_rate >= 80, f"CPU boundary test success rate too low: {success_rate:.1f}%"
+    
+    def test_storage_limit_boundary_conditions(self, edge_case_framework):
+        """Test storage and disk space boundary conditions."""
+        logger.info("💾 Testing storage limit boundary conditions")
+        
+        # Test with containers that create varying amounts of data
+        storage_tests = [
+            ('no_storage', None, 'echo "minimal storage test"'),
+            ('small_files', '50m', 'dd if=/dev/zero of=/tmp/small_file bs=1M count=10'),
+            ('medium_files', '100m', 'dd if=/dev/zero of=/tmp/medium_file bs=1M count=25'),
+        ]
+        
+        successful_storage_tests = 0
+        storage_failures = 0
+        
+        for test_name, disk_limit, test_command in storage_tests:
+            container_name = f'storage_boundary_{test_name}_{uuid.uuid4().hex[:6]}'
+            
+            try:
+                # Create container with optional storage limits
+                docker_cmd = [
+                    'docker', 'run', '--name', container_name,
+                    '--rm',  # Auto-cleanup
+                ]
+                
+                if disk_limit:
+                    # Add storage limit using tmpfs
+                    docker_cmd.extend(['--tmpfs', f'/tmp:size={disk_limit}'])
+                
+                docker_cmd.extend(['alpine:latest', 'sh', '-c', test_command])
+                
+                result = execute_docker_command(docker_cmd)
+                
+                if result.returncode == 0:
+                    successful_storage_tests += 1
+                    logger.info(f"Storage test {test_name} completed successfully")
+                else:
+                    storage_failures += 1
+                    logger.warning(f"Storage test {test_name} failed: {result.stderr}")
+                    
+            except Exception as e:
+                storage_failures += 1
+                logger.error(f"Storage boundary test {test_name} exception: {e}")
+        
+        success_rate = successful_storage_tests / len(storage_tests) * 100
+        logger.info(f"✅ Storage boundary tests: {success_rate:.1f}% success rate, {storage_failures} failures")
+        
+        assert success_rate >= 70, f"Storage boundary test success rate too low: {success_rate:.1f}%"
+
+
+class TestNetworkEdgeCases:
+    """Test Docker network edge cases and unusual configurations."""
+    
+    def test_network_isolation_edge_cases(self, edge_case_framework):
+        """Test network isolation in edge case scenarios."""
+        logger.info("🔒 Testing network isolation edge cases")
+        
+        # Create custom networks for isolation testing
+        isolated_networks = []
+        for i in range(3):
+            network_name = f'isolated_net_{i}_{uuid.uuid4().hex[:6]}'
+            try:
+                result = execute_docker_command([
+                    'docker', 'network', 'create', '--driver', 'bridge', 
+                    '--internal', network_name  # Internal network for isolation
+                ])
+                if result.returncode == 0:
+                    isolated_networks.append(network_name)
+                    edge_case_framework.test_networks.append(network_name)
+            except Exception as e:
+                logger.warning(f"Failed to create isolated network {network_name}: {e}")
+        
+        if len(isolated_networks) < 2:
+            pytest.skip("Need at least 2 isolated networks for isolation testing")
+        
+        # Create containers on different isolated networks
+        isolation_containers = []
+        for i, network_name in enumerate(isolated_networks[:2]):  # Use first 2 networks
+            container_name = f'isolation_test_{i}_{uuid.uuid4().hex[:6]}'
+            try:
+                result = execute_docker_command([
+                    'docker', 'create', '--name', container_name,
+                    '--network', network_name,
+                    'alpine:latest', 'sleep', '60'
+                ])
+                if result.returncode == 0:
+                    isolation_containers.append((container_name, network_name))
+                    edge_case_framework.test_containers.append(container_name)
+            except Exception as e:
+                logger.warning(f"Failed to create isolation container {container_name}: {e}")
+        
+        # Verify network isolation
+        isolation_verified = True
+        if len(isolation_containers) >= 2:
+            # Start containers
+            for container_name, _ in isolation_containers:
+                execute_docker_command(['docker', 'start', container_name])
+            
+            time.sleep(3)
+            
+            # Test isolation by trying to ping between containers on different networks
+            container1, network1 = isolation_containers[0]
+            container2, network2 = isolation_containers[1]
+            
+            # This should fail due to network isolation
+            try:
+                ping_result = execute_docker_command([
+                    'docker', 'exec', container1, 'ping', '-c', '1', '-W', '2', container2
+                ])
+                if ping_result.returncode == 0:
+                    isolation_verified = False
+                    logger.warning("Network isolation may not be working - ping succeeded")
+            except Exception:
+                # Exception expected due to isolation - this is good
+                pass
+            
+            # Stop containers
+            for container_name, _ in isolation_containers:
+                execute_docker_command(['docker', 'stop', container_name])
+        
+        logger.info(f"✅ Network isolation test: {'verified' if isolation_verified else 'failed'}")
+        logger.info(f"Networks created: {len(isolated_networks)}, Containers: {len(isolation_containers)}")
+        
+        assert len(isolated_networks) >= 2, "Should create at least 2 isolated networks"
+        assert isolation_verified, "Network isolation should prevent cross-network communication"
+    
+    def test_network_name_conflicts_and_resolution(self, edge_case_framework):
+        """Test network name conflicts and resolution strategies."""
+        logger.info("🌐 Testing network name conflicts and resolution")
+        
+        base_network_name = f'network_conflict_{uuid.uuid4().hex[:8]}'
+        
+        # Create first network
+        try:
+            result = execute_docker_command([
+                'docker', 'network', 'create', '--driver', 'bridge', base_network_name
+            ])
+            first_network_created = result.returncode == 0
+            if first_network_created:
+                edge_case_framework.test_networks.append(base_network_name)
+        except Exception as e:
+            logger.error(f"Failed to create first network: {e}")
+            pytest.skip("Cannot create first network for conflict testing")
+        
+        # Try to create second network with same name (should fail)
+        try:
+            result = execute_docker_command([
+                'docker', 'network', 'create', '--driver', 'bridge', base_network_name
+            ])
+            name_conflict_detected = result.returncode != 0
+        except Exception as e:
+            name_conflict_detected = True
+            logger.info(f"Network name conflict correctly detected: {e}")
+        
+        assert name_conflict_detected, "Network name conflict should be detected"
+        logger.info("✅ Network name conflict correctly detected")
+        
+        # Test resolution strategies
+        resolution_strategies = [
+            f'{base_network_name}_v2',
+            f'{base_network_name}_{int(time.time())}',
+            f'{base_network_name}_resolved'
+        ]
+        
+        successful_resolutions = 0
+        for strategy_name in resolution_strategies:
+            try:
+                result = execute_docker_command([
+                    'docker', 'network', 'create', '--driver', 'bridge', strategy_name
+                ])
+                
+                if result.returncode == 0:
+                    edge_case_framework.test_networks.append(strategy_name)
+                    successful_resolutions += 1
+                    edge_case_framework.edge_case_metrics['name_conflicts_resolved'] += 1
+            except Exception as e:
+                logger.warning(f"Network name resolution strategy '{strategy_name}' failed: {e}")
+        
+        resolution_rate = successful_resolutions / len(resolution_strategies) * 100
+        logger.info(f"✅ Network name conflict resolution: {resolution_rate:.1f}% success rate")
+        
+        assert resolution_rate >= 100, f"All network name resolution strategies should work: {resolution_rate:.1f}%"
+    
+    def test_bridge_network_edge_cases(self, edge_case_framework):
+        """Test bridge network configuration edge cases."""
+        logger.info("🌉 Testing bridge network edge cases")
+        
+        # Test various bridge network configurations
+        bridge_configs = [
+            ('default_bridge', {}),
+            ('custom_subnet', {'subnet': '172.25.0.0/16'}),
+            ('custom_gateway', {'subnet': '172.26.0.0/16', 'gateway': '172.26.0.1'}),
+        ]
+        
+        successful_bridges = 0
+        bridge_functionality_tests = 0
+        
+        for config_name, config in bridge_configs:
+            network_name = f'bridge_edge_{config_name}_{uuid.uuid4().hex[:6]}'
+            
+            try:
+                # Create bridge network with configuration
+                cmd = ['docker', 'network', 'create', '--driver', 'bridge']
+                
+                if 'subnet' in config:
+                    cmd.extend(['--subnet', config['subnet']])
+                if 'gateway' in config:
+                    cmd.extend(['--gateway', config['gateway']])
+                
+                cmd.append(network_name)
+                
+                result = execute_docker_command(cmd)
+                
+                if result.returncode == 0:
+                    edge_case_framework.test_networks.append(network_name)
+                    successful_bridges += 1
+                    
+                    # Test functionality by creating container on network
+                    test_container = f'bridge_test_{config_name}_{uuid.uuid4().hex[:4]}'
+                    container_result = execute_docker_command([
+                        'docker', 'create', '--name', test_container,
+                        '--network', network_name,
+                        'alpine:latest', 'ping', '-c', '1', '8.8.8.8'
+                    ])
+                    
+                    if container_result.returncode == 0:
+                        edge_case_framework.test_containers.append(test_container)
+                        bridge_functionality_tests += 1
+                        
+                        # Clean up test container
+                        execute_docker_command(['docker', 'container', 'rm', test_container])
+                else:
+                    logger.warning(f"Failed to create bridge network {config_name}: {result.stderr}")
+                    
+            except Exception as e:
+                logger.error(f"Bridge network test {config_name} failed: {e}")
+        
+        bridge_success_rate = successful_bridges / len(bridge_configs) * 100
+        functionality_rate = bridge_functionality_tests / successful_bridges * 100 if successful_bridges > 0 else 0
+        
+        logger.info(f"✅ Bridge network tests: {bridge_success_rate:.1f}% creation success, {functionality_rate:.1f}% functionality")
+        
+        assert bridge_success_rate >= 80, f"Bridge network creation success rate too low: {bridge_success_rate:.1f}%"
+
+
+class TestVolumeEdgeCases:
+    """Test Docker volume edge cases and unusual configurations."""
+    
+    def test_volume_mount_permission_edge_cases(self, edge_case_framework):
+        """Test volume mount permission edge cases."""
+        logger.info("🔐 Testing volume mount permission edge cases")
+        
+        # Test different mount scenarios
+        mount_scenarios = [
+            ('readonly_mount', True, 'ro'),
+            ('readwrite_mount', False, 'rw'),
+            ('no_exec_mount', False, 'rw,noexec'),
+        ]
+        
+        successful_mounts = 0
+        permission_tests_passed = 0
+        
+        for scenario_name, readonly, mount_options in mount_scenarios:
+            volume_name = f'perm_test_{scenario_name}_{uuid.uuid4().hex[:6]}'
+            container_name = f'mount_test_{scenario_name}_{uuid.uuid4().hex[:6]}'
+            
+            try:
+                # Create volume
+                volume_result = execute_docker_command(['docker', 'volume', 'create', volume_name])
+                if volume_result.returncode != 0:
+                    continue
+                    
+                edge_case_framework.test_volumes.append(volume_name)
+                
+                # Create container with volume mount
+                mount_spec = f'{volume_name}:/data:{mount_options}'
+                result = execute_docker_command([
+                    'docker', 'create', '--name', container_name,
+                    '-v', mount_spec,
+                    'alpine:latest', 'sh', '-c', 'echo "test" > /data/test.txt; cat /data/test.txt'
+                ])
+                
+                if result.returncode == 0:
+                    edge_case_framework.test_containers.append(container_name)
+                    successful_mounts += 1
+                    
+                    # Test the mount by starting container
+                    start_result = execute_docker_command(['docker', 'start', '-a', container_name])
+                    
+                    if readonly:
+                        # Should fail for readonly mounts when trying to write
+                        if start_result.returncode != 0:
+                            permission_tests_passed += 1  # Failure expected for readonly
+                            logger.info(f"Readonly mount correctly prevented write access: {scenario_name}")
+                        else:
+                            logger.warning(f"Readonly mount unexpectedly allowed write access: {scenario_name}")
+                    else:
+                        # Should succeed for readwrite mounts
+                        if start_result.returncode == 0:
+                            permission_tests_passed += 1
+                            logger.info(f"Read-write mount correctly allowed access: {scenario_name}")
+                        else:
+                            logger.warning(f"Read-write mount unexpectedly failed: {scenario_name}")
+                else:
+                    logger.warning(f"Failed to create container for {scenario_name}: {result.stderr}")
+                    
+            except Exception as e:
+                logger.error(f"Volume permission test {scenario_name} failed: {e}")
+        
+        mount_success_rate = successful_mounts / len(mount_scenarios) * 100
+        permission_success_rate = permission_tests_passed / len(mount_scenarios) * 100
+        
+        logger.info(f"✅ Volume permission tests: {mount_success_rate:.1f}% mount success, {permission_success_rate:.1f}% permission tests passed")
+        
+        assert mount_success_rate >= 80, f"Volume mount success rate too low: {mount_success_rate:.1f}%"
+    
+    def test_volume_cleanup_with_dependency_chains(self, edge_case_framework):
+        """Test volume cleanup with complex dependency chains."""
+        logger.info("🔗 Testing volume cleanup with dependency chains")
+        
+        # Create a chain of volumes and containers with dependencies
+        base_volume = f'base_volume_{uuid.uuid4().hex[:8]}'
+        derived_volumes = []
+        dependency_containers = []
+        
+        try:
+            # Create base volume
+            result = execute_docker_command(['docker', 'volume', 'create', base_volume])
+            if result.returncode == 0:
+                edge_case_framework.test_volumes.append(base_volume)
+                
+                # Create derived volumes (simulated by additional volumes)
+                for i in range(3):
+                    derived_volume = f'derived_vol_{i}_{uuid.uuid4().hex[:6]}'
+                    result = execute_docker_command(['docker', 'volume', 'create', derived_volume])
+                    if result.returncode == 0:
+                        derived_volumes.append(derived_volume)
+                        edge_case_framework.test_volumes.append(derived_volume)
+                
+                # Create containers using these volumes
+                all_volumes = [base_volume] + derived_volumes
+                for i, volume in enumerate(all_volumes):
+                    container_name = f'dep_container_{i}_{uuid.uuid4().hex[:6]}'
+                    
+                    # Create container that mounts multiple volumes to create dependencies
+                    mount_args = []
+                    for j, vol in enumerate(all_volumes[:i+1]):  # Mount all volumes up to current
+                        mount_args.extend(['-v', f'{vol}:/data{j}'])
+                    
+                    cmd = ['docker', 'create', '--name', container_name] + mount_args + [
+                        'alpine:latest', 'sh', '-c', 'echo "dependency test" > /data0/test.txt'
+                    ]
+                    
+                    result = execute_docker_command(cmd)
+                    if result.returncode == 0:
+                        dependency_containers.append(container_name)
+                        edge_case_framework.test_containers.append(container_name)
+                
+                # Test cleanup order - should fail if dependencies exist
+                cleanup_attempts = 0
+                cleanup_successes = 0
+                
+                # Try to clean up volumes (should fail due to container dependencies)
+                for volume in all_volumes:
+                    cleanup_attempts += 1
+                    try:
+                        result = execute_docker_command(['docker', 'volume', 'rm', volume])
+                        if result.returncode != 0:
+                            logger.info(f"Volume {volume} correctly cannot be removed due to dependencies")
+                        else:
+                            cleanup_successes += 1
+                            edge_case_framework.test_volumes.remove(volume)
+                    except Exception as e:
+                        logger.info(f"Volume cleanup attempt failed as expected: {e}")
+                
+                # Clean up containers first
+                for container_name in dependency_containers:
+                    execute_docker_command(['docker', 'container', 'rm', container_name])
+                
+                # Now volumes should be cleanable
+                final_cleanup_successes = 0
+                for volume in [v for v in all_volumes if v in edge_case_framework.test_volumes]:
+                    try:
+                        result = execute_docker_command(['docker', 'volume', 'rm', volume])
+                        if result.returncode == 0:
+                            final_cleanup_successes += 1
+                            edge_case_framework.test_volumes.remove(volume)
+                    except Exception as e:
+                        logger.warning(f"Final volume cleanup failed for {volume}: {e}")
+                
+                dependency_protection_rate = ((cleanup_attempts - cleanup_successes) / cleanup_attempts * 100 
+                                            if cleanup_attempts > 0 else 0)
+                final_cleanup_rate = final_cleanup_successes / len([v for v in all_volumes if v in edge_case_framework.test_volumes]) * 100
+                
+                logger.info(f"✅ Volume dependency chain: {dependency_protection_rate:.1f}% protected by dependencies, "
+                           f"{final_cleanup_rate:.1f}% final cleanup success")
+                
+                assert dependency_protection_rate >= 50, f"Volume dependency protection too low: {dependency_protection_rate:.1f}%"
+                
+        except Exception as e:
+            logger.error(f"Volume dependency chain test failed: {e}")
+            raise
+
+
+class TestContainerLifecycleEdgeCases:
+    """Test edge cases in container lifecycle management."""
+    
+    def test_container_state_transition_edge_cases(self, edge_case_framework):
+        """Test edge cases in container state transitions."""
+        logger.info("🔄 Testing container state transition edge cases")
+        
+        state_transition_tests = [
+            ('create_start_stop', ['create', 'start', 'stop']),
+            ('create_start_pause_unpause', ['create', 'start', 'pause', 'unpause', 'stop']),
+            ('create_start_restart', ['create', 'start', 'restart', 'stop']),
+        ]
+        
+        successful_transitions = 0
+        total_transitions = 0
+        
+        for test_name, transitions in state_transition_tests:
+            container_name = f'state_test_{test_name}_{uuid.uuid4().hex[:6]}'
+            transitions_completed = 0
+            
+            try:
+                current_container = None
+                
+                for i, action in enumerate(transitions):
+                    total_transitions += 1
+                    
+                    if action == 'create':
+                        result = execute_docker_command([
+                            'docker', 'create', '--name', container_name,
+                            'alpine:latest', 'sh', '-c', 'while true; do echo running; sleep 1; done'
+                        ])
+                        if result.returncode == 0:
+                            current_container = container_name
+                            edge_case_framework.test_containers.append(container_name)
+                            transitions_completed += 1
+                    
+                    elif action == 'start' and current_container:
+                        result = execute_docker_command(['docker', 'start', current_container])
+                        if result.returncode == 0:
+                            transitions_completed += 1
+                            time.sleep(1)  # Let it start
+                    
+                    elif action == 'stop' and current_container:
+                        result = execute_docker_command(['docker', 'stop', '-t', '2', current_container])
+                        if result.returncode == 0:
+                            transitions_completed += 1
+                    
+                    elif action == 'pause' and current_container:
+                        result = execute_docker_command(['docker', 'pause', current_container])
+                        if result.returncode == 0:
+                            transitions_completed += 1
+                            time.sleep(1)
+                    
+                    elif action == 'unpause' and current_container:
+                        result = execute_docker_command(['docker', 'unpause', current_container])
+                        if result.returncode == 0:
+                            transitions_completed += 1
+                            time.sleep(1)
+                    
+                    elif action == 'restart' and current_container:
+                        result = execute_docker_command(['docker', 'restart', '-t', '2', current_container])
+                        if result.returncode == 0:
+                            transitions_completed += 1
+                            time.sleep(2)  # Let it restart
+                
+                if transitions_completed == len(transitions):
+                    successful_transitions += 1
+                
+                logger.info(f"State transition test {test_name}: {transitions_completed}/{len(transitions)} transitions completed")
+                
+            except Exception as e:
+                logger.error(f"State transition test {test_name} failed: {e}")
+        
+        transition_success_rate = successful_transitions / len(state_transition_tests) * 100
+        overall_transition_rate = (total_transitions - (total_transitions - sum(len(t[1]) for t in state_transition_tests if successful_transitions > 0))) / total_transitions * 100
+        
+        logger.info(f"✅ Container state transitions: {transition_success_rate:.1f}% test success, {overall_transition_rate:.1f}% overall transitions")
+        
+        assert transition_success_rate >= 80, f"State transition success rate too low: {transition_success_rate:.1f}%"
+    
+    def test_container_exit_code_edge_cases(self, edge_case_framework):
+        """Test handling of various container exit codes."""
+        logger.info("🚪 Testing container exit code edge cases")
+        
+        exit_code_tests = [
+            ('success_exit', 0, 'exit 0'),
+            ('general_error', 1, 'exit 1'),
+            ('misuse_error', 2, 'exit 2'),
+            ('signal_terminated', 130, 'sleep 5; exit 130'),  # Ctrl+C simulation
+            ('custom_exit', 42, 'exit 42'),
+        ]
+        
+        correct_exit_codes = 0
+        containers_tested = 0
+        
+        for test_name, expected_code, command in exit_code_tests:
+            container_name = f'exit_test_{test_name}_{uuid.uuid4().hex[:6]}'
+            containers_tested += 1
+            
+            try:
+                # Run container with specific exit command
+                result = execute_docker_command([
+                    'docker', 'run', '--name', container_name,
+                    'alpine:latest', 'sh', '-c', command
+                ])
+                
+                edge_case_framework.test_containers.append(container_name)
+                
+                # Get actual exit code
+                inspect_result = execute_docker_command([
+                    'docker', 'inspect', container_name, '--format', '{{.State.ExitCode}}'
+                ])
+                
+                if inspect_result.returncode == 0:
+                    try:
+                        actual_exit_code = int(inspect_result.stdout.strip())
+                        if actual_exit_code == expected_code:
+                            correct_exit_codes += 1
+                            logger.info(f"Exit code test {test_name}: expected {expected_code}, got {actual_exit_code} ✅")
+                        else:
+                            logger.warning(f"Exit code test {test_name}: expected {expected_code}, got {actual_exit_code}")
+                    except ValueError:
+                        logger.error(f"Could not parse exit code for {test_name}")
+                else:
+                    logger.error(f"Could not inspect container {container_name}")
+                    
+                # Clean up
+                execute_docker_command(['docker', 'container', 'rm', container_name])
+                
+            except Exception as e:
+                logger.error(f"Exit code test {test_name} failed: {e}")
+        
+        exit_code_accuracy = correct_exit_codes / containers_tested * 100 if containers_tested > 0 else 0
+        logger.info(f"✅ Container exit code tests: {exit_code_accuracy:.1f}% accuracy ({correct_exit_codes}/{containers_tested})")
+        
+        assert exit_code_accuracy >= 90, f"Exit code accuracy too low: {exit_code_accuracy:.1f}%"
+
+
 if __name__ == "__main__":
     # Direct execution for debugging
     framework = DockerEdgeCaseFramework()

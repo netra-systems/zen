@@ -35,10 +35,10 @@ from loguru import logger
 from test_framework.real_services import get_real_services, RealServicesManager
 from test_framework.environment_isolation import isolated_test_env
 
-# Import production components for real testing
+# Import production components for real testing with factory pattern
+from netra_backend.app.services.websocket_bridge_factory import WebSocketBridgeFactory, UserWebSocketEmitter
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
-from netra_backend.app.websocket_core.manager import WebSocketManager
 from netra_backend.app.agents.state import DeepAgentState
 
 # Import available sub-agent classes
@@ -48,6 +48,144 @@ from netra_backend.app.agents.data_sub_agent.data_sub_agent import DataSubAgent
 from netra_backend.app.agents.base_agent import BaseAgent
 
 from netra_backend.app.llm.llm_manager import LLMManager
+
+# Import real WebSocket client for end-to-end testing
+import websockets
+import ssl
+from urllib.parse import urlparse
+
+
+# ============================================================================
+# REAL WEBSOCKET CONNECTION MANAGER
+# ============================================================================
+
+class RealWebSocketConnectionManager:
+    """Manages real WebSocket connections for end-to-end testing."""
+    
+    def __init__(self, websocket_url: str = "ws://localhost:8000/ws"):
+        self.websocket_url = websocket_url
+        self.active_connections = {}
+        self.event_listeners = {}
+        
+    async def connect_user(self, user_id: str, thread_id: str, auth_token: str = None) -> str:
+        """Create a real WebSocket connection for a user."""
+        connection_key = f"{user_id}:{thread_id}"
+        
+        # Configure connection headers
+        headers = {}
+        if auth_token:
+            headers["Authorization"] = f"Bearer {auth_token}"
+            
+        # Handle SSL/TLS for secure connections
+        ssl_context = None
+        if self.websocket_url.startswith("wss://"):
+            ssl_context = ssl.create_default_context()
+            
+        try:
+            # Establish real WebSocket connection
+            websocket = await websockets.connect(
+                self.websocket_url,
+                extra_headers=headers,
+                ssl=ssl_context,
+                ping_interval=20,
+                ping_timeout=10,
+                close_timeout=10
+            )
+            
+            self.active_connections[connection_key] = {
+                'websocket': websocket,
+                'user_id': user_id,
+                'thread_id': thread_id,
+                'connected_at': time.time(),
+                'events_received': []
+            }
+            
+            # Start listening for events
+            asyncio.create_task(self._listen_for_events(connection_key))
+            
+            logger.info(f"✅ Real WebSocket connection established for {connection_key}")
+            return connection_key
+            
+        except Exception as e:
+            logger.error(f"❌ Failed to establish WebSocket connection for {connection_key}: {e}")
+            raise
+            
+    async def _listen_for_events(self, connection_key: str):
+        """Listen for WebSocket events on a real connection."""
+        connection_info = self.active_connections.get(connection_key)
+        if not connection_info:
+            return
+            
+        websocket = connection_info['websocket']
+        
+        try:
+            async for message in websocket:
+                try:
+                    # Parse JSON message
+                    event_data = json.loads(message)
+                    
+                    # Record the event
+                    connection_info['events_received'].append({
+                        'event': event_data,
+                        'received_at': time.time(),
+                        'connection_key': connection_key
+                    })
+                    
+                    # Notify event listeners
+                    if connection_key in self.event_listeners:
+                        for listener in self.event_listeners[connection_key]:
+                            try:
+                                await listener(event_data)
+                            except Exception as e:
+                                logger.warning(f"Event listener error: {e}")
+                                
+                    logger.debug(f"📡 Real WebSocket event received: {event_data.get('type', 'unknown')}")
+                    
+                except json.JSONDecodeError as e:
+                    logger.warning(f"Invalid JSON received on WebSocket: {e}")
+                except Exception as e:
+                    logger.error(f"Error processing WebSocket message: {e}")
+                    
+        except websockets.exceptions.ConnectionClosed:
+            logger.info(f"WebSocket connection closed for {connection_key}")
+        except Exception as e:
+            logger.error(f"WebSocket listener error for {connection_key}: {e}")
+        finally:
+            # Clean up connection
+            if connection_key in self.active_connections:
+                del self.active_connections[connection_key]
+                
+    def add_event_listener(self, connection_key: str, listener_func):
+        """Add an event listener for a specific connection."""
+        if connection_key not in self.event_listeners:
+            self.event_listeners[connection_key] = []
+        self.event_listeners[connection_key].append(listener_func)
+        
+    def get_events_for_connection(self, connection_key: str) -> List[Dict[str, Any]]:
+        """Get all events received for a specific connection."""
+        connection_info = self.active_connections.get(connection_key, {})
+        return connection_info.get('events_received', [])
+        
+    async def disconnect_user(self, connection_key: str):
+        """Disconnect a user's WebSocket connection."""
+        if connection_key in self.active_connections:
+            connection_info = self.active_connections[connection_key]
+            websocket = connection_info['websocket']
+            
+            try:
+                await websocket.close()
+                logger.info(f"✅ WebSocket connection closed for {connection_key}")
+            except Exception as e:
+                logger.warning(f"Error closing WebSocket connection for {connection_key}: {e}")
+            finally:
+                del self.active_connections[connection_key]
+                if connection_key in self.event_listeners:
+                    del self.event_listeners[connection_key]
+                    
+    async def cleanup_all_connections(self):
+        """Clean up all active WebSocket connections."""
+        for connection_key in list(self.active_connections.keys()):
+            await self.disconnect_user(connection_key)
 
 
 # ============================================================================
@@ -66,23 +204,32 @@ class RealWebSocketEventValidator:
         "agent_completed"     # Sub-agent finishes
     }
     
-    def __init__(self, connection_id: str, timeout: float = 30.0):
-        self.connection_id = connection_id
+    def __init__(self, user_id: str, thread_id: str, timeout: float = 30.0):
+        self.user_id = user_id
+        self.thread_id = thread_id
         self.timeout = timeout
         self.events: List[Dict] = []
         self.event_timeline: List[tuple] = []  # (timestamp, event_type, event)
         self.start_time = time.time()
         self.validation_errors: List[str] = []
         
-    def record_event(self, event: Dict) -> None:
+    def record_event(self, event_type: str, data: Dict[str, Any]) -> None:
         """Record WebSocket event with timestamp."""
         timestamp = time.time() - self.start_time
-        event_type = event.get("type", "unknown")
+        
+        event = {
+            "type": event_type,
+            "user_id": self.user_id,
+            "thread_id": self.thread_id,
+            "data": data,
+            "timestamp": timestamp,
+            "received_at": time.time()
+        }
         
         self.events.append(event)
         self.event_timeline.append((timestamp, event_type, event))
         
-        logger.info(f"📡 Event: {event_type} at {timestamp:.2f}s - {event.get('message', '')}")
+        logger.info(f"📡 Event: {event_type} at {timestamp:.2f}s - {data.get('message', '')}")
         
     def validate_basic_sub_agent_flow(self) -> tuple[bool, List[str]]:
         """Validate that basic sub-agent WebSocket event flow occurred correctly."""
@@ -159,14 +306,17 @@ Required Events Coverage:
 # ============================================================================
 
 class RealSubAgentExecutor:
-    """Executes real sub-agents with proper WebSocket integration."""
+    """Executes real sub-agents with proper WebSocket integration using factory pattern."""
     
     def __init__(self, real_services: RealServicesManager):
         self.real_services = real_services
+        self.websocket_factory = WebSocketBridgeFactory()
+        self.event_validators = {}
+        self.test_connections = []
         
-    async def create_sub_agent_with_websocket(self, agent_class, websocket_manager: WebSocketManager, 
-                                            connection_id: str) -> BaseAgent:
-        """Create a sub-agent instance with WebSocket integration."""
+    async def create_sub_agent_with_websocket(self, agent_class, factory: WebSocketBridgeFactory, 
+                                            user_id: str, thread_id: str) -> tuple[BaseAgent, UserWebSocketEmitter]:
+        """Create a sub-agent instance with WebSocket integration using factory pattern."""
         
         # Create a simplified LLM manager for testing
         class TestLLMManager:
@@ -179,6 +329,13 @@ class RealSubAgentExecutor:
                     "confidence": 0.9
                 }
         
+        # Create WebSocket emitter for this specific user with enhanced connection tracking
+        connection_id = f"conn_{user_id}_{uuid.uuid4().hex[:8]}"
+        emitter = await factory.create_user_emitter(user_id, thread_id, connection_id=connection_id)
+        
+        # Track this connection for cleanup
+        self.test_connections.append((user_id, thread_id, connection_id, emitter))
+        
         # Create agent instance
         if agent_class == TriageSubAgent:
             agent = TriageSubAgent(llm_manager=TestLLMManager())
@@ -189,40 +346,48 @@ class RealSubAgentExecutor:
         else:
             # Generic sub-agent for testing
             class TestSubAgent(BaseAgent):
+                def __init__(self, name: str):
+                    super().__init__()
+                    self.name = name
+                    self.emitter = None
+                    
+                def set_emitter(self, emitter: UserWebSocketEmitter):
+                    self.emitter = emitter
+                    
                 async def execute(self, state: DeepAgentState, run_id: str, stream_updates: bool = False):
-                    # Emit events manually for testing
-                    if hasattr(self, 'emit_thinking'):
-                        await self.emit_thinking("Processing test request...")
-                        
-                    if hasattr(self, 'emit_tool_executing'):
-                        await self.emit_tool_executing("test_tool", {"param": "value"})
+                    if self.emitter:
+                        # Emit required events using factory pattern
+                        await self.emitter.notify_agent_started(self.name, {"status": "started"})
+                        await self.emitter.notify_agent_thinking("Processing test request...")
+                        await self.emitter.notify_tool_executing("test_tool", {"param": "value"})
                         await asyncio.sleep(0.1)  # Simulate tool execution
-                        await self.emit_tool_completed("test_tool", {"result": "success"})
+                        await self.emitter.notify_tool_completed("test_tool", {"result": "success"})
+                        await self.emitter.notify_agent_completed(self.name, {"result": "Test execution completed", "status": "success"})
                         
                     return {"result": "Test execution completed", "status": "success"}
                     
             agent = TestSubAgent(name=f"Test{agent_class.__name__}")
         
-        # Set WebSocket context for event emission
-        agent.websocket_manager = websocket_manager
-        agent.user_id = connection_id
+        # Set emitter on agent for event emission
+        if hasattr(agent, 'set_emitter'):
+            agent.set_emitter(emitter)
         
-        return agent
+        return agent, emitter
         
-    async def execute_sub_agent_flow(self, agent: BaseAgent, connection_id: str) -> None:
+    async def execute_sub_agent_flow(self, agent: BaseAgent, user_id: str, thread_id: str) -> None:
         """Execute a complete sub-agent flow with WebSocket events."""
         
         # Create state for execution
         state = DeepAgentState()
-        state.user_request = f"Test request for {agent.name}"
-        state.chat_thread_id = connection_id
-        state.user_id = connection_id
+        state.user_request = f"Test request for {getattr(agent, 'name', 'TestAgent')}"
+        state.chat_thread_id = thread_id
+        state.user_id = user_id
         
         # Generate unique run ID
         run_id = f"test-run-{uuid.uuid4().hex[:8]}"
         
         # Execute the agent with stream updates enabled
-        logger.info(f"Executing {agent.name} with WebSocket events...")
+        logger.info(f"Executing {getattr(agent, 'name', 'TestAgent')} with WebSocket events...")
         
         try:
             result = await agent.execute(state, run_id, stream_updates=True)

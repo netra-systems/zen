@@ -14,6 +14,7 @@
     "emit:",
     "error",
     "filtered_by_event",
+    "first_event",
     "high_cost_per_event",
     "last_event",
     "listen:",
@@ -26,9 +27,11 @@
     "onSearchChange",
     "ping",
     "pong",
+    "privacy_event",
     "security_event",
     "subscribe",
     "trigger_event",
-    "unsubscribe"
+    "unsubscribe",
+    "validate_event"
   ]
 }

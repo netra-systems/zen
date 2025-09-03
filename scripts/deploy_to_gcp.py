@@ -81,7 +81,7 @@ class GCPDeployer:
             ServiceConfig(
                 name="backend",
                 directory="netra_backend",
-                port=8888,
+                port=8000,
                 dockerfile="deployment/docker/backend.gcp.Dockerfile",
                 cloud_run_name="netra-backend-staging",
                 memory="1Gi",
@@ -91,7 +91,7 @@ class GCPDeployer:
                 environment_vars={
                     "ENVIRONMENT": "staging",
                     "PYTHONUNBUFFERED": "1",
-                    "AUTH_SERVICE_URL": "https://auth.staging.netrasystems.ai",
+                    "AUTH_SERVICE_URL": "https://netra-auth-service-pnovr5vsba-uc.a.run.app",
                     "AUTH_SERVICE_ENABLED": "true",  # CRITICAL: Enable auth service integration
                     "SERVICE_ID": "netra-backend",  # CRITICAL: Required for service-to-service auth
                     "FRONTEND_URL": "https://app.staging.netrasystems.ai",
@@ -119,7 +119,7 @@ class GCPDeployer:
                     "ENVIRONMENT": "staging",
                     "PYTHONUNBUFFERED": "1",
                     "FRONTEND_URL": "https://app.staging.netrasystems.ai",
-                    "AUTH_SERVICE_URL": "https://auth.staging.netrasystems.ai",
+                    "AUTH_SERVICE_URL": "https://netra-auth-service-pnovr5vsba-uc.a.run.app",
                     "SERVICE_ID": "auth-service",  # CRITICAL: Required for service-to-service auth
                     "JWT_ALGORITHM": "HS256",
                     "JWT_ACCESS_EXPIRY_MINUTES": "15",
@@ -406,6 +406,30 @@ class GCPDeployer:
         print("✅ All required APIs enabled")
         return True
     
+    def configure_docker_auth(self) -> bool:
+        """Configure Docker authentication for Google Container Registry."""
+        try:
+            print("  Configuring Docker authentication for GCR...")
+            auth_cmd = [self.gcloud_cmd, "auth", "configure-docker", "gcr.io", "--quiet"]
+            result = subprocess.run(
+                auth_cmd, 
+                capture_output=True,
+                text=True,
+                check=False,
+                shell=self.use_shell
+            )
+            
+            if result.returncode == 0:
+                print("  ✅ Docker authentication configured successfully")
+                return True
+            else:
+                print(f"  ❌ Failed to configure Docker authentication: {result.stderr}")
+                return False
+                
+        except Exception as e:
+            print(f"  ❌ Docker authentication error: {e}")
+            return False
+    
     def create_dockerfile(self, service: ServiceConfig) -> bool:
         """Create Dockerfile for the service if it doesn't exist."""
         dockerfile_path = self.project_root / service.dockerfile
@@ -439,7 +463,7 @@ COPY shared/ ./shared/
 ENV PYTHONPATH=/app
 
 # Run the application - use sh to evaluate PORT env var
-CMD ["sh", "-c", "uvicorn netra_backend.app.main:app --host 0.0.0.0 --port ${PORT:-8888}"]
+CMD ["sh", "-c", "uvicorn netra_backend.app.main:app --host 0.0.0.0 --port ${PORT:-8000}"]
 """
         elif service.name == "auth":
             content = """FROM python:3.11-slim
@@ -547,8 +571,8 @@ CMD ["npm", "start"]
             print(f"  ✅ Built successfully, now pushing to registry...")
             
             # Configure docker for GCR
-            auth_cmd = [self.gcloud_cmd, "auth", "configure-docker", "gcr.io", "--quiet"]
-            subprocess.run(auth_cmd, check=True, shell=self.use_shell)
+            if not self.configure_docker_auth():
+                return False
             
             # Push to registry
             push_cmd = [self.docker_cmd, "push", image_tag]
@@ -1233,18 +1257,18 @@ CMD ["npm", "start"]
         Returns:
             True if all tests pass, False otherwise
         """
+        # Determine environment based on project ID (before try block so it's always defined)
+        if self.project_id == "netra-production":
+            environment = "production"
+        elif self.project_id == "netra-staging":
+            environment = "staging"
+        else:
+            environment = "development"
+            
         try:
             # Import the test module
             sys.path.insert(0, str(self.project_root))
             from tests.post_deployment.test_auth_integration import PostDeploymentAuthTest
-            
-            # Determine environment based on project ID
-            if self.project_id == "netra-production":
-                environment = "production"
-            elif self.project_id == "netra-staging":
-                environment = "staging"
-            else:
-                environment = "development"
             
             print(f"\nTesting {environment} environment...")
             

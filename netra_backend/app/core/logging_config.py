@@ -4,7 +4,6 @@ Logging configuration for Cloud Run compatibility.
 This module ensures that logs are properly formatted for Cloud Run
 without ANSI escape codes that can corrupt log output.
 """
-import os
 import sys
 import logging
 from shared.isolated_environment import IsolatedEnvironment
@@ -21,9 +20,10 @@ def configure_cloud_run_logging():
     env = IsolatedEnvironment.get_instance()
     
     # Disable colored output in environment variables
-    os.environ['NO_COLOR'] = '1'
-    os.environ['FORCE_COLOR'] = '0'
-    os.environ['PY_COLORS'] = '0'
+    # IsolatedEnvironment.get_subprocess_env() ensures these are passed to child processes
+    env.set('NO_COLOR', '1', source='cloud_run_logging')
+    env.set('FORCE_COLOR', '0', source='cloud_run_logging')
+    env.set('PY_COLORS', '0', source='cloud_run_logging')
     
     # Disable colored tracebacks in Python 3.11+
     if hasattr(sys, '_xoptions'):

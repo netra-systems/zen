@@ -15,10 +15,18 @@ from typing import Any, Dict, List, Optional
 from enum import Enum
 
 from netra_backend.app.agents.base_agent import BaseAgent
-from netra_backend.app.agents.base.interface import ExecutionContext
-from netra_backend.app.agents.input_validation import validate_agent_input
 from netra_backend.app.logging_config import central_logger
-from netra_backend.app.schemas.registry import DeepAgentState
+from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
+from netra_backend.app.database.session_manager import DatabaseSessionManager
+from netra_backend.app.core.serialization.unified_json_handler import (
+    LLMResponseParser,
+    JSONErrorFixer,
+    UnifiedJSONHandler
+)
+from netra_backend.app.core.unified_error_handler import agent_error_handler
+from netra_backend.app.schemas.shared_types import ErrorContext
+from datetime import datetime, timezone
+from uuid import uuid4
 
 logger = central_logger.get_logger(__name__)
 
@@ -92,17 +100,15 @@ class GoalsTriageSubAgent(BaseAgent):
             enable_caching=True,          # Enable caching for goal analysis
         )
         
-    async def validate_preconditions(self, context: ExecutionContext) -> bool:
+    async def validate_preconditions(self, context: UserExecutionContext, user_request: str) -> bool:
         """Validate execution preconditions for goal triage."""
-        state = context.state
-        
-        if not state.user_request:
+        if not user_request:
             self.logger.warning(f"No user request provided for goal triage in run_id: {context.run_id}")
             return False
             
         # Check if the request contains goals to triage
         goals_indicators = ["goal", "objective", "target", "achieve", "priority", "plan"]
-        request_lower = state.user_request.lower()
+        request_lower = user_request.lower()
         
         if not any(indicator in request_lower for indicator in goals_indicators):
             self.logger.warning(f"Request doesn't appear to contain goals to triage: {context.run_id}")
@@ -110,7 +116,7 @@ class GoalsTriageSubAgent(BaseAgent):
             
         return True
 
-    async def execute_core_logic(self, context: ExecutionContext) -> Dict[str, Any]:
+    async def execute_core_logic(self, context: UserExecutionContext, user_request: str, session_manager: DatabaseSessionManager) -> Dict[str, Any]:
         """Execute core goal triage logic with WebSocket events."""
         start_time = time.time()
         
@@ -123,7 +129,7 @@ class GoalsTriageSubAgent(BaseAgent):
         
         # Business logic with progress updates
         await self.emit_progress("Identifying individual goals and requirements...")
-        goals = await self._extract_goals_from_request(context)
+        goals = await self._extract_goals_from_request(context, user_request)
         
         await self.emit_progress("Analyzing goal priorities and strategic impact...")
         triage_results = await self._triage_goals(context, goals)
@@ -132,7 +138,7 @@ class GoalsTriageSubAgent(BaseAgent):
         prioritized_plan = await self._create_prioritized_plan(context, triage_results)
         
         await self.emit_progress("Finalizing strategic recommendations...")
-        result = await self._finalize_goal_triage_result(context, triage_results, prioritized_plan)
+        result = await self._finalize_goal_triage_result(context, triage_results, prioritized_plan, session_manager)
         
         # Completion events
         await self.emit_progress("Goal triage and prioritization completed successfully", is_complete=True)
@@ -150,18 +156,16 @@ class GoalsTriageSubAgent(BaseAgent):
         
         return result
 
-    async def _extract_goals_from_request(self, context: ExecutionContext) -> List[str]:
+    async def _extract_goals_from_request(self, context: UserExecutionContext, user_request: str) -> List[str]:
         """Extract goals and objectives from the user request with tool transparency."""
-        state = context.state
-        
         # Show tool execution for transparency
-        await self.emit_tool_executing("goal_extractor", {"input_size_chars": len(state.user_request)})
+        await self.emit_tool_executing("goal_extractor", {"input_size_chars": len(user_request)})
         
         # Use LLM to extract goals
         extraction_prompt = f"""
         Analyze the following user request and extract all business goals, objectives, and targets mentioned:
         
-        User Request: {state.user_request}
+        User Request: {user_request}
         
         Extract each goal as a separate item. If no explicit goals are mentioned, 
         infer reasonable business goals based on the context.
@@ -186,13 +190,27 @@ class GoalsTriageSubAgent(BaseAgent):
             return goals
             
         except Exception as e:
-            self.logger.error(f"Failed to extract goals via LLM: {e}")
+            # Create error context with user execution context details
+            error_context = ErrorContext(
+                trace_id=str(uuid4()),
+                operation="goal_extraction",
+                agent_name="GoalsTriageSubAgent",
+                operation_name="extract_goals_from_request",
+                user_id=context.user_id,
+                run_id=context.run_id,
+                timestamp=datetime.now(timezone.utc),
+                details={"user_request_length": len(user_request)}
+            )
+            
+            # Handle error using unified error handler
+            await agent_error_handler.handle_error(e, error_context)
+            
             await self.emit_tool_completed("goal_extractor", {"error": str(e), "fallback_used": True})
             
             # Fallback: use basic text analysis
-            return self._extract_goals_fallback(state.user_request)
+            return self._extract_goals_fallback(user_request)
 
-    async def _triage_goals(self, context: ExecutionContext, goals: List[str]) -> List[GoalTriageResult]:
+    async def _triage_goals(self, context: UserExecutionContext, goals: List[str]) -> List[GoalTriageResult]:
         """Triage and prioritize the extracted goals."""
         triage_results = []
         
@@ -211,7 +229,7 @@ class GoalsTriageSubAgent(BaseAgent):
         
         return triage_results
 
-    async def _analyze_single_goal(self, context: ExecutionContext, goal: str, goal_index: int) -> GoalTriageResult:
+    async def _analyze_single_goal(self, context: UserExecutionContext, goal: str, goal_index: int) -> GoalTriageResult:
         """Analyze a single goal for priority, category, and other attributes."""
         
         analysis_prompt = f"""
@@ -268,12 +286,29 @@ class GoalsTriageSubAgent(BaseAgent):
             )
             
         except Exception as e:
-            self.logger.error(f"Failed to analyze goal via LLM: {e}")
+            # Create error context with user execution context details
+            error_context = ErrorContext(
+                trace_id=str(uuid4()),
+                operation="goal_analysis",
+                agent_name="GoalsTriageSubAgent",
+                operation_name="analyze_single_goal",
+                user_id=context.user_id,
+                run_id=context.run_id,
+                timestamp=datetime.now(timezone.utc),
+                details={
+                    "goal_index": goal_index,
+                    "goal_text": goal[:100],  # First 100 chars for context
+                    "goal_length": len(goal)
+                }
+            )
+            
+            # Handle error using unified error handler
+            await agent_error_handler.handle_error(e, error_context)
             
             # Fallback analysis
             return self._create_fallback_goal_analysis(goal, goal_index)
 
-    async def _create_prioritized_plan(self, context: ExecutionContext, triage_results: List[GoalTriageResult]) -> Dict[str, Any]:
+    async def _create_prioritized_plan(self, context: UserExecutionContext, triage_results: List[GoalTriageResult]) -> Dict[str, Any]:
         """Create a prioritized execution plan from triaged goals."""
         
         # Sort goals by priority
@@ -306,9 +341,10 @@ class GoalsTriageSubAgent(BaseAgent):
             }
         }
 
-    async def _finalize_goal_triage_result(self, context: ExecutionContext, 
+    async def _finalize_goal_triage_result(self, context: UserExecutionContext, 
                                          triage_results: List[GoalTriageResult],
-                                         prioritized_plan: Dict[str, Any]) -> Dict[str, Any]:
+                                         prioritized_plan: Dict[str, Any],
+                                         session_manager: DatabaseSessionManager) -> Dict[str, Any]:
         """Finalize and structure the goal triage results."""
         
         # Structure the result data
@@ -319,12 +355,17 @@ class GoalsTriageSubAgent(BaseAgent):
                 "total_goals_analyzed": len(triage_results),
                 "analysis_timestamp": time.time(),
                 "high_confidence_goals": len([g for g in triage_results if g.confidence_score >= 0.8]),
-                "agent_version": "1.0.0"
+                "agent_version": "1.0.0",
+                "user_id": context.user_id,
+                "run_id": context.run_id,
+                "thread_id": context.thread_id
             }
         }
         
-        # Store result in agent metadata for future reference
-        context.state.metadata.custom_fields["goal_triage_result"] = str(goal_triage_result)
+        # Store result in context metadata for proper isolation
+        if "goal_triage_results" not in context.metadata:
+            context.metadata["goal_triage_results"] = []
+        context.metadata["goal_triage_results"].append(goal_triage_result)
         
         return {
             "goal_triage_result": goal_triage_result,
@@ -332,17 +373,16 @@ class GoalsTriageSubAgent(BaseAgent):
         }
 
     def _parse_goals_from_llm_response(self, response: str) -> List[str]:
-        """Parse goals from LLM response, with fallback parsing."""
-        try:
-            import json
-            # Try to parse as JSON array
-            goals = json.loads(response)
-            if isinstance(goals, list):
-                return [str(goal) for goal in goals if goal]
-        except Exception:
-            pass
+        """Parse goals from LLM response using SSOT unified JSON handler."""
+        # Use SSOT LLMResponseParser for safe JSON parsing
+        parser = LLMResponseParser()
+        parsed_goals = parser.safe_json_parse(response, fallback=None)
         
-        # Fallback: extract goals from text
+        # If we got a valid list, process it
+        if isinstance(parsed_goals, list):
+            return [str(goal) for goal in parsed_goals if goal]
+        
+        # Fallback: extract goals from text using existing logic
         lines = response.strip().split('\n')
         goals = []
         for line in lines:
@@ -358,23 +398,43 @@ class GoalsTriageSubAgent(BaseAgent):
         return goals if goals else ["Improve business performance and user satisfaction"]
 
     def _parse_goal_analysis_response(self, response: str) -> Dict[str, Any]:
-        """Parse goal analysis response from LLM."""
-        try:
-            import json
-            return json.loads(response)
-        except Exception:
-            # Fallback analysis
-            return {
-                "priority": "medium",
-                "category": "operational",
-                "confidence_score": 0.6,
-                "rationale": "Automated analysis based on standard business priorities",
-                "estimated_impact": "Positive impact on business operations expected",
-                "resource_requirements": {"time": "moderate", "people": "2-3 team members", "budget": "standard"},
-                "timeline_estimate": "3-6 months",
-                "dependencies": [],
-                "risk_assessment": {"probability": "low", "impact": "manageable", "mitigation": "standard risk management"}
-            }
+        """Parse goal analysis response from LLM using SSOT unified JSON handler."""
+        # Use SSOT LLMResponseParser for proper JSON handling with error recovery
+        parser = LLMResponseParser()
+        parsed_response = parser.ensure_agent_response_is_json(response)
+        
+        # If we got a valid parsed response with expected structure, use it
+        if isinstance(parsed_response, dict) and parsed_response.get("parsed", True):
+            # Remove metadata fields added by ensure_agent_response_is_json if present
+            clean_response = {k: v for k, v in parsed_response.items() 
+                            if k not in ["type", "parsed", "message"]}
+            if clean_response:
+                return clean_response
+        
+        # If parsing failed or response is malformed, use fallback with error recovery
+        if isinstance(parsed_response, dict) and not parsed_response.get("parsed", True):
+            # Log the parsing issue for debugging
+            self.logger.warning(f"LLM response parsing failed: {parsed_response.get('message', 'Unknown error')}")
+            
+            # Try to recover using JSONErrorFixer if we have raw_response
+            if "raw_response" in parsed_response:
+                error_fixer = JSONErrorFixer()
+                recovered = error_fixer.recover_truncated_json(parsed_response["raw_response"])
+                if recovered and isinstance(recovered, dict):
+                    return recovered
+        
+        # Final fallback analysis
+        return {
+            "priority": "medium",
+            "category": "operational",
+            "confidence_score": 0.6,
+            "rationale": "Automated analysis based on standard business priorities",
+            "estimated_impact": "Positive impact on business operations expected",
+            "resource_requirements": {"time": "moderate", "people": "2-3 team members", "budget": "standard"},
+            "timeline_estimate": "3-6 months",
+            "dependencies": [],
+            "risk_assessment": {"probability": "low", "impact": "manageable", "mitigation": "standard risk management"}
+        }
 
     def _extract_goals_fallback(self, user_request: str) -> List[str]:
         """Fallback goal extraction using basic text analysis."""
@@ -488,49 +548,160 @@ class GoalsTriageSubAgent(BaseAgent):
         
         return recommendations
 
-    @validate_agent_input('GoalsTriageSubAgent')
-    async def execute(self, state: DeepAgentState, run_id: str, stream_updates: bool) -> None:
-        """Execute goal triage using BaseAgent's golden pattern infrastructure."""
-        # Use BaseAgent's modern execution pattern with reliability
-        from netra_backend.app.agents.utils import extract_thread_id
+    async def execute(self, context: UserExecutionContext, stream_updates: bool = False) -> Dict[str, Any]:
+        """Execute goal triage with proper user context isolation.
         
-        context = ExecutionContext(
-            run_id=run_id,
-            agent_name=self.name,
-            state=state,
-            stream_updates=stream_updates,
-            thread_id=extract_thread_id(state),
-            user_id=getattr(state, 'user_id', None),
-            start_time=time.time(),
-            correlation_id=self.correlation_id
-        )
-        
-        # Execute using BaseAgent's reliability infrastructure
-        await self.execute_with_reliability(
-            lambda: self._execute_main_logic(context),
-            "execute_goal_triage",
-            fallback=lambda: self._execute_fallback_logic(context)
-        )
-        
-    async def _execute_main_logic(self, context: ExecutionContext) -> None:
-        """Main execution logic using golden pattern."""
-        if not await self.validate_preconditions(context):
-            raise ValueError("Precondition validation failed for goal triage")
-        await self.execute_core_logic(context)
-        
-    async def _execute_fallback_logic(self, context: ExecutionContext) -> None:
-        """Fallback execution with proper WebSocket events for user transparency."""
-        if context.stream_updates:
-            await self.emit_agent_started("Creating fallback goal triage due to processing issues")
-            await self.emit_thinking("Switching to fallback goal analysis...")
+        Args:
+            context: User execution context with isolated database session
+            stream_updates: Whether to stream progress updates via WebSocket
             
-        self.logger.warning(f"Using fallback goal triage for run_id: {context.run_id}")
+        Returns:
+            Goal triage results with priorities and recommendations
+            
+        Raises:
+            ValueError: If context validation fails
+            RuntimeError: If goal triage processing fails
+        """
+        # Validate context at entry point
+        self._validate_context(context)
         
-        # Simple fallback goal analysis
+        # Extract user request from context metadata or raise error
+        user_request = self._extract_user_request(context)
+        
+        self.logger.info(f"GoalsTriageSubAgent executing for user {context.user_id}, run {context.run_id}")
+        
+        # Create database session manager from context
+        session_manager = DatabaseSessionManager(context)
+        
+        try:
+            # Validate preconditions
+            if not await self.validate_preconditions(context, user_request):
+                raise ValueError("Goal triage preconditions not met")
+            
+            # Execute core logic with session isolation
+            result = await self.execute_core_logic(context, user_request, session_manager)
+            
+            self.logger.info(f"GoalsTriageSubAgent completed successfully for user {context.user_id}")
+            return result
+            
+        except Exception as e:
+            # Create error context with user execution context details
+            error_context = ErrorContext(
+                trace_id=str(uuid4()),
+                operation="execute",
+                agent_name="GoalsTriageSubAgent",
+                operation_name="execute",
+                user_id=context.user_id,
+                run_id=context.run_id,
+                thread_id=context.thread_id,
+                timestamp=datetime.now(timezone.utc),
+                details={"stream_updates": stream_updates}
+            )
+            
+            # Handle error using unified error handler
+            await agent_error_handler.handle_error(e, error_context)
+            
+            # Execute fallback logic if main execution fails
+            if stream_updates:
+                await self.emit_thinking("Switching to fallback goal analysis due to processing issues...")
+            
+            return await self._execute_fallback_logic(context, user_request, session_manager)
+            
+        finally:
+            # Ensure session cleanup
+            try:
+                await session_manager.close()
+            except Exception as cleanup_error:
+                # Create error context for cleanup failure
+                cleanup_error_context = ErrorContext(
+                    trace_id=str(uuid4()),
+                    operation="session_cleanup",
+                    agent_name="GoalsTriageSubAgent",
+                    operation_name="execute_cleanup",
+                    user_id=context.user_id,
+                    run_id=context.run_id,
+                    timestamp=datetime.now(timezone.utc),
+                    details={"cleanup_operation": "session_manager.close()"}
+                )
+                
+                # Handle cleanup error using unified error handler
+                await agent_error_handler.handle_error(cleanup_error, cleanup_error_context)
+        
+    def _validate_context(self, context: UserExecutionContext) -> None:
+        """Validate UserExecutionContext for goal triage.
+        
+        Args:
+            context: User execution context to validate
+            
+        Raises:
+            ValueError: If context is invalid or missing required data
+        """
+        if not isinstance(context, UserExecutionContext):
+            raise ValueError(f"Expected UserExecutionContext, got {type(context)}")
+        
+        if not context.user_id:
+            raise ValueError("Context must have valid user_id for proper isolation")
+        
+        if not context.run_id:
+            raise ValueError("Context must have valid run_id for tracking")
+        
+        if not context.thread_id:
+            raise ValueError("Context must have valid thread_id for conversation tracking")
+        
+        # Validate session isolation
+        if not context.db_session:
+            raise ValueError("Context must include database session for proper isolation")
+        
+        self.logger.debug(f"Context validation passed for user {context.user_id}, run {context.run_id}")
+    
+    def _extract_user_request(self, context: UserExecutionContext) -> str:
+        """Extract user request from context metadata.
+        
+        Args:
+            context: User execution context
+            
+        Returns:
+            User request text
+            
+        Raises:
+            ValueError: If user request is not found in context
+        """
+        user_request = context.metadata.get('user_request')
+        if not user_request:
+            # Try alternative keys
+            user_request = context.metadata.get('request')
+        
+        if not user_request:
+            raise ValueError(
+                "No user request found in context metadata. "
+                "Context must include 'user_request' or 'request' in metadata."
+            )
+        
+        return str(user_request)
+        
+    async def _execute_fallback_logic(self, context: UserExecutionContext, 
+                                    user_request: str, 
+                                    session_manager: DatabaseSessionManager) -> Dict[str, Any]:
+        """Fallback execution with proper WebSocket events and user isolation.
+        
+        Args:
+            context: User execution context
+            user_request: The user's request text
+            session_manager: Database session manager for this request
+            
+        Returns:
+            Fallback goal triage results
+        """
+        await self.emit_agent_started("Creating fallback goal triage due to processing issues")
+        await self.emit_thinking("Switching to fallback goal analysis...")
+            
+        self.logger.warning(f"Using fallback goal triage for user {context.user_id}, run_id: {context.run_id}")
+        
+        # Simple fallback goal analysis with user isolation
         fallback_result = {
             "triage_results": [{
                 "goal_id": "goal_1",
-                "original_goal": context.state.user_request,
+                "original_goal": user_request,
                 "priority": "medium",
                 "category": "operational",
                 "confidence_score": 0.5,
@@ -553,25 +724,27 @@ class GoalsTriageSubAgent(BaseAgent):
                 "total_goals_analyzed": 1,
                 "analysis_timestamp": time.time(),
                 "fallback_used": True,
-                "agent_version": "1.0.0"
+                "agent_version": "1.0.0",
+                "user_id": context.user_id,
+                "run_id": context.run_id,
+                "thread_id": context.thread_id
             }
         }
         
-        context.state.metadata.custom_fields["goal_triage_result"] = str(fallback_result)
+        # Store result in context metadata for proper isolation
+        if "goal_triage_results" not in context.metadata:
+            context.metadata["goal_triage_results"] = []
+        context.metadata["goal_triage_results"].append(fallback_result)
         
-        if context.stream_updates:
-            await self.emit_agent_completed({
-                "success": True,
-                "fallback_used": True,
-                "goals_analyzed": 1,
-                "message": "Goal triage completed using fallback method - manual review recommended"
-            })
+        await self.emit_agent_completed({
+            "success": True,
+            "fallback_used": True,
+            "goals_analyzed": 1,
+            "message": "Goal triage completed using fallback method - manual review recommended"
+        })
+        
+        return {
+            "goal_triage_result": fallback_result,
+            "recommendations": ["Manual review recommended for comprehensive goal analysis"]
+        }
 
-    async def check_entry_conditions(self, state: DeepAgentState, run_id: str) -> bool:
-        """Legacy entry condition check - maintained for backward compatibility."""
-        return bool(state.user_request)
-    
-    async def cleanup(self, state: DeepAgentState, run_id: str) -> None:
-        """Cleanup after execution - goal triage specific cleanup only."""
-        if "goal_triage_result" in state.metadata.custom_fields:
-            self.logger.debug(f"Goal triage completed for run_id {run_id}")

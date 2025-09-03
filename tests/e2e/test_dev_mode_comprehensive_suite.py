@@ -46,6 +46,10 @@ class TestDevModeResult:
     details: Dict[str, Any] = None
 
 
+# Alias for backward compatibility (fixing typo)
+DevModeTestResult = TestDevModeResult
+
+
 class TestDevModeer:
     """Comprehensive dev mode testing utility"""
     

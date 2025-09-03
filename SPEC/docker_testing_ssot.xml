@@ -76,8 +76,6 @@
         <service name="redis" test="6381" dev="6380" prod="6379"/>
         <service name="clickhouse" test="8125" dev="8124" prod="8123"/>
         <service name="rabbitmq" test="5673" dev="5672" prod="5672"/>
-        <service name="mailhog_smtp" test="1026" dev="1025" prod="N/A"/>
-        <service name="mailhog_web" test="8026" dev="8025" prod="N/A"/>
     </port_allocation>
     
     <known_issues>

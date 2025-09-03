@@ -17,7 +17,8 @@ from netra_backend.app.agents.base.executor import (
     LambdaExecutionPhase, AgentMethodExecutionPhase
 )
 from netra_backend.app.agents.base.interface import ExecutionContext, ExecutionResult
-from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext, validate_user_context
+from netra_backend.app.database.session_manager import DatabaseSessionManager
 from netra_backend.app.agents.supply_researcher.data_extractor import (
     SupplyDataExtractor,
 )
@@ -81,21 +82,26 @@ class SupplyResearcherAgent(BaseAgent):
     
     async def execute(
         self,
-        state: DeepAgentState,
-        run_id: str,
+        context: UserExecutionContext,
         stream_updates: bool = False
     ) -> None:
-        """Execute supply research using BaseExecutionEngine."""
+        """Execute supply research using UserExecutionContext."""
+        # Validate context
+        context = validate_user_context(context)
+        
         try:
-            # Create execution context
+            # Create database session manager
+            session_mgr = DatabaseSessionManager(context)
+            
+            # Create execution context for BaseExecutionEngine
             execution_context = ExecutionContext(
-                run_id=run_id,
+                run_id=context.run_id,
                 agent_name=self.name,
-                state=state,
+                state=self._create_compatible_state(context),
                 stream_updates=stream_updates,
-                thread_id=getattr(state, 'chat_thread_id', None),
-                user_id=getattr(state, 'user_id', None),
-                correlation_id=run_id
+                thread_id=context.thread_id,
+                user_id=context.user_id,
+                correlation_id=context.run_id
             )
             
             # Execute using BaseExecutionEngine with phases
@@ -103,10 +109,21 @@ class SupplyResearcherAgent(BaseAgent):
             
             if not result.success:
                 raise Exception(result.error)
+            
+            # Store result in context metadata for UserExecutionContext pattern
+            if hasattr(execution_context.state, 'supply_research_result'):
+                context.metadata['supply_research_result'] = execution_context.state.supply_research_result
                 
         except Exception as e:
-            await self._handle_execution_error(e, state, run_id, stream_updates)
+            await self._handle_execution_error(e, context, stream_updates)
             raise
+        finally:
+            # Ensure proper cleanup
+            try:
+                if 'session_mgr' in locals():
+                    await session_mgr.cleanup()
+            except Exception as cleanup_e:
+                logger.error(f"Session cleanup error: {cleanup_e}")
     
     async def _pre_execution_hook(self, context: ExecutionContext) -> None:
         """Pre-execution hook for setup."""
@@ -115,10 +132,11 @@ class SupplyResearcherAgent(BaseAgent):
     async def _post_execution_hook(self, context: ExecutionContext, phase_results: Dict[str, Any]) -> None:
         """Post-execution hook for cleanup."""
         logger.info(f"Supply research completed for run_id: {context.run_id}")
-        # Extract final result and store in state
+        # Extract final result and store in state (via UserExecutionContext metadata)
         if "results_processing" in phase_results:
             result_data = phase_results["results_processing"]
-            context.state.supply_research_result = result_data.get("final_result", {})
+            if hasattr(context.state, 'supply_research_result'):
+                context.state.supply_research_result = result_data.get("final_result", {})
     
     # Phase execution methods for BaseExecutionEngine integration
     async def _execute_parsing_phase(self, context: ExecutionContext, previous_results: Dict[str, Any]) -> Dict[str, Any]:
@@ -160,14 +178,8 @@ class SupplyResearcherAgent(BaseAgent):
         await self._send_completion_update(context.run_id, context.stream_updates, result)
         return {"final_result": result}
     
-    async def _execute_research_pipeline(self, state: DeepAgentState, run_id: str, stream_updates: bool) -> None:
-        """Execute the main research pipeline."""
-        request = state.user_request or "Provide AI market overview"
-        parsed_request = await self._parse_and_log_request(request, run_id, stream_updates)
-        research_session = await self._create_research_session(parsed_request, state)
-        research_result = await self._conduct_research_with_updates(parsed_request, research_session, run_id, stream_updates)
-        result = await self._process_and_finalize_results(research_result, parsed_request, research_session, run_id, stream_updates, state)
-        logger.info(f"SupplyResearcherAgent completed for run_id: {run_id}")
+    # Legacy method - removed in favor of UserExecutionContext pattern
+    # Use execute(context: UserExecutionContext, stream_updates: bool) instead
     
     async def _parse_and_log_request(self, request: str, run_id: str, stream_updates: bool):
         """Parse request and log details."""
@@ -181,13 +193,8 @@ class SupplyResearcherAgent(BaseAgent):
         await self._send_research_update(run_id, stream_updates, parsed_request)
         return await self._conduct_research(parsed_request, research_session)
     
-    async def _process_and_finalize_results(self, research_result, parsed_request, research_session, run_id: str, stream_updates: bool, state: DeepAgentState):
-        """Process results and finalize state."""
-        await self._send_processing_update(run_id, stream_updates)
-        result = await self._process_research_results(research_result, parsed_request, research_session, run_id, stream_updates)
-        state.supply_research_result = result
-        await self._send_completion_update(run_id, stream_updates, result)
-        return result
+    # Legacy method - removed in favor of UserExecutionContext pattern
+    # Results are now stored in context.metadata['supply_research_result']
     
     async def process_scheduled_research(
         self,
@@ -210,16 +217,17 @@ class SupplyResearcherAgent(BaseAgent):
     async def _process_single_provider_research(self, research_type: ResearchType, provider: str) -> Dict[str, Any]:
         """Process research for a single provider."""
         try:
-            state = self._create_scheduled_state(research_type, provider)
-            await self.execute(state, f"scheduled_{provider}_{datetime.now().timestamp()}", False)
-            return self._create_success_provider_result(provider, state)
+            context = self._create_scheduled_context(research_type, provider)
+            await self.execute(context, False)
+            return self._create_success_provider_result(provider, context)
         except Exception as e:
             return self._create_error_provider_result(provider, e)
     
-    def _create_success_provider_result(self, provider: str, state: DeepAgentState) -> Dict[str, Any]:
+    def _create_success_provider_result(self, provider: str, context: UserExecutionContext) -> Dict[str, Any]:
         """Create successful provider result."""
-        if hasattr(state, 'supply_research_result'):
-            return {"provider": provider, "result": state.supply_research_result}
+        result = context.metadata.get('supply_research_result')
+        if result:
+            return {"provider": provider, "result": result}
         return {"provider": provider, "error": "No result generated"}
     
     def _create_error_provider_result(self, provider: str, error: Exception) -> Dict[str, Any]:
@@ -246,7 +254,7 @@ class SupplyResearcherAgent(BaseAgent):
     async def _create_research_session(
         self,
         parsed_request: Dict[str, Any],
-        state: DeepAgentState
+        state: Any
     ) -> ResearchSession:
         """Create research session record"""
         research_query = self.research_engine.generate_research_query(parsed_request)
@@ -254,7 +262,7 @@ class SupplyResearcherAgent(BaseAgent):
         await self._save_research_session(research_session)
         return research_session
     
-    def _build_research_session(self, research_query: str, state: DeepAgentState) -> ResearchSession:
+    def _build_research_session(self, research_query: str, state: Any) -> ResearchSession:
         """Build research session object."""
         return ResearchSession(
             query=research_query,
@@ -378,15 +386,13 @@ class SupplyResearcherAgent(BaseAgent):
     async def _handle_execution_error(
         self,
         error: Exception,
-        state: DeepAgentState,
-        run_id: str,
+        context: UserExecutionContext,
         stream_updates: bool
     ) -> None:
         """Handle execution errors"""
         logger.error(f"SupplyResearcherAgent execution failed: {error}")
         await self._update_failed_session_if_exists(error)
-        self._store_error_result(error, state)
-        await self._send_error_notification(run_id, error, stream_updates)
+        await self._send_error_notification(context.run_id, error, stream_updates)
     
     async def _update_failed_session_if_exists(self, error: Exception) -> None:
         """Update research session if it exists"""
@@ -395,12 +401,17 @@ class SupplyResearcherAgent(BaseAgent):
             research_session.error_message = str(error)
             self.db.commit()
     
-    def _store_error_result(self, error: Exception, state: DeepAgentState) -> None:
-        """Store error result in state"""
-        state.supply_research_result = {
-            "status": "error",
-            "error": str(error)
-        }
+    def _create_compatible_state(self, context: UserExecutionContext) -> Any:
+        """Create compatible state object for BaseExecutionEngine."""
+        # Create a simple object with the necessary attributes
+        class CompatibleState:
+            def __init__(self, context: UserExecutionContext):
+                self.user_request = context.metadata.get('user_request', 'Provide AI market overview')
+                self.chat_thread_id = context.thread_id
+                self.user_id = context.user_id
+                self.supply_research_result = None
+        
+        return CompatibleState(context)
     
     async def _send_error_notification(self, run_id: str, error: Exception, stream_updates: bool) -> None:
         """Send error notification if streaming enabled"""
@@ -429,12 +440,14 @@ class SupplyResearcherAgent(BaseAgent):
         research_session.questions_answered = json.dumps(research_result.get("questions_answered", []))
         research_session.citations = json.dumps(research_result.get("citations", []))
     
-    def _create_scheduled_state(self, research_type: ResearchType, provider: str) -> DeepAgentState:
-        """Create state for scheduled research"""
-        return DeepAgentState(
-            user_request=f"Update {research_type.value} for {provider}",
-            chat_thread_id=f"scheduled_{research_type.value}",
-            user_id="scheduler"
+    def _create_scheduled_context(self, research_type: ResearchType, provider: str) -> UserExecutionContext:
+        """Create context for scheduled research"""
+        import uuid
+        return UserExecutionContext(
+            user_id="scheduler",
+            thread_id=f"scheduled_{research_type.value}",
+            run_id=f"scheduled_{provider}_{uuid.uuid4().hex[:8]}",
+            metadata={"user_request": f"Update {research_type.value} for {provider}"}
         )
     
     async def _send_update(self, run_id: str, update: Dict[str, Any]) -> None:

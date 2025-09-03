@@ -7,6 +7,10 @@ import pytest
 import time
 import statistics
 from unittest.mock import Mock
+from netra_backend.app.core.backend_environment import get_backend_env
+
+# Get backend environment for configuration
+backend_env = get_backend_env()
 
 # Handle optional OpenTelemetry dependency
 try:
@@ -76,9 +80,9 @@ class TestDistributedTracingPerformanceOverhead:
         overhead_ratio = (traced_median - baseline_median) / baseline_median
         
         # Determine threshold based on environment - more lenient for shared/CI environments
-        is_ci = (os.getenv('CI') == 'true' or 
-                os.getenv('GITHUB_ACTIONS') == 'true' or
-                os.getenv('PYTEST_RUNNING') == 'true')
+        is_ci = (backend_env.get('CI') == 'true' or 
+                backend_env.get('GITHUB_ACTIONS') == 'true' or
+                backend_env.get('PYTEST_RUNNING') == 'true')
         
         # Even more lenient thresholds for stability
         threshold = 0.50 if is_ci else 0.25  # 50% for CI, 25% for local
@@ -103,7 +107,7 @@ class TestDistributedTracingPerformanceOverhead:
         initial_span_count = len(performance_tracer._span_processors) if hasattr(performance_tracer, '_span_processors') else 0
         
         # Create and complete multiple spans (reduced count for CI stability)
-        span_count = 500 if os.getenv('CI') == 'true' else 1000
+        span_count = 500 if backend_env.get('CI') == 'true' else 1000
         for i in range(span_count):
             with performance_tracer.start_as_current_span(f"memory_test_span_{i}") as span:
                 span.set_attribute("iteration", i)

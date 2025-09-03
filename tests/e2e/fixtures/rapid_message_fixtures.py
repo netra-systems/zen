@@ -1,5 +1,4 @@
 """
-from shared.isolated_environment import get_env
 Shared fixtures for rapid message succession E2E tests.
 
 Business Value Justification (BVJ):
@@ -20,6 +19,8 @@ from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
 
 import pytest
+
+from shared.isolated_environment import get_env
 
 logger = logging.getLogger(__name__)
 
