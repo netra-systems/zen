@@ -136,7 +136,10 @@ class StartupValidator:
     async def _validate_tools(self, app) -> None:
         """Validate tool registration and dispatcher."""
         try:
+            # In UserContext-based architecture, tool_dispatcher is None by design
+            # Check for tool_classes configuration instead
             if hasattr(app.state, 'tool_dispatcher') and app.state.tool_dispatcher:
+                # Legacy path - validate global tool dispatcher if it exists
                 dispatcher = app.state.tool_dispatcher
                 
                 # 🔧 DEBUG: Log dispatcher details
@@ -184,8 +187,35 @@ class StartupValidator:
                 else:
                     self.logger.info(f"✓ Tool Dispatcher: {tool_count} tools, WebSocket enhanced")
                     
+            elif hasattr(app.state, 'tool_classes') and app.state.tool_classes:
+                # UserContext-based path - validate tool configuration
+                tool_classes = app.state.tool_classes
+                tool_count = len(tool_classes) if tool_classes else 0
+                
+                self.logger.info(f"🔍 UserContext mode: {tool_count} tool classes configured")
+                
+                validation = ComponentValidation(
+                    name="Tool Configuration",
+                    category="Tools",
+                    expected_min=1,  # At least one tool class should be configured
+                    actual_count=tool_count,
+                    status=self._get_status(tool_count, 1, is_critical=True),
+                    message=f"Configured {tool_count} tool classes for UserContext",
+                    is_critical=True,
+                    metadata={
+                        "mode": "UserContext",
+                        "tool_count": tool_count
+                    }
+                )
+                
+                self.validations.append(validation)
+                
+                if tool_count > 0:
+                    self.logger.info(f"✓ Tool Configuration: {tool_count} tools ready for UserContext creation")
+                else:
+                    self.logger.warning("⚠️ NO TOOLS CONFIGURED for UserContext")
             else:
-                self._add_failed_validation("Tool Dispatcher", "Tools", "Dispatcher not initialized")
+                self._add_failed_validation("Tool System", "Tools", "Neither dispatcher nor UserContext configuration found")
                 
         except Exception as e:
             self._add_failed_validation("Tool Validation", "Tools", str(e))
