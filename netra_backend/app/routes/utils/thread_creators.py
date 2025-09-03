@@ -15,12 +15,23 @@ def generate_thread_id() -> str:
 
 
 def prepare_thread_metadata(thread_data, user_id: str) -> Dict[str, Any]:
-    """Prepare thread metadata."""
+    """Prepare thread metadata with consistent user_id formatting."""
+    from netra_backend.app.logging_config import central_logger
+    logger = central_logger.get_logger(__name__)
+    
     metadata = thread_data.metadata or {}
-    metadata["user_id"] = user_id
+    
+    # Ensure user_id is always stored as a string for consistency
+    normalized_user_id = str(user_id).strip()
+    metadata["user_id"] = normalized_user_id
+    
+    logger.debug(f"Creating thread with user_id: {normalized_user_id} (original type: {type(user_id).__name__})")
+    
     if thread_data.title:
         metadata["title"] = thread_data.title
     metadata["status"] = "active"
+    metadata["created_at"] = int(time.time())
+    
     return metadata
 
 
