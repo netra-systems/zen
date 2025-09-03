@@ -154,7 +154,7 @@ class LogFormatter:
         - Additional fields for context
         """
         import json
-        from datetime import timezone
+        from datetime import datetime, timezone
         
         # Map loguru levels to GCP severity levels
         severity_mapping = {
@@ -167,54 +167,100 @@ class LogFormatter:
             'CRITICAL': 'CRITICAL'
         }
         
-        # Create GCP-compatible log entry
-        # Loguru provides level as a namedtuple with .name, .no, .icon attributes
-        level = record.get("level", {})
-        level_name = level.name if hasattr(level, 'name') else 'DEFAULT'
-        
-        # Get timestamp - Loguru provides datetime object
-        time_obj = record.get("time")
-        timestamp = time_obj.isoformat() if hasattr(time_obj, 'isoformat') else str(time_obj)
-        
-        gcp_entry = {
-            'severity': severity_mapping.get(level_name, 'DEFAULT'),
-            'message': self._filter.filter_message(record.get("message", "")),
-            'timestamp': timestamp,
-            'labels': {
-                'module': record.get("name", ""),
-                'function': record.get("function", ""),
-                'line': str(record.get("line", ""))
-            }
-        }
-        
-        # Add context if available
-        if trace_id := trace_id_context.get():
-            gcp_entry['trace'] = trace_id
-        if request_id := request_id_context.get():
-            gcp_entry['labels']['request_id'] = request_id
-        if user_id := user_id_context.get():
-            gcp_entry['labels']['user_id'] = user_id
-        
-        # Add extra context
-        if extra := record.get("extra"):
-            filtered_extra = self._filter.filter_dict(extra)
-            if filtered_extra:
-                gcp_entry['context'] = filtered_extra
-        
-        # Add exception info if present
-        if exc := record.get("exception"):
-            if exc and hasattr(exc, 'type'):
-                # Format traceback as single line for GCP
-                traceback_str = None
-                if hasattr(exc, 'traceback') and exc.traceback:
-                    # Replace newlines with \n to keep JSON on single line
-                    traceback_str = str(exc.traceback).replace('\n', '\\n').replace('\r', '')
-                
-                gcp_entry['error'] = {
-                    'type': exc.type.__name__ if hasattr(exc, 'type') and exc.type else None,
-                    'value': str(exc.value) if hasattr(exc, 'value') and exc.value else None,
-                    'traceback': traceback_str
+        # Safely handle Loguru record structure
+        # In Loguru, record is a dict-like object with specific attributes
+        try:
+            # Handle None or invalid record
+            if not record or not hasattr(record, 'get'):
+                raise ValueError(f"Invalid record type: {type(record)}")
+            
+            # Safely get level name - level is a namedtuple with .name, .no, .icon attributes
+            level = record.get("level", {})
+            if hasattr(level, 'name'):
+                level_name = level.name
+            elif isinstance(level, str):
+                level_name = level
+            elif isinstance(level, dict) and 'name' in level:
+                level_name = level['name']
+            else:
+                level_name = 'DEFAULT'
+            
+            # Safely get timestamp - Loguru provides datetime object
+            time_obj = record.get("time")
+            if hasattr(time_obj, 'isoformat'):
+                timestamp = time_obj.isoformat()
+            elif isinstance(time_obj, str):
+                timestamp = time_obj
+            else:
+                timestamp = str(time_obj) if time_obj else datetime.now(timezone.utc).isoformat()
+            
+            # Safely get message
+            message = record.get("message", "")
+            if not isinstance(message, str):
+                message = str(message)
+            
+            # Safely get other fields
+            module = record.get("name", "")
+            function = record.get("function", "")
+            line = record.get("line", "")
+            
+            gcp_entry = {
+                'severity': severity_mapping.get(level_name, 'DEFAULT'),
+                'message': self._filter.filter_message(message),
+                'timestamp': timestamp,
+                'labels': {
+                    'module': str(module) if module else "",
+                    'function': str(function) if function else "",
+                    'line': str(line) if line else ""
                 }
+            }
+        except Exception as e:
+            # Fallback for any unexpected record structure
+            import traceback
+            # datetime already imported at top of function
+            gcp_entry = {
+                'severity': 'ERROR',
+                'message': f"Logging formatter error: {str(e)} | Original message: {record.get('message', 'N/A') if isinstance(record, dict) else 'N/A'}",
+                'timestamp': datetime.now(timezone.utc).isoformat(),
+                'labels': {
+                    'module': 'logging_formatter',
+                    'function': 'gcp_json_formatter',
+                    'line': '0',
+                    'formatter_error': str(e),
+                    'traceback': traceback.format_exc().replace('\n', '\\n')
+                }
+            }
+        
+        # Add context if available (but only if record was valid)
+        if isinstance(record, dict) or hasattr(record, 'get'):
+            if trace_id := trace_id_context.get():
+                gcp_entry['trace'] = trace_id
+            if request_id := request_id_context.get():
+                gcp_entry['labels']['request_id'] = request_id
+            if user_id := user_id_context.get():
+                gcp_entry['labels']['user_id'] = user_id
+            
+            # Add extra context
+            if hasattr(record, 'get'):
+                if extra := record.get("extra"):
+                    filtered_extra = self._filter.filter_dict(extra)
+                    if filtered_extra:
+                        gcp_entry['context'] = filtered_extra
+                
+                # Add exception info if present
+                if exc := record.get("exception"):
+                    if exc and hasattr(exc, 'type'):
+                        # Format traceback as single line for GCP
+                        traceback_str = None
+                        if hasattr(exc, 'traceback') and exc.traceback:
+                            # Replace newlines with \n to keep JSON on single line
+                            traceback_str = str(exc.traceback).replace('\n', '\\n').replace('\r', '')
+                        
+                        gcp_entry['error'] = {
+                            'type': exc.type.__name__ if hasattr(exc, 'type') and exc.type else None,
+                            'value': str(exc.value) if hasattr(exc, 'value') and exc.value else None,
+                            'traceback': traceback_str
+                        }
         
         # Use separators to minimize JSON size and ensure single line
         return json.dumps(gcp_entry, separators=(',', ':'), ensure_ascii=False)
@@ -305,7 +351,8 @@ class LogHandlerConfig:
             # Use GCP-compatible JSON formatter with custom sink
             def gcp_sink(message):
                 """Custom sink that writes formatted JSON to stderr."""
-                record = message.record
+                # In Loguru, message.record is the record dict
+                record = message.record if hasattr(message, 'record') else message
                 try:
                     json_output = self.formatter.gcp_json_formatter(record)
                     sys.stderr.write(json_output + "\n")
@@ -313,10 +360,22 @@ class LogHandlerConfig:
                 except Exception as e:
                     # Fallback to ensure logging doesn't fail completely
                     import json
+                    from datetime import datetime, timezone
+                    # Safely extract message and time from record
+                    original_msg = 'N/A'
+                    time_str = datetime.now(timezone.utc).isoformat()
+                    if isinstance(record, dict):
+                        original_msg = record.get('message', 'N/A')
+                        time_obj = record.get('time')
+                        if hasattr(time_obj, 'isoformat'):
+                            time_str = time_obj.isoformat()
+                        elif time_obj:
+                            time_str = str(time_obj)
+                    
                     fallback_entry = {
                         'severity': 'ERROR',
-                        'message': f"Logging formatter error: {str(e)} | Original message: {record.get('message', 'N/A')}",
-                        'timestamp': str(record.get('time', 'N/A')),
+                        'message': f"Logging formatter error: {str(e)} | Original message: {original_msg}",
+                        'timestamp': time_str,
                         'error_type': 'LogFormatterError'
                     }
                     json_output = json.dumps(fallback_entry, separators=(',', ':'))
