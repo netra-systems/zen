@@ -17,6 +17,14 @@ from typing import Any, Dict, Optional
 from loguru import logger
 from shared.isolated_environment import get_env
 
+# Import unified trace context
+from netra_backend.app.core.unified_trace_context import (
+    UnifiedTraceContext,
+    get_current_trace_context,
+    set_trace_context,
+    clear_trace_context as clear_unified_trace
+)
+
 # Context variables for request tracking
 request_id_context: ContextVar[Optional[str]] = ContextVar('request_id', default=None)
 user_id_context: ContextVar[Optional[str]] = ContextVar('user_id', default=None)
@@ -32,11 +40,31 @@ class LoggingContext:
             'user_id': user_id_context,
             'trace_id': trace_id_context
         }
+        # Track unified trace context separately
+        self._unified_context: Optional[UnifiedTraceContext] = None
     
     def set_context(self, request_id: Optional[str] = None, 
                     user_id: Optional[str] = None,
-                    trace_id: Optional[str] = None):
-        """Set logging context for the current async context."""
+                    trace_id: Optional[str] = None,
+                    unified_context: Optional[UnifiedTraceContext] = None):
+        """Set logging context for the current async context.
+        
+        Args:
+            request_id: HTTP request ID
+            user_id: User identifier
+            trace_id: Trace identifier (legacy)
+            unified_context: Unified trace context with W3C support
+        """
+        # If unified context provided, extract values from it
+        if unified_context:
+            self._unified_context = unified_context
+            set_trace_context(unified_context)
+            
+            # Extract values from unified context
+            request_id = request_id or unified_context.request_id
+            user_id = user_id or unified_context.user_id
+            trace_id = trace_id or unified_context.trace_id
+        
         self._set_if_provided('request_id', request_id)
         self._set_if_provided('user_id', user_id)
         self._set_if_provided('trace_id', trace_id)
@@ -50,13 +78,27 @@ class LoggingContext:
         """Clear all logging context variables."""
         for context_var in self._contexts.values():
             context_var.set(None)
+        # Clear unified context
+        clear_unified_trace()
+        self._unified_context = None
     
     def get_context(self) -> Dict[str, Optional[str]]:
         """Get current context values."""
-        return {
+        base_context = {
             name: context_var.get() 
             for name, context_var in self._contexts.items()
         }
+        
+        # Add unified context if available
+        unified = get_current_trace_context()
+        if unified:
+            base_context.update({
+                'correlation_id': unified.correlation_id,
+                'thread_id': unified.thread_id,
+                'span_id': unified._current_span.span_id if unified._current_span else None
+            })
+        
+        return base_context
     
     def get_filtered_context(self) -> Dict[str, str]:
         """Get context with non-None values only."""
@@ -65,6 +107,25 @@ class LoggingContext:
             for name, value in self.get_context().items()
             if value is not None
         }
+    
+    def get_unified_context(self) -> Optional[UnifiedTraceContext]:
+        """Get the current unified trace context.
+        
+        Returns:
+            Current unified trace context or None
+        """
+        return get_current_trace_context() or self._unified_context
+    
+    def create_child_context(self) -> Optional[UnifiedTraceContext]:
+        """Create a child context for sub-agent propagation.
+        
+        Returns:
+            Child context or None if no parent context exists
+        """
+        parent = self.get_unified_context()
+        if parent:
+            return parent.propagate_to_child()
+        return None
 
 
 class PerformanceTracker:
@@ -270,9 +331,17 @@ _stdlib_interceptor = StandardLibraryInterceptor()
 # Convenience functions for context management
 def set_logging_context(request_id: Optional[str] = None, 
                        user_id: Optional[str] = None,
-                       trace_id: Optional[str] = None):
-    """Set logging context - convenience function."""
-    _logging_context.set_context(request_id, user_id, trace_id)
+                       trace_id: Optional[str] = None,
+                       unified_context: Optional[UnifiedTraceContext] = None):
+    """Set logging context - convenience function.
+    
+    Args:
+        request_id: HTTP request ID
+        user_id: User identifier
+        trace_id: Trace identifier (legacy)
+        unified_context: Unified trace context with W3C support
+    """
+    _logging_context.set_context(request_id, user_id, trace_id, unified_context)
 
 
 def clear_logging_context():
@@ -283,6 +352,16 @@ def clear_logging_context():
 def get_logging_context() -> Dict[str, Optional[str]]:
     """Get current logging context - convenience function."""
     return _logging_context.get_context()
+
+
+def get_unified_trace_context() -> Optional[UnifiedTraceContext]:
+    """Get current unified trace context - convenience function."""
+    return _logging_context.get_unified_context()
+
+
+def create_child_trace_context() -> Optional[UnifiedTraceContext]:
+    """Create child trace context for sub-agents - convenience function."""
+    return _logging_context.create_child_context()
 
 
 def should_log_record(record) -> bool:
