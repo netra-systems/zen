@@ -23,6 +23,8 @@ from netra_backend.app.logging_config import central_logger
 from netra_backend.app.orchestration.agent_execution_registry import get_agent_execution_registry
 from netra_backend.app.websocket_core import get_websocket_manager
 from netra_backend.app.services.thread_run_registry import get_thread_run_registry, ThreadRunRegistry
+from netra_backend.app.utils.run_id_generator import extract_thread_id_from_run_id
+from netra_backend.app.core.id_manager import IDManager
 from shared.monitoring.interfaces import MonitorableComponent
 
 if TYPE_CHECKING:
@@ -911,7 +913,8 @@ class AgentWebSocketBridge(MonitorableComponent):
         self, 
         run_id: str, 
         agent_name: str, 
-        context: Optional[Dict[str, Any]] = None
+        context: Optional[Dict[str, Any]] = None,
+        trace_context: Optional[Dict[str, Any]] = None
     ) -> bool:
         """
         Send agent started notification with guaranteed delivery.
@@ -950,6 +953,10 @@ class AgentWebSocketBridge(MonitorableComponent):
                 }
             }
             
+            # Add trace context if provided
+            if trace_context:
+                notification["trace"] = trace_context
+            
             # CRYSTAL CLEAR EMISSION: Resolve thread_id and emit
             thread_id = await self._resolve_thread_id_from_run_id(run_id)
             if not thread_id:
@@ -976,7 +983,8 @@ class AgentWebSocketBridge(MonitorableComponent):
         agent_name: str, 
         reasoning: str,
         step_number: Optional[int] = None,
-        progress_percentage: Optional[float] = None
+        progress_percentage: Optional[float] = None,
+        trace_context: Optional[Dict[str, Any]] = None
     ) -> bool:
         """
         Send agent thinking notification with progress context.
@@ -1013,6 +1021,10 @@ class AgentWebSocketBridge(MonitorableComponent):
                     "status": "thinking"
                 }
             }
+            
+            # Add trace context if provided
+            if trace_context:
+                notification["trace"] = trace_context
             
             # CRYSTAL CLEAR EMISSION: Resolve thread_id and emit
             thread_id = await self._resolve_thread_id_from_run_id(run_id)
@@ -1166,7 +1178,8 @@ class AgentWebSocketBridge(MonitorableComponent):
         run_id: str, 
         agent_name: str, 
         result: Optional[Dict[str, Any]] = None,
-        execution_time_ms: Optional[float] = None
+        execution_time_ms: Optional[float] = None,
+        trace_context: Optional[Dict[str, Any]] = None
     ) -> bool:
         """
         Send agent completion notification with final results.
@@ -1203,6 +1216,10 @@ class AgentWebSocketBridge(MonitorableComponent):
                 }
             }
             
+            # Add trace context if provided
+            if trace_context:
+                notification["trace"] = trace_context
+            
             # CRYSTAL CLEAR EMISSION: Resolve thread_id and emit
             thread_id = await self._resolve_thread_id_from_run_id(run_id)
             if not thread_id:
@@ -1228,7 +1245,8 @@ class AgentWebSocketBridge(MonitorableComponent):
         run_id: str, 
         agent_name: str, 
         error: str,
-        error_context: Optional[Dict[str, Any]] = None
+        error_context: Optional[Dict[str, Any]] = None,
+        trace_context: Optional[Dict[str, Any]] = None
     ) -> bool:
         """
         Send agent error notification with context.
@@ -1264,6 +1282,10 @@ class AgentWebSocketBridge(MonitorableComponent):
                     "message": f"{agent_name} encountered an issue processing your request"
                 }
             }
+            
+            # Add trace context if provided
+            if trace_context:
+                notification["trace"] = trace_context
             
             # CRYSTAL CLEAR EMISSION: Resolve thread_id and emit
             thread_id = await self._resolve_thread_id_from_run_id(run_id)
@@ -1950,8 +1972,44 @@ class AgentWebSocketBridge(MonitorableComponent):
             
             # Pattern 1: Direct thread format (run_id IS a thread_id)
             if run_id.startswith("thread_") and self._is_valid_thread_format(run_id):
-                logger.debug(f"🔍 PATTERN 1 MATCH: run_id={run_id} is direct thread format")
-                return run_id
+                # Check if this is already a pure thread_id (no "_run_" component)
+                if "_run_" not in run_id:
+                    logger.debug(f"🔍 PATTERN 1 MATCH: run_id={run_id} is direct thread format")
+                    return run_id
+            
+            # Pattern 1.5: Use the standard extraction function for composite format
+            # This handles thread_{thread_id}_run_{timestamp}_{unique} format (run_id_generator format)
+            if run_id.startswith("thread_") and "_run_" in run_id:
+                try:
+                    # Use the canonical extraction function from run_id_generator
+                    extracted = extract_thread_id_from_run_id(run_id)
+                    if extracted:
+                        # The extraction returns without "thread_" prefix, so add it back
+                        thread_id = f"thread_{extracted}"
+                        if self._is_valid_thread_format(thread_id):
+                            logger.debug(f"🔍 PATTERN 1.5 MATCH: run_id={run_id} → extracted thread_id={thread_id} (run_id_generator format)")
+                            return thread_id
+                except Exception as e:
+                    logger.debug(f"⚠️ PATTERN 1.5 EXCEPTION: Failed to extract thread from {run_id}: {e}")
+            
+            # Pattern 1.6: Try IDManager format as fallback (SSOT from core)
+            # This handles run_{thread_id}_{uuid} format (IDManager format)
+            if run_id.startswith("run_"):
+                try:
+                    # Use the SSOT IDManager extraction
+                    extracted = IDManager.extract_thread_id(run_id)
+                    if extracted:
+                        # Check if we need to add "thread_" prefix
+                        if not extracted.startswith("thread_"):
+                            thread_id = f"thread_{extracted}"
+                        else:
+                            thread_id = extracted
+                        
+                        if self._is_valid_thread_format(thread_id):
+                            logger.debug(f"🔍 PATTERN 1.6 MATCH: run_id={run_id} → extracted thread_id={thread_id} (IDManager format)")
+                            return thread_id
+                except Exception as e:
+                    logger.debug(f"⚠️ PATTERN 1.6 EXCEPTION: Failed to extract thread from {run_id} using IDManager: {e}")
             
             # Pattern 2: Embedded thread format (contains "thread_" with identifier)
             if "thread_" in run_id:
