@@ -59,8 +59,13 @@ class AgentMessageHandler(BaseMessageHandler):
                 from netra_backend.app.websocket_core import get_websocket_manager
                 ws_manager = get_websocket_manager()
                 if ws_manager:
-                    ws_manager.update_connection_thread(user_id, thread_id)
-                    logger.debug(f"Updated thread association for user {user_id} to thread {thread_id}")
+                    # Get connection ID from the WebSocket instance
+                    connection_id = ws_manager.get_connection_id_by_websocket(websocket)
+                    if connection_id:
+                        ws_manager.update_connection_thread(connection_id, thread_id)
+                        logger.debug(f"Updated thread association for connection {connection_id} (user {user_id}) to thread {thread_id}")
+                    else:
+                        logger.warning(f"Could not find connection ID for websocket of user {user_id}")
             
             # Get database session using async context manager
             # CRITICAL: Do NOT manually close the session - let the context manager handle it

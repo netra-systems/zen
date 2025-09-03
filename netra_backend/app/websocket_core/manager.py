@@ -729,6 +729,46 @@ class WebSocketManager:
         logger.info(f"Enhanced WebSocket connected: {connection_id} for user {user_id} (protocol: {protocol_type})")
         return connection_id
 
+    def update_connection_thread(self, connection_id: str, thread_id: str) -> bool:
+        """
+        Update the thread association for an existing connection.
+        
+        This method allows dynamic thread assignment after connection establishment,
+        enabling proper thread-specific message routing.
+        
+        Args:
+            connection_id: The connection to update
+            thread_id: The thread ID to associate with the connection
+            
+        Returns:
+            bool: True if update was successful, False if connection not found
+        """
+        if connection_id not in self.connections:
+            logger.warning(f"Cannot update thread for non-existent connection: {connection_id}")
+            return False
+            
+        old_thread_id = self.connections[connection_id].get("thread_id")
+        self.connections[connection_id]["thread_id"] = thread_id
+        self.connections[connection_id]["last_activity"] = datetime.now(timezone.utc)
+        
+        logger.info(f"Updated connection {connection_id} thread: {old_thread_id} -> {thread_id}")
+        return True
+    
+    def get_connection_id_by_websocket(self, websocket: WebSocket) -> Optional[str]:
+        """
+        Get the connection ID for a given WebSocket instance.
+        
+        Args:
+            websocket: The WebSocket instance to find
+            
+        Returns:
+            The connection ID if found, None otherwise
+        """
+        for conn_id, conn_info in self.connections.items():
+            if conn_info.get("websocket") == websocket:
+                return conn_id
+        return None
+
     async def _cleanup_connection(self, connection_id: str, code: int = 1000, 
                                 reason: str = "Normal closure") -> None:
         """Clean up connection resources."""
