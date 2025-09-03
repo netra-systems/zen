@@ -88,7 +88,7 @@ class TestEnvironmentManager:
         # Restore original environment variables
         for key, original_value in self._temp_env_vars.items():
             if original_value:
-                get_env().get(key) = original_value
+                os.environ[key] = original_value
             else:
                 os.environ.pop(key, None)
         self._temp_env_vars.clear()

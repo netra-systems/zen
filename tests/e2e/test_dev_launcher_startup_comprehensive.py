@@ -169,7 +169,7 @@ class TestDevLauncherStartuper:
             if original_value is None:
                 os.environ.pop(var, None)
             else:
-                get_env().get(var) = original_value
+                os.environ[var] = original_value
                 
         self.original_env.clear()
         

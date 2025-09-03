@@ -54,6 +54,23 @@ class DockerStabilityManager:
         self.max_restart_attempts = 3
         self.restart_delay = 10  # seconds
     
+    def _get_project_prefix(self) -> str:
+        """
+        Get the Docker Compose project prefix based on the current directory.
+        
+        Returns:
+            Project prefix for container names
+        """
+        # Try to get from environment variable first
+        project_name = os.environ.get('COMPOSE_PROJECT_NAME')
+        if project_name:
+            return project_name
+        
+        # Otherwise use the current directory name
+        current_dir = Path.cwd()
+        # Docker Compose uses the directory name as the project name
+        return current_dir.name
+    
     def _find_compose_file(self) -> str:
         """
         Find the docker-compose.test.yml file relative to current directory.

@@ -30,19 +30,11 @@ export interface TestRenderOptions extends Omit<RenderOptions, 'wrapper'> {
   initialAuthState?: any;
 }
 
+import { PerformanceMetrics } from '@/types/performance-metrics';
+
 // ============================================================================
 // PERFORMANCE & SYSTEM METRICS - Consolidated testing metrics
 // ============================================================================
-
-export interface PerformanceMetrics {
-  renderTime: number;
-  paintTime: number;
-  interactionTime: number;
-  memoryUsage?: number;
-  cpuUsage?: number;
-  networkLatency?: number;
-  bundleSize?: number;
-}
 
 // ============================================================================
 // MOCK USER TYPES - Consolidated from all test files
