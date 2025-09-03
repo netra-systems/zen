@@ -68,22 +68,55 @@ def setup_exception_handler():
     import traceback
     
     def exception_handler(exc_type, exc_value, exc_traceback):
-        """Custom exception handler without colors."""
+        """Custom exception handler for GCP environments with JSON output."""
         if issubclass(exc_type, KeyboardInterrupt):
             sys.__excepthook__(exc_type, exc_value, exc_traceback)
             return
         
-        # Format exception without colors
-        tb_lines = traceback.format_exception(exc_type, exc_value, exc_traceback)
-        # Remove any ANSI escape codes that might have been added
-        clean_lines = []
-        for line in tb_lines:
-            # Remove ANSI escape sequences
-            import re
-            clean_line = re.sub(r'\x1b\[[0-9;]*m', '', line)
-            clean_lines.append(clean_line)
+        # Check if we're in GCP environment
+        from shared.isolated_environment import get_env
+        env = get_env()
+        is_cloud_run = env.get('K_SERVICE') is not None
+        environment = env.get('ENVIRONMENT', 'development').lower()
+        is_gcp = is_cloud_run or environment in ['staging', 'production', 'prod']
         
-        sys.stderr.write(''.join(clean_lines))
+        if is_gcp:
+            # Output JSON for GCP Cloud Logging
+            import json
+            from datetime import datetime
+            
+            # Format traceback as single string
+            tb_lines = traceback.format_exception(exc_type, exc_value, exc_traceback)
+            traceback_str = ''.join(tb_lines).replace('\n', '\\n').replace('\r', '')
+            
+            error_entry = {
+                'severity': 'CRITICAL',
+                'message': f"Uncaught exception: {exc_type.__name__}: {str(exc_value)}",
+                'timestamp': datetime.utcnow().isoformat() + 'Z',
+                'error': {
+                    'type': exc_type.__name__,
+                    'message': str(exc_value),
+                    'traceback': traceback_str
+                },
+                'labels': {
+                    'error_type': 'uncaught_exception'
+                }
+            }
+            
+            sys.stderr.write(json.dumps(error_entry, separators=(',', ':')) + '\n')
+            sys.stderr.flush()
+        else:
+            # Format exception without colors for non-GCP environments
+            tb_lines = traceback.format_exception(exc_type, exc_value, exc_traceback)
+            # Remove any ANSI escape codes that might have been added
+            clean_lines = []
+            for line in tb_lines:
+                # Remove ANSI escape sequences
+                import re
+                clean_line = re.sub(r'\x1b\[[0-9;]*m', '', line)
+                clean_lines.append(clean_line)
+            
+            sys.stderr.write(''.join(clean_lines))
     
     env = IsolatedEnvironment.get_instance()
     environment = env.get('ENVIRONMENT', 'development').lower()

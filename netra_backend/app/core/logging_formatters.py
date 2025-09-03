@@ -302,11 +302,14 @@ class LogHandlerConfig:
         is_gcp = is_cloud_run or environment in ['staging', 'production']
         
         if is_gcp:
-            # Use GCP-compatible JSON formatter
-            def gcp_format(record):
-                """Format log record for GCP Cloud Logging."""
+            # Use GCP-compatible JSON formatter with custom sink
+            def gcp_sink(message):
+                """Custom sink that writes formatted JSON to stderr."""
+                record = message.record
                 try:
-                    return self.formatter.gcp_json_formatter(record) + "\n"
+                    json_output = self.formatter.gcp_json_formatter(record)
+                    sys.stderr.write(json_output + "\n")
+                    sys.stderr.flush()
                 except Exception as e:
                     # Fallback to ensure logging doesn't fail completely
                     import json
@@ -316,11 +319,12 @@ class LogHandlerConfig:
                         'timestamp': str(record.get('time', 'N/A')),
                         'error_type': 'LogFormatterError'
                     }
-                    return json.dumps(fallback_entry, separators=(',', ':')) + "\n"
+                    json_output = json.dumps(fallback_entry, separators=(',', ':'))
+                    sys.stderr.write(json_output + "\n")
+                    sys.stderr.flush()
             
             logger.add(
-                sys.stderr,
-                format=gcp_format,
+                gcp_sink,
                 level=self.level,
                 filter=should_log_func,
                 enqueue=True,
