@@ -228,9 +228,13 @@ async def staging_suite():
         pass
 
 
-@pytest.fixture(scope="session", autouse=True)
+@pytest.fixture(scope="function", autouse=False)
 async def staging_suite_session_cleanup():
-    """Session-level fixture to cleanup staging suite at the end."""
+    """Staging suite cleanup fixture.
+    
+    FIXED: Changed from session scope with autouse=True to function scope with autouse=False
+    to resolve fixture conflicts. Tests that need staging cleanup should explicitly request it.
+    """
     yield
     
     global _staging_suite

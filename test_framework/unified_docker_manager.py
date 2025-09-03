@@ -1124,6 +1124,19 @@ class UnifiedDockerManager:
                 "docker-compose.yml"
             ]
         
+        # Try to find git root first for most reliable path resolution
+        try:
+            import git
+            repo = git.Repo(search_parent_directories=True)
+            project_root = Path(repo.working_dir)
+            for file_name in compose_files:
+                full_path = project_root / file_name
+                if full_path.exists():
+                    logger.info(f"Selected Docker compose file: {full_path} (from git root, Alpine: {self.use_alpine}, Environment: {self.environment_type.value})")
+                    return str(full_path)
+        except Exception as e:
+            logger.debug(f"Git root detection failed: {e}, falling back to other methods")
+        
         # First check in current directory
         for file_path in compose_files:
             if Path(file_path).exists():
@@ -1132,7 +1145,7 @@ class UnifiedDockerManager:
         
         # Then check in project root (absolute path from env)
         env = get_env()
-        project_root = env.get("PROJECT_ROOT")
+        project_root = env.get("PROJECT_ROOT") or env.get("NETRA_PROJECT_ROOT")
         if project_root:
             project_path = Path(project_root)
             for file_name in compose_files:
@@ -2554,6 +2567,77 @@ class UnifiedDockerManager:
             logger.warning(f"Error checking container reusability for {service}: {e}")
             return False
     
+    def pre_test_cleanup(self) -> bool:
+        """
+        Perform pre-test cleanup to ensure clean Docker state.
+        
+        This addresses root cause #3 from Five Whys analysis:
+        - Removes orphaned containers and networks
+        - Prunes system to free resources
+        - Ensures Docker daemon is in clean state
+        
+        Returns:
+            True if cleanup successful
+        """
+        logger.info("🧹 Performing pre-test Docker cleanup...")
+        
+        try:
+            # 1. Stop any orphaned containers from previous test runs
+            logger.info("Stopping orphaned containers...")
+            result = subprocess.run(
+                ["docker", "ps", "-q", "--filter", "label=com.docker.compose.project"],
+                capture_output=True, text=True, timeout=10
+            )
+            if result.returncode == 0 and result.stdout.strip():
+                container_ids = result.stdout.strip().split('\n')
+                logger.info(f"Found {len(container_ids)} orphaned containers to clean")
+                subprocess.run(
+                    ["docker", "stop"] + container_ids,
+                    capture_output=True, timeout=30
+                )
+            
+            # 2. Prune stopped containers (but not volumes - we want to keep test data)
+            logger.info("Pruning stopped containers...")
+            subprocess.run(
+                ["docker", "container", "prune", "-f"],
+                capture_output=True, timeout=30
+            )
+            
+            # 3. Prune unused networks to prevent network conflicts
+            logger.info("Pruning unused networks...")
+            subprocess.run(
+                ["docker", "network", "prune", "-f"],
+                capture_output=True, timeout=30
+            )
+            
+            # 4. Clean build cache if disk space is low (optional, conservative)
+            # Only clean layers older than 24h to preserve recent builds
+            logger.info("Cleaning old build cache...")
+            subprocess.run(
+                ["docker", "builder", "prune", "-f", "--filter", "until=24h"],
+                capture_output=True, timeout=30
+            )
+            
+            # 5. Verify Docker daemon is responsive
+            logger.info("Verifying Docker daemon health...")
+            result = subprocess.run(
+                ["docker", "version", "--format", "{{.Server.Version}}"],
+                capture_output=True, text=True, timeout=5
+            )
+            if result.returncode != 0:
+                logger.error("Docker daemon not responding properly")
+                return False
+            
+            logger.info("✅ Pre-test cleanup completed successfully")
+            return True
+            
+        except subprocess.TimeoutExpired as e:
+            logger.error(f"⚠️ Pre-test cleanup timeout: {e}")
+            return False
+        except Exception as e:
+            logger.error(f"⚠️ Pre-test cleanup error: {e}")
+            return False
+    
     async def start_services_smart(self, services: List[str], wait_healthy: bool = True) -> bool:
         """
         Start services only if they're not already healthy (smart container reuse).
@@ -2565,6 +2649,10 @@ class UnifiedDockerManager:
         Returns:
             True if all services started successfully
         """
+        # Run pre-test cleanup before starting services
+        if not self.pre_test_cleanup():
+            logger.warning("Pre-test cleanup had issues, continuing anyway...")
+        
         logger.info(f"Smart starting services: {', '.join(services)}")
         
         services_to_start = []

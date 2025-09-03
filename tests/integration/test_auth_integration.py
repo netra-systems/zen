@@ -14,9 +14,12 @@ client = TestClient(app)
 
 
 env = get_env()
-@pytest.fixture(scope="module", autouse=True)
+@pytest.fixture(scope="function", autouse=True)
 def setup_database():
-    """Setup database tables before running tests."""
+    """Setup database tables before running tests.
+    
+    FIXED: Changed from module to function scope to resolve fixture conflicts.
+    """
     async def create_tables():
         # Initialize the database connection first
         await auth_db.initialize()
