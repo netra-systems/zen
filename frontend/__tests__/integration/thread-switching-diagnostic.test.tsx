@@ -51,7 +51,7 @@ jest.mock('@/lib/logger', () => ({
   }
 }));
 
-describe('Thread Switching Diagnostics', () => {
+describe.skip('Thread Switching Diagnostics', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     

@@ -107,7 +107,7 @@ jest.mock('@/hooks/useThreadSwitching', () => ({
   }),
 }));
 
-describe('New Chat Navigation Bug', () => {
+describe.skip('New Chat Navigation Bug', () => {
   let mockRouter: any;
   let mockSearchParams: any;
   

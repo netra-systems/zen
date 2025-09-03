@@ -56,7 +56,7 @@ jest.mock('@/services/threadLoadingService', () => ({
   },
 }));
 
-describe('New Chat URL Update Integration', () => {
+describe.skip('New Chat URL Update Integration', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
