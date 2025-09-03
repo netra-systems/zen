@@ -2,7 +2,7 @@
   "metadata": {
     "version": "3.0.0",
     "category": "database",
-    "generated_at": "2025-09-02T18:16:21.531313",
+    "generated_at": "2025-09-02T19:49:01.963542",
     "root_directory": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1",
     "total_literals": 307
   },
@@ -615,7 +615,7 @@
       "value": "completed_at",
       "category": "database",
       "locations": [
-        "netra_backend/app/agents/admin_tool_dispatcher/dispatcher_core.py:199",
+        "netra_backend/app/agents/admin_tool_dispatcher/dispatcher_core.py:202",
         "netra_backend/app/agents/admin_tool_dispatcher/execution_helpers.py:132",
         "netra_backend/app/agents/supervisor/flow_logger.py:142",
         "netra_backend/app/alembic/migrations_helpers/agent_tables.py:73",
@@ -953,8 +953,8 @@
       "category": "database",
       "locations": [
         "netra_backend/app/agents/request_scoped_tool_dispatcher.py:334",
-        "netra_backend/app/agents/tool_dispatcher_unified.py:460",
-        "netra_backend/app/agents/tool_dispatcher_unified.py:570"
+        "netra_backend/app/agents/tool_dispatcher_unified.py:488",
+        "netra_backend/app/agents/tool_dispatcher_unified.py:598"
       ]
     },
     "document_id": {
@@ -1744,7 +1744,7 @@
       "locations": [
         "netra_backend/app/agents/request_scoped_tool_dispatcher.py:313",
         "netra_backend/app/agents/tool_dispatcher_core.py:173",
-        "netra_backend/app/agents/tool_dispatcher_unified.py:594"
+        "netra_backend/app/agents/tool_dispatcher_unified.py:622"
       ]
     },
     "numeric_container_id": {
@@ -2392,7 +2392,7 @@
       "value": "started_at",
       "category": "database",
       "locations": [
-        "netra_backend/app/agents/admin_tool_dispatcher/dispatcher_core.py:199",
+        "netra_backend/app/agents/admin_tool_dispatcher/dispatcher_core.py:202",
         "netra_backend/app/agents/execution_tracking/timeout.py:406",
         "netra_backend/app/agents/supervisor/flow_logger.py:140",
         "netra_backend/app/alembic/migrations_helpers/agent_tables.py:66",
@@ -2750,10 +2750,10 @@
       "locations": [
         "netra_backend/app/agents/actions_goals_plan_builder.py:246",
         "netra_backend/app/agents/admin_tool_dispatcher/corpus_handlers_base.py:53",
-        "netra_backend/app/agents/admin_tool_dispatcher/dispatcher_core.py:164",
-        "netra_backend/app/agents/admin_tool_dispatcher/dispatcher_core.py:165",
-        "netra_backend/app/agents/admin_tool_dispatcher/dispatcher_core.py:171",
-        "netra_backend/app/agents/admin_tool_dispatcher/dispatcher_core.py:194",
+        "netra_backend/app/agents/admin_tool_dispatcher/dispatcher_core.py:167",
+        "netra_backend/app/agents/admin_tool_dispatcher/dispatcher_core.py:168",
+        "netra_backend/app/agents/admin_tool_dispatcher/dispatcher_core.py:174",
+        "netra_backend/app/agents/admin_tool_dispatcher/dispatcher_core.py:197",
         "netra_backend/app/agents/admin_tool_dispatcher/dispatcher_helpers.py:65",
         "netra_backend/app/agents/admin_tool_dispatcher/dispatcher_helpers.py:256",
         "netra_backend/app/agents/admin_tool_dispatcher/dispatcher_helpers.py:256",
