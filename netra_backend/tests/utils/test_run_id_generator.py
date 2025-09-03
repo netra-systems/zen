@@ -126,6 +126,96 @@ class TestGenerateRunId:
         
         assert len(unique_id) == UNIQUE_ID_LENGTH
 
+    def test_generate_run_id_prevents_double_prefix_simple(self):
+        """Test that double prefix is prevented for simple prefixed thread_id."""
+        # Case 1: Thread ID already has "thread_" prefix (from generate_thread_id)
+        prefixed_thread_id = "thread_abc123"
+        run_id = generate_run_id(prefixed_thread_id)
+        
+        # Should NOT have "thread_thread_" prefix - should be "thread_abc123_run_..."
+        assert not run_id.startswith("thread_thread_"), f"Double prefix detected: {run_id}"
+        assert run_id.startswith("thread_abc123_run_"), f"Expected correct format: {run_id}"
+        
+        # Thread extraction should work correctly
+        extracted = extract_thread_id_from_run_id(run_id)
+        assert extracted == "abc123", f"Expected 'abc123', got '{extracted}'"
+
+    def test_generate_run_id_prevents_double_prefix_complex(self):
+        """Test double prefix prevention with complex thread IDs."""
+        test_cases = [
+            # (input_thread_id, expected_clean_part)
+            ("thread_user123_session456", "user123_session456"),
+            ("thread_86db35a070e14921", "86db35a070e14921"),
+            ("thread_admin_tool_test", "admin_tool_test"),
+            ("thread_enterprise_client_789", "enterprise_client_789"),
+        ]
+        
+        for input_thread_id, expected_clean_part in test_cases:
+            run_id = generate_run_id(input_thread_id)
+            
+            # Should not have double prefix
+            assert not run_id.startswith("thread_thread_"), \
+                f"Double prefix in run_id: {run_id} from input: {input_thread_id}"
+            
+            # Should start with correct single prefix + clean part
+            expected_start = f"thread_{expected_clean_part}_run_"
+            assert run_id.startswith(expected_start), \
+                f"Expected '{expected_start}', got: {run_id}"
+            
+            # Thread extraction should return the clean part
+            extracted = extract_thread_id_from_run_id(run_id)
+            assert extracted == expected_clean_part, \
+                f"For input '{input_thread_id}': expected '{expected_clean_part}', got '{extracted}'"
+
+    def test_generate_run_id_handles_non_prefixed_normally(self):
+        """Test that non-prefixed thread IDs work normally (backward compatibility)."""
+        non_prefixed_cases = [
+            "user123",
+            "session_abc",
+            "admin_tool",
+            "86db35a070e14921"
+        ]
+        
+        for thread_id in non_prefixed_cases:
+            run_id = generate_run_id(thread_id)
+            
+            # Should have single prefix
+            expected_start = f"thread_{thread_id}_run_"
+            assert run_id.startswith(expected_start), \
+                f"Expected '{expected_start}', got: {run_id}"
+            
+            # Thread extraction should work
+            extracted = extract_thread_id_from_run_id(run_id)
+            assert extracted == thread_id, \
+                f"For input '{thread_id}': expected '{thread_id}', got '{extracted}'"
+
+    def test_generate_run_id_empty_after_prefix_removal(self):
+        """Test error handling when thread_id is only the prefix."""
+        with pytest.raises(ValueError, match="thread_id cannot be empty after removing prefix"):
+            generate_run_id("thread_")
+
+    def test_generate_run_id_websocket_routing_fix(self):
+        """Test that the WebSocket routing bug is fixed - real-world scenario."""
+        # This reproduces the exact scenario from the audit report
+        thread_id_from_generate_thread_id = "thread_86db35a070e14921"  # From generate_thread_id()
+        
+        run_id = generate_run_id(thread_id_from_generate_thread_id, "agent_execution")
+        
+        # Should be "thread_86db35a070e14921_run_..." NOT "thread_thread_86db35a070e14921_run_..."
+        assert not run_id.startswith("thread_thread_"), \
+            f"BUG REPRODUCED: Double prefix in {run_id}"
+        assert "86db35a070e14921" in run_id, \
+            f"Thread ID should be present in run_id: {run_id}"
+        
+        # WebSocket routing should extract the correct thread ID
+        extracted_for_routing = extract_thread_id_from_run_id(run_id)
+        assert extracted_for_routing == "86db35a070e14921", \
+            f"WebSocket routing would fail: expected '86db35a070e14921', got '{extracted_for_routing}'"
+        
+        # The extracted thread_id should NOT have a prefix
+        assert not extracted_for_routing.startswith("thread_"), \
+            f"Extracted thread_id should not have prefix for routing: {extracted_for_routing}"
+
 
 class TestExtractThreadId:
     """Test thread ID extraction functionality."""
@@ -335,6 +425,36 @@ class TestWebSocketIntegration:
             extracted = extract_thread_id_from_run_id(run_id)
             assert extracted == thread_id, f"Failed for business thread_id: {thread_id}"
 
+    def test_websocket_routing_with_both_formats(self):
+        """Test WebSocket routing works correctly with both prefixed and non-prefixed thread IDs."""
+        # Test cases: (input_thread_id, expected_extracted_for_routing)
+        test_cases = [
+            # Non-prefixed (legacy/direct usage)
+            ("user123", "user123"),
+            ("session_abc", "session_abc"),
+            # Prefixed (from generate_thread_id)
+            ("thread_user123", "user123"),
+            ("thread_session_abc", "session_abc"),
+            # Complex prefixed cases
+            ("thread_86db35a070e14921", "86db35a070e14921"),
+            ("thread_user123_session456", "user123_session456"),
+        ]
+        
+        for input_thread_id, expected_routing_id in test_cases:
+            # Generate run_id as would happen in agent execution
+            run_id = generate_run_id(input_thread_id, "agent_execution")
+            
+            # Verify no double prefix
+            assert not run_id.startswith("thread_thread_"), \
+                f"Double prefix bug in {run_id} for input {input_thread_id}"
+            
+            # Extract thread_id as would happen in WebSocket bridge
+            extracted_for_routing = extract_thread_id_from_run_id(run_id)
+            
+            # Should match expected routing ID for WebSocket delivery
+            assert extracted_for_routing == expected_routing_id, \
+                f"WebSocket routing failed for {input_thread_id}: expected '{expected_routing_id}', got '{extracted_for_routing}'"
+
 
 class TestPerformanceAndReliability:
     """Test performance and reliability aspects."""
@@ -440,17 +560,19 @@ class TestErrorHandling:
 
     def test_unicode_thread_ids(self):
         """Test handling of unicode characters in thread IDs."""
-        unicode_thread_ids = [
-            "user_测试",
-            "session_🔥", 
-            "thread_ñoño",
+        # Test cases: (input_thread_id, expected_extracted_id)
+        unicode_test_cases = [
+            ("user_测试", "user_测试"),           # Non-prefixed unicode
+            ("session_🔥", "session_🔥"),        # Non-prefixed with emoji  
+            ("thread_ñoño", "ñoño"),             # Prefixed unicode - prefix should be stripped
         ]
         
-        for thread_id in unicode_thread_ids:
+        for thread_id, expected_extracted in unicode_test_cases:
             try:
                 run_id = generate_run_id(thread_id)
                 extracted = extract_thread_id_from_run_id(run_id)
-                assert extracted == thread_id
+                assert extracted == expected_extracted, \
+                    f"For thread_id '{thread_id}': expected '{expected_extracted}', got '{extracted}'"
             except Exception as e:
                 # If unicode not supported, should fail gracefully
                 assert isinstance(e, (ValueError, UnicodeError))
