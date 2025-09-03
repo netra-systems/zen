@@ -50,9 +50,18 @@ async def handle_create_thread_request(db: AsyncSession, thread_data, user_id: s
 
 
 async def handle_get_thread_request(db: AsyncSession, thread_id: str, user_id: str):
-    """Handle get thread request logic."""
+    """Handle get thread request logic with enhanced logging."""
+    from netra_backend.app.logging_config import central_logger
+    logger = central_logger.get_logger(__name__)
+    
+    logger.info(f"Getting thread {thread_id} for user {user_id}")
     thread = await get_thread_with_validation(db, thread_id, user_id)
+    
+    logger.debug(f"Thread {thread_id} metadata: {thread.metadata_ if hasattr(thread, 'metadata_') else 'No metadata'}")
+    
     message_count = await MessageRepository().count_by_thread(db, thread_id)
+    logger.debug(f"Thread {thread_id} has {message_count} messages")
+    
     return await build_thread_response(thread, message_count)
 
 
@@ -67,11 +76,28 @@ def _update_title_field(thread, thread_update) -> None:
         thread.metadata_["title"] = thread_update.title
 
 async def update_thread_metadata_fields(thread, thread_update):
-    """Update thread metadata fields."""
+    """Update thread metadata fields while preserving user_id consistency."""
+    from netra_backend.app.logging_config import central_logger
+    logger = central_logger.get_logger(__name__)
+    
     _initialize_thread_metadata(thread)
+    
+    # Preserve the original user_id to prevent accidental changes
+    original_user_id = thread.metadata_.get("user_id")
+    
     _update_title_field(thread, thread_update)
     if thread_update.metadata:
-        thread.metadata_.update(thread_update.metadata)
+        # Prevent user_id from being changed via metadata update
+        update_data = thread_update.metadata.copy()
+        if "user_id" in update_data:
+            logger.warning(f"Attempt to change user_id in thread {thread.id} blocked")
+            del update_data["user_id"]
+        thread.metadata_.update(update_data)
+    
+    # Ensure user_id remains unchanged and properly formatted
+    if original_user_id:
+        thread.metadata_["user_id"] = str(original_user_id).strip()
+    
     thread.metadata_["updated_at"] = int(time.time())
 
 
@@ -92,9 +118,19 @@ async def handle_delete_thread_request(db: AsyncSession, thread_id: str, user_id
 
 
 async def handle_get_messages_request(db: AsyncSession, thread_id: str, user_id: str, limit: int, offset: int):
-    """Handle get thread messages request logic."""
-    await get_thread_with_validation(db, thread_id, user_id)
-    return await build_thread_messages_response(db, thread_id, limit, offset)
+    """Handle get thread messages request logic with enhanced logging."""
+    from netra_backend.app.logging_config import central_logger
+    logger = central_logger.get_logger(__name__)
+    
+    logger.info(f"Getting messages for thread {thread_id}, user {user_id}, limit {limit}, offset {offset}")
+    
+    thread = await get_thread_with_validation(db, thread_id, user_id)
+    logger.debug(f"Thread validation passed for {thread_id}")
+    
+    response = await build_thread_messages_response(db, thread_id, limit, offset)
+    logger.debug(f"Returning {len(response.get('messages', []))} messages for thread {thread_id}")
+    
+    return response
 
 
 async def handle_auto_rename_request(db: AsyncSession, thread_id: str, user_id: str):
