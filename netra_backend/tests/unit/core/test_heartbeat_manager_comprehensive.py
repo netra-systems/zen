@@ -24,7 +24,7 @@ from unittest.mock import AsyncMock, MagicMock, patch, call
 import pytest
 from typing import Dict, Any
 
-from netra_backend.app.websocket_core.heartbeat_manager import (
+from netra_backend.app.websocket_core.manager import (
     WebSocketHeartbeatManager,
     HeartbeatConfig,
     ConnectionHeartbeat,

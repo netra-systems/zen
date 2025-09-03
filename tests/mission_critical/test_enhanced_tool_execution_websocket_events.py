@@ -25,6 +25,13 @@ if project_root not in sys.path:
 import pytest
 from loguru import logger
 
+# Import unified WebSocket mock for consistent tool execution testing
+from test_framework.fixtures.websocket_manager_mock import create_performance_mock
+from test_framework.fixtures.websocket_test_helpers import (
+    WebSocketAssertions,
+    reset_mock_for_test
+)
+
 # Import enhanced tool execution components
 from netra_backend.app.agents.unified_tool_execution import (
     UnifiedToolExecutionEngine,
@@ -39,33 +46,39 @@ from netra_backend.app.schemas.tool import ToolInput, ToolResult
 
 
 # ============================================================================
-# MOCK CLASSES FOR ENHANCED TOOL EXECUTION TESTING
+# UNIFIED MOCK FOR TOOL EXECUTION TESTING - REPLACES LOCAL IMPLEMENTATION
 # ============================================================================
 
 class MockWebSocketManager:
-    """Mock WebSocket manager optimized for tool execution testing."""
+    """Legacy compatibility wrapper using unified performance mock."""
     
     def __init__(self):
-        self.messages: List[Dict] = []
-        self.tool_events: List[Dict] = []
-        self.connections: Dict[str, Any] = {}
+        self._unified_mock = create_performance_mock()
+        # Legacy attributes for backward compatibility
+        self.messages = []
+        self.tool_events = []
+        self.connections = {}
     
     async def send_to_thread(self, thread_id: str, message: Dict[str, Any]) -> bool:
-        """Record message and simulate successful delivery."""
-        event_data = {
-            'thread_id': thread_id,
-            'message': message,
-            'event_type': message.get('type', 'unknown'),
-            'timestamp': time.time()
-        }
+        """Send using unified mock and maintain compatibility."""
+        result = await self._unified_mock.send_to_thread(thread_id, message)
         
-        self.messages.append(event_data)
+        # Sync legacy attributes
+        self.messages = self._unified_mock.messages
+        self.connections = self._unified_mock.connections
         
-        # Track tool-specific events separately
-        if event_data['event_type'] in ['tool_executing', 'tool_completed']:
+        # Track tool events for compatibility
+        event_type = message.get('type', 'unknown')
+        if event_type in ['tool_executing', 'tool_completed']:
+            event_data = {
+                'thread_id': thread_id,
+                'message': message,
+                'event_type': event_type,
+                'timestamp': time.time()
+            }
             self.tool_events.append(event_data)
         
-        return True
+        return result
     
     def get_tool_events_for_thread(self, thread_id: str) -> List[Dict]:
         """Get tool-specific events for a thread."""
@@ -90,8 +103,10 @@ class MockWebSocketManager:
     
     def clear_messages(self):
         """Clear all recorded messages."""
+        self._unified_mock.clear_messages()
         self.messages.clear()
         self.tool_events.clear()
+        self.connections.clear()
 
 
 class MockTool:

@@ -16,7 +16,7 @@ async def run_tests():
     print("=" * 60)
     
     # Test HeartbeatConfig
-    from netra_backend.app.websocket_core.heartbeat_manager import HeartbeatConfig
+    from netra_backend.app.websocket_core.manager import HeartbeatConfig
     
     print("\n1. Testing HeartbeatConfig...")
     config = HeartbeatConfig()
@@ -29,7 +29,7 @@ async def run_tests():
     print("   [PASS] Staging config works")
     
     # Test HeartbeatManager
-    from netra_backend.app.websocket_core.heartbeat_manager import WebSocketHeartbeatManager
+    from netra_backend.app.websocket_core.manager import WebSocketHeartbeatManager
     
     print("\n2. Testing WebSocketHeartbeatManager...")
     manager = WebSocketHeartbeatManager(config)

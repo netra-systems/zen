@@ -64,13 +64,13 @@ class MockWebSocketConnection:
         if not self.is_connected:
             raise ConnectionError("WebSocket disconnected")
         self.sent_events.append(data)
-        print(f"📤 Mock WebSocket sent to user {self.user_id}: {data.get('event_type', 'unknown')}")
+        print(f"[SENT] Mock WebSocket sent to user {self.user_id}: {data.get('event_type', 'unknown')}")
         
     async def send_text(self, data: str) -> None:
         """Mock send_text method for ping."""
         if not self.is_connected:
             raise ConnectionError("WebSocket disconnected")
-        print(f"🏓 Mock WebSocket ping to user {self.user_id}")
+        print(f"[PING] Mock WebSocket ping to user {self.user_id}")
         
     async def ping(self) -> None:
         """Mock ping method."""
@@ -154,7 +154,7 @@ async def test_factory_websocket_emitter_creation():
         assert emitter.user_context.user_id == user_id, f"Expected user_id {user_id}, got {emitter.user_context.user_id}"
         assert emitter.user_context.thread_id == thread_id, f"Expected thread_id {thread_id}, got {emitter.user_context.thread_id}"
         
-        print(f"✅ Successfully created emitter for user {user_id}")
+        print(f"[SUCCESS] Successfully created emitter for user {user_id}")
         
         # Clean up
         await emitter.cleanup()
@@ -162,7 +162,7 @@ async def test_factory_websocket_emitter_creation():
         return True
         
     except Exception as e:
-        print(f"❌ Factory creation test failed: {e}")
+        print(f"[FAIL] Factory creation test failed: {e}")
         import traceback
         traceback.print_exc()
         return False
@@ -202,29 +202,29 @@ async def test_all_required_websocket_events():
         agent_name = "TestAgent"
         run_id = "run_test_123"
         
-        print("🚀 Sending agent_started event...")
+        print("[EVENT] Sending agent_started event...")
         await emitter.notify_agent_started(agent_name, run_id)
         await asyncio.sleep(0.1)  # Allow event processing
         
-        print("🤔 Sending agent_thinking event...")
+        print("[EVENT] Sending agent_thinking event...")
         await emitter.notify_agent_thinking(agent_name, run_id, "Analyzing user request...")
         await asyncio.sleep(0.1)
         
-        print("🔧 Sending tool_executing event...")
+        print("[EVENT] Sending tool_executing event...")
         await emitter.notify_tool_executing(agent_name, run_id, "search_tool", {"query": "test query"})
         await asyncio.sleep(0.1)
         
-        print("✅ Sending tool_completed event...")
+        print("[EVENT] Sending tool_completed event...")
         await emitter.notify_tool_completed(agent_name, run_id, "search_tool", {"results": ["result1", "result2"]})
         await asyncio.sleep(0.1)
         
-        print("🏁 Sending agent_completed event...")
+        print("[EVENT] Sending agent_completed event...")
         await emitter.notify_agent_completed(agent_name, run_id, {"status": "success", "response": "Test completed"})
         await asyncio.sleep(0.1)
         
         # Verify all events were sent
         sent_events = mock_connection.sent_events
-        print(f"\n📊 Total events sent: {len(sent_events)}")
+        print(f"\n[STATS] Total events sent: {len(sent_events)}")
         
         # Check for required event types
         required_events = ["agent_started", "agent_thinking", "tool_executing", "tool_completed", "agent_completed"]
@@ -236,11 +236,11 @@ async def test_all_required_websocket_events():
                 missing_events.append(required_event)
                 
         if missing_events:
-            print(f"❌ Missing required events: {missing_events}")
+            print(f"[ERROR] Missing required events: {missing_events}")
             print(f"Found events: {found_events}")
             return False
             
-        print(f"✅ All 5 required events found: {found_events}")
+        print(f"[SUCCESS] All 5 required events found: {found_events}")
         
         # Verify event structure
         for event in sent_events:
@@ -250,7 +250,7 @@ async def test_all_required_websocket_events():
             assert 'data' in event, f"Event missing data: {event}"
             assert 'timestamp' in event, f"Event missing timestamp: {event}"
             
-        print("✅ All events have proper structure")
+        print("[SUCCESS] All events have proper structure")
         
         # Clean up
         await emitter.cleanup()
@@ -258,7 +258,7 @@ async def test_all_required_websocket_events():
         return True
         
     except Exception as e:
-        print(f"❌ Required events test failed: {e}")
+        print(f"[FAIL] Required events test failed: {e}")
         import traceback
         traceback.print_exc()
         return False
@@ -294,11 +294,11 @@ async def test_websocket_event_json_serialization():
         
         # Serialize to JSON
         json_str = json.dumps(event_dict)
-        print(f"✅ Event serialized to JSON: {len(json_str)} characters")
+        print(f"[SUCCESS] Event serialized to JSON: {len(json_str)} characters")
         
         # Deserialize from JSON
         deserialized = json.loads(json_str)
-        print(f"✅ Event deserialized from JSON")
+        print(f"[SUCCESS] Event deserialized from JSON")
         
         # Verify structure
         assert deserialized['event_type'] == event.event_type
@@ -306,11 +306,11 @@ async def test_websocket_event_json_serialization():
         assert deserialized['thread_id'] == event.thread_id
         assert deserialized['data']['agent_name'] == "TestAgent"
         
-        print("✅ JSON serialization/deserialization successful")
+        print("[SUCCESS] JSON serialization/deserialization successful")
         return True
         
     except Exception as e:
-        print(f"❌ JSON serialization test failed: {e}")
+        print(f"[FAIL] JSON serialization test failed: {e}")
         import traceback
         traceback.print_exc()
         return False
@@ -325,17 +325,17 @@ async def run_test():
     
     try:
         # Test 1: Factory emitter creation
-        print("\n🧪 TEST 1: Factory WebSocket Emitter Creation")
+        print("\n[TEST 1] Factory WebSocket Emitter Creation")
         result1 = await test_factory_websocket_emitter_creation()
         test_results.append(("Factory Creation", result1))
         
         # Test 2: All required events
-        print("\n🧪 TEST 2: All 5 Required WebSocket Events")
+        print("\n[TEST 2] All 5 Required WebSocket Events")
         result2 = await test_all_required_websocket_events()
         test_results.append(("Required Events", result2))
         
         # Test 3: JSON serialization
-        print("\n🧪 TEST 3: WebSocket Event JSON Serialization")
+        print("\n[TEST 3] WebSocket Event JSON Serialization")
         result3 = await test_websocket_event_json_serialization()
         test_results.append(("JSON Serialization", result3))
         
@@ -346,26 +346,26 @@ async def run_test():
         
         all_passed = True
         for test_name, result in test_results:
-            status = "✅ PASS" if result else "❌ FAIL"
+            status = "[PASS]" if result else "[FAIL]"
             print(f"{status} {test_name}")
             if not result:
                 all_passed = False
                 
         print("\n" + "=" * 60)
         if all_passed:
-            print("🎉 SUCCESS: All WebSocket event tests passed!")
-            print("✅ Factory pattern working correctly")
-            print("✅ All 5 required events validated")
-            print("✅ JSON serialization working")
+            print("[SUCCESS] All WebSocket event tests passed!")
+            print("[SUCCESS] Factory pattern working correctly")
+            print("[SUCCESS] All 5 required events validated")
+            print("[SUCCESS] JSON serialization working")
         else:
-            print("❌ FAILURE: Some WebSocket event tests failed!")
-            print("💥 Critical issues detected in WebSocket events")
+            print("[FAILURE] Some WebSocket event tests failed!")
+            print("[CRITICAL] Critical issues detected in WebSocket events")
         print("=" * 60)
         
         return all_passed
         
     except Exception as e:
-        print(f"\n💥 CRITICAL EXCEPTION: {e}")
+        print(f"\n[CRITICAL ERROR] CRITICAL EXCEPTION: {e}")
         import traceback
         traceback.print_exc()
         return False

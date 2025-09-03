@@ -17,7 +17,7 @@ import uuid
 import time
 
 from netra_backend.app.services.websocket_bridge_factory import WebSocketBridgeFactory
-from netra_backend.app.agents.supervisor.execution_factory import ExecutionFactory
+from netra_backend.app.agents.supervisor.execution_factory import ExecutionEngineFactory
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from test_framework.backend_client import BackendClient
 from test_framework.test_context import TestContext

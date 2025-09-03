@@ -81,7 +81,7 @@ class GCPDeployer:
             ServiceConfig(
                 name="backend",
                 directory="netra_backend",
-                port=8888,
+                port=8000,
                 dockerfile="deployment/docker/backend.gcp.Dockerfile",
                 cloud_run_name="netra-backend-staging",
                 memory="1Gi",
@@ -463,7 +463,7 @@ COPY shared/ ./shared/
 ENV PYTHONPATH=/app
 
 # Run the application - use sh to evaluate PORT env var
-CMD ["sh", "-c", "uvicorn netra_backend.app.main:app --host 0.0.0.0 --port ${PORT:-8888}"]
+CMD ["sh", "-c", "uvicorn netra_backend.app.main:app --host 0.0.0.0 --port ${PORT:-8000}"]
 """
         elif service.name == "auth":
             content = """FROM python:3.11-slim

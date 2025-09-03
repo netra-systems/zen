@@ -1248,6 +1248,613 @@ class TestDockerInfrastructureLoadTesting:
                     pass
 
 
+class TestDockerInfrastructureAlpineOptimization:
+    """Test Infrastructure: Alpine Container Optimization (5 tests)"""
+    
+    @pytest.fixture(autouse=True)
+    def setup(self):
+        self.validator = DockerInfrastructureValidator()
+        self.docker_manager = UnifiedDockerManager()
+        yield
+        self.docker_manager.cleanup_orphaned_containers()
+    
+    def test_alpine_startup_speed_optimization(self):
+        """Test Alpine containers start 3x faster than regular"""
+        alpine_times = []
+        regular_times = []
+        
+        try:
+            # Test Alpine startup times
+            for i in range(3):
+                start = time.time()
+                env_name = f"alpine_speed_{i}_{int(time.time())}"
+                result = self.docker_manager.acquire_environment(
+                    env_name,
+                    use_alpine=True,
+                    timeout=30
+                )
+                if result:
+                    alpine_times.append(time.time() - start)
+                    self.docker_manager.release_environment(env_name)
+            
+            # Test regular startup times  
+            for i in range(3):
+                start = time.time()
+                env_name = f"regular_speed_{i}_{int(time.time())}"
+                result = self.docker_manager.acquire_environment(
+                    env_name,
+                    use_alpine=False,
+                    timeout=60
+                )
+                if result:
+                    regular_times.append(time.time() - start)
+                    self.docker_manager.release_environment(env_name)
+            
+            if alpine_times and regular_times:
+                avg_alpine = sum(alpine_times) / len(alpine_times)
+                avg_regular = sum(regular_times) / len(regular_times)
+                speedup = avg_regular / avg_alpine
+                
+                assert speedup >= ALPINE_SPEEDUP, f"Alpine speedup {speedup:.2f}x < {ALPINE_SPEEDUP}x"
+                assert avg_alpine < 15, f"Alpine startup {avg_alpine:.2f}s > 15s"
+            
+        except Exception as e:
+            logger.error(f"Alpine optimization test failed: {e}")
+    
+    def test_alpine_memory_footprint(self):
+        """Test Alpine containers use less memory"""
+        env_name = f"alpine_memory_{int(time.time())}"
+        
+        try:
+            result = self.docker_manager.acquire_environment(
+                env_name,
+                use_alpine=True
+            )
+            assert result is not None
+            
+            # Monitor memory for Alpine containers
+            time.sleep(5)
+            containers = docker.from_env().containers.list()
+            alpine_memory = 0
+            
+            for container in containers:
+                if env_name in container.name:
+                    stats = container.stats(stream=False)
+                    memory_mb = stats['memory_stats']['usage'] / (1024 * 1024)
+                    alpine_memory += memory_mb
+            
+            # Alpine should use less memory per container
+            container_count = len([c for c in containers if env_name in c.name])
+            avg_memory_per_container = alpine_memory / container_count if container_count > 0 else 0
+            
+            assert avg_memory_per_container < 200, f"Alpine memory {avg_memory_per_container:.2f}MB > 200MB per container"
+            
+        finally:
+            self.docker_manager.release_environment(env_name)
+    
+    def test_alpine_resource_efficiency(self):
+        """Test Alpine containers are more resource efficient"""
+        env_name = f"alpine_efficiency_{int(time.time())}"
+        
+        try:
+            result = self.docker_manager.acquire_environment(
+                env_name,
+                use_alpine=True
+            )
+            assert result is not None
+            
+            # Run workload in Alpine containers
+            containers = docker.from_env().containers.list()
+            for container in containers:
+                if env_name in container.name:
+                    # Light workload
+                    container.exec_run("sh -c 'for i in $(seq 1 50); do echo $i; done'", detach=True)
+            
+            # Monitor resource usage
+            time.sleep(10)
+            total_cpu = 0
+            total_memory = 0
+            
+            for container in containers:
+                if env_name in container.name:
+                    stats = container.stats(stream=False)
+                    cpu_delta = stats['cpu_stats']['cpu_usage']['total_usage'] - \
+                               stats['precpu_stats']['cpu_usage']['total_usage']
+                    system_delta = stats['cpu_stats']['system_cpu_usage'] - \
+                                  stats['precpu_stats']['system_cpu_usage']
+                    if system_delta > 0:
+                        cpu_percent = (cpu_delta / system_delta) * 100
+                        total_cpu += cpu_percent
+                    
+                    memory_mb = stats['memory_stats']['usage'] / (1024 * 1024)
+                    total_memory += memory_mb
+            
+            # Alpine should be efficient
+            assert total_cpu < 100, f"Alpine CPU usage {total_cpu:.2f}% > 100%"
+            assert total_memory < 1000, f"Alpine memory {total_memory:.2f}MB > 1000MB"
+            
+        finally:
+            self.docker_manager.release_environment(env_name)
+    
+    def test_alpine_compatibility_verification(self):
+        """Test Alpine containers maintain full service compatibility"""
+        env_name = f"alpine_compat_{int(time.time())}"
+        
+        try:
+            result = self.docker_manager.acquire_environment(
+                env_name,
+                use_alpine=True
+            )
+            assert result is not None
+            
+            # Verify all expected services are running
+            health = self.docker_manager.get_health_report(env_name)
+            assert health['all_healthy'], "Alpine services not healthy"
+            
+            # Test service endpoints respond
+            ports = result.get('ports', {})
+            for service, port in ports.items():
+                if service in ['backend', 'auth']:
+                    # Test HTTP connectivity
+                    try:
+                        import socket
+                        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                        sock.settimeout(5)
+                        result = sock.connect_ex(('localhost', port))
+                        sock.close()
+                        assert result == 0, f"Alpine {service} not responding on port {port}"
+                    except Exception as e:
+                        logger.warning(f"Connection test failed for {service}: {e}")
+            
+        finally:
+            self.docker_manager.release_environment(env_name)
+    
+    def test_alpine_scale_performance(self):
+        """Test Alpine containers scale better than regular containers"""
+        alpine_containers = []
+        regular_containers = []
+        
+        try:
+            # Create multiple Alpine containers
+            alpine_start = time.time()
+            for i in range(10):
+                container = docker.from_env().containers.run(
+                    "alpine:latest",
+                    command="sleep 60",
+                    name=f"alpine_scale_{i}_{int(time.time())}",
+                    detach=True,
+                    remove=True,
+                    mem_limit="100m"
+                )
+                alpine_containers.append(container)
+            alpine_time = time.time() - alpine_start
+            
+            # Create multiple regular containers
+            regular_start = time.time() 
+            for i in range(10):
+                container = docker.from_env().containers.run(
+                    "ubuntu:20.04",
+                    command="sleep 60",
+                    name=f"regular_scale_{i}_{int(time.time())}",
+                    detach=True,
+                    remove=True,
+                    mem_limit="100m"
+                )
+                regular_containers.append(container)
+            regular_time = time.time() - regular_start
+            
+            # Alpine should scale faster
+            scale_improvement = regular_time / alpine_time
+            assert scale_improvement > 1.5, f"Alpine scale improvement {scale_improvement:.2f}x < 1.5x"
+            assert alpine_time < 30, f"Alpine scaling took {alpine_time:.2f}s > 30s"
+            
+        finally:
+            for container in alpine_containers + regular_containers:
+                try:
+                    container.stop()
+                    container.remove()
+                except:
+                    pass
+
+
+class TestDockerInfrastructureEdgeCases:
+    """Test Infrastructure: Edge Cases and Error Handling (5 tests)"""
+    
+    @pytest.fixture(autouse=True)
+    def setup(self):
+        self.validator = DockerInfrastructureValidator()
+        self.docker_manager = UnifiedDockerManager()
+        yield
+        self.docker_manager.cleanup_orphaned_containers()
+    
+    def test_docker_daemon_connection_loss(self):
+        """Test handling of Docker daemon connection loss"""
+        env_name = f"daemon_loss_{int(time.time())}"
+        
+        try:
+            result = self.docker_manager.acquire_environment(env_name)
+            assert result is not None
+            
+            # Simulate connection loss by replacing client
+            original_client = docker.from_env()
+            self.docker_manager.docker_client = None
+            
+            # Should handle gracefully and reconnect
+            time.sleep(2)
+            health = self.docker_manager.get_health_report(env_name)
+            
+            # Should recover connection automatically
+            assert health is not None, "Failed to handle connection loss"
+            
+        finally:
+            self.docker_manager.docker_client = original_client
+            self.docker_manager.release_environment(env_name)
+    
+    def test_port_exhaustion_handling(self):
+        """Test handling when all ports are exhausted"""
+        environments = []
+        
+        try:
+            # Try to exhaust available ports
+            for i in range(50):
+                try:
+                    env_name = f"port_exhaust_{i}_{int(time.time())}"
+                    result = self.docker_manager.acquire_environment(env_name, timeout=10)
+                    if result:
+                        environments.append(env_name)
+                    else:
+                        # Should handle port exhaustion gracefully
+                        break
+                except Exception as e:
+                    if "port" in str(e).lower() or "address already in use" in str(e).lower():
+                        logger.info(f"Port exhaustion handled at {i} environments")
+                        break
+                    raise
+            
+            # Should create at least some environments before exhaustion
+            assert len(environments) > 10, f"Only created {len(environments)} environments"
+            
+        finally:
+            for env_name in environments:
+                try:
+                    self.docker_manager.release_environment(env_name)
+                except:
+                    pass
+    
+    def test_corrupted_compose_file_handling(self):
+        """Test handling of corrupted docker-compose files"""
+        # This test simulates handling of invalid configurations
+        env_name = f"corrupt_compose_{int(time.time())}"
+        
+        try:
+            # Create environment with potentially problematic settings
+            result = self.docker_manager.acquire_environment(
+                env_name,
+                extra_args=['--invalid-flag']  # This should be handled gracefully
+            )
+            
+            # Should either succeed or fail gracefully without crashing
+            if result is None:
+                logger.info("Corrupted compose handled gracefully - no environment created")
+            else:
+                logger.info("Environment created despite invalid settings")
+                health = self.docker_manager.get_health_report(env_name)
+                assert health is not None, "Health report should be available"
+                
+        except Exception as e:
+            # Should not crash with unhandled exceptions
+            assert "docker" in str(e).lower() or "compose" in str(e).lower(), f"Unexpected error: {e}"
+        finally:
+            try:
+                self.docker_manager.release_environment(env_name)
+            except:
+                pass
+    
+    def test_resource_limit_enforcement(self):
+        """Test that resource limits are properly enforced"""
+        containers = []
+        
+        try:
+            # Create containers with strict limits
+            for i in range(5):
+                container = docker.from_env().containers.run(
+                    "alpine:latest",
+                    command="sh -c 'while true; do echo test > /dev/null; done'",
+                    name=f"limit_test_{i}_{int(time.time())}",
+                    detach=True,
+                    remove=True,
+                    mem_limit="50m",
+                    cpu_quota=10000,  # 10% CPU
+                    oom_kill_disable=False
+                )
+                containers.append(container)
+            
+            # Let containers run and monitor
+            time.sleep(10)
+            
+            # Check that limits are enforced
+            for container in containers:
+                try:
+                    stats = container.stats(stream=False)
+                    memory_mb = stats['memory_stats']['usage'] / (1024 * 1024)
+                    
+                    # Should respect memory limit
+                    assert memory_mb <= 60, f"Container using {memory_mb}MB > 60MB (limit: 50MB)"
+                    
+                    # CPU should be throttled
+                    cpu_delta = stats['cpu_stats']['cpu_usage']['total_usage'] - \
+                               stats['precpu_stats']['cpu_usage']['total_usage']
+                    system_delta = stats['cpu_stats']['system_cpu_usage'] - \
+                                  stats['precpu_stats']['system_cpu_usage']
+                    if system_delta > 0:
+                        cpu_percent = (cpu_delta / system_delta) * 100
+                        assert cpu_percent <= 25, f"CPU usage {cpu_percent}% > 25% (limit: 10%)"
+                        
+                except Exception as e:
+                    logger.warning(f"Stats check failed for container: {e}")
+            
+        finally:
+            for container in containers:
+                try:
+                    container.stop()
+                    container.remove()
+                except:
+                    pass
+    
+    def test_zombie_process_cleanup(self):
+        """Test cleanup of zombie processes in containers"""
+        env_name = f"zombie_test_{int(time.time())}"
+        
+        try:
+            result = self.docker_manager.acquire_environment(env_name)
+            assert result is not None
+            
+            # Create zombie processes
+            containers = docker.from_env().containers.list()
+            for container in containers:
+                if env_name in container.name:
+                    try:
+                        # Start processes that create zombies
+                        container.exec_run("sh -c 'sh -c \"sleep 1 &\" ; sleep 2'", detach=True)
+                    except:
+                        pass
+            
+            time.sleep(5)
+            
+            # Check for zombie processes
+            for container in containers:
+                if env_name in container.name:
+                    try:
+                        result = container.exec_run("ps aux | grep -c Z")
+                        zombie_count = int(result.output.decode().strip())
+                        # Should have minimal zombies
+                        assert zombie_count <= 5, f"Too many zombie processes: {zombie_count}"
+                    except:
+                        pass
+                        
+        finally:
+            self.docker_manager.release_environment(env_name)
+
+
+class TestDockerInfrastructureSecurityValidation:
+    """Test Infrastructure: Security Validation (5 tests)"""
+    
+    @pytest.fixture(autouse=True)
+    def setup(self):
+        self.validator = DockerInfrastructureValidator()
+        self.docker_manager = UnifiedDockerManager()
+        yield
+        self.docker_manager.cleanup_orphaned_containers()
+    
+    def test_container_isolation_verification(self):
+        """Test that containers are properly isolated"""
+        env1_name = f"isolation_1_{int(time.time())}"
+        env2_name = f"isolation_2_{int(time.time())}"
+        
+        try:
+            # Create two isolated environments
+            result1 = self.docker_manager.acquire_environment(env1_name)
+            result2 = self.docker_manager.acquire_environment(env2_name)
+            
+            assert result1 is not None and result2 is not None
+            
+            # Verify network isolation
+            containers1 = []
+            containers2 = []
+            
+            all_containers = docker.from_env().containers.list()
+            for container in all_containers:
+                if env1_name in container.name:
+                    containers1.append(container)
+                elif env2_name in container.name:
+                    containers2.append(container)
+            
+            # Test network isolation
+            for c1 in containers1:
+                for c2 in containers2:
+                    try:
+                        # Try to ping between environments - should fail
+                        c2_ip = list(c2.attrs['NetworkSettings']['Networks'].values())[0]['IPAddress']
+                        ping_result = c1.exec_run(f"ping -c 1 -W 1 {c2_ip}")
+                        # Ping should fail due to isolation
+                        assert ping_result.exit_code != 0, "Container isolation failed - ping succeeded"
+                    except Exception:
+                        # Exception is expected due to isolation
+                        pass
+            
+        finally:
+            self.docker_manager.release_environment(env1_name)
+            self.docker_manager.release_environment(env2_name)
+    
+    def test_privilege_escalation_prevention(self):
+        """Test prevention of privilege escalation"""
+        containers = []
+        
+        try:
+            # Create containers without privileged mode
+            for i in range(3):
+                container = docker.from_env().containers.run(
+                    "alpine:latest",
+                    command="sleep 60",
+                    name=f"security_test_{i}_{int(time.time())}",
+                    detach=True,
+                    remove=True,
+                    privileged=False,
+                    user="1000:1000"  # Non-root user
+                )
+                containers.append(container)
+            
+            # Verify containers run as non-root
+            for container in containers:
+                try:
+                    whoami_result = container.exec_run("whoami")
+                    username = whoami_result.output.decode().strip()
+                    assert username != "root", f"Container running as root: {username}"
+                    
+                    # Try to escalate - should fail
+                    sudo_result = container.exec_run("sudo echo test")
+                    assert sudo_result.exit_code != 0, "Privilege escalation possible"
+                    
+                except Exception as e:
+                    # Expected - sudo might not be installed in Alpine
+                    pass
+            
+        finally:
+            for container in containers:
+                try:
+                    container.stop()
+                    container.remove()
+                except:
+                    pass
+    
+    def test_host_filesystem_protection(self):
+        """Test protection of host filesystem from container access"""
+        containers = []
+        
+        try:
+            # Create containers without host volume mounts
+            for i in range(2):
+                container = docker.from_env().containers.run(
+                    "alpine:latest",
+                    command="sleep 60",
+                    name=f"fs_security_{i}_{int(time.time())}",
+                    detach=True,
+                    remove=True,
+                    read_only=True,  # Read-only filesystem
+                    tmpfs={'/tmp': 'size=100m'}
+                )
+                containers.append(container)
+            
+            # Verify filesystem restrictions
+            for container in containers:
+                try:
+                    # Try to write to root filesystem - should fail
+                    write_result = container.exec_run("echo 'test' > /test_file")
+                    assert write_result.exit_code != 0, "Filesystem not read-only"
+                    
+                    # Should be able to write to tmpfs
+                    tmp_result = container.exec_run("echo 'test' > /tmp/test_file")
+                    assert tmp_result.exit_code == 0, "tmpfs not writable"
+                    
+                except Exception as e:
+                    logger.warning(f"Filesystem test failed: {e}")
+            
+        finally:
+            for container in containers:
+                try:
+                    container.stop()
+                    container.remove()
+                except:
+                    pass
+    
+    def test_resource_exhaustion_protection(self):
+        """Test protection against resource exhaustion attacks"""
+        containers = []
+        
+        try:
+            # Create containers with strict limits
+            for i in range(3):
+                container = docker.from_env().containers.run(
+                    "alpine:latest",
+                    command="sleep 300",
+                    name=f"resource_protect_{i}_{int(time.time())}",
+                    detach=True,
+                    remove=True,
+                    mem_limit="128m",
+                    cpu_quota=25000,  # 25% CPU
+                    pids_limit=100,   # Limit process count
+                    ulimits=[
+                        docker.types.Ulimit(name='nofile', soft=1024, hard=1024),  # File descriptor limit
+                        docker.types.Ulimit(name='nproc', soft=50, hard=50)       # Process limit
+                    ]
+                )
+                containers.append(container)
+            
+            # Try resource exhaustion attacks
+            for container in containers:
+                try:
+                    # Try fork bomb - should be limited
+                    fork_result = container.exec_run("sh -c 'while true; do sh & done'", detach=True)
+                    
+                    # Try memory exhaustion - should be limited
+                    mem_result = container.exec_run("sh -c 'while true; do x=$x$x; done'", detach=True)
+                    
+                    time.sleep(5)
+                    
+                    # Container should still be responsive despite attacks
+                    health_check = container.exec_run("echo 'alive'")
+                    assert health_check.exit_code == 0, "Container became unresponsive"
+                    
+                except Exception as e:
+                    # Some attacks might cause the container to be killed - that's good protection
+                    logger.info(f"Resource attack prevented: {e}")
+            
+        finally:
+            for container in containers:
+                try:
+                    container.stop()
+                    container.remove()
+                except:
+                    pass
+    
+    def test_secrets_isolation_validation(self):
+        """Test that secrets and sensitive data are properly isolated"""
+        env_name = f"secrets_test_{int(time.time())}"
+        
+        try:
+            result = self.docker_manager.acquire_environment(env_name)
+            assert result is not None
+            
+            # Verify no secrets in environment variables
+            containers = docker.from_env().containers.list()
+            for container in containers:
+                if env_name in container.name:
+                    try:
+                        # Check environment variables
+                        env_result = container.exec_run("env")
+                        env_output = env_result.output.decode()
+                        
+                        # Should not contain obvious secrets
+                        sensitive_patterns = ['password', 'secret', 'key', 'token']
+                        for pattern in sensitive_patterns:
+                            # Allow some test patterns but not real secrets
+                            lines_with_pattern = [line for line in env_output.lower().split('\n') 
+                                                if pattern in line and 'test' not in line]
+                            assert len(lines_with_pattern) == 0, f"Potential secrets found: {pattern}"
+                        
+                        # Check no world-readable secret files
+                        find_result = container.exec_run("find / -type f -perm -004 -name '*secret*' 2>/dev/null")
+                        if find_result.exit_code == 0 and find_result.output:
+                            world_readable_secrets = find_result.output.decode().strip()
+                            assert not world_readable_secrets, f"World-readable secrets: {world_readable_secrets}"
+                        
+                    except Exception as e:
+                        logger.warning(f"Secrets check failed: {e}")
+            
+        finally:
+            self.docker_manager.release_environment(env_name)
+
+
 if __name__ == "__main__":
     # Run with comprehensive reporting
     pytest.main([

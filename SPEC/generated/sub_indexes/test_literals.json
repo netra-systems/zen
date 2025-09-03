@@ -2,9 +2,9 @@
   "metadata": {
     "version": "3.0.0",
     "category": "test_literals",
-    "generated_at": "2025-09-02T16:51:33.972324",
+    "generated_at": "2025-09-02T18:16:22.054256",
     "root_directory": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1",
-    "total_literals": 13215
+    "total_literals": 13213
   },
   "literals": {
     "\u001b[0m": {
@@ -12554,7 +12554,7 @@
       "value": ": FAIL -",
       "category": "test_literals",
       "locations": [
-        "scripts/test_modern_websocket_migration.py:196"
+        "scripts/test_modern_websocket_migration.py:183"
       ]
     },
     ": FAILED": {
@@ -15299,7 +15299,7 @@
       "value": "All WebSocket migration tests PASSED!",
       "category": "test_literals",
       "locations": [
-        "scripts/test_modern_websocket_migration.py:243"
+        "scripts/test_modern_websocket_migration.py:230"
       ]
     },
     "All configured": {
@@ -18941,6 +18941,35 @@
         "scripts/debug_supervisor_test.py:131"
       ]
     },
+    "Canonical WebSocket manager functional (modern features integrated)": {
+      "value": "Canonical WebSocket manager functional (modern features integrated)",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_modern_websocket_migration.py:78"
+      ]
+    },
+    "Canonical WebSocket manager imported successfully (modern features integrated)": {
+      "value": "Canonical WebSocket manager imported successfully (modern features integrated)",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_modern_websocket_migration.py:47"
+      ]
+    },
+    "Canonical WebSocket manager test failed:": {
+      "value": "Canonical WebSocket manager test failed:",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_modern_websocket_migration.py:81",
+        "scripts/test_modern_websocket_migration.py:114"
+      ]
+    },
+    "Canonical WebSocket manager tests passed (replaces wrapper functionality)": {
+      "value": "Canonical WebSocket manager tests passed (replaces wrapper functionality)",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_modern_websocket_migration.py:111"
+      ]
+    },
     "Capture event instead of sending.": {
       "value": "Capture event instead of sending.",
       "category": "test_literals",
@@ -20923,6 +20952,20 @@
         "scripts/business_value_test_index.py:491"
       ]
     },
+    "Core WebSocket imports failed:": {
+      "value": "Core WebSocket imports failed:",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_modern_websocket_migration.py:92"
+      ]
+    },
+    "Core WebSocket imports successful (no legacy dependencies)": {
+      "value": "Core WebSocket imports successful (no legacy dependencies)",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_modern_websocket_migration.py:89"
+      ]
+    },
     "Core functionality unit tests": {
       "value": "Core functionality unit tests",
       "category": "test_literals",
@@ -22018,7 +22061,7 @@
       "value": "DEPRECATION WARNINGS:",
       "category": "test_literals",
       "locations": [
-        "scripts/test_modern_websocket_migration.py:226"
+        "scripts/test_modern_websocket_migration.py:213"
       ]
     },
     "DETAILED CONNECTION LIFECYCLE MONITORING": {
@@ -25977,7 +26020,7 @@
       "category": "test_literals",
       "locations": [
         "scripts/test_coordination_fixes.py:385",
-        "scripts/test_modern_websocket_migration.py:220"
+        "scripts/test_modern_websocket_migration.py:207"
       ]
     },
     "FAILED:": {
@@ -26654,14 +26697,14 @@
       "value": "Failed to import WebSocket core:",
       "category": "test_literals",
       "locations": [
-        "scripts/test_modern_websocket_migration.py:66"
+        "scripts/test_modern_websocket_migration.py:65"
       ]
     },
-    "Failed to import modern WebSocket abstraction:": {
-      "value": "Failed to import modern WebSocket abstraction:",
+    "Failed to import canonical WebSocket manager:": {
+      "value": "Failed to import canonical WebSocket manager:",
       "category": "test_literals",
       "locations": [
-        "scripts/test_modern_websocket_migration.py:51"
+        "scripts/test_modern_websocket_migration.py:50"
       ]
     },
     "Failed to import optimization modules:": {
@@ -32018,7 +32061,7 @@
       "locations": [
         "scripts/test_cors_implementation.py:230",
         "scripts/test_docker_websocket_fix.py:309",
-        "scripts/test_modern_websocket_migration.py:235",
+        "scripts/test_modern_websocket_migration.py:222",
         "scripts/test_real_jwt_e2e.py:263"
       ]
     },
@@ -32581,7 +32624,7 @@
       "category": "test_literals",
       "locations": [
         "scripts/setup_test_environment.py:105",
-        "scripts/test_modern_websocket_migration.py:146"
+        "scripts/test_modern_websocket_migration.py:133"
       ]
     },
     "Missing Access-Control-Allow-Origin header": {
@@ -33014,46 +33057,11 @@
         "scripts/test_blocking_analysis.py:303"
       ]
     },
-    "Modern WebSocket abstraction imported successfully": {
-      "value": "Modern WebSocket abstraction imported successfully",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_modern_websocket_migration.py:48"
-      ]
-    },
     "Modern WebSocket implementation is working correctly.": {
       "value": "Modern WebSocket implementation is working correctly.",
       "category": "test_literals",
       "locations": [
-        "scripts/test_modern_websocket_migration.py:244"
-      ]
-    },
-    "Modern WebSocket manager functional": {
-      "value": "Modern WebSocket manager functional",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_modern_websocket_migration.py:78"
-      ]
-    },
-    "Modern WebSocket manager test failed:": {
-      "value": "Modern WebSocket manager test failed:",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_modern_websocket_migration.py:81"
-      ]
-    },
-    "Modern WebSocket protocol imports successful": {
-      "value": "Modern WebSocket protocol imports successful",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_modern_websocket_migration.py:89"
-      ]
-    },
-    "Modern protocol imports failed:": {
-      "value": "Modern protocol imports failed:",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_modern_websocket_migration.py:92"
+        "scripts/test_modern_websocket_migration.py:231"
       ]
     },
     "Modernize legacy test patterns": {
@@ -33864,7 +33872,7 @@
       "value": "No deprecation warnings detected",
       "category": "test_literals",
       "locations": [
-        "scripts/test_modern_websocket_migration.py:164"
+        "scripts/test_modern_websocket_migration.py:151"
       ]
     },
     "No env vars set:": {
@@ -35893,7 +35901,7 @@
         "scripts/test_coordination_fixes.py:380",
         "scripts/test_database_url_builder_comprehensive.py:348",
         "scripts/test_example_message_flow.py:321",
-        "scripts/test_modern_websocket_migration.py:215"
+        "scripts/test_modern_websocket_migration.py:202"
       ]
     },
     "Password Mismatch": {
@@ -38710,7 +38718,7 @@
       "value": "Review the issues above before proceeding.",
       "category": "test_literals",
       "locations": [
-        "scripts/test_modern_websocket_migration.py:248"
+        "scripts/test_modern_websocket_migration.py:235"
       ]
     },
     "Reviews code and provides feedback": {
@@ -38829,7 +38837,7 @@
       "value": "Run all WebSocket migration tests.",
       "category": "test_literals",
       "locations": [
-        "scripts/test_modern_websocket_migration.py:168"
+        "scripts/test_modern_websocket_migration.py:155"
       ]
     },
     "Run all WebSocket serialization blocking tests": {
@@ -39281,7 +39289,7 @@
       "value": "Running WebSocket migration tests...",
       "category": "test_literals",
       "locations": [
-        "scripts/test_modern_websocket_migration.py:178"
+        "scripts/test_modern_websocket_migration.py:165"
       ]
     },
     "Running command:": {
@@ -42042,7 +42050,7 @@
       "value": "Should use ASGI3 interface",
       "category": "test_literals",
       "locations": [
-        "scripts/test_modern_websocket_migration.py:148"
+        "scripts/test_modern_websocket_migration.py:135"
       ]
     },
     "Show category details": {
@@ -42437,7 +42445,7 @@
       "value": "Some WebSocket migration tests FAILED!",
       "category": "test_literals",
       "locations": [
-        "scripts/test_modern_websocket_migration.py:247"
+        "scripts/test_modern_websocket_migration.py:234"
       ]
     },
     "Some direct tests failed": {
@@ -43560,7 +43568,7 @@
         "scripts/comprehensive_test_fixer.py:396",
         "scripts/test_agent_pipeline_simple.py:380",
         "scripts/test_clickhouse_startup_fix.py:376",
-        "scripts/test_modern_websocket_migration.py:217",
+        "scripts/test_modern_websocket_migration.py:204",
         "scripts/test_parallel_docker_manager.py:153"
       ]
     },
@@ -46031,6 +46039,13 @@
         "scripts/simple_serialization_test.py:58"
       ]
     },
+    "Test canonical WebSocket manager functionality (with integrated modern features).": {
+      "value": "Test canonical WebSocket manager functionality (with integrated modern features).",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_modern_websocket_migration.py:69"
+      ]
+    },
     "Test case": {
       "value": "Test case",
       "category": "test_literals",
@@ -46615,7 +46630,7 @@
       "locations": [
         "scripts/test_agent_orchestration_recovery.py:330",
         "scripts/test_backend_optimized.py:449",
-        "scripts/test_modern_websocket_migration.py:252"
+        "scripts/test_modern_websocket_migration.py:239"
       ]
     },
     "Test execution interrupted by user": {
@@ -46971,13 +46986,6 @@
       "category": "test_literals",
       "locations": [
         "scripts/test_staging_login_automated.py:398"
-      ]
-    },
-    "Test modern WebSocket manager functionality.": {
-      "value": "Test modern WebSocket manager functionality.",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_modern_websocket_migration.py:70"
       ]
     },
     "Test module for refresh token fix - ensures tokens are properly refreshed with unique values": {
@@ -47709,7 +47717,7 @@
       "value": "Test that WebSocket core imports work without deprecation warnings.",
       "category": "test_literals",
       "locations": [
-        "scripts/test_modern_websocket_migration.py:55"
+        "scripts/test_modern_websocket_migration.py:54"
       ]
     },
     "Test that access tokens cannot be used for refresh": {
@@ -47761,6 +47769,13 @@
         "auth_service/tests/test_auth_comprehensive_audit.py:472"
       ]
     },
+    "Test that canonical WebSocket manager can be imported without warnings.": {
+      "value": "Test that canonical WebSocket manager can be imported without warnings.",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_modern_websocket_migration.py:40"
+      ]
+    },
     "Test that concurrent refresh attempts are handled correctly": {
       "value": "Test that concurrent refresh attempts are handled correctly",
       "category": "test_literals",
@@ -47773,6 +47788,13 @@
       "category": "test_literals",
       "locations": [
         "auth_service/tests/test_auth_comprehensive_audit.py:315"
+      ]
+    },
+    "Test that core imports work without legacy dependencies.": {
+      "value": "Test that core imports work without legacy dependencies.",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_modern_websocket_migration.py:85"
       ]
     },
     "Test that dependency resolution prevents early startup.": {
@@ -47803,13 +47825,6 @@
         "auth_service/tests/test_redis_staging_connectivity_fixes.py:286"
       ]
     },
-    "Test that legacy imports issue appropriate warnings.": {
-      "value": "Test that legacy imports issue appropriate warnings.",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_modern_websocket_migration.py:85"
-      ]
-    },
     "Test that localhost Redis URL is rejected in staging unless explicitly allowed": {
       "value": "Test that localhost Redis URL is rejected in staging unless explicitly allowed",
       "category": "test_literals",
@@ -47829,13 +47844,6 @@
       "category": "test_literals",
       "locations": [
         "auth_service/tests/test_redis_staging_fixes.py:18"
-      ]
-    },
-    "Test that modern WebSocket abstraction can be imported without warnings.": {
-      "value": "Test that modern WebSocket abstraction can be imported without warnings.",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_modern_websocket_migration.py:40"
       ]
     },
     "Test that multiple concurrent serializations block each other": {
@@ -47989,7 +47997,7 @@
       "value": "Test that uvicorn configuration includes modern WebSocket settings.",
       "category": "test_literals",
       "locations": [
-        "scripts/test_modern_websocket_migration.py:131"
+        "scripts/test_modern_websocket_migration.py:118"
       ]
     },
     "Test that we can establish a real Redis connection.": {
@@ -48048,6 +48056,13 @@
         "scripts/test_service_health_simple.py:91"
       ]
     },
+    "Test the canonical WebSocket manager functionality (replaces wrapper).": {
+      "value": "Test the canonical WebSocket manager functionality (replaces wrapper).",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_modern_websocket_migration.py:96"
+      ]
+    },
     "Test the exact JWT validation flow that's failing": {
       "value": "Test the exact JWT validation flow that's failing",
       "category": "test_literals",
@@ -48074,13 +48089,6 @@
       "category": "test_literals",
       "locations": [
         "scripts/test_staging_threads_fix.py:68"
-      ]
-    },
-    "Test the modern WebSocket wrapper functionality.": {
-      "value": "Test the modern WebSocket wrapper functionality.",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_modern_websocket_migration.py:96"
       ]
     },
     "Test the real data pipeline with actual running services.": {
@@ -51042,7 +51050,7 @@
       "category": "test_literals",
       "locations": [
         "scripts/test_clickhouse_startup_fix.py:373",
-        "scripts/test_modern_websocket_migration.py:214"
+        "scripts/test_modern_websocket_migration.py:201"
       ]
     },
     "Total time:": {
@@ -52242,14 +52250,14 @@
       "value": "Uvicorn config test failed:",
       "category": "test_literals",
       "locations": [
-        "scripts/test_modern_websocket_migration.py:153"
+        "scripts/test_modern_websocket_migration.py:140"
       ]
     },
     "Uvicorn configuration includes modern WebSocket settings": {
       "value": "Uvicorn configuration includes modern WebSocket settings",
       "category": "test_literals",
       "locations": [
-        "scripts/test_modern_websocket_migration.py:150"
+        "scripts/test_modern_websocket_migration.py:137"
       ]
     },
     "VALIDATION ERROR:": {
@@ -52914,7 +52922,7 @@
       "value": "WEBSOCKET MIGRATION TEST SUMMARY",
       "category": "test_literals",
       "locations": [
-        "scripts/test_modern_websocket_migration.py:212"
+        "scripts/test_modern_websocket_migration.py:199"
       ]
     },
     "WEBSOCKET_AUTH_BYPASS": {
@@ -53345,7 +53353,7 @@
       "value": "WebSocket core imports successful",
       "category": "test_literals",
       "locations": [
-        "scripts/test_modern_websocket_migration.py:63"
+        "scripts/test_modern_websocket_migration.py:62"
       ]
     },
     "WebSocket endpoint": {
@@ -53478,20 +53486,6 @@
         "scripts/test_cold_start_e2e.py:306",
         "scripts/test_staging_env.py:99",
         "scripts/test_websocket_dev_mode.py:232"
-      ]
-    },
-    "WebSocket wrapper test failed:": {
-      "value": "WebSocket wrapper test failed:",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_modern_websocket_migration.py:127"
-      ]
-    },
-    "WebSocket wrapper tests passed": {
-      "value": "WebSocket wrapper tests passed",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_modern_websocket_migration.py:124"
       ]
     },
     "WebSocket-related tests": {
@@ -60405,7 +60399,7 @@
       "value": "always",
       "category": "test_literals",
       "locations": [
-        "scripts/test_modern_websocket_migration.py:183"
+        "scripts/test_modern_websocket_migration.py:170"
       ]
     },
     "analysis": {
@@ -61292,7 +61286,7 @@
       "value": "asgi3",
       "category": "test_literals",
       "locations": [
-        "scripts/test_modern_websocket_migration.py:148"
+        "scripts/test_modern_websocket_migration.py:135"
       ]
     },
     "assert": {
@@ -66710,7 +66704,7 @@
       "value": "deprecation warnings:",
       "category": "test_literals",
       "locations": [
-        "scripts/test_modern_websocket_migration.py:159"
+        "scripts/test_modern_websocket_migration.py:146"
       ]
     },
     "describe(": {
@@ -74147,7 +74141,7 @@
       "value": "in uvicorn config",
       "category": "test_literals",
       "locations": [
-        "scripts/test_modern_websocket_migration.py:146"
+        "scripts/test_modern_websocket_migration.py:133"
       ]
     },
     "inactive@netra.local": {
@@ -74407,8 +74401,8 @@
       "category": "test_literals",
       "locations": [
         "scripts/frontend_iterative_test_runner.py:680",
-        "scripts/test_modern_websocket_migration.py:142",
-        "scripts/test_modern_websocket_migration.py:148"
+        "scripts/test_modern_websocket_migration.py:129",
+        "scripts/test_modern_websocket_migration.py:135"
       ]
     },
     "intermediate_results": {
@@ -77541,14 +77535,14 @@
       "value": "modern_abstraction_import",
       "category": "test_literals",
       "locations": [
-        "scripts/test_modern_websocket_migration.py:170"
+        "scripts/test_modern_websocket_migration.py:157"
       ]
     },
     "modern_websocket_manager": {
       "value": "modern_websocket_manager",
       "category": "test_literals",
       "locations": [
-        "scripts/test_modern_websocket_migration.py:172"
+        "scripts/test_modern_websocket_migration.py:159"
       ]
     },
     "module": {
@@ -78971,14 +78965,14 @@
       "value": "no_deprecation_warnings",
       "category": "test_literals",
       "locations": [
-        "scripts/test_modern_websocket_migration.py:201"
+        "scripts/test_modern_websocket_migration.py:188"
       ]
     },
     "no_legacy_imports": {
       "value": "no_legacy_imports",
       "category": "test_literals",
       "locations": [
-        "scripts/test_modern_websocket_migration.py:173"
+        "scripts/test_modern_websocket_migration.py:160"
       ]
     },
     "no_specific_test_found": {
@@ -89593,8 +89587,8 @@
         "scripts/test_environment_validation_clean.py:99"
       ]
     },
-    "test_secret": {
-      "value": "test_secret",
+    "test_secret_minimum_20_characters_long": {
+      "value": "test_secret_minimum_20_characters_long",
       "category": "test_literals",
       "locations": [
         "auth_service/tests/test_refresh_endpoint_compatibility.py:27",
@@ -92819,7 +92813,7 @@
       "value": "uvicorn_config",
       "category": "test_literals",
       "locations": [
-        "scripts/test_modern_websocket_migration.py:175"
+        "scripts/test_modern_websocket_migration.py:162"
       ]
     },
     "valid": {
@@ -93534,7 +93528,7 @@
       "value": "websocket_core_imports",
       "category": "test_literals",
       "locations": [
-        "scripts/test_modern_websocket_migration.py:171"
+        "scripts/test_modern_websocket_migration.py:158"
       ]
     },
     "websocket_cors_test_results_": {
@@ -93634,7 +93628,7 @@
       "value": "websocket_wrapper",
       "category": "test_literals",
       "locations": [
-        "scripts/test_modern_websocket_migration.py:174"
+        "scripts/test_modern_websocket_migration.py:161"
       ]
     },
     "websockets": {
@@ -94046,21 +94040,21 @@
       "value": "ws_max_size",
       "category": "test_literals",
       "locations": [
-        "scripts/test_modern_websocket_migration.py:141"
+        "scripts/test_modern_websocket_migration.py:128"
       ]
     },
     "ws_ping_interval": {
       "value": "ws_ping_interval",
       "category": "test_literals",
       "locations": [
-        "scripts/test_modern_websocket_migration.py:139"
+        "scripts/test_modern_websocket_migration.py:126"
       ]
     },
     "ws_ping_timeout": {
       "value": "ws_ping_timeout",
       "category": "test_literals",
       "locations": [
-        "scripts/test_modern_websocket_migration.py:140"
+        "scripts/test_modern_websocket_migration.py:127"
       ]
     },
     "ws_url": {
@@ -94246,13 +94240,6 @@
       "category": "test_literals",
       "locations": [
         "auth_service/tests/test_critical_bugs.py:214"
-      ]
-    },
-    "{\"type\": \"test\"}": {
-      "value": "{\"type\": \"test\"}",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_modern_websocket_migration.py:109"
       ]
     },
     "{refresh_token: \"test_token\"}": {

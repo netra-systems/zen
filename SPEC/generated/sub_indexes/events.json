@@ -2,7 +2,7 @@
   "metadata": {
     "version": "3.0.0",
     "category": "events",
-    "generated_at": "2025-09-02T16:51:33.555348",
+    "generated_at": "2025-09-02T18:16:21.538255",
     "root_directory": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1",
     "total_literals": 33
   },
@@ -32,7 +32,7 @@
       "value": "_shutdown_event",
       "category": "events",
       "locations": [
-        "netra_backend/app/websocket_core/manager.py:726"
+        "netra_backend/app/websocket_core/manager.py:1238"
       ]
     },
     "auth_event": {

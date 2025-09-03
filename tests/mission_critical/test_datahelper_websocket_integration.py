@@ -33,6 +33,14 @@ if project_root not in sys.path:
 import pytest
 from loguru import logger
 
+# Import unified WebSocket mock for consistent DataHelper testing
+from test_framework.fixtures.websocket_manager_mock import create_concurrency_mock
+from test_framework.fixtures.websocket_test_helpers import (
+    WebSocketAssertions,
+    simulate_agent_execution_flow,
+    reset_mock_for_test
+)
+
 # Import production components
 from netra_backend.app.agents.data_helper_agent import DataHelperAgent
 from netra_backend.app.agents.base.interface import ExecutionContext
@@ -49,45 +57,56 @@ from netra_backend.app.llm.llm_manager import LLMManager
 
 
 # ============================================================================
-# MOCK WEBSOCKET MANAGER FOR TESTING
+# UNIFIED WEBSOCKET MOCK FOR DATAHELPER TESTING - REPLACES LOCAL MOCK
 # ============================================================================
 
 class MockWebSocketManager:
-    """Mock WebSocket manager that captures events for validation."""
+    """Legacy compatibility wrapper for DataHelper testing using unified mock."""
     
     def __init__(self):
-        self.messages: List[Dict] = []
-        self.connections: Dict[str, Any] = {}
+        self._unified_mock = create_concurrency_mock()
+        # Legacy attributes for backward compatibility
+        self.messages = []
+        self.connections = {}
         self.event_lock = threading.Lock()
     
     async def send_to_thread(self, thread_id: str, message: Dict[str, Any]) -> bool:
-        """Record message and simulate successful delivery."""
+        """Send using unified mock with DataHelper-specific tracking."""
+        result = await self._unified_mock.send_to_thread(thread_id, message)
+        
+        # Maintain legacy interface with thread safety
         with self.event_lock:
-            self.messages.append({
+            event_record = {
                 'thread_id': thread_id,
                 'message': message,
                 'event_type': message.get('type', 'unknown'),
                 'timestamp': time.time(),
                 'agent_name': message.get('agent_name', 'unknown')
-            })
-        return True
+            }
+            self.messages.append(event_record)
+        
+        # Sync connections from unified mock
+        self.connections = self._unified_mock.connections
+        
+        return result
     
     async def connect_user(self, user_id: str, websocket, thread_id: str):
-        """Mock user connection."""
-        self.connections[thread_id] = {'user_id': user_id, 'connected': True}
+        """Connect using unified mock."""
+        await self._unified_mock.connect_user(user_id, websocket, thread_id)
+        self.connections = self._unified_mock.connections
     
     async def disconnect_user(self, user_id: str, websocket, thread_id: str):
-        """Mock user disconnection."""
-        if thread_id in self.connections:
-            self.connections[thread_id]['connected'] = False
+        """Disconnect using unified mock."""
+        await self._unified_mock.disconnect_user(user_id, websocket, thread_id)
+        self.connections = self._unified_mock.connections
     
     def get_events_for_thread(self, thread_id: str) -> List[Dict]:
-        """Get all events for a specific thread."""
+        """Get events with legacy interface."""
         with self.event_lock:
             return [msg for msg in self.messages if msg['thread_id'] == thread_id]
     
     def get_events_for_agent(self, agent_name: str) -> List[Dict]:
-        """Get all events for a specific agent."""
+        """Get events for a specific agent (DataHelper-specific feature)."""
         with self.event_lock:
             return [msg for msg in self.messages if msg.get('agent_name') == agent_name]
     
@@ -98,6 +117,10 @@ class MockWebSocketManager:
     
     def clear_messages(self):
         """Clear all recorded messages."""
+        self._unified_mock.clear_messages()
+        with self.event_lock:
+            self.messages.clear()
+            self.connections.clear()
         with self.event_lock:
             self.messages.clear()
 

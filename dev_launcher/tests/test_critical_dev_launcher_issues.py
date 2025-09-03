@@ -29,6 +29,9 @@ from dev_launcher.launcher import DevLauncher
 from shared.isolated_environment import get_env
 from dev_launcher.log_filter import LogFilter, LogLevel, StartupMode
 
+# Get environment instance for configuration
+env = get_env()
+
 
 class TestCriticalDevLauncherIssues(unittest.TestCase):
     """Test suite for critical dev launcher issues."""
@@ -45,13 +48,13 @@ class TestCriticalDevLauncherIssues(unittest.TestCase):
         (self.test_path / 'auth_service').mkdir(parents=True)
         
         # Save original environment
-        self.original_env = dict(os.environ)
+        self.original_env = env.get_all()
         
-        # Clear test-specific env vars
-        for key in list(os.environ.keys()):
+        # Clear test-specific env vars using IsolatedEnvironment
+        for key in list(env.get_all().keys()):
             if key.startswith('TEST_') or key.startswith('CLICKHOUSE_'):
-                if key in os.environ:
-                    del os.environ[key]
+                if env.exists(key):
+                    env.delete(key)
         
         # Track error messages for testing premature error display
         self.error_messages = []
@@ -208,11 +211,11 @@ JWT_SECRET_KEY=super_secret_key_at_least_64_characters_long_for_testing_purposes
         error code 194, often due to configuration or environment loading issues.
         """
         # Set up ClickHouse environment variables with incorrect password
-        os.environ['CLICKHOUSE_HOST'] = 'localhost'
-        os.environ['CLICKHOUSE_PORT'] = '8123'
-        os.environ['CLICKHOUSE_USER'] = 'default'
-        os.environ['CLICKHOUSE_PASSWORD'] = 'wrong_password'
-        os.environ['CLICKHOUSE_DATABASE'] = 'test_db'
+        env.set('CLICKHOUSE_HOST', 'localhost')
+        env.set('CLICKHOUSE_PORT', '8123')
+        env.set('CLICKHOUSE_USER', 'default')
+        env.set('CLICKHOUSE_PASSWORD', 'wrong_password')
+        env.set('CLICKHOUSE_DATABASE', 'test_db')
         
         # Mock ClickHouse client that fails with code 194
         class MockClickHouseError(Exception):
@@ -487,7 +490,7 @@ REDIS_URL=redis://localhost:6379
             required_vars = ['DATABASE_URL', 'JWT_SECRET_KEY', 'CLICKHOUSE_PASSWORD']
             missing_vars = []
             for var in required_vars:
-                if not os.environ.get(var):
+                if not env.get(var):
                     missing_vars.append(var)
             
             error_check_complete = time.time()
@@ -540,7 +543,7 @@ REDIS_URL=redis://localhost:6379
         
         # Layer 4: OS environment (highest priority)
         # Must set AFTER reset_to_original() which clears the environment
-        os.environ[test_var_name] = 'from_os_environment'
+        env.set(test_var_name, 'from_os_environment')
         
         # Load files in priority order (reversed for proper layering)
         # Later files override earlier ones
@@ -559,7 +562,7 @@ REDIS_URL=redis://localhost:6379
         )
         
         # Test each layer by removing higher priority sources
-        del os.environ[test_var_name]
+        env.delete(test_var_name)
         env.reset_to_original()
         for file_name in ['.secrets', '.env', '.env.local']:
             file_path = self.test_path / file_name

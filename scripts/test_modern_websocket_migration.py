@@ -37,18 +37,17 @@ class WebSocketMigrationTester:
         self.deprecation_warnings: List[str] = []
         
     async def test_modern_abstraction_import(self) -> bool:
-        """Test that modern WebSocket abstraction can be imported without warnings."""
+        """Test that canonical WebSocket manager can be imported without warnings."""
         try:
-            from netra_backend.app.websocket_core.modern_websocket_abstraction import (
-                ModernWebSocketWrapper,
-                ModernWebSocketManager,
-                get_modern_websocket_manager,
-                websocket_connection_context
+            from netra_backend.app.websocket_core import (
+                WebSocketManager,
+                get_websocket_manager,
+                websocket_context
             )
-            logger.info("Modern WebSocket abstraction imported successfully")
+            logger.info("Canonical WebSocket manager imported successfully (modern features integrated)")
             return True
         except Exception as e:
-            logger.error(f"Failed to import modern WebSocket abstraction: {e}")
+            logger.error(f"Failed to import canonical WebSocket manager: {e}")
             return False
     
     async def test_websocket_core_imports(self) -> bool:
@@ -57,8 +56,8 @@ class WebSocketMigrationTester:
             from netra_backend.app.websocket_core import (
                 WebSocketManager,
                 get_websocket_manager,
-                ModernWebSocketWrapper,
-                get_modern_websocket_manager
+                WebSocketMessage,
+                MessageRouter
             )
             logger.info("WebSocket core imports successful")
             return True
@@ -67,64 +66,52 @@ class WebSocketMigrationTester:
             return False
     
     async def test_modern_websocket_manager(self) -> bool:
-        """Test modern WebSocket manager functionality."""
+        """Test canonical WebSocket manager functionality (with integrated modern features)."""
         try:
-            from netra_backend.app.websocket_core import get_modern_websocket_manager
+            from netra_backend.app.websocket_core import get_websocket_manager
             
-            manager = get_modern_websocket_manager()
+            manager = get_websocket_manager()
             
             # Test basic functionality
-            assert manager.get_connection_count() == 0
-            logger.info("Modern WebSocket manager functional")
+            stats = await manager.get_stats()
+            assert stats is not None
+            logger.info("Canonical WebSocket manager functional (modern features integrated)")
             return True
         except Exception as e:
-            logger.error(f"Modern WebSocket manager test failed: {e}")
+            logger.error(f"Canonical WebSocket manager test failed: {e}")
             return False
     
     async def test_no_legacy_imports(self) -> bool:
-        """Test that legacy imports issue appropriate warnings."""
+        """Test that core imports work without legacy dependencies."""
         try:
-            # This should work without issues - modern approach
-            from netra_backend.app.websocket_core import WebSocketClientProtocol, WebSocketServerProtocol
-            logger.info("Modern WebSocket protocol imports successful")
+            # This should work without issues - canonical approach
+            from netra_backend.app.websocket_core import WebSocketManager, MessageType, ConnectionInfo
+            logger.info("Core WebSocket imports successful (no legacy dependencies)")
             return True
         except Exception as e:
-            logger.error(f"Modern protocol imports failed: {e}")
+            logger.error(f"Core WebSocket imports failed: {e}")
             return False
     
     async def test_websocket_wrapper(self) -> bool:
-        """Test the modern WebSocket wrapper functionality."""
+        """Test the canonical WebSocket manager functionality (replaces wrapper)."""
         try:
-            from netra_backend.app.websocket_core.modern_websocket_abstraction import ModernWebSocketWrapper
+            from netra_backend.app.websocket_core import get_websocket_manager, create_standard_message
             
-            # Mock WebSocket for testing
-            class MockWebSocket:
-                def __init__(self):
-                    self.closed = False
-                    
-                async def send(self, message):
-                    pass
-                    
-                async def recv(self):
-                    return '{"type": "test"}'
-                    
-                async def close(self, code=1000, reason=""):
-                    self.closed = True
+            manager = get_websocket_manager()
             
-            mock_ws = MockWebSocket()
-            wrapper = ModernWebSocketWrapper(mock_ws)
+            # Test message creation (replaces wrapper functionality)
+            message = create_standard_message(
+                message_type="test",
+                payload={"test": "data"}
+            )
             
-            # Test basic functionality
-            assert wrapper.connection_type == "unknown"  # Mock doesn't match known types
-            assert wrapper.is_connected == True  # Not closed
+            assert message is not None
+            assert message.message_type == "test"
             
-            # Test sending
-            await wrapper.send({"test": "message"})
-            
-            logger.info("WebSocket wrapper tests passed")
+            logger.info("Canonical WebSocket manager tests passed (replaces wrapper functionality)")
             return True
         except Exception as e:
-            logger.error(f"WebSocket wrapper test failed: {e}")
+            logger.error(f"Canonical WebSocket manager test failed: {e}")
             return False
     
     async def test_uvicorn_config(self) -> bool:

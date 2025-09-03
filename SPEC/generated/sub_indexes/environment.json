@@ -2,9 +2,9 @@
   "metadata": {
     "version": "3.0.0",
     "category": "environment",
-    "generated_at": "2025-09-02T16:51:33.552974",
+    "generated_at": "2025-09-02T18:16:21.536295",
     "root_directory": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1",
-    "total_literals": 148
+    "total_literals": 153
   },
   "literals": {
     "AI21_API_KEY": {
@@ -19,8 +19,8 @@
       "category": "environment",
       "locations": [
         "netra_backend/app/core/environment_validator.py:44",
-        "shared/configuration/central_config_validator.py:460",
-        "shared/configuration/central_config_validator.py:465"
+        "shared/configuration/central_config_validator.py:465",
+        "shared/configuration/central_config_validator.py:470"
       ]
     },
     "ANTHROPIC_API_KEY": {
@@ -29,14 +29,14 @@
       "locations": [
         "netra_backend/app/agents/github_analyzer/ai_pattern_definitions.py:122",
         "netra_backend/app/agents/github_analyzer/config_parser.py:35",
+        "netra_backend/app/core/backend_environment.py:114",
         "netra_backend/app/core/configuration/secrets.py:88",
         "netra_backend/app/core/configuration/secrets.py:457",
         "netra_backend/app/core/configuration/secrets.py:457",
         "netra_backend/app/core/configuration/staging_validator.py:53",
         "netra_backend/app/core/configuration/unified_secrets.py:101",
         "netra_backend/app/core/configuration/unified_secrets.py:401",
-        "netra_backend/app/core/configuration/unified_secrets.py:420",
-        "netra_backend/app/core/configuration/unified_secrets.py:592"
+        "netra_backend/app/core/configuration/unified_secrets.py:420"
       ]
     },
     "API_": {
@@ -223,10 +223,18 @@
         "scripts/fix_authentication_system.py:285"
       ]
     },
+    "AUTH_SERVICE_HOST": {
+      "value": "AUTH_SERVICE_HOST",
+      "category": "environment",
+      "locations": [
+        "auth_service/auth_core/auth_environment.py:161"
+      ]
+    },
     "AUTH_SERVICE_PORT": {
       "value": "AUTH_SERVICE_PORT",
       "category": "environment",
       "locations": [
+        "auth_service/auth_core/auth_environment.py:155",
         "scripts/fix_authentication_system.py:174",
         "shared/port_discovery.py:90"
       ]
@@ -235,6 +243,7 @@
       "value": "AUTH_SERVICE_URL",
       "category": "environment",
       "locations": [
+        "netra_backend/app/core/backend_environment.py:119",
         "netra_backend/app/core/configuration/services.py:346",
         "netra_backend/app/core/configuration/staging_validator.py:177",
         "netra_backend/app/core/environment_validator.py:53",
@@ -243,8 +252,7 @@
         "netra_backend/app/core/health_checkers.py:809",
         "netra_backend/app/core/network_constants.py:224",
         "netra_backend/app/routes/auth_proxy.py:25",
-        "netra_backend/app/routes/auth_routes/debug_helpers.py:23",
-        "netra_backend/app/routes/system_info.py:299"
+        "netra_backend/app/routes/auth_routes/debug_helpers.py:23"
       ]
     },
     "AUTH_TOKEN_EXPIRED": {
@@ -330,8 +338,8 @@
         "netra_backend/app/core/configuration/unified_secrets.py:263",
         "netra_backend/app/core/configuration/unified_secrets.py:281",
         "shared/configuration/central_config_validator.py:93",
-        "shared/configuration/central_config_validator.py:349",
-        "shared/configuration/central_config_validator.py:358"
+        "shared/configuration/central_config_validator.py:354",
+        "shared/configuration/central_config_validator.py:363"
       ]
     },
     "DATABASE_NAME": {
@@ -340,8 +348,8 @@
       "locations": [
         "netra_backend/app/core/configuration/unified_secrets.py:274",
         "netra_backend/app/core/configuration/unified_secrets.py:283",
-        "shared/configuration/central_config_validator.py:351",
-        "shared/configuration/central_config_validator.py:360"
+        "shared/configuration/central_config_validator.py:356",
+        "shared/configuration/central_config_validator.py:365"
       ]
     },
     "DATABASE_PASSWORD": {
@@ -355,8 +363,8 @@
         "netra_backend/app/core/configuration/unified_secrets.py:588",
         "netra_backend/app/core/configuration/unified_secrets.py:588",
         "shared/configuration/central_config_validator.py:85",
-        "shared/configuration/central_config_validator.py:353",
-        "shared/configuration/central_config_validator.py:362"
+        "shared/configuration/central_config_validator.py:358",
+        "shared/configuration/central_config_validator.py:367"
       ]
     },
     "DATABASE_PORT": {
@@ -365,8 +373,8 @@
       "locations": [
         "netra_backend/app/core/configuration/unified_secrets.py:273",
         "netra_backend/app/core/configuration/unified_secrets.py:282",
-        "shared/configuration/central_config_validator.py:350",
-        "shared/configuration/central_config_validator.py:359"
+        "shared/configuration/central_config_validator.py:355",
+        "shared/configuration/central_config_validator.py:364"
       ]
     },
     "DATABASE_URL": {
@@ -374,15 +382,15 @@
       "category": "environment",
       "locations": [
         "netra_backend/app/core/auth_constants.py:124",
+        "netra_backend/app/core/backend_environment.py:35",
+        "netra_backend/app/core/backend_environment.py:62",
+        "netra_backend/app/core/backend_environment.py:254",
         "netra_backend/app/core/configuration/base.py:344",
         "netra_backend/app/core/configuration/database.py:160",
         "netra_backend/app/core/configuration/database.py:160",
         "netra_backend/app/core/configuration/database.py:614",
         "netra_backend/app/core/configuration/database.py:640",
-        "netra_backend/app/core/configuration/environment_detector.py:192",
-        "netra_backend/app/core/configuration/environment_detector.py:241",
-        "netra_backend/app/core/configuration/environment_detector.py:284",
-        "netra_backend/app/core/configuration/environment_detector.py:284"
+        "netra_backend/app/core/configuration/environment_detector.py:192"
       ]
     },
     "DATABASE_URL_PLACEHOLDER": {
@@ -400,8 +408,8 @@
       "locations": [
         "netra_backend/app/core/configuration/unified_secrets.py:275",
         "netra_backend/app/core/configuration/unified_secrets.py:284",
-        "shared/configuration/central_config_validator.py:352",
-        "shared/configuration/central_config_validator.py:361"
+        "shared/configuration/central_config_validator.py:357",
+        "shared/configuration/central_config_validator.py:366"
       ]
     },
     "DEEP_RESEARCH_API_KEY": {
@@ -698,9 +706,7 @@
       "locations": [
         "netra_backend/app/core/environment_validator.py:122",
         "netra_backend/app/core/environment_validator.py:194",
-        "netra_backend/app/core/project_utils.py:65",
-        "netra_backend/app/core/project_utils.py:96",
-        "netra_backend/app/core/project_utils.py:118",
+        "netra_backend/app/core/project_utils.py:64",
         "netra_backend/app/routes/auth_proxy.py:35",
         "netra_backend/app/routes/auth_routes/debug_helpers.py:62",
         "shared/config_builder_base.py:105"
@@ -789,12 +795,40 @@
         "auth_service/auth_core/routes/auth_routes.py:416"
       ]
     },
+    "OAUTH_GITHUB_CLIENT_ID": {
+      "value": "OAUTH_GITHUB_CLIENT_ID",
+      "category": "environment",
+      "locations": [
+        "auth_service/auth_core/auth_environment.py:145"
+      ]
+    },
+    "OAUTH_GITHUB_CLIENT_SECRET": {
+      "value": "OAUTH_GITHUB_CLIENT_SECRET",
+      "category": "environment",
+      "locations": [
+        "auth_service/auth_core/auth_environment.py:149"
+      ]
+    },
+    "OAUTH_GOOGLE_CLIENT_ID": {
+      "value": "OAUTH_GOOGLE_CLIENT_ID",
+      "category": "environment",
+      "locations": [
+        "auth_service/auth_core/auth_environment.py:137"
+      ]
+    },
     "OAUTH_GOOGLE_CLIENT_ID_ENV": {
       "value": "OAUTH_GOOGLE_CLIENT_ID_ENV",
       "category": "environment",
       "locations": [
         "netra_backend/app/core/auth_constants.py:114",
         "netra_backend/app/core/auth_constants.py:116"
+      ]
+    },
+    "OAUTH_GOOGLE_CLIENT_SECRET": {
+      "value": "OAUTH_GOOGLE_CLIENT_SECRET",
+      "category": "environment",
+      "locations": [
+        "auth_service/auth_core/auth_environment.py:141"
       ]
     },
     "OAUTH_GOOGLE_CLIENT_SECRET_ENV": {
@@ -818,6 +852,7 @@
       "value": "OPENAI_API_KEY",
       "category": "environment",
       "locations": [
+        "netra_backend/app/core/backend_environment.py:110",
         "netra_backend/app/core/configuration/staging_validator.py:54",
         "netra_backend/app/llm/llm_defaults.py:229",
         "netra_backend/app/routes/system_info.py:133",
@@ -826,8 +861,7 @@
         "scripts/ci/generate_fix.py:39",
         "scripts/fetch_secrets_to_env.py:56",
         "scripts/fetch_secrets_to_env.py:165",
-        "scripts/fix_staging_deployment.py:251",
-        "scripts/llm_compliance_report.py:34"
+        "scripts/fix_staging_deployment.py:251"
       ]
     },
     "PERPLEXITY_API_KEY": {
@@ -1001,6 +1035,7 @@
       "value": "REDIS_HOST",
       "category": "environment",
       "locations": [
+        "netra_backend/app/core/backend_environment.py:96",
         "netra_backend/app/core/configuration/database.py:113",
         "netra_backend/app/core/configuration/database.py:113",
         "netra_backend/app/core/configuration/database.py:459",
@@ -1009,8 +1044,7 @@
         "netra_backend/app/core/configuration/staging_validator.py:173",
         "netra_backend/app/core/configuration/unified_secrets.py:314",
         "netra_backend/app/core/configuration/unified_secrets.py:331",
-        "netra_backend/app/core/environment_constants.py:96",
-        "netra_backend/app/core/network_constants.py:403"
+        "netra_backend/app/core/environment_constants.py:96"
       ]
     },
     "REDIS_LOG_SLOW_QUERIES": {
@@ -1084,6 +1118,7 @@
       "value": "REDIS_PORT",
       "category": "environment",
       "locations": [
+        "netra_backend/app/core/backend_environment.py:100",
         "netra_backend/app/core/configuration/database.py:114",
         "netra_backend/app/core/configuration/database.py:114",
         "netra_backend/app/core/configuration/database.py:460",
@@ -1092,8 +1127,7 @@
         "netra_backend/app/core/configuration/unified_secrets.py:332",
         "netra_backend/app/core/environment_constants.py:97",
         "netra_backend/app/core/redis_connection_handler.py:47",
-        "netra_backend/app/core/redis_connection_handler.py:185",
-        "netra_backend/app/core/redis_connection_handler.py:190"
+        "netra_backend/app/core/redis_connection_handler.py:185"
       ]
     },
     "REDIS_PRODUCTION_HOST": {
@@ -1220,6 +1254,7 @@
       "category": "environment",
       "locations": [
         "netra_backend/app/core/auth_constants.py:125",
+        "netra_backend/app/core/backend_environment.py:92",
         "netra_backend/app/core/configuration/base.py:344",
         "netra_backend/app/core/configuration/database.py:112",
         "netra_backend/app/core/configuration/database.py:112",
@@ -1227,7 +1262,6 @@
         "netra_backend/app/core/configuration/database.py:458",
         "netra_backend/app/core/configuration/database.py:645",
         "netra_backend/app/core/configuration/environment_detector.py:252",
-        "netra_backend/app/core/configuration/environment_detector.py:286",
         "netra_backend/app/core/configuration/environment_detector.py:286"
       ]
     },

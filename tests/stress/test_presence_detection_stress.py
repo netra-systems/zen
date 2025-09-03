@@ -28,7 +28,7 @@ from dataclasses import dataclass
 from typing import Dict, List, Optional, Any, Tuple
 import pytest
 
-from netra_backend.app.websocket_core.heartbeat_manager import (
+from netra_backend.app.websocket_core.manager import (
     WebSocketHeartbeatManager,
     HeartbeatConfig,
     get_heartbeat_manager

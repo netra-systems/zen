@@ -2,7 +2,7 @@
   "metadata": {
     "version": "3.0.0",
     "category": "metrics",
-    "generated_at": "2025-09-02T16:51:33.961250",
+    "generated_at": "2025-09-02T18:16:22.029483",
     "root_directory": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1",
     "total_literals": 247
   },
@@ -376,15 +376,7 @@
       "category": "metrics",
       "locations": [
         "netra_backend/app/core/degradation_manager.py:39",
-        "netra_backend/app/core/shared_health_types.py:106",
-        "netra_backend/app/websocket_core/scaling_manager.py:72",
-        "netra_backend/app/websocket_core/scaling_manager.py:185",
-        "netra_backend/app/websocket_core/scaling_manager.py:211",
-        "netra_backend/app/websocket_core/scaling_manager.py:211",
-        "netra_backend/app/websocket_core/scaling_manager.py:325",
-        "netra_backend/app/websocket_core/scaling_manager.py:336",
-        "netra_backend/app/websocket_core/scaling_manager.py:336",
-        "netra_backend/app/websocket_core/scaling_manager.py:348"
+        "netra_backend/app/core/shared_health_types.py:106"
       ]
     },
     "corpus_count": {
@@ -1068,11 +1060,13 @@
         "netra_backend/app/routes/agent_route_processors.py:49",
         "netra_backend/app/routes/utils/thread_builders.py:25",
         "netra_backend/app/services/redis/session_manager.py:364",
-        "netra_backend/app/websocket_core/manager.py:409",
-        "netra_backend/app/websocket_core/manager.py:626",
-        "netra_backend/app/websocket_core/manager.py:626",
-        "netra_backend/app/websocket_core/manager.py:690",
-        "netra_backend/app/websocket_core/manager.py:690"
+        "netra_backend/app/websocket_core/manager.py:706",
+        "netra_backend/app/websocket_core/manager.py:1096",
+        "netra_backend/app/websocket_core/manager.py:1096",
+        "netra_backend/app/websocket_core/manager.py:1160",
+        "netra_backend/app/websocket_core/manager.py:1160",
+        "netra_backend/app/websocket_core/manager.py:1539",
+        "netra_backend/app/websocket_core/manager.py:1539"
       ]
     },
     "metric_name": {
@@ -1536,8 +1530,8 @@
       "value": "resurrection_count",
       "category": "metrics",
       "locations": [
-        "netra_backend/app/websocket_core/heartbeat_manager.py:103",
-        "netra_backend/app/websocket_core/heartbeat_manager.py:187"
+        "netra_backend/app/websocket_core/manager.py:362",
+        "netra_backend/app/websocket_core/manager.py:931"
       ]
     },
     "retry_count": {

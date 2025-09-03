@@ -2,7 +2,7 @@
   "metadata": {
     "version": "3.0.0",
     "category": "database",
-    "generated_at": "2025-09-02T16:51:33.547801",
+    "generated_at": "2025-09-02T18:16:21.531313",
     "root_directory": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1",
     "total_literals": 307
   },
@@ -540,8 +540,8 @@
         "netra_backend/app/agents/supervisor/state_manager_core.py:59",
         "netra_backend/app/agents/utils.py:76",
         "netra_backend/app/services/user_execution_context.py:596",
-        "netra_backend/app/websocket_core/manager.py:307",
-        "netra_backend/app/websocket_core/manager.py:307"
+        "netra_backend/app/websocket_core/manager.py:582",
+        "netra_backend/app/websocket_core/manager.py:582"
       ]
     },
     "check_id": {
@@ -640,8 +640,9 @@
       "value": "connected_at",
       "category": "database",
       "locations": [
-        "netra_backend/app/websocket_core/manager.py:407",
-        "netra_backend/app/websocket_core/scaling_manager.py:173",
+        "netra_backend/app/websocket_core/manager.py:704",
+        "netra_backend/app/websocket_core/manager.py:1540",
+        "netra_backend/app/websocket_core/manager.py:1540",
         "netra_backend/app/websocket_core/utils.py:378",
         "netra_backend/app/websocket_core/utils.py:435"
       ]
@@ -1256,7 +1257,7 @@
       "value": "generate_connection_id",
       "category": "database",
       "locations": [
-        "netra_backend/app/websocket_core/__init__.py:176"
+        "netra_backend/app/websocket_core/__init__.py:175"
       ]
     },
     "generate_llm_correlation_id": {
@@ -1405,13 +1406,7 @@
       "value": "instance_id",
       "category": "database",
       "locations": [
-        "netra_backend/app/services/discovery.py:179",
-        "netra_backend/app/websocket_core/scaling_manager.py:70",
-        "netra_backend/app/websocket_core/scaling_manager.py:171",
-        "netra_backend/app/websocket_core/scaling_manager.py:264",
-        "netra_backend/app/websocket_core/scaling_manager.py:335",
-        "netra_backend/app/websocket_core/scaling_manager.py:347",
-        "netra_backend/app/websocket_core/scaling_manager.py:572"
+        "netra_backend/app/services/discovery.py:179"
       ]
     },
     "invocation_id": {

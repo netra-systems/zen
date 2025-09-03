@@ -2,7 +2,7 @@
   "metadata": {
     "version": "3.0.0",
     "category": "states",
-    "generated_at": "2025-09-02T16:51:33.972324",
+    "generated_at": "2025-09-02T18:16:22.053252",
     "root_directory": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1",
     "total_literals": 28
   },
@@ -20,7 +20,7 @@
       "category": "states",
       "locations": [
         "netra_backend/app/services/api_gateway/gateway_manager.py:228",
-        "netra_backend/app/smd.py:1320",
+        "netra_backend/app/smd.py:1329",
         "scripts/deploy_to_gcp.py:1142"
       ]
     },
@@ -29,7 +29,7 @@
       "category": "states",
       "locations": [
         "netra_backend/app/services/api_gateway/gateway_manager.py:228",
-        "netra_backend/app/smd.py:1320",
+        "netra_backend/app/smd.py:1329",
         "scripts/deploy_to_gcp.py:1142"
       ]
     },
@@ -103,8 +103,6 @@
       "value": "Warning",
       "category": "states",
       "locations": [
-        "netra_backend/app/websocket_core/heartbeat_manager.py:325",
-        "netra_backend/app/websocket_core/heartbeat_manager.py:329",
         "scripts/backend_error_extractor.py:99",
         "scripts/comprehensive_error_hunter.py:124",
         "scripts/comprehensive_error_hunter.py:125",

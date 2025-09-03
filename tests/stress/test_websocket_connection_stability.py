@@ -37,7 +37,7 @@ from loguru import logger
 
 # Import production components
 from netra_backend.app.websocket_core.manager import WebSocketManager
-from netra_backend.app.websocket_core.heartbeat_manager import WebSocketHeartbeatManager, HeartbeatConfig
+from netra_backend.app.websocket_core.manager import WebSocketHeartbeatManager, HeartbeatConfig
 from netra_backend.app.websocket_core.rate_limiter import get_rate_limiter
 from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier
 from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext

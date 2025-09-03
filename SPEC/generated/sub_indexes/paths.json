@@ -2,7 +2,7 @@
   "metadata": {
     "version": "3.0.0",
     "category": "paths",
-    "generated_at": "2025-09-02T16:51:33.963236",
+    "generated_at": "2025-09-02T18:16:22.033515",
     "root_directory": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1",
     "total_literals": 1243
   },
@@ -519,14 +519,14 @@
       "value": "/5 startup fixes applied - some functionality may be degraded",
       "category": "paths",
       "locations": [
-        "netra_backend/app/smd.py:1167"
+        "netra_backend/app/smd.py:1176"
       ]
     },
     "/5 startup fixes applied with": {
       "value": "/5 startup fixes applied with",
       "category": "paths",
       "locations": [
-        "netra_backend/app/smd.py:1165"
+        "netra_backend/app/smd.py:1174"
       ]
     },
     "/5 successful": {
@@ -540,7 +540,7 @@
       "value": "/5 successful,",
       "category": "paths",
       "locations": [
-        "netra_backend/app/smd.py:1116"
+        "netra_backend/app/smd.py:1125"
       ]
     },
     "/60 seconds)": {
@@ -554,7 +554,7 @@
       "value": "/7",
       "category": "paths",
       "locations": [
-        "netra_backend/app/smd.py:1370"
+        "netra_backend/app/smd.py:1379"
       ]
     },
     "/FI": {
@@ -886,7 +886,7 @@
       "value": "/api/agents/run_agent_v2",
       "category": "paths",
       "locations": [
-        "netra_backend/app/smd.py:1305"
+        "netra_backend/app/smd.py:1314"
       ]
     },
     "/api/agents/start": {
@@ -908,21 +908,21 @@
       "value": "/api/agents/v2/thread/{thread_id}/runs",
       "category": "paths",
       "locations": [
-        "netra_backend/app/smd.py:1308"
+        "netra_backend/app/smd.py:1317"
       ]
     },
     "/api/agents/v2/{run_id}/state": {
       "value": "/api/agents/v2/{run_id}/state",
       "category": "paths",
       "locations": [
-        "netra_backend/app/smd.py:1307"
+        "netra_backend/app/smd.py:1316"
       ]
     },
     "/api/agents/v2/{run_id}/status": {
       "value": "/api/agents/v2/{run_id}/status",
       "category": "paths",
       "locations": [
-        "netra_backend/app/smd.py:1306"
+        "netra_backend/app/smd.py:1315"
       ]
     },
     "/api/corpus": {

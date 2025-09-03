@@ -24,7 +24,7 @@ class TestRefreshEndpointCompatibility:
     @pytest.fixture
     def valid_refresh_token(self):
         """Generate a valid refresh token for testing"""
-        secret = AuthConfig.get_jwt_secret() or "test_secret"
+        secret = AuthConfig.get_jwt_secret() or "test_secret_minimum_20_characters_long"
         payload = {
             "sub": "test_user_id",
             "type": "refresh",
@@ -36,7 +36,7 @@ class TestRefreshEndpointCompatibility:
     @pytest.fixture
     def expired_refresh_token(self):
         """Generate an expired refresh token"""
-        secret = AuthConfig.get_jwt_secret() or "test_secret"
+        secret = AuthConfig.get_jwt_secret() or "test_secret_minimum_20_characters_long"
         payload = {
             "sub": "test_user_id",
             "type": "refresh",

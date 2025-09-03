@@ -78,7 +78,7 @@ class TestEnvironmentLoadingRegression:
         
         # Simulate secret loader setting actual secrets
         manager.set("DATABASE_URL", "postgresql://test", source="secret_loader")
-        manager.set("JWT_SECRET_KEY", "test_secret", source="secret_loader")
+        manager.set("JWT_SECRET_KEY", "test_secret_minimum_20_characters_long", source="secret_loader")
         
         # Manually clean up temporary flag (simulating end of loading)
         manager.delete("NETRA_SECRETS_LOADING", source="launcher_cleanup")
@@ -88,7 +88,7 @@ class TestEnvironmentLoadingRegression:
         
         # But actual secrets should remain
         assert manager.get("DATABASE_URL") == "postgresql://test"
-        assert manager.get("JWT_SECRET_KEY") == "test_secret"
+        assert manager.get("JWT_SECRET_KEY") == "test_secret_minimum_20_characters_long"
     
     def test_isolation_mode_prevents_os_environ_pollution_in_development(self):
         """Test that development mode uses isolation to prevent os.environ pollution."""
