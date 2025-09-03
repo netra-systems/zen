@@ -1231,6 +1231,7 @@ async def run_single_test(test_name: str):
         # Start active chat session
         chat_messages = []
         refresh_completed = False
+        refreshed_token = None
         
         async def simulate_active_chat():
             """Simulate ongoing chat conversation."""

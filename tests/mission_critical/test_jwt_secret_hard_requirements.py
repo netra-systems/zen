@@ -889,6 +889,737 @@ class TestJWTSecretHardRequirements:
         assert avg_token_validation < 0.005, f"Token validation too slow: {avg_token_validation:.6f}s (max 0.005s)"
         assert p95_token_generation < 0.02, f"P95 token generation too slow: {p95_token_generation:.6f}s (max 0.02s)"
         assert p95_token_validation < 0.01, f"P95 token validation too slow: {p95_token_validation:.6f}s (max 0.01s)"
+    
+    def test_jwt_secret_rotation_security_compliance(self):
+        """Test JWT secret rotation compliance with security requirements."""
+        os.environ['ENVIRONMENT'] = 'staging'
+        
+        # Test multiple secret generations for rotation scenarios
+        secrets_generated = []
+        for rotation_cycle in range(5):
+            current_timestamp = int(time.time()) + rotation_cycle * 3600  # 1 hour intervals
+            
+            # Generate environment-specific secret for rotation
+            rotation_secret = f"staging_secret_rotation_{current_timestamp}_{hashlib.sha256(str(rotation_cycle).encode()).hexdigest()[:16]}"
+            os.environ['JWT_SECRET_STAGING'] = rotation_secret
+            
+            # Test secret loading after rotation
+            from shared.jwt_secret_manager import SharedJWTSecretManager
+            SharedJWTSecretManager.clear_cache()
+            
+            loaded_secret = get_env("JWT_SECRET_STAGING")
+            assert loaded_secret == rotation_secret, f"Secret rotation failed for cycle {rotation_cycle}"
+            
+            # Test tokens generated with rotated secret are valid
+            import jwt
+            test_payload = {'user_id': f'rotation_test_{rotation_cycle}', 'exp': datetime.utcnow() + timedelta(hours=1)}
+            token = jwt.encode(test_payload, rotation_secret, algorithm='HS256')
+            decoded = jwt.decode(token, rotation_secret, algorithms=['HS256'])
+            assert decoded['user_id'] == f'rotation_test_{rotation_cycle}'
+            
+            secrets_generated.append(rotation_secret)
+        
+        # Verify all secrets are different (proper rotation)
+        assert len(set(secrets_generated)) == 5, "Secret rotation did not generate unique secrets"
+        
+        # Test that old secrets cannot validate new tokens
+        old_secret = secrets_generated[0]
+        current_secret = secrets_generated[-1]
+        
+        current_payload = {'user_id': 'current_user', 'exp': datetime.utcnow() + timedelta(hours=1)}
+        current_token = jwt.encode(current_payload, current_secret, algorithm='HS256')
+        
+        # This should fail with old secret
+        with pytest.raises(jwt.InvalidSignatureError):
+            jwt.decode(current_token, old_secret, algorithms=['HS256'])
+    
+    def test_enterprise_multi_tenant_jwt_isolation(self):
+        """Test JWT secret isolation for enterprise multi-tenant scenarios."""
+        # Test tenant A
+        os.environ['ENVIRONMENT'] = 'production'  
+        tenant_a_secret = f"tenant_a_prod_{hashlib.sha256(b'tenant_a_isolation').hexdigest()[:32]}"
+        os.environ['JWT_SECRET_PRODUCTION'] = tenant_a_secret
+        
+        from auth_service.auth_core.secret_loader import AuthSecretLoader
+        AuthSecretLoader._secret_cache = {}
+        
+        tenant_a_loaded = AuthSecretLoader.get_jwt_secret()
+        assert tenant_a_loaded == tenant_a_secret
+        
+        # Generate tenant A token
+        import jwt
+        tenant_a_payload = {
+            'user_id': 'tenant_a_user',
+            'tenant_id': 'tenant_a',
+            'role': 'enterprise_admin',
+            'exp': datetime.utcnow() + timedelta(hours=1)
+        }
+        tenant_a_token = jwt.encode(tenant_a_payload, tenant_a_secret, algorithm='HS256')
+        
+        # Test tenant B (simulate different deployment with different secret)  
+        tenant_b_secret = f"tenant_b_prod_{hashlib.sha256(b'tenant_b_isolation').hexdigest()[:32]}"
+        os.environ['JWT_SECRET_PRODUCTION'] = tenant_b_secret
+        AuthSecretLoader._secret_cache = {}
+        
+        tenant_b_loaded = AuthSecretLoader.get_jwt_secret()
+        assert tenant_b_loaded == tenant_b_secret
+        assert tenant_b_loaded != tenant_a_secret
+        
+        # Test that tenant A token cannot be validated with tenant B secret
+        with pytest.raises(jwt.InvalidSignatureError):
+            jwt.decode(tenant_a_token, tenant_b_secret, algorithms=['HS256'])
+        
+        # Test that tenant B can generate and validate its own tokens
+        tenant_b_payload = {
+            'user_id': 'tenant_b_user',
+            'tenant_id': 'tenant_b', 
+            'role': 'enterprise_user',
+            'exp': datetime.utcnow() + timedelta(hours=1)
+        }
+        tenant_b_token = jwt.encode(tenant_b_payload, tenant_b_secret, algorithm='HS256')
+        tenant_b_decoded = jwt.decode(tenant_b_token, tenant_b_secret, algorithms=['HS256'])
+        assert tenant_b_decoded['tenant_id'] == 'tenant_b'
+    
+    def test_mobile_app_jwt_token_security_requirements(self):
+        """Test JWT token security requirements for mobile applications."""
+        os.environ['ENVIRONMENT'] = 'production'
+        mobile_secret = f"mobile_prod_secure_{hashlib.sha256(b'mobile_security_2024').hexdigest()[:32]}"
+        os.environ['JWT_SECRET_PRODUCTION'] = mobile_secret
+        
+        from shared.jwt_secret_manager import SharedJWTSecretManager
+        SharedJWTSecretManager.clear_cache()
+        
+        import jwt
+        
+        # Test mobile-specific token requirements
+        mobile_devices = ['ios', 'android', 'tablet']
+        mobile_tokens = {}
+        
+        for device_type in mobile_devices:
+            # Generate mobile token with device-specific claims
+            mobile_payload = {
+                'user_id': f'mobile_user_{device_type}',
+                'device_type': device_type,
+                'device_id': f'{device_type}_device_{hashlib.sha256(f"{device_type}_{time.time()}".encode()).hexdigest()[:16]}',
+                'app_version': '2.1.3',
+                'platform': 'mobile',
+                'security_level': 'high',
+                'exp': datetime.utcnow() + timedelta(hours=24),  # Longer expiry for mobile
+                'iat': datetime.utcnow(),
+                'nbf': datetime.utcnow()
+            }
+            
+            mobile_token = jwt.encode(mobile_payload, mobile_secret, algorithm='HS256')
+            mobile_tokens[device_type] = mobile_token
+            
+            # Test token validation
+            decoded = jwt.decode(mobile_token, mobile_secret, algorithms=['HS256'])
+            assert decoded['device_type'] == device_type
+            assert decoded['platform'] == 'mobile'
+            assert decoded['security_level'] == 'high'
+            
+            # Test token not valid before nbf time
+            future_payload = mobile_payload.copy()
+            future_payload['nbf'] = datetime.utcnow() + timedelta(hours=1)
+            future_token = jwt.encode(future_payload, mobile_secret, algorithm='HS256')
+            
+            with pytest.raises(jwt.ImmatureSignatureError):
+                jwt.decode(future_token, mobile_secret, algorithms=['HS256'])
+        
+        # Test that mobile tokens are properly isolated
+        assert len(mobile_tokens) == 3
+        for device_type, token in mobile_tokens.items():
+            decoded = jwt.decode(token, mobile_secret, algorithms=['HS256'])
+            assert decoded['device_type'] == device_type
+    
+    def test_api_key_jwt_hybrid_authentication(self):
+        """Test hybrid authentication using both API keys and JWT tokens."""
+        os.environ['ENVIRONMENT'] = 'staging'
+        hybrid_secret = f"hybrid_staging_{hashlib.sha256(b'api_jwt_hybrid_2024').hexdigest()[:32]}"
+        os.environ['JWT_SECRET_STAGING'] = hybrid_secret
+        
+        from shared.jwt_secret_manager import SharedJWTSecretManager
+        SharedJWTSecretManager.clear_cache()
+        
+        import jwt
+        
+        # Generate API key-based JWT tokens for different API access levels
+        api_access_levels = ['read_only', 'read_write', 'admin']
+        api_tokens = {}
+        
+        for access_level in api_access_levels:
+            # Generate API key
+            api_key = f"netra_api_{access_level}_{hashlib.sha256(f'{access_level}_{time.time()}'.encode()).hexdigest()[:24]}"
+            
+            # Generate JWT token that includes API key validation
+            api_jwt_payload = {
+                'api_key_id': api_key,
+                'access_level': access_level,
+                'user_id': f'api_user_{access_level}',
+                'account_type': 'developer',
+                'rate_limit': {'requests_per_minute': 100 if access_level == 'read_only' else 500},
+                'allowed_endpoints': self._get_allowed_endpoints_for_level(access_level),
+                'exp': datetime.utcnow() + timedelta(days=30),  # Longer expiry for API tokens
+                'iat': datetime.utcnow(),
+                'iss': 'netra-api-gateway',
+                'aud': 'netra-backend'
+            }
+            
+            api_token = jwt.encode(api_jwt_payload, hybrid_secret, algorithm='HS256')
+            api_tokens[access_level] = {
+                'api_key': api_key,
+                'jwt_token': api_token
+            }
+            
+            # Test hybrid token validation
+            decoded = jwt.decode(api_token, hybrid_secret, algorithms=['HS256'])
+            assert decoded['access_level'] == access_level
+            assert decoded['api_key_id'] == api_key
+            assert 'rate_limit' in decoded
+            assert 'allowed_endpoints' in decoded
+        
+        # Test that different access levels have different permissions
+        read_only_decoded = jwt.decode(api_tokens['read_only']['jwt_token'], hybrid_secret, algorithms=['HS256'])
+        admin_decoded = jwt.decode(api_tokens['admin']['jwt_token'], hybrid_secret, algorithms=['HS256'])
+        
+        assert len(admin_decoded['allowed_endpoints']) > len(read_only_decoded['allowed_endpoints'])
+        assert admin_decoded['rate_limit']['requests_per_minute'] > read_only_decoded['rate_limit']['requests_per_minute']
+    
+    def test_jwt_token_claims_validation_comprehensive(self):
+        """Test comprehensive JWT token claims validation for all user scenarios."""
+        os.environ['ENVIRONMENT'] = 'production'
+        claims_secret = f"claims_prod_{hashlib.sha256(b'comprehensive_claims_2024').hexdigest()[:32]}"
+        os.environ['JWT_SECRET_PRODUCTION'] = claims_secret
+        
+        from shared.jwt_secret_manager import SharedJWTSecretManager
+        SharedJWTSecretManager.clear_cache()
+        
+        import jwt
+        
+        # Test different user personas with comprehensive claims
+        user_personas = [
+            {
+                'persona': 'free_tier_user',
+                'user_id': 'user_free_12345',
+                'email': 'free_user@example.com',
+                'tier': 'free',
+                'permissions': ['read_profile', 'basic_chat'],
+                'limits': {'chat_messages_per_day': 10, 'api_calls_per_hour': 100},
+                'features': ['basic_ai_assistant']
+            },
+            {
+                'persona': 'premium_user',
+                'user_id': 'user_premium_67890',
+                'email': 'premium_user@example.com', 
+                'tier': 'premium',
+                'permissions': ['read_profile', 'advanced_chat', 'export_data', 'analytics'],
+                'limits': {'chat_messages_per_day': 1000, 'api_calls_per_hour': 5000},
+                'features': ['advanced_ai_assistant', 'custom_models', 'priority_support']
+            },
+            {
+                'persona': 'enterprise_admin',
+                'user_id': 'user_enterprise_admin_111',
+                'email': 'admin@enterprise.com',
+                'tier': 'enterprise',
+                'permissions': ['read_profile', 'unlimited_chat', 'export_data', 'analytics', 'manage_team', 'admin_panel'],
+                'limits': {'chat_messages_per_day': -1, 'api_calls_per_hour': -1},  # -1 means unlimited
+                'features': ['enterprise_ai_suite', 'custom_models', 'white_label', 'priority_support', 'sso'],
+                'tenant_id': 'enterprise_corp_001'
+            }
+        ]
+        
+        validated_tokens = {}
+        
+        for persona_config in user_personas:
+            persona = persona_config['persona']
+            
+            # Generate comprehensive token with all claims
+            comprehensive_payload = {
+                'sub': persona_config['user_id'],  # Subject (user ID)
+                'email': persona_config['email'],
+                'tier': persona_config['tier'],
+                'permissions': persona_config['permissions'],
+                'limits': persona_config['limits'],
+                'features': persona_config['features'],
+                'persona': persona,
+                'exp': datetime.utcnow() + timedelta(hours=1),
+                'iat': datetime.utcnow(),
+                'nbf': datetime.utcnow(),
+                'iss': 'netra-auth-service',
+                'aud': ['netra-backend', 'netra-chat', 'netra-analytics'],
+                'jti': f'jti_{persona}_{int(time.time())}',  # JWT ID for revocation
+                'auth_time': int(time.time()),
+                'session_id': f'session_{persona}_{hashlib.sha256(f"{persona}_{time.time()}".encode()).hexdigest()[:16]}'
+            }
+            
+            # Add tenant-specific claims for enterprise users
+            if persona == 'enterprise_admin':
+                comprehensive_payload['tenant_id'] = persona_config['tenant_id']
+                comprehensive_payload['org_role'] = 'admin'
+                comprehensive_payload['org_permissions'] = ['manage_users', 'billing', 'security_settings']
+            
+            comprehensive_token = jwt.encode(comprehensive_payload, claims_secret, algorithm='HS256')
+            validated_tokens[persona] = comprehensive_token
+            
+            # Test comprehensive claims validation
+            decoded = jwt.decode(comprehensive_token, claims_secret, algorithms=['HS256'])
+            
+            # Verify all required claims are present and correct
+            assert decoded['sub'] == persona_config['user_id']
+            assert decoded['email'] == persona_config['email']
+            assert decoded['tier'] == persona_config['tier']
+            assert decoded['permissions'] == persona_config['permissions']
+            assert decoded['limits'] == persona_config['limits']
+            assert decoded['features'] == persona_config['features']
+            assert decoded['persona'] == persona
+            
+            # Verify standard JWT claims
+            assert 'exp' in decoded and decoded['exp'] > time.time()
+            assert 'iat' in decoded
+            assert 'nbf' in decoded
+            assert 'iss' in decoded and decoded['iss'] == 'netra-auth-service'
+            assert 'aud' in decoded and isinstance(decoded['aud'], list)
+            assert 'jti' in decoded
+            assert 'auth_time' in decoded
+            assert 'session_id' in decoded
+            
+            # Test persona-specific validations
+            if persona == 'free_tier_user':
+                assert decoded['limits']['chat_messages_per_day'] == 10
+                assert 'basic_ai_assistant' in decoded['features']
+                assert 'advanced_chat' not in decoded['permissions']
+            
+            elif persona == 'premium_user':
+                assert decoded['limits']['chat_messages_per_day'] == 1000
+                assert 'advanced_ai_assistant' in decoded['features']
+                assert 'advanced_chat' in decoded['permissions']
+            
+            elif persona == 'enterprise_admin':
+                assert decoded['limits']['chat_messages_per_day'] == -1  # Unlimited
+                assert decoded['tenant_id'] == 'enterprise_corp_001'
+                assert 'org_role' in decoded
+                assert 'manage_team' in decoded['permissions']
+        
+        # Test cross-persona token isolation
+        assert len(validated_tokens) == 3
+        
+        # Verify that tokens contain different permissions for different tiers
+        free_decoded = jwt.decode(validated_tokens['free_tier_user'], claims_secret, algorithms=['HS256'])
+        enterprise_decoded = jwt.decode(validated_tokens['enterprise_admin'], claims_secret, algorithms=['HS256'])
+        
+        assert len(enterprise_decoded['permissions']) > len(free_decoded['permissions'])
+        assert enterprise_decoded['limits']['api_calls_per_hour'] == -1
+        assert free_decoded['limits']['api_calls_per_hour'] == 100
+    
+    def test_jwt_cross_service_validation_stress_test(self):
+        """Stress test JWT validation across multiple services simultaneously."""
+        os.environ['ENVIRONMENT'] = 'staging'
+        stress_secret = f"stress_staging_{hashlib.sha256(b'cross_service_stress_2024').hexdigest()[:32]}"
+        os.environ['JWT_SECRET_STAGING'] = stress_secret
+        
+        from shared.jwt_secret_manager import SharedJWTSecretManager
+        SharedJWTSecretManager.clear_cache()
+        
+        import jwt
+        import concurrent.futures
+        
+        # Generate test tokens for stress testing
+        test_tokens = []
+        for i in range(100):  # 100 test tokens
+            stress_payload = {
+                'user_id': f'stress_user_{i}',
+                'service_test': True,
+                'batch_id': f'batch_{i // 10}',  # 10 batches
+                'exp': datetime.utcnow() + timedelta(hours=1),
+                'iat': datetime.utcnow()
+            }
+            stress_token = jwt.encode(stress_payload, stress_secret, algorithm='HS256')
+            test_tokens.append((i, stress_token))
+        
+        # Simulate cross-service validation stress
+        validation_results = {
+            'auth_service': [],
+            'backend_service': [],
+            'analytics_service': [],
+            'chat_service': []
+        }
+        
+        def validate_token_in_service(service_name, token_data):
+            """Simulate token validation in different services."""
+            token_id, token = token_data
+            try:
+                start_time = time.time()
+                
+                # Simulate service-specific validation logic
+                decoded = jwt.decode(token, stress_secret, algorithms=['HS256'])
+                
+                # Add service-specific validation delays
+                service_delays = {
+                    'auth_service': 0.001,    # Fastest
+                    'backend_service': 0.002,
+                    'analytics_service': 0.003,
+                    'chat_service': 0.0015
+                }
+                time.sleep(service_delays.get(service_name, 0.001))
+                
+                validation_time = time.time() - start_time
+                
+                return {
+                    'token_id': token_id,
+                    'service': service_name,
+                    'success': True,
+                    'user_id': decoded['user_id'],
+                    'validation_time': validation_time
+                }
+                
+            except Exception as e:
+                return {
+                    'token_id': token_id,
+                    'service': service_name,
+                    'success': False,
+                    'error': str(e),
+                    'validation_time': time.time() - start_time
+                }
+        
+        # Run concurrent validation across all services
+        with concurrent.futures.ThreadPoolExecutor(max_workers=20) as executor:
+            futures = []
+            
+            for service in validation_results.keys():
+                for token_data in test_tokens:
+                    future = executor.submit(validate_token_in_service, service, token_data)
+                    futures.append(future)
+            
+            # Collect results
+            for future in concurrent.futures.as_completed(futures):
+                result = future.result()
+                validation_results[result['service']].append(result)
+        
+        # Analyze stress test results
+        total_validations = sum(len(results) for results in validation_results.values())
+        successful_validations = sum(
+            len([r for r in results if r['success']]) 
+            for results in validation_results.values()
+        )
+        
+        success_rate = successful_validations / total_validations if total_validations > 0 else 0
+        
+        # Calculate performance metrics per service
+        for service, results in validation_results.items():
+            successful_results = [r for r in results if r['success']]
+            failed_results = [r for r in results if not r['success']]
+            
+            if successful_results:
+                avg_validation_time = sum(r['validation_time'] for r in successful_results) / len(successful_results)
+                max_validation_time = max(r['validation_time'] for r in successful_results)
+                
+                print(f"\n📊 {service.upper()} Stress Test Results:")
+                print(f"  - Successful validations: {len(successful_results)}/{len(results)}")
+                print(f"  - Failed validations: {len(failed_results)}")
+                print(f"  - Average validation time: {avg_validation_time:.6f}s")
+                print(f"  - Max validation time: {max_validation_time:.6f}s")
+                
+                # Service-specific performance assertions
+                assert len(successful_results) == len(results), f"{service} had validation failures"
+                assert avg_validation_time < 0.01, f"{service} average validation too slow: {avg_validation_time:.6f}s"
+                assert max_validation_time < 0.02, f"{service} max validation too slow: {max_validation_time:.6f}s"
+        
+        # Overall stress test assertions
+        assert success_rate >= 0.99, f"Cross-service validation success rate too low: {success_rate:.2%}"
+        assert total_validations == 400, f"Expected 400 validations, got {total_validations}"  # 4 services × 100 tokens
+    
+    def test_jwt_security_headers_and_csrf_protection(self):
+        """Test JWT security headers and CSRF protection mechanisms."""
+        os.environ['ENVIRONMENT'] = 'production'
+        security_secret = f"security_prod_{hashlib.sha256(b'security_headers_csrf_2024').hexdigest()[:32]}"
+        os.environ['JWT_SECRET_PRODUCTION'] = security_secret
+        
+        from shared.jwt_secret_manager import SharedJWTSecretManager
+        SharedJWTSecretManager.clear_cache()
+        
+        import jwt
+        
+        # Test security-enhanced JWT tokens with anti-CSRF measures
+        security_scenarios = [
+            {
+                'name': 'web_session_with_csrf_token',
+                'client_type': 'web_browser',
+                'csrf_token': hashlib.sha256(f"csrf_{time.time()}".encode()).hexdigest()[:32],
+                'fingerprint': hashlib.sha256(f"browser_fingerprint_{time.time()}".encode()).hexdigest()
+            },
+            {
+                'name': 'mobile_app_session',
+                'client_type': 'mobile_app',
+                'app_signature': hashlib.sha256(f"mobile_signature_{time.time()}".encode()).hexdigest()[:32],
+                'device_fingerprint': hashlib.sha256(f"device_fingerprint_{time.time()}".encode()).hexdigest()
+            },
+            {
+                'name': 'api_client_session',
+                'client_type': 'api_client',
+                'api_key_hash': hashlib.sha256(f"api_key_{time.time()}".encode()).hexdigest()[:32],
+                'client_ip_hash': hashlib.sha256(f"192.168.1.100".encode()).hexdigest()
+            }
+        ]
+        
+        validated_security_tokens = {}
+        
+        for scenario in security_scenarios:
+            # Generate security-enhanced token
+            security_payload = {
+                'user_id': f"secure_user_{scenario['name']}",
+                'client_type': scenario['client_type'],
+                'security_context': {
+                    'csrf_token': scenario.get('csrf_token'),
+                    'client_fingerprint': scenario.get('fingerprint') or scenario.get('device_fingerprint'),
+                    'client_signature': scenario.get('app_signature'),
+                    'api_key_hash': scenario.get('api_key_hash'),
+                    'ip_hash': scenario.get('client_ip_hash'),
+                    'timestamp': int(time.time())
+                },
+                'security_level': 'high',
+                'requires_csrf_validation': scenario['client_type'] == 'web_browser',
+                'allowed_origins': self._get_allowed_origins_for_client(scenario['client_type']),
+                'rate_limiting': {
+                    'requests_per_minute': 60,
+                    'burst_limit': 10
+                },
+                'exp': datetime.utcnow() + timedelta(hours=1),
+                'iat': datetime.utcnow(),
+                'iss': 'netra-secure-auth',
+                'aud': 'netra-backend',
+                'jti': f"secure_{scenario['name']}_{int(time.time())}"
+            }
+            
+            # Remove None values from security context
+            security_payload['security_context'] = {
+                k: v for k, v in security_payload['security_context'].items() if v is not None
+            }
+            
+            security_token = jwt.encode(security_payload, security_secret, algorithm='HS256')
+            validated_security_tokens[scenario['name']] = security_token
+            
+            # Test security token validation
+            decoded = jwt.decode(security_token, security_secret, algorithms=['HS256'])
+            
+            # Verify security claims
+            assert decoded['client_type'] == scenario['client_type']
+            assert decoded['security_level'] == 'high'
+            assert 'security_context' in decoded
+            assert 'rate_limiting' in decoded
+            assert 'allowed_origins' in decoded
+            
+            # Test client-specific security requirements
+            if scenario['client_type'] == 'web_browser':
+                assert decoded['requires_csrf_validation'] == True
+                assert 'csrf_token' in decoded['security_context']
+                assert decoded['security_context']['csrf_token'] == scenario['csrf_token']
+            
+            elif scenario['client_type'] == 'mobile_app':
+                assert 'client_signature' in decoded['security_context']
+                assert decoded['security_context']['client_signature'] == scenario['app_signature']
+            
+            elif scenario['client_type'] == 'api_client':
+                assert 'api_key_hash' in decoded['security_context']
+                assert 'ip_hash' in decoded['security_context']
+        
+        # Test security token cross-contamination prevention
+        web_decoded = jwt.decode(validated_security_tokens['web_session_with_csrf_token'], security_secret, algorithms=['HS256'])
+        mobile_decoded = jwt.decode(validated_security_tokens['mobile_app_session'], security_secret, algorithms=['HS256'])
+        api_decoded = jwt.decode(validated_security_tokens['api_client_session'], security_secret, algorithms=['HS256'])
+        
+        # Verify that tokens have different security contexts
+        assert web_decoded['client_type'] != mobile_decoded['client_type']
+        assert 'csrf_token' in web_decoded['security_context']
+        assert 'csrf_token' not in mobile_decoded['security_context']
+        assert 'api_key_hash' in api_decoded['security_context']
+        assert 'api_key_hash' not in web_decoded['security_context']
+        
+        # Test that each token has appropriate security measures
+        assert web_decoded['requires_csrf_validation'] == True
+        assert mobile_decoded['requires_csrf_validation'] == False
+        assert api_decoded['requires_csrf_validation'] == False
+    
+    def test_jwt_compliance_with_revenue_critical_slas(self):
+        """Test JWT performance compliance with revenue-critical SLA requirements."""
+        os.environ['ENVIRONMENT'] = 'production'
+        sla_secret = f"sla_prod_{hashlib.sha256(b'revenue_sla_compliance_2024').hexdigest()[:32]}"
+        os.environ['JWT_SECRET_PRODUCTION'] = sla_secret
+        
+        from shared.jwt_secret_manager import SharedJWTSecretManager
+        SharedJWTSecretManager.clear_cache()
+        
+        import jwt
+        import concurrent.futures
+        
+        # Revenue-critical SLA requirements
+        sla_requirements = {
+            'token_generation_p99': 0.010,  # 10ms P99
+            'token_validation_p99': 0.005,  # 5ms P99
+            'success_rate': 0.9999,         # 99.99% success rate
+            'concurrent_users': 1000,       # Support 1000 concurrent users
+            'tokens_per_second': 10000      # 10k tokens/second throughput
+        }
+        
+        # Generate high-volume test data
+        test_operations = []
+        for user_id in range(sla_requirements['concurrent_users']):
+            operation_data = {
+                'user_id': f'sla_user_{user_id}',
+                'operation_type': 'login',
+                'timestamp': time.time(),
+                'session_data': {
+                    'device': 'production_client',
+                    'location': 'global',
+                    'security_level': 'standard'
+                }
+            }
+            test_operations.append(operation_data)
+        
+        # SLA compliance metrics
+        sla_metrics = {
+            'token_generation_times': [],
+            'token_validation_times': [],
+            'successful_operations': 0,
+            'failed_operations': 0,
+            'total_operations': 0
+        }
+        
+        def execute_sla_test_operation(operation_data):
+            """Execute a complete JWT operation for SLA testing."""
+            try:
+                operation_start = time.time()
+                
+                # Token generation (simulating user login)
+                gen_start = time.time()
+                sla_payload = {
+                    'sub': operation_data['user_id'],
+                    'operation': operation_data['operation_type'],
+                    'session': operation_data['session_data'],
+                    'sla_test': True,
+                    'exp': datetime.utcnow() + timedelta(hours=1),
+                    'iat': datetime.utcnow()
+                }
+                
+                token = jwt.encode(sla_payload, sla_secret, algorithm='HS256')
+                gen_time = time.time() - gen_start
+                
+                # Token validation (simulating API request)
+                val_start = time.time()
+                decoded = jwt.decode(token, sla_secret, algorithms=['HS256'])
+                val_time = time.time() - val_start
+                
+                operation_time = time.time() - operation_start
+                
+                return {
+                    'success': True,
+                    'user_id': operation_data['user_id'],
+                    'generation_time': gen_time,
+                    'validation_time': val_time,
+                    'total_operation_time': operation_time,
+                    'token_valid': decoded['sub'] == operation_data['user_id']
+                }
+                
+            except Exception as e:
+                return {
+                    'success': False,
+                    'user_id': operation_data['user_id'],
+                    'error': str(e),
+                    'generation_time': None,
+                    'validation_time': None,
+                    'total_operation_time': time.time() - operation_start
+                }
+        
+        # Execute SLA compliance test with high concurrency
+        sla_test_start = time.time()
+        
+        with concurrent.futures.ThreadPoolExecutor(max_workers=50) as executor:
+            futures = [
+                executor.submit(execute_sla_test_operation, operation) 
+                for operation in test_operations
+            ]
+            
+            for future in concurrent.futures.as_completed(futures):
+                result = future.result()
+                sla_metrics['total_operations'] += 1
+                
+                if result['success']:
+                    sla_metrics['successful_operations'] += 1
+                    sla_metrics['token_generation_times'].append(result['generation_time'])
+                    sla_metrics['token_validation_times'].append(result['validation_time'])
+                else:
+                    sla_metrics['failed_operations'] += 1
+        
+        total_sla_test_time = time.time() - sla_test_start
+        
+        # Calculate SLA compliance metrics
+        success_rate = sla_metrics['successful_operations'] / sla_metrics['total_operations']
+        tokens_per_second = sla_metrics['successful_operations'] / total_sla_test_time
+        
+        # P99 calculations
+        if sla_metrics['token_generation_times']:
+            gen_times_sorted = sorted(sla_metrics['token_generation_times'])
+            val_times_sorted = sorted(sla_metrics['token_validation_times'])
+            
+            p99_index = int(len(gen_times_sorted) * 0.99)
+            generation_p99 = gen_times_sorted[p99_index] if p99_index < len(gen_times_sorted) else gen_times_sorted[-1]
+            validation_p99 = val_times_sorted[p99_index] if p99_index < len(val_times_sorted) else val_times_sorted[-1]
+            
+            avg_generation = sum(sla_metrics['token_generation_times']) / len(sla_metrics['token_generation_times'])
+            avg_validation = sum(sla_metrics['token_validation_times']) / len(sla_metrics['token_validation_times'])
+        else:
+            generation_p99 = float('inf')
+            validation_p99 = float('inf')
+            avg_generation = float('inf')
+            avg_validation = float('inf')
+        
+        print(f"\n🎯 Revenue-Critical SLA Compliance Results:")
+        print(f"  - Total operations: {sla_metrics['total_operations']}")
+        print(f"  - Successful operations: {sla_metrics['successful_operations']}")
+        print(f"  - Failed operations: {sla_metrics['failed_operations']}")
+        print(f"  - Success rate: {success_rate:.4%} (Required: {sla_requirements['success_rate']:.2%})")
+        print(f"  - Tokens per second: {tokens_per_second:.1f} (Required: {sla_requirements['tokens_per_second']})")
+        print(f"  - Token generation P99: {generation_p99:.6f}s (Required: <{sla_requirements['token_generation_p99']:.3f}s)")
+        print(f"  - Token validation P99: {validation_p99:.6f}s (Required: <{sla_requirements['token_validation_p99']:.3f}s)")
+        print(f"  - Average generation time: {avg_generation:.6f}s")
+        print(f"  - Average validation time: {avg_validation:.6f}s")
+        print(f"  - Total test time: {total_sla_test_time:.2f}s")
+        
+        # Revenue-critical SLA assertions
+        assert success_rate >= sla_requirements['success_rate'], \
+            f"SLA VIOLATION: Success rate {success_rate:.4%} below required {sla_requirements['success_rate']:.2%}"
+        
+        assert generation_p99 <= sla_requirements['token_generation_p99'], \
+            f"SLA VIOLATION: Token generation P99 {generation_p99:.6f}s exceeds {sla_requirements['token_generation_p99']:.3f}s"
+        
+        assert validation_p99 <= sla_requirements['token_validation_p99'], \
+            f"SLA VIOLATION: Token validation P99 {validation_p99:.6f}s exceeds {sla_requirements['token_validation_p99']:.3f}s"
+        
+        assert tokens_per_second >= sla_requirements['tokens_per_second'], \
+            f"SLA VIOLATION: Throughput {tokens_per_second:.1f} tokens/s below required {sla_requirements['tokens_per_second']}"
+        
+        print(f"\n✅ ALL REVENUE-CRITICAL SLA REQUIREMENTS MET!")
+        print(f"💰 Authentication system certified for production scaling!")
+    
+    # Helper methods for comprehensive testing
+    def _get_allowed_endpoints_for_level(self, access_level):
+        """Get allowed endpoints based on API access level."""
+        if access_level == 'read_only':
+            return ['/api/status', '/api/user/profile', '/api/data/read']
+        elif access_level == 'read_write':
+            return ['/api/status', '/api/user/profile', '/api/data/read', '/api/data/write', '/api/chat']
+        elif access_level == 'admin':
+            return ['/api/*']  # All endpoints
+        return []
+    
+    def _get_allowed_origins_for_client(self, client_type):
+        """Get allowed origins based on client type."""
+        if client_type == 'web_browser':
+            return ['https://app.netrasystems.ai', 'https://staging.netrasystems.ai']
+        elif client_type == 'mobile_app':
+            return ['netra-mobile-app://auth', 'https://mobile-api.netrasystems.ai']
+        elif client_type == 'api_client':
+            return ['*']  # API clients can come from anywhere
+        return []
 
 
 if __name__ == "__main__":

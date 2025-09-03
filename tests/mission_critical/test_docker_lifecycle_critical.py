@@ -1466,6 +1466,331 @@ class TestDockerLifecycleCritical:
     # FINAL VALIDATION TESTS
     # ==========================================
     
+    # ==========================================
+    # ADDITIONAL SERVICE STARTUP TESTS (Team Delta Requirements)
+    # ==========================================
+    
+    def test_service_startup_under_resource_contention(self):
+        """CRITICAL: Validate service startup works under resource contention."""
+        # Create resource contention by starting multiple environments
+        contention_environments = []
+        
+        try:
+            # Start multiple environments to create resource contention
+            for i in range(3):
+                env_name = f"contention-env-{i}-{int(time.time())}"
+                contention_environments.append(env_name)
+                self.test_containers.add(env_name)
+                
+                # Create environment with limited resources
+                try:
+                    result = self.docker_manager.acquire_environment(
+                        env_name,
+                        use_alpine=True,
+                        timeout=45
+                    )
+                    
+                    if result:
+                        # Verify startup succeeded despite resource contention
+                        health = self.docker_manager.wait_for_services(env_name, timeout=30)
+                        assert health, f"Environment {env_name} failed health check under resource contention"
+                        
+                        logger.info(f"Environment {env_name} started successfully under contention")
+                    
+                except Exception as e:
+                    logger.warning(f"Expected resource contention for environment {i}: {e}")
+                
+                # Brief pause between environment starts
+                time.sleep(2)
+            
+            # At least one environment should succeed even under contention
+            healthy_environments = 0
+            for env_name in contention_environments:
+                try:
+                    health_report = self.docker_manager.get_health_report(env_name)
+                    if health_report.get('all_healthy', False):
+                        healthy_environments += 1
+                except Exception:
+                    pass
+            
+            assert healthy_environments >= 1, f"No environments healthy under resource contention: {healthy_environments}/3"
+            logger.info(f"RESOURCE CONTENTION PASSED: {healthy_environments}/3 environments healthy")
+            
+        finally:
+            # Clean up contention environments
+            for env_name in contention_environments:
+                try:
+                    self.docker_manager.release_environment(env_name)
+                except Exception as e:
+                    logger.error(f"Failed to clean up contention environment {env_name}: {e}")
+    
+    def test_service_startup_with_pre_existing_conflicts(self):
+        """CRITICAL: Validate startup handles pre-existing container conflicts."""
+        # Create conflicting containers that might interfere
+        conflict_containers = []
+        
+        try:
+            # Create containers that might conflict with service startup
+            for i in range(3):
+                container_name = f"conflict-container-{i}-{int(time.time())}"
+                
+                result = execute_docker_command([
+                    "docker", "run", "-d", "--name", container_name,
+                    "alpine:latest", "sleep", "60"
+                ], timeout=20)
+                
+                if result.returncode == 0:
+                    conflict_containers.append(container_name)
+                    self.test_containers.add(container_name)
+            
+            # Now try to start service environment with potential conflicts
+            env_name = f"conflict-test-{int(time.time())}"
+            self.test_containers.add(env_name)
+            
+            start_time = time.time()
+            result = self.docker_manager.acquire_environment(
+                env_name,
+                use_alpine=True,
+                timeout=60
+            )
+            startup_duration = time.time() - start_time
+            
+            # Startup should succeed despite pre-existing containers
+            assert result is not None, "Service startup failed due to pre-existing containers"
+            assert startup_duration < 60, f"Startup took too long with conflicts: {startup_duration:.2f}s"
+            
+            # Verify services are healthy
+            healthy = self.docker_manager.wait_for_services(env_name, timeout=30)
+            assert healthy, "Services not healthy after conflict resolution"
+            
+            logger.info(f"CONFLICT RESOLUTION PASSED: Startup succeeded with {len(conflict_containers)} conflicting containers")
+            
+        finally:
+            # Clean up conflict containers
+            for container_name in conflict_containers:
+                try:
+                    execute_docker_command(["docker", "stop", container_name], timeout=5)
+                    execute_docker_command(["docker", "rm", container_name], timeout=5)
+                except Exception as e:
+                    logger.error(f"Failed to clean up conflict container {container_name}: {e}")
+    
+    def test_service_startup_port_conflict_auto_resolution(self):
+        """CRITICAL: Validate automatic port conflict resolution during startup."""
+        # Create containers using common ports
+        port_blocking_containers = []
+        
+        try:
+            # Block common service ports
+            common_ports = [5432, 6379, 8000]  # postgres, redis, backend
+            
+            for i, port in enumerate(common_ports):
+                container_name = f"port-blocker-{port}-{int(time.time())}"
+                
+                try:
+                    result = execute_docker_command([
+                        "docker", "run", "-d", "--name", container_name,
+                        "-p", f"{port}:{port}", "alpine:latest",
+                        "sh", "-c", f"nc -l -p {port} || sleep 60"
+                    ], timeout=15)
+                    
+                    if result.returncode == 0:
+                        port_blocking_containers.append(container_name)
+                        self.test_containers.add(container_name)
+                        logger.info(f"Blocked port {port} with container {container_name}")
+                        
+                except Exception as e:
+                    logger.warning(f"Failed to block port {port}: {e}")
+                
+                time.sleep(1)
+            
+            # Now start services which should auto-resolve port conflicts
+            env_name = f"port-resolution-test-{int(time.time())}"
+            self.test_containers.add(env_name)
+            
+            start_time = time.time()
+            result = self.docker_manager.acquire_environment(
+                env_name,
+                use_alpine=True,
+                timeout=90  # Allow extra time for port resolution
+            )
+            resolution_time = time.time() - start_time
+            
+            # Should succeed despite port conflicts through dynamic allocation
+            assert result is not None, "Service startup failed due to port conflicts"
+            assert resolution_time < 90, f"Port resolution took too long: {resolution_time:.2f}s"
+            
+            # Verify services are running on alternative ports
+            health_report = self.docker_manager.get_health_report(env_name)
+            assert health_report.get('all_healthy', False), "Services not healthy after port resolution"
+            
+            logger.info(f"PORT RESOLUTION PASSED: Services started despite {len(port_blocking_containers)} port conflicts")
+            
+        finally:
+            # Clean up port blocking containers
+            for container_name in port_blocking_containers:
+                try:
+                    execute_docker_command(["docker", "stop", container_name], timeout=3)
+                    execute_docker_command(["docker", "rm", container_name], timeout=3)
+                except Exception as e:
+                    logger.error(f"Failed to clean up port blocker {container_name}: {e}")
+    
+    def test_service_startup_network_isolation_verification(self):
+        """CRITICAL: Validate services start with proper network isolation."""
+        env_name = f"network-isolation-test-{int(time.time())}"
+        self.test_containers.add(env_name)
+        
+        # Start environment and verify network isolation
+        result = self.docker_manager.acquire_environment(
+            env_name,
+            use_alpine=True,
+            timeout=45
+        )
+        
+        assert result is not None, "Environment creation failed"
+        
+        # Wait for services to be healthy
+        healthy = self.docker_manager.wait_for_services(env_name, timeout=30)
+        assert healthy, "Services should be healthy"
+        
+        # Check network configuration
+        if hasattr(self.docker_manager, '_get_environment_containers'):
+            containers = self.docker_manager._get_environment_containers(env_name)
+            
+            if containers:
+                # Verify containers are on isolated network
+                network_names = set()
+                
+                for container in containers:
+                    container.reload()
+                    networks = container.attrs.get('NetworkSettings', {}).get('Networks', {})
+                    
+                    for network_name in networks.keys():
+                        if network_name != 'bridge':  # Skip default bridge
+                            network_names.add(network_name)
+                
+                # Should have at least one custom network for isolation
+                assert len(network_names) >= 1, "Containers should be on isolated network"
+                
+                # All containers should share the same custom network
+                if len(containers) > 1:
+                    first_container_networks = set(containers[0].attrs['NetworkSettings']['Networks'].keys())
+                    
+                    for container in containers[1:]:
+                        container_networks = set(container.attrs['NetworkSettings']['Networks'].keys())
+                        shared_networks = first_container_networks.intersection(container_networks)
+                        
+                        assert len(shared_networks) > 0, f"Containers not sharing network: {container.name}"
+                
+                logger.info(f"NETWORK ISOLATION PASSED: {len(containers)} containers on isolated networks {network_names}")
+    
+    def test_service_startup_rolling_deployment_simulation(self):
+        """CRITICAL: Validate rolling deployment scenarios work correctly."""
+        base_env_name = f"rolling-deploy-{int(time.time())}"
+        environments = []
+        
+        try:
+            # Simulate rolling deployment by starting multiple versions
+            for version in range(3):
+                env_name = f"{base_env_name}-v{version}"
+                environments.append(env_name)
+                self.test_containers.add(env_name)
+                
+                start_time = time.time()
+                
+                # Each "version" starts with slight delay to simulate rolling deploy
+                result = self.docker_manager.acquire_environment(
+                    env_name,
+                    use_alpine=True,
+                    timeout=45
+                )
+                
+                startup_time = time.time() - start_time
+                
+                if result:
+                    # Verify this version started successfully
+                    healthy = self.docker_manager.wait_for_services(env_name, timeout=25)
+                    assert healthy, f"Version {version} failed to become healthy"
+                    
+                    logger.info(f"Version {version} deployed successfully in {startup_time:.2f}s")
+                    
+                    # Brief pause to simulate rolling deployment timing
+                    time.sleep(3)
+                else:
+                    logger.warning(f"Version {version} failed to deploy")
+            
+            # Verify multiple versions can run concurrently
+            healthy_versions = 0
+            for env_name in environments:
+                try:
+                    health_report = self.docker_manager.get_health_report(env_name)
+                    if health_report.get('all_healthy', False):
+                        healthy_versions += 1
+                except Exception:
+                    pass
+            
+            # At least 2 versions should be healthy in rolling deployment
+            assert healthy_versions >= 2, f"Rolling deployment failed: only {healthy_versions}/3 versions healthy"
+            
+            logger.info(f"ROLLING DEPLOYMENT PASSED: {healthy_versions}/3 versions healthy")
+            
+        finally:
+            # Clean up all versions
+            for env_name in environments:
+                try:
+                    self.docker_manager.release_environment(env_name)
+                except Exception as e:
+                    logger.error(f"Failed to clean up version {env_name}: {e}")
+    
+    def test_service_startup_cross_platform_compatibility(self):
+        """CRITICAL: Validate startup works consistently across platform configurations."""
+        import platform
+        
+        system_info = {
+            'platform': platform.system(),
+            'machine': platform.machine(),
+            'processor': platform.processor(),
+            'python_version': platform.python_version()
+        }
+        
+        logger.info(f"Testing cross-platform compatibility on: {system_info}")
+        
+        env_name = f"cross-platform-test-{int(time.time())}"
+        self.test_containers.add(env_name)
+        
+        # Test startup with platform-specific optimizations
+        start_time = time.time()
+        
+        result = self.docker_manager.acquire_environment(
+            env_name,
+            use_alpine=True,  # Alpine should work on all platforms
+            timeout=60
+        )
+        
+        startup_duration = time.time() - start_time
+        
+        assert result is not None, f"Cross-platform startup failed on {system_info['platform']}"
+        
+        # Platform-specific performance expectations
+        if system_info['platform'] == 'Windows':
+            # Windows Docker typically slower
+            assert startup_duration < 60, f"Windows startup too slow: {startup_duration:.2f}s"
+        elif system_info['platform'] == 'Darwin':  # macOS
+            # macOS Docker Desktop has VM overhead
+            assert startup_duration < 45, f"macOS startup too slow: {startup_duration:.2f}s"
+        else:  # Linux
+            # Linux should be fastest
+            assert startup_duration < 30, f"Linux startup too slow: {startup_duration:.2f}s"
+        
+        # Verify services are healthy regardless of platform
+        healthy = self.docker_manager.wait_for_services(env_name, timeout=30)
+        assert healthy, f"Services not healthy on {system_info['platform']}"
+        
+        # Platform-specific validations
+        health_report = self.docker_manager.get_health_report(env_name)
+        assert health_report.get('all_healthy'), f"Health check failed on {system_info['platform']}"
+        
+        logger.info(f"CROSS-PLATFORM PASSED: {system_info['platform']} startup in {startup_duration:.2f}s")
+
     def test_docker_daemon_final_stability_check(self):
         """Final comprehensive check that Docker daemon is stable."""
         stability_start = self.daemon_monitor.check_daemon_stability()
