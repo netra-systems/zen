@@ -208,19 +208,19 @@ def create_tables(client: Client, schemas: List[Tuple[str, str]], verbose: bool 
                 print(f"Creating table: {table_name}...")
             
             # Execute the CREATE TABLE statement
-            client.execute(schema)
+            client.command(schema)
             
             # Verify the table was created
-            result = client.execute(f"EXISTS TABLE {table_name}")
+            result = client.query(f"EXISTS TABLE {table_name}").result_rows
             if result[0][0] == 1:
-                print(f"✅ Successfully created/verified table: {table_name}")
+                print(f"[SUCCESS] Successfully created/verified table: {table_name}")
                 success_count += 1
             else:
-                print(f"⚠️ Table creation uncertain: {table_name}")
+                print(f"[WARNING] Table creation uncertain: {table_name}")
                 failure_count += 1
                 
         except Exception as e:
-            print(f"❌ Failed to create table {table_name}: {e}")
+            print(f"[FAIL] Failed to create table {table_name}: {e}")
             failure_count += 1
     
     return success_count, failure_count
@@ -235,19 +235,19 @@ def verify_tables(client: Client, schemas: List[Tuple[str, str]]):
     for table_name, _ in schemas:
         try:
             # Check if table exists
-            result = client.execute(f"EXISTS TABLE {table_name}")
+            result = client.query(f"EXISTS TABLE {table_name}").result_rows
             exists = result[0][0] == 1
             
             if exists:
                 # Get row count
-                count_result = client.execute(f"SELECT count() FROM {table_name}")
+                count_result = client.query(f"SELECT count() FROM {table_name}").result_rows
                 row_count = count_result[0][0]
-                print(f"✅ Table {table_name}: EXISTS ({row_count} rows)")
+                print(f"[OK] Table {table_name}: EXISTS ({row_count} rows)")
             else:
-                print(f"❌ Table {table_name}: DOES NOT EXIST")
+                print(f"[FAIL] Table {table_name}: DOES NOT EXIST")
                 
         except Exception as e:
-            print(f"❌ Error checking table {table_name}: {e}")
+            print(f"[FAIL] Error checking table {table_name}: {e}")
 
 
 def main():
@@ -284,7 +284,7 @@ def main():
         # Connect to ClickHouse
         print(f"Connecting to ClickHouse at {config['host']}:{config['port']}...")
         client = clickhouse_connect.get_client(**config)
-        print("✅ Connected successfully\n")
+        print("[OK] Connected successfully\n")
         
         # Get table schemas
         schemas = get_table_schemas()
@@ -300,21 +300,21 @@ def main():
             print(f"\n{'=' * 80}")
             print(f"SUMMARY")
             print(f"{'=' * 80}")
-            print(f"✅ Successfully created/verified: {success} tables")
+            print(f"[OK] Successfully created/verified: {success} tables")
             if failure > 0:
-                print(f"❌ Failed: {failure} tables")
+                print(f"[FAIL] Failed: {failure} tables")
             
             # Verify all tables
             verify_tables(client, schemas)
             
             if failure == 0:
-                print(f"\n🎉 All tables created successfully!")
+                print(f"\n[COMPLETE] All tables created successfully!")
             else:
-                print(f"\n⚠️ Some tables failed to create. Check the errors above.")
+                print(f"\n[WARNING] Some tables failed to create. Check the errors above.")
                 sys.exit(1)
                 
     except Exception as e:
-        print(f"\n❌ FATAL ERROR: {e}")
+        print(f"\n[FAIL] FATAL ERROR: {e}")
         print("\nTroubleshooting:")
         print("1. Check network connectivity to ClickHouse Cloud")
         print("2. Verify credentials in Secret Manager")
