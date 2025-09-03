@@ -1,24 +1,38 @@
 #!/usr/bin/env python3
 """
-Test Docker Manager - Intelligent Docker management for tests
+Test Docker Manager - DEPRECATED
 
-This script prevents Docker Compose brittleness by:
-1. Reusing healthy containers across test runs
-2. Only restarting containers when necessary
-3. Proper cleanup without affecting unrelated services
-4. Fast startup through container reuse
+⚠️  DEPRECATION NOTICE ⚠️ 
+This script is DEPRECATED and should NOT be used for new code.
+
+ALL Docker operations must now go through UnifiedDockerManager per CLAUDE.md Section 7.1.
+
+Use instead:
+- test_framework.unified_docker_manager.UnifiedDockerManager
+- scripts/docker_manual.py (uses UnifiedDockerManager)
+- tests/unified_test_runner.py --real-services (automatic Docker management)
+
+This file remains only for legacy compatibility and will be removed in a future version.
 """
 
 import os
 import sys
 import subprocess
 import time
+import warnings
 from pathlib import Path
 from typing import List, Optional, Set
 
 # Add project root to path
 project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
+
+# Issue deprecation warning
+warnings.warn(
+    "TestDockerManager is deprecated. Use test_framework.unified_docker_manager.UnifiedDockerManager instead.",
+    DeprecationWarning,
+    stacklevel=2
+)
 
 from scripts.docker_health_manager import DockerHealthManager
 

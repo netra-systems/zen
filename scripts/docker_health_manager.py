@@ -1,12 +1,17 @@
 #!/usr/bin/env python3
 """
-Docker Health Manager - Smart container lifecycle management
+Docker Health Manager - DEPRECATED
 
-This script addresses Docker Compose brittleness issues by:
-1. Checking container health before stopping/starting
-2. Avoiding unnecessary restarts of healthy containers
-3. Providing graceful shutdown with proper cleanup
-4. Using optimized restart policies
+⚠️  DEPRECATION NOTICE ⚠️ 
+This script is DEPRECATED and should NOT be used for new code.
+
+ALL Docker operations must now go through UnifiedDockerManager per CLAUDE.md Section 7.1.
+
+Use instead:
+- test_framework.unified_docker_manager.UnifiedDockerManager
+- scripts/docker_manual.py (uses UnifiedDockerManager)
+
+This file remains only for legacy compatibility and will be removed in a future version.
 """
 
 import argparse
@@ -14,10 +19,18 @@ import json
 import subprocess
 import sys
 import time
+import warnings
 from pathlib import Path
 from typing import Dict, List, Optional, Set
 from dataclasses import dataclass
 from enum import Enum
+
+# Issue deprecation warning
+warnings.warn(
+    "DockerHealthManager is deprecated. Use test_framework.unified_docker_manager.UnifiedDockerManager instead.",
+    DeprecationWarning,
+    stacklevel=2
+)
 
 
 class ContainerState(Enum):
