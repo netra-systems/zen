@@ -111,6 +111,40 @@
         </related-learnings>
     </learning>
     
+    <learning id="circular-import-supervisor-fix-2025-09-03">
+        <title>Supervisor Module Circular Import Fix - Critical System Recovery</title>
+        <category>Import-Management/Circular-Import/SSOT</category>
+        <keywords>circular-import, supervisor, supervisor_consolidated, __init__.py, ssot, package-exports</keywords>
+        <path>circular_import_supervisor_fix_20250903.xml</path>
+        <critical-takeaway>
+            Package __init__.py files must NEVER re-export classes that depend on package submodules.
+            SupervisorAgent circular import fixed by removing package-level re-export and requiring
+            direct imports from supervisor_consolidated.py. SSOT principle: import from source module,
+            not through convenience package exports.
+        </critical-takeaway>
+        <severity>CRITICAL</severity>
+        <business-impact>Prevents complete system initialization failure that blocks all agent functionality and chat</business-impact>
+        <prevention>
+            Never re-export complex classes in package __init__.py. Use direct imports from source modules.
+            Implement package-level circular import detection in CI/CD. Apply SSOT principle to import paths.
+        </prevention>
+        <implementation-patterns>
+            <pattern>Direct imports from source modules</pattern>
+            <pattern>Package __init__.py for utilities only</pattern>
+            <pattern>Single canonical import path per class</pattern>
+        </implementation-patterns>
+        <testing-strategies>
+            <strategy>Package initialization circular import detection</strategy>
+            <strategy>System startup validation with agent registration</strategy>
+            <strategy>Import hierarchy dependency mapping</strategy>
+        </testing-strategies>
+        <related-learnings>
+            <learning-ref>circular_import_detection.xml</learning-ref>
+            <learning-ref>import_management.xml</learning-ref>
+            <learning-ref>import_structure.xml</learning-ref>
+        </related-learnings>
+    </learning>
+    
     <learning id="golden-agent-index-2025-09-02">
         <title>Golden Agent Index - Comprehensive Agent Implementation Guide</title>
         <category>Agent/Implementation/SSOT</category>
