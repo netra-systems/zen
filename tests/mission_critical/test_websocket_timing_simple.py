@@ -13,6 +13,7 @@ import pytest
 from netra_backend.app.websocket_core.manager import WebSocketManager, get_websocket_manager
 from netra_backend.app.websocket_core.message_buffer import BufferConfig
 from fastapi import WebSocket
+from fastapi.websockets import WebSocketState
 
 
 class TestWebSocketTimingSimple:
@@ -44,7 +45,7 @@ class TestWebSocketTimingSimple:
         mock_ws.send_text = AsyncMock()
         mock_ws.send_json = AsyncMock()
         mock_ws.close = AsyncMock()
-        mock_ws.client_state = 1  # Connected
+        mock_ws.client_state = WebSocketState.CONNECTED
         
         # Connect
         connection_id = await manager.connect_user(
@@ -74,7 +75,7 @@ class TestWebSocketTimingSimple:
         mock_ws.send_text = AsyncMock()
         mock_ws.send_json = AsyncMock()
         mock_ws.close = AsyncMock()
-        mock_ws.client_state = 1
+        mock_ws.client_state = WebSocketState.CONNECTED
         
         # Connect with thread_id
         connection_id = await manager.connect_user(
@@ -112,7 +113,7 @@ class TestWebSocketTimingSimple:
             mock_ws.send_text = AsyncMock()
             mock_ws.send_json = AsyncMock()
             mock_ws.close = AsyncMock()
-            mock_ws.client_state = 1
+            mock_ws.client_state = WebSocketState.CONNECTED
             user_id = str(uuid.uuid4())
             
             connection_id = await manager.connect_user(
@@ -147,7 +148,7 @@ class TestWebSocketTimingSimple:
         mock_ws = AsyncMock(spec=WebSocket)
         mock_ws.send_json = AsyncMock()
         mock_ws.close = AsyncMock()
-        mock_ws.client_state = 1
+        mock_ws.client_state = WebSocketState.CONNECTED
         
         # Connect
         connection_id = await manager.connect_user(
