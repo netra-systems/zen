@@ -337,12 +337,15 @@ async def _create_test_noop_client():
         await client.disconnect()
 
 @asynccontextmanager
-async def get_clickhouse_client():
+async def get_clickhouse_client(bypass_manager: bool = False):
     """Get ClickHouse client - REAL connections only in dev/prod.
     
     NO MOCKS IN DEV MODE - development must use real ClickHouse.
     Tests marked with @pytest.mark.real_database will attempt real connections
     and raise connection errors that can be handled gracefully by the test.
+    
+    Args:
+        bypass_manager: If True, bypasses the connection manager to avoid recursion
     
     Usage:
         async with get_clickhouse_client() as client:
@@ -358,22 +361,28 @@ async def get_clickhouse_client():
             return
     
     # Try to use the connection manager if available (for startup and production use)
-    try:
-        from netra_backend.app.core.clickhouse_connection_manager import get_clickhouse_connection_manager
-        
-        connection_manager = get_clickhouse_connection_manager()
-        if connection_manager and connection_manager.connection_health.state.value != "disconnected":
-            # Use connection manager's pooled connection
-            async with connection_manager.get_connection() as client:
-                yield client
-                return
-    except ImportError:
-        # Connection manager not available, fall back to direct connection
-        logger.debug("[ClickHouse] Connection manager not available, using direct connection")
-        pass
-    except Exception as e:
-        logger.warning(f"[ClickHouse] Connection manager failed, falling back to direct connection: {e}")
-        pass
+    # CRITICAL FIX: Only use connection manager if not bypassed (prevents recursion)
+    if not bypass_manager:
+        try:
+            from netra_backend.app.core.clickhouse_connection_manager import get_clickhouse_connection_manager
+            
+            connection_manager = get_clickhouse_connection_manager()
+            if connection_manager and connection_manager.connection_health.state.value != "disconnected":
+                # Use connection manager's pooled connection
+                async with connection_manager.get_connection() as client:
+                    yield client
+                    return
+        except ImportError:
+            # Connection manager not available, fall back to direct connection
+            logger.debug("[ClickHouse] Connection manager not available, using direct connection")
+            pass
+        except RecursionError as e:
+            # CRITICAL FIX: Catch recursion error and fall back to direct connection
+            logger.error("[ClickHouse] Recursion detected in connection manager, using direct connection")
+            pass
+        except Exception as e:
+            logger.warning(f"[ClickHouse] Connection manager failed, falling back to direct connection: {e}")
+            pass
     
     # Fallback to direct connection (backward compatibility)
     environment = get_env().get("ENVIRONMENT", "development").lower()
