@@ -90,7 +90,7 @@ export const useURLSyncWithThreadSwitching = (
   
   const initializeFromUrl = useCallback(() => {
     if (!fullConfig.enabled) return;
-    const urlThreadId = searchParams.get(fullConfig.paramName);
+    const urlThreadId = searchParams?.get(fullConfig.paramName) ?? null;
     if (urlThreadId && urlThreadId !== activeThreadId) {
       switchToThread(urlThreadId);
     }
@@ -98,7 +98,7 @@ export const useURLSyncWithThreadSwitching = (
   
   const syncFromUrl = useCallback(() => {
     if (!fullConfig.enabled) return;
-    const urlThreadId = searchParams.get(fullConfig.paramName);
+    const urlThreadId = searchParams?.get(fullConfig.paramName) ?? null;
     if (urlThreadId && urlThreadId !== activeThreadId) {
       switchToThread(urlThreadId);
     }
