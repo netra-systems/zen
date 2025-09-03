@@ -144,6 +144,66 @@ class LogFormatter:
         self._add_exception_info(record, entry)
         return entry.model_dump_json() + "\n"
     
+    def gcp_json_formatter(self, record) -> str:
+        """Format log record as GCP Cloud Logging compatible JSON.
+        
+        GCP expects specific fields for proper severity mapping:
+        - severity: Must use GCP severity levels (DEBUG, INFO, WARNING, ERROR, CRITICAL, etc.)
+        - message: The log message
+        - timestamp: ISO 8601 format timestamp
+        - Additional fields for context
+        """
+        import json
+        from datetime import timezone
+        
+        # Map loguru levels to GCP severity levels
+        severity_mapping = {
+            'TRACE': 'DEBUG',
+            'DEBUG': 'DEBUG', 
+            'INFO': 'INFO',
+            'SUCCESS': 'INFO',
+            'WARNING': 'WARNING',
+            'ERROR': 'ERROR',
+            'CRITICAL': 'CRITICAL'
+        }
+        
+        # Create GCP-compatible log entry
+        gcp_entry = {
+            'severity': severity_mapping.get(record["level"].name, 'DEFAULT'),
+            'message': self._filter.filter_message(record["message"]),
+            'timestamp': record["time"].isoformat(),
+            'labels': {
+                'module': record["name"],
+                'function': record["function"],
+                'line': str(record["line"])
+            }
+        }
+        
+        # Add context if available
+        if trace_id := trace_id_context.get():
+            gcp_entry['trace'] = trace_id
+        if request_id := request_id_context.get():
+            gcp_entry['labels']['request_id'] = request_id
+        if user_id := user_id_context.get():
+            gcp_entry['labels']['user_id'] = user_id
+        
+        # Add extra context
+        if extra := record.get("extra"):
+            filtered_extra = self._filter.filter_dict(extra)
+            if filtered_extra:
+                gcp_entry['context'] = filtered_extra
+        
+        # Add exception info if present
+        if record["exception"]:
+            exc_info = record["exception"]
+            gcp_entry['error'] = {
+                'type': exc_info.type.__name__ if exc_info.type else None,
+                'value': str(exc_info.value) if exc_info.value else None,
+                'traceback': exc_info.traceback if exc_info.traceback else None
+            }
+        
+        return json.dumps(gcp_entry) + "\n"
+    
     def _create_log_entry(self, record) -> LogEntry:
         """Create a LogEntry from a loguru record."""
         return LogEntry(
@@ -218,11 +278,25 @@ class LogHandlerConfig:
             self._add_readable_console_handler(should_log_func)
     
     def _add_json_console_handler(self, should_log_func):
-        """Add JSON format console handler."""
+        """Add JSON format console handler with GCP Cloud Run support."""
+        from shared.isolated_environment import get_env
+        
+        # Check if running in GCP Cloud Run
+        is_cloud_run = get_env().get('K_SERVICE') is not None
+        environment = get_env().get('ENVIRONMENT', 'development').lower()
+        is_gcp = is_cloud_run or environment in ['staging', 'production']
+        
+        if is_gcp:
+            # Use GCP-compatible JSON formatter
+            formatter = self.formatter.gcp_json_formatter
+        else:
+            # Use standard JSON formatter
+            formatter = self.formatter.json_formatter
+        
         logger.add(
             sys.stderr,
             format="{message}",  # Simple format, JSON serialization happens in serialize
-            serialize=self.formatter.json_formatter,
+            serialize=formatter,
             level=self.level,
             filter=should_log_func,
             enqueue=True,
