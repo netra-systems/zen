@@ -43,6 +43,11 @@ CRUCIAL: ULTRA THINK DEEPLY.
 - [WebSocket Modernization Report](./WEBSOCKET_MODERNIZATION_REPORT.md) - WebSocket isolation implementation
 - [Documentation Hub](./docs/index.md) - Central documentation index
 
+Expect everything to fail. Add conditional error logging by default whenever possible.
+Success is "quiet" and summarized. ANTHING that's not what's expected must be super obvious in logs.
+Make all errors loud.
+Protect against silent errors. Avoid "fallbacks" unless expressly part of named design and class.
+
 -----
 
 ## 1\. The Business Mandate: Value Capture and Growth
