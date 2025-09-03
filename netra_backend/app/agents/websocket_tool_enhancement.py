@@ -26,10 +26,11 @@ def enhance_tool_dispatcher_with_notifications(tool_dispatcher: Any, websocket_m
         logger.warning("Cannot enhance tool dispatcher: missing dispatcher or websocket manager")
         return
     
-    # Mark the dispatcher as enhanced to avoid double enhancement
-    if getattr(tool_dispatcher, '_websocket_enhanced', False):
-        logger.debug("Tool dispatcher already enhanced with WebSocket notifications")
-        return
+    # Check if already enhanced with WebSocket bridge
+    if hasattr(tool_dispatcher, 'executor') and hasattr(tool_dispatcher.executor, 'websocket_bridge'):
+        if tool_dispatcher.executor.websocket_bridge is not None:
+            logger.debug("Tool dispatcher already enhanced with WebSocket notifications")
+            return
     
     # Import required components
     from netra_backend.app.agents.unified_tool_execution import UnifiedToolExecutionEngine

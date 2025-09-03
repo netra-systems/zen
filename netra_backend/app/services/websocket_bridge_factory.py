@@ -427,6 +427,9 @@ class UserWebSocketEmitter:
         self._batch_size = 10
         self._batch_timeout = 0.1  # 100ms
         
+        # Control flags
+        self._shutdown = False
+        
         # Start background event processor
         self._processor_task = asyncio.create_task(self._process_events())
         
@@ -559,7 +562,7 @@ class UserWebSocketEmitter:
     async def _process_events(self) -> None:
         """Background event processor with delivery guarantees."""
         try:
-            while True:
+            while not self._shutdown:
                 try:
                     # Get next event from user-specific queue
                     event = await asyncio.wait_for(
@@ -571,14 +574,18 @@ class UserWebSocketEmitter:
                     await self._deliver_event_with_retries(event)
                     
                 except asyncio.TimeoutError:
-                    # Heartbeat - check connection health
-                    await self._check_connection_health()
+                    # Heartbeat - check connection health if not shutting down
+                    if not self._shutdown:
+                        await self._check_connection_health()
                     
                 except Exception as e:
-                    logger.error(f"Event processor error for user {self.user_context.user_id}: {e}")
+                    if not self._shutdown:
+                        logger.error(f"Event processor error for user {self.user_context.user_id}: {e}")
                     
         except asyncio.CancelledError:
             logger.info(f"Event processor cancelled for user {self.user_context.user_id}")
+        
+        logger.info(f"Event processor stopped for user {self.user_context.user_id}")
             
     async def _deliver_event_with_retries(self, event: WebSocketEvent) -> None:
         """Deliver event with retry mechanism."""
@@ -758,12 +765,15 @@ class UserWebSocketEmitter:
         from netra_backend.app.monitoring.websocket_metrics import record_factory_event
         
         try:
+            # Signal shutdown
+            self._shutdown = True
+            
             # Cancel event processor
             if self._processor_task and not self._processor_task.done():
                 self._processor_task.cancel()
                 try:
-                    await self._processor_task
-                except asyncio.CancelledError:
+                    await asyncio.wait_for(self._processor_task, timeout=2.0)
+                except (asyncio.CancelledError, asyncio.TimeoutError):
                     pass
                     
             # Cancel batch timer if active
