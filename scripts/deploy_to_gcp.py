@@ -73,7 +73,9 @@ class GCPDeployer:
         
         # Use gcloud.cmd on Windows
         self.gcloud_cmd = "gcloud.cmd" if sys.platform == "win32" else "gcloud"
-        self.docker_cmd = "docker" 
+        
+        # Detect container runtime (Docker or Podman)
+        self.docker_cmd = self._detect_container_runtime()
         self.use_shell = sys.platform == "win32"
         
         # Service configurations
@@ -157,6 +159,41 @@ class GCPDeployer:
                 }
             )
         ]
+    
+    def _detect_container_runtime(self) -> str:
+        """Detect available container runtime (Docker or Podman)."""
+        # First try Docker
+        try:
+            result = subprocess.run(
+                ["docker", "--version"],
+                capture_output=True,
+                text=True,
+                check=False,
+                shell=sys.platform == "win32"
+            )
+            if result.returncode == 0:
+                print("  Container runtime: Docker")
+                return "docker"
+        except (subprocess.SubprocessError, FileNotFoundError):
+            pass
+        
+        # Try Podman
+        try:
+            result = subprocess.run(
+                ["podman", "--version"],
+                capture_output=True,
+                text=True,
+                check=False,
+                shell=sys.platform == "win32"
+            )
+            if result.returncode == 0:
+                print("  Container runtime: Podman (Docker compatibility mode)")
+                return "podman"
+        except (subprocess.SubprocessError, FileNotFoundError):
+            pass
+        
+        print("  Warning: No container runtime detected, defaulting to 'docker'")
+        return "docker"
     
     def check_gcloud(self) -> bool:
         """Check if gcloud CLI is installed and configured."""
@@ -413,27 +450,69 @@ class GCPDeployer:
         return True
     
     def configure_docker_auth(self) -> bool:
-        """Configure Docker authentication for Google Container Registry."""
+        """Configure Docker/Podman authentication for Google Container Registry."""
         try:
-            print("  Configuring Docker authentication for GCR...")
-            auth_cmd = [self.gcloud_cmd, "auth", "configure-docker", "gcr.io", "--quiet"]
-            result = subprocess.run(
-                auth_cmd, 
-                capture_output=True,
-                text=True,
-                check=False,
-                shell=self.use_shell
-            )
+            runtime_name = "Podman" if self.docker_cmd == "podman" else "Docker"
+            print(f"  Configuring {runtime_name} authentication for GCR...")
             
-            if result.returncode == 0:
-                print("  ✅ Docker authentication configured successfully")
-                return True
+            # For Podman, we need to login directly
+            if self.docker_cmd == "podman":
+                # First get an access token
+                token_cmd = [self.gcloud_cmd, "auth", "print-access-token"]
+                token_result = subprocess.run(
+                    token_cmd,
+                    capture_output=True,
+                    text=True,
+                    check=False,
+                    shell=self.use_shell
+                )
+                
+                if token_result.returncode != 0:
+                    print(f"  ❌ Failed to get access token: {token_result.stderr}")
+                    return False
+                
+                access_token = token_result.stdout.strip()
+                
+                # Login to GCR with Podman
+                login_cmd = [
+                    self.docker_cmd, "login", "gcr.io",
+                    "-u", "oauth2accesstoken",
+                    "-p", access_token
+                ]
+                login_result = subprocess.run(
+                    login_cmd,
+                    capture_output=True,
+                    text=True,
+                    check=False,
+                    shell=self.use_shell
+                )
+                
+                if login_result.returncode == 0:
+                    print(f"  ✅ {runtime_name} authentication configured successfully")
+                    return True
+                else:
+                    print(f"  ❌ Failed to configure {runtime_name} authentication: {login_result.stderr}")
+                    return False
             else:
-                print(f"  ❌ Failed to configure Docker authentication: {result.stderr}")
-                return False
+                # Use standard Docker configuration
+                auth_cmd = [self.gcloud_cmd, "auth", "configure-docker", "gcr.io", "--quiet"]
+                result = subprocess.run(
+                    auth_cmd, 
+                    capture_output=True,
+                    text=True,
+                    check=False,
+                    shell=self.use_shell
+                )
+                
+                if result.returncode == 0:
+                    print(f"  ✅ {runtime_name} authentication configured successfully")
+                    return True
+                else:
+                    print(f"  ❌ Failed to configure {runtime_name} authentication: {result.stderr}")
+                    return False
                 
         except Exception as e:
-            print(f"  ❌ Docker authentication error: {e}")
+            print(f"  ❌ Container runtime authentication error: {e}")
             return False
     
     def create_dockerfile(self, service: ServiceConfig) -> bool:

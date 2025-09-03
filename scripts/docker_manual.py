@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 """
-Docker Manual Control Script
-For manual Docker operations when needed outside of the test framework.
+Container Manual Control Script - Supports Docker and Podman
+For manual container operations when needed outside of the test framework.
 
-This script provides a simple CLI interface to the unified Docker management system.
-All operations use the central UnifiedDockerManager from test_framework.
+This script provides a simple CLI interface to the unified container management system.
+All operations use the central UnifiedDockerManager from test_framework, with added
+Podman compatibility detection.
 
 Usage:
     python scripts/docker_manual.py start       # Start test environment
@@ -12,7 +13,8 @@ Usage:
     python scripts/docker_manual.py restart     # Restart services
     python scripts/docker_manual.py status      # Check status
     python scripts/docker_manual.py clean       # Clean up everything
-    python scripts/docker_manual.py test        # Run tests with Docker
+    python scripts/docker_manual.py test        # Run tests with containers
+    python scripts/docker_manual.py --runtime podman start  # Force Podman
 """
 
 import sys
@@ -20,8 +22,9 @@ import os
 import subprocess
 import time
 import logging
+import shutil
 from pathlib import Path
-from typing import Optional, List
+from typing import Optional, List, Tuple
 import argparse
 
 # Add project root to path
@@ -44,23 +47,73 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
-class DockerManualControl:
-    """Manual control interface for Docker operations using central manager"""
+class ContainerManualControl:
+    """Manual control interface for container operations supporting Docker and Podman"""
     
-    def __init__(self):
-        # Use the central unified Docker manager
+    def __init__(self, runtime: Optional[str] = None):
+        """Initialize with optional runtime specification.
+        
+        Args:
+            runtime: Force 'docker' or 'podman', or None for auto-detect
+        """
+        # Detect container runtime
+        self.runtime, self.compose_cmd = self._detect_runtime(runtime)
+        logger.info(f"Using container runtime: {self.runtime}")
+        
+        # Use the central unified Docker manager (works with both Docker and Podman)
         self.manager = get_default_manager()
         self.project_root = project_root
+    
+    def _detect_runtime(self, preferred: Optional[str] = None) -> Tuple[str, str]:
+        """Detect available container runtime.
+        
+        Returns:
+            Tuple of (runtime_command, compose_command)
+        """
+        if preferred:
+            if preferred == "docker" and shutil.which("docker"):
+                if shutil.which("docker-compose"):
+                    return "docker", "docker-compose"
+                elif subprocess.run(["docker", "compose", "version"], capture_output=True).returncode == 0:
+                    return "docker", "docker compose"
+            elif preferred == "podman" and shutil.which("podman"):
+                if shutil.which("podman-compose"):
+                    return "podman", "podman-compose"
+                else:
+                    logger.warning("podman-compose not found. Install with: pip install podman-compose")
+                    if shutil.which("docker-compose"):
+                        logger.info("Falling back to docker-compose with Podman backend")
+                        return "podman", "docker-compose"
+        
+        # Auto-detect
+        if shutil.which("docker"):
+            if shutil.which("docker-compose"):
+                return "docker", "docker-compose"
+            elif subprocess.run(["docker", "compose", "version"], capture_output=True).returncode == 0:
+                return "docker", "docker compose"
+        
+        if shutil.which("podman"):
+            if shutil.which("podman-compose"):
+                return "podman", "podman-compose"
+            elif shutil.which("docker-compose"):
+                logger.info("Using docker-compose with Podman backend")
+                return "podman", "docker-compose"
+        
+        raise RuntimeError(
+            "No container runtime found! Please install Docker or Podman:\n"
+            "Docker: https://docs.docker.com/get-docker/\n"
+            "Podman: https://podman.io/getting-started/installation"
+        )
         
     def start(self, environment: str = "test") -> bool:
-        """Start Docker services using central manager"""
-        logger.info(f"🚀 Starting {environment} environment...")
+        """Start container services using central manager"""
+        logger.info(f"🚀 Starting {environment} environment with {self.runtime}...")
         
-        # Ensure Docker is running first
-        if not self.manager.is_docker_available():
-            logger.info("Docker is not running. Starting Docker...")
-            if not self._start_docker_daemon():
-                logger.error("Failed to start Docker")
+        # Ensure container runtime is available
+        if not self._is_runtime_available():
+            logger.info(f"{self.runtime.title()} is not running. Starting {self.runtime}...")
+            if not self._start_runtime_daemon():
+                logger.error(f"Failed to start {self.runtime}")
                 return False
         
         # Acquire environment from central manager
@@ -82,8 +135,8 @@ class DockerManualControl:
             return False
     
     def stop(self) -> bool:
-        """Stop all Docker services using central manager"""
-        logger.info("🛑 Stopping all services...")
+        """Stop all container services using central manager"""
+        logger.info(f"🛑 Stopping all {self.runtime} services...")
         
         # Get current environment name
         env_name = self.manager._get_environment_name()
@@ -95,9 +148,9 @@ class DockerManualControl:
         return True
     
     def restart(self, services: Optional[List[str]] = None) -> bool:
-        """Restart Docker services using central manager"""
+        """Restart container services using central manager"""
         if services:
-            logger.info(f"🔄 Restarting services: {', '.join(services)}")
+            logger.info(f"🔄 Restarting {self.runtime} services: {', '.join(services)}")
             success = True
             for service in services:
                 if not restart_service(service):
@@ -127,12 +180,12 @@ class DockerManualControl:
         return True
     
     def test(self, test_args: List[str] = None) -> bool:
-        """Run tests with Docker services"""
-        logger.info("🧪 Running tests with Docker...")
+        """Run tests with container services"""
+        logger.info(f"🧪 Running tests with {self.runtime}...")
         
         # Check if services are already running
-        if not self.manager.is_docker_available():
-            logger.info("Docker not running, starting services...")
+        if not self._is_runtime_available():
+            logger.info(f"{self.runtime.title()} not running, starting services...")
             if not self.start("test"):
                 return False
         elif not wait_for_services(timeout=10):
@@ -161,11 +214,11 @@ class DockerManualControl:
     
     def status(self) -> bool:
         """Check status of all services using central manager"""
-        logger.info("📊 Checking service status...")
+        logger.info(f"📊 Checking {self.runtime} service status...")
         
-        # Check if Docker is running
-        if not self.manager.is_docker_available():
-            logger.error("❌ Docker is not running")
+        # Check if runtime is available
+        if not self._is_runtime_available():
+            logger.error(f"❌ {self.runtime.title()} is not running")
             return False
         
         # Get container status from central manager
@@ -185,57 +238,91 @@ class DockerManualControl:
         
         return True
     
-    def _start_docker_daemon(self) -> bool:
-        """Start Docker daemon based on platform"""
-        # Check if Docker is already running
-        if self.manager.is_docker_available():
+    def _is_runtime_available(self) -> bool:
+        """Check if container runtime is available."""
+        try:
+            result = subprocess.run(
+                [self.runtime, "version"],
+                capture_output=True,
+                timeout=5
+            )
+            return result.returncode == 0
+        except:
+            return False
+    
+    def _start_runtime_daemon(self) -> bool:
+        """Start container runtime daemon based on platform and runtime type."""
+        # Check if runtime is already available
+        if self._is_runtime_available():
             return True
         
-        logger.info("Starting Docker daemon...")
+        logger.info(f"Starting {self.runtime} daemon...")
         
-        # Platform-specific Docker startup
-        if sys.platform == "win32":
-            # Windows: Start Docker Desktop
-            docker_desktop = r"C:\Program Files\Docker\Docker\Docker Desktop.exe"
-            if Path(docker_desktop).exists():
-                subprocess.Popen([docker_desktop], shell=True)
-                logger.info("Starting Docker Desktop on Windows...")
-            else:
-                logger.error("Docker Desktop not found")
-                return False
+        # Platform-specific runtime startup
+        if self.runtime == "docker":
+            if sys.platform == "win32":
+                # Windows: Start Docker Desktop
+                docker_desktop = r"C:\Program Files\Docker\Docker\Docker Desktop.exe"
+                if Path(docker_desktop).exists():
+                    subprocess.Popen([docker_desktop], shell=True)
+                    logger.info("Starting Docker Desktop on Windows...")
+                else:
+                    logger.error("Docker Desktop not found")
+                    return False
+                    
+            elif sys.platform == "darwin":
+                # macOS: Start Docker Desktop
+                subprocess.run(["open", "-a", "Docker"], capture_output=True)
+                logger.info("Starting Docker Desktop on macOS...")
                 
-        elif sys.platform == "darwin":
-            # macOS: Start Docker Desktop
-            subprocess.run(["open", "-a", "Docker"], capture_output=True)
-            logger.info("Starting Docker Desktop on macOS...")
-            
-        else:
-            # Linux: Start Docker daemon
-            subprocess.run(["sudo", "systemctl", "start", "docker"], capture_output=True)
-            logger.info("Starting Docker daemon on Linux...")
+            else:
+                # Linux: Start Docker daemon
+                subprocess.run(["sudo", "systemctl", "start", "docker"], capture_output=True)
+                logger.info("Starting Docker daemon on Linux...")
         
-        # Wait for Docker to be ready
+        elif self.runtime == "podman":
+            if sys.platform == "win32":
+                # Windows: Start Podman machine
+                subprocess.run(["podman", "machine", "start"], capture_output=True)
+                logger.info("Starting Podman machine on Windows...")
+                
+            elif sys.platform == "darwin":
+                # macOS: Start Podman machine
+                subprocess.run(["podman", "machine", "start"], capture_output=True)
+                logger.info("Starting Podman machine on macOS...")
+                
+            else:
+                # Linux: Podman runs rootless, no daemon needed
+                logger.info("Podman runs rootless on Linux, no daemon to start")
+                return True
+        
+        # Wait for runtime to be ready
         max_wait = 60
         for i in range(max_wait):
-            if self.manager.is_docker_available():
-                logger.info(f"✅ Docker is ready after {i+1} seconds")
+            if self._is_runtime_available():
+                logger.info(f"✅ {self.runtime.title()} is ready after {i+1} seconds")
                 return True
             time.sleep(1)
             if i % 5 == 0:
-                logger.info(f"Waiting for Docker... ({i}/{max_wait}s)")
+                logger.info(f"Waiting for {self.runtime}... ({i}/{max_wait}s)")
         
-        logger.error(f"❌ Docker failed to start after {max_wait} seconds")
+        logger.error(f"❌ {self.runtime.title()} failed to start after {max_wait} seconds")
         return False
 
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Manual Docker control using central UnifiedDockerManager"
+        description="Manual container control supporting Docker and Podman"
     )
     parser.add_argument(
         "command",
         choices=["start", "stop", "restart", "clean", "test", "status"],
         help="Command to execute"
+    )
+    parser.add_argument(
+        "--runtime",
+        choices=["docker", "podman"],
+        help="Force specific container runtime (auto-detect by default)"
     )
     parser.add_argument(
         "--services",
@@ -256,7 +343,11 @@ def main():
     
     args = parser.parse_args()
     
-    controller = DockerManualControl()
+    try:
+        controller = ContainerManualControl(runtime=args.runtime)
+    except RuntimeError as e:
+        logger.error(str(e))
+        sys.exit(1)
     
     try:
         if args.command == "start":
