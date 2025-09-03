@@ -2,9 +2,9 @@
   "metadata": {
     "version": "3.0.0",
     "category": "configuration",
-    "generated_at": "2025-09-03T07:26:23.493174",
-    "root_directory": "/Users/anthony/Documents/GitHub/netra-apex",
-    "total_literals": 783
+    "generated_at": "2025-09-03T10:26:39.545852",
+    "root_directory": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1",
+    "total_literals": 808
   },
   "literals": {
     "ABORTED": {
@@ -522,8 +522,8 @@
       "value": "BYPASS_STARTUP_VALIDATION",
       "category": "configuration",
       "locations": [
-        "netra_backend/app/smd.py:602",
-        "netra_backend/app/smd.py:654"
+        "netra_backend/app/smd.py:634",
+        "netra_backend/app/smd.py:686"
       ]
     },
     "CACHE_ENABLED": {
@@ -808,8 +808,8 @@
       "value": "CLICKHOUSE_REQUIRED",
       "category": "configuration",
       "locations": [
-        "netra_backend/app/db/clickhouse.py:550",
-        "netra_backend/app/db/clickhouse.py:694",
+        "netra_backend/app/db/clickhouse.py:578",
+        "netra_backend/app/db/clickhouse.py:722",
         "netra_backend/app/db/database_manager.py:1122",
         "netra_backend/app/db/database_manager.py:1743",
         "netra_backend/app/routes/health.py:265",
@@ -947,11 +947,11 @@
       "value": "COMPLETED",
       "category": "configuration",
       "locations": [
-        "frontend/components/SubAgentStatus.tsx:36",
-        "frontend/components/SubAgentStatus.tsx:92",
         "frontend/components/chat/MCPToolIndicator.tsx:26",
         "frontend/components/chat/MCPToolIndicator.tsx:35",
-        "frontend/components/chat/MCPToolIndicator.tsx:131"
+        "frontend/components/chat/MCPToolIndicator.tsx:131",
+        "frontend/components/SubAgentStatus.tsx:36",
+        "frontend/components/SubAgentStatus.tsx:92"
       ]
     },
     "COMPLETE_PARTIAL_MIGRATION": {
@@ -1076,9 +1076,9 @@
       "value": "CONNECTING",
       "category": "configuration",
       "locations": [
-        "frontend/components/InitializationProgress.tsx:10",
         "frontend/components/chat/MCPServerStatus.tsx:29",
         "frontend/components/chat/MCPServerStatus.tsx:39",
+        "frontend/components/InitializationProgress.tsx:10",
         "frontend/providers/EnhancedWebSocketProvider.tsx:19",
         "frontend/providers/EnhancedWebSocketProvider.tsx:399"
       ]
@@ -1382,7 +1382,7 @@
       "value": "DEPRECATED",
       "category": "configuration",
       "locations": [
-        "netra_backend/app/agents/base_agent.py:941",
+        "netra_backend/app/agents/base_agent.py:1115",
         "scripts/consolidate_duplicate_mocks.py:257",
         "scripts/update_spec_timestamps.py:22"
       ]
@@ -1740,7 +1740,7 @@
       "locations": [
         "netra_backend/app/core/configuration_validator.py:688",
         "netra_backend/app/core/error_logging_types.py:18",
-        "netra_backend/app/core/logging_context.py:174",
+        "netra_backend/app/core/logging_context.py:235",
         "netra_backend/app/core/unified_logging.py:132",
         "netra_backend/app/monitoring/websocket_logging_enhanced.py:43",
         "netra_backend/app/routes/config.py:57",
@@ -1960,10 +1960,10 @@
         "netra_backend/app/agents/artifact_validator.py:304",
         "netra_backend/app/agents/execution_tracking/registry.py:31",
         "netra_backend/app/core/error_logger_core.py:137",
-        "frontend/components/SubAgentStatus.tsx:37",
         "frontend/components/chat/MCPToolIndicator.tsx:27",
         "frontend/components/chat/MCPToolIndicator.tsx:36",
         "frontend/components/chat/MCPToolIndicator.tsx:132",
+        "frontend/components/SubAgentStatus.tsx:37",
         "scripts/benchmark_optimization.py:123",
         "scripts/comprehensive_error_hunter.py:101"
       ]
@@ -2076,6 +2076,13 @@
       "category": "configuration",
       "locations": [
         "netra_backend/app/agents/corpus_admin/corpus_upload_handlers.py:157"
+      ]
+    },
+    "FINAL": {
+      "value": "FINAL",
+      "category": "configuration",
+      "locations": [
+        "netra_backend/app/db/clickhouse_schema.py:250"
       ]
     },
     "FIXME": {
@@ -2710,7 +2717,8 @@
       "value": "HOSTNAME",
       "category": "configuration",
       "locations": [
-        "netra_backend/app/core/clickhouse_port_discovery.py:360"
+        "netra_backend/app/core/clickhouse_port_discovery.py:360",
+        "netra_backend/app/core/telemetry_config.py:157"
       ]
     },
     "HOTFIX": {
@@ -2766,13 +2774,13 @@
         "netra_backend/app/core/health/unified_health_checker.py:187",
         "netra_backend/app/core/unified_error_handler.py:305",
         "netra_backend/app/core/unified_error_handler.py:408",
+        "netra_backend/app/middleware/telemetry_middleware.py:210",
         "netra_backend/app/routes/system_info.py:284",
         "netra_backend/app/routes/system_info.py:324",
         "netra_backend/app/services/circuit_breaker/failure_detector.py:324",
         "netra_backend/app/services/circuit_breaker/service_health_monitor.py:272",
         "netra_backend/app/services/circuit_breaker/service_health_monitor.py:278",
-        "netra_backend/app/services/oauth_manager.py:317",
-        "netra_backend/app/services/oauth_manager.py:345"
+        "netra_backend/app/services/oauth_manager.py:317"
       ]
     },
     "HTTPS": {
@@ -2975,6 +2983,29 @@
       "category": "configuration",
       "locations": [
         "scripts/comprehensive_error_hunter.py:259"
+      ]
+    },
+    "JAEGER_AGENT_HOST": {
+      "value": "JAEGER_AGENT_HOST",
+      "category": "configuration",
+      "locations": [
+        "netra_backend/app/core/telemetry_config.py:104"
+      ]
+    },
+    "JAEGER_AGENT_PORT": {
+      "value": "JAEGER_AGENT_PORT",
+      "category": "configuration",
+      "locations": [
+        "netra_backend/app/core/telemetry_config.py:105"
+      ]
+    },
+    "JAEGER_ENDPOINT": {
+      "value": "JAEGER_ENDPOINT",
+      "category": "configuration",
+      "locations": [
+        "netra_backend/app/core/telemetry.py:83",
+        "netra_backend/app/core/telemetry_config.py:98",
+        "netra_backend/app/core/telemetry_config.py:269"
       ]
     },
     "JENKINS_HOME": {
@@ -3327,6 +3358,13 @@
       "category": "configuration",
       "locations": [
         "scripts/update_spec_timestamps.py:25"
+      ]
+    },
+    "LEGACY_GLOBAL": {
+      "value": "LEGACY_GLOBAL",
+      "category": "configuration",
+      "locations": [
+        "netra_backend/app/core/startup_validation.py:201"
       ]
     },
     "LICENSE": {
@@ -3986,7 +4024,7 @@
       "value": "OPEN",
       "category": "configuration",
       "locations": [
-        "netra_backend/app/agents/base_agent.py:684",
+        "netra_backend/app/agents/base_agent.py:850",
         "netra_backend/app/core/async_retry_logic.py:168",
         "netra_backend/app/core/async_retry_logic.py:194",
         "netra_backend/app/core/reliability/unified_reliability_manager.py:544",
@@ -4055,6 +4093,147 @@
         "scripts/staging_validation_e2e.py:498",
         "scripts/validate_gcp_deployment.py:405",
         "shared/cors_config_builder.py:361"
+      ]
+    },
+    "OTEL_BSP_EXPORT_TIMEOUT": {
+      "value": "OTEL_BSP_EXPORT_TIMEOUT",
+      "category": "configuration",
+      "locations": [
+        "netra_backend/app/core/telemetry_config.py:150"
+      ]
+    },
+    "OTEL_BSP_MAX_EXPORT_BATCH_SIZE": {
+      "value": "OTEL_BSP_MAX_EXPORT_BATCH_SIZE",
+      "category": "configuration",
+      "locations": [
+        "netra_backend/app/core/telemetry_config.py:144"
+      ]
+    },
+    "OTEL_BSP_MAX_QUEUE_SIZE": {
+      "value": "OTEL_BSP_MAX_QUEUE_SIZE",
+      "category": "configuration",
+      "locations": [
+        "netra_backend/app/core/telemetry_config.py:141"
+      ]
+    },
+    "OTEL_BSP_SCHEDULE_DELAY": {
+      "value": "OTEL_BSP_SCHEDULE_DELAY",
+      "category": "configuration",
+      "locations": [
+        "netra_backend/app/core/telemetry_config.py:147"
+      ]
+    },
+    "OTEL_CONSOLE_EXPORTER": {
+      "value": "OTEL_CONSOLE_EXPORTER",
+      "category": "configuration",
+      "locations": [
+        "netra_backend/app/core/telemetry.py:133",
+        "netra_backend/app/core/telemetry_config.py:118"
+      ]
+    },
+    "OTEL_ENABLED": {
+      "value": "OTEL_ENABLED",
+      "category": "configuration",
+      "locations": [
+        "netra_backend/app/core/telemetry.py:86",
+        "netra_backend/app/core/telemetry_config.py:81"
+      ]
+    },
+    "OTEL_EXCLUDED_URLS": {
+      "value": "OTEL_EXCLUDED_URLS",
+      "category": "configuration",
+      "locations": [
+        "netra_backend/app/core/telemetry_config.py:135"
+      ]
+    },
+    "OTEL_EXPORTER_OTLP_ENDPOINT": {
+      "value": "OTEL_EXPORTER_OTLP_ENDPOINT",
+      "category": "configuration",
+      "locations": [
+        "netra_backend/app/core/telemetry.py:82",
+        "netra_backend/app/core/telemetry_config.py:87",
+        "netra_backend/app/core/telemetry_config.py:267"
+      ]
+    },
+    "OTEL_EXPORTER_OTLP_HEADERS": {
+      "value": "OTEL_EXPORTER_OTLP_HEADERS",
+      "category": "configuration",
+      "locations": [
+        "netra_backend/app/core/telemetry_config.py:88",
+        "netra_backend/app/core/telemetry_config.py:90"
+      ]
+    },
+    "OTEL_EXPORTER_OTLP_INSECURE": {
+      "value": "OTEL_EXPORTER_OTLP_INSECURE",
+      "category": "configuration",
+      "locations": [
+        "netra_backend/app/core/telemetry_config.py:95"
+      ]
+    },
+    "OTEL_INSTRUMENT_FASTAPI": {
+      "value": "OTEL_INSTRUMENT_FASTAPI",
+      "category": "configuration",
+      "locations": [
+        "netra_backend/app/core/telemetry_config.py:123"
+      ]
+    },
+    "OTEL_INSTRUMENT_REDIS": {
+      "value": "OTEL_INSTRUMENT_REDIS",
+      "category": "configuration",
+      "locations": [
+        "netra_backend/app/core/telemetry_config.py:129"
+      ]
+    },
+    "OTEL_INSTRUMENT_REQUESTS": {
+      "value": "OTEL_INSTRUMENT_REQUESTS",
+      "category": "configuration",
+      "locations": [
+        "netra_backend/app/core/telemetry_config.py:126"
+      ]
+    },
+    "OTEL_INSTRUMENT_SQLALCHEMY": {
+      "value": "OTEL_INSTRUMENT_SQLALCHEMY",
+      "category": "configuration",
+      "locations": [
+        "netra_backend/app/core/telemetry_config.py:132"
+      ]
+    },
+    "OTEL_RESOURCE_ATTRIBUTES": {
+      "value": "OTEL_RESOURCE_ATTRIBUTES",
+      "category": "configuration",
+      "locations": [
+        "netra_backend/app/core/telemetry_config.py:161"
+      ]
+    },
+    "OTEL_SAMPLING_RATE": {
+      "value": "OTEL_SAMPLING_RATE",
+      "category": "configuration",
+      "locations": [
+        "netra_backend/app/core/telemetry_config.py:114"
+      ]
+    },
+    "OTEL_SAMPLING_STRATEGY": {
+      "value": "OTEL_SAMPLING_STRATEGY",
+      "category": "configuration",
+      "locations": [
+        "netra_backend/app/core/telemetry_config.py:108"
+      ]
+    },
+    "OTEL_SERVICE_NAME": {
+      "value": "OTEL_SERVICE_NAME",
+      "category": "configuration",
+      "locations": [
+        "netra_backend/app/core/telemetry.py:80",
+        "netra_backend/app/core/telemetry_config.py:82",
+        "netra_backend/app/core/telemetry_config.py:265"
+      ]
+    },
+    "OTEL_SERVICE_VERSION": {
+      "value": "OTEL_SERVICE_VERSION",
+      "category": "configuration",
+      "locations": [
+        "netra_backend/app/core/telemetry.py:81",
+        "netra_backend/app/core/telemetry_config.py:83"
       ]
     },
     "OWASP_A01_001": {
@@ -4959,11 +5138,11 @@
       "category": "configuration",
       "locations": [
         "netra_backend/app/agents/execution_tracking/registry.py:29",
-        "frontend/components/SubAgentStatus.tsx:35",
-        "frontend/components/SubAgentStatus.tsx:42",
         "frontend/components/chat/MCPToolIndicator.tsx:25",
         "frontend/components/chat/MCPToolIndicator.tsx:34",
-        "frontend/components/chat/MCPToolIndicator.tsx:130"
+        "frontend/components/chat/MCPToolIndicator.tsx:130",
+        "frontend/components/SubAgentStatus.tsx:35",
+        "frontend/components/SubAgentStatus.tsx:42"
       ]
     },
     "RUNNING_IN_DOCKER": {
@@ -5691,12 +5870,12 @@
         "scripts/check_e2e_imports.py:277",
         "scripts/check_schema_imports.py:313",
         "scripts/compliance/reporter.py:253",
+        "scripts/create_clickhouse_tables.py:301",
         "scripts/docker_compose_log_introspector.py:453",
         "scripts/fast_import_checker.py:435",
         "scripts/fix_e2e_imports.py:417",
         "scripts/fix_embedded_setup_imports.py:198",
-        "scripts/fix_imports.py:364",
-        "scripts/fix_malformed_imports.py:243"
+        "scripts/fix_imports.py:364"
       ]
     },
     "SUPERSEDED": {
@@ -5831,7 +6010,7 @@
       "value": "TEST_COLLECTION_MODE",
       "category": "configuration",
       "locations": [
-        "netra_backend/app/agents/base_agent.py:384",
+        "netra_backend/app/agents/base_agent.py:488",
         "netra_backend/app/db/database_manager.py:154",
         "netra_backend/app/db/database_manager.py:163",
         "netra_backend/app/db/postgres_core.py:563"
@@ -6023,16 +6202,16 @@
       "value": "UNKNOWN",
       "category": "configuration",
       "locations": [
+        "netra_backend/app/db/clickhouse_trace_writer.py:422",
         "netra_backend/app/db/database_manager.py:1662",
         "netra_backend/app/routes/agents_execute.py:152",
         "netra_backend/app/routes/agents_execute.py:167",
-        "netra_backend/app/smd.py:1508",
+        "netra_backend/app/smd.py:1540",
         "netra_backend/app/websocket_core/handlers.py:567",
         "auth_service/auth_core/database/staging_validation.py:375",
         "auth_service/auth_core/database/staging_validation.py:376",
         "scripts/compliance_validation_ci.py:162",
-        "scripts/compliance_validation_ci.py:209",
-        "scripts/compliance_validation_ci.py:210"
+        "scripts/compliance_validation_ci.py:209"
       ]
     },
     "UNMAPPED": {
@@ -6121,6 +6300,13 @@
         "netra_backend/app/core/type_validation_rules.py:206"
       ]
     },
+    "Unified Trace Context with W3C Trace Context support.\n\nThis module implements distributed tracing across all layers of the system,\nenabling correlation of requests through agents, sub-agents, and WebSocket events.\n\nW3C Trace Context: https://www.w3.org/TR/trace-context/": {
+      "value": "Unified Trace Context with W3C Trace Context support.\n\nThis module implements distributed tracing across all layers of the system,\nenabling correlation of requests through agents, sub-agents, and WebSocket events.\n\nW3C Trace Context: https://www.w3.org/TR/trace-context/",
+      "category": "configuration",
+      "locations": [
+        "netra_backend/app/core/unified_trace_context.py:1"
+      ]
+    },
     "VALID": {
       "value": "VALID",
       "category": "configuration",
@@ -6183,7 +6369,7 @@
         "netra_backend/app/core/configuration/environment_detector.py:100",
         "netra_backend/app/core/configuration_validator.py:688",
         "netra_backend/app/core/error_logging_types.py:17",
-        "netra_backend/app/core/logging_context.py:186",
+        "netra_backend/app/core/logging_context.py:247",
         "netra_backend/app/routes/config.py:57",
         "netra_backend/app/schemas/monitoring_schemas.py:27",
         "netra_backend/app/websocket_core/validation_integration.py:98",
@@ -6353,6 +6539,7 @@
       "locations": [
         "netra_backend/app/agents/data_sub_agent/clickhouse_recovery.py:144",
         "netra_backend/app/core/schema_sync/utils.py:90",
+        "netra_backend/app/db/clickhouse_trace_writer.py:547",
         "netra_backend/app/services/corpus/search_operations.py:195",
         "netra_backend/app/services/corpus/search_operations.py:369",
         "netra_backend/app/services/database/rollback_manager_postgres.py:92",
