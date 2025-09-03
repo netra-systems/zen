@@ -485,87 +485,83 @@ class AgentInstanceFactory:
                     raise ValueError("No agent registry configured")
             
             # Create fresh agent instance with request-scoped dependencies
-            # CRITICAL: Different agents have different constructor signatures
-            # We need to handle each pattern appropriately
+            # CRITICAL: Prefer factory methods to avoid deprecated global tool_dispatcher warnings
             
             logger.info(f"🔧 Creating agent instance for {agent_name} with class {AgentClass.__name__}")
             
             # Map agent names to their class names for consistency
             agent_class_name = AgentClass.__name__
             
-            # Agents that don't take any parameters
-            no_param_agents = [
-                'TriageSubAgent', 'GoalsTriageSubAgent', 'ReportingSubAgent'
-            ]
-            
-            # ReportingSubAgent takes optional context parameter (removed - now in no_param)
-            optional_context_agents = [
-            ]
-            
-            # Agents that take llm_manager and tool_dispatcher (no name parameter)
-            llm_tool_only_agents = [
-                'DataSubAgent', 'OptimizationsCoreSubAgent', 
-                'ActionsToMeetGoalsSubAgent', 'DataHelperAgent',
-                'SyntheticDataSubAgent'
-            ]
-            
-            # Add debug logging
-            logger.debug(f"🔍 Agent {agent_class_name} categorization:")
-            logger.debug(f"   - Is no_param: {agent_class_name in no_param_agents}")
-            logger.debug(f"   - Is llm_tool_only: {agent_class_name in llm_tool_only_agents}")
-            
             try:
-                # Check by class name for consistency
-                if agent_class_name in no_param_agents:
-                    logger.info(f"✅ Creating {agent_name} ({agent_class_name}) with no parameters")
-                    agent = AgentClass()
-                elif agent_class_name in optional_context_agents:
-                    logger.info(f"✅ Creating {agent_name} ({agent_class_name}) with optional context")
-                    agent = AgentClass(context=user_context)
-                elif agent_class_name in llm_tool_only_agents:
-                    if llm_manager and tool_dispatcher:
-                        logger.info(f"✅ Creating {agent_name} ({agent_class_name}) with llm_manager and tool_dispatcher only")
-                        agent = AgentClass(
-                            llm_manager=llm_manager,
-                            tool_dispatcher=tool_dispatcher
-                        )
-                    else:
-                        logger.warning(f"⚠️ {agent_name} ({agent_class_name}) requires llm_manager and tool_dispatcher, attempting no-param init")
-                        agent = AgentClass()
+                # FIRST: Check if agent has create_agent_with_context factory method (preferred)
+                if hasattr(AgentClass, 'create_agent_with_context'):
+                    logger.info(f"✅ Using create_agent_with_context factory for {agent_name} ({agent_class_name})")
+                    agent = AgentClass.create_agent_with_context(user_context)
                 else:
-                    # Try different parameter combinations based on what the agent accepts
-                    logger.info(f"🔧 Trying parameter combinations for {agent_name} ({agent_class_name})")
+                    # FALLBACK: Use legacy constructor patterns (may trigger deprecation warnings)
+                    logger.debug(f"⚠️ No factory method found for {agent_class_name}, using legacy constructor")
                     
-                    # First try no parameters (simpler agents)
-                    try:
-                        logger.debug(f"   Trying: no parameters")
+                    # Agents that don't take any parameters
+                    no_param_agents = [
+                        'TriageSubAgent', 'GoalsTriageSubAgent', 'ReportingSubAgent'
+                    ]
+                    
+                    # Agents that take llm_manager and tool_dispatcher (may trigger deprecation)
+                    llm_tool_only_agents = [
+                        'DataSubAgent', 'OptimizationsCoreSubAgent', 
+                        'ActionsToMeetGoalsSubAgent', 'DataHelperAgent',
+                        'SyntheticDataSubAgent'
+                    ]
+                    
+                    # Check by class name for consistency
+                    if agent_class_name in no_param_agents:
+                        logger.info(f"✅ Creating {agent_name} ({agent_class_name}) with no parameters")
                         agent = AgentClass()
-                        logger.info(f"✅ Created {agent_name} with no parameters")
-                    except TypeError as e1:
-                        # Then try with llm_manager and tool_dispatcher
+                    elif agent_class_name in llm_tool_only_agents:
                         if llm_manager and tool_dispatcher:
-                            try:
-                                logger.debug(f"   Trying: llm_manager + tool_dispatcher")
-                                agent = AgentClass(
-                                    llm_manager=llm_manager,
-                                    tool_dispatcher=tool_dispatcher
-                                )
-                                logger.info(f"✅ Created {agent_name} with llm_manager and tool_dispatcher")
-                            except TypeError as e2:
-                                # Log detailed error for debugging
-                                logger.error(f"❌ Could not instantiate {agent_name}:")
-                                logger.error(f"   No params error: {e1}")
-                                logger.error(f"   LLM+tool error: {e2}") 
-                                raise RuntimeError(f"Could not instantiate {agent_name}: tried no params ({e1}), tried llm+tool ({e2})")
+                            logger.warning(f"⚠️ Creating {agent_name} ({agent_class_name}) with tool_dispatcher (may trigger deprecation warning)")
+                            agent = AgentClass(
+                                llm_manager=llm_manager,
+                                tool_dispatcher=tool_dispatcher
+                            )
                         else:
-                            raise RuntimeError(f"Could not instantiate {agent_name} without params and no llm/tool available: {e1}")
+                            logger.warning(f"⚠️ {agent_name} ({agent_class_name}) requires llm_manager and tool_dispatcher, attempting no-param init")
+                            agent = AgentClass()
                     else:
-                        # No llm_manager/tool_dispatcher available, try no parameters
+                        # Try different parameter combinations based on what the agent accepts
+                        logger.info(f"🔧 Trying parameter combinations for {agent_name} ({agent_class_name})")
+                        
+                        # First try no parameters (simpler agents)
                         try:
+                            logger.debug(f"   Trying: no parameters")
                             agent = AgentClass()
                             logger.info(f"✅ Created {agent_name} with no parameters")
-                        except TypeError:
-                            raise RuntimeError(f"Could not instantiate {agent_name} without llm_manager/tool_dispatcher")
+                        except TypeError as e1:
+                            # Then try with llm_manager and tool_dispatcher
+                            if llm_manager and tool_dispatcher:
+                                try:
+                                    logger.debug(f"   Trying: llm_manager + tool_dispatcher")
+                                    agent = AgentClass(
+                                        llm_manager=llm_manager,
+                                        tool_dispatcher=tool_dispatcher
+                                    )
+                                    logger.info(f"✅ Created {agent_name} with llm_manager and tool_dispatcher")
+                                except TypeError as e2:
+                                    # Log detailed error for debugging
+                                    logger.error(f"❌ Could not instantiate {agent_name}:")
+                                    logger.error(f"   No params error: {e1}")
+                                    logger.error(f"   LLM+tool error: {e2}") 
+                                    raise RuntimeError(f"Could not instantiate {agent_name}: tried no params ({e1}), tried llm+tool ({e2})")
+                            else:
+                                raise RuntimeError(f"Could not instantiate {agent_name} without params and no llm/tool available: {e1}")
+                        else:
+                            # No llm_manager/tool_dispatcher available, try no parameters
+                            try:
+                                agent = AgentClass()
+                                logger.info(f"✅ Created {agent_name} with no parameters")
+                            except TypeError:
+                                raise RuntimeError(f"Could not instantiate {agent_name} without llm_manager/tool_dispatcher")
+                                
             except Exception as e:
                 logger.error(f"❌ Failed to instantiate {agent_name}: {e}")
                 raise RuntimeError(f"Could not instantiate {agent_name}: {e}")
