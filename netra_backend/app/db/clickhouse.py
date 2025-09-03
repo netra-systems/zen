@@ -790,7 +790,7 @@ class ClickHouseService:
         # Fallback to standard circuit breaker execution
         try:
             self._metrics["queries"] += 1
-            result = await self._execute_with_circuit_breaker(query, params)
+            result = await self._execute_with_circuit_breaker(query, params, user_id=user_id)
             
             # Cache successful read results
             if query.lower().strip().startswith("select") and result:
@@ -802,8 +802,14 @@ class ClickHouseService:
             logger.error(f"ClickHouse query failed: {e}")
             raise
     
-    async def _execute_with_circuit_breaker(self, query: str, params: Optional[Dict[str, Any]] = None) -> List[Dict[str, Any]]:
-        """Execute query with circuit breaker protection."""
+    async def _execute_with_circuit_breaker(self, query: str, params: Optional[Dict[str, Any]] = None, user_id: Optional[str] = None) -> List[Dict[str, Any]]:
+        """Execute query with circuit breaker protection.
+        
+        Args:
+            query: SQL query to execute
+            params: Optional query parameters
+            user_id: Optional user identifier for cache isolation
+        """
         async def _execute():
             if not self._client:
                 await self.initialize()
