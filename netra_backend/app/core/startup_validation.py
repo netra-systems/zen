@@ -136,75 +136,31 @@ class StartupValidator:
     async def _validate_tools(self, app) -> None:
         """Validate tool registration and dispatcher."""
         try:
-            # In UserContext-based architecture, tool_dispatcher is None by design
-            # Check for tool_classes configuration instead
-            if hasattr(app.state, 'tool_dispatcher') and app.state.tool_dispatcher:
-                # Legacy path - validate global tool dispatcher if it exists
-                dispatcher = app.state.tool_dispatcher
-                
-                # 🔧 DEBUG: Log dispatcher details
-                self.logger.info(f"🔍 Validating tool dispatcher: {dispatcher.__class__.__name__}")
-                self.logger.info(f"🔍 Dispatcher ID: {getattr(dispatcher, 'dispatcher_id', 'unknown')}")
-                
-                # Check if tools are registered
-                tool_count = 0
-                if hasattr(dispatcher, 'tools'):
-                    tools_data = dispatcher.tools
-                    tool_count = len(tools_data) if tools_data else 0
-                    self.logger.info(f"🔍 Found {tool_count} tools via dispatcher.tools property")
-                    if tool_count > 0 and isinstance(tools_data, dict):
-                        self.logger.info(f"🔍 Tool names: {list(tools_data.keys())[:5]}...")
-                elif hasattr(dispatcher, '_tools'):
-                    tool_count = len(dispatcher._tools) if dispatcher._tools else 0
-                    self.logger.info(f"🔍 Found {tool_count} tools via dispatcher._tools")
-                else:
-                    self.logger.warning("⚠️ Dispatcher has neither 'tools' nor '_tools' attribute")
-                
-                # Check WebSocket enhancement
-                websocket_enhanced = getattr(dispatcher, '_websocket_enhanced', False)
-                
-                validation = ComponentValidation(
-                    name="Tool Dispatcher",
-                    category="Tools",
-                    expected_min=1,  # At least one tool should be registered
-                    actual_count=tool_count,
-                    status=self._get_status(tool_count, 1, is_critical=True),
-                    message=f"Registered {tool_count} tools, WebSocket: {websocket_enhanced}",
-                    is_critical=True,
-                    metadata={
-                        "websocket_enhanced": websocket_enhanced,
-                        "tool_count": tool_count
-                    }
-                )
-                
-                self.validations.append(validation)
-                
-                if tool_count == 0:
-                    self.logger.warning("⚠️ ZERO TOOLS REGISTERED in tool dispatcher")
-                    
-                if not websocket_enhanced:
-                    self.logger.warning("⚠️ Tool dispatcher NOT enhanced with WebSocket notifications")
-                else:
-                    self.logger.info(f"✓ Tool Dispatcher: {tool_count} tools, WebSocket enhanced")
-                    
-            elif hasattr(app.state, 'tool_classes') and app.state.tool_classes:
-                # UserContext-based path - validate tool configuration
+            # UserContext-based architecture: tool_dispatcher is None by design
+            # Validate tool configuration and factories instead
+            
+            # Check for tool_classes configuration (REQUIRED)
+            if hasattr(app.state, 'tool_classes') and app.state.tool_classes:
                 tool_classes = app.state.tool_classes
                 tool_count = len(tool_classes) if tool_classes else 0
                 
                 self.logger.info(f"🔍 UserContext mode: {tool_count} tool classes configured")
                 
+                # Check for websocket_bridge_factory (CRITICAL for per-user WebSocket)
+                has_bridge_factory = hasattr(app.state, 'websocket_bridge_factory') and app.state.websocket_bridge_factory is not None
+                
                 validation = ComponentValidation(
                     name="Tool Configuration",
                     category="Tools",
-                    expected_min=1,  # At least one tool class should be configured
+                    expected_min=4,  # Expected: DataHelperTool, DeepResearchTool, ReliabilityScorerTool, SandboxedInterpreterTool
                     actual_count=tool_count,
-                    status=self._get_status(tool_count, 1, is_critical=True),
-                    message=f"Configured {tool_count} tool classes for UserContext",
+                    status=self._get_status(tool_count, 4, is_critical=True),
+                    message=f"Configured {tool_count} tool classes for UserContext, Bridge Factory: {'✓' if has_bridge_factory else '✗'}",
                     is_critical=True,
                     metadata={
                         "mode": "UserContext",
-                        "tool_count": tool_count
+                        "tool_count": tool_count,
+                        "websocket_bridge_factory": has_bridge_factory
                     }
                 )
                 
@@ -212,10 +168,47 @@ class StartupValidator:
                 
                 if tool_count > 0:
                     self.logger.info(f"✓ Tool Configuration: {tool_count} tools ready for UserContext creation")
+                    if has_bridge_factory:
+                        self.logger.info(f"✓ WebSocketBridgeFactory configured for per-user WebSocket handling")
+                    else:
+                        self.logger.warning("⚠️ WebSocketBridgeFactory NOT configured - per-user WebSocket isolation may fail")
                 else:
                     self.logger.warning("⚠️ NO TOOLS CONFIGURED for UserContext")
+                    
+            # Legacy fallback path - should not be used in UserContext architecture
+            elif hasattr(app.state, 'tool_dispatcher') and app.state.tool_dispatcher:
+                # This indicates incorrect configuration - should be None in UserContext mode
+                self.logger.warning("⚠️ LEGACY: Global tool_dispatcher found - should be None in UserContext architecture")
+                dispatcher = app.state.tool_dispatcher
+                
+                # Still validate it if it exists (for backward compatibility during migration)
+                tool_count = 0
+                if hasattr(dispatcher, 'tools'):
+                    tools_data = dispatcher.tools
+                    tool_count = len(tools_data) if tools_data else 0
+                elif hasattr(dispatcher, '_tools'):
+                    tool_count = len(dispatcher._tools) if dispatcher._tools else 0
+                
+                validation = ComponentValidation(
+                    name="Tool Dispatcher (LEGACY)",
+                    category="Tools",
+                    expected_min=0,  # Should be 0 in UserContext mode
+                    actual_count=tool_count,
+                    status=ComponentStatus.WARNING,  # Always warning - shouldn't exist
+                    message=f"LEGACY: Global dispatcher with {tool_count} tools - migrate to UserContext",
+                    is_critical=False,
+                    metadata={
+                        "mode": "LEGACY_GLOBAL",
+                        "tool_count": tool_count
+                    }
+                )
+                
+                self.validations.append(validation)
+                self.logger.warning(f"⚠️ LEGACY Tool Dispatcher: {tool_count} tools - MIGRATE TO UserContext")
+                    
             else:
-                self._add_failed_validation("Tool System", "Tools", "Neither dispatcher nor UserContext configuration found")
+                # Neither UserContext nor legacy configuration found
+                self._add_failed_validation("Tool System", "Tools", "Neither UserContext configuration nor legacy dispatcher found")
                 
         except Exception as e:
             self._add_failed_validation("Tool Validation", "Tools", str(e))
@@ -387,6 +380,63 @@ class StartupValidator:
                 
             except Exception as e:
                 self._add_failed_validation(display_name, "Services", str(e))
+        
+        # Validate UserContext factory patterns (CRITICAL for per-user isolation)
+        factory_services = [
+            ("execution_engine_factory", "ExecutionEngineFactory", True, "Per-user execution isolation"),
+            ("websocket_bridge_factory", "WebSocketBridgeFactory", True, "Per-user WebSocket isolation"),
+            ("websocket_connection_pool", "WebSocketConnectionPool", True, "WebSocket connection management"),
+            ("agent_instance_factory", "AgentInstanceFactory", False, "Agent instance creation"),
+            ("factory_adapter", "FactoryAdapter", False, "Migration compatibility")
+        ]
+        
+        self.logger.info("Validating UserContext Factory Patterns...")
+        
+        for attr_name, display_name, is_critical, description in factory_services:
+            try:
+                if hasattr(app.state, attr_name):
+                    factory = getattr(app.state, attr_name)
+                    if factory is not None:
+                        validation = ComponentValidation(
+                            name=display_name,
+                            category="Factories",
+                            expected_min=1,
+                            actual_count=1,
+                            status=ComponentStatus.HEALTHY,
+                            message=f"{display_name} initialized - {description}",
+                            is_critical=is_critical
+                        )
+                        self.logger.info(f"✓ {display_name}: Initialized - {description}")
+                    else:
+                        validation = ComponentValidation(
+                            name=display_name,
+                            category="Factories",
+                            expected_min=1,
+                            actual_count=0,
+                            status=ComponentStatus.CRITICAL if is_critical else ComponentStatus.WARNING,
+                            message=f"{display_name} is None - {description} unavailable",
+                            is_critical=is_critical
+                        )
+                        self.logger.warning(f"⚠️ {display_name} is None - {description} unavailable")
+                else:
+                    validation = ComponentValidation(
+                        name=display_name,
+                        category="Factories",
+                        expected_min=1,
+                        actual_count=0,
+                        status=ComponentStatus.CRITICAL if is_critical else ComponentStatus.WARNING,
+                        message=f"{display_name} not found - {description} missing",
+                        is_critical=is_critical
+                    )
+                    if is_critical:
+                        self.logger.warning(f"⚠️ {display_name} not found - {description} missing")
+                    else:
+                        self.logger.info(f"ℹ️ {display_name} not configured - {description} optional")
+                    
+                self.validations.append(validation)
+                
+            except Exception as e:
+                self._add_failed_validation(display_name, "Factories", str(e))
     
     async def _validate_middleware(self, app) -> None:
         """Validate middleware stack."""

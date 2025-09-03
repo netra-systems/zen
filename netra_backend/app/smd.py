@@ -538,10 +538,12 @@ class StartupOrchestrator:
             'agent_websocket_bridge': 'WebSocket Bridge (real-time events)'
         }
         
-        # For UserContext-based pattern, verify configuration instead
+        # For UserContext-based pattern, verify configuration and factories
         usercontext_configs = {
             'tool_classes': 'Tool Classes (for per-user tool creation)',
-            # websocket_bridge_factory is initialized later in _initialize_factory_patterns
+            'websocket_bridge_factory': 'WebSocketBridgeFactory (per-user WebSocket isolation)',
+            'execution_engine_factory': 'ExecutionEngineFactory (per-user execution isolation)',
+            'websocket_connection_pool': 'WebSocketConnectionPool (connection management)'
         }
         
         missing_services = []
@@ -555,13 +557,28 @@ class StartupOrchestrator:
                 if service is None:
                     none_services.append(f"{service_name} ({description})")
         
-        # Check UserContext configurations
+        # Check UserContext configurations and factories
         missing_configs = []
+        none_configs = []
         for config_name, description in usercontext_configs.items():
             if not hasattr(self.app.state, config_name):
-                missing_configs.append(f"{config_name} ({description})")
+                # websocket_bridge_factory might be initialized later, so only warn
+                if config_name == 'websocket_bridge_factory':
+                    self.logger.warning(f"    ⚠ {config_name} not yet initialized - will be created in factory pattern phase")
+                elif config_name == 'execution_engine_factory':
+                    self.logger.warning(f"    ⚠ {config_name} not yet initialized - will be created in factory pattern phase")
+                elif config_name == 'websocket_connection_pool':
+                    self.logger.warning(f"    ⚠ {config_name} not yet initialized - will be created in factory pattern phase")
+                else:
+                    missing_configs.append(f"{config_name} ({description})")
+            else:
+                config_value = getattr(self.app.state, config_name)
+                if config_value is None:
+                    none_configs.append(f"{config_name} ({description})")
         
-        if missing_services or none_services or missing_configs:
+        # Only fail if critical non-factory services are missing
+        # Factories are initialized in _initialize_factory_patterns which happens later
+        if missing_services or none_services or (missing_configs and 'tool_classes' in ' '.join(missing_configs)):
             error_msg = "CRITICAL SERVICE VALIDATION FAILED:\n"
             if missing_services:
                 error_msg += f"  Missing services: {', '.join(missing_services)}\n"
@@ -569,9 +586,11 @@ class StartupOrchestrator:
                 error_msg += f"  None services: {', '.join(none_services)}\n"
             if missing_configs:
                 error_msg += f"  Missing UserContext configs: {', '.join(missing_configs)}\n"
+            if none_configs:
+                error_msg += f"  None UserContext configs: {', '.join(none_configs)}\n"
             raise DeterministicStartupError(error_msg)
         
-        self.logger.info("    ✓ All critical services validated")
+        self.logger.info("    ✓ All critical services validated (factories will be initialized in next phase)")
     
     async def _run_comprehensive_validation(self) -> None:
         """Run comprehensive startup validation."""
