@@ -139,12 +139,23 @@ class StartupValidator:
             if hasattr(app.state, 'tool_dispatcher') and app.state.tool_dispatcher:
                 dispatcher = app.state.tool_dispatcher
                 
+                # 🔧 DEBUG: Log dispatcher details
+                self.logger.info(f"🔍 Validating tool dispatcher: {dispatcher.__class__.__name__}")
+                self.logger.info(f"🔍 Dispatcher ID: {getattr(dispatcher, 'dispatcher_id', 'unknown')}")
+                
                 # Check if tools are registered
                 tool_count = 0
                 if hasattr(dispatcher, 'tools'):
-                    tool_count = len(dispatcher.tools) if dispatcher.tools else 0
+                    tools_data = dispatcher.tools
+                    tool_count = len(tools_data) if tools_data else 0
+                    self.logger.info(f"🔍 Found {tool_count} tools via dispatcher.tools property")
+                    if tool_count > 0 and isinstance(tools_data, dict):
+                        self.logger.info(f"🔍 Tool names: {list(tools_data.keys())[:5]}...")
                 elif hasattr(dispatcher, '_tools'):
                     tool_count = len(dispatcher._tools) if dispatcher._tools else 0
+                    self.logger.info(f"🔍 Found {tool_count} tools via dispatcher._tools")
+                else:
+                    self.logger.warning("⚠️ Dispatcher has neither 'tools' nor '_tools' attribute")
                 
                 # Check WebSocket enhancement
                 websocket_enhanced = getattr(dispatcher, '_websocket_enhanced', False)

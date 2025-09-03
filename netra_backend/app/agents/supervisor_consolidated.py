@@ -176,7 +176,10 @@ class SupervisorAgent(BaseAgent):
                 logger.info(f"🔧 Creating ToolDispatcher with websocket_manager type: {type(actual_websocket_manager) if actual_websocket_manager else 'None'}")
                 logger.info(f"🔧 User tools available: {len(self._get_user_tools(context)) if self._get_user_tools(context) else 0}")
                 
-                async with ToolDispatcher.create_scoped_dispatcher_context(
+                # CRITICAL: create_scoped_dispatcher_context returns a function, we need to call it
+                from netra_backend.app.agents.tool_executor_factory import isolated_tool_dispatcher_scope
+                
+                async with isolated_tool_dispatcher_scope(
                     user_context=context,
                     tools=self._get_user_tools(context),
                     websocket_manager=actual_websocket_manager  # Pass actual WebSocketManager, not emitter
