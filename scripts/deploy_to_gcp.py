@@ -58,7 +58,7 @@ class ServiceConfig:
     cpu: str = "1"
     min_instances: int = 0
     max_instances: int = 10
-    timeout: int = 300
+    timeout: int = 600
 
 
 class GCPDeployer:
