@@ -21,6 +21,7 @@
 - **[User Context Architecture](../USER_CONTEXT_ARCHITECTURE.md)** - Factory patterns and execution engines
 - [3-Tier Persistence Architecture](./3tier_persistence_architecture.md) - Database layer design
 - [Agent Golden Pattern Guide](./agent_golden_pattern_guide.md) - Best practices for agent development
+- [Critical Bug Fix Documentation](./critical_bug_fixes/) - Documented fixes and audit reports
 
 #### Agents & Tools
 - **[Agent Architecture Disambiguation Guide](./AGENT_ARCHITECTURE_DISAMBIGUATION_GUIDE.md)** - Comprehensive disambiguation of agent components
@@ -50,6 +51,7 @@
 - [Agent Testing Root Cause Summary](./agents/AGENT_TESTING_ROOT_CAUSE_SUMMARY.md)
 - [Phase 0 Completion Report](../PHASE_0_COMPLETION_REPORT.md)
 - [Docker Backend Five Whys Report](../DOCKER_BACKEND_FIVE_WHYS_BUG_REPORT.md)
+- [WebSocket Thread Association Tests](../tests/mission_critical/test_websocket_thread_association.py) - Verification tests for thread routing
 
 ### 🚀 Performance & Optimization
 
@@ -127,9 +129,11 @@ The system uses factory patterns extensively:
 
 1. **[User Context Architecture](../USER_CONTEXT_ARCHITECTURE.md)** - Start here for system overview
 2. **[Agent Architecture Disambiguation Guide](./AGENT_ARCHITECTURE_DISAMBIGUATION_GUIDE.md)** - Clarify component relationships
-3. [Agent System Architecture](./AGENT_SYSTEM_ARCHITECTURE.md) - Understand agent execution
-4. [Tool Dispatcher Migration Guide](../TOOL_DISPATCHER_MIGRATION_GUIDE.md) - Learn isolation patterns
-5. [WebSocket Modernization Report](../WEBSOCKET_MODERNIZATION_REPORT.md) - Event delivery system
+3. **[Golden Agent Index](./GOLDEN_AGENT_INDEX.md)** - Definitive agent implementation patterns
+4. [Agent System Architecture](./AGENT_SYSTEM_ARCHITECTURE.md) - Understand agent execution
+5. [Tool Dispatcher Migration Guide](../TOOL_DISPATCHER_MIGRATION_GUIDE.md) - Learn isolation patterns
+6. [WebSocket Modernization Report](../WEBSOCKET_MODERNIZATION_REPORT.md) - Event delivery system
+7. [Learnings Index](../SPEC/learnings/index.xml) - Critical patterns and known issues
 
 ## 🛠️ Development Guidelines
 

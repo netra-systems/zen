@@ -3,6 +3,13 @@
 ## Overview
 This document presents the new user context architecture with Factory patterns and execution isolation at multiple levels of detail.
 
+## Related Documentation
+- **[Documentation Hub](./docs/index.md)** - Central documentation index
+- **[Agent Architecture Disambiguation Guide](./docs/AGENT_ARCHITECTURE_DISAMBIGUATION_GUIDE.md)** - Clarifies component relationships
+- **[Golden Agent Index](./docs/GOLDEN_AGENT_INDEX.md)** - Definitive agent implementation patterns
+- **[WebSocket Thread Association Learning](./SPEC/learnings/websocket_thread_association_critical_20250903.xml)** - Critical thread routing patterns
+- **[Tool Dispatcher Migration Guide](./TOOL_DISPATCHER_MIGRATION_GUIDE.md)** - Migration to request-scoped dispatchers
+
 ## High-Level Architecture Overview
 
 ```mermaid

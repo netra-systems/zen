@@ -71,6 +71,8 @@
             <learning>websocket_agent_integration_critical.xml</learning>
             <learning>../../USER_CONTEXT_ARCHITECTURE.md</learning>
             <learning>../../docs/AGENT_ARCHITECTURE_DISAMBIGUATION_GUIDE.md</learning>
+            <learning>../../docs/critical_bug_fixes/websocket_thread_association_audit_20250903.md</learning>
+            <learning>../../tests/mission_critical/test_websocket_thread_association.py</learning>
         </related-learnings>
     </learning>
     
