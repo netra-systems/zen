@@ -64,6 +64,7 @@ class CORSFixMiddleware(BaseHTTPMiddleware):
         
         try:
             # Get the response from the next middleware
+            # call_next is always a callable in FastAPI middleware
             response = await call_next(request)
         except Exception as e:
             # On error, create an error response with CORS headers
