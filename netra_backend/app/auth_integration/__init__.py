@@ -18,11 +18,11 @@ This module provides:
 # Import from parent dependencies.py file for backward compatibility
 # NOTE: Conditional import to avoid circular dependency with schemas
 try:
-    from netra_backend.app.dependencies import DbDep, get_db_dependency, get_llm_manager
+    from netra_backend.app.dependencies import DbDep, get_request_scoped_db_session, get_llm_manager
 except ImportError:
     # Handle circular import during schema initialization
     DbDep = None
-    get_db_dependency = None
+    get_request_scoped_db_session = None
     get_llm_manager = None
 
 # Auth dependency functions
@@ -163,4 +163,4 @@ __all__ = [
 
 # Add dependency items if available
 if DbDep is not None:
-    __all__.extend(['DbDep', 'get_db_dependency', 'get_llm_manager'])
+    __all__.extend(['DbDep', 'get_request_scoped_db_session', 'get_llm_manager'])

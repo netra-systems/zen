@@ -24,13 +24,23 @@ def _validate_session_type(session) -> None:
     logger.debug(f"Dependency injected session type: {type(session).__name__}")
 
 
-async def get_db_dependency() -> AsyncGenerator[AsyncSession, None]:
-    """Wrapper for database dependency with validation.
+async def get_request_scoped_db_session() -> AsyncGenerator[AsyncSession, None]:
+    """Request-scoped database session with validation.
     
     Uses single source of truth from netra_backend.app.database.
     """
     async for session in get_db():
         _validate_session_type(session)
+        yield session
+
+# Alias for backward compatibility
+async def get_db_dependency() -> AsyncGenerator[AsyncSession, None]:
+    """DEPRECATED: Use get_request_scoped_db_session instead.
+    
+    Kept for backward compatibility.
+    """
+    logger.warning("Using deprecated get_db_dependency - consider get_request_scoped_db_session")
+    async for session in get_request_scoped_db_session():
         yield session
 
 # LEGACY COMPATIBILITY: get_db_session for backward compatibility
@@ -39,13 +49,13 @@ async def get_db_session() -> AsyncGenerator[AsyncSession, None]:
     
     Use get_db_dependency instead for new code.
     """
-    async for session in get_db_dependency():
+    async for session in get_request_scoped_db_session():
         yield session
 
 
 async def get_security_service(
     request: Request,
-    db: AsyncSession = Depends(get_db_dependency)
+    db: AsyncSession = Depends(get_request_scoped_db_session)
 ) -> SecurityService:
     """Get security service instance."""
     return SecurityService(db)

@@ -37,7 +37,7 @@ from netra_backend.app.clients.auth_client_core import AuthServiceClient
 auth_client = AuthServiceClient()
 from netra_backend.app.db.models_postgres import User
 from netra_backend.app.database import get_db_session
-from netra_backend.app.dependencies import get_db_dependency as get_db
+from netra_backend.app.dependencies import get_request_scoped_db_session as get_db
 
 # Note: Password hashing is handled by the auth service, not directly here
 
