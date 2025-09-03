@@ -55,6 +55,7 @@
 
 ### 🚀 Performance & Optimization
 
+- **[Performance Metrics User Guide](./PERFORMANCE_METRICS_USER_GUIDE.md)** 📊 - **NEW**: Comprehensive guide to performance timing and metrics collection
 - [Agent Performance Dependencies](./AGENT_PERFORMANCE_DEPENDENCIES_EXPLAINED.md)
 - [Agent Performance Real Issues](./AGENT_PERFORMANCE_REAL_ISSUES.md)
 - [Alpine Containers Guide](./alpine_containers.md) - Container optimization

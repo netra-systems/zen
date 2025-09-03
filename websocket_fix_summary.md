@@ -1,69 +1,104 @@
-# WebSocket Sub-Agent Communication Fix Summary
+# WebSocket Thread Routing and Message Delivery Fix Summary
 
-## Problem
-Sub-agents were not sending WebSocket messages to users because the `AgentInstanceFactory`'s `_websocket_bridge` was None when creating sub-agents, causing all WebSocket events to fail silently.
+## Problem Statement
+WebSocket messages from agents were not reaching users due to thread ID resolution failures. The error "No connections found for thread thread_13679e4dcc38403a_run_1756919162904_9adf1f09" indicated a critical breakdown in the message routing system.
 
-## Root Cause
-The `AgentInstanceFactory` is a singleton that was being retrieved before configuration. The factory was only configured with the WebSocket bridge during the supervisor's `execute()` method, but by then it might be too late for some sub-agents.
+## Root Causes Identified
 
-## Solution Implemented
+1. **Thread ID Format Mismatch**: The system was using composite run_ids (format: `thread_{thread_id}_run_{timestamp}_{unique}`) but the WebSocket manager expected only the thread_id portion (`thread_{thread_id}`).
 
-### 1. Pre-Configure Factory in Supervisor Init
-**File:** `netra_backend/app/agents/supervisor_consolidated.py`
-- Added immediate configuration of AgentInstanceFactory with WebSocket bridge in supervisor's `__init__` method
-- This ensures the factory always has a valid WebSocket bridge before any sub-agents are created
-- Configuration happens again in `execute()` to add registries, but the critical WebSocket bridge is already set
+2. **Dual ID Management Systems**: Two different SSOT violations:
+   - `IDManager` in `app/core/id_manager.py` using format: `run_{thread_id}_{uuid}`
+   - `run_id_generator` module using format: `thread_{thread_id}_run_{timestamp}_{uuid}`
 
-### 2. Added Validation and Loud Logging
-**File:** `netra_backend/app/agents/supervisor/agent_instance_factory.py`
-- Added validation to throw RuntimeError if WebSocket bridge is None when creating agents
-- Enhanced logging to show WebSocket bridge type and status
-- Added detailed error messages explaining the failure
+3. **Incomplete Thread ID Extraction**: The agent_websocket_bridge was not properly extracting thread_ids from the composite run_id format.
 
-**File:** `netra_backend/app/agents/mixins/websocket_bridge_adapter.py`
-- Changed silent failures to loud warnings
-- Added detailed logging showing bridge and run_id status
-- Shows exactly why events are not being sent
+## Solutions Implemented
 
-### 3. Validation in Supervisor
-**File:** `netra_backend/app/agents/supervisor_consolidated.py`
-- Added validation to ensure websocket_bridge is provided to supervisor
-- Added logging to confirm WebSocket bridge type
+### 1. Enhanced Thread ID Extraction (agent_websocket_bridge.py)
 
-## Key Code Changes
-
-### Supervisor Init (Lines 100-114)
+Added Pattern 1.5 to handle the standard composite format:
 ```python
-# CRITICAL FIX: Pre-configure the factory with WebSocket bridge IMMEDIATELY
-# This ensures sub-agents created later will have WebSocket events working
-logger.info(f"🔧 Pre-configuring agent instance factory with WebSocket bridge in supervisor init")
-try:
-    self.agent_instance_factory.configure(
-        websocket_bridge=websocket_bridge,
-        websocket_manager=getattr(websocket_bridge, 'websocket_manager', None),
-        agent_class_registry=self.agent_class_registry
-    )
-    logger.info(f"✅ Factory pre-configured with WebSocket bridge to prevent sub-agent event failures")
-except Exception as e:
-    logger.warning(f"⚠️ Could not pre-configure factory in init (will configure in execute): {e}")
+# Pattern 1.5: Use the standard extraction function for composite format
+# This handles thread_{thread_id}_run_{timestamp}_{unique} format (run_id_generator format)
+if run_id.startswith("thread_") and "_run_" in run_id:
+    try:
+        # Use the canonical extraction function from run_id_generator
+        extracted = extract_thread_id_from_run_id(run_id)
+        if extracted:
+            # The extraction returns without "thread_" prefix, so add it back
+            thread_id = f"thread_{extracted}"
+            if self._is_valid_thread_format(thread_id):
+                logger.debug(f"PATTERN 1.5 MATCH: run_id={run_id} → extracted thread_id={thread_id}")
+                return thread_id
+    except Exception as e:
+        logger.debug(f"PATTERN 1.5 EXCEPTION: Failed to extract thread from {run_id}: {e}")
 ```
 
-### Factory Validation (Lines 539-545)
+### 2. Added IDManager Format Support
+
+Added Pattern 1.6 to support the IDManager format as fallback:
 ```python
-# CRITICAL: Validate WebSocket bridge is configured
-if not self._websocket_bridge:
-    logger.error(f"❌ CRITICAL: AgentInstanceFactory._websocket_bridge is None when creating {agent_name}!")
-    logger.error(f"   This will cause ALL WebSocket events from {agent_name} to fail silently!")
-    logger.error(f"   Factory must be configured with websocket_bridge before creating agents.")
-    raise RuntimeError(f"AgentInstanceFactory not configured: websocket_bridge is None. Call configure() first!")
+# Pattern 1.6: Try IDManager format as fallback (SSOT from core)
+# This handles run_{thread_id}_{uuid} format (IDManager format)
+if run_id.startswith("run_"):
+    try:
+        # Use the SSOT IDManager extraction
+        extracted = IDManager.extract_thread_id(run_id)
+        if extracted:
+            # Check if we need to add "thread_" prefix
+            if not extracted.startswith("thread_"):
+                thread_id = f"thread_{extracted}"
+            else:
+                thread_id = extracted
+            
+            if self._is_valid_thread_format(thread_id):
+                logger.debug(f"PATTERN 1.6 MATCH: run_id={run_id} → extracted thread_id={thread_id}")
+                return thread_id
+    except Exception as e:
+        logger.debug(f"PATTERN 1.6 EXCEPTION: Failed to extract thread from {run_id} using IDManager: {e}")
 ```
 
-## Result
-With these changes:
-1. ✅ AgentInstanceFactory is always configured with WebSocket bridge before creating sub-agents
-2. ✅ Any attempt to create sub-agents without WebSocket bridge will fail loudly with clear error messages
-3. ✅ Silent failures are replaced with warning logs showing exactly what's missing
-4. ✅ Sub-agents will now properly emit WebSocket events to users
+## Test Coverage
 
-## Testing
-The WebSocket test suite should now pass with sub-agent events properly reaching users. Any failures will be clearly logged with actionable error messages.
+Created comprehensive integration tests in `netra_backend/tests/integration/test_websocket_thread_routing.py`:
+
+1. **test_thread_id_extraction_from_run_id_generator_format** - Verifies extraction from run_id_generator format
+2. **test_thread_id_extraction_from_id_manager_format** - Verifies extraction from IDManager format  
+3. **test_round_trip_generation_and_extraction** - Tests full cycle of ID generation and extraction
+4. **test_websocket_notification_with_correct_thread_id** - Ensures notifications use correct thread_id
+5. **test_thread_resolution_priority_chain** - Tests the 5-priority resolution chain
+6. **test_thread_resolution_with_registry_hit** - Verifies thread registry is checked first
+7. **test_all_notification_types_use_correct_thread** - Tests all agent notification types
+8. **test_both_id_formats_supported** - Confirms both ID formats work
+
+## Verification
+
+All tests pass successfully:
+- Thread IDs are correctly extracted from run_ids
+- Both ID formats (run_id_generator and IDManager) are supported
+- WebSocket notifications are properly routed to the correct thread_id
+- The 5-priority resolution chain works as expected
+
+## Business Impact
+
+- **RESOLVED**: WebSocket messages from agents now correctly reach users
+- **Chat functionality restored** - Critical business value preserved
+- **Backward compatibility** - Both ID formats are supported
+- **Enhanced logging** - Better visibility into thread resolution process
+
+## Future Recommendations
+
+1. **Consolidate to Single SSOT**: Choose either IDManager or run_id_generator as the single source of truth for ID generation to prevent future confusion.
+
+2. **Add Thread Registry Persistence**: Implement a persistent thread registry to improve thread resolution reliability.
+
+3. **Add Debug Endpoints**: Create endpoints to inspect active WebSocket connections and thread mappings for easier debugging.
+
+4. **Improve Error Messages**: Make error messages more specific about what format was expected vs what was received.
+
+## Files Modified
+
+- `netra_backend/app/services/agent_websocket_bridge.py` - Enhanced thread ID extraction logic
+- `netra_backend/tests/integration/test_websocket_thread_routing.py` - Added comprehensive test suite
+- `test_websocket_thread_fix.py` - Created standalone verification script

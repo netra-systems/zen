@@ -50,6 +50,41 @@
         </related-learnings>
     </learning>
     
+    <learning id="opentelemetry-otlp-implementation-2025-01-03">
+        <title>OpenTelemetry with OTLP Export Implementation</title>
+        <category>Observability/Distributed-Tracing/Telemetry</category>
+        <keywords>opentelemetry, otlp, jaeger, distributed-tracing, spans, telemetry, observability, agent-instrumentation</keywords>
+        <path>opentelemetry_otlp_implementation.xml</path>
+        <critical-takeaway>
+            Implemented comprehensive OpenTelemetry with safe opt-in design. Telemetry is NOT auto-initialized,
+            requires explicit init_telemetry() call. All span operations safely handle null when disabled.
+            Zero performance impact when not initialized. Agent execution unaffected - proper null checks throughout.
+            Supports OTLP and Jaeger exporters with full W3C Trace Context propagation.
+        </critical-takeaway>
+        <severity>HIGH</severity>
+        <business-impact>Enables comprehensive observability for distributed systems without breaking existing functionality</business-impact>
+        <prevention>
+            Always design observability as opt-in. Use safe null handling throughout telemetry pipeline.
+            Separate configuration from implementation. Test with telemetry both enabled and disabled.
+        </prevention>
+        <implementation-patterns>
+            <pattern>Singleton TelemetryManager with lazy initialization</pattern>
+            <pattern>Safe null checks: if not self.enabled or not self.tracer: return None</pattern>
+            <pattern>Context manager for span lifecycle with exception handling</pattern>
+            <pattern>Separate TelemetryConfig for environment-based configuration</pattern>
+        </implementation-patterns>
+        <testing-strategies>
+            <strategy>Test with telemetry disabled (default state)</strategy>
+            <strategy>Test graceful degradation when packages missing</strategy>
+            <strategy>Verify no auto-initialization on startup</strategy>
+            <strategy>Ensure agent execution works with and without telemetry</strategy>
+        </testing-strategies>
+        <related-learnings>
+            <learning-ref>unified_environment_management.xml - Environment patterns used</learning-ref>
+            <learning-ref>configuration_architecture.md - Config system telemetry follows</learning-ref>
+        </related-learnings>
+    </learning>
+    
     <learning id="websocket-thread-association-critical-2025-09-03">
         <title>CRITICAL: WebSocket Thread Association Timing Issue</title>
         <category>WebSocket/Threading/Critical</category>
