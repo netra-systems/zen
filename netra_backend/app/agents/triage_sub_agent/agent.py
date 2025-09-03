@@ -342,3 +342,19 @@ class TriageSubAgent(BaseAgent):
     def __repr__(self) -> str:
         """Detailed string representation of the agent."""
         return f"TriageSubAgent(name='{self.name}')"
+    
+    @classmethod
+    def create_agent_with_context(cls, context) -> 'TriageSubAgent':
+        """Factory method for creating TriageSubAgent with user context.
+        
+        This method enables the agent to be created through AgentInstanceFactory
+        with proper user context isolation.
+        
+        Args:
+            context: User execution context for isolation
+            
+        Returns:
+            TriageSubAgent: Configured agent instance
+        """
+        # TriageSubAgent takes no constructor parameters
+        return cls()

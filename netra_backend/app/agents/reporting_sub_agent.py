@@ -349,7 +349,7 @@ class ReportingSubAgent(BaseAgent):
             self.logger.warning(f"Failed to cache report result: {e}")
 
     @classmethod
-    def create_agent_with_context(cls, context: UserExecutionContext) -> 'ReportingSubAgent':
+    def create_agent_with_context(cls, context: 'UserExecutionContext') -> 'ReportingSubAgent':
         """Factory method for creating agent with user context.
         
         This method enables the agent to be created through AgentInstanceFactory

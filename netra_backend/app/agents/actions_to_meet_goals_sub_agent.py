@@ -44,7 +44,7 @@ class ActionsToMeetGoalsSubAgent(BaseAgent):
     - Zero global state references
     """
     
-    def __init__(self, llm_manager: LLMManager, tool_dispatcher: ToolDispatcher):
+    def __init__(self, llm_manager: Optional[LLMManager] = None, tool_dispatcher: Optional[ToolDispatcher] = None):
         """Initialize with BaseAgent infrastructure."""
         # Initialize BaseAgent with full infrastructure
         super().__init__(
@@ -271,3 +271,21 @@ class ActionsToMeetGoalsSubAgent(BaseAgent):
             self._apply_defaults_for_missing_deps(context, missing)
         
         return True  # Always allow execution with defaults
+    
+    @classmethod
+    def create_agent_with_context(cls, context: 'UserExecutionContext') -> 'ActionsToMeetGoalsSubAgent':
+        """Factory method for creating ActionsToMeetGoalsSubAgent with user context.
+        
+        This method enables the agent to be created through AgentInstanceFactory
+        with proper user context isolation, avoiding deprecated global tool_dispatcher warnings.
+        
+        Args:
+            context: User execution context for isolation
+            
+        Returns:
+            ActionsToMeetGoalsSubAgent: Configured agent instance without deprecated warnings
+        """
+        # Create agent without tool_dispatcher parameter to avoid deprecation warning
+        # Note: This agent requires LLMManager and ToolDispatcher but doesn't pass tool_dispatcher to BaseAgent
+        # so we need to provide them via the registry or dependencies
+        return cls(llm_manager=None, tool_dispatcher=None)

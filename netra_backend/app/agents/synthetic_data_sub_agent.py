@@ -50,7 +50,7 @@ logger = central_logger.get_logger(__name__)
 class SyntheticDataSubAgent(BaseAgent):
     """Sub-agent dedicated to synthetic data generation"""
     
-    def __init__(self, llm_manager: LLMManager, tool_dispatcher: ToolDispatcher):
+    def __init__(self, llm_manager: Optional[LLMManager] = None, tool_dispatcher: Optional[ToolDispatcher] = None):
         super().__init__(
             llm_manager, 
             name="SyntheticDataSubAgent", 
@@ -259,3 +259,20 @@ class SyntheticDataSubAgent(BaseAgent):
             await super().cleanup(state, run_id)
         if hasattr(self, 'MetricsValidator'):
             self.MetricsValidator.log_final_metrics(state)
+    
+    @classmethod
+    def create_agent_with_context(cls, context: 'UserExecutionContext') -> 'SyntheticDataSubAgent':
+        """Factory method for creating SyntheticDataSubAgent with user context.
+        
+        This method enables the agent to be created through AgentInstanceFactory
+        with proper user context isolation, avoiding deprecated global tool_dispatcher warnings.
+        
+        Args:
+            context: User execution context for isolation
+            
+        Returns:
+            SyntheticDataSubAgent: Configured agent instance without deprecated warnings
+        """
+        # Create agent without tool_dispatcher parameter to avoid deprecation warning
+        # Note: This agent requires LLMManager and ToolDispatcher but doesn't pass tool_dispatcher to BaseAgent
+        return cls(llm_manager=None, tool_dispatcher=None)

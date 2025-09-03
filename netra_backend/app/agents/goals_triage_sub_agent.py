@@ -747,4 +747,20 @@ class GoalsTriageSubAgent(BaseAgent):
             "goal_triage_result": fallback_result,
             "recommendations": ["Manual review recommended for comprehensive goal analysis"]
         }
+    
+    @classmethod
+    def create_agent_with_context(cls, context) -> 'GoalsTriageSubAgent':
+        """Factory method for creating GoalsTriageSubAgent with user context.
+        
+        This method enables the agent to be created through AgentInstanceFactory
+        with proper user context isolation.
+        
+        Args:
+            context: User execution context for isolation
+            
+        Returns:
+            GoalsTriageSubAgent: Configured agent instance
+        """
+        # GoalsTriageSubAgent takes no constructor parameters
+        return cls()
 
