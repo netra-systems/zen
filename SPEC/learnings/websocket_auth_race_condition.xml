@@ -150,4 +150,23 @@ this.ws.onerror = (error) => {
     <issue>Other providers may have similar race conditions with AuthProvider</issue>
     <issue>Token refresh during active WebSocket connections needs careful handling</issue>
   </related_issues>
+
+  <critical_update date="2025-01-03">
+    <title>Connection Loop Bug Discovered</title>
+    <description>
+      This race condition fix was a precursor to discovering a more severe architectural issue.
+      When auth was fixed to work correctly and this race condition was resolved, it exposed
+      that WebSocketProvider had duplicate React effects causing connection loops.
+    </description>
+    <cross_references>
+      <ref type="root_cause">/WEBSOCKET_CONNECTION_LOOP_ROOT_CAUSE.md</ref>
+      <ref type="complete_fix">/WEBSOCKET_CONNECTION_LOOP_COMPLETE_ANALYSIS.md</ref>
+      <ref type="spec_learning">/SPEC/learnings/websocket_connection_loop_ssot_fix.xml</ref>
+    </cross_references>
+    <key_lesson>
+      Fixing race conditions and auth timing issues can expose deeper architectural problems.
+      The duplicate React effects were always present but only triggered when auth worked correctly.
+      Always review component architecture when fixing timing issues.
+    </key_lesson>
+  </critical_update>
 </learning>
