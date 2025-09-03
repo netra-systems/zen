@@ -43,6 +43,9 @@ from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 from netra_backend.app.agents.config import agent_config
 from netra_backend.app.agents.utils import extract_thread_id
 
+# Create logger instance
+logger = central_logger
+
 # Import domain-specific circuit breaker and reliability manager
 from netra_backend.app.core.resilience.domain_circuit_breakers import (
     AgentCircuitBreaker,
@@ -193,7 +196,7 @@ class BaseAgent(ABC):
         self._enable_reliability = enable_reliability
         self._unified_reliability_handler = None
         if enable_reliability:
-            logger.warning(
+            self.logger.warning(
                 f"⚠️ RELIABILITY FEATURES ENABLED for {name} - "
                 "These features may suppress critical errors. "
                 "See AGENT_RELIABILITY_ERROR_SUPPRESSION_ANALYSIS_20250903.md"
@@ -831,11 +834,13 @@ class BaseAgent(ABC):
         """Get circuit breaker status using unified reliability handler (SSOT pattern)."""
         # First check primary circuit breaker
         if hasattr(self, 'circuit_breaker') and self.circuit_breaker:
-            cb_state = self.circuit_breaker.get_state()
+            cb_status = self.circuit_breaker.get_status()
             return {
-                "state": cb_state,
-                "can_execute": self.circuit_breaker.can_execute(),
-                "status": "available"
+                "state": cb_status.get("state"),
+                "status": cb_status.get("state", "unknown"),
+                "domain": cb_status.get("domain", "agent"),
+                "metrics": cb_status.get("metrics", {}),
+                "is_healthy": cb_status.get("is_healthy", False)
             }
         
         # Fall back to unified reliability handler if available
