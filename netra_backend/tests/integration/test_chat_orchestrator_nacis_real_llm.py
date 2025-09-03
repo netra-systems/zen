@@ -57,7 +57,7 @@ class TestChatOrchestratorNACISRealLLM:
         await llm_manager.initialize()
         
         websocket_manager = WebSocketManager()
-        tool_dispatcher = ToolDispatcher(llm_manager=llm_manager)
+        tool_dispatcher = ToolDispatcher()
         await tool_dispatcher.initialize_tools(session)
         
         orchestrator = ChatOrchestrator(

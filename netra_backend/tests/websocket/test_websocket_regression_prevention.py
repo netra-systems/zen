@@ -87,7 +87,9 @@ class TestAgentRegistration:
         
         llm_manager = LLMManager()
 
-        tool_dispatcher = ToolDispatcher(llm_manager)
+        # UnifiedToolDispatcher (aliased as ToolDispatcher) expects:
+        # user_context, tools, websocket_emitter, websocket_bridge, permission_service
+        tool_dispatcher = ToolDispatcher(user_context=None, tools=None)
 
         websocket_manager = UnifiedWebSocketManager()
 
