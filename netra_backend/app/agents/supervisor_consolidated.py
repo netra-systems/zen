@@ -100,7 +100,15 @@ class SupervisorAgent(BaseAgent):
         # in execute() for complete user isolation
         # Note: We create with a temporary tool dispatcher that will NOT be used for actual requests
         from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
-        startup_tool_dispatcher = ToolDispatcher(llm_manager=llm_manager)
+        # UnifiedToolDispatcher (aliased as ToolDispatcher) expects:
+        # user_context, tools, websocket_emitter, websocket_bridge, permission_service
+        startup_tool_dispatcher = ToolDispatcher(
+            user_context=None,  # Use legacy global mode for startup validation
+            tools=None,
+            websocket_emitter=None,
+            websocket_bridge=websocket_bridge,
+            permission_service=None
+        )
         self.registry = AgentRegistry(llm_manager, startup_tool_dispatcher)
         self.registry.register_default_agents()
         self.registry.set_websocket_bridge(websocket_bridge)

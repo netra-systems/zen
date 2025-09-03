@@ -58,7 +58,15 @@ def _determine_admin_access(db: Optional[AsyncSession], user: Optional[User]) ->
 def _create_admin_tool_dispatcher(tools: List[BaseTool], db: AsyncSession, user: User) -> AdminToolDispatcher:
     """Create admin tool dispatcher and log information."""
     logger.info(f"Creating supervisor with admin tools for user {user.email}")
-    tool_dispatcher = AdminToolDispatcher(tools, db, user)
+    # AdminToolDispatcher expects: llm_manager, tool_dispatcher, tools, db, user, websocket_manager
+    tool_dispatcher = AdminToolDispatcher(
+        llm_manager=None, 
+        tool_dispatcher=None, 
+        tools=tools, 
+        db=db, 
+        user=user, 
+        websocket_manager=None
+    )
     admin_tools = tool_dispatcher.list_all_tools()
     logger.info(f"Total tools available (including admin): {len(admin_tools)}")
     return tool_dispatcher
@@ -67,7 +75,9 @@ def _create_admin_tool_dispatcher(tools: List[BaseTool], db: AsyncSession, user:
 def _create_standard_tool_dispatcher(tools: List[BaseTool]) -> ToolDispatcher:
     """Create standard tool dispatcher."""
     logger.info("Creating supervisor with standard tools only")
-    return ToolDispatcher(tools)
+    # UnifiedToolDispatcher (aliased as ToolDispatcher) expects:
+    # user_context, tools, websocket_emitter, websocket_bridge, permission_service
+    return ToolDispatcher(user_context=None, tools=tools)
 
 
 def _determine_supervisor_mode(has_admin_access: bool, enable_quality_gates: bool) -> SupervisorMode:

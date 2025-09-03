@@ -454,6 +454,34 @@ class UnifiedToolDispatcher:
         """Get current WebSocket bridge from executor."""
         return getattr(self, 'websocket_bridge', None)
     
+    def set_websocket_manager(self, websocket_manager: Optional['WebSocketManager']) -> None:
+        """Set WebSocket manager for compatibility with legacy AgentRegistry integration.
+        
+        This method provides compatibility with the AgentRegistry.set_websocket_manager()
+        integration pattern. It converts the WebSocketManager to an AgentWebSocketBridge
+        and delegates to set_websocket_bridge().
+        
+        Args:
+            websocket_manager: WebSocket manager instance or None to clear
+        """
+        if websocket_manager is None:
+            self.set_websocket_bridge(None)
+            logger.info(f"✅ Cleared WebSocket manager for {self._get_log_prefix()}")
+        else:
+            try:
+                # Convert WebSocketManager to AgentWebSocketBridge
+                from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
+                # Create a bridge that wraps the manager
+                bridge = AgentWebSocketBridge()  # Use default initialization
+                self.set_websocket_bridge(bridge)
+                logger.info(f"✅ Set WebSocket manager via bridge conversion for {self._get_log_prefix()}")
+            except ImportError as e:
+                logger.error(f"Failed to import AgentWebSocketBridge for WebSocket manager conversion: {e}")
+                self.set_websocket_bridge(None)
+            except Exception as e:
+                logger.error(f"Failed to convert WebSocket manager to bridge for {self._get_log_prefix()}: {e}")
+                self.set_websocket_bridge(None)
+    
     def diagnose_websocket_wiring(self) -> Dict[str, Any]:
         """Diagnose WebSocket wiring for debugging silent failures."""
         diagnosis = {

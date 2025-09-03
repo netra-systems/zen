@@ -822,9 +822,14 @@ class StartupOrchestrator:
         
         # Create tool dispatcher with bridge support
         tool_registry = ToolRegistry(self.app.state.db_session_factory)
+        # UnifiedToolDispatcher (aliased as ToolDispatcher) expects:
+        # user_context, tools, websocket_emitter, websocket_bridge, permission_service
         self.app.state.tool_dispatcher = ToolDispatcher(
+            user_context=None,  # Use legacy global mode during startup
             tools=tool_registry.get_tools([]),
-            websocket_bridge=websocket_bridge
+            websocket_emitter=None,
+            websocket_bridge=websocket_bridge,
+            permission_service=None
         )
         
         # Validate that the tool dispatcher has WebSocket support
