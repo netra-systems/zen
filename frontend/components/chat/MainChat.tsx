@@ -177,7 +177,9 @@ const MainChat: React.FC = () => {
   const { status: wsStatus } = useWebSocket();
   
   // Show loading state while initializing
-  if (!isInitialized || shouldShowLoading) {
+  // Fixed: Only show loading if init is not complete, not based on shouldShowLoading
+  // which can get stuck after initialization completes
+  if (!isInitialized || phase !== 'ready') {
     return (
       <InitializationProgress 
         phase={phase}
