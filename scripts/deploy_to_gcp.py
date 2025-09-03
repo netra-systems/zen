@@ -152,9 +152,25 @@ class GCPDeployer:
                 cpu="1",
                 min_instances=1,
                 max_instances=10,
+                # ⚠️ CRITICAL: Frontend environment variables are MANDATORY for deployment
+                # These are duplicated in deploy_service() method for redundancy
+                # See also: frontend/.env.staging, SPEC/frontend_deployment_critical.xml
+                # NEVER REMOVE ANY OF THESE VARIABLES - Frontend will fail without them
                 environment_vars={
                     "NODE_ENV": "production",
-                    "NEXT_PUBLIC_API_URL": "https://api.staging.netrasystems.ai",
+                    "NEXT_PUBLIC_ENVIRONMENT": "staging",  # CRITICAL: Controls environment-specific behavior
+                    "NEXT_PUBLIC_API_URL": "https://api.staging.netrasystems.ai",  # CRITICAL: Backend API endpoint
+                    "NEXT_PUBLIC_WS_URL": "wss://api.staging.netrasystems.ai",  # CRITICAL: WebSocket endpoint
+                    "NEXT_PUBLIC_WEBSOCKET_URL": "wss://api.staging.netrasystems.ai",  # CRITICAL: Alternative WebSocket endpoint
+                    "NEXT_PUBLIC_AUTH_URL": "https://auth.staging.netrasystems.ai",  # CRITICAL: Auth service endpoint
+                    "NEXT_PUBLIC_AUTH_SERVICE_URL": "https://auth.staging.netrasystems.ai",  # CRITICAL: Auth service alternative
+                    "NEXT_PUBLIC_AUTH_API_URL": "https://auth.staging.netrasystems.ai",  # CRITICAL: Auth API endpoint
+                    "NEXT_PUBLIC_BACKEND_URL": "https://api.staging.netrasystems.ai",  # CRITICAL: Backend alternative endpoint
+                    "NEXT_PUBLIC_FRONTEND_URL": "https://app.staging.netrasystems.ai",  # CRITICAL: OAuth redirects
+                    "NEXT_PUBLIC_FORCE_HTTPS": "true",  # CRITICAL: Security enforcement
+                    "NEXT_PUBLIC_GTM_CONTAINER_ID": "GTM-WKP28PNQ",  # Analytics tracking
+                    "NEXT_PUBLIC_GTM_ENABLED": "true",  # Analytics enablement
+                    "NEXT_PUBLIC_GTM_DEBUG": "false",  # Analytics debug mode
                     "FORCE_HTTPS": "true",  # REQUIREMENT 6: FORCE_HTTPS for load balancer
                 }
             )
@@ -254,9 +270,63 @@ class GCPDeployer:
         print("🔍 Using centralized authentication configuration...")
         return GCPAuthConfig.ensure_authentication()
     
+    def validate_frontend_environment_variables(self) -> bool:
+        """
+        🚨 CRITICAL: Validate all required frontend environment variables are present.
+        Missing any of these will cause complete frontend failure.
+        Cross-reference: frontend/.env.staging, SPEC/frontend_deployment_critical.xml
+        """
+        required_frontend_vars = [
+            "NEXT_PUBLIC_ENVIRONMENT",
+            "NEXT_PUBLIC_API_URL", 
+            "NEXT_PUBLIC_AUTH_URL",
+            "NEXT_PUBLIC_WS_URL",
+            "NEXT_PUBLIC_WEBSOCKET_URL",
+            "NEXT_PUBLIC_AUTH_SERVICE_URL",
+            "NEXT_PUBLIC_AUTH_API_URL", 
+            "NEXT_PUBLIC_BACKEND_URL",
+            "NEXT_PUBLIC_FRONTEND_URL",
+            "NEXT_PUBLIC_FORCE_HTTPS",
+            "NEXT_PUBLIC_GTM_CONTAINER_ID",
+            "NEXT_PUBLIC_GTM_ENABLED",
+            "NEXT_PUBLIC_GTM_DEBUG"
+        ]
+        
+        # Find frontend service config
+        frontend_service = None
+        for service in self.services:
+            if service.name == "frontend":
+                frontend_service = service
+                break
+        
+        if not frontend_service:
+            print("  ❌ Frontend service configuration not found!")
+            return False
+        
+        missing_vars = []
+        for var in required_frontend_vars:
+            if var not in frontend_service.environment_vars:
+                missing_vars.append(var)
+        
+        if missing_vars:
+            print("  ❌ CRITICAL: Missing required frontend environment variables:")
+            for var in missing_vars:
+                print(f"     - {var}")
+            print("\n  🔴 DEPLOYMENT BLOCKED: Frontend will fail without these variables!")
+            print("  See: frontend/.env.staging for required values")
+            print("  See: SPEC/frontend_deployment_critical.xml for documentation")
+            return False
+        
+        print("  ✅ All required frontend environment variables present")
+        return True
+    
     def validate_deployment_configuration(self) -> bool:
         """Validate deployment configuration and environment variables."""
         print("\n🔍 Validating deployment configuration...")
+        
+        # CRITICAL: Validate frontend environment variables first
+        if not self.validate_frontend_environment_variables():
+            return False
         
         # CRITICAL: OAuth validation BEFORE deployment
         print("🔐 Validating OAuth configuration before deployment...")
@@ -763,22 +833,37 @@ CMD ["npm", "start"]
         for key, value in service.environment_vars.items():
             env_vars.append(f"{key}={value}")
         
-        # Add service-specific environment variables
+        # ⚠️ CRITICAL: Frontend environment variables - MANDATORY FOR DEPLOYMENT
+        # These variables MUST be present for frontend to function
+        # DO NOT REMOVE ANY OF THESE - See also: ServiceConfig initialization above
+        # Cross-reference: frontend/.env.staging, SPEC/frontend_deployment_critical.xml
         if service.name == "frontend":
-            # Frontend needs API URLs - use staging URLs for consistent configuration
+            # 🚨 CRITICAL: All these URLs are REQUIRED for frontend connectivity
+            # Missing any of these will cause complete frontend failure
             staging_api_url = "https://api.staging.netrasystems.ai"
             staging_auth_url = "https://auth.staging.netrasystems.ai"
-            staging_ws_url = "wss://api.staging.netrasystems.ai/ws"
-            env_vars.extend([
-                f"NEXT_PUBLIC_API_URL={staging_api_url}",
-                f"NEXT_PUBLIC_AUTH_URL={staging_auth_url}",
-                f"NEXT_PUBLIC_WS_URL={staging_ws_url}",
-                # GTM Configuration
+            staging_ws_url = "wss://api.staging.netrasystems.ai"
+            staging_frontend_url = "https://app.staging.netrasystems.ai"
+            
+            # 🔴 NEVER REMOVE: Each variable below is used by different frontend components
+            # Some may appear redundant but are required for backward compatibility
+            critical_frontend_vars = [
+                f"NEXT_PUBLIC_API_URL={staging_api_url}",  # Main API endpoint
+                f"NEXT_PUBLIC_AUTH_URL={staging_auth_url}",  # Auth service primary
+                f"NEXT_PUBLIC_WS_URL={staging_ws_url}",  # WebSocket primary
+                f"NEXT_PUBLIC_WEBSOCKET_URL={staging_ws_url}",  # WebSocket fallback
+                f"NEXT_PUBLIC_AUTH_SERVICE_URL={staging_auth_url}",  # Auth service fallback
+                f"NEXT_PUBLIC_AUTH_API_URL={staging_auth_url}",  # Auth API specific
+                f"NEXT_PUBLIC_BACKEND_URL={staging_api_url}",  # Backend fallback
+                f"NEXT_PUBLIC_FRONTEND_URL={staging_frontend_url}",  # OAuth & self-reference
+                "NEXT_PUBLIC_FORCE_HTTPS=true",  # Security requirement
+                # GTM Configuration - Required for analytics
                 "NEXT_PUBLIC_GTM_CONTAINER_ID=GTM-WKP28PNQ",
                 "NEXT_PUBLIC_GTM_ENABLED=true",
                 "NEXT_PUBLIC_GTM_DEBUG=false",
-                "NEXT_PUBLIC_ENVIRONMENT=staging"
-            ])
+                "NEXT_PUBLIC_ENVIRONMENT=staging"  # Environment detection
+            ]
+            env_vars.extend(critical_frontend_vars)
         
         if env_vars:
             cmd.extend(["--set-env-vars", ",".join(env_vars)])
