@@ -180,6 +180,9 @@ class TriageSubAgent(BaseAgent):
             # Finalize result
             final_result = await self._finalize_result(context, user_request, triage_result, processor)
             
+            # CRITICAL: Store triage result in context metadata for other agents
+            context.metadata['triage_result'] = final_result
+            
             logger.debug(f"Triage analysis completed for run {context.run_id}")
             return final_result
             

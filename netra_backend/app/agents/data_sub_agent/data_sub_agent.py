@@ -174,6 +174,9 @@ class DataSubAgent(BaseAgent):
             }
             await self.emit_agent_completed(completion_data)
         
+        # CRITICAL: Store data result in context metadata for other agents
+        context.metadata['data_result'] = result_data
+        
         return result_data
     
     async def _process_analysis_request_from_context(self, context: UserExecutionContext) -> Dict[str, Any]:
