@@ -29,7 +29,7 @@ import {
 } from '../support/websocket-test-helpers';
 
 // Circuit breaker test configurations
-interface CircuitBreakerState {
+interface TestTestCircuitBreakerState {
   state: 'closed' | 'open' | 'half-open';
   failures: number;
   lastFailureTime: number;
@@ -46,7 +46,7 @@ interface QueuedMessage {
 
 describe('CRITICAL: WebSocket Resilience - System Under Test Validation', () => {
   let connectionAttempts: number = 0;
-  let circuitBreakerState: CircuitBreakerState;
+  let circuitBreakerState: TestCircuitBreakerState;
   let messageQueue: QueuedMessage[] = [];
   let reconnectionDelays: number[] = [];
 
@@ -111,24 +111,24 @@ describe('CRITICAL: WebSocket Resilience - System Under Test Validation', () => 
       cy.log('Testing circuit breaker implementation');
       
       // Initial state should be CLOSED
-      verifyCircuitBreakerState('closed');
+      verifyTestCircuitBreakerState('closed');
       
       // Cause failures to trip the circuit breaker
       simulateCircuitBreakerTrip();
       
       // Verify circuit breaker opens after threshold failures
-      verifyCircuitBreakerState('open');
+      verifyTestCircuitBreakerState('open');
       verifyConnectionsBlocked();
       
       // Wait for reset timeout and verify HALF_OPEN state
       cy.wait(35000).then(() => {
-        verifyCircuitBreakerState('half-open');
+        verifyTestCircuitBreakerState('half-open');
         testHalfOpenBehavior();
       });
       
       // Successful connection should close circuit breaker
       simulateSuccessfulConnection();
-      verifyCircuitBreakerState('closed');
+      verifyTestCircuitBreakerState('closed');
       
       // Test agent events work with circuit breaker
       testAgentEventsWithCircuitBreaker();
@@ -407,12 +407,12 @@ describe('CRITICAL: WebSocket Resilience - System Under Test Validation', () => 
   }
 
   // Helper functions for circuit breaker testing
-  function verifyCircuitBreakerState(expectedState: 'closed' | 'open' | 'half-open'): void {
+  function verifyTestCircuitBreakerState(expectedState: 'closed' | 'open' | 'half-open'): void {
     cy.window().then((win) => {
       // Check if resilient WebSocket service is available
       const resilientService = (win as any).resilientWebSocketService;
-      if (resilientService && resilientService.getCircuitBreakerState) {
-        const state = resilientService.getCircuitBreakerState();
+      if (resilientService && resilientService.getTestCircuitBreakerState) {
+        const state = resilientService.getTestCircuitBreakerState();
         expect(state).to.equal(expectedState);
         cy.log(`Circuit breaker state verified: ${expectedState}`);
       } else {

@@ -11,6 +11,7 @@
  */
 
 import { logger } from './logger';
+import { HydrationHydrationValidationResult } from '@/types/shared/validation';
 
 interface HydrationState {
   timestamp: number;
@@ -21,13 +22,6 @@ interface HydrationState {
   clientRendered: boolean;
 }
 
-interface ValidationResult {
-  isValid: boolean;
-  mismatches: string[];
-  warnings: string[];
-  serverState?: unknown;
-  clientState?: unknown;
-}
 
 interface HydrationConfig {
   strictMode: boolean;
@@ -40,7 +34,7 @@ export class HydrationValidator {
   private config: HydrationConfig;
   private serverState: Map<string, unknown> = new Map();
   private clientState: Map<string, unknown> = new Map();
-  private validationResults: Map<string, ValidationResult> = new Map();
+  private validationResults: Map<string, HydrationValidationResult> = new Map();
   
   constructor(config?: Partial<HydrationConfig>) {
     this.config = {
@@ -95,7 +89,7 @@ export class HydrationValidator {
   /**
    * Validate hydration for a specific state key
    */
-  async validateHydration(key: string): Promise<ValidationResult> {
+  async validateHydration(key: string): Promise<HydrationValidationResult> {
     try {
       let serverState = this.serverState.get(key);
       const clientState = this.clientState.get(key);
@@ -110,7 +104,7 @@ export class HydrationValidator {
       }
 
       if (!serverState || !clientState) {
-        const result: ValidationResult = {
+        const result: HydrationValidationResult = {
           isValid: false,
           mismatches: ['Missing state data'],
           warnings: [],
@@ -123,7 +117,7 @@ export class HydrationValidator {
       }
 
       const comparison = this.compareStates(serverState, clientState);
-      const result: ValidationResult = {
+      const result: HydrationValidationResult = {
         isValid: comparison.mismatches.length === 0,
         mismatches: comparison.mismatches,
         warnings: comparison.warnings,
@@ -148,7 +142,7 @@ export class HydrationValidator {
     } catch (error) {
       logger.error(`Hydration validation failed for ${key}:`, error);
       
-      const result: ValidationResult = {
+      const result: HydrationValidationResult = {
         isValid: false,
         mismatches: [`Validation error: ${error}`],
         warnings: []
@@ -162,8 +156,8 @@ export class HydrationValidator {
   /**
    * Validate all captured states
    */
-  async validateAllStates(): Promise<Record<string, ValidationResult>> {
-    const results: Record<string, ValidationResult> = {};
+  async validateAllStates(): Promise<Record<string, HydrationValidationResult>> {
+    const results: Record<string, HydrationValidationResult> = {};
     
     const allKeys = new Set([
       ...this.serverState.keys(),
@@ -466,12 +460,12 @@ export function captureClientState(key: string, state: unknown): void {
   validator.captureClientState(key, state);
 }
 
-export async function validateHydration(key: string): Promise<ValidationResult> {
+export async function validateHydration(key: string): Promise<HydrationValidationResult> {
   const validator = getHydrationValidator();
   return validator.validateHydration(key);
 }
 
-export async function validateAllHydration(): Promise<Record<string, ValidationResult>> {
+export async function validateAllHydration(): Promise<Record<string, HydrationValidationResult>> {
   const validator = getHydrationValidator();
   return validator.validateAllStates();
 }

@@ -18,6 +18,8 @@ export interface CircuitBreakerState {
   openedAt: number;
 }
 
+export type CircuitBreakerStateValue = 'closed' | 'open' | 'half-open';
+
 export class CircuitBreaker {
   private state: CircuitBreakerState;
   private config: CircuitBreakerConfig;

@@ -3,6 +3,8 @@
  * Provides 60fps animations with GPU acceleration and batch DOM updates
  */
 
+import { PerformanceMetrics } from '@/types/performance-metrics';
+
 interface AnimationConfig {
   duration?: number;
   easing?: string;
@@ -19,12 +21,6 @@ interface AnimationFrame {
   endValues: Record<string, number>;
 }
 
-interface PerformanceMetrics {
-  frameCount: number;
-  droppedFrames: number;
-  lastFPS: number;
-  avgFrameTime: number;
-}
 
 class AnimationEngine {
   private static instance: AnimationEngine;
@@ -32,10 +28,15 @@ class AnimationEngine {
   private animations = new Map<string, AnimationFrame>();
   private batchUpdates: Array<() => void> = [];
   private metrics: PerformanceMetrics = {
-    frameCount: 0,
-    droppedFrames: 0,
-    lastFPS: 60,
-    avgFrameTime: 16.67
+    renderCount: 0,
+    lastRenderTime: 0,
+    averageResponseTime: 0,
+    wsLatency: 0,
+    memoryUsage: 0,
+    fps: 60,
+    componentRenderTimes: new Map<string, number>(),
+    errorCount: 0,
+    cacheHitRate: 0
   };
 
   static getInstance(): AnimationEngine {
