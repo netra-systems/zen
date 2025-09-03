@@ -167,7 +167,7 @@ class CorpusAdminSubAgent(BaseAgent):
     
     async def _validate_corpus_admin_dependencies(self) -> None:
         """Validate corpus admin dependencies are healthy."""
-        if not self.reliability_manager.get_health_status().get('overall_health') == 'healthy':
+        if not self._unified_reliability_handler.get_health_status().get('overall_health') == 'healthy':
             logger.warning("Corpus admin dependencies in degraded state")
     
     
@@ -183,8 +183,8 @@ class CorpusAdminSubAgent(BaseAgent):
             "monitor": self._execution_monitor.get_health_status(),
             "error_handler": self.error_handler.get_health_status()
         }
-        if self.reliability_manager:
-            status["reliability"] = self.reliability_manager.get_health_status()
+        if self._unified_reliability_handler:
+            status["reliability"] = self._unified_reliability_handler.get_health_status()
         return status
     
     
