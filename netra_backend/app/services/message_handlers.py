@@ -1,3 +1,4 @@
+import asyncio
 from datetime import datetime
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, TypedDict, Union
 from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
@@ -135,6 +136,19 @@ class MessageHandlerService(IMessageHandlerService):
         """Process the agent request"""
         logger.info(f"🎯 Starting agent request processing for user={user_id}, thread={thread.id}")
         logger.info(f"📊 db_session status at start: {type(db_session)}, is None: {db_session is None}")
+        
+        # CRITICAL FIX: Ensure thread association is established before processing
+        # This prevents WebSocket emission failures during agent execution
+        if self.websocket_manager:
+            # Force thread association update and verify it worked
+            success = self.websocket_manager.update_connection_thread(user_id, thread.id)
+            if success:
+                logger.info(f"✅ Thread association confirmed for user={user_id}, thread={thread.id}")
+                # Small delay to ensure association propagates through all internal structures
+                await asyncio.sleep(0.01)
+            else:
+                logger.warning(f"⚠️ No WebSocket connections found for user={user_id} - agent events may not be delivered")
+                # Continue anyway - agent can still execute without WebSocket events
         
         await self._create_user_message(thread, user_request, user_id, db_session)
         run = await self._create_run(thread, db_session)
@@ -317,6 +331,17 @@ class MessageHandlerService(IMessageHandlerService):
             return
         
         thread, run = await self._setup_thread_and_run(user_id, text, references, thread_id, db_session)
+        
+        # CRITICAL FIX: Ensure thread association before processing
+        if thread and thread_id and self.websocket_manager:
+            # Update thread association BEFORE any agent processing
+            success = self.websocket_manager.update_connection_thread(user_id, thread_id)
+            if success:
+                logger.info(f"✅ Thread association confirmed for user={user_id}, thread={thread_id}")
+                await asyncio.sleep(0.01)  # Small delay to ensure propagation
+            else:
+                logger.warning(f"⚠️ No WebSocket connections for user={user_id}, thread={thread_id}")
+        
         # Join user to thread room for WebSocket broadcasts
         if thread and thread_id:
             await manager.broadcasting.join_room(user_id, thread_id)
