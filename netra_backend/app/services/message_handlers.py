@@ -97,6 +97,16 @@ class MessageHandlerService(IMessageHandlerService):
         thread = await self._get_or_validate_thread(user_id, payload, db_session)
         if not thread:
             return
+        
+        # CRITICAL FIX: Ensure thread association before agent processing
+        if thread and self.websocket_manager and websocket:
+            connection_id = self.websocket_manager.get_connection_id_by_websocket(websocket)
+            if connection_id:
+                success = self.websocket_manager.update_connection_thread(connection_id, thread.id)
+                if success:
+                    logger.info(f"✅ Thread association set for start_agent: connection={connection_id}, thread={thread.id}")
+                    await asyncio.sleep(0.01)  # Small delay to ensure propagation
+        
         await self._process_agent_request(user_id, user_request, thread, db_session)
     
     def _extract_user_request(self, payload: StartAgentPayloadTyped) -> str:
@@ -333,14 +343,19 @@ class MessageHandlerService(IMessageHandlerService):
         thread, run = await self._setup_thread_and_run(user_id, text, references, thread_id, db_session)
         
         # CRITICAL FIX: Ensure thread association before processing
-        if thread and thread_id and self.websocket_manager:
-            # Update thread association BEFORE any agent processing
-            success = self.websocket_manager.update_connection_thread(user_id, thread_id)
-            if success:
-                logger.info(f"✅ Thread association confirmed for user={user_id}, thread={thread_id}")
-                await asyncio.sleep(0.01)  # Small delay to ensure propagation
+        if thread and thread_id and self.websocket_manager and websocket:
+            # Get connection_id from the websocket instance
+            connection_id = self.websocket_manager.get_connection_id_by_websocket(websocket)
+            if connection_id:
+                # Update thread association BEFORE any agent processing
+                success = self.websocket_manager.update_connection_thread(connection_id, thread_id)
+                if success:
+                    logger.info(f"✅ Thread association confirmed for connection={connection_id}, user={user_id}, thread={thread_id}")
+                    await asyncio.sleep(0.01)  # Small delay to ensure propagation
+                else:
+                    logger.warning(f"⚠️ Failed to update thread for connection={connection_id}")
             else:
-                logger.warning(f"⚠️ No WebSocket connections for user={user_id}, thread={thread_id}")
+                logger.warning(f"⚠️ No connection found for websocket of user={user_id}")
         
         # Join user to thread room for WebSocket broadcasts
         if thread and thread_id:
