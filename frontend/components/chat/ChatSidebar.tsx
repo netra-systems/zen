@@ -46,25 +46,29 @@ export const ChatSidebar: React.FC = () => {
 
 
   // Use the proper thread switching hook
-  const { switchToThread } = useThreadSwitching();
+  const { switchToThread, state: threadSwitchState } = useThreadSwitching();
 
   // Create thread click handler using the hook
   const handleThreadClick = useCallback(async (threadId: string) => {
-    if (threadId === activeThreadId || isProcessing) return;
+    // Prevent switching if already switching, processing, or same thread
+    if (threadId === activeThreadId || isProcessing || threadSwitchState.isLoading) {
+      return;
+    }
     
-    // Send WebSocket message for thread switch
+    // Send WebSocket message for thread switch notification
     sendMessage({
       type: 'switch_thread',
       payload: { thread_id: threadId }
     });
     
     // Use the hook to perform the actual thread switch
+    // The hook handles all state management, loading, and cleanup
     await switchToThread(threadId, {
       clearMessages: true,
       showLoadingIndicator: true,
       updateUrl: true
     });
-  }, [activeThreadId, isProcessing, sendMessage, switchToThread]);
+  }, [activeThreadId, isProcessing, threadSwitchState.isLoading, sendMessage, switchToThread]);
   
   const { threads, isLoadingThreads, loadError, loadThreads } = useThreadLoader(
     showAllThreads,
