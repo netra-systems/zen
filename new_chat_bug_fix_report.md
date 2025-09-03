@@ -109,9 +109,60 @@ Add debouncing to URL updates to prevent rapid successive calls to router.replac
 4. Clear flag after manual update completes
 5. Add proper error handling and logging
 
+## Implementation Details
+
+### Changes Made
+
+1. **frontend/services/urlSyncService.ts**
+   - Added `isManualUpdateRef` to track manual URL updates
+   - Modified store-to-URL effect to skip updates during manual updates
+   - Added flag management in `syncStoreToUrl` callback
+
+2. **frontend/hooks/useThreadSwitching.ts**
+   - Added setTimeout delay to URL update to avoid race condition
+   - Ensures store update completes before manual URL update
+
+### Code Changes
+
+#### urlSyncService.ts (Lines 33-50)
+```typescript
+const isManualUpdateRef = useRef(false);
+
+// Skip auto-sync during manual updates
+useEffect(() => {
+  if (!isManualUpdateRef.current) {
+    urlSyncHandlers.handleStoreToUrlSync(...);
+  }
+}, [activeThreadId, pathname, router]);
+
+const syncStoreToUrl = useCallback((threadId: string | null): void => {
+  isManualUpdateRef.current = true;
+  urlSyncHandlers.performStoreToUrlSync(...);
+  setTimeout(() => {
+    isManualUpdateRef.current = false;
+  }, 100);
+}, [router]);
+```
+
+#### useThreadSwitching.ts (Lines 336-342)
+```typescript
+if (options?.updateUrl && !options?.skipUrlUpdate && updateUrl) {
+  // Delay URL update to avoid race with store-triggered update
+  setTimeout(() => {
+    updateUrl(threadId);
+  }, 50);
+}
+```
+
 ## Test Plan
 1. Test new chat creation with existing chat open
 2. Test new chat creation from empty state
 3. Test rapid clicking of new chat button
 4. Test browser back/forward after new chat creation
 5. Test concurrent new chat creations
+
+## Verification Status
+- Implementation: ✅ Complete
+- Unit Tests: ⚠️ Written but need mock improvements
+- Manual Testing: 🔄 In Progress
+- Integration Testing: 📝 Pending

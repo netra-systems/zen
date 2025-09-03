@@ -395,7 +395,10 @@ class AgentInstanceFactory:
             websocket_manager: Optional WebSocket manager for direct access
         """
         if not websocket_bridge:
+            logger.error("❌ CRITICAL: Attempting to configure AgentInstanceFactory with None websocket_bridge!")
             raise ValueError("AgentWebSocketBridge cannot be None")
+        
+        logger.info(f"🔧 Configuring AgentInstanceFactory with WebSocket bridge type: {type(websocket_bridge).__name__}")
         
         # Prefer AgentClassRegistry but fallback to AgentRegistry for compatibility
         if agent_class_registry:
@@ -415,7 +418,10 @@ class AgentInstanceFactory:
         self._websocket_bridge = websocket_bridge
         self._websocket_manager = websocket_manager
         
-        logger.info("✅ AgentInstanceFactory configured with infrastructure components")
+        logger.info(f"✅ AgentInstanceFactory configured successfully:")
+        logger.info(f"   - WebSocket bridge: {type(websocket_bridge).__name__}")
+        logger.info(f"   - WebSocket manager: {type(websocket_manager).__name__ if websocket_manager else 'None'}")
+        logger.info(f"   - Registry type: {'AgentClassRegistry' if self._agent_class_registry else 'AgentRegistry' if self._agent_registry else 'Unknown'}")
     
     async def create_user_execution_context(self, 
                                            user_id: str,
@@ -535,10 +541,18 @@ class AgentInstanceFactory:
         if not user_context:
             raise ValueError("UserExecutionContext is required")
         
+        # CRITICAL: Validate WebSocket bridge is configured
+        if not self._websocket_bridge:
+            logger.error(f"❌ CRITICAL: AgentInstanceFactory._websocket_bridge is None when creating {agent_name}!")
+            logger.error(f"   This will cause ALL WebSocket events from {agent_name} to fail silently!")
+            logger.error(f"   Factory must be configured with websocket_bridge before creating agents.")
+            raise RuntimeError(f"AgentInstanceFactory not configured: websocket_bridge is None. Call configure() first!")
+        
         start_time = time.time()
         
         try:
             logger.debug(f"Creating agent instance: {agent_name} for user {user_context.user_id}")
+            logger.debug(f"Factory has websocket_bridge: {self._websocket_bridge is not None}, type: {type(self._websocket_bridge).__name__ if self._websocket_bridge else 'None'}")
             
             # Get agent class from registries or use provided class
             if agent_class:
@@ -656,14 +670,22 @@ class AgentInstanceFactory:
             # CRITICAL: Set WebSocket bridge on agent with REAL run_id (not placeholder)
             if hasattr(agent, 'set_websocket_bridge'):
                 try:
+                    # Validate bridge exists before setting
+                    if not self._websocket_bridge:
+                        raise RuntimeError(f"Cannot set WebSocket bridge on {agent_name}: factory bridge is None")
+                    
                     # Use the WebSocketBridgeAdapter pattern from BaseAgent
                     if hasattr(agent, '_websocket_adapter'):
+                        logger.info(f"🔧 Setting WebSocket bridge on {agent_name} via adapter")
+                        logger.info(f"   Bridge type: {type(self._websocket_bridge).__name__}")
+                        logger.info(f"   Run ID: {user_context.run_id}")
+                        
                         agent._websocket_adapter.set_websocket_bridge(
                             self._websocket_bridge, 
                             user_context.run_id,  # REAL run_id from UserExecutionContext
                             agent_name
                         )
-                        logger.debug(f"✅ WebSocket bridge set via adapter for {agent_name} (run_id: {user_context.run_id})")
+                        logger.info(f"✅ WebSocket bridge set via adapter for {agent_name} (run_id: {user_context.run_id})")
                     else:
                         # Fallback for older agent implementations
                         agent.set_websocket_bridge(self._websocket_bridge, user_context.run_id)
