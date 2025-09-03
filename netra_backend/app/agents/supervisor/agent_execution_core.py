@@ -282,7 +282,7 @@ class AgentExecutionCore:
         agent: Any,
         context: AgentExecutionContext,
         state: DeepAgentState,
-        heartbeat: AgentHeartbeat,
+        heartbeat: Optional[Any],  # Disabled - was AgentHeartbeat
         trace_context: UnifiedTraceContext
     ) -> Any:
         """Execute agent and validate result."""
@@ -406,7 +406,7 @@ class AgentExecutionCore:
     def _calculate_performance_metrics(
         self, 
         start_time: float, 
-        heartbeat: Optional[AgentHeartbeat] = None
+        heartbeat: Optional[Any] = None  # Disabled - was AgentHeartbeat
     ) -> dict:
         """Calculate performance metrics for the execution."""
         duration = time.time() - start_time
@@ -436,7 +436,7 @@ class AgentExecutionCore:
         exec_id: UUID, 
         result: AgentExecutionResult, 
         state: DeepAgentState, 
-        heartbeat: Optional[AgentHeartbeat] = None
+        heartbeat: Optional[Any] = None  # Disabled - was AgentHeartbeat
     ) -> dict:
         """Collect comprehensive metrics for the execution."""
         # Get metrics from execution tracker
