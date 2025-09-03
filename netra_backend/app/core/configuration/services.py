@@ -216,7 +216,7 @@ class ServiceConfigManager:
         if self._environment == Environment.PRODUCTION.value:
             return "https://api.netrasystems.ai"
         elif self._environment == Environment.STAGING.value:
-            return "https://api-staging.netrasystems.ai"
+            return "https://api.staging.netrasystems.ai"
         return ServiceEndpoints.build_backend_service_url()
     
     def _set_oauth_urls(self, config: AppConfig) -> None:
@@ -249,7 +249,7 @@ class ServiceConfigManager:
         """Set staging OAuth URLs."""
         config.oauth_config.authorized_redirect_uris = [
             URLConstants.STAGING_FRONTEND + URLConstants.AUTH_CALLBACK_PATH,
-            "https://api-staging.netrasystems.ai" + URLConstants.API_PREFIX + URLConstants.AUTH_CALLBACK_PATH
+            "https://api.staging.netrasystems.ai" + URLConstants.API_PREFIX + URLConstants.AUTH_CALLBACK_PATH
         ]
     
     def _set_production_oauth_urls(self, config: AppConfig) -> None:
