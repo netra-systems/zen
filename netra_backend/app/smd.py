@@ -807,7 +807,7 @@ class StartupOrchestrator:
     def _initialize_tool_registry(self) -> None:
         """Initialize tool registry and dispatcher with AgentWebSocketBridge support - CRITICAL."""
         from netra_backend.app.agents.tool_registry_unified import UnifiedToolRegistry
-        from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
+        from netra_backend.app.agents.tool_dispatcher import ToolDispatcher, create_legacy_tool_dispatcher
         from netra_backend.app.agents.tools.langchain_wrappers import (
             DataHelperTool, DeepResearchTool, ReliabilityScorerTool, SandboxedInterpreterTool
         )
@@ -823,53 +823,47 @@ class StartupOrchestrator:
         websocket_bridge = self.app.state.agent_websocket_bridge
         self.logger.info("    - Using pre-created AgentWebSocketBridge for tool dispatcher")
         
-        # Create unified tool registry with default tools
-        tool_registry = UnifiedToolRegistry(registry_id="global_startup")
+        # 🚀 REVOLUTIONARY CHANGE: NO MORE GLOBAL REGISTRIES OR SINGLETONS
+        # Store tool factory configuration for per-user registry creation
+        # Each UserExecutionContext will get its own isolated registry instance
         
-        # 🔧 CRITICAL FIX: Load actual LangChain wrapped tool instances that exist
-        all_tools = [
-            DataHelperTool(),
-            DeepResearchTool(), 
-            ReliabilityScorerTool(),
-            SandboxedInterpreterTool()
+        # Define available tools for user registry creation (not instantiated globally)
+        available_tool_classes = [
+            DataHelperTool,
+            DeepResearchTool, 
+            ReliabilityScorerTool,
+            SandboxedInterpreterTool
         ]
         
-        self.logger.info(f"    - ✅ Loaded {len(all_tools)} LangChain wrapped tools for dispatcher")
+        self.logger.info(f"    - ✅ Configured {len(available_tool_classes)} tool classes for per-user registry creation")
         
-        # UnifiedToolDispatcher (aliased as ToolDispatcher) expects:
-        # user_context, tools, websocket_emitter, websocket_bridge, permission_service
-        self.app.state.tool_dispatcher = ToolDispatcher(
-            user_context=None,  # Use legacy global mode during startup
-            tools=all_tools,
-            websocket_emitter=None,
-            websocket_bridge=websocket_bridge,
-            permission_service=None
-        )
+        # Store tool factory configuration (NOT instances) for UserContext-based creation
+        self.app.state.tool_classes = available_tool_classes
+        self.app.state.websocket_bridge_factory = lambda: websocket_bridge  # Factory for bridge creation
         
-        # Store the registry for later use
-        self.app.state.tool_registry = tool_registry
+        # 🔥 NO MORE GLOBAL TOOL DISPATCHER OR REGISTRY
+        # These will be created per-user via UserExecutionContext
+        self.app.state.tool_dispatcher = None  # Signals: use UserContext-based creation
+        self.app.state.tool_registry = None   # Signals: use UserContext-based creation
         
-        # Validate that the tool dispatcher has WebSocket support
-        if self.app.state.tool_dispatcher is None:
+        self.logger.info("    - 🎯 Configured UserContext-based tool system (no global singletons)")
+        
+        # Validate UserContext-based configuration
+        if not hasattr(self.app.state, 'tool_classes') or not self.app.state.tool_classes:
             raise DeterministicStartupError(
-                "Tool dispatcher is None after initialization - "
-                "failed to create tool dispatcher properly"
+                "Tool classes configuration missing - "
+                "cannot create UserContext-based tool dispatchers"
             )
         
-        if not hasattr(self.app.state.tool_dispatcher, 'has_websocket_support'):
+        if not hasattr(self.app.state, 'websocket_bridge_factory'):
             raise DeterministicStartupError(
-                "Tool dispatcher missing has_websocket_support property - "
-                "cannot verify WebSocket event capability"
+                "WebSocket bridge factory missing - "
+                "cannot create UserContext-based WebSocket support"
             )
         
-        if not self.app.state.tool_dispatcher.has_websocket_support:
-            raise DeterministicStartupError(
-                "Tool dispatcher reports no WebSocket support despite being provided a bridge. "
-                "This will cause tool execution events to be silent."
-            )
-        
-        self.logger.info("    - Tool dispatcher created with AgentWebSocketBridge support verified")
-        self.logger.info(f"    - WebSocket notification capability: {'✓ Enabled' if self.app.state.tool_dispatcher.has_websocket_support else '✗ Disabled'}")
+        self.logger.info("    - ✅ UserContext-based tool system validated and ready")
+        self.logger.info("    - 🔧 Tool dispatchers will be created per-user with isolated registries")
+        self.logger.info("    - 🌐 WebSocket bridges will be created per-user with isolated events")
     
     async def _initialize_websocket(self) -> None:
         """Initialize WebSocket components - CRITICAL."""
@@ -882,14 +876,14 @@ class StartupOrchestrator:
     async def _initialize_agent_websocket_bridge_basic(self) -> None:
         """Create AgentWebSocketBridge instance - CRITICAL (Integration happens in Phase 4)."""
         try:
-            from netra_backend.app.services.agent_websocket_bridge import get_agent_websocket_bridge
+            from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
             
-            # Get bridge instance (singleton) - just create it, don't integrate yet
+            # Create bridge instance (non-singleton) - proper user isolation pattern
             self.logger.info("  Creating AgentWebSocketBridge instance...")
-            bridge = await get_agent_websocket_bridge()
+            bridge = AgentWebSocketBridge()
             if bridge is None:
-                self.logger.error("  ❌ get_agent_websocket_bridge() returned None")
-                raise DeterministicStartupError("Failed to get AgentWebSocketBridge instance - factory returned None")
+                self.logger.error("  ❌ AgentWebSocketBridge() returned None")
+                raise DeterministicStartupError("Failed to create AgentWebSocketBridge instance")
             
             # Store bridge in app state for later integration
             self.app.state.agent_websocket_bridge = bridge

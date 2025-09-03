@@ -113,7 +113,8 @@ class UnifiedToolDispatcher:
         tools: List[BaseTool] = None,
         websocket_emitter: Optional[WebSocketEventEmitter] = None,
         websocket_bridge: Optional['AgentWebSocketBridge'] = None,  # Legacy support
-        permission_service = None
+        permission_service = None,
+        registry: Optional['UnifiedToolRegistry'] = None  # Optional registry to reuse
     ):
         """Initialize unified tool dispatcher.
         
@@ -143,7 +144,7 @@ class UnifiedToolDispatcher:
         self._is_active = True
         
         # Initialize core components
-        self._init_components(websocket_emitter, websocket_bridge, permission_service)
+        self._init_components(websocket_emitter, websocket_bridge, permission_service, registry)
         self._register_initial_tools(tools)
         
         # Metrics tracking
@@ -172,11 +173,18 @@ class UnifiedToolDispatcher:
         self,
         websocket_emitter: Optional[WebSocketEventEmitter],
         websocket_bridge: Optional['AgentWebSocketBridge'],
-        permission_service
+        permission_service,
+        registry: Optional['UnifiedToolRegistry'] = None
     ) -> None:
         """Initialize dispatcher components."""
         # Core components with clean separation of concerns
-        self.registry = UnifiedToolRegistry(f"registry_{self.dispatcher_id}")
+        # CRITICAL FIX: Reuse existing registry to prevent duplicates
+        if registry is not None:
+            self.registry = registry
+            logger.info(f"🔄 Reusing existing registry {registry.registry_id} to prevent duplicates")
+        else:
+            self.registry = UnifiedToolRegistry(f"registry_{self.dispatcher_id}")
+            logger.info(f"🆕 Created new registry registry_{self.dispatcher_id}")
         self.validator = ToolValidator()
         
         # Permission layer
@@ -836,7 +844,8 @@ class UnifiedToolDispatcherFactory:
     def create_legacy_global(
         tools: List[BaseTool] = None,
         websocket_bridge: Optional['AgentWebSocketBridge'] = None,
-        permission_service = None
+        permission_service = None,
+        registry: Optional['UnifiedToolRegistry'] = None
     ) -> UnifiedToolDispatcher:
         """Create legacy global dispatcher (DEPRECATED).
         
@@ -847,6 +856,7 @@ class UnifiedToolDispatcherFactory:
             tools: Optional list of tools to register initially
             websocket_bridge: Optional AgentWebSocketBridge for events
             permission_service: Optional permission service for security
+            registry: Optional existing registry to reuse (prevents duplicate registrations)
             
         Returns:
             UnifiedToolDispatcher: Global dispatcher (DEPRECATED)
@@ -855,7 +865,8 @@ class UnifiedToolDispatcherFactory:
             user_context=None,  # This triggers the global state warning
             tools=tools,
             websocket_bridge=websocket_bridge,
-            permission_service=permission_service
+            permission_service=permission_service,
+            registry=registry  # Pass existing registry to prevent duplicates
         )
         
         logger.warning(f"⚠️ Created LEGACY GLOBAL UnifiedToolDispatcher {dispatcher.dispatcher_id}")
@@ -891,11 +902,16 @@ async def request_scoped_tool_dispatcher_context(
 def create_legacy_tool_dispatcher(
     tools: List[BaseTool] = None,
     websocket_bridge: Optional['AgentWebSocketBridge'] = None,
-    permission_service = None
+    permission_service = None,
+    registry: Optional['UnifiedToolRegistry'] = None
 ) -> UnifiedToolDispatcher:
-    """Convenience function to create legacy global dispatcher (DEPRECATED)."""
+    """Convenience function to create legacy global dispatcher (DEPRECATED).
+    
+    Args:
+        registry: Optional existing registry to reuse (prevents duplicate registrations)
+    """
     return UnifiedToolDispatcherFactory.create_legacy_global(
-        tools, websocket_bridge, permission_service
+        tools, websocket_bridge, permission_service, registry
     )
 
 
