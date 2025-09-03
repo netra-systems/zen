@@ -38,6 +38,7 @@ CRUCIAL: ULTRA THINK DEEPLY.
 
 ### Related Architecture Documents:
 - **[User Context Architecture](./USER_CONTEXT_ARCHITECTURE.md)** - Factory patterns and execution isolation (START HERE)
+- **[Agent Architecture Disambiguation Guide](./docs/AGENT_ARCHITECTURE_DISAMBIGUATION_GUIDE.md)** - Clarifies complex agent workflow architecture and relationships
 - [Tool Dispatcher Migration Guide](./TOOL_DISPATCHER_MIGRATION_GUIDE.md) - Migration from singleton to request-scoped
 - [WebSocket Modernization Report](./WEBSOCKET_MODERNIZATION_REPORT.md) - WebSocket isolation implementation
 - [Documentation Hub](./docs/index.md) - Central documentation index
@@ -193,7 +194,9 @@ At every opportunity spawn new subagent with dedicated focus mission and context
 
 **CRITICAL: For any refactoring involving inheritance, multiple classes, or SSOT consolidation:**
 
-**See Also:** [`docs/GOLDEN_AGENT_INDEX.md`](docs/GOLDEN_AGENT_INDEX.md) for comprehensive agent implementation patterns and migration guidance.
+**See Also:** 
+- [`docs/GOLDEN_AGENT_INDEX.md`](docs/GOLDEN_AGENT_INDEX.md) for comprehensive agent implementation patterns and migration guidance.
+- [`docs/AGENT_ARCHITECTURE_DISAMBIGUATION_GUIDE.md`](docs/AGENT_ARCHITECTURE_DISAMBIGUATION_GUIDE.md) for clarification on agent components and relationships.
 
 1.  **MRO (Method Resolution Order) Analysis:** Generate a comprehensive MRO report BEFORE refactoring:
     - Document current inheritance hierarchy using `inspect.getmro()` or equivalent
@@ -340,6 +343,7 @@ The following events MUST be sent during agent execution to enable meaningful AI
 
 **For Complete Agent Implementation Patterns:**
 - See [`docs/GOLDEN_AGENT_INDEX.md`](docs/GOLDEN_AGENT_INDEX.md) - The definitive guide to agent implementation
+- See [`docs/AGENT_ARCHITECTURE_DISAMBIGUATION_GUIDE.md`](docs/AGENT_ARCHITECTURE_DISAMBIGUATION_GUIDE.md) - Comprehensive clarification of agent architecture
 
 -----
 

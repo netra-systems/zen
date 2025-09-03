@@ -5,6 +5,7 @@
 ### 🏗️ Core Architecture (Start Here)
 
 - **[User Context Architecture](../USER_CONTEXT_ARCHITECTURE.md)** ⭐ - **CRITICAL DOCUMENT**: Comprehensive guide to the Factory-based user isolation architecture with detailed diagrams
+- **[Agent Architecture Disambiguation Guide](./AGENT_ARCHITECTURE_DISAMBIGUATION_GUIDE.md)** 🎯 - **ESSENTIAL**: Clarifies agent workflow architecture, relationships between components, and common confusion points
 - [Agent System Architecture](./AGENT_SYSTEM_ARCHITECTURE.md) - Complete agent execution pipeline documentation
 - [Agent Architecture Diagrams](./agent_architecture_mermaid.md) - Visual architecture representations
 
@@ -22,9 +23,11 @@
 - [Agent Golden Pattern Guide](./agent_golden_pattern_guide.md) - Best practices for agent development
 
 #### Agents & Tools
+- **[Agent Architecture Disambiguation Guide](./AGENT_ARCHITECTURE_DISAMBIGUATION_GUIDE.md)** - Comprehensive disambiguation of agent components
 - [Agent System Overview](./agents/AGENT_SYSTEM.md) - High-level agent system design
 - [Subagents Documentation](./agents/subagents-doc.md) - Subagent patterns and usage
 - [Agent Modernization Plan](./agents/AGENT_MODERNIZATION_PLAN.md) - Future improvements
+- [Golden Agent Index](./GOLDEN_AGENT_INDEX.md) - Definitive agent implementation patterns
 
 #### WebSocket & Real-time
 - [Actions Agent WebSocket Flow](./actions_agent_websocket_flow.md) - WebSocket event patterns
@@ -117,9 +120,10 @@ The system uses factory patterns extensively:
 ## 📖 Essential Reading Order
 
 1. **[User Context Architecture](../USER_CONTEXT_ARCHITECTURE.md)** - Start here for system overview
-2. [Agent System Architecture](./AGENT_SYSTEM_ARCHITECTURE.md) - Understand agent execution
-3. [Tool Dispatcher Migration Guide](../TOOL_DISPATCHER_MIGRATION_GUIDE.md) - Learn isolation patterns
-4. [WebSocket Modernization Report](../WEBSOCKET_MODERNIZATION_REPORT.md) - Event delivery system
+2. **[Agent Architecture Disambiguation Guide](./AGENT_ARCHITECTURE_DISAMBIGUATION_GUIDE.md)** - Clarify component relationships
+3. [Agent System Architecture](./AGENT_SYSTEM_ARCHITECTURE.md) - Understand agent execution
+4. [Tool Dispatcher Migration Guide](../TOOL_DISPATCHER_MIGRATION_GUIDE.md) - Learn isolation patterns
+5. [WebSocket Modernization Report](../WEBSOCKET_MODERNIZATION_REPORT.md) - Event delivery system
 
 ## 🛠️ Development Guidelines
 
