@@ -213,22 +213,10 @@ async def websocket_endpoint(websocket: WebSocket):
                 agent_handler = AgentMessageHandler(message_handler_service, websocket)
                 
                 # Register agent handler with message router
-                # CRITICAL FIX: Check if handler already exists before adding to prevent accumulation
-                existing_agent_handler = None
-                for handler in message_router.handlers:
-                    if isinstance(handler, AgentMessageHandler):
-                        existing_agent_handler = handler
-                        break
-                
-                if existing_agent_handler:
-                    # Update existing handler with new service/websocket instead of adding duplicate
-                    existing_agent_handler.message_handler_service = message_handler_service
-                    existing_agent_handler.websocket = websocket
-                    logger.info(f"Updated existing AgentMessageHandler for production agent pipeline")
-                else:
-                    # Add new handler only if none exists
-                    message_router.add_handler(agent_handler)
-                    logger.info(f"Registered new AgentMessageHandler for production agent pipeline")
+                # CRITICAL FIX: Each connection needs its own handler to prevent WebSocket reference conflicts
+                # The handler will be cleaned up on disconnect to prevent accumulation
+                message_router.register_handler(agent_handler)
+                logger.info(f"Registered new AgentMessageHandler for connection (will cleanup on disconnect)")
                 
                 logger.info(f"Total handlers after registration: {len(message_router.handlers)}")
             except Exception as e:
@@ -239,19 +227,10 @@ async def websocket_endpoint(websocket: WebSocket):
                 else:
                     logger.warning(f"Failed to register real AgentMessageHandler: {e}, using fallback for {environment}")
                     # Create fallback agent handler only for testing/development
-                    # CRITICAL FIX: Check if fallback handler already exists before adding
-                    existing_fallback = None
-                    for handler in message_router.handlers:
-                        if handler.__class__.__name__ == 'FallbackAgentHandler':
-                            existing_fallback = handler
-                            break
-                    
-                    if not existing_fallback:
-                        fallback_handler = _create_fallback_agent_handler()
-                        message_router.add_handler(fallback_handler)
-                        logger.info(f"Registered new fallback AgentMessageHandler for {environment} environment")
-                    else:
-                        logger.info(f"Fallback AgentMessageHandler already registered for {environment} environment")
+                    # Each connection needs its own fallback handler
+                    fallback_handler = _create_fallback_agent_handler(websocket)
+                    message_router.register_handler(fallback_handler)
+                    logger.info(f"Registered fallback AgentMessageHandler for {environment} environment")
                     
                     logger.info(f"Total handlers after fallback registration: {len(message_router.handlers)}")
         else:
@@ -282,20 +261,11 @@ async def websocket_endpoint(websocket: WebSocket):
             else:
                 logger.warning(f"WebSocket dependencies not available in {environment} - creating fallback agent handler")
                 # Create fallback agent handler only for testing/development
-                # CRITICAL FIX: Check if fallback handler already exists before adding
-                existing_fallback = None
-                for handler in message_router.handlers:
-                    if handler.__class__.__name__ == 'FallbackAgentHandler':
-                        existing_fallback = handler
-                        break
-                
-                if not existing_fallback:
-                    fallback_handler = _create_fallback_agent_handler()
-                    message_router.add_handler(fallback_handler)
-                    logger.info(f"🤖 Registered new fallback AgentMessageHandler for {environment} - will handle CHAT messages!")
-                    logger.info(f"🤖 Fallback handler can handle: {fallback_handler.supported_types}")
-                else:
-                    logger.info(f"🤖 Fallback AgentMessageHandler already registered for {environment}")
+                # Each connection needs its own fallback handler
+                fallback_handler = _create_fallback_agent_handler(websocket)
+                message_router.register_handler(fallback_handler)
+                logger.info(f"🤖 Registered fallback AgentMessageHandler for {environment} - will handle CHAT messages!")
+                logger.info(f"🤖 Fallback handler can handle: {fallback_handler.supported_types}")
                 
                 logger.info(f"🤖 Total handlers registered: {len(message_router.handlers)}")
                 
@@ -415,6 +385,30 @@ async def websocket_endpoint(websocket: WebSocket):
     finally:
         # Clear GCP error reporting context
         clear_request_context()
+        
+        # CRITICAL: Clean up connection-specific handlers to prevent accumulation
+        try:
+            message_router = get_message_router()
+            from netra_backend.app.websocket_core.agent_handler import AgentMessageHandler
+            
+            # Remove this connection's handler (both real and fallback)
+            handlers_to_remove = []
+            for handler in message_router.handlers:
+                # Remove AgentMessageHandler that matches this websocket
+                if isinstance(handler, AgentMessageHandler) and handler.websocket == websocket:
+                    handlers_to_remove.append(handler)
+                # Remove FallbackAgentHandler (check by class name as it's dynamically created)
+                elif handler.__class__.__name__ == 'FallbackAgentHandler' and hasattr(handler, 'websocket') and handler.websocket == websocket:
+                    handlers_to_remove.append(handler)
+            
+            for handler in handlers_to_remove:
+                message_router.handlers.remove(handler)
+                handler_type = handler.__class__.__name__
+                logger.info(f"Removed {handler_type} for disconnected WebSocket")
+            
+            logger.info(f"Handler cleanup complete. Remaining handlers: {len(message_router.handlers)}")
+        except Exception as handler_cleanup_error:
+            logger.warning(f"Error during handler cleanup: {handler_cleanup_error}")
         
         # Cleanup resources - only if authentication was successful
         if heartbeat:
@@ -590,7 +584,7 @@ async def _send_format_error(websocket: WebSocket, error_message: str) -> None:
     await safe_websocket_send(websocket, error_msg.model_dump())
 
 
-def _create_fallback_agent_handler():
+def _create_fallback_agent_handler(websocket: WebSocket = None):
     """Create fallback agent handler for E2E testing when real services are not available."""
     from netra_backend.app.websocket_core.handlers import BaseMessageHandler
     from netra_backend.app.websocket_core.types import MessageType, WebSocketMessage, create_server_message
@@ -598,12 +592,13 @@ def _create_fallback_agent_handler():
     class FallbackAgentHandler(BaseMessageHandler):
         """Fallback handler that generates mock agent responses for E2E testing."""
         
-        def __init__(self):
+        def __init__(self, websocket: WebSocket = None):
             super().__init__([
                 MessageType.CHAT,
                 MessageType.USER_MESSAGE,
                 MessageType.START_AGENT
             ])
+            self.websocket = websocket  # Store for cleanup tracking
         
         async def handle_message(self, user_id: str, websocket: WebSocket,
                                message: WebSocketMessage) -> bool:
@@ -647,7 +642,7 @@ def _create_fallback_agent_handler():
                 await safe_websocket_send(websocket, error_msg.model_dump())
                 return False
     
-    return FallbackAgentHandler()
+    return FallbackAgentHandler(websocket)
 
 
 # Configuration and Health Endpoints
