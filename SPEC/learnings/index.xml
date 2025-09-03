@@ -147,6 +147,41 @@
         </related-learnings>
     </learning>
     
+    <learning id="websocket-connection-loop-ssot-fix-2025-01-03">
+        <title>WebSocket Connection Loop - SSOT Fix for React Effects</title>
+        <category>WebSocket/Frontend/React/SSOT/Critical</category>
+        <keywords>websocket, connection-loop, react-effects, ssot, auth-integration, duplicate-connections, race-condition</keywords>
+        <path>websocket_connection_loop_ssot_fix.xml</path>
+        <critical-takeaway>
+            WebSocket connection loops were caused by duplicate React effects in WebSocketProvider that
+            fired simultaneously on auth state changes. The bug was EXPOSED (not caused) by fixing auth -
+            broken auth had masked the architectural flaw. Solution: Consolidate multiple effects into
+            single SSOT effect with explicit state management (connectionStateRef). Key lesson: Success
+            can expose hidden failures. When fixing core systems like auth, audit all consumers for
+            implicit dependencies on broken behavior.
+        </critical-takeaway>
+        <severity>CRITICAL</severity>
+        <business-impact>Complete chat functionality failure, backend overwhelmed with 10-50 connections/second</business-impact>
+        <prevention>
+            <pattern>Single coordinated useEffect for connection lifecycle</pattern>
+            <pattern>Explicit connection state tracking with refs</pattern>
+            <pattern>Connection deduplication at multiple levels</pattern>
+            <pattern>Minimum interval enforcement between attempts</pattern>
+        </prevention>
+        <testing-requirements>
+            <test>Test rapid auth state changes</test>
+            <test>Test token refresh during active connection</test>
+            <test>Test prevention of duplicate connections</test>
+            <test>Regression test for connection loops</test>
+        </testing-requirements>
+        <related-learnings>
+            <learning>websocket_auth_timing.xml</learning>
+            <learning>websocket_auth_race_condition.xml</learning>
+            <learning>auth_token_refresh_root_cause.xml</learning>
+            <learning>../../WEBSOCKET_CONNECTION_LOOP_COMPLETE_ANALYSIS.md</learning>
+        </related-learnings>
+    </learning>
+    
     <learning id="podman-integration-dynamic-ports-2025-09-03">
         <title>Podman Integration with Dynamic Port Allocation</title>
         <category>Infrastructure/Containers/Testing</category>

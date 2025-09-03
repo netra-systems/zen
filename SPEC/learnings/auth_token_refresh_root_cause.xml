@@ -85,4 +85,30 @@
     <test>auth_service/tests/test_refresh_critical_fix.py::test_jwt_handler_refresh_not_hardcoded</test>
     <test>auth_service/tests/test_refresh_token_fix.py::test_refresh_token_contains_user_data</test>
   </tests_added>
+
+  <critical_update date="2025-01-03">
+    <title>Downstream WebSocket Connection Loop Impact</title>
+    <description>
+      This auth token refresh fix was critical but inadvertently exposed a severe WebSocket 
+      connection loop bug. When tokens started refreshing correctly, it revealed that the 
+      WebSocketProvider had duplicate React effects that would create connection loops on 
+      every auth state change.
+    </description>
+    <cascade_effect>
+      1. This fix made tokens refresh correctly with unique values
+      2. Frontend auth context started propagating token changes properly
+      3. WebSocketProvider's duplicate effects both fired on token changes
+      4. Result: Connection loops that overwhelmed the backend
+    </cascade_effect>
+    <cross_references>
+      <ref>/WEBSOCKET_CONNECTION_LOOP_ROOT_CAUSE.md</ref>
+      <ref>/WEBSOCKET_CONNECTION_LOOP_COMPLETE_ANALYSIS.md</ref>
+      <ref>/SPEC/learnings/websocket_connection_loop_ssot_fix.xml</ref>
+      <ref>/WEBSOCKET_REQUEST_SPAM_FIVE_WHYS.md</ref>
+    </cross_references>
+    <lesson>
+      When fixing critical authentication bugs, always audit downstream consumers.
+      Broken auth can mask architectural issues in dependent systems.
+    </lesson>
+  </critical_update>
 </learning>
