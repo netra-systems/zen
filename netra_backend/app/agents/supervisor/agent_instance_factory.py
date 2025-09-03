@@ -485,16 +485,80 @@ class AgentInstanceFactory:
                     raise ValueError("No agent registry configured")
             
             # Create fresh agent instance with request-scoped dependencies
-            if llm_manager and tool_dispatcher:
-                agent = AgentClass(
-                    llm_manager=llm_manager,
-                    tool_dispatcher=tool_dispatcher,
-                    name=agent_name,
-                    user_id=user_context.user_id  # Bind to specific user
-                )
-            else:
-                # For provided agent class, try basic initialization
-                agent = AgentClass(name=agent_name, user_id=user_context.user_id)
+            # CRITICAL: Different agents have different constructor signatures
+            # We need to handle each pattern appropriately
+            
+            logger.info(f"🔧 Creating agent instance for {agent_name} with class {AgentClass.__name__}")
+            
+            # Map agent names to their class names for consistency
+            agent_class_name = AgentClass.__name__
+            
+            # Agents that don't take any parameters (except ReportingSubAgent which takes optional context)
+            no_param_agents = [
+                'TriageSubAgent', 'GoalsTriageSubAgent'
+            ]
+            
+            # ReportingSubAgent takes optional context parameter
+            optional_context_agents = [
+                'ReportingSubAgent'
+            ]
+            
+            # Agents that take llm_manager and tool_dispatcher (no name parameter)
+            llm_tool_only_agents = [
+                'DataSubAgent', 'OptimizationsCoreSubAgent', 
+                'ActionsToMeetGoalsSubAgent', 'DataHelperAgent',
+                'SyntheticDataSubAgent'
+            ]
+            
+            try:
+                # Check by class name for consistency
+                if agent_class_name in no_param_agents:
+                    logger.info(f"✅ Creating {agent_name} ({agent_class_name}) with no parameters")
+                    agent = AgentClass()
+                elif agent_class_name in optional_context_agents:
+                    logger.info(f"✅ Creating {agent_name} ({agent_class_name}) with optional context")
+                    agent = AgentClass(context=user_context)
+                elif agent_class_name in llm_tool_only_agents:
+                    if llm_manager and tool_dispatcher:
+                        logger.info(f"✅ Creating {agent_name} ({agent_class_name}) with llm_manager and tool_dispatcher only")
+                        agent = AgentClass(
+                            llm_manager=llm_manager,
+                            tool_dispatcher=tool_dispatcher
+                        )
+                    else:
+                        logger.warning(f"⚠️ {agent_name} ({agent_class_name}) requires llm_manager and tool_dispatcher, attempting no-param init")
+                        agent = AgentClass()
+                else:
+                    # Try different parameter combinations based on what the agent accepts
+                    logger.info(f"🔧 Trying parameter combinations for {agent_name} ({agent_class_name})")
+                    
+                    # First try with llm_manager and tool_dispatcher only (most common)
+                    if llm_manager and tool_dispatcher:
+                        try:
+                            logger.debug(f"   Trying: llm_manager + tool_dispatcher")
+                            agent = AgentClass(
+                                llm_manager=llm_manager,
+                                tool_dispatcher=tool_dispatcher
+                            )
+                            logger.info(f"✅ Created {agent_name} with llm_manager and tool_dispatcher")
+                        except TypeError as e1:
+                            # Try no parameters as fallback
+                            try:
+                                logger.debug(f"   Trying: no parameters")
+                                agent = AgentClass()
+                                logger.info(f"✅ Created {agent_name} with no parameters")
+                            except TypeError as e2:
+                                raise RuntimeError(f"Could not instantiate {agent_name}: {e1}, {e2}")
+                    else:
+                        # No llm_manager/tool_dispatcher available, try no parameters
+                        try:
+                            agent = AgentClass()
+                            logger.info(f"✅ Created {agent_name} with no parameters")
+                        except TypeError:
+                            raise RuntimeError(f"Could not instantiate {agent_name} without llm_manager/tool_dispatcher")
+            except Exception as e:
+                logger.error(f"❌ Failed to instantiate {agent_name}: {e}")
+                raise RuntimeError(f"Could not instantiate {agent_name}: {e}")
             
             # CRITICAL: Set WebSocket bridge on agent with REAL run_id (not placeholder)
             if hasattr(agent, 'set_websocket_bridge'):

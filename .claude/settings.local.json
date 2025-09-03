@@ -44,7 +44,8 @@
       "Bash(gcloud run services describe:*)",
       "Bash(docker restart:*)",
       "Bash(npx cypress run:*)",
-      "Bash(gcloud run services list:*)"
+      "Bash(gcloud run services list:*)",
+      "Bash(grep:*)"
     ],
     "deny": []
   },

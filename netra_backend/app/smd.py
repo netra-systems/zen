@@ -819,6 +819,9 @@ class StartupOrchestrator:
         """Initialize tool registry and dispatcher with AgentWebSocketBridge support - CRITICAL."""
         from netra_backend.app.agents.tool_registry_unified import UnifiedToolRegistry
         from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
+        from netra_backend.app.agents.tools.langchain_wrappers import (
+            DataHelperTool, DeepResearchTool, ReliabilityScorerTool, SandboxedInterpreterTool
+        )
         
         # CRITICAL FIX: WebSocket bridge MUST be created before tool dispatcher
         # Bridge should already be created in previous step
@@ -834,15 +837,15 @@ class StartupOrchestrator:
         # Create unified tool registry with default tools
         tool_registry = UnifiedToolRegistry(registry_id="global_startup")
         
-        # Get all registered tools by iterating through tool names
-        tool_names = tool_registry.list_tools()
-        all_tools = []
-        for tool_name in tool_names:
-            tool = tool_registry.get_tool(tool_name)
-            if tool:
-                all_tools.append(tool)
+        # 🔧 CRITICAL FIX: Load actual LangChain wrapped tool instances that exist
+        all_tools = [
+            DataHelperTool(),
+            DeepResearchTool(), 
+            ReliabilityScorerTool(),
+            SandboxedInterpreterTool()
+        ]
         
-        self.logger.info(f"    - Initialized UnifiedToolRegistry with {len(all_tools)} tools")
+        self.logger.info(f"    - ✅ Loaded {len(all_tools)} LangChain wrapped tools for dispatcher")
         
         # UnifiedToolDispatcher (aliased as ToolDispatcher) expects:
         # user_context, tools, websocket_emitter, websocket_bridge, permission_service

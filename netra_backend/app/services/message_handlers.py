@@ -133,13 +133,24 @@ class MessageHandlerService(IMessageHandlerService):
         self, user_id: str, user_request: str, thread: Thread, db_session: AsyncSession
     ) -> None:
         """Process the agent request"""
+        logger.info(f"🎯 Starting agent request processing for user={user_id}, thread={thread.id}")
+        logger.info(f"📊 db_session status at start: {type(db_session)}, is None: {db_session is None}")
+        
         await self._create_user_message(thread, user_request, user_id, db_session)
         run = await self._create_run(thread, db_session)
+        
+        logger.info(f"📝 Configuring supervisor for user={user_id}")
         self._configure_supervisor(user_id, thread, db_session)
-        response = await self._execute_supervisor(user_request, thread, user_id, run)
+        
+        logger.info(f"🚀 Executing supervisor for run={run.id}")
+        response = await self._execute_supervisor(user_request, thread, user_id, run, db_session)
+        
+        logger.info(f"💾 Saving response for run={run.id}")
         await self._save_response(thread, response, run, db_session)
         await self._complete_run(run, db_session)
         await self._send_completion(user_id, response)
+        
+        logger.info(f"✅ Agent request processing completed for user={user_id}, thread={thread.id}")
     
     async def _create_user_message(
         self, thread: Thread, content: str, user_id: str, db_session: AsyncSession
@@ -173,7 +184,7 @@ class MessageHandlerService(IMessageHandlerService):
             logger.warning(f"Supervisor missing agent_registry - WebSocket events may not work for user {user_id}")
     
     async def _execute_supervisor(
-        self, user_request: str, thread: Thread, user_id: str, run: Run
+        self, user_request: str, thread: Thread, user_id: str, run: Run, db_session: AsyncSession
     ) -> Any:
         """Execute supervisor run"""
         # CRITICAL: Register run-thread mapping for WebSocket routing
@@ -210,8 +221,65 @@ class MessageHandlerService(IMessageHandlerService):
             logger.error(f"🚨 Error registering run-thread mapping: {e}")
             # Continue execution even if registration fails
         
-        # Execute the supervisor
-        return await self.supervisor.run(user_request, thread.id, user_id, run.id)
+        # Create UserExecutionContext for the new pattern
+        from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
+        
+        # CRITICAL DEBUG: Log the db_session status
+        logger.info(f"🔍 DEBUG: db_session type: {type(db_session)}, is None: {db_session is None}")
+        if db_session is None:
+            logger.error(f"🚨 CRITICAL: db_session is None! This will cause UserExecutionContext validation to fail")
+            logger.error(f"🚨 Stack trace for debugging:")
+            import traceback
+            logger.error(traceback.format_stack())
+        
+        # Create context with proper metadata using the passed db_session
+        logger.info(f"📝 Creating UserExecutionContext with: user_id={user_id}, thread_id={thread.id}, run_id={run.id}, db_session={type(db_session)}")
+        
+        try:
+            context = UserExecutionContext(
+                user_id=user_id,
+                thread_id=thread.id,
+                run_id=run.id,
+                db_session=db_session,
+                metadata={
+                    "user_request": user_request,
+                    "timestamp": run.created_at
+                }
+            )
+            logger.info(f"✅ Successfully created UserExecutionContext for user={user_id}, thread={thread.id}, run={run.id}")
+        except Exception as e:
+            logger.error(f"🚨 Failed to create UserExecutionContext: {e}")
+            logger.error(f"🚨 Parameters were: user_id={user_id}, thread_id={thread.id}, run_id={run.id}, db_session={type(db_session)}")
+            raise
+        
+        # Execute the supervisor with the new UserExecutionContext pattern
+        try:
+            logger.info(f"🚀 Attempting to execute SupervisorAgent.execute() with context for run_id={run.id}")
+            
+            # Double-check the supervisor has execute method
+            if not hasattr(self.supervisor, 'execute'):
+                logger.error(f"🚨 CRITICAL: SupervisorAgent does not have 'execute' method!")
+                logger.error(f"🚨 Available methods: {[m for m in dir(self.supervisor) if not m.startswith('_')]}")
+                raise AttributeError("SupervisorAgent missing execute method")
+            
+            result = await self.supervisor.execute(context, stream_updates=True)
+            logger.info(f"✅ SupervisorAgent executed successfully for run_id={run.id}")
+            logger.info(f"📊 Result type: {type(result)}, has content: {result is not None}")
+            return result
+        except AttributeError as e:
+            logger.error(f"🚨 AttributeError in SupervisorAgent execution for run_id={run.id}: {e}")
+            logger.error(f"🚨 This likely means the supervisor is missing a required method")
+            logger.error(f"🚨 Supervisor type: {type(self.supervisor)}")
+            raise
+        except ValueError as e:
+            logger.error(f"🚨 ValueError in SupervisorAgent execution for run_id={run.id}: {e}")
+            logger.error(f"🚨 This likely means UserExecutionContext validation failed")
+            logger.error(f"🚨 Context details: user_id={context.user_id}, thread_id={context.thread_id}, run_id={context.run_id}")
+            raise
+        except Exception as e:
+            logger.error(f"❌ SupervisorAgent execution failed for run_id={run.id}: {e}", exc_info=True)
+            logger.error(f"❌ Exception type: {type(e).__name__}")
+            raise
     
     async def _save_response(
         self, thread: Thread, response: Any, run: Run, db_session: AsyncSession

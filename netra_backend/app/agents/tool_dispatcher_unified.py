@@ -221,8 +221,17 @@ class UnifiedToolDispatcher:
     
     def _register_initial_tools(self, tools: List[BaseTool]) -> None:
         """Register initial tools if provided."""
+        logger.info(f"🔧 UnifiedToolDispatcher._register_initial_tools called with {len(tools) if tools else 0} tools")
         if tools:
-            self.registry.register_tools(tools)
+            logger.info(f"🔧 Registering {len(tools)} tools in registry {self.registry.registry_id}")
+            registered_count = self.registry.register_tools(tools)
+            logger.info(f"✅ Successfully registered {registered_count}/{len(tools)} tools")
+            
+            # Log current state of registry
+            current_tools = self.registry.list_tools()
+            logger.info(f"📦 Registry now contains {len(current_tools)} tools: {current_tools[:5]}...")
+        else:
+            logger.warning("⚠️ No tools provided to _register_initial_tools")
     
     def _init_metrics(self) -> None:
         """Initialize metrics tracking."""
@@ -241,7 +250,9 @@ class UnifiedToolDispatcher:
     @property
     def tools(self) -> Dict[str, Any]:
         """Expose tools registry for compatibility."""
-        return self.registry.tools
+        tools_dict = self.registry.tools
+        logger.debug(f"🔍 UnifiedToolDispatcher.tools property called - returning {len(tools_dict)} tools from registry {self.registry.registry_id}")
+        return tools_dict
     
     @property
     def has_websocket_support(self) -> bool:
