@@ -828,6 +828,12 @@ class StartupOrchestrator:
         )
         
         # Validate that the tool dispatcher has WebSocket support
+        if self.app.state.tool_dispatcher is None:
+            raise DeterministicStartupError(
+                "Tool dispatcher is None after initialization - "
+                "failed to create tool dispatcher properly"
+            )
+        
         if not hasattr(self.app.state.tool_dispatcher, 'has_websocket_support'):
             raise DeterministicStartupError(
                 "Tool dispatcher missing has_websocket_support property - "
@@ -998,8 +1004,11 @@ class StartupOrchestrator:
                 supervisor = self.app.state.agent_supervisor
                 if hasattr(supervisor, 'registry') and hasattr(supervisor.registry, 'tool_dispatcher'):
                     dispatcher = supervisor.registry.tool_dispatcher
+                    # Check if dispatcher exists
+                    if dispatcher is None:
+                        raise DeterministicStartupError("Supervisor tool dispatcher is None - failed to initialize properly")
                     # Check using the actual has_websocket_support property
-                    if not dispatcher.has_websocket_support:
+                    if not hasattr(dispatcher, 'has_websocket_support') or not dispatcher.has_websocket_support:
                         raise DeterministicStartupError("Supervisor tool dispatcher has no WebSocket support - agent events will be silent")
                     
                     # Check that the unified executor is present (it contains the notifier internally)
