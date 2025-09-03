@@ -143,3 +143,24 @@ private async attemptTokenRefreshAndReconnect(): Promise<void> {
 3. **Coordination**: Services that interact with shared resources (like auth tokens) need coordinated retry strategies
 4. **Testing**: Need integration tests that specifically test the interaction between WebSocket reconnection and auth refresh
 5. **Monitoring**: Should add metrics to track refresh attempt frequency and WebSocket reconnection rates
+
+## Critical Update (2025-01-03)
+
+**IMPORTANT**: This issue was part of a larger architectural problem that was fully exposed when auth started working correctly.
+
+### Connection Loop Root Cause Discovered
+After fixing this auth refresh coordination issue, a more severe bug was discovered: the WebSocketProvider had **duplicate React effects** that would trigger simultaneous connection attempts whenever auth state changed. This created connection loops that were previously masked by broken auth.
+
+### Related Documentation:
+- **Root Cause Analysis**: `/WEBSOCKET_CONNECTION_LOOP_ROOT_CAUSE.md`
+- **Complete Fix Report**: `/WEBSOCKET_CONNECTION_LOOP_COMPLETE_ANALYSIS.md`
+- **SPEC Learning**: `/SPEC/learnings/websocket_connection_loop_ssot_fix.xml`
+
+### Key Insight:
+The request spamming fixed here was a symptom of deeper architectural issues. The real problem was lack of Single Source of Truth (SSOT) for WebSocket connection management in the React layer. When auth worked correctly, it triggered multiple effects that created connection loops.
+
+### Current Status:
+✅ **FULLY RESOLVED** - Both the auth coordination AND the underlying connection loop issues have been fixed through:
+1. This fix: Auth refresh coordination with cooldown periods
+2. SSOT fix: Consolidated React effects in WebSocketProvider
+3. Connection deduplication in WebSocketService
