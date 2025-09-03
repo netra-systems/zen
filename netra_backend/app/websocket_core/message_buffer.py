@@ -20,6 +20,7 @@ from enum import Enum
 
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.schemas.registry import ServerMessage, WebSocketMessage
+from netra_backend.app.core.websocket_exceptions import WebSocketBufferOverflowError
 
 logger = central_logger.get_logger(__name__)
 
@@ -178,9 +179,16 @@ class WebSocketMessageBuffer:
             
             # Check message size
             if buffered_msg.size_bytes > self.config.max_message_size_bytes:
-                logger.warning(f"Message too large to buffer: {buffered_msg.size_bytes} bytes")
+                error_msg = f"Message too large: {buffered_msg.size_bytes} bytes exceeds max {self.config.max_message_size_bytes}"
+                logger.error(f"🚨 BUFFER OVERFLOW: {error_msg}")
                 self.stats['messages_dropped'] += 1
-                return False
+                
+                # LOUD FAILURE: Raise exception instead of silent return
+                raise WebSocketBufferOverflowError(
+                    buffer_size=self.config.max_message_size_bytes,
+                    message_size=buffered_msg.size_bytes,
+                    user_id=user_id
+                )
             
             # Check global buffer limits
             if not await self._check_global_limits(buffered_msg):
@@ -204,9 +212,14 @@ class WebSocketMessageBuffer:
             logger.debug(f"Buffered message for user {user_id}: {buffered_msg.id}")
             return True
             
+        except WebSocketBufferOverflowError:
+            # Re-raise our custom exception
+            raise
         except Exception as e:
-            logger.error(f"Failed to buffer message for user {user_id}: {e}")
+            logger.error(f"🚨 MESSAGE BUFFER FAILURE: Failed to buffer message for user {user_id}: {e}")
             self.stats['messages_dropped'] += 1
+            # Log at ERROR level but still return False for backward compatibility
+            # TODO: Convert to exception in next major version
             return False
     
     async def get_buffered_messages(self, user_id: str, limit: Optional[int] = None) -> List[BufferedMessage]:

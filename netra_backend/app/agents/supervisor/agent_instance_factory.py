@@ -33,6 +33,10 @@ from netra_backend.app.agents.supervisor.agent_class_registry import AgentClassR
 from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
 from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
 from netra_backend.app.websocket_core.manager import WebSocketManager
+from netra_backend.app.core.websocket_exceptions import (
+    AgentCommunicationFailureError,
+    WebSocketSendFailureError
+)
 from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
@@ -78,12 +82,32 @@ class UserWebSocketEmitter:
             if success:
                 logger.debug(f"✅ Agent started notification sent for user {self.user_id}: {agent_name}")
             else:
-                logger.error(f"❌ Agent started notification failed for user {self.user_id}: {agent_name}")
+                error_msg = f"Agent started notification failed for user {self.user_id}: {agent_name}"
+                logger.error(f"❌ {error_msg}")
+                
+                # LOUD FAILURE: Raise exception for failed notifications
+                raise WebSocketSendFailureError(
+                    reason="WebSocket bridge returned failure",
+                    event_type="agent_started",
+                    user_id=self.user_id,
+                    thread_id=self.thread_id
+                )
             
             return success
+        except WebSocketSendFailureError:
+            # Re-raise our custom exception
+            raise
         except Exception as e:
-            logger.error(f"Exception in notify_agent_started for user {self.user_id}: {e}")
-            return False
+            error_msg = f"Exception in notify_agent_started for user {self.user_id}: {e}"
+            logger.error(f"🚨 AGENT COMMUNICATION FAILURE: {error_msg}")
+            
+            # LOUD FAILURE: Convert generic exceptions to specific ones
+            raise AgentCommunicationFailureError(
+                from_agent="UserWebSocketEmitter",
+                to_agent=agent_name,
+                reason=str(e),
+                user_id=self.user_id
+            )
     
     async def notify_agent_thinking(self, agent_name: str, reasoning: str, 
                                    step_number: Optional[int] = None,
@@ -104,12 +128,30 @@ class UserWebSocketEmitter:
             if success:
                 logger.debug(f"✅ Agent thinking notification sent for user {self.user_id}: {agent_name}")
             else:
-                logger.error(f"❌ Agent thinking notification failed for user {self.user_id}: {agent_name}")
+                error_msg = f"Agent thinking notification failed for user {self.user_id}: {agent_name}"
+                logger.error(f"❌ {error_msg}")
+                
+                # LOUD FAILURE: Raise exception
+                raise WebSocketSendFailureError(
+                    reason="WebSocket bridge returned failure",
+                    event_type="agent_thinking",
+                    user_id=self.user_id,
+                    thread_id=self.thread_id
+                )
             
             return success
+        except WebSocketSendFailureError:
+            raise
         except Exception as e:
-            logger.error(f"Exception in notify_agent_thinking for user {self.user_id}: {e}")
-            return False
+            error_msg = f"Exception in notify_agent_thinking for user {self.user_id}: {e}"
+            logger.error(f"🚨 AGENT COMMUNICATION FAILURE: {error_msg}")
+            
+            raise AgentCommunicationFailureError(
+                from_agent="UserWebSocketEmitter",
+                to_agent=agent_name,
+                reason=str(e),
+                user_id=self.user_id
+            )
     
     async def notify_tool_executing(self, agent_name: str, tool_name: str, 
                                    parameters: Optional[Dict[str, Any]] = None) -> bool:
@@ -128,12 +170,27 @@ class UserWebSocketEmitter:
             if success:
                 logger.debug(f"✅ Tool executing notification sent for user {self.user_id}: {tool_name}")
             else:
-                logger.error(f"❌ Tool executing notification failed for user {self.user_id}: {tool_name}")
+                error_msg = f"Tool executing notification failed for user {self.user_id}: {tool_name}"
+                logger.error(f"❌ {error_msg}")
+                
+                raise WebSocketSendFailureError(
+                    reason="WebSocket bridge returned failure",
+                    event_type="tool_executing",
+                    user_id=self.user_id,
+                    thread_id=self.thread_id
+                )
             
             return success
+        except WebSocketSendFailureError:
+            raise
         except Exception as e:
-            logger.error(f"Exception in notify_tool_executing for user {self.user_id}: {e}")
-            return False
+            logger.error(f"🚨 TOOL NOTIFICATION FAILURE: Exception in notify_tool_executing for user {self.user_id}: {e}")
+            raise AgentCommunicationFailureError(
+                from_agent="UserWebSocketEmitter",
+                to_agent=agent_name,
+                reason=str(e),
+                user_id=self.user_id
+            )
     
     async def notify_tool_completed(self, agent_name: str, tool_name: str, 
                                    result: Optional[Dict[str, Any]] = None,
@@ -154,12 +211,27 @@ class UserWebSocketEmitter:
             if success:
                 logger.debug(f"✅ Tool completed notification sent for user {self.user_id}: {tool_name}")
             else:
-                logger.error(f"❌ Tool completed notification failed for user {self.user_id}: {tool_name}")
+                error_msg = f"Tool completed notification failed for user {self.user_id}: {tool_name}"
+                logger.error(f"❌ {error_msg}")
+                
+                raise WebSocketSendFailureError(
+                    reason="WebSocket bridge returned failure",
+                    event_type="tool_completed",
+                    user_id=self.user_id,
+                    thread_id=self.thread_id
+                )
             
             return success
+        except WebSocketSendFailureError:
+            raise
         except Exception as e:
-            logger.error(f"Exception in notify_tool_completed for user {self.user_id}: {e}")
-            return False
+            logger.error(f"🚨 TOOL NOTIFICATION FAILURE: Exception in notify_tool_completed for user {self.user_id}: {e}")
+            raise AgentCommunicationFailureError(
+                from_agent="UserWebSocketEmitter",
+                to_agent=agent_name,
+                reason=str(e),
+                user_id=self.user_id
+            )
     
     async def notify_agent_completed(self, agent_name: str, result: Optional[Dict[str, Any]] = None,
                                     execution_time_ms: Optional[float] = None) -> bool:
@@ -178,12 +250,27 @@ class UserWebSocketEmitter:
             if success:
                 logger.debug(f"✅ Agent completed notification sent for user {self.user_id}: {agent_name}")
             else:
-                logger.error(f"❌ Agent completed notification failed for user {self.user_id}: {agent_name}")
+                error_msg = f"Agent completed notification failed for user {self.user_id}: {agent_name}"
+                logger.error(f"❌ {error_msg}")
+                
+                raise WebSocketSendFailureError(
+                    reason="WebSocket bridge returned failure",
+                    event_type="agent_completed",
+                    user_id=self.user_id,
+                    thread_id=self.thread_id
+                )
             
             return success
+        except WebSocketSendFailureError:
+            raise
         except Exception as e:
-            logger.error(f"Exception in notify_agent_completed for user {self.user_id}: {e}")
-            return False
+            logger.error(f"🚨 AGENT COMPLETION FAILURE: Exception in notify_agent_completed for user {self.user_id}: {e}")
+            raise AgentCommunicationFailureError(
+                from_agent="UserWebSocketEmitter",
+                to_agent=agent_name,
+                reason=str(e),
+                user_id=self.user_id
+            )
     
     async def notify_agent_error(self, agent_name: str, error: str,
                                 error_context: Optional[Dict[str, Any]] = None) -> bool:
