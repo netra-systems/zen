@@ -21,7 +21,7 @@ def mock_justified(reason):
         return func
     return decorator
 
-from netra_backend.app.agents.data_sub_agent.agent import DataSubAgent
+from netra_backend.app.agents.data_sub_agent import DataSubAgent
 
 from netra_backend.tests.agents.helpers.shared_test_types import (
     TestErrorHandling as SharedTestErrorHandling,

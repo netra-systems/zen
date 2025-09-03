@@ -51,7 +51,7 @@ class TestAgentE2ECriticalTools(AgentE2ETestBase):
         tool_dispatcher.dispatch_tool = AsyncMock(side_effect=tool_results)
         
         # Execute a sub-agent that uses tools
-        from netra_backend.app.agents.data_sub_agent.agent import DataSubAgent
+        from netra_backend.app.agents.data_sub_agent import DataSubAgent
         data_agent = DataSubAgent(llm_manager, tool_dispatcher)
         state = DeepAgentState(user_request="Analyze GPU metrics")
         
