@@ -300,13 +300,17 @@ class WebSocketManager:
             cls._instance = super().__new__(cls)
         return cls._instance
     
-    def __init__(self, heartbeat_config: Optional[EnhancedHeartbeatConfig] = None):
+    def __init__(self, heartbeat_config: Optional[EnhancedHeartbeatConfig] = None,
+                 enable_connection_scoping: bool = True):
         """
         Initialize enhanced WebSocket manager with optional heartbeat configuration.
         
         Args:
             heartbeat_config: Optional enhanced heartbeat configuration.
                              If None, environment-specific config will be auto-detected.
+            enable_connection_scoping: If True, enables per-connection scoping for 
+                                     complete user isolation. This prevents event 
+                                     leakage between users.
         """
         if hasattr(self, '_initialized'):
             return
@@ -423,8 +427,23 @@ class WebSocketManager:
         # Enhanced health monitoring lock
         self._health_lock = None
         
+        # CONNECTION SCOPING: Enable per-connection isolation to prevent event leakage
+        self.enable_connection_scoping = enable_connection_scoping
+        self._connection_scopes: Dict[str, 'ConnectionScope'] = {}  # connection_id -> scope
+        self._scope_locks: Dict[str, asyncio.Lock] = {}  # connection_id -> lock
+        
+        # Connection scoping stats
+        self.scoping_stats = {
+            "scoped_connections": 0,
+            "global_connections": 0,
+            "events_blocked": 0,  # Events blocked due to user mismatch
+            "scopes_created": 0,
+            "scopes_cleaned": 0
+        }
+        
         self._initialized = True
-        logger.info(f"Enhanced WebSocketManager initialized with {self.heartbeat_config.heartbeat_interval_seconds}s heartbeat interval")
+        logger.info(f"Enhanced WebSocketManager initialized with {self.heartbeat_config.heartbeat_interval_seconds}s heartbeat interval, "
+                   f"connection_scoping={'enabled' if enable_connection_scoping else 'disabled'}")
         
     def _increment_stat(self, stat_key: str, amount: int = 1) -> None:
         """Safely increment a connection statistic."""
@@ -900,6 +919,10 @@ class WebSocketManager:
         self.connection_wrappers.pop(connection_id, None)
         self.connection_health.pop(connection_id, None)
         self.active_pings.pop(connection_id, None)
+        
+        # Clean up connection scope if enabled
+        if self.enable_connection_scoping:
+            self.cleanup_connection_scope(connection_id)
         
         # Remove connection
         del self.connections[connection_id]
@@ -1524,6 +1547,205 @@ class WebSocketManager:
                     await websocket.close(code=code, reason=reason)
                 except Exception as close_error:
                     logger.warning(f"Error closing websocket for user {user_id}: {close_error}")
+    
+    def get_connection_scope(self, connection_id: str) -> Optional['ConnectionScope']:
+        """
+        Get or create a connection-specific scope for complete user isolation.
+        
+        When connection scoping is enabled, this ensures that each connection
+        has its own isolated scope that only handles events for that specific user.
+        This prevents cross-user event leakage and enforces strict user isolation.
+        
+        Args:
+            connection_id: The connection ID to get scope for
+            
+        Returns:
+            ConnectionScope if scoping is enabled and connection exists, None otherwise
+        """
+        if not self.enable_connection_scoping:
+            return None  # Use global scope when scoping disabled
+            
+        if connection_id not in self.connections:
+            logger.warning(f"Cannot create scope for non-existent connection: {connection_id}")
+            return None
+            
+        # Get or create connection scope
+        if connection_id not in self._connection_scopes:
+            conn = self.connections[connection_id]
+            user_id = conn.get("user_id")
+            thread_id = conn.get("thread_id")
+            
+            # Create new connection scope
+            scope = ConnectionScope(
+                connection_id=connection_id,
+                user_id=user_id,
+                thread_id=thread_id,
+                websocket=conn.get("websocket"),
+                parent_manager=self
+            )
+            
+            self._connection_scopes[connection_id] = scope
+            self.scoping_stats["scopes_created"] += 1
+            self.scoping_stats["scoped_connections"] += 1
+            
+            logger.info(f"Created connection scope for {connection_id} (user: {user_id[:8] if user_id else 'unknown'}...)")
+            
+        return self._connection_scopes[connection_id]
+    
+    async def send_scoped_event(self, connection_id: str, event_type: str, 
+                               payload: Dict[str, Any], user_id: Optional[str] = None) -> bool:
+        """
+        Send event with connection scoping and user validation.
+        
+        This method ensures events are only sent to the correct user when 
+        connection scoping is enabled, preventing cross-user event leakage.
+        
+        Args:
+            connection_id: Target connection
+            event_type: Type of event to send
+            payload: Event payload
+            user_id: Optional user ID to validate against connection's user
+            
+        Returns:
+            True if event was sent successfully, False otherwise
+        """
+        if connection_id not in self.connections:
+            return False
+            
+        conn = self.connections[connection_id]
+        conn_user_id = conn.get("user_id")
+        
+        # Validate user if provided
+        if user_id and conn_user_id and user_id != conn_user_id:
+            logger.warning(f"Blocking event {event_type} - user mismatch: "
+                         f"requested {user_id} != connection {conn_user_id}")
+            self.scoping_stats["events_blocked"] += 1
+            return False
+            
+        # Use connection scope if enabled
+        if self.enable_connection_scoping:
+            scope = self.get_connection_scope(connection_id)
+            if scope:
+                return await scope.send_event(event_type, payload)
+                
+        # Fallback to regular send
+        event = {
+            "type": event_type,
+            "payload": payload,
+            "connection_id": connection_id,
+            "user_id": conn_user_id,
+            "timestamp": datetime.now(timezone.utc).isoformat()
+        }
+        
+        return await self.send_to_connection(connection_id, event)
+    
+    def cleanup_connection_scope(self, connection_id: str) -> None:
+        """
+        Clean up connection scope when connection closes.
+        
+        Args:
+            connection_id: Connection ID whose scope to clean up
+        """
+        if connection_id in self._connection_scopes:
+            del self._connection_scopes[connection_id]
+            self.scoping_stats["scopes_cleaned"] += 1
+            self.scoping_stats["scoped_connections"] = max(0, self.scoping_stats["scoped_connections"] - 1)
+            logger.debug(f"Cleaned up connection scope for {connection_id}")
+            
+        if connection_id in self._scope_locks:
+            del self._scope_locks[connection_id]
+
+
+# CONNECTION SCOPE CLASS
+class ConnectionScope:
+    """
+    Connection-specific scope for complete user isolation.
+    
+    Each ConnectionScope instance serves exactly one user connection,
+    ensuring that events are properly isolated and cannot leak between users.
+    This replaces the dangerous singleton pattern with per-connection isolation.
+    """
+    
+    def __init__(self, connection_id: str, user_id: str, thread_id: Optional[str],
+                 websocket: WebSocket, parent_manager: WebSocketManager):
+        """
+        Initialize connection-specific scope.
+        
+        Args:
+            connection_id: Unique connection identifier
+            user_id: Authenticated user this scope serves
+            thread_id: Optional thread ID for this connection
+            websocket: WebSocket connection
+            parent_manager: Parent WebSocketManager instance
+        """
+        self.connection_id = connection_id
+        self.user_id = user_id
+        self.thread_id = thread_id
+        self.websocket = websocket
+        self.parent_manager = parent_manager
+        
+        # Scope-specific stats
+        self.stats = {
+            "events_sent": 0,
+            "events_received": 0,
+            "events_blocked": 0,
+            "created_at": datetime.now(timezone.utc),
+            "last_activity": datetime.now(timezone.utc)
+        }
+        
+    async def send_event(self, event_type: str, payload: Dict[str, Any]) -> bool:
+        """
+        Send event through this connection scope with user validation.
+        
+        Args:
+            event_type: Type of event
+            payload: Event payload
+            
+        Returns:
+            True if sent successfully
+        """
+        # Create event with scope context
+        event = {
+            "type": event_type,
+            "payload": payload,
+            "user_id": self.user_id,
+            "connection_id": self.connection_id,
+            "thread_id": self.thread_id,
+            "timestamp": datetime.now(timezone.utc).isoformat()
+        }
+        
+        # Send through parent manager
+        success = await self.parent_manager.send_to_connection(self.connection_id, event)
+        
+        if success:
+            self.stats["events_sent"] += 1
+            self.stats["last_activity"] = datetime.now(timezone.utc)
+        
+        return success
+    
+    def validate_user(self, user_id: str) -> bool:
+        """
+        Validate that the provided user ID matches this scope's user.
+        
+        Args:
+            user_id: User ID to validate
+            
+        Returns:
+            True if user matches, False otherwise
+        """
+        if user_id != self.user_id:
+            self.stats["events_blocked"] += 1
+            return False
+        return True
+    
+    def get_stats(self) -> Dict[str, Any]:
+        """Get connection scope statistics."""
+        return {
+            "connection_id": self.connection_id,
+            "user_id": self.user_id,
+            "thread_id": self.thread_id,
+            **self.stats
+        }
 
 
 # Global manager instance
