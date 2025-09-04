@@ -23,13 +23,17 @@ class ThreadRepository(BaseRepository[Thread]):
         super().__init__(Thread)
     
     async def find_by_user(self, db: AsyncSession, user_id: str) -> List[Thread]:
-        """Find all threads for a user with robust error handling"""
+        """Find all threads for a user using JSONB query.
+        
+        SSOT: This is the canonical way to query threads by user_id.
+        No fallback queries or Python filtering - database query must work correctly.
+        """
         try:
             # Ensure user_id is string format for consistent comparison
             user_id_str = str(user_id).strip()
             logger.debug(f"Finding threads for user_id: {user_id_str}")
             
-            # Primary query using JSONB operators
+            # Query using JSONB operators - this is the SSOT pattern
             result = await db.execute(
                 select(Thread).where(
                     Thread.metadata_.op('->>')('user_id') == user_id_str
@@ -38,48 +42,27 @@ class ThreadRepository(BaseRepository[Thread]):
             threads = list(result.scalars().all())
             logger.info(f"Found {len(threads)} threads for user {user_id_str}")
             return threads
-            
         except Exception as e:
-            logger.error(f"Primary JSONB query failed for user {user_id}: {e}", exc_info=True)
-            
-            # Fallback: try alternative query approach for cases where metadata might be NULL or malformed
-            try:
-                logger.warning(f"Attempting fallback query for user {user_id}")
-                result = await db.execute(
-                    select(Thread).order_by(Thread.created_at.desc())
-                )
-                all_threads = result.scalars().all()
-                
-                # Filter threads in Python as a last resort
-                user_threads = []
-                for thread in all_threads:
-                    if thread.metadata_ and isinstance(thread.metadata_, dict):
-                        thread_user_id = thread.metadata_.get('user_id')
-                        if thread_user_id and str(thread_user_id).strip() == user_id_str:
-                            user_threads.append(thread)
-                
-                logger.info(f"Fallback: Found {len(user_threads)} threads for user {user_id_str}")
-                return user_threads
-                
-            except Exception as fallback_error:
-                logger.error(f"Fallback query also failed: {fallback_error}", exc_info=True)
-                # Return empty list to prevent endpoint failure, but log the issue
-                logger.critical(f"Unable to retrieve threads for user {user_id} - returning empty list")
-                return []
+            logger.error(f"Error finding threads for user {user_id}: {e}", exc_info=True)
+            # Raise the error - no fallback, let caller handle it
+            raise
     
     async def get_or_create_for_user(self, db: AsyncSession, user_id: str) -> Optional[Thread]:
         """Get existing thread for user or create new one
         
         First checks for existing active threads for the user.
-        If none exist, creates a new thread with a unique UUID-based ID.
+        If none exist, creates a new thread using UnifiedIDManager for consistent ID generation.
         """
         # First check if user has any existing active threads
         existing_thread = await self.get_active_thread(db, user_id)
         if existing_thread:
             return existing_thread
         
-        # Create new thread with unique ID
-        thread_id = f"thread_{uuid.uuid4().hex[:16]}"
+        # Create new thread using UnifiedIDManager for SSOT compliance
+        from netra_backend.app.core.unified_id_manager import UnifiedIDManager
+        # UnifiedIDManager.generate_thread_id() returns unprefixed ID to prevent double prefixing
+        base_id = UnifiedIDManager.generate_thread_id()
+        thread_id = f"thread_{base_id}"
         
         return await self.create(
             db=db,
@@ -127,24 +110,17 @@ class ThreadRepository(BaseRepository[Thread]):
             return False
     
     async def get_active_threads(self, db: AsyncSession, user_id: str) -> List[Thread]:
-        """Get all active (non-soft-deleted) threads for a user"""
-        try:
-            result = await db.execute(
-                select(Thread).where(
-                    and_(
-                        Thread.metadata_.op('->>')('user_id') == user_id,
-                        Thread.deleted_at.is_(None)
-                    )
-                ).order_by(Thread.created_at.desc())
-            )
-            scalars = result.scalars()
-            # Handle potential mock coroutine issues
-            if hasattr(scalars, '__await__'):
-                scalars = await scalars
-            scalars_result = scalars.all()
-            if hasattr(scalars_result, '__await__'):
-                scalars_result = await scalars_result
-            return list(scalars_result)
-        except Exception as e:
-            logger.error(f"Error getting active threads for user {user_id}: {e}")
-            return []
+        """Get all active (non-soft-deleted) threads for a user.
+        
+        SSOT: Query pattern for active threads.
+        No mock workarounds - tests should use proper async mocking.
+        """
+        result = await db.execute(
+            select(Thread).where(
+                and_(
+                    Thread.metadata_.op('->>')('user_id') == user_id,
+                    Thread.deleted_at.is_(None)
+                )
+            ).order_by(Thread.created_at.desc())
+        )
+        return list(result.scalars().all())

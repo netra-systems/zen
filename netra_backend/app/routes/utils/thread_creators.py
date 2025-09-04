@@ -1,17 +1,24 @@
 """Thread creation utilities."""
 import time
-import uuid
 from typing import Any, Dict
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from netra_backend.app.core.unified_id_manager import UnifiedIDManager
 from netra_backend.app.routes.utils.thread_builders import build_thread_response
 from netra_backend.app.services.database.thread_repository import ThreadRepository
 
 
 def generate_thread_id() -> str:
-    """Generate unique thread ID."""
-    return f"thread_{uuid.uuid4().hex[:16]}"
+    """Generate unique thread ID using UnifiedIDManager for SSOT compliance.
+    
+    Returns the full thread ID with 'thread_' prefix included.
+    UnifiedIDManager.generate_thread_id() returns unprefixed ID to prevent double prefixing.
+    """
+    # UnifiedIDManager returns unprefixed ID like "session_1234_abcd"
+    # We add the thread_ prefix here for the full ID
+    base_id = UnifiedIDManager.generate_thread_id()
+    return f"thread_{base_id}"
 
 
 def prepare_thread_metadata(thread_data, user_id: str) -> Dict[str, Any]:

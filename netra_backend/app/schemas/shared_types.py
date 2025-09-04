@@ -21,6 +21,7 @@ from typing import (
 )
 
 from pydantic import BaseModel, Field, field_validator
+import uuid
 
 from netra_backend.app.core.serialization.unified_json_handler import (
     parse_dict_field,
@@ -65,10 +66,18 @@ class ProcessingResult(BaseModel):
 class ErrorContext(BaseModel):
     """Standard error context for consistent error handling across all modules"""
     # Core identifiers  
-    trace_id: str = Field(..., description="Unique trace identifier")
+    trace_id: str = Field(default_factory=lambda: f"trace_{uuid.uuid4().hex[:16]}", description="Unique trace identifier")
     operation: str = Field(..., description="Operation being performed")
     timestamp: datetime = Field(default_factory=lambda: datetime.now(UTC), description="Error timestamp")
     user_id: Optional[str] = Field(default=None, description="User identifier")
+    
+    @field_validator('trace_id', mode='before')
+    @classmethod
+    def ensure_trace_id(cls, v):
+        """Ensure trace_id is always present, generate if missing."""
+        if v is None or v == "":
+            return f"trace_{uuid.uuid4().hex[:16]}"
+        return v
     
     # Additional context for compatibility with existing code
     correlation_id: Optional[str] = Field(default=None, description="Correlation identifier")

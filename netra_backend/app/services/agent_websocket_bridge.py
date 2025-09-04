@@ -1663,9 +1663,15 @@ class AgentWebSocketBridge(MonitorableComponent):
             "debug", "dev", "local", "temp", "temporary"
         ]
         
-        # Check for exact matches or contained patterns
+        # Check for exact matches or word boundaries to avoid false positives
+        # like 'test' matching 'thread_test' but not 'thread_'
+        import re
         for pattern in suspicious_patterns:
-            if pattern in run_id_lower:
+            if pattern == "":
+                continue  # Skip empty pattern
+            # Use word boundary matching to avoid false positives
+            # Match pattern as whole word or with underscores/dashes as boundaries
+            if re.search(r'(^|_|-)' + re.escape(pattern) + r'($|_|-)', run_id_lower):
                 return True
         
         # Check for overly short identifiers (less than 3 chars)
