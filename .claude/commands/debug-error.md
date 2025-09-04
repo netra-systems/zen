@@ -1,220 +1,358 @@
 ---
-allowed-tools: ["Task", "Read", "Edit", "Bash", "TodoWrite"]
-description: "Intelligent error debugging with N agents consensus and cascade prevention"
-argument-hint: "<error-description> [num-agents]"
+allowed-tools: ["Task", "Read", "Edit", "Bash", "TodoWrite", "Grep", "Glob"]
+description: "Five Whys error analysis with dynamically allocated specialist agents"
+argument-hint: "<error-description> [initial-agents]"
 ---
 
-# 🔬 Intelligent Error Debugging with Consensus
+# 🔬 Five Whys Root Cause Analysis with Dynamic Agent Allocation
 
-Spawn N agents to analyze errors, debug only with consensus, prevent cascades, and revert if needed.
+Deep error analysis using the Five Whys methodology and dynamically allocated specialist agents based on error patterns.
 
 ## Configuration
 - **Error Description:** $1
-- **Number of Debug Agents:** ${2:-5}
-- **Consensus Threshold:** (n-1)/n agents must agree
-- **Mode:** Safe debugging with cascade prevention
+- **Initial Agent Count:** ${2:-3}
+- **Dynamic Allocation:** Agents spawned based on error type
+- **Consensus Threshold:** 80% agreement required
+- **Mode:** Five Whys iterative analysis with cascade prevention
 
-## Phase 1: Error Discovery & Analysis
+## Phase 1: Initial Error Assessment & Five Whys
 
 ### 1. Capture Current Error State
 !echo "🔴 CURRENT ERROR STATE:"
 !echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 !echo "Error: $1"
+!echo "Timestamp: $(date)"
 !echo ""
 
-### 2. Collect Error Context
+### 2. Collect Error Evidence
 !echo "📄 Collecting error evidence..."
 
 # Check Docker logs for errors
-!docker compose logs --tail 100 2>&1 | grep -iE "error|exception|failed" | tail -20
+!docker compose logs --tail 200 2>&1 | grep -iE "error|exception|failed|traceback" | tail -30 > /tmp/error_context.log
 
-# Check test failures
-!python tests/unified_test_runner.py --category smoke --fast-fail 2>&1 | grep -E "FAILED|ERROR" | head -10 || echo "Tests not run yet"
+# Check recent changes
+!git log --oneline -10 > /tmp/recent_commits.log
 
 # Save initial state
 !git status --short > /tmp/debug_initial_state.txt
 !echo "Initial state saved to /tmp/debug_initial_state.txt"
 
-## Phase 2: Multi-Agent Root Cause Analysis
+### 3. Five Whys Analysis with Dynamic Agent Spawning
 
-### 3. Spawn Diagnostic Agents (${2:-5} agents)
+**Root Cause Analyzer - Five Whys Methodology**
+@Task: Perform Five Whys analysis on error: $1
+Five Whys Analyst:
+CRITICAL: Apply the Five Whys methodology systematically:
 
-**Agent 1 - Code Analysis**
-@Task: Analyze code for error: $1
-Diagnostic Agent 1:
-- Examine the error message and stack trace
-- Identify the exact file and line causing the error
-- Analyze the code logic around the error
-- Determine root cause from code perspective
-- Document findings in structured format
-- DO NOT make any changes yet
+1. **WHY #1**: Why did the error occur?
+   - Analyze the immediate error message
+   - Identify the direct trigger
+   - Document: "The error occurred because..."
 
-**Agent 2 - Dependency Analysis**
-@Task: Analyze dependencies for error: $1
-Diagnostic Agent 2:
-- Check import statements and module dependencies
-- Verify all required packages are installed
-- Check for version conflicts
-- Analyze circular dependencies
-- Document dependency-related causes
-- DO NOT make any changes yet
+2. **WHY #2**: Why did [answer from Why #1] happen?
+   - Dig deeper into the underlying cause
+   - Look for system/code issues
+   - Document: "This happened because..."
 
-**Agent 3 - Configuration Analysis**
-@Task: Analyze configuration for error: $1
-Diagnostic Agent 3:
-- Check environment variables
-- Verify configuration files
-- Analyze service connections (DB, Redis, etc.)
-- Check for missing or incorrect settings
-- Document configuration issues
-- DO NOT make any changes yet
+3. **WHY #3**: Why did [answer from Why #2] happen?
+   - Examine design/architecture decisions
+   - Check for process failures
+   - Document: "This was caused by..."
 
-**Agent 4 - Historical Analysis**
-@Task: Analyze git history for error: $1
-Diagnostic Agent 4:
-- Review recent commits that might have introduced the error
-- Check if similar errors occurred before
-- Analyze what changed recently
-- Look for patterns in past fixes
-- Document historical context
-- DO NOT make any changes yet
+4. **WHY #4**: Why did [answer from Why #3] happen?
+   - Investigate organizational/structural issues
+   - Review development practices
+   - Document: "This resulted from..."
 
-**Agent 5 - System Analysis**
-@Task: Analyze system state for error: $1
-Diagnostic Agent 5:
-- Check system resources (memory, CPU, disk)
-- Verify Docker container states
-- Analyze network connectivity
-- Check file permissions
-- Document system-level issues
-- DO NOT make any changes yet
+5. **WHY #5**: Why did [answer from Why #4] happen?
+   - Identify the root systemic cause
+   - Find the fundamental issue
+   - Document: "The root cause is..."
 
-### 4. Consensus Evaluation
-@Task: Evaluate consensus from ${2:-5} diagnostic agents
-Consensus Evaluator:
-- Collect all ${2:-5} agent reports
-- Identify the root cause that (${2:-5}-1)/${2:-5} agents agree on
-- If consensus reached: Document agreed root cause
-- If no consensus: List all proposed causes with agent votes
-- Create decision matrix
+After Five Whys, determine which specialist agents are needed:
+- If database-related: Request DatabaseSpecialist agent
+- If async/context manager: Request AsyncPythonExpert agent
+- If WebSocket-related: Request WebSocketSpecialist agent
+- If Docker/deployment: Request DevOpsSpecialist agent
+- If dependency/import: Request DependencyAnalyst agent
+- If performance: Request PerformanceEngineer agent
+- If security: Request SecurityAuditor agent
+- If frontend integration: Request FrontendSpecialist agent
 
-## Phase 3: Solution Implementation (Only with Consensus)
+Return:
+1. Complete Five Whys chain
+2. Identified root cause
+3. List of required specialist agents
+4. Initial remediation hypothesis
 
-### 5. Implement Fix (If Consensus Achieved)
-@Task: Implement fix for agreed root cause
-IF (${2:-5}-1)/${2:-5} agents agree on root cause:
-- Create detailed fix plan
-- Make MINIMAL changes required
-- Add extensive logging around changes
-- Document every modification
-- Save rollback information
+## Phase 2: Dynamic Agent Allocation
+
+### 4. Spawn Specialist Agents Based on Error Type
+
+**Dynamic Agent Spawner**
+@Task: Based on Five Whys analysis, spawn appropriate specialist agents
+Agent Orchestrator:
+Based on the Five Whys findings, dynamically spawn the following agents:
+
+# The actual agents spawned will be determined by the Five Whys analysis
+# Examples of specialist agents that might be spawned:
+
+IF error contains "async_generator" or "context manager":
+  **AsyncPythonExpert Agent**
+  @Task: Analyze async/await and context manager patterns
+  - Review asynccontextmanager decorators
+  - Check async generator usage
+  - Verify FastAPI dependency injection
+  - Analyze yield vs return patterns
+  - Document async flow issues
+
+IF error contains "500" or "Internal Server Error":
+  **HTTPErrorSpecialist Agent**
+  @Task: Analyze HTTP 500 error patterns
+  - Check API endpoint handlers
+  - Review middleware stack
+  - Analyze request/response cycle
+  - Check error handling and logging
+  - Identify cascade failures
+
+IF error contains "database" or "session" or "connection":
+  **DatabaseSpecialist Agent**
+  @Task: Analyze database and session issues
+  - Check connection pooling
+  - Review transaction boundaries
+  - Analyze session lifecycle
+  - Verify isolation levels
+  - Check for connection leaks
+
+IF error contains "WebSocket" or "real-time":
+  **WebSocketSpecialist Agent**
+  @Task: Analyze WebSocket communication
+  - Check WebSocket handlers
+  - Review event routing
+  - Analyze connection management
+  - Verify message serialization
+  - Check for race conditions
+
+IF error contains "import" or "module" or "circular":
+  **DependencyAnalyst Agent**
+  @Task: Analyze import and dependency issues
+  - Map import graph
+  - Detect circular dependencies
+  - Check package versions
+  - Analyze module loading order
+  - Review lazy imports
+
+IF error contains "Docker" or "container" or "deployment":
+  **DevOpsSpecialist Agent**
+  @Task: Analyze deployment and container issues
+  - Check Docker configurations
+  - Review environment variables
+  - Analyze build process
+  - Verify service dependencies
+  - Check resource limits
+
+IF error contains "memory" or "CPU" or "performance":
+  **PerformanceEngineer Agent**
+  @Task: Analyze performance issues
+  - Profile resource usage
+  - Check for memory leaks
+  - Analyze query performance
+  - Review caching strategies
+  - Identify bottlenecks
+
+IF error contains "auth" or "security" or "permission":
+  **SecurityAuditor Agent**
+  @Task: Analyze security and authentication issues
+  - Check authentication flow
+  - Review authorization logic
+  - Analyze token validation
+  - Verify security headers
+  - Check for vulnerabilities
+
+IF error pattern is unclear:
+  **GeneralistDebugger Agent**
+  @Task: Perform broad spectrum analysis
+  - General code review
+  - Check recent changes
+  - Review system logs
+  - Analyze test failures
+  - Document observations
+
+### 5. Consensus Building from Dynamic Agents
+
+@Task: Build consensus from all spawned specialist agents
+Consensus Builder:
+- Collect all specialist agent reports
+- Weight opinions based on agent expertise relevance
+- Calculate consensus score (must exceed 80%)
+- Identify primary root cause
+- Document dissenting opinions
+- Create action priority matrix
+
+## Phase 3: Solution Development (With Consensus)
+
+### 6. Develop Targeted Fix
+
+@Task: Create fix based on Five Whys root cause and specialist consensus
+IF consensus >= 80%:
+  Solution Architect:
+  - Design minimal fix addressing root cause
+  - Consider Five Whys chain for comprehensive solution
+  - Add defensive coding where needed
+  - Include detailed comments explaining the fix
+  - Create rollback plan
 ELSE:
-- DO NOT implement any fix
-- Request human intervention
-- Document disagreement for review
+  - Document lack of consensus
+  - Present all hypotheses with evidence
+  - Request human intervention
+  - Suggest additional investigation paths
 
-### 6. Test Fix Locally
-!echo "\n🧪 Testing implemented fix..."
-!python tests/unified_test_runner.py --real-services --category smoke --fast-fail
+### 7. Pre-Implementation Testing
 
-## Phase 4: Cascade Prevention
+!echo "\n🧪 Pre-implementation verification..."
 
-### 7. Spawn Validation Agents (${2:-5} new agents)
+# Run specific tests related to the error area
+!python -m pytest tests/ -k "relevant_test_pattern" --tb=short || true
 
-**Validation Squad**
-@Task: Verify fix doesn't cause new issues - Agent Squad of ${2:-5}
-Spawn ${2:-5} NEW validation agents to check:
-- Agent 1: Verify core functionality still works
-- Agent 2: Check for new errors in logs
-- Agent 3: Validate all API endpoints
-- Agent 4: Test WebSocket events
-- Agent 5: Verify database operations
+## Phase 4: Implementation & Validation
 
-Each agent should:
-- Run specific tests for their area
-- Check for any new errors or warnings
-- Verify no regression occurred
-- Report any cascade issues found
+### 8. Implement Fix with Safeguards
 
-### 8. Cascade Detection
-@Task: Analyze validation results for cascading failures
-Cascade Analyzer:
-- Review all validation agent reports
-- Identify any new issues introduced
-- Check for unexpected side effects
-- Determine if rollback is needed
-- Document cascade risks
+@Task: Apply the consensus-approved fix with safety checks
+Implementation Specialist:
+- Apply fix incrementally
+- Add comprehensive logging
+- Include error recovery mechanisms
+- Update relevant documentation
+- Create unit tests for the fix
 
-## Phase 5: Commit or Revert Decision
+### 9. Dynamic Validation Agent Allocation
 
-### 9. Final Decision Logic
-!echo "\n🎯 FINAL DECISION:"
-!echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+@Task: Spawn validation agents based on fix type
+Validation Orchestrator:
+Based on the implemented fix, spawn appropriate validation agents:
 
-@Task: Make final commit or revert decision
-Decision Maker:
-IF all conditions met:
-  1. (${2:-5}-1)/${2:-5} diagnostic agents agreed on root cause
-  2. Fix was implemented successfully
-  3. Local tests pass
-  4. No cascade issues detected by validation agents
-  5. Execution is now flawless
-THEN:
-  - Commit the fix with detailed message
-  - Document the solution
+- If database fix: DatabaseValidation agent
+- If async fix: AsyncFlowValidation agent  
+- If API fix: APIEndpointValidation agent
+- If WebSocket fix: RealtimeValidation agent
+- If configuration fix: ConfigValidation agent
+
+Each validation agent should:
+- Test specific area affected by fix
+- Check for regressions
+- Verify no new errors introduced
+- Measure performance impact
+- Report validation status
+
+### 10. Cascade Prevention Analysis
+
+@Task: Analyze for potential cascade failures
+Cascade Analyst:
+- Map all dependencies of changed code
+- Test downstream components
+- Check for breaking changes
+- Verify backward compatibility
+- Document any risks
+
+## Phase 5: Decision & Documentation
+
+### 11. Final Decision Matrix
+
+!echo "\n🎯 FINAL DECISION MATRIX:"
+!echo "━━━━━━━━━━━━━━━━━━━━━━━━"
+
+@Task: Make commit/revert decision based on comprehensive analysis
+Decision Engine:
+Evaluate all factors:
+1. Five Whys root cause clarity: [score/5]
+2. Specialist consensus level: [percentage]
+3. Fix implementation quality: [score/10]
+4. Validation success rate: [percentage]
+5. Cascade risk assessment: [low/medium/high]
+
+IF all criteria meet thresholds:
+  - Commit with detailed message including Five Whys
+  - Document solution in knowledge base
+  - Create monitoring alerts
 ELSE:
-  - REVERT all changes
-  - Restore original state
-  - Document why fix was reverted
-  - Provide detailed report for human review
+  - Revert all changes
+  - Document investigation findings
+  - Escalate to senior engineers
+  - Provide detailed failure analysis
 
-### 10. Execute Decision
+### 12. Execute Decision
 
 **If Committing:**
-!echo "✅ All checks passed. Committing fix..."
+!echo "✅ All validations passed. Committing fix..."
 !git add -A
-!git commit -m "fix: $1 - Validated by ${2:-5} agents with consensus"
+!git commit -m "fix: $1
+
+Root Cause (Five Whys):
+$(cat /tmp/five_whys_analysis.txt 2>/dev/null || echo 'See investigation notes')
+
+Validated by dynamic agent consensus (${CONSENSUS_SCORE}%)
+Specialist agents involved: ${AGENT_LIST}"
 
 **If Reverting:**
-!echo "❌ Issues detected. Reverting changes..."
+!echo "❌ Validation failed. Reverting changes..."
 !git checkout -- .
 !git clean -fd
 !echo "Reverted to original state"
 
-### 11. Final Report
-@TodoWrite: Create final debugging report
-- Error: $1
-- Root cause: [Consensus finding]
-- Solution: [Implemented fix or revert reason]
-- Validation: [Test results]
-- Decision: [Commit or Revert]
-- Next steps: [Recommendations]
+### 13. Knowledge Base Update
+
+@TodoWrite: Update debugging knowledge base
+- Error Pattern: $1
+- Five Whys Chain: [Complete analysis]
+- Root Cause: [Identified cause]
+- Agents Used: [List of dynamically allocated agents]
+- Solution: [Applied fix or investigation notes]
+- Validation Results: [Test outcomes]
+- Lessons Learned: [Key insights]
+- Prevention Measures: [Future recommendations]
 
 ## Usage Examples
-- `/debug-error "IndentationError in agent_websocket_bridge.py" 5`
-- `/debug-error "Connection refused to PostgreSQL" 7`
-- `/debug-error "WebSocket events not firing" 3`
-- `/debug-error "Import cycle detected" 10`
+- `/debug-error "AsyncGeneratorContextManager error in WebSocket handler"`
+- `/debug-error "500 Internal Server Error on /api/threads endpoint"`
+- `/debug-error "Database connection pool exhausted" 5`
+- `/debug-error "Circular import in agent modules"`
 
-## Safety Features
-1. **No Unilateral Changes:** Requires (n-1)/n consensus
-2. **Cascade Prevention:** Validation agents check for new issues
-3. **Automatic Revert:** Reverts if any validation fails
-4. **No Commits Without Perfection:** Only commits if execution is flawless
-5. **Human Fallback:** Requests human help if no consensus
+## Advanced Features
 
-## Debug Workflow Summary
-1. 🔍 Analyze error with N agents
-2. 🤝 Require (N-1)/N consensus on root cause
-3. 🔧 Implement minimal fix
-4. 🧪 Test thoroughly
-5. 🔎 Validate with N new agents
-6. ✅ Commit only if perfect
-7. ❌ Revert if any issues found
+### Dynamic Agent Types (Automatically Selected)
+1. **AsyncPythonExpert** - Async/await patterns, generators, context managers
+2. **DatabaseSpecialist** - Connection pools, transactions, query optimization
+3. **WebSocketSpecialist** - Real-time events, message routing, connection handling
+4. **HTTPErrorSpecialist** - API errors, middleware, request/response cycle
+5. **DevOpsSpecialist** - Docker, deployment, environment configuration
+6. **DependencyAnalyst** - Import graphs, circular dependencies, package conflicts
+7. **PerformanceEngineer** - Profiling, optimization, resource management
+8. **SecurityAuditor** - Authentication, authorization, vulnerability assessment
+9. **FrontendSpecialist** - UI/Backend integration, CORS, API contracts
+10. **GeneralistDebugger** - Broad analysis when pattern is unclear
+
+### Safety Mechanisms
+1. **Five Whys Methodology** - Systematic root cause analysis
+2. **Dynamic Agent Allocation** - Right expertise for each error type
+3. **80% Consensus Required** - High confidence threshold
+4. **Cascade Prevention** - Proactive regression testing
+5. **Automatic Revert** - Rollback on validation failure
+6. **Knowledge Capture** - Learn from every debugging session
+
+## Workflow Summary
+1. 🔍 Five Whys root cause analysis
+2. 🤖 Dynamic specialist agent allocation
+3. 🤝 Build consensus (80% threshold)
+4. 🔧 Implement targeted fix
+5. 🧪 Dynamic validation testing
+6. 🛡️ Cascade prevention check
+7. ✅ Commit if valid, ❌ Revert if not
+8. 📚 Update knowledge base
 
 ## Notes
-- Agents work sequentially to avoid system overload
-- Every change is documented and reversible
-- Consensus prevents wrong fixes
-- Validation prevents cascade failures
-- Conservative approach: When in doubt, revert
+- Five Whys ensures deep understanding, not just symptom fixing
+- Agents are allocated based on error characteristics, not predetermined
+- Each debugging session improves the knowledge base
+- Conservative approach: revert when uncertain
+- All decisions are traceable and reversible
