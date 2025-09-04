@@ -36,7 +36,8 @@ async def get_async_session() -> AsyncGenerator[AsyncSession, None]:
     
     SSOT COMPLIANCE: Delegates to get_db() for centralized session management.
     """
-    async for session in get_db():
+    # FIX: get_db() is now an async context manager, use 'async with' not 'async for'
+    async with get_db() as session:
         yield session
 
 class UnifiedDatabaseManager:
@@ -54,7 +55,8 @@ class UnifiedDatabaseManager:
         This ensures all session management logic is centralized.
         """
         # Delegate to the primary get_db() function for true SSOT
-        async for session in get_db():
+        # FIX: get_db() is now an async context manager, use 'async with' not 'async for'
+        async with get_db() as session:
             yield session
     
     @staticmethod
@@ -81,7 +83,8 @@ class SessionManager:
     
     async def get_session(self):
         """Get a database session via DatabaseManager."""
-        async for session in get_db():
+        # FIX: get_db() is now an async context manager, use 'async with' not 'async for'
+        async with get_db() as session:
             yield session
     
     def get_stats(self):
@@ -94,6 +97,7 @@ class SessionManager:
 session_manager = SessionManager()
 
 # SINGLE SOURCE OF TRUTH for PostgreSQL sessions in netra_backend
+@asynccontextmanager
 async def get_db() -> AsyncGenerator[AsyncSession, None]:
     """Primary PostgreSQL session provider using DatabaseManager.
     
@@ -101,6 +105,7 @@ async def get_db() -> AsyncGenerator[AsyncSession, None]:
     All database access delegates to DatabaseManager implementation.
     
     CRITICAL FIX: Delegates to DatabaseManager.get_async_session() for proper handling.
+    Now properly decorated as async context manager to support 'async with' pattern.
     """
     # Delegate to DatabaseManager's implementation which has proper error handling
     async with DatabaseManager.get_async_session() as session:
@@ -134,7 +139,8 @@ def get_clickhouse_config():
 # PostgreSQL Compatibility aliases - all delegate to the single source of truth
 async def get_postgres_db() -> AsyncGenerator[AsyncSession, None]:
     """Compatibility alias - delegates to primary implementation."""
-    async for session in get_db():
+    # FIX: get_db() is now an async context manager, use 'async with' not 'async for'
+    async with get_db() as session:
         yield session
 
 def get_db_session():

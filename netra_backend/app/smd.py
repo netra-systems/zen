@@ -1129,36 +1129,70 @@ class StartupOrchestrator:
             raise DeterministicStartupError(f"WebSocket verification failed: {e}")
     
     async def _initialize_clickhouse(self) -> None:
-        """Initialize ClickHouse with robust retry logic and dependency validation."""
-        from netra_backend.app.core.clickhouse_connection_manager import (
-            initialize_clickhouse_with_retry,
-            get_clickhouse_connection_manager
-        )
+        """Initialize ClickHouse with clear status reporting and consistent error handling.
         
-        self.logger.info("Initializing ClickHouse with robust connection manager...")
+        CRITICAL FIX: Updated to use consistent error handling pattern from startup_module.py
+        """
+        # Use the improved initialization function from startup_module for consistency
+        from netra_backend.app.startup_module import initialize_clickhouse
         
-        # Use the robust connection manager with retry logic and health monitoring
-        success = await initialize_clickhouse_with_retry()
+        self.logger.info("Initializing ClickHouse with consistent error handling...")
         
-        if success:
-            # Store connection manager in app state for health checks
-            self.app.state.clickhouse_connection_manager = get_clickhouse_connection_manager()
+        try:
+            # Call the improved initialization function
+            result = await initialize_clickhouse(self.logger)
             
-            # Initialize ClickHouse tables after successful connection
-            try:
-                from netra_backend.app.db.clickhouse_init import initialize_clickhouse_tables
-                await asyncio.wait_for(initialize_clickhouse_tables(), timeout=30.0)
-                self.logger.info("  ✓ ClickHouse tables initialized")
-            except Exception as e:
-                self.logger.warning(f"  ⚠ ClickHouse table initialization failed: {e}")
-                # Don't fail startup for table creation issues
-        
-        else:
-            # Log failure but don't raise exception (ClickHouse is optional)
-            self.logger.warning("ClickHouse initialization failed - continuing without analytics")
+            # Handle the result based on status
+            if result["status"] == "connected":
+                self.logger.info("  ✓ ClickHouse connected successfully")
+                # Store success indicator in app state
+                self.app.state.clickhouse_available = True
+                self.app.state.clickhouse_connection_status = "connected"
+            elif result["status"] == "skipped":
+                self.logger.info("  ⚠ ClickHouse skipped (optional in this environment)")
+                self.app.state.clickhouse_available = False
+                self.app.state.clickhouse_connection_status = "skipped"
+            elif result["status"] == "failed":
+                if result["required"]:
+                    # Required but failed - this should have raised an exception already
+                    # but log additional context for deterministic startup
+                    self.logger.error(f"  ❌ ClickHouse required but failed: {result['error']}")
+                    raise DeterministicStartupError(f"ClickHouse initialization failed: {result['error']}")
+                else:
+                    # Optional and failed - log and continue
+                    self.logger.info(f"  ⚠ ClickHouse unavailable (optional): {result['error']}")
+                    self.app.state.clickhouse_available = False
+                    self.app.state.clickhouse_connection_status = "failed"
             
-            # Store a None connection manager to indicate ClickHouse is unavailable
-            self.app.state.clickhouse_connection_manager = None
+            # Store the full result for health checks
+            self.app.state.clickhouse_initialization_result = result
+            
+        except DeterministicStartupError:
+            # Re-raise deterministic errors (ClickHouse was required but failed)
+            raise
+        except Exception as e:
+            # Handle unexpected errors in the initialization process
+            self.logger.error(f"  ❌ Unexpected error in ClickHouse initialization: {e}")
+            # Check if ClickHouse is required for this environment
+            from shared.isolated_environment import get_env
+            config = get_config()
+            clickhouse_required = (
+                config.environment == "production" or
+                get_env().get("CLICKHOUSE_REQUIRED", "false").lower() == "true"
+            )
+            
+            if clickhouse_required:
+                raise DeterministicStartupError(f"ClickHouse initialization system error: {e}")
+            else:
+                # Optional - store failure state and continue
+                self.app.state.clickhouse_available = False
+                self.app.state.clickhouse_connection_status = "error"
+                self.app.state.clickhouse_initialization_result = {
+                    "service": "clickhouse",
+                    "required": False,
+                    "status": "failed",
+                    "error": f"Initialization system error: {e}"
+                }
     
     async def _initialize_monitoring(self) -> None:
         """Initialize monitoring - optional."""

@@ -192,7 +192,8 @@ async def get_request_scoped_db_session() -> AsyncGenerator[AsyncSession, None]:
     logger.debug("Creating new request-scoped database session")
     
     try:
-        async for session in get_db():
+        # FIX: get_db() is now an async context manager, use 'async with' not 'async for'
+        async with get_db() as session:
             _validate_session_type(session)
             logger.debug(f"Created database session: {id(session)}")
             yield session
@@ -209,8 +210,9 @@ async def get_db_dependency() -> AsyncGenerator[AsyncSession, None]:
     DEPRECATED: Use get_request_scoped_db_session for new code.
     Uses the single source of truth from netra_backend.app.database.
     """
-    logger.warning("Using deprecated get_db_dependency - consider get_request_scoped_db_session")
-    async for session in get_db():
+    logger.warning("DEPRECATED: get_db_dependency() may cause _AsyncGeneratorContextManager errors. Use get_request_scoped_db_session() instead.")
+    # FIX: get_db() is now an async context manager, use 'async with' not 'async for'
+    async with get_db() as session:
         _validate_session_type(session)
         yield session
 
@@ -228,7 +230,8 @@ async def get_db_session() -> AsyncGenerator[AsyncSession, None]:
     This function is deprecated. Use get_db_dependency() or DbDep type annotation instead.
     Kept for backward compatibility with existing routes.
     """
-    async for session in get_db():
+    # FIX: get_db() is now an async context manager, use 'async with' not 'async for'
+    async with get_db() as session:
         yield session
 
 def get_security_service(request: Request) -> SecurityService:

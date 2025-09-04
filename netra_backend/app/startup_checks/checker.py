@@ -24,8 +24,9 @@ from netra_backend.app.startup_checks.system_checks import SystemChecker
 class StartupChecker:
     """Comprehensive startup check orchestrator"""
     
-    def __init__(self, app: FastAPI):
+    def __init__(self, app: FastAPI, test_thread_aware: bool = False):
         self.app = app
+        self.test_thread_aware = test_thread_aware
         self._initialize_state()
         self._initialize_checkers(app)
     

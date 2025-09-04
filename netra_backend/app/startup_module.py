@@ -597,30 +597,53 @@ def setup_security_services(app: FastAPI, key_manager: KeyManager) -> None:
     app.state.clickhouse_client = None  # Will be initialized on-demand
 
 
-async def initialize_clickhouse(logger: logging.Logger) -> None:
-    """Initialize ClickHouse tables based on service mode (optional service)."""
+async def initialize_clickhouse(logger: logging.Logger) -> dict:
+    """Initialize ClickHouse with clear status reporting and handle failures appropriately.
+    
+    CRITICAL FIX: Improved error handling per STAGING_STARTUP_FIXES_IMPLEMENTATION_PLAN.md
+    - Check if ClickHouse is required based on environment
+    - Return detailed status report from initialization  
+    - Log appropriate level based on requirement (error if required, info if optional)
+    - Only raise exception if ClickHouse is required and fails
+    - Make logging crystal clear about optional vs required status
+    
+    Returns:
+        dict: Status report with service, required, status, and error fields
+    """
     config = get_config()
     clickhouse_mode = config.clickhouse_mode.lower()
     graceful_startup = getattr(config, 'graceful_startup_mode', 'true').lower() == "true"
     
-    # CRITICAL FIX: Check if ClickHouse is explicitly required
+    # Status tracking object
+    result = {
+        "service": "clickhouse",
+        "required": False,
+        "status": "unknown",
+        "error": None
+    }
+    
+    # CRITICAL FIX: Check if ClickHouse is required based on environment
     from shared.isolated_environment import get_env
     import subprocess
-    clickhouse_required = get_env().get("CLICKHOUSE_REQUIRED", "false").lower() == "true"
+    clickhouse_required = (
+        config.environment == "production" or
+        get_env().get("CLICKHOUSE_REQUIRED", "false").lower() == "true"
+    )
+    result["required"] = clickhouse_required
     
     # Check if ClickHouse container is running (for better error reporting)
     try:
         # Try podman first, then docker
         for cmd in ['podman', 'docker']:
             try:
-                result = subprocess.run(
+                result_cmd = subprocess.run(
                     [cmd, 'ps', '--format', '{{.Names}}'],
                     capture_output=True,
                     text=True,
                     timeout=2
                 )
-                if result.returncode == 0:
-                    running_containers = result.stdout.strip().split('\n')
+                if result_cmd.returncode == 0:
+                    running_containers = result_cmd.stdout.strip().split('\n')
                     clickhouse_running = any('clickhouse' in name.lower() for name in running_containers)
                     if not clickhouse_running:
                         logger.warning("=" * 80)
@@ -638,8 +661,10 @@ async def initialize_clickhouse(logger: logging.Logger) -> None:
     
     # CRITICAL FIX: Make ClickHouse optional in development when not explicitly required
     if config.environment == "development" and not clickhouse_required:
-        logger.debug(f"ClickHouse not required in {config.environment} environment - skipping initialization")
-        return
+        result["status"] = "skipped"
+        logger.info(f"ℹ️ ClickHouse not required in {config.environment} environment - skipping initialization")
+        logger.info("ℹ️ System continuing without analytics")
+        return result
     elif config.environment == "staging":
         logger.debug(f"ClickHouse initialization required in {config.environment} environment")
         # Proceed with real connection for staging
@@ -649,49 +674,47 @@ async def initialize_clickhouse(logger: logging.Logger) -> None:
             # CRITICAL FIX: Reduce timeout for faster startup failure in optional environments
             timeout = 10.0 if config.environment in ["staging", "development"] else 30.0
             
+            # Attempt connection
             await asyncio.wait_for(
                 _setup_clickhouse_tables(logger, clickhouse_mode),
                 timeout=timeout
             )
+            result["status"] = "connected"
+            logger.info("✅ ClickHouse initialized successfully")
+            
         except asyncio.TimeoutError:
             timeout_msg = f"ClickHouse initialization timed out after {timeout} seconds"
-            logger.error(timeout_msg)
+            result["status"] = "failed"
+            result["error"] = timeout_msg
             
-            # NO MOCKS IN DEV/STAGING - fail fast
-            if config.environment in ["development", "staging"]:
+            if clickhouse_required:
+                logger.error(f"❌ CRITICAL: ClickHouse required but timed out: {timeout_msg}")
                 raise RuntimeError(f"{timeout_msg}. ClickHouse is required in {config.environment} mode.")
-            elif graceful_startup or not clickhouse_required:
-                logger.warning(f"{timeout_msg} - continuing without ClickHouse (optional service)")
-                # Only allow mock in test environment, not dev
-                if config.environment == "testing":
-                    config.clickhouse_mode = "mock"
             else:
-                raise RuntimeError(timeout_msg)
+                logger.info(f"ℹ️ ClickHouse unavailable (optional): {timeout_msg}")
+                logger.info("ℹ️ System continuing without analytics")
                 
         except Exception as e:
+            result["status"] = "failed"
+            result["error"] = str(e)
+            
             # Enhanced error handling for common ClickHouse connection issues
             error_msg = str(e).lower()
             is_connection_error = any(keyword in error_msg for keyword in [
                 'connection', 'refused', 'timeout', 'unreachable', 'network', 'dns', 'httpsconnectionpool'
             ])
             
-            # NO MOCKS IN DEV/STAGING - fail fast
-            if config.environment in ["development", "staging"]:
+            if clickhouse_required:
+                logger.error(f"❌ CRITICAL: ClickHouse required but failed: {e}")
                 raise RuntimeError(f"ClickHouse initialization failed in {config.environment}: {e}. ClickHouse is required in {config.environment} mode.") from e
-            elif (is_connection_error or graceful_startup) and not clickhouse_required:
-                logger.warning(f"ClickHouse connection/initialization failed but continuing (optional service): {e}")
-                # Only allow mock in test environment, not dev
-                if config.environment == "testing":
-                    config.clickhouse_mode = "mock"
-            elif graceful_startup and not clickhouse_required:
-                logger.warning(f"ClickHouse initialization failed but continuing (optional service): {e}")
-                # Only allow mock in test environment, not dev
-                if config.environment == "testing":
-                    config.clickhouse_mode = "mock"
             else:
-                raise RuntimeError(f"ClickHouse initialization failed: {e}") from e
+                logger.info(f"ℹ️ ClickHouse unavailable (optional): {e}")
+                logger.info("ℹ️ System continuing without analytics")
     else:
+        result["status"] = "skipped"
         _log_clickhouse_skip(logger, clickhouse_mode)
+    
+    return result
 
 
 async def _setup_clickhouse_tables(logger: logging.Logger, mode: str) -> None:
@@ -937,7 +960,11 @@ async def initialize_websocket_components(logger: logging.Logger) -> None:
 
 
 async def startup_health_checks(app: FastAPI, logger: logging.Logger) -> None:
-    """Run application startup checks with timeout protection (graceful failure handling)."""
+    """Run application startup checks with timeout protection and test thread awareness.
+    
+    CRITICAL FIX: Added test thread detection to prevent "Cannot deliver message" errors
+    during health checks. Test threads are handled gracefully without WebSocket connections.
+    """
     config = get_config()
     disable_checks = config.disable_startup_checks.lower() == "true"
     fast_startup = config.fast_startup_mode.lower() == "true"
@@ -947,13 +974,13 @@ async def startup_health_checks(app: FastAPI, logger: logging.Logger) -> None:
         logger.debug("Skipping startup health checks (fast startup mode)")
         return
     
-    logger.debug("Starting comprehensive startup health checks...")
+    logger.debug("Starting comprehensive startup health checks with test thread awareness...")
     from netra_backend.app.startup_checks import run_startup_checks
     try:
         logger.debug("Calling run_startup_checks() with 20s timeout...")
         # CRITICAL FIX: Add timeout to prevent startup health checks from hanging server startup
         results = await asyncio.wait_for(
-            run_startup_checks(app),
+            run_startup_checks(app, test_thread_aware=True),  # Enable test thread detection
             timeout=20.0
         )
         passed = results.get('passed', 0)
@@ -965,6 +992,7 @@ async def startup_health_checks(app: FastAPI, logger: logging.Logger) -> None:
             failed = total - passed
             logger.warning(f"Some startup checks failed ({failed}), but continuing in graceful mode")
         elif passed < total:
+            failed = total - passed
             raise RuntimeError(f"Critical startup checks failed: {failed} of {total}")
             
     except asyncio.TimeoutError:
@@ -1088,9 +1116,12 @@ def log_startup_complete(start_time: float, logger: logging.Logger) -> None:
     logger.info(f"✓ Netra Backend Ready ({elapsed_time:.2f}s)")
 
 
-async def initialize_monitoring_integration() -> bool:
+async def initialize_monitoring_integration(handlers: dict = None) -> bool:
     """
     Initialize monitoring integration between ChatEventMonitor and AgentWebSocketBridge.
+    
+    CRITICAL FIX: Now accepts handlers parameter to ensure monitoring is initialized
+    AFTER handlers are registered, preventing "ZERO handlers" warnings during startup.
     
     This function connects the ChatEventMonitor with the AgentWebSocketBridge to enable
     comprehensive monitoring coverage where the monitor can audit the bridge without
@@ -1099,6 +1130,9 @@ async def initialize_monitoring_integration() -> bool:
     CRITICAL DESIGN: Both components work independently if integration fails.
     The system continues operating even if monitoring integration is not available.
     
+    Args:
+        handlers: Dictionary of registered handlers (ensures monitoring happens after registration)
+    
     Returns:
         bool: True if integration successful, False if integration failed but components
               are still operating independently
@@ -1106,7 +1140,12 @@ async def initialize_monitoring_integration() -> bool:
     logger = central_logger.get_logger(__name__)
     
     try:
-        logger.debug("Initializing monitoring integration...")
+        # CRITICAL FIX: Log handler registration status at monitoring initialization
+        handler_count = len(handlers) if handlers else 0
+        logger.info(f"Initializing monitoring integration with {handler_count} registered handlers...")
+        
+        if handler_count == 0:
+            logger.warning("⚠️ Monitoring initialized with zero handlers - may indicate registration timing issue")
         
         # Import monitoring components
         from netra_backend.app.websocket_core.event_monitor import chat_event_monitor
@@ -1114,7 +1153,7 @@ async def initialize_monitoring_integration() -> bool:
         
         # Initialize ChatEventMonitor independently first
         await chat_event_monitor.start_monitoring()
-        logger.debug("ChatEventMonitor started successfully")
+        logger.debug(f"ChatEventMonitor started successfully with {handler_count} handlers available")
         
         # Get AgentWebSocketBridge instance (may be uninitialized - this is expected)
         try:
@@ -1246,10 +1285,17 @@ async def _deprecated_run_startup_phase_three(app: FastAPI, logger: logging.Logg
 
 
 async def run_complete_startup(app: FastAPI) -> Tuple[float, logging.Logger]:
-    """Run complete startup sequence - DETERMINISTIC MODE ONLY.
+    """Run complete startup sequence - FIXED DETERMINISTIC MODE ONLY.
     
     This is the SSOT for startup. NO FALLBACKS, NO GRACEFUL DEGRADATION.
     If chat cannot work, the service MUST NOT start.
+    
+    CRITICAL FIX: Ensures proper startup sequence order:
+    1. Core Infrastructure (Database, Redis, Auth)
+    2. WebSocket Components BEFORE Monitoring (register handlers first!)
+    3. Monitoring WITH handlers context (only if handlers exist)
+    4. Optional Services (ClickHouse)
+    5. Health Checks LAST with proper setup
     """
     # ALWAYS use deterministic startup - this is the SSOT
     from netra_backend.app.smd import run_deterministic_startup

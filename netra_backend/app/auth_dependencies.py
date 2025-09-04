@@ -29,7 +29,7 @@ async def get_request_scoped_db_session() -> AsyncGenerator[AsyncSession, None]:
     
     Uses single source of truth from netra_backend.app.database.
     """
-    async for session in get_db():
+    async with get_db() as session:
         _validate_session_type(session)
         yield session
 
