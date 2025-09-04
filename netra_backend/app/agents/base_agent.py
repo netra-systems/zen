@@ -310,6 +310,77 @@ class BaseAgent(ABC):
         if self._subagent_logging_enabled:
             self.logger.info(f"{self.name} {status} for run_id: {run_id}")
     
+    # === Metadata Storage Methods (SSOT) ===
+    
+    def store_metadata_result(self, context: 'UserExecutionContext', key: str, value: Any, 
+                             ensure_serializable: bool = True) -> None:
+        """SSOT method for storing results in context metadata.
+        
+        This method provides a centralized, consistent way to store agent results
+        in the execution context metadata, ensuring proper serialization for
+        WebSocket transmission and preventing JSON serialization errors.
+        
+        Args:
+            context: The user execution context
+            key: The metadata key (e.g., 'action_plan_result', 'data_result')
+            value: The value to store (can be Pydantic model, dict, or any JSON-serializable type)
+            ensure_serializable: If True, converts Pydantic models to JSON-serializable dicts
+                                following websocket_json_serialization.xml learning
+        
+        Examples:
+            # Store a Pydantic model result
+            self.store_metadata_result(context, 'action_plan_result', action_plan)
+            
+            # Store a dict without conversion
+            self.store_metadata_result(context, 'config', {'key': 'value'}, ensure_serializable=False)
+        """
+        if ensure_serializable and hasattr(value, 'model_dump'):
+            # CRITICAL: Use mode='json' to prevent datetime serialization errors
+            # Following SPEC/learnings/websocket_json_serialization.xml
+            value = value.model_dump(mode='json', exclude_none=True)
+        
+        context.metadata[key] = value
+        
+        # Log for observability (only if debug logging enabled)
+        if self.logger.isEnabledFor(10):  # DEBUG level
+            self.logger.debug(f"{self.name} stored metadata: {key}")
+    
+    def store_metadata_batch(self, context: 'UserExecutionContext', 
+                            data: Dict[str, Any], ensure_serializable: bool = True) -> None:
+        """Store multiple metadata entries at once.
+        
+        This batch method reduces code duplication when storing multiple
+        related results and ensures consistent serialization across all entries.
+        
+        Args:
+            context: The user execution context
+            data: Dictionary of key-value pairs to store
+            ensure_serializable: If True, converts all Pydantic models in values
+        
+        Example:
+            self.store_metadata_batch(context, {
+                'triage_result': triage_result,
+                'workflow_path': workflow_path,
+                'priority': priority_level
+            })
+        """
+        for key, value in data.items():
+            self.store_metadata_result(context, key, value, ensure_serializable)
+    
+    def get_metadata_value(self, context: 'UserExecutionContext', key: str, 
+                          default: Any = None) -> Any:
+        """Safely retrieve a value from context metadata.
+        
+        Args:
+            context: The user execution context
+            key: The metadata key to retrieve
+            default: Default value if key doesn't exist
+            
+        Returns:
+            The metadata value or default if not found
+        """
+        return context.metadata.get(key, default)
+    
     # === Session Isolation Methods ===
     
     def _validate_session_isolation(self) -> None:

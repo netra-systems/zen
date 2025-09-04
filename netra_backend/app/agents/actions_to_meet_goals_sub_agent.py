@@ -129,8 +129,8 @@ class ActionsToMeetGoalsSubAgent(BaseAgent):
         await self.emit_agent_completed(result_data)
         
         # CRITICAL: Store action plan result in context metadata for other agents
-        # SERIALIZATION FIX: Convert Pydantic model to JSON-serializable dict to prevent WebSocket serialization errors
-        context.metadata['action_plan_result'] = action_plan_result.model_dump(mode='json', exclude_none=True)
+        # Using SSOT method from base_agent for consistent metadata storage
+        self.store_metadata_result(context, 'action_plan_result', action_plan_result)
         
         return {"action_plan_result": action_plan_result}
 
@@ -274,8 +274,8 @@ class ActionsToMeetGoalsSubAgent(BaseAgent):
             })
             
         # CRITICAL: Store fallback action plan in context metadata for other agents
-        # SERIALIZATION FIX: Convert Pydantic model to JSON-serializable dict to prevent WebSocket serialization errors
-        context.metadata['action_plan_result'] = fallback_plan.model_dump(mode='json', exclude_none=True)
+        # Using SSOT method from base_agent for consistent metadata storage
+        self.store_metadata_result(context, 'action_plan_result', fallback_plan)
             
         return {"action_plan_result": fallback_plan}
 
@@ -289,8 +289,8 @@ class ActionsToMeetGoalsSubAgent(BaseAgent):
             )
             # Note: Default values handled in metadata copy for isolation
             if 'optimizations_result' not in context.metadata:
-                # Since context.metadata should be mutable copy, this should work
-                context.metadata['optimizations_result'] = default_optimization.model_dump()
+                # Using SSOT method for consistent metadata storage
+                self.store_metadata_result(context, 'optimizations_result', default_optimization)
         
         if "data_result" in missing_deps and not context.metadata.get('data_result'):
             default_data = DataAnalysisResponse(
@@ -302,8 +302,8 @@ class ActionsToMeetGoalsSubAgent(BaseAgent):
             )
             # Note: Default values handled in metadata copy for isolation
             if 'data_result' not in context.metadata:
-                # Since context.metadata should be mutable copy, this should work
-                context.metadata['data_result'] = default_data.model_dump()
+                # Using SSOT method for consistent metadata storage
+                self.store_metadata_result(context, 'data_result', default_data)
     
     async def check_entry_conditions(self, context: 'UserExecutionContext') -> bool:
         """Entry condition check using UserExecutionContext."""
