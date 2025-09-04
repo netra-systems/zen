@@ -2739,4 +2739,43 @@
             <learning-ref>unified_agent_testing_implementation.xml</learning-ref>
         </related-learnings>
     </learning>
+    
+    <learning id="message-router-staging-failure-2025-09-04">
+        <title>MessageRouter SSOT Violation Causing Staging Failures</title>
+        <category>SSOT/WebSocket/Production-Bug</category>
+        <keywords>messagerouter, ssot, duplicate-class, register_handler, add_handler, staging, websocket, agent, AttributeError, shaving-yaks</keywords>
+        <path>message_router_staging_failure_20250904.xml</path>
+        <critical-takeaway>
+            CRITICAL SSOT VIOLATION: Two MessageRouter classes with incompatible interfaces broke staging.
+            websocket_core.handlers.MessageRouter had add_handler() (CORRECT).
+            services.websocket.message_router.MessageRouter had register_handler() (WRONG).
+            Error: 'MessageRouter' object has no attribute 'register_handler'.
+            Root cause: Mixed imports and deployment caching. 
+            Fix: Deleted duplicate class, updated ALL imports to canonical version, cleared caches.
+        </critical-takeaway>
+        <severity>CRITICAL</severity>
+        <business-impact>Complete chat failure in staging/production - ALL AI interactions blocked</business-impact>
+        <prevention>
+            ENFORCE SSOT: No duplicate class names. Lint for duplicates: grep -r "^class ClassName".
+            Test SSOT compliance before deploy. Document canonical imports in SPEC/canonical_imports.xml.
+            Deploy critical fixes with: --no-cache flag, clear .pyc files, force Docker rebuild.
+        </prevention>
+        <implementation-patterns>
+            <pattern>ONE MessageRouter: netra_backend.app.websocket_core.handlers.MessageRouter</pattern>
+            <pattern>CORRECT method: add_handler() NOT register_handler()</pattern>
+            <pattern>CANONICAL import: from netra_backend.app.websocket_core import MessageRouter</pattern>
+            <pattern>Test file: tests/mission_critical/test_message_router_failure.py</pattern>
+        </implementation-patterns>
+        <testing-strategies>
+            <strategy>Pre-deploy: python tests/mission_critical/test_message_router_failure.py</strategy>
+            <strategy>Verify single class: Only one MessageRouter in codebase</strategy>
+            <strategy>Check interface: has add_handler(), NOT register_handler()</strategy>
+            <strategy>Test registration: AgentMessageHandler.add_handler() works</strategy>
+        </testing-strategies>
+        <related-learnings>
+            <learning-ref>message_router_ssot_violation_20250903.xml</learning-ref>
+            <learning-ref>websocket_agent_integration_critical.xml</learning-ref>
+            <learning-ref>websocket_handler_per_connection_critical.xml</learning-ref>
+        </related-learnings>
+    </learning>
 </specification>
