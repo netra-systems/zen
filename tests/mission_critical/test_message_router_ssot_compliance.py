@@ -77,6 +77,11 @@ def test_no_duplicate_message_router_imports():
         for file in files:
             if file.endswith('.py'):
                 file_path = os.path.join(root, file)
+                
+                # Skip test files that are intentionally checking for the failure
+                if 'test_message_router_failure.py' in file_path:
+                    continue
+                    
                 try:
                     with open(file_path, 'r', encoding='utf-8') as f:
                         content = f.read()
