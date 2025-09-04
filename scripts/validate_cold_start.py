@@ -140,7 +140,7 @@ class ColdStartValidator:
                 from netra_backend.app.dependencies import get_async_db
                 from netra_backend.app.services.thread_service import ThreadService
                 
-                async for db in get_async_db():
+                async with get_async_db() as db:
                     try:
                         # Test basic query
                         result = await db.execute("SELECT 1")

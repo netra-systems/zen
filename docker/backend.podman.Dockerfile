@@ -46,16 +46,13 @@ COPY --chown=netra:netra shared/ ./shared/
 COPY --chown=netra:netra test_framework/ ./test_framework/
 COPY --chown=netra:netra scripts/ ./scripts/
 COPY --chown=netra:netra SPEC/ ./SPEC/
-# Copy Python files if they exist
-COPY --chown=netra:netra *.py ./ 2>/dev/null || true
 
 # Switch to non-root user
 USER netra
 
-# Environment variables
-ENV PYTHONPATH=/app \
-    PYTHONUNBUFFERED=1 \
-    PYTHONIOENCODING=utf-8
+# Set environment variables
+ENV PYTHONPATH=/app:$PYTHONPATH
+ENV RUNNING_IN_DOCKER=true
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
@@ -64,5 +61,5 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
 # Expose port
 EXPOSE 8000
 
-# Default command for development (with hot reload)
-CMD ["uvicorn", "netra_backend.app.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload", "--reload-dir", "/app/netra_backend"]
+# Start the application with dynamic configuration
+CMD ["sh", "-c", "uvicorn netra_backend.app.main:app --host 0.0.0.0 --port 8000 --workers ${WORKERS:-2} --log-level ${LOG_LEVEL:-info}"]
