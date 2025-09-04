@@ -371,7 +371,8 @@ class StartupOrchestrator:
     async def _perform_complete_bridge_integration(self) -> None:
         """Complete AgentWebSocketBridge integration with all dependencies."""
         from netra_backend.app.services.agent_websocket_bridge import IntegrationState
-        from netra_backend.app.orchestration.agent_execution_registry import get_agent_execution_registry
+        # REMOVED: Singleton orchestrator import - replaced with per-request factory patterns
+        # from netra_backend.app.orchestration.agent_execution_registry import get_agent_execution_registry
         
         bridge = self.app.state.agent_websocket_bridge
         supervisor = self.app.state.agent_supervisor
@@ -381,13 +382,13 @@ class StartupOrchestrator:
         if not supervisor:
             raise DeterministicStartupError("Agent supervisor not available for integration")
         
-        # Get registry for enhanced integration
-        try:
-            registry = await get_agent_execution_registry()
-        except Exception as e:
-            # Registry is optional for basic integration
-            self.logger.warning(f"Agent execution registry not available for bridge: {e}")
-            registry = supervisor.registry if hasattr(supervisor, 'registry') else None
+        # REMOVED: Singleton registry usage - using per-request factory patterns
+        # Per-request isolation is handled through factory methods in bridge
+        registry = supervisor.registry if hasattr(supervisor, 'registry') else None
+        if registry:
+            self.logger.info("Using supervisor registry for bridge integration")
+        else:
+            self.logger.info("No registry available - bridge will use per-request factory patterns")
         
         # Initialize complete integration with timeout
         integration_result = await asyncio.wait_for(
