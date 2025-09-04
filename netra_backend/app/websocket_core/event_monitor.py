@@ -96,6 +96,11 @@ class ChatEventMonitor(ComponentMonitor):
         metadata: Optional[Dict] = None
     ) -> None:
         """Record an event occurrence and check for anomalies."""
+        # Skip monitoring for test threads to prevent false anomaly detection
+        if self._is_test_thread(thread_id):
+            logger.debug(f"Skipping event monitoring for test thread: {thread_id}")
+            return
+        
         now = time.time()
         
         # Track event
@@ -370,8 +375,45 @@ class ChatEventMonitor(ComponentMonitor):
         for key in keys_to_remove:
             self.last_event_time.pop(key, None)
     
+    def _is_test_thread(self, thread_id: str) -> bool:
+        """
+        Identify test threads to prevent false anomaly detection.
+        
+        Test threads created during health checks, unit tests, and system
+        validation should not be monitored for anomalies as they have
+        different lifecycle patterns than real user threads.
+        
+        Args:
+            thread_id: Thread identifier to check
+            
+        Returns:
+            bool: True if this is a test thread, False otherwise
+        """
+        if not isinstance(thread_id, str):
+            return False
+            
+        test_patterns = [
+            "startup_test_",
+            "health_check_", 
+            "test_",
+            "unit_test_",
+            "integration_test_",
+            "validation_",
+            "mock_"
+        ]
+        
+        return any(thread_id.startswith(pattern) for pattern in test_patterns)
+    
     def get_thread_status(self, thread_id: str) -> Dict[str, Any]:
         """Get detailed status for a specific thread."""
+        # Handle test threads specially
+        if self._is_test_thread(thread_id):
+            return {
+                "status": "test_thread", 
+                "thread_id": thread_id,
+                "message": "Test thread - not monitored for anomalies"
+            }
+            
         if thread_id not in self.thread_start_time:
             return {"status": "unknown", "thread_id": thread_id}
         

@@ -975,6 +975,24 @@ async def websocket_test_endpoint(websocket: WebSocket):
             logger.debug(f"Test WebSocket cleanup completed: {connection_id}")
 
 
+@router.get("/ws/beacon")
+@router.head("/ws/beacon") 
+@router.options("/ws/beacon")
+async def websocket_beacon():
+    """
+    WebSocket beacon endpoint for health monitoring.
+    
+    This lightweight endpoint is used by the frontend to check if the
+    WebSocket service is available before attempting connections.
+    """
+    return {
+        "status": "healthy",
+        "service": "websocket_beacon",
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "message": "WebSocket service is available"
+    }
+
+
 @router.get("/ws/stats")
 async def websocket_detailed_stats():
     """Detailed WebSocket statistics (for development/monitoring)."""

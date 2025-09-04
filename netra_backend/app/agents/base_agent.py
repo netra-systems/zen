@@ -1164,3 +1164,44 @@ class BaseAgent(ABC):
             "validation_timestamp": time.time(),
             "compliance_details": validation
         }
+    
+    @classmethod
+    def create_agent_with_context(cls, context: 'UserExecutionContext') -> 'BaseAgent':
+        """Factory method for creating BaseAgent with UserExecutionContext.
+        
+        This is the PREFERRED method for creating agent instances as it ensures
+        proper user isolation and prevents global state contamination.
+        
+        Args:
+            context: UserExecutionContext containing request-scoped data
+            
+        Returns:
+            BaseAgent instance configured with the provided context
+            
+        Example:
+            >>> from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
+            >>> context = UserExecutionContext(
+            ...     user_id="user123",
+            ...     thread_id="thread456", 
+            ...     run_id="run789"
+            ... )
+            >>> agent = BaseAgent.create_agent_with_context(context)
+        """
+        # Create agent without deprecated tool_dispatcher to avoid warnings
+        agent = cls(
+            name=f"{cls.__name__}",
+            description=f"Instance of {cls.__name__} with user context isolation",
+            user_id=context.user_id,
+            enable_reliability=True,
+            enable_execution_engine=True,
+            enable_caching=False,
+            tool_dispatcher=None  # Avoid deprecated parameter
+        )
+        
+        # Store context for request-scoped operations
+        agent._user_execution_context = context
+        
+        logger.info(f"✅ Created {cls.__name__} with UserExecutionContext: "
+                   f"user={context.user_id}, thread={context.thread_id}, run={context.run_id}")
+        
+        return agent

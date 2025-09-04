@@ -75,6 +75,87 @@ class BaseMessageHandler:
         return True
 
 
+class ConnectionHandler(BaseMessageHandler):
+    """Handler for connection lifecycle messages (connect, disconnect)."""
+    
+    def __init__(self):
+        super().__init__([
+            MessageType.CONNECT,
+            MessageType.DISCONNECT
+        ])
+    
+    async def handle_message(self, user_id: str, websocket: WebSocket,
+                           message: WebSocketMessage) -> bool:
+        """Handle connection lifecycle messages."""
+        try:
+            if message.type == MessageType.CONNECT:
+                logger.info(f"Connection established for user {user_id}")
+                # Connection already established, just acknowledge
+                response = create_server_message(
+                    MessageType.SYSTEM_MESSAGE,
+                    {"status": "connected", "user_id": user_id, "timestamp": time.time()}
+                )
+            elif message.type == MessageType.DISCONNECT:
+                logger.info(f"Disconnect message received from user {user_id}")
+                # Acknowledge disconnect - the actual disconnect will be handled by WebSocket infrastructure
+                response = create_server_message(
+                    MessageType.SYSTEM_MESSAGE,
+                    {"status": "disconnect_acknowledged", "user_id": user_id, "timestamp": time.time()}
+                )
+            else:
+                logger.warning(f"Unexpected connection message type: {message.type}")
+                return False
+            
+            if is_websocket_connected(websocket):
+                await websocket.send_json(response.model_dump())
+            return True
+            
+        except Exception as e:
+            logger.error(f"Error in ConnectionHandler for user {user_id}: {e}")
+            return False
+
+
+class TypingHandler(BaseMessageHandler):
+    """Handler for typing indicator messages."""
+    
+    def __init__(self):
+        super().__init__([
+            MessageType.USER_TYPING,
+            MessageType.AGENT_TYPING,
+            MessageType.TYPING_STARTED,
+            MessageType.TYPING_STOPPED
+        ])
+    
+    async def handle_message(self, user_id: str, websocket: WebSocket,
+                           message: WebSocketMessage) -> bool:
+        """Handle typing indicator messages."""
+        try:
+            logger.debug(f"Handling typing message {message.type} from {user_id}")
+            
+            # Extract thread_id for typing indicators
+            thread_id = message.thread_id or message.payload.get("thread_id")
+            
+            # Acknowledge typing message - broadcast logic would be handled by WebSocketManager
+            response = create_server_message(
+                MessageType.SYSTEM_MESSAGE,
+                {
+                    "status": "typing_acknowledged", 
+                    "type": str(message.type),
+                    "user_id": user_id,
+                    "thread_id": thread_id,
+                    "timestamp": time.time()
+                }
+            )
+            
+            if is_websocket_connected(websocket):
+                await websocket.send_json(response.model_dump())
+            return True
+            
+        except Exception as e:
+            logger.error(f"Error in TypingHandler for user {user_id}: {e}")
+            return False
+
+
 class HeartbeatHandler(BaseMessageHandler):
     """Handler for ping/pong and heartbeat messages."""
     
@@ -381,15 +462,56 @@ class TestAgentHandler(BaseMessageHandler):
             return False
 
 
+class AgentHandler(BaseMessageHandler):
+    """Handler for agent-specific messages that don't require full agent processing."""
+    
+    def __init__(self):
+        super().__init__([
+            MessageType.AGENT_TASK_ACK,
+            MessageType.AGENT_RESPONSE_CHUNK,
+            MessageType.AGENT_RESPONSE_COMPLETE,
+            MessageType.AGENT_STATUS_UPDATE,
+            MessageType.AGENT_ERROR
+        ])
+    
+    async def handle_message(self, user_id: str, websocket: WebSocket,
+                           message: WebSocketMessage) -> bool:
+        """Handle agent status and response messages."""
+        try:
+            logger.info(f"Processing agent message {message.type} from {user_id}")
+            
+            # These are typically outbound messages from agents, just acknowledge receipt
+            response = create_server_message(
+                MessageType.SYSTEM_MESSAGE,
+                {
+                    "status": "agent_message_acknowledged",
+                    "original_type": str(message.type),
+                    "user_id": user_id,
+                    "timestamp": time.time()
+                }
+            )
+            
+            if is_websocket_connected(websocket):
+                await websocket.send_json(response.model_dump())
+            return True
+            
+        except Exception as e:
+            logger.error(f"Error in AgentHandler for user {user_id}: {e}")
+            return False
+
+
 class UserMessageHandler(BaseMessageHandler):
     """Handler for user messages and general communication."""
     
     def __init__(self):
         super().__init__([
             MessageType.USER_MESSAGE,
+            MessageType.CHAT,
             MessageType.SYSTEM_MESSAGE,
             MessageType.AGENT_RESPONSE,
-            MessageType.AGENT_PROGRESS
+            MessageType.AGENT_PROGRESS,
+            MessageType.THREAD_UPDATE,
+            MessageType.THREAD_MESSAGE
         ])
         self.message_stats = {
             "processed": 0,
@@ -408,7 +530,7 @@ class UserMessageHandler(BaseMessageHandler):
             logger.info(f"Processing {message.type} from {user_id}: {message.payload.get('content', '')[:100]}")
             
             # Handle different message subtypes
-            if message.type == MessageType.USER_MESSAGE:
+            if message.type in [MessageType.USER_MESSAGE, MessageType.CHAT]:
                 return await self._handle_user_message(user_id, websocket, message)
             elif message.type == MessageType.AGENT_RESPONSE:
                 return await self._handle_agent_response(user_id, websocket, message)
@@ -751,13 +873,17 @@ class MessageRouter:
     
     def __init__(self):
         self.handlers: List[MessageHandler] = [
+            ConnectionHandler(),
+            TypingHandler(),
             HeartbeatHandler(),
+            AgentHandler(),  # Handle agent status messages
             # NOTE: AgentRequestHandler and TestAgentHandler removed - these are test-only handlers
             # that should not be in production. Real agent handling is done by AgentMessageHandler
             # which is registered dynamically in websocket.py
             UserMessageHandler(), 
             JsonRpcHandler(),
-            ErrorHandler()
+            ErrorHandler(),
+            BatchMessageHandler()  # Add batch processing capability
         ]
         self.fallback_handler = BaseMessageHandler([])
         self.routing_stats = {
@@ -766,6 +892,10 @@ class MessageRouter:
             "handler_errors": 0,
             "message_types": {}
         }
+        
+        # CRITICAL FIX: Track startup time for grace period handling
+        self.startup_time = time.time()
+        self.startup_grace_period_seconds = 10.0  # 10 second grace period
         
         # Log initialization for debugging
         logger.info(f"MessageRouter initialized with {len(self.handlers)} base handlers")
@@ -891,6 +1021,56 @@ class MessageRouter:
             logger.error(f"Error sending unknown message ack to {user_id}: {e}")
             return False
     
+    def check_handler_status_with_grace_period(self) -> Dict[str, Any]:
+        """Check handler status with startup grace period awareness.
+        
+        CRITICAL FIX: Prevents false "ZERO handlers" warnings during startup.
+        Returns different status during grace period vs after.
+        """
+        elapsed_seconds = time.time() - self.startup_time
+        handler_count = len(self.handlers)
+        
+        # During grace period - return "initializing" status even if zero handlers
+        if elapsed_seconds < self.startup_grace_period_seconds:
+            if handler_count == 0:
+                return {
+                    "status": "initializing",
+                    "message": f"Startup in progress ({elapsed_seconds:.1f}s of {self.startup_grace_period_seconds}s grace period)",
+                    "handler_count": 0,
+                    "elapsed_seconds": elapsed_seconds,
+                    "grace_period_active": True
+                }
+            else:
+                return {
+                    "status": "initializing",
+                    "message": f"Handlers registered during startup ({elapsed_seconds:.1f}s)",
+                    "handler_count": handler_count,
+                    "elapsed_seconds": elapsed_seconds,
+                    "grace_period_active": True,
+                    "handlers": [h.__class__.__name__ for h in self.handlers]
+                }
+        
+        # After grace period - warn if zero handlers
+        if handler_count == 0:
+            logger.warning(f"⚠️ ZERO WebSocket message handlers after {self.startup_grace_period_seconds}s grace period")
+            return {
+                "status": "error",
+                "message": f"No handlers registered after {self.startup_grace_period_seconds}s grace period",
+                "handler_count": 0,
+                "elapsed_seconds": elapsed_seconds,
+                "grace_period_active": False
+            }
+        
+        # Normal operation - handlers are registered
+        return {
+            "status": "ready",
+            "message": f"Handler registration complete ({handler_count} handlers)",
+            "handler_count": handler_count,
+            "elapsed_seconds": elapsed_seconds,
+            "grace_period_active": False,
+            "handlers": [h.__class__.__name__ for h in self.handlers]
+        }
+
     def get_stats(self) -> Dict[str, Any]:
         """Get routing statistics."""
         stats = self.routing_stats.copy()
@@ -905,6 +1085,10 @@ class MessageRouter:
                 handler_stats[handler_name] = {"status": "active"}
         
         stats["handler_stats"] = handler_stats
+        
+        # CRITICAL FIX: Add startup grace period status
+        stats["handler_status"] = self.check_handler_status_with_grace_period()
+        
         return stats
 
 
