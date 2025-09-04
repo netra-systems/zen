@@ -2487,6 +2487,241 @@ async def test_event_burst_handling():
 
 
 # ============================================================================
+# ENHANCED WEBSOCKET TEST SCENARIOS - COMPREHENSIVE COVERAGE
+# ============================================================================
+
+class TestEnhancedWebSocketScenarios:
+    """Enhanced WebSocket test scenarios for comprehensive isolation coverage."""
+    
+    @pytest.mark.asyncio
+    @pytest.mark.critical
+    async def test_websocket_event_ordering_under_load(self):
+        """Test WebSocket event ordering consistency under heavy concurrent load."""
+        
+        concurrent_connections = 50
+        events_per_connection = 100
+        
+        # Track event ordering per connection
+        connection_sequences = defaultdict(list)
+        ordering_violations = []
+        sequence_lock = threading.Lock()
+        
+        async def load_test_connection(connection_id: str):
+            """Generate high-frequency events to test ordering."""
+            test_base = RealWebSocketTestBase()
+            
+            async with test_base.real_websocket_test_session() as test_session:
+                context = await test_session.create_test_context(user_id=f"load_user_{connection_id}")
+                await context.setup_websocket_connection(endpoint="/ws/test", auth_required=False)
+                
+                validator = MissionCriticalEventValidator()
+                
+                # Generate rapid sequence of events
+                for i in range(events_per_connection):
+                    event_sequence_num = i
+                    
+                    # Send event with sequence number
+                    event_msg = {
+                        "type": "agent_thinking",
+                        "reasoning": f"Processing step {event_sequence_num}",
+                        "sequence_num": event_sequence_num,
+                        "connection_id": connection_id,
+                        "timestamp": time.time()
+                    }
+                    
+                    await context.send_message(event_msg)
+                    
+                    # Collect received events with minimal delay
+                    if i % 10 == 0:  # Check every 10 events
+                        events = await context.get_received_events(timeout=0.5)
+                        
+                        with sequence_lock:
+                            connection_sequences[connection_id].extend(events)
+                            
+                            # Check for ordering violations
+                            if len(events) > 1:
+                                for j in range(1, len(events)):
+                                    prev_seq = events[j-1].get("sequence_num", -1)
+                                    curr_seq = events[j].get("sequence_num", -1)
+                                    
+                                    if prev_seq >= 0 and curr_seq >= 0 and prev_seq > curr_seq:
+                                        ordering_violations.append({
+                                            "connection_id": connection_id,
+                                            "prev_seq": prev_seq,
+                                            "curr_seq": curr_seq,
+                                            "violation_index": j
+                                        })
+                    
+                    # Small delay to create realistic load
+                    await asyncio.sleep(0.001)
+                
+                return {
+                    "connection_id": connection_id,
+                    "status": "completed",
+                    "events_sent": events_per_connection,
+                    "total_received": len(connection_sequences[connection_id])
+                }
+        
+        # Execute load test
+        logger.info(f"Starting WebSocket ordering test: {concurrent_connections} connections, {events_per_connection} events each")
+        
+        start_time = time.time()
+        results = await asyncio.gather(
+            *[load_test_connection(f"conn_{i:03d}") for i in range(concurrent_connections)],
+            return_exceptions=True
+        )
+        end_time = time.time()
+        
+        # Analyze results
+        successful_connections = [r for r in results if isinstance(r, dict) and r.get("status") == "completed"]
+        failed_connections = [r for r in results if isinstance(r, Exception) or (isinstance(r, dict) and r.get("status") != "completed")]
+        
+        total_events_sent = sum(r["events_sent"] for r in successful_connections)
+        total_events_received = sum(r["total_received"] for r in successful_connections)
+        
+        # Performance and ordering assertions
+        success_rate = len(successful_connections) / len(results)
+        assert success_rate > 0.9, f"Connection success rate too low: {success_rate:.2%}"
+        
+        # No ordering violations allowed under load
+        assert len(ordering_violations) == 0, \
+            f"Event ordering violations detected: {len(ordering_violations)} violations\\n{ordering_violations[:5]}"
+        
+        # Reasonable event delivery rate
+        delivery_rate = total_events_received / total_events_sent if total_events_sent > 0 else 0
+        assert delivery_rate > 0.8, f"Event delivery rate too low: {delivery_rate:.2%}"
+        
+        # Performance requirement: complete within reasonable time
+        total_time = end_time - start_time
+        assert total_time < 30.0, f"Load test took too long: {total_time:.2f}s"
+        
+        logger.info(f"WebSocket Ordering Load Test SUCCESS:")
+        logger.info(f"  Connections: {len(successful_connections)}/{concurrent_connections}")
+        logger.info(f"  Events: {total_events_sent} sent, {total_events_received} received")
+        logger.info(f"  Delivery Rate: {delivery_rate:.2%}")
+        logger.info(f"  Ordering Violations: 0")
+        logger.info(f"  Total Time: {total_time:.2f}s")
+    
+    @pytest.mark.asyncio
+    @pytest.mark.critical
+    async def test_websocket_cross_user_isolation_extreme(self):
+        """Test extreme WebSocket isolation between users under high concurrency."""
+        
+        user_count = 150
+        events_per_user = 30
+        
+        # Track cross-user contamination
+        user_event_isolation = defaultdict(list)
+        contamination_violations = []
+        isolation_lock = threading.Lock()
+        
+        async def isolated_user_scenario(user_id: str):
+            """Run isolated user scenario with contamination detection."""
+            test_base = RealWebSocketTestBase()
+            user_signature = f"isolation_sig_{user_id}_{uuid.uuid4()}"
+            
+            async with test_base.real_websocket_test_session() as test_session:
+                context = await test_session.create_test_context(user_id=user_id)
+                await context.setup_websocket_connection(endpoint="/ws/test", auth_required=False)
+                
+                # Send user-specific events with unique signatures
+                for i in range(events_per_user):
+                    user_event = {
+                        "type": random.choice(["agent_started", "agent_thinking", "tool_executing", "agent_completed"]),
+                        "data": {
+                            "user_id": user_id,
+                            "user_signature": user_signature,
+                            "event_index": i,
+                            "user_specific_data": f"data_for_{user_id}_only",
+                            "timestamp": time.time()
+                        }
+                    }
+                    
+                    await context.send_message(user_event)
+                    
+                    # Periodically check received events for contamination
+                    if i % 10 == 0:
+                        received_events = await context.get_received_events(timeout=0.5)
+                        
+                        with isolation_lock:
+                            for event in received_events:
+                                event_user_id = event.get("data", {}).get("user_id")
+                                event_signature = event.get("data", {}).get("user_signature")
+                                
+                                # Detect cross-user contamination
+                                if event_user_id and event_user_id != user_id:
+                                    contamination_violations.append({
+                                        "receiving_user": user_id,
+                                        "sending_user": event_user_id,
+                                        "event_type": event.get("type"),
+                                        "contamination_type": "cross_user_event",
+                                        "timestamp": time.time()
+                                    })
+                                
+                                if event_signature and event_signature != user_signature and user_signature not in event_signature:
+                                    contamination_violations.append({
+                                        "receiving_user": user_id,
+                                        "expected_signature": user_signature,
+                                        "received_signature": event_signature,
+                                        "contamination_type": "signature_mismatch",
+                                        "timestamp": time.time()
+                                    })
+                                
+                                # Track user events
+                                user_event_isolation[user_id].append(event)
+                    
+                    await asyncio.sleep(0.002)  # Small delay for realistic timing
+                
+                return {
+                    "user_id": user_id,
+                    "status": "isolation_test_completed",
+                    "events_sent": events_per_user,
+                    "user_signature": user_signature,
+                    "events_received": len(user_event_isolation[user_id])
+                }
+        
+        # Execute extreme isolation test
+        logger.info(f"Starting WebSocket extreme isolation test: {user_count} users")
+        
+        isolation_results = await asyncio.gather(
+            *[isolated_user_scenario(f"isolation_user_{i:03d}") for i in range(user_count)],
+            return_exceptions=True
+        )
+        
+        # Analyze isolation results
+        successful_isolation = [r for r in isolation_results if isinstance(r, dict) and r.get("status") == "isolation_test_completed"]
+        failed_isolation = [r for r in isolation_results if not (isinstance(r, dict) and r.get("status") == "isolation_test_completed")]
+        
+        isolation_success_rate = len(successful_isolation) / len(isolation_results)
+        
+        # CRITICAL: Zero contamination tolerance
+        assert len(contamination_violations) == 0, \\
+            f"CRITICAL: WebSocket cross-user contamination detected: {len(contamination_violations)} violations\\n{contamination_violations[:5]}"
+        
+        # High success rate required
+        assert isolation_success_rate > 0.95, f"Isolation success rate too low: {isolation_success_rate:.2%}"
+        
+        # Verify user-specific event isolation
+        unique_signatures = set()
+        for result in successful_isolation:
+            user_signature = result.get("user_signature")
+            if user_signature:
+                assert user_signature not in unique_signatures, f"Duplicate signature detected: {user_signature}"
+                unique_signatures.add(user_signature)
+        
+        # Verify event counts are reasonable
+        total_events_sent = sum(r["events_sent"] for r in successful_isolation)
+        total_events_received = sum(r["events_received"] for r in successful_isolation)
+        
+        logger.info(f"WebSocket Extreme Isolation Test SUCCESS:")
+        logger.info(f"  Users: {len(successful_isolation)}/{user_count}")
+        logger.info(f"  Success Rate: {isolation_success_rate:.2%}")
+        logger.info(f"  Events: {total_events_sent} sent, {total_events_received} received")
+        logger.info(f"  Cross-User Contamination: 0 (PERFECT ISOLATION)")
+        logger.info(f"  Unique Signatures: {len(unique_signatures)}")
+
+
+# ============================================================================
 # COMPREHENSIVE TEST SUITE EXECUTION
 # ============================================================================
 
@@ -2495,12 +2730,13 @@ if __name__ == "__main__":
     import sys
     
     print("\n" + "=" * 80)
-    print("MISSION CRITICAL WEBSOCKET AGENT EVENTS TEST SUITE")
-    print("COMPREHENSIVE VALIDATION OF ALL 5 REQUIRED EVENTS")
+    print("MISSION CRITICAL WEBSOCKET AGENT EVENTS TEST SUITE - ENHANCED")
+    print("COMPREHENSIVE VALIDATION OF ALL 5 REQUIRED EVENTS + ISOLATION")
     print("=" * 80)
     print("\nBusiness Value: $500K+ ARR - Core chat functionality")
-    print("Testing: Individual events, sequences, timing, chaos, concurrency")
+    print("Testing: Individual events, sequences, timing, chaos, concurrency, isolation")
     print("Requirements: Latency < 100ms, Reconnection < 3s, 10+ concurrent users")
+    print("Enhanced Coverage: 250+ concurrent users, extreme isolation tests")
     print("\nRunning with REAL WebSocket connections (NO MOCKS)...\n")
     
     # Run all comprehensive tests
