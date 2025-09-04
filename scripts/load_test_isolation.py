@@ -41,9 +41,12 @@ import statistics
 sys.path.insert(0, '/Users/rindhujajohnson/Netra/GitHub/netra-apex')
 
 from netra_backend.app.logging_config import central_logger
-from netra_backend.app.agents.supervisor.agent_instance_factory_optimized import (
-    OptimizedAgentInstanceFactory,
-    get_optimized_factory
+from netra_backend.app.agents.supervisor.agent_instance_factory import (
+    AgentInstanceFactory,
+    get_agent_instance_factory
+)
+from netra_backend.app.agents.supervisor.factory_performance_config import (
+    FactoryPerformanceConfig
 )
 from netra_backend.app.monitoring.performance_metrics import (
     PerformanceMonitor,
@@ -120,7 +123,7 @@ class LoadTester:
     def __init__(self, config: LoadTestConfig):
         """Initialize load tester."""
         self.config = config
-        self.factory: Optional[OptimizedAgentInstanceFactory] = None
+        self.factory: Optional[AgentInstanceFactory] = None
         self.monitor: Optional[PerformanceMonitor] = None
         self.users: Dict[str, UserSimulation] = {}
         self.start_time: Optional[float] = None
@@ -132,7 +135,10 @@ class LoadTester:
         logger.info("Setting up load test infrastructure...")
         
         # Initialize factory
-        self.factory = get_optimized_factory()
+        # Use maximum performance configuration for load testing
+        from netra_backend.app.agents.supervisor.factory_performance_config import set_factory_performance_config
+        set_factory_performance_config(FactoryPerformanceConfig.maximum_performance())
+        self.factory = get_agent_instance_factory()
         
         # Mock dependencies for testing
         from unittest.mock import AsyncMock, Mock

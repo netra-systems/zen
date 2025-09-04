@@ -32,9 +32,13 @@ import sys
 import os
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
-from netra_backend.app.agents.supervisor.agent_instance_factory_optimized import (
-    OptimizedAgentInstanceFactory,
-    get_optimized_factory
+from netra_backend.app.agents.supervisor.agent_instance_factory import (
+    AgentInstanceFactory,
+    get_agent_instance_factory
+)
+from netra_backend.app.agents.supervisor.factory_performance_config import (
+    FactoryPerformanceConfig,
+    set_factory_performance_config
 )
 from netra_backend.app.monitoring.performance_metrics import (
     PerformanceMonitor,
@@ -63,7 +67,9 @@ class TestPerformanceTargets:
     @pytest.fixture
     async def factory(self):
         """Create optimized factory for testing."""
-        factory = OptimizedAgentInstanceFactory()
+        # Use maximum performance config for testing
+        set_factory_performance_config(FactoryPerformanceConfig.maximum_performance())
+        factory = AgentInstanceFactory()
         
         # Mock dependencies
         mock_bridge = AsyncMock()
