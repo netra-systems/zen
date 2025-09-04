@@ -635,7 +635,23 @@ class AgentInstanceFactory:
                 if self._agent_class_registry:
                     AgentClass = self._agent_class_registry.get_agent_class(agent_name)
                     if not AgentClass:
-                        raise ValueError(f"Agent '{agent_name}' not found in AgentClassRegistry")
+                        # Provide detailed debugging information
+                        available_agents = self._agent_class_registry.list_agent_names()
+                        error_msg = (
+                            f"Agent '{agent_name}' not found in AgentClassRegistry. "
+                            f"Available agents: {sorted(available_agents)}. "
+                        )
+                        
+                        # Check for common issues
+                        if agent_name == 'synthetic_data':
+                            error_msg += (
+                                "\n⚠️ KNOWN ISSUE: synthetic_data agent registration may have failed due to: "
+                                "\n  1. Missing opentelemetry dependency (pip install opentelemetry-api) "
+                                "\n  2. Import error in synthetic_data_sub_agent.py module "
+                                "\n  3. Agent not registered during startup (check initialization logs)"
+                            )
+                        
+                        raise ValueError(error_msg)
                     
                     # Use directly injected dependencies or fallback to legacy registry
                     # Note: tool_dispatcher can be None for per-request creation pattern

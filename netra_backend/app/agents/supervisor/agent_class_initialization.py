@@ -158,12 +158,14 @@ def _register_core_agents(registry: AgentClassRegistry) -> None:
 
 def _register_specialized_agents(registry: AgentClassRegistry) -> None:
     """Register specialized domain agents."""
+    registration_failures = []
+    
+    # Try to import and register each specialized agent individually
+    # This ensures partial failures don't prevent other agents from registering
+    
+    # Corpus Admin Agent
     try:
-        # Import specialized agents
         from netra_backend.app.agents.corpus_admin.agent import CorpusAdminSubAgent
-        from netra_backend.app.agents.supply_researcher.agent import SupplyResearcherAgent
-        from netra_backend.app.agents.github_analyzer.agent import GitHubAnalyzerAgent
-        from netra_backend.app.agents.synthetic_data_sub_agent import SyntheticDataSubAgent
         
         registry.register(
             "corpus_admin",
@@ -177,7 +179,17 @@ def _register_specialized_agents(registry: AgentClassRegistry) -> None:
                 "domain": "corpus_management"
             }
         )
+        logger.info("  ✓ Registered corpus_admin agent")
+    except ImportError as e:
+        registration_failures.append(f"corpus_admin: {e}")
+        logger.warning(f"  ⚠ Failed to import corpus_admin agent: {e}")
+    except Exception as e:
+        registration_failures.append(f"corpus_admin: {e}")
+        logger.error(f"  ❌ Failed to register corpus_admin agent: {e}")
         
+    # Supply Researcher Agent
+    try:
+        from netra_backend.app.agents.supply_researcher.agent import SupplyResearcherAgent
         registry.register(
             "supply_researcher",
             SupplyResearcherAgent,
@@ -190,7 +202,17 @@ def _register_specialized_agents(registry: AgentClassRegistry) -> None:
                 "domain": "supply_research"
             }
         )
+        logger.info("  ✓ Registered supply_researcher agent")
+    except ImportError as e:
+        registration_failures.append(f"supply_researcher: {e}")
+        logger.warning(f"  ⚠ Failed to import supply_researcher agent: {e}")
+    except Exception as e:
+        registration_failures.append(f"supply_researcher: {e}")
+        logger.error(f"  ❌ Failed to register supply_researcher agent: {e}")
         
+    # GitHub Analyzer Agent
+    try:
+        from netra_backend.app.agents.github_analyzer.agent import GitHubAnalyzerAgent
         registry.register(
             "github_analyzer",
             GitHubAnalyzerAgent,
@@ -203,7 +225,17 @@ def _register_specialized_agents(registry: AgentClassRegistry) -> None:
                 "domain": "code_analysis"
             }
         )
+        logger.info("  ✓ Registered github_analyzer agent")
+    except ImportError as e:
+        registration_failures.append(f"github_analyzer: {e}")
+        logger.warning(f"  ⚠ Failed to import github_analyzer agent: {e}")
+    except Exception as e:
+        registration_failures.append(f"github_analyzer: {e}")
+        logger.error(f"  ❌ Failed to register github_analyzer agent: {e}")
         
+    # Synthetic Data Agent - CRITICAL for data generation workflows
+    try:
+        from netra_backend.app.agents.synthetic_data_sub_agent import SyntheticDataSubAgent
         registry.register(
             "synthetic_data",
             SyntheticDataSubAgent,
@@ -212,19 +244,36 @@ def _register_specialized_agents(registry: AgentClassRegistry) -> None:
             dependencies=["data"],
             metadata={
                 "category": "specialized",
-                "priority": "low",
-                "domain": "data_generation"
+                "priority": "high",  # Elevated priority - required for data workflows
+                "domain": "data_generation",
+                "critical": True  # Mark as critical agent
             }
         )
-        
-        logger.info("Specialized agents registered successfully")
-        
+        logger.info("  ✓ Registered synthetic_data agent")
     except ImportError as e:
-        logger.warning(f"Some specialized agents not available: {e}")
-        # Continue initialization - specialized agents are optional
+        registration_failures.append(f"synthetic_data (CRITICAL): {e}")
+        logger.error(f"  ❌ CRITICAL: Failed to import synthetic_data agent: {e}")
+        # Log detailed import error for debugging
+        import traceback
+        logger.error(f"  Import traceback:\n{traceback.format_exc()}")
     except Exception as e:
-        logger.error(f"Failed to register specialized agents: {e}")
-        raise
+        registration_failures.append(f"synthetic_data (CRITICAL): {e}")
+        logger.error(f"  ❌ CRITICAL: Failed to register synthetic_data agent: {e}")
+    
+    # Summary of registration results
+    if registration_failures:
+        logger.warning(f"Specialized agent registration completed with {len(registration_failures)} failures:")
+        for failure in registration_failures:
+            logger.warning(f"    - {failure}")
+        
+        # Check if any critical agents failed
+        critical_failures = [f for f in registration_failures if "CRITICAL" in f]
+        if critical_failures:
+            logger.error(f"CRITICAL agents failed to register: {critical_failures}")
+            # Note: Not raising here to allow partial functionality
+            # but logging prominently for monitoring
+    else:
+        logger.info("All specialized agents registered successfully")
 
 
 def _register_auxiliary_agents(registry: AgentClassRegistry) -> None:
