@@ -410,7 +410,7 @@ class AgentExecutionRegistry:
         from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier
         from netra_backend.app.core.unified_id_manager import UnifiedIDManager
         
-        run_id = UnifiedIDManager.generate_run_id(thread_id, "agent_execution")
+        run_id = UnifiedIDManager.generate_run_id(thread_id)
         
         # Create new execution context
         exec_context = AgentExecutionContext(
