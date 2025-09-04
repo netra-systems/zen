@@ -182,6 +182,12 @@ class AgentRegistry:
         if name in self.agents:
             logger.debug(f"Agent {name} already registered, skipping")
             return
+        
+        # Validate agent supports reset_state() for request isolation
+        if not hasattr(agent, 'reset_state'):
+            logger.warning(f"⚠️ Agent {name} does not support reset_state() - may persist error state between requests")
+        else:
+            logger.debug(f"✅ Agent {name} supports reset_state() for request isolation")
             
         # CRITICAL FIX: Do not set WebSocket bridge with None run_id at registration time
         # The bridge will be set with a proper run_id when the agent is created 
@@ -235,6 +241,12 @@ class AgentRegistry:
                 **kwargs
             )
             
+            # Validate agent supports reset_state() for request isolation
+            if not hasattr(agent, 'reset_state'):
+                logger.warning(f"⚠️ Agent {name} does not support reset_state() - may persist error state between requests")
+            else:
+                logger.debug(f"✅ Agent {name} supports reset_state() for request isolation")
+            
             # CRITICAL FIX: Do not set WebSocket bridge at registration time
             # The bridge will be set with proper run_id during request execution
             if self.websocket_bridge and hasattr(agent, 'set_websocket_bridge'):
@@ -256,8 +268,48 @@ class AgentRegistry:
             return False
     
     def get(self, name: str) -> Optional['BaseAgent']:
-        """Get agent by name"""
+        """Get agent by name (DEPRECATED - no state reset).
+        
+        WARNING: This method returns agents without resetting their state,
+        which can cause singleton error state to persist across requests.
+        
+        Use get_agent() instead for proper request isolation with state reset.
+        """
+        logger.warning(f"⚠️ DEPRECATED: Using agent_registry.get('{name}') without state reset. "
+                      f"Use await agent_registry.get_agent('{name}') for proper request isolation.")
         return self.agents.get(name)
+    
+    async def get_agent(self, name: str) -> Optional['BaseAgent']:
+        """Get agent by name with state reset for request isolation.
+        
+        CRITICAL: This method resets agent state before returning to ensure
+        clean state between requests and prevent singleton error persistence.
+        
+        Args:
+            name: Name of the agent to retrieve
+            
+        Returns:
+            BaseAgent instance with reset state, None if not found
+        """
+        if name not in self.agents:
+            logger.warning(f"Agent {name} not found in registry")
+            return None
+            
+        agent = self.agents[name]
+        
+        # CRITICAL: Reset state before returning to ensure clean state
+        try:
+            if hasattr(agent, 'reset_state'):
+                await agent.reset_state()
+                logger.info(f"✅ Reset state for agent {name} before returning")
+            else:
+                logger.warning(f"Agent {name} does not support reset_state() - may persist error state")
+        except Exception as e:
+            logger.error(f"❌ Failed to reset agent {name}: {e}")
+            # Continue anyway - better to try than fail completely
+            logger.error(f"Agent {name} may be in inconsistent state - consider creating new instance")
+        
+        return agent
     
     def get_registry_health(self) -> Dict[str, Any]:
         """Get the health status of the registry.
@@ -338,6 +390,53 @@ class AgentRegistry:
     def get_all_agents(self) -> List['BaseAgent']:
         """Get all registered agents"""
         return list(self.agents.values())
+    
+    async def reset_all_agents(self) -> Dict[str, Any]:
+        """Reset state for all registered agents to clean singleton state.
+        
+        CRITICAL: This method resets all agents to prevent singleton error 
+        state from persisting across requests. Useful for global cleanup.
+        
+        Returns:
+            Dictionary with reset results for each agent
+        """
+        reset_results = {
+            'total_agents': len(self.agents),
+            'successful_resets': 0,
+            'failed_resets': 0,
+            'agents_without_reset': 0,
+            'reset_details': {}
+        }
+        
+        logger.info(f"Resetting state for {len(self.agents)} registered agents")
+        
+        for agent_name, agent in self.agents.items():
+            try:
+                if hasattr(agent, 'reset_state'):
+                    await agent.reset_state()
+                    reset_results['successful_resets'] += 1
+                    reset_results['reset_details'][agent_name] = {'status': 'success', 'error': None}
+                    logger.debug(f"✅ Successfully reset agent {agent_name}")
+                else:
+                    reset_results['agents_without_reset'] += 1
+                    reset_results['reset_details'][agent_name] = {
+                        'status': 'no_reset_method', 
+                        'error': 'Agent does not support reset_state()'
+                    }
+                    logger.warning(f"⚠️ Agent {agent_name} does not support reset_state()")
+            except Exception as e:
+                reset_results['failed_resets'] += 1
+                reset_results['reset_details'][agent_name] = {
+                    'status': 'error', 
+                    'error': str(e)
+                }
+                logger.error(f"❌ Failed to reset agent {agent_name}: {e}")
+        
+        logger.info(f"✅ Agent reset complete: {reset_results['successful_resets']} success, "
+                   f"{reset_results['failed_resets']} failed, "
+                   f"{reset_results['agents_without_reset']} no reset method")
+        
+        return reset_results
     
     def _register_reporting_agent(self) -> None:
         """Register reporting agent."""
