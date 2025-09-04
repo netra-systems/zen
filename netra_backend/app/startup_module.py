@@ -733,7 +733,11 @@ async def initialize_clickhouse(logger: logging.Logger) -> dict:
 
 
 async def _setup_clickhouse_tables(logger: logging.Logger, mode: str) -> None:
-    """Setup ClickHouse tables with timeout and error handling."""
+    """Setup ClickHouse tables with timeout and error handling.
+    
+    CRITICAL FIX: Based on Five Whys root cause analysis - tables MUST be initialized
+    for core business functionality.
+    """
     import asyncio
     from shared.isolated_environment import get_env
     
@@ -744,6 +748,32 @@ async def _setup_clickhouse_tables(logger: logging.Logger, mode: str) -> None:
         environment = get_env().get("ENVIRONMENT", "development").lower()
         init_timeout = 8.0 if environment in ["staging", "development"] else 20.0
         
+        # First try the new table initializer for mandatory tables
+        logger.info("🚀 Ensuring ClickHouse critical tables exist...")
+        from netra_backend.app.db.clickhouse_table_initializer import ensure_clickhouse_tables
+        
+        # Get ClickHouse connection details
+        config = get_config()
+        host = 'dev-clickhouse' if environment == 'development' else 'localhost'
+        port = 9000  # Native protocol port
+        user = 'netra'
+        password = ''
+        
+        try:
+            # Ensure critical tables exist (fail_fast=False for backward compatibility)
+            tables_ok = await asyncio.wait_for(
+                asyncio.to_thread(ensure_clickhouse_tables, host, port, user, password, False),
+                timeout=init_timeout
+            )
+            
+            if tables_ok:
+                logger.info("✅ All critical ClickHouse tables verified")
+            else:
+                logger.warning("⚠️ Some ClickHouse tables could not be created - proceeding with legacy init")
+        except Exception as table_error:
+            logger.warning(f"⚠️ Table initializer encountered issue: {table_error} - trying legacy method")
+        
+        # Also run legacy initialization for backward compatibility
         from netra_backend.app.db.clickhouse_init import initialize_clickhouse_tables
         
         await asyncio.wait_for(
