@@ -57,6 +57,8 @@ class DataFetchingRecoveryManager:
     ) -> ErrorContext:
         """Create error context for data fetching failures."""
         return ErrorContext(
+            trace_id=ErrorContext.generate_trace_id(),
+            operation="data_fetching",
             agent_name="data_sub_agent",
             operation_name="data_fetching",
             run_id=run_id,

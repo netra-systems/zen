@@ -280,6 +280,8 @@ class MetricsRecoveryManager:
     def _build_error_context_object(self, run_id: str, additional_data: Dict[str, Any]) -> ErrorContext:
         """Build ErrorContext object with standard agent data."""
         return ErrorContext(
+            trace_id=ErrorContext.generate_trace_id(),
+            operation="metrics_calculation",
             agent_name="data_sub_agent",
             operation_name="metrics_calculation",
             run_id=run_id,

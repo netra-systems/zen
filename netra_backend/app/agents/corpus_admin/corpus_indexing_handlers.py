@@ -98,6 +98,8 @@ class IndexingErrorHandler:
     ) -> ErrorContext:
         """Build error context instance."""
         return ErrorContext(
+            trace_id=ErrorContext.generate_trace_id(),
+            operation="document_indexing",
             agent_name="corpus_admin_agent",
             operation_name="document_indexing",
             run_id=run_id,

@@ -160,11 +160,18 @@ class ActionsToMeetGoalsSubAgent(BaseAgent):
             )
             return response
         except Exception as e:
-            error_context = ErrorContext(
-                operation="llm_response_generation",
-                details={"prompt_size": len(prompt), "config": "actions_to_meet_goals"},
-                component="ActionsToMeetGoalsSubAgent"
-            )
+            # Try to create error context, but don't fail if it doesn't work
+            try:
+                error_context = ErrorContext(
+                    trace_id=ErrorContext.generate_trace_id(),
+                    operation="llm_response_generation",
+                    details={"prompt_size": len(prompt), "config": "actions_to_meet_goals"},
+                    component="ActionsToMeetGoalsSubAgent"
+                )
+            except Exception as ec_error:
+                # If ErrorContext creation fails, just log the error
+                self.logger.error(f"ErrorContext creation failed: {ec_error}")
+            
             self.logger.error(f"LLM request failed: {e}")
             # Re-raise with context - let BaseAgent's error handling manage it
             raise
@@ -182,12 +189,18 @@ class ActionsToMeetGoalsSubAgent(BaseAgent):
         try:
             # Validate preconditions with SSOT error handling
             if not await self.validate_preconditions(context):
-                # Create structured error for validation failure
-                error_context = ErrorContext(
-                    operation="precondition_validation",
-                    details={"run_id": context.run_id, "reason": "validation_failed"},
-                    component="ActionsToMeetGoalsSubAgent"
-                )
+                # Try to create structured error for validation failure
+                try:
+                    error_context = ErrorContext(
+                        trace_id=ErrorContext.generate_trace_id(),
+                        operation="precondition_validation",
+                        details={"run_id": context.run_id, "reason": "validation_failed"},
+                        component="ActionsToMeetGoalsSubAgent"
+                    )
+                except Exception as ec_error:
+                    # If ErrorContext creation fails, just log it
+                    self.logger.error(f"ErrorContext creation failed: {ec_error}")
+                
                 raise ValueError("Precondition validation failed for action plan generation")
             
             # Execute core logic
@@ -195,12 +208,18 @@ class ActionsToMeetGoalsSubAgent(BaseAgent):
             return result
             
         except Exception as e:
-            # Structured error handling with ErrorContext
-            error_context = ErrorContext(
-                operation="action_plan_execution",
-                details={"run_id": context.run_id, "stream_updates": stream_updates, "error": str(e)},
-                component="ActionsToMeetGoalsSubAgent"
-            )
+            # Try to create structured error handling with ErrorContext
+            try:
+                error_context = ErrorContext(
+                    trace_id=ErrorContext.generate_trace_id(),
+                    operation="action_plan_execution",
+                    details={"run_id": context.run_id, "stream_updates": stream_updates, "error": str(e)},
+                    component="ActionsToMeetGoalsSubAgent"
+                )
+            except Exception as ec_error:
+                # If ErrorContext creation fails, just log it and continue with fallback
+                self.logger.error(f"ErrorContext creation failed: {ec_error}")
+            
             # Fallback logic for errors with structured logging
             self.logger.warning(f"Action plan generation failed, using fallback: {e}")
             return await self._execute_fallback_logic(context, stream_updates)
@@ -242,7 +261,7 @@ class ActionsToMeetGoalsSubAgent(BaseAgent):
             # Note: Default values handled in metadata copy for isolation
             if 'optimizations_result' not in context.metadata:
                 # Since context.metadata should be mutable copy, this should work
-                context.metadata['optimizations_result'] = backend_json_handler.to_dict(default_optimization)
+                context.metadata['optimizations_result'] = default_optimization.model_dump()
         
         if "data_result" in missing_deps and not context.metadata.get('data_result'):
             default_data = DataAnalysisResponse(
@@ -255,7 +274,7 @@ class ActionsToMeetGoalsSubAgent(BaseAgent):
             # Note: Default values handled in metadata copy for isolation
             if 'data_result' not in context.metadata:
                 # Since context.metadata should be mutable copy, this should work
-                context.metadata['data_result'] = backend_json_handler.to_dict(default_data)
+                context.metadata['data_result'] = default_data.model_dump()
     
     async def check_entry_conditions(self, context: 'UserExecutionContext') -> bool:
         """Entry condition check using UserExecutionContext."""

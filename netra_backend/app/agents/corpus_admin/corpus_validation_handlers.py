@@ -122,6 +122,8 @@ class DocumentValidationErrorHandler:
     def _build_error_context(self, run_id: str, additional_data: Dict[str, Any]) -> ErrorContext:
         """Build error context with standard parameters."""
         return ErrorContext(
+            trace_id=ErrorContext.generate_trace_id(),
+            operation="document_validation",
             agent_name="corpus_admin_agent",
             operation_name="document_validation",
             run_id=run_id,

@@ -41,6 +41,8 @@ class TriageErrorHandler:
         """Create error context for intent detection errors."""
         additional_data = self._build_intent_additional_data(user_input, original_error)
         return ErrorContext(
+            trace_id=ErrorContext.generate_trace_id(),
+            operation="intent_detection",
             agent_name="triage_sub_agent",
             operation_name="intent_detection",
             run_id=run_id,
@@ -88,6 +90,8 @@ class TriageErrorHandler:
         """Create error context for entity extraction errors."""
         additional_data = self._build_entity_additional_data(failed_entities, user_input, original_error)
         return ErrorContext(
+            trace_id=ErrorContext.generate_trace_id(),
+            operation="entity_extraction",
             agent_name="triage_sub_agent",
             operation_name="entity_extraction",
             run_id=run_id,
@@ -136,6 +140,8 @@ class TriageErrorHandler:
         """Create error context for tool recommendation errors."""
         additional_data = self._build_tool_additional_data(intent, entities, original_error)
         return ErrorContext(
+            trace_id=ErrorContext.generate_trace_id(),
+            operation="tool_recommendation",
             agent_name="triage_sub_agent",
             operation_name="tool_recommendation",
             run_id=run_id,
@@ -304,6 +310,8 @@ class TriageErrorHandler:
     def _create_generic_error_context(self, operation_name: str, run_id: str) -> ErrorContext:
         """Create generic error context."""
         return ErrorContext(
+            trace_id=ErrorContext.generate_trace_id(),
+            operation=operation_name,
             agent_name="triage_sub_agent",
             operation_name=operation_name,
             run_id=run_id

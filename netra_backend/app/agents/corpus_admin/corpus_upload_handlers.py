@@ -77,6 +77,8 @@ class UploadErrorHandler:
     def _build_error_context(self, run_id: str, additional_data: Dict[str, Any]) -> ErrorContext:
         """Build error context for upload failures."""
         return ErrorContext(
+            trace_id=ErrorContext.generate_trace_id(),
+            operation="document_upload",
             agent_name="corpus_admin_agent",
             operation_name="document_upload",
             run_id=run_id,

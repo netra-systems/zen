@@ -47,12 +47,18 @@ class CorpusContextHelper:
     def _create_user_context_from_request(request: CorpusToolRequest):
         """Create UserExecutionContext from request."""
         from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
+        from netra_backend.app.core.unified_id_manager import UnifiedIDManager
         import uuid
         
         # Extract user_id from request or use placeholder
         user_id = getattr(request, 'user_id', None) or f"corpus_user_{uuid.uuid4().hex[:8]}"
-        thread_id = f"corpus_{request.tool_type.value}_{uuid.uuid4().hex[:8]}"
-        run_id = f"corpus_run_{uuid.uuid4().hex[:8]}"
+        
+        # Use UnifiedIDManager for consistent thread ID generation
+        base_thread_id = UnifiedIDManager.generate_thread_id()
+        thread_id = f"corpus_{request.tool_type.value}_{base_thread_id}"
+        
+        # Generate run_id using the canonical format
+        run_id = UnifiedIDManager.generate_run_id(thread_id)
         
         return UserExecutionContext.from_request(
             user_id=user_id,

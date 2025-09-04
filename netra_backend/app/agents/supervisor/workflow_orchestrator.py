@@ -44,21 +44,24 @@ class WorkflowOrchestrator:
         
         if data_sufficiency == "sufficient":
             # Full workflow when sufficient data is available
+            # FIXED: Data collection must happen BEFORE optimization can analyze it
             return [
                 self._create_pipeline_step("triage", "classification", 1, dependencies=[]),
-                self._create_pipeline_step("optimization", "strategies", 2, dependencies=["triage"]),
-                self._create_pipeline_step("data", "insights", 3, dependencies=["optimization"]),
-                self._create_pipeline_step("actions", "implementation", 4, dependencies=["data"]),
+                self._create_pipeline_step("data", "insights", 2, dependencies=["triage"]),
+                self._create_pipeline_step("optimization", "strategies", 3, dependencies=["data"]),
+                self._create_pipeline_step("actions", "implementation", 4, dependencies=["optimization"]),
                 self._create_pipeline_step("reporting", "summary", 5, dependencies=["actions"])
             ]
         elif data_sufficiency == "partial":
             # Partial workflow with data_helper for additional data needs
+            # FIXED: Data helper comes early to identify gaps, then process what we have
             return [
                 self._create_pipeline_step("triage", "classification", 1, dependencies=[]),
-                self._create_pipeline_step("optimization", "strategies", 2, dependencies=["triage"]),
-                self._create_pipeline_step("actions", "implementation", 3, dependencies=["optimization"]),
-                self._create_pipeline_step("data_helper", "data_request", 4, dependencies=["actions"]),
-                self._create_pipeline_step("reporting", "summary_with_data_request", 5, dependencies=["data_helper"])
+                self._create_pipeline_step("data_helper", "data_request", 2, dependencies=["triage"]),
+                self._create_pipeline_step("data", "insights", 3, dependencies=["data_helper"]),
+                self._create_pipeline_step("optimization", "strategies", 4, dependencies=["data"]),
+                self._create_pipeline_step("actions", "implementation", 5, dependencies=["optimization"]),
+                self._create_pipeline_step("reporting", "summary_with_data_request", 6, dependencies=["actions"])
             ]
         elif data_sufficiency == "insufficient":
             # Minimal workflow - only request data
@@ -67,8 +70,9 @@ class WorkflowOrchestrator:
                 self._create_pipeline_step("data_helper", "data_request", 2, dependencies=["triage"])
             ]
         else:
-            # Default fallback to standard workflow
+            # Default fallback to standard workflow with correct ordering
             logger.warning(f"Unknown data sufficiency level: {data_sufficiency}, using default workflow")
+            # Default workflow uses logical order: triage -> data -> optimization -> actions -> reporting
             return [
                 self._create_pipeline_step("triage", "classification", 1, dependencies=[]),
                 self._create_pipeline_step("data", "insights", 2, dependencies=["triage"]),
@@ -250,3 +254,107 @@ class WorkflowOrchestrator:
             {"agent_name": "actions", "step_type": "implementation", "order": 4, "metadata": {"description": "Define implementation actions"}},
             {"agent_name": "reporting", "step_type": "summary", "order": 5, "metadata": {"description": "Generate final report"}}
         ]
+    
+    def assess_data_completeness(self, request_data: Dict[str, Any]) -> Dict[str, Any]:
+        """Assess the completeness of data in the request.
+        
+        Args:
+            request_data: The request data containing available and missing information
+            
+        Returns:
+            Assessment dict with completeness score and workflow recommendation
+        """
+        # Extract completeness from request if provided
+        completeness = request_data.get("completeness", 0.0)
+        
+        # If not provided, calculate based on available vs missing data
+        if completeness == 0.0:
+            available_data = request_data.get("available_data", {})
+            missing_data = request_data.get("missing_data", [])
+            
+            if available_data and missing_data:
+                total_fields = len(available_data) + len(missing_data)
+                completeness = len(available_data) / total_fields if total_fields > 0 else 0.0
+            elif available_data:
+                # If only available data is provided, estimate based on typical requirements
+                completeness = min(0.7, len(available_data) / 10)  # Assume 10 typical fields
+        
+        # Determine workflow based on completeness
+        if completeness >= 0.8:
+            workflow_type = "full_optimization"
+            confidence = 0.90
+        elif completeness >= 0.4:
+            workflow_type = "modified_optimization"
+            confidence = 0.65
+        else:
+            workflow_type = "data_collection_focus"
+            confidence = 0.10
+        
+        return {
+            "completeness": completeness,
+            "workflow": workflow_type,
+            "confidence": confidence,
+            "data_sufficiency": self._classify_data_sufficiency(completeness)
+        }
+    
+    def _classify_data_sufficiency(self, completeness: float) -> str:
+        """Classify data sufficiency level based on completeness score.
+        
+        Args:
+            completeness: Data completeness score between 0 and 1
+            
+        Returns:
+            String classification of data sufficiency
+        """
+        if completeness >= 0.8:
+            return "sufficient"
+        elif completeness >= 0.4:
+            return "partial"
+        else:
+            return "insufficient"
+    
+    async def select_workflow(self, request_data: Dict[str, Any]) -> Dict[str, Any]:
+        """Select appropriate workflow based on data assessment.
+        
+        Args:
+            request_data: The request data to assess
+            
+        Returns:
+            Workflow configuration with type, confidence, and phases
+        """
+        assessment = self.assess_data_completeness(request_data)
+        
+        workflow_config = {
+            "type": assessment["workflow"],
+            "confidence": assessment["confidence"],
+            "completeness": assessment["completeness"],
+            "phases": []
+        }
+        
+        # Define phases based on workflow type
+        if assessment["workflow"] == "full_optimization":
+            workflow_config["phases"] = [
+                "triage",
+                "data_analysis",
+                "optimization",
+                "actions",
+                "reporting"
+            ]
+        elif assessment["workflow"] == "modified_optimization":
+            workflow_config["phases"] = [
+                "triage",
+                "quick_wins",  # Immediate value delivery
+                "data_request",  # Request missing data
+                "partial_optimization",  # Work with what we have
+                "phased_actions",  # Progressive implementation
+                "reporting_with_caveats"
+            ]
+        else:  # data_collection_focus
+            workflow_config["phases"] = [
+                "triage",
+                "educate",  # Educate user on capabilities
+                "collect",  # Collect necessary data
+                "demonstrate_value"  # Show potential value
+            ]
+        
+        return workflow_config

@@ -50,10 +50,12 @@ class AdminToolDispatcherMigrationHelper:
         logger.warning(f"⚠️ Creating TEMPORARY context for admin migration - admin_user: {admin_user.id}")
         logger.warning("⚠️ This should only be used during migration - provide proper UserExecutionContext in production")
         
-        # Create temporary IDs for migration
+        # Create temporary IDs for migration using UnifiedIDManager for consistency
+        from netra_backend.app.core.unified_id_manager import UnifiedIDManager
         temp_user_id = f"admin_{admin_user.id}"
-        temp_thread_id = f"migration_thread_{uuid.uuid4().hex[:8]}"
-        temp_run_id = f"migration_run_{uuid.uuid4().hex[:8]}"
+        base_thread_id = UnifiedIDManager.generate_thread_id()
+        temp_thread_id = f"migration_{base_thread_id}"
+        temp_run_id = UnifiedIDManager.generate_run_id(temp_thread_id)
         
         return UserExecutionContext(
             user_id=temp_user_id,

@@ -24,7 +24,9 @@ def create_dispatch_context(dispatcher, tool_name: str, kwargs: Dict[str, Any]) 
     from netra_backend.app.core.unified_id_manager import UnifiedIDManager
     # Use dispatcher's user context if available for thread_id
     user_id = getattr(dispatcher.user, 'id', 'unknown') if dispatcher.user else 'unknown'
-    admin_thread_id = f"admin_{user_id}_{tool_name}_{uuid.uuid4().hex[:8]}"
+    # Use UnifiedIDManager for consistent thread ID generation
+    base_thread_id = UnifiedIDManager.generate_thread_id()
+    admin_thread_id = f"admin_{user_id}_{tool_name}_{base_thread_id}"
     run_id = UnifiedIDManager.generate_run_id(admin_thread_id)
     metadata = {"tool_name": tool_name, "kwargs": kwargs}
     return ExecutionContext(
