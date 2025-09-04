@@ -104,16 +104,19 @@ class SupervisorAgent(BaseAgent):
         try:
             # Pre-configure with just the websocket bridge (registries will be added in execute())
             # This is critical to prevent None bridge errors when creating sub-agents
+            # NOTE: tool_dispatcher is created per-request, NOT passed in constructor
             self.agent_instance_factory.configure(
                 websocket_bridge=websocket_bridge,
                 websocket_manager=getattr(websocket_bridge, 'websocket_manager', None),
                 agent_class_registry=self.agent_class_registry,  # Use the class registry we just got
                 llm_manager=llm_manager,
-                tool_dispatcher=tool_dispatcher
+                tool_dispatcher=None  # Will be set per-request in execute()
             )
             logger.info(f"✅ Factory pre-configured with WebSocket bridge to prevent sub-agent event failures")
         except Exception as e:
-            logger.warning(f"⚠️ Could not pre-configure factory in init (will configure in execute): {e}")
+            # CRITICAL: Changed from warning to error - configuration failure should fail fast
+            logger.error(f"❌ Failed to pre-configure factory in init: {e}")
+            raise RuntimeError(f"Agent instance factory pre-configuration failed: {e}")
         
         # Store LLM manager for creating request-scoped registries
         self._llm_manager = llm_manager
