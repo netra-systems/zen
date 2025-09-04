@@ -47,7 +47,7 @@ COPY --chown=netra:netra test_framework/ ./test_framework/
 COPY --chown=netra:netra scripts/ ./scripts/
 COPY --chown=netra:netra SPEC/ ./SPEC/
 # Copy Python files if they exist
-COPY --chown=netra:netra *.py ./ 2>/dev/null || true
+# Removed problematic COPY command that uses shell redirection
 
 # Switch to non-root user
 USER netra
