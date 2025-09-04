@@ -2695,7 +2695,7 @@ class TestEnhancedWebSocketScenarios:
         isolation_success_rate = len(successful_isolation) / len(isolation_results)
         
         # CRITICAL: Zero contamination tolerance
-        assert len(contamination_violations) == 0, \\
+        assert len(contamination_violations) == 0, \
             f"CRITICAL: WebSocket cross-user contamination detected: {len(contamination_violations)} violations\\n{contamination_violations[:5]}"
         
         # High success rate required
