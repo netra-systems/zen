@@ -15,7 +15,7 @@ from netra_backend.app.services.agent_service_factory import get_agent_service
 async def process_message(message: str, thread_id: Optional[str] = None) -> Dict[str, Any]:
     """Module-level wrapper for AgentService.process_message for test compatibility"""
     from netra_backend.app.dependencies import get_request_scoped_db_session, get_llm_manager
-    async with get_request_scoped_db_session() as db:
+    async for db in get_request_scoped_db_session():
         return await _execute_module_process_message(db, message, thread_id)
 
 
@@ -29,7 +29,7 @@ async def _execute_module_process_message(db, message: str, thread_id: Optional[
 async def generate_stream(message: str, thread_id: Optional[str] = None) -> AsyncGenerator[Dict[str, Any], None]:
     """Module-level wrapper for AgentService.generate_stream for test compatibility"""
     from netra_backend.app.dependencies import get_request_scoped_db_session
-    async with get_request_scoped_db_session() as db:
+    async for db in get_request_scoped_db_session():
         async for chunk in _execute_module_generate_stream(db, message, thread_id):
             yield chunk
 

@@ -180,12 +180,13 @@ class RequestScopedContext:
         # CRITICAL: Log that this context contains NO database sessions
         logger.debug(f"Created RequestScopedContext {self.request_id} - NO sessions stored")
 
-@asynccontextmanager
 async def get_request_scoped_db_session() -> AsyncGenerator[AsyncSession, None]:
     """Create a request-scoped database session with proper lifecycle management.
     
     CRITICAL: This creates a fresh session for each request and ensures it's
     properly closed after the request completes. Sessions are NEVER stored globally.
+    
+    NOTE: No @asynccontextmanager decorator for FastAPI compatibility.
     
     Uses the enhanced RequestScopedSessionFactory for isolation and monitoring.
     """
@@ -265,7 +266,30 @@ async def get_user_scoped_db_session(
     finally:
         logger.debug(f"User-scoped database session lifecycle completed for user {user_id}")
 
-# FIXED: Use get_request_scoped_db_session for both to ensure consistency
+
+async def get_request_scoped_db_session_for_fastapi() -> AsyncGenerator[AsyncSession, None]:
+    """FastAPI-compatible wrapper for get_request_scoped_db_session.
+    
+    CRITICAL: get_request_scoped_db_session is a plain async generator (no @asynccontextmanager).
+    This wrapper ensures proper usage pattern for FastAPI Depends() injection.
+    
+    Yields:
+        AsyncSession: Request-scoped database session compatible with FastAPI Depends()
+    """
+    logger.debug("Creating FastAPI-compatible request-scoped database session")
+    
+    try:
+        # Directly delegate to the async generator
+        async for session in get_request_scoped_db_session():
+            logger.debug(f"Yielding FastAPI-compatible session: {id(session)}")
+            yield session
+            logger.debug(f"FastAPI-compatible session {id(session)} completed")
+    except Exception as e:
+        logger.error(f"Failed to create FastAPI-compatible request-scoped database session: {e}")
+        raise
+
+
+# FIXED: Use async generator directly (no @asynccontextmanager)
 DbDep = Annotated[AsyncSession, Depends(get_request_scoped_db_session)]
 RequestScopedDbDep = Annotated[AsyncSession, Depends(get_request_scoped_db_session)]
 UserScopedDbDep = Annotated[AsyncSession, Depends(get_user_scoped_db_session)]
