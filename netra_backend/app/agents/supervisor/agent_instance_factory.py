@@ -650,14 +650,15 @@ class AgentInstanceFactory:
                         logger.info(f"✅ Creating {agent_name} ({agent_class_name}) with no parameters")
                         agent = AgentClass()
                     elif agent_class_name in llm_tool_only_agents:
-                        if llm_manager and tool_dispatcher:
-                            logger.warning(f"⚠️ Creating {agent_name} ({agent_class_name}) with tool_dispatcher (may trigger deprecation warning)")
+                        # Note: tool_dispatcher can be None for per-request creation pattern
+                        if llm_manager:
+                            logger.info(f"✅ Creating {agent_name} ({agent_class_name}) with llm_manager (tool_dispatcher: {tool_dispatcher is not None})")
                             agent = AgentClass(
                                 llm_manager=llm_manager,
-                                tool_dispatcher=tool_dispatcher
+                                tool_dispatcher=tool_dispatcher  # Can be None for per-request pattern
                             )
                         else:
-                            logger.warning(f"⚠️ {agent_name} ({agent_class_name}) requires llm_manager and tool_dispatcher, attempting no-param init")
+                            logger.warning(f"⚠️ {agent_name} ({agent_class_name}) requires llm_manager, attempting no-param init")
                             agent = AgentClass()
                     else:
                         # Try different parameter combinations based on what the agent accepts
@@ -670,12 +671,13 @@ class AgentInstanceFactory:
                             logger.info(f"✅ Created {agent_name} with no parameters")
                         except TypeError as e1:
                             # Then try with llm_manager and tool_dispatcher
-                            if llm_manager and tool_dispatcher:
+                            # Note: tool_dispatcher can be None for per-request creation
+                            if llm_manager:
                                 try:
-                                    logger.debug(f"   Trying: llm_manager + tool_dispatcher")
+                                    logger.debug(f"   Trying: llm_manager + tool_dispatcher (tool_dispatcher: {tool_dispatcher is not None})")
                                     agent = AgentClass(
                                         llm_manager=llm_manager,
-                                        tool_dispatcher=tool_dispatcher
+                                        tool_dispatcher=tool_dispatcher  # Can be None
                                     )
                                     logger.info(f"✅ Created {agent_name} with llm_manager and tool_dispatcher")
                                 except TypeError as e2:
