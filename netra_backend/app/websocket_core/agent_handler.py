@@ -67,9 +67,9 @@ class AgentMessageHandler(BaseMessageHandler):
                     else:
                         logger.warning(f"Could not find connection ID for websocket of user {user_id}")
             
-            # Get database session using async context manager
-            # CRITICAL: Do NOT manually close the session - let the context manager handle it
-            async with get_request_scoped_db_session() as db_session:
+            # Get database session using async generator pattern
+            # CRITICAL: Do NOT manually close the session - the generator handles cleanup
+            async for db_session in get_request_scoped_db_session():
                 try:
                     # Route message to appropriate handler
                     success = await self._route_agent_message(

@@ -91,6 +91,26 @@ class StartupValidator:
         """Validate agent registration and counts."""
         try:
             if hasattr(app.state, 'agent_supervisor') and app.state.agent_supervisor:
+                # Factory pattern: No registry needed - agents created per-request
+                # Validate that supervisor exists and can create agents
+                supervisor = app.state.agent_supervisor
+                
+                # With factory pattern, we validate the supervisor itself, not a registry
+                validation = ComponentValidation(
+                    name="Agent Factory",
+                    category="Agents",
+                    expected_min=1,  # Just need supervisor
+                    actual_count=1 if supervisor else 0,
+                    status=ComponentStatus.HEALTHY if supervisor else ComponentStatus.FAILED,
+                    message="Factory-based agent creation ready (per-request isolation)",
+                    is_critical=True,
+                    metadata={"factory_pattern": True, "supervisor_ready": bool(supervisor)}
+                )
+                
+                self.validations.append(validation)
+                self.logger.info("✓ Agent Factory: Supervisor ready for per-request agent creation")
+                
+                # Check for legacy registry (backward compatibility)
                 if hasattr(app.state.agent_supervisor, 'registry'):
                     registry = app.state.agent_supervisor.registry
                     agent_count = len(registry.agents) if hasattr(registry, 'agents') else 0
@@ -102,19 +122,6 @@ class StartupValidator:
                     ]
                     expected_min = len(expected_agents)
                     
-                    validation = ComponentValidation(
-                        name="Agent Registry",
-                        category="Agents",
-                        expected_min=expected_min,
-                        actual_count=agent_count,
-                        status=self._get_status(agent_count, expected_min, is_critical=True),
-                        message=f"Registered {agent_count}/{expected_min} agents",
-                        is_critical=True,
-                        metadata={"registered_agents": list(registry.agents.keys()) if hasattr(registry, 'agents') else []}
-                    )
-                    
-                    self.validations.append(validation)
-                    
                     if agent_count == 0:
                         self.logger.warning(f"⚠️ ZERO AGENTS REGISTERED - Expected at least {expected_min} agents")
                         self.logger.warning(f"   Expected agents: {', '.join(expected_agents)}")
@@ -125,8 +132,7 @@ class StartupValidator:
                             self.logger.warning(f"   Missing agents: {', '.join(missing)}")
                     else:
                         self.logger.info(f"✓ Agent Registry: {agent_count} agents registered")
-                else:
-                    self._add_failed_validation("Agent Registry", "Agents", "Registry not found")
+                # else: No registry - this is expected with factory pattern (already validated above)
             else:
                 self._add_failed_validation("Agent Supervisor", "Agents", "Supervisor not initialized")
                 

@@ -10,24 +10,98 @@ from typing import Dict, Optional, Any, Callable
 from contextlib import contextmanager
 import os
 
-# OpenTelemetry imports
-from opentelemetry import trace
-from opentelemetry.sdk.trace import TracerProvider
-from opentelemetry.sdk.trace.export import BatchSpanProcessor, ConsoleSpanExporter
-from opentelemetry.sdk.resources import Resource, SERVICE_NAME, SERVICE_VERSION
-from opentelemetry.trace import Status, StatusCode, Span
-from opentelemetry.propagate import extract, inject
-from opentelemetry.trace.propagation.tracecontext import TraceContextTextMapPropagator
-
-# Exporters
-from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
-from opentelemetry.exporter.jaeger.thrift import JaegerExporter
-
-# Instrumentation
-from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
-from opentelemetry.instrumentation.requests import RequestsInstrumentor
-from opentelemetry.instrumentation.sqlalchemy import SQLAlchemyInstrumentor
-from opentelemetry.instrumentation.redis import RedisInstrumentor
+# Handle optional OpenTelemetry dependency gracefully
+try:
+    # OpenTelemetry imports
+    from opentelemetry import trace
+    from opentelemetry.sdk.trace import TracerProvider
+    from opentelemetry.sdk.trace.export import BatchSpanProcessor, ConsoleSpanExporter
+    from opentelemetry.sdk.resources import Resource, SERVICE_NAME, SERVICE_VERSION
+    from opentelemetry.trace import Status, StatusCode, Span
+    from opentelemetry.propagate import extract, inject
+    from opentelemetry.trace.propagation.tracecontext import TraceContextTextMapPropagator
+    
+    # Exporters
+    from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
+    from opentelemetry.exporter.jaeger.thrift import JaegerExporter
+    
+    # Instrumentation
+    from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
+    from opentelemetry.instrumentation.requests import RequestsInstrumentor
+    from opentelemetry.instrumentation.sqlalchemy import SQLAlchemyInstrumentor
+    from opentelemetry.instrumentation.redis import RedisInstrumentor
+    
+    TELEMETRY_AVAILABLE = True
+except ImportError as e:
+    # Create stub classes when OpenTelemetry is not available
+    TELEMETRY_AVAILABLE = False
+    
+    # Stub implementations
+    class StatusCode:
+        OK = 'ok'
+        ERROR = 'error'
+    
+    class Status:
+        def __init__(self, status_code, description=None):
+            self.status_code = status_code
+            self.description = description
+    
+    class Span:
+        def set_status(self, status): pass
+        def set_attribute(self, key, value): pass
+        def add_event(self, name, attributes=None): pass
+        def record_exception(self, exception): pass
+    
+    class NoOpTracer:
+        def start_span(self, name, **kwargs):
+            return NoOpSpan()
+    
+    class NoOpSpan(Span):
+        def __enter__(self): return self
+        def __exit__(self, *args): pass
+    
+    class NoOpProvider:
+        def get_tracer(self, name, version=None):
+            return NoOpTracer()
+    
+    # Stub instrumentors
+    class FastAPIInstrumentor:
+        @staticmethod
+        def instrument_app(app): pass
+    
+    class RequestsInstrumentor:
+        @staticmethod
+        def instrument(): pass
+    
+    class SQLAlchemyInstrumentor:
+        @staticmethod
+        def instrument(engine=None): pass
+    
+    class RedisInstrumentor:
+        @staticmethod
+        def instrument(): pass
+    
+    # Module-level stub
+    class trace:
+        @staticmethod
+        def get_tracer(name, version=None):
+            return NoOpTracer()
+        
+        @staticmethod
+        def set_tracer_provider(provider):
+            pass
+    
+    TracerProvider = NoOpProvider
+    BatchSpanProcessor = lambda x: None
+    ConsoleSpanExporter = lambda: None
+    OTLPSpanExporter = lambda **kwargs: None
+    JaegerExporter = lambda **kwargs: None
+    Resource = dict
+    SERVICE_NAME = 'service.name'
+    SERVICE_VERSION = 'service.version'
+    extract = lambda carrier, context=None: {}
+    inject = lambda carrier, context=None: None
+    TraceContextTextMapPropagator = lambda: None
 
 from netra_backend.app.core.config import get_config
 from netra_backend.app.logging_config import central_logger
@@ -53,9 +127,17 @@ class TelemetryManager:
         if not self._initialized:
             self.tracer: Optional[trace.Tracer] = None
             self.tracer_provider: Optional[TracerProvider] = None
-            self.propagator = TraceContextTextMapPropagator()
-            self.enabled = True
+            self.propagator = TraceContextTextMapPropagator() if TELEMETRY_AVAILABLE else None
+            self.enabled = TELEMETRY_AVAILABLE
             self._initialized = True
+            
+            if not TELEMETRY_AVAILABLE:
+                logger.warning(
+                    "OpenTelemetry not available - telemetry features disabled. "
+                    "To enable telemetry, install: pip install opentelemetry-api opentelemetry-sdk "
+                    "opentelemetry-instrumentation-fastapi opentelemetry-instrumentation-requests "
+                    "opentelemetry-instrumentation-sqlalchemy opentelemetry-instrumentation-redis"
+                )
     
     def init_telemetry(
         self, 
@@ -68,6 +150,8 @@ class TelemetryManager:
         """
         Initialize OpenTelemetry SDK with proper configuration.
         
+        If OpenTelemetry is not available, this method does nothing.
+        
         Args:
             service_name: Name of the service for tracing
             service_version: Version of the service
@@ -75,6 +159,12 @@ class TelemetryManager:
             jaeger_endpoint: Jaeger exporter endpoint
             enable_console: Whether to enable console exporter for debugging
         """
+        # Check if telemetry is available
+        if not TELEMETRY_AVAILABLE:
+            self.enabled = False
+            logger.debug("Telemetry initialization skipped - OpenTelemetry not available")
+            return
+        
         try:
             # Get configuration from environment or defaults
             service_name = service_name or os.getenv("OTEL_SERVICE_NAME", "netra-backend")
@@ -83,7 +173,7 @@ class TelemetryManager:
             jaeger_endpoint = jaeger_endpoint or os.getenv("JAEGER_ENDPOINT", "localhost:6831")
             
             # Check if telemetry should be enabled
-            self.enabled = os.getenv("OTEL_ENABLED", "true").lower() == "true"
+            self.enabled = os.getenv("OTEL_ENABLED", "true").lower() == "true" and TELEMETRY_AVAILABLE
             if not self.enabled:
                 logger.info("OpenTelemetry is disabled via configuration")
                 return

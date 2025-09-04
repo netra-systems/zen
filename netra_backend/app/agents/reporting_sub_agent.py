@@ -212,8 +212,16 @@ class ReportingSubAgent(BaseAgent):
     def _build_reporting_prompt(self, context: UserExecutionContext) -> str:
         """Build the reporting prompt from context metadata."""
         metadata = context.metadata
+        
+        # Serialize ActionPlanResult if it's a Pydantic model
+        action_plan = metadata.get("action_plan_result", "")
+        if hasattr(action_plan, 'model_dump'):
+            action_plan = action_plan.model_dump(mode='json', exclude_none=True)
+        elif hasattr(action_plan, 'dict'):
+            action_plan = action_plan.dict(exclude_none=True)
+        
         return reporting_prompt_template.format(
-            action_plan=metadata.get("action_plan_result", ""),
+            action_plan=action_plan,
             optimizations=metadata.get("optimizations_result", ""),
             data=metadata.get("data_result", ""),
             triage_result=metadata.get("triage_result", ""),
@@ -298,9 +306,16 @@ class ReportingSubAgent(BaseAgent):
     def _generate_report_cache_key(self, context: UserExecutionContext) -> str:
         """Generate cache key for report with user context isolation."""
         # Build key data with user context
+        # Serialize ActionPlanResult if present
+        action_plan = context.metadata.get("action_plan_result", "")
+        if hasattr(action_plan, 'model_dump'):
+            action_plan = str(action_plan.model_dump(mode='json', exclude_none=True))
+        elif hasattr(action_plan, 'dict'):
+            action_plan = str(action_plan.dict(exclude_none=True))
+        
         key_data = {
             "agent": "reporting",
-            "action_plan": context.metadata.get("action_plan_result", ""),
+            "action_plan": action_plan,
             "optimizations": context.metadata.get("optimizations_result", ""), 
             "data_result": context.metadata.get("data_result", ""),
             "triage_result": context.metadata.get("triage_result", ""),
@@ -337,7 +352,23 @@ class ReportingSubAgent(BaseAgent):
             
         try:
             import json
-            cache_data = json.dumps(result)
+            # Ensure any Pydantic models are serialized properly
+            def serialize_value(v):
+                if hasattr(v, 'model_dump'):
+                    return v.model_dump(mode='json', exclude_none=True)
+                elif hasattr(v, 'dict'):
+                    return v.dict(exclude_none=True)
+                return v
+            
+            # Deep copy and serialize any Pydantic models
+            serializable_result = {}
+            for key, value in result.items():
+                if isinstance(value, dict):
+                    serializable_result[key] = {k: serialize_value(v) for k, v in value.items()}
+                else:
+                    serializable_result[key] = serialize_value(value)
+            
+            cache_data = json.dumps(serializable_result)
             ttl = getattr(self, 'cache_ttl', 3600)  # Default 1 hour TTL
             await self.redis_manager.set(
                 f"report_cache:{cache_key}",

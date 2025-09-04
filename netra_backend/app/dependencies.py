@@ -186,22 +186,34 @@ async def get_request_scoped_db_session() -> AsyncGenerator[AsyncSession, None]:
     CRITICAL: This creates a fresh session for each request and ensures it's
     properly closed after the request completes. Sessions are NEVER stored globally.
     
-    Uses the single source of truth from netra_backend.app.database.
+    NOTE: No @asynccontextmanager decorator for FastAPI compatibility.
+    
+    Uses the enhanced RequestScopedSessionFactory for isolation and monitoring.
     """
-    logger.debug("Creating new request-scoped database session")
+    from netra_backend.app.database.request_scoped_session_factory import get_session_factory
+    
+    # Generate unique request ID for this session
+    request_id = f"req_{uuid.uuid4().hex[:12]}"
+    # Use placeholder user ID - will be overridden by actual user context when available
+    user_id = "system"  # This gets overridden in practice by request context
+    
+    logger.debug(f"Creating new request-scoped database session {request_id}")
     
     try:
-        # FIX: get_db() is already an async context manager, don't double-wrap
-        async with get_db() as session:
+        # Get the factory and use its method directly (which is decorated with @asynccontextmanager)
+        factory = await get_session_factory()
+        # Since factory.get_request_scoped_session is decorated with @asynccontextmanager,
+        # we use it with async with
+        async with factory.get_request_scoped_session(user_id, request_id) as session:
             _validate_session_type(session)
-            logger.debug(f"Created database session: {id(session)}")
+            logger.debug(f"Created database session: {id(session)} for request {request_id}")
             yield session
             logger.debug(f"Request-scoped session {id(session)} completed")
     except Exception as e:
-        logger.error(f"Failed to create request-scoped database session: {e}")
+        logger.error(f"Failed to create request-scoped database session {request_id}: {e}")
         raise
     finally:
-        logger.debug("Request-scoped database session lifecycle completed")
+        logger.debug(f"Request-scoped database session {request_id} lifecycle completed")
 
 async def get_db_dependency() -> AsyncGenerator[AsyncSession, None]:
     """Wrapper for database dependency with validation.
@@ -215,9 +227,72 @@ async def get_db_dependency() -> AsyncGenerator[AsyncSession, None]:
         _validate_session_type(session)
         yield session
 
-# FIXED: Use get_request_scoped_db_session for both to ensure consistency
+# Enhanced session dependencies using RequestScopedSessionFactory
+async def get_user_scoped_db_session(
+    user_id: str = "system",
+    request_id: Optional[str] = None,
+    thread_id: Optional[str] = None
+) -> AsyncGenerator[AsyncSession, None]:
+    """Create a user-scoped database session with enhanced isolation.
+    
+    Args:
+        user_id: User identifier for session isolation
+        request_id: Request identifier (auto-generated if not provided)
+        thread_id: Thread identifier for WebSocket routing
+        
+    Yields:
+        AsyncSession: Isolated database session for the user
+    """
+    from netra_backend.app.database.request_scoped_session_factory import get_isolated_session
+    
+    if not request_id:
+        request_id = f"req_{uuid.uuid4().hex[:12]}"
+    
+    logger.debug(f"Creating user-scoped database session for user {user_id}, request {request_id}")
+    
+    try:
+        async with get_isolated_session(user_id, request_id, thread_id) as session:
+            _validate_session_type(session)
+            # Additional validation for user isolation
+            from netra_backend.app.database.request_scoped_session_factory import validate_session_isolation
+            await validate_session_isolation(session, user_id)
+            
+            logger.debug(f"Created user-scoped session {id(session)} for user {user_id}")
+            yield session
+            logger.debug(f"User-scoped session {id(session)} completed for user {user_id}")
+    except Exception as e:
+        logger.error(f"Failed to create user-scoped database session for user {user_id}: {e}")
+        raise
+    finally:
+        logger.debug(f"User-scoped database session lifecycle completed for user {user_id}")
+
+
+async def get_request_scoped_db_session_for_fastapi() -> AsyncGenerator[AsyncSession, None]:
+    """FastAPI-compatible wrapper for get_request_scoped_db_session.
+    
+    CRITICAL: get_request_scoped_db_session is a plain async generator (no @asynccontextmanager).
+    This wrapper ensures proper usage pattern for FastAPI Depends() injection.
+    
+    Yields:
+        AsyncSession: Request-scoped database session compatible with FastAPI Depends()
+    """
+    logger.debug("Creating FastAPI-compatible request-scoped database session")
+    
+    try:
+        # Directly delegate to the async generator
+        async for session in get_request_scoped_db_session():
+            logger.debug(f"Yielding FastAPI-compatible session: {id(session)}")
+            yield session
+            logger.debug(f"FastAPI-compatible session {id(session)} completed")
+    except Exception as e:
+        logger.error(f"Failed to create FastAPI-compatible request-scoped database session: {e}")
+        raise
+
+
+# FIXED: Use async generator directly (no @asynccontextmanager)
 DbDep = Annotated[AsyncSession, Depends(get_request_scoped_db_session)]
 RequestScopedDbDep = Annotated[AsyncSession, Depends(get_request_scoped_db_session)]
+UserScopedDbDep = Annotated[AsyncSession, Depends(get_user_scoped_db_session)]
 
 def get_llm_manager(request: Request) -> LLMManager:
     return request.app.state.llm_manager

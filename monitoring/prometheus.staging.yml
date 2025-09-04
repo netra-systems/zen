@@ -1,0 +1,79 @@
+# Prometheus Configuration for Staging Environment
+# Monitors request isolation metrics and system health
+
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    environment: 'staging'
+    cluster: 'netra-staging'
+
+rule_files:
+  - "alert_rules.yml"
+
+scrape_configs:
+  # Backend service metrics
+  - job_name: 'netra-backend'
+    static_configs:
+      - targets: ['backend:8000']
+    scrape_interval: 10s
+    metrics_path: '/metrics'
+    scrape_timeout: 10s
+
+  # Auth service metrics  
+  - job_name: 'netra-auth'
+    static_configs:
+      - targets: ['auth:8081']
+    scrape_interval: 10s
+    metrics_path: '/metrics'
+    scrape_timeout: 10s
+
+  # Frontend metrics (if available)
+  - job_name: 'netra-frontend'
+    static_configs:
+      - targets: ['frontend:3000']
+    scrape_interval: 30s
+    metrics_path: '/api/metrics'
+    scrape_timeout: 10s
+
+  # Database metrics
+  - job_name: 'postgres'
+    static_configs:
+      - targets: ['postgres:5432']
+    scrape_interval: 30s
+
+  - job_name: 'redis'
+    static_configs:
+      - targets: ['redis:6379']
+    scrape_interval: 30s
+
+  - job_name: 'clickhouse'
+    static_configs:
+      - targets: ['clickhouse:8123']
+    scrape_interval: 30s
+
+  # Node exporter for system metrics
+  - job_name: 'node-exporter'
+    static_configs:
+      - targets: ['node-exporter:9100']
+    scrape_interval: 15s
+
+  # Load testing metrics
+  - job_name: 'load-tester'
+    static_configs:
+      - targets: ['load-tester:8089']
+    scrape_interval: 5s
+    scrape_timeout: 5s
+
+# Alerting configuration
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets:
+          - alertmanager:9093
+
+# Storage configuration
+storage:
+  tsdb:
+    retention.time: 7d
+    retention.size: 1GB

@@ -73,10 +73,17 @@ class ConnectionHealth:
 
 
 class AgentExecutionRegistry:
-    """SSOT for WebSocket-Agent integration with centralized lifecycle management."""
+    """DEPRECATED: SSOT for WebSocket-Agent integration - replaced with factory patterns.
     
-    _instance: Optional['AgentExecutionRegistry'] = None
-    _lock = asyncio.Lock()
+    This class is now deprecated in favor of per-request factory patterns that provide
+    complete user isolation and prevent cascade failures between concurrent users.
+    
+    For new code, use ExecutionEngineFactory and related factory patterns.
+    """
+    
+    # REMOVED: Singleton pattern implementation - replaced with factory patterns  
+    # _instance: Optional['AgentExecutionRegistry'] = None
+    # _lock = asyncio.Lock()
     
     # Configuration constants
     RETRY_MAX_ATTEMPTS = 3
@@ -86,10 +93,13 @@ class AgentExecutionRegistry:
     EVENT_DELIVERY_TIMEOUT_MS = 500
     
     def __new__(cls) -> 'AgentExecutionRegistry':
-        """Singleton pattern implementation."""
-        if cls._instance is None:
-            cls._instance = super().__new__(cls)
-        return cls._instance
+        """DEPRECATED: Singleton pattern removed - use factory patterns instead.
+        
+        This method now creates regular instances instead of singletons to prevent
+        cascade failures between users.
+        """
+        # Create regular instance - no singleton pattern
+        return super().__new__(cls)
     
     def __init__(self):
         """Initialize registry with thread-safe singleton pattern."""
@@ -647,47 +657,57 @@ class AgentExecutionRegistry:
             return False
 
 
-# Global singleton instance
-_registry_instance: Optional[AgentExecutionRegistry] = None
+# REMOVED: Global singleton instance - replaced with factory patterns
+# _registry_instance: Optional[AgentExecutionRegistry] = None
 
 
 async def get_agent_execution_registry() -> AgentExecutionRegistry:
-    """Get singleton Agent Execution Registry instance.
+    """DEPRECATED: Singleton registry function removed - use factory patterns.
     
-    DEPRECATED: This singleton pattern prevents user isolation and can cause
-    execution context conflicts between concurrent users.
+    This function is deprecated because singleton execution registries prevent
+    user isolation and cause cascade failures between concurrent users.
     
     For new code, use:
     - ExecutionEngineFactory.create_execution_engine() for per-user isolation
-    - FactoryAdapter.get_execution_engine() for gradual migration
+    - UserWebSocketEmitter for per-request event emission
+    - AgentInstanceFactory.create_agent_instance() for agent creation
     
-    Business Impact: Singleton pattern prevents concurrent user support and
-    can cause execution conflicts. Migration to factory patterns enables
-    safe concurrent user operations.
+    Business Impact: Factory patterns enable safe concurrent user operations
+    and prevent cascade failures that affect all users.
+    
+    Raises:
+        RuntimeError: Always - function is deprecated
     """
     import warnings
     warnings.warn(
-        "get_agent_execution_registry() singleton is deprecated. "
-        "Use ExecutionEngineFactory for user isolation. "
-        "Singleton execution registry can cause context conflicts between users.",
+        "get_agent_execution_registry() is completely deprecated. "
+        "Use ExecutionEngineFactory and factory patterns for user isolation. "
+        "Singleton patterns cause cascade failures between users.",
         DeprecationWarning,
         stacklevel=2
     )
     
-    global _registry_instance
-    
-    if _registry_instance is None:
-        async with AgentExecutionRegistry._lock:
-            if _registry_instance is None:
-                _registry_instance = AgentExecutionRegistry()
-                await _registry_instance.initialize()
-    
-    return _registry_instance
+    logger.error("🚨 DEPRECATED: get_agent_execution_registry() no longer supported")
+    logger.error("   Use: ExecutionEngineFactory.create_execution_engine() for per-user isolation")
+    logger.error("   Or: UserWebSocketEmitter for per-request event emission")
+    raise RuntimeError(
+        "get_agent_execution_registry() is deprecated. Use ExecutionEngineFactory and "
+        "factory patterns to prevent cascade failures between users."
+    )
 
 
 async def initialize_registry() -> AgentExecutionRegistry:
-    """Initialize registry singleton (convenience function)."""
-    return await get_agent_execution_registry()
+    """DEPRECATED: Registry initialization removed - use factory patterns.
+    
+    This function is deprecated because singleton registries prevent user isolation.
+    
+    Raises:
+        RuntimeError: Always - function is deprecated
+    """
+    logger.error("🚨 DEPRECATED: initialize_registry() no longer supported")
+    raise RuntimeError(
+        "initialize_registry() is deprecated. Use factory patterns for user isolation."
+    )
 
 
 def extract_thread_id_from_run_id(run_id: str) -> Optional[str]:

@@ -57,7 +57,30 @@ from netra_backend.app.schemas.shared_types import RetryConfig as SharedRetryCon
 
 # Import telemetry components for distributed tracing
 from netra_backend.app.core.telemetry import telemetry_manager, agent_tracer
-from opentelemetry.trace import Status, StatusCode
+
+# Make opentelemetry import optional to prevent startup failures
+try:
+    from opentelemetry.trace import Status, StatusCode
+    TELEMETRY_AVAILABLE = True
+except ImportError:
+    # Fallback when opentelemetry is not installed
+    from enum import Enum
+    
+    class StatusCode(Enum):
+        OK = 'ok'
+        ERROR = 'error'
+    
+    class Status:
+        def __init__(self, status_code: StatusCode, description: str = None):
+            self.status_code = status_code
+            self.description = description
+    
+    TELEMETRY_AVAILABLE = False
+    import logging
+    logging.getLogger(__name__).warning(
+        "OpenTelemetry not available - telemetry features disabled. "
+        "Install with: pip install opentelemetry-api opentelemetry-sdk"
+    )
 
 # CRITICAL: Import session management for proper per-request isolation
 # Use TYPE_CHECKING imports to avoid circular dependency

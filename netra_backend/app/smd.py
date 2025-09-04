@@ -244,6 +244,9 @@ class StartupOrchestrator:
         """Phase 5: SERVICES - Chat Pipeline and critical services."""
         self.logger.info("PHASE 5: SERVICES - Chat Pipeline & Critical Services")
         
+        # Step 9.5: Initialize Agent Class Registry (CRITICAL - Must be done BEFORE any agent operations)
+        await self._initialize_agent_class_registry()
+        
         # Step 10: AgentWebSocketBridge Creation (CRITICAL - Must be created BEFORE tool dispatcher)
         await self._initialize_agent_websocket_bridge_basic()
         if not hasattr(self.app.state, 'agent_websocket_bridge') or self.app.state.agent_websocket_bridge is None:
@@ -322,9 +325,22 @@ class StartupOrchestrator:
         await self._apply_startup_validation_fixes()
         self.logger.info("  ✓ Step 23a: Startup validation fixes applied")
         
-        # Step 23b: Comprehensive startup validation
+        # Step 23b: Run comprehensive startup health checks (CRITICAL)
+        from netra_backend.app.startup_health_checks import validate_startup_health
+        self.logger.info("  🏥 Running comprehensive startup health checks...")
+        try:
+            health_ok = await validate_startup_health(self.app, fail_on_critical=True)
+            if health_ok:
+                self.logger.info("  ✓ Step 23b: All critical services passed health checks")
+            else:
+                self.logger.warning("  ⚠️ Step 23b: Some optional services are degraded but continuing")
+        except RuntimeError as e:
+            self.logger.error(f"  ❌ Step 23b: Critical services failed health checks: {e}")
+            raise DeterministicStartupError(f"Health check validation failed: {e}")
+        
+        # Step 23c: Comprehensive startup validation
         await self._run_comprehensive_validation()
-        self.logger.info("  ✓ Step 23b: Comprehensive validation completed")
+        self.logger.info("  ✓ Step 23c: Comprehensive validation completed")
         
         # Step 24: Critical path validation (CHAT FUNCTIONALITY)
         await self._run_critical_path_validation()
@@ -371,7 +387,8 @@ class StartupOrchestrator:
     async def _perform_complete_bridge_integration(self) -> None:
         """Complete AgentWebSocketBridge integration with all dependencies."""
         from netra_backend.app.services.agent_websocket_bridge import IntegrationState
-        from netra_backend.app.orchestration.agent_execution_registry import get_agent_execution_registry
+        # REMOVED: Singleton orchestrator import - replaced with per-request factory patterns
+        # from netra_backend.app.orchestration.agent_execution_registry import get_agent_execution_registry
         
         bridge = self.app.state.agent_websocket_bridge
         supervisor = self.app.state.agent_supervisor
@@ -381,19 +398,17 @@ class StartupOrchestrator:
         if not supervisor:
             raise DeterministicStartupError("Agent supervisor not available for integration")
         
-        # Get registry for enhanced integration
-        try:
-            registry = await get_agent_execution_registry()
-        except Exception as e:
-            # Registry is optional for basic integration
-            self.logger.warning(f"Agent execution registry not available for bridge: {e}")
-            registry = supervisor.registry if hasattr(supervisor, 'registry') else None
+        # REMOVED: Singleton registry usage - using per-request factory patterns
+        # Per-request isolation is handled through factory methods in bridge
+        # Registry is no longer needed with factory pattern - pass None
+        registry = None
+        self.logger.info("Using per-request factory patterns - no global registry needed")
         
         # Initialize complete integration with timeout
         integration_result = await asyncio.wait_for(
             bridge.ensure_integration(
                 supervisor=supervisor,
-                registry=registry,
+                registry=registry,  # None is acceptable with factory pattern
                 force_reinit=False
             ),
             timeout=30.0
@@ -777,8 +792,8 @@ class StartupOrchestrator:
             deps = status['dependencies']
             if not deps['websocket_manager_available']:
                 raise DeterministicStartupError("WebSocket manager not available in bridge")
-            if not deps['registry_available']:
-                raise DeterministicStartupError("Registry not available in bridge")
+            # Registry is no longer required with factory pattern - skip check
+            # Factory pattern ensures per-request isolation without global registry
             
         except DeterministicStartupError:
             raise
@@ -912,6 +927,33 @@ class StartupOrchestrator:
         manager = get_websocket_manager()
         if hasattr(manager, 'initialize'):
             await manager.initialize()
+    
+    async def _initialize_agent_class_registry(self) -> None:
+        """Initialize the global agent class registry with all agent types - CRITICAL."""
+        try:
+            from netra_backend.app.agents.supervisor.agent_class_initialization import initialize_agent_class_registry
+            
+            self.logger.info("  Initializing AgentClassRegistry...")
+            registry = initialize_agent_class_registry()
+            
+            # Validate registry is properly populated
+            if not registry or not registry.is_frozen():
+                raise DeterministicStartupError("AgentClassRegistry initialization failed - registry not frozen")
+            
+            agent_count = len(registry)
+            if agent_count == 0:
+                raise DeterministicStartupError("AgentClassRegistry is empty - no agents registered")
+            
+            # Store reference for health checks
+            self.app.state.agent_class_registry = registry
+            self.logger.info(f"  ✓ Step 9.5: AgentClassRegistry initialized with {agent_count} agent classes")
+            
+        except ImportError as e:
+            self.logger.error(f"  ❌ Failed to import agent class initialization: {e}")
+            raise DeterministicStartupError(f"Agent class initialization import failed: {e}")
+        except Exception as e:
+            self.logger.error(f"  ❌ Agent class registry initialization failed: {e}")
+            raise DeterministicStartupError(f"Agent class registry initialization failed: {e}")
     
     async def _initialize_agent_websocket_bridge_basic(self) -> None:
         """Create AgentWebSocketBridge instance - CRITICAL (Integration happens in Phase 4)."""
@@ -1449,7 +1491,9 @@ class StartupOrchestrator:
             # 4. Initialize AgentInstanceFactory
             agent_instance_factory = await configure_agent_instance_factory(
                 websocket_bridge=self.app.state.agent_websocket_bridge,
-                websocket_manager=get_websocket_manager()
+                websocket_manager=get_websocket_manager(),
+                llm_manager=self.app.state.llm_manager,
+                tool_dispatcher=None  # Will be created per-request in UserExecutionContext pattern
             )
             self.app.state.agent_instance_factory = agent_instance_factory
             self.logger.info("    ✓ AgentInstanceFactory configured")

@@ -347,6 +347,15 @@ class AgentInstanceFactory:
     classes and AgentRegistry for backward compatibility during the transition.
     """
     
+    # CRITICAL: Define which agents require which dependencies
+    AGENT_DEPENDENCIES = {
+        'DataSubAgent': ['llm_manager'],
+        'OptimizationsCoreSubAgent': ['llm_manager'],
+        'ActionsToMeetGoalsSubAgent': ['llm_manager'],
+        'DataHelperAgent': ['llm_manager'],
+        'SyntheticDataSubAgent': ['llm_manager'],
+    }
+    
     def __init__(self):
         """Initialize the factory with infrastructure components."""
         # Infrastructure components (shared, immutable)
@@ -354,6 +363,8 @@ class AgentInstanceFactory:
         self._agent_registry: Optional[AgentRegistry] = None
         self._websocket_bridge: Optional[AgentWebSocketBridge] = None
         self._websocket_manager: Optional[WebSocketManager] = None
+        self._llm_manager: Optional[Any] = None
+        self._tool_dispatcher: Optional[Any] = None
         
         # Factory configuration
         self._max_concurrent_per_user = 5
@@ -384,7 +395,9 @@ class AgentInstanceFactory:
                  agent_class_registry: Optional[AgentClassRegistry] = None,
                  agent_registry: Optional[AgentRegistry] = None,
                  websocket_bridge: Optional[AgentWebSocketBridge] = None,
-                 websocket_manager: Optional[WebSocketManager] = None) -> None:
+                 websocket_manager: Optional[WebSocketManager] = None,
+                 llm_manager: Optional[Any] = None,
+                 tool_dispatcher: Optional[Any] = None) -> None:
         """
         Configure factory with infrastructure components.
         
@@ -393,6 +406,8 @@ class AgentInstanceFactory:
             agent_registry: Legacy agent registry (for backward compatibility)
             websocket_bridge: WebSocket bridge for agent notifications
             websocket_manager: Optional WebSocket manager for direct access
+            llm_manager: LLM manager for agent communication
+            tool_dispatcher: Tool dispatcher for agent tools
         """
         if not websocket_bridge:
             logger.error("❌ CRITICAL: Attempting to configure AgentInstanceFactory with None websocket_bridge!")
@@ -411,17 +426,70 @@ class AgentInstanceFactory:
             # Try to get global agent class registry
             try:
                 self._agent_class_registry = get_agent_class_registry()
-                logger.info("✅ AgentInstanceFactory configured with global AgentClassRegistry")
+                # Validate registry is populated
+                if self._agent_class_registry:
+                    registry_size = len(self._agent_class_registry)
+                    if registry_size == 0:
+                        logger.error("❌ AgentClassRegistry is empty - no agents registered!")
+                        logger.error("    Ensure initialize_agent_class_registry() was called during startup")
+                        raise ValueError("AgentClassRegistry is empty - startup initialization may have failed")
+                    else:
+                        logger.info(f"✅ AgentInstanceFactory configured with global AgentClassRegistry ({registry_size} agents)")
+                else:
+                    raise ValueError("Global AgentClassRegistry is None")
+            except ValueError:
+                raise  # Re-raise our validation errors
             except Exception as e:
-                raise ValueError("Either agent_class_registry or agent_registry must be provided")
+                logger.error(f"❌ Failed to get global agent class registry: {e}")
+                raise ValueError(f"Could not access agent class registry: {e}")
         
         self._websocket_bridge = websocket_bridge
         self._websocket_manager = websocket_manager
+        self._llm_manager = llm_manager
+        self._tool_dispatcher = tool_dispatcher
         
         logger.info(f"✅ AgentInstanceFactory configured successfully:")
         logger.info(f"   - WebSocket bridge: {type(websocket_bridge).__name__}")
         logger.info(f"   - WebSocket manager: {type(websocket_manager).__name__ if websocket_manager else 'None'}")
         logger.info(f"   - Registry type: {'AgentClassRegistry' if self._agent_class_registry else 'AgentRegistry' if self._agent_registry else 'Unknown'}")
+        logger.info(f"   - LLM manager: {'Configured' if llm_manager else 'None'}")
+        logger.info(f"   - Tool dispatcher: {'Configured' if tool_dispatcher else 'None'}")
+    
+    def _validate_agent_dependencies(self, agent_name: str) -> None:
+        """
+        Validate that all required dependencies for an agent are available.
+        
+        Args:
+            agent_name: Name of the agent or its class name
+            
+        Raises:
+            RuntimeError: If required dependencies are missing
+        """
+        # Check both agent name and class name
+        dependencies = []
+        
+        # Check by agent name
+        if agent_name in self.AGENT_DEPENDENCIES:
+            dependencies = self.AGENT_DEPENDENCIES[agent_name]
+        
+        # Also check by class name (e.g., OptimizationsCoreSubAgent)
+        for class_name, deps in self.AGENT_DEPENDENCIES.items():
+            if agent_name.lower() in class_name.lower() or class_name.lower() in agent_name.lower():
+                dependencies = deps
+                break
+        
+        # Validate each required dependency
+        for dep in dependencies:
+            if dep == 'llm_manager' and not self._llm_manager:
+                logger.error(f"❌ CRITICAL: Agent {agent_name} requires LLM manager but none configured")
+                logger.error(f"   Factory state: llm_manager={self._llm_manager}")
+                logger.error(f"   This will cause agent execution to fail")
+                raise RuntimeError(
+                    f"Cannot create {agent_name}: Required dependency 'llm_manager' not available. "
+                    f"Ensure LLM manager is initialized during startup and passed to factory."
+                )
+            elif dep == 'tool_dispatcher' and not self._tool_dispatcher:
+                logger.warning(f"⚠️ Agent {agent_name} prefers tool_dispatcher but none configured (can use per-request)")
     
     async def create_user_execution_context(self, 
                                            user_id: str,
@@ -554,6 +622,9 @@ class AgentInstanceFactory:
             logger.debug(f"Creating agent instance: {agent_name} for user {user_context.user_id}")
             logger.debug(f"Factory has websocket_bridge: {self._websocket_bridge is not None}, type: {type(self._websocket_bridge).__name__ if self._websocket_bridge else 'None'}")
             
+            # CRITICAL: Validate dependencies before attempting creation
+            self._validate_agent_dependencies(agent_name)
+            
             # Get agent class from registries or use provided class
             if agent_class:
                 AgentClass = agent_class
@@ -564,14 +635,34 @@ class AgentInstanceFactory:
                 if self._agent_class_registry:
                     AgentClass = self._agent_class_registry.get_agent_class(agent_name)
                     if not AgentClass:
-                        raise ValueError(f"Agent '{agent_name}' not found in AgentClassRegistry")
+                        # Provide detailed debugging information
+                        available_agents = self._agent_class_registry.list_agent_names()
+                        error_msg = (
+                            f"Agent '{agent_name}' not found in AgentClassRegistry. "
+                            f"Available agents: {sorted(available_agents)}. "
+                        )
+                        
+                        # Check for common issues
+                        if agent_name == 'synthetic_data':
+                            error_msg += (
+                                "\n⚠️ KNOWN ISSUE: synthetic_data agent registration may have failed due to: "
+                                "\n  1. Missing opentelemetry dependency (pip install opentelemetry-api) "
+                                "\n  2. Import error in synthetic_data_sub_agent.py module "
+                                "\n  3. Agent not registered during startup (check initialization logs)"
+                            )
+                        
+                        raise ValueError(error_msg)
                     
-                    # For class registry, we need to get dependencies from legacy registry for now
-                    if self._agent_registry:
+                    # Use directly injected dependencies or fallback to legacy registry
+                    # Note: tool_dispatcher can be None for per-request creation pattern
+                    if self._llm_manager:
+                        llm_manager = self._llm_manager
+                        tool_dispatcher = self._tool_dispatcher  # Can be None for per-request creation
+                    elif self._agent_registry:
                         llm_manager = self._agent_registry.llm_manager
                         tool_dispatcher = self._agent_registry.tool_dispatcher
                     else:
-                        raise ValueError("No LLM manager or tool dispatcher available")
+                        raise ValueError("No LLM manager available")
                 
                 # Fallback to legacy AgentRegistry with state reset
                 elif self._agent_registry:
@@ -584,7 +675,10 @@ class AgentInstanceFactory:
                     llm_manager = self._agent_registry.llm_manager
                     tool_dispatcher = self._agent_registry.tool_dispatcher
                 else:
-                    raise ValueError("No agent registry configured")
+                    logger.error(f"❌ Cannot create agent '{agent_name}' - no registry configured")
+                    logger.error("    Neither agent_class_registry nor agent_registry is available")
+                    logger.error("    Ensure initialize_agent_class_registry() was called during startup")
+                    raise ValueError(f"No agent registry configured - cannot create agent '{agent_name}'")
             
             # Create fresh agent instance with request-scoped dependencies
             # CRITICAL: Prefer factory methods to avoid deprecated global tool_dispatcher warnings
@@ -620,15 +714,17 @@ class AgentInstanceFactory:
                         logger.info(f"✅ Creating {agent_name} ({agent_class_name}) with no parameters")
                         agent = AgentClass()
                     elif agent_class_name in llm_tool_only_agents:
-                        if llm_manager and tool_dispatcher:
-                            logger.warning(f"⚠️ Creating {agent_name} ({agent_class_name}) with tool_dispatcher (may trigger deprecation warning)")
+                        # Note: tool_dispatcher can be None for per-request creation pattern
+                        if llm_manager:
+                            logger.info(f"✅ Creating {agent_name} ({agent_class_name}) with llm_manager (tool_dispatcher: {tool_dispatcher is not None})")
                             agent = AgentClass(
                                 llm_manager=llm_manager,
-                                tool_dispatcher=tool_dispatcher
+                                tool_dispatcher=tool_dispatcher  # Can be None for per-request pattern
                             )
                         else:
-                            logger.warning(f"⚠️ {agent_name} ({agent_class_name}) requires llm_manager and tool_dispatcher, attempting no-param init")
-                            agent = AgentClass()
+                            # CRITICAL FIX: Never create LLM-requiring agents without LLM manager
+                            logger.error(f"❌ CRITICAL: {agent_name} ({agent_class_name}) requires llm_manager but none available")
+                            raise RuntimeError(f"Cannot create {agent_name}: LLM manager is required but not available")
                     else:
                         # Try different parameter combinations based on what the agent accepts
                         logger.info(f"🔧 Trying parameter combinations for {agent_name} ({agent_class_name})")
@@ -640,12 +736,18 @@ class AgentInstanceFactory:
                             logger.info(f"✅ Created {agent_name} with no parameters")
                         except TypeError as e1:
                             # Then try with llm_manager and tool_dispatcher
-                            if llm_manager and tool_dispatcher:
+                            # Note: tool_dispatcher can be None for per-request creation
+                            if not llm_manager:
+                                # CRITICAL FIX: Don't attempt to create agent without required dependencies
+                                logger.error(f"❌ CRITICAL: {agent_name} likely requires llm_manager but none available")
+                                raise RuntimeError(f"Cannot create {agent_name}: LLM manager not available (TypeError: {e1})")
+                            
+                            if llm_manager:
                                 try:
-                                    logger.debug(f"   Trying: llm_manager + tool_dispatcher")
+                                    logger.debug(f"   Trying: llm_manager + tool_dispatcher (tool_dispatcher: {tool_dispatcher is not None})")
                                     agent = AgentClass(
                                         llm_manager=llm_manager,
-                                        tool_dispatcher=tool_dispatcher
+                                        tool_dispatcher=tool_dispatcher  # Can be None
                                     )
                                     logger.info(f"✅ Created {agent_name} with llm_manager and tool_dispatcher")
                                 except TypeError as e2:
@@ -940,7 +1042,9 @@ def get_agent_instance_factory() -> AgentInstanceFactory:
 async def configure_agent_instance_factory(agent_class_registry: Optional[AgentClassRegistry] = None,
                                           agent_registry: Optional[AgentRegistry] = None,
                                           websocket_bridge: Optional[AgentWebSocketBridge] = None,
-                                          websocket_manager: Optional[WebSocketManager] = None) -> AgentInstanceFactory:
+                                          websocket_manager: Optional[WebSocketManager] = None,
+                                          llm_manager: Optional[Any] = None,
+                                          tool_dispatcher: Optional[Any] = None) -> AgentInstanceFactory:
     """
     Configure the singleton AgentInstanceFactory with infrastructure components.
     
@@ -949,6 +1053,8 @@ async def configure_agent_instance_factory(agent_class_registry: Optional[AgentC
         agent_registry: Legacy agent registry (for backward compatibility)
         websocket_bridge: WebSocket bridge for notifications
         websocket_manager: Optional WebSocket manager
+        llm_manager: LLM manager for agent communication
+        tool_dispatcher: Tool dispatcher for agent tools
         
     Returns:
         AgentInstanceFactory: Configured factory instance
@@ -958,7 +1064,9 @@ async def configure_agent_instance_factory(agent_class_registry: Optional[AgentC
         agent_class_registry=agent_class_registry,
         agent_registry=agent_registry,
         websocket_bridge=websocket_bridge,
-        websocket_manager=websocket_manager
+        websocket_manager=websocket_manager,
+        llm_manager=llm_manager,
+        tool_dispatcher=tool_dispatcher
     )
     
     logger.info("✅ AgentInstanceFactory configured and ready for per-request agent instantiation")

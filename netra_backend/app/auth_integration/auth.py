@@ -36,7 +36,6 @@ from netra_backend.app.clients.auth_client_core import AuthServiceClient
 # Initialize auth client instance
 auth_client = AuthServiceClient()
 from netra_backend.app.db.models_postgres import User
-from netra_backend.app.database import get_db_session
 from netra_backend.app.dependencies import get_request_scoped_db_session as get_db
 
 # Note: Password hashing is handled by the auth service, not directly here
@@ -77,6 +76,11 @@ async def _get_user_from_database(db: AsyncSession, validation_result: Dict[str,
     """Get or create user from database."""
     from sqlalchemy import select
     
+    # Debug: Check what type db actually is
+    if not isinstance(db, AsyncSession):
+        logger.error(f"ERROR: db is not AsyncSession, it's {type(db)}: {db}")
+        raise TypeError(f"Expected AsyncSession, got {type(db)}")
+    
     user_id = validation_result.get("user_id")
     result = await db.execute(select(User).where(User.id == user_id))
     user = result.scalar_one_or_none()
@@ -108,15 +112,41 @@ async def get_current_user_optional(
     if not credentials:
         return None
     
+    # Debug: Check what type db actually is
+    logger.debug(f"get_current_user_optional - db type: {type(db)}")
+    if not isinstance(db, AsyncSession):
+        logger.error(f"ERROR in get_current_user_optional: db is {type(db)}, not AsyncSession")
+    
     try:
-        # Reuse get_current_user logic by calling it directly
-        return await get_current_user(credentials, db)
+        # Extract the token and validate it
+        token = credentials.credentials
+        validation_result = await _validate_token_with_auth_service(token)
+        user = await _get_user_from_database(db, validation_result)
+        return user
     except Exception as e:
         logger.debug(f"Optional auth failed: {e}")
         return None
 
 # Alias for backward compatibility
 get_current_active_user = get_current_user
+
+async def get_current_user_with_db(
+    credentials: HTTPAuthorizationCredentials = Depends(security),
+    db: AsyncSession = None  # Will be injected separately
+) -> User:
+    """
+    Get current authenticated user from auth service.
+    This version is for use when db is already injected by another dependency.
+    """
+    if db is None:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Database session not provided"
+        )
+    token = credentials.credentials
+    validation_result = await _validate_token_with_auth_service(token)
+    user = await _get_user_from_database(db, validation_result)
+    return user
 
 
 async def validate_token_jwt(token: str) -> Optional[Dict[str, str]]:

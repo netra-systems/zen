@@ -112,7 +112,8 @@ class ActionsToMeetGoalsSubAgent(BaseAgent):
         await self.emit_agent_completed(result_data)
         
         # CRITICAL: Store action plan result in context metadata for other agents
-        context.metadata['action_plan_result'] = action_plan_result
+        # SERIALIZATION FIX: Convert Pydantic model to JSON-serializable dict to prevent WebSocket serialization errors
+        context.metadata['action_plan_result'] = action_plan_result.model_dump(mode='json', exclude_none=True)
         
         return {"action_plan_result": action_plan_result}
 
@@ -246,7 +247,8 @@ class ActionsToMeetGoalsSubAgent(BaseAgent):
             })
             
         # CRITICAL: Store fallback action plan in context metadata for other agents
-        context.metadata['action_plan_result'] = fallback_plan
+        # SERIALIZATION FIX: Convert Pydantic model to JSON-serializable dict to prevent WebSocket serialization errors
+        context.metadata['action_plan_result'] = fallback_plan.model_dump(mode='json', exclude_none=True)
             
         return {"action_plan_result": fallback_plan}
 

@@ -57,6 +57,7 @@ from netra_backend.app.redis_manager import redis_manager
 from netra_backend.app.services.key_manager import KeyManager
 from netra_backend.app.services.security_service import SecurityService
 from netra_backend.app.utils.multiprocessing_cleanup import setup_multiprocessing
+from netra_backend.app.startup_health_checks import validate_startup_health
 
 
 # SSOT compliance: _get_project_root now imported from netra_backend.app.core.project_utils
