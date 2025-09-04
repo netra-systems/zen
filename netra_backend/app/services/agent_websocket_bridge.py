@@ -137,13 +137,19 @@ class AgentWebSocketBridge(MonitorableComponent):
         logger.debug("Integration configuration initialized")
     
     def _initialize_state(self) -> None:
-        """Initialize integration state tracking."""
+        """Initialize integration state tracking.
+        
+        NOTE: The bridge intentionally starts in UNINITIALIZED state and remains
+        that way in the per-request architecture. This is EXPECTED behavior.
+        Actual initialization happens per-request via create_user_emitter().
+        See AGENT_WEBSOCKET_BRIDGE_UNINITIALIZED_FIVE_WHYS.md for details.
+        """
         self.state = IntegrationState.UNINITIALIZED
         self.initialization_lock = asyncio.Lock()
         self.recovery_lock = asyncio.Lock()
         self.health_lock = asyncio.Lock()
         self._shutdown = False
-        logger.debug("Integration state tracking initialized")
+        logger.debug("Integration state tracking initialized (UNINITIALIZED is expected for per-request pattern)")
     
     def _initialize_dependencies(self) -> None:
         """Initialize dependency references."""

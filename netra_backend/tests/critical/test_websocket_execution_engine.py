@@ -31,7 +31,7 @@ from netra_backend.app.websocket_core import (
 )
 from netra_backend.app.services.websocket.broadcast_manager import BroadcastManager
 from netra_backend.app.services.websocket.message_handler import MessageHandlerService
-from netra_backend.app.services.websocket.message_router import MessageRouter as ServiceMessageRouter
+from netra_backend.app.websocket_core.handlers import MessageRouter as ServiceMessageRouter
 
 class TestWebSocketExecutionEngineInitialization:
     """Test that all WebSocket components are properly initialized."""
@@ -244,7 +244,7 @@ class TestCircularImportPrevention:
         # Service imports should work
         from netra_backend.app.services.websocket.broadcast_manager import BroadcastManager
         from netra_backend.app.services.websocket.message_handler import MessageHandlerService
-        from netra_backend.app.services.websocket.message_router import MessageRouter as ServiceMessageRouter
+        from netra_backend.app.websocket_core.handlers import MessageRouter as ServiceMessageRouter
         
         # All components should initialize successfully
         ws_manager = WebSocketManager()

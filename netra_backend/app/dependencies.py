@@ -214,7 +214,8 @@ async def get_db_dependency() -> AsyncGenerator[AsyncSession, None]:
         _validate_session_type(session)
         yield session
 
-DbDep = Annotated[AsyncSession, Depends(get_db_dependency)]
+# FIXED: Use get_request_scoped_db_session for both to ensure consistency
+DbDep = Annotated[AsyncSession, Depends(get_request_scoped_db_session)]
 RequestScopedDbDep = Annotated[AsyncSession, Depends(get_request_scoped_db_session)]
 
 def get_llm_manager(request: Request) -> LLMManager:
@@ -473,7 +474,7 @@ async def get_user_supervisor_factory(request: Request,
                                      user_id: str,
                                      thread_id: str,
                                      run_id: Optional[str] = None,
-                                     db_session: AsyncSession = Depends(get_db_dependency)) -> "Supervisor":
+                                     db_session: AsyncSession = Depends(get_request_scoped_db_session)) -> "Supervisor":
     """Factory to create per-request SupervisorAgent with UserExecutionContext.
     
     DEPRECATED: Use get_request_scoped_supervisor for new code.
@@ -816,7 +817,7 @@ async def get_isolated_message_handler_service(user_id: str,
                                               thread_id: str,
                                               run_id: Optional[str],
                                               request: Request,
-                                              db_session: AsyncSession = Depends(get_db_dependency)):
+                                              db_session: AsyncSession = Depends(get_request_scoped_db_session)):
     """Create MessageHandlerService with isolated supervisor for this request.
     
     DEPRECATED: Use get_request_scoped_message_handler for new code.

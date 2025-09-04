@@ -1116,14 +1116,16 @@ async def initialize_monitoring_integration() -> bool:
         await chat_event_monitor.start_monitoring()
         logger.debug("ChatEventMonitor started successfully")
         
-        # Get AgentWebSocketBridge instance (should already be initialized independently)
+        # Get AgentWebSocketBridge instance (may be uninitialized - this is expected)
         try:
             bridge = await get_agent_websocket_bridge()
             if bridge is None:
-                logger.warning("⚠️ AgentWebSocketBridge not available - components operating independently")
+                logger.info("ℹ️ AgentWebSocketBridge not globally initialized - expected for per-request architecture")
+                logger.info("ℹ️ WebSocket events will work via per-user emitters. See AGENT_WEBSOCKET_BRIDGE_UNINITIALIZED_FIVE_WHYS.md")
                 return False
         except Exception as e:
-            logger.warning(f"⚠️ Failed to get AgentWebSocketBridge: {e} - components operating independently")
+            logger.info(f"ℹ️ AgentWebSocketBridge using per-request pattern: {e}")
+            logger.info("ℹ️ This is expected - components operating independently")
             return False
         
         # Integration is attempted but not required for either component to function

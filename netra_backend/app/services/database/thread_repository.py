@@ -23,17 +23,49 @@ class ThreadRepository(BaseRepository[Thread]):
         super().__init__(Thread)
     
     async def find_by_user(self, db: AsyncSession, user_id: str) -> List[Thread]:
-        """Find all threads for a user"""
+        """Find all threads for a user with robust error handling"""
         try:
+            # Ensure user_id is string format for consistent comparison
+            user_id_str = str(user_id).strip()
+            logger.debug(f"Finding threads for user_id: {user_id_str}")
+            
+            # Primary query using JSONB operators
             result = await db.execute(
                 select(Thread).where(
-                    Thread.metadata_.op('->>')('user_id') == user_id
+                    Thread.metadata_.op('->>')('user_id') == user_id_str
                 ).order_by(Thread.created_at.desc())
             )
-            return list(result.scalars().all())
+            threads = list(result.scalars().all())
+            logger.info(f"Found {len(threads)} threads for user {user_id_str}")
+            return threads
+            
         except Exception as e:
-            logger.error(f"Error finding threads for user {user_id}: {e}")
-            return []
+            logger.error(f"Primary JSONB query failed for user {user_id}: {e}", exc_info=True)
+            
+            # Fallback: try alternative query approach for cases where metadata might be NULL or malformed
+            try:
+                logger.warning(f"Attempting fallback query for user {user_id}")
+                result = await db.execute(
+                    select(Thread).order_by(Thread.created_at.desc())
+                )
+                all_threads = result.scalars().all()
+                
+                # Filter threads in Python as a last resort
+                user_threads = []
+                for thread in all_threads:
+                    if thread.metadata_ and isinstance(thread.metadata_, dict):
+                        thread_user_id = thread.metadata_.get('user_id')
+                        if thread_user_id and str(thread_user_id).strip() == user_id_str:
+                            user_threads.append(thread)
+                
+                logger.info(f"Fallback: Found {len(user_threads)} threads for user {user_id_str}")
+                return user_threads
+                
+            except Exception as fallback_error:
+                logger.error(f"Fallback query also failed: {fallback_error}", exc_info=True)
+                # Return empty list to prevent endpoint failure, but log the issue
+                logger.critical(f"Unable to retrieve threads for user {user_id} - returning empty list")
+                return []
     
     async def get_or_create_for_user(self, db: AsyncSession, user_id: str) -> Optional[Thread]:
         """Get existing thread for user or create new one

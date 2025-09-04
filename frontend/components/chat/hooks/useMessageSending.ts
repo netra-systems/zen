@@ -10,6 +10,7 @@ import { optimisticMessageManager } from '@/services/optimistic-updates';
 import { logger } from '@/lib/logger';
 import { useGTMEvent } from '@/hooks/useGTMEvent';
 import { getUnifiedApiConfig } from '@/lib/unified-api-config';
+import { WebSocketMessageType } from '@/types/shared/enums';
 
 // Constants for error handling and recovery
 const MESSAGE_TIMEOUT = 15000; // 15 second timeout
@@ -123,10 +124,16 @@ export const useMessageSending = () => {
   };
 
   const checkIfFirstMessage = (threadId: string): boolean => {
+    // If no threadId, this is definitely the first message
+    if (!threadId) return true;
+    
     // Check if there are any messages for this thread
-    const threadMessages = messages.filter(msg => 
-      msg.thread_id === threadId && msg.role === 'user'
-    );
+    // Include messages without thread_id for new conversations
+    const threadMessages = messages.filter(msg => {
+      // Check both thread_id match and user role
+      return (msg.thread_id === threadId || (!msg.thread_id && messages.length === 0)) && msg.role === 'user';
+    });
+    
     return threadMessages.length === 0;
   };
 
@@ -197,36 +204,39 @@ export const useMessageSending = () => {
           return;
         }
 
-        // For the first message in a thread or new conversation, use start_agent
-        // For subsequent messages, use user_message
-        // This ensures proper agent initialization and context setup
+        // Simplified and consistent logic for message type determination
+        // Use start_agent for new conversations or when no messages exist
+        // Use user_message for continuing existing conversations
         
-        // Check if this is the first message (new thread or no messages in current thread)
-        const isFirstMessage = !threadId || checkIfFirstMessage(threadId);
+        // Check if this is the first message - simplified check
+        const threadMessages = messages.filter(msg => msg.thread_id === threadId && msg.role === 'user');
+        const isFirstMessage = !threadId || threadMessages.length === 0;
         
         if (isFirstMessage) {
           // Track agent activation for first message
           trackAgentActivated('supervisor_agent', threadId);
           // Use start_agent for initial message - properly initializes agent context
           sendMessage({ 
-            type: 'start_agent', 
+            type: WebSocketMessageType.START_AGENT, 
             payload: { 
               user_request: message,
               thread_id: threadId || null,
-              context: {},
+              context: { source: 'message_input' },
               settings: {}
             } 
           });
+          logger.info('Sent start_agent message for new conversation', { threadId, message: message.substring(0, 50) });
         } else {
           // Use user_message for subsequent messages in an existing conversation
           sendMessage({ 
-            type: 'user_message', 
+            type: WebSocketMessageType.USER_MESSAGE, 
             payload: { 
               content: message, 
               references: [],
               thread_id: threadId 
             } 
           });
+          logger.info('Sent user_message for existing conversation', { threadId, messageCount: threadMessages.length });
         }
         
         // Track message sent event

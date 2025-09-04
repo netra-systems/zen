@@ -52,6 +52,41 @@
         </related-learnings>
     </learning>
     
+    <learning id="threads-500-error-jsonb-query-20250904">
+        <title>Staging Threads 500 Error - JSONB Query Failure Pattern</title>
+        <category>Database/JSONB/Error-Handling</category>
+        <keywords>threads, jsonb, postgresql, 500-error, staging, metadata, fallback, error-handling</keywords>
+        <path>threads_500_error_jsonb_query_20250904.xml</path>
+        <critical-takeaway>
+            PostgreSQL JSONB queries can fail on NULL or malformed data. Always implement fallback 
+            mechanisms and robust error handling. Primary pattern: try JSONB query, fallback to 
+            Python filtering, return empty list only after all attempts fail. Environment-aware 
+            logging essential for debugging production issues.
+        </critical-takeaway>
+        <severity>CRITICAL</severity>
+        <business-impact>Complete feature failure - users cannot access threads/chat history</business-impact>
+        <prevention>
+            Always handle NULL JSON fields explicitly. Implement fallback for DB-specific features.
+            Test with production-like data including NULL and malformed JSON. Monitor fallback usage.
+        </prevention>
+        <implementation-patterns>
+            <pattern>Normalize all IDs to string before comparison</pattern>
+            <pattern>Try primary JSONB query, catch and log with exc_info</pattern>
+            <pattern>Fallback to loading all data and filter in Python</pattern>
+            <pattern>Return empty list only after all attempts exhausted</pattern>
+        </implementation-patterns>
+        <testing-strategies>
+            <strategy>Test NULL metadata handling explicitly</strategy>
+            <strategy>Test type conversion (UUID, int, string)</strategy>
+            <strategy>Verify fallback executes on primary failure</strategy>
+            <strategy>Test graceful degradation when both queries fail</strategy>
+        </testing-strategies>
+        <related-learnings>
+            <learning>type_safety.xml - Related to consistent type handling</learning>
+            <learning>ssot_consolidation_20250825.xml - Single source of truth patterns</learning>
+        </related-learnings>
+    </learning>
+    
     <learning id="websocket-handler-per-connection-critical-2025-09-03">
         <title>WebSocket Handlers Must Be Per-Connection Not Global</title>
         <category>WebSocket/Architecture/Handler-Lifecycle</category>

@@ -16,7 +16,7 @@ import asyncio
 from unittest.mock import patch, MagicMock, AsyncMock
 
 from netra_backend.app.agents.agent_communication import AgentCommunicationMixin
-from netra_backend.app.services.websocket.message_router import MessageRouter
+from netra_backend.app.websocket_core.handlers import MessageRouter
 from netra_backend.app.core.unified_logging import get_logger
 from netra_backend.app.schemas.agent import SubAgentLifecycle
 

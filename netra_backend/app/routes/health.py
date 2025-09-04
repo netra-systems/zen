@@ -217,19 +217,19 @@ async def _check_clickhouse_connection() -> None:
         logger.debug("ClickHouse check skipped - skip_clickhouse_init=True")
         return
     
-    # CRITICAL FIX: Skip ClickHouse entirely in staging environment
-    if config.environment == "staging":
-        logger.info("ClickHouse check skipped entirely in staging environment (infrastructure not available)")
-        return  # Skip ClickHouse completely in staging
+    # Check if ClickHouse is required based on environment variables
+    from shared.isolated_environment import get_env
+    clickhouse_required = get_env().get("CLICKHOUSE_REQUIRED", "false").lower() == "true"
     
-    # Environment-specific ClickHouse requirements for non-staging environments
-    if config.environment == "development":
+    # Environment-specific ClickHouse requirements
+    if config.environment in ["staging", "development"] and not clickhouse_required:
         try:
             await asyncio.wait_for(_perform_clickhouse_check(), timeout=2.0)
         except (asyncio.TimeoutError, Exception) as e:
-            logger.warning(f"ClickHouse check failed (non-critical in development): {e}")
-            return  # Don't fail readiness for ClickHouse in development
+            logger.warning(f"ClickHouse check failed (non-critical in {config.environment}): {e}")
+            return  # Don't fail readiness for ClickHouse when not required
     else:
+        # ClickHouse is required (production or explicitly required in staging/dev)
         await _perform_clickhouse_check()
 
 async def _perform_clickhouse_check() -> None:
@@ -281,20 +281,24 @@ async def _check_redis_connection() -> None:
         logger.debug("Redis check skipped - skip_redis_init=True")
         return
     
-    # CRITICAL FIX: Skip Redis entirely in staging environment
-    if config.environment == "staging":
-        logger.info("Redis check skipped entirely in staging environment (infrastructure not available)")
-        return  # Skip Redis completely in staging
+    # Check if Redis is required based on environment variables
+    from shared.isolated_environment import get_env
+    redis_required = get_env().get("REDIS_REQUIRED", "false").lower() == "true"
     
-    # Environment-specific Redis requirements for non-staging environments
-    if config.environment == "development":
-        # In development, Redis is optional
+    # Environment-specific Redis requirements
+    if config.environment in ["staging", "development"] and not redis_required:
+        # In staging/development, Redis is optional when not required
         try:
             from netra_backend.app.redis_manager import redis_manager
             if redis_manager.enabled:
                 await asyncio.wait_for(redis_manager.ping(), timeout=2.0)
         except Exception as e:
-            logger.warning(f"Redis check failed (non-critical in development): {e}")
+            logger.warning(f"Redis check failed (non-critical in {config.environment}): {e}")
+    else:
+        # Redis is required (production or explicitly required in staging/dev)
+        from netra_backend.app.redis_manager import redis_manager
+        if redis_manager.enabled:
+            await redis_manager.ping()
 
 async def _check_database_connection(db: AsyncSession) -> None:
     """Check database connection using dependency injection."""

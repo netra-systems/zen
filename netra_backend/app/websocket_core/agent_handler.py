@@ -69,7 +69,7 @@ class AgentMessageHandler(BaseMessageHandler):
             
             # Get database session using async context manager
             # CRITICAL: Do NOT manually close the session - let the context manager handle it
-            async for db_session in get_request_scoped_db_session():
+            async with get_request_scoped_db_session() as db_session:
                 try:
                     # Route message to appropriate handler
                     success = await self._route_agent_message(
@@ -87,11 +87,7 @@ class AgentMessageHandler(BaseMessageHandler):
                     self.processing_stats["errors"] += 1
                     logger.error(f"Error routing agent message from {user_id}: {e}", exc_info=True)
                     return False
-                # Session automatically closed when exiting async for loop
-            
-            # Should not reach here, but handle if no session obtained
-            logger.error(f"Failed to get database session for user {user_id}")
-            return False
+                # Session automatically closed when exiting async with block
                 
         except Exception as e:
             self.processing_stats["errors"] += 1

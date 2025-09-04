@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { ChevronDown, Send, Sparkles, Zap, TrendingUp, Shield, Database, Brain } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { logger } from '@/lib/logger';
+import { WebSocketMessageType } from '@/types/shared/enums';
 
 export const ExamplePrompts: React.FC = () => {
   const { sendMessage } = useWebSocket();
@@ -38,7 +39,7 @@ export const ExamplePrompts: React.FC = () => {
     
     // Send start_agent message for example prompts (these start new conversations)
     sendMessage({ 
-      type: 'start_agent', 
+      type: WebSocketMessageType.START_AGENT, 
       payload: { 
         user_request: prompt,
         thread_id: null,

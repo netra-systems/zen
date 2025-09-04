@@ -1,0 +1,194 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learning>
+    <metadata>
+        <title>MessageRouter SSOT Violation Causing Staging Failures</title>
+        <date>2025-09-04</date>
+        <severity>CRITICAL</severity>
+        <category>SSOT_VIOLATION</category>
+        <environments>staging, production</environments>
+        <components>websocket, message_router, agent_handler</components>
+        <related_errors>
+            <error>Failed to register AgentMessageHandler in staging: 'MessageRouter' object has no attribute 'register_handler'</error>
+            <error>WebSocket error: AgentMessageHandler registration failed in staging - this is a critical error</error>
+        </related_errors>
+    </metadata>
+
+    <problem>
+        <description>
+            Two MessageRouter classes existed with incompatible interfaces, causing AttributeError
+            in staging when trying to register AgentMessageHandler. The code was calling the correct
+            method (add_handler) but error messages suggested otherwise, indicating deployment issues.
+        </description>
+        
+        <duplicate_classes>
+            <class location="netra_backend/app/websocket_core/handlers.py">
+                <method>add_handler()</method>
+                <method>remove_handler()</method>
+                <status>CORRECT - This is the canonical implementation</status>
+            </class>
+            <class location="netra_backend/app/services/websocket/message_router.py">
+                <method>register_handler()</method>
+                <method>unregister_handler()</method>
+                <status>WRONG - Duplicate that violated SSOT</status>
+            </class>
+        </duplicate_classes>
+        
+        <import_chain>
+            <!-- Some code was importing the wrong MessageRouter -->
+            <import>netra_backend.app.agents.message_router -> services.websocket.message_router</import>
+            <import>tests using services.websocket.message_router directly</import>
+        </import_chain>
+    </problem>
+
+    <five_whys_analysis>
+        <why number="1">
+            <question>Why is the registration failing?</question>
+            <answer>MessageRouter object does not have 'register_handler' attribute</answer>
+        </why>
+        <why number="2">
+            <question>Why doesn't MessageRouter have register_handler?</question>
+            <answer>Two different MessageRouter classes existed with different method names</answer>
+        </why>
+        <why number="3">
+            <question>Why were there two MessageRouter classes?</question>
+            <answer>SSOT violation - duplicate implementations in different modules</answer>
+        </why>
+        <why number="4">
+            <question>Why wasn't this caught earlier?</question>
+            <answer>Different parts of code imported different MessageRouter classes</answer>
+        </why>
+        <why number="5">
+            <question>Why did staging fail but development work?</question>
+            <answer>Likely deployment lag, Python bytecode caching, or Docker layer caching</answer>
+        </why>
+    </five_whys_analysis>
+
+    <solution>
+        <actions_taken>
+            <action priority="1">
+                <description>Deleted duplicate MessageRouter at services/websocket/message_router.py</description>
+                <impact>Eliminated SSOT violation at the source</impact>
+            </action>
+            <action priority="2">
+                <description>Updated all imports to use websocket_core.handlers.MessageRouter</description>
+                <files_updated>
+                    <file>tests/test_websocket_handler_per_connection.py</file>
+                    <file>netra_backend/tests/critical/test_websocket_execution_engine.py</file>
+                    <file>netra_backend/tests/critical/test_agent_communication_cycles_61_70.py</file>
+                    <file>netra_backend/app/agents/message_router.py</file>
+                </files_updated>
+            </action>
+            <action priority="3">
+                <description>Changed all register_handler() calls to add_handler()</description>
+                <impact>Consistent interface usage across codebase</impact>
+            </action>
+            <action priority="4">
+                <description>Created comprehensive SSOT compliance test</description>
+                <test_file>tests/mission_critical/test_message_router_failure.py</test_file>
+            </action>
+        </actions_taken>
+        
+        <deployment_fix>
+            <!-- Critical for staging deployment -->
+            <step>Clear Python bytecode: find . -name "*.pyc" -delete</step>
+            <step>Clear Docker cache: docker system prune -af</step>
+            <step>Deploy with --no-cache flag</step>
+            <step>Verify with: gcloud logging read for "Registered new AgentMessageHandler"</step>
+        </deployment_fix>
+    </solution>
+
+    <lessons_learned>
+        <lesson severity="CRITICAL">
+            NEVER have two classes with the same name but different interfaces - this violates SSOT
+            and causes deployment failures that are hard to debug
+        </lesson>
+        <lesson severity="HIGH">
+            Error messages in production may be misleading if deployment is out of sync - always
+            verify the actual deployed code matches repository
+        </lesson>
+        <lesson severity="HIGH">
+            Python bytecode caching and Docker layer caching can cause old code to persist even
+            after fixes are committed - always use --no-cache for critical deployments
+        </lesson>
+        <lesson severity="MEDIUM">
+            Import paths matter immensely - establish a single canonical import path for each
+            component and enforce it everywhere
+        </lesson>
+        <lesson severity="MEDIUM">
+            When refactoring creates duplicates temporarily, immediately add a compatibility layer
+            that points to the canonical implementation
+        </lesson>
+    </lessons_learned>
+
+    <prevention>
+        <measure priority="1">
+            <action>Add linting rule to detect duplicate class names</action>
+            <implementation>
+                grep -r "^class MessageRouter" --include="*.py" | wc -l
+                # Should return exactly 1
+            </implementation>
+        </measure>
+        <measure priority="2">
+            <action>Create architecture compliance test for SSOT</action>
+            <test>tests/mission_critical/test_message_router_failure.py</test>
+        </measure>
+        <measure priority="3">
+            <action>Add pre-deployment validation</action>
+            <script>
+                # Check that critical interfaces exist with correct methods
+                python -c "from netra_backend.app.websocket_core import MessageRouter; 
+                          assert hasattr(MessageRouter(), 'add_handler')"
+            </script>
+        </measure>
+        <measure priority="4">
+            <action>Document canonical import paths</action>
+            <location>SPEC/canonical_imports.xml</location>
+        </measure>
+    </prevention>
+
+    <testing_requirements>
+        <test type="unit">
+            <description>Verify MessageRouter has correct interface</description>
+            <assertions>
+                <assert>MessageRouter has add_handler method</assert>
+                <assert>MessageRouter does NOT have register_handler method</assert>
+            </assertions>
+        </test>
+        <test type="integration">
+            <description>Verify AgentMessageHandler registration works</description>
+            <assertions>
+                <assert>AgentMessageHandler can be registered with add_handler</assert>
+                <assert>Handler appears in router.handlers list</assert>
+            </assertions>
+        </test>
+        <test type="ssot">
+            <description>Verify no duplicate MessageRouter classes exist</description>
+            <assertions>
+                <assert>Only one MessageRouter class in entire codebase</assert>
+                <assert>All imports point to same MessageRouter</assert>
+            </assertions>
+        </test>
+    </testing_requirements>
+
+    <critical_notes>
+        <note>
+            This was a "shaving yaks" situation where multiple MessageRouter issues compounded.
+            The fix required systematic elimination of all duplicates and verification of all imports.
+        </note>
+        <note>
+            The error message was accurate but misleading - the code was correct locally but
+            staging was running old cached code. Always verify deployment state.
+        </note>
+        <note>
+            SSOT violations are CRITICAL bugs that must be fixed immediately. They cause
+            unpredictable behavior and deployment failures.
+        </note>
+    </critical_notes>
+
+    <related_files>
+        <file>tests/mission_critical/test_message_router_failure.py</file>
+        <file>tests/mission_critical/test_message_router_ssot_compliance.py</file>
+        <file>MESSAGE_ROUTING_FAILURE_FIVE_WHYS.md</file>
+        <file>SPEC/learnings/message_router_ssot_violation_20250903.xml</file>
+    </related_files>
+</learning>

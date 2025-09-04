@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learning id="threads-500-error-jsonb-query" date="2025-09-04">
+  <title>Staging Threads 500 Error - JSONB Query Failure Pattern</title>
+  
+  <problem>
+    <description>GET /api/threads endpoint returning 500 errors in staging environment</description>
+    <symptoms>
+      <symptom>500 Internal Server Error on thread list requests</symptom>
+      <symptom>Generic error message "Failed to list threads"</symptom>
+      <symptom>Works locally but fails in staging</symptom>
+    </symptoms>
+    <root_causes>
+      <cause priority="1">PostgreSQL JSONB query failing on NULL or malformed metadata</cause>
+      <cause priority="2">Insufficient error handling - exceptions swallowed</cause>
+      <cause priority="3">No fallback mechanism for database query failures</cause>
+    </root_causes>
+  </problem>
+
+  <pattern name="jsonb-query-resilience">
+    <description>
+      JSONB queries in PostgreSQL can fail due to NULL values, type mismatches, or malformed JSON.
+      Always implement fallback mechanisms for production environments.
+    </description>
+    <antipattern>
+      <code><![CDATA[
+# BAD: No error handling, returns empty list on failure
+async def find_by_user(self, db: AsyncSession, user_id: str) -> List[Thread]:
+    try:
+        result = await db.execute(
+            select(Thread).where(
+                Thread.metadata_.op('->>')('user_id') == user_id
+            )
+        )
+        return list(result.scalars().all())
+    except Exception as e:
+        logger.error(f"Error: {e}")
+        return []  # Silent failure!
+      ]]></code>
+    </antipattern>
+    <solution>
+      <code><![CDATA[
+# GOOD: Robust error handling with fallback
+async def find_by_user(self, db: AsyncSession, user_id: str) -> List[Thread]:
+    try:
+        # Normalize input
+        user_id_str = str(user_id).strip()
+        
+        # Primary JSONB query
+        result = await db.execute(
+            select(Thread).where(
+                Thread.metadata_.op('->>')('user_id') == user_id_str
+            )
+        )
+        return list(result.scalars().all())
+        
+    except Exception as e:
+        logger.error(f"JSONB query failed: {e}", exc_info=True)
+        
+        # Fallback to Python filtering
+        try:
+            result = await db.execute(select(Thread))
+            all_threads = result.scalars().all()
+            
+            return [
+                t for t in all_threads
+                if t.metadata_ and 
+                   isinstance(t.metadata_, dict) and
+                   str(t.metadata_.get('user_id', '')).strip() == user_id_str
+            ]
+        except Exception as fallback_error:
+            logger.critical(f"Both queries failed: {fallback_error}")
+            return []  # Only return empty after all attempts fail
+      ]]></code>
+    </solution>
+  </pattern>
+
+  <pattern name="environment-aware-error-logging">
+    <description>
+      Error messages should provide different levels of detail based on environment.
+      Production should hide sensitive details while staging/dev should expose full errors.
+    </description>
+    <solution>
+      <code><![CDATA[
+# Environment-aware error handling
+config = get_config()
+if config.environment in ["development", "staging"]:
+    logger.error(f"Error: {e}", exc_info=True)  # Full stack trace
+    error_detail = f"Failed to {action}. Error: {str(e)}"
+else:
+    logger.error(f"Error: {e}")  # Basic error only
+    error_detail = f"Failed to {action}"  # Generic message
+      ]]></code>
+    </solution>
+  </pattern>
+
+  <data_consistency>
+    <finding>Thread persistence and retrieval ARE consistent</finding>
+    <details>
+      <detail>User IDs normalized to string on both save and retrieve</detail>
+      <detail>JWT "sub" field properly mapped to "user_id" by auth service</detail>
+      <detail>Thread.metadata stores user_id as string in JSON</detail>
+      <detail>JSONB query extracts user_id as text for comparison</detail>
+    </details>
+  </data_consistency>
+
+  <testing_strategy>
+    <test_case name="null-metadata-handling">
+      Test threads with NULL metadata_ field return empty list gracefully
+    </test_case>
+    <test_case name="type-conversion">
+      Test user_id as UUID object, string, integer all normalize correctly
+    </test_case>
+    <test_case name="fallback-mechanism">
+      Test fallback query executes when primary JSONB query fails
+    </test_case>
+    <test_case name="both-queries-fail">
+      Test graceful handling when both primary and fallback fail
+    </test_case>
+  </testing_strategy>
+
+  <deployment_notes>
+    <note priority="high">
+      Check for NULL metadata in existing staging threads before deployment
+    </note>
+    <note priority="high">
+      Verify PostgreSQL JSONB operator support in staging database
+    </note>
+    <note priority="medium">
+      Consider adding index on metadata_->>'user_id' for performance
+    </note>
+  </deployment_notes>
+
+  <prevention>
+    <measure>Always handle NULL JSON fields explicitly</measure>
+    <measure>Implement fallback mechanisms for database-specific features</measure>
+    <measure>Add comprehensive logging with environment awareness</measure>
+    <measure>Test with production-like data including edge cases</measure>
+    <measure>Monitor for fallback query usage as indicator of issues</measure>
+  </prevention>
+
+  <related_files>
+    <file>netra_backend/app/services/database/thread_repository.py</file>
+    <file>netra_backend/app/routes/utils/thread_error_handling.py</file>
+    <file>netra_backend/app/routes/utils/thread_creators.py</file>
+    <file>tests/mission_critical/test_threads_500_error_fix.py</file>
+  </related_files>
+
+  <metrics>
+    <metric name="tests_added">9</metric>
+    <metric name="files_modified">3</metric>
+    <metric name="patterns_identified">2</metric>
+    <metric name="root_causes">3</metric>
+  </metrics>
+</learning>

@@ -10,7 +10,7 @@ import asyncio
 import pytest
 from unittest.mock import MagicMock, AsyncMock, patch
 from fastapi import WebSocket
-from netra_backend.app.services.websocket.message_router import MessageRouter
+from netra_backend.app.websocket_core.handlers import MessageRouter
 from netra_backend.app.websocket_core.agent_handler import AgentMessageHandler
 from netra_backend.app.services.message_handlers import MessageHandlerService
 
@@ -23,6 +23,7 @@ class TestWebSocketHandlerPerConnection:
         """Verify each WebSocket connection gets its own handler instance."""
         # Create mock components
         message_router = MessageRouter()
+        initial_handler_count = len(message_router.handlers)
         
         # Create mock WebSockets
         ws1 = MagicMock(spec=WebSocket)
@@ -45,12 +46,12 @@ class TestWebSocketHandlerPerConnection:
         handler3 = AgentMessageHandler(service3, ws3)
         
         # Add all handlers
-        message_router.register_handler(handler1)
-        message_router.register_handler(handler2)
-        message_router.register_handler(handler3)
+        message_router.add_handler(handler1)
+        message_router.add_handler(handler2)
+        message_router.add_handler(handler3)
         
         # Verify all handlers are registered
-        assert len(message_router.handlers) == 3
+        assert len(message_router.handlers) == initial_handler_count + 3
         
         # Verify each handler has its own websocket reference
         agent_handlers = [h for h in message_router.handlers if isinstance(h, AgentMessageHandler)]
@@ -82,15 +83,15 @@ class TestWebSocketHandlerPerConnection:
         # Add handlers
         service1 = MessageHandlerService(mock_supervisor, mock_thread_service, mock_ws_manager)
         handler1 = AgentMessageHandler(service1, ws1)
-        message_router.register_handler(handler1)
+        message_router.add_handler(handler1)
         
         service2 = MessageHandlerService(mock_supervisor, mock_thread_service, mock_ws_manager)
         handler2 = AgentMessageHandler(service2, ws2)
-        message_router.register_handler(handler2)
+        message_router.add_handler(handler2)
         
         service3 = MessageHandlerService(mock_supervisor, mock_thread_service, mock_ws_manager)
         handler3 = AgentMessageHandler(service3, ws3)
-        message_router.register_handler(handler3)
+        message_router.add_handler(handler3)
         
         assert len(message_router.handlers) == 3
         
@@ -128,7 +129,7 @@ class TestWebSocketHandlerPerConnection:
             
             service = MessageHandlerService(mock_supervisor, mock_thread_service, mock_ws_manager)
             handler = AgentMessageHandler(service, ws)
-            message_router.register_handler(handler)
+            message_router.add_handler(handler)
             
             # Simulate disconnect - cleanup
             handlers_to_remove = []
@@ -191,8 +192,8 @@ class TestWebSocketHandlerPerConnection:
         fallback1 = FallbackAgentHandler(ws1)
         fallback2 = FallbackAgentHandler(ws2)
         
-        message_router.register_handler(fallback1)
-        message_router.register_handler(fallback2)
+        message_router.add_handler(fallback1)
+        message_router.add_handler(fallback2)
         
         assert len(message_router.handlers) == 2
         

@@ -75,7 +75,7 @@ class SessionInfo(BaseModel):
 async def get_user_profile(
     current_user: Dict = Depends(get_current_user),
     request: Request = None,
-    db: AsyncSession = Depends(DbDep)
+    db: DbDep
 ) -> UserProfile:
     """Get current user profile information with distributed tracing support."""
     try:
@@ -130,7 +130,7 @@ async def get_user_profile(
 async def update_user_profile(
     profile_data: UserProfile,
     current_user: Dict = Depends(get_current_user),
-    db: AsyncSession = Depends(DbDep)
+    db: DbDep
 ) -> Dict[str, str]:
     """Update user profile information."""
     try:
@@ -166,7 +166,7 @@ async def update_user_profile(
 @router.get("/settings")
 async def get_user_settings(
     current_user: Dict = Depends(get_current_user),
-    db: AsyncSession = Depends(DbDep)
+    db: DbDep
 ) -> UserSettings:
     """Get current user settings."""
     try:
@@ -187,7 +187,7 @@ async def get_user_settings(
 async def update_user_settings(
     settings_data: UserSettings,
     current_user: Dict = Depends(get_current_user),
-    db: AsyncSession = Depends(DbDep)
+    db: DbDep
 ) -> Dict[str, str]:
     """Update user settings."""
     try:
@@ -206,7 +206,7 @@ async def update_user_settings(
 @router.get("/api-keys")
 async def list_api_keys(
     current_user: Dict = Depends(get_current_user),
-    db: AsyncSession = Depends(DbDep)
+    db: DbDep
 ) -> List[ApiKeyResponse]:
     """List user's API keys."""
     try:
