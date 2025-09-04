@@ -41,6 +41,7 @@ Recent issues to be extra aware of:
 The system has a lot of async, websockets, and other patterns that require heavy awarness of this.
 2. Solve for the 95% of cases first. Always make sure the breadth and coverage of those expected cases is ironclad before the 5%.
 3. Limit volume of code and new features. Rather delete an ugly or overbearing test then add a ton of code just to satisfy it. Always think of the whole system.
+4. This is a multi-user system.
 
 ### Related Architecture Documents:
 - **[User Context Architecture](./USER_CONTEXT_ARCHITECTURE.md)** - Factory patterns and execution isolation (START HERE)
@@ -75,6 +76,8 @@ Netra Apex succeeds by creating and capturing value from a customer's AI spend.
   * **Real Solutions** Agents solving REAL problems, providing insights, and delivering actionable results. Technical send/receive of messages is one part of that whole.
   * **Helpful** The Chat UI/UX/Backend interconnections must be responsive, useful and strong. Success is measured by the substance and quality of AI responses.
   * **Timely** When a user is running an agent they must get timely updates AND receive meaningful, problem-solving results.  Some agents run slower or faster than others. Updates must be reasonable and contextually useful.
+  * **Complete Business Value** Users must get complete readable responses, the end to end flow of agents must work.
+  * **Data Driven** A large part of our value comes from the data driven.
   * **Business IP** We must protect our IP so messages to the users must protect "secrets" of how the agents work.
 
   The system must make sense for the default flows expected for business value. Business value > Abstract system purity.
