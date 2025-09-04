@@ -45,7 +45,12 @@ class ActionsToMeetGoalsSubAgent(BaseAgent):
     """
     
     def __init__(self, llm_manager: Optional[LLMManager] = None, tool_dispatcher: Optional[ToolDispatcher] = None):
-        """Initialize with BaseAgent infrastructure."""
+        """Initialize with BaseAgent infrastructure.
+        
+        CRITICAL: LLM manager is required for this agent to function.
+        During architectural migration, some instantiation paths don't provide it.
+        See FIVE_WHYS_ANALYSIS_20250904.md for root cause analysis.
+        """
         # Initialize BaseAgent with full infrastructure
         super().__init__(
             llm_manager=llm_manager,
@@ -55,6 +60,18 @@ class ActionsToMeetGoalsSubAgent(BaseAgent):
             enable_execution_engine=True, # Get modern execution patterns
             enable_caching=False,         # No caching needed for plan generation
         )
+        
+        # FIVE WHYS FIX: Validate critical dependency at construction time
+        if llm_manager is None:
+            import warnings
+            warnings.warn(
+                "ActionsToMeetGoalsSubAgent instantiated without LLMManager - "
+                "will fail at runtime if LLM operations are attempted. "
+                "This is a known issue from incomplete architectural migration.",
+                RuntimeWarning,
+                stacklevel=2
+            )
+        
         # Store business logic dependencies only
         self.tool_dispatcher = tool_dispatcher
         self.action_plan_builder = ActionPlanBuilder()
@@ -155,6 +172,16 @@ class ActionsToMeetGoalsSubAgent(BaseAgent):
     async def _get_llm_response_with_monitoring(self, prompt: str) -> str:
         """Get LLM response with SSOT error handling."""
         try:
+            # CRITICAL: Validate LLM manager is available (Five Whys Fix)
+            if not self.llm_manager:
+                error_msg = (
+                    "❌ LLM manager is None - agent was instantiated without required dependency. "
+                    "This indicates incomplete architectural migration between legacy AgentRegistry "
+                    "and new factory patterns. See FIVE_WHYS_ANALYSIS_20250904.md"
+                )
+                self.logger.error(error_msg)
+                raise RuntimeError(error_msg)
+                
             # Use BaseAgent's LLM infrastructure
             response = await self.llm_manager.ask_llm(
                 prompt, llm_config_name='actions_to_meet_goals'

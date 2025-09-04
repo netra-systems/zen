@@ -316,6 +316,62 @@ class DependencyInjector:
 
 ---
 
+## 🟢 SPECIFIC FIX IMPLEMENTED: LLM Manager Null Reference Errors
+
+### Error Fixed
+**Time:** 2025-09-04 20:20  
+**Files Updated:**
+- `/netra_backend/app/agents/actions_to_meet_goals_sub_agent.py`
+- `/netra_backend/app/agents/optimizations_core_sub_agent.py`
+- Created test: `/tests/mission_critical/test_llm_manager_null_reference_fix.py`
+
+### Root Cause via Five Whys
+1. **WHY #1**: The llm_manager attribute is None when agents try to call `ask_llm()`
+2. **WHY #2**: ActionsToMeetGoalsSubAgent instantiated without LLMManager passed
+3. **WHY #3**: AgentRegistry constructor requires parameters but called without them
+4. **WHY #4**: Inconsistent instantiation patterns - some paths pass args, others don't  
+5. **WHY #5**: Incomplete architectural migration between legacy and factory patterns
+
+### Solution Implemented
+
+#### Layer 1: Runtime Validation
+```python
+# Added null check before LLM operations
+if not self.llm_manager:
+    error_msg = (
+        "❌ LLM manager is None - agent was instantiated without required dependency. "
+        "This indicates incomplete architectural migration between legacy AgentRegistry "
+        "and new factory patterns. See FIVE_WHYS_ANALYSIS_20250904.md"
+    )
+    self.logger.error(error_msg)
+    raise RuntimeError(error_msg)
+```
+
+#### Layer 2: Construction-Time Warning
+```python
+# Added warning when agent created without LLM manager
+if llm_manager is None:
+    import warnings
+    warnings.warn(
+        "Agent instantiated without LLMManager - "
+        "will fail at runtime if LLM operations are attempted. "
+        "This is a known issue from incomplete architectural migration.",
+        RuntimeWarning,
+        stacklevel=2
+    )
+```
+
+### Verification
+✅ Clear error message instead of NoneType AttributeError  
+✅ Warning at construction time for early detection  
+✅ References to root cause analysis document  
+✅ Test suite validates all Five Whys levels  
+✅ Backward compatibility maintained during migration
+
+**Fix Status:** DEPLOYED AND TESTED
+
+---
+
 ## 🔴 SPECIFIC FIX IMPLEMENTED: Undefined tool_dispatcher Variable
 
 ### Error Fixed
