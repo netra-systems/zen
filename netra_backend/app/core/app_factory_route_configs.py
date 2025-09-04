@@ -41,6 +41,7 @@ def _get_service_route_configs(modules: dict) -> dict:
     """Get service route configurations."""
     return {"quality": (modules["quality"].router, "", ["quality"]),
         "websocket": (modules["websocket_router"], "", ["websocket"]),
+        "websocket_isolated": (modules["websocket_isolated_router"], "", ["websocket-isolated"]),
         "discovery": (modules["discovery"].router, "", ["discovery"])}
 
 
