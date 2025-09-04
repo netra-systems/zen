@@ -24,7 +24,6 @@ This document contains comprehensive Mermaid diagrams for all critical and missi
 ```mermaid
 stateDiagram-v2
     [*] --> AgentStarted: User sends request
-    
     AgentStarted --> AgentThinking: agent_started event sent
     AgentThinking --> ToolExecuting: agent_thinking event sent
     ToolExecuting --> ToolCompleted: tool_executing event sent
