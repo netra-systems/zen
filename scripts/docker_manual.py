@@ -249,6 +249,93 @@ class ContainerManualControl:
         
         return True
     
+    def monitor_resources(self) -> bool:
+        """Monitor resource usage of running containers"""
+        logger.info("📊 Monitoring container resource usage...")
+        
+        # Check if runtime is available
+        if not self._is_runtime_available():
+            logger.error(f"❌ {self.runtime.title()} is not running")
+            return False
+        
+        # Get real-time stats
+        try:
+            # Docker stats command to show resource usage
+            cmd = [self.runtime, "stats", "--no-stream", "--format",
+                   "table {{.Name}}\t{{.CPUPerc}}\t{{.MemUsage}}\t{{.MemPerc}}\t{{.NetIO}}\t{{.BlockIO}}"]
+            
+            result = subprocess.run(cmd, capture_output=True, text=True, timeout=10)
+            
+            if result.returncode == 0:
+                logger.info("\n🔍 Current Resource Usage:")
+                print(result.stdout)
+                
+                # Parse and analyze the output
+                lines = result.stdout.strip().split('\n')
+                if len(lines) > 1:  # Skip header
+                    total_mem_percent = 0.0
+                    high_usage_containers = []
+                    
+                    for line in lines[1:]:
+                        parts = line.split()
+                        if len(parts) >= 4:
+                            container = parts[0]
+                            try:
+                                mem_percent = float(parts[3].rstrip('%'))
+                                total_mem_percent += mem_percent
+                                
+                                # Flag high memory usage
+                                if mem_percent > 50:
+                                    high_usage_containers.append((container, mem_percent))
+                            except (ValueError, IndexError):
+                                continue
+                    
+                    # Summary analysis
+                    logger.info(f"\n📈 Resource Analysis:")
+                    logger.info(f"  Total Memory Usage: {total_mem_percent:.1f}%")
+                    
+                    if high_usage_containers:
+                        logger.warning("  ⚠️ High memory usage detected:")
+                        for container, usage in high_usage_containers:
+                            logger.warning(f"    - {container}: {usage:.1f}%")
+                    
+                    if total_mem_percent > 80:
+                        logger.error("  🚨 CRITICAL: Total memory usage exceeds 80%!")
+                        logger.info("  Consider stopping unnecessary services or reducing limits")
+                
+                # Check WSL2 memory if on Windows
+                if platform.system() == "Windows":
+                    self._check_wsl_memory()
+                    
+            else:
+                logger.error(f"Failed to get stats: {result.stderr}")
+                return False
+                
+        except subprocess.TimeoutExpired:
+            logger.error("Timeout getting container stats")
+            return False
+        except Exception as e:
+            logger.error(f"Error monitoring resources: {e}")
+            return False
+        
+        return True
+    
+    def _check_wsl_memory(self):
+        """Check WSL2 memory usage on Windows"""
+        try:
+            # Get WSL2 memory info
+            wsl_cmd = ["wsl", "-e", "free", "-h"]
+            result = subprocess.run(wsl_cmd, capture_output=True, text=True, timeout=5)
+            
+            if result.returncode == 0:
+                logger.info("\n🖥️ WSL2 Memory Status:")
+                for line in result.stdout.split('\n'):
+                    if line.strip():
+                        print(f"  {line}")
+        except:
+            # WSL might not be available
+            pass
+    
     def _is_runtime_available(self) -> bool:
         """Check if container runtime is available."""
         try:
@@ -327,7 +414,7 @@ def main():
     )
     parser.add_argument(
         "command",
-        choices=["start", "stop", "restart", "clean", "test", "status"],
+        choices=["start", "stop", "restart", "clean", "test", "status", "monitor"],
         help="Command to execute"
     )
     parser.add_argument(
@@ -373,6 +460,8 @@ def main():
             success = controller.test(args.test_args)
         elif args.command == "status":
             success = controller.status()
+        elif args.command == "monitor":
+            success = controller.monitor_resources()
         else:
             logger.error(f"Unknown command: {args.command}")
             success = False
