@@ -354,6 +354,8 @@ class AgentInstanceFactory:
         self._agent_registry: Optional[AgentRegistry] = None
         self._websocket_bridge: Optional[AgentWebSocketBridge] = None
         self._websocket_manager: Optional[WebSocketManager] = None
+        self._llm_manager: Optional[Any] = None
+        self._tool_dispatcher: Optional[Any] = None
         
         # Factory configuration
         self._max_concurrent_per_user = 5
@@ -384,7 +386,9 @@ class AgentInstanceFactory:
                  agent_class_registry: Optional[AgentClassRegistry] = None,
                  agent_registry: Optional[AgentRegistry] = None,
                  websocket_bridge: Optional[AgentWebSocketBridge] = None,
-                 websocket_manager: Optional[WebSocketManager] = None) -> None:
+                 websocket_manager: Optional[WebSocketManager] = None,
+                 llm_manager: Optional[Any] = None,
+                 tool_dispatcher: Optional[Any] = None) -> None:
         """
         Configure factory with infrastructure components.
         
@@ -393,6 +397,8 @@ class AgentInstanceFactory:
             agent_registry: Legacy agent registry (for backward compatibility)
             websocket_bridge: WebSocket bridge for agent notifications
             websocket_manager: Optional WebSocket manager for direct access
+            llm_manager: LLM manager for agent communication
+            tool_dispatcher: Tool dispatcher for agent tools
         """
         if not websocket_bridge:
             logger.error("❌ CRITICAL: Attempting to configure AgentInstanceFactory with None websocket_bridge!")
@@ -430,11 +436,15 @@ class AgentInstanceFactory:
         
         self._websocket_bridge = websocket_bridge
         self._websocket_manager = websocket_manager
+        self._llm_manager = llm_manager
+        self._tool_dispatcher = tool_dispatcher
         
         logger.info(f"✅ AgentInstanceFactory configured successfully:")
         logger.info(f"   - WebSocket bridge: {type(websocket_bridge).__name__}")
         logger.info(f"   - WebSocket manager: {type(websocket_manager).__name__ if websocket_manager else 'None'}")
         logger.info(f"   - Registry type: {'AgentClassRegistry' if self._agent_class_registry else 'AgentRegistry' if self._agent_registry else 'Unknown'}")
+        logger.info(f"   - LLM manager: {'Configured' if llm_manager else 'None'}")
+        logger.info(f"   - Tool dispatcher: {'Configured' if tool_dispatcher else 'None'}")
     
     async def create_user_execution_context(self, 
                                            user_id: str,
@@ -579,8 +589,11 @@ class AgentInstanceFactory:
                     if not AgentClass:
                         raise ValueError(f"Agent '{agent_name}' not found in AgentClassRegistry")
                     
-                    # For class registry, we need to get dependencies from legacy registry for now
-                    if self._agent_registry:
+                    # Use directly injected dependencies or fallback to legacy registry
+                    if self._llm_manager and self._tool_dispatcher:
+                        llm_manager = self._llm_manager
+                        tool_dispatcher = self._tool_dispatcher
+                    elif self._agent_registry:
                         llm_manager = self._agent_registry.llm_manager
                         tool_dispatcher = self._agent_registry.tool_dispatcher
                     else:
@@ -956,7 +969,9 @@ def get_agent_instance_factory() -> AgentInstanceFactory:
 async def configure_agent_instance_factory(agent_class_registry: Optional[AgentClassRegistry] = None,
                                           agent_registry: Optional[AgentRegistry] = None,
                                           websocket_bridge: Optional[AgentWebSocketBridge] = None,
-                                          websocket_manager: Optional[WebSocketManager] = None) -> AgentInstanceFactory:
+                                          websocket_manager: Optional[WebSocketManager] = None,
+                                          llm_manager: Optional[Any] = None,
+                                          tool_dispatcher: Optional[Any] = None) -> AgentInstanceFactory:
     """
     Configure the singleton AgentInstanceFactory with infrastructure components.
     
@@ -965,6 +980,8 @@ async def configure_agent_instance_factory(agent_class_registry: Optional[AgentC
         agent_registry: Legacy agent registry (for backward compatibility)
         websocket_bridge: WebSocket bridge for notifications
         websocket_manager: Optional WebSocket manager
+        llm_manager: LLM manager for agent communication
+        tool_dispatcher: Tool dispatcher for agent tools
         
     Returns:
         AgentInstanceFactory: Configured factory instance
@@ -974,7 +991,9 @@ async def configure_agent_instance_factory(agent_class_registry: Optional[AgentC
         agent_class_registry=agent_class_registry,
         agent_registry=agent_registry,
         websocket_bridge=websocket_bridge,
-        websocket_manager=websocket_manager
+        websocket_manager=websocket_manager,
+        llm_manager=llm_manager,
+        tool_dispatcher=tool_dispatcher
     )
     
     logger.info("✅ AgentInstanceFactory configured and ready for per-request agent instantiation")

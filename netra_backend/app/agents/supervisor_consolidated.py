@@ -107,7 +107,9 @@ class SupervisorAgent(BaseAgent):
             self.agent_instance_factory.configure(
                 websocket_bridge=websocket_bridge,
                 websocket_manager=getattr(websocket_bridge, 'websocket_manager', None),
-                agent_class_registry=self.agent_class_registry  # Use the class registry we just got
+                agent_class_registry=self.agent_class_registry,  # Use the class registry we just got
+                llm_manager=llm_manager,
+                tool_dispatcher=tool_dispatcher
             )
             logger.info(f"✅ Factory pre-configured with WebSocket bridge to prevent sub-agent event failures")
         except Exception as e:
@@ -216,8 +218,9 @@ class SupervisorAgent(BaseAgent):
                 self.agent_instance_factory.configure(
                     agent_class_registry=self.agent_class_registry,
                     websocket_bridge=self.websocket_bridge,
-                    websocket_manager=getattr(self.websocket_bridge, 'websocket_manager', None)
-                    # Note: tool_dispatcher is accessed via registry when creating agents, not during configure
+                    websocket_manager=getattr(self.websocket_bridge, 'websocket_manager', None),
+                    llm_manager=self._llm_manager,
+                    tool_dispatcher=self.tool_dispatcher
                 )
                 
                 # CRITICAL: Enhance tool dispatcher with WebSocket notifications directly
