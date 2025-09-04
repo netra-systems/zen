@@ -573,9 +573,10 @@ class AgentInstanceFactory:
                     else:
                         raise ValueError("No LLM manager or tool dispatcher available")
                 
-                # Fallback to legacy AgentRegistry
+                # Fallback to legacy AgentRegistry with state reset
                 elif self._agent_registry:
-                    agent_instance = self._agent_registry.get(agent_name)
+                    # Use get_agent() instead of get() to ensure state reset
+                    agent_instance = await self._agent_registry.get_agent(agent_name)
                     if not agent_instance:
                         raise ValueError(f"Agent '{agent_name}' not found in AgentRegistry")
                     

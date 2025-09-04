@@ -126,8 +126,8 @@ class MultiAgentOrchestrationTestManager:
         """Spawn single sub-agent with state management."""
         agent_id = f"{agent_type}_{uuid.uuid4().hex[:8]}"
         
-        # Get agent from registry
-        agent = self.agent_registry.get(agent_type)
+        # Get agent from registry with state reset for request isolation
+        agent = await self.agent_registry.get_agent(agent_type)
         if not agent:
             raise ValueError(f"Agent type {agent_type} not found in registry")
             
