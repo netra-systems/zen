@@ -244,6 +244,9 @@ class StartupOrchestrator:
         """Phase 5: SERVICES - Chat Pipeline and critical services."""
         self.logger.info("PHASE 5: SERVICES - Chat Pipeline & Critical Services")
         
+        # Step 9.5: Initialize Agent Class Registry (CRITICAL - Must be done BEFORE any agent operations)
+        await self._initialize_agent_class_registry()
+        
         # Step 10: AgentWebSocketBridge Creation (CRITICAL - Must be created BEFORE tool dispatcher)
         await self._initialize_agent_websocket_bridge_basic()
         if not hasattr(self.app.state, 'agent_websocket_bridge') or self.app.state.agent_websocket_bridge is None:
@@ -911,6 +914,33 @@ class StartupOrchestrator:
         manager = get_websocket_manager()
         if hasattr(manager, 'initialize'):
             await manager.initialize()
+    
+    async def _initialize_agent_class_registry(self) -> None:
+        """Initialize the global agent class registry with all agent types - CRITICAL."""
+        try:
+            from netra_backend.app.agents.supervisor.agent_class_initialization import initialize_agent_class_registry
+            
+            self.logger.info("  Initializing AgentClassRegistry...")
+            registry = initialize_agent_class_registry()
+            
+            # Validate registry is properly populated
+            if not registry or not registry.is_frozen():
+                raise DeterministicStartupError("AgentClassRegistry initialization failed - registry not frozen")
+            
+            agent_count = len(registry)
+            if agent_count == 0:
+                raise DeterministicStartupError("AgentClassRegistry is empty - no agents registered")
+            
+            # Store reference for health checks
+            self.app.state.agent_class_registry = registry
+            self.logger.info(f"  ✓ Step 9.5: AgentClassRegistry initialized with {agent_count} agent classes")
+            
+        except ImportError as e:
+            self.logger.error(f"  ❌ Failed to import agent class initialization: {e}")
+            raise DeterministicStartupError(f"Agent class initialization import failed: {e}")
+        except Exception as e:
+            self.logger.error(f"  ❌ Agent class registry initialization failed: {e}")
+            raise DeterministicStartupError(f"Agent class registry initialization failed: {e}")
     
     async def _initialize_agent_websocket_bridge_basic(self) -> None:
         """Create AgentWebSocketBridge instance - CRITICAL (Integration happens in Phase 4)."""

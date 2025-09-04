@@ -411,9 +411,22 @@ class AgentInstanceFactory:
             # Try to get global agent class registry
             try:
                 self._agent_class_registry = get_agent_class_registry()
-                logger.info("✅ AgentInstanceFactory configured with global AgentClassRegistry")
+                # Validate registry is populated
+                if self._agent_class_registry:
+                    registry_size = len(self._agent_class_registry)
+                    if registry_size == 0:
+                        logger.error("❌ AgentClassRegistry is empty - no agents registered!")
+                        logger.error("    Ensure initialize_agent_class_registry() was called during startup")
+                        raise ValueError("AgentClassRegistry is empty - startup initialization may have failed")
+                    else:
+                        logger.info(f"✅ AgentInstanceFactory configured with global AgentClassRegistry ({registry_size} agents)")
+                else:
+                    raise ValueError("Global AgentClassRegistry is None")
+            except ValueError:
+                raise  # Re-raise our validation errors
             except Exception as e:
-                raise ValueError("Either agent_class_registry or agent_registry must be provided")
+                logger.error(f"❌ Failed to get global agent class registry: {e}")
+                raise ValueError(f"Could not access agent class registry: {e}")
         
         self._websocket_bridge = websocket_bridge
         self._websocket_manager = websocket_manager
@@ -584,7 +597,10 @@ class AgentInstanceFactory:
                     llm_manager = self._agent_registry.llm_manager
                     tool_dispatcher = self._agent_registry.tool_dispatcher
                 else:
-                    raise ValueError("No agent registry configured")
+                    logger.error(f"❌ Cannot create agent '{agent_name}' - no registry configured")
+                    logger.error("    Neither agent_class_registry nor agent_registry is available")
+                    logger.error("    Ensure initialize_agent_class_registry() was called during startup")
+                    raise ValueError(f"No agent registry configured - cannot create agent '{agent_name}'")
             
             # Create fresh agent instance with request-scoped dependencies
             # CRITICAL: Prefer factory methods to avoid deprecated global tool_dispatcher warnings
