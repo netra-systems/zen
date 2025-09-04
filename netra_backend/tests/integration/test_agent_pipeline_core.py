@@ -63,7 +63,7 @@ class TestAgentResponsePipelineCore:
     @pytest.fixture
     async def real_database_session(self):
         """Real database session for persistence"""
-        async for session in get_db():
+        async with get_db() as session:
             yield session
             break
 

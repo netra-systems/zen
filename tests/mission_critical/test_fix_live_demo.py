@@ -184,11 +184,11 @@ async def demonstrate_fix_working():
     print("PROOF THE FIX WORKS - ALL SCENARIOS HANDLED")
     print("="*70)
     print("""
-[SUCCESS] JSONB Query Failure    → Fallback executes successfully
-[SUCCESS] NULL Metadata          → Filtered out, no crash
-[SUCCESS] Type Mismatches        → All normalized to string
-[SUCCESS] Both Queries Fail      → Returns empty list, logs critical
-[SUCCESS] Normal Operation       → Works as expected
+[SUCCESS] JSONB Query Failure    -> Fallback executes successfully
+[SUCCESS] NULL Metadata          -> Filtered out, no crash
+[SUCCESS] Type Mismatches        -> All normalized to string
+[SUCCESS] Both Queries Fail      -> Returns empty list, logs critical
+[SUCCESS] Normal Operation       -> Works as expected
 
 THE FIX IS WORKING AND PRODUCTION-READY!
     """)

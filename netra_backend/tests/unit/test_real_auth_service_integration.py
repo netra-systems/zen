@@ -112,7 +112,7 @@ async def real_credentials(real_token):
 @pytest.fixture
 async def db_session():
     """Real database session"""
-    async for session in get_db_session():
+    async with get_db_session() as session:
         yield session
 
 @pytest.mark.asyncio

@@ -100,7 +100,7 @@ class TestBaseAgentRealServices:
     @pytest.fixture
     async def real_database_session(self):
         """Get real database session for integration testing"""
-        async for session in get_db_session():
+        async with get_db_session() as session:
             yield session
             break
     

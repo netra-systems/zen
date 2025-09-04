@@ -28,7 +28,7 @@ class TestSessionConcurrencyRegression:
         """Test normal session lifecycle without errors."""
         session_count = 0
         
-        async for session in get_db():
+        async with get_db() as session:
             session_count += 1
             assert isinstance(session, AsyncSession)
             # Simulate normal operation
@@ -41,7 +41,7 @@ class TestSessionConcurrencyRegression:
     async def test_cancelled_task_handling(self):
         """Test that cancelled tasks don't cause IllegalStateChangeError."""
         async def long_running_operation():
-            async for session in get_db():
+            async with get_db() as session:
                 # Start a transaction
                 await session.execute(text("SELECT 1"))
                 # Simulate long operation that gets cancelled
@@ -63,7 +63,7 @@ class TestSessionConcurrencyRegression:
         rollback_called = False
         
         with pytest.raises(ValueError):
-            async for session in get_db():
+            async with get_db() as session:
                 # Mock the rollback to track if it's called
                 original_rollback = session.rollback
                 async def tracked_rollback():
@@ -87,7 +87,7 @@ class TestSessionConcurrencyRegression:
         results = []
         
         async def db_operation(operation_id: int):
-            async for session in get_db():
+            async with get_db() as session:
                 result = await session.execute(text("SELECT :id"), {"id": operation_id})
                 results.append(result.scalar())
         
@@ -105,12 +105,12 @@ class TestSessionConcurrencyRegression:
         outer_session_id = None
         inner_session_id = None
         
-        async for outer_session in get_db():
+        async with get_db() as outer_session:
             outer_session_id = id(outer_session)
             await outer_session.execute(text("SELECT 1"))
             
             # Nested context (different transaction)
-            async for inner_session in get_db():
+            async with get_db() as inner_session:
                 inner_session_id = id(inner_session)
                 await inner_session.execute(text("SELECT 2"))
             
@@ -138,7 +138,7 @@ class TestSessionConcurrencyRegression:
     async def test_generator_exit_handling(self):
         """Test GeneratorExit is handled gracefully."""
         async def generator_function():
-            async for session in get_db():
+            async with get_db() as session:
                 await session.execute(text("SELECT 1"))
                 # Generator exits here without completing
                 return
@@ -150,7 +150,7 @@ class TestSessionConcurrencyRegression:
     async def test_rapid_session_creation(self):
         """Test rapid session creation/destruction doesn't cause issues."""
         for _ in range(50):
-            async for session in get_db():
+            async with get_db() as session:
                 await session.execute(text("SELECT 1"))
                 # Session closes immediately
     
@@ -168,7 +168,7 @@ class TestSessionConcurrencyRegression:
         sessions = []
         
         async def create_session():
-            async for session in get_db():
+            async with get_db() as session:
                 sessions.append(session)
                 await session.execute(text("SELECT 1"))
                 await asyncio.sleep(0.01)
@@ -186,7 +186,7 @@ class TestSessionConcurrencyRegression:
         """Verify asyncio.shield is not used in session cleanup."""
         # This would cause IllegalStateChangeError
         with patch('asyncio.shield') as mock_shield:
-            async for session in get_db():
+            async with get_db() as session:
                 await session.execute(text("SELECT 1"))
             
             # Shield should not be called during session cleanup
@@ -195,7 +195,7 @@ class TestSessionConcurrencyRegression:
     @pytest.mark.asyncio
     async def test_session_transaction_state_verification(self):
         """Test that in_transaction() check prevents inappropriate commits."""
-        async for session in get_db():
+        async with get_db() as session:
             # Start transaction
             await session.begin()
             
@@ -276,7 +276,7 @@ async def test_session_lifecycle_with_mock(mock_async_session):
         mock_context.__aexit__.return_value = None
         mock_factory.return_value.return_value = mock_context
         
-        async for session in get_db():
+        async with get_db() as session:
             await session.execute(text("SELECT 1"))
         
         # Verify session methods were called correctly

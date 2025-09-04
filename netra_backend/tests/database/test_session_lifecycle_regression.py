@@ -194,7 +194,7 @@ class TestSessionLifecycle:
         async def use_session(task_id: int):
             """Use a database session concurrently."""
             try:
-                async for session in get_db():
+                async with get_db() as session:
                     # Simulate some database work
                     result = await session.execute(text("SELECT :id as task_id"), {"id": task_id})
                     value = result.scalar()
@@ -248,12 +248,12 @@ class TestSessionLifecycle:
         outer_session_used = False
         inner_session_used = False
         
-        async for outer_session in get_db():
+        async with get_db() as outer_session:
             outer_session_used = True
             await outer_session.execute(text("SELECT 1"))
             
             # Create a nested session context
-            async for inner_session in get_db():
+            async with get_db() as inner_session:
                 inner_session_used = True
                 await inner_session.execute(text("SELECT 2"))
                 
@@ -294,7 +294,7 @@ class TestSessionMemoryLeaks:
         
         async def create_sessions():
             for _ in range(10):
-                async for session in get_db():
+                async with get_db() as session:
                     session_refs.append(weakref.ref(session))
                     await session.execute(text("SELECT 1"))
         
@@ -376,7 +376,7 @@ async def test_regression_illegal_state_change_error():
         nonlocal error_occurred
         
         try:
-            async for session in get_db():
+            async with get_db() as session:
                 # Simulate work
                 await session.execute(text("SELECT 1"))
                 
