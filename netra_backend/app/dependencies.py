@@ -180,6 +180,7 @@ class RequestScopedContext:
         # CRITICAL: Log that this context contains NO database sessions
         logger.debug(f"Created RequestScopedContext {self.request_id} - NO sessions stored")
 
+@asynccontextmanager
 async def get_request_scoped_db_session() -> AsyncGenerator[AsyncSession, None]:
     """Create a request-scoped database session with proper lifecycle management.
     
