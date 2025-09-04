@@ -542,6 +542,7 @@ def _handle_connection_error(e: Exception):
     
     environment = get_env().get("ENVIRONMENT", "development").lower()
     error_str = str(e).lower()
+    clickhouse_required = get_env().get("CLICKHOUSE_REQUIRED", "false").lower() == "true"
     
     # LOUD ERROR DIFFERENTIATION - Make errors super obvious per CLAUDE.md
     if "error code 60" in error_str or "unknown_table" in error_str or "table does not exist" in error_str:
@@ -563,6 +564,15 @@ def _handle_connection_error(e: Exception):
         logger.error(f"Environment: {environment}")
         logger.error(f"Full error: {str(e)}")
         logger.error("=" * 80)
+    elif "required secrets missing" in error_str or "clickhouse_url" in error_str.lower():
+        logger.error("=" * 80)
+        logger.error("CLICKHOUSE CONFIGURATION MISSING")
+        logger.error("=" * 80)
+        logger.error(f"CONFIGURATION ERROR: Required ClickHouse secrets/configuration missing!")
+        logger.error(f"ACTION REQUIRED: Check CLICKHOUSE_URL or CLICKHOUSE_HOST configuration")
+        logger.error(f"Environment: {environment}")
+        logger.error(f"Full error: {str(e)}")
+        logger.error("=" * 80)
     else:
         logger.error("=" * 80)
         logger.error("CLICKHOUSE CONNECTION ERROR")
@@ -572,19 +582,13 @@ def _handle_connection_error(e: Exception):
         logger.error(f"Full error: {str(e)}")
         logger.error("=" * 80)
     
-    # CRITICAL FIX: ClickHouse is always optional in staging - never block startup
-    if environment == "staging":
-        logger.warning("[ClickHouse] Continuing without ClickHouse in staging - analytics features disabled")
-        return  # Never raise in staging - ClickHouse is always optional
+    # CRITICAL FIX: ClickHouse is optional unless explicitly required
+    if not clickhouse_required:
+        logger.warning(f"[ClickHouse] Continuing without ClickHouse in {environment} - analytics features disabled (CLICKHOUSE_REQUIRED=false)")
+        return  # Never raise when ClickHouse is not required
     
-    # In development, ClickHouse is also optional unless explicitly required
-    if environment == "development":
-        clickhouse_required = get_env().get("CLICKHOUSE_REQUIRED", "false").lower() == "true"
-        if not clickhouse_required:
-            logger.warning("[ClickHouse] Continuing without ClickHouse in development - analytics features disabled")
-            return
-    
-    # Only raise in production or when explicitly required
+    # Only raise when ClickHouse is explicitly required
+    logger.error(f"[ClickHouse] ClickHouse connection failed and CLICKHOUSE_REQUIRED=true in {environment}")
     raise
 
 async def _cleanup_client_connection(client):

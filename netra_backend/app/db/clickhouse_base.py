@@ -120,6 +120,17 @@ class ClickHouseDatabase:
     
     def __init__(self, host: str, port: int, database: str, user: str, password: str, secure: bool = False):
         self._initialize_connection_params(host, port, database, user, password, secure)
+        # CRITICAL FIX: Make connection optional in staging environments
+        from shared.isolated_environment import get_env
+        environment = get_env().get("ENVIRONMENT", "development").lower()
+        
+        if environment == "staging":
+            clickhouse_required = get_env().get("CLICKHOUSE_REQUIRED", "true").lower() == "true"
+            if not clickhouse_required:
+                logger.info(f"[ClickHouse] Skipping connection in {environment} - CLICKHOUSE_REQUIRED=false")
+                self.client = None
+                return
+        
         self._establish_connection()
 
     def ping(self):
