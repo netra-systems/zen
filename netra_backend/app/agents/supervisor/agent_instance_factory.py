@@ -590,14 +590,15 @@ class AgentInstanceFactory:
                         raise ValueError(f"Agent '{agent_name}' not found in AgentClassRegistry")
                     
                     # Use directly injected dependencies or fallback to legacy registry
-                    if self._llm_manager and self._tool_dispatcher:
+                    # Note: tool_dispatcher can be None for per-request creation pattern
+                    if self._llm_manager:
                         llm_manager = self._llm_manager
-                        tool_dispatcher = self._tool_dispatcher
+                        tool_dispatcher = self._tool_dispatcher  # Can be None for per-request creation
                     elif self._agent_registry:
                         llm_manager = self._agent_registry.llm_manager
                         tool_dispatcher = self._agent_registry.tool_dispatcher
                     else:
-                        raise ValueError("No LLM manager or tool dispatcher available")
+                        raise ValueError("No LLM manager available")
                 
                 # Fallback to legacy AgentRegistry with state reset
                 elif self._agent_registry:
