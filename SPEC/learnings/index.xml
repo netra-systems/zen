@@ -20,6 +20,77 @@
         </workflow>
     </retrieval-protocol>
     
+    <learning id="agent-execution-order-fix-2025-09-04">
+        <title>Agent Execution Order Logic Fix - Data Before Optimization</title>
+        <category>Agent/Orchestration/Workflow</category>
+        <keywords>agent-execution-order, workflow-dependencies, data-before-optimization, logical-ordering, orchestration-fix</keywords>
+        <path>agent_execution_order_fix_20250904.xml</path>
+        <critical-takeaway>
+            Agent workflow had illogical execution order where optimization ran BEFORE data collection.
+            This violated "you can't optimize what you haven't measured." Fixed order: Triage → Data → 
+            Optimization → Actions → Reporting. Each agent now receives required inputs from dependencies.
+        </critical-takeaway>
+        <severity>CRITICAL</severity>
+        <business-impact>AI optimization quality - strategies were based on assumptions not data</business-impact>
+        <prevention>
+            Always follow logical dependency chain. Data collection must precede optimization.
+            Helper agents should run early. Validate each agent has required inputs.
+        </prevention>
+    </learning>
+    
+    <learning id="orchestration-data-handling-patterns-2025-09-04">
+        <title>Orchestration Data Handling Patterns - Partial and Insufficient Data</title>
+        <category>Agent/Orchestration/DataHandling</category>
+        <keywords>partial-data, insufficient-data, graceful-degradation, progressive-enhancement, data-collection, confidence-scoring, conversion-optimization</keywords>
+        <path>orchestration_data_handling_patterns_20250904.xml</path>
+        <critical-takeaway>
+            System must handle varying data completeness levels with adaptive workflows.
+            Three tiers: Sufficient (80-100%) → full optimization; Partial (40-79%) → modified workflow 
+            with caveats; Insufficient (&lt;40%) → data collection focus with education.
+            Always provide immediate value regardless of data completeness.
+        </critical-takeaway>
+        <severity>CRITICAL</severity>
+        <business-impact>40-60% value delivery possible with partial data, improved Free/Early conversion rates</business-impact>
+        <prevention>
+            Design workflows with data completeness tiers. Implement confidence scoring.
+            Include educational content and quick templates. Test with varying completeness levels.
+        </prevention>
+    </learning>
+    
+    <learning id="clickhouse-staging-config-fix-2025-09-04">
+        <title>ClickHouse Staging Configuration Fix - Environment-Specific Handlers Required</title>
+        <category>Configuration/Environment/ClickHouse</category>
+        <keywords>clickhouse, staging, configuration, environment-detection, five-whys, url-parsing, cloud</keywords>
+        <path>clickhouse_staging_config_fix_20250904.xml</path>
+        <critical-takeaway>
+            Staging was using localhost:8124 instead of ClickHouse Cloud because _extract_clickhouse_config() 
+            had no staging-specific handler. It fell back to empty config.clickhouse_https which defaulted to 
+            development settings. Fix: Add explicit staging handler that loads CLICKHOUSE_URL from environment 
+            and parses it to extract cloud connection details. Each environment needs explicit handling.
+        </critical-takeaway>
+        <severity>CRITICAL</severity>
+        <business-impact>$15K MRR analytics features completely broken in staging/production</business-impact>
+        <prevention>
+            Add explicit environment handlers in configuration extraction. Load from environment variables 
+            directly, don't rely on populated config objects. Use URL-based configuration. Test with minimal setup.
+        </prevention>
+        <implementation-patterns>
+            <pattern>Environment-specific config classes in _extract_clickhouse_config()</pattern>
+            <pattern>URL parsing to extract host, port, credentials</pattern>
+            <pattern>Fallback to component-based configuration if URL missing</pattern>
+            <pattern>Secret Manager integration for passwords</pattern>
+        </implementation-patterns>
+        <testing-strategies>
+            <strategy>Test configuration extraction with just environment variables</strategy>
+            <strategy>Verify correct host/port for each environment</strategy>
+            <strategy>Check logs for localhost usage in staging/production</strategy>
+        </testing-strategies>
+        <related-learnings>
+            <learning>websocket_agent_integration_critical.xml</learning>
+            <learning>ssot_consolidation_20250825.xml</learning>
+        </related-learnings>
+    </learning>
+    
     <learning id="clickhouse-mock-package-structure-2025-09-02">
         <title>ClickHouse Mock Package Structure Fix</title>
         <category>Testing/Mocking/Package-Structure</category>

@@ -61,24 +61,25 @@
 
     <workflow_configurations>
       <configuration name="sufficient_data">
-        <description>Full workflow when data is sufficient</description>
+        <description>Full workflow when data is sufficient - follows logical dependency chain</description>
         <sequence>
-          <step order="1">triage</step>
-          <step order="2">optimization</step>
-          <step order="3">data</step>
-          <step order="4">actions</step>
-          <step order="5">reporting</step>
+          <step order="1">triage (assess request and data availability)</step>
+          <step order="2">data (gather and analyze metrics)</step>
+          <step order="3">optimization (generate strategies based on data insights)</step>
+          <step order="4">actions (create implementation plans)</step>
+          <step order="5">reporting (synthesize results)</step>
         </sequence>
       </configuration>
       
       <configuration name="partial_data">
         <description>Modified workflow when additional data would help</description>
         <sequence>
-          <step order="1">triage</step>
-          <step order="2">optimization</step>
-          <step order="3">actions</step>
-          <step order="4">data_helper</step>
-          <step order="5">reporting (with data request)</step>
+          <step order="1">triage (identify data gaps)</step>
+          <step order="2">data_helper (request missing critical data)</step>
+          <step order="3">data (analyze available data)</step>
+          <step order="4">optimization (best-effort strategies with partial data)</step>
+          <step order="5">actions (limited implementation plans)</step>
+          <step order="6">reporting (with data request)</step>
         </sequence>
       </configuration>
       
