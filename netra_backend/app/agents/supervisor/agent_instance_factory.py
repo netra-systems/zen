@@ -20,9 +20,12 @@ No global state is shared between instances. Each user gets their own execution 
 import asyncio
 import time
 import uuid
+import weakref
+from collections import deque
 from contextlib import asynccontextmanager
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
+from functools import lru_cache
 from typing import Any, Callable, Dict, List, Optional, Type, Union, Awaitable
 
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -31,7 +34,15 @@ from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.agents.supervisor.agent_class_registry import AgentClassRegistry, get_agent_class_registry
 from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
+from netra_backend.app.agents.supervisor.factory_performance_config import (
+    FactoryPerformanceConfig, 
+    get_factory_performance_config
+)
 from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
+from netra_backend.app.services.websocket_emitter_pool import (
+    WebSocketEmitterPool,
+    get_websocket_emitter_pool
+)
 from netra_backend.app.websocket_core.manager import WebSocketManager
 from netra_backend.app.core.websocket_exceptions import (
     AgentCommunicationFailureError,
@@ -366,14 +377,44 @@ class AgentInstanceFactory:
         self._llm_manager: Optional[Any] = None
         self._tool_dispatcher: Optional[Any] = None
         
-        # Factory configuration
-        self._max_concurrent_per_user = 5
-        self._execution_timeout = 30.0
-        self._cleanup_interval = 300  # 5 minutes
-        self._max_history_per_user = 100
+        # Performance configuration
+        self._performance_config = get_factory_performance_config()
         
-        # Per-user concurrency control (infrastructure manages this)
-        self._user_semaphores: Dict[str, asyncio.Semaphore] = {}
+        # Factory configuration (use performance config where applicable)
+        self._max_concurrent_per_user = self._performance_config.max_concurrent_per_user
+        self._execution_timeout = self._performance_config.execution_timeout
+        self._cleanup_interval = 300  # 5 minutes
+        self._max_history_per_user = self._performance_config.max_history_per_user
+        
+        # Object pools (if enabled)
+        self._emitter_pool = None
+        if self._performance_config.enable_emitter_pooling:
+            # Initialize emitter pool asynchronously when needed
+            self._emitter_pool_task = None
+        
+        # Agent class cache (if enabled)
+        if self._performance_config.enable_class_caching:
+            self._agent_class_cache = {}
+            self._cache_lock = asyncio.Lock()
+        
+        # Performance tracking (if enabled)
+        if self._performance_config.enable_metrics:
+            self._perf_stats = {
+                'context_creation_ms': deque(maxlen=self._performance_config.metrics_buffer_size),
+                'agent_creation_ms': deque(maxlen=self._performance_config.metrics_buffer_size),
+                'cleanup_ms': deque(maxlen=self._performance_config.metrics_buffer_size)
+            }
+        
+        # Use weak references if enabled
+        if self._performance_config.enable_weak_references:
+            self._active_contexts = weakref.WeakValueDictionary()
+            self._user_semaphores = weakref.WeakValueDictionary()
+        else:
+            # Per-user concurrency control (infrastructure manages this)
+            self._user_semaphores: Dict[str, asyncio.Semaphore] = {}
+            # Active contexts tracking for monitoring
+            self._active_contexts: Dict[str, UserExecutionContext] = {}
+        
         self._semaphore_lock = asyncio.Lock()
         
         # Factory metrics
@@ -386,10 +427,10 @@ class AgentInstanceFactory:
             'average_context_lifetime_seconds': 0.0
         }
         
-        # Active contexts tracking for monitoring
-        self._active_contexts: Dict[str, UserExecutionContext] = {}
-        
-        logger.info("AgentInstanceFactory initialized")
+        logger.info(f"AgentInstanceFactory initialized with performance optimizations enabled: "
+                   f"pooling={self._performance_config.enable_emitter_pooling}, "
+                   f"caching={self._performance_config.enable_class_caching}, "
+                   f"metrics={self._performance_config.enable_metrics}")
     
     def configure(self, 
                  agent_class_registry: Optional[AgentClassRegistry] = None,
@@ -525,6 +566,9 @@ class AgentInstanceFactory:
         start_time = time.time()
         context_id = f"{user_id}_{thread_id}_{run_id}"
         
+        # Performance tracking (if enabled)
+        should_track_metrics = self._should_sample()
+        
         try:
             logger.info(f"Creating user execution context: {context_id}")
             
@@ -538,13 +582,8 @@ class AgentInstanceFactory:
                 metadata=metadata or {}
             )
             
-            # Create user-specific WebSocket emitter
-            websocket_emitter = UserWebSocketEmitter(
-                user_id=user_id,
-                thread_id=thread_id,
-                run_id=run_id,
-                websocket_bridge=self._websocket_bridge
-            )
+            # Create user-specific WebSocket emitter (with pooling support)
+            websocket_emitter = await self._create_emitter(user_id, thread_id, run_id)
             
             # Store the emitter in a way that works with immutable context
             # We'll need to track these separately since context is immutable
@@ -578,6 +617,11 @@ class AgentInstanceFactory:
             self._factory_metrics['active_contexts'] = len(self._active_contexts)
             
             creation_time_ms = (time.time() - start_time) * 1000
+            
+            # Track performance metrics if enabled
+            if should_track_metrics and hasattr(self, '_perf_stats'):
+                self._perf_stats['context_creation_ms'].append(creation_time_ms)
+            
             logger.info(f"✅ Created user execution context {context_id} in {creation_time_ms:.1f}ms")
             
             return context
@@ -618,6 +662,9 @@ class AgentInstanceFactory:
         
         start_time = time.time()
         
+        # Performance tracking (if enabled)
+        should_track_metrics = self._should_sample()
+        
         try:
             logger.debug(f"Creating agent instance: {agent_name} for user {user_context.user_id}")
             logger.debug(f"Factory has websocket_bridge: {self._websocket_bridge is not None}, type: {type(self._websocket_bridge).__name__ if self._websocket_bridge else 'None'}")
@@ -631,8 +678,13 @@ class AgentInstanceFactory:
                 llm_manager = None
                 tool_dispatcher = None
             else:
-                # Try AgentClassRegistry first (preferred)
-                if self._agent_class_registry:
+                # Try cached lookup first (if caching enabled)
+                AgentClass = None
+                if self._performance_config.enable_class_caching:
+                    AgentClass = self._get_cached_agent_class(agent_name)
+                
+                # Fallback to registry lookup if not cached
+                if not AgentClass and self._agent_class_registry:
                     AgentClass = self._agent_class_registry.get_agent_class(agent_name)
                     if not AgentClass:
                         # Provide detailed debugging information
@@ -809,6 +861,11 @@ class AgentInstanceFactory:
             }
             
             creation_time_ms = (time.time() - start_time) * 1000
+            
+            # Track performance metrics if enabled
+            if should_track_metrics and hasattr(self, '_perf_stats'):
+                self._perf_stats['agent_creation_ms'].append(creation_time_ms)
+            
             logger.info(f"✅ Created agent instance {agent_name} for user {user_context.user_id} in {creation_time_ms:.1f}ms (run_id: {user_context.run_id})")
             
             return agent
@@ -831,6 +888,9 @@ class AgentInstanceFactory:
         context_id = f"{user_context.user_id}_{user_context.thread_id}_{user_context.run_id}"
         start_time = time.time()
         
+        # Performance tracking (if enabled)
+        should_track_metrics = self._should_sample()
+        
         try:
             logger.info(f"Cleaning up user execution context: {context_id}")
             
@@ -846,7 +906,17 @@ class AgentInstanceFactory:
             emitter_key = f"{context_id}_emitter"
             if hasattr(self, '_websocket_emitters') and emitter_key in self._websocket_emitters:
                 try:
-                    await self._websocket_emitters[emitter_key].cleanup()
+                    emitter = self._websocket_emitters[emitter_key]
+                    
+                    # Return to pool if pooling enabled
+                    if self._performance_config.enable_emitter_pooling and self._emitter_pool:
+                        if hasattr(emitter, 'reset'):  # Check if it's an optimized pooled emitter
+                            await self._emitter_pool.release(emitter)
+                        else:
+                            await emitter.cleanup()
+                    else:
+                        await emitter.cleanup()
+                    
                     del self._websocket_emitters[emitter_key]
                 except Exception as e:
                     logger.error(f"Failed to cleanup WebSocket emitter for {context_id}: {e}")
@@ -893,6 +963,11 @@ class AgentInstanceFactory:
                 )
             
             cleanup_time_ms = (time.time() - start_time) * 1000
+            
+            # Track performance metrics if enabled
+            if should_track_metrics and hasattr(self, '_perf_stats'):
+                self._perf_stats['cleanup_ms'].append(cleanup_time_ms)
+            
             logger.info(f"✅ Cleaned up user execution context {context_id} in {cleanup_time_ms:.1f}ms")
             
         except Exception as e:
@@ -950,9 +1025,65 @@ class AgentInstanceFactory:
                 logger.debug(f"Created semaphore for user {user_id} (max: {self._max_concurrent_per_user})")
             return self._user_semaphores[user_id]
     
+    async def _create_emitter(self, user_id: str, thread_id: str, run_id: str) -> UserWebSocketEmitter:
+        """Create WebSocket emitter with optional pooling."""
+        if self._performance_config.enable_emitter_pooling:
+            # Initialize emitter pool if needed
+            if self._emitter_pool is None:
+                self._emitter_pool = await get_websocket_emitter_pool(self._performance_config)
+            
+            # Get from pool (this will return an OptimizedUserWebSocketEmitter)
+            # Note: For now we maintain backward compatibility by creating regular emitters
+            # The pooling infrastructure is in place for future optimization
+            try:
+                # Future: Implement full pooling when UserWebSocketEmitter is adapted
+                # For now, the pool exists but we create compatible instances
+                logger.debug(f"WebSocket emitter pool available but not yet fully integrated")
+            except Exception as e:
+                logger.warning(f"Failed to access emitter pool, falling back to direct creation: {e}")
+        
+        # Create new instance (backward compatible)
+        # This maintains 100% compatibility with existing UserWebSocketEmitter
+        return UserWebSocketEmitter(
+            user_id, thread_id, run_id, self._websocket_bridge
+        )
+    
+    @lru_cache(maxsize=128)
+    def _get_cached_agent_class(self, agent_name: str) -> Optional[Type[BaseAgent]]:
+        """Get agent class with LRU caching."""
+        if not self._performance_config.enable_class_caching:
+            return None
+        
+        # Try AgentClassRegistry first (preferred)
+        if self._agent_class_registry:
+            return self._agent_class_registry.get_agent_class(agent_name)
+        
+        return None
+    
+    def get_pool_stats(self) -> Dict[str, Any]:
+        """Get pool statistics if pooling enabled."""
+        if self._performance_config.enable_emitter_pooling and self._emitter_pool:
+            stats = self._emitter_pool.get_statistics()
+            return {
+                'total_acquired': stats.total_acquired,
+                'total_released': stats.total_released,
+                'current_active': stats.current_active,
+                'current_pooled': stats.current_pooled,
+                'cache_hit_rate': stats.cache_hit_rate,
+                'average_acquisition_time_ms': stats.average_acquisition_time_ms
+            }
+        return {}
+    
+    def _should_sample(self) -> bool:
+        """Check if metrics should be sampled."""
+        if not self._performance_config.enable_metrics:
+            return False
+        import random
+        return random.random() < self._performance_config.metrics_sample_rate
+    
     def get_factory_metrics(self) -> Dict[str, Any]:
         """Get comprehensive factory metrics for monitoring."""
-        return {
+        metrics = {
             **self._factory_metrics.copy(),
             'user_semaphores_count': len(self._user_semaphores),
             'max_concurrent_per_user': self._max_concurrent_per_user,
@@ -963,8 +1094,27 @@ class AgentInstanceFactory:
                 'agent_registry_configured': self._agent_registry is not None,
                 'websocket_bridge_configured': self._websocket_bridge is not None,
                 'websocket_manager_configured': self._websocket_manager is not None
-            }
+            },
+            'performance_config': self._performance_config.to_dict()
         }
+        
+        # Add performance statistics if metrics enabled
+        if self._performance_config.enable_metrics and hasattr(self, '_perf_stats'):
+            perf_data = {}
+            for metric_name, values in self._perf_stats.items():
+                if values:
+                    perf_data[metric_name] = {
+                        'avg': sum(values) / len(values),
+                        'min': min(values),
+                        'max': max(values),
+                        'count': len(values)
+                    }
+            metrics['performance_stats'] = perf_data
+        
+        # Add pool statistics (always include, even if empty)
+        metrics['pool_stats'] = self.get_pool_stats()
+        
+        return metrics
     
     def get_active_contexts_summary(self) -> Dict[str, Any]:
         """Get summary of all active user contexts."""
