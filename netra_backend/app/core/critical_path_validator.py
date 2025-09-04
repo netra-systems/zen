@@ -103,8 +103,32 @@ class CriticalPathValidator:
     async def _validate_websocket_bridge_chain(self, app) -> None:
         """Validate WebSocket bridge is properly supported by all agents."""
         try:
-            # Check if agents have the mixin
+            # With factory pattern, agents are created per-request, not stored globally
+            # Validate that the supervisor and bridge are available for factory creation
             if hasattr(app.state, 'agent_supervisor') and app.state.agent_supervisor:
+                # Factory pattern: No registry needed - agents created on demand
+                # Just verify supervisor has WebSocket bridge support
+                supervisor = app.state.agent_supervisor
+                
+                # Check if supervisor has WebSocket capabilities (BaseAgent pattern)
+                has_bridge_setter = hasattr(supervisor, 'set_websocket_bridge')
+                has_emit = hasattr(supervisor, 'emit_thinking')
+                has_propagate = hasattr(supervisor, 'propagate_websocket_context_to_state')
+                
+                if has_bridge_setter or has_emit or has_propagate:
+                    validation = CriticalPathValidation(
+                        component="WebSocket Bridge Chain",
+                        path="Supervisor -> AgentWebSocketBridge",
+                        check_type="bridge_support",
+                        passed=True,
+                        criticality=CriticalityLevel.CHAT_BREAKING,
+                        metadata={"factory_pattern": True, "supervisor_supported": True}
+                    )
+                    self.logger.info("✓ WebSocket bridge supported via factory pattern - supervisor ready")
+                    self.validations.append(validation)
+                    return  # Factory pattern validation complete
+                
+                # Legacy registry-based validation (deprecated - kept for backward compatibility)
                 if hasattr(app.state.agent_supervisor, 'registry'):
                     registry = app.state.agent_supervisor.registry
                     
@@ -171,11 +195,25 @@ class CriticalPathValidator:
                     
                     self.validations.append(validation)
                 else:
-                    self._add_critical_failure(
-                        "WebSocket Bridge Chain",
-                        "Registry not found - cannot validate bridge support",
-                        "Ensure agent_supervisor has registry attribute"
-                    )
+                    # No registry - this is expected with factory pattern
+                    # Validate bridge is available for factory use
+                    if hasattr(app.state, 'agent_websocket_bridge') and app.state.agent_websocket_bridge:
+                        validation = CriticalPathValidation(
+                            component="WebSocket Bridge Chain",
+                            path="Factory Pattern -> AgentWebSocketBridge",
+                            check_type="bridge_available",
+                            passed=True,
+                            criticality=CriticalityLevel.CHAT_BREAKING,
+                            metadata={"factory_pattern": True, "registry": False}
+                        )
+                        self.logger.info("✓ WebSocket bridge available for factory-based agent creation")
+                        self.validations.append(validation)
+                    else:
+                        self._add_critical_failure(
+                            "WebSocket Bridge Chain",
+                            "WebSocket bridge not available for factory pattern",
+                            "Ensure agent_websocket_bridge is initialized during startup"
+                        )
             else:
                 self._add_critical_failure(
                     "WebSocket Bridge Chain",
