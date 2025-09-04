@@ -3,6 +3,7 @@
 Auth service specific dependencies without LLM imports.
 CRITICAL: Uses single source of truth from netra_backend.app.database.
 """
+from contextlib import asynccontextmanager
 from typing import AsyncGenerator
 
 from fastapi import Depends, Request
@@ -24,6 +25,7 @@ def _validate_session_type(session) -> None:
     logger.debug(f"Dependency injected session type: {type(session).__name__}")
 
 
+@asynccontextmanager
 async def get_request_scoped_db_session() -> AsyncGenerator[AsyncSession, None]:
     """Request-scoped database session with validation.
     
@@ -34,22 +36,26 @@ async def get_request_scoped_db_session() -> AsyncGenerator[AsyncSession, None]:
         yield session
 
 # Alias for backward compatibility
+@asynccontextmanager
 async def get_db_dependency() -> AsyncGenerator[AsyncSession, None]:
     """DEPRECATED: Use get_request_scoped_db_session instead.
     
     Kept for backward compatibility.
     """
     logger.warning("Using deprecated get_db_dependency - consider get_request_scoped_db_session")
-    async for session in get_request_scoped_db_session():
+    async with get_db() as session:
+        _validate_session_type(session)
         yield session
 
 # LEGACY COMPATIBILITY: get_db_session for backward compatibility
+@asynccontextmanager
 async def get_db_session() -> AsyncGenerator[AsyncSession, None]:
     """DEPRECATED: Legacy compatibility function for get_db_session.
     
     Use get_db_dependency instead for new code.
     """
-    async for session in get_request_scoped_db_session():
+    async with get_db() as session:
+        _validate_session_type(session)
         yield session
 
 

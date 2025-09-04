@@ -50,7 +50,7 @@ class RunRepository(BaseRepository[Run]):
         from netra_backend.app.core.unified_id_manager import UnifiedIDManager
         return await self.create(
             db=db,
-            id=UnifiedIDManager.generate_run_id(thread_id, "run_repository_create"),
+            id=UnifiedIDManager.generate_run_id(thread_id),
             object="thread.run",
             created_at=int(time.time()),
             thread_id=thread_id,

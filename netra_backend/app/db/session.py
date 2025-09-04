@@ -81,7 +81,7 @@ async def get_db_session() -> AsyncIterator[AsyncSession]:
     in netra_backend.app.database to eliminate duplication.
     """
     from netra_backend.app.database import get_db
-    async for session in get_db():
+    async with get_db() as session:
         yield session
 
 async def get_session_from_factory(db_session_or_factory) -> AsyncSession:
