@@ -19,7 +19,7 @@ const CostAnalysisContent: React.FC<{ costData: any }> = ({ costData }) => (
     initial={{ height: 0, opacity: 0 }}
     animate={{ height: 'auto', opacity: 1 }}
     exit={{ height: 0, opacity: 0 }}
-    className="px-6 pb-6"
+    className="px-3 pb-3"
   >
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
       <CostSection
@@ -57,7 +57,7 @@ export const CostAnalysis: React.FC<{ data: ReportData }> = ({ data }) => {
     <motion.div
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-white rounded-xl shadow-sm border border-gray-200 mb-6"
+      className="bg-white rounded-xl shadow-sm border border-gray-200 mb-3"
     >
       <SectionHeader
         icon={<DollarSign className="w-4 h-4 mr-2 text-green-600" />}
@@ -79,7 +79,7 @@ const PerformanceMetricsContent: React.FC<{ perfData: any }> = ({ perfData }) =>
     initial={{ height: 0, opacity: 0 }}
     animate={{ height: 'auto', opacity: 1 }}
     exit={{ height: 0, opacity: 0 }}
-    className="px-6 pb-6"
+    className="px-3 pb-3"
   >
     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
       <PerformanceCard
@@ -131,7 +131,7 @@ export const PerformanceMetrics: React.FC<{ data: ReportData }> = ({ data }) => 
     <motion.div
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-white rounded-xl shadow-sm border border-gray-200 mb-6"
+      className="bg-white rounded-xl shadow-sm border border-gray-200 mb-3"
     >
       <SectionHeader
         icon={<Activity className="w-4 h-4 mr-2 text-blue-600" />}

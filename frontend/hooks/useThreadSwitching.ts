@@ -23,6 +23,7 @@ import { globalCleanupManager } from '@/lib/operation-cleanup';
 import type { ThreadError } from '@/types/thread-error-types';
 import { createThreadError } from '@/types/thread-error-types';
 import { useURLSync, useBrowserHistorySync } from '@/services/urlSyncService';
+import { ThreadOperationManager } from '@/lib/thread-operation-manager';
 import { logger } from '@/lib/logger';
 
 /**
@@ -46,6 +47,7 @@ export interface ThreadSwitchingOptions {
   readonly timeoutMs?: number;
   readonly updateUrl?: boolean;
   readonly skipUrlUpdate?: boolean;
+  readonly force?: boolean;
 }
 
 /**
@@ -115,17 +117,31 @@ export const useThreadSwitching = (): UseThreadSwitchingResult => {
     threadId: string,
     options: ThreadSwitchingOptions = {}
   ): Promise<boolean> => {
-    return await performThreadSwitch(
+    // Use ThreadOperationManager to ensure atomic operations
+    const result = await ThreadOperationManager.startOperation(
+      'switch',
       threadId,
-      options,
-      state,
-      setState,
-      storeActions,
-      abortControllerRef,
-      lastFailedThreadRef,
-      timeoutManagerRef.current,
-      updateUrl
+      async (signal) => {
+        return await performThreadSwitchWithManager(
+          threadId,
+          options,
+          state,
+          setState,
+          storeActions,
+          signal,
+          lastFailedThreadRef,
+          timeoutManagerRef.current,
+          updateUrl
+        );
+      },
+      {
+        timeoutMs: options.timeoutMs || DEFAULT_OPTIONS.timeoutMs,
+        retryAttempts: 2,
+        force: options.force
+      }
     );
+    
+    return result.success;
   }, [state, storeActions, updateUrl]);
   
   const cancelLoading = useCallback(() => {
@@ -174,7 +190,58 @@ const createTimeoutManager = () => {
 
 
 /**
- * Performs thread switch operation
+ * Performs thread switch operation with manager
+ */
+const performThreadSwitchWithManager = async (
+  threadId: string,
+  options: ThreadSwitchingOptions,
+  currentState: ThreadSwitchingState,
+  setState: (state: ThreadSwitchingState) => void,
+  storeActions: any,
+  signal: AbortSignal,
+  lastFailedThreadRef: React.MutableRefObject<string | null>,
+  timeoutManager: any,
+  updateUrl?: (threadId: string | null) => void
+): Promise<{ success: boolean; threadId?: string; error?: Error }> => {
+  const opts = { ...DEFAULT_OPTIONS, ...options };
+  const operationId = generateOperationId(threadId);
+  
+  // Start loading state
+  const controller = startLoadingState(threadId, operationId, setState, storeActions, opts, timeoutManager);
+  
+  try {
+    // Check if operation was aborted
+    if (signal.aborted) {
+      throw new Error('Operation aborted');
+    }
+    
+    const result = await executeWithRetry(() => threadLoadingService.loadThread(threadId), {
+      maxAttempts: 3,
+      baseDelayMs: 1000,
+      signal
+    });
+    
+    const success = handleLoadingResult(
+      result, 
+      threadId, 
+      operationId, 
+      setState, 
+      storeActions, 
+      lastFailedThreadRef, 
+      timeoutManager, 
+      opts, 
+      updateUrl
+    );
+    
+    return { success, threadId };
+  } catch (error) {
+    handleLoadingError(error, threadId, operationId, setState, lastFailedThreadRef, storeActions, timeoutManager);
+    return { success: false, error: error as Error };
+  }
+};
+
+/**
+ * Performs thread switch operation (legacy)
  */
 const performThreadSwitch = async (
   threadId: string,
@@ -333,13 +400,9 @@ const handleLoadingResult = (
       storeActions.handleWebSocketEvent(loadedEvent);
     }
     
-    // Update URL if enabled and not skipped
-    // Use setTimeout to ensure store update completes first
+    // Update URL if enabled and not skipped - do it immediately
     if (options?.updateUrl && !options?.skipUrlUpdate && updateUrl) {
-      // Delay URL update slightly to avoid race with store-triggered update
-      setTimeout(() => {
-        updateUrl(threadId);
-      }, 50);
+      updateUrl(threadId);
     }
     
     setState(prev => ({

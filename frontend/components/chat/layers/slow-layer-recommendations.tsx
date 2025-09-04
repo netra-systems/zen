@@ -143,7 +143,7 @@ export const EnhancedRecommendations: React.FC<{ recommendations: Recommendation
 
   return (
     <div className="space-y-4">
-      <h3 className="text-sm font-semibold text-gray-800 flex items-center mb-4">
+      <h3 className="text-sm font-semibold text-gray-800 flex items-center mb-2">
         <Package className="w-4 h-4 mr-2 text-indigo-600" />
         Optimization Recommendations
       </h3>
@@ -184,13 +184,13 @@ export const ActionPlanStepper: React.FC<{ actionPlan: ActionPlanItem[] }> = ({ 
   const [currentStep, setCurrentStep] = useState(0);
 
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-      <h3 className="text-sm font-semibold text-gray-800 flex items-center mb-4">
+    <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-3">
+      <h3 className="text-sm font-semibold text-gray-800 flex items-center mb-2">
         <Layers className="w-4 h-4 mr-2 text-orange-600" />
         Implementation Roadmap
       </h3>
 
-      <div className="space-y-4">
+      <div className="space-y-2">
         {actionPlan.map((step, index) => (
           <motion.div
             key={step.id}
@@ -218,8 +218,8 @@ export const AgentTimeline: React.FC<{ agents: AgentTimelineItem[] }> = ({ agent
   const maxDuration = Math.max(...agents.map(a => a.duration || 0));
 
   return (
-    <div className="bg-gray-50 rounded-xl p-4">
-      <h4 className="text-xs font-semibold text-gray-700 mb-3">Agent Execution Timeline</h4>
+    <div className="bg-gray-50 rounded-xl p-3">
+      <h4 className="text-xs font-semibold text-gray-700 mb-2">Agent Execution Timeline</h4>
       <div className="space-y-2">
         {agents.map((agent, index) => (
           <TimelineBar

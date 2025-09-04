@@ -2,78 +2,85 @@
 // Modular approach following CLAUDE.md 25-line function limit
 
 /**
- * Maps backend agent_started payload to frontend expected structure
+ * Maps backend agent_started event to frontend expected structure
+ * Note: Receives the full event, not just the payload
  */
-export const mapAgentStartedPayload = (backendPayload: any) => {
+export const mapAgentStartedPayload = (fullEvent: any) => {
+  // Extract agent_name from top level and payload fields from nested payload
   return {
-    agent_id: backendPayload.agent_name || backendPayload.agent_id,
-    agent_type: backendPayload.agent_name || backendPayload.agent_type,
-    run_id: backendPayload.run_id,
-    timestamp: backendPayload.timestamp,
-    status: 'started',
-    message: `Agent ${backendPayload.agent_name || 'Unknown'} started`
+    agent_id: fullEvent.agent_name || fullEvent.payload?.agent_id || 'unknown',
+    agent_type: fullEvent.agent_name || fullEvent.payload?.agent_type || 'unknown',
+    run_id: fullEvent.run_id,
+    timestamp: fullEvent.timestamp,
+    status: fullEvent.payload?.status || 'started',
+    message: fullEvent.payload?.message || `Agent ${fullEvent.agent_name || 'Unknown'} started`
   };
 };
 
 /**
- * Maps backend agent_completed payload to frontend expected structure
+ * Maps backend agent_completed event to frontend expected structure
+ * Note: Receives the full event, not just the payload
  */
-export const mapAgentCompletedPayload = (backendPayload: any) => {
+export const mapAgentCompletedPayload = (fullEvent: any) => {
   return {
-    agent_id: backendPayload.agent_name || backendPayload.agent_id,
-    agent_type: backendPayload.agent_name || backendPayload.agent_type,
-    duration_ms: backendPayload.duration_ms || 0,
-    result: backendPayload.payload?.result || backendPayload.result || {},
-    metrics: backendPayload.metrics || {},
-    message: backendPayload.payload?.message || backendPayload.message,
-    iteration: backendPayload.iteration || 1
+    agent_id: fullEvent.agent_name || fullEvent.payload?.agent_id || 'unknown',
+    agent_type: fullEvent.agent_name || fullEvent.payload?.agent_type || 'unknown',
+    duration_ms: fullEvent.payload?.execution_time_ms || fullEvent.payload?.duration_ms || 0,
+    result: fullEvent.payload?.result || {},
+    metrics: fullEvent.payload?.metrics || {},
+    message: fullEvent.payload?.message || `Agent ${fullEvent.agent_name || 'Unknown'} completed`,
+    iteration: fullEvent.payload?.iteration || 1
   };
 };
 
 /**
- * Maps backend agent_thinking payload to frontend expected structure
+ * Maps backend agent_thinking event to frontend expected structure
+ * Note: Receives the full event, not just the payload
  */
-export const mapAgentThinkingPayload = (backendPayload: any) => {
-  // Handle different payload structures from backend
-  // Format 1: Direct message field
-  // Format 2: Nested in payload.reasoning
-  const thought = backendPayload.message || 
-                  backendPayload.payload?.reasoning || 
-                  backendPayload.thought || 
+export const mapAgentThinkingPayload = (fullEvent: any) => {
+  // Extract reasoning from payload
+  const thought = fullEvent.payload?.reasoning || 
+                  fullEvent.payload?.message || 
+                  fullEvent.message || 
                   'Processing...';
   
   return {
     thought: thought,
-    agent_id: backendPayload.agent_name || backendPayload.agent_id,
-    agent_type: backendPayload.agent_name || backendPayload.agent_type,
-    step_number: backendPayload.payload?.step_number || backendPayload.step_number || 0,
-    total_steps: backendPayload.payload?.total_steps || backendPayload.total_steps || 0
+    agent_id: fullEvent.agent_name || fullEvent.payload?.agent_id || 'unknown',
+    agent_type: fullEvent.agent_name || fullEvent.payload?.agent_type || 'unknown',
+    step_number: fullEvent.payload?.step_number || 0,
+    total_steps: fullEvent.payload?.total_steps || 0,
+    progress_percentage: fullEvent.payload?.progress_percentage || null
   };
 };
 
 /**
- * Maps backend tool_executing payload to frontend expected structure
+ * Maps backend tool_executing event to frontend expected structure
+ * Note: Receives the full event, not just the payload
  */
-export const mapToolExecutingPayload = (backendPayload: any) => {
+export const mapToolExecutingPayload = (fullEvent: any) => {
   return {
-    tool_name: backendPayload.tool_name,
-    agent_id: backendPayload.agent_name || backendPayload.agent_id,
-    agent_type: backendPayload.agent_name || backendPayload.agent_type,
-    timestamp: backendPayload.timestamp || Date.now()
+    tool_name: fullEvent.payload?.tool_name || 'unknown_tool',
+    agent_id: fullEvent.agent_name || fullEvent.payload?.agent_id || 'unknown',
+    agent_type: fullEvent.agent_name || fullEvent.payload?.agent_type || 'unknown',
+    timestamp: fullEvent.timestamp || Date.now(),
+    parameters: fullEvent.payload?.parameters || {}
   };
 };
 
 /**
- * Maps backend tool_completed payload to frontend expected structure
+ * Maps backend tool_completed event to frontend expected structure
+ * Note: Receives the full event, not just the payload
  */
-export const mapToolCompletedPayload = (backendPayload: any) => {
+export const mapToolCompletedPayload = (fullEvent: any) => {
   return {
-    tool_name: backendPayload.tool_name,
-    name: backendPayload.tool_name,
-    result: backendPayload.result,
-    agent_id: backendPayload.agent_name || backendPayload.agent_id,
-    agent_type: backendPayload.agent_name || backendPayload.agent_type,
-    timestamp: backendPayload.timestamp || Date.now()
+    tool_name: fullEvent.payload?.tool_name || 'unknown_tool',
+    name: fullEvent.payload?.tool_name || 'unknown_tool',
+    result: fullEvent.payload?.result || {},
+    agent_id: fullEvent.agent_name || fullEvent.payload?.agent_id || 'unknown',
+    agent_type: fullEvent.agent_name || fullEvent.payload?.agent_type || 'unknown',
+    timestamp: fullEvent.timestamp || Date.now(),
+    execution_time_ms: fullEvent.payload?.execution_time_ms || null
   };
 };
 
@@ -179,10 +186,11 @@ export const mapAgentManagerShutdownPayload = (backendPayload: any) => {
 };
 
 /**
- * Main payload mapper - routes events to specific mappers
+ * Main event mapper - routes events to specific mappers
+ * CRITICAL: Pass the full event object, not just the payload
  */
-export const mapEventPayload = (eventType: string, backendPayload: any) => {
-  const mappers: Record<string, (payload: any) => any> = {
+export const mapEventPayload = (eventType: string, fullEvent: any) => {
+  const mappers: Record<string, (event: any) => any> = {
     'agent_started': mapAgentStartedPayload,
     'agent_completed': mapAgentCompletedPayload,
     'agent_thinking': mapAgentThinkingPayload,
@@ -199,5 +207,5 @@ export const mapEventPayload = (eventType: string, backendPayload: any) => {
   };
   
   const mapper = mappers[eventType];
-  return mapper ? mapper(backendPayload) : backendPayload;
+  return mapper ? mapper(fullEvent) : fullEvent;
 };

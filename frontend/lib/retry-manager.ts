@@ -19,6 +19,7 @@ export interface FrontendRetryConfig {
   readonly maxDelayMs: number;
   readonly multiplier: number;
   readonly jitter: boolean;
+  readonly signal?: AbortSignal;
 }
 
 /**
@@ -59,10 +60,20 @@ export const executeWithRetry = async <T>(
   
   for (let attempt = 1; attempt <= fullConfig.maxAttempts; attempt++) {
     try {
+      // Check if aborted before attempting
+      if (fullConfig.signal?.aborted) {
+        throw new Error('Operation aborted');
+      }
+      
       const result = await operation();
       logRetrySuccess(attempt, startTime);
       return result;
     } catch (error) {
+      // Check if aborted after error
+      if (fullConfig.signal?.aborted) {
+        throw new Error('Operation aborted');
+      }
+      
       const shouldRetry = determineShouldRetry(attempt, fullConfig, error);
       
       if (!shouldRetry) {
@@ -71,7 +82,7 @@ export const executeWithRetry = async <T>(
       }
       
       const delay = calculateDelay(attempt, fullConfig);
-      await waitForDelay(delay);
+      await waitForDelay(delay, fullConfig.signal);
     }
   }
   
@@ -126,8 +137,22 @@ const addJitter = (delay: number): number => {
 /**
  * Waits for specified delay
  */
-const waitForDelay = (delayMs: number): Promise<void> => {
-  return new Promise(resolve => setTimeout(resolve, delayMs));
+const waitForDelay = (delayMs: number, signal?: AbortSignal): Promise<void> => {
+  return new Promise((resolve, reject) => {
+    if (signal?.aborted) {
+      reject(new Error('Operation aborted'));
+      return;
+    }
+    
+    const timeoutId = setTimeout(resolve, delayMs);
+    
+    if (signal) {
+      signal.addEventListener('abort', () => {
+        clearTimeout(timeoutId);
+        reject(new Error('Operation aborted'));
+      });
+    }
+  });
 };
 
 /**
