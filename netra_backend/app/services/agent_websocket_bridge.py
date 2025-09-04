@@ -1720,28 +1720,6 @@ class AgentWebSocketBridge(MonitorableComponent):
             # REMOVED: Orchestrator query - using per-request factory patterns
             # Thread resolution is handled per-request through factory methods
             # No global orchestrator needed for user isolation pattern
-                            resolution_source = "orchestrator"
-                            logger.info(f"✅ PRIORITY 2 SUCCESS: run_id={run_id} → thread_id={thread_id} via Orchestrator ({resolution_time_ms:.1f}ms)")
-                            self._track_resolution_success(resolution_source, resolution_time_ms)
-                            
-                            # OPTIONAL: Register this mapping in ThreadRunRegistry for future lookups
-                            if self._thread_registry:
-                                try:
-                                    await self._thread_registry.register(run_id, thread_id, {"source": "orchestrator_backfill"})
-                                    logger.debug(f"📝 BACKFILL: Registered orchestrator mapping run_id={run_id} → thread_id={thread_id} in ThreadRunRegistry")
-                                except Exception as backfill_error:
-                                    logger.debug(f"⚠️ BACKFILL FAILED: Could not register orchestrator mapping: {backfill_error}")
-                            
-                            return thread_id
-                        elif thread_id is not None:
-                            logger.warning(f"⚠️ PRIORITY 2 INVALID: Orchestrator returned invalid thread_id: '{thread_id}' for run_id={run_id}")
-                    else:
-                        logger.debug("⚠️ PRIORITY 2 SKIP: Orchestrator missing get_thread_id_for_run method")
-                except Exception as e:
-                    logger.warning(f"⚠️ PRIORITY 2 EXCEPTION: Orchestrator query failed for run_id={run_id}: {e}")
-                    self._track_resolution_failure("orchestrator", str(e))
-            else:
-                logger.debug(f"⚠️ PRIORITY 2 SKIP: Orchestrator not available for run_id={run_id}")
             
             # PRIORITY 3: Direct WebSocketManager check (TERTIARY SOURCE - active connections)
             # Check if WebSocketManager has any active connections that might help resolve
