@@ -216,8 +216,8 @@ class SupervisorAgent(BaseAgent):
                 self.agent_instance_factory.configure(
                     agent_class_registry=self.agent_class_registry,
                     websocket_bridge=self.websocket_bridge,
-                    websocket_manager=getattr(self.websocket_bridge, 'websocket_manager', None),
-                    tool_dispatcher=self.tool_dispatcher  # Pass the isolated tool dispatcher
+                    websocket_manager=getattr(self.websocket_bridge, 'websocket_manager', None)
+                    # Note: tool_dispatcher is accessed via registry when creating agents, not during configure
                 )
                 
                 # CRITICAL: Enhance tool dispatcher with WebSocket notifications directly
