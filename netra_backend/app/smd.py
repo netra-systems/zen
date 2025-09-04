@@ -384,17 +384,15 @@ class StartupOrchestrator:
         
         # REMOVED: Singleton registry usage - using per-request factory patterns
         # Per-request isolation is handled through factory methods in bridge
-        registry = supervisor.registry if hasattr(supervisor, 'registry') else None
-        if registry:
-            self.logger.info("Using supervisor registry for bridge integration")
-        else:
-            self.logger.info("No registry available - bridge will use per-request factory patterns")
+        # Registry is no longer needed with factory pattern - pass None
+        registry = None
+        self.logger.info("Using per-request factory patterns - no global registry needed")
         
         # Initialize complete integration with timeout
         integration_result = await asyncio.wait_for(
             bridge.ensure_integration(
                 supervisor=supervisor,
-                registry=registry,
+                registry=registry,  # None is acceptable with factory pattern
                 force_reinit=False
             ),
             timeout=30.0
@@ -778,8 +776,8 @@ class StartupOrchestrator:
             deps = status['dependencies']
             if not deps['websocket_manager_available']:
                 raise DeterministicStartupError("WebSocket manager not available in bridge")
-            if not deps['registry_available']:
-                raise DeterministicStartupError("Registry not available in bridge")
+            # Registry is no longer required with factory pattern - skip check
+            # Factory pattern ensures per-request isolation without global registry
             
         except DeterministicStartupError:
             raise
