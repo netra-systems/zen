@@ -586,6 +586,53 @@ class WebSocketManager:
                         "serialization_error": f"DeepAgentState serialization failed: {e2}"
                     }
         
+        # Handle specific Pydantic models from agents.state (CRITICAL FIX for JSON serialization errors)
+        from netra_backend.app.agents.state import ActionPlanResult, OptimizationsResult, ReportSection
+        
+        if isinstance(message, ActionPlanResult):
+            try:
+                result = message.model_dump(mode='json', exclude_none=True)
+                logger.debug(f"Successfully serialized ActionPlanResult: {type(result)}")
+                return result
+            except Exception as e:
+                logger.error(f"CRITICAL: ActionPlanResult serialization failed: {e}")
+                # Fallback to basic fields to prevent complete failure
+                return {
+                    "action_plan_summary": getattr(message, 'action_plan_summary', 'Failed to serialize'),
+                    "total_estimated_time": getattr(message, 'total_estimated_time', 'Unknown'),
+                    "serialization_error": f"ActionPlanResult serialization failed: {e}",
+                    "type": "ActionPlanResult"
+                }
+        
+        if isinstance(message, OptimizationsResult):
+            try:
+                result = message.model_dump(mode='json', exclude_none=True)
+                logger.debug(f"Successfully serialized OptimizationsResult: {type(result)}")
+                return result
+            except Exception as e:
+                logger.error(f"CRITICAL: OptimizationsResult serialization failed: {e}")
+                return {
+                    "optimization_type": getattr(message, 'optimization_type', 'Unknown'),
+                    "recommendations": getattr(message, 'recommendations', []),
+                    "serialization_error": f"OptimizationsResult serialization failed: {e}",
+                    "type": "OptimizationsResult"
+                }
+                
+        if isinstance(message, ReportSection):
+            try:
+                result = message.model_dump(mode='json', exclude_none=True)
+                logger.debug(f"Successfully serialized ReportSection: {type(result)}")
+                return result
+            except Exception as e:
+                logger.error(f"CRITICAL: ReportSection serialization failed: {e}")
+                return {
+                    "section_id": getattr(message, 'section_id', 'unknown'),
+                    "title": getattr(message, 'title', 'Unknown Section'),
+                    "content": getattr(message, 'content', 'Failed to serialize content'),
+                    "serialization_error": f"ReportSection serialization failed: {e}",
+                    "type": "ReportSection"
+                }
+        
         # Handle other Pydantic models
         if hasattr(message, 'model_dump'):
             try:
@@ -610,9 +657,12 @@ class WebSocketManager:
             # Test if it's already JSON-serializable
             json.dumps(message)
             return message
-        except TypeError:
+        except TypeError as e:
             # Not JSON-serializable, convert to string representation
-            logger.warning(f"Object {type(message).__name__} not JSON-serializable, converting to string")
+            logger.error(f"CRITICAL: Object {type(message).__name__} not JSON-serializable: {e}")
+            logger.error(f"Object details - Type: {type(message)}, Attributes: {dir(message) if hasattr(message, '__dict__') else 'no __dict__'}")
+            
+            # Enhanced fallback with more context
             return {
                 "payload": str(message),
                 "type": type(message).__name__,
