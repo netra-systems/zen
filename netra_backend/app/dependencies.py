@@ -180,7 +180,6 @@ class RequestScopedContext:
         # CRITICAL: Log that this context contains NO database sessions
         logger.debug(f"Created RequestScopedContext {self.request_id} - NO sessions stored")
 
-@asynccontextmanager
 async def get_request_scoped_db_session() -> AsyncGenerator[AsyncSession, None]:
     """Create a request-scoped database session with proper lifecycle management.
     
@@ -189,7 +188,7 @@ async def get_request_scoped_db_session() -> AsyncGenerator[AsyncSession, None]:
     
     Uses the enhanced RequestScopedSessionFactory for isolation and monitoring.
     """
-    from netra_backend.app.database.request_scoped_session_factory import get_isolated_session
+    from netra_backend.app.database.request_scoped_session_factory import get_session_factory
     
     # Generate unique request ID for this session
     request_id = f"req_{uuid.uuid4().hex[:12]}"
@@ -199,7 +198,11 @@ async def get_request_scoped_db_session() -> AsyncGenerator[AsyncSession, None]:
     logger.debug(f"Creating new request-scoped database session {request_id}")
     
     try:
-        async with get_isolated_session(user_id, request_id) as session:
+        # Get the factory and use its method directly (which is decorated with @asynccontextmanager)
+        factory = await get_session_factory()
+        # Since factory.get_request_scoped_session is decorated with @asynccontextmanager,
+        # we use it with async with
+        async with factory.get_request_scoped_session(user_id, request_id) as session:
             _validate_session_type(session)
             logger.debug(f"Created database session: {id(session)} for request {request_id}")
             yield session
