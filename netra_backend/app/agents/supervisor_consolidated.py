@@ -116,21 +116,10 @@ class SupervisorAgent(BaseAgent):
         # Store LLM manager for creating request-scoped registries
         self._llm_manager = llm_manager
         
-        # CRITICAL: Create a startup registry for validation and infrastructure setup
-        # This registry is used for startup validation and will be replaced per-request
-        # in execute() for complete user isolation
-        # Note: We create with a temporary tool dispatcher that will NOT be used for actual requests
-        from netra_backend.app.agents.tool_dispatcher import ToolDispatcher, create_legacy_tool_dispatcher
-        # Use legacy tool dispatcher for startup validation (avoids global state warnings) 
-        # create_legacy_tool_dispatcher is the proper startup method without warnings
-        startup_tool_dispatcher = create_legacy_tool_dispatcher(
-            tools=None,
-            websocket_bridge=websocket_bridge,
-            permission_service=None
-        )
-        self.registry = AgentRegistry(llm_manager, startup_tool_dispatcher)
-        self.registry.register_default_agents()
-        self.registry.set_websocket_bridge(websocket_bridge)
+        # REMOVED: Startup registry instantiation to eliminate singleton patterns
+        # Agent validation is now handled through AgentClassRegistry and 
+        # AgentInstanceFactory which provide proper isolation
+        # No startup AgentRegistry needed - factory handles agent creation per-request
         
         # Per-request execution lock (not global!)
         self._execution_lock = asyncio.Lock()
@@ -219,25 +208,23 @@ class SupervisorAgent(BaseAgent):
                 self.user_tool_registry = tool_system['registry']
                 self.user_tools = tool_system['tools']
                 
-                # Create request-scoped registry for this user
-                self.registry = AgentRegistry(self._llm_manager, self.tool_dispatcher)
-                self.registry.register_default_agents()
-                self.registry.set_websocket_bridge(self.websocket_bridge)
+                # REMOVED: Request-scoped registry creation to eliminate singleton patterns
+                # Factory handles agent creation with proper isolation without AgentRegistry
                 
-                # CRITICAL: Configure agent instance factory with the registry
-                logger.info(f"🔧 Configuring agent instance factory with registry for user {context.user_id}")
+                # CRITICAL: Configure agent instance factory directly for complete isolation
+                logger.info(f"🔧 Configuring agent instance factory for user {context.user_id}")
                 self.agent_instance_factory.configure(
-                    agent_registry=self.registry,
+                    agent_class_registry=self.agent_class_registry,
                     websocket_bridge=self.websocket_bridge,
-                    websocket_manager=getattr(self.websocket_bridge, 'websocket_manager', None)
+                    websocket_manager=getattr(self.websocket_bridge, 'websocket_manager', None),
+                    tool_dispatcher=self.tool_dispatcher  # Pass the isolated tool dispatcher
                 )
                 
-                # CRITICAL: Enhance tool dispatcher with WebSocket notifications
-                if hasattr(self.registry, 'set_websocket_manager'):
-                    # Use websocket_manager from bridge if available
-                    websocket_manager = getattr(self.websocket_bridge, 'websocket_manager', None)
-                    if websocket_manager:
-                        self.registry.set_websocket_manager(websocket_manager)
+                # CRITICAL: Enhance tool dispatcher with WebSocket notifications directly
+                websocket_manager = getattr(self.websocket_bridge, 'websocket_manager', None)
+                if websocket_manager and hasattr(self.tool_dispatcher, 'set_websocket_manager'):
+                    self.tool_dispatcher.set_websocket_manager(websocket_manager)
+                    logger.info(f"✅ Enhanced tool dispatcher with WebSocket for user {context.user_id}")
                 
                 # Create session manager for database operations
                 logger.info(f"📂 Creating managed session for user {context.user_id}")
@@ -257,7 +244,7 @@ class SupervisorAgent(BaseAgent):
             finally:
                 # Clean up request-scoped resources
                 self.tool_dispatcher = None
-                self.registry = None
+                # No registry cleanup needed - using factory pattern
     
     async def _orchestrate_agents(self, context: UserExecutionContext, 
                                  session_manager: DatabaseSessionManager, 

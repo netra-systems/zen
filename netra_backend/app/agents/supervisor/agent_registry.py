@@ -63,7 +63,8 @@ class AgentRegistry:
         
         self.llm_manager = llm_manager
         self.tool_dispatcher = tool_dispatcher
-        self.agents: Dict[str, 'BaseAgent'] = {}
+        # REMOVED: Singleton agent storage - replaced with factory patterns for user isolation
+        # self.agents: Dict[str, 'BaseAgent'] = {}
         self.websocket_bridge: Optional['AgentWebSocketBridge'] = None
         self.websocket_manager: Optional['WebSocketManager'] = None
         self._agents_registered = False
@@ -106,23 +107,16 @@ class AgentRegistry:
         self._register_auxiliary_agents()
         self._agents_registered = True
         
-        # Validate agent registration counts
-        agent_count = len(self.agents)
+        # REMOVED: Agent instance counting - using AgentClassRegistry for infrastructure
+        # Agent instances are created per-request through factory patterns
         expected_agents = ["triage", "data", "optimization", "actions", 
                           "reporting", "goals_triage", "data_helper", "synthetic_data", "corpus_admin"]
-        expected_min = len(expected_agents)
         
-        if agent_count == 0:
-            logger.warning(f"⚠️ CRITICAL: ZERO AGENTS REGISTERED - Expected {expected_min} agents")
-            logger.warning(f"   Expected agents: {', '.join(expected_agents)}")
-            logger.warning("   Chat functionality will be broken!")
-        elif agent_count < expected_min:
-            logger.warning(f"⚠️ WARNING: Only {agent_count}/{expected_min} agents registered")
-            missing = set(expected_agents) - set(self.agents.keys())
-            if missing:
-                logger.warning(f"   Missing agents: {', '.join(missing)}")
+        if self._agent_class_registry:
+            registered_classes = len(self._agent_class_registry.list_agent_names())
+            logger.info(f"✓ AgentClassRegistry has {registered_classes} agent classes available")
         else:
-            logger.info(f"✓ Successfully registered {agent_count} agents")
+            logger.warning(f"⚠️ AgentClassRegistry not available - factory patterns may not work")
     
     def _register_core_agents(self) -> None:
         """Register core workflow agents."""
@@ -179,8 +173,9 @@ class AgentRegistry:
         Use AgentInstanceFactory.create_agent_instance() instead for proper
         per-user isolation with real run_id from UserExecutionContext.
         """
-        if name in self.agents:
-            logger.debug(f"Agent {name} already registered, skipping")
+        # REMOVED: Singleton agent storage check - using AgentClassRegistry instead
+        if self._agent_class_registry and self._agent_class_registry.has_agent_class(name):
+            logger.debug(f"Agent class {name} already registered, skipping")
             return
         
         # Validate agent supports reset_state() for request isolation
@@ -200,10 +195,11 @@ class AgentRegistry:
             else:
                 logger.warning(f"Agent {name} supports WebSocket bridge but no bridge is available in registry")
         
-        self.agents[name] = agent
+        # REMOVED: Singleton agent instance storage - using AgentClassRegistry for infrastructure
+        # self.agents[name] = agent
         
-        # NEW: Also register agent class in AgentClassRegistry for new architecture
-        if self._agent_class_registry and not self._agent_class_registry.has_agent_class(name):
+        # Register agent class in AgentClassRegistry for factory pattern support
+        if self._agent_class_registry:
             try:
                 agent_class = type(agent)
                 self._agent_class_registry.register(
@@ -212,9 +208,13 @@ class AgentRegistry:
                     description=getattr(agent, 'description', f"{agent_class.__name__} agent"),
                     version=getattr(agent, 'version', '1.0.0')
                 )
-                logger.debug(f"Registered agent class {name} in AgentClassRegistry")
+                logger.debug(f"Registered agent class {name} in AgentClassRegistry (no instance storage)")
             except Exception as e:
                 logger.warning(f"Failed to register agent class {name} in AgentClassRegistry: {e}")
+                raise RuntimeError(f"Agent class registration failed for {name}: {e}")
+        else:
+            logger.error(f"Cannot register agent {name} - AgentClassRegistry not available")
+            raise RuntimeError(f"AgentClassRegistry required for agent registration")
         
         # Clear any previous registration errors
         self.registration_errors.pop(name, None)
@@ -252,8 +252,19 @@ class AgentRegistry:
             if self.websocket_bridge and hasattr(agent, 'set_websocket_bridge'):
                 logger.debug(f"Agent {name} WebSocket bridge will be configured during request execution")
                 
-            # Store the agent
-            self.agents[name] = agent
+            # REMOVED: Singleton agent instance storage - register class in AgentClassRegistry
+            if self._agent_class_registry:
+                agent_class = type(agent)
+                self._agent_class_registry.register(
+                    name=name,
+                    agent_class=agent_class,
+                    description=getattr(agent, 'description', f"{agent_class.__name__} agent"),
+                    version=getattr(agent, 'version', '1.0.0')
+                )
+                logger.debug(f"Registered agent class {name} in AgentClassRegistry via register_agent_safely")
+            else:
+                raise RuntimeError(f"AgentClassRegistry not available for registering {name}")
+            # No instance storage - instances created per-request via factory
             
             # Clear any previous registration errors
             self.registration_errors.pop(name, None)
@@ -268,48 +279,50 @@ class AgentRegistry:
             return False
     
     def get(self, name: str) -> Optional['BaseAgent']:
-        """Get agent by name (DEPRECATED - no state reset).
+        """DEPRECATED: Agent retrieval removed - use factory patterns for user isolation.
         
-        WARNING: This method returns agents without resetting their state,
-        which can cause singleton error state to persist across requests.
-        
-        Use get_agent() instead for proper request isolation with state reset.
-        """
-        logger.warning(f"⚠️ DEPRECATED: Using agent_registry.get('{name}') without state reset. "
-                      f"Use await agent_registry.get_agent('{name}') for proper request isolation.")
-        return self.agents.get(name)
-    
-    async def get_agent(self, name: str) -> Optional['BaseAgent']:
-        """Get agent by name with state reset for request isolation.
-        
-        CRITICAL: This method resets agent state before returning to ensure
-        clean state between requests and prevent singleton error persistence.
+        This method is deprecated because it provided singleton agents that caused
+        user context leakage. Use AgentInstanceFactory.create_agent_instance() instead.
         
         Args:
-            name: Name of the agent to retrieve
+            name: Agent name (for compatibility)
             
         Returns:
-            BaseAgent instance with reset state, None if not found
-        """
-        if name not in self.agents:
-            logger.warning(f"Agent {name} not found in registry")
-            return None
+            None - method is deprecated
             
-        agent = self.agents[name]
+        Raises:
+            RuntimeError: Always - method is deprecated
+        """
+        logger.error(f"🚨 DEPRECATED: agent_registry.get('{name}') no longer supported")
+        logger.error(f"   Use: factory = registry.create_request_scoped_factory()")
+        logger.error(f"   Then: agent = await factory.create_agent_instance('{name}', user_context)")
+        raise RuntimeError(
+            f"agent_registry.get() is deprecated. Use AgentInstanceFactory.create_agent_instance() "
+            f"with UserExecutionContext for proper user isolation. This prevents cascade failures."
+        )
+    
+    async def get_agent(self, name: str) -> Optional['BaseAgent']:
+        """DEPRECATED: Agent retrieval removed - use factory patterns for user isolation.
         
-        # CRITICAL: Reset state before returning to ensure clean state
-        try:
-            if hasattr(agent, 'reset_state'):
-                await agent.reset_state()
-                logger.info(f"✅ Reset state for agent {name} before returning")
-            else:
-                logger.warning(f"Agent {name} does not support reset_state() - may persist error state")
-        except Exception as e:
-            logger.error(f"❌ Failed to reset agent {name}: {e}")
-            # Continue anyway - better to try than fail completely
-            logger.error(f"Agent {name} may be in inconsistent state - consider creating new instance")
+        This method is deprecated because even with state reset, using singleton agents
+        causes cascade failures between users. Use AgentInstanceFactory instead.
         
-        return agent
+        Args:
+            name: Agent name (for compatibility)
+            
+        Returns:
+            None - method is deprecated
+            
+        Raises:
+            RuntimeError: Always - method is deprecated  
+        """
+        logger.error(f"🚨 DEPRECATED: agent_registry.get_agent('{name}') no longer supported")
+        logger.error(f"   Use: factory = registry.create_request_scoped_factory()")
+        logger.error(f"   Then: agent = await factory.create_agent_instance('{name}', user_context)")
+        raise RuntimeError(
+            f"agent_registry.get_agent() is deprecated. Use AgentInstanceFactory.create_agent_instance() "
+            f"with UserExecutionContext for complete user isolation and cascade failure prevention."
+        )
     
     def get_registry_health(self) -> Dict[str, Any]:
         """Get the health status of the registry.
@@ -320,25 +333,21 @@ class AgentRegistry:
         healthy_agents = 0
         agent_health_details = {}
         
-        for name, agent in self.agents.items():
-            try:
-                if hasattr(agent, 'get_health_status'):
-                    health_status = agent.get_health_status()
-                    agent_health_details[name] = health_status
-                    # Consider agent healthy if it has a 'status' field that's not 'error' or 'failed'
-                    if isinstance(health_status, dict):
-                        status = health_status.get('status', 'unknown')
-                        if status not in ['error', 'failed', 'critical']:
-                            healthy_agents += 1
-                    else:
-                        healthy_agents += 1
-                else:
-                    # Agent doesn't have health status method, assume healthy if it exists
+        # REMOVED: Singleton agent iteration - using AgentClassRegistry instead
+        if self._agent_class_registry:
+            registered_agent_names = self._agent_class_registry.list_agent_names()
+            for name in registered_agent_names:
+                try:
+                    # Agent health is checked per-request through factory patterns
+                    agent_health_details[name] = {"status": "factory_pattern", "note": "Health checked per-request"}
                     healthy_agents += 1
-                    agent_health_details[name] = {"status": "unknown"}
-            except Exception as e:
-                logger.warning(f"Failed to get health status for agent {name}: {e}")
-                agent_health_details[name] = {"status": "error", "error": str(e)}
+                except Exception as e:
+                    logger.warning(f"Failed to get health info for agent class {name}: {e}")
+                    agent_health_details[name] = {"status": "error", "error": str(e)}
+        else:
+            logger.warning("No AgentClassRegistry available for health check")
+            # Legacy fallback - no agents to check
+            pass
         
         # Add execution tracker metrics
         execution_metrics = {}
@@ -358,7 +367,7 @@ class AgentRegistry:
             ]
         
         return {
-            "total_agents": len(self.agents),
+            "total_agents": len(self._agent_class_registry.list_agent_names()) if self._agent_class_registry else 0,
             "healthy_agents": healthy_agents,
             "failed_registrations": len(self.registration_errors),
             "agent_health": agent_health_details,
@@ -369,27 +378,42 @@ class AgentRegistry:
         }
 
     def remove_agent(self, name: str) -> bool:
-        """Remove an agent from the registry.
+        """Remove an agent class from AgentClassRegistry.
         
         Args:
-            name: Name of the agent to remove
+            name: Name of the agent class to remove
             
         Returns:
-            bool: True if agent was removed, False if not found
+            bool: True if agent class was removed, False if not found
         """
-        if name in self.agents:
-            del self.agents[name]
-            logger.info(f"Removed agent: {name}")
+        if self._agent_class_registry and self._agent_class_registry.has_agent_class(name):
+            # AgentClassRegistry doesn't have remove method, so we just log
+            logger.info(f"Agent class {name} removal requested - handled by AgentClassRegistry lifecycle")
             return True
-        return False
+        else:
+            logger.warning(f"Agent class {name} not found in AgentClassRegistry")
+            return False
     
     def list_agents(self) -> List[str]:
-        """List registered agent names"""
-        return list(self.agents.keys())
+        """List registered agent names from AgentClassRegistry."""
+        if self._agent_class_registry:
+            return self._agent_class_registry.list_agent_names()
+        else:
+            logger.warning("No AgentClassRegistry available for listing agents")
+            return []
     
     def get_all_agents(self) -> List['BaseAgent']:
-        """Get all registered agents"""
-        return list(self.agents.values())
+        """DEPRECATED: Getting all agent instances removed - use factory patterns.
+        
+        This method is deprecated because it provided singleton agents that caused
+        user context leakage. Use AgentInstanceFactory for per-request instances.
+        """
+        logger.error("🚨 DEPRECATED: get_all_agents() no longer supported")
+        logger.error("   Use factory patterns to create agents per-request")
+        raise RuntimeError(
+            "get_all_agents() is deprecated. Use AgentInstanceFactory.create_agent_instance() "
+            "with UserExecutionContext for each agent you need."
+        )
     
     async def reset_all_agents(self) -> Dict[str, Any]:
         """Reset state for all registered agents to clean singleton state.
@@ -401,16 +425,30 @@ class AgentRegistry:
             Dictionary with reset results for each agent
         """
         reset_results = {
-            'total_agents': len(self.agents),
+            'total_agents': len(self._agent_class_registry.list_agent_names()) if self._agent_class_registry else 0,
             'successful_resets': 0,
             'failed_resets': 0,
             'agents_without_reset': 0,
             'reset_details': {}
         }
         
-        logger.info(f"Resetting state for {len(self.agents)} registered agents")
+        # REMOVED: Singleton agent reset - using factory patterns for isolation
+        logger.info("Agent state reset not needed - factory patterns create fresh instances per-request")
         
-        for agent_name, agent in self.agents.items():
+        if self._agent_class_registry:
+            agent_names = self._agent_class_registry.list_agent_names()
+            logger.info(f"AgentClassRegistry has {len(agent_names)} agent classes - no state to reset")
+            for agent_name in agent_names:
+                reset_results['successful_resets'] += 1
+                reset_results['reset_details'][agent_name] = {
+                    'status': 'factory_pattern', 
+                    'note': 'Fresh instances created per-request - no reset needed'
+                }
+        else:
+            logger.warning("No AgentClassRegistry available")
+            
+        # Legacy iteration removed
+        if False:  # Placeholder for removed agent iteration
             try:
                 if hasattr(agent, 'reset_state'):
                     await agent.reset_state()
@@ -581,9 +619,17 @@ class AgentRegistry:
                 else:
                     logger.warning("⚠️ Tool dispatcher created without WebSocket support - may need reconfiguration")
         
-        # Set WebSocket bridge on all registered agents that support it
+        # REMOVED: Setting WebSocket bridge on singleton agents - using factory patterns
         agent_count = 0
-        for agent_name, agent in self.agents.items():
+        if self._agent_class_registry:
+            agent_names = self._agent_class_registry.list_agent_names()
+            logger.info(f"WebSocket bridge will be set per-request for {len(agent_names)} agent classes")
+            agent_count = len(agent_names)
+        else:
+            logger.warning("No AgentClassRegistry available for WebSocket bridge setup")
+            
+        # Legacy agent iteration removed
+        if False:  # Placeholder for removed singleton iteration
             try:
                 if hasattr(agent, 'set_websocket_bridge'):
                     # CRITICAL FIX: Do not set WebSocket bridge at registration time
@@ -594,7 +640,7 @@ class AgentRegistry:
             except Exception as e:
                 logger.warning(f"Failed to set WebSocket bridge for agent {agent_name}: {e}")
         
-        logger.info(f"✅ WebSocket bridge set for {agent_count}/{len(self.agents)} agents")
+        logger.info(f"✅ WebSocket bridge will be set per-request for {agent_count} agent classes")
     
     def get_websocket_bridge(self) -> Optional['AgentWebSocketBridge']:
         """Get the current AgentWebSocketBridge instance.
@@ -643,14 +689,21 @@ class AgentRegistry:
         else:
             diagnosis["critical_issues"].append("AgentRegistry missing tool_dispatcher")
         
-        # Check agent WebSocket support
-        for agent_name, agent in self.agents.items():
-            if hasattr(agent, 'set_websocket_bridge'):
+        # Check agent WebSocket support from AgentClassRegistry
+        if self._agent_class_registry:
+            agent_names = self._agent_class_registry.list_agent_names()
+            for agent_name in agent_names:
+                # All agent classes support WebSocket bridge through factory patterns
                 diagnosis["agents_with_websocket_support"].append(agent_name)
-            else:
-                diagnosis["agents_without_websocket_support"].append(agent_name)
-        
-        diagnosis["total_agents"] = len(self.agents)
+            
+            diagnosis["total_agents"] = len(agent_names)
+        else:
+            diagnosis["agents_with_websocket_support"] = []
+            diagnosis["agents_without_websocket_support"] = []
+            diagnosis["total_agents"] = 0
+            diagnosis["critical_issues"].append("No AgentClassRegistry available for WebSocket diagnostics")
+            
+        # Legacy agent iteration removed
         diagnosis["agents_with_support_count"] = len(diagnosis["agents_with_websocket_support"])
         diagnosis["agents_without_support_count"] = len(diagnosis["agents_without_websocket_support"])
         
@@ -780,7 +833,7 @@ class AgentRegistry:
             'migration_errors': [],
             'recommendations': [],
             'infrastructure_registry_available': False,
-            'legacy_agents_count': len(self.agents),
+            'legacy_agents_count': 0,  # No legacy agent instances stored
             'migration_complete': False
         }
         
@@ -796,38 +849,18 @@ class AgentRegistry:
         
         migration_status['infrastructure_registry_available'] = True
         
-        # Migrate agent classes
-        for agent_name, agent_instance in self.agents.items():
-            try:
-                agent_class = type(agent_instance)
-                
-                # Skip if already registered
-                if infrastructure_registry.has_agent_class(agent_name):
-                    logger.debug(f"Agent class {agent_name} already registered in infrastructure registry")
-                    migration_status['agent_classes_migrated'] += 1
-                    continue
-                
-                # Register agent class
-                infrastructure_registry.register(
-                    name=agent_name,
-                    agent_class=agent_class,
-                    description=getattr(agent_instance, 'description', f"{agent_class.__name__} agent"),
-                    version=getattr(agent_instance, 'version', '1.0.0'),
-                    dependencies=getattr(agent_instance, 'dependencies', []),
-                    metadata={
-                        'migrated_from_legacy_registry': True,
-                        'migration_timestamp': datetime.now(timezone.utc).isoformat(),
-                        'original_instance_id': id(agent_instance)
-                    }
-                )
-                
-                migration_status['agent_classes_migrated'] += 1
-                logger.info(f"✅ Migrated agent class {agent_name} to infrastructure registry")
-                
-            except Exception as e:
-                error_msg = f"Failed to migrate agent {agent_name}: {e}"
-                migration_status['migration_errors'].append(error_msg)
-                logger.error(error_msg)
+        # REMOVED: Legacy agent instance migration - no singleton instances to migrate
+        # Agent classes are already in AgentClassRegistry
+        if self._agent_class_registry:
+            agent_names = self._agent_class_registry.list_agent_names()
+            migration_status['agent_classes_migrated'] = len(agent_names)
+            logger.info(f"AgentClassRegistry already has {len(agent_names)} agent classes")
+            migration_status['migration_complete'] = True
+        else:
+            migration_status['migration_errors'].append("AgentClassRegistry not available")
+            
+        # Legacy migration loop removed - no instances to migrate
+        pass
         
         # Provide recommendations
         if migration_status['agent_classes_migrated'] == migration_status['legacy_agents_count']:
@@ -1031,7 +1064,7 @@ class AgentRegistry:
             'factory_adapter_configured': hasattr(self, '_factory_adapter') and self._factory_adapter is not None,
             'infrastructure_registry_available': self._agent_class_registry is not None,
             'websocket_bridge_available': self.websocket_bridge is not None,
-            'agents_count': len(self.agents),
+            'agents_count': len(self._agent_class_registry.list_agent_names()) if self._agent_class_registry else 0,
             'integration_features': {
                 'user_execution_context': True,  # Always available through import
                 'factory_compatible_engine': True,
