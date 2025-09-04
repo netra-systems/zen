@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learning>
+  <metadata>
+    <title>SSOT Pattern for Agent Metadata Storage</title>
+    <category>architecture</category>
+    <subcategory>ssot</subcategory>
+    <date>2025-09-04</date>
+    <severity>important</severity>
+    <impact>code-quality</impact>
+  </metadata>
+
+  <problem>
+    <description>
+      Multiple agents were directly manipulating context.metadata with their own
+      serialization logic, leading to code duplication and inconsistent patterns
+      for handling Pydantic model serialization across the codebase.
+    </description>
+    <identified_issues>
+      <issue>19 different agents implementing their own metadata storage</issue>
+      <issue>Inconsistent use of model_dump() parameters</issue>
+      <issue>No centralized logging for metadata operations</issue>
+      <issue>Risk of WebSocket serialization errors without mode='json'</issue>
+    </identified_issues>
+    <affected_components>
+      <component>actions_to_meet_goals_sub_agent (4 occurrences)</component>
+      <component>synthetic_data agents (8 occurrences)</component>
+      <component>goals_triage_sub_agent (2 occurrences)</component>
+      <component>Other agents (5 occurrences)</component>
+    </affected_components>
+  </problem>
+
+  <solution>
+    <principle>
+      All agents MUST use the BaseAgent SSOT methods for storing metadata
+      instead of directly manipulating context.metadata dictionary.
+    </principle>
+    <implementation>
+      <step>Added store_metadata_result() method to BaseAgent class</step>
+      <step>Added store_metadata_batch() for multiple entries</step>
+      <step>Added get_metadata_value() for safe retrieval</step>
+      <step>Methods handle Pydantic serialization automatically</step>
+      <step>Follows websocket_json_serialization.xml learning</step>
+    </implementation>
+    <methods>
+      <method name="store_metadata_result">
+        <purpose>Store single metadata entry with automatic serialization</purpose>
+        <signature>store_metadata_result(context, key, value, ensure_serializable=True)</signature>
+        <features>
+          <feature>Automatic Pydantic model serialization with mode='json'</feature>
+          <feature>Optional serialization bypass for pre-serialized data</feature>
+          <feature>Debug logging for observability</feature>
+        </features>
+      </method>
+      <method name="store_metadata_batch">
+        <purpose>Store multiple metadata entries efficiently</purpose>
+        <signature>store_metadata_batch(context, data, ensure_serializable=True)</signature>
+        <features>
+          <feature>Batch storage with consistent serialization</feature>
+          <feature>Reduces code duplication for related entries</feature>
+        </features>
+      </method>
+      <method name="get_metadata_value">
+        <purpose>Safely retrieve metadata with default fallback</purpose>
+        <signature>get_metadata_value(context, key, default=None)</signature>
+      </method>
+    </methods>
+    <code_examples>
+      <example context="Migrating existing code">
+        <!-- BEFORE (Direct manipulation) -->
+        context.metadata['action_plan_result'] = action_plan_result.model_dump(mode='json', exclude_none=True)
+        
+        <!-- AFTER (Using SSOT method) -->
+        self.store_metadata_result(context, 'action_plan_result', action_plan_result)
+      </example>
+      <example context="Storing multiple related values">
+        <!-- Using batch method -->
+        self.store_metadata_batch(context, {
+            'triage_result': triage_result,
+            'workflow_path': workflow_path,
+            'priority': priority_level
+        })
+      </example>
+      <example context="Retrieving metadata safely">
+        <!-- Safe retrieval with default -->
+        data_result = self.get_metadata_value(context, 'data_result', default={})
+      </example>
+    </code_examples>
+  </solution>
+
+  <migration_guide>
+    <step>Identify all direct context.metadata assignments in agent</step>
+    <step>Replace with appropriate store_metadata_* method call</step>
+    <step>Remove manual model_dump() calls - method handles it</step>
+    <step>Update any metadata retrievals to use get_metadata_value()</step>
+    <step>Test WebSocket serialization still works correctly</step>
+  </migration_guide>
+
+  <benefits>
+    <benefit>Single Source of Truth for metadata storage logic</benefit>
+    <benefit>Automatic prevention of WebSocket serialization errors</benefit>
+    <benefit>Centralized observability through logging</benefit>
+    <benefit>Reduced code duplication across agents</benefit>
+    <benefit>Easier to maintain and update serialization logic</benefit>
+    <benefit>Type safety improvements possible in future</benefit>
+  </benefits>
+
+  <testing_strategy>
+    <test_category name="Serialization">
+      <description>Verify Pydantic models serialize correctly</description>
+      <coverage>All model types with datetime fields</coverage>
+    </test_category>
+    <test_category name="WebSocket Flow">
+      <description>Ensure metadata transmits through WebSocket</description>
+      <coverage>End-to-end agent execution with metadata</coverage>
+    </test_category>
+    <test_category name="Migration">
+      <description>Test migrated agents work identically</description>
+      <coverage>Before/after comparison of metadata storage</coverage>
+    </test_category>
+  </testing_strategy>
+
+  <related_specs>
+    <spec>websocket_json_serialization.xml</spec>
+    <spec>type_safety.xml</spec>
+    <spec>core.xml</spec>
+  </related_specs>
+</learning>

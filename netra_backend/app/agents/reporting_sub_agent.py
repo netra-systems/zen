@@ -1,13 +1,4 @@
-"""Golden Pattern ReportingSubAgent - Clean business logic only (<200 lines).
-
-Golden Pattern Implementation:
-- Inherits reliability management, execution patterns, WebSocket events from BaseAgent
-- Contains ONLY report generation business logic
-- Clean single inheritance pattern
-- No infrastructure duplication
-- Proper AgentError handling
-- <200 lines total
-
+""" SSOT ReportingSubAgent
 Business Value: Final output for ALL analyses - CRITICAL revenue impact.
 BVJ: ALL segments | Customer Experience | +30% reduction in report generation failures
 """
@@ -38,12 +29,6 @@ logger = central_logger.get_logger(__name__)
 
 
 class ReportingSubAgent(BaseAgent):
-    """Golden Pattern ReportingSubAgent - Clean business logic only.
-    
-    Contains ONLY report generation business logic - all infrastructure 
-    (reliability, execution, WebSocket events) inherited from BaseAgent.
-    Follows golden pattern: <200 lines, proper error handling, WebSocket events.
-    """
     
     def __init__(self, context: Optional[UserExecutionContext] = None):
         # Initialize BaseAgent with full infrastructure
