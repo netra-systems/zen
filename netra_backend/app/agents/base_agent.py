@@ -6,6 +6,7 @@ Main base agent class that composes functionality from focused modular component
 
 from abc import ABC, abstractmethod
 from typing import Dict, Optional, Any, List, Callable, Awaitable
+import asyncio
 import time
 
 # Remove mixin imports since we're using single inheritance now
@@ -507,6 +508,160 @@ class BaseAgent(ABC):
             return getattr(config, 'subagent_logging_enabled', True)
         except Exception:
             return True  # Default to enabled if config unavailable
+
+    async def reset_state(self) -> None:
+        """Reset agent to clean state for safe restart after failures.
+        
+        This method clears all persistent state, error flags, caches, and resets 
+        the agent to a clean state that's safe to reuse across requests.
+        
+        CRITICAL: This addresses the bug where agent singletons persist error 
+        state across requests, causing restart failures.
+        
+        Components reset:
+        - Agent lifecycle state
+        - Context and internal caches
+        - WebSocket state and bridge connections
+        - Circuit breaker and reliability manager state
+        - Execution engine and monitoring data
+        - Timing collector state
+        - Error flags and exception state
+        """
+        self.logger.info(f"Resetting agent state for {self.name}")
+        
+        try:
+            # 1. Reset agent lifecycle state to clean PENDING state
+            self.state = SubAgentLifecycle.PENDING
+            self.start_time = None
+            self.end_time = None
+            
+            # 2. Clear context and internal caches safely
+            try:
+                self.context.clear()
+            except Exception as e:
+                self.logger.warning(f"Error clearing context during reset: {e}")
+                # Recreate context dict if clearing failed
+                self.context = {}
+            
+            # 3. Reset WebSocket state and bridge connections
+            try:
+                if hasattr(self, '_websocket_adapter') and self._websocket_adapter:
+                    # Reset WebSocket adapter to clean state
+                    self._websocket_adapter = WebSocketBridgeAdapter()
+                if hasattr(self, '_websocket_context'):
+                    self._websocket_context = {}
+            except Exception as e:
+                self.logger.warning(f"Error resetting WebSocket state during reset: {e}")
+            
+            # 4. Reset circuit breaker to closed/healthy state
+            try:
+                if hasattr(self, 'circuit_breaker') and self.circuit_breaker:
+                    # Check if circuit breaker has a reset method, otherwise it resets itself through state transitions
+                    if hasattr(self.circuit_breaker, 'reset'):
+                        if asyncio.iscoroutinefunction(self.circuit_breaker.reset):
+                            await self.circuit_breaker.reset()
+                        else:
+                            self.circuit_breaker.reset()
+                        self.logger.debug(f"Circuit breaker reset for {self.name}")
+                    elif hasattr(self.circuit_breaker, '_circuit_breaker') and hasattr(self.circuit_breaker._circuit_breaker, 'reset'):
+                        # Try underlying circuit breaker reset
+                        if asyncio.iscoroutinefunction(self.circuit_breaker._circuit_breaker.reset):
+                            await self.circuit_breaker._circuit_breaker.reset()
+                        else:
+                            self.circuit_breaker._circuit_breaker.reset()
+                        self.logger.debug(f"Underlying circuit breaker reset for {self.name}")
+                    else:
+                        # Circuit breaker will naturally recover through its own mechanisms
+                        self.logger.debug(f"Circuit breaker for {self.name} will recover through natural mechanisms")
+            except Exception as e:
+                self.logger.warning(f"Error resetting circuit breaker during reset: {e}")
+            
+            # 5. Reset reliability manager state
+            try:
+                if hasattr(self, '_reliability_manager_instance') and self._reliability_manager_instance:
+                    # Reset reliability manager metrics and state
+                    if hasattr(self._reliability_manager_instance, 'reset_metrics'):
+                        self._reliability_manager_instance.reset_metrics()
+                    # Reset circuit breaker connection
+                    if hasattr(self._reliability_manager_instance, 'circuit_breaker'):
+                        self._reliability_manager_instance.circuit_breaker = self.circuit_breaker._circuit_breaker
+            except Exception as e:
+                self.logger.warning(f"Error resetting reliability manager during reset: {e}")
+            
+            # 6. Reset unified reliability handler
+            try:
+                if hasattr(self, '_unified_reliability_handler') and self._unified_reliability_handler:
+                    # Circuit breaker reset handled above, just clear any cached state
+                    if hasattr(self._unified_reliability_handler, 'reset'):
+                        self._unified_reliability_handler.reset()
+            except Exception as e:
+                self.logger.warning(f"Error resetting unified reliability handler during reset: {e}")
+            
+            # 7. Reset execution engine and monitoring data
+            try:
+                if hasattr(self, 'monitor') and self.monitor:
+                    # Clear execution history and metrics
+                    if hasattr(self.monitor, 'reset'):
+                        self.monitor.reset()
+                    elif hasattr(self.monitor, 'clear_history'):
+                        self.monitor.clear_history()
+                    
+                if hasattr(self, '_execution_monitor') and self._execution_monitor:
+                    if hasattr(self._execution_monitor, 'reset'):
+                        self._execution_monitor.reset()
+                    elif hasattr(self._execution_monitor, 'clear_history'):
+                        self._execution_monitor.clear_history()
+                        
+                if hasattr(self, '_execution_engine') and self._execution_engine:
+                    if hasattr(self._execution_engine, 'reset'):
+                        self._execution_engine.reset()
+            except Exception as e:
+                self.logger.warning(f"Error resetting execution infrastructure during reset: {e}")
+            
+            # 8. Reset timing collector state
+            try:
+                if hasattr(self, 'timing_collector') and self.timing_collector:
+                    # Complete any pending timing tree and reset
+                    if hasattr(self.timing_collector, 'current_tree') and self.timing_collector.current_tree:
+                        self.timing_collector.complete_execution()
+                    if hasattr(self.timing_collector, 'reset'):
+                        self.timing_collector.reset()
+                    else:
+                        # Recreate timing collector if no reset method
+                        self.timing_collector = ExecutionTimingCollector(agent_name=self.name)
+            except Exception as e:
+                self.logger.warning(f"Error resetting timing collector during reset: {e}")
+            
+            # 9. Clear any cached LLM correlation IDs and generate new ones
+            try:
+                self.correlation_id = generate_llm_correlation_id()
+            except Exception as e:
+                self.logger.warning(f"Error generating new correlation ID during reset: {e}")
+            
+            # 10. Reset any user execution context (if present)
+            try:
+                if hasattr(self, '_user_execution_context'):
+                    # Don't clear the context itself, but clear any cached state derived from it
+                    pass  # Context should be set fresh for each request
+                if hasattr(self, '_user_context'):
+                    pass  # Context should be set fresh for each request
+            except Exception as e:
+                self.logger.warning(f"Error handling user context during reset: {e}")
+            
+            # 11. Validate session isolation after reset
+            try:
+                self._validate_session_isolation()
+            except Exception as e:
+                self.logger.warning(f"Session isolation validation failed after reset: {e}")
+            
+            self.logger.info(f"✅ Agent state reset completed successfully for {self.name}")
+            
+        except Exception as e:
+            # If reset fails, log the error but don't raise - agent should still be usable
+            self.logger.error(f"❌ Critical error during agent state reset for {self.name}: {e}")
+            self.logger.error(f"Agent may be in inconsistent state - consider creating new instance")
+            # Still set state to PENDING to allow retry attempts
+            self.state = SubAgentLifecycle.PENDING
 
     async def shutdown(self) -> None:
         """Graceful shutdown of the agent."""
