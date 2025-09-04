@@ -552,6 +552,253 @@ class UnifiedIDManager:
             return UnifiedIDManager.normalize_thread_id(chat_thread_id)
         
         return None
+    
+    # ========================================================================
+    # ADDITIONAL ID GENERATION FUNCTIONS - Centralized from across codebase
+    # ========================================================================
+    
+    @staticmethod
+    def generate_connection_id(user_id: str = "", prefix: str = "conn") -> str:
+        """
+        Generate WebSocket connection ID.
+        
+        Format: {prefix}_{user_id}_{timestamp}_{8_hex_uuid}
+        
+        Args:
+            user_id: Optional user identifier to include
+            prefix: ID prefix (default: "conn")
+            
+        Returns:
+            Connection ID string
+            
+        Example:
+            >>> UnifiedIDManager.generate_connection_id("user123")
+            'conn_user123_1693430400000_a1b2c3d4'
+        """
+        timestamp = int(time.time() * 1000)
+        uuid_suffix = uuid.uuid4().hex[:UnifiedIDManager.UUID_LENGTH]
+        
+        if user_id:
+            connection_id = f"{prefix}_{user_id}_{timestamp}_{uuid_suffix}"
+        else:
+            connection_id = f"{prefix}_{timestamp}_{uuid_suffix}"
+        
+        logger.debug(f"Generated connection_id: {connection_id}")
+        return connection_id
+    
+    @staticmethod
+    def generate_message_id() -> str:
+        """
+        Generate message ID.
+        
+        Format: Full UUID4 string
+        
+        Returns:
+            Message ID string
+            
+        Example:
+            >>> UnifiedIDManager.generate_message_id()
+            'a1b2c3d4-e5f6-g7h8-i9j0-k1l2m3n4o5p6'
+        """
+        message_id = str(uuid.uuid4())
+        logger.debug(f"Generated message_id: {message_id}")
+        return message_id
+    
+    @staticmethod
+    def generate_session_id(user_id: Optional[str] = None) -> str:
+        """
+        Generate session ID.
+        
+        Format: sess_{user_id}_{timestamp}_{8_hex_uuid} or sess_{timestamp}_{8_hex_uuid}
+        
+        Args:
+            user_id: Optional user identifier to include
+            
+        Returns:
+            Session ID string
+            
+        Example:
+            >>> UnifiedIDManager.generate_session_id("user123")
+            'sess_user123_1693430400000_a1b2c3d4'
+        """
+        timestamp = int(time.time() * 1000)
+        uuid_suffix = uuid.uuid4().hex[:UnifiedIDManager.UUID_LENGTH]
+        
+        if user_id:
+            session_id = f"sess_{user_id}_{timestamp}_{uuid_suffix}"
+        else:
+            session_id = f"sess_{timestamp}_{uuid_suffix}"
+        
+        logger.debug(f"Generated session_id: {session_id}")
+        return session_id
+    
+    @staticmethod
+    def generate_request_id() -> str:
+        """
+        Generate request ID.
+        
+        Format: req_{timestamp}_{8_hex_uuid}
+        
+        Returns:
+            Request ID string
+            
+        Example:
+            >>> UnifiedIDManager.generate_request_id()
+            'req_1693430400000_a1b2c3d4'
+        """
+        timestamp = int(time.time() * 1000)
+        uuid_suffix = uuid.uuid4().hex[:UnifiedIDManager.UUID_LENGTH]
+        
+        request_id = f"req_{timestamp}_{uuid_suffix}"
+        logger.debug(f"Generated request_id: {request_id}")
+        return request_id
+    
+    @staticmethod
+    def generate_trace_id() -> str:
+        """
+        Generate trace ID for distributed tracing.
+        
+        Format: trace_{16_hex_uuid}
+        
+        Returns:
+            Trace ID string
+            
+        Example:
+            >>> UnifiedIDManager.generate_trace_id()
+            'trace_a1b2c3d4e5f6g7h8'
+        """
+        uuid_suffix = uuid.uuid4().hex[:16]  # 16 chars for trace IDs
+        
+        trace_id = f"trace_{uuid_suffix}"
+        logger.debug(f"Generated trace_id: {trace_id}")
+        return trace_id
+    
+    @staticmethod
+    def generate_span_id() -> str:
+        """
+        Generate span ID for distributed tracing.
+        
+        Format: span_{8_hex_uuid}
+        
+        Returns:
+            Span ID string
+            
+        Example:
+            >>> UnifiedIDManager.generate_span_id()
+            'span_a1b2c3d4'
+        """
+        uuid_suffix = uuid.uuid4().hex[:UnifiedIDManager.UUID_LENGTH]
+        
+        span_id = f"span_{uuid_suffix}"
+        logger.debug(f"Generated span_id: {span_id}")
+        return span_id
+    
+    @staticmethod
+    def generate_correlation_id() -> str:
+        """
+        Generate correlation ID for operation tracking.
+        
+        Format: Full UUID4 string (same as message_id for simplicity)
+        
+        Returns:
+            Correlation ID string
+            
+        Example:
+            >>> UnifiedIDManager.generate_correlation_id()
+            'a1b2c3d4-e5f6-g7h8-i9j0-k1l2m3n4o5p6'
+        """
+        correlation_id = str(uuid.uuid4())
+        logger.debug(f"Generated correlation_id: {correlation_id}")
+        return correlation_id
+    
+    @staticmethod
+    def generate_audit_id() -> str:
+        """
+        Generate audit ID for audit logging.
+        
+        Format: audit_{timestamp}_{8_hex_uuid}
+        
+        Returns:
+            Audit ID string
+            
+        Example:
+            >>> UnifiedIDManager.generate_audit_id()
+            'audit_1693430400000_a1b2c3d4'
+        """
+        timestamp = int(time.time() * 1000)
+        uuid_suffix = uuid.uuid4().hex[:UnifiedIDManager.UUID_LENGTH]
+        
+        audit_id = f"audit_{timestamp}_{uuid_suffix}"
+        logger.debug(f"Generated audit_id: {audit_id}")
+        return audit_id
+    
+    @staticmethod
+    def generate_context_id() -> str:
+        """
+        Generate context ID for security context isolation.
+        
+        Format: ctx_{16_hex_uuid}
+        
+        Returns:
+            Context ID string
+            
+        Example:
+            >>> UnifiedIDManager.generate_context_id()
+            'ctx_a1b2c3d4e5f6g7h8'
+        """
+        uuid_suffix = uuid.uuid4().hex[:16]  # 16 chars for context IDs
+        
+        context_id = f"ctx_{uuid_suffix}"
+        logger.debug(f"Generated context_id: {context_id}")
+        return context_id
+    
+    @staticmethod
+    def generate_user_id(prefix: str = "user") -> str:
+        """
+        Generate user ID (mainly for testing).
+        
+        Format: {prefix}_{timestamp}_{8_hex_uuid}
+        
+        Args:
+            prefix: ID prefix (default: "user")
+            
+        Returns:
+            User ID string
+            
+        Example:
+            >>> UnifiedIDManager.generate_user_id()
+            'user_1693430400000_a1b2c3d4'
+        """
+        timestamp = int(time.time() * 1000)
+        uuid_suffix = uuid.uuid4().hex[:UnifiedIDManager.UUID_LENGTH]
+        
+        user_id = f"{prefix}_{timestamp}_{uuid_suffix}"
+        logger.debug(f"Generated user_id: {user_id}")
+        return user_id
+    
+    @staticmethod
+    def generate_test_id(prefix: str = "test") -> str:
+        """
+        Generate test ID for test frameworks.
+        
+        Format: {prefix}_{timestamp}_{8_hex_uuid}
+        
+        Args:
+            prefix: ID prefix (default: "test")
+            
+        Returns:
+            Test ID string
+            
+        Example:
+            >>> UnifiedIDManager.generate_test_id()
+            'test_1693430400000_a1b2c3d4'
+        """
+        timestamp = int(time.time() * 1000)
+        uuid_suffix = uuid.uuid4().hex[:UnifiedIDManager.UUID_LENGTH]
+        
+        test_id = f"{prefix}_{timestamp}_{uuid_suffix}"
+        logger.debug(f"Generated test_id: {test_id}")
+        return test_id
 
 
 # Backward compatibility aliases for migration
