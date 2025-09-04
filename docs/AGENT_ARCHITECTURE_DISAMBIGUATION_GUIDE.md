@@ -262,6 +262,40 @@ graph TB
     style AC fill:#c8e6c9
 ```
 
+#### 6. Workflow Execution Order (CRITICAL)
+
+**⚠️ BUSINESS-CRITICAL**: Agents MUST execute in logical dependency order to produce valuable outputs.
+
+**Correct Execution Order**:
+```
+1. Triage → Assess data availability and request type
+2. Data → Collect and analyze metrics (MUST precede optimization!)  
+3. Optimization → Generate strategies based on data insights
+4. Actions → Create implementation plans from strategies
+5. Reporting → Synthesize all results
+```
+
+**Why Order Matters**:
+- **Wrong**: Optimization → Data = Strategies without metrics = Worthless
+- **Right**: Data → Optimization = Data-driven strategies = Business value
+
+**Implementation** (`workflow_orchestrator.py`):
+```python
+def _define_workflow_based_on_triage(self, triage_result):
+    if data_sufficiency == "sufficient":
+        return [
+            self._create_pipeline_step("triage", dependencies=[]),
+            self._create_pipeline_step("data", dependencies=["triage"]),  # MUST come before optimization
+            self._create_pipeline_step("optimization", dependencies=["data"]),  # Requires data insights
+            self._create_pipeline_step("actions", dependencies=["optimization"]),
+            self._create_pipeline_step("reporting", dependencies=["actions"])
+        ]
+```
+
+**Related Documentation**:
+- [`SPEC/learnings/agent_execution_order_fix_20250904.xml`](../SPEC/learnings/agent_execution_order_fix_20250904.xml) - Critical fix details
+- [`AGENT_EXECUTION_ORDER_REASONING.md`](../AGENT_EXECUTION_ORDER_REASONING.md) - Business impact analysis
+
 ---
 
 ## Deep Dive (For Senior Architects)

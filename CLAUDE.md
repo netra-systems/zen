@@ -350,6 +350,8 @@ The following events MUST be sent during agent execution to enable meaningful AI
 **For Complete Agent Implementation Patterns:**
 - See [`docs/GOLDEN_AGENT_INDEX.md`](docs/GOLDEN_AGENT_INDEX.md) - The definitive guide to agent implementation
 - See [`docs/AGENT_ARCHITECTURE_DISAMBIGUATION_GUIDE.md`](docs/AGENT_ARCHITECTURE_DISAMBIGUATION_GUIDE.md) - Comprehensive clarification of agent architecture
+- See [`SPEC/learnings/agent_execution_order_fix_20250904.xml`](SPEC/learnings/agent_execution_order_fix_20250904.xml) - CRITICAL: Correct agent execution order (Data BEFORE Optimization)
+- See [`AGENT_EXECUTION_ORDER_REASONING.md`](AGENT_EXECUTION_ORDER_REASONING.md) - Why execution order matters for business value
 
 -----
 

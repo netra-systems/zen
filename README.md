@@ -1,5 +1,41 @@
 # Netra Core - Generation 1
 
+## 📊 Business Context
+
+### Value Proposition
+The Netra Core platform delivers AI optimization value across all customer segments by providing:
+
+- **Cost Reduction**: 30-70% reduction in AI/LLM spending through intelligent model routing and optimization
+- **Performance Improvement**: 40-60% improvement in response times through caching and batching strategies
+- **Scale Enablement**: 10x scalability through efficient resource management
+- **Progressive Value Delivery**: Immediate value even with partial data (40-60% optimization possible)
+
+### Customer Segments & Data Handling
+
+| Segment | Data Completeness | Value Delivery Strategy |
+|---------|------------------|------------------------|
+| **Free** | <40% (Insufficient) | Education + Quick templates + Value demonstration |
+| **Early** | 40-79% (Partial) | Immediate wins + Progressive optimization + Data collection |
+| **Mid** | 60-85% (Mostly complete) | Phased implementation + Quality preservation |
+| **Enterprise** | 80-100% (Sufficient) | Full optimization + Compliance focus + Custom strategies |
+
+### Adaptive Workflow Architecture
+
+The platform implements **adaptive workflows** based on data completeness:
+
+1. **Sufficient Data (≥80%)**: Full optimization workflow with high confidence
+2. **Partial Data (40-79%)**: Modified workflow with caveats, immediate value, and progressive enhancement
+3. **Insufficient Data (<40%)**: Focus on education, data collection, and value demonstration
+
+See [Orchestration Data Handling Patterns](./ORCHESTRATION_DATA_HANDLING_PATTERNS.md) for comprehensive patterns and examples.
+
+### Key Business Metrics
+
+- **Conversion Rate**: Users providing data after initial insufficient data scenario
+- **Value Delivery Rate**: Successful optimizations despite incomplete data
+- **Confidence Accuracy**: Correlation between confidence scores and actual outcomes
+- **Time to Value**: <24 hours for initial recommendations, 1-3 weeks for full implementation
+
 ## 🏗️ Architecture Overview
 
 -- [Documentation Index](./index.md)

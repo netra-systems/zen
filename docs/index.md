@@ -25,6 +25,7 @@
 
 #### Agents & Tools
 - **[Agent Architecture Disambiguation Guide](./AGENT_ARCHITECTURE_DISAMBIGUATION_GUIDE.md)** - Comprehensive disambiguation of agent components
+- **[Orchestration Data Handling Patterns](../ORCHESTRATION_DATA_HANDLING_PATTERNS.md)** 🆕 - **CRITICAL**: Patterns for handling partial/insufficient data in agent orchestration
 - [Agent System Overview](./agents/AGENT_SYSTEM.md) - High-level agent system design
 - [Subagents Documentation](./agents/subagents-doc.md) - Subagent patterns and usage
 - [Agent Modernization Plan](./agents/AGENT_MODERNIZATION_PLAN.md) - Future improvements

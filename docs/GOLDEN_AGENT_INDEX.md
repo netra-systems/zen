@@ -85,6 +85,16 @@ graph TD
 
 ## 🔑 Key Patterns
 
+### Agent Execution Order (CRITICAL)
+**⚠️ IMPORTANT**: Agents MUST execute in logical dependency order:
+1. **Triage** → Assess data availability
+2. **Data** → Collect and analyze metrics (MUST come before optimization!)
+3. **Optimization** → Generate strategies based on data
+4. **Actions** → Create implementation plans
+5. **Reporting** → Synthesize results
+
+See: [`SPEC/learnings/agent_execution_order_fix_20250904.xml`](../SPEC/learnings/agent_execution_order_fix_20250904.xml) for critical ordering requirements.
+
 ### BaseAgent Infrastructure
 ```python
 from netra_backend.app.agents.base_agent import BaseAgent
