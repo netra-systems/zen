@@ -325,9 +325,22 @@ class StartupOrchestrator:
         await self._apply_startup_validation_fixes()
         self.logger.info("  ✓ Step 23a: Startup validation fixes applied")
         
-        # Step 23b: Comprehensive startup validation
+        # Step 23b: Run comprehensive startup health checks (CRITICAL)
+        from netra_backend.app.startup_health_checks import validate_startup_health
+        self.logger.info("  🏥 Running comprehensive startup health checks...")
+        try:
+            health_ok = await validate_startup_health(self.app, fail_on_critical=True)
+            if health_ok:
+                self.logger.info("  ✓ Step 23b: All critical services passed health checks")
+            else:
+                self.logger.warning("  ⚠️ Step 23b: Some optional services are degraded but continuing")
+        except RuntimeError as e:
+            self.logger.error(f"  ❌ Step 23b: Critical services failed health checks: {e}")
+            raise DeterministicStartupError(f"Health check validation failed: {e}")
+        
+        # Step 23c: Comprehensive startup validation
         await self._run_comprehensive_validation()
-        self.logger.info("  ✓ Step 23b: Comprehensive validation completed")
+        self.logger.info("  ✓ Step 23c: Comprehensive validation completed")
         
         # Step 24: Critical path validation (CHAT FUNCTIONALITY)
         await self._run_critical_path_validation()

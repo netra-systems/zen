@@ -347,6 +347,15 @@ class AgentInstanceFactory:
     classes and AgentRegistry for backward compatibility during the transition.
     """
     
+    # CRITICAL: Define which agents require which dependencies
+    AGENT_DEPENDENCIES = {
+        'DataSubAgent': ['llm_manager'],
+        'OptimizationsCoreSubAgent': ['llm_manager'],
+        'ActionsToMeetGoalsSubAgent': ['llm_manager'],
+        'DataHelperAgent': ['llm_manager'],
+        'SyntheticDataSubAgent': ['llm_manager'],
+    }
+    
     def __init__(self):
         """Initialize the factory with infrastructure components."""
         # Infrastructure components (shared, immutable)
@@ -445,6 +454,42 @@ class AgentInstanceFactory:
         logger.info(f"   - Registry type: {'AgentClassRegistry' if self._agent_class_registry else 'AgentRegistry' if self._agent_registry else 'Unknown'}")
         logger.info(f"   - LLM manager: {'Configured' if llm_manager else 'None'}")
         logger.info(f"   - Tool dispatcher: {'Configured' if tool_dispatcher else 'None'}")
+    
+    def _validate_agent_dependencies(self, agent_name: str) -> None:
+        """
+        Validate that all required dependencies for an agent are available.
+        
+        Args:
+            agent_name: Name of the agent or its class name
+            
+        Raises:
+            RuntimeError: If required dependencies are missing
+        """
+        # Check both agent name and class name
+        dependencies = []
+        
+        # Check by agent name
+        if agent_name in self.AGENT_DEPENDENCIES:
+            dependencies = self.AGENT_DEPENDENCIES[agent_name]
+        
+        # Also check by class name (e.g., OptimizationsCoreSubAgent)
+        for class_name, deps in self.AGENT_DEPENDENCIES.items():
+            if agent_name.lower() in class_name.lower() or class_name.lower() in agent_name.lower():
+                dependencies = deps
+                break
+        
+        # Validate each required dependency
+        for dep in dependencies:
+            if dep == 'llm_manager' and not self._llm_manager:
+                logger.error(f"❌ CRITICAL: Agent {agent_name} requires LLM manager but none configured")
+                logger.error(f"   Factory state: llm_manager={self._llm_manager}")
+                logger.error(f"   This will cause agent execution to fail")
+                raise RuntimeError(
+                    f"Cannot create {agent_name}: Required dependency 'llm_manager' not available. "
+                    f"Ensure LLM manager is initialized during startup and passed to factory."
+                )
+            elif dep == 'tool_dispatcher' and not self._tool_dispatcher:
+                logger.warning(f"⚠️ Agent {agent_name} prefers tool_dispatcher but none configured (can use per-request)")
     
     async def create_user_execution_context(self, 
                                            user_id: str,
@@ -577,6 +622,9 @@ class AgentInstanceFactory:
             logger.debug(f"Creating agent instance: {agent_name} for user {user_context.user_id}")
             logger.debug(f"Factory has websocket_bridge: {self._websocket_bridge is not None}, type: {type(self._websocket_bridge).__name__ if self._websocket_bridge else 'None'}")
             
+            # CRITICAL: Validate dependencies before attempting creation
+            self._validate_agent_dependencies(agent_name)
+            
             # Get agent class from registries or use provided class
             if agent_class:
                 AgentClass = agent_class
@@ -658,8 +706,9 @@ class AgentInstanceFactory:
                                 tool_dispatcher=tool_dispatcher  # Can be None for per-request pattern
                             )
                         else:
-                            logger.warning(f"⚠️ {agent_name} ({agent_class_name}) requires llm_manager, attempting no-param init")
-                            agent = AgentClass()
+                            # CRITICAL FIX: Never create LLM-requiring agents without LLM manager
+                            logger.error(f"❌ CRITICAL: {agent_name} ({agent_class_name}) requires llm_manager but none available")
+                            raise RuntimeError(f"Cannot create {agent_name}: LLM manager is required but not available")
                     else:
                         # Try different parameter combinations based on what the agent accepts
                         logger.info(f"🔧 Trying parameter combinations for {agent_name} ({agent_class_name})")
@@ -672,6 +721,11 @@ class AgentInstanceFactory:
                         except TypeError as e1:
                             # Then try with llm_manager and tool_dispatcher
                             # Note: tool_dispatcher can be None for per-request creation
+                            if not llm_manager:
+                                # CRITICAL FIX: Don't attempt to create agent without required dependencies
+                                logger.error(f"❌ CRITICAL: {agent_name} likely requires llm_manager but none available")
+                                raise RuntimeError(f"Cannot create {agent_name}: LLM manager not available (TypeError: {e1})")
+                            
                             if llm_manager:
                                 try:
                                     logger.debug(f"   Trying: llm_manager + tool_dispatcher (tool_dispatcher: {tool_dispatcher is not None})")
