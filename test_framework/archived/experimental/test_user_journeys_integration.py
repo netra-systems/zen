@@ -15,6 +15,7 @@ ARCHITECTURE COMPLIANCE: ≤300 lines, functions ≤8 lines, modular design
 
 import asyncio
 import json
+from shared.isolated_environment import IsolatedEnvironment
 
 # Add project root to path
 import sys

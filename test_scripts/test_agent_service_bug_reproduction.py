@@ -4,9 +4,9 @@ This test demonstrates the failure when app.state.agent_service is not initializ
 """
 import pytest
 import asyncio
-from unittest.mock import Mock, MagicMock
 from fastapi import FastAPI, Request
 from starlette.datastructures import State
+from shared.isolated_environment import IsolatedEnvironment
 
 
 def test_agent_service_missing_attribute_error():

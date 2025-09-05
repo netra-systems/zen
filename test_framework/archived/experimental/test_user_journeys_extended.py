@@ -15,6 +15,7 @@ ARCHITECTURE COMPLIANCE: ≤300 lines, functions ≤8 lines, modular design
 
 import asyncio
 import json
+from shared.isolated_environment import IsolatedEnvironment
 
 # Add project root to path
 import sys
@@ -23,7 +24,6 @@ import uuid
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
-from unittest.mock import AsyncMock, Mock
 
 import pytest
 import pytest_asyncio

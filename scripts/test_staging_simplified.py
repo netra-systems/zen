@@ -7,6 +7,7 @@ Verifies that staging will load secrets from Google Secret Manager only.
 import os
 import sys
 from pathlib import Path
+from shared.isolated_environment import IsolatedEnvironment
 
 # Add project root to path
 project_root = Path(__file__).parent.parent

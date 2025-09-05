@@ -5,6 +5,7 @@ Test script to validate SQLAlchemy 2.0 migration
 import asyncio
 import uuid
 from datetime import datetime, timezone
+from shared.isolated_environment import IsolatedEnvironment
 
 async def test_sqlalchemy_2_migration():
     """Test SQLAlchemy 2.0 patterns are working correctly."""

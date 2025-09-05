@@ -1,11 +1,11 @@
 from shared.isolated_environment import get_env
+from shared.isolated_environment import IsolatedEnvironment
 """Test auth service database session management and DatabaseURLBuilder integration."""
 
 import sys
 import os
 import asyncio
 from pathlib import Path
-from unittest.mock import patch, MagicMock
 from google.cloud import secretmanager
 
 # Add parent directory to path

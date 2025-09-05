@@ -3,6 +3,7 @@
 import requests
 import json
 from datetime import datetime
+from shared.isolated_environment import IsolatedEnvironment
 
 def log_error(category, error, details=None):
     """Log an error with timestamp and category"""

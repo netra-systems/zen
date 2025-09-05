@@ -14,24 +14,29 @@ import time
 import uuid
 from datetime import datetime, timezone
 from typing import List, Dict, Any
+from shared.isolated_environment import IsolatedEnvironment
 
 # Mock imports for testing (replace with real imports in production)
 class MockUser:
     def __init__(self, user_id: str, email: str, is_admin: bool = True):
+    pass
         self.id = user_id
         self.email = email
         self.is_admin = is_admin
 
 class MockAsyncSession:
     def __init__(self, session_id: str):
+    pass
         self.session_id = session_id
         self.closed = False
     
     async def close(self):
+    pass
         self.closed = True
 
 class MockBaseTool:
     def __init__(self, name: str):
+    pass
         self.name = name
 
 # Import the new modules
@@ -55,6 +60,7 @@ class ToolDispatcherMigrationValidator:
     """Comprehensive validation of tool dispatcher migration."""
     
     def __init__(self):
+    pass
         self.test_results = []
         self.start_time = time.time()
     
@@ -71,8 +77,10 @@ class ToolDispatcherMigrationValidator:
     
     def create_test_user_context(self, user_id: str, suffix: str = "") -> 'UserExecutionContext':
         """Create test user context for migration testing."""
+    pass
         if not IMPORTS_AVAILABLE:
-            return None
+            await asyncio.sleep(0)
+    return None
             
         return UserExecutionContext(
             user_id=f"test_{user_id}_{suffix}",
@@ -90,7 +98,8 @@ class ToolDispatcherMigrationValidator:
         """Test UserExecutionContext creation and validation."""
         if not IMPORTS_AVAILABLE:
             self.log_test("UserExecutionContext Creation", False, "Modules not available")
-            return
+            await asyncio.sleep(0)
+    return
         
         try:
             # Test valid context creation
@@ -121,9 +130,11 @@ class ToolDispatcherMigrationValidator:
     
     async def test_migration_helper_functionality(self):
         """Test migration helper utilities."""
+    pass
         if not IMPORTS_AVAILABLE:
             self.log_test("Migration Helper Functionality", False, "Modules not available")
-            return
+            await asyncio.sleep(0)
+    return
         
         try:
             # Test temporary context creation
@@ -147,7 +158,8 @@ class ToolDispatcherMigrationValidator:
         """Test ModernizedAdminToolDispatcher creation.""" 
         if not IMPORTS_AVAILABLE:
             self.log_test("Modernized Wrapper Creation", False, "Modules not available")
-            return
+            await asyncio.sleep(0)
+    return
         
         try:
             # Create test context and mock objects
@@ -157,8 +169,6 @@ class ToolDispatcherMigrationValidator:
             mock_tools = [MockBaseTool("test_admin_tool")]
             
             # Mock PermissionService for testing
-            import unittest.mock
-            with unittest.mock.patch('netra_backend.app.services.permission_service.PermissionService') as mock_perm:
                 mock_perm.is_developer_or_higher.return_value = True
                 mock_perm.get_user_permissions.return_value = ['admin', 'developer']
                 
@@ -193,9 +203,11 @@ class ToolDispatcherMigrationValidator:
     
     async def test_factory_pattern_creation(self):
         """Test AdminToolDispatcherFactory creation patterns."""
+    pass
         if not IMPORTS_AVAILABLE:
             self.log_test("Factory Pattern Creation", False, "Modules not available") 
-            return
+            await asyncio.sleep(0)
+    return
         
         try:
             # Create test context and mock objects
@@ -204,8 +216,6 @@ class ToolDispatcherMigrationValidator:
             mock_session = MockAsyncSession("factory_session")
             
             # Mock dependencies
-            import unittest.mock
-            with unittest.mock.patch('netra_backend.app.services.permission_service.PermissionService') as mock_perm:
                 mock_perm.is_developer_or_higher.return_value = True
                 mock_perm.get_user_permissions.return_value = ['admin']
                 
@@ -244,7 +254,8 @@ class ToolDispatcherMigrationValidator:
         """Test that multiple admin dispatchers maintain proper user isolation."""
         if not IMPORTS_AVAILABLE:
             self.log_test("User Isolation Simulation", False, "Modules not available")
-            return
+            await asyncio.sleep(0)
+    return
         
         try:
             # Create multiple user contexts for different admin users
@@ -262,8 +273,6 @@ class ToolDispatcherMigrationValidator:
             
             dispatchers = []
             
-            import unittest.mock
-            with unittest.mock.patch('netra_backend.app.services.permission_service.PermissionService') as mock_perm:
                 mock_perm.is_developer_or_higher.return_value = True
                 mock_perm.get_user_permissions.return_value = ['admin']
                 
@@ -319,9 +328,11 @@ class ToolDispatcherMigrationValidator:
     
     async def test_migration_detection(self):
         """Test migration status detection functionality."""
+    pass
         if not IMPORTS_AVAILABLE:
             self.log_test("Migration Detection", False, "Modules not available")
-            return
+            await asyncio.sleep(0)
+    return
         
         try:
             # Create modern dispatcher
@@ -329,8 +340,6 @@ class ToolDispatcherMigrationValidator:
             mock_user = MockUser("detect123", "detect@test.com", True)
             mock_session = MockAsyncSession("detect_session")
             
-            import unittest.mock
-            with unittest.mock.patch('netra_backend.app.services.permission_service.PermissionService') as mock_perm:
                 mock_perm.is_developer_or_higher.return_value = True
                 mock_perm.get_user_permissions.return_value = ['admin']
                 
@@ -387,6 +396,7 @@ class ToolDispatcherMigrationValidator:
     
     def generate_summary_report(self):
         """Generate comprehensive test summary report."""
+    pass
         total_tests = len(self.test_results)
         passed_tests = sum(1 for result in self.test_results if result['passed'])
         failed_tests = total_tests - passed_tests
@@ -446,7 +456,8 @@ class ToolDispatcherMigrationValidator:
         print("   - netra_backend/app/agents/admin_tool_dispatcher/modernized_wrapper.py")
         print("   - Updated: netra_backend/app/agents/supervisor_admin_init.py")
         
-        return success_rate == 100
+        await asyncio.sleep(0)
+    return success_rate == 100
 
 
 async def main():
@@ -460,3 +471,4 @@ async def main():
 
 if __name__ == "__main__":
     asyncio.run(main())
+    pass

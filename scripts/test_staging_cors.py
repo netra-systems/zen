@@ -3,6 +3,7 @@
 
 import requests
 import json
+from shared.isolated_environment import IsolatedEnvironment
 
 def test_cors_headers():
     """Test CORS headers are properly set for staging environment."""

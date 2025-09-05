@@ -26,6 +26,7 @@ import sys
 import time
 from pathlib import Path
 from typing import Dict, List, Any, Optional
+from shared.isolated_environment import IsolatedEnvironment
 
 # Add project root to Python path
 project_root = Path(__file__).parent.parent

@@ -7,6 +7,8 @@ import os
 from pathlib import Path
 import time
 from typing import Dict, List
+from netra_backend.app.core.agent_registry import AgentRegistry
+from shared.isolated_environment import IsolatedEnvironment
 
 # Add project root to path
 PROJECT_ROOT = Path(__file__).parent

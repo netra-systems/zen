@@ -8,6 +8,7 @@ import time
 import sys
 import json
 import gc
+from shared.isolated_environment import IsolatedEnvironment
 
 sys.path.insert(0, '/Users/anthony/Documents/GitHub/netra-apex')
 

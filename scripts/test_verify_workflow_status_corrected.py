@@ -9,6 +9,7 @@ import os
 import subprocess
 import sys
 from typing import List, Tuple
+from shared.isolated_environment import IsolatedEnvironment
 
 
 class WorkflowStatusTester:

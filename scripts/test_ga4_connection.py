@@ -6,6 +6,7 @@ Test GA4 connection and find property
 from google.analytics.admin import AnalyticsAdminServiceClient
 from google.oauth2 import service_account
 from pathlib import Path
+from shared.isolated_environment import IsolatedEnvironment
 
 # Load credentials
 cred_path = Path(__file__).parent.parent / "gcp-staging-sa-key.json"

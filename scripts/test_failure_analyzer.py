@@ -24,6 +24,7 @@ import re
 from datetime import datetime
 from pathlib import Path
 from typing import Dict, Optional, List, Tuple
+from shared.isolated_environment import IsolatedEnvironment
 
 # Add parent directory to Python path
 sys.path.insert(0, str(Path(__file__).parent.parent))

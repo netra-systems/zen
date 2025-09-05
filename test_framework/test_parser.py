@@ -3,6 +3,7 @@
 import re
 from datetime import datetime
 from typing import Dict, List, Optional
+from shared.isolated_environment import IsolatedEnvironment
 
 
 def parse_test_counts(output: str, component: str) -> Dict:

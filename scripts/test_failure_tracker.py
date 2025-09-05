@@ -9,6 +9,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Set, Optional
 import re
+from shared.isolated_environment import IsolatedEnvironment
 
 
 class TestFailureTracker:

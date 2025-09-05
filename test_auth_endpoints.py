@@ -4,6 +4,7 @@
 import asyncio
 from httpx import AsyncClient, ASGITransport
 from netra_backend.app.main import app
+from shared.isolated_environment import IsolatedEnvironment
 
 
 async def test_auth_endpoints():

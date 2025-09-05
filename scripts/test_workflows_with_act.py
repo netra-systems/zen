@@ -12,6 +12,7 @@ import time
 from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Tuple
+from shared.isolated_environment import IsolatedEnvironment
 
 # Fix encoding for Windows
 if sys.platform == "win32":

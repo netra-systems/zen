@@ -4,6 +4,7 @@
 import asyncio
 import sys
 from datetime import datetime
+from shared.isolated_environment import IsolatedEnvironment
 
 # Add path for imports
 sys.path.append('.')

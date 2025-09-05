@@ -21,6 +21,7 @@ from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Set, Tuple
 import hashlib
+from shared.isolated_environment import IsolatedEnvironment
 
 
 @dataclass

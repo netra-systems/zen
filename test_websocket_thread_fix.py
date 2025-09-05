@@ -11,6 +11,7 @@ This script tests the critical fixes for:
 import asyncio
 import sys
 import os
+from shared.isolated_environment import IsolatedEnvironment
 
 # Add project root to path
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))

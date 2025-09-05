@@ -13,6 +13,7 @@ import sys
 import time
 from pathlib import Path
 from typing import Any, Dict, List
+from shared.isolated_environment import IsolatedEnvironment
 
 # Add project root to path
 

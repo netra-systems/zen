@@ -8,6 +8,7 @@ import json
 from datetime import datetime
 import time
 import base64
+from shared.isolated_environment import IsolatedEnvironment
 
 async def test_auth_flow():
     """Test complete authentication flow on staging"""

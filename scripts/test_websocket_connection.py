@@ -11,6 +11,7 @@ import json
 import websockets
 import logging
 from datetime import datetime
+from shared.isolated_environment import IsolatedEnvironment
 
 # Configure logging
 logging.basicConfig(level=logging.DEBUG)

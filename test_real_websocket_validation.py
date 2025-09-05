@@ -11,6 +11,7 @@ import asyncio
 import pytest
 import sys
 import os
+from shared.isolated_environment import IsolatedEnvironment
 
 # Add project root to path
 project_root = os.path.abspath(os.path.dirname(__file__))

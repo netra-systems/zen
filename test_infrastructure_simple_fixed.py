@@ -9,6 +9,7 @@ import sys
 import time
 import traceback
 from pathlib import Path
+from shared.isolated_environment import IsolatedEnvironment
 
 def test_imports():
     """Test that all infrastructure modules can be imported."""

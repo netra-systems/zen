@@ -6,6 +6,7 @@ Tests that the unified bridge pattern is correctly implemented.
 import ast
 import sys
 from pathlib import Path
+from shared.isolated_environment import IsolatedEnvironment
 
 # Add project root to path
 sys.path.insert(0, str(Path(__file__).parent))

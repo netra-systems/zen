@@ -6,6 +6,7 @@ Provides comprehensive analysis and performance insights for test suites
 
 from collections import defaultdict
 from typing import Any, Dict, List
+from shared.isolated_environment import IsolatedEnvironment
 
 from test_framework.archived.experimental.failure_patterns import FailurePatternAnalyzer
 

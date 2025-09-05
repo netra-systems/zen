@@ -5,6 +5,7 @@ import json
 import sys
 from pathlib import Path
 from shared.isolated_environment import get_env
+from shared.isolated_environment import IsolatedEnvironment
 
 # Add project root to path
 env = get_env()
@@ -69,7 +70,6 @@ async def test_local_environment():
     
     import os
     import uuid
-    from unittest.mock import patch
     
     # Set environment to staging
     env.set("ENVIRONMENT", "staging", "test")

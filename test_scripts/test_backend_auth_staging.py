@@ -8,6 +8,7 @@ import httpx
 import json
 import uuid
 from typing import Dict, Any
+from shared.isolated_environment import IsolatedEnvironment
 
 BACKEND_URL = "https://netra-backend-staging-pnovr5vsba-uc.a.run.app"
 

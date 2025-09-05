@@ -8,6 +8,7 @@ import sys
 from datetime import datetime
 from pathlib import Path
 from typing import Dict, Optional
+from shared.isolated_environment import IsolatedEnvironment
 
 
 class TestDashboard:

@@ -5,6 +5,7 @@ import requests
 import jwt
 import json
 from datetime import datetime, timedelta
+from shared.isolated_environment import IsolatedEnvironment
 
 # Test JWT secrets
 JWT_SECRETS = {

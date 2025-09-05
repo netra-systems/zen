@@ -9,6 +9,7 @@ import time
 import httpx
 from datetime import datetime
 from typing import Optional, Dict, Tuple
+from shared.isolated_environment import IsolatedEnvironment
 
 
 class StagingAuthE2ETest:

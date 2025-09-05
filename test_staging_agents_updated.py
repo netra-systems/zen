@@ -8,6 +8,7 @@ import time
 import sys
 import uuid
 from typing import Dict, List, Optional
+from shared.isolated_environment import IsolatedEnvironment
 
 # LIVE STAGING ENDPOINTS (discovered from OpenAPI)
 STAGING_BASE_URL = "https://api.staging.netrasystems.ai"

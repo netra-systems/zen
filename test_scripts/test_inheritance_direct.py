@@ -5,6 +5,7 @@ import sys
 import inspect
 import asyncio
 import traceback
+from shared.isolated_environment import IsolatedEnvironment
 
 # Add project root to path
 sys.path.insert(0, r'C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1')

@@ -6,6 +6,7 @@ import asyncio
 import httpx
 import json
 from datetime import datetime
+from shared.isolated_environment import IsolatedEnvironment
 
 async def test_jwt_validation():
     """Test the exact JWT validation flow that's failing"""

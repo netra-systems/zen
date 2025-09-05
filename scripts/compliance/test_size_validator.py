@@ -25,6 +25,7 @@ from collections import defaultdict
 from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Dict, List, Optional, Set, Tuple
+from shared.isolated_environment import IsolatedEnvironment
 
 # Add project root to path
 

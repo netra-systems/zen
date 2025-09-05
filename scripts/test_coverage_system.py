@@ -9,6 +9,7 @@ import sys
 from pathlib import Path
 import json
 import xml.etree.ElementTree as ET
+from shared.isolated_environment import IsolatedEnvironment
 
 def main():
     """Test the coverage reporting system."""

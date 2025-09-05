@@ -9,6 +9,7 @@ import subprocess
 from collections import defaultdict
 from pathlib import Path
 from typing import Any, Dict, List
+from shared.isolated_environment import IsolatedEnvironment
 
 from scripts.autonomous_review.report_generator import ReportGenerator
 from scripts.autonomous_review.test_generator import TestGenerator

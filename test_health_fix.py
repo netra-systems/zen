@@ -4,6 +4,7 @@
 import asyncio
 import sys
 from pathlib import Path
+from shared.isolated_environment import IsolatedEnvironment
 
 # Add project root to Python path
 sys.path.insert(0, str(Path(__file__).parent))

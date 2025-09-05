@@ -1,4 +1,5 @@
 from shared.isolated_environment import get_env
+from shared.isolated_environment import IsolatedEnvironment
 """
 Standalone Agent Component Test
 
@@ -18,7 +19,6 @@ import pytest
 import asyncio
 import uuid
 from typing import Dict, Any
-from unittest.mock import AsyncMock, MagicMock
 
 # Set up minimal environment before imports
 os.environ['TESTING'] = '1'

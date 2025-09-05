@@ -3,6 +3,7 @@
 
 import sys
 import asyncio
+from shared.isolated_environment import IsolatedEnvironment
 sys.path.insert(0, r'C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1')
 
 async def test_websocket_integration():

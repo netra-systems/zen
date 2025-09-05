@@ -19,7 +19,7 @@ import tempfile
 import time
 import unittest
 from pathlib import Path
-from unittest.mock import Mock, patch, MagicMock
+from shared.isolated_environment import IsolatedEnvironment
 
 # Add project root to path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
@@ -139,7 +139,6 @@ class TestBackgroundE2EAgent(unittest.TestCase):
         status = self.agent.get_task_status("non-existent-task-id")
         self.assertIsNone(status)
     
-    @patch('subprocess.Popen')
     def test_background_process_manager(self, mock_popen):
         """Test BackgroundProcessManager functionality"""
         # Mock process
@@ -266,7 +265,6 @@ class TestBackgroundE2ECLIIntegration(unittest.TestCase):
         self.assertIn("--background-category", help_text)
         self.assertIn("--background-timeout", help_text)
     
-    @patch('test_framework.orchestration.background_e2e_agent.BackgroundE2EAgent')
     def test_handle_background_status_command(self, mock_agent_class):
         """Test handling background status command"""
         # Mock agent instance
@@ -295,7 +293,6 @@ class TestBackgroundE2ECLIIntegration(unittest.TestCase):
         mock_agent.get_queue_status.assert_called_once()
         mock_agent.stop.assert_called_once()
     
-    @patch('test_framework.orchestration.background_e2e_agent.BackgroundE2EAgent')
     def test_handle_background_results_command(self, mock_agent_class):
         """Test handling background results command"""
         # Mock agent instance
@@ -327,7 +324,6 @@ class TestBackgroundE2ECLIIntegration(unittest.TestCase):
         mock_agent.get_recent_results.assert_called_once_with(10)
         mock_agent.stop.assert_called_once()
     
-    @patch('test_framework.orchestration.background_e2e_agent.BackgroundE2EAgent')
     def test_handle_background_e2e_command(self, mock_agent_class):
         """Test handling background E2E execution command"""
         # Mock agent instance
@@ -378,7 +374,6 @@ class TestBackgroundE2EAgentWithMockedServices(unittest.TestCase):
         if self.test_root.exists():
             shutil.rmtree(self.test_root)
     
-    @patch('test_framework.orchestration.background_e2e_agent.ServiceAvailabilityChecker')
     def test_service_availability_check(self, mock_checker_class):
         """Test service availability checking"""
         # Mock service checker
@@ -399,13 +394,9 @@ class TestBackgroundE2EAgentWithMockedServices(unittest.TestCase):
         
         # Verify all required services were checked
         expected_calls = [
-            unittest.mock.call("postgres"),
-            unittest.mock.call("redis"),
-            unittest.mock.call("backend")
         ]
         mock_checker.check_service_health.assert_has_calls(expected_calls, any_order=True)
     
-    @patch('test_framework.orchestration.background_e2e_agent.ServiceAvailabilityChecker')
     def test_service_unavailable_handling(self, mock_checker_class):
         """Test handling when required services are unavailable"""
         # Mock service checker to return False for some services

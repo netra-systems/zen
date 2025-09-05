@@ -3,7 +3,7 @@
 
 import asyncio
 import sys
-from unittest.mock import Mock, AsyncMock
+from shared.isolated_environment import IsolatedEnvironment
 
 print("=" * 60)
 print("SUPERVISOR AGENT IMPORT TEST")

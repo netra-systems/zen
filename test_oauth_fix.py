@@ -2,8 +2,9 @@
 
 from fastapi.testclient import TestClient
 from auth_service.main import app
-from unittest.mock import patch
 import sys
+from auth_service.core.auth_manager import AuthManager
+from shared.isolated_environment import IsolatedEnvironment
 
 def test_oauth_login_route():
     """Test that GET /auth/login?provider=google works"""

@@ -1,3 +1,4 @@
+from shared.isolated_environment import IsolatedEnvironment
 #!/usr/bin/env python3
 """
 Test Limits Violation Examples and Fixes

@@ -7,6 +7,7 @@ import tempfile
 from pathlib import Path
 from google.cloud import secretmanager
 from shared.isolated_environment import get_env
+from shared.isolated_environment import IsolatedEnvironment
 
 # Add parent directory to path
 sys.path.insert(0, str(Path(__file__).parent.parent))

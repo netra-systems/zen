@@ -4,6 +4,7 @@ import sys
 from pathlib import Path
 import traceback
 from typing import Dict, Any
+from shared.isolated_environment import IsolatedEnvironment
 
 # Add parent directory to path
 sys.path.insert(0, str(Path(__file__).parent.parent))

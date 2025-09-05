@@ -1,11 +1,11 @@
 from shared.isolated_environment import get_env
+from shared.isolated_environment import IsolatedEnvironment
 #!/usr/bin/env python
 """Isolated test for WebSocket bridge lifecycle audit."""
 
 import asyncio
 import os
 import sys
-from unittest.mock import AsyncMock, MagicMock, patch
 
 # Add project root to path
 project_root = os.path.abspath(os.path.dirname(__file__))

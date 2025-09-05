@@ -7,6 +7,7 @@ import os
 import subprocess
 import sys
 import tempfile
+from shared.isolated_environment import IsolatedEnvironment
 
 
 def create_memory_intensive_test():

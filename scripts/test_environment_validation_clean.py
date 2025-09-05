@@ -12,6 +12,7 @@ Reduces environment-related service failures by 90% through intelligent categori
 import sys
 import os
 from pathlib import Path
+from shared.isolated_environment import IsolatedEnvironment
 
 # Add the project root to the Python path
 project_root = Path(__file__).parent.parent
