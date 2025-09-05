@@ -23,14 +23,16 @@ class TestDatetimeUtils:
     
     def test_core_functionality(self, instance):
         """Test core business logic"""
-        # Test happy path
-        result = instance.process()
+        # Test happy path - get UTC time
+        result = instance.now_utc()
         assert result is not None
+        assert result.tzinfo is not None
     
     def test_error_handling(self, instance):
         """Test error scenarios"""
-        with pytest.raises(Exception):
-            instance.process_invalid()
+        # Test with invalid timezone should not raise exception, just return original datetime
+        result = instance.convert_timezone(instance.now_utc(), "Invalid/Timezone")
+        assert result is not None
     
     def test_edge_cases(self, instance):
         """Test boundary conditions"""

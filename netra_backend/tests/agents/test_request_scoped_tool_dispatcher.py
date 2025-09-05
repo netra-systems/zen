@@ -34,7 +34,7 @@ from netra_backend.app.agents.tool_executor_factory import (
     isolated_tool_dispatcher_scope
 )
 from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
-from netra_backend.app.services.websocket_event_emitter import WebSocketEventEmitter
+from netra_backend.app.websocket_core import WebSocketEventEmitter
 from netra_backend.app.agents.tool_dispatcher_core import ToolDispatcher
 from netra_backend.app.schemas.tool import ToolInput, ToolResult, ToolStatus
 
