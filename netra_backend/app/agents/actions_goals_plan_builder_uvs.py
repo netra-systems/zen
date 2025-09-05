@@ -696,8 +696,15 @@ class ActionPlanBuilderUVS(ActionPlanBuilder):
         # Store UVS metadata in the AgentMetadata custom_fields
         result.metadata.custom_fields.update({
             'uvs_mode': 'ultimate_fallback',
+            'data_state': 'error',
             'error': error_msg,
-            'recovery_mode': True
+            'recovery_mode': True,
+            'next_steps': [
+                'Contact support if issue persists',
+                'Review error message for details',
+                'Retry with simplified request'
+            ],
+            'user_guidance': 'The system encountered an issue but has provided fallback guidance above.'
         })
         return result
     

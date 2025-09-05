@@ -1,697 +1,481 @@
-# Multi-Agent Team: UVS Frontend Multiturn Conversation Support v3
+# Multi-Agent Team: UVS Frontend Multiturn Conversation Support
 
-## 📚 CRITICAL: Required Reading Before Starting
+## Required Reading Before Starting
 
-### Primary Source of Truth
-**MUST READ FIRST**: [`../../UVS_REQUIREMENTS.md`](../../UVS_REQUIREMENTS.md) - This is the authoritative specification for UVS implementation.
-
-### Coordination with Backend Teams
-**For backend implementation details**, read the backend agent prompts:
-- `01_action_plan_enhancement_prompt.md` - ActionPlanBuilder resilience
-- `02_reporting_resilience_prompt.md` - ReportingSubAgent UVS
-- `03_supervisor_orchestration_prompt.md` - Simplified orchestration
-
-This prompt focuses on frontend implementation to enable seamless multiturn conversations with UVS.
+### Primary Sources of Truth (READ IN ORDER)
+1. **[`../../UVS_REQUIREMENTS.md`](../../UVS_REQUIREMENTS.md)** - Authoritative UVS specification
+2. **[`../../CLAUDE.md`](../../CLAUDE.md)** - Core directives and SSOT principles  
+3. **[`../../docs/AGENT_ARCHITECTURE_DISAMBIGUATION_GUIDE.md`](../../docs/AGENT_ARCHITECTURE_DISAMBIGUATION_GUIDE.md)** - Agent architecture clarity
+4. **[`../../SPEC/learnings/websocket_agent_integration_critical.xml`](../../SPEC/learnings/websocket_agent_integration_critical.xml)** - WebSocket SSOT patterns
 
 ## Team Mission
-Enhance the frontend to support multiturn conversations that leverage the UVS system, ensuring users can iteratively refine their optimization requests and always receive value, even with incomplete data.
+Enhance frontend to support multiturn conversations leveraging UVS, ensuring:
+- **CHAT IS KING**: Always deliver substantive value (per CLAUDE.md §1.1)
+- **Zero Silent Failures**: All errors are loud and visible
+- **User Isolation**: Factory pattern for multi-user safety
+- **Business Value**: Time-to-value < 2 minutes for new users
 
 ## Team Composition & Roles
 
-### 1. Principal Engineer (Coordinator)
-- **Role**: Frontend architecture and WebSocket integration
+### 1. Principal Engineer (Coordinator + SSOT Guardian)
+- **Primary Responsibilities**:
+  - Enforce SSOT principles from CLAUDE.md
+  - Implement factory pattern for frontend isolation
+  - Ensure WebSocket bridge pattern compliance
+  - Coordinate with AgentWebSocketBridge backend
+- **Critical Tasks**:
+  - Validate against `MISSION_CRITICAL_NAMED_VALUES_INDEX.xml`
+  - Implement race condition prevention
+  - Create comprehensive MRO analysis for component inheritance
+
+### 2. Product Manager Agent (Business Value Driver)
 - **Responsibilities**:
-  - Design conversation state management
-  - Implement WebSocket event handling for UVS flows
-  - Coordinate between UI components and backend
-  - Ensure seamless user experience
+  - Map user journeys with BVJ (Business Value Justification)
+  - Define conversion metrics (Free → Paid)
+  - Ensure "Chat delivers COMPLETE value" (CLAUDE.md §1.1)
+  - Create fallback UX for all failure modes
 
-### 2. Product Manager Agent
-- **Role**: User experience and conversation flows
+### 3. Implementation Agent (Execution with Resilience)
 - **Responsibilities**:
-  - Map multiturn conversation journeys
-  - Define UI feedback patterns for UVS states
-  - Create success metrics for engagement
-  - Validate "CHAT IS KING" in UI/UX
+  - Implement with circuit breakers and retry logic
+  - Use factory pattern for component instantiation
+  - Add comprehensive error boundaries
+  - Follow `SPEC/type_safety.xml` strictly
 
-### 3. Implementation Agent
-- **Role**: Execute frontend enhancements
+### 4. QA/Security Agent (Mission Critical Testing)
 - **Responsibilities**:
-  - Implement conversation context persistence
-  - Add UI components for progressive data collection
-  - Create visual indicators for UVS report types
-  - Build interactive guidance elements
+  - Test against `tests/mission_critical/test_websocket_agent_events_suite.py`
+  - Verify multi-user isolation (10+ concurrent users)
+  - Test all 4 UVS report types + edge cases
+  - Validate WebSocket event ordering
 
-### 4. QA/Security Agent
-- **Role**: Frontend testing and validation
-- **Responsibilities**:
-  - Test multiturn conversation flows
-  - Verify state management across sessions
-  - Validate WebSocket resilience
-  - Test progressive enhancement scenarios
+## Critical Architecture Patterns
 
-## Context & Requirements
-
-### Core UVS Frontend Principles
+### 1. Frontend Factory Pattern
 ```typescript
-// Frontend must support these UVS modes
-enum ReportType {
-  FULL_ANALYSIS = 'full_analysis',     // Complete data available
-  PARTIAL_ANALYSIS = 'partial_analysis', // Some data available
-  GUIDANCE = 'guidance',                // No data - help user get started
-  FALLBACK = 'fallback'                 // Error recovery mode
-}
-
-// Conversation must maintain context
-interface ConversationContext {
-  sessionId: string;
-  turnCount: number;
-  dataCollected: DataSufficiency;
-  previousResponses: ChatMessage[];
-  currentWorkflow: WorkflowType;
-  nextSteps: string[];
-}
-```
-
-### Multiturn Conversation Features
-
-#### 1. Progressive Data Collection
-```typescript
-interface ProgressiveDataUI {
-  // Show what data we have
-  dataCompleteness: {
-    usage_data: boolean;
-    cost_data: boolean;
-    performance_data: boolean;
-  };
+// SSOT: Frontend component factory for user isolation
+class FrontendComponentFactory {
+  private static instances = new Map<string, ConversationManager>();
   
-  // Guide user to provide missing pieces
-  missingDataPrompts: string[];
+  static getConversationManager(userId: string): ConversationManager {
+    const key = `conv_${userId}`;
+    if (!this.instances.has(key)) {
+      // Create isolated instance per user
+      this.instances.set(key, new ConversationManager(userId));
+    }
+    return this.instances.get(key)!;
+  }
   
-  // Allow incremental uploads
-  uploadHandlers: {
-    csv: (file: File) => void;
-    json: (file: File) => void;
-    text: (description: string) => void;
-  };
-}
-```
-
-#### 2. Dynamic UI Based on Report Type
-```tsx
-function ReportDisplay({ report }: { report: UVSReport }) {
-  switch (report.report_type) {
-    case 'full_analysis':
-      return <FullAnalysisView 
-        data={report.data_insights}
-        optimizations={report.optimizations}
-        savings={report.savings_potential}
-        charts={report.visualizations}
-      />;
-      
-    case 'partial_analysis':
-      return <PartialAnalysisView
-        availableData={report.available_sections}
-        insights={report.data_insights}
-        missingDataGuide={report.missing_data_guidance}
-        nextSteps={report.next_steps}
-      />;
-      
-    case 'guidance':
-      return <GuidanceView
-        questions={report.exploration_questions}
-        dataGuide={report.data_collection_guide}
-        examples={report.example_optimizations}
-        nextSteps={report.next_steps}
-      />;
-      
-    case 'fallback':
-      return <FallbackView
-        message={report.message}
-        alternatives={report.conversation_starters}
-        capabilities={report.capabilities}
-      />;
+  static cleanup(userId: string): void {
+    const key = `conv_${userId}`;
+    const instance = this.instances.get(key);
+    if (instance) {
+      instance.dispose();
+      this.instances.delete(key);
+    }
   }
 }
 ```
 
-#### 3. Interactive Next Steps
-```tsx
-interface NextStepsComponent {
-  steps: NextStep[];
-  onStepClick: (step: NextStep) => void;
-}
-
-function NextSteps({ steps, onStepClick }: NextStepsComponent) {
-  return (
-    <div className="next-steps-container">
-      <h3>What would you like to do next?</h3>
-      {steps.map((step, index) => (
-        <button
-          key={index}
-          onClick={() => onStepClick(step)}
-          className="next-step-action"
-        >
-          {step.icon && <Icon name={step.icon} />}
-          {step.label}
-        </button>
-      ))}
-    </div>
-  );
+### 2. WebSocket Bridge Integration
+```typescript
+// Must integrate with backend AgentWebSocketBridge pattern
+class WebSocketBridgeClient {
+  private bridge: AgentWebSocketBridge;
+  private retryPolicy = new ExponentialBackoff();
+  private circuitBreaker = new CircuitBreaker();
+  
+  async ensureIntegration(): Promise<void> {
+    // Idempotent initialization (per websocket_agent_integration_critical.xml)
+    if (this.isIntegrated()) return;
+    
+    await this.circuitBreaker.call(async () => {
+      await this.bridge.ensure_integration();
+      await this.validateEventFlow();
+    });
+  }
+  
+  private async validateEventFlow(): Promise<void> {
+    // Verify all 5 critical events from CLAUDE.md §6
+    const requiredEvents = [
+      'agent_started',
+      'agent_thinking', 
+      'tool_executing',
+      'tool_completed',
+      'agent_completed'
+    ];
+    
+    for (const event of requiredEvents) {
+      if (!this.bridge.supportsEvent(event)) {
+        throw new Error(`Missing critical event: ${event}`);
+      }
+    }
+  }
 }
 ```
 
-## Implementation Requirements
-
-### 1. Conversation State Management
-
+### 3. Race Condition Prevention
 ```typescript
+// CLAUDE.md: "Avoid architectural overkill" - Use simple, proven patterns
+
+// Pattern 1: Simple queue with processing flag
 class ConversationManager {
-  private context: ConversationContext;
-  private websocket: WebSocketManager;
+  private messageQueue: Message[] = [];
+  private isProcessing = false;
   
-  constructor(sessionId: string) {
-    this.context = {
-      sessionId,
-      turnCount: 0,
-      dataCollected: DataSufficiency.NONE,
-      previousResponses: [],
-      currentWorkflow: null,
-      nextSteps: []
-    };
+  async sendMessage(message: string): Promise<void> {
+    // Queue the message
+    this.messageQueue.push({ text: message, timestamp: Date.now() });
+    
+    // Process if not already processing
+    if (!this.isProcessing) {
+      await this.processMessageQueue();
+    }
   }
   
-  async sendMessage(message: string, attachments?: File[]) {
-    this.context.turnCount++;
+  private async processMessageQueue(): Promise<void> {
+    this.isProcessing = true;
     
-    // Include context in request
-    const request = {
-      message,
-      attachments,
-      context: {
-        turn_count: this.context.turnCount,
-        data_collected: this.context.dataCollected,
-        previous_summary: this.summarizePrevious()
+    while (this.messageQueue.length > 0) {
+      const message = this.messageQueue.shift()!;
+      try {
+        await this.websocket.send('user_message', message);
+        await this.waitForResponse();
+      } catch (error) {
+        console.error('🚨 Message send failed:', error);
+        this.messageQueue.unshift(message); // Re-queue for retry
+        break;
       }
-    };
+    }
     
-    await this.websocket.send('user_message', request);
+    this.isProcessing = false;
   }
+}
+
+// Pattern 2: Use React's built-in state batching
+function useMessageQueue() {
+  const [sending, setSending] = useState(false);
+  const [queue, setQueue] = useState<Message[]>([]);
   
-  handleUVSResponse(response: UVSReport) {
-    // Update context based on response
-    this.updateDataSufficiency(response);
-    this.context.previousResponses.push(response);
-    this.context.nextSteps = response.next_steps || [];
+  const sendMessage = useCallback(async (text: string) => {
+    if (sending) {
+      // React batches state updates - no race condition
+      setQueue(prev => [...prev, { text }]);
+      return;
+    }
     
-    // Update UI to show appropriate view
-    this.renderResponse(response);
-  }
+    setSending(true);
+    try {
+      await api.sendMessage(text);
+    } finally {
+      setSending(false);
+      // Process next in queue if any
+      setQueue(prev => {
+        const [next, ...rest] = prev;
+        if (next) sendMessage(next.text);
+        return rest;
+      });
+    }
+  }, [sending]);
   
-  private updateDataSufficiency(response: UVSReport) {
-    if (response.report_type === 'full_analysis') {
-      this.context.dataCollected = DataSufficiency.SUFFICIENT;
-    } else if (response.report_type === 'partial_analysis') {
-      this.context.dataCollected = DataSufficiency.PARTIAL;
+  return { sendMessage, sending, queueLength: queue.length };
+}
+
+// Pattern 3: AbortController for cancellable requests (Web Standard)
+class RequestManager {
+  private currentRequest?: AbortController;
+  
+  async sendMessage(message: string): Promise<void> {
+    // Cancel in-flight request
+    this.currentRequest?.abort();
+    
+    this.currentRequest = new AbortController();
+    
+    try {
+      await fetch('/api/message', {
+        method: 'POST',
+        body: JSON.stringify({ message }),
+        signal: this.currentRequest.signal
+      });
+    } catch (error) {
+      if (error.name !== 'AbortError') throw error;
     }
   }
 }
 ```
 
-### 2. WebSocket Event Handling for UVS
-
-```typescript
-class UVSWebSocketHandler {
-  private socket: WebSocket;
-  private ui: UIManager;
-  
-  setupEventHandlers() {
-    // Workflow type indication
-    this.socket.on('workflow_started', (data) => {
-      this.ui.showWorkflowIndicator(data.workflow_type);
-      
-      if (data.workflow_type === 'guidance') {
-        this.ui.showMessage('I\'ll help you get started with optimization');
-      } else if (data.workflow_type === 'partial_analysis') {
-        this.ui.showMessage('Analyzing available data...');
-      }
-    });
-    
-    // Agent progress
-    this.socket.on('agent_started', (data) => {
-      if (data.agent === 'data_helper') {
-        this.ui.showHelper('Preparing data collection guidance...');
-      }
-    });
-    
-    // Handle different report types
-    this.socket.on('agent_completed', (data) => {
-      if (data.agent === 'reporting') {
-        this.handleReportingComplete(data);
-      }
-    });
-  }
-  
-  private handleReportingComplete(data: any) {
-    // Determine UI based on report type
-    switch (data.report_type) {
-      case 'guidance':
-        this.ui.showGuidanceMode();
-        this.ui.enableDataUpload();
-        break;
-      case 'partial_analysis':
-        this.ui.showPartialResults();
-        this.ui.highlightMissingData();
-        break;
-      case 'full_analysis':
-        this.ui.showFullAnalysis();
-        break;
-    }
-  }
-}
-```
-
-### 3. Progressive Enhancement UI Components
-
+### 4. Error Boundaries with Loud Failures
 ```tsx
-// Data Collection Helper Component
-function DataCollectionHelper({ missingData }: { missingData: string[] }) {
-  const [uploadProgress, setUploadProgress] = useState({});
-  
-  return (
-    <div className="data-collection-helper">
-      <h3>Help us analyze your AI usage better</h3>
-      
-      {missingData.includes('usage_data') && (
-        <div className="data-request">
-          <Icon name="chart" />
-          <div>
-            <h4>Usage Data</h4>
-            <p>Upload your AI service usage logs or metrics</p>
-            <FileUpload 
-              accept=".csv,.json"
-              onUpload={(file) => handleDataUpload('usage', file)}
-            />
-          </div>
-        </div>
-      )}
-      
-      {missingData.includes('cost_data') && (
-        <div className="data-request">
-          <Icon name="dollar" />
-          <div>
-            <h4>Cost Data</h4>
-            <p>Share your billing or cost reports</p>
-            <FileUpload 
-              accept=".csv,.pdf"
-              onUpload={(file) => handleDataUpload('cost', file)}
-            />
-          </div>
-        </div>
-      )}
-      
-      <div className="alternative-input">
-        <p>Or describe your setup:</p>
-        <textarea 
-          placeholder="E.g., We use GPT-4 for customer support, processing about 10k requests daily..."
-          onBlur={(e) => handleTextDescription(e.target.value)}
-        />
-      </div>
-    </div>
-  );
-}
-
-// Adaptive Report Display
-function AdaptiveReport({ report, onNextStep }: AdaptiveReportProps) {
-  const [expanded, setExpanded] = useState({});
-  
-  return (
-    <div className={`report-container report-${report.report_type}`}>
-      {/* Visual indicator of report completeness */}
-      <DataCompletenessIndicator 
-        level={report.data_completeness || 0}
-      />
-      
-      {/* Dynamic content based on report type */}
-      {report.report_type === 'guidance' ? (
-        <GuidanceContent 
-          questions={report.exploration_questions}
-          onQuestionAnswer={(q, a) => handleQuestionResponse(q, a)}
-        />
-      ) : report.report_type === 'partial_analysis' ? (
-        <PartialAnalysisContent
-          available={report.available_sections}
-          missing={report.missing_data_guidance}
-          onProvideData={() => showDataHelper()}
-        />
-      ) : (
-        <FullAnalysisContent 
-          insights={report.data_insights}
-          optimizations={report.optimizations}
-        />
-      )}
-      
-      {/* Always show next steps */}
-      <NextStepsSection 
-        steps={report.next_steps}
-        onSelectStep={onNextStep}
-      />
-    </div>
-  );
-}
-```
-
-### 4. Conversation Context Persistence
-
-```typescript
-class ConversationPersistence {
-  private storage = window.localStorage;
-  private sessionKey: string;
-  
-  saveContext(context: ConversationContext) {
-    this.storage.setItem(
-      this.sessionKey,
-      JSON.stringify({
-        ...context,
-        timestamp: Date.now()
-      })
-    );
-  }
-  
-  loadContext(): ConversationContext | null {
-    const saved = this.storage.getItem(this.sessionKey);
-    if (!saved) return null;
+// CLAUDE.md: "Make all errors loud. Protect against silent errors."
+class UVSErrorBoundary extends React.Component<Props, State> {
+  componentDidCatch(error: Error, info: ErrorInfo) {
+    // LOUD error logging
+    console.error('🚨 UVS ERROR:', error);
+    console.error('Component Stack:', info.componentStack);
     
-    const parsed = JSON.parse(saved);
+    // Send to monitoring
+    this.sendToMonitoring({
+      error: error.message,
+      stack: error.stack,
+      component: info.componentStack,
+      userId: this.props.userId,
+      timestamp: Date.now()
+    });
     
-    // Check if context is still valid (e.g., not older than 1 hour)
-    if (Date.now() - parsed.timestamp > 3600000) {
-      this.storage.removeItem(this.sessionKey);
-      return null;
-    }
-    
-    return parsed;
-  }
-  
-  appendToConversation(message: ChatMessage) {
-    const context = this.loadContext() || this.createNewContext();
-    context.previousResponses.push(message);
-    context.turnCount++;
-    this.saveContext(context);
-  }
-}
-```
-
-## UI/UX Patterns for UVS
-
-### Visual Feedback States
-
-```css
-/* Different visual states for report types */
-.report-guidance {
-  border-left: 4px solid #3498db; /* Blue - informational */
-}
-
-.report-partial_analysis {
-  border-left: 4px solid #f39c12; /* Orange - incomplete */
-}
-
-.report-full_analysis {
-  border-left: 4px solid #27ae60; /* Green - complete */
-}
-
-.report-fallback {
-  border-left: 4px solid #95a5a6; /* Gray - recovery */
-}
-
-/* Progress indicators */
-.data-completeness-bar {
-  height: 8px;
-  background: linear-gradient(
-    to right,
-    #27ae60 var(--completeness),
-    #ecf0f1 var(--completeness)
-  );
-}
-
-/* Interactive elements for next steps */
-.next-step-action {
-  transition: all 0.2s;
-  cursor: pointer;
-}
-
-.next-step-action:hover {
-  transform: translateX(4px);
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-}
-```
-
-### Conversation Flow Animations
-
-```typescript
-// Smooth transitions between report states
-function animateReportTransition(
-  fromType: ReportType,
-  toType: ReportType
-) {
-  const container = document.querySelector('.report-container');
-  
-  container.style.animation = 'fadeOut 0.3s';
-  
-  setTimeout(() => {
-    // Update content
-    updateReportContent(toType);
-    
-    // Animate in with appropriate effect
-    if (toType === 'full_analysis' && fromType === 'partial_analysis') {
-      container.style.animation = 'slideUpFadeIn 0.5s';
-    } else {
-      container.style.animation = 'fadeIn 0.3s';
-    }
-  }, 300);
-}
-```
-
-## Testing Scenarios
-
-### Scenario 1: No Data to Full Analysis Journey
-```typescript
-async function test_progressive_data_collection() {
-  // Start with no data
-  const conversation = new ConversationManager('test-session');
-  await conversation.sendMessage('Help me optimize my AI costs');
-  
-  // Should receive guidance report
-  expect(ui.getCurrentReportType()).toBe('guidance');
-  expect(ui.hasDataUploadPrompts()).toBe(true);
-  
-  // Upload partial data
-  await conversation.uploadFile(mockUsageData);
-  
-  // Should receive partial analysis
-  expect(ui.getCurrentReportType()).toBe('partial_analysis');
-  expect(ui.hasMissingDataIndicators()).toBe(true);
-  
-  // Upload remaining data
-  await conversation.uploadFile(mockCostData);
-  
-  // Should receive full analysis
-  expect(ui.getCurrentReportType()).toBe('full_analysis');
-  expect(ui.hasCompleteOptimizations()).toBe(true);
-}
-```
-
-### Scenario 2: Conversation Context Retention
-```typescript
-async function test_context_persistence() {
-  // First turn
-  const conv1 = new ConversationManager('session-1');
-  await conv1.sendMessage('I use GPT-4 for customer service');
-  
-  // Simulate page refresh
-  window.location.reload();
-  
-  // Resume conversation
-  const conv2 = new ConversationManager('session-1');
-  await conv2.sendMessage('How can I reduce costs?');
-  
-  // Should remember previous context
-  expect(conv2.context.turnCount).toBe(2);
-  expect(conv2.context.previousResponses).toHaveLength(1);
-}
-```
-
-### Scenario 3: Fallback UI Handling
-```typescript
-async function test_fallback_ui() {
-  // Simulate backend error
-  mockWebSocket.simulateError('reporting_failed');
-  
-  await conversation.sendMessage('Analyze my usage');
-  
-  // UI should show fallback gracefully
-  expect(ui.getCurrentReportType()).toBe('fallback');
-  expect(ui.hasAlternativeActions()).toBe(true);
-  expect(ui.hasErrorMessages()).toBe(false); // Don't show technical errors
-}
-```
-
-## Performance Optimizations
-
-```typescript
-// Debounced text input for descriptions
-const handleTextDescription = debounce((text: string) => {
-  if (text.length > 50) {
-    conversation.addContext({ 
-      type: 'user_description',
-      content: text 
+    // Update UI to show error state
+    this.setState({
+      hasError: true,
+      errorType: this.categorizeError(error),
+      fallbackAction: this.determineFallback(error)
     });
   }
-}, 500);
-
-// Lazy load heavy visualizations
-const ChartComponent = lazy(() => import('./Charts'));
-
-// Cache report components
-const reportCache = new Map<string, ReactElement>();
-
-function getCachedReport(reportId: string, report: UVSReport) {
-  if (!reportCache.has(reportId)) {
-    reportCache.set(reportId, <AdaptiveReport report={report} />);
+  
+  render() {
+    if (this.state.hasError) {
+      return (
+        <FallbackUI
+          errorType={this.state.errorType}
+          action={this.state.fallbackAction}
+          onRetry={() => this.setState({ hasError: false })}
+        />
+      );
+    }
+    return this.props.children;
   }
-  return reportCache.get(reportId);
 }
 ```
 
-## Success Metrics
+## Edge Cases and Failure Modes
 
-### Week 1 Must-Haves
-✅ Conversation context persists across turns  
-✅ UI adapts to all 4 report types  
-✅ Data upload UI appears for guidance/partial reports  
-✅ Next steps are interactive and actionable  
-✅ WebSocket events update UI appropriately  
-✅ No UI crashes on any report type  
+### Critical Edge Cases to Handle
 
-### User Engagement Metrics
-- Time to first data upload (target: < 2 minutes)
-- Conversion from guidance to data provision (target: > 40%)
-- Multi-turn conversation rate (target: > 60%)
-- Next step click-through rate (target: > 30%)
-
-## Key Files to Modify
-
-### Frontend Components
-- `frontend/src/components/Chat/ChatInterface.tsx` - Main conversation UI
-- `frontend/src/components/Reports/AdaptiveReport.tsx` - Dynamic report display
-- `frontend/src/components/DataCollection/DataHelper.tsx` - Progressive data UI
-
-### State Management
-- `frontend/src/store/conversationSlice.ts` - Conversation context
-- `frontend/src/store/reportSlice.ts` - Report state handling
-
-### WebSocket Integration
-- `frontend/src/services/websocket.ts` - WebSocket event handlers
-- `frontend/src/services/uvs-handler.ts` - UVS-specific events
-
-### New Files to Create
-- `frontend/src/components/UVS/GuidanceView.tsx` - Guidance report UI
-- `frontend/src/components/UVS/ProgressIndicator.tsx` - Data completeness
-- `frontend/src/hooks/useConversationContext.ts` - Context management
-- `frontend/src/utils/reportTypeAdapter.ts` - Report type handling
-
-## Integration with Backend UVS
-
-### Request Format
+#### 1. WebSocket Disconnection During Multi-turn
 ```typescript
-interface UVSRequest {
-  message: string;
-  session_id: string;
-  turn_count: number;
-  context: {
-    data_sufficiency: DataSufficiency;
-    previous_report_type?: ReportType;
-    collected_data_types: string[];
-  };
-  attachments?: {
-    type: 'csv' | 'json' | 'text';
-    content: string | File;
-  }[];
+class WebSocketReconnectionHandler {
+  private messageBuffer: QueuedMessage[] = [];
+  private reconnectAttempts = 0;
+  
+  async handleDisconnection(): Promise<void> {
+    // Buffer messages during disconnection
+    this.startBuffering();
+    
+    // Attempt reconnection with backoff
+    while (this.reconnectAttempts < 5) {
+      try {
+        await this.reconnect();
+        await this.flushBuffer();
+        break;
+      } catch (e) {
+        this.reconnectAttempts++;
+        await this.exponentialBackoff();
+      }
+    }
+    
+    if (this.reconnectAttempts >= 5) {
+      // Switch to polling fallback
+      await this.switchToPollingMode();
+    }
+  }
 }
 ```
 
-### Response Handling
+#### 2. Concurrent User Message Race Conditions
 ```typescript
-interface UVSResponse {
-  report_type: ReportType;
-  content: any; // Varies by report type
-  next_steps: NextStep[];
-  data_completeness?: number; // 0-100
-  workflow_type: 'guidance' | 'partial_analysis' | 'full_analysis';
-  session_context?: {
-    can_continue: boolean;
-    suggested_actions: string[];
-  };
+interface MessageQueue {
+  userId: string;
+  queue: UserMessage[];
+  processing: boolean;
+}
+
+class ConcurrentMessageHandler {
+  private queues = new Map<string, MessageQueue>();
+  
+  async processMessage(userId: string, message: UserMessage): Promise<void> {
+    const queue = this.getOrCreateQueue(userId);
+    queue.queue.push(message);
+    
+    if (!queue.processing) {
+      queue.processing = true;
+      await this.processQueue(queue);
+    }
+  }
+  
+  private async processQueue(queue: MessageQueue): Promise<void> {
+    while (queue.queue.length > 0) {
+      const message = queue.queue.shift()!;
+      await this.sendWithRetry(message);
+    }
+    queue.processing = false;
+  }
 }
 ```
 
-## Critical Constraints
+#### 3. State Corruption Recovery
+```typescript
+class StateRecoveryManager {
+  private lastKnownGoodState: ConversationState;
+  private stateValidator = new StateValidator();
+  
+  async validateAndRecover(state: ConversationState): Promise<ConversationState> {
+    if (!this.stateValidator.isValid(state)) {
+      console.error('🚨 State corruption detected');
+      
+      // Attempt recovery strategies
+      const recovered = await this.tryRecoveryStrategies([
+        () => this.recoverFromLocalStorage(),
+        () => this.recoverFromServer(),
+        () => this.useLastKnownGood(),
+        () => this.createFreshState()
+      ]);
+      
+      return recovered;
+    }
+    
+    // State is valid, update last known good
+    this.lastKnownGoodState = structuredClone(state);
+    return state;
+  }
+}
+```
 
-### MUST Maintain
-- WebSocket connection stability
-- Message ordering guarantees
-- User authentication state
-- Existing API contracts
-- Browser compatibility (Chrome, Safari, Firefox, Edge)
+## SSOT Compliance Checklist
 
-### Performance Requirements
-- Report rendering: < 100ms
-- Context save/load: < 50ms
-- WebSocket latency: < 200ms
-- Smooth animations: 60fps
+### Pre-Implementation Verification
+- [ ] Read `MISSION_CRITICAL_NAMED_VALUES_INDEX.xml`
+- [ ] Verify all string literals with `scripts/query_string_literals.py`
+- [ ] Check `SPEC/mega_class_exceptions.xml` for allowed large classes
+- [ ] Review `SPEC/learnings/websocket_agent_integration_critical.xml`
+- [ ] Validate against `DEFINITION_OF_DONE_CHECKLIST.md`
+
+### Implementation Requirements
+- [ ] Use factory pattern for ALL component creation
+- [ ] Implement idempotent initialization
+- [ ] Add circuit breakers to external calls
+- [ ] Include retry with exponential backoff
+- [ ] Create comprehensive error boundaries
+- [ ] Log all errors loudly (no silent failures)
+- [ ] Test with 10+ concurrent users
+
+### Testing Requirements
+- [ ] Run `python tests/mission_critical/test_websocket_agent_events_suite.py`
+- [ ] Test all 4 UVS report types
+- [ ] Verify WebSocket event ordering
+- [ ] Test disconnection recovery
+- [ ] Validate race condition prevention
+- [ ] Test state corruption recovery
+- [ ] Verify memory cleanup
+
+## Performance Requirements
+
+### Critical Metrics
+- **First Meaningful Response**: < 500ms
+- **Complete Report Rendering**: < 100ms  
+- **WebSocket Latency**: < 200ms
+- **Context Save/Load**: < 50ms
+- **Memory Per User**: < 10MB
+- **Concurrent Users**: 10+ without degradation
+
+### Optimization Strategies
+```typescript
+// Use React.memo for expensive components
+const ExpensiveReport = React.memo(({ report }: Props) => {
+  // Component implementation
+}, (prevProps, nextProps) => {
+  // Custom comparison for re-render optimization
+  return prevProps.report.id === nextProps.report.id &&
+         prevProps.report.version === nextProps.report.version;
+});
+
+// Use virtual scrolling for long lists
+const VirtualizedMessageList = ({ messages }: { messages: Message[] }) => {
+  return (
+    <VirtualList
+      height={600}
+      itemCount={messages.length}
+      itemSize={80}
+      overscanCount={5}
+    >
+      {({ index, style }) => (
+        <div style={style}>
+          <MessageComponent message={messages[index]} />
+        </div>
+      )}
+    </VirtualList>
+  );
+};
+```
+
+## Deployment Validation
+
+### Pre-Deployment Checklist
+1. **Run unified test runner with real services**:
+   ```bash
+   python tests/unified_test_runner.py --real-services --categories unit integration e2e
+   ```
+
+2. **Verify WebSocket events**:
+   ```bash
+   python tests/mission_critical/test_websocket_agent_events_suite.py
+   ```
+
+3. **Check architecture compliance**:
+   ```bash
+   python scripts/check_architecture_compliance.py
+   ```
+
+4. **Update string literals index**:
+   ```bash
+   python scripts/scan_string_literals.py
+   ```
+
+### Rollback Triggers
+- Error rate > 1% in production
+- WebSocket connection failures > 5%
+- Response time > 1s for any UVS report type
+- Memory usage > 100MB per user
+- Any SSOT violation detected
+
+## Business Value Justification (BVJ)
+
+### Segment: All (Free → Enterprise)
+### Business Goal: Conversion & Retention
+### Value Impact:
+- **Free → Paid Conversion**: +15% through better UX
+- **User Engagement**: +60% multi-turn conversation rate
+- **Time to Value**: -50% (from 4 min to 2 min)
+- **Support Tickets**: -30% due to better guidance
+
+### Strategic Impact:
+- Foundation for AI-powered customer success
+- Enables data-driven optimization insights
+- Reduces onboarding friction significantly
+- Creates stickiness through conversation context
 
 ## Team Execution Flow
 
-1. **Principal** analyzes current frontend architecture
-2. **PM** designs optimal multiturn conversation flows
-3. **Principal** architects state management solution
-4. **Implementation** builds conversation context system
-5. **Implementation** creates adaptive UI components
-6. **QA** tests all conversation scenarios
-7. **Implementation** adds progressive enhancement
-8. **QA** validates cross-browser compatibility
-9. **Principal** integrates with backend WebSocket
-10. **Full team** monitors user engagement metrics
+1. **Principal** reviews SSOT compliance and architecture
+2. **Principal** performs MRO analysis on existing components
+3. **PM** validates BVJ and conversion metrics
+4. **Implementation** creates factory pattern infrastructure
+5. **Implementation** builds race condition guards
+6. **QA** creates edge case test suite
+7. **Implementation** adds error boundaries
+8. **Implementation** integrates WebSocket bridge
+9. **QA** runs mission-critical test suite
+10. **Principal** validates SSOT compliance
+11. **Full team** monitors rollout metrics
 
-## Deployment Strategy
+## Final Critical Reminders
 
-1. **Feature Flag Implementation**
-   ```typescript
-   if (features.uvsMultiturn) {
-     return <UVSConversationInterface />;
-   } else {
-     return <LegacyChatInterface />;
-   }
-   ```
+### From CLAUDE.md:
+- "ULTRA THINK DEEPLY ALWAYS. Our lives DEPEND on you SUCCEEDING."
+- "CHAT IS KING - SUBSTANTIVE VALUE"
+- "Make all errors loud"
+- "Protect against silent errors"
+- "COMPLETE YOUR TASKS FULLY"
 
-2. **A/B Testing**
-   - 10% initial rollout
-   - Monitor engagement metrics
-   - Gradual increase to 100%
-
-3. **Rollback Plan**
-   - Feature flag for instant disable
-   - Fallback to simple chat
-   - No data migration needed
-
-## Remember the Goal
-
-The frontend should make the UVS system feel magical to users:
-
-1. **Always Helpful** - Never leave user stuck
-2. **Progressive** - Build understanding over time
-3. **Responsive** - Immediate feedback for all actions
-4. **Intelligent** - Remember context and adapt
-5. **Delightful** - Smooth, intuitive interactions
-
-This is about creating a conversation, not just a Q&A. The UI should guide users naturally from "I need help" to "Here's my optimized AI strategy" regardless of how much data they start with.
+### From Learnings:
+- "ALL initialization methods must be idempotent"
+- "Business-critical integrations require proactive health monitoring"
+- "Always provide graceful degradation paths"
+- "Coordination concerns must be separated from domain concerns"

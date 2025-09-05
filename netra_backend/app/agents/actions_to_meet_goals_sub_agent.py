@@ -17,7 +17,7 @@ if TYPE_CHECKING:
     from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
     from netra_backend.app.database.session_manager import DatabaseSessionManager
 
-from netra_backend.app.agents.actions_goals_plan_builder import ActionPlanBuilder
+from netra_backend.app.agents.actions_goals_plan_builder_uvs import ActionPlanBuilderUVS
 from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.agents.input_validation import validate_agent_input
 from netra_backend.app.agents.prompts import actions_to_meet_goals_prompt_template
@@ -74,7 +74,7 @@ class ActionsToMeetGoalsSubAgent(BaseAgent):
         
         # Store business logic dependencies only
         self.tool_dispatcher = tool_dispatcher
-        self.action_plan_builder = ActionPlanBuilder()
+        self.action_plan_builder = ActionPlanBuilderUVS()  # UVS-enhanced for guaranteed value delivery
 
     async def validate_preconditions(self, context: 'UserExecutionContext') -> bool:
         """Validate execution preconditions for action plan generation."""
@@ -135,7 +135,7 @@ class ActionsToMeetGoalsSubAgent(BaseAgent):
         return {"action_plan_result": action_plan_result}
 
     async def _generate_action_plan(self, context: 'UserExecutionContext') -> ActionPlanResult:
-        """Generate action plan from context data with tool execution transparency."""
+        """Generate action plan from context data with tool execution transparency using UVS."""
         run_id = context.run_id
         
         # Extract data from context metadata
@@ -143,19 +143,20 @@ class ActionsToMeetGoalsSubAgent(BaseAgent):
         data_result = context.metadata.get('data_result')
         
         # Show tool execution for transparency
-        await self.emit_tool_executing("prompt_builder", {"optimizations": bool(optimizations_result), "data": bool(data_result)})
-        prompt = self._build_action_plan_prompt(context)
-        await self.emit_tool_completed("prompt_builder", {"prompt_size_kb": len(prompt) / 1024})
+        await self.emit_tool_executing("uvs_plan_builder", {"optimizations": bool(optimizations_result), "data": bool(data_result)})
         
-        # LLM execution with transparency
-        await self.emit_tool_executing("llm_processor", {"config": "actions_to_meet_goals"})
-        llm_response = await self._get_llm_response_with_monitoring(prompt)
-        await self.emit_tool_completed("llm_processor", {"response_size_kb": len(llm_response) / 1024})
+        # Use UVS adaptive plan generation for guaranteed value delivery
+        result = await self.action_plan_builder.generate_adaptive_plan(context)
         
-        # Action plan processing
-        await self.emit_tool_executing("action_plan_processor", {})
-        result = await self.action_plan_builder.process_llm_response(llm_response, run_id)
-        await self.emit_tool_completed("action_plan_processor", {"steps_generated": len(result.plan_steps) if result.plan_steps else 0})
+        # Extract UVS mode and data state for transparency
+        uvs_mode = result.metadata.custom_fields.get('uvs_mode', 'unknown') if hasattr(result, 'metadata') else 'unknown'
+        data_state = result.metadata.custom_fields.get('data_state', 'unknown') if hasattr(result, 'metadata') else 'unknown'
+        
+        await self.emit_tool_completed("uvs_plan_builder", {
+            "steps_generated": len(result.plan_steps) if result.plan_steps else 0,
+            "uvs_mode": uvs_mode,
+            "data_state": data_state
+        })
         
         return result
         
@@ -255,13 +256,17 @@ class ActionsToMeetGoalsSubAgent(BaseAgent):
     # Removed _execute_main_logic - integrated into main execute method
         
     async def _execute_fallback_logic(self, context: 'UserExecutionContext', stream_updates: bool) -> Dict[str, Any]:
-        """Fallback execution with proper WebSocket events for user transparency."""
+        """Fallback execution with proper WebSocket events for user transparency using UVS."""
         if stream_updates:
             await self.emit_agent_started("Creating fallback action plan due to processing issues")
-            await self.emit_thinking("Switching to fallback action plan generation...")
+            await self.emit_thinking("Switching to UVS fallback action plan generation...")
             
-        self.logger.warning(f"Using fallback action plan for run_id: {context.run_id}")
-        fallback_plan = ActionPlanBuilder.get_default_action_plan()
+        self.logger.warning(f"Using UVS fallback action plan for run_id: {context.run_id}")
+        
+        # Use UVS builder's ultimate fallback for guaranteed value
+        fallback_plan = self.action_plan_builder._get_ultimate_fallback_plan(
+            "Fallback triggered due to processing issues"
+        )
         
         # Note: Fallback result will be returned directly rather than stored in context
         
@@ -269,8 +274,9 @@ class ActionsToMeetGoalsSubAgent(BaseAgent):
             await self.emit_agent_completed({
                 "success": True,
                 "fallback_used": True,
+                "uvs_enabled": True,
                 "steps_generated": len(fallback_plan.plan_steps) if fallback_plan.plan_steps else 0,
-                "message": "Action plan created using fallback method"
+                "message": "Action plan created using UVS fallback method with guaranteed value delivery"
             })
             
         # CRITICAL: Store fallback action plan in context metadata for other agents
