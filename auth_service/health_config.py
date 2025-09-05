@@ -1,12 +1,12 @@
 """
 Auth service health check configuration.
-Simplified standalone health checks for auth service.
+Uses SSOT AuthEnvironment for all configuration access.
 """
 
 import os
 from typing import Dict, Any
 from enum import Enum
-from shared.isolated_environment import get_env
+from auth_service.auth_core.auth_environment import get_auth_env
 
 
 class HealthStatus(Enum):
@@ -40,19 +40,12 @@ async def check_auth_postgres_health() -> Dict[str, Any]:
 async def check_oauth_providers_health() -> Dict[str, Any]:
     """Check OAuth provider connectivity and configuration."""
     try:
-        # Check that OAuth providers are configured using environment-specific variables
-        env = get_env().get("ENVIRONMENT", "development").lower()
+        # Use SSOT AuthEnvironment for all configuration access
+        auth_env = get_auth_env()
         
-        # Check for environment-specific Google OAuth configuration
-        google_client_id = None
-        if env == "development":
-            google_client_id = get_env().get("GOOGLE_OAUTH_CLIENT_ID_DEVELOPMENT")
-        elif env == "staging":
-            google_client_id = get_env().get("GOOGLE_OAUTH_CLIENT_ID_STAGING")
-        elif env == "production":
-            google_client_id = get_env().get("GOOGLE_OAUTH_CLIENT_ID_PRODUCTION")
-            
-        github_client_id = get_env().get("GITHUB_CLIENT_ID")
+        # Check OAuth configuration using SSOT
+        google_client_id = auth_env.get_oauth_google_client_id()
+        github_client_id = auth_env.get_oauth_github_client_id()
         
         configured_providers = []
         if google_client_id:
@@ -82,8 +75,11 @@ async def check_oauth_providers_health() -> Dict[str, Any]:
 async def check_jwt_configuration() -> Dict[str, Any]:
     """Check JWT configuration and secret key."""
     try:
-        secret_key = get_env().get("SECRET_KEY") or get_env().get("JWT_SECRET_KEY")
-        algorithm = get_env().get("ALGORITHM", "HS256")
+        # Use SSOT AuthEnvironment for all JWT configuration
+        auth_env = get_auth_env()
+        
+        secret_key = auth_env.get_jwt_secret_key()
+        algorithm = auth_env.get_jwt_algorithm()
         
         if not secret_key:
             return {

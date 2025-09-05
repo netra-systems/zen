@@ -18,7 +18,21 @@ from shared.isolated_environment import get_env
 def check_health(port=None) -> bool:
     """Check if the auth service is healthy."""
     if port is None:
-        port = int(get_env().get('PORT', '8080'))
+        # Environment-specific port defaults (no fallback pattern)
+        port_str = get_env().get('PORT')
+        if port_str:
+            port = int(port_str)
+        else:
+            # Get environment to determine appropriate port
+            environment = get_env().get('ENVIRONMENT', 'development').lower()
+            if environment in ['production', 'staging']:
+                port = 8080  # Cloud Run standard port
+            elif environment == 'development':
+                port = 8081  # Development port
+            elif environment == 'test':
+                port = 8082  # Test port
+            else:
+                port = 8080  # Default
     
     try:
         url = f"http://localhost:{port}/health"
@@ -39,7 +53,21 @@ def check_health(port=None) -> bool:
 def check_readiness(port=None) -> bool:
     """Check if the auth service is ready to serve requests."""
     if port is None:
-        port = int(get_env().get('PORT', '8080'))
+        # Environment-specific port defaults (no fallback pattern)
+        port_str = get_env().get('PORT')
+        if port_str:
+            port = int(port_str)
+        else:
+            # Get environment to determine appropriate port
+            environment = get_env().get('ENVIRONMENT', 'development').lower()
+            if environment in ['production', 'staging']:
+                port = 8080  # Cloud Run standard port
+            elif environment == 'development':
+                port = 8081  # Development port
+            elif environment == 'test':
+                port = 8082  # Test port
+            else:
+                port = 8080  # Default
     
     try:
         url = f"http://localhost:{port}/readiness"
