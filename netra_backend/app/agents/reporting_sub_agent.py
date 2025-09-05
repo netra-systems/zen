@@ -751,12 +751,14 @@ class ReportingSubAgent(BaseAgent):
         # REQUIRED: Show thinking based on data availability
         if data_assessment['has_full_data']:
             await self.emit_thinking("Analyzing complete data set and generating comprehensive report...")
+            await self.emit_progress("Processing analysis data...")
             
             # Call LLM directly without fallback
             prompt = self._build_reporting_prompt(user_context)
             correlation_id = generate_llm_correlation_id()
             
             # This will raise exceptions for test compliance
+            await self.emit_thinking("Generating comprehensive report using AI reasoning...")
             llm_response_str = await self._execute_reporting_llm_with_observability(
                 prompt, correlation_id, user_context, stream_updates=True
             )
@@ -841,6 +843,10 @@ class ReportingSubAgent(BaseAgent):
             user_id=getattr(state, 'user_id', 'unknown'),
             session_id=getattr(state, 'chat_thread_id', run_id),
             correlation_id=f"report_{run_id}",
+            run_id=run_id,
+            agent_name="ReportingSubAgent",
+            state=state,
+            stream_updates=stream_updates,
             metadata={
                 "agent_name": "ReportingSubAgent",
                 "state": state,
@@ -953,71 +959,11 @@ class ReportingSubAgent(BaseAgent):
         return result
     
     # ========================================================================
-    # WEBSOCKET EVENT METHODS - Required by Golden Pattern
+    # WEBSOCKET EVENT METHODS - Inherited from BaseAgent (SSOT pattern)
     # ========================================================================
-    
-    async def emit_thinking(self, message: str) -> None:
-        """Emit thinking event to WebSocket
-        
-        Args:
-            message: Thinking message
-        """
-        if hasattr(self, '_websocket_adapter') and self._websocket_adapter:
-            try:
-                await self._websocket_adapter.emit_thinking(message)
-            except Exception as e:
-                self.logger.warning(f"Failed to emit thinking event: {e}")
-    
-    async def emit_progress(self, message: str, is_complete: bool = False) -> None:
-        """Emit progress event to WebSocket
-        
-        Args:
-            message: Progress message
-            is_complete: Whether progress is complete
-        """
-        if hasattr(self, '_websocket_adapter') and self._websocket_adapter:
-            try:
-                await self._websocket_adapter.emit_progress(message, is_complete)
-            except Exception as e:
-                self.logger.warning(f"Failed to emit progress event: {e}")
-    
-    async def emit_agent_completed(self, result: Dict[str, Any]) -> None:
-        """Emit agent completed event to WebSocket
-        
-        Args:
-            result: Agent result data
-        """
-        if hasattr(self, '_websocket_adapter') and self._websocket_adapter:
-            try:
-                await self._websocket_adapter.emit_agent_completed(result)
-            except Exception as e:
-                self.logger.warning(f"Failed to emit completion event: {e}")
-    
-    async def emit_error(self, message: str, error_type: str, details: Dict[str, Any] = None) -> None:
-        """Emit error event to WebSocket
-        
-        Args:
-            message: Error message
-            error_type: Type of error
-            details: Additional error details
-        """
-        if hasattr(self, '_websocket_adapter') and self._websocket_adapter:
-            try:
-                await self._websocket_adapter.emit_error(message, error_type, details or {})
-            except Exception as e:
-                self.logger.warning(f"Failed to emit error event: {e}")
-    
-    async def emit_agent_started(self, message: str) -> None:
-        """Emit agent started event to WebSocket
-        
-        Args:
-            message: Start message
-        """
-        if hasattr(self, '_websocket_adapter') and self._websocket_adapter:
-            try:
-                await self._websocket_adapter.emit_agent_started(message)
-            except Exception as e:
-                self.logger.warning(f"Failed to emit start event: {e}")
+    # NOTE: WebSocket methods are inherited from BaseAgent and should not be overridden.
+    # BaseAgent provides: emit_thinking(), emit_progress(), emit_agent_completed(), emit_error()
+    # and properly delegates to _websocket_adapter which is set up via set_websocket_bridge().
     
     # ========================================================================
     # FALLBACK OPERATION METHODS - Required by Tests
