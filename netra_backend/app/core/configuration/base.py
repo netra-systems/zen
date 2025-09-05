@@ -90,6 +90,17 @@ class UnifiedConfigManager:
         
         try:
             config = config_class()
+            
+            # CRITICAL FIX: Ensure service_secret is loaded from environment if not set
+            # This handles cases where the config class doesn't properly load it
+            if not config.service_secret:
+                from shared.isolated_environment import get_env
+                env = get_env()
+                service_secret = env.get('SERVICE_SECRET')
+                if service_secret:
+                    config.service_secret = service_secret
+                    self._logger.info("Loaded SERVICE_SECRET from environment as fallback")
+                    
             return config
         except Exception as e:
             self._logger.error(f"Failed to create config for {environment}: {e}")
