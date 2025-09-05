@@ -84,7 +84,9 @@ class GoogleOAuthProvider:
             self._redirect_uri = "https://netra-auth-service.run.app/auth/oauth/callback"
         else:
             # Development environment
-            self._redirect_uri = "http://localhost:8081/auth/oauth/callback"
+            # Try common redirect URIs that might be configured in Google Console
+            # You can change this to match what's in your Google Console
+            self._redirect_uri = "http://localhost:3000/auth/callback"
             
         return self._redirect_uri
     

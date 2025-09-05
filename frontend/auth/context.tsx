@@ -13,7 +13,7 @@ import { monitorAuthState } from '@/lib/auth-validation';
 import { useUnifiedChatStore } from '@/store/unified-chat';
 export interface AuthContextType {
   user: User | null;
-  login: () => Promise<void> | void;
+  login: (forceOAuth?: boolean) => Promise<void> | void;
   logout: () => Promise<void>;
   loading: boolean;
   authConfig: AuthConfigResponse | null;
@@ -289,18 +289,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           actualUser = null;
           actualToken = null;
         }
-      } else if (data.development_mode) {
-        // Check if user explicitly logged out in dev mode
+      } else if (data.development_mode && !data.oauth_enabled) {
+        // Only auto-login with dev credentials if OAuth is NOT configured
+        // If OAuth is configured, let the user choose to login manually
         const hasLoggedOut = unifiedAuthService.getDevLogoutFlag();
-        logger.debug('Development mode detected', {
+        logger.debug('Development mode detected (OAuth not configured)', {
           component: 'AuthContext',
           action: 'dev_mode_check',
-          metadata: { hasLoggedOut }
+          metadata: { hasLoggedOut, oauth_enabled: data.oauth_enabled }
         });
         
         if (!hasLoggedOut) {
-          // Only auto-login if user hasn't explicitly logged out
-          logger.info('Attempting auto dev login', {
+          // Only auto-login if user hasn't explicitly logged out AND OAuth is not available
+          logger.info('Attempting auto dev login (OAuth not available)', {
             component: 'AuthContext',
             action: 'auto_dev_login_attempt'
           });
@@ -436,15 +437,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
   }, []); // Remove dependencies to prevent re-runs
 
-  const login = async () => {
+  const login = async (forceOAuth: boolean = false) => {
     try {
       if (authConfig) {
         // Clear dev logout flag when user manually logs in
         unifiedAuthService.clearDevLogoutFlag();
         
-        // In development mode, use dev login instead of OAuth
-        if (authConfig.development_mode) {
-          logger.info('Using dev login in development mode');
+        // In development mode, prefer OAuth when it's configured
+        // Only use dev login when OAuth is explicitly disabled or not configured
+        if (authConfig.development_mode && !authConfig.oauth_enabled && !forceOAuth) {
+          logger.info('Using dev login in development mode (OAuth not configured)');
           const result = await unifiedAuthService.handleDevLogin(authConfig);
           if (result) {
             // Dev login successful, token is already set by handleDevLogin
@@ -469,7 +471,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             trackError('auth_dev_login_error', 'Dev login failed', 'AuthContext', false);
           }
         } else {
-          // Production/staging mode - use OAuth
+          // Use OAuth for:
+          // 1. Production/staging mode
+          // 2. Development mode when OAuth is configured and enabled
+          // 3. When explicitly requested via forceOAuth parameter
+          logger.info('Using OAuth login', { 
+            environment: authConfig.development_mode ? 'development' : 'production',
+            oauth_enabled: authConfig.oauth_enabled,
+            forceOAuth
+          });
           unifiedAuthService.handleLogin(authConfig);
           // Track login attempt (OAuth flow will be tracked separately)
           trackLogin('oauth', false);
