@@ -4,8 +4,11 @@ Re-export from modular alert system components.
 """
 
 # Import types for backward compatibility
-# Import the main alert manager from the modular core
-from netra_backend.app.monitoring.alert_manager_core import AlertManager, alert_manager
+# Import the main alert manager from the compact SSOT implementation
+from netra_backend.app.monitoring.alert_manager_compact import CompactAlertManager as AlertManager
+
+# Create singleton instance for backward compatibility
+alert_manager = AlertManager()
 from netra_backend.app.monitoring.alert_models import (
     Alert,
     AlertLevel,
