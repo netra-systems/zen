@@ -611,8 +611,41 @@ class ProductionConfig(AppConfig):
     debug: bool = False
     log_level: str = "INFO"
     
+    def _load_database_url_from_unified_config_production(self, data: dict) -> None:
+        """Load database URL from environment using DatabaseURLBuilder SSOT.
+        
+        Uses DatabaseURLBuilder to ensure SSOT compliance for production environment.
+        """
+        from shared.database_url_builder import DatabaseURLBuilder
+        import logging
+        
+        logger = logging.getLogger(__name__)
+        
+        # Use IsolatedEnvironment for production database URL
+        env = get_env()
+        
+        # Use DatabaseURLBuilder as the SINGLE SOURCE OF TRUTH
+        builder = DatabaseURLBuilder(env.as_dict())
+        
+        # Get URL for production environment
+        database_url = builder.production.auto_url
+        
+        # Set the database URL from builder - NO MANUAL FALLBACKS
+        if database_url:
+            data['database_url'] = database_url
+            logger.info(builder.get_safe_log_message())
+        else:
+            # Production MUST have a database URL - this is critical
+            raise ValueError(
+                "DatabaseURLBuilder failed to construct URL for production environment. "
+                "Ensure POSTGRES_HOST, POSTGRES_USER, POSTGRES_PASSWORD, and POSTGRES_DB are set, "
+                "or DATABASE_URL is provided."
+            )
+    
     def __init__(self, **data):
         """Initialize production config."""
+        # CRITICAL: Load database URL before calling parent init
+        self._load_database_url_from_unified_config_production(data)
         super().__init__(**data)
         # Validation moved to validate_mandatory_services() to be called after population
     
@@ -652,6 +685,8 @@ class StagingConfig(AppConfig):
     
     def __init__(self, **data):
         """Initialize staging config."""
+        # CRITICAL: Load database URL before calling parent init
+        self._load_database_url_from_unified_config_staging(data)
         super().__init__(**data)
         # Validation moved to validate_mandatory_services() to be called after population
     
@@ -708,6 +743,7 @@ class StagingConfig(AppConfig):
                 "Ensure POSTGRES_HOST, POSTGRES_USER, POSTGRES_PASSWORD, and POSTGRES_DB are set, "
                 "or DATABASE_URL is provided."
             )
+    
 
 class NetraTestingConfig(AppConfig):
     """Testing-specific settings."""
