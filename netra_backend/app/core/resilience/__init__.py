@@ -24,14 +24,14 @@ Usage:
     result = await with_resilience("user_api", lambda: api_call())
 """
 
-# Core resilience components
-from netra_backend.app.core.resilience.circuit_breaker import (
-    CircuitBreakerOpenError,
-    CircuitConfig,
-    CircuitMetrics,
-    CircuitState,
-    UnifiedCircuitBreaker,
-)
+# Core resilience components - only import available modules
+# from netra_backend.app.core.resilience.circuit_breaker import (
+#     CircuitBreakerOpenError,
+#     CircuitConfig,
+#     CircuitMetrics,
+#     CircuitState,
+#     UnifiedCircuitBreaker,
+# )
 from netra_backend.app.core.resilience.fallback import (
     AlternativeServiceFallback,
     CacheLastKnownFallback,
@@ -65,15 +65,15 @@ from netra_backend.app.core.resilience.policy import (
     create_llm_service_policy,
     policy_manager,
 )
-from netra_backend.app.core.resilience.registry import (
-    ServiceResilienceComponents,
-    UnifiedResilienceRegistry,
-    register_api_service,
-    register_database_service,
-    register_llm_service,
-    resilience_registry,
-    with_resilience,
-)
+# from netra_backend.app.core.resilience.registry import (
+#     ServiceResilienceComponents,
+#     UnifiedResilienceRegistry,
+#     register_api_service,
+#     register_database_service,
+#     register_llm_service,
+#     resilience_registry,
+#     with_resilience,
+# )
 from netra_backend.app.core.resilience.retry_manager import (
     BackoffStrategy,
     JitterType,
@@ -82,33 +82,33 @@ from netra_backend.app.core.resilience.retry_manager import (
     RetryPresets,
     UnifiedRetryManager,
 )
-from netra_backend.app.core.resilience.unified_retry_handler import (
-    UnifiedRetryHandler,
-    RetryResult,
-    RetryStrategy,
-    exponential_backoff,
-    linear_backoff,
-    default_retry_handler,
-)
+# from netra_backend.app.core.resilience.unified_retry_handler import (
+#     UnifiedRetryHandler,
+#     RetryResult,
+#     RetryStrategy,
+#     exponential_backoff,
+#     linear_backoff,
+#     default_retry_handler,
+# )
 
-# Export all public interfaces
+# Export all public interfaces - only available modules
 __all__ = [
     # Core Components
-    "UnifiedCircuitBreaker",
+    # "UnifiedCircuitBreaker",
     "UnifiedRetryManager", 
     "UnifiedFallbackChain",
     "UnifiedResilienceMonitor",
-    "UnifiedResilienceRegistry",
+    # "UnifiedResilienceRegistry",
     
     # Configuration Classes
-    "CircuitConfig",
+    # "CircuitConfig",
     "RetryConfig", 
     "FallbackConfig",
     "ResiliencePolicy",
     "AlertThreshold",
     
     # Enums
-    "CircuitState",
+    # "CircuitState",
     "BackoffStrategy",
     "JitterType", 
     "FallbackStrategy",
@@ -119,14 +119,14 @@ __all__ = [
     "EnvironmentType",
     
     # Data Classes
-    "CircuitMetrics",
+    # "CircuitMetrics",
     "Alert",
     "HealthMetric", 
     "ServiceHealth",
-    "ServiceResilienceComponents",
+    # "ServiceResilienceComponents",
     
     # Exceptions
-    "CircuitBreakerOpenError",
+    # "CircuitBreakerOpenError",
     "RetryExhaustedException",
     
     # Handlers and Strategies
@@ -140,25 +140,25 @@ __all__ = [
     "FallbackPresets",
     
     # Global Instances
-    "resilience_registry",
+    # "resilience_registry",
     "resilience_monitor",
     "policy_manager",
     "fallback_manager",
     
     # Convenience Functions
-    "with_resilience",
-    "register_api_service",
-    "register_database_service",
-    "register_llm_service",
+    # "with_resilience",
+    # "register_api_service",
+    # "register_database_service",
+    # "register_llm_service",
     "create_api_service_policy",
     "create_database_service_policy", 
     "create_llm_service_policy",
     
     # Unified Retry Handler
-    "UnifiedRetryHandler",
-    "RetryResult",
-    "RetryStrategy",
-    "exponential_backoff",
-    "linear_backoff",
-    "default_retry_handler",
+    # "UnifiedRetryHandler",
+    # "RetryResult",
+    # "RetryStrategy",
+    # "exponential_backoff",
+    # "linear_backoff",
+    # "default_retry_handler",
 ]
