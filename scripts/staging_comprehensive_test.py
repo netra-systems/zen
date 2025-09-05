@@ -24,7 +24,7 @@ import requests
 STAGING_URLS = {
     'frontend': 'https://netra-frontend-staging-pnovr5vsba-uc.a.run.app',
     'backend': 'https://netra-backend-staging-pnovr5vsba-uc.a.run.app',
-    'auth': 'https://netra-auth-service-pnovr5vsba-uc.a.run.app'
+    'auth': 'https://auth.staging.netrasystems.ai'
 }
 
 @dataclass
