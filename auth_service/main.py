@@ -249,10 +249,18 @@ Auth Service startup ABORTED.
         logger.info(f"Skipping OAuth validation in {env} environment")
     
     # Log Redis configuration status
-    from auth_service.auth_core.routes.auth_routes import auth_service
-    redis_enabled = auth_service.session_manager.redis_enabled
-    redis_status = "enabled" if redis_enabled else "disabled (staging environment)"
-    logger.info(f"Redis session management: {redis_status}")
+    try:
+        from auth_service.auth_core.routes.auth_routes import auth_service
+        if hasattr(auth_service, 'session_manager'):
+            redis_enabled = auth_service.session_manager.redis_enabled
+            redis_status = "enabled" if redis_enabled else "disabled (staging environment)"
+        else:
+            # Session manager might not be initialized yet
+            redis_status = "will be configured during route initialization"
+        logger.info(f"Redis session management: {redis_status}")
+    except Exception as e:
+        logger.warning(f"Could not determine Redis status: {e}")
+        redis_status = "status unknown"
     
     # Check if we're in fast test mode
     # @marked: Test mode flag for test infrastructure
