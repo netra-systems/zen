@@ -37,18 +37,23 @@ class PipelineExecutor:
     """
     
     def __init__(self, engine: ExecutionEngine, 
-                 websocket_manager: 'WebSocketManager'):
+                 websocket_manager: 'WebSocketManager', 
+                 user_context=None):
         """Initialize without global session storage.
         
         Args:
             engine: Execution engine for running agents
             websocket_manager: WebSocket manager for notifications
+            user_context: Optional user execution context for event isolation
         """
         self.engine = engine
         self.websocket_manager = websocket_manager
         # REMOVED: self.db_session = db_session (global session storage removed)
         self.state_persistence = self._get_persistence_service()
         self.flow_logger = get_supervisor_flow_logger()
+        # Store user context for isolated WebSocket events (factory pattern)
+        self.user_context = user_context
+        self._websocket_emitter = None  # Will be created when user_context is available
     
     def _get_persistence_service(self):
         """Get the unified state persistence service.
@@ -294,18 +299,20 @@ class PipelineExecutor:
     
     async def _send_message_safely(self, state: DeepAgentState, 
                                   run_id: str, thread_id: str) -> None:
-        """Send message with error handling via AgentWebSocketBridge."""
+        """Send message with error handling via factory pattern for user isolation."""
         try:
-            from netra_backend.app.services.agent_websocket_bridge import get_agent_websocket_bridge
-            
-            bridge = await get_agent_websocket_bridge()
+            # Get user-isolated emitter (factory pattern)
+            emitter = await self._get_user_emitter_from_context(run_id, thread_id)
+            if not emitter:
+                logger.debug("No user context available for pipeline WebSocket updates - skipping")
+                return
             
             # Send pipeline completion notification
-            await bridge.notify_agent_completed(
-                run_id, "PipelineExecutor", 
-                result={"pipeline_completed": True, "state_summary": "Pipeline execution completed"},
-                execution_time_ms=None
-            )
+            await emitter.emit_agent_completed("PipelineExecutor", {
+                "pipeline_completed": True, 
+                "state_summary": "Pipeline execution completed",
+                "agent_name": "PipelineExecutor"
+            })
         except Exception as e:
             logger.error(f"Failed to send completion via bridge: {e}")
     
@@ -339,21 +346,23 @@ class PipelineExecutor:
     
     async def _send_orchestration_notification(self, thread_id: str, run_id: str, 
                                              event_type: str, message: str) -> None:
-        """Send orchestration-level WebSocket notification via AgentWebSocketBridge."""
+        """Send orchestration-level WebSocket notification via factory pattern for user isolation."""
         try:
-            from netra_backend.app.services.agent_websocket_bridge import get_agent_websocket_bridge
+            # Get user-isolated emitter (factory pattern)
+            emitter = await self._get_user_emitter_from_context(run_id, thread_id)
+            if not emitter:
+                logger.debug("No user context available for orchestration WebSocket updates - skipping")
+                return
             
-            bridge = await get_agent_websocket_bridge()
-            
-            # Map event types to appropriate bridge notifications
+            # Map event types to appropriate emitter notifications
             if event_type == "pipeline_started":
-                await bridge.notify_agent_started(run_id, "PipelineExecutor", {"orchestration_level": True, "message": message})
+                await emitter.emit_agent_started("PipelineExecutor", {"orchestration_level": True, "message": message})
             elif event_type == "pipeline_thinking" or "processing" in event_type:
-                await bridge.notify_agent_thinking(run_id, "PipelineExecutor", message)
+                await emitter.emit_agent_thinking("PipelineExecutor", {"message": message, "orchestration_level": True})
             elif event_type == "pipeline_completed":
-                await bridge.notify_agent_completed(run_id, "PipelineExecutor", {"orchestration_level": True})
+                await emitter.emit_agent_completed("PipelineExecutor", {"orchestration_level": True, "agent_name": "PipelineExecutor"})
             elif event_type == "pipeline_error":
-                await bridge.notify_agent_error(run_id, "PipelineExecutor", message, {"orchestration_level": True})
+                await emitter.emit_custom_event("agent_error", {"agent_name": "PipelineExecutor", "error_message": message, "orchestration_level": True})
             else:
                 # Custom pipeline event
                 payload = {
@@ -364,14 +373,68 @@ class PipelineExecutor:
                     "agent_name": "pipeline_executor",
                     "orchestration_level": True
                 }
-                await bridge.notify_custom(run_id, "PipelineExecutor", f"pipeline_{event_type}", payload)
+                await emitter.emit_custom_event(f"pipeline_{event_type}", payload)
             
-            logger.info(f"Sent orchestration notification via bridge: {event_type} - {message[:50]}...")
+            logger.info(f"Sent orchestration notification via factory pattern: {event_type} - {message[:50]}...")
             
         except Exception as e:
-            logger.warning(f"Failed to send orchestration notification via bridge {event_type}: {e}")
+            logger.warning(f"Failed to send orchestration notification via factory pattern {event_type}: {e}")
     
     def _get_current_timestamp(self) -> float:
         """Get current timestamp."""
         from datetime import datetime, timezone
         return datetime.now(timezone.utc).timestamp()
+    async def _get_user_emitter_from_context(self, run_id: str, thread_id: str, user_id: str = None):
+        """Get user-isolated WebSocket emitter from context parameters using factory pattern."""
+        try:
+            # Try to get user context if already stored
+            if self.user_context:
+                return await self._get_user_emitter()
+                
+            # Create UserExecutionContext from parameters if available
+            if run_id and thread_id:
+                from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
+                from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
+                
+                user_context = UserExecutionContext(
+                    user_id=user_id or "unknown_user",
+                    thread_id=thread_id, 
+                    run_id=run_id
+                )
+                
+                bridge = AgentWebSocketBridge()
+                return await bridge.create_user_emitter(user_context)
+            else:
+                logger.debug("Missing required context parameters for user emitter")
+                return None
+                
+        except Exception as e:
+            logger.debug(f"Failed to create user emitter from context parameters: {e}")
+            return None
+            
+    async def _get_user_emitter(self):
+        """Get user-isolated WebSocket emitter using factory pattern."""
+        if not self.user_context:
+            return None
+            
+        # Create emitter if not already created (lazy initialization)
+        if not self._websocket_emitter:
+            try:
+                from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
+                bridge = AgentWebSocketBridge()
+                self._websocket_emitter = await bridge.create_user_emitter(self.user_context)
+            except Exception as e:
+                logger.debug(f"Failed to create user emitter: {e}")
+                return None
+                
+        return self._websocket_emitter
+    
+    def set_user_context(self, user_context) -> None:
+        """Set user context for isolated WebSocket events (factory pattern).
+        
+        Args:
+            user_context: User execution context for event isolation
+        """
+        self.user_context = user_context
+        # Reset emitter to force recreation with new context
+        self._websocket_emitter = None
