@@ -1,4 +1,5 @@
 import asyncio
+import uuid
 from datetime import datetime
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, TypedDict, Union
 from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
@@ -569,40 +570,61 @@ class MessageHandlerService(IMessageHandlerService):
         """Handle a WebSocket message with proper type and payload."""
         message_type = message.get("type", "")
         payload = message.get("payload", {})
-        await self._route_message(user_id, message_type, payload)
+        
+        # Create UserExecutionContext - for interface compatibility
+        # Note: This creates a temporary context without full isolation
+        user_context = UserExecutionContext(
+            user_id=user_id,
+            thread_id="interface_thread",  # Temporary for interface compatibility
+            run_id=f"interface_run_{uuid.uuid4()}",
+            request_id=f"interface_req_{uuid.uuid4()}"
+        )
+        await self._route_message(user_context, message_type, payload)
     
-    async def _route_message(self, user_id: str, message_type: str, payload: Dict[str, Any]) -> None:
+    async def _route_message(self, user_context: UserExecutionContext, message_type: str, payload: Dict[str, Any]) -> None:
         """Route message to appropriate handler based on type"""
         if message_type == "start_agent":
-            await self.handle_start_agent(user_id, payload, None)
+            await self.handle_start_agent(user_context, payload, None)
         elif message_type == "user_message":
-            await self.handle_user_message(user_id, payload, None)
+            await self.handle_user_message(user_context, payload, None)
         else:
-            await self._route_other_messages(user_id, message_type, payload)
+            await self._route_other_messages(user_context, message_type, payload)
     
-    async def _route_other_messages(self, user_id: str, message_type: str, payload: Dict[str, Any]) -> None:
+    async def _route_other_messages(self, user_context: UserExecutionContext, message_type: str, payload: Dict[str, Any]) -> None:
         """Route other message types to their handlers"""
         if message_type == "get_thread_history":
-            await self.handle_thread_history(user_id, None)
+            await self.handle_thread_history(user_context, None)
         elif message_type == "stop_agent":
-            await self.handle_stop_agent(user_id)
+            await self.handle_stop_agent(user_context)
         elif message_type == "switch_thread":
-            await self.handle_switch_thread(user_id, payload, None)
+            await self.handle_switch_thread(user_context, payload, None)
         elif message_type == "example_message":
-            await self.handle_example_message(user_id, payload, None)
+            await self.handle_example_message(user_context, payload, None)
         else:
-            await manager.send_error(user_id, f"Unknown message type: {message_type}")
+            websocket_manager = create_websocket_manager(user_context)
+            await websocket_manager.send_to_user({"type": "error", "message": f"Unknown message type: {message_type}"})
 
     async def process_user_message(self, user_id: str, message: str, thread_id: str = None):
         """Process a user message in a specific thread."""
         payload = {"text": message}
         if thread_id:
             payload["thread_id"] = thread_id
-        await self.handle_user_message(user_id, payload, None)
+        
+        # Create UserExecutionContext for interface compatibility
+        user_context = UserExecutionContext(
+            user_id=user_id,
+            thread_id=thread_id or f"interface_thread_{uuid.uuid4()}",
+            run_id=f"interface_run_{uuid.uuid4()}",
+            request_id=f"interface_req_{uuid.uuid4()}"
+        )
+        await self.handle_user_message(user_context, payload, None)
 
     async def broadcast_message(self, message: Dict[str, Any]):
         """Broadcast a message to all connected clients."""
-        await manager.broadcast(message)
+        # Note: Broadcasting with isolated managers requires a different approach
+        # This legacy interface is maintained for backward compatibility
+        # but actual broadcasting would need to be handled by the isolated managers
+        logger.warning("broadcast_message called - this legacy interface cannot broadcast with isolated managers")
 
     async def handle_get_conversation_history(
         self, user_context: UserExecutionContext, payload: Dict[str, Any], db_session: Optional[AsyncSession]
