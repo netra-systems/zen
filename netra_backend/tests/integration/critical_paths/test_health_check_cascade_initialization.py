@@ -28,7 +28,6 @@ from unittest.mock import AsyncMock, MagicMock, Mock, patch, patch
 
 import aiohttp
 import pytest
-from netra_backend.app.routes.health import health_interface
 
 from netra_backend.app.core.health_checkers import (
     check_clickhouse_health,

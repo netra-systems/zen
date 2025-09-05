@@ -212,7 +212,7 @@ class TestBaseAgentComprehensive:
         # Verify WebSocket context is established
         assert agent.has_websocket_context()
         assert agent._websocket_adapter._run_id == test_run_id
-        assert agent._websocket_adapter._websocket_bridge == mock_ws_bridge
+        assert agent._websocket_adapter._bridge == mock_ws_bridge
         
         # Test multiple agents with different contexts
         agent2 = ConcreteConcreteTestAgent(llm_manager=real_llm_manager, name="SecondWSAgent")
@@ -224,6 +224,7 @@ class TestBaseAgentComprehensive:
         assert agent2.has_websocket_context()
         assert agent2._websocket_adapter._run_id == test_run_id2
         assert agent._websocket_adapter._run_id != agent2._websocket_adapter._run_id
+        assert agent._websocket_adapter._bridge != agent2._websocket_adapter._bridge
         
         # Test agent without WebSocket context
         agent3 = ConcreteConcreteTestAgent(llm_manager=real_llm_manager, name="NoWSAgent")
@@ -235,29 +236,22 @@ class TestBaseAgentComprehensive:
         agent3.set_websocket_bridge(mock_ws_bridge3, test_run_id3)
         assert agent3.has_websocket_context()
         assert agent3._websocket_adapter._run_id == test_run_id3
-        
-        # Test the condition logic handles falsy values correctly
-        can_send_empty_user = False
-        if agent3.websocket_manager and agent3.user_id:  # "" is falsy
-            can_send_empty_user = True
-        assert can_send_empty_user is False  # Should be False since empty string is falsy
     
     @pytest.mark.asyncio
     async def test_shutdown_comprehensive(self, real_llm_manager):
         """Additional test: Comprehensive shutdown behavior validation"""
         agent = ConcreteConcreteTestAgent(llm_manager=real_llm_manager, name="ShutdownConcreteTestAgent")
         
-        # Set up some state
+        # Set up some state (using modern patterns)
         agent.context = {"key1": "value1", "key2": "value2"}
-        agent.user_id = "test_user"
-        agent.websocket_manager = Mock()
+        mock_ws_bridge = Mock()
+        agent.set_websocket_bridge(mock_ws_bridge, "run_shutdown_test")
         agent.set_state(SubAgentLifecycle.RUNNING)
         
         # Test initial state
         assert agent.state == SubAgentLifecycle.RUNNING
         assert len(agent.context) == 2
-        assert agent.user_id == "test_user"
-        assert agent.websocket_manager is not None
+        assert agent.has_websocket_context()
         
         # Perform shutdown with proper exception handling
         try:
