@@ -49,12 +49,20 @@ async def test_user_creation_with_defaults():
 
 @pytest.mark.asyncio
 async def test_user_creation_datetime_defaults():
-    """Test that datetime defaults are properly callable."""
-    # Test that the defaults are lambdas
+    """Test that datetime defaults are properly configured with SQLAlchemy func.now()."""
+    # Test that the defaults use SQLAlchemy's func.now() (SSOT method)
     from netra_backend.app.db.models_user import User as UserModel
-    assert callable(UserModel.created_at.default.arg)
-    assert callable(UserModel.updated_at.default.arg)
-    assert callable(UserModel.plan_started_at.default.arg)
+    from sqlalchemy.sql.functions import now
+    
+    # Check that the default is SQLAlchemy func.now() - the SSOT method
+    assert UserModel.created_at.default is not None
+    assert UserModel.updated_at.default is not None  
+    assert UserModel.plan_started_at.default is not None
+    
+    # Verify the default is func.now() (not Python callable)
+    assert isinstance(UserModel.created_at.default.arg, now)
+    assert isinstance(UserModel.updated_at.default.arg, now)
+    assert isinstance(UserModel.plan_started_at.default.arg, now)
     
     # Create a user and test default values work when saved to DB
     user = User(
@@ -67,9 +75,15 @@ async def test_user_creation_datetime_defaults():
 
 @pytest.mark.asyncio 
 async def test_tool_usage_log_datetime_defaults():
-    """Test that ToolUsageLog datetime defaults are properly callable."""
+    """Test that ToolUsageLog datetime defaults are properly configured with SQLAlchemy func.now()."""
     from netra_backend.app.db.models_user import ToolUsageLog as LogModel
-    assert callable(LogModel.created_at.default.arg)
+    from sqlalchemy.sql.functions import now
+    
+    # Check that the default is SQLAlchemy func.now() - the SSOT method
+    assert LogModel.created_at.default is not None
+    
+    # Verify the default is func.now() (not Python callable)
+    assert isinstance(LogModel.created_at.default.arg, now)
     
     log = ToolUsageLog(
         user_id="test-user-id",

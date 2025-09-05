@@ -140,20 +140,23 @@ class TestSecretKeyDeploymentRegression:
         
         Duplicate mappings could cause deployment script errors.
         """
-        # Test auth service
+        # Test auth service - use more precise pattern to avoid matching JWT_SECRET_KEY
         auth_secrets_string = SecretConfig.generate_secrets_string("auth", "staging")
-        secret_key_count = auth_secrets_string.count("SECRET_KEY=")
-        assert secret_key_count == 1, (
+        # Split by comma and count exact matches
+        auth_mappings = [mapping.strip() for mapping in auth_secrets_string.split(",")]
+        secret_key_mappings = [mapping for mapping in auth_mappings if mapping.startswith("SECRET_KEY=")]
+        assert len(secret_key_mappings) == 1, (
             f"SECRET_KEY should appear exactly once in auth secrets string, "
-            f"found {secret_key_count} occurrences"
+            f"found {len(secret_key_mappings)} occurrences: {secret_key_mappings}"
         )
         
         # Test backend service
         backend_secrets_string = SecretConfig.generate_secrets_string("backend", "staging")
-        secret_key_count = backend_secrets_string.count("SECRET_KEY=")
-        assert secret_key_count == 1, (
+        backend_mappings = [mapping.strip() for mapping in backend_secrets_string.split(",")]
+        secret_key_mappings = [mapping for mapping in backend_mappings if mapping.startswith("SECRET_KEY=")]
+        assert len(secret_key_mappings) == 1, (
             f"SECRET_KEY should appear exactly once in backend secrets string, "
-            f"found {secret_key_count} occurrences"
+            f"found {len(secret_key_mappings)} occurrences: {secret_key_mappings}"
         )
     
     def test_validate_critical_secrets_detects_missing_secret_key(self):

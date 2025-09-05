@@ -301,8 +301,8 @@ class TestAuthServiceRedisClientErrorHandling:
     
     def test_redis_client_attribute_missing_safety(self):
         """Test behavior when redis_client attribute is missing entirely."""
-        # Create auth service without redis_client attribute
-        auth_service = Mock()
+        # Create auth service without redis_client attribute - use spec to prevent auto-creation
+        auth_service = Mock(spec=[])  # Empty spec prevents attribute auto-creation
         
         # Should handle missing attribute gracefully
         has_redis_client = hasattr(auth_service, 'redis_client')
