@@ -19,6 +19,7 @@ import os
 import sys
 import time
 import uuid
+from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timedelta
 from typing import Dict, List, Set, Any, Optional
@@ -40,8 +41,9 @@ from loguru import logger
 from netra_backend.app.core.registry.universal_registry import AgentRegistry
 from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
 from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
+from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
 from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier
-from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
+from netra_backend.app.agents.tool_dispatcher import UnifiedToolDispatcherFactory
 from netra_backend.app.agents.unified_tool_execution import UnifiedToolExecutionEngine
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager as WebSocketManager
 from netra_backend.app.agents.state import DeepAgentState
@@ -49,14 +51,23 @@ from netra_backend.app.llm.llm_manager import LLMManager
 
 # Import WebSocket test utilities - automatically chooses real or mock based on Docker availability
 from tests.mission_critical.websocket_real_test_base import (
-    get_websocket_test_base,  # Factory that returns appropriate test base
+    is_docker_available,  # Docker availability checker
     RealWebSocketTestConfig,
     assert_agent_events_received,
     send_test_agent_request
 )
 
-# Get the appropriate test base (real if Docker available, mock otherwise)
-WebSocketTestBase = get_websocket_test_base()
+# Get the appropriate test base class (real if Docker available, mock otherwise)
+def get_test_base_class():
+    """Get the appropriate test base class based on Docker availability."""
+    if is_docker_available():
+        from tests.mission_critical.websocket_real_test_base import RealWebSocketTestBase
+        return RealWebSocketTestBase
+    else:
+        from tests.mission_critical.websocket_real_test_base import MockWebSocketTestBase
+        return MockWebSocketTestBase
+
+WebSocketTestBase = get_test_base_class()
 from test_framework.test_context import TestContext, create_test_context
 from test_framework.websocket_helpers import WebSocketTestHelpers
 
@@ -389,8 +400,22 @@ class TestRealWebSocketComponents:
     @pytest.mark.critical
     async def test_tool_dispatcher_websocket_integration(self):
         """Test that tool dispatcher integrates with WebSocket properly."""
+        # Create user context for proper isolation
+        user_context = UserExecutionContext(
+            user_id="test_user",
+            run_id="test_run", 
+            thread_id="test_thread"
+        )
+        
+        # Import and create WebSocket manager  
+        from netra_backend.app.websocket_core import get_websocket_manager
+        websocket_manager = get_websocket_manager()
+        
         # Test that tool dispatcher can be created and has proper integration points
-        dispatcher = ToolDispatcher()
+        dispatcher = UnifiedToolDispatcherFactory.create_for_request(
+            user_context=user_context,
+            websocket_manager=websocket_manager
+        )
         
         # Verify initial state
         assert hasattr(dispatcher, 'executor'), "ToolDispatcher missing executor"
@@ -405,11 +430,22 @@ class TestRealWebSocketComponents:
         """Test that AgentRegistry properly integrates WebSocket."""
         from netra_backend.app.websocket_core import get_websocket_manager
         
+        # Create user context for proper isolation
+        user_context = UserExecutionContext(
+            user_id="test_user", 
+            run_id="test_run",
+            thread_id="test_thread"
+        )
+        
         # Use real LLM manager instead of mock
         llm_manager = LLMManager()
-        tool_dispatcher = ToolDispatcher()
-        registry = AgentRegistry()
         ws_manager = get_websocket_manager()
+        
+        tool_dispatcher = UnifiedToolDispatcherFactory.create_for_request(
+            user_context=user_context,
+            websocket_manager=ws_manager
+        )
+        registry = AgentRegistry()
         
         # Set WebSocket manager
         registry.set_websocket_manager(ws_manager)

@@ -61,8 +61,7 @@ class MockWebSocketConnection:
         self._sent_messages = []
         self._receive_queue = asyncio.Queue()
         
-        # Add some default mock responses
-        asyncio.create_task(self._add_mock_responses())
+        # Don't auto-populate with mock responses - let tests control what they receive
     
     async def _add_mock_responses(self):
         """Add mock responses to simulate WebSocket events."""
@@ -79,8 +78,10 @@ class MockWebSocketConnection:
             await self._receive_queue.put(json.dumps(event))
     
     async def send(self, message: str):
-        """Mock send method."""
+        """Mock send method - echoes message back to receive queue."""
         self._sent_messages.append(message)
+        # Echo the message back to the receive queue so tests can receive what they sent
+        await self._receive_queue.put(message)
     
     async def recv(self):
         """Mock receive method."""

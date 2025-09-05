@@ -38,16 +38,17 @@ export const mapAgentCompletedPayload = (fullEvent: any) => {
  * Note: Receives the full event, not just the payload
  */
 export const mapAgentThinkingPayload = (fullEvent: any) => {
-  // Extract reasoning from payload
+  // Extract reasoning from multiple possible sources (SSOT compatibility)
   const thought = fullEvent.payload?.reasoning || 
                   fullEvent.payload?.message || 
                   fullEvent.message || 
+                  fullEvent.thought || // Legacy support
                   'Processing...';
   
   return {
     thought: thought,
-    agent_id: fullEvent.agent_name || fullEvent.payload?.agent_id || 'unknown',
-    agent_type: fullEvent.agent_name || fullEvent.payload?.agent_type || 'unknown',
+    agent_id: fullEvent.agent_name || fullEvent.agent_id || fullEvent.payload?.agent_id || 'unknown',
+    agent_type: fullEvent.agent_name || fullEvent.agent_type || fullEvent.payload?.agent_type || 'unknown',
     step_number: fullEvent.payload?.step_number || 0,
     total_steps: fullEvent.payload?.total_steps || 0,
     progress_percentage: fullEvent.payload?.progress_percentage || null

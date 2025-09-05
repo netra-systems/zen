@@ -4,7 +4,8 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
-import { WebSocketProvider, useWebSocketContext } from '../../providers/WebSocketProvider';
+// Force direct import to bypass any Jest mocking
+import { WebSocketProvider, useWebSocketContext } from 'C:/Users/antho/OneDrive/Desktop/Netra/netra-core-generation-1/frontend/providers/WebSocketProvider';
 import { AuthContext } from '@/auth/context';
 
 // Mock all dependencies to isolate the issue
