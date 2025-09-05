@@ -6,6 +6,7 @@ Provides clear access to all possible URL combinations.
 from typing import Optional, Dict, Any
 import logging
 import re
+import os
 from urllib.parse import quote
 
 logger = logging.getLogger(__name__)
@@ -49,6 +50,68 @@ class DatabaseURLBuilder:
         self.docker = self.DockerBuilder(self)
         self.staging = self.StagingBuilder(self)
         self.production = self.ProductionBuilder(self)
+    
+    def is_docker_environment(self) -> bool:
+        """
+        Detect if running in Docker container using multiple indicators.
+        
+        Returns:
+            bool: True if running in Docker, False otherwise
+        """
+        # Method 1: Check environment variables
+        docker_env_vars = [
+            "RUNNING_IN_DOCKER",
+            "IS_DOCKER", 
+            "DOCKER_CONTAINER"
+        ]
+        for var in docker_env_vars:
+            if self.env.get(var) == "true":
+                return True
+        
+        # Method 2: Check for .dockerenv file
+        if os.path.exists("/.dockerenv"):
+            return True
+        
+        # Method 3: Check /proc/self/cgroup for docker references
+        try:
+            if os.path.exists("/proc/self/cgroup"):
+                with open("/proc/self/cgroup", "r") as f:
+                    content = f.read()
+                    if "docker" in content.lower():
+                        return True
+        except (OSError, IOError):
+            # Ignore file access errors
+            pass
+        
+        return False
+    
+    def apply_docker_hostname_resolution(self, host: str) -> str:
+        """
+        Apply Docker hostname resolution if conditions are met.
+        
+        Only applies in development and test environments, and only overrides
+        localhost/127.0.0.1 with Docker service name 'postgres'.
+        
+        Args:
+            host: Original hostname
+            
+        Returns:
+            str: Resolved hostname (original or Docker service name)
+        """
+        # Only apply Docker hostname resolution in development/test environments
+        if self.environment not in ["development", "test"]:
+            return host
+        
+        # Only override localhost/127.0.0.1 
+        if host not in ["localhost", "127.0.0.1"]:
+            return host
+        
+        # Check if running in Docker
+        if self.is_docker_environment():
+            logger.info(f"Detected Docker environment in {self.environment}, using 'postgres' as database host")
+            return "postgres"
+        
+        return host
     
     class CloudSQLBuilder:
         """Build Cloud SQL URLs (Unix socket connections)."""
@@ -206,13 +269,16 @@ class DatabaseURLBuilder:
             if not self.has_config:
                 return None
             
+            # Apply Docker hostname resolution
+            resolved_host = self.parent.apply_docker_hostname_resolution(self.parent.postgres_host)
+            
             # URL encode user and password for safety
             user = quote(self.parent.postgres_user or 'postgres', safe='')
             password_part = f":{quote(self.parent.postgres_password, safe='')}" if self.parent.postgres_password else ""
             return (
                 f"postgresql+asyncpg://"
                 f"{user}{password_part}"
-                f"@{self.parent.postgres_host}"
+                f"@{resolved_host}"
                 f":{self.parent.postgres_port}"
                 f"/{self.parent.postgres_db or 'netra_dev'}"
             )
@@ -223,13 +289,16 @@ class DatabaseURLBuilder:
             if not self.has_config:
                 return None
             
+            # Apply Docker hostname resolution
+            resolved_host = self.parent.apply_docker_hostname_resolution(self.parent.postgres_host)
+            
             # URL encode user and password for safety
             user = quote(self.parent.postgres_user or 'postgres', safe='')
             password_part = f":{quote(self.parent.postgres_password, safe='')}" if self.parent.postgres_password else ""
             return (
                 f"postgresql://"
                 f"{user}{password_part}"
-                f"@{self.parent.postgres_host}"
+                f"@{resolved_host}"
                 f":{self.parent.postgres_port}"
                 f"/{self.parent.postgres_db or 'netra_dev'}"
             )
@@ -260,13 +329,16 @@ class DatabaseURLBuilder:
             if not self.has_config:
                 return None
             
+            # Apply Docker hostname resolution
+            resolved_host = self.parent.apply_docker_hostname_resolution(self.parent.postgres_host)
+            
             # URL encode user and password for safety
             user = quote(self.parent.postgres_user or 'postgres', safe='')
             password_part = f":{quote(self.parent.postgres_password, safe='')}" if self.parent.postgres_password else ""
             return (
                 f"postgresql+psycopg://"
                 f"{user}{password_part}"
-                f"@{self.parent.postgres_host}"
+                f"@{resolved_host}"
                 f":{self.parent.postgres_port}"
                 f"/{self.parent.postgres_db or 'netra_dev'}"
             )
@@ -332,13 +404,16 @@ class DatabaseURLBuilder:
         def postgres_url(self) -> Optional[str]:
             """PostgreSQL URL for test environment."""
             if self.parent.tcp.has_config:
+                # Apply Docker hostname resolution
+                resolved_host = self.parent.apply_docker_hostname_resolution(self.parent.postgres_host)
+                
                 # URL encode user and password for safety
                 user = quote(self.parent.postgres_user or 'postgres', safe='')
                 password_part = f":{quote(self.parent.postgres_password, safe='')}" if self.parent.postgres_password else ""
                 return (
                     f"postgresql+asyncpg://"
                     f"{user}{password_part}"
-                    f"@{self.parent.postgres_host}"
+                    f"@{resolved_host}"
                     f":{self.parent.postgres_port}"
                     f"/{self.parent.postgres_db or 'netra_test'}"
                 )
