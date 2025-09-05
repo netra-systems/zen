@@ -8,13 +8,13 @@ from datetime import UTC, datetime
 from typing import Any, Optional
 
 from netra_backend.app.logging_config import central_logger
-from netra_backend.app.schemas.llm_base_types import (
+from netra_backend.app.llm.schemas import (
     LLMConfigInfo,
     LLMHealthCheck,
     LLMManagerStats,
     LLMProvider,
 )
-from netra_backend.app.schemas.llm_config_types import LLMConfig as GenerationConfig
+from netra_backend.app.schemas.config import LLMConfig as GenerationConfig
 
 logger = central_logger.get_logger(__name__)
 
@@ -36,7 +36,7 @@ class LLMManagementUtilities:
         """Build LLMConfigInfo from configuration."""
         return LLMConfigInfo(
             name=name,
-            provider=LLMProvider(config.provider),
+            provider=config.provider,  # Use string directly, not enum
             model_name=config.model_name,
             api_key_configured=bool(config.api_key),
             generation_config=config.generation_config,

@@ -17,7 +17,7 @@ from netra_backend.app.llm.llm_response_processing import (
     should_cache_structured_response,
 )
 from netra_backend.app.logging_config import central_logger
-from netra_backend.app.schemas.llm_config_types import LLMConfig as GenerationConfig
+from netra_backend.app.schemas.config import LLMConfig as GenerationConfig
 
 logger = central_logger.get_logger(__name__)
 T = TypeVar('T', bound=BaseModel)
