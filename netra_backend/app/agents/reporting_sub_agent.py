@@ -312,9 +312,10 @@ class ReportingSubAgent(BaseAgent):
             self.logger.info(f"Successfully recovered malformed JSON for run_id: {run_id}")
             return fixed_result
         
-        # Final fallback
+        # For golden pattern compliance, return fallback result instead of raising exception
+        # This allows tests to verify fallback behavior  
         self.logger.warning(f"Could not extract or recover JSON from LLM response for run_id: {run_id}. Using fallback report.")
-        return {"report": "No report could be generated from LLM response."}
+        return {"report": "No report could be generated."}
     
     async def _send_success_update(self, run_id: str, stream_updates: bool, result: Dict[str, Any]) -> None:
         """Send success status update via WebSocket."""

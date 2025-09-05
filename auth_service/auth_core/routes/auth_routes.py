@@ -36,6 +36,53 @@ async def auth_status() -> Dict[str, Any]:
         "version": "1.0.0"
     }
 
+@router.get("/auth/config")
+async def auth_config() -> Dict[str, Any]:
+    """Get auth service configuration for frontend initialization"""
+    from auth_service.auth_core.config import AuthConfig
+    
+    # Get environment for conditional logic
+    environment = AuthConfig.get_environment()
+    is_development = environment in ["development", "test"]
+    
+    # Get Google OAuth client ID
+    google_client_id = AuthConfig.get_google_client_id() or ""
+    
+    # Determine base URLs based on environment
+    if environment == "production":
+        auth_base_url = "https://auth.netrasystems.ai"
+        frontend_base_url = "https://app.netrasystems.ai"
+    elif environment == "staging":
+        auth_base_url = "https://auth.staging.netrasystems.ai"
+        frontend_base_url = "https://app.staging.netrasystems.ai"
+    else:
+        # Development/test environment
+        auth_base_url = "http://localhost:8081"
+        frontend_base_url = "http://localhost:3000"
+    
+    # Build auth configuration response matching frontend expectations
+    config_response = {
+        "google_client_id": google_client_id,
+        "oauth_enabled": bool(google_client_id),
+        "development_mode": is_development,
+        "endpoints": {
+            "login": f"{auth_base_url}/auth/login",
+            "logout": f"{auth_base_url}/auth/logout", 
+            "callback": f"{auth_base_url}/auth/callback",
+            "token": f"{auth_base_url}/auth/token",
+            "user": f"{auth_base_url}/auth/me",
+            "dev_login": f"{auth_base_url}/auth/dev/login" if is_development else None
+        },
+        "authorized_javascript_origins": [frontend_base_url],
+        "authorized_redirect_uris": [f"{frontend_base_url}/auth/callback"]
+    }
+    
+    # Remove None values from endpoints
+    config_response["endpoints"] = {k: v for k, v in config_response["endpoints"].items() if v is not None}
+    
+    logger.info(f"Auth config requested for {environment} environment")
+    return config_response
+
 @router.post("/auth/refresh")
 async def refresh_tokens_endpoint(request: Request) -> Dict[str, Any]:
     """Refresh token endpoint with flexible field name support"""
