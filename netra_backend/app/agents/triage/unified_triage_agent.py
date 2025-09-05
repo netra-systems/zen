@@ -864,22 +864,108 @@ Focus on:
     def _determine_next_agents(self, triage_result: TriageResult) -> List[str]:
         """Determine which agents should run next based on triage
         
+        UVS ENHANCED: Provides intelligent workflow recommendations based on:
+        - Data availability
+        - User intent
+        - Request complexity
+        - Optimization opportunities
+        
         Args:
             triage_result: Triage analysis result
             
         Returns:
             List of agent names to execute
         """
-        # Based on data sufficiency
-        if triage_result.data_sufficiency == "sufficient":
-            return ["data", "optimization", "actions", "reporting"]
+        next_agents = []
+        
+        # Analyze user intent for workflow optimization
+        user_intent = triage_result.user_intent
+        primary_intent = user_intent.primary_intent.lower() if user_intent else ""
+        
+        # Check data sufficiency first
+        if triage_result.data_sufficiency == "insufficient":
+            # No data - guidance flow only
+            next_agents = ["data_helper"]
+            
         elif triage_result.data_sufficiency == "partial":
-            return ["data_helper", "data", "optimization", "actions", "reporting"]
-        elif triage_result.data_sufficiency == "insufficient":
-            return ["data_helper"]
-        else:
-            # Default workflow
-            return ["data", "optimization", "actions", "reporting"]
+            # Some data - start with helper, then selective agents
+            next_agents = ["data_helper"]
+            
+            # Add data agent if analysis is needed
+            if self._intent_needs_analysis(primary_intent):
+                next_agents.append("data")
+            
+            # Add optimization if relevant
+            if self._intent_needs_optimization(primary_intent):
+                next_agents.append("optimization")
+                
+            # Add actions if needed
+            if user_intent.action_required or self._intent_needs_actions(primary_intent):
+                next_agents.append("actions")
+                
+        else:  # sufficient data or unknown
+            # Selective pipeline based on intent
+            
+            # Data analysis
+            if self._intent_needs_analysis(primary_intent) or triage_result.category in [
+                "cost_analysis", "usage_analysis", "performance_analysis"
+            ]:
+                next_agents.append("data")
+            
+            # Optimization
+            if self._intent_needs_optimization(primary_intent) or triage_result.category in [
+                "optimization", "cost_optimization", "performance_optimization"
+            ]:
+                if "data" not in next_agents:
+                    next_agents.append("data")  # Need data for optimization
+                next_agents.append("optimization")
+            
+            # Action planning
+            if user_intent.action_required or self._intent_needs_actions(primary_intent) or triage_result.category in [
+                "implementation", "migration", "setup"
+            ]:
+                next_agents.append("actions")
+            
+            # If no specific agents selected, use data helper for guidance
+            if not next_agents:
+                next_agents = ["data_helper"]
+        
+        # Reporting ALWAYS runs last in supervisor (don't include here)
+        # The supervisor will add it automatically
+        
+        logger.info(f"Triage recommends workflow: {' → '.join(next_agents + ['reporting'])}")
+        logger.info(f"Reasoning: data={triage_result.data_sufficiency}, "
+                   f"category={triage_result.category}, "
+                   f"action_required={user_intent.action_required if user_intent else False}")
+        
+        return next_agents
+    
+    def _intent_needs_analysis(self, intent: str) -> bool:
+        """Check if intent requires data analysis"""
+        analysis_keywords = [
+            "analyze", "analysis", "review", "examine", "investigate",
+            "trend", "pattern", "usage", "cost", "performance",
+            "metric", "statistic", "report", "insight", "understand"
+        ]
+        return any(keyword in intent.lower() for keyword in analysis_keywords)
+    
+    def _intent_needs_optimization(self, intent: str) -> bool:
+        """Check if intent requires optimization"""
+        optimization_keywords = [
+            "optimize", "improve", "reduce", "save", "efficient",
+            "better", "enhance", "minimize", "maximize", "tune",
+            "streamline", "accelerate", "boost", "upgrade"
+        ]
+        return any(keyword in intent.lower() for keyword in optimization_keywords)
+    
+    def _intent_needs_actions(self, intent: str) -> bool:
+        """Check if intent requires action planning"""
+        action_keywords = [
+            "implement", "deploy", "setup", "configure", "migrate",
+            "plan", "roadmap", "steps", "guide", "how to",
+            "build", "create", "establish", "install", "integrate"
+        ]
+        return any(keyword in intent.lower() for keyword in action_keywords)
     
     # ========================================================================
     # REQUIRED BASEAGENT METHODS
