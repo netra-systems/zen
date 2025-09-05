@@ -141,7 +141,7 @@ class AuthServiceClient:
     
     async def _try_cached_token(self, token: str) -> Optional[Dict]:
         """Try to get token from cache with atomic blacklist checking."""
-        cached_result = self.token_cache.get_cached_token(token)
+        cached_result = await self.token_cache.get_cached_token(token)
         if cached_result:
             # ATOMIC FIX: Check blacklist BEFORE accepting cached result
             # This prevents race conditions where token is cached but then blacklisted
@@ -697,7 +697,7 @@ class AuthServiceClient:
             }
         
         # First, try cached token as fallback
-        cached_result = self.token_cache.get_cached_token(token)
+        cached_result = await self.token_cache.get_cached_token(token)
         if cached_result:
             logger.warning("Using cached token validation due to auth service unavailability")
             cached_result["fallback_used"] = True
@@ -1306,7 +1306,7 @@ class AuthServiceClient:
             logger.error(f"Token validation with resilience failed: {e}")
             
             # Try cached validation as fallback
-            cached_result = self.token_cache.get_cached_token(token)
+            cached_result = await self.token_cache.get_cached_token(token)
             if cached_result and cached_result.get("valid"):
                 logger.warning("Using cached token validation due to auth service unavailability")
                 return {

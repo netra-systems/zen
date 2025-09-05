@@ -160,6 +160,46 @@ class TokenCache:
     async def invalidate_token(self, user_id: str) -> None:
         """Invalidate cached token for user."""
         await self._cache.delete(f"token:{user_id}")
+    
+    async def get_cached_token(self, token: str) -> Optional[Dict[str, Any]]:
+        """Backward compatibility method for legacy auth flow.
+        
+        This method provides backward compatibility for the authentication flow
+        that expects to retrieve cached token data based on the token itself.
+        
+        Args:
+            token: The authentication token to look up
+            
+        Returns:
+            Cached token data if available, None otherwise
+        """
+        # Bridge to token validation cache
+        return await self._cache.get(f"validated_token:{token}")
+    
+    async def set_cached_token(self, token: str, token_data: Dict[str, Any], expires_in: int = 3600) -> None:
+        """Cache validated token data for backward compatibility.
+        
+        Args:
+            token: The authentication token
+            token_data: The validated token data to cache
+            expires_in: TTL for cache entry in seconds
+        """
+        # Set TTL slightly less than token expiry for safety
+        ttl = max(expires_in - 60, 300)  # At least 5 minutes
+        await self._cache.set(f"validated_token:{token}", token_data, ttl)
+    
+    def get_cached_token_sync(self, token: str) -> Optional[Dict[str, Any]]:
+        """Synchronous backward compatibility wrapper with unique name.
+        
+        Some legacy code may expect a synchronous version of token validation.
+        This returns None to avoid blocking, indicating cache miss.
+        The calling code should fall back to async validation.
+        
+        Note: This is a separate method to avoid SSOT violation with async version.
+        Legacy code should migrate to async get_cached_token() when possible.
+        """
+        logger.debug(f"Sync get_cached_token_sync called for backward compatibility - returning None to force async path")
+        return None
 
 
 class UserCache:
