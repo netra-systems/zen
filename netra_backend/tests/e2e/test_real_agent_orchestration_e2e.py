@@ -22,7 +22,7 @@ from netra_backend.app.agents.data_sub_agent.models import (
 
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.agents.triage.unified_triage_agent import TriageResult
-from netra_backend.app.schemas.agent_models import SubAgentLifecycle
+from netra_backend.app.schemas.agent import SubAgentLifecycle
 from netra_backend.tests.e2e.state_validation_utils import (
     StateIntegrityChecker,
     StateValidationReporter,

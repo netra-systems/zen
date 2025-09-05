@@ -6,7 +6,7 @@ Maximum 300 lines, functions ≤8 lines.
 
 import pytest
 
-from netra_backend.app.agents.data_sub_agent.data_sub_agent import DataSubAgent
+from netra_backend.app.agents.data_sub_agent import DataSubAgent
 
 from netra_backend.app.agents.triage.unified_triage_agent import UnifiedTriageAgent
 # from scaling_test_helpers - using fixtures instead:

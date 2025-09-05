@@ -14,7 +14,7 @@ from unittest.mock import AsyncMock, MagicMock, Mock, patch
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from netra_backend.app.agents.data_sub_agent.data_sub_agent import DataSubAgent
+from netra_backend.app.agents.data_sub_agent import DataSubAgent
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
 from netra_backend.app.core.exceptions import NetraException
 from netra_backend.app.db.models_postgres import Message, Run, Thread

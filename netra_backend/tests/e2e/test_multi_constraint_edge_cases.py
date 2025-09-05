@@ -12,7 +12,7 @@ from pathlib import Path
 from typing import Dict, List
 
 import pytest
-from netra_backend.app.schemas.agent_models import SubAgentLifecycle
+from netra_backend.app.schemas.agent import SubAgentLifecycle
 
 from netra_backend.tests.e2e.multi_constraint_test_helpers import (
     build_multi_constraint_setup,

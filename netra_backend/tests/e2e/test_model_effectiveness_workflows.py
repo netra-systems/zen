@@ -10,16 +10,19 @@ from typing import Dict, List, Optional
 
 import pytest
 import pytest_asyncio
-from netra_backend.app.schemas.agent_models import SubAgentLifecycle
+from netra_backend.app.schemas.agent import SubAgentLifecycle
 from netra_backend.app.websocket_core.manager import WebSocketManager as UnifiedWebSocketManager
 from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
 
-from netra_backend.app.agents.data_sub_agent.data_sub_agent import DataSubAgent
+from netra_backend.app.agents.data_sub_agent import DataSubAgent
 from netra_backend.app.agents.state import AgentMetadata, DeepAgentState
 
 from netra_backend.app.agents.triage.unified_triage_agent import UnifiedTriageAgent
 from netra_backend.app.core.exceptions import NetraException
 from netra_backend.app.llm.llm_manager import LLMManager
+
+# Import WebSocketManager for type annotations
+from netra_backend.app.websocket_core.manager import WebSocketManager
 
 @pytest.fixture
 
@@ -54,7 +57,7 @@ def _create_agent_dictionary(llm_manager, tool_dispatcher):
     
     return {
 
-        'triage': TriageSubAgent(llm_manager, tool_dispatcher, None),
+        'triage': UnifiedTriageAgent(llm_manager, tool_dispatcher),
 
         'data': DataSubAgent(llm_manager, tool_dispatcher),
 

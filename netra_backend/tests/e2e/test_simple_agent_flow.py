@@ -22,7 +22,7 @@ from unittest.mock import AsyncMock, MagicMock
 
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
 from netra_backend.app.agents.state import DeepAgentState
-from netra_backend.app.schemas.agent_models import SubAgentLifecycle
+from netra_backend.app.schemas.agent import SubAgentLifecycle
 from shared.isolated_environment import get_env
 
 
