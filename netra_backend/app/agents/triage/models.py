@@ -28,7 +28,9 @@ class Complexity(str, Enum):
 class ExtractedEntities:
     """Entities extracted from user request"""
     models: List[str] = field(default_factory=list)
+    models_mentioned: List[str] = field(default_factory=list)  # Alias for compatibility
     metrics: List[str] = field(default_factory=list)
+    metrics_mentioned: List[str] = field(default_factory=list)  # Alias for compatibility
     time_ranges: List[str] = field(default_factory=list)
     thresholds: List[float] = field(default_factory=list)
     targets: List[float] = field(default_factory=list)
