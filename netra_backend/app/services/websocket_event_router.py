@@ -18,7 +18,7 @@ from typing import Dict, List, Optional, Set, Any
 from dataclasses import dataclass
 
 from netra_backend.app.logging_config import central_logger
-from netra_backend.app.websocket_core.manager import WebSocketManager
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager as WebSocketManager
 
 logger = central_logger.get_logger(__name__)
 
@@ -339,7 +339,7 @@ def get_websocket_router() -> WebSocketEventRouter:
     global _router_instance
     
     if _router_instance is None:
-        from netra_backend.app.websocket_core.manager import get_websocket_manager
+        from netra_backend.app.websocket_core.unified_manager import get_websocket_manager
         websocket_manager = get_websocket_manager()
         _router_instance = WebSocketEventRouter(websocket_manager)
     

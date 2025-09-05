@@ -30,7 +30,7 @@ from shared.monitoring.interfaces import MonitorableComponent
 if TYPE_CHECKING:
     from shared.monitoring.interfaces import ComponentMonitor
     from netra_backend.app.models.user_execution_context import UserExecutionContext
-    from netra_backend.app.services.user_websocket_emitter import UserWebSocketEmitter
+    from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmitter as UserWebSocketEmitter
 
 logger = central_logger.get_logger(__name__)
 
@@ -2292,7 +2292,7 @@ class AgentWebSocketBridge(MonitorableComponent):
             raise ValueError("user_context is required for creating user emitter")
         
         try:
-            from netra_backend.app.services.websocket_event_emitter import WebSocketEventEmitter
+            from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmitter as WebSocketEventEmitter
             from netra_backend.app.agents.supervisor.user_execution_context import validate_user_context
             
             # Validate user context before creating emitter
