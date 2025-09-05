@@ -11,7 +11,7 @@ L3 Test: Uses real Redis instance and real WebSocket connections to validate com
 session store → state sync pipeline with actual serialization/deserialization.
 """
 
-from netra_backend.app.websocket_core.manager import WebSocketManager
+from netra_backend.app.websocket_core import WebSocketManager
 # Test framework import - using pytest fixtures instead
 from pathlib import Path
 import sys
@@ -29,7 +29,7 @@ import redis.asyncio as redis
 from netra_backend.app.schemas import User
 
 from netra_backend.app.redis_manager import RedisManager
-from netra_backend.app.websocket_core.manager import WebSocketManager
+from netra_backend.app.websocket_core import WebSocketManager
 
 # ApplicationState and StateUpdate don't exist - creating mock classes for testing
 # Removed broken import statement

@@ -31,8 +31,8 @@ from netra_backend.app.websocket_core import (
     get_websocket_manager,
     WebSocketHeartbeat
 )
-from netra_backend.app.websocket_core.manager import (
-    WebSocketHeartbeatManager,
+from netra_backend.app.websocket_core import (
+    UnifiedWebSocketManager,
     HeartbeatConfig,
     get_heartbeat_manager
 )
@@ -101,7 +101,7 @@ async def heartbeat_manager():
         max_missed_heartbeats=2,
         cleanup_interval_seconds=5
     )
-    manager = WebSocketHeartbeatManager(config)
+    manager = UnifiedWebSocketManager(config)
     await manager.start()
     yield manager
     await manager.stop()

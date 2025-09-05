@@ -12,7 +12,7 @@ Connection establishment -> Load testing -> Network interruption -> Reconnection
 Coverage: 100+ concurrent connections, network fault injection, message delivery guarantees, staging environment validation
 """
 
-from netra_backend.app.websocket_core.manager import WebSocketManager
+from netra_backend.app.websocket_core import WebSocketManager
 # Test framework import - using pytest fixtures instead
 from pathlib import Path
 import sys
@@ -37,7 +37,7 @@ from websockets import ServerConnection
 StagingTestSuite = AsyncMock()
 
 get_staging_suite = AsyncMock()
-# from netra_backend.app.websocket_core.manager import WebSocketManager
+# from netra_backend.app.websocket_core import WebSocketManager
 
 WebSocketManager = AsyncMock()
 # from app.services.redis.session_manager import RedisSessionManager
