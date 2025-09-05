@@ -134,7 +134,7 @@ class DatabaseManager:
             
             async with AsyncSession(engine) as session:
                 result = await session.execute(text("SELECT 1"))
-                await result.fetchone()
+                result.fetchone()  # fetchone() is not awaitable
             
             return {
                 "status": "healthy",
