@@ -1,351 +1,356 @@
-"""
-Auth Service Redis Manager - Independent Redis management for auth service
+"""Redis manager for auth service.
 
-Business Value Justification (BVJ):
-- Segment: Platform/Internal
-- Business Goal: Complete microservice independence 
-- Value Impact: Enables auth service to operate independently
-- Strategic Impact: Removes circular dependencies and enables independent deployment
+Provides Redis connection and management functionality specifically for
+authentication operations like session storage, token blacklisting, and
+cache management.
 
-CRITICAL: This is a completely independent Redis manager. NEVER import from netra_backend.
-This ensures 100% microservice independence as required by architecture principles.
+Business Value:
+- Enables fast session lookups for user authentication
+- Provides token blacklisting for secure logout
+- Caches user permissions and roles for performance
 """
-import os
-import logging
+
+from typing import Optional, Dict, Any, List
 import asyncio
-import time
-from typing import Optional, Any
 import redis.asyncio as redis
+from datetime import datetime, timedelta
+import json
+import logging
+
 from shared.isolated_environment import get_env
 
 logger = logging.getLogger(__name__)
 
 
 class AuthRedisManager:
-    """Completely independent Redis manager for auth service"""
+    """Redis manager specifically for authentication operations."""
     
     def __init__(self):
         self.redis_client: Optional[redis.Redis] = None
-        self.enabled = True  # Will be set properly in initialize()
+        self._connection_pool: Optional[redis.ConnectionPool] = None
+        self.connected = False
         
-    def _check_if_enabled(self) -> bool:
-        """Check if Redis is enabled for auth service"""
-        # Check for explicit disable flags first
-        if get_env().get("DISABLE_REDIS", "false").lower() == "true":
-            return False
+        # Get Redis configuration from environment
+        env = get_env()
+        self.host = env.get("REDIS_HOST", "localhost")
+        self.port = int(env.get("REDIS_PORT", 6379))
+        self.db = int(env.get("AUTH_REDIS_DB", 1))  # Use separate DB for auth
+        self.password = env.get("REDIS_PASSWORD")
+        self.ssl = env.get("REDIS_SSL", "false").lower() == "true"
         
-        # Check for test disable flags (for consistent test behavior)
-        if get_env().get("TEST_DISABLE_REDIS", "false").lower() == "true":
-            return False
+        # Check if Redis is enabled (for testing environments)
+        self.enabled = env.get("TEST_DISABLE_REDIS", "false").lower() != "true"
         
-        redis_url = get_env().get("REDIS_URL")
-        if redis_url == "disabled":
-            return False
-            
-        # For staging/production, we need more validation in initialize()
-        # Just return True here to allow initialize() to do full checks
-        return True
+        # Auth-specific prefixes
+        self.session_prefix = "auth:session:"
+        self.token_blacklist_prefix = "auth:blacklist:"
+        self.user_cache_prefix = "auth:user:"
+        self.permission_prefix = "auth:perm:"
+        
+        logger.debug(f"AuthRedisManager initialized for {self.host}:{self.port}/{self.db}")
     
-    async def initialize(self) -> None:
-        """Initialize Redis connection for auth service"""
-        # Re-check if Redis should be enabled
-        self.enabled = self._check_if_enabled()
-        if not self.enabled:
-            logger.info("Redis disabled for auth service")
-            return
-            
+    async def connect(self) -> bool:
+        """Connect to Redis server."""
         try:
-            env = get_env().get("ENVIRONMENT", "development").lower()
-            redis_url = get_env().get("REDIS_URL")
-            
-            # CRITICAL: Prevent localhost fallback in staging/production
-            if not redis_url:
-                if env in ["staging", "production"]:
-                    # Check if Redis is required
-                    redis_required = get_env().get("REDIS_REQUIRED", "false").lower() == "true"
-                    if redis_required:
-                        raise ValueError(f"REDIS_URL must be configured in {env} environment (REDIS_REQUIRED=true)")
-                    else:
-                        logger.warning(f"Redis not configured in {env} environment, disabling Redis support")
-                        self.enabled = False
-                        return
-                else:
-                    # Only allow localhost fallback in development
-                    redis_url = "redis://localhost:6379"
-                    logger.info("Using localhost Redis fallback for development environment")
-            
-            # Validate Redis URL doesn't contain localhost in staging/production
-            if env in ["staging", "production"] and "localhost" in redis_url.lower():
-                redis_fallback_enabled = get_env().get("REDIS_FALLBACK_ENABLED", "false").lower() == "true"
-                if not redis_fallback_enabled:
-                    raise ValueError(f"Localhost Redis URL not allowed in {env} environment (REDIS_FALLBACK_ENABLED=false)")
-                logger.warning(f"Using localhost Redis in {env} - this should only be for testing!")
-            
-            self.redis_client = redis.from_url(
-                redis_url,
+            self._connection_pool = redis.ConnectionPool(
+                host=self.host,
+                port=self.port,
+                db=self.db,
+                password=self.password,
+                ssl=self.ssl,
                 decode_responses=True,
-                socket_connect_timeout=5,
-                socket_timeout=5,
+                max_connections=20,
                 retry_on_timeout=True,
-                health_check_interval=30
             )
             
-            # Test connection with retry logic and exponential backoff
-            await self._test_connection_with_retry(redis_url)
-            logger.info(f"Auth service Redis connection initialized successfully to {redis_url.split('@')[-1] if '@' in redis_url else redis_url}")
+            self.redis_client = redis.Redis(connection_pool=self._connection_pool)
             
-        except Exception as e:
-            env = get_env().get("ENVIRONMENT", "development").lower()
-            redis_required = get_env().get("REDIS_REQUIRED", "false").lower() == "true"
+            # Test connection
+            await self.redis_client.ping()
+            self.connected = True
             
-            if env in ["staging", "production"] and redis_required:
-                # In staging/production with REDIS_REQUIRED=true, fail hard
-                logger.error(f"Critical: Failed to initialize Redis in {env} environment: {e}")
-                raise
-            else:
-                # In development or when Redis not required, allow graceful degradation
-                logger.warning(f"Failed to initialize Redis for auth service: {e}")
-                logger.warning(f"Redis disabled - running without Redis support (environment={env}, required={redis_required})")
-                self.enabled = False
-                self.redis_client = None
-    
-    def connect(self) -> bool:
-        """Synchronous connect method for compatibility with session manager"""
-        try:
-            # For synchronous compatibility, just check if we're enabled
-            # Actual connection will be established on first use
-            return self.enabled
-        except Exception as e:
-            logger.warning(f"Redis connection check failed: {e}")
-            return False
-    
-    async def async_connect(self) -> None:
-        """Connect to Redis - async version"""
-        await self.initialize()
-    
-    def get_client(self) -> Optional[redis.Redis]:
-        """Get Redis client instance"""
-        return self.redis_client
-    
-    async def get(self, key: str) -> Optional[str]:
-        """Get value from Redis with comprehensive error handling"""
-        if not self.enabled:
-            logger.debug(f"Redis disabled, cannot GET key: {key}")
-            return None
-            
-        if not self.redis_client:
-            logger.warning(f"Redis client not available for GET operation: {key}")
-            return None
-            
-        try:
-            result = await self.redis_client.get(key)
-            if result is not None:
-                logger.debug(f"Redis GET successful for key: {key}")
-            return result
-        except redis.ConnectionError as e:
-            logger.error(f"Redis connection error during GET for key {key}: {e}")
-            self._handle_connection_error()
-            return None
-        except redis.TimeoutError as e:
-            logger.warning(f"Redis timeout during GET for key {key}: {e}")
-            return None
-        except Exception as e:
-            logger.error(f"Unexpected Redis GET error for key {key}: {e}")
-            return None
-    
-    async def set(self, key: str, value: str, ex: Optional[int] = None) -> bool:
-        """Set value in Redis with optional expiration and comprehensive error handling"""
-        if not self.enabled:
-            logger.debug(f"Redis disabled, cannot SET key: {key}")
-            return False
-            
-        if not self.redis_client:
-            logger.warning(f"Redis client not available for SET operation: {key}")
-            return False
-            
-        try:
-            await self.redis_client.set(key, value, ex=ex)
-            logger.debug(f"Redis SET successful for key: {key} (expiry: {ex}s)")
+            logger.info(f"Connected to Redis at {self.host}:{self.port}/{self.db}")
             return True
-        except redis.ConnectionError as e:
-            logger.error(f"Redis connection error during SET for key {key}: {e}")
-            self._handle_connection_error()
-            return False
-        except redis.TimeoutError as e:
-            logger.warning(f"Redis timeout during SET for key {key}: {e}")
-            return False
+            
         except Exception as e:
-            logger.error(f"Unexpected Redis SET error for key {key}: {e}")
+            logger.error(f"Failed to connect to Redis: {e}")
+            self.connected = False
             return False
     
-    async def delete(self, key: str) -> bool:
-        """Delete key from Redis with comprehensive error handling"""
-        if not self.enabled:
-            logger.debug(f"Redis disabled, cannot DELETE key: {key}")
-            return False
-            
-        if not self.redis_client:
-            logger.warning(f"Redis client not available for DELETE operation: {key}")
-            return False
-            
-        try:
-            result = await self.redis_client.delete(key)
-            success = result > 0
-            if success:
-                logger.debug(f"Redis DELETE successful for key: {key}")
-            else:
-                logger.debug(f"Redis DELETE - key not found: {key}")
-            return success
-        except redis.ConnectionError as e:
-            logger.error(f"Redis connection error during DELETE for key {key}: {e}")
-            self._handle_connection_error()
-            return False
-        except redis.TimeoutError as e:
-            logger.warning(f"Redis timeout during DELETE for key {key}: {e}")
-            return False
-        except Exception as e:
-            logger.error(f"Unexpected Redis DELETE error for key {key}: {e}")
-            return False
-    
-    async def exists(self, key: str) -> bool:
-        """Check if key exists in Redis"""
-        if not self.redis_client:
-            return False
-            
-        try:
-            return await self.redis_client.exists(key) > 0
-        except Exception as e:
-            logger.warning(f"Redis EXISTS check failed for key {key}: {e}")
-            return False
-    
-    async def expire(self, key: str, seconds: int) -> bool:
-        """Set expiration time for a key"""
-        if not self.redis_client:
-            return False
-            
-        try:
-            return await self.redis_client.expire(key, seconds)
-        except Exception as e:
-            logger.warning(f"Redis EXPIRE failed for key {key}: {e}")
-            return False
-    
-    async def close(self) -> None:
-        """Close Redis connection"""
+    async def disconnect(self):
+        """Disconnect from Redis."""
         if self.redis_client:
-            try:
-                await self.redis_client.aclose()
-                logger.info("Auth service Redis connection closed")
-            except Exception as e:
-                logger.warning(f"Error closing Redis connection: {e}")
-            finally:
-                self.redis_client = None
-    
-    def is_available(self) -> bool:
-        """Check if Redis is available"""
-        return self.enabled and self.redis_client is not None
-    
-    async def _test_connection_with_retry(self, redis_url: str, max_retries: int = 3) -> None:
-        """Test Redis connection with exponential backoff retry logic"""
-        last_error = None
+            await self.redis_client.close()
+        if self._connection_pool:
+            await self._connection_pool.disconnect()
         
-        for attempt in range(max_retries):
-            try:
-                # Test connection with timeout
-                await asyncio.wait_for(self.redis_client.ping(), timeout=10)
-                if attempt > 0:
-                    logger.info(f"Redis connection successful after {attempt + 1} attempts")
-                return
-                
-            except asyncio.TimeoutError as e:
-                last_error = TimeoutError(f"Redis connection timeout after 10 seconds to {redis_url.split('@')[-1] if '@' in redis_url else redis_url}")
-            except Exception as e:
-                last_error = e
-                
-            if attempt < max_retries - 1:
-                # Exponential backoff: 1s, 2s, 4s
-                wait_time = 2 ** attempt
-                logger.warning(f"Redis connection attempt {attempt + 1} failed: {last_error}. Retrying in {wait_time}s...")
-                await asyncio.sleep(wait_time)
-            else:
-                logger.error(f"Redis connection failed after {max_retries} attempts: {last_error}")
-                
-        # If we get here, all retries failed
-        if last_error:
-            raise last_error
+        self.connected = False
+        logger.info("Disconnected from Redis")
     
-    async def ping_with_timeout(self, timeout: float = 5.0) -> bool:
-        """Ping Redis with timeout for health checks"""
+    async def ensure_connected(self) -> bool:
+        """Ensure Redis connection is active."""
         if not self.enabled:
-            return True  # Consider healthy when intentionally disabled
-            
-        if not self.redis_client:
-            logger.debug("Redis client not available for ping")
+            logger.debug("Redis is disabled for testing")
             return False
-            
+        
+        if not self.connected or not self.redis_client:
+            return await self.connect()
+        
         try:
-            await asyncio.wait_for(self.redis_client.ping(), timeout=timeout)
+            await self.redis_client.ping()
             return True
-        except asyncio.TimeoutError:
-            logger.warning(f"Redis ping timeout after {timeout}s")
-            return False
-        except redis.ConnectionError as e:
-            logger.warning(f"Redis connection error during ping: {e}")
-            self._handle_connection_error()
-            return False
         except Exception as e:
-            logger.debug(f"Redis ping failed: {e}")
+            logger.warning(f"Redis connection lost: {e}")
+            return await self.connect()
+    
+    # Session Management
+    async def store_session(self, session_id: str, session_data: Dict[str, Any], ttl_seconds: int = 3600) -> bool:
+        """Store user session data."""
+        if not await self.ensure_connected():
+            return False
+        
+        try:
+            key = f"{self.session_prefix}{session_id}"
+            session_json = json.dumps(session_data, default=str)
+            
+            await self.redis_client.setex(key, ttl_seconds, session_json)
+            logger.debug(f"Stored session {session_id} with TTL {ttl_seconds}s")
+            return True
+            
+        except Exception as e:
+            logger.error(f"Failed to store session {session_id}: {e}")
             return False
     
-    def _handle_connection_error(self) -> None:
-        """Handle Redis connection errors by potentially disabling Redis"""
-        env = get_env().get("ENVIRONMENT", "development").lower()
-        if env in ["development", "test"]:
-            # In development/test, disable Redis on persistent connection errors
-            logger.warning("Redis connection error in development environment - disabling Redis")
-            self.enabled = False
-        else:
-            # In staging/production, log error but keep trying
-            logger.error("Redis connection error in production environment - sessions may be affected")
+    async def get_session(self, session_id: str) -> Optional[Dict[str, Any]]:
+        """Retrieve user session data."""
+        if not await self.ensure_connected():
+            return None
+        
+        try:
+            key = f"{self.session_prefix}{session_id}"
+            session_json = await self.redis_client.get(key)
+            
+            if session_json:
+                return json.loads(session_json)
+            return None
+            
+        except Exception as e:
+            logger.error(f"Failed to get session {session_id}: {e}")
+            return None
     
-    def get_connection_info(self) -> dict:
-        """Get Redis connection information for debugging"""
-        if not self.redis_client:
+    async def delete_session(self, session_id: str) -> bool:
+        """Delete user session."""
+        if not await self.ensure_connected():
+            return False
+        
+        try:
+            key = f"{self.session_prefix}{session_id}"
+            result = await self.redis_client.delete(key)
+            logger.debug(f"Deleted session {session_id}")
+            return result > 0
+            
+        except Exception as e:
+            logger.error(f"Failed to delete session {session_id}: {e}")
+            return False
+    
+    async def extend_session(self, session_id: str, ttl_seconds: int = 3600) -> bool:
+        """Extend session TTL."""
+        if not await self.ensure_connected():
+            return False
+        
+        try:
+            key = f"{self.session_prefix}{session_id}"
+            result = await self.redis_client.expire(key, ttl_seconds)
+            logger.debug(f"Extended session {session_id} TTL to {ttl_seconds}s")
+            return result
+            
+        except Exception as e:
+            logger.error(f"Failed to extend session {session_id}: {e}")
+            return False
+    
+    # Token Blacklisting
+    async def blacklist_token(self, token: str, ttl_seconds: int = 86400) -> bool:
+        """Add token to blacklist."""
+        if not await self.ensure_connected():
+            return False
+        
+        try:
+            key = f"{self.token_blacklist_prefix}{token}"
+            await self.redis_client.setex(key, ttl_seconds, "blacklisted")
+            logger.debug(f"Blacklisted token with TTL {ttl_seconds}s")
+            return True
+            
+        except Exception as e:
+            logger.error(f"Failed to blacklist token: {e}")
+            return False
+    
+    async def is_token_blacklisted(self, token: str) -> bool:
+        """Check if token is blacklisted."""
+        if not await self.ensure_connected():
+            return False
+        
+        try:
+            key = f"{self.token_blacklist_prefix}{token}"
+            result = await self.redis_client.exists(key)
+            return result > 0
+            
+        except Exception as e:
+            logger.error(f"Failed to check token blacklist: {e}")
+            return False
+    
+    # User Caching
+    async def cache_user_data(self, user_id: str, user_data: Dict[str, Any], ttl_seconds: int = 1800) -> bool:
+        """Cache user data for fast lookup."""
+        if not await self.ensure_connected():
+            return False
+        
+        try:
+            key = f"{self.user_cache_prefix}{user_id}"
+            user_json = json.dumps(user_data, default=str)
+            
+            await self.redis_client.setex(key, ttl_seconds, user_json)
+            logger.debug(f"Cached user data for {user_id}")
+            return True
+            
+        except Exception as e:
+            logger.error(f"Failed to cache user data for {user_id}: {e}")
+            return False
+    
+    async def get_cached_user_data(self, user_id: str) -> Optional[Dict[str, Any]]:
+        """Get cached user data."""
+        if not await self.ensure_connected():
+            return None
+        
+        try:
+            key = f"{self.user_cache_prefix}{user_id}"
+            user_json = await self.redis_client.get(key)
+            
+            if user_json:
+                return json.loads(user_json)
+            return None
+            
+        except Exception as e:
+            logger.error(f"Failed to get cached user data for {user_id}: {e}")
+            return None
+    
+    async def invalidate_user_cache(self, user_id: str) -> bool:
+        """Invalidate cached user data."""
+        if not await self.ensure_connected():
+            return False
+        
+        try:
+            key = f"{self.user_cache_prefix}{user_id}"
+            result = await self.redis_client.delete(key)
+            logger.debug(f"Invalidated user cache for {user_id}")
+            return result > 0
+            
+        except Exception as e:
+            logger.error(f"Failed to invalidate user cache for {user_id}: {e}")
+            return False
+    
+    # Permission Caching
+    async def cache_user_permissions(self, user_id: str, permissions: List[str], ttl_seconds: int = 1800) -> bool:
+        """Cache user permissions."""
+        if not await self.ensure_connected():
+            return False
+        
+        try:
+            key = f"{self.permission_prefix}{user_id}"
+            permissions_json = json.dumps(permissions)
+            
+            await self.redis_client.setex(key, ttl_seconds, permissions_json)
+            logger.debug(f"Cached permissions for user {user_id}")
+            return True
+            
+        except Exception as e:
+            logger.error(f"Failed to cache permissions for {user_id}: {e}")
+            return False
+    
+    async def get_cached_permissions(self, user_id: str) -> Optional[List[str]]:
+        """Get cached user permissions."""
+        if not await self.ensure_connected():
+            return None
+        
+        try:
+            key = f"{self.permission_prefix}{user_id}"
+            permissions_json = await self.redis_client.get(key)
+            
+            if permissions_json:
+                return json.loads(permissions_json)
+            return None
+            
+        except Exception as e:
+            logger.error(f"Failed to get cached permissions for {user_id}: {e}")
+            return None
+    
+    # Health Check
+    async def health_check(self) -> Dict[str, Any]:
+        """Check Redis health and return status."""
+        try:
+            if not await self.ensure_connected():
+                return {"status": "unhealthy", "error": "Cannot connect to Redis"}
+            
+            # Test basic operations
+            test_key = "auth:health:test"
+            await self.redis_client.set(test_key, "test", ex=5)
+            test_value = await self.redis_client.get(test_key)
+            await self.redis_client.delete(test_key)
+            
+            if test_value != "test":
+                return {"status": "unhealthy", "error": "Basic operations failed"}
+            
+            # Get connection info
+            info = await self.redis_client.info()
+            
             return {
-                "enabled": self.enabled,
-                "connected": False,
-                "client": None
+                "status": "healthy",
+                "connection": {
+                    "host": self.host,
+                    "port": self.port,
+                    "db": self.db,
+                },
+                "server_info": {
+                    "version": info.get("redis_version"),
+                    "uptime_seconds": info.get("uptime_in_seconds"),
+                    "connected_clients": info.get("connected_clients"),
+                    "used_memory_human": info.get("used_memory_human"),
+                },
+                "timestamp": datetime.utcnow().isoformat(),
             }
             
-        try:
-            connection_pool = self.redis_client.connection_pool
-            return {
-                "enabled": self.enabled,
-                "connected": True,
-                "host": getattr(connection_pool.connection_kwargs, 'host', 'unknown'),
-                "port": getattr(connection_pool.connection_kwargs, 'port', 'unknown'),
-                "db": getattr(connection_pool.connection_kwargs, 'db', 0),
-                "max_connections": connection_pool.max_connections,
-                "created_connections": len(connection_pool._created_connections) if hasattr(connection_pool, '_created_connections') else 'unknown'
-            }
         except Exception as e:
-            logger.debug(f"Error getting Redis connection info: {e}")
-            return {
-                "enabled": self.enabled,
-                "connected": False,
-                "error": str(e)
-            }
+            return {"status": "unhealthy", "error": str(e)}
+    
+    # Cleanup utilities
+    async def cleanup_expired_sessions(self) -> int:
+        """Clean up expired sessions (already handled by Redis TTL, but useful for monitoring)."""
+        if not await self.ensure_connected():
+            return 0
+        
+        try:
+            # Get all session keys
+            pattern = f"{self.session_prefix}*"
+            keys = await self.redis_client.keys(pattern)
+            
+            # Check which ones exist (non-expired)
+            active_sessions = 0
+            for key in keys:
+                if await self.redis_client.exists(key):
+                    active_sessions += 1
+            
+            logger.info(f"Found {active_sessions} active sessions")
+            return active_sessions
+            
+        except Exception as e:
+            logger.error(f"Failed to cleanup sessions: {e}")
+            return 0
 
 
-# Global instance for auth service
+# Global auth Redis manager instance
 auth_redis_manager = AuthRedisManager()
 
 
-def get_redis_status() -> dict:
-    """Get comprehensive Redis status for monitoring and debugging"""
-    return {
-        "manager_enabled": auth_redis_manager.enabled,
-        "client_available": auth_redis_manager.redis_client is not None,
-        "connection_info": auth_redis_manager.get_connection_info(),
-        "environment": get_env().get("ENVIRONMENT", "development"),
-        "redis_url_configured": bool(get_env().get("REDIS_URL"))
-    }
+__all__ = [
+    "AuthRedisManager",
+    "auth_redis_manager",
+]

@@ -18,7 +18,7 @@ from argon2.exceptions import VerifyMismatchError
 
 from auth_service.auth_core.core.jwt_handler import JWTHandler
 from shared.isolated_environment import get_env
-from auth_service.auth_core.core.session_manager import SessionManager
+# Session manager module was deleted - using direct functionality
 from auth_service.auth_core.database.repository import (
     AuthAuditRepository,
     AuthUserRepository,
@@ -45,7 +45,10 @@ class AuthService:
     
     def __init__(self):
         self.jwt_handler = JWTHandler()
-        self.session_manager = SessionManager()
+        # Simple session management - replace SessionManager functionality
+        self._sessions = {}
+        self.used_refresh_tokens = set()
+        self.redis_client = None  # Initialize as None, set later if Redis available
         self.password_hasher = PasswordHasher()
         self.max_login_attempts = int(get_env().get("MAX_LOGIN_ATTEMPTS", "5"))
         self.lockout_duration = int(get_env().get("LOCKOUT_DURATION_MINUTES", "15"))
@@ -59,6 +62,34 @@ class AuthService:
         
         # Simple in-memory user store for testing
         self._test_users = {}
+        
+    def create_session(self, user_id: str, user_data: Dict) -> str:
+        """Create a new user session."""
+        import uuid
+        session_id = str(uuid.uuid4())
+        self._sessions[session_id] = {
+            'user_id': user_id,
+            'user_data': user_data,
+            'created_at': datetime.now(UTC)
+        }
+        return session_id
+    
+    def delete_session(self, session_id: str) -> bool:
+        """Delete a user session."""
+        if session_id in self._sessions:
+            del self._sessions[session_id]
+            return True
+        return False
+    
+    async def invalidate_user_sessions(self, user_id: str) -> None:
+        """Invalidate all sessions for a specific user."""
+        sessions_to_delete = []
+        for session_id, session_data in self._sessions.items():
+            if session_data.get('user_id') == user_id:
+                sessions_to_delete.append(session_id)
+        
+        for session_id in sessions_to_delete:
+            self.delete_session(session_id)
         
     async def login(self, request: LoginRequest, 
                    client_info: Dict) -> LoginResponse:
@@ -95,7 +126,7 @@ class AuthService:
             )
             
             # Create session
-            session_id = self.session_manager.create_session(
+            session_id = self.create_session(
                 user_id=user["id"],
                 user_data={
                     "email": user["email"],
@@ -141,10 +172,10 @@ class AuthService:
             
             # Delete session if provided
             if session_id:
-                self.session_manager.delete_session(session_id)
+                self.delete_session(session_id)
             elif user_id:
                 # Invalidate all user sessions
-                await self.session_manager.invalidate_user_sessions(user_id)
+                await self.invalidate_user_sessions(user_id)
             
             # Log logout
             await self._audit_log(
@@ -314,14 +345,10 @@ class AuthService:
             # For now, we'll simulate this with session manager state
             
             # Check if token was already used (race condition check)
-            if hasattr(self.session_manager, 'used_refresh_tokens'):
-                if refresh_token in self.session_manager.used_refresh_tokens:
-                    return None
-                # Mark token as used atomically
-                self.session_manager.used_refresh_tokens.add(refresh_token)
-            else:
-                # Initialize used tokens set if not exists
-                self.session_manager.used_refresh_tokens = {refresh_token}
+            if refresh_token in self.used_refresh_tokens:
+                return None
+            # Mark token as used atomically
+            self.used_refresh_tokens.add(refresh_token)
             
             # CRITICAL FIX: Get real user details from database or existing token payload
             email = payload.get("email", "user@example.com")  # Try to get from token first
@@ -755,7 +782,7 @@ class AuthService:
             await user_repo.mark_reset_token_used(token_hash)
             
             # Invalidate all user sessions
-            await self.session_manager.invalidate_user_sessions(user.id)
+            await self.invalidate_user_sessions(user.id)
             
             # Audit log
             await self._audit_log(
@@ -919,9 +946,9 @@ class AuthService:
         """Check if circuit breaker is open for a service with Redis persistence"""
         try:
             # Try to get state from Redis first
-            if self.session_manager.redis_client:
+            if self.redis_client:
                 redis_key = f"{self._circuit_breaker_redis_prefix}{service}_state"
-                redis_state = self.session_manager.redis_client.get(redis_key)
+                redis_state = self.redis_client.get(redis_key)
                 if redis_state:
                     state = redis_state
                 else:
@@ -989,18 +1016,18 @@ class AuthService:
         """Set circuit breaker state with Redis persistence"""
         self._circuit_breaker_state[service] = state
         try:
-            if self.session_manager.redis_client:
+            if self.redis_client:
                 redis_key = f"{self._circuit_breaker_redis_prefix}{service}_state"
-                self.session_manager.redis_client.setex(redis_key, 3600, state)  # 1 hour TTL
+                self.redis_client.setex(redis_key, 3600, state)  # 1 hour TTL
         except Exception as e:
             logger.warning(f"Failed to persist circuit breaker state to Redis: {e}")
     
     def _get_circuit_breaker_state(self, service: str) -> str:
         """Get circuit breaker state from Redis or memory"""
         try:
-            if self.session_manager.redis_client:
+            if self.redis_client:
                 redis_key = f"{self._circuit_breaker_redis_prefix}{service}_state"
-                redis_state = self.session_manager.redis_client.get(redis_key)
+                redis_state = self.redis_client.get(redis_key)
                 if redis_state:
                     return redis_state
         except Exception as e:
@@ -1011,18 +1038,18 @@ class AuthService:
         """Set failure count with Redis persistence"""
         self._failure_counts[service] = count
         try:
-            if self.session_manager.redis_client:
+            if self.redis_client:
                 redis_key = f"{self._circuit_breaker_redis_prefix}{service}_failures"
-                self.session_manager.redis_client.setex(redis_key, 3600, str(count))
+                self.redis_client.setex(redis_key, 3600, str(count))
         except Exception as e:
             logger.warning(f"Failed to persist failure count to Redis: {e}")
     
     def _get_failure_count(self, service: str) -> int:
         """Get failure count from Redis or memory"""
         try:
-            if self.session_manager.redis_client:
+            if self.redis_client:
                 redis_key = f"{self._circuit_breaker_redis_prefix}{service}_failures"
-                redis_count = self.session_manager.redis_client.get(redis_key)
+                redis_count = self.redis_client.get(redis_key)
                 if redis_count:
                     return int(redis_count)
         except Exception as e:
@@ -1033,18 +1060,18 @@ class AuthService:
         """Set last failure time with Redis persistence"""
         self._last_failure_times[service] = timestamp
         try:
-            if self.session_manager.redis_client:
+            if self.redis_client:
                 redis_key = f"{self._circuit_breaker_redis_prefix}{service}_last_failure"
-                self.session_manager.redis_client.setex(redis_key, 3600, str(timestamp))
+                self.redis_client.setex(redis_key, 3600, str(timestamp))
         except Exception as e:
             logger.warning(f"Failed to persist last failure time to Redis: {e}")
     
     def _get_last_failure_time(self, service: str) -> float:
         """Get last failure time from Redis or memory"""
         try:
-            if self.session_manager.redis_client:
+            if self.redis_client:
                 redis_key = f"{self._circuit_breaker_redis_prefix}{service}_last_failure"
-                redis_time = self.session_manager.redis_client.get(redis_key)
+                redis_time = self.redis_client.get(redis_key)
                 if redis_time:
                     return float(redis_time)
         except Exception as e:
@@ -1061,14 +1088,14 @@ class AuthService:
             
             # Clear from Redis too
             try:
-                if self.session_manager.redis_client:
+                if self.redis_client:
                     redis_keys = [
                         f"{self._circuit_breaker_redis_prefix}{service}_state",
                         f"{self._circuit_breaker_redis_prefix}{service}_failures",
                         f"{self._circuit_breaker_redis_prefix}{service}_last_failure"
                     ]
                     for key in redis_keys:
-                        self.session_manager.redis_client.delete(key)
+                        self.redis_client.delete(key)
             except Exception as e:
                 logger.warning(f"Failed to clear circuit breaker state from Redis for {service}: {e}")
         else:
@@ -1079,11 +1106,11 @@ class AuthService:
             
             # Clear from Redis too
             try:
-                if self.session_manager.redis_client:
+                if self.redis_client:
                     # Get all circuit breaker keys and delete them
                     pattern = f"{self._circuit_breaker_redis_prefix}*"
-                    keys = self.session_manager.redis_client.keys(pattern)
+                    keys = self.redis_client.keys(pattern)
                     if keys:
-                        self.session_manager.redis_client.delete(*keys)
+                        self.redis_client.delete(*keys)
             except Exception as e:
                 logger.warning(f"Failed to clear circuit breaker state from Redis: {e}")
