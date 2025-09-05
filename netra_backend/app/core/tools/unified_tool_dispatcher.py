@@ -30,10 +30,9 @@ if TYPE_CHECKING:
     from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
     from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager as WebSocketManager
     from langchain_core.tools import BaseTool
+    from netra_backend.app.agents.state import DeepAgentState
 
 from pydantic import BaseModel, Field
-
-from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.schemas.tool import (
     SimpleToolPayload,
@@ -351,7 +350,7 @@ class UnifiedToolDispatcher:
         self,
         tool_name: str,
         parameters: Dict[str, Any],
-        state: DeepAgentState = None,
+        state = None,
         run_id: str = None
     ) -> ToolDispatchResponse:
         """Legacy compatibility method - redirects to execute_tool."""

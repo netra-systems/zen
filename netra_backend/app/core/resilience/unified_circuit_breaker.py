@@ -1,8 +1,9 @@
 """
 Unified circuit breaker implementation.
-Minimal implementation to satisfy imports.
+Enhanced implementation with proper status and metrics tracking.
 """
 
+import time
 from enum import Enum
 from typing import Any, Dict, Optional
 from pydantic import BaseModel
@@ -24,32 +25,103 @@ class UnifiedCircuitConfig(BaseModel):
 
 
 class UnifiedCircuitBreaker:
-    """Minimal unified circuit breaker implementation."""
+    """Enhanced unified circuit breaker implementation with metrics and status tracking."""
     
     def __init__(self, config: UnifiedCircuitConfig):
         self.config = config
         self.state = UnifiedCircuitBreakerState.CLOSED
         self.failure_count = 0
+        self.success_count = 0
+        self.total_calls = 0
+        self.last_failure_time = None
+        self.last_success_time = None
+        self.opened_at = None
         
     async def call(self, func, *args, **kwargs):
         """Execute function with circuit breaker protection."""
+        self.total_calls += 1
+        
         if self.state == UnifiedCircuitBreakerState.OPEN:
-            raise Exception("Circuit breaker is open")
+            # Check if we should try half-open
+            if self.last_failure_time and (time.time() - self.last_failure_time) > self.config.recovery_timeout:
+                self.state = UnifiedCircuitBreakerState.HALF_OPEN
+            else:
+                raise Exception("Circuit breaker is open")
         
         try:
             result = await func(*args, **kwargs) if callable(func) else func
+            
+            # Success - reset failure count and close circuit if half-open
+            self.success_count += 1
             self.failure_count = 0
-            self.state = UnifiedCircuitBreakerState.CLOSED
+            self.last_success_time = time.time()
+            
+            if self.state == UnifiedCircuitBreakerState.HALF_OPEN:
+                self.state = UnifiedCircuitBreakerState.CLOSED
+                self.opened_at = None
+            
             return result
+            
         except Exception as e:
             self.failure_count += 1
+            self.last_failure_time = time.time()
+            
+            # Check if we should open the circuit
             if self.failure_count >= self.config.failure_threshold:
+                if self.state == UnifiedCircuitBreakerState.CLOSED:
+                    self.opened_at = time.time()
                 self.state = UnifiedCircuitBreakerState.OPEN
+            
             raise
             
     def get_state(self) -> UnifiedCircuitBreakerState:
         """Get current state."""
         return self.state
+    
+    def get_status(self) -> Dict[str, Any]:
+        """Get detailed circuit breaker status and metrics."""
+        now = time.time()
+        
+        return {
+            "state": self.state.value,
+            "status": self.state.value,
+            "name": self.config.name,
+            "is_healthy": self.state == UnifiedCircuitBreakerState.CLOSED,
+            "can_execute": self.state != UnifiedCircuitBreakerState.OPEN,
+            "metrics": {
+                "failure_count": self.failure_count,
+                "success_count": self.success_count,
+                "total_calls": self.total_calls,
+                "failure_threshold": self.config.failure_threshold,
+                "success_rate": self.success_count / max(1, self.total_calls),
+                "error_rate": self.failure_count / max(1, self.total_calls),
+                "last_failure_time": self.last_failure_time,
+                "last_success_time": self.last_success_time,
+                "opened_at": self.opened_at,
+                "time_since_opened": (now - self.opened_at) if self.opened_at else None,
+                "recovery_timeout": self.config.recovery_timeout
+            },
+            "domain": "unified"
+        }
+    
+    def reset(self) -> None:
+        """Reset circuit breaker to closed state."""
+        self.state = UnifiedCircuitBreakerState.CLOSED
+        self.failure_count = 0
+        self.success_count = 0
+        self.total_calls = 0
+        self.last_failure_time = None
+        self.last_success_time = None
+        self.opened_at = None
+    
+    def can_execute(self) -> bool:
+        """Check if circuit breaker allows execution."""
+        if self.state == UnifiedCircuitBreakerState.OPEN:
+            # Check if recovery timeout has passed
+            if self.last_failure_time and (time.time() - self.last_failure_time) > self.config.recovery_timeout:
+                return True
+            return False
+        return True
 
 
 class UnifiedCircuitBreakerManager:
