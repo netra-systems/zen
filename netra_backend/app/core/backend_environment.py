@@ -57,9 +57,33 @@ class BackendEnvironment:
         return self.env.get("FERNET_KEY", "")
     
     # Database Configuration
-    def get_database_url(self) -> str:
-        """Get database connection URL."""
-        return self.env.get("DATABASE_URL", "")
+    def get_database_url(self, sync: bool = False) -> str:
+        """Get database connection URL using DatabaseURLBuilder.
+        
+        Args:
+            sync: If True, return synchronous URL (for Alembic, etc.)
+        """
+        from shared.database_url_builder import DatabaseURLBuilder
+        
+        # First check if DATABASE_URL is explicitly set
+        database_url = self.env.get("DATABASE_URL", "")
+        if database_url:
+            return database_url
+        
+        # Use DatabaseURLBuilder to construct URL from components
+        builder = DatabaseURLBuilder(self.env.as_dict())
+        
+        # Get URL for current environment (async by default, sync if requested)
+        database_url = builder.get_url_for_environment(sync=sync)
+        
+        if database_url:
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.info(builder.get_safe_log_message())
+            return database_url
+        
+        # No fallback - let caller handle missing URL
+        return ""
     
     def get_postgres_host(self) -> str:
         """Get PostgreSQL host."""
@@ -295,9 +319,13 @@ def get_jwt_secret_key() -> str:
     return get_backend_env().get_jwt_secret_key()
 
 
-def get_database_url() -> str:
-    """Get database URL."""
-    return get_backend_env().get_database_url()
+def get_database_url(sync: bool = False) -> str:
+    """Get database URL.
+    
+    Args:
+        sync: If True, return synchronous URL (for Alembic, etc.)
+    """
+    return get_backend_env().get_database_url(sync=sync)
 
 
 def get_environment() -> str:

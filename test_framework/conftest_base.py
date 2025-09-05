@@ -85,6 +85,7 @@ if "pytest" in sys.modules or get_env().get("PYTEST_CURRENT_TEST"):
     
     # Authentication secrets required for tests
     env.set("JWT_SECRET_KEY", "test-jwt-secret-key-for-testing-only-do-not-use-in-production", "test_framework_base")
+    env.set("SECRET_KEY", "test-secret-key-for-testing-only-do-not-use-in-production", "test_framework_base")
     
     # FastMCP home directory workaround for Windows compatibility
     # Ensures Path.home() works correctly in FastMCP settings initialization

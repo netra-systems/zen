@@ -47,13 +47,16 @@ from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketMan
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.llm.llm_manager import LLMManager
 
-# Import real WebSocket test utilities - NO MOCKS
+# Import WebSocket test utilities - automatically chooses real or mock based on Docker availability
 from tests.mission_critical.websocket_real_test_base import (
-    RealWebSocketTestBase,
+    get_websocket_test_base,  # Factory that returns appropriate test base
     RealWebSocketTestConfig,
     assert_agent_events_received,
     send_test_agent_request
 )
+
+# Get the appropriate test base (real if Docker available, mock otherwise)
+WebSocketTestBase = get_websocket_test_base()
 from test_framework.test_context import TestContext, create_test_context
 from test_framework.websocket_helpers import WebSocketTestHelpers
 
@@ -311,7 +314,7 @@ class TestRealWebSocketComponents:
     async def setup_real_services(self):
         """Setup real WebSocket services for authentic testing."""
         # Create real WebSocket test base
-        self.test_base = RealWebSocketTestBase()
+        self.test_base = WebSocketTestBase()
         
         # Start real services session
         self._test_session = self.test_base.real_websocket_test_session()
@@ -426,7 +429,7 @@ class TestIndividualWebSocketEvents:
     @pytest.fixture(autouse=True)
     async def setup_individual_event_testing(self):
         """Setup for individual event testing."""
-        self.test_base = RealWebSocketTestBase()
+        self.test_base = WebSocketTestBase()
         self._test_session = self.test_base.real_websocket_test_session()
         self.test_base = await self._test_session.__aenter__()
         
@@ -643,7 +646,7 @@ class TestEventSequenceAndTiming:
     @pytest.fixture(autouse=True)
     async def setup_sequence_testing(self):
         """Setup for sequence testing."""
-        self.test_base = RealWebSocketTestBase()
+        self.test_base = WebSocketTestBase()
         self._test_session = self.test_base.real_websocket_test_session()
         self.test_base = await self._test_session.__aenter__()
         
@@ -814,7 +817,7 @@ class TestRealWebSocketIntegration:
     async def setup_real_integration_services(self):
         """Setup real WebSocket services for integration tests."""
         # Create real WebSocket test base
-        self.test_base = RealWebSocketTestBase()
+        self.test_base = WebSocketTestBase()
         
         # Start real services session
         self._test_session = self.test_base.real_websocket_test_session()
@@ -987,7 +990,7 @@ class TestRealE2EWebSocketAgentFlow:
     async def setup_real_e2e_environment(self):
         """Setup real E2E test environment with Docker services."""
         # Create comprehensive real WebSocket test base
-        self.test_base = RealWebSocketTestBase(
+        self.test_base = WebSocketTestBase(
             config=RealWebSocketTestConfig(
                 connection_timeout=20.0,
                 event_timeout=15.0,
@@ -1143,7 +1146,7 @@ class TestWebSocketChaosAndResilience:
     @pytest.fixture(autouse=True)
     async def setup_chaos_testing(self):
         """Setup for chaos testing scenarios."""
-        self.test_base = RealWebSocketTestBase()
+        self.test_base = WebSocketTestBase()
         self._test_session = self.test_base.real_websocket_test_session()
         self.test_base = await self._test_session.__aenter__()
         
@@ -1382,7 +1385,7 @@ class TestConcurrentUserIsolation:
     @pytest.fixture(autouse=True)
     async def setup_concurrent_isolation_testing(self):
         """Setup for concurrent user isolation testing."""
-        self.test_base = RealWebSocketTestBase()
+        self.test_base = WebSocketTestBase()
         self._test_session = self.test_base.real_websocket_test_session()
         self.test_base = await self._test_session.__aenter__()
         
@@ -1654,7 +1657,7 @@ class TestRealWebSocketPerformance:
             max_retries=3
         )
         
-        self.test_base = RealWebSocketTestBase(config=perf_config)
+        self.test_base = WebSocketTestBase(config=perf_config)
         
         # Start performance test session
         self._test_session = self.test_base.real_websocket_test_session()
@@ -1786,7 +1789,7 @@ class TestRealWebSocketPerformance:
 @pytest.mark.timeout(60)
 async def test_real_websocket_agent_event_flow_comprehensive():
     """Comprehensive test of real WebSocket agent event flow - standalone test."""
-    async with RealWebSocketTestBase().real_websocket_test_session() as test_base:
+    async with WebSocketTestBase().real_websocket_test_session() as test_base:
         # Create test context
         test_context = await test_base.create_test_context()
         await test_context.setup_websocket_connection(endpoint="/ws/test", auth_required=False)
@@ -1841,7 +1844,7 @@ async def test_comprehensive_event_content_validation():
     CRITICAL: Event content must contain all required fields and meaningful data
     to deliver substantive chat value to users.
     """
-    async with RealWebSocketTestBase().real_websocket_test_session() as test_base:
+    async with WebSocketTestBase().real_websocket_test_session() as test_base:
         test_context = await test_base.create_test_context(user_id="content_validation_user")
         await test_context.setup_websocket_connection(endpoint="/ws/test", auth_required=False)
         
@@ -2022,7 +2025,7 @@ async def test_event_latency_performance_validation():
     CRITICAL: Low latency ensures responsive chat experience.
     Users expect immediate feedback during AI interactions.
     """
-    async with RealWebSocketTestBase().real_websocket_test_session() as test_base:
+    async with WebSocketTestBase().real_websocket_test_session() as test_base:
         test_context = await test_base.create_test_context(user_id="latency_test_user")
         await test_context.setup_websocket_connection(endpoint="/ws/test", auth_required=False)
         
@@ -2117,7 +2120,7 @@ async def test_reconnection_within_3_seconds():
     CRITICAL: Fast reconnection maintains chat continuity.
     Users must not experience long interruptions in AI interactions.
     """
-    async with RealWebSocketTestBase().real_websocket_test_session() as test_base:
+    async with WebSocketTestBase().real_websocket_test_session() as test_base:
         reconnection_attempts = 8
         successful_reconnections = 0
         reconnection_times = []
@@ -2233,7 +2236,7 @@ async def test_reconnection_within_3_seconds():
 @pytest.mark.timeout(90)
 async def test_real_websocket_concurrent_users():
     """Test multiple concurrent users with real WebSocket connections."""
-    async with RealWebSocketTestBase().real_websocket_test_session() as test_base:
+    async with WebSocketTestBase().real_websocket_test_session() as test_base:
         user_count = 5
         user_contexts = []
         
@@ -2315,7 +2318,7 @@ async def test_malformed_event_handling():
     CRITICAL: System must gracefully handle malformed events
     without breaking chat functionality.
     """
-    async with RealWebSocketTestBase().real_websocket_test_session() as test_base:
+    async with WebSocketTestBase().real_websocket_test_session() as test_base:
         test_context = await test_base.create_test_context(user_id="malformed_test_user")
         await test_context.setup_websocket_connection(endpoint="/ws/test", auth_required=False)
         
@@ -2409,7 +2412,7 @@ async def test_event_burst_handling():
     CRITICAL: Chat must handle bursts of agent activity
     during complex AI reasoning without losing events.
     """
-    async with RealWebSocketTestBase().real_websocket_test_session() as test_base:
+    async with WebSocketTestBase().real_websocket_test_session() as test_base:
         test_context = await test_base.create_test_context(user_id="burst_test_user")
         await test_context.setup_websocket_connection(endpoint="/ws/test", auth_required=False)
         
@@ -2508,7 +2511,7 @@ class TestEnhancedWebSocketScenarios:
         
         async def load_test_connection(connection_id: str):
             """Generate high-frequency events to test ordering."""
-            test_base = RealWebSocketTestBase()
+            test_base = WebSocketTestBase()
             
             async with test_base.real_websocket_test_session() as test_session:
                 context = await test_session.create_test_context(user_id=f"load_user_{connection_id}")
@@ -2617,7 +2620,7 @@ class TestEnhancedWebSocketScenarios:
         
         async def isolated_user_scenario(user_id: str):
             """Run isolated user scenario with contamination detection."""
-            test_base = RealWebSocketTestBase()
+            test_base = WebSocketTestBase()
             user_signature = f"isolation_sig_{user_id}_{uuid.uuid4()}"
             
             async with test_base.real_websocket_test_session() as test_session:

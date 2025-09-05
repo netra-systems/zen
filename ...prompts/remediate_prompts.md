@@ -318,9 +318,11 @@ Phase #2  Section 3 in AGENT_SSOT_AUDIT_PLAN.md
     2) Use multi-agent (3-7 best most relevant agents) to complete actual work.
     3) failing tests and test suite must be complete, comphrensive, and difficult
 
+"""
 LIFE OR DEATH CRITICAL: ACTION:
-Phase #3 in AGENT_SSOT_AUDIT_PLAN.md
+{batch} CHAT_IS_KING_REMEDIATION_PLAN.md
  FOR EACH sub task in item:
     1) don't believe the report fully - check latest system and think about it yourself
     2) Use multi-agent (3-7 best most relevant agents) to complete actual work.
     3) failing tests and test suite must be complete, comphrensive, and difficult
+"""

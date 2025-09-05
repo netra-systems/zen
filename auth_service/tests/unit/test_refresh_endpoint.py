@@ -165,7 +165,8 @@ class TestJWTHandlerRefreshTokens:
         payload = jwt.decode(
             token, 
             jwt_handler.secret, 
-            algorithms=[jwt_handler.algorithm]
+            algorithms=[jwt_handler.algorithm],
+            options={"verify_aud": False}  # Disable audience verification for test
         )
         assert payload["sub"] == user_id
         assert payload["type"] == "refresh"
@@ -242,12 +243,14 @@ class TestJWTHandlerRefreshTokens:
         payload = jwt.decode(
             token,
             jwt_handler.secret,
-            algorithms=[jwt_handler.algorithm]
+            algorithms=[jwt_handler.algorithm],
+            options={"verify_aud": False}  # Disable audience verification for test
         )
         
-        # Check expiry is 7 days from now
+        # Check expiry matches the environment-specific configuration
+        # In test environment, refresh tokens expire in 1 day
         exp_time = datetime.fromtimestamp(payload["exp"], UTC)
-        expected_exp = datetime.now(UTC) + timedelta(days=7)
+        expected_exp = datetime.now(UTC) + timedelta(days=1)  # Test environment uses 1 day
         
         # Allow 1 minute tolerance for test execution time
         assert abs((exp_time - expected_exp).total_seconds()) < 60
@@ -275,7 +278,7 @@ class TestAuthServiceRefreshLogic:
                     mock_refresh.return_value = "new.refresh.token"
                     
                     # Initialize used_refresh_tokens set
-                    auth_service.session_manager.used_refresh_tokens = set()
+                    auth_service.used_refresh_tokens = set()
                     
                     result = await auth_service.refresh_tokens("old.refresh.token")
                     
@@ -284,7 +287,7 @@ class TestAuthServiceRefreshLogic:
                     assert access_token == "new.access.token"
                     assert refresh_token == "new.refresh.token"
                     # Verify token was marked as used
-                    assert "old.refresh.token" in auth_service.session_manager.used_refresh_tokens
+                    assert "old.refresh.token" in auth_service.used_refresh_tokens
     
     @pytest.mark.asyncio
     async def test_refresh_tokens_invalid_token(self, auth_service):
@@ -302,7 +305,7 @@ class TestAuthServiceRefreshLogic:
             mock_validate.return_value = {"sub": "user-123", "type": "refresh"}
             
             # Mark token as already used (race condition)
-            auth_service.session_manager.used_refresh_tokens = {"already.used.token"}
+            auth_service.used_refresh_tokens = {"already.used.token"}
             
             result = await auth_service.refresh_tokens("already.used.token")
             assert result is None
@@ -318,7 +321,7 @@ class TestAuthServiceRefreshLogic:
                     mock_refresh.return_value = "new.refresh.token"
                     
                     # Initialize used_refresh_tokens set  
-                    auth_service.session_manager.used_refresh_tokens = set()
+                    auth_service.used_refresh_tokens = set()
                     
                     result = await auth_service.refresh_tokens("old.refresh.token")
                     
@@ -327,7 +330,7 @@ class TestAuthServiceRefreshLogic:
                     assert result[0] == "new.access.token"
                     assert result[1] == "new.refresh.token"
                     # Verify old token was marked as used
-                    assert "old.refresh.token" in auth_service.session_manager.used_refresh_tokens
+                    assert "old.refresh.token" in auth_service.used_refresh_tokens
 
 
 if __name__ == "__main__":

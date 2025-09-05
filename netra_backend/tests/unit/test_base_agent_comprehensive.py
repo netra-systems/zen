@@ -35,8 +35,7 @@ class TestBaseAgentComprehensive:
     def real_llm_manager(self):
         """Create a real LLM manager instance"""
         # Using real instance to minimize mocking
-        config = get_config()
-        return LLMManager(settings=config)
+        return LLMManager()
     
     def test_timing_collector_lifecycle_management(self, real_llm_manager):
         """Test 1: Validates timing collector integration with agent lifecycle"""

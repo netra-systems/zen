@@ -80,7 +80,7 @@ def complete_state():
     state.optimizations_result = {"optimizations": "Performance improvements"}
     state.data_result = {"data": "Analysis data"}
     state.triage_result = {"category": "optimization", "priority": "high"}
-    state.thread_id = "test-thread-123"
+    state.chat_thread_id = "test-thread-123"
     state.user_id = "test-user-456"
     return state
 
@@ -91,20 +91,23 @@ def incomplete_state():
     state.user_request = "Generate report"
     state.action_plan_result = {"plan": "Some plan"}
     # Missing: optimizations_result, data_result, triage_result
-    state.thread_id = "test-thread-123"
+    state.chat_thread_id = "test-thread-123"
     return state
 
 @pytest.fixture
 def execution_context(complete_state):
     """Create execution context for testing."""
     return ExecutionContext(
-        run_id="test-run-123",
-        agent_name="ReportingSubAgent",
-        state=complete_state,
-        stream_updates=True,
-        thread_id="test-thread-123",
-        start_time=datetime.now(timezone.utc),
-        correlation_id="test-correlation-123"
+        request_id="test-run-123",
+        user_id="test-user-456",
+        session_id="test-thread-123",
+        correlation_id="test-correlation-123",
+        metadata={
+            "agent_name": "ReportingSubAgent",
+            "state": complete_state,
+            "stream_updates": True
+        },
+        created_at=datetime.now(timezone.utc)
     )
 
 
@@ -188,9 +191,9 @@ class TestGoldenPatternMethods:
     async def test_validate_preconditions_incomplete_state(self, reporting_agent, incomplete_state):
         """Test validate_preconditions with missing required data."""
         context = ExecutionContext(
-            run_id="test-run-123",
-            agent_name="ReportingSubAgent", 
-            state=incomplete_state
+            request_id="test-run-123",
+            user_id="test-user-456",
+            metadata={"agent_name": "ReportingSubAgent", "state": incomplete_state}
         )
         result = await reporting_agent.validate_preconditions(context)
         assert result is False
@@ -199,9 +202,9 @@ class TestGoldenPatternMethods:
         """Test validate_preconditions with completely empty state."""
         empty_state = DeepAgentState()
         context = ExecutionContext(
-            run_id="test-run-123",
-            agent_name="ReportingSubAgent",
-            state=empty_state
+            request_id="test-run-123",
+            user_id="test-user-456",
+            metadata={"agent_name": "ReportingSubAgent", "state": empty_state}
         )
         result = await reporting_agent.validate_preconditions(context)
         assert result is False
@@ -476,9 +479,9 @@ class TestErrorHandlingEdgeCases:
         corrupted_state.optimizations_result = []
         
         context = ExecutionContext(
-            run_id="test-run-123",
-            agent_name="ReportingSubAgent",
-            state=corrupted_state
+            request_id="test-run-123",
+            user_id="test-user-456",
+            metadata={"agent_name": "ReportingSubAgent", "state": corrupted_state}
         )
         
         # Should return False for invalid state
@@ -500,9 +503,9 @@ class TestErrorHandlingEdgeCases:
             state.triage_result = {"triage": f"Triage {i}"}
             
             contexts.append(ExecutionContext(
-                run_id=f"run-{i}",
-                agent_name="ReportingSubAgent",
-                state=state
+                request_id=f"run-{i}",
+                user_id=f"user-{i}",
+                metadata={"agent_name": "ReportingSubAgent", "state": state}
             ))
         
         # Execute concurrently

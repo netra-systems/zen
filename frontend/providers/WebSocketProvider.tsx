@@ -1,5 +1,5 @@
 'use client';
-import React, { createContext, useContext, useEffect, useState, useCallback, useRef } from 'react';
+import React, { createContext, useContext, useEffect, useState, useCallback, useRef, useMemo } from 'react';
 import { webSocketService, WebSocketStatus } from '../services/webSocketService';
 import { WebSocketMessage, Message } from '@/types/unified';
 import { config as appConfig } from '@/config';
@@ -436,13 +436,13 @@ export const WebSocketProvider = ({ children }: WebSocketProviderProps) => {
     };
   }, []);
   
-  const contextValue = {
+  const contextValue = useMemo(() => ({
     status,
     messages,
     sendMessage,
     sendOptimisticMessage,
     reconciliationStats: reconciliationService.getStats(),
-  };
+  }), [status, messages, sendMessage, sendOptimisticMessage]);
 
   return (
     <WebSocketContext.Provider value={contextValue}>

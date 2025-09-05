@@ -65,6 +65,12 @@ class UnifiedWebSocketManager:
         self._lock = asyncio.Lock()
         # Add compatibility registry for legacy tests
         self.registry = RegistryCompat(self)
+        
+        # Add compatibility for legacy tests expecting connection_manager
+        self._connection_manager = self
+        self.connection_manager = self
+        self.active_connections = {}  # Compatibility mapping
+        
         logger.info("UnifiedWebSocketManager initialized")
     
     async def add_connection(self, connection: WebSocketConnection) -> None:
@@ -74,6 +80,18 @@ class UnifiedWebSocketManager:
             if connection.user_id not in self._user_connections:
                 self._user_connections[connection.user_id] = set()
             self._user_connections[connection.user_id].add(connection.connection_id)
+            
+            # Update compatibility mapping for legacy tests
+            if connection.user_id not in self.active_connections:
+                self.active_connections[connection.user_id] = []
+            # Create a simple connection info object for compatibility
+            conn_info = type('ConnectionInfo', (), {
+                'websocket': connection.websocket,
+                'user_id': connection.user_id,
+                'connection_id': connection.connection_id
+            })()
+            self.active_connections[connection.user_id].append(conn_info)
+            
             logger.info(f"Added connection {connection.connection_id} for user {connection.user_id}")
     
     async def remove_connection(self, connection_id: str) -> None:
@@ -86,6 +104,16 @@ class UnifiedWebSocketManager:
                     self._user_connections[connection.user_id].discard(connection_id)
                     if not self._user_connections[connection.user_id]:
                         del self._user_connections[connection.user_id]
+                
+                # Update compatibility mapping
+                if connection.user_id in self.active_connections:
+                    self.active_connections[connection.user_id] = [
+                        c for c in self.active_connections[connection.user_id]
+                        if c.connection_id != connection_id
+                    ]
+                    if not self.active_connections[connection.user_id]:
+                        del self.active_connections[connection.user_id]
+                
                 logger.info(f"Removed connection {connection_id}")
     
     def get_connection(self, connection_id: str) -> Optional[WebSocketConnection]:
@@ -157,6 +185,26 @@ class UnifiedWebSocketManager:
                 for user_id, conns in self._user_connections.items()
             }
         }
+    
+    async def connect_user(self, user_id: str, websocket: Any) -> Any:
+        """Legacy compatibility method for connecting a user."""
+        import uuid
+        from datetime import datetime
+        connection_id = str(uuid.uuid4())
+        connection = WebSocketConnection(
+            connection_id=connection_id,
+            user_id=user_id,
+            websocket=websocket,
+            connected_at=datetime.now()
+        )
+        await self.add_connection(connection)
+        
+        # Return a ConnectionInfo-like object for compatibility
+        return type('ConnectionInfo', (), {
+            'user_id': user_id,
+            'connection_id': connection_id,
+            'websocket': websocket
+        })()
 
 
 # Global instance
