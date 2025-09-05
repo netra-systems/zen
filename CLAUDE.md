@@ -50,6 +50,7 @@ Configuration SSOT ≠ Code SSOT: Environment-specific configs (TEST/STAGING/PRO
    - **NO silent fallbacks** - Hard failures are better than wrong environment configs leaking
    - **Strict SSOT enforcement** - BUT provide migration paths and test credentials
    - **Config changes = CASCADE FAILURES** - One missing env var can break entire flow 
+  7. The system is MULTI-USER.
 
 ### Related Architecture Documents:
 - **[User Context Architecture](./USER_CONTEXT_ARCHITECTURE.md)** - Factory patterns and execution isolation (START HERE)
