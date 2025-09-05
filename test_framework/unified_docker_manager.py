@@ -2653,7 +2653,7 @@ class UnifiedDockerManager:
                 
             # Use docker stats to get memory usage
             result = execute_docker_command([
-                "stats", "--no-stream", "--format", 
+                "docker", "stats", "--no-stream", "--format", 
                 "table {{.MemUsage}}", container_name
             ])
             
@@ -2675,7 +2675,7 @@ class UnifiedDockerManager:
         try:
             # Get detailed stats for all containers
             result = execute_docker_command([
-                "stats", "--no-stream", "--format",
+                "docker", "stats", "--no-stream", "--format",
                 "table {{.Container}}\\t{{.MemUsage}}\\t{{.MemPerc}}\\t{{.CPUPerc}}"
             ])
             
@@ -2723,7 +2723,7 @@ class UnifiedDockerManager:
         
         try:
             result = execute_docker_command([
-                "stats", "--no-stream", "--format",
+                "docker", "stats", "--no-stream", "--format",
                 "{{.Container}} {{.MemPerc}}"
             ])
             
@@ -2759,7 +2759,7 @@ class UnifiedDockerManager:
             container_name = service_config.get("container", f"netra-{service}")
             
             # Check if container exists
-            result = execute_docker_command(["ps", "-q", "-f", f"name={container_name}"])
+            result = execute_docker_command(["docker", "ps", "-q", "--filter", f"name={container_name}"])
             if result.returncode == 0 and result.stdout.strip():
                 return container_name
                 
