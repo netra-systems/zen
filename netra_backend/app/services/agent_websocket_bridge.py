@@ -2394,57 +2394,88 @@ class AgentWebSocketBridge(MonitorableComponent):
             pass
 
 
-# DEPRECATED: Legacy singleton factory function
-_bridge_instance: Optional[AgentWebSocketBridge] = None
+# SECURITY FIX: Replace singleton with factory pattern
+# Global instance removed to prevent multi-user data leakage
+# Use create_agent_websocket_bridge(user_context) instead
+
+
+def create_agent_websocket_bridge(user_context: 'UserExecutionContext' = None) -> AgentWebSocketBridge:
+    """
+    Create a new AgentWebSocketBridge instance with optional user context.
+    
+    This factory function replaces the singleton pattern to prevent cross-user
+    data leakage. Each bridge instance is isolated and can safely create
+    user-specific emitters.
+    
+    Args:
+        user_context: Optional UserExecutionContext for default emitter creation
+        
+    Returns:
+        AgentWebSocketBridge: New isolated bridge instance
+        
+    Example:
+        # Create isolated bridge for a specific user
+        bridge = create_agent_websocket_bridge(user_context)
+        emitter = bridge.create_user_emitter(user_context)
+        await emitter.notify_agent_started(agent_name, metadata)
+    """
+    from netra_backend.app.logging_config import central_logger
+    logger = central_logger.get_logger(__name__)
+    
+    logger.info("Creating isolated AgentWebSocketBridge instance")
+    bridge = AgentWebSocketBridge()
+    
+    # Pre-create user emitter if context is provided
+    if user_context:
+        try:
+            _ = bridge.create_user_emitter(user_context)
+            logger.info(f"Pre-created user emitter for user {user_context.user_id[:8]}...")
+        except Exception as e:
+            logger.warning(f"Failed to pre-create user emitter: {e}")
+    
+    return bridge
 
 
 async def get_agent_websocket_bridge() -> AgentWebSocketBridge:
-    """DEPRECATED: Get singleton AgentWebSocketBridge instance.
+    """
+    DEPRECATED: Get singleton AgentWebSocketBridge instance.
     
-    MIGRATION WARNING: This singleton pattern can cause cross-user event leakage.
-    For new code, create a non-singleton bridge and use create_user_emitter():
+    WARNING: This function creates a non-isolated bridge instance that can cause
+    CRITICAL SECURITY VULNERABILITIES in multi-user environments. It should only
+    be used for backward compatibility in legacy code that cannot be immediately
+    migrated to the factory pattern.
     
-    # OLD (DEPRECATED)
-    bridge = await get_agent_websocket_bridge()
-    await bridge.notify_agent_started(run_id, agent_name)  # UNSAFE
+    For new code, use:
+    - create_agent_websocket_bridge(user_context) for isolated bridges
+    - bridge.create_user_emitter(user_context) for per-user event emission
     
-    # NEW (RECOMMENDED)
-    bridge = AgentWebSocketBridge()  # Non-singleton
-    emitter = bridge.create_user_emitter(user_context)
-    await emitter.notify_agent_started(agent_name, metadata)  # SAFE
+    Returns:
+        AgentWebSocketBridge: A NEW instance (not singleton) for basic compatibility
     """
     import warnings
     
     warnings.warn(
-        "get_agent_websocket_bridge() creates a singleton that can leak events "
-        "between users. Use AgentWebSocketBridge().create_user_emitter(context) "
+        "get_agent_websocket_bridge() creates instances that can leak events "
+        "between users. Use create_agent_websocket_bridge(user_context) "
         "for safe per-user event emission.",
         DeprecationWarning,
         stacklevel=2
     )
     
-    global _bridge_instance
-    _bridge_lock = asyncio.Lock()
+    logger.warning(
+        "SECURITY WARNING: Using deprecated get_agent_websocket_bridge() function. "
+        "This creates a non-isolated bridge that can leak events between users. "
+        "Migrate to create_agent_websocket_bridge(user_context) for proper isolation."
+    )
     
-    try:
-        if _bridge_instance is None:
-            async with _bridge_lock:
-                if _bridge_instance is None:
-                    logger.info("Creating singleton AgentWebSocketBridge instance...")
-                    _bridge_instance = AgentWebSocketBridge()
-                    logger.warning("⚠️  Created singleton AgentWebSocketBridge - consider migrating to per-user emitters!")
-        
-        # Verify the instance is properly initialized
-        if not hasattr(_bridge_instance, '_initialized') or not _bridge_instance._initialized:
-            logger.error("AgentWebSocketBridge instance created but not properly initialized!")
-            raise RuntimeError("AgentWebSocketBridge initialization incomplete")
-        
-        logger.debug("Returning singleton AgentWebSocketBridge instance")
-        return _bridge_instance
-        
-    except Exception as e:
-        logger.error(f"Failed to create AgentWebSocketBridge singleton: {e}")
-        logger.error(f"Exception type: {type(e).__name__}")
-        # Reset instance to None to allow retry on next call
-        _bridge_instance = None
-        raise RuntimeError(f"AgentWebSocketBridge singleton creation failed: {e}") from e
+    warnings.warn(
+        "SECURITY WARNING: Using deprecated get_agent_websocket_bridge() function. "
+        "This creates a non-isolated bridge that can leak events between users. "
+        "Migrate to create_agent_websocket_bridge(user_context) for proper isolation.",
+        UserWarning,
+        stacklevel=2
+    )
+    
+    # Return a NEW instance each time to prevent shared state
+    # This is still not ideal but safer than a true singleton
+    return AgentWebSocketBridge()

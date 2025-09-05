@@ -212,34 +212,18 @@ class MessageHandlerService(IMessageHandlerService):
     ) -> Any:
         """Execute supervisor run"""
         # CRITICAL: Register run-thread mapping for WebSocket routing
-        # This ensures all agent events reach the correct user
+        # This ensures all agent events reach the correct user  
         try:
-            from netra_backend.app.services.agent_websocket_bridge import get_agent_websocket_bridge
-            bridge = await get_agent_websocket_bridge()
+            from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
+            bridge = AgentWebSocketBridge()
             
-            # Register the mapping BEFORE execution
-            success = await bridge.register_run_thread_mapping(
-                run_id=run.id,
-                thread_id=thread.id,
-                metadata={
-                    "user_id": user_id,
-                    "user_request": user_request[:100] if user_request else "",
-                    "timestamp": run.created_at
-                }
-            )
-            
-            if success:
-                logger.info(f"✅ Registered run-thread mapping: run_id={run.id} → thread_id={thread.id}")
-            else:
-                logger.warning(f"⚠️ Failed to register run-thread mapping for run_id={run.id}")
+            # MIGRATION NOTE: register_run_thread_mapping is deprecated in factory pattern
+            # Event routing is now handled automatically through UserExecutionContext
+            logger.info(f"ℹ️ Bridge created for user isolation - run_id={run.id} → thread_id={thread.id}")
                 
-            # CRITICAL: Set WebSocket bridge on SupervisorAgent for real-time events
-            # This enables emit_thinking, emit_progress, and other WebSocket events
-            if hasattr(self.supervisor, 'set_websocket_bridge'):
-                self.supervisor.set_websocket_bridge(bridge, run.id)
-                logger.info(f"✅ Set WebSocket bridge on SupervisorAgent for run_id={run.id}")
-            else:
-                logger.warning(f"⚠️ SupervisorAgent doesn't have set_websocket_bridge method")
+            # Store bridge for later user emitter creation (after UserExecutionContext is available)
+            # The actual emitter will be created and set after context creation below
+            self._bridge_for_supervisor = bridge
                 
         except Exception as e:
             logger.error(f"🚨 Error registering run-thread mapping: {e}")
@@ -271,9 +255,37 @@ class MessageHandlerService(IMessageHandlerService):
                 }
             )
             logger.info(f"✅ Successfully created UserExecutionContext for user={user_id}, thread={thread.id}, run={run.id}")
+            
+            # CRITICAL: Create per-user WebSocket emitter (SECURITY: prevents cross-user leakage)
+            if hasattr(self, '_bridge_for_supervisor'):
+                try:
+                    user_emitter = await self._bridge_for_supervisor.create_user_emitter(context)
+                    
+                    # Set user-specific emitter on SupervisorAgent for real-time events
+                    if hasattr(self.supervisor, 'set_websocket_emitter'):
+                        self.supervisor.set_websocket_emitter(user_emitter)
+                        logger.info(f"✅ Set user-specific WebSocket emitter on SupervisorAgent for run_id={run.id}")
+                    elif hasattr(self.supervisor, 'set_websocket_bridge'):
+                        # Backward compatibility: use bridge if emitter method not available
+                        self.supervisor.set_websocket_bridge(self._bridge_for_supervisor, run.id)
+                        logger.warning(f"⚠️ Using legacy bridge method - supervisor should be updated to use set_websocket_emitter")
+                    else:
+                        logger.warning(f"⚠️ SupervisorAgent doesn't have WebSocket emitter or bridge methods")
+                        
+                    # Cleanup temporary bridge reference
+                    delattr(self, '_bridge_for_supervisor')
+                    
+                except Exception as emitter_error:
+                    logger.error(f"🚨 Failed to create user emitter: {emitter_error}")
+                    # Continue execution without WebSocket events rather than failing completely
+                    if hasattr(self, '_bridge_for_supervisor'):
+                        delattr(self, '_bridge_for_supervisor')
         except Exception as e:
             logger.error(f"🚨 Failed to create UserExecutionContext: {e}")
             logger.error(f"🚨 Parameters were: user_id={user_id}, thread_id={thread.id}, run_id={run.id}, db_session={type(db_session)}")
+            # Cleanup bridge reference on error
+            if hasattr(self, '_bridge_for_supervisor'):
+                delattr(self, '_bridge_for_supervisor')
             raise
         
         # Execute the supervisor with the new UserExecutionContext pattern

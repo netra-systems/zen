@@ -60,31 +60,15 @@ async def execute_and_persist(
     # CRITICAL: Register run-thread mapping for WebSocket routing
     # This ensures all agent events reach the correct user
     try:
-        from netra_backend.app.services.agent_websocket_bridge import get_agent_websocket_bridge
-        bridge = await get_agent_websocket_bridge()
+        from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
+        bridge = AgentWebSocketBridge()
         
-        # Register the mapping BEFORE execution
-        success = await bridge.register_run_thread_mapping(
-            run_id=run_id,
-            thread_id=thread_id,
-            metadata={
-                "user_id": user_id,
-                "user_request": text[:100] if text else "",
-                "source": "message_processing"
-            }
-        )
+        # MIGRATION NOTE: register_run_thread_mapping is deprecated in factory pattern
+        # Event routing is now handled automatically through UserExecutionContext  
+        logger.info(f"ℹ️ Bridge created for user isolation - run_id={run_id} → thread_id={thread_id}")
         
-        if success:
-            logger.info(f"✅ Registered run-thread mapping: run_id={run_id} → thread_id={thread_id}")
-        else:
-            logger.warning(f"⚠️ Failed to register run-thread mapping for run_id={run_id}")
-            
-        # Set WebSocket bridge on supervisor if possible
-        if hasattr(supervisor, 'set_websocket_bridge'):
-            supervisor.set_websocket_bridge(bridge, run_id)
-            logger.info(f"✅ Set WebSocket bridge on supervisor for run_id={run_id}")
-        else:
-            logger.warning(f"⚠️ Supervisor doesn't have set_websocket_bridge method")
+        # Store bridge for later use with UserExecutionContext
+        bridge_for_emitter = bridge
             
     except Exception as e:
         logger.error(f"🚨 Error registering run-thread mapping: {e}")
@@ -106,6 +90,26 @@ async def execute_and_persist(
             }
         )
         logger.info(f"✅ Created UserExecutionContext for user={user_id}, thread={thread_id}, run={run_id}")
+        
+        # CRITICAL: Create per-user WebSocket emitter (SECURITY: prevents cross-user leakage)
+        if 'bridge_for_emitter' in locals():
+            try:
+                user_emitter = await bridge_for_emitter.create_user_emitter(context)
+                
+                # Set user-specific emitter on supervisor for real-time events
+                if hasattr(supervisor, 'set_websocket_emitter'):
+                    supervisor.set_websocket_emitter(user_emitter)
+                    logger.info(f"✅ Set user-specific WebSocket emitter on supervisor for run_id={run_id}")
+                elif hasattr(supervisor, 'set_websocket_bridge'):
+                    # Backward compatibility: use bridge if emitter method not available
+                    supervisor.set_websocket_bridge(bridge_for_emitter, run_id)
+                    logger.warning(f"⚠️ Using legacy bridge method - supervisor should be updated to use set_websocket_emitter")
+                else:
+                    logger.warning(f"⚠️ Supervisor doesn't have WebSocket emitter or bridge methods")
+                    
+            except Exception as emitter_error:
+                logger.error(f"🚨 Failed to create user emitter: {emitter_error}")
+                # Continue execution without WebSocket events rather than failing completely
         
         # Check if supervisor has execute method
         if not hasattr(supervisor, 'execute'):
