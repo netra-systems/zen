@@ -3,6 +3,146 @@
 ## Executive Summary
 This document traces the complete flow of an agent request from frontend initiation through WebSocket connection, backend processing, and event streaming back to the frontend with every parameter and configuration detail.
 
+## System Architecture Diagram
+
+```mermaid
+graph TB
+    subgraph Frontend
+        UI[User Interface]
+        Hook[useAgent Hook]
+        WSP[WebSocket Provider]
+        WSS[WebSocket Service]
+        Redux[State Management]
+        Cache[Chat Persistence]
+    end
+    
+    subgraph WebSocket_Layer
+        WS[WebSocket Connection]
+        Auth[JWT Authentication]
+        HB[Heartbeat Monitor]
+    end
+    
+    subgraph Backend_Entry
+        WSR[WebSocket Route /ws]
+        MR[Message Router]
+        AH[Agent Handler]
+    end
+    
+    subgraph Message_Processing
+        MHS[MessageHandlerService]
+        TS[Thread Service]
+        Bridge[WebSocket Bridge]
+    end
+    
+    subgraph Agent_Execution
+        SA[SupervisorAgent]
+        UEC[UserExecutionContext]
+        Factory[Agent Factory]
+        TD[Tool Dispatcher]
+    end
+    
+    subgraph Data_Layer
+        DB[(PostgreSQL)]
+        Redis[(Redis Cache)]
+        Session[DB Session]
+    end
+    
+    %% Request Flow
+    UI -->|user message| Hook
+    Hook -->|sendMessage| WSP
+    WSP -->|WebSocket.send| WSS
+    WSS -->|JSON message| WS
+    
+    %% Backend Processing
+    WS -->|authenticated| WSR
+    WSR -->|route| MR
+    MR -->|dispatch| AH
+    AH -->|process| MHS
+    MHS -->|create context| UEC
+    MHS -->|execute| SA
+    SA -->|create tools| TD
+    SA -->|factory.create| Factory
+    
+    %% Data Access
+    MHS -->|query/update| DB
+    SA -->|cache| Redis
+    UEC -->|scoped session| Session
+    Session -->|transaction| DB
+    
+    %% Event Flow Back
+    TD -.->|tool events| Bridge
+    SA -.->|agent events| Bridge
+    Bridge -.->|emit| WS
+    WS -.->|messages| WSS
+    WSS -.->|onMessage| WSP
+    WSP -.->|setState| Redux
+    WSP -.->|persist| Cache
+    
+    style UI fill:#e1f5fe
+    style SA fill:#fff3e0
+    style DB fill:#f3e5f5
+    style WS fill:#e8f5e9
+```
+
+## Sequence Diagram: Complete Agent Request Flow
+
+```mermaid
+sequenceDiagram
+    participant User
+    participant Frontend
+    participant WebSocket
+    participant Router
+    participant Handler
+    participant Service
+    participant Supervisor
+    participant Tools
+    participant DB
+    
+    User->>Frontend: Send message
+    Frontend->>Frontend: Prepare WebSocket message
+    Frontend->>WebSocket: Send {type: "user_message", payload: {content}}
+    
+    WebSocket->>WebSocket: Authenticate JWT
+    WebSocket->>Router: Route message
+    Router->>Handler: AgentMessageHandler.handle_message()
+    
+    Handler->>Handler: Update thread association
+    Handler->>DB: Get session (request-scoped)
+    Handler->>Service: MessageHandlerService.handle_user_message()
+    
+    Service->>DB: Create/get thread
+    Service->>DB: Create message
+    Service->>DB: Create run
+    Service->>Service: Create UserExecutionContext
+    Service->>Supervisor: execute(context)
+    
+    Supervisor->>Supervisor: Validate context
+    Supervisor->>Supervisor: Create isolated emitter
+    Supervisor->>Tools: Create tool dispatcher
+    Supervisor->>WebSocket: emit("agent_started")
+    
+    loop Agent Processing
+        Supervisor->>WebSocket: emit("agent_thinking")
+        Supervisor->>Tools: Execute tool
+        Tools->>WebSocket: emit("tool_executing")
+        Tools->>Tools: Run tool logic
+        Tools->>WebSocket: emit("tool_completed")
+    end
+    
+    Supervisor->>WebSocket: emit("agent_completed")
+    Supervisor-->>Service: Return result
+    
+    Service->>DB: Save response
+    Service->>DB: Complete run
+    Service-->>Handler: Success
+    
+    Handler-->>Router: Route complete
+    Router-->>WebSocket: Send events
+    WebSocket-->>Frontend: Stream events
+    Frontend->>Frontend: Update UI state
+    Frontend->>User: Display response
+```
+
 ## 1. Frontend Agent Request Initiation
 
 ### 1.1 User Action Trigger
@@ -352,13 +492,226 @@ Each request gets its own AsyncSession:
 - Auto-closed after request completion
 - Never shared between requests
 
+## 10. Critical Errors, Single Points of Failure, and Weaknesses
+
+### 10.1 🔴 CRITICAL ERRORS DETECTED
+
+#### Error 1: Missing WebSocket Connection Check
+**Location**: `frontend/hooks/useAgent.ts:18`
+```typescript
+webSocket?.sendMessage(message);  // ❌ No error handling if websocket is null
+```
+**Impact**: Silent failures when WebSocket is disconnected
+**Fix Required**: Add connection state check and user feedback
+
+#### Error 2: Race Condition in Thread Association
+**Location**: `netra_backend/app/services/message_handlers.py:102-110`
+```python
+# Thread association AFTER WebSocket setup - creates race condition
+if thread and self.websocket_manager and websocket:
+    connection_id = self.websocket_manager.get_connection_id_by_websocket(websocket)
+    # ❌ Delay here can cause events to be lost
+    await asyncio.sleep(0.01)  # Small delay to ensure propagation
+```
+**Impact**: Initial agent events may not reach frontend
+**Fix Required**: Establish association before any async operations
+
+#### Error 3: Fallback Handler Security Risk
+**Location**: `netra_backend/app/routes/websocket.py:590-648`
+```python
+def _create_fallback_agent_handler(websocket: WebSocket = None):
+    # ❌ Fallback handler bypasses authentication and security checks
+    # Sends arbitrary responses without validation
+```
+**Impact**: Security vulnerability in development/testing environments
+**Fix Required**: Add authentication checks even in fallback mode
+
+#### Error 4: Uncaught Database Session Errors
+**Location**: `netra_backend/app/websocket_core/agent_handler.py:71-90`
+```python
+async for db_session in get_request_scoped_db_session():
+    # ❌ No handling if session creation fails
+    success = await self._route_agent_message(user_id, message, db_session)
+```
+**Impact**: Complete request failure without proper error messaging
+**Fix Required**: Add try-catch with user-friendly error responses
+
+### 10.2 ⚠️ SINGLE POINTS OF FAILURE
+
+#### SPOF 1: WebSocketManager Global Instance
+**Location**: `netra_backend/app/websocket_core/unified_manager.py:152-160`
+```python
+_manager_instance = None  # ❌ Global singleton
+
+def get_websocket_manager() -> UnifiedWebSocketManager:
+    global _manager_instance
+    if _manager_instance is None:
+        _manager_instance = UnifiedWebSocketManager()
+    return _manager_instance
+```
+**Impact**: If manager crashes, ALL WebSocket connections fail
+**Mitigation**: Implement manager redundancy and health checks
+
+#### SPOF 2: Message Router Single Instance
+**Location**: `netra_backend/app/routes/websocket.py:393-415`
+```python
+message_router = get_message_router()  # ❌ Single router for all connections
+```
+**Impact**: Router failure blocks ALL message processing
+**Mitigation**: Per-connection routers or router pool
+
+#### SPOF 3: Database Connection Pool
+**Impact**: No fallback if PostgreSQL becomes unavailable
+**Current State**: No caching layer for read operations
+**Mitigation**: Implement Redis read-through cache
+
+#### SPOF 4: AgentWebSocketBridge
+**Location**: `netra_backend/app/services/message_handlers.py:217-246`
+```python
+bridge = await get_agent_websocket_bridge()  # ❌ Single bridge instance
+```
+**Impact**: Bridge failure prevents ALL agent events
+**Mitigation**: Implement bridge pool with failover
+
+### 10.3 🟡 ARCHITECTURAL WEAKNESSES
+
+#### Weakness 1: Message Size Limitation
+**Constraint**: 8192 bytes max message size
+```python
+max_message_size_bytes=8192  # ❌ Too small for complex agent responses
+```
+**Impact**: Large responses get truncated or fail
+**Solution**: Implement message chunking or increase limit
+
+#### Weakness 2: No Message Priority Queue
+**Current**: All messages processed FIFO
+**Impact**: Critical errors can be delayed behind normal messages
+**Solution**: Implement priority-based message queue
+
+#### Weakness 3: Thread ID Dependency
+**Issue**: Events routed solely by thread_id mapping
+```python
+ws_manager.update_connection_thread(connection_id, thread_id)
+```
+**Impact**: Lost events if mapping fails
+**Solution**: Fallback to user_id based routing
+
+#### Weakness 4: Heartbeat Timeout Vulnerability
+**Configuration**: 25-90 seconds depending on environment
+**Issue**: Long agent operations can trigger false disconnections
+**Solution**: Separate heartbeat from processing timeout
+
+### 10.4 🔶 PERFORMANCE BOTTLENECKS
+
+#### Bottleneck 1: Synchronous Handler Registration
+**Location**: `netra_backend/app/routes/websocket.py:219`
+```python
+message_router.add_handler(agent_handler)  # ❌ Blocks during registration
+```
+**Impact**: Connection setup delays under load
+**Solution**: Async handler registration
+
+#### Bottleneck 2: Sequential Event Emission
+**Issue**: Events sent one by one to each connection
+```python
+for conn_id in connection_ids:
+    await connection.websocket.send_json(message)  # ❌ Sequential
+```
+**Impact**: Slow broadcast to multiple users
+**Solution**: Parallel emission with asyncio.gather()
+
+#### Bottleneck 3: No Connection Pooling
+**Issue**: Each WebSocket creates new resources
+**Impact**: Memory overhead with many connections
+**Solution**: Resource pooling for handlers and sessions
+
+### 10.5 🔷 RELIABILITY CONCERNS
+
+#### Concern 1: No Event Replay Mechanism
+**Issue**: Lost events cannot be recovered
+**Impact**: Incomplete agent execution visibility
+**Solution**: Event log with replay capability
+
+#### Concern 2: Missing Circuit Breakers
+**Issue**: Failed services keep getting called
+**Impact**: Cascading failures
+**Solution**: Implement circuit breaker pattern
+
+#### Concern 3: No Rate Limiting Per Operation
+**Current**: Global rate limit only
+**Impact**: Single expensive operation can block user
+**Solution**: Per-operation rate limits
+
+### 10.6 🟣 DATA CONSISTENCY ISSUES
+
+#### Issue 1: Race Condition in Message Persistence
+**Location**: `frontend/providers/WebSocketProvider.tsx:90-103`
+```typescript
+// ❌ State updates not atomic
+setMessages((prevMessages) => [...prevMessages, newMessage]);
+chatStatePersistence.updateMessages(chatMessages);
+```
+**Impact**: Messages can be lost or duplicated
+**Solution**: Atomic state transaction
+
+#### Issue 2: No Transaction Boundaries
+**Issue**: Multiple DB operations not wrapped in transaction
+```python
+await self._create_user_message(...)  # Separate operation
+run = await self._create_run(...)      # Could fail independently
+```
+**Impact**: Partial state on failures
+**Solution**: Wrap in database transaction
+
+### 10.7 📊 MONITORING GAPS
+
+1. **No metrics on**:
+   - WebSocket reconnection frequency
+   - Message processing latency percentiles
+   - Handler registration/cleanup success rates
+   - Thread association success rates
+
+2. **Missing alerts for**:
+   - Sustained high error rates
+   - Memory leaks in message queues
+   - Database connection pool exhaustion
+   - WebSocket manager degradation
+
+### 10.8 🔧 RECOMMENDED FIXES PRIORITY
+
+**Priority 1 (Immediate)**:
+1. Add WebSocket connection checks in frontend
+2. Fix thread association race condition
+3. Add database session error handling
+4. Implement WebSocketManager health checks
+
+**Priority 2 (Short-term)**:
+1. Increase message size limit or add chunking
+2. Implement priority message queue
+3. Add circuit breakers
+4. Create event replay mechanism
+
+**Priority 3 (Long-term)**:
+1. Refactor to eliminate global singletons
+2. Implement connection pooling
+3. Add comprehensive monitoring
+4. Create redundancy for critical components
+
 ## Conclusion
 
-The agent flow implements complete user isolation through:
-- Request-scoped database sessions
-- Per-user WebSocket emitters
-- Isolated tool dispatchers
-- Thread-based event routing
-- Factory-enforced component creation
+While the agent flow implements good user isolation through request-scoped sessions and isolated tool dispatchers, there are critical reliability and performance issues that need addressing. The architecture's heavy reliance on global singletons (WebSocketManager, MessageRouter, AgentWebSocketBridge) creates multiple single points of failure that could bring down the entire system.
 
-This architecture supports concurrent multi-user execution with zero context leakage and real-time event streaming.
+**Key Strengths**:
+- Request-scoped database sessions prevent data leakage
+- Per-user WebSocket emitters provide isolation
+- Factory-enforced component creation ensures consistency
+- Thread-based event routing enables targeted messaging
+
+**Critical Weaknesses**:
+- Multiple single points of failure with no redundancy
+- Race conditions in critical paths (thread association)
+- No error recovery mechanisms (circuit breakers, event replay)
+- Limited monitoring and alerting capabilities
+- Performance bottlenecks under concurrent load
+
+**Recommendation**: Prioritize fixing the critical errors and single points of failure before scaling to production load. Implement comprehensive monitoring to detect issues before they impact users.
