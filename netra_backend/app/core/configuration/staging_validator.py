@@ -31,7 +31,7 @@ class StagingConfigurationValidator:
     # Critical variables that MUST be present for staging
     CRITICAL_VARIABLES = [
         'ENVIRONMENT',
-        'DATABASE_URL',
+        # DATABASE_URL removed - now built from individual POSTGRES_* variables via DatabaseURLBuilder
         'POSTGRES_HOST',
         'POSTGRES_USER',
         'POSTGRES_PASSWORD',
@@ -169,7 +169,7 @@ class StagingConfigurationValidator:
         localhost_patterns = ['localhost', '127.0.0.1', '0.0.0.0']
         
         vars_to_check = [
-            'DATABASE_URL',
+            # DATABASE_URL no longer checked directly - built from POSTGRES_* variables
             'POSTGRES_HOST',
             'REDIS_URL',
             'REDIS_HOST',
@@ -190,21 +190,29 @@ class StagingConfigurationValidator:
     
     def _validate_database_config(self) -> None:
         """Validate database configuration is complete."""
-        db_url = self._env.get('DATABASE_URL', '')
+        # DATABASE_URL is now built from individual POSTGRES_* variables via DatabaseURLBuilder
+        # Check individual postgres vars instead
+        postgres_host = self._env.get('POSTGRES_HOST', '')
+        postgres_user = self._env.get('POSTGRES_USER', '')
+        postgres_password = self._env.get('POSTGRES_PASSWORD', '')
+        postgres_db = self._env.get('POSTGRES_DB', '')
         
-        if db_url:
-            # Check for proper staging database URL format
-            if 'staging' not in db_url and 'cloudsql' not in db_url:
-                self._warnings.append("DATABASE_URL doesn't appear to be a staging database")
-            
-            # Check for SSL configuration
-            if 'sslmode=' not in db_url and 'ssl=' not in db_url and '/cloudsql/' not in db_url:
-                self._warnings.append("DATABASE_URL missing SSL configuration for staging")
-        
-        # Validate individual postgres vars if present
-        if self._env.get('POSTGRES_HOST') and self._env.get('POSTGRES_USER'):
-            if not self._env.get('POSTGRES_PASSWORD'):
+        if postgres_host and postgres_user:
+            if not postgres_password:
                 self._errors.append("POSTGRES_PASSWORD is required when POSTGRES_HOST is set")
+            
+            # Check for proper staging database host format
+            if postgres_host and 'staging' not in postgres_host and '/cloudsql/' not in postgres_host:
+                self._warnings.append("POSTGRES_HOST doesn't appear to be a staging database")
+            
+            # For Cloud SQL Unix socket paths, SSL is not needed
+            if postgres_host and '/cloudsql/' not in postgres_host:
+                # For TCP connections, we should have SSL configured (handled by DatabaseURLBuilder)
+                self._warnings.append("Ensure SSL is configured for TCP database connections (handled by DatabaseURLBuilder)")
+        
+        # Check that database name is specified
+        if not postgres_db:
+            self._warnings.append("POSTGRES_DB not specified, will use default database name")
     
     def _validate_auth_config(self) -> None:
         """Validate authentication configuration."""
