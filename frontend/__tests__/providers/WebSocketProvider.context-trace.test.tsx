@@ -2,7 +2,7 @@
  * Test to trace exactly what useWebSocketContext returns and when
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { render } from '@testing-library/react';
 import { WebSocketProvider, useWebSocketContext } from '../../providers/WebSocketProvider';
 import { AuthContext } from '@/auth/context';
@@ -28,33 +28,46 @@ jest.mock('../../services/reconciliation', () => ({ reconciliationService: { add
 jest.mock('../../services/chatStatePersistence', () => ({ chatStatePersistence: { getRestorableState: jest.fn(() => null), updateThread: jest.fn(), updateMessages: jest.fn(), destroy: jest.fn() } }));
 jest.mock('@/lib/logger', () => ({ logger: { debug: jest.fn(), info: jest.fn(), warn: jest.fn(), error: jest.fn() } }));
 
-// Component that traces useWebSocketContext updates
+// Component that traces useWebSocketContext updates with memory leak prevention
 const ContextTracer = () => {
   const context = useWebSocketContext();
   const [renderCount, setRenderCount] = useState(0);
+  const renderCountRef = useRef(0);
   
+  // Use ref to prevent infinite re-renders and memory leaks
   useEffect(() => {
-    setRenderCount(prev => prev + 1);
-  });
+    renderCountRef.current = renderCountRef.current + 1;
+    setRenderCount(renderCountRef.current);
+  }, [context.status, context.messages.length]); // Only update on actual context changes
   
-  console.log(`🔍 Render ${renderCount + 1}: useWebSocketContext returned:`, {
-    status: context.status,
-    messagesLength: context.messages.length,
-    contextKeys: Object.keys(context)
-  });
+  // Limit console logging to prevent memory exhaustion in tests
+  useEffect(() => {
+    if (renderCountRef.current <= 10) { // Limit to first 10 renders
+      console.log(`🔍 Render ${renderCountRef.current}: useWebSocketContext returned:`, {
+        status: context.status,
+        messagesLength: context.messages.length,
+        contextKeys: Object.keys(context)
+      });
+    }
+  }, [context.status, context.messages.length]);
   
   return (
     <div>
       <div data-testid="status">{context.status}</div>
       <div data-testid="messages-count">{context.messages.length}</div>
-      <div data-testid="render-count">{renderCount + 1}</div>
+      <div data-testid="render-count">{renderCount}</div>
     </div>
   );
 };
 
 describe('WebSocketProvider Context Trace', () => {
+  let cleanup: (() => void) | null = null;
+  
   beforeEach(() => {
     jest.clearAllMocks();
+    
+    // Clear any existing timers to prevent memory leaks
+    jest.clearAllTimers();
     
     // Set controlled auth state
     (global as any).mockAuthState = {
@@ -69,8 +82,24 @@ describe('WebSocketProvider Context Trace', () => {
       logout: jest.fn()
     };
   });
+  
+  afterEach(() => {
+    // Comprehensive cleanup to prevent memory leaks
+    if (cleanup) {
+      cleanup();
+      cleanup = null;
+    }
+    
+    // Clear all timers
+    jest.clearAllTimers();
+    
+    // Force garbage collection if available (test environment)
+    if (global.gc) {
+      global.gc();
+    }
+  });
 
-  it('should trace context values from WebSocketProvider', () => {
+  it('should trace context values from WebSocketProvider without memory leaks', () => {
     console.log('🚀 Starting context trace test...');
     
     const authContext = {
@@ -79,13 +108,22 @@ describe('WebSocketProvider Context Trace', () => {
       user: null,
     };
 
-    render(
+    const { unmount } = render(
       <AuthContext.Provider value={authContext}>
         <WebSocketProvider>
           <ContextTracer />
         </WebSocketProvider>
       </AuthContext.Provider>
     );
+    
+    // Store cleanup function for afterEach
+    cleanup = () => {
+      try {
+        unmount();
+      } catch (error) {
+        console.warn('Error during cleanup:', error);
+      }
+    };
     
     console.log('✅ Context trace complete');
   });

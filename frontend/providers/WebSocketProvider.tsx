@@ -388,16 +388,34 @@ export const WebSocketProvider = ({ children }: WebSocketProviderProps) => {
       previousTokenRef.current = currentToken;
     }, 50); // 50ms debounce to handle rapid token changes
 
+    // Comprehensive cleanup function to prevent memory leaks
     return () => {
+      // Clear all timeouts to prevent memory leaks
       if (debounceTimeoutRef.current) {
         clearTimeout(debounceTimeoutRef.current);
         debounceTimeoutRef.current = undefined;
       }
+      
+      // Execute WebSocket cleanup if available
       if (cleanupRef.current) {
-        cleanupRef.current();
-        cleanupRef.current = undefined;
+        try {
+          cleanupRef.current();
+        } catch (error) {
+          logger.debug('Error during WebSocket cleanup:', error);
+        } finally {
+          cleanupRef.current = undefined;
+        }
       }
+      
+      // Reset connection state
       isConnectingRef.current = false;
+      connectionStateRef.current = 'disconnected';
+      
+      // Clear status handler to prevent memory leaks
+      webSocketService.onStatusChange = null;
+      webSocketService.onMessage = null;
+      
+      logger.debug('[WebSocketProvider] Effect cleanup completed');
     };
   }, [token, authInitialized, handleMessage, handleStatusChange, performInitialConnection, performTokenUpdate]);
 
@@ -429,10 +447,39 @@ export const WebSocketProvider = ({ children }: WebSocketProviderProps) => {
     return optimisticMsg;
   }, []);
 
-  // Clean up persistence on unmount
+  // Comprehensive cleanup on unmount to prevent memory leaks
   useEffect(() => {
     return () => {
-      chatStatePersistence.destroy();
+      try {
+        // Clear all event handlers to prevent memory leaks
+        webSocketService.onStatusChange = null;
+        webSocketService.onMessage = null;
+        
+        // Disconnect WebSocket service
+        webSocketService.disconnect();
+        
+        // Destroy chat state persistence
+        chatStatePersistence.destroy();
+        
+        // Clear all refs to help garbage collection
+        isConnectingRef.current = false;
+        cleanupRef.current = undefined;
+        previousTokenRef.current = null;
+        hasRestoredStateRef.current = false;
+        currentThreadIdRef.current = null;
+        connectionStateRef.current = 'disconnected';
+        lastProcessedTokenRef.current = null;
+        
+        // Clear any pending timeouts
+        if (debounceTimeoutRef.current) {
+          clearTimeout(debounceTimeoutRef.current);
+          debounceTimeoutRef.current = undefined;
+        }
+        
+        logger.debug('[WebSocketProvider] Component cleanup completed');
+      } catch (error) {
+        logger.debug('Error during component cleanup:', error);
+      }
     };
   }, []);
   
