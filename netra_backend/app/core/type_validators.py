@@ -13,8 +13,8 @@ from beartype import beartype
 from beartype.roar import BeartypeException
 
 from netra_backend.app.agents.triage.unified_triage_agent import TriageResult
+from netra_backend.app.schemas.agent_models import AgentState
 from netra_backend.app.schemas.shared_types import (
-    AgentState,
     AnomalyDetectionResponse,
     DataAnalysisResponse,
 )
