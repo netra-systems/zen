@@ -352,7 +352,6 @@ class TestRealWebSocketComponents:
     @pytest.mark.critical
     async def test_websocket_notifier_all_methods(self):
         """Test that WebSocketNotifier has ALL required methods and they work."""
-    pass
         ws_manager = WebSocketManager()
         notifier = WebSocketNotifier(ws_manager)
         
@@ -404,7 +403,6 @@ class TestRealWebSocketComponents:
     @pytest.mark.critical
     async def test_tool_dispatcher_websocket_integration(self):
         """Test that tool dispatcher integrates with WebSocket properly."""
-    pass
         # Create user context for proper isolation
         user_context = UserExecutionContext(
             user_id="test_user",
@@ -493,7 +491,6 @@ class TestIndividualWebSocketEvents:
         CRITICAL: This event must include user context and timestamp to show
         the AI agent has begun processing the user's problem.
         """
-    pass
         validator = MissionCriticalEventValidator(strict_mode=True)
         
         # Create test agent_started event data
