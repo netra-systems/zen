@@ -159,8 +159,9 @@ def _execute_config_model_rebuild():
 def _import_config_components():
     """Import config model modules and classes."""
     import netra_backend.app.schemas.llm_types as llm_types
-    from netra_backend.app.schemas.llm_config_types import LLMConfig, LLMManagerConfig
-    return llm_types, [LLMConfig, LLMManagerConfig]
+    from netra_backend.app.schemas.config import LLMConfig
+    # Note: LLMManagerConfig no longer exists, only returning LLMConfig
+    return llm_types, [LLMConfig]
 
 
 def _rebuild_config_model_list(models, types_namespace):
