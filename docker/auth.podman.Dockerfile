@@ -1,37 +1,51 @@
-# Podman-optimized Auth Service Dockerfile
-FROM python:3.11-alpine3.19
+# Multi-stage build for optimized image size
+FROM python:3.11-slim AS builder
 
-# Install system dependencies in one layer
-RUN apk add --no-cache \
-    gcc \
-    musl-dev \
-    libffi-dev \
-    postgresql-dev \
-    curl \
-    && rm -rf /var/cache/apk/*
+# Install system dependencies for building Python packages
+RUN apt-get update && apt-get install -y --no-install-recommends     gcc     g++     build-essential     libpq-dev     && rm -rf /var/lib/apt/lists/*
 
 # Set working directory
 WORKDIR /app
 
-# Copy and install Python dependencies
-COPY requirements.txt .
-RUN pip install --no-cache-dir --upgrade pip && \
-    pip install --no-cache-dir -r requirements.txt
+# Copy requirements first for better layer caching
+COPY auth_service/requirements.txt ./auth_service/
+
+# Install Python dependencies
+RUN pip install --no-cache-dir --upgrade pip &&     pip install --no-cache-dir -r auth_service/requirements.txt
+
+# Production stage
+FROM python:3.11-slim
+
+# Install runtime dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends     libpq5     curl     && rm -rf /var/lib/apt/lists/*
+
+# Create non-root user (check if user exists first)
+RUN (useradd -m -u 1000 netra 2>/dev/null || true) &&     mkdir -p /app/logs &&     chown -R 1000:1000 /app
+
+# Set working directory
+WORKDIR /app
+
+# Copy Python packages from builder
+COPY --from=builder /usr/local/lib/python3.11/site-packages /usr/local/lib/python3.11/site-packages
+COPY --from=builder /usr/local/bin /usr/local/bin
 
 # Copy application code
-COPY auth_service /app/auth_service
-COPY shared /app/shared
+COPY --chown=netra:netra auth_service/ ./auth_service/
+COPY --chown=netra:netra shared/ ./shared/
+COPY --chown=netra:netra test_framework/ ./test_framework/
 
-# Set Python environment
-ENV PYTHONPATH=/app
-ENV PYTHONDONTWRITEBYTECODE=1
-ENV PYTHONUNBUFFERED=1
+# Switch to non-root user
+USER netra
+
+# Set environment variables
+ENV PYTHONPATH=/app:$PYTHONPATH
+ENV RUNNING_IN_DOCKER=true
 
 # Health check
-HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
-    CMD curl -f http://localhost:8081/health || exit 1
+HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3     CMD curl -f http://localhost:8081/health || exit 1
 
+# Expose port
 EXPOSE 8081
 
-# Run with uvicorn
-CMD ["python", "-m", "uvicorn", "auth_service.main:app", "--host", "0.0.0.0", "--port", "8081"]
+# Start the application with dynamic configuration
+CMD ["sh", "-c", "uvicorn auth_service.main:app --host 0.0.0.0 --port 8081 --workers ${WORKERS:-2} --log-level info"]
