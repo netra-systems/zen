@@ -42,7 +42,7 @@ from test_framework.service_availability import check_service_availability
 
 # Production components
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
-from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
+from netra_backend.app.core.registry.universal_registry import AgentRegistry
 from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
 from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
@@ -51,11 +51,11 @@ from netra_backend.app.agents.unified_tool_execution import (
     enhance_tool_dispatcher_with_notifications
 )
 from netra_backend.app.agents.state import DeepAgentState
-from netra_backend.app.agents.triage_sub_agent.agent import TriageSubAgent
+from netra_backend.app.agents.triage.unified_triage_agent import UnifiedTriageAgent
 from netra_backend.app.agents.data_sub_agent.agent import DataSubAgent
 from netra_backend.app.agents.optimizations_core_sub_agent import OptimizationsCoreSubAgent
 from netra_backend.app.llm.llm_manager import LLMManager
-from netra_backend.app.websocket_core.manager import WebSocketManager
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager as WebSocketManager
 from netra_backend.app.core.configuration import UnifiedConfigManager
 from netra_backend.app.db.postgres import get_postgres_db
 

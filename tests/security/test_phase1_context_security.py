@@ -27,7 +27,7 @@ from netra_backend.app.agents.supervisor.user_execution_context import (
     validate_user_context
 )
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
-from netra_backend.app.agents.triage_sub_agent import TriageSubAgent  
+from netra_backend.app.agents.triage.unified_triage_agent import TriageSubAgent  
 from netra_backend.app.agents.data_sub_agent.data_sub_agent import DataSubAgent
 
 

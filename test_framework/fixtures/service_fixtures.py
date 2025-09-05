@@ -1,352 +1,509 @@
-from shared.isolated_environment import get_env
 """
-Service-related test fixtures.
-Consolidates service mocks and fixtures from across the project.
+Service fixtures for testing.
+
+Provides pytest fixtures for service components including databases, 
+caches, message queues, and external API clients.
 """
 
 import asyncio
-import os
-import pytest
-import time
+import logging
+from typing import AsyncIterator, Dict, Any, Optional
 from unittest.mock import AsyncMock, MagicMock
-from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
+
+import pytest
+
+logger = logging.getLogger(__name__)
 
 
-# Only import Redis if not in collection mode
-if not os.environ.get("TEST_COLLECTION_MODE"):
-    try:
-        import redis.asyncio as redis
-        REDIS_AVAILABLE = True
-    except ImportError:
-        REDIS_AVAILABLE = False
-else:
-    REDIS_AVAILABLE = False
-
+# =============================================================================
+# DATABASE SERVICE FIXTURES
+# =============================================================================
 
 @pytest.fixture
-def mock_llm_service():
-    """Mock LLM service with various providers"""
-    service = AsyncMock()
-    service.generate_response = AsyncMock(return_value={
-        "content": "This is a test AI response",
-        "model": LLMModel.GEMINI_2_5_FLASH.value,
+async def postgres_service():
+    """PostgreSQL database service fixture."""
+    # Mock: Database service isolation for transaction testing without real database dependency
+    mock_service = AsyncMock()
+    mock_service.connection = AsyncMock()
+    mock_service.execute = AsyncMock(return_value=[])
+    mock_service.fetchone = AsyncMock(return_value=None)
+    mock_service.fetchall = AsyncMock(return_value=[])
+    mock_service.fetchval = AsyncMock(return_value=None)
+    mock_service.transaction = AsyncMock()
+    mock_service.close = AsyncMock()
+    
+    # Context manager support for connections
+    mock_service.__aenter__ = AsyncMock(return_value=mock_service)
+    mock_service.__aexit__ = AsyncMock(return_value=None)
+    
+    yield mock_service
+    await mock_service.close()
+
+
+@pytest.fixture 
+async def clickhouse_service():
+    """ClickHouse analytics service fixture."""
+    # Mock: Analytics service isolation for query testing without real ClickHouse dependency
+    mock_service = AsyncMock()
+    mock_service.execute = AsyncMock(return_value=[])
+    mock_service.insert = AsyncMock(return_value=True)
+    mock_service.query = AsyncMock(return_value=[])
+    mock_service.close = AsyncMock()
+    
+    # ClickHouse-specific methods
+    mock_service.create_table = AsyncMock(return_value=True)
+    mock_service.drop_table = AsyncMock(return_value=True)
+    mock_service.optimize_table = AsyncMock(return_value=True)
+    
+    yield mock_service
+    await mock_service.close()
+
+
+# =============================================================================
+# CACHE SERVICE FIXTURES  
+# =============================================================================
+
+@pytest.fixture
+async def redis_service():
+    """Redis cache service fixture."""
+    # Mock: Cache service isolation for testing without real Redis dependency
+    mock_service = AsyncMock()
+    
+    # Redis basic operations
+    mock_service.get = AsyncMock(return_value=None)
+    mock_service.set = AsyncMock(return_value=True)
+    mock_service.delete = AsyncMock(return_value=True)
+    mock_service.exists = AsyncMock(return_value=False)
+    mock_service.expire = AsyncMock(return_value=True)
+    mock_service.ttl = AsyncMock(return_value=-1)
+    
+    # Redis advanced operations
+    mock_service.hget = AsyncMock(return_value=None)
+    mock_service.hset = AsyncMock(return_value=True)
+    mock_service.hdel = AsyncMock(return_value=True)
+    mock_service.hgetall = AsyncMock(return_value={})
+    mock_service.sadd = AsyncMock(return_value=True)
+    mock_service.smembers = AsyncMock(return_value=set())
+    mock_service.zadd = AsyncMock(return_value=True)
+    mock_service.zrange = AsyncMock(return_value=[])
+    
+    # Redis connection management
+    mock_service.ping = AsyncMock(return_value=True)
+    mock_service.close = AsyncMock()
+    mock_service.flushdb = AsyncMock(return_value=True)
+    mock_service.info = AsyncMock(return_value={"redis_version": "7.0.0"})
+    
+    yield mock_service
+    await mock_service.close()
+
+
+# =============================================================================
+# MESSAGE QUEUE SERVICE FIXTURES
+# =============================================================================
+
+@pytest.fixture
+async def message_queue_service():
+    """Message queue service fixture."""
+    # Mock: Message queue isolation for event testing without real queue dependency
+    mock_service = AsyncMock()
+    
+    # Queue operations
+    mock_service.publish = AsyncMock(return_value=True)
+    mock_service.subscribe = AsyncMock()
+    mock_service.unsubscribe = AsyncMock(return_value=True)
+    mock_service.consume = AsyncMock()
+    mock_service.ack = AsyncMock(return_value=True)
+    mock_service.nack = AsyncMock(return_value=True)
+    
+    # Queue management
+    mock_service.create_queue = AsyncMock(return_value=True)
+    mock_service.delete_queue = AsyncMock(return_value=True)
+    mock_service.purge_queue = AsyncMock(return_value=True)
+    mock_service.queue_length = AsyncMock(return_value=0)
+    
+    # Connection management
+    mock_service.connect = AsyncMock()
+    mock_service.disconnect = AsyncMock()
+    mock_service.is_connected = AsyncMock(return_value=True)
+    
+    yield mock_service
+    await mock_service.disconnect()
+
+
+# =============================================================================
+# EXTERNAL API SERVICE FIXTURES
+# =============================================================================
+
+@pytest.fixture
+async def llm_service():
+    """LLM API service fixture."""
+    # Mock: LLM service isolation for fast testing without API calls or rate limits
+    mock_service = AsyncMock()
+    
+    # LLM operations
+    mock_service.generate = AsyncMock(return_value={
+        "content": "Test LLM response",
+        "model": "test-model",
+        "tokens_used": 50,
+        "cost": 0.001,
+        "finish_reason": "stop"
+    })
+    
+    mock_service.chat = AsyncMock(return_value={
+        "messages": [{"role": "assistant", "content": "Test response"}],
+        "model": "test-model",
         "tokens_used": 45,
-        "cost": 0.0012,
-        "metadata": {"test": True}
+        "cost": 0.0008
     })
-    service.analyze_optimization = AsyncMock(return_value={
-        "optimization_suggestions": ["Use batch processing", "Implement caching"],
-        "confidence": 0.85,
-        "potential_savings": 1200
+    
+    mock_service.embedding = AsyncMock(return_value={
+        "embedding": [0.1, 0.2, 0.3],  # Simplified embedding vector
+        "model": "text-embedding-test",
+        "tokens_used": 10,
+        "cost": 0.0001
     })
-    service.get_available_models = MagicMock(return_value=[
-        LLMModel.GEMINI_2_5_FLASH.value, LLMModel.GEMINI_2_5_FLASH.value, "gemini-pro"
-    ])
-    return service
+    
+    # Model management
+    mock_service.list_models = AsyncMock(return_value=["test-model-1", "test-model-2"])
+    mock_service.get_model_info = AsyncMock(return_value={
+        "name": "test-model",
+        "max_tokens": 4000,
+        "cost_per_token": 0.00002
+    })
+    
+    # Rate limiting info
+    mock_service.get_rate_limits = AsyncMock(return_value={
+        "requests_per_minute": 60,
+        "tokens_per_minute": 60000,
+        "remaining_requests": 59,
+        "remaining_tokens": 59950
+    })
+    
+    yield mock_service
 
-@pytest.fixture  
-def mock_agent_service():
-    """Mock agent service for workflow testing"""
-    service = AsyncMock()
-    service.process_message = AsyncMock(return_value={
-        "response": "Agent processed the request successfully",
-        "metadata": {"agent_id": "test_agent", "processing_time": 1.2},
-        "status": "completed"
-    })
-    service.start_agent = AsyncMock(return_value={"agent_id": "test_agent"})
-    service.stop_agent = AsyncMock(return_value=True)
-    service.get_agent_status = MagicMock(return_value="running")
-    return service
-
-@pytest.fixture
-def mock_notification_service():
-    """Mock notification service"""
-    service = AsyncMock()
-    service.send_email = AsyncMock(return_value={"sent": True, "message_id": "test_123"})
-    service.send_sms = AsyncMock(return_value={"sent": True, "message_id": "sms_123"})
-    service.send_push_notification = AsyncMock(return_value={"sent": True})
-    return service
 
 @pytest.fixture
-def mock_payment_service():
-    """Mock payment service"""
-    service = AsyncMock()
-    service.process_payment = AsyncMock(return_value={
-        "success": True,
-        "transaction_id": "txn_123",
-        "amount": 99.00,
-        "currency": "USD"
+async def auth_service():
+    """Authentication service fixture."""
+    # Mock: Auth service isolation for security testing without real auth provider dependency
+    mock_service = AsyncMock()
+    
+    # Authentication operations
+    mock_service.authenticate = AsyncMock(return_value={
+        "user_id": "test-user-123",
+        "access_token": "test-access-token",
+        "refresh_token": "test-refresh-token",
+        "expires_in": 3600,
+        "token_type": "Bearer"
     })
-    service.create_subscription = AsyncMock(return_value={
-        "subscription_id": "sub_123",
-        "status": "active",
-        "next_billing_date": "2025-02-01"
+    
+    mock_service.verify_token = AsyncMock(return_value={
+        "valid": True,
+        "user_id": "test-user-123",
+        "email": "test@example.com",
+        "roles": ["user"],
+        "expires_at": "2024-12-31T23:59:59Z"
     })
-    service.cancel_subscription = AsyncMock(return_value={"cancelled": True})
-    return service
+    
+    mock_service.refresh_token = AsyncMock(return_value={
+        "access_token": "new-test-access-token",
+        "expires_in": 3600
+    })
+    
+    mock_service.logout = AsyncMock(return_value=True)
+    
+    # User management
+    mock_service.get_user = AsyncMock(return_value={
+        "id": "test-user-123", 
+        "email": "test@example.com",
+        "name": "Test User",
+        "roles": ["user"],
+        "is_active": True
+    })
+    
+    mock_service.create_user = AsyncMock(return_value={
+        "id": "new-user-123",
+        "email": "new@example.com",
+        "name": "New User"
+    })
+    
+    mock_service.update_user = AsyncMock(return_value=True)
+    mock_service.delete_user = AsyncMock(return_value=True)
+    
+    yield mock_service
+
+
+# =============================================================================
+# MONITORING AND OBSERVABILITY SERVICE FIXTURES
+# =============================================================================
 
 @pytest.fixture
-def mock_metrics_service():
-    """Mock metrics and analytics service"""
-    service = AsyncMock()
-    service.record_metric = AsyncMock()
-    service.increment_counter = AsyncMock()
-    service.record_histogram = AsyncMock()
-    service.get_metrics = AsyncMock(return_value={
-        "requests_total": 1000,
-        "avg_response_time": 0.25,
-        "error_rate": 0.01
-    })
-    return service
+async def metrics_service():
+    """Metrics collection service fixture."""
+    # Mock: Metrics service isolation for monitoring testing without real telemetry dependency
+    mock_service = AsyncMock()
+    
+    # Metric operations
+    mock_service.counter = AsyncMock()
+    mock_service.gauge = AsyncMock()
+    mock_service.histogram = AsyncMock()
+    mock_service.summary = AsyncMock()
+    
+    # Recording methods
+    mock_service.increment = AsyncMock()
+    mock_service.decrement = AsyncMock()
+    mock_service.set_gauge = AsyncMock()
+    mock_service.observe = AsyncMock()
+    mock_service.time_function = AsyncMock()
+    
+    # Query methods
+    mock_service.get_metric = AsyncMock(return_value={"value": 42, "timestamp": "2024-01-01T00:00:00Z"})
+    mock_service.get_metrics = AsyncMock(return_value=[])
+    mock_service.export_metrics = AsyncMock(return_value="# Mock metrics export")
+    
+    yield mock_service
+
 
 @pytest.fixture
-def mock_cache_service():
-    """Mock cache service (Redis, etc.)"""
-    service = AsyncMock()
-    service.get = AsyncMock(return_value=None)
-    service.set = AsyncMock(return_value=True)
-    service.delete = AsyncMock(return_value=True)
-    service.exists = AsyncMock(return_value=False)
-    service.expire = AsyncMock(return_value=True)
-    service.flush_all = AsyncMock(return_value=True)
-    return service
+async def logging_service():
+    """Structured logging service fixture.""" 
+    # Mock: Logging service isolation for audit testing without real log aggregation dependency
+    mock_service = AsyncMock()
+    
+    # Logging operations
+    mock_service.debug = AsyncMock()
+    mock_service.info = AsyncMock()
+    mock_service.warning = AsyncMock()
+    mock_service.error = AsyncMock()
+    mock_service.critical = AsyncMock()
+    
+    # Structured logging
+    mock_service.log_structured = AsyncMock()
+    mock_service.log_event = AsyncMock()
+    mock_service.log_transaction = AsyncMock()
+    mock_service.log_performance = AsyncMock()
+    
+    # Log management
+    mock_service.set_level = AsyncMock()
+    mock_service.get_logs = AsyncMock(return_value=[])
+    mock_service.search_logs = AsyncMock(return_value=[])
+    mock_service.export_logs = AsyncMock(return_value="Mock log export")
+    
+    yield mock_service
+
+
+# =============================================================================
+# FILE STORAGE SERVICE FIXTURES  
+# =============================================================================
 
 @pytest.fixture
-def mock_email_service():
-    """Mock email service"""
-    service = AsyncMock()
-    service.send_welcome_email = AsyncMock(return_value={"sent": True})
-    service.send_verification_email = AsyncMock(return_value={"sent": True})
-    service.send_password_reset = AsyncMock(return_value={"sent": True})
-    service.send_upgrade_notification = AsyncMock(return_value={"sent": True})
-    return service
-
-@pytest.fixture
-def mock_file_storage_service():
-    """Mock file storage service (S3, etc.)"""
-    service = AsyncMock()
-    service.upload_file = AsyncMock(return_value={
-        "file_id": "file_123",
-        "url": "https://example.com/file.pdf",
-        "size": 1024
-    })
-    service.download_file = AsyncMock(return_value=b"file content")
-    service.delete_file = AsyncMock(return_value=True)
-    service.get_file_info = AsyncMock(return_value={
-        "file_id": "file_123",
-        "filename": "test.pdf",
+async def file_storage_service():
+    """File storage service fixture."""
+    # Mock: Storage service isolation for file testing without real cloud storage dependency
+    mock_service = AsyncMock()
+    
+    # File operations
+    mock_service.upload = AsyncMock(return_value={
+        "file_id": "test-file-123",
+        "url": "https://storage.example.com/test-file-123",
         "size": 1024,
-        "content_type": "application/pdf"
+        "content_type": "text/plain"
     })
-    return service
+    
+    mock_service.download = AsyncMock(return_value=b"test file content")
+    mock_service.delete = AsyncMock(return_value=True)
+    mock_service.exists = AsyncMock(return_value=True)
+    mock_service.get_metadata = AsyncMock(return_value={
+        "size": 1024,
+        "created_at": "2024-01-01T00:00:00Z",
+        "content_type": "text/plain"
+    })
+    
+    # Directory operations
+    mock_service.create_directory = AsyncMock(return_value=True)
+    mock_service.list_files = AsyncMock(return_value=[])
+    mock_service.delete_directory = AsyncMock(return_value=True)
+    
+    # Bulk operations
+    mock_service.upload_batch = AsyncMock(return_value=[])
+    mock_service.download_batch = AsyncMock(return_value=[])
+    mock_service.delete_batch = AsyncMock(return_value=True)
+    
+    yield mock_service
+
+
+# =============================================================================
+# SERVICE CONFIGURATION FIXTURES
+# =============================================================================
 
 @pytest.fixture
-def mock_logging_service():
-    """Mock structured logging service"""
-    service = MagicMock()
-    service.log_info = MagicMock()
-    service.log_warning = MagicMock()
-    service.log_error = MagicMock()
-    service.log_debug = MagicMock()
-    service.log_audit = MagicMock()
-    return service
-
-@pytest.fixture
-def mock_queue_service():
-    """Mock message queue service"""
-    service = AsyncMock()
-    service.publish = AsyncMock(return_value={"message_id": "msg_123"})
-    service.subscribe = AsyncMock()
-    service.acknowledge = AsyncMock(return_value=True)
-    service.reject = AsyncMock(return_value=True)
-    service.get_queue_size = AsyncMock(return_value=0)
-    return service
-
-@pytest.fixture  
-def mock_config_service():
-    """Mock configuration service"""
-    service = MagicMock()
-    service.get = MagicMock(side_effect=lambda key, default=None: {
-        "database_url": "sqlite:///test.db",
-        "redis_url": "redis://localhost:6379/0",
-        "jwt_secret": "test-secret",
-        "environment": "testing"
-    }.get(key, default))
-    service.set = MagicMock(return_value=True)
-    service.reload = MagicMock()
-    return service
-
-@pytest.fixture
-def mock_health_check_service():
-    """Mock health check service"""
-    service = AsyncMock()
-    service.check_database = AsyncMock(return_value={"status": "healthy"})
-    service.check_redis = AsyncMock(return_value={"status": "healthy"})
-    service.check_external_apis = AsyncMock(return_value={"status": "healthy"})
-    service.get_overall_health = AsyncMock(return_value={
-        "status": "healthy",
-        "checks": {
-            "database": "healthy",
-            "redis": "healthy", 
-            "external_apis": "healthy"
+def service_config() -> Dict[str, Any]:
+    """Common service configuration for tests."""
+    return {
+        "postgres": {
+            "host": "localhost",
+            "port": 5432,
+            "database": "test_db",
+            "user": "test_user",
+            "password": "test_pass",
+            "pool_size": 5,
+            "max_overflow": 10
+        },
+        "redis": {
+            "host": "localhost",
+            "port": 6379,
+            "db": 0,
+            "password": None,
+            "max_connections": 10
+        },
+        "clickhouse": {
+            "host": "localhost", 
+            "port": 8123,
+            "database": "test_analytics",
+            "user": "test_user",
+            "password": "test_pass"
+        },
+        "llm": {
+            "provider": "test",
+            "model": "test-model",
+            "api_key": "test-api-key",
+            "max_tokens": 4000,
+            "temperature": 0.7
+        },
+        "auth": {
+            "provider": "test",
+            "client_id": "test-client-id",
+            "client_secret": "test-client-secret",
+            "redirect_uri": "http://localhost/auth/callback"
         }
-    })
-    return service
+    }
+
 
 @pytest.fixture
-def mock_security_service():
-    """Mock security service"""
-    service = MagicMock()
-    service.encrypt_data = MagicMock(return_value="encrypted_data")
-    service.decrypt_data = MagicMock(return_value="decrypted_data")
-    service.hash_password = MagicMock(return_value="hashed_password")
-    service.verify_password = MagicMock(return_value=True)
-    service.generate_api_key = MagicMock(return_value="api_key_123")
-    service.validate_api_key = MagicMock(return_value=True)
-    return service
+def service_health_check():
+    """Service health check utility for tests."""
+    # Mock: Health check isolation for availability testing without real service dependency
+    class MockHealthChecker:
+        async def check_service(self, service_name: str) -> bool:
+            # Always return healthy for tests
+            return True
+            
+        async def check_all_services(self) -> Dict[str, bool]:
+            return {
+                "postgres": True,
+                "redis": True, 
+                "clickhouse": True,
+                "llm": True,
+                "auth": True
+            }
+            
+        async def wait_for_service(self, service_name: str, timeout: int = 30) -> bool:
+            # Simulate waiting
+            await asyncio.sleep(0.1)
+            return True
+    
+    return MockHealthChecker()
+
+
+# =============================================================================
+# SERVICE LIFECYCLE FIXTURES
+# =============================================================================
 
 @pytest.fixture
-def mock_search_service():
-    """Mock search service (Elasticsearch, etc.)"""
-    service = AsyncMock()
-    service.index_document = AsyncMock(return_value={"indexed": True, "id": "doc_123"})
-    service.search = AsyncMock(return_value={
-        "hits": [
-            {"id": "doc_123", "score": 0.95, "content": "test document"}
-        ],
-        "total": 1
-    })
-    service.delete_document = AsyncMock(return_value=True)
-    return service
+async def service_lifecycle_manager():
+    """Service lifecycle management for tests."""
+    # Mock: Lifecycle management isolation for orchestration testing without real service dependency
+    mock_manager = AsyncMock()
+    
+    # Lifecycle operations
+    mock_manager.start_service = AsyncMock(return_value=True)
+    mock_manager.stop_service = AsyncMock(return_value=True)
+    mock_manager.restart_service = AsyncMock(return_value=True)
+    mock_manager.scale_service = AsyncMock(return_value=True)
+    
+    # Status operations
+    mock_manager.get_service_status = AsyncMock(return_value="running")
+    mock_manager.is_service_healthy = AsyncMock(return_value=True)
+    mock_manager.get_service_logs = AsyncMock(return_value=[])
+    
+    # Batch operations
+    mock_manager.start_all_services = AsyncMock(return_value=True)
+    mock_manager.stop_all_services = AsyncMock(return_value=True)
+    mock_manager.get_all_service_status = AsyncMock(return_value={})
+    
+    yield mock_manager
 
-@pytest.fixture(scope="function")
-async def isolated_redis_client():
-    """Create isolated Redis client for integration testing with real Redis.
-    
-    This fixture provides a real Redis connection for integration tests that need
-    to test Redis functionality. It uses a separate database (15) to isolate from
-    production data and other tests.
-    
-    Business Value Justification (BVJ):
-    - Segment: Platform/Internal (test infrastructure)
-    - Business Goal: Enable reliable database connectivity testing
-    - Value Impact: Ensures Redis-dependent features work correctly
-    - Strategic Impact: Critical for 2FA, caching, and session management
-    """
-    if not REDIS_AVAILABLE:
-        # Fallback to mock Redis client if Redis not available
-        mock_client = AsyncMock()
-        mock_client.ping = AsyncMock(return_value=True)
-        mock_client.get = AsyncMock(return_value=None)
-        mock_client.set = AsyncMock(return_value=True)
-        mock_client.setex = AsyncMock(return_value=True)
-        mock_client.delete = AsyncMock(return_value=True)
-        mock_client.exists = AsyncMock(return_value=False)
-        mock_client.incr = AsyncMock(return_value=1)
-        mock_client.expire = AsyncMock(return_value=True)
-        mock_client.keys = AsyncMock(return_value=[])
-        mock_client.flushdb = AsyncMock(return_value=True)
-        mock_client.close = AsyncMock(return_value=None)
-        yield mock_client
-        return
-    
-    # Configuration for Redis connection
-    redis_host = get_env().get("REDIS_HOST", "localhost")
-    redis_port = int(get_env().get("REDIS_PORT", "6379"))
-    redis_username = get_env().get("REDIS_USERNAME", "")
-    redis_password = get_env().get("REDIS_PASSWORD", "")
-    
-    # Use database 15 for isolated testing to avoid conflicts
-    test_database = 15
-    
-    redis_client = redis.Redis(
-        host=redis_host,
-        port=redis_port,
-        db=test_database,
-        username=redis_username or None,
-        password=redis_password or None,
-        decode_responses=True,
-        socket_connect_timeout=10,
-        socket_timeout=5,
-        health_check_interval=30
-    )
-    
-    try:
-        # Test connection and clear test database
-        await redis_client.ping()
-        await redis_client.flushdb()  # Clear test database
-        yield redis_client
-    except Exception as e:
-        # If Redis is not available, fall back to mock client
-        print(f"Warning: Redis connection failed ({e}), using mock client")
-        mock_client = AsyncMock()
-        mock_client.ping = AsyncMock(return_value=True)
-        mock_client.get = AsyncMock(return_value=None)
-        mock_client.set = AsyncMock(return_value=True)
-        mock_client.setex = AsyncMock(return_value=True)
-        mock_client.delete = AsyncMock(return_value=True)
-        mock_client.exists = AsyncMock(return_value=False)
-        mock_client.incr = AsyncMock(return_value=1)
-        mock_client.expire = AsyncMock(return_value=True)
-        mock_client.keys = AsyncMock(return_value=[])
-        mock_client.flushdb = AsyncMock(return_value=True)
-        mock_client.close = AsyncMock(return_value=None)
-        yield mock_client
-    finally:
-        try:
-            if hasattr(redis_client, 'aclose'):
-                await redis_client.aclose()
-            elif hasattr(redis_client, 'close'):
-                await redis_client.close()
-        except Exception:
-            pass  # Ignore cleanup errors
 
+# =============================================================================
+# LEGACY COMPATIBILITY HELPERS
+# =============================================================================
 
 class _ConfigManagerHelper:
-    """Mock test configuration manager."""
+    """Helper class for configuration management in tests."""
     
-    def __init__(self, overrides: dict = None):
-        self.overrides = overrides or {}
-        self._config = {
-            "database_url": "sqlite:///test.db",
-            "redis_url": "redis://localhost:6379/0", 
-            "jwt_secret": "test-secret",
-            "environment": "testing",
-            "port": 8000,
-            "host": "localhost"
-        }
-        self._config.update(self.overrides)
+    def __init__(self):
+        self.config = {}
     
-    def get(self, key: str, default=None):
+    def get_config(self, key: str, default: Any = None) -> Any:
         """Get configuration value."""
-        return self._config.get(key, default)
+        return self.config.get(key, default)
     
-    def set(self, key: str, value):
+    def set_config(self, key: str, value: Any):
         """Set configuration value."""
-        self._config[key] = value
+        self.config[key] = value
     
-    def to_dict(self):
-        """Get all configuration as dictionary."""
-        return self._config.copy()
+    def reset_config(self):
+        """Reset configuration."""
+        self.config.clear()
 
 
-# Alias for backward compatibility
-TestConfigManager = _ConfigManagerHelper
-ConfigManagerHelper = _ConfigManagerHelper
+def create_test_app():
+    """Create test application instance."""
+    try:
+        from fastapi import FastAPI
+        app = FastAPI(title="Test App", version="1.0.0")
+        return app
+    except ImportError:
+        # Return mock app if FastAPI not available
+        from unittest.mock import MagicMock
+        mock_app = MagicMock()
+        mock_app.title = "Test App"
+        mock_app.version = "1.0.0"
+        return mock_app
 
 
-async def create_test_app():
-    """Create a minimal test application instance."""
-    from unittest.mock import MagicMock
+# =============================================================================
+# EXPORT ALL FIXTURES
+# =============================================================================
+
+__all__ = [
+    # Database fixtures
+    'postgres_service',
+    'clickhouse_service', 
     
-    # Create a mock app object
-    app = MagicMock()
-    app.state = MagicMock()
-    app.config = TestConfigManager()
+    # Cache fixtures
+    'redis_service',
     
-    # Mock health endpoint behavior
-    async def health_check():
-        return {"status": "healthy", "timestamp": time.time()}
+    # Message queue fixtures  
+    'message_queue_service',
     
-    app.health_check = health_check
-    return app
+    # External API fixtures
+    'llm_service',
+    'auth_service',
+    
+    # Monitoring fixtures
+    'metrics_service', 
+    'logging_service',
+    
+    # Storage fixtures
+    'file_storage_service',
+    
+    # Configuration fixtures
+    'service_config',
+    'service_health_check',
+    'service_lifecycle_manager',
+    
+    # Legacy helpers
+    '_ConfigManagerHelper',
+    'create_test_app'
+]

@@ -37,7 +37,7 @@ from shared.isolated_environment import get_env
 from netra_backend.app.logging_config import central_logger
 
 # Import WebSocket components to test
-from netra_backend.app.websocket_core.manager import WebSocketManager, get_websocket_manager
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager as WebSocketManager, get_websocket_manager
 from netra_backend.app.services.websocket_bridge_factory import (
     WebSocketBridgeFactory,
     UserWebSocketEmitter,

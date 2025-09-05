@@ -42,7 +42,7 @@ from multiprocessing import Process, Queue
 # Import real framework components - NO MOCKS
 from netra_backend.app.database.manager import DatabaseManager
 from netra_backend.app.services.websocket_manager import WebSocketManager
-from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
+from netra_backend.app.core.registry.universal_registry import AgentRegistry
 from netra_backend.app.agents.supervisor.execution_factory import ExecutionFactory
 from test_framework.backend_client import BackendClient
 from test_framework.test_context import TestContext

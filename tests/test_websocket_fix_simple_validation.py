@@ -20,12 +20,12 @@ if project_root not in sys.path:
     sys.path.insert(0, project_root)
 
 # Import critical components
-from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
+from netra_backend.app.core.registry.universal_registry import AgentRegistry
 from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 from netra_backend.app.agents.unified_tool_execution import UnifiedToolExecutionEngine
 from netra_backend.app.agents.unified_tool_execution import enhance_tool_dispatcher_with_notifications
-from netra_backend.app.websocket_core.manager import WebSocketManager
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager as WebSocketManager
 from netra_backend.app.agents.state import DeepAgentState
 
 
@@ -65,7 +65,7 @@ async def test_agent_registry_enhancement():
     # Create components
     tool_dispatcher = ToolDispatcher()
     original_executor = tool_dispatcher.executor
-    registry = AgentRegistry(MockLLM(), tool_dispatcher)
+    registry = AgentRegistry(), tool_dispatcher)
     ws_manager = WebSocketManager()
     
     print(f"   Original executor: {type(original_executor).__name__}")
@@ -156,7 +156,7 @@ async def test_double_enhancement_safety():
         pass
         
     tool_dispatcher = ToolDispatcher()
-    registry = AgentRegistry(MockLLM(), tool_dispatcher)
+    registry = AgentRegistry(), tool_dispatcher)
     ws_manager = WebSocketManager()
     
     # Apply enhancement twice

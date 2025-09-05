@@ -13,10 +13,10 @@ import os
 # Add project root to path
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
-from netra_backend.app.agents.triage_sub_agent.agent import TriageSubAgent
-from netra_backend.app.agents.triage_sub_agent.core import TriageCore
+from netra_backend.app.agents.triage.unified_triage_agent import UnifiedTriageAgent
+from netra_backend.app.agents.triage.unified_triage_agent import TriageCore
 from netra_backend.app.agents.triage_sub_agent.processing import TriageProcessor
-from netra_backend.app.agents.triage_sub_agent import cache_utils
+from netra_backend.app.agents.triage.unified_triage_agent import cache_utils
 from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
 from netra_backend.app.agents.base_agent import BaseAgent
 
@@ -63,7 +63,7 @@ class TestTriageAgentSSOTCompliance(unittest.TestCase):
     
     def test_no_deprecated_json_imports(self):
         """Verify no deprecated JSON imports."""
-        import netra_backend.app.agents.triage_sub_agent.core as core_module
+        import netra_backend.app.agents.triage.unified_triage_agent.core as core_module
         
         self.assertNotIn('extract_json_from_response', dir(core_module),
                         "✅ No deprecated extract_json_from_response import")
@@ -177,7 +177,7 @@ class TestTriageAgentSSOTCompliance(unittest.TestCase):
     
     def test_no_direct_environ_access(self):
         """Verify no direct os.environ access."""
-        import netra_backend.app.agents.triage_sub_agent as triage_module
+        import netra_backend.app.agents.triage.unified_triage_agent as triage_module
         
         # This is a basic check - more thorough AST analysis would be better
         source_files = ['core', 'processing', 'cache_utils']

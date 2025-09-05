@@ -23,7 +23,7 @@ from netra_backend.app.agents.supervisor.execution_factory import (
     ExecutionFactory,
     UserExecutionContext
 )
-from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
+from netra_backend.app.core.registry.universal_registry import AgentRegistry
 
 
 class TestWebSocketExecutionIntegration:

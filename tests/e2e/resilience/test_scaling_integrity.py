@@ -15,7 +15,7 @@ setup_test_path()
 import pytest
 
 from netra_backend.app.agents.data_sub_agent.data_sub_agent import DataSubAgent
-from netra_backend.app.agents.triage_sub_agent.agent import TriageSubAgent
+from netra_backend.app.agents.triage.unified_triage_agent import UnifiedTriageAgent
 
 # Note: These imports would come from scaling_test_helpers in a complete implementation
 # from scaling_test_helpers import (

@@ -11,7 +11,9 @@
 
 ### 🔄 Migration Guides
 
+- **[SSOT Consolidation Status Report](../SSOT_CONSOLIDATION_STATUS_20250904.md)** ⭐ - **NEW**: Complete status of SSOT consolidations (91% code reduction)
 - **[Tool Dispatcher Migration Guide](../TOOL_DISPATCHER_MIGRATION_GUIDE.md)** - Migrate from singleton to request-scoped dispatchers
+- [Tool Dispatcher Consolidation Complete](../TOOL_DISPATCHER_CONSOLIDATION_COMPLETE.md) - Tool dispatcher SSOT success
 - [WebSocket Modernization Report](../WEBSOCKET_MODERNIZATION_REPORT.md) - WebSocket isolation implementation
 - [Agent Registry Split Migration](./AGENT_REGISTRY_SPLIT_MIGRATION_GUIDE.md) - Agent registry refactoring
 

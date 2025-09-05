@@ -37,7 +37,7 @@ from netra_backend.app.schemas.websocket_models import (
     AgentCompleted, StreamChunk, StreamComplete, WebSocketError
 )
 from netra_backend.app.schemas.agent_models import AgentMetadata
-from netra_backend.app.websocket_core.manager import WebSocketManager
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager as WebSocketManager
 from netra_backend.app.websocket_core.types import get_frontend_message_type
 
 

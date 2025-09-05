@@ -45,7 +45,7 @@ if project_root not in sys.path:
 from shared.isolated_environment import get_env
 
 # Import core WebSocket components
-from netra_backend.app.websocket_core.manager import WebSocketManager
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager as WebSocketManager
 from netra_backend.app.websocket_core.types import MessageType, WebSocketMessage
 from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge, IntegrationState
 from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext

@@ -31,7 +31,7 @@ from netra_backend.app.agents.supervisor.factory_performance_config import (
     set_factory_performance_config
 )
 from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
-from netra_backend.app.websocket_core.manager import WebSocketManager
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager as WebSocketManager
 from netra_backend.app.agents.supervisor.agent_class_registry import AgentClassRegistry
 
 

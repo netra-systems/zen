@@ -19,9 +19,9 @@ from unittest.mock import MagicMock, patch, AsyncMock, call
 import pytest
 from datetime import datetime
 
-from netra_backend.app.websocket_core.manager import WebSocketManager, get_websocket_manager
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager as WebSocketManager, get_websocket_manager
 from netra_backend.app.services.message_handlers import handle_ai_backend_message
-from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.registry.universal_registry import AgentRegistry
 from netra_backend.app.core.execution_engine import ExecutionEngine
 from fastapi import WebSocket
 from fastapi.websockets import WebSocketState

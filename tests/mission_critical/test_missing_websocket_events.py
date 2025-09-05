@@ -15,7 +15,7 @@ from datetime import datetime, timezone
 from netra_backend.app.agents.supervisor.agent_manager import AgentManager
 from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
 from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier
-from netra_backend.app.websocket_core.manager import WebSocketManager
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager as WebSocketManager
 from netra_backend.app.schemas.websocket_models import WebSocketMessage
 from netra_backend.app.logging_config import central_logger
 

@@ -38,7 +38,7 @@ from test_framework.environment_isolation import isolated_test_env, get_test_env
 from shared.isolated_environment import IsolatedEnvironment
 from shared.database_url_builder import DatabaseURLBuilder
 from netra_backend.app.services.database_manager import DatabaseManager
-from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
+from netra_backend.app.core.registry.universal_registry import AgentRegistry
 from netra_backend.app.services.websocket_manager import WebSocketManager
 from netra_backend.app.services.websocket_bridge_factory import WebSocketBridgeFactory
 

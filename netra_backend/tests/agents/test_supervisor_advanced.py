@@ -72,7 +72,7 @@ class TestSupervisorAdvancedFeatures:
         )
         
         # Mock triage agent to fail
-        from netra_backend.app.agents.triage_sub_agent.agent import TriageSubAgent
+        from netra_backend.app.agents.triage.unified_triage_agent import UnifiedTriageAgent
         # Mock: Agent service isolation for testing without LLM agent execution
         mock_triage = AsyncMock(spec=TriageSubAgent)
         # Mock: Agent service isolation for testing without LLM agent execution
@@ -147,7 +147,7 @@ class TestSupervisorAdvancedFeatures:
             return state
         
         # Mock triage agent for concurrent test
-        from netra_backend.app.agents.triage_sub_agent.agent import TriageSubAgent
+        from netra_backend.app.agents.triage.unified_triage_agent import UnifiedTriageAgent
         # Mock: Agent service isolation for testing without LLM agent execution
         mock_triage = AsyncMock(spec=TriageSubAgent)
         mock_triage.execute = mock_execute
@@ -238,7 +238,7 @@ class TestSupervisorAdvancedFeatures:
             return state
         
         # Mock triage agent for metrics test
-        from netra_backend.app.agents.triage_sub_agent.agent import TriageSubAgent
+        from netra_backend.app.agents.triage.unified_triage_agent import UnifiedTriageAgent
         # Mock: Agent service isolation for testing without LLM agent execution
         mock_triage = AsyncMock(spec=TriageSubAgent)
         mock_triage.execute = mock_execute
@@ -305,7 +305,7 @@ class TestSupervisorAdvancedFeatures:
 
     def _setup_circuit_breaker_agent(self, supervisor):
         """Setup mock triage agent for circuit breaker test"""
-        from netra_backend.app.agents.triage_sub_agent.agent import TriageSubAgent
+        from netra_backend.app.agents.triage.unified_triage_agent import UnifiedTriageAgent
         # Mock: Agent service isolation for testing without LLM agent execution
         mock_triage = AsyncMock(spec=TriageSubAgent)
         mock_triage.execute = lambda state, run_id, stream_updates=True: self._mock_circuit_breaker_execute(supervisor, state, run_id, stream_updates)

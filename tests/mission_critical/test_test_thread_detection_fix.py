@@ -20,7 +20,7 @@ import logging
 import pytest
 from unittest.mock import Mock, AsyncMock, patch
 
-from netra_backend.app.websocket_core.manager import WebSocketManager
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager as WebSocketManager
 from netra_backend.app.websocket_core.event_monitor import ChatEventMonitor
 from netra_backend.app.logging_config import central_logger
 

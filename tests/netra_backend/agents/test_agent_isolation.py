@@ -29,7 +29,7 @@ from netra_backend.app.agents.supervisor.user_execution_context import (
     UserExecutionContext,
     InvalidContextError
 )
-from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
+from netra_backend.app.core.registry.universal_registry import AgentRegistry
 from netra_backend.app.agents.base_agent import BaseAgent
 
 
@@ -533,7 +533,7 @@ class TestAgentRegistryMigration:
         with patch('warnings.warn'):
             with patch('netra_backend.app.agents.supervisor.agent_registry.get_agent_class_registry', 
                       return_value=test_infrastructure_registry):
-                registry = AgentRegistry(llm_manager, tool_dispatcher)
+                registry = AgentRegistry()
         
         # Manually register some test agents
         registry.register("mock_agent_1", MockAgent("mock_agent_1"))
@@ -592,7 +592,7 @@ class TestAgentRegistryMigration:
         tool_dispatcher = MagicMock()
         
         with patch('warnings.warn') as mock_warn:
-            registry = AgentRegistry(llm_manager, tool_dispatcher)
+            registry = AgentRegistry()
             
             # Should have issued deprecation warning
             mock_warn.assert_called_once()
@@ -612,7 +612,7 @@ class TestBackwardCompatibility:
         tool_dispatcher = MagicMock()
         
         with patch('warnings.warn'):
-            legacy_registry = AgentRegistry(llm_manager, tool_dispatcher)
+            legacy_registry = AgentRegistry()
         
         # Register test agents
         legacy_registry.register("test_agent", MockAgent("test_agent"))

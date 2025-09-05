@@ -15,10 +15,10 @@ from unittest.mock import MagicMock, AsyncMock
 import pytest
 from loguru import logger
 
-from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
+from netra_backend.app.core.registry.universal_registry import AgentRegistry
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 from netra_backend.app.agents.unified_tool_execution import UnifiedToolExecutionEngine
-from netra_backend.app.websocket_core.manager import WebSocketManager
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager as WebSocketManager
 
 
 class TestFinalValidation:
@@ -36,7 +36,7 @@ class TestFinalValidation:
         original_executor = tool_dispatcher.executor
         
         # Create registry
-        registry = AgentRegistry(MockLLM(), tool_dispatcher)
+        registry = AgentRegistry(), tool_dispatcher)
         
         # Create WebSocket manager
         ws_manager = WebSocketManager()
@@ -64,7 +64,7 @@ class TestFinalValidation:
             pass
         
         tool_dispatcher = ToolDispatcher()
-        registry = AgentRegistry(MockLLM(), tool_dispatcher)
+        registry = AgentRegistry(), tool_dispatcher)
         ws_manager = WebSocketManager()
         
         # Enhance
@@ -93,7 +93,7 @@ class TestFinalValidation:
             tool_dispatcher = ToolDispatcher()
             original = tool_dispatcher.executor
             
-            registry = AgentRegistry(MockLLM(), tool_dispatcher)
+            registry = AgentRegistry(), tool_dispatcher)
             registry.set_websocket_manager(ws_manager)
             
             # Each must be enhanced
@@ -129,7 +129,7 @@ class TestFinalValidation:
         await ws_manager.connect_user("test-user", mock_ws, "test-conn")
         
         tool_dispatcher = ToolDispatcher()
-        registry = AgentRegistry(MockLLM(), tool_dispatcher)
+        registry = AgentRegistry(), tool_dispatcher)
         
         # CRITICAL: This must enhance the tool dispatcher
         registry.set_websocket_manager(ws_manager)
@@ -148,7 +148,7 @@ class TestFinalValidation:
             pass
         
         tool_dispatcher = ToolDispatcher()
-        registry = AgentRegistry(MockLLM(), tool_dispatcher)
+        registry = AgentRegistry(), tool_dispatcher)
         ws_manager1 = WebSocketManager()
         ws_manager2 = WebSocketManager()
         

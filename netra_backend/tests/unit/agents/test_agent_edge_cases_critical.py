@@ -29,7 +29,7 @@ from typing import Dict, Any, List
 from unittest.mock import Mock, AsyncMock, patch, MagicMock
 
 from netra_backend.app.agents.base_agent import BaseAgent
-from netra_backend.app.agents.triage_sub_agent.agent import TriageSubAgent
+from netra_backend.app.agents.triage.unified_triage_agent import UnifiedTriageAgent
 from netra_backend.app.agents.base.interface import ExecutionContext, ExecutionResult
 from netra_backend.app.agents.base.circuit_breaker import CircuitBreakerConfig, CircuitBreakerState
 from netra_backend.app.llm.llm_manager import LLMManager

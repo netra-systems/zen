@@ -148,7 +148,7 @@ class TestInsufficientDataHandling:
     @pytest.mark.asyncio
     async def test_clarification_request_generation(self, insufficient_vague_request):
         """Test generation of clarification requests for vague input."""
-        from netra_backend.app.agents.triage_sub_agent.agent import TriageSubAgent
+        from netra_backend.app.agents.triage.unified_triage_agent import UnifiedTriageAgent
         
         agent = TriageSubAgent()
         
@@ -513,7 +513,7 @@ Quick Win Opportunities (check if interested):
             "completeness": 0.00
         }
         
-        from netra_backend.app.agents.triage_sub_agent.agent import TriageSubAgent
+        from netra_backend.app.agents.triage.unified_triage_agent import UnifiedTriageAgent
         
         agent = TriageSubAgent()
         

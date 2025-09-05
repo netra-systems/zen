@@ -82,7 +82,7 @@ class TestFlowTransitionsAndHandoffs:
     async def test_triage_to_optimization_handoff(self, initial_state, mock_agent_outputs):
         """Test state handoff from triage to optimization agent."""
         # Setup state after triage
-        from netra_backend.app.agents.triage_sub_agent.models import TriageResult
+        from netra_backend.app.agents.triage.unified_triage_agent import TriageResult
         initial_state.triage_result = TriageResult(
             category="cost_optimization",
             confidence_score=0.75,
@@ -129,7 +129,7 @@ class TestFlowTransitionsAndHandoffs:
             agents_executed.append(agent_name)
             # Set appropriate state field based on agent_name
             if agent_name == "triage":
-                from netra_backend.app.agents.triage_sub_agent.models import TriageResult
+                from netra_backend.app.agents.triage.unified_triage_agent import TriageResult
                 state.triage_result = TriageResult(**output) if isinstance(output, dict) else output
             elif agent_name == "optimization":
                 from netra_backend.app.agents.state import OptimizationsResult
@@ -302,7 +302,7 @@ class TestFlowTransitionsAndHandoffs:
         state = DeepAgentState()
         
         # Simulate triage identifying high-priority issue
-        from netra_backend.app.agents.triage_sub_agent.models import TriageResult
+        from netra_backend.app.agents.triage.unified_triage_agent import TriageResult
         state.triage_result = TriageResult(
             category="cost_explosion",
             confidence_score=0.95,
@@ -345,7 +345,7 @@ class TestFlowTransitionsAndHandoffs:
     async def test_state_rollback_on_failure(self):
         """Test state rollback when critical agent fails."""
         initial_state = DeepAgentState()
-        from netra_backend.app.agents.triage_sub_agent.models import TriageResult
+        from netra_backend.app.agents.triage.unified_triage_agent import TriageResult
         initial_state.triage_result = TriageResult(
             category="cost_optimization",
             confidence_score=0.85,

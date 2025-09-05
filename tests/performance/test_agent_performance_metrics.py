@@ -46,14 +46,14 @@ import pytest
 
 from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.agents.state import DeepAgentState
-from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
+from netra_backend.app.core.registry.universal_registry import AgentRegistry
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.monitoring.metrics_collector import PerformanceMetric
 from netra_backend.app.redis_manager import RedisManager
 from netra_backend.app.services.state.state_manager import StateManager, StateStorage
-from netra_backend.app.websocket_core.manager import WebSocketManager
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager as WebSocketManager
 from netra_backend.tests.performance.performance_baseline_config import (
     get_benchmark_runner,
     PerformanceCategory,

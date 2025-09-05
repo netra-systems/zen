@@ -38,9 +38,9 @@ from test_framework.real_services import RealServicesManager, WebSocketTestClien
 from test_framework.websocket_helpers import WebSocketTestHelpers
 
 # Import core WebSocket and agent components for integration testing
-from netra_backend.app.websocket_core.manager import WebSocketManager
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager as WebSocketManager
 from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier
-from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
+from netra_backend.app.core.registry.universal_registry import AgentRegistry
 from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
 from netra_backend.app.agents.unified_tool_execution import UnifiedToolExecutionEngine
 from netra_backend.app.llm.llm_manager import LLMManager

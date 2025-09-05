@@ -48,7 +48,7 @@ from unittest.mock import AsyncMock, MagicMock, Mock, patch, PropertyMock
 from sqlalchemy.ext.asyncio import AsyncSession
 
 # Import the classes under test
-from netra_backend.app.agents.triage_sub_agent import TriageSubAgent
+from netra_backend.app.agents.triage.unified_triage_agent import TriageSubAgent
 from netra_backend.app.agents.supervisor.user_execution_context import (
     UserExecutionContext, 
     InvalidContextError,
@@ -58,7 +58,7 @@ from netra_backend.app.agents.supervisor.user_execution_context import (
 )
 from netra_backend.app.agents.base.interface import ExecutionContext
 from netra_backend.app.agents.state import DeepAgentState
-from netra_backend.app.agents.triage_sub_agent.models import TriageResult
+from netra_backend.app.agents.triage.unified_triage_agent import TriageResult
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 

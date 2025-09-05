@@ -93,6 +93,7 @@ else:
         }
     except ImportError:
         # Fallback to defaults if port manager not available
+        env = get_env()
         backend_port = env.get("TEST_BACKEND_PORT", "8000")
         auth_port = env.get("TEST_AUTH_PORT", "8081")
         E2E_CONFIG = {

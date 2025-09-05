@@ -26,7 +26,9 @@ import pytest
 import redis.asyncio as aioredis
 from netra_backend.app.services.api_gateway.cache_strategies import CacheStrategy
 # from caching.llm_cache_manager import LLMCacheManager  # Module doesn't exist, use available cache manager
-from netra_backend.app.services.cache.cache_manager import LLMCacheManager
+# Legacy import removed - use resource_cache instead
+# from netra_backend.app.services.cache.cache_manager import LLMCacheManager
+from netra_backend.app.llm.resource_cache import LRUCache as LLMCacheManager
 # from netra_backend.app.llm.response_processor import LLMResponseProcessor  # Module doesn't exist
 
 @pytest.mark.L3

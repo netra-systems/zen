@@ -48,9 +48,9 @@ from netra_backend.app.agents.state import (
     PlanStep,
 
 )
-from netra_backend.app.agents.triage_sub_agent.agent import TriageSubAgent
+from netra_backend.app.agents.triage.unified_triage_agent import UnifiedTriageAgent
 
-from netra_backend.app.agents.triage_sub_agent.models import (
+from netra_backend.app.agents.triage.unified_triage_agent import (
 
     Complexity,
 
@@ -522,7 +522,7 @@ class TestPydanticValidationCritical:
         mock_llm_manager.ask_llm = AsyncMock(return_value='{"category": "General Inquiry"}')
         
         # Should retry and succeed on second attempt
-        from netra_backend.app.agents.triage_sub_agent.agent import TriageSubAgent
+        from netra_backend.app.agents.triage.unified_triage_agent import UnifiedTriageAgent
 
         # Mock: LLM service isolation for fast testing without API calls or rate limits
         agent = TriageSubAgent(mock_llm_manager, Mock())

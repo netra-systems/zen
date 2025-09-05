@@ -12,7 +12,7 @@ import pytest
 
 from netra_backend.app.agents.supervisor.agent_instance_factory import AgentInstanceFactory
 from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
-from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
+from netra_backend.app.core.registry.universal_registry import AgentRegistry
 from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
 from netra_backend.app.logging_config import central_logger
 
@@ -84,7 +84,7 @@ class TestWebSocketRunIdFix:
         tool_dispatcher = MagicMock()
         websocket_bridge = MagicMock(spec=AgentWebSocketBridge)
         
-        registry = AgentRegistry(llm_manager, tool_dispatcher)
+        registry = AgentRegistry()
         
         # Mock agent with set_websocket_bridge method
         mock_agent = MagicMock()

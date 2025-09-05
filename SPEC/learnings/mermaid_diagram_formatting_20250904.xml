@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learning>
+  <title>Mermaid Diagram Formatting Issues and Solutions</title>
+  <date>2025-01-04</date>
+  <category>documentation</category>
+  <tags>
+    <tag>mermaid</tag>
+    <tag>markdown</tag>
+    <tag>diagrams</tag>
+    <tag>formatting</tag>
+  </tags>
+  
+  <problem>
+    <description>
+      Mermaid diagrams in SSOT_INDEX.md were failing to render correctly due to syntax issues.
+      Multiple problems were identified that caused "Unsupported markdown" errors.
+    </description>
+    <symptoms>
+      <symptom>Error message: "Unsupported markdown: list"</symptom>
+      <symptom>Diagrams not rendering in markdown viewers</symptom>
+      <symptom>Node labels with special characters causing parsing failures</symptom>
+    </symptoms>
+  </problem>
+  
+  <root_cause>
+    <issue id="1">
+      <description>Thick arrow syntax (==>) is not valid in Mermaid</description>
+      <example>
+        <!-- WRONG -->
+        CRIT ==> UCM
+        <!-- CORRECT -->
+        CRIT --> UCM
+      </example>
+    </issue>
+    
+    <issue id="2">
+      <description>Node labels with dots and special characters need quotes</description>
+      <example>
+        <!-- WRONG -->
+        FILE[Config Files<br/>.env, .yaml]
+        <!-- CORRECT -->
+        FILE["Config Files<br/>env and yaml"]
+      </example>
+    </issue>
+    
+    <issue id="3">
+      <description>Numbered lists in node labels cause parsing issues</description>
+      <example>
+        <!-- WRONG -->
+        P1[1. Environment]
+        <!-- CORRECT -->
+        P1["Environment - Priority 1"]
+      </example>
+    </issue>
+  </root_cause>
+  
+  <solution>
+    <step number="1">
+      <action>Replace all thick arrows (==>) with standard arrows (-->)</action>
+      <rationale>Mermaid only supports standard arrow syntax for flow relationships</rationale>
+    </step>
+    
+    <step number="2">
+      <action>Wrap all node labels in quotes when they contain special characters</action>
+      <rationale>Quotes prevent parsing errors with dots, slashes, and commas</rationale>
+    </step>
+    
+    <step number="3">
+      <action>Avoid numbered lists in node labels, use descriptive text instead</action>
+      <rationale>Numbered lists trigger markdown parsing that conflicts with Mermaid</rationale>
+    </step>
+  </solution>
+  
+  <best_practices>
+    <practice>
+      <title>Always quote complex node labels</title>
+      <description>
+        When a node label contains any of these characters, wrap it in quotes:
+        - Dots (.)
+        - Slashes (/)
+        - Commas (,)
+        - HTML tags like <br/>
+        - Special symbols
+      </description>
+    </practice>
+    
+    <practice>
+      <title>Use consistent arrow syntax</title>
+      <description>
+        Standard Mermaid arrow types:
+        - --> (solid arrow)
+        - -.-> (dotted arrow)
+        - ==> (NOT VALID - don't use)
+      </description>
+    </practice>
+    
+    <practice>
+      <title>Test diagrams in multiple renderers</title>
+      <description>
+        Different Mermaid renderers may have varying tolerance for syntax.
+        Test in GitHub, VS Code, and web-based Mermaid editors.
+      </description>
+    </practice>
+  </best_practices>
+  
+  <validation>
+    <test>Verify all node labels are properly quoted</test>
+    <test>Confirm no thick arrows (==>) are used</test>
+    <test>Check that no numbered lists appear in node labels</test>
+    <test>Test rendering in VS Code markdown preview</test>
+    <test>Test rendering in GitHub markdown viewer</test>
+  </validation>
+  
+  <related_files>
+    <file>SSOT_INDEX.md</file>
+    <file>Any documentation with Mermaid diagrams</file>
+  </related_files>
+  
+  <impact>
+    <positive>Fixed diagram rendering issues in critical documentation</positive>
+    <positive>Improved readability of SSOT architecture diagrams</positive>
+    <positive>Established best practices for future Mermaid diagrams</positive>
+  </impact>
+</learning>

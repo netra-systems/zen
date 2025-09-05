@@ -30,10 +30,10 @@ from collections import defaultdict, deque
 from datetime import datetime
 
 from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
-from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
+from netra_backend.app.core.registry.universal_registry import AgentRegistry
 from netra_backend.app.agents.supervisor.agent_instance_factory import AgentInstanceFactory
 from netra_backend.app.agents.base_agent import BaseAgent
-from netra_backend.app.agents.triage_sub_agent.agent import TriageSubAgent
+from netra_backend.app.agents.triage.unified_triage_agent import UnifiedTriageAgent
 from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
 from netra_backend.app.logging_config import central_logger
 
@@ -50,7 +50,7 @@ class TestAgentRestartAfterFailure:
         # Setup: Create agent registry with singleton pattern (current behavior)
         llm_manager = Mock()
         tool_dispatcher = Mock()
-        registry = AgentRegistry(llm_manager, tool_dispatcher)
+        registry = AgentRegistry()
         
         # Register triage agent (creates singleton instance)
         triage_agent = TriageSubAgent()
@@ -102,7 +102,7 @@ class TestAgentRestartAfterFailure:
         # Setup registry
         llm_manager = Mock()
         tool_dispatcher = Mock()
-        registry = AgentRegistry(llm_manager, tool_dispatcher)
+        registry = AgentRegistry()
         
         # Register triage agent
         triage_agent = TriageSubAgent()
@@ -188,7 +188,7 @@ class TestAgentRestartAfterFailure:
         # Setup registry with WebSocket components
         llm_manager = Mock()
         tool_dispatcher = Mock()
-        registry = AgentRegistry(llm_manager, tool_dispatcher)
+        registry = AgentRegistry()
         
         # Mock WebSocket components
         websocket_bridge = Mock()
@@ -265,7 +265,7 @@ class TestAgentRestartAfterFailure:
         """Reproduce the exact bug: agent gets stuck on 'triage start'."""
         
         # Setup
-        registry = AgentRegistry(Mock(), Mock())
+        registry = AgentRegistry(), Mock())
         triage_agent = TriageSubAgent()
         registry.register("triage", triage_agent)
         
@@ -320,7 +320,7 @@ class TestAgentRestartAfterFailure:
 @pytest.fixture
 async def mock_registry():
     """Fixture for creating a mock agent registry."""
-    registry = AgentRegistry(Mock(), Mock())
+    registry = AgentRegistry(), Mock())
     registry.register_default_agents()
     return registry
 

@@ -31,7 +31,7 @@ env.set("ENVIRONMENT", "testing", "test")
 
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
-from netra_backend.app.agents.triage_sub_agent.agent import TriageSubAgent
+from netra_backend.app.agents.triage.unified_triage_agent import UnifiedTriageAgent
 from netra_backend.app.llm.llm_manager import LLMManager
 from shared.isolated_environment import IsolatedEnvironment
 from netra_backend.app.schemas.config import AppConfig

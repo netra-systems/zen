@@ -15,7 +15,7 @@ from typing import Dict, Any, List
 from unittest.mock import AsyncMock, MagicMock, patch
 import json
 
-from netra_backend.app.agents.triage_sub_agent.agent import TriageSubAgent
+from netra_backend.app.agents.triage.unified_triage_agent import UnifiedTriageAgent
 from netra_backend.app.agents.base.interface import ExecutionContext, ExecutionResult
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.schemas.core_enums import ExecutionStatus

@@ -10,7 +10,7 @@ import asyncio
 import json
 
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
-from netra_backend.app.agents.triage_sub_agent.agent import TriageSubAgent
+from netra_backend.app.agents.triage.unified_triage_agent import UnifiedTriageAgent
 from netra_backend.app.agents.optimizations_core_sub_agent import OptimizationsCoreSubAgent
 from netra_backend.app.agents.data_sub_agent import DataSubAgent
 from netra_backend.app.agents.data_helper_agent import DataHelperAgent

@@ -21,7 +21,7 @@ from fastapi import FastAPI
 import json
 
 from netra_backend.app.routes.websocket import router, websocket_beacon
-from netra_backend.app.websocket_core.manager import WebSocketManager
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager as WebSocketManager
 from netra_backend.app.websocket_core.handlers import MessageRouter, ConnectionHandler
 from netra_backend.app.websocket_core.types import MessageType, WebSocketMessage
 

@@ -36,9 +36,9 @@ from test_framework.environment_isolation import get_env, IsolatedEnvironment
 from test_framework.real_services import get_real_services, RealServicesManager
 
 # Production imports - using absolute paths only
-from netra_backend.app.websocket_core.manager import WebSocketManager
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager as WebSocketManager
 from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier
-from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
+from netra_backend.app.core.registry.universal_registry import AgentRegistry
 from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
 from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
@@ -377,7 +377,7 @@ class TestPrimaryChatWebSocketFlowE2E:
             
             # Create agent registry and enhance with WebSocket
             llm = TestLLM()
-            registry = AgentRegistry(llm, tool_dispatcher)
+            registry = AgentRegistry()
             registry.set_websocket_manager(ws_manager)  # CRITICAL: This enhances tool dispatcher
             
             # Verify tool dispatcher was enhanced (regression prevention)
@@ -707,7 +707,7 @@ class TestPrimaryChatWebSocketFlowE2E:
             
             # Create complete agent system
             llm = RealisticChatLLM()
-            registry = AgentRegistry(llm, tool_dispatcher)
+            registry = AgentRegistry()
             registry.set_websocket_manager(ws_manager)
             
             # Verify system is properly configured

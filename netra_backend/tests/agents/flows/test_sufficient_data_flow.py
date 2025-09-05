@@ -210,7 +210,7 @@ class TestSufficientDataFlow:
     @pytest.mark.critical
     async def test_triage_correctly_identifies_sufficient_data(self, complete_user_request, expected_triage_output):
         """Validate triage agent correctly identifies data sufficiency."""
-        from netra_backend.app.agents.triage_sub_agent.agent import TriageSubAgent
+        from netra_backend.app.agents.triage.unified_triage_agent import UnifiedTriageAgent
         
         with patch.object(TriageSubAgent, 'llm_manager') as mock_llm_manager:
             mock_llm_manager.ask_structured_llm.return_value = expected_triage_output
@@ -239,7 +239,7 @@ class TestSufficientDataFlow:
             
             agent = OptimizationsCoreSubAgent()
             state = DeepAgentState()
-            from netra_backend.app.agents.triage_sub_agent.models import TriageResult
+            from netra_backend.app.agents.triage.unified_triage_agent import TriageResult
             state.triage_result = TriageResult(
                 category="cost_optimization",
                 confidence_score=0.95,
@@ -393,7 +393,7 @@ class TestSufficientDataFlow:
         state.user_request = json.dumps(complete_user_request)
         
         # Simulate state updates through flow
-        from netra_backend.app.agents.triage_sub_agent.models import TriageResult
+        from netra_backend.app.agents.triage.unified_triage_agent import TriageResult
         from netra_backend.app.agents.state import OptimizationsResult, ActionPlanResult, ReportResult
         from netra_backend.app.schemas.shared_types import DataAnalysisResponse
         

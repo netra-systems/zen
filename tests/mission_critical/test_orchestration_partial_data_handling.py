@@ -459,7 +459,7 @@ class TestPartialDataHandling:
             "completeness": 0.40
         }
         
-        from netra_backend.app.agents.triage_sub_agent.agent import TriageSubAgent
+        from netra_backend.app.agents.triage.unified_triage_agent import UnifiedTriageAgent
         
         agent = TriageSubAgent()
         

@@ -9,7 +9,7 @@ from unittest.mock import Mock, AsyncMock, MagicMock
 
 import pytest
 
-from netra_backend.app.agents.triage_sub_agent.agent import TriageSubAgent
+from netra_backend.app.agents.triage.unified_triage_agent import UnifiedTriageAgent
 from netra_backend.app.agents.utils import extract_json_from_response
 
 def test_extract_json_with_trailing_comma():

@@ -23,28 +23,33 @@ COVERAGE:
 - Error recovery and fallback responses
 """
 
-import sys
-from pathlib import Path
-from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
-
-
-# Test framework import - using pytest fixtures instead
-
 import asyncio
 import json
 import time
 from typing import Any, Dict, List, Optional
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from netra_backend.app.agents.data_sub_agent.agent import DataSubAgent
-
+from netra_backend.app.agents.data_sub_agent.data_sub_agent import DataSubAgent
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
-from netra_backend.app.agents.triage_sub_agent.agent import TriageSubAgent
+from netra_backend.app.agents.triage.unified_triage_agent import UnifiedTriageAgent
+from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.schemas.websocket_message_types import WebSocketMessage
 from netra_backend.app.services.agent_service import AgentService
+
+
+class MockLLMResponse:
+    """Mock LLM response for testing."""
+    
+    def __init__(self, content: str, tool_calls: List[Dict] = None):
+        self.content = content
+        self.tool_calls = tool_calls or []
+        
+    def __str__(self):
+        return self.content
 
 class TestAgentMessageProcessing:
     """Agent message reception and routing tests."""
@@ -70,7 +75,7 @@ class TestAgentMessageProcessing:
         """Test agent service successfully processes user messages."""
         # Mock dependencies
         # Mock: Agent supervisor isolation for testing without spawning real agents
-        with patch('app.services.agent_service.SupervisorAgent') as mock_supervisor:
+        with patch('netra_backend.app.services.agent_service.SupervisorAgent') as mock_supervisor:
             # Mock: Async component isolation for testing without real async operations
             mock_supervisor.return_value.process_message = AsyncMock(
                 return_value={
@@ -91,7 +96,7 @@ class TestAgentMessageProcessing:
     async def test_message_routing_to_supervisor(self, agent_service, sample_user_message):
         """Test messages are correctly routed to supervisor agent."""
         # Mock: Agent supervisor isolation for testing without spawning real agents
-        with patch('app.agents.supervisor.supervisor_consolidated.SupervisorAgent.process_message') as mock_process:
+        with patch('netra_backend.app.agents.supervisor_consolidated.SupervisorAgent.process_message') as mock_process:
             mock_process.return_value = {"response": "Supervisor processed"}
             
             # Process message
@@ -121,7 +126,7 @@ class TestAgentMessageProcessing:
         
         # Mock supervisor responses
         # Mock: Agent supervisor isolation for testing without spawning real agents
-        with patch('app.agents.supervisor.supervisor_consolidated.SupervisorAgent.process_message') as mock_process:
+        with patch('netra_backend.app.agents.supervisor_consolidated.SupervisorAgent.process_message') as mock_process:
             mock_process.return_value = {"response": "Processed"}
             
             # Process messages concurrently
@@ -155,14 +160,14 @@ class TestSupervisorAgentOrchestration:
         """Test supervisor delegates data analysis to data sub-agent."""
         # Mock data sub-agent
         # Mock: Agent service isolation for testing without LLM agent execution
-        with patch('app.agents.data_sub_agent.agent.DataSubAgent.process_request') as mock_data_agent:
+        with patch('netra_backend.app.agents.data_sub_agent.data_sub_agent.DataSubAgent.process_request') as mock_data_agent:
             mock_data_agent.return_value = {
                 "analysis": "Current costs: $5000/month, optimization potential: 35%"
             }
             
             # Mock LLM response that triggers data agent
             # Mock: LLM service isolation for fast testing without API calls or rate limits
-            with patch('app.llm.llm_manager.LLMManager.generate_response') as mock_llm:
+            with patch('netra_backend.app.llm.llm_manager.LLMManager.generate_response') as mock_llm:
                 mock_llm.return_value = MockLLMResponse(
                     content="I need to analyze your current usage data.",
                     tool_calls=[{"function": {"name": "data_analysis"}}]
@@ -186,7 +191,7 @@ class TestSupervisorAgentOrchestration:
         
         # Mock triage sub-agent
         # Mock: Component isolation for testing without external dependencies
-        with patch('app.agents.triage_sub_agent.agent.TriageSubAgent.process_request') as mock_triage:
+        with patch('netra_backend.app.agents.triage.unified_triage_agent.UnifiedTriageAgent.process_request') as mock_triage:
             mock_triage.return_value = {
                 "prioritized_issues": ["performance", "cost", "quality"],
                 "recommendations": ["Optimize model selection", "Implement caching"]
@@ -194,7 +199,7 @@ class TestSupervisorAgentOrchestration:
             
             # Mock LLM response that triggers triage
             # Mock: LLM service isolation for fast testing without API calls or rate limits
-            with patch('app.llm.llm_manager.LLMManager.generate_response') as mock_llm:
+            with patch('netra_backend.app.llm.llm_manager.LLMManager.generate_response') as mock_llm:
                 mock_llm.return_value = MockLLMResponse(
                     content="This requires issue triage and prioritization.",
                     tool_calls=[{"function": {"name": "triage_issues"}}]
@@ -218,15 +223,15 @@ class TestSupervisorAgentOrchestration:
         
         # Mock multiple sub-agents
         # Mock: Component isolation for testing without external dependencies
-        with patch('app.agents.data_sub_agent.agent.DataSubAgent.process_request') as mock_data, \
-             patch('app.agents.reporting_sub_agent.ReportingSubAgent.process_request') as mock_reporting:
+        with patch('netra_backend.app.agents.data_sub_agent.data_sub_agent.DataSubAgent.process_request') as mock_data, \
+             patch('netra_backend.app.agents.reporting_sub_agent.ReportingSubAgent.process_request') as mock_reporting:
             
             mock_data.return_value = {"cost_analysis": "Current: $5000, Potential: $3500"}
             mock_reporting.return_value = {"strategy_report": "Comprehensive optimization plan"}
             
             # Mock LLM responses
             # Mock: LLM service isolation for fast testing without API calls or rate limits
-            with patch('app.llm.llm_manager.LLMManager.generate_response') as mock_llm:
+            with patch('netra_backend.app.llm.llm_manager.LLMManager.generate_response') as mock_llm:
                 # Sequence of LLM calls
                 mock_llm.side_effect = [
                     MockLLMResponse("Need data analysis", [{"function": {"name": "data_analysis"}}]),
@@ -257,7 +262,7 @@ class TestSubAgentExecution:
         
         # Mock ClickHouse data
         # Mock: ClickHouse external database isolation for unit testing performance
-        with patch('app.db.clickhouse.ClickHouseClient.query') as mock_query:
+        with patch('netra_backend.app.db.clickhouse.ClickHouseClient.query') as mock_query:
             mock_query.return_value = [
                 {"metric": "cost", "value": 5000, "date": "2025-01-01"},
                 {"metric": "latency", "value": 250, "date": "2025-01-01"}
@@ -273,7 +278,7 @@ class TestSubAgentExecution:
     @pytest.mark.asyncio
     async def test_triage_agent_prioritizes_issues(self):
         """Test triage sub-agent prioritizes multiple issues."""
-        triage_agent = TriageSubAgent()
+        triage_agent = UnifiedTriageAgent()
         
         triage_request = {
             "type": "triage",
@@ -286,7 +291,7 @@ class TestSubAgentExecution:
         
         # Mock LLM for issue analysis
         # Mock: LLM service isolation for fast testing without API calls or rate limits
-        with patch('app.llm.llm_manager.LLMManager.generate_response') as mock_llm:
+        with patch('netra_backend.app.llm.llm_manager.LLMManager.generate_response') as mock_llm:
             mock_llm.return_value = MockLLMResponse(
                 content=json.dumps({
                     "prioritized_issues": [
@@ -320,7 +325,7 @@ class TestSubAgentExecution:
         
         # Mock tool execution
         # Mock: Tool execution isolation for predictable agent testing
-        with patch('app.agents.tool_dispatcher.ToolDispatcher.execute_tool') as mock_execute:
+        with patch('netra_backend.app.agents.tool_dispatcher.ToolDispatcher.execute_tool') as mock_execute:
             mock_execute.return_value = {
                 "current_cost": 2500,
                 "optimized_cost": 1750,
@@ -351,7 +356,7 @@ class TestAgentResponseGeneration:
         
         # Mock LLM response
         # Mock: LLM service isolation for fast testing without API calls or rate limits
-        with patch('app.llm.llm_manager.LLMManager.generate_response') as mock_llm:
+        with patch('netra_backend.app.llm.llm_manager.LLMManager.generate_response') as mock_llm:
             mock_llm.return_value = MockLLMResponse(
                 content="""Based on your cost-sensitive requirements, I recommend:
                 
@@ -390,7 +395,7 @@ class TestAgentResponseGeneration:
         
         # Mock comprehensive response
         # Mock: LLM service isolation for fast testing without API calls or rate limits
-        with patch('app.llm.llm_manager.LLMManager.generate_response') as mock_llm:
+        with patch('netra_backend.app.llm.llm_manager.LLMManager.generate_response') as mock_llm:
             mock_llm.return_value = MockLLMResponse(
                 content="""Here's your optimization plan:
                 
@@ -431,7 +436,7 @@ class TestAgentResponseGeneration:
         
         # Mock consistent LLM responses
         # Mock: LLM service isolation for fast testing without API calls or rate limits
-        with patch('app.llm.llm_manager.LLMManager.generate_response') as mock_llm:
+        with patch('netra_backend.app.llm.llm_manager.LLMManager.generate_response') as mock_llm:
             mock_llm.return_value = MockLLMResponse(
                 content="Well-formatted response with clear structure and recommendations."
             )
@@ -464,7 +469,7 @@ class TestAgentErrorHandling:
         
         # Mock LLM failure
         # Mock: LLM service isolation for fast testing without API calls or rate limits
-        with patch('app.llm.llm_manager.LLMManager.generate_response') as mock_llm:
+        with patch('netra_backend.app.llm.llm_manager.LLMManager.generate_response') as mock_llm:
             mock_llm.side_effect = Exception("LLM service unavailable")
             
             # Process request (should not crash)
@@ -493,7 +498,7 @@ class TestAgentErrorHandling:
             mock_data.side_effect = Exception("Data service unavailable")
             
             # Mock: LLM service isolation for fast testing without API calls or rate limits
-            with patch('app.llm.llm_manager.LLMManager.generate_response') as mock_llm:
+            with patch('netra_backend.app.llm.llm_manager.LLMManager.generate_response') as mock_llm:
                 mock_llm.return_value = MockLLMResponse(
                     content="I'll provide general optimization advice since data analysis is unavailable."
                 )
@@ -523,7 +528,7 @@ class TestAgentErrorHandling:
             return MockLLMResponse("Delayed response")
         
         # Mock: Component isolation for testing without external dependencies
-        with patch('app.llm.llm_manager.LLMManager.generate_response', side_effect=slow_llm_response):
+        with patch('netra_backend.app.llm.llm_manager.LLMManager.generate_response', side_effect=slow_llm_response):
             # Process with timeout
             try:
                 result = await asyncio.wait_for(
@@ -553,7 +558,7 @@ class TestAgentPerformance:
         
         # Mock fast LLM response
         # Mock: LLM service isolation for fast testing without API calls or rate limits
-        with patch('app.llm.llm_manager.LLMManager.generate_response') as mock_llm:
+        with patch('netra_backend.app.llm.llm_manager.LLMManager.generate_response') as mock_llm:
             mock_llm.return_value = MockLLMResponse(
                 content="For simple tasks, use GPT-3.5-turbo or Claude-3-haiku."
             )
@@ -582,7 +587,7 @@ class TestAgentPerformance:
         
         # Mock LLM responses
         # Mock: LLM service isolation for fast testing without API calls or rate limits
-        with patch('app.llm.llm_manager.LLMManager.generate_response') as mock_llm:
+        with patch('netra_backend.app.llm.llm_manager.LLMManager.generate_response') as mock_llm:
             mock_llm.return_value = MockLLMResponse("Response to request")
             
             # Process requests concurrently

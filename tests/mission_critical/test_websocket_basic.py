@@ -24,13 +24,13 @@ def test_imports():
         from netra_backend.app.agents.websocket_tool_enhancement import enhance_tool_dispatcher_with_notifications
         print("OK UnifiedToolExecutionEngine import successful")
         
-        from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
+        from netra_backend.app.core.registry.universal_registry import AgentRegistry
         print("OK AgentRegistry import successful")
         
         from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
         print("OK ExecutionEngine import successful")
         
-        from netra_backend.app.websocket_core.manager import WebSocketManager
+        from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager as WebSocketManager
         print("OK WebSocketManager import successful")
         
         return True
@@ -44,7 +44,7 @@ def test_websocket_notifier_methods():
     """Test that WebSocketNotifier has all required methods."""
     try:
         from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier
-        from netra_backend.app.websocket_core.manager import WebSocketManager
+        from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager as WebSocketManager
         
         ws_manager = WebSocketManager()
         notifier = WebSocketNotifier(ws_manager)
@@ -85,7 +85,7 @@ def test_tool_dispatcher_enhancement():
         from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
         from netra_backend.app.agents.unified_tool_execution import UnifiedToolExecutionEngine
         from netra_backend.app.agents.websocket_tool_enhancement import enhance_tool_dispatcher_with_notifications
-        from netra_backend.app.websocket_core.manager import WebSocketManager
+        from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager as WebSocketManager
         
         dispatcher = ToolDispatcher()
         ws_manager = WebSocketManager()
@@ -124,16 +124,16 @@ def test_tool_dispatcher_enhancement():
 def test_agent_registry_integration():
     """Test that AgentRegistry properly integrates WebSocket."""
     try:
-        from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
+        from netra_backend.app.core.registry.universal_registry import AgentRegistry
         from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
         from netra_backend.app.agents.unified_tool_execution import UnifiedToolExecutionEngine
-        from netra_backend.app.websocket_core.manager import WebSocketManager
+        from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager as WebSocketManager
         
         class MockLLM:
             pass
         
         tool_dispatcher = ToolDispatcher()
-        registry = AgentRegistry(MockLLM(), tool_dispatcher)
+        registry = AgentRegistry(), tool_dispatcher)
         ws_manager = WebSocketManager()
         
         # Set WebSocket manager
@@ -156,7 +156,7 @@ async def test_unified_tool_execution():
     """Test UnifiedToolExecutionEngine without real WebSocket connections."""
     try:
         from netra_backend.app.agents.unified_tool_execution import UnifiedToolExecutionEngine
-        from netra_backend.app.websocket_core.manager import WebSocketManager
+        from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager as WebSocketManager
         from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
         from netra_backend.app.agents.state import DeepAgentState
         from unittest.mock import AsyncMock

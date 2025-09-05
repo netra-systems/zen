@@ -10,10 +10,7 @@ from pathlib import Path
 import pytest
 
 # Import all required types
-from netra_backend.app.agents.triage_sub_agent.models import (
-    TriageMetadata,
-    TriageResult,
-)
+from netra_backend.app.agents.triage.unified_triage_agent import TriageResult
 from netra_backend.app.schemas.agent_models import AgentMetadata, DeepAgentState
 from netra_backend.app.schemas.unified_tools import (
     AgentCompleted,

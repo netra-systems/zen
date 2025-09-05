@@ -52,7 +52,7 @@ from netra_backend.app.schemas.websocket_models import (
     StartAgentPayload,
     WebSocketMessage,
 )
-from netra_backend.app.websocket_core.manager import WebSocketManager
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager as WebSocketManager
 # from netra_backend.app.websocket_core  # Fixed: legacy websocket.unified.messaging import UnifiedMessagingService  # UnifiedMessagingService doesn't exist
 
 

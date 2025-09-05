@@ -37,11 +37,11 @@ from netra_backend.app.agents.optimizations_core_sub_agent import OptimizationsC
 from netra_backend.app.agents.reporting_sub_agent import ReportingSubAgent
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
-from netra_backend.app.agents.triage_sub_agent.agent import TriageSubAgent
+from netra_backend.app.agents.triage.unified_triage_agent import UnifiedTriageAgent
 from shared.isolated_environment import get_env
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.schemas.agent import SubAgentLifecycle
-from netra_backend.app.websocket_core.manager import WebSocketManager as UnifiedWebSocketManager
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager as WebSocketManager
 
 
 class MultiAgentOrchestrationSuite:

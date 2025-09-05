@@ -62,4 +62,4 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
 EXPOSE 8000
 
 # Start the application with dynamic configuration
-CMD ["sh", "-c", "uvicorn netra_backend.app.main:app --host 0.0.0.0 --port 8000 --workers ${WORKERS:-2} --log-level ${LOG_LEVEL:-info}"]
+CMD ["sh", "-c", "uvicorn netra_backend.app.main:app --host 0.0.0.0 --port 8000 --workers ${WORKERS:-2} --log-level info"]

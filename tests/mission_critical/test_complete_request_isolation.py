@@ -33,9 +33,9 @@ from collections import defaultdict, deque
 
 from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
 from netra_backend.app.agents.supervisor.agent_instance_factory import AgentInstanceFactory
-from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
+from netra_backend.app.core.registry.universal_registry import AgentRegistry
 from netra_backend.app.agents.base_agent import BaseAgent
-from netra_backend.app.agents.triage_sub_agent.agent import TriageSubAgent
+from netra_backend.app.agents.triage.unified_triage_agent import UnifiedTriageAgent
 from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
 from netra_backend.app.logging_config import central_logger
 
@@ -354,7 +354,7 @@ class TestCompleteRequestIsolation:
         """Verify agent state is properly reset between requests."""
         
         # Use the legacy registry to test reset_state functionality
-        registry = AgentRegistry(Mock(), Mock())
+        registry = AgentRegistry(), Mock())
         
         # Create a test agent
         test_agent = TriageSubAgent()

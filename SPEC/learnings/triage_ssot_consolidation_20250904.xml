@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learning timestamp="2025-09-04T12:45:00">
+  <title>Triage SubAgent SSOT Consolidation - Complete Success</title>
+  
+  <problem>
+    <description>28 separate triage_sub_agent files violating SSOT principles</description>
+    <issues>
+      <issue>Multiple implementations of same functionality</issue>
+      <issue>Execution order bug - triage not running first</issue>
+      <issue>No factory pattern for user isolation</issue>
+      <issue>Direct metadata assignments violating SSOT</issue>
+      <issue>Scattered WebSocket integration</issue>
+    </issues>
+  </problem>
+  
+  <solution>
+    <approach>Complete SSOT consolidation into UnifiedTriageAgent</approach>
+    
+    <architecture_analysis>
+      <mro_report>Generated complete MRO analysis documenting inheritance</mro_report>
+      <execution_order>Fixed priority to 0 ensuring triage ALWAYS runs first</execution_order>
+      <value_extraction>Analyzed all 28 files, preserved critical logic</value_extraction>
+    </architecture_analysis>
+    
+    <implementation>
+      <unified_agent>
+        <location>netra_backend/app/agents/triage/unified_triage_agent.py</location>
+        <lines>900+</lines>
+        <features>
+          <feature>Factory pattern via UnifiedTriageAgentFactory</feature>
+          <feature>Per-request isolation through UserExecutionContext</feature>
+          <feature>Complete WebSocket event integration</feature>
+          <feature>SSOT metadata methods</feature>
+          <feature>All critical triage logic preserved</feature>
+        </features>
+      </unified_agent>
+      
+      <models_separation>
+        <location>netra_backend/app/agents/triage/models.py</location>
+        <purpose>Separate data models to avoid circular imports</purpose>
+        <classes>Priority, Complexity, ExtractedEntities, UserIntent, ToolRecommendation, TriageResult</classes>
+      </models_separation>
+      
+      <registry_integration>
+        <location>netra_backend/app/agents/supervisor/agent_registry.py</location>
+        <change>Now uses UnifiedTriageAgent with priority 0</change>
+      </registry_integration>
+    </implementation>
+    
+    <testing>
+      <test_suite>netra_backend/tests/agents/test_unified_triage_agent.py</test_suite>
+      <coverage>
+        <test>Factory creates isolated instances</test>
+        <test>Execution priority is 0</test>
+        <test>WebSocket events emitted correctly</test>
+        <test>Metadata SSOT methods used</test>
+        <test>Multi-user isolation verified</test>
+        <test>Performance within timeout</test>
+      </coverage>
+    </testing>
+  </solution>
+  
+  <results>
+    <files_removed>28 legacy triage_sub_agent files</files_removed>
+    <ssot_violations_fixed>1 direct metadata assignment</ssot_violations_fixed>
+    <execution_order>GUARANTEED to run first (priority 0)</execution_order>
+    <user_isolation>Complete via factory pattern</user_isolation>
+    <backwards_compatibility>All imports updated to unified implementation</backwards_compatibility>
+  </results>
+  
+  <critical_fixes>
+    <fix>
+      <issue>Circular import with interfaces.py</issue>
+      <solution>Used TYPE_CHECKING and forward references</solution>
+    </fix>
+    <fix>
+      <issue>UserExecutionContext parameter mismatch</issue>
+      <solution>Updated to use run_id instead of session_id</solution>
+    </fix>
+    <fix>
+      <issue>set_websocket_bridge missing run_id</issue>
+      <solution>Added context.run_id parameter</solution>
+    </fix>
+    <fix>
+      <issue>reliability_manager property setter</issue>
+      <solution>Used private _reliability_manager_instance</solution>
+    </fix>
+  </critical_fixes>
+  
+  <key_patterns>
+    <pattern>Factory pattern for per-request isolation</pattern>
+    <pattern>Separate models file to avoid circular imports</pattern>
+    <pattern>TYPE_CHECKING for import cycle resolution</pattern>
+    <pattern>Execution priority in agent construction</pattern>
+    <pattern>WebSocket bridge set after construction</pattern>
+  </key_patterns>
+  
+  <lessons_learned>
+    <lesson>Always generate MRO report before refactoring inheritance</lesson>
+    <lesson>Execution order is critical for agent pipeline</lesson>
+    <lesson>Factory pattern essential for multi-user systems</lesson>
+    <lesson>Models should be separate from implementation to avoid cycles</lesson>
+    <lesson>Test fixtures must match actual constructor signatures</lesson>
+  </lessons_learned>
+  
+  <next_steps>
+    <step>Run full E2E tests with real services</step>
+    <step>Deploy to staging for integration testing</step>
+    <step>Monitor execution order in production</step>
+    <step>Apply similar consolidation to other sub-agents</step>
+  </next_steps>
+  
+  <references>
+    <reference>USER_CONTEXT_ARCHITECTURE.md</reference>
+    <reference>AGENT_ARCHITECTURE_DISAMBIGUATION_GUIDE.md</reference>
+    <reference>GOLDEN_AGENT_INDEX.md</reference>
+    <reference>agent_execution_order_fix_20250904.xml</reference>
+    <reference>websocket_agent_integration_critical.xml</reference>
+  </references>
+</learning>

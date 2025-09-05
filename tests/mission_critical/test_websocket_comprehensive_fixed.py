@@ -43,8 +43,8 @@ from loguru import logger
 
 # Import current SSOT implementations
 from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
-from netra_backend.app.websocket_core.manager import WebSocketManager
-from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager as WebSocketManager
+from netra_backend.app.core.registry.universal_registry import AgentRegistry
 from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
 from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
 from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier
@@ -205,7 +205,7 @@ class TestWebSocketInfrastructure:
         
         # Create components
         tool_dispatcher = ToolDispatcher()
-        registry = AgentRegistry(MockLLM(), tool_dispatcher)
+        registry = AgentRegistry(), tool_dispatcher)
         
         # Enhance with WebSocket
         registry.set_websocket_manager(self.ws_manager)
@@ -225,7 +225,7 @@ class TestWebSocketInfrastructure:
                 self.name = "test_llm"
         
         # Create registry and engine
-        registry = AgentRegistry(MockLLM(), ToolDispatcher())
+        registry = AgentRegistry(), ToolDispatcher())
         engine = ExecutionEngine(registry, self.ws_manager)
         
         # Verify WebSocket components

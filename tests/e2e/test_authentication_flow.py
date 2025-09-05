@@ -25,7 +25,7 @@ from typing import Dict, Optional, Any, List
 
 # ABSOLUTE IMPORTS ONLY per Claude.md
 from shared.isolated_environment import get_env
-from netra_backend.app.websocket_core.manager import WebSocketManager
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager as WebSocketManager
 
 
 @pytest.mark.e2e

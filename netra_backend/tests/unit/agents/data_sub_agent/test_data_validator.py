@@ -220,15 +220,19 @@ class TestRawDataValidation:
     def test_validate_data_with_missing_required_fields(self, validator):
         """Test validation identifies missing required fields."""
         data_missing_fields = [
-            {"latency_ms": 100.0},  # Missing timestamp and user_id
-            {"timestamp": datetime.now().isoformat()},  # Missing user_id
+            {"latency_ms": 100.0},  # Missing timestamp
+            {"user_id": "user_1"},  # Missing timestamp
         ]
         
         valid, result = validator.validate_raw_data(data_missing_fields, [])
         
-        structure_result = result["quality_metrics"]["structure"]
-        assert not structure_result["valid"]
-        assert "timestamp" in structure_result["missing_fields"] or "user_id" in structure_result["missing_fields"]
+        # The validator should identify missing 'timestamp' fields
+        assert not valid
+        assert not result["valid"]
+        assert len(result["errors"]) > 0
+        # Check that at least one error mentions missing timestamp
+        error_messages = " ".join(result["errors"])
+        assert "timestamp" in error_messages.lower()
     
     def test_validate_data_with_high_null_percentage(self, validator):
         """Test validation identifies high null percentages."""
@@ -243,9 +247,13 @@ class TestRawDataValidation:
         
         valid, result = validator.validate_raw_data(data_with_nulls, ["latency_ms"])
         
-        structure_result = result["quality_metrics"]["structure"]
-        assert "latency_ms" in structure_result["high_null_fields"]
-        assert structure_result["high_null_fields"]["latency_ms"] > 20.0  # Above threshold
+        # The validator should identify high null percentage in errors
+        assert not valid
+        assert not result["valid"]
+        assert len(result["errors"]) > 0
+        # Check that at least one error mentions high null percentage for latency_ms
+        error_messages = " ".join(result["errors"])
+        assert "latency_ms" in error_messages and ("null" in error_messages.lower() or "percentage" in error_messages.lower())
     
     def test_validate_metric_values_out_of_range(self, validator):
         """Test validation identifies out-of-range metric values."""

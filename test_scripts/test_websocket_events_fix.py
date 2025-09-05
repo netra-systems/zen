@@ -19,7 +19,7 @@ from unittest.mock import Mock, AsyncMock, MagicMock
 # Add project root to path
 sys.path.insert(0, '/Users/anthony/Documents/GitHub/netra-apex')
 
-from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
+from netra_backend.app.core.registry.universal_registry import AgentRegistry
 from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
 from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
 from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier
@@ -76,7 +76,7 @@ class TestWebSocketEventIntegration:
         websocket_manager.send_to_thread = event_capture.capture_event
         
         # Create agent registry and set WebSocket manager
-        registry = AgentRegistry(llm_manager, tool_dispatcher)
+        registry = AgentRegistry()
         registry.register_default_agents()
         
         # CRITICAL: Set WebSocket manager to enable event notifications

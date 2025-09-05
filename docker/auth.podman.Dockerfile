@@ -34,4 +34,4 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
 EXPOSE 8081
 
 # Run with uvicorn
-CMD ["python", "-m", "uvicorn", "auth_service.app.main:app", "--host", "0.0.0.0", "--port", "8081"]
+CMD ["python", "-m", "uvicorn", "auth_service.main:app", "--host", "0.0.0.0", "--port", "8081"]

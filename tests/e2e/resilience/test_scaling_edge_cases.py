@@ -17,7 +17,7 @@ import pytest
 from netra_backend.app.agents.data_sub_agent.data_sub_agent import DataSubAgent
 
 # Add project root to path
-from netra_backend.app.agents.triage_sub_agent.agent import TriageSubAgent
+from netra_backend.app.agents.triage.unified_triage_agent import UnifiedTriageAgent
 # from scaling_test_helpers - using fixtures instead
 # (create_declining_usage_state, create_extreme_usage_state, 
 #  create_scaling_setup, execute_scaling_workflow,

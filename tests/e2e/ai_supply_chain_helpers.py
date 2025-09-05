@@ -14,7 +14,7 @@ from netra_backend.app.llm.fallback_config import FallbackConfig
 from netra_backend.app.llm.fallback_handler import LLMFallbackHandler
 from netra_backend.app.schemas.llm_base_types import LLMProvider
 from netra_backend.app.llm.llm_provider_handlers import create_llm_for_provider
-from netra_backend.app.schemas.llm_config_types import LLMConfig
+from netra_backend.app.schemas.config import LLMConfig
 
 
 class ProviderStatus(Enum):

@@ -23,7 +23,7 @@ import random
 import time
 
 # Import core components to test
-from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
+from netra_backend.app.core.registry.universal_registry import AgentRegistry
 from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
 from netra_backend.app.agents.supervisor.execution_context import (
     AgentExecutionContext,
@@ -58,7 +58,7 @@ class TestConcurrentUserIsolation:
         # Setup
         llm_manager = Mock(spec=LLMManager)
         tool_dispatcher = Mock(spec=ToolDispatcher)
-        registry = AgentRegistry(llm_manager, tool_dispatcher)
+        registry = AgentRegistry()
         websocket_bridge = Mock(spec=AgentWebSocketBridge)
         
         engine = ExecutionEngine(registry, websocket_bridge)
@@ -115,7 +115,7 @@ class TestConcurrentUserIsolation:
         """Test that the execution semaphore doesn't starve any users."""
         llm_manager = Mock(spec=LLMManager)
         tool_dispatcher = Mock(spec=ToolDispatcher)
-        registry = AgentRegistry(llm_manager, tool_dispatcher)
+        registry = AgentRegistry()
         websocket_bridge = Mock(spec=AgentWebSocketBridge)
         
         engine = ExecutionEngine(registry, websocket_bridge)
@@ -233,7 +233,7 @@ class TestWebSocketEventIsolation:
         # Setup registry and engine
         llm_manager = Mock(spec=LLMManager)
         tool_dispatcher = Mock(spec=ToolDispatcher)
-        registry = AgentRegistry(llm_manager, tool_dispatcher)
+        registry = AgentRegistry()
         registry.set_websocket_bridge(websocket_bridge)
         
         engine = ExecutionEngine(registry, websocket_bridge)
@@ -374,7 +374,7 @@ class TestDatabaseSessionIsolation:
         tool_dispatcher = Mock(spec=ToolDispatcher)
         
         # Create registry (simulating app startup)
-        registry = AgentRegistry(llm_manager, tool_dispatcher)
+        registry = AgentRegistry()
         registry.register_default_agents()
         
         # Track modifications from different "requests"
@@ -418,7 +418,7 @@ class TestGlobalStateExecutionPath:
         """Test that ExecutionEngine's global run tracking causes conflicts."""
         llm_manager = Mock(spec=LLMManager)
         tool_dispatcher = Mock(spec=ToolDispatcher)
-        registry = AgentRegistry(llm_manager, tool_dispatcher)
+        registry = AgentRegistry()
         websocket_bridge = Mock(spec=AgentWebSocketBridge)
         
         # Single global engine (as in production)
@@ -537,7 +537,7 @@ class TestThreadUserContextMixing:
         """Test that context IDs can get mixed up in global state."""
         llm_manager = Mock(spec=LLMManager)
         tool_dispatcher = Mock(spec=ToolDispatcher)
-        registry = AgentRegistry(llm_manager, tool_dispatcher)
+        registry = AgentRegistry()
         websocket_bridge = Mock(spec=AgentWebSocketBridge)
         
         engine = ExecutionEngine(registry, websocket_bridge)
@@ -605,7 +605,7 @@ class TestPlaceholderValueIssues:
         """Test that registry uses 'registry' as placeholder run_id."""
         llm_manager = Mock(spec=LLMManager)
         tool_dispatcher = Mock(spec=ToolDispatcher)
-        registry = AgentRegistry(llm_manager, tool_dispatcher)
+        registry = AgentRegistry()
         
         # Create a mock agent
         mock_agent = Mock()
@@ -634,7 +634,7 @@ class TestRaceConditions:
         """Test race condition when multiple requests set WebSocket bridge."""
         llm_manager = Mock(spec=LLMManager)
         tool_dispatcher = Mock(spec=ToolDispatcher)
-        registry = AgentRegistry(llm_manager, tool_dispatcher)
+        registry = AgentRegistry()
         
         # Track bridge changes
         bridge_changes = []
@@ -685,7 +685,7 @@ class TestScalabilityLimits:
         """Test that system cannot handle the target of 5+ concurrent users efficiently."""
         llm_manager = Mock(spec=LLMManager)
         tool_dispatcher = Mock(spec=ToolDispatcher)
-        registry = AgentRegistry(llm_manager, tool_dispatcher)
+        registry = AgentRegistry()
         websocket_bridge = Mock(spec=AgentWebSocketBridge)
         
         engine = ExecutionEngine(registry, websocket_bridge)

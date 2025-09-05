@@ -12,7 +12,7 @@ from typing import Dict, Any
 import pytest
 
 from netra_backend.app.agents.state import DeepAgentState
-from netra_backend.app.agents.triage_sub_agent.agent import TriageSubAgent
+from netra_backend.app.agents.triage.unified_triage_agent import UnifiedTriageAgent
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.redis_manager import RedisManager

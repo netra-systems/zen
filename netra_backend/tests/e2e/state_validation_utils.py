@@ -11,7 +11,7 @@ from netra_backend.app.agents.data_sub_agent.models import (
     DataAnalysisResponse,
 )
 from netra_backend.app.agents.state import DeepAgentState
-from netra_backend.app.agents.triage_sub_agent.models import TriageResult
+from netra_backend.app.agents.triage.unified_triage_agent import TriageResult
 
 class StateTransitionValidator:
     """Validates state transitions between agents."""

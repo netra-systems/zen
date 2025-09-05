@@ -29,7 +29,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 from concurrent.futures import ThreadPoolExecutor
 
 from netra_backend.app.agents.state import DeepAgentState, OptimizationsResult, ActionPlanResult
-from netra_backend.app.websocket_core.manager import WebSocketManager
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager as WebSocketManager
 
 
 class TestWebSocketJSONPerformance:

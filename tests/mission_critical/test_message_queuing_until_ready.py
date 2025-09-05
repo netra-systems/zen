@@ -20,8 +20,8 @@ import pytest
 import json
 from datetime import datetime
 
-from netra_backend.app.websocket_core.manager import WebSocketManager, get_websocket_manager
-from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager as WebSocketManager, get_websocket_manager
+from netra_backend.app.core.registry.universal_registry import AgentRegistry
 from fastapi import WebSocket
 from fastapi.websockets import WebSocketState
 

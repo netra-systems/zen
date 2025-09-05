@@ -38,7 +38,7 @@ from unittest.mock import AsyncMock, MagicMock, Mock, patch
 import pytest
 
 from shared.isolated_environment import IsolatedEnvironment, get_env
-from test_framework.unified.base_interfaces import (
+from test_framework.unified import (
     TestResult, TestExecutionState, TestCategory, TestConfiguration
 )
 

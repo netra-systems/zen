@@ -23,10 +23,9 @@ import pytest
 # Add project root for imports
 from shared.isolated_environment import get_env
 from test_framework.environment_isolation import (
-    get_test_env_manager,
-    isolated_test_session,
     isolated_test_env,
-    ensure_test_isolation,
+    setup_test_environment,
+    teardown_test_environment
 )
 
 # Memory profiling decorator
@@ -46,10 +45,10 @@ def memory_profile(description: str = ""):
 # Set up isolated test environment if we're running tests
 if "pytest" in sys.modules or get_env().get("PYTEST_CURRENT_TEST"):
     # Ensure test isolation is enabled
-    ensure_test_isolation()
+    setup_test_environment()
 
 # Re-export test environment fixtures for convenience
-__all__ = ['isolated_test_session', 'isolated_test_env']
+__all__ = ['isolated_test_env']
 
 # Enable pytest-asyncio plugin
 pytest_plugins = ["pytest_asyncio"]

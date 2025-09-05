@@ -202,7 +202,7 @@ class TestInsufficientDataFlow:
     @pytest.mark.asyncio
     async def test_triage_correctly_identifies_insufficient_data(self, insufficient_user_request, expected_triage_insufficient):
         """Validate triage identifies insufficient data scenario."""
-        from netra_backend.app.agents.triage_sub_agent.agent import TriageSubAgent
+        from netra_backend.app.agents.triage.unified_triage_agent import UnifiedTriageAgent
         
         with patch.object(TriageSubAgent, 'llm_manager') as mock_llm_manager:
             mock_llm_manager.ask_structured_llm.return_value = expected_triage_insufficient
@@ -232,7 +232,7 @@ class TestInsufficientDataFlow:
             
             agent = DataHelperAgent()
             state = DeepAgentState()
-            from netra_backend.app.agents.triage_sub_agent.models import TriageResult
+            from netra_backend.app.agents.triage.unified_triage_agent import TriageResult
             state.triage_result = TriageResult(
                 category="unknown_optimization",
                 confidence_score=0.20,
@@ -278,7 +278,7 @@ class TestInsufficientDataFlow:
             
             agent = DataHelperAgent()
             state = DeepAgentState()
-            from netra_backend.app.agents.triage_sub_agent.models import TriageResult
+            from netra_backend.app.agents.triage.unified_triage_agent import TriageResult
             state.triage_result = TriageResult(
                 category="unknown_optimization",
                 confidence_score=0.20,

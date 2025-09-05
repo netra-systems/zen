@@ -11,9 +11,9 @@ from pathlib import Path
 
 import pytest
 
-from netra_backend.app.agents.data_sub_agent.agent import DataSubAgent
+from netra_backend.app.agents.data_sub_agent.data_sub_agent import DataSubAgent
 
-from netra_backend.app.agents.triage_sub_agent.agent import TriageSubAgent
+from netra_backend.app.agents.triage.unified_triage_agent import UnifiedTriageAgent
 # from scaling_test_helpers - using fixtures instead:
 # create_50_percent_increase_state,
 # create_cost_projection_state,

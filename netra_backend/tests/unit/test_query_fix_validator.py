@@ -5,7 +5,7 @@ from pathlib import Path
 
 import pytest
 
-from netra_backend.app.agents.data_sub_agent.query_fix_validator import (
+from netra_backend.app.services.query_fix_validator import (
     ensure_query_uses_arrayElement,
     fix_simplified_correlation_query,
     validate_and_fix_query,

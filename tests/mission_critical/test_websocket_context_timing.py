@@ -19,7 +19,7 @@ from unittest.mock import MagicMock, patch, AsyncMock
 import pytest
 import json
 
-from netra_backend.app.websocket_core.manager import WebSocketManager, get_websocket_manager
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager as WebSocketManager, get_websocket_manager
 from fastapi import WebSocket
 from fastapi.websockets import WebSocketState
 

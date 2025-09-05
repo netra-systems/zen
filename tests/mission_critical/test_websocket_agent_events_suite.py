@@ -37,13 +37,13 @@ import pytest
 from loguru import logger
 
 # Import production components
-from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
+from netra_backend.app.core.registry.universal_registry import AgentRegistry
 from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
 from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
 from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 from netra_backend.app.agents.unified_tool_execution import UnifiedToolExecutionEngine
-from netra_backend.app.websocket_core.manager import WebSocketManager
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager as WebSocketManager
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.llm.llm_manager import LLMManager
 
@@ -405,7 +405,7 @@ class TestRealWebSocketComponents:
         # Use real LLM manager instead of mock
         llm_manager = LLMManager()
         tool_dispatcher = ToolDispatcher()
-        registry = AgentRegistry(llm_manager, tool_dispatcher)
+        registry = AgentRegistry()
         ws_manager = get_websocket_manager()
         
         # Set WebSocket manager

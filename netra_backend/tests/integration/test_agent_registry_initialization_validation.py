@@ -31,7 +31,7 @@ from typing import Any, Dict, List, Optional
 import pytest
 
 # CLAUDE.md compliance: Use absolute imports only, no relative imports
-from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
+from netra_backend.app.core.registry.universal_registry import AgentRegistry
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 from shared.isolated_environment import get_env
 from netra_backend.app.llm.llm_manager import LLMManager
@@ -150,7 +150,7 @@ class TestAgentRegistryInitializationValidation:
     async def agent_registry(self, llm_manager: LLMManager, 
                            tool_dispatcher: ToolDispatcher) -> AgentRegistry:
         """Create real AgentRegistry for testing."""
-        return AgentRegistry(llm_manager, tool_dispatcher)
+        return AgentRegistry()
 
     @pytest.mark.asyncio
     async def test_agent_registry_initialization_real_services(
@@ -481,7 +481,7 @@ class TestAgentRegistryAdvancedIntegration:
         
         async def create_registry():
             tool_dispatcher = ToolDispatcher()
-            registry = AgentRegistry(llm_manager, tool_dispatcher)
+            registry = AgentRegistry()
             registry.set_websocket_manager(websocket_manager)
             registry.register_default_agents()
             return registry
@@ -514,7 +514,7 @@ class TestAgentRegistryAdvancedIntegration:
         tool_dispatcher = ToolDispatcher()
         websocket_manager = get_websocket_manager()
         
-        registry = AgentRegistry(llm_manager, tool_dispatcher)
+        registry = AgentRegistry()
         
         # Test WebSocket manager failure recovery
         try:
@@ -552,7 +552,7 @@ class TestAgentRegistryAdvancedIntegration:
         websocket_manager = get_websocket_manager()
         
         # Set up AgentRegistry with full WebSocket integration
-        registry = AgentRegistry(llm_manager, tool_dispatcher)
+        registry = AgentRegistry()
         registry.set_websocket_manager(websocket_manager)
         registry.register_default_agents()
         

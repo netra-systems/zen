@@ -250,7 +250,7 @@ async def real_agent_setup():
         supervisor.state = SubAgentLifecycle.COMPLETED
         
         # Return completed state with mock triage result
-        from netra_backend.app.agents.triage_sub_agent import TriageResult, UserIntent, Priority, Complexity, ExtractedEntities, TriageMetadata
+        from netra_backend.app.agents.triage.unified_triage_agent import TriageResult, UserIntent, Priority, Complexity, ExtractedEntities, TriageMetadata
         
         # Create mock triage result
         mock_user_intent = UserIntent(

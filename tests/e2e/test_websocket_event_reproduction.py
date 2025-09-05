@@ -8,7 +8,7 @@ import pytest
 from typing import List, Set
 from unittest.mock import MagicMock, AsyncMock, patch
 
-from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
+from netra_backend.app.core.registry.universal_registry import AgentRegistry
 from netra_backend.app.agents.execution_engine import ExecutionEngine
 from netra_backend.app.services.tool_dispatcher import UnifiedToolDispatcher
 

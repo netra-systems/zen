@@ -90,7 +90,7 @@ async def test_execution_core_bridge_setting():
     """Verify AgentExecutionCore properly sets WebSocket bridge on agents"""
     from netra_backend.app.agents.supervisor.agent_execution_core import AgentExecutionCore
     from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
-    from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
+    from netra_backend.app.core.registry.universal_registry import AgentRegistry
     
     print("\n=== TEST 4: AgentExecutionCore Bridge Setting ===")
     

@@ -804,9 +804,11 @@ CMD ["npm", "start"]
         else:
             return self.build_image_cloud(service)
     
-    def deploy_service(self, service: ServiceConfig) -> Tuple[bool, Optional[str]]:
+    def deploy_service(self, service: ServiceConfig, no_traffic: bool = False) -> Tuple[bool, Optional[str]]:
         """Deploy service to Cloud Run."""
         print(f"\n🚀 Deploying {service.name} to Cloud Run...")
+        if no_traffic:
+            print(f"   ⚠️ Deploying with --no-traffic flag (revision won't receive traffic)")
         
         image_tag = f"{self.registry}/{service.cloud_run_name}:latest"
         
@@ -827,6 +829,10 @@ CMD ["npm", "start"]
             "--ingress", "all",  # REQUIREMENT 6: Allow traffic from anywhere
             "--execution-environment", "gen2"  # Use 2nd generation execution environment
         ]
+        
+        # Add no-traffic flag if requested
+        if no_traffic:
+            cmd.append("--no-traffic")
         
         # Add environment variables
         env_vars = []
@@ -908,8 +914,11 @@ CMD ["npm", "start"]
             if url:
                 print(f"   URL: {url}")
                 
-            # Ensure traffic is routed to the latest revision
-            self.update_traffic_to_latest(service.cloud_run_name)
+            # Ensure traffic is routed to the latest revision (unless no-traffic flag is set)
+            if not no_traffic:
+                self.update_traffic_to_latest(service.cloud_run_name)
+            else:
+                print(f"   ⚠️ Traffic not routed to new revision (--no-traffic flag set)")
             
             return True, url
             
@@ -1295,7 +1304,7 @@ CMD ["npm", "start"]
     
     def deploy_all(self, skip_build: bool = False, use_local_build: bool = False, 
                    run_checks: bool = False, service_filter: Optional[str] = None,
-                   skip_post_tests: bool = False) -> bool:
+                   skip_post_tests: bool = False, no_traffic: bool = False) -> bool:
         """Deploy all services to GCP.
         
         Args:
@@ -1304,12 +1313,15 @@ CMD ["npm", "start"]
             run_checks: Run pre-deployment checks
             service_filter: Deploy only specific service (e.g., 'frontend', 'backend', 'auth')
             skip_post_tests: Skip post-deployment authentication tests
+            no_traffic: Deploy without routing traffic to new revisions
         """
         print(f"🚀 Deploying Netra Apex Platform to GCP")
         print(f"   Project: {self.project_id}")
         print(f"   Region: {self.region}")
         print(f"   Build Mode: {'Local (Fast)' if use_local_build else 'Cloud Build'}")
         print(f"   Pre-checks: {'Enabled' if run_checks else 'Disabled'}")
+        if no_traffic:
+            print(f"   ⚠️ Traffic Mode: NO TRAFFIC (revisions won't receive traffic)")
         
         # CRITICAL: Validate ALL prerequisites BEFORE any build operations
         print("\n🔐 Phase 1: Validating Prerequisites...")
@@ -1370,7 +1382,7 @@ CMD ["npm", "start"]
                     
             # Deploy service
             print(f"   Deploying {service.name}...")
-            success, url = self.deploy_service(service)
+            success, url = self.deploy_service(service, no_traffic=no_traffic)
             if not success:
                 print(f"❌ Failed to deploy {service.name}")
                 return False
@@ -1607,6 +1619,8 @@ See SPEC/gcp_deployment.xml for detailed guidelines.
                        help="Deploy only specific service (frontend, backend, auth)")
     parser.add_argument("--skip-post-tests", action="store_true",
                        help="Skip post-deployment authentication tests")
+    parser.add_argument("--no-traffic", action="store_true",
+                       help="Deploy without routing traffic to the new revision (useful for testing)")
     
     args = parser.parse_args()
     
@@ -1627,7 +1641,8 @@ See SPEC/gcp_deployment.xml for detailed guidelines.
                 use_local_build=args.build_local,
                 run_checks=args.run_checks,
                 service_filter=args.service,
-                skip_post_tests=args.skip_post_tests
+                skip_post_tests=args.skip_post_tests,
+                no_traffic=args.no_traffic
             )
             
         sys.exit(0 if success else 1)

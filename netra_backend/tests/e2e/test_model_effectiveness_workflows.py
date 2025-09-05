@@ -4,26 +4,20 @@ Tests real LLM agents for model effectiveness and GPT-5 migration workflows.
 Maximum 300 lines, functions ≤8 lines.
 """
 
-from netra_backend.app.websocket_core.manager import WebSocketManager as WebSocketManager
-from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
-
-# Test framework import - using pytest fixtures instead
-from pathlib import Path
-import sys
-
 import asyncio
 import uuid
 from typing import Dict, List, Optional
 
 import pytest
 import pytest_asyncio
-from netra_backend.app.schemas import SubAgentLifecycle
+from netra_backend.app.schemas.agent_models import SubAgentLifecycle
 from netra_backend.app.websocket_core.manager import WebSocketManager as UnifiedWebSocketManager
+from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
 
-from netra_backend.app.agents.data_sub_agent.agent import DataSubAgent
+from netra_backend.app.agents.data_sub_agent.data_sub_agent import DataSubAgent
 from netra_backend.app.agents.state import AgentMetadata, DeepAgentState
 
-from netra_backend.app.agents.triage_sub_agent.agent import TriageSubAgent
+from netra_backend.app.agents.triage.unified_triage_agent import UnifiedTriageAgent
 from netra_backend.app.core.exceptions import NetraException
 from netra_backend.app.llm.llm_manager import LLMManager
 

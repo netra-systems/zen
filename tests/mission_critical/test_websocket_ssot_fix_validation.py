@@ -24,7 +24,7 @@ from datetime import datetime, timezone
 from typing import Dict, Any, List
 from unittest.mock import AsyncMock, MagicMock, patch
 
-from netra_backend.app.websocket_core.manager import WebSocketManager, get_websocket_manager
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager as WebSocketManager, get_websocket_manager
 from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier
 from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
 

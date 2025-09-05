@@ -42,7 +42,7 @@ import pytest
 from loguru import logger
 
 # Import critical components
-from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
+from netra_backend.app.core.registry.universal_registry import AgentRegistry
 from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
 from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
 from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier
@@ -51,7 +51,7 @@ from netra_backend.app.agents.unified_tool_execution import (
     UnifiedToolExecutionEngine,
     enhance_tool_dispatcher_with_notifications
 )
-from netra_backend.app.websocket_core.manager import WebSocketManager
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager as WebSocketManager
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.llm.llm_manager import LLMManager
 
@@ -241,7 +241,7 @@ class TestWebSocketCriticalFixValidation:
         tool_dispatcher = ToolDispatcher()
         original_executor = tool_dispatcher.executor
         
-        registry = AgentRegistry(MockLLM(), tool_dispatcher)
+        registry = AgentRegistry(), tool_dispatcher)
         ws_manager = WebSocketManager()
         
         # Verify initial state
@@ -419,7 +419,7 @@ class TestWebSocketCriticalFixValidation:
         tool_dispatcher = ToolDispatcher()
         
         # Create registry and set WebSocket manager (this applies the fix)
-        registry = AgentRegistry(failing_llm, tool_dispatcher)
+        registry = AgentRegistry()
         registry.set_websocket_manager(ws_manager)
         
         # Create execution engine
@@ -515,7 +515,7 @@ class TestWebSocketCriticalFixValidation:
         }
         
         # Create registry and apply the critical fix
-        registry = AgentRegistry(working_llm, tool_dispatcher)
+        registry = AgentRegistry()
         registry.set_websocket_manager(ws_manager)
         
         # Verify the fix was applied
@@ -706,7 +706,7 @@ class TestWebSocketCriticalFixValidation:
             pass
         
         tool_dispatcher = ToolDispatcher()
-        registry = AgentRegistry(MockLLM(), tool_dispatcher)
+        registry = AgentRegistry(), tool_dispatcher)
         ws_manager = WebSocketManager()
         
         # Apply the fix once
@@ -744,7 +744,7 @@ class TestWebSocketCriticalFixValidation:
             class MockLLM:
                 pass
             tool_dispatcher = ToolDispatcher()
-            registry = AgentRegistry(MockLLM(), tool_dispatcher)
+            registry = AgentRegistry(), tool_dispatcher)
             registry.set_websocket_manager(WebSocketManager())
             
             test_results["enhancement_integration"] = isinstance(

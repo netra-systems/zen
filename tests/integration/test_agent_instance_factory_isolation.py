@@ -31,7 +31,7 @@ from netra_backend.app.agents.supervisor.agent_instance_factory import (
     UserWebSocketEmitter,
     configure_agent_instance_factory
 )
-from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
+from netra_backend.app.core.registry.universal_registry import AgentRegistry
 from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
 from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
@@ -151,7 +151,7 @@ def mock_websocket_bridge():
 async def configured_factory(mock_llm_manager, mock_tool_dispatcher, mock_websocket_bridge):
     """Create configured agent instance factory."""
     # Create agent registry with mock agent
-    registry = AgentRegistry(mock_llm_manager, mock_tool_dispatcher)
+    registry = AgentRegistry()
     registry.register("mock_agent", MockAgent(mock_llm_manager, "MockAgent"))
     
     # Create and configure factory
@@ -763,7 +763,7 @@ async def test_agent_instance_factory_end_to_end_isolation():
     mock_websocket_bridge.unregister_run_mapping = AsyncMock(return_value=True)
     
     # Create and configure factory
-    registry = AgentRegistry(mock_llm, mock_dispatcher)
+    registry = AgentRegistry()
     registry.register("isolation_test_agent", MockAgent(mock_llm, "IsolationTestAgent"))
     
     factory = AgentInstanceFactory()

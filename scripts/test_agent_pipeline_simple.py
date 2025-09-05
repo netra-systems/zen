@@ -31,7 +31,7 @@ from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 
 # Try to import real agents
 try:
-    from netra_backend.app.agents.triage_sub_agent.agent import TriageSubAgent
+    from netra_backend.app.agents.triage.unified_triage_agent import UnifiedTriageAgent
     from netra_backend.app.agents.data_sub_agent.data_sub_agent import DataSubAgent
     from netra_backend.app.agents.optimizations_core_sub_agent import OptimizationsCoreSubAgent
     REAL_AGENTS_AVAILABLE = True

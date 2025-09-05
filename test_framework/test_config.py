@@ -5,7 +5,7 @@ import os
 from typing import Any, Dict
 
 # Import environment management
-from test_framework.environment_isolation import get_env
+from shared.isolated_environment import get_env
 
 # Determine optimal parallelization
 CPU_COUNT = multiprocessing.cpu_count()

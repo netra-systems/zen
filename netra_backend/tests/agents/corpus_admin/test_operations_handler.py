@@ -194,8 +194,7 @@ class TestExecuteOperation:
         (CorpusOperation.UPDATE, "crud"),
         (CorpusOperation.DELETE, "crud"),
         (CorpusOperation.ANALYZE, "analysis"),
-        (CorpusOperation.EXPORT, "analysis"),
-        (CorpusOperation.IMPORT, "analysis"),
+        (CorpusOperation.INDEX, "analysis"),
         (CorpusOperation.VALIDATE, "analysis"),
     ])
     @pytest.mark.asyncio

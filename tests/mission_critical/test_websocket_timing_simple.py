@@ -10,7 +10,7 @@ from typing import Dict, Any
 from unittest.mock import MagicMock, patch, AsyncMock
 import pytest
 
-from netra_backend.app.websocket_core.manager import WebSocketManager, get_websocket_manager
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager as WebSocketManager, get_websocket_manager
 from netra_backend.app.websocket_core.message_buffer import BufferConfig
 from fastapi import WebSocket
 from fastapi.websockets import WebSocketState

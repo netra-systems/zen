@@ -17,7 +17,7 @@ from pathlib import Path
 project_root = Path(__file__).parent
 sys.path.insert(0, str(project_root))
 
-from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
+from netra_backend.app.core.registry.universal_registry import AgentRegistry
 from netra_backend.app.agents.tool_dispatcher_core import ToolDispatcher
 from netra_backend.app.llm.llm_manager import LLMManager
 
@@ -122,7 +122,7 @@ async def test_websocket_wiring():
         print("   Using simplified test setup...")
     
     try:
-        agent_registry = AgentRegistry(llm_manager, tool_dispatcher)
+        agent_registry = AgentRegistry()
         print("[OK] Created AgentRegistry")
     except Exception as e:
         print(f"[WARN] Could not create AgentRegistry: {e}")
