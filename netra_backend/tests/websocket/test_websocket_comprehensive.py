@@ -52,7 +52,7 @@ from netra_backend.app.routes.utils.websocket_helpers import (
 )
 from netra_backend.app.websocket_core.auth import WebSocketAuthenticator
 from netra_backend.app.routes.websocket import authenticate_websocket_with_database
-from netra_backend.app.websocket_core.manager import WebSocketManager
+from netra_backend.app.websocket_core import WebSocketManager
 from netra_backend.tests.helpers.model_setup_helpers import create_test_user, get_test_token
 
 class WebSocketTestClient:

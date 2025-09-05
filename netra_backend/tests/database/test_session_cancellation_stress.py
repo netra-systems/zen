@@ -47,7 +47,7 @@ class TestCancellationStress:
             tasks = []
             for i in range(50):
                 async def cancellable_op():
-                    async with DatabaseManager.get_async_session() as session:
+                    async with DatabaseManager.get_db() as session:
                         await asyncio.sleep(1)  # Will be cancelled before this
                 
                 task = asyncio.create_task(cancellable_op())
@@ -95,7 +95,7 @@ class TestCancellationStress:
             
             # Start operations that will be cancelled during commit
             async def operation_with_commit():
-                async with DatabaseManager.get_async_session() as session:
+                async with DatabaseManager.get_db() as session:
                     await session.commit()  # Will be cancelled during this
             
             tasks = []
@@ -150,7 +150,7 @@ class TestCancellationStress:
             
             # Operations that will fail and trigger rollback
             async def failing_operation():
-                async with DatabaseManager.get_async_session() as session:
+                async with DatabaseManager.get_db() as session:
                     raise ValueError("Trigger rollback")
             
             tasks = []
@@ -199,12 +199,12 @@ class TestCancellationStress:
             
             # Create chain of dependent operations
             async def dependent_operations():
-                async with DatabaseManager.get_async_session() as session:
+                async with DatabaseManager.get_db() as session:
                     await session.execute("QUERY_1")
                     
                     # Start nested operation
                     async def nested():
-                        async with DatabaseManager.get_async_session() as nested_session:
+                        async with DatabaseManager.get_db() as nested_session:
                             await nested_session.execute("QUERY_2")
                             await asyncio.sleep(0.1)  # Will be cancelled
                             await nested_session.execute("QUERY_3")
@@ -256,7 +256,7 @@ class TestCancellationStress:
             # Run many operations with random cancellation
             async def random_operation(op_id):
                 try:
-                    async with DatabaseManager.get_async_session() as session:
+                    async with DatabaseManager.get_db() as session:
                         # Random operations
                         for _ in range(random.randint(1, 5)):
                             await session.execute(f"QUERY_{op_id}")
@@ -330,7 +330,7 @@ class TestCancellationStress:
             
             # Create operations that will be cancelled
             async def operation_with_resources():
-                async with DatabaseManager.get_async_session() as session:
+                async with DatabaseManager.get_db() as session:
                     await asyncio.sleep(0.1)  # Will be cancelled
                     return session.resource_id
             
@@ -377,7 +377,7 @@ class TestCancellationStress:
             
             # Create and cancel many sessions
             async def leaky_operation():
-                async with DatabaseManager.get_async_session() as session:
+                async with DatabaseManager.get_db() as session:
                     # Allocate some memory (simulate real session)
                     session.data = bytearray(1024)  # 1KB per session
                     await asyncio.sleep(0.1)
@@ -427,7 +427,7 @@ class TestCancellationStress:
             
             # Should handle SQLite quirks during cancellation
             async def sqlite_operation():
-                async with DatabaseManager.get_async_session() as session:
+                async with DatabaseManager.get_db() as session:
                     await asyncio.sleep(0.01)
                     return "Success"
             
@@ -465,7 +465,7 @@ class TestCancellationRecovery:
             mock_factory.return_value = MagicMock(side_effect=lambda: create_numbered_session())
             
             # First operation gets cancelled
-            task1 = asyncio.create_task(DatabaseManager.get_async_session().__aenter__())
+            task1 = asyncio.create_task(DatabaseManager.get_db().__aenter__())
             await asyncio.sleep(0.001)
             task1.cancel()
             try:
@@ -474,13 +474,13 @@ class TestCancellationRecovery:
                 pass
             
             # Second operation should work fine
-            async with DatabaseManager.get_async_session() as session:
+            async with DatabaseManager.get_db() as session:
                 result = await session.execute("SELECT 1")
                 value = result.scalar()
                 assert value >= 0  # Should get a valid session ID
             
             # Third operation should also work
-            async with DatabaseManager.get_async_session() as session:
+            async with DatabaseManager.get_db() as session:
                 result = await session.execute("SELECT 2")
                 value = result.scalar()
                 assert value >= 0
@@ -507,7 +507,7 @@ class TestCancellationRecovery:
                     await asyncio.sleep(1)
                     return f"Should not reach here {op_id}"
                 else:
-                    async with DatabaseManager.get_async_session() as session:
+                    async with DatabaseManager.get_db() as session:
                         await session.execute(f"SELECT {op_id}")
                         return f"Completed {op_id}"
             

@@ -37,7 +37,7 @@ from netra_backend.app.schemas.websocket_message_types import (
     UserMessage,
     WebSocketMessage
 )
-from netra_backend.app.websocket_core.manager import WebSocketManager
+from netra_backend.app.websocket_core import WebSocketManager
 
 
 class EventLoopBlockingDetector:

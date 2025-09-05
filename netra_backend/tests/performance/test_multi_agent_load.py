@@ -29,7 +29,7 @@ from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
 from netra_backend.app.core.registry.universal_registry import AgentRegistry
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 from netra_backend.app.llm.llm_manager import LLMManager
-from netra_backend.app.websocket_core.manager import WebSocketManager
+from netra_backend.app.websocket_core import WebSocketManager
 from netra_backend.tests.performance.performance_baseline_config import (
     get_benchmark_runner,
     PerformanceCategory,

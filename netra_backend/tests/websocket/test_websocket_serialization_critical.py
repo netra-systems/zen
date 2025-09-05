@@ -34,7 +34,7 @@ from netra_backend.app.schemas.websocket_message_types import (
     UserMessage,
 )
 from netra_backend.app.services.state_persistence import DateTimeEncoder
-from netra_backend.app.websocket_core.manager import WebSocketManager  # BroadcastManager functionality is in WebSocketManager
+from netra_backend.app.websocket_core import WebSocketManager  # BroadcastManager functionality is in WebSocketManager
 from netra_backend.app.schemas.websocket_models import BroadcastResult
 from netra_backend.app.websocket_core.utils import validate_message_structure as MessageValidator
 

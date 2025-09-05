@@ -32,7 +32,7 @@ import socket
 from test_framework.environment_isolation import get_test_env_manager
 from netra_backend.app.core.resilience.unified_circuit_breaker import UnifiedCircuitBreaker
 from netra_backend.app.db.database_manager import DatabaseManager
-from netra_backend.app.websocket_core.manager import WebSocketManager
+from netra_backend.app.websocket_core import WebSocketManager
 from netra_backend.app.services.external_api_client import HTTPError
 
 

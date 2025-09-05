@@ -42,7 +42,7 @@ class TestIllegalStateChangeProtection:
             # Simulate GeneratorExit scenario
             async def use_session():
                 try:
-                    async with DatabaseManager.get_async_session() as session:
+                    async with DatabaseManager.get_db() as session:
                         # Simulate work
                         await asyncio.sleep(0.01)
                         # Force a GeneratorExit by breaking out early
@@ -69,7 +69,7 @@ class TestIllegalStateChangeProtection:
             mock_factory.return_value = MagicMock(return_value=mock_session_context())
             
             # Should complete without raising
-            async with DatabaseManager.get_async_session() as session:
+            async with DatabaseManager.get_db() as session:
                 pass  # Session cleanup should handle the error
     
     @pytest.mark.asyncio
@@ -95,7 +95,7 @@ class TestIllegalStateChangeProtection:
             
             # Run multiple concurrent session operations
             async def session_operation(operation_id):
-                async with DatabaseManager.get_async_session() as session:
+                async with DatabaseManager.get_db() as session:
                     await asyncio.sleep(0.01)  # Simulate work
                     return f"Operation {operation_id} completed"
             
@@ -131,7 +131,7 @@ class TestIllegalStateChangeProtection:
             
             # Create a task that will be cancelled
             async def cancellable_operation():
-                async with DatabaseManager.get_async_session() as session:
+                async with DatabaseManager.get_db() as session:
                     await asyncio.sleep(1)  # Will be cancelled before this completes
             
             task = asyncio.create_task(cancellable_operation())
@@ -170,7 +170,7 @@ class TestIllegalStateChangeProtection:
                 mock_factory.return_value = MagicMock(return_value=mock_session_context())
                 
                 # Should handle broken session states gracefully
-                async with DatabaseManager.get_async_session() as session:
+                async with DatabaseManager.get_db() as session:
                     pass  # Should complete without errors
     
     @pytest.mark.asyncio
@@ -189,7 +189,7 @@ class TestIllegalStateChangeProtection:
             
             # Raise an exception during the transaction
             with pytest.raises(ValueError):
-                async with DatabaseManager.get_async_session() as session:
+                async with DatabaseManager.get_db() as session:
                     raise ValueError("Test exception")
             
             # Rollback should have been called
@@ -211,7 +211,7 @@ class TestIllegalStateChangeProtection:
             
             # Original exception should be raised, not the rollback error
             with pytest.raises(ValueError) as exc_info:
-                async with DatabaseManager.get_async_session() as session:
+                async with DatabaseManager.get_db() as session:
                     raise ValueError("Original error")
             
             assert str(exc_info.value) == "Original error"
@@ -232,7 +232,7 @@ class TestIllegalStateChangeProtection:
             mock_factory.return_value = MagicMock(return_value=mock_session_context())
             
             # Normal operation should work
-            async with DatabaseManager.get_async_session() as session:
+            async with DatabaseManager.get_db() as session:
                 result = await session.execute("SELECT 42")
                 value = result.scalar()
             
@@ -256,9 +256,9 @@ class TestIllegalStateChangeProtection:
             mock_factory.return_value = MagicMock(side_effect=lambda: create_mock_session())
             
             # Use nested sessions
-            async with DatabaseManager.get_async_session() as outer_session:
+            async with DatabaseManager.get_db() as outer_session:
                 outer_id = outer_session.id
-                async with DatabaseManager.get_async_session() as inner_session:
+                async with DatabaseManager.get_db() as inner_session:
                     inner_id = inner_session.id
                     assert outer_id != inner_id  # Should be different sessions
             
@@ -287,7 +287,7 @@ class TestStressScenarios:
             # Rapidly create and destroy sessions
             async def rapid_session_use():
                 for _ in range(10):
-                    async with DatabaseManager.get_async_session() as session:
+                    async with DatabaseManager.get_db() as session:
                         pass  # Immediate cleanup
             
             # Run multiple rapid users concurrently
@@ -317,7 +317,7 @@ class TestStressScenarios:
             mock_factory.return_value = MagicMock(return_value=create_mock_session())
             
             # Session should handle cleanup errors during shutdown
-            async with DatabaseManager.get_async_session() as session:
+            async with DatabaseManager.get_db() as session:
                 pass  # Cleanup will attempt and fail
             
             assert len(cleanup_attempted) > 0  # Cleanup was attempted
@@ -354,7 +354,7 @@ class TestStressScenarios:
             results = []
             for _ in range(10):
                 try:
-                    async with DatabaseManager.get_async_session() as session:
+                    async with DatabaseManager.get_db() as session:
                         results.append("success")
                 except Exception as e:
                     results.append(f"handled: {type(e).__name__}")
@@ -424,7 +424,7 @@ class TestRegressionPrevention:
             mock_factory.return_value = MagicMock(return_value=mock_session_context())
             
             # This should not raise an error with the fix in place
-            async with DatabaseManager.get_async_session() as session:
+            async with DatabaseManager.get_db() as session:
                 pass  # The fix should handle the cleanup error
 
 

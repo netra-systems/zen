@@ -39,7 +39,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from netra_backend.app.db.models_postgres import User
-from netra_backend.app.database import get_db_session
+from netra_backend.app.database import get_db
 
 class RealUserSessionHelper:
     """Helper class for real user session management testing."""

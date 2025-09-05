@@ -16,7 +16,7 @@ from sqlalchemy import text
 from sqlalchemy.exc import OperationalError
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from netra_backend.app.database import get_db, UnifiedDatabaseManager
+from netra_backend.app.database import get_db, DatabaseManager
 from netra_backend.app.db.database_manager import DatabaseManager
 
 
@@ -122,7 +122,7 @@ class TestSessionConcurrencyRegression:
     @pytest.mark.asyncio
     async def test_session_state_checks(self):
         """Test that session state is properly checked before operations."""
-        db_manager = UnifiedDatabaseManager()
+        db_manager = DatabaseManager()
         
         async for session in db_manager.postgres_session():
             # Session should be active
@@ -157,7 +157,7 @@ class TestSessionConcurrencyRegression:
     @pytest.mark.asyncio  
     async def test_database_manager_session_handling(self):
         """Test DatabaseManager's get_async_session handles cancellation."""
-        async with DatabaseManager.get_async_session() as session:
+        async with DatabaseManager.get_db() as session:
             result = await session.execute(text("SELECT 1"))
             assert result.scalar() == 1
     

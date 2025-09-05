@@ -12,7 +12,7 @@ from unittest.mock import AsyncMock, MagicMock, Mock, patch
 import pytest
 
 from netra_backend.app.websocket_core.types import ConnectionInfo
-from netra_backend.app.websocket_core.manager import WebSocketManager as ConnectionManager
+from netra_backend.app.websocket_core import WebSocketManager as ConnectionManager
 
 from netra_backend.app.websocket_core.state_synchronizer import ConnectionStateSynchronizer
 from netra_backend.app.websocket_core.sync_types import CriticalCallbackFailure
