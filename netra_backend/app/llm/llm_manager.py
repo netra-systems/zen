@@ -29,19 +29,40 @@ T = TypeVar('T', bound=BaseModel)
 
 
 class LLMManager:
-    """Main LLM Manager for handling LLM operations.
+    """Main LLM Manager for handling LLM operations with user isolation.
     
     This class provides the primary interface for LLM operations throughout
     the application. It manages configurations, handles requests, and provides
-    caching and error handling.
+    user-scoped caching and error handling to prevent conversation mixing.
+    
+    SECURITY: Each LLM Manager instance maintains its own cache to prevent
+    conversation data from leaking between users. Use create_llm_manager()
+    factory function for proper isolation.
     """
     
-    def __init__(self):
-        """Initialize LLM Manager."""
+    def __init__(self, user_context: Optional['UserExecutionContext'] = None):
+        """
+        Initialize LLM Manager with optional user context.
+        
+        Args:
+            user_context: Optional UserExecutionContext for user-scoped operations
+        """
+        from netra_backend.app.models.user_execution_context import UserExecutionContext
+        
         self._logger = logger
         self._config = None
-        self._cache: Dict[str, Any] = {}
+        self._cache: Dict[str, Any] = {}  # User-scoped cache
         self._initialized = False
+        self._user_context = user_context
+        
+        # Log the initialization with security context
+        if user_context:
+            self._logger.info(f"LLM Manager initialized for user {user_context.user_id[:8]}...")
+        else:
+            self._logger.warning(
+                "LLM Manager initialized without user context. "
+                "This may lead to cache mixing between users."
+            )
     
     async def initialize(self) -> None:
         """Initialize the LLM manager with configuration."""
@@ -62,6 +83,21 @@ class LLMManager:
         if not self._initialized:
             await self.initialize()
     
+    def _is_cached(self, prompt: str, llm_config_name: str) -> bool:
+        """Check if a prompt is cached for this user context."""
+        user_prefix = ""
+        if self._user_context:
+            user_prefix = f"{self._user_context.user_id}:"
+        cache_key = f"{user_prefix}{llm_config_name}:{hash(prompt)}"
+        return cache_key in self._cache
+    
+    def _get_cache_key(self, prompt: str, llm_config_name: str) -> str:
+        """Generate user-scoped cache key for a prompt."""
+        user_prefix = ""
+        if self._user_context:
+            user_prefix = f"{self._user_context.user_id}:"
+        return f"{user_prefix}{llm_config_name}:{hash(prompt)}"
+    
     async def ask_llm(
         self, 
         prompt: str, 
@@ -80,20 +116,23 @@ class LLMManager:
         """
         await self._ensure_initialized()
         
-        # Check cache first
-        if use_cache:
-            cache_key = f"{llm_config_name}:{hash(prompt)}"
-            if cache_key in self._cache:
-                self._logger.debug(f"Cache hit for prompt hash: {hash(prompt)}")
-                return self._cache[cache_key]
+        # Check cache first (user-scoped for security)
+        if use_cache and self._is_cached(prompt, llm_config_name):
+            cache_key = self._get_cache_key(prompt, llm_config_name)
+            self._logger.debug(
+                f"Cache hit for user {self._user_context.user_id[:8] if self._user_context else 'unknown'}... "
+                f"prompt hash: {hash(prompt)}"
+            )
+            return self._cache[cache_key]
         
         try:
             # For now, return a placeholder response
             # In a real implementation, this would call the actual LLM
             response = await self._make_llm_request(prompt, llm_config_name)
             
-            # Cache the response
+            # Cache the response (user-scoped)
             if use_cache:
+                cache_key = self._get_cache_key(prompt, llm_config_name)
                 self._cache[cache_key] = response
             
             return response
@@ -132,7 +171,7 @@ class LLMManager:
                 completion_tokens=len(text_response.split()),  # Rough estimate
                 total_tokens=len(prompt.split()) + len(text_response.split())
             ),
-            cached=use_cache and f"{llm_config_name}:{hash(prompt)}" in self._cache
+            cached=use_cache and self._is_cached(prompt, llm_config_name)
         )
         
         return response
@@ -255,21 +294,84 @@ class LLMManager:
         self._logger.info("LLM Manager shutdown complete")
 
 
-# Global LLM manager instance
-_llm_manager: Optional[LLMManager] = None
+# SECURITY FIX: Replace singleton with factory pattern
+# Global instance removed to prevent multi-user conversation mixing
+# Use create_llm_manager(user_context) instead
+
+
+def create_llm_manager(user_context: 'UserExecutionContext' = None) -> LLMManager:
+    """
+    Create a new LLM Manager instance with user context isolation.
+    
+    This factory function replaces the singleton pattern to prevent conversation
+    mixing between users. Each manager instance maintains its own cache scoped
+    to the specific user context.
+    
+    Args:
+        user_context: Optional UserExecutionContext for user-scoped operations
+        
+    Returns:
+        LLMManager: New isolated manager instance
+        
+    Example:
+        # Create user-scoped LLM manager
+        manager = create_llm_manager(user_context)
+        response = await manager.ask_llm("Hello", use_cache=True)
+    """
+    from netra_backend.app.models.user_execution_context import UserExecutionContext
+    from netra_backend.app.logging_config import central_logger
+    logger = central_logger.get_logger(__name__)
+    
+    if user_context:
+        logger.info(f"Creating LLM Manager for user {user_context.user_id[:8]}...")
+    else:
+        logger.warning("Creating LLM Manager without user context - cache isolation may be compromised")
+    
+    manager = LLMManager(user_context)
+    return manager
 
 
 async def get_llm_manager() -> LLMManager:
-    """Get the global LLM manager instance."""
-    global _llm_manager
-    if _llm_manager is None:
-        _llm_manager = LLMManager()
-        await _llm_manager.initialize()
-    return _llm_manager
+    """
+    DEPRECATED: Get the global LLM manager instance.
+    
+    WARNING: This function creates a non-isolated manager instance that can cause
+    CRITICAL SECURITY VULNERABILITIES in multi-user environments. It should only
+    be used for backward compatibility in legacy code that cannot be immediately
+    migrated to the factory pattern.
+    
+    For new code, use:
+    - create_llm_manager(user_context) for isolated managers with user-scoped cache
+    
+    Returns:
+        LLMManager: A NEW instance (not singleton) for basic compatibility
+    """
+    import warnings
+    
+    warnings.warn(
+        "get_llm_manager() creates instances that can mix conversations "
+        "between users. Use create_llm_manager(user_context) "
+        "for safe per-user LLM operations.",
+        DeprecationWarning,
+        stacklevel=2
+    )
+    
+    logger.warning(
+        "SECURITY WARNING: Using deprecated get_llm_manager() function. "
+        "This creates a non-isolated manager that can mix conversations between users. "
+        "Migrate to create_llm_manager(user_context) for proper isolation."
+    )
+    
+    # Return a NEW instance each time to prevent shared state
+    # This is still not ideal but safer than a true singleton
+    manager = LLMManager()
+    await manager.initialize()
+    return manager
 
 
 # Export the main classes and functions
 __all__ = [
     "LLMManager",
-    "get_llm_manager",
+    "create_llm_manager",  # New factory function
+    "get_llm_manager",     # Deprecated singleton function
 ]
