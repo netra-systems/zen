@@ -1,0 +1,53 @@
+{
+  "token_optimization": {
+    "enabled": true,
+    "default_target_reduction": 20,
+    "max_retries": 3,
+    "cache_ttl_minutes": 5,
+    "session_ttl_minutes": 60,
+    "cleanup_interval_seconds": 300
+  },
+  "pricing": {
+    "gpt4": {
+      "input_per_token": 0.00003,
+      "output_per_token": 0.00006
+    },
+    "gpt35": {
+      "input_per_token": 0.0000015,
+      "output_per_token": 0.000002
+    },
+    "claude": {
+      "input_per_token": 0.000008,
+      "output_per_token": 0.000024
+    },
+    "gemini": {
+      "input_per_token": 0.0000005,
+      "output_per_token": 0.0000015
+    }
+  },
+  "cost_alerts": {
+    "low_threshold": 1.00,
+    "medium_threshold": 3.00,
+    "high_threshold": 5.00,
+    "daily_budget_default": 10.00,
+    "monthly_budget_default": 100.00
+  },
+  "business_metrics": {
+    "target_cost_savings": 0.20,
+    "target_user_engagement": 0.75,
+    "conversion_tracking_enabled": true,
+    "revenue_attribution_enabled": true
+  },
+  "performance": {
+    "max_concurrent_optimizations": 100,
+    "optimization_timeout_seconds": 30,
+    "websocket_timeout_seconds": 60,
+    "batch_processing_size": 50
+  },
+  "monitoring": {
+    "metrics_collection_enabled": true,
+    "detailed_logging_enabled": true,
+    "audit_trail_enabled": true,
+    "performance_tracking_enabled": true
+  }
+}

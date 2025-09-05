@@ -1,0 +1,204 @@
+# Token Optimization Metrics Collection Configuration
+# Prometheus metrics for business value tracking and system monitoring
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: token-optimization-metrics
+  namespace: production
+data:
+  prometheus.yml: |
+    global:
+      scrape_interval: 15s
+      evaluation_interval: 15s
+      external_labels:
+        deployment: 'token-optimization-production'
+        environment: 'production'
+        
+    rule_files:
+      - "/etc/prometheus/rules/*.yml"
+      
+    scrape_configs:
+      # Token Optimization Service Metrics
+      - job_name: 'token-optimization'
+        static_configs:
+          - targets: ['backend:8000']
+        metrics_path: '/metrics'
+        scrape_interval: 10s
+        honor_labels: true
+        
+      # Business Value Metrics
+      - job_name: 'business-metrics'
+        static_configs:
+          - targets: ['backend:8000']
+        metrics_path: '/business-metrics'
+        scrape_interval: 30s
+        
+      # WebSocket Performance Metrics
+      - job_name: 'websocket-metrics'
+        static_configs:
+          - targets: ['backend:8000']
+        metrics_path: '/websocket-metrics'
+        scrape_interval: 5s
+        
+    alerting:
+      alertmanagers:
+        - static_configs:
+            - targets:
+              - alertmanager:9093
+
+  business_metrics.yml: |
+    # Business Value Tracking Metrics
+    
+    # Cost Optimization Metrics
+    - metric_name: token_cost_savings_usd_total
+      help: "Total cost savings achieved through token optimization"
+      type: counter
+      labels: ['user_id', 'model', 'optimization_type']
+      
+    - metric_name: token_usage_before_optimization
+      help: "Token usage before optimization"
+      type: histogram
+      buckets: [100, 500, 1000, 5000, 10000, 50000, 100000]
+      labels: ['user_id', 'model', 'agent_type']
+      
+    - metric_name: token_usage_after_optimization
+      help: "Token usage after optimization"
+      type: histogram
+      buckets: [100, 500, 1000, 5000, 10000, 50000, 100000]
+      labels: ['user_id', 'model', 'agent_type']
+      
+    # User Engagement Metrics
+    - metric_name: user_cost_feature_interactions_total
+      help: "Total user interactions with cost features"
+      type: counter
+      labels: ['feature_type', 'user_tier']
+      
+    - metric_name: cost_dashboard_views_total
+      help: "Total cost dashboard views"
+      type: counter
+      labels: ['user_id', 'view_type']
+      
+    # Revenue Impact Metrics
+    - metric_name: revenue_attributed_to_token_optimization_usd
+      help: "Revenue directly attributed to token optimization features"
+      type: gauge
+      labels: ['customer_tier', 'month']
+      
+    - metric_name: customer_cost_savings_usd
+      help: "Cost savings delivered to customers"
+      type: counter
+      labels: ['customer_id', 'optimization_type']
+      
+    - metric_name: free_to_paid_conversions_total
+      help: "Conversions from free to paid attributed to cost visibility"
+      type: counter
+      labels: ['conversion_trigger', 'user_segment']
+      
+    # Technical Performance Metrics
+    - metric_name: token_optimization_attempts_total
+      help: "Total token optimization attempts"
+      type: counter
+      labels: ['optimization_type', 'model']
+      
+    - metric_name: token_optimization_success_total
+      help: "Successful token optimizations"
+      type: counter
+      labels: ['optimization_type', 'model']
+      
+    - metric_name: token_optimization_duration_seconds
+      help: "Time taken for token optimization"
+      type: histogram
+      buckets: [0.1, 0.5, 1.0, 2.0, 5.0, 10.0, 30.0]
+      labels: ['optimization_type', 'model']
+      
+    - metric_name: cost_calculation_accuracy_ratio
+      help: "Accuracy of cost calculations (0-1)"
+      type: histogram
+      buckets: [0.8, 0.85, 0.9, 0.95, 0.98, 0.99, 1.0]
+      labels: ['model', 'calculation_type']
+      
+    # Session and Isolation Metrics
+    - metric_name: session_isolation_violations_total
+      help: "Session isolation violations detected"
+      type: counter
+      labels: ['violation_type', 'severity']
+      
+    - metric_name: active_token_sessions
+      help: "Currently active token optimization sessions"
+      type: gauge
+      labels: ['user_tier']
+      
+    - metric_name: session_cleanup_operations_total
+      help: "Session cleanup operations performed"
+      type: counter
+      labels: ['cleanup_type']
+
+  alerts.yml: |
+    groups:
+    - name: token-optimization-business
+      rules:
+      - alert: TokenOptimizationRevenueImpactLow
+        expr: increase(revenue_attributed_to_token_optimization_usd[1h]) < 50
+        for: 60m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Low revenue attribution to token optimization"
+          description: "Revenue attributed to token optimization is ${{ $value }}/hour, below expected $50/hour threshold"
+          
+      - alert: CustomerCostSavingsStagnant
+        expr: rate(customer_cost_savings_usd[6h]) < 100
+        for: 2h
+        labels:
+          severity: warning
+        annotations:
+          summary: "Customer cost savings rate is low"
+          description: "Customer cost savings rate is ${{ $value }}/hour, below expected $100/hour"
+          
+      - alert: ConversionRateDropped
+        expr: rate(free_to_paid_conversions_total[24h]) < 0.1
+        for: 4h
+        labels:
+          severity: critical
+        annotations:
+          summary: "Free to paid conversion rate critically low"
+          description: "Only {{ $value }} conversions in 24 hours, indicating significant business impact"
+          
+    - name: token-optimization-technical
+      rules:
+      - alert: TokenOptimizationFailureRateHigh
+        expr: rate(token_optimization_attempts_total[5m]) - rate(token_optimization_success_total[5m]) > rate(token_optimization_attempts_total[5m]) * 0.05
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Token optimization failure rate above 5%"
+          description: "{{ $value }}% of token optimizations are failing"
+          
+      - alert: CostCalculationAccuracyLow
+        expr: avg(cost_calculation_accuracy_ratio) < 0.95
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Cost calculation accuracy below 95%"
+          description: "Cost calculation accuracy is {{ $value | humanizePercentage }}"
+          
+      - alert: SessionIsolationViolation
+        expr: increase(session_isolation_violations_total[5m]) > 0
+        for: 0m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Session isolation violation detected"
+          description: "{{ $value }} session isolation violations in the last 5 minutes"
+          
+      - alert: UserEngagementDropping
+        expr: rate(user_cost_feature_interactions_total[1h]) < 50
+        for: 30m
+        labels:
+          severity: warning
+        annotations:
+          summary: "User engagement with cost features is dropping"
+          description: "User interactions with cost features: {{ $value }}/hour"

@@ -1,0 +1,377 @@
+{
+  "dashboard": {
+    "id": null,
+    "title": "Token Optimization - Business Value Dashboard",
+    "tags": ["token-optimization", "business-value", "revenue"],
+    "timezone": "UTC",
+    "panels": [
+      {
+        "id": 1,
+        "title": "💰 Revenue Impact Overview",
+        "type": "row",
+        "collapsed": false,
+        "gridPos": {"h": 1, "w": 24, "x": 0, "y": 0}
+      },
+      {
+        "id": 2,
+        "title": "Monthly Revenue Attribution ($)",
+        "type": "stat",
+        "gridPos": {"h": 8, "w": 6, "x": 0, "y": 1},
+        "targets": [
+          {
+            "expr": "sum(revenue_attributed_to_token_optimization_usd)",
+            "legendFormat": "Monthly Revenue",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {"mode": "palette-classic"},
+            "custom": {"displayMode": "lcd", "orientation": "horizontal"},
+            "decimals": 0,
+            "unit": "currencyUSD",
+            "thresholds": {
+              "steps": [
+                {"color": "red", "value": 0},
+                {"color": "yellow", "value": 10000},
+                {"color": "green", "value": 35000}
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 3,
+        "title": "Customer Cost Savings ($)",
+        "type": "stat",
+        "gridPos": {"h": 8, "w": 6, "x": 6, "y": 1},
+        "targets": [
+          {
+            "expr": "sum(increase(customer_cost_savings_usd[30d]))",
+            "legendFormat": "30-Day Savings",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {"mode": "palette-classic"},
+            "unit": "currencyUSD",
+            "decimals": 0,
+            "thresholds": {
+              "steps": [
+                {"color": "red", "value": 0},
+                {"color": "yellow", "value": 25000},
+                {"color": "green", "value": 50000}
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 4,
+        "title": "Free-to-Paid Conversion Rate",
+        "type": "stat",
+        "gridPos": {"h": 8, "w": 6, "x": 12, "y": 1},
+        "targets": [
+          {
+            "expr": "rate(free_to_paid_conversions_total[7d]) / rate(free_user_signups_total[7d]) * 100",
+            "legendFormat": "7-Day Rate %",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent",
+            "decimals": 1,
+            "thresholds": {
+              "steps": [
+                {"color": "red", "value": 0},
+                {"color": "yellow", "value": 10},
+                {"color": "green", "value": 15}
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 5,
+        "title": "ROI Achievement",
+        "type": "stat",
+        "gridPos": {"h": 8, "w": 6, "x": 18, "y": 1},
+        "targets": [
+          {
+            "expr": "(sum(revenue_attributed_to_token_optimization_usd) - 120000) / 120000 * 100",
+            "legendFormat": "Current ROI %",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent",
+            "decimals": 0,
+            "thresholds": {
+              "steps": [
+                {"color": "red", "value": 0},
+                {"color": "yellow", "value": 200},
+                {"color": "green", "value": 400}
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 6,
+        "title": "📊 Cost Optimization Performance",
+        "type": "row",
+        "collapsed": false,
+        "gridPos": {"h": 1, "w": 24, "x": 0, "y": 9}
+      },
+      {
+        "id": 7,
+        "title": "Token Cost Savings Over Time",
+        "type": "graph",
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 10},
+        "targets": [
+          {
+            "expr": "sum(rate(token_cost_savings_usd_total[1h]))",
+            "legendFormat": "Total Savings $/hour",
+            "refId": "A"
+          },
+          {
+            "expr": "sum by (model) (rate(token_cost_savings_usd_total[1h]))",
+            "legendFormat": "{{model}} Savings $/hour",
+            "refId": "B"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "USD per Hour",
+            "min": 0
+          }
+        ]
+      },
+      {
+        "id": 8,
+        "title": "Optimization Success Rate by Model",
+        "type": "pie",
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 10},
+        "targets": [
+          {
+            "expr": "sum by (model) (rate(token_optimization_success_total[1h])) / sum by (model) (rate(token_optimization_attempts_total[1h])) * 100",
+            "legendFormat": "{{model}}",
+            "refId": "A"
+          }
+        ]
+      },
+      {
+        "id": 9,
+        "title": "👥 User Engagement & Behavior",
+        "type": "row",
+        "collapsed": false,
+        "gridPos": {"h": 1, "w": 24, "x": 0, "y": 18}
+      },
+      {
+        "id": 10,
+        "title": "Cost Feature Usage",
+        "type": "graph",
+        "gridPos": {"h": 8, "w": 8, "x": 0, "y": 19},
+        "targets": [
+          {
+            "expr": "sum by (feature_type) (rate(user_cost_feature_interactions_total[1h]))",
+            "legendFormat": "{{feature_type}}",
+            "refId": "A"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Interactions per Hour",
+            "min": 0
+          }
+        ]
+      },
+      {
+        "id": 11,
+        "title": "Dashboard Views by User Tier",
+        "type": "graph",
+        "gridPos": {"h": 8, "w": 8, "x": 8, "y": 19},
+        "targets": [
+          {
+            "expr": "sum by (user_tier) (rate(cost_dashboard_views_total[1h]))",
+            "legendFormat": "{{user_tier}} Users",
+            "refId": "A"
+          }
+        ]
+      },
+      {
+        "id": 12,
+        "title": "Active Sessions by Tier",
+        "type": "stat",
+        "gridPos": {"h": 8, "w": 8, "x": 16, "y": 19},
+        "targets": [
+          {
+            "expr": "sum by (user_tier) (active_token_sessions)",
+            "legendFormat": "{{user_tier}}",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "short"
+          }
+        }
+      },
+      {
+        "id": 13,
+        "title": "🔧 Technical Performance",
+        "type": "row",
+        "collapsed": false,
+        "gridPos": {"h": 1, "w": 24, "x": 0, "y": 27}
+      },
+      {
+        "id": 14,
+        "title": "Optimization Duration Distribution",
+        "type": "heatmap",
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 28},
+        "targets": [
+          {
+            "expr": "sum(rate(token_optimization_duration_seconds_bucket[5m])) by (le)",
+            "format": "heatmap",
+            "legendFormat": "{{le}}",
+            "refId": "A"
+          }
+        ]
+      },
+      {
+        "id": 15,
+        "title": "Cost Calculation Accuracy",
+        "type": "stat",
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 28},
+        "targets": [
+          {
+            "expr": "avg(cost_calculation_accuracy_ratio) * 100",
+            "legendFormat": "Accuracy %",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent",
+            "min": 90,
+            "max": 100,
+            "thresholds": {
+              "steps": [
+                {"color": "red", "value": 90},
+                {"color": "yellow", "value": 95},
+                {"color": "green", "value": 99}
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 16,
+        "title": "🚨 System Health",
+        "type": "row",
+        "collapsed": false,
+        "gridPos": {"h": 1, "w": 24, "x": 0, "y": 36}
+      },
+      {
+        "id": 17,
+        "title": "Session Isolation Status",
+        "type": "stat",
+        "gridPos": {"h": 4, "w": 6, "x": 0, "y": 37},
+        "targets": [
+          {
+            "expr": "sum(session_isolation_violations_total)",
+            "legendFormat": "Violations",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "short",
+            "thresholds": {
+              "steps": [
+                {"color": "green", "value": 0},
+                {"color": "red", "value": 1}
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 18,
+        "title": "System Error Rate",
+        "type": "stat",
+        "gridPos": {"h": 4, "w": 6, "x": 6, "y": 37},
+        "targets": [
+          {
+            "expr": "rate(token_optimization_attempts_total[5m]) - rate(token_optimization_success_total[5m])",
+            "legendFormat": "Error Rate",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent",
+            "max": 10,
+            "thresholds": {
+              "steps": [
+                {"color": "green", "value": 0},
+                {"color": "yellow", "value": 1},
+                {"color": "red", "value": 5}
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 19,
+        "title": "WebSocket Performance",
+        "type": "graph",
+        "gridPos": {"h": 4, "w": 12, "x": 12, "y": 37},
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, rate(websocket_event_duration_seconds_bucket[5m]))",
+            "legendFormat": "P95 Latency",
+            "refId": "A"
+          },
+          {
+            "expr": "histogram_quantile(0.50, rate(websocket_event_duration_seconds_bucket[5m]))",
+            "legendFormat": "P50 Latency",
+            "refId": "B"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Seconds",
+            "max": 0.5
+          }
+        ]
+      }
+    ],
+    "time": {
+      "from": "now-6h",
+      "to": "now"
+    },
+    "refresh": "30s",
+    "editable": true,
+    "hideControls": false,
+    "sharedCrosshair": false,
+    "style": "dark",
+    "schemaVersion": 16,
+    "version": 1,
+    "links": [
+      {
+        "icon": "external link",
+        "title": "Token Optimization Documentation",
+        "url": "https://docs.netra.app/token-optimization"
+      },
+      {
+        "icon": "dashboard",
+        "title": "System Health Dashboard", 
+        "url": "/d/system-health"
+      }
+    ]
+  }
+}

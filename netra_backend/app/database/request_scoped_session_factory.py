@@ -242,6 +242,7 @@ class RequestScopedSessionFactory:
         session = None
         try:
             # Create session using the single source of truth
+            # get_db() is decorated with @asynccontextmanager, so we use async with
             async with get_db() as db_session:
                 session = db_session
                 
