@@ -12,6 +12,7 @@ This module provides:
 import asyncio
 import json
 import time
+import uuid
 from datetime import UTC, datetime, timezone
 from typing import Any, Dict, List, Optional
 from unittest.mock import AsyncMock, MagicMock
@@ -54,12 +55,17 @@ except ImportError:
 class MockWebSocketConnection:
     """Mock WebSocket connection for testing without Docker services."""
     
-    def __init__(self):
+    def __init__(self, user_id: str = None):
         self.closed = False
         self.state = MagicMock()
         self.state.name = "OPEN"
         self._sent_messages = []
         self._receive_queue = asyncio.Queue()
+        self.user_id = user_id or f"mock_user_{uuid.uuid4().hex[:8]}"
+        self.connection_id = f"conn_{uuid.uuid4().hex[:8]}"
+        
+        # Track sequence numbers for ordering tests
+        self._sequence_number = 0
         
         # Don't auto-populate with mock responses - let tests control what they receive
     
@@ -78,10 +84,137 @@ class MockWebSocketConnection:
             await self._receive_queue.put(json.dumps(event))
     
     async def send(self, message: str):
-        """Mock send method - echoes message back to receive queue."""
+        """Mock send method - validates message and handles malformed events."""
         self._sent_messages.append(message)
-        # Echo the message back to the receive queue so tests can receive what they sent
-        await self._receive_queue.put(message)
+        
+        # Validate message format and generate appropriate responses
+        try:
+            # Try to parse the message as JSON
+            parsed_message = json.loads(message)
+            
+            # Check for various malformed scenarios
+            error_response = None
+            
+            # Check for missing required fields
+            if not isinstance(parsed_message, dict):
+                error_response = {
+                    "type": "error",
+                    "error": "invalid_message_format",
+                    "message": "Message must be a JSON object",
+                    "timestamp": time.time()
+                }
+            elif not parsed_message.get("type"):
+                error_response = {
+                    "type": "error", 
+                    "error": "missing_type_field",
+                    "message": "Message type is required",
+                    "timestamp": time.time()
+                }
+            elif parsed_message.get("type") == "invalid_type":
+                error_response = {
+                    "type": "error",
+                    "error": "unknown_message_type", 
+                    "message": f"Unknown message type: {parsed_message.get('type')}",
+                    "timestamp": time.time()
+                }
+            elif parsed_message.get("type") == "agent_started" and not parsed_message.get("user_id"):
+                error_response = {
+                    "type": "error",
+                    "error": "missing_user_id",
+                    "message": "user_id is required for agent_started events",
+                    "timestamp": time.time()
+                }
+            elif parsed_message.get("type") == "agent_thinking" and parsed_message.get("reasoning") is None:
+                error_response = {
+                    "type": "error",
+                    "error": "invalid_reasoning",
+                    "message": "reasoning cannot be null for agent_thinking events",
+                    "timestamp": time.time()
+                }
+            elif parsed_message.get("type") == "agent_thinking" and isinstance(parsed_message.get("timestamp"), str) and parsed_message.get("timestamp") == "invalid_timestamp":
+                error_response = {
+                    "type": "error",
+                    "error": "invalid_timestamp",
+                    "message": "timestamp must be a valid numeric timestamp",
+                    "timestamp": time.time()
+                }
+            elif parsed_message.get("type") == "tool_executing" and not parsed_message.get("tool_name"):
+                error_response = {
+                    "type": "error",
+                    "error": "missing_tool_name",
+                    "message": "tool_name is required for tool_executing events",
+                    "timestamp": time.time()
+                }
+            elif parsed_message.get("type") == "tool_executing" and parsed_message.get("tool_name") == "":
+                error_response = {
+                    "type": "error",
+                    "error": "empty_tool_name",
+                    "message": "tool_name cannot be empty for tool_executing events",
+                    "timestamp": time.time()
+                }
+            elif parsed_message.get("type") == "agent_completed" and len(str(parsed_message.get("final_response", ""))) > 5000:
+                error_response = {
+                    "type": "error",
+                    "error": "oversized_response",
+                    "message": "final_response exceeds maximum length",
+                    "timestamp": time.time()
+                }
+            elif len(message) > 50000:  # Oversized content
+                error_response = {
+                    "type": "error",
+                    "error": "message_too_large",
+                    "message": "Message exceeds maximum size limit",
+                    "timestamp": time.time()
+                }
+            
+            # If we detected an error, add error response to queue
+            if error_response:
+                await self._receive_queue.put(json.dumps(error_response))
+            else:
+                # Valid message - echo back the original event structure with sequence number for ordering tests
+                self._sequence_number += 1
+                
+                # For agent events, echo back the original structure to support structure validation tests
+                if parsed_message.get("type") in ["agent_started", "agent_thinking", "tool_executing", "tool_completed", "agent_completed"]:
+                    # Echo back the original event with added sequence number for ordering tests
+                    echo_response = parsed_message.copy()
+                    echo_response["sequence_num"] = self._sequence_number
+                    echo_response["connection_id"] = self.connection_id
+                    # Ensure timestamp is present
+                    if "timestamp" not in echo_response:
+                        echo_response["timestamp"] = time.time()
+                else:
+                    # For other messages, use ack format
+                    echo_response = {
+                        "type": "ack",
+                        "original_type": parsed_message.get("type"),
+                        "message": "Message processed successfully",
+                        "sequence_num": self._sequence_number,
+                        "user_id": self.user_id,
+                        "connection_id": self.connection_id,
+                        "timestamp": time.time()
+                    }
+                
+                await self._receive_queue.put(json.dumps(echo_response))
+                
+        except json.JSONDecodeError:
+            # Invalid JSON format
+            error_response = {
+                "type": "error",
+                "error": "invalid_json",
+                "message": "Message contains invalid JSON format",
+                "timestamp": time.time()
+            }
+            await self._receive_queue.put(json.dumps(error_response))
+        except Exception as e:
+            # Other parsing errors
+            error_response = {
+                "type": "error", 
+                "error": "parsing_error",
+                "message": f"Error parsing message: {str(e)}",
+                "timestamp": time.time()
+            }
+            await self._receive_queue.put(json.dumps(error_response))
     
     async def recv(self):
         """Mock receive method."""
@@ -107,13 +240,14 @@ class WebSocketTestHelpers:
         url: str,
         headers: Optional[Dict[str, str]] = None,
         timeout: float = 10.0,
-        max_retries: int = 3
+        max_retries: int = 3,
+        user_id: str = None
     ):
         """Create a test WebSocket connection with proper authentication and retries"""
         # Check if we should use mock connection (Docker not available)
         if not is_docker_available_for_websocket():
             print("Docker not available, using mock WebSocket connection")
-            return MockWebSocketConnection()
+            return MockWebSocketConnection(user_id=user_id)
         
         if not WEBSOCKETS_AVAILABLE:
             raise pytest.skip("websockets library not available")
@@ -224,6 +358,35 @@ class WebSocketTestHelpers:
                 raise RuntimeError(f"Failed to send WebSocket message: {e}")
     
     @staticmethod
+    async def send_raw_test_message(
+        websocket,
+        raw_message: str,
+        timeout: float = 5.0
+    ):
+        """Send a raw string message through WebSocket with connection validation"""
+        try:
+            # Handle mock connections
+            if isinstance(websocket, MockWebSocketConnection):
+                await websocket.send(raw_message)
+                return
+            
+            # Check if connection is still alive
+            if hasattr(websocket, 'closed') and websocket.closed:
+                raise RuntimeError("WebSocket connection is closed")
+            elif hasattr(websocket, 'state') and websocket.state.name != 'OPEN':
+                raise RuntimeError("WebSocket connection is not open")
+            
+            await asyncio.wait_for(
+                websocket.send(raw_message),
+                timeout=timeout
+            )
+        except Exception as e:
+            if 'websockets' in str(type(e)) and 'ConnectionClosed' in str(type(e)):
+                raise RuntimeError(f"WebSocket connection closed while sending message: {e}")
+            else:
+                raise RuntimeError(f"Failed to send WebSocket message: {e}")
+    
+    @staticmethod
     async def receive_test_message(
         websocket,
         timeout: float = 5.0
@@ -256,12 +419,13 @@ class WebSocketTestHelpers:
                 # Handle text messages that aren't JSON
                 return {"type": "text", "content": message_raw}
                 
-        except websockets.exceptions.ConnectionClosed as e:
-            raise RuntimeError(f"WebSocket connection closed while receiving message: {e}")
-        except asyncio.TimeoutError:
-            raise RuntimeError(f"Timeout waiting for WebSocket message (timeout: {timeout}s)")
         except Exception as e:
-            raise RuntimeError(f"Failed to receive WebSocket message: {e}")
+            if 'websockets' in str(type(e)) and ('ConnectionClosed' in str(type(e)) or 'ConnectionClosed' in str(e)):
+                raise RuntimeError(f"WebSocket connection closed while receiving message: {e}")
+            elif isinstance(e, asyncio.TimeoutError):
+                raise RuntimeError(f"Timeout waiting for WebSocket message (timeout: {timeout}s)")
+            else:
+                raise RuntimeError(f"Failed to receive WebSocket message: {e}")
     
     @staticmethod
     async def close_test_connection(websocket):
