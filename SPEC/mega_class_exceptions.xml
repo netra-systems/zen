@@ -89,6 +89,63 @@
         <requirement>Must centralize all GCP configuration</requirement>
       </requirements>
     </exception>
+
+    <exception>
+      <path>/netra_backend/app/core/managers/unified_lifecycle_manager.py</path>
+      <current_size>1950</current_size>
+      <max_allowed>2000</max_allowed>
+      <justification>
+        SSOT for all lifecycle operations consolidating 100+ legacy managers.
+        Central integration point for startup, shutdown, health monitoring.
+        Critical for zero-downtime deployments and chat service reliability.
+        Contains factory pattern for multi-user isolation and WebSocket coordination.
+        Splitting would break lifecycle coordination and create race conditions.
+      </justification>
+      <requirements>
+        <requirement>Must handle all component lifecycle phases atomically</requirement>
+        <requirement>Must provide user-isolated lifecycle management</requirement>
+        <requirement>Must coordinate with WebSocket events for real-time notifications</requirement>
+        <requirement>Must maintain comprehensive health monitoring</requirement>
+      </requirements>
+    </exception>
+
+    <exception>
+      <path>/netra_backend/app/core/managers/unified_configuration_manager.py</path>
+      <current_size>1890</current_size>
+      <max_allowed>2000</max_allowed>
+      <justification>
+        SSOT for all configuration management consolidating 50+ config managers.
+        Central configuration store with multi-source precedence and validation.
+        Critical for eliminating configuration drift across environments.
+        Contains service-specific configuration creation and IsolatedEnvironment integration.
+        Splitting would fragment configuration consistency and validation.
+      </justification>
+      <requirements>
+        <requirement>Must use IsolatedEnvironment for all environment variable access</requirement>
+        <requirement>Must validate against MISSION_CRITICAL_NAMED_VALUES_INDEX</requirement>
+        <requirement>Must provide service-specific configuration methods</requirement>
+        <requirement>Must support multi-user configuration isolation</requirement>
+      </requirements>
+    </exception>
+
+    <exception>
+      <path>/netra_backend/app/core/managers/unified_state_manager.py</path>
+      <current_size>1820</current_size>
+      <max_allowed>2000</max_allowed>
+      <justification>
+        SSOT for all state management consolidating 50+ state managers.
+        Central state store with scoped isolation and TTL-based expiration.
+        Critical for agent state consistency and WebSocket synchronization.
+        Contains multi-user state isolation and comprehensive querying capabilities.
+        Splitting would break state consistency and create synchronization issues.
+      </justification>
+      <requirements>
+        <requirement>Must provide thread-safe state operations with fine-grained locking</requirement>
+        <requirement>Must support scoped state isolation (user, session, thread, agent)</requirement>
+        <requirement>Must integrate with WebSocket manager for real-time state sync</requirement>
+        <requirement>Must provide comprehensive state querying and filtering</requirement>
+      </requirements>
+    </exception>
   </approved_exceptions>
 
   <rejected_candidates>
