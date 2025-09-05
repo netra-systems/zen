@@ -16,6 +16,7 @@ from urllib.parse import urlencode
 import requests
 
 from auth_service.auth_core.secret_loader import AuthSecretLoader
+from auth_service.auth_core.auth_environment import get_auth_env
 from shared.isolated_environment import get_env
 
 logger = logging.getLogger(__name__)
@@ -35,6 +36,7 @@ class GoogleOAuthProvider:
     
     def __init__(self):
         """Initialize Google OAuth provider with environment configuration."""
+        self.auth_env = get_auth_env()
         self.env = get_env().get("ENVIRONMENT", "development").lower()
         self._client_id = None
         self._client_secret = None
@@ -74,20 +76,19 @@ class GoogleOAuthProvider:
         return self._client_secret
     
     def get_redirect_uri(self) -> Optional[str]:
-        """Get OAuth redirect URI for current environment."""
+        """Get OAuth redirect URI for current environment.
+        
+        CRITICAL: Uses SSOT from AuthEnvironment.get_auth_service_url()
+        for proper domain configuration (e.g., auth.staging.netrasystems.ai)
+        """
         if self._redirect_uri:
             return self._redirect_uri
             
-        # Construct environment-specific redirect URI
-        if self.env == "staging":
-            self._redirect_uri = "https://netra-auth-service-staging.run.app/auth/oauth/callback"
-        elif self.env == "production":
-            self._redirect_uri = "https://netra-auth-service.run.app/auth/oauth/callback"
-        else:
-            # Development environment
-            # Try common redirect URIs that might be configured in Google Console
-            # You can change this to match what's in your Google Console
-            self._redirect_uri = "http://localhost:3000/auth/callback"
+        # Get the proper auth service URL from configuration
+        base_url = self.auth_env.get_auth_service_url()
+        
+        # Construct redirect URI using configured auth service URL
+        self._redirect_uri = f"{base_url}/auth/oauth/callback"
             
         return self._redirect_uri
     
