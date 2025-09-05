@@ -44,11 +44,12 @@ The system has a lot of async, websockets, and other patterns that require heavy
 4. This is a multi-user system.
 5. Update tests to SSOT methods. NEVER re-create legacy code to pass old tests!
 6. **🚨 CRITICAL CONFIG/ENV REGRESSION PREVENTION:** See [OAuth Regression Analysis](./OAUTH_REGRESSION_ANALYSIS_20250905.md) and [Config Regression Prevention Plan](./CONFIG_REGRESSION_PREVENTION_PLAN.md)
-Configuration SSOT ≠ Code SSOT: Environment-specific configs (TEST/STAGING/PROD) are NOT duplicates
+Configuration SSOT ≠ Code SSOT: Environment-specific configs (TEST/DEV/STAGING/PROD) **IF named as such** are NOT duplicates
    - **NEVER delete config without dependency checking** - Missing OAuth credentials caused 503 errors
    - **Each environment needs INDEPENDENT config** - Test/staging/prod MUST have separate OAuth credentials  
    - **NO silent fallbacks** - Hard failures are better than wrong environment configs leaking
    - **Strict SSOT enforcement** - BUT provide migration paths and test credentials
+   - **Examples** Good: FuncStaging() or Func(env=staging). Bad: Func() #staging Func() #prod (Bad because same name with no vars)
    - **Config changes = CASCADE FAILURES** - One missing env var can break entire flow 
   7. The system is MULTI-USER.
 
