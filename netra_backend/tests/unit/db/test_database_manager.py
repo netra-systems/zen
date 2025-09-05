@@ -822,7 +822,7 @@ class TestDatabaseManagerStaticMethods:
             mock_manager.get_session = mock_get_session
             mock_get_manager.return_value = mock_manager
             
-            async with DatabaseManager.get_async_session() as session:
+            async with DatabaseManager.get_db() as session:
                 assert session == mock_session
             
             mock_get_manager.assert_called_once()
@@ -842,7 +842,7 @@ class TestDatabaseManagerStaticMethods:
             mock_manager.get_session = mock_get_session
             mock_get_manager.return_value = mock_manager
             
-            async with DatabaseManager.get_async_session() as session:
+            async with DatabaseManager.get_db() as session:
                 pass
             
             mock_manager.initialize.assert_called_once()
