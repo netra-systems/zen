@@ -25,6 +25,11 @@ class WebSocketConnectionState(str, Enum):
     DISCONNECTING = "disconnecting"
     DISCONNECTED = "disconnected"
     ERROR = "error"
+    # Compatibility aliases for tests
+    ACTIVE = "connected"  # Alias for CONNECTED
+    CLOSING = "disconnecting"  # Alias for DISCONNECTING  
+    CLOSED = "disconnected"  # Alias for DISCONNECTED
+    FAILED = "error"  # Alias for ERROR
 
 
 class ReconnectionState(str, Enum):
@@ -107,6 +112,31 @@ class ConnectionInfo(BaseModel):
     is_healthy: bool = True
     is_closing: bool = False
     client_info: Optional[Dict[str, Any]] = None
+    state: WebSocketConnectionState = WebSocketConnectionState.ACTIVE
+    failure_count: int = 0  # Track state transition failures
+    
+    def transition_to_failed(self):
+        """Transition connection to failed state."""
+        self.state = WebSocketConnectionState.FAILED
+        self.is_healthy = False
+        self.failure_count += 1
+        return True
+    
+    def transition_to_closing(self):
+        """Transition connection to closing state."""
+        # Cannot transition to closing if already closing or closed
+        if self.state in [WebSocketConnectionState.CLOSING, WebSocketConnectionState.CLOSED]:
+            return False
+        self.state = WebSocketConnectionState.CLOSING
+        self.is_closing = True
+        return True
+        
+    def transition_to_closed(self):
+        """Transition connection to closed state."""
+        self.state = WebSocketConnectionState.CLOSED
+        self.is_closing = False
+        self.is_healthy = False
+        return True
 
 
 class WebSocketMessage(BaseModel):

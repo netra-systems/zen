@@ -23,6 +23,36 @@ class WebSocketConnection:
     metadata: Dict[str, Any] = None
 
 
+class RegistryCompat:
+    """Compatibility registry for legacy tests."""
+    
+    def __init__(self, manager):
+        self.manager = manager
+    
+    async def register_connection(self, user_id: str, connection_info):
+        """Register a connection for test compatibility."""
+        # Convert ConnectionInfo to WebSocketConnection format for the unified manager
+        websocket_conn = WebSocketConnection(
+            connection_id=connection_info.connection_id,
+            user_id=user_id,
+            websocket=connection_info.websocket,
+            connected_at=connection_info.connected_at,
+            metadata={"connection_info": connection_info}
+        )
+        await self.manager.add_connection(websocket_conn)
+        # Store connection info for tests that expect it
+        if not hasattr(self.manager, '_connection_infos'):
+            self.manager._connection_infos = {}
+        self.manager._connection_infos[connection_info.connection_id] = connection_info
+    
+    def get_user_connections(self, user_id: str):
+        """Get user connections for test compatibility."""
+        if hasattr(self.manager, '_connection_infos') and user_id in self.manager._user_connections:
+            conn_ids = self.manager._user_connections[user_id]
+            return [self.manager._connection_infos.get(conn_id) for conn_id in conn_ids if conn_id in self.manager._connection_infos]
+        return []
+
+
 class UnifiedWebSocketManager:
     """Unified WebSocket connection manager - SSOT.
     
@@ -33,6 +63,8 @@ class UnifiedWebSocketManager:
         self._connections: Dict[str, WebSocketConnection] = {}
         self._user_connections: Dict[str, Set[str]] = {}
         self._lock = asyncio.Lock()
+        # Add compatibility registry for legacy tests
+        self.registry = RegistryCompat(self)
         logger.info("UnifiedWebSocketManager initialized")
     
     async def add_connection(self, connection: WebSocketConnection) -> None:

@@ -2380,10 +2380,18 @@ class AgentWebSocketBridge(MonitorableComponent):
                 await emitter.emit_agent_started("MyAgent")
                 # Automatic cleanup happens here
         """
-        from netra_backend.app.services.websocket_event_emitter import websocket_event_emitter_scope
+        # Import from the actual location - use the create_scoped_emitter function
+        from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmitter
+        from netra_backend.app.websocket_core import get_websocket_manager
         
-        async with websocket_event_emitter_scope(user_context) as emitter:
+        # Create scoped emitter using the correct pattern
+        manager = get_websocket_manager()
+        emitter = UnifiedWebSocketEmitter.create_scoped_emitter(manager, user_context)
+        try:
             yield emitter
+        finally:
+            # Clean up if needed
+            pass
 
 
 # DEPRECATED: Legacy singleton factory function
