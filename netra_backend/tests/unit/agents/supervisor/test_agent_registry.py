@@ -89,10 +89,16 @@ class TestAgentRegistryInitialization:
 
     def test_init_with_required_dependencies_creates_registry_successfully(self, mock_llm_manager, mock_tool_dispatcher):
         """Test that AgentRegistry initializes successfully with required dependencies."""
-        registry = AgentRegistry(mock_llm_manager, mock_tool_dispatcher)
+        # Create factory function for the new SSOT API
+        def mock_factory(user_context=None, websocket_bridge=None):
+            return mock_tool_dispatcher
+        
+        registry = AgentRegistry(mock_llm_manager, mock_factory)
         
         assert registry.llm_manager is mock_llm_manager
-        assert registry.tool_dispatcher is mock_tool_dispatcher
+        assert registry.tool_dispatcher_factory is mock_factory
+        # tool_dispatcher property is deprecated and returns None for security
+        assert registry.tool_dispatcher is None  
         assert registry._agents_registered is False
         assert isinstance(registry.registration_errors, dict)
         assert len(registry.registration_errors) == 0
@@ -112,10 +118,16 @@ class TestAgentRegistryInitialization:
 
     def test_init_with_none_llm_manager_should_work(self, mock_tool_dispatcher):
         """Test initialization with None LLM manager (should work but may limit functionality)."""
-        registry = AgentRegistry(None, mock_tool_dispatcher)
+        # Create factory function for the new SSOT API
+        def mock_factory(user_context=None, websocket_bridge=None):
+            return mock_tool_dispatcher
+        
+        registry = AgentRegistry(None, mock_factory)
         
         assert registry.llm_manager is None
-        assert registry.tool_dispatcher is mock_tool_dispatcher
+        assert registry.tool_dispatcher_factory is mock_factory
+        # tool_dispatcher property is deprecated and returns None for security
+        assert registry.tool_dispatcher is None
         assert registry._agents_registered is False
 
     def test_init_with_none_tool_dispatcher_should_work(self, mock_llm_manager):
@@ -393,8 +405,8 @@ class TestWebSocketIntegration:
         
         assert diagnosis["registry_has_websocket_bridge"] is False
         assert diagnosis["registry_has_websocket_manager"] is False
-        assert "No WebSocket bridge configured" in diagnosis["critical_issues"]
-        assert "No WebSocket manager configured" in diagnosis["critical_issues"]
+        assert "No global WebSocket bridge configured" in diagnosis["critical_issues"]
+        assert "No global WebSocket manager configured" in diagnosis["critical_issues"]
         assert diagnosis["websocket_health"] == "CRITICAL"
 
     def test_diagnose_websocket_wiring_with_components_shows_healthy(self, registry, mock_websocket_manager, mock_websocket_bridge):
@@ -809,11 +821,17 @@ class TestGetAgentRegistryFunction:
         llm = Mock(spec=LLMManager)
         dispatcher = Mock(spec=ToolDispatcher)
         
-        registry = get_agent_registry(llm, dispatcher)
+        # Create factory function for the new SSOT API
+        def dispatcher_factory(user_context=None, websocket_bridge=None):
+            return dispatcher
+        
+        registry = get_agent_registry(llm, dispatcher_factory)
         
         assert isinstance(registry, AgentRegistry)
         assert registry.llm_manager is llm
-        assert registry.tool_dispatcher is dispatcher
+        assert registry.tool_dispatcher_factory is dispatcher_factory
+        # tool_dispatcher property is deprecated and returns None for security
+        assert registry.tool_dispatcher is None
 
     def test_get_agent_registry_with_existing_global_registry(self):
         """Test that get_agent_registry handles existing global registry."""
@@ -837,13 +855,19 @@ class TestGetAgentRegistryFunction:
         llm = Mock(spec=LLMManager)
         dispatcher = Mock(spec=ToolDispatcher)
         
+        # Create factory function for the new SSOT API
+        def dispatcher_factory(user_context=None, websocket_bridge=None):
+            return dispatcher
+        
         with patch('netra_backend.app.agents.supervisor.agent_registry.get_global_registry', side_effect=Exception("Global registry failed")):
             
-            registry = get_agent_registry(llm, dispatcher)
+            registry = get_agent_registry(llm, dispatcher_factory)
             
             assert isinstance(registry, AgentRegistry)
             assert registry.llm_manager is llm
-            assert registry.tool_dispatcher is dispatcher
+            assert registry.tool_dispatcher_factory is dispatcher_factory
+            # tool_dispatcher property is deprecated and returns None for security
+            assert registry.tool_dispatcher is None
 
 
 class TestRegistryStateManagement:

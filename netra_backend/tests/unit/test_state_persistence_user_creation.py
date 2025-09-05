@@ -73,10 +73,14 @@ async def test_state_persistence_auto_creates_dev_user():
     This test verifies the desired behavior where dev/test users
     are automatically created when saving agent state.
     """
-    # Create a mock database session
+    # Create a mock database session with proper async context manager setup
     mock_session = AsyncMock()
-    mock_session.begin = AsyncMock()
+    mock_begin_context = AsyncMock()
+    mock_begin_context.__aenter__ = AsyncMock(return_value=None)
+    mock_begin_context.__aexit__ = AsyncMock(return_value=None)
+    mock_session.begin = Mock(return_value=mock_begin_context)
     mock_session.flush = AsyncMock()
+    mock_session.add = Mock()
     
     # Create a persistence request with a dev user that doesn't exist
     dev_user_id = "dev-temp-" + str(uuid.uuid4())[:8]
@@ -94,7 +98,7 @@ async def test_state_persistence_auto_creates_dev_user():
         is_recovery_point=False
     )
     
-    # Mock the user service
+    # Mock the user service and force legacy save path
     with patch('netra_backend.app.services.state_persistence.user_service') as mock_user_service:
         # First call returns None (user doesn't exist)
         # Second call returns the created user
@@ -102,30 +106,34 @@ async def test_state_persistence_auto_creates_dev_user():
         mock_user_service.get = AsyncMock(side_effect=[None, mock_created_user])
         mock_user_service.create = AsyncMock(return_value=mock_created_user)
         
-        # Mock successful database operations
-        mock_session.add = Mock()
-        mock_session.execute = AsyncMock()
-        
-        # Call the save method with the enhanced implementation
-        success, snapshot_id = await state_persistence_service.save_agent_state(
-            request, mock_session
-        )
-        
-        # Verify the user was created
-        mock_user_service.create.assert_called_once()
-        create_call_args = mock_user_service.create.call_args
-        user_create_obj = create_call_args[1]['obj_in']
-        
-        # Verify the created user has correct properties
-        assert user_create_obj.id == dev_user_id
-        assert user_create_obj.email == f"{dev_user_id}@dev.local"
-        assert user_create_obj.is_active is True
-        assert user_create_obj.is_developer is True
-        assert user_create_obj.role == "developer"
-        
-        # Verify the save succeeded
-        assert success is True
-        assert snapshot_id is not None
+        # Force legacy save path by mocking Redis failure
+        with patch('netra_backend.app.services.state_persistence.state_cache_manager') as mock_cache:
+            mock_cache.save_primary_state = AsyncMock(return_value=False)  # Force fallback
+            mock_cache.cache_legacy_state = AsyncMock(return_value=True)  # Mock legacy cache
+            
+            # Mock successful database operations
+            mock_session.execute = AsyncMock()
+            
+            # Call the save method with the enhanced implementation
+            success, snapshot_id = await state_persistence_service.save_agent_state(
+                request, mock_session
+            )
+            
+            # Verify the user was created
+            mock_user_service.create.assert_called_once()
+            create_call_args = mock_user_service.create.call_args
+            user_create_obj = create_call_args[1]['obj_in']
+            
+            # Verify the created user has correct properties
+            assert user_create_obj.id == dev_user_id
+            assert user_create_obj.email == f"{dev_user_id}@example.com"
+            assert user_create_obj.is_active is True
+            assert user_create_obj.is_developer is True
+            assert user_create_obj.role == "developer"
+            
+            # Verify the save succeeded
+            assert success is True
+            assert snapshot_id is not None
 
 
 @pytest.mark.asyncio
@@ -184,10 +192,14 @@ async def test_state_persistence_handles_test_users():
     
     This verifies that test users are handled the same as dev users.
     """
-    # Create a mock database session
+    # Create a mock database session with proper async context manager setup
     mock_session = AsyncMock()
-    mock_session.begin = AsyncMock()
+    mock_begin_context = AsyncMock()
+    mock_begin_context.__aenter__ = AsyncMock(return_value=None)
+    mock_begin_context.__aexit__ = AsyncMock(return_value=None)
+    mock_session.begin = Mock(return_value=mock_begin_context)
     mock_session.flush = AsyncMock()
+    mock_session.add = Mock()
     
     # Create a persistence request with a test user that doesn't exist
     test_user_id = "test-user-" + str(uuid.uuid4())[:8]
@@ -205,32 +217,36 @@ async def test_state_persistence_handles_test_users():
         is_recovery_point=False
     )
     
-    # Mock the user service
+    # Mock the user service and force legacy save path
     with patch('netra_backend.app.services.state_persistence.user_service') as mock_user_service:
         # First call returns None (user doesn't exist)
         mock_user_service.get = AsyncMock(return_value=None)
         mock_created_user = Mock(id=test_user_id)
         mock_user_service.create = AsyncMock(return_value=mock_created_user)
         
-        # Mock successful database operations
-        mock_session.add = Mock()
-        mock_session.execute = AsyncMock()
-        
-        # Call the save method
-        success, snapshot_id = await state_persistence_service.save_agent_state(
-            request, mock_session
-        )
-        
-        # Verify the user was created
-        mock_user_service.create.assert_called_once()
-        create_call_args = mock_user_service.create.call_args
-        user_create_obj = create_call_args[1]['obj_in']
-        
-        # Verify the created user has correct properties
-        assert user_create_obj.id == test_user_id
-        assert user_create_obj.email == f"{test_user_id}@dev.local"
-        assert user_create_obj.is_developer is True
-        
-        # Verify the save succeeded
-        assert success is True
-        assert snapshot_id is not None
+        # Force legacy save path by mocking Redis failure
+        with patch('netra_backend.app.services.state_persistence.state_cache_manager') as mock_cache:
+            mock_cache.save_primary_state = AsyncMock(return_value=False)  # Force fallback
+            mock_cache.cache_legacy_state = AsyncMock(return_value=True)  # Mock legacy cache
+            
+            # Mock successful database operations
+            mock_session.execute = AsyncMock()
+            
+            # Call the save method
+            success, snapshot_id = await state_persistence_service.save_agent_state(
+                request, mock_session
+            )
+            
+            # Verify the user was created
+            mock_user_service.create.assert_called_once()
+            create_call_args = mock_user_service.create.call_args
+            user_create_obj = create_call_args[1]['obj_in']
+            
+            # Verify the created user has correct properties
+            assert user_create_obj.id == test_user_id
+            assert user_create_obj.email == f"{test_user_id}@example.com"
+            assert user_create_obj.is_developer is True
+            
+            # Verify the save succeeded
+            assert success is True
+            assert snapshot_id is not None

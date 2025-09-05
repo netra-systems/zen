@@ -60,18 +60,19 @@ class TestActionsToMeetGoalsSSoTCompliance:
     @pytest.fixture
     def user_context(self):
         """Create UserExecutionContext for testing"""
+        # UserExecutionContext is frozen, so metadata must be passed in constructor
         context = UserExecutionContext(
             user_id="test_user",
             thread_id="test_thread",
             run_id="test_run",
             request_id="test_request",
-            session_manager=Mock(spec=DatabaseSessionManager)
+            db_session=Mock(spec=DatabaseSessionManager),  # Use db_session instead of session_manager
+            metadata={
+                'user_request': 'Test request',
+                'optimizations_result': {'type': 'test', 'recommendations': []},
+                'data_result': {'query': 'test', 'results': []}
+            }
         )
-        context.metadata = {
-            'user_request': 'Test request',
-            'optimizations_result': {'type': 'test', 'recommendations': []},
-            'data_result': {'query': 'test', 'results': []}
-        }
         return context
     
     @pytest.fixture

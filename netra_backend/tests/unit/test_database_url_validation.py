@@ -145,7 +145,8 @@ class TestHealthCheckDatabaseValidation:
         """Test that _check_postgres_connection handles None database_url gracefully."""
         from netra_backend.app.routes.health import _check_postgres_connection
         
-        mock_db = AsyncMock()
+        from sqlalchemy.ext.asyncio import AsyncSession
+        mock_db = AsyncMock(spec=AsyncSession)
         mock_config = MagicMock()
         mock_config.database_url = None
         
@@ -163,7 +164,8 @@ class TestHealthCheckDatabaseValidation:
         """Test that _check_postgres_connection raises in staging with None database_url."""
         from netra_backend.app.routes.health import _check_postgres_connection
         
-        mock_db = AsyncMock()
+        from sqlalchemy.ext.asyncio import AsyncSession
+        mock_db = AsyncMock(spec=AsyncSession)
         mock_config = MagicMock()
         mock_config.database_url = None
         
@@ -181,7 +183,8 @@ class TestHealthCheckDatabaseValidation:
         from netra_backend.app.routes.health import _check_postgres_connection
         from sqlalchemy import text
         
-        mock_db = AsyncMock()
+        from sqlalchemy.ext.asyncio import AsyncSession
+        mock_db = AsyncMock(spec=AsyncSession)
         mock_result = MagicMock()
         mock_result.scalar_one_or_none.return_value = 1
         mock_db.execute.return_value = mock_result
@@ -202,7 +205,8 @@ class TestHealthCheckDatabaseValidation:
         """Test that _check_postgres_connection skips execution for mock database."""
         from netra_backend.app.routes.health import _check_postgres_connection
         
-        mock_db = AsyncMock()
+        from sqlalchemy.ext.asyncio import AsyncSession
+        mock_db = AsyncMock(spec=AsyncSession)
         mock_config = MagicMock()
         mock_config.database_url = 'postgresql+mock://mockuser:mockpass@mockhost/mockdb'
         
@@ -218,7 +222,8 @@ class TestHealthCheckDatabaseValidation:
         from netra_backend.app.routes.health import _check_readiness_status
         from fastapi import HTTPException
         
-        mock_db = AsyncMock()
+        from sqlalchemy.ext.asyncio import AsyncSession
+        mock_db = AsyncMock(spec=AsyncSession)
         mock_db.execute.side_effect = Exception("Connection failed")
         
         mock_config = MagicMock()

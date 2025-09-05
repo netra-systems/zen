@@ -233,12 +233,13 @@ class TestDataHelperAgentSSOTCompliance:
         state.context_tracking = {}
         
         context = ExecutionContext(
+            request_id=user_context.run_id,  # Use run_id as request_id
             run_id=user_context.run_id,
             agent_name="data_helper",
             state=state,
             stream_updates=True,
-            thread_id=user_context.thread_id,
-            user_id=user_context.user_id
+            user_id=user_context.user_id,
+            metadata={'thread_id': user_context.thread_id}  # Store thread_id in metadata
         )
         
         # Mock the data helper tool to return success
@@ -277,12 +278,13 @@ class TestDataHelperAgentSSOTCompliance:
         state.context_tracking = {}
         
         context = ExecutionContext(
+            request_id=user_context.run_id,  # Use run_id as request_id
             run_id=user_context.run_id,
             agent_name="data_helper",
             state=state,
             stream_updates=True,
-            thread_id=user_context.thread_id,
-            user_id=user_context.user_id
+            user_id=user_context.user_id,
+            metadata={'thread_id': user_context.thread_id}  # Store thread_id in metadata
         )
         
         # Mock the data helper tool to raise an exception
@@ -317,12 +319,13 @@ class TestDataHelperAgentSSOTCompliance:
         state.context_tracking = {}
         
         context = ExecutionContext(
+            request_id=user_context.run_id,  # Use run_id as request_id
             run_id=user_context.run_id,
             agent_name="data_helper",
             state=state,
             stream_updates=True,
-            thread_id=user_context.thread_id,
-            user_id=user_context.user_id
+            user_id=user_context.user_id,
+            metadata={'thread_id': user_context.thread_id}  # Store thread_id in metadata
         )
         
         # Mock the data helper tool to raise an exception

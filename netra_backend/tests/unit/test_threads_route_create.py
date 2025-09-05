@@ -21,8 +21,9 @@ from netra_backend.tests.helpers.thread_test_helpers import (
 @pytest.fixture
 def mock_db():
     """Mock database session"""
-    # Mock: Generic component isolation for controlled unit testing
-    db = AsyncMock()
+    from sqlalchemy.ext.asyncio import AsyncSession
+    # Mock: Generic component isolation for controlled unit testing with proper AsyncSession spec
+    db = AsyncMock(spec=AsyncSession)
     # Mock: Generic component isolation for controlled unit testing
     db.commit = AsyncMock()
     return db

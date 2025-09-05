@@ -286,7 +286,7 @@ class TestBaseAgentExecutionEngine:
         # Create test state
         state = DeepAgentState()
         state.user_request = "Test user request"
-        state.thread_id = "test_thread_123"
+        state.chat_thread_id = "test_thread_123"
         state.user_id = "test_user_456"
         
         # Execute using modern pattern
