@@ -172,6 +172,53 @@ async def refresh_tokens_endpoint(request: Request) -> Dict[str, Any]:
             detail="Internal server error"
         )
 
+@router.post("/auth/dev/login")
+async def dev_login() -> Dict[str, Any]:
+    """Development login endpoint - generates tokens for dev environment only"""
+    # Check if we're in development environment
+    from auth_service.auth_core.config import AuthConfig
+    env = AuthConfig.get_environment()
+    
+    if env not in ["development", "test"]:
+        logger.warning(f"Dev login attempted in {env} environment")
+        raise HTTPException(
+            status_code=403,
+            detail="Dev login is only available in development environment"
+        )
+    
+    # Generate development tokens
+    try:
+        # Create a dev user token with standard claims
+        dev_user_id = "dev-user-001"
+        dev_email = "dev@example.com"
+        
+        # Generate tokens using auth service
+        access_token = await auth_service.create_access_token(
+            user_id=dev_user_id,
+            email=dev_email
+        )
+        
+        refresh_token = await auth_service.create_refresh_token(
+            user_id=dev_user_id,
+            email=dev_email
+        )
+        
+        logger.info(f"Dev login successful for environment: {env}")
+        
+        return {
+            "access_token": access_token,
+            "refresh_token": refresh_token,
+            "token_type": "Bearer",
+            "expires_in": 900  # 15 minutes
+        }
+        
+    except Exception as e:
+        logger.error(f"Dev login failed: {e}")
+        raise HTTPException(
+            status_code=500,
+            detail="Failed to generate development tokens"
+        )
+
 @oauth_router.get("/oauth/providers")
 async def oauth_providers() -> Dict[str, Any]:
     """Basic OAuth providers endpoint"""
