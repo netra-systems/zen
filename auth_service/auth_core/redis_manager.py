@@ -19,8 +19,6 @@ from datetime import datetime, timedelta
 import json
 import logging
 
-from auth_service.auth_core.auth_environment import get_auth_env
-
 logger = logging.getLogger(__name__)
 
 
@@ -32,41 +30,68 @@ class AuthRedisManager:
         self._connection_pool: Optional[redis.ConnectionPool] = None
         self.connected = False
         
-        # Get Redis configuration from SSOT AuthEnvironment
-        auth_env = get_auth_env()
-        self.host = auth_env.get_redis_host()
-        self.port = auth_env.get_redis_port()
-        self.db = 1  # Use separate DB for auth (default from AuthEnvironment Redis URL)
-        
-        # Extract password from Redis URL if available
-        redis_url = auth_env.get_redis_url()
+        # Defer configuration loading until first use
+        self._initialized = False
+        self.host = None
+        self.port = None
+        self.db = 1  # Use separate DB for auth
         self.password = None
-        if redis_url and ":" in redis_url and "@" in redis_url:
-            # Parse password from redis://user:password@host:port/db format
-            try:
-                import urllib.parse
-                parsed = urllib.parse.urlparse(redis_url)
-                self.password = parsed.password
-            except Exception:
-                self.password = None
-        
         self.ssl = False  # Default to no SSL unless explicitly configured
-        
-        # Check if Redis is enabled (for testing environments) 
-        from shared.isolated_environment import get_env
-        env = get_env()  # Test-specific checks can still use get_env
-        self.enabled = env.get("TEST_DISABLE_REDIS", "false").lower() != "true"
+        self._enabled = True  # Will be determined on first init
         
         # Auth-specific prefixes
         self.session_prefix = "auth:session:"
         self.token_blacklist_prefix = "auth:blacklist:"
         self.user_cache_prefix = "auth:user:"
         self.permission_prefix = "auth:perm:"
+    
+    @property
+    def enabled(self):
+        """Check if Redis is enabled (lazy initialization)."""
+        self._lazy_init()
+        return self._enabled
+    
+    def _lazy_init(self):
+        """Lazy initialization of Redis configuration."""
+        if self._initialized:
+            return
         
-        logger.debug(f"AuthRedisManager initialized for {self.host}:{self.port}/{self.db}")
+        try:
+            # Import here to avoid circular dependency at module level
+            from auth_service.auth_core.auth_environment import get_auth_env
+            
+            # Get Redis configuration from SSOT AuthEnvironment
+            auth_env = get_auth_env()
+            self.host = auth_env.get_redis_host()
+            self.port = auth_env.get_redis_port()
+            
+            # Extract password from Redis URL if available
+            redis_url = auth_env.get_redis_url()
+            if redis_url and ":" in redis_url and "@" in redis_url:
+                # Parse password from redis://user:password@host:port/db format
+                try:
+                    import urllib.parse
+                    parsed = urllib.parse.urlparse(redis_url)
+                    self.password = parsed.password
+                except Exception:
+                    self.password = None
+            
+            # Check if Redis is enabled (for testing environments) 
+            from shared.isolated_environment import get_env
+            env = get_env()  # Test-specific checks can still use get_env
+            self._enabled = env.get("TEST_DISABLE_REDIS", "false").lower() != "true"
+            
+            self._initialized = True
+            logger.debug(f"AuthRedisManager initialized for {self.host}:{self.port}/{self.db}")
+        except Exception as e:
+            logger.error(f"Failed to initialize AuthRedisManager: {e}")
+            self._enabled = False
+            self._initialized = True
     
     async def connect(self) -> bool:
         """Connect to Redis server."""
+        self._lazy_init()  # Ensure configuration is loaded
+        
         try:
             self._connection_pool = redis.ConnectionPool(
                 host=self.host,
@@ -102,6 +127,11 @@ class AuthRedisManager:
         
         self.connected = False
         logger.info("Disconnected from Redis")
+    
+    def get_client(self) -> Optional[redis.Redis]:
+        """Get the Redis client instance."""
+        self._lazy_init()  # Ensure configuration is loaded
+        return self.redis_client
     
     async def ensure_connected(self) -> bool:
         """Ensure Redis connection is active."""
