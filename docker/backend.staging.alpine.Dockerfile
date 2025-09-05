@@ -30,12 +30,8 @@ COPY requirements.txt .
 
 # Install Python packages with BuildKit cache mount for speed
 # Cache mount persists pip cache across builds = 67% faster builds
+# CRITICAL: Must NOT use --no-deps as it breaks transitive dependencies
 RUN --mount=type=cache,target=/root/.cache/pip \
-    pip install --no-cache-dir --user \
-    --no-warn-script-location \
-    --disable-pip-version-check \
-    --no-deps \
-    -r requirements.txt || \
     pip install --no-cache-dir --user \
     --no-warn-script-location \
     --disable-pip-version-check \
@@ -72,17 +68,14 @@ WORKDIR /app
 # Copy Python packages from builder (expensive layer, changes rarely)
 COPY --from=builder --chown=netra:netra /root/.local /home/netra/.local
 
-# Copy configuration files (changes less frequently)
-COPY --chown=netra:netra alembic.ini ./
-COPY --chown=netra:netra alembic /app/alembic
+# Copy SPEC files for reference (changes less frequently)
 COPY --chown=netra:netra SPEC /app/SPEC
 
 # Copy shared libraries (changes moderately)
 COPY --chown=netra:netra shared /app/shared
 
-# Copy essential scripts (changes rarely)
-COPY --chown=netra:netra scripts/wait_for_db.py /app/scripts/
-RUN touch /app/scripts/__init__.py && chown netra:netra /app/scripts/__init__.py
+# Create scripts directory (no need for wait_for_db.py in Cloud Run)
+RUN mkdir -p /app/scripts && touch /app/scripts/__init__.py && chown -R netra:netra /app/scripts
 
 # Copy application code LAST (changes most frequently)
 # This ensures maximum cache utilization
@@ -119,14 +112,12 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=5 \
 # Expose application port
 EXPOSE 8000
 
-# Optimized startup with database migration and gunicorn
-# Uses uvicorn workers for async performance with worker recycling
+# Optimized startup for Cloud Run staging deployment
+# Cloud SQL migrations should be run separately, not at container startup
+# This follows the pattern of the non-Alpine GCP deployment
 CMD ["sh", "-c", "\
-    echo '[Staging] Starting Alpine-optimized backend service...' && \
+    echo '[Staging] Starting Alpine-optimized backend service on Cloud Run...' && \
     echo '[Staging] Memory limit: 512MB, Workers: ${WORKERS:-4}' && \
-    python scripts/wait_for_db.py --max-attempts 60 --delay 2 && \
-    echo '[Staging] Running database migrations...' && \
-    alembic upgrade head && \
     echo '[Staging] Starting Gunicorn with uvicorn workers...' && \
     exec gunicorn netra_backend.app.main:app \
         -w ${WORKERS:-4} \
@@ -134,11 +125,10 @@ CMD ["sh", "-c", "\
         --bind 0.0.0.0:8000 \
         --timeout ${TIMEOUT:-300} \
         --graceful-timeout 30 \
-        --keepalive 65 \
         --max-requests 2000 \
         --max-requests-jitter 200 \
         --access-logfile - \
         --error-logfile - \
         --log-level ${LOG_LEVEL:-info} \
-        --worker-tmp-dir /dev/shm \
+        --worker-tmp-dir /tmp \
         --preload"]
