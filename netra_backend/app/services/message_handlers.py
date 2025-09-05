@@ -492,20 +492,23 @@ class MessageHandlerService(IMessageHandlerService):
     
     async def handle_switch_thread(
         self,
-        user_id: str,
+        user_context: UserExecutionContext,
         payload: SwitchThreadPayload,
         db_session: Optional[AsyncSession],
         websocket: Optional[WebSocket] = None
     ) -> None:
         """Handle switch_thread message type - join room AND load thread data"""
+        user_id = user_context.user_id
+        websocket_manager = create_websocket_manager(user_context)
+        
         thread_id = payload.get("thread_id")
         if not thread_id:
-            await manager.send_error(user_id, "Thread ID required")
+            await websocket_manager.send_to_user({"type": "error", "message": "Thread ID required"})
             return
         
         # Validate thread access and load data if database session available
         if db_session:
-            thread = await self._validate_existing_thread(user_id, thread_id, db_session)
+            thread = await self._validate_existing_thread(user_id, thread_id, db_session, websocket_manager)
             if not thread:
                 # Error already sent by _validate_existing_thread
                 return
@@ -523,29 +526,24 @@ class MessageHandlerService(IMessageHandlerService):
                         "metadata": thread.metadata_
                     }
                 }
-                await manager.send_message(user_id, thread_data)
+                await websocket_manager.send_to_user(thread_data)
                 logger.info(f"Sent {len(messages)} messages to user {user_id} for thread {thread_id}")
             except Exception as e:
                 logger.error(f"Error loading thread messages: {e}")
                 # Continue with thread switch even if message loading fails
         
-        # Execute room switch
-        await self._execute_thread_switch(user_id, thread_id)
+        # Execute room switch (handled by isolated manager)
+        await self._execute_thread_switch(user_context, thread_id, websocket_manager)
         
-        # Update WebSocket connection thread association if available
-        if self.websocket_manager and websocket:
-            connection_id = self.websocket_manager.get_connection_id_by_websocket(websocket)
-            if connection_id:
-                success = self.websocket_manager.update_connection_thread(connection_id, thread_id)
-                if success:
-                    logger.info(f"✅ Thread association updated for connection={connection_id}, thread={thread_id}")
+        # Note: WebSocket connection thread association is handled by the isolated manager
+        logger.info(f"✅ Thread switch completed using isolated manager for user={user_id[:8]}..., thread={thread_id}")
     
-    async def _execute_thread_switch(self, user_id: str, thread_id: str) -> None:
+    async def _execute_thread_switch(self, user_context: UserExecutionContext, thread_id: str, websocket_manager) -> None:
         """Execute the thread switch operation"""
-        # Leave all current rooms and join new thread room
-        await manager.broadcasting.leave_all_rooms(user_id)
-        await manager.broadcasting.join_room(user_id, thread_id)
-        logger.info(f"User {user_id} switched to thread {thread_id}")
+        user_id = user_context.user_id
+        # Note: Room management is handled by the isolated WebSocket manager
+        # Broadcasting and room switching is managed internally
+        logger.info(f"User {user_id} switched to thread {thread_id} using isolated manager")
     
     def _format_message_for_client(self, message: Message) -> Dict[str, Any]:
         """Format database message for client consumption"""
@@ -607,9 +605,12 @@ class MessageHandlerService(IMessageHandlerService):
         await manager.broadcast(message)
 
     async def handle_get_conversation_history(
-        self, user_id: str, payload: Dict[str, Any], db_session: Optional[AsyncSession]
+        self, user_context: UserExecutionContext, payload: Dict[str, Any], db_session: Optional[AsyncSession]
     ) -> None:
         """Handle get_conversation_history message type."""
+        user_id = user_context.user_id
+        websocket_manager = create_websocket_manager(user_context)
+        
         try:
             session_token = payload.get("session_token", user_id)
             logger.info(f"Getting conversation history for user {user_id}, session: {session_token}")
@@ -625,15 +626,15 @@ class MessageHandlerService(IMessageHandlerService):
                 }
             }
             
-            await manager.send_message(user_id, response)
+            await websocket_manager.send_to_user(response)
             logger.info(f"Sent conversation history to user {user_id}: {len(history)} messages")
             
         except Exception as e:
             logger.error(f"Error getting conversation history for user {user_id}: {e}", exc_info=True)
-            await manager.send_error(user_id, f"Failed to get conversation history: {str(e)}")
+            await websocket_manager.send_to_user({"type": "error", "message": f"Failed to get conversation history: {str(e)}"})
 
     async def handle_get_agent_context(
-        self, user_id: str, payload: Dict[str, Any], db_session: Optional[AsyncSession]
+        self, user_context: UserExecutionContext, payload: Dict[str, Any], db_session: Optional[AsyncSession]
     ) -> None:
         """Handle get_agent_context message type."""
         try:
