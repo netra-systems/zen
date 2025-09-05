@@ -11,12 +11,17 @@ while requesting additional data for enhanced optimization.
 """
 
 import pytest
-from unittest.mock import AsyncMock, MagicMock, patch
 from typing import Dict, Any
 import json
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from auth_service.core.auth_manager import AuthManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 from netra_backend.app.agents.base.interface import ExecutionContext, ExecutionResult
 from netra_backend.app.agents.state import DeepAgentState
+import asyncio
 
 
 class TestPartialDataFlow:
@@ -24,7 +29,10 @@ class TestPartialDataFlow:
     
     @pytest.fixture
     def partial_user_request(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create a user request with partial data."""
+    pass
         return {
             "user_request": "My LLM costs are too high, around $3-4K monthly",
             "metrics": {
@@ -40,7 +48,10 @@ class TestPartialDataFlow:
     
     @pytest.fixture
     def expected_triage_output_partial(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Expected output from triage agent for partial data."""
+    pass
         return {
             "data_sufficiency": "partial",
             "category": "cost_optimization",
@@ -53,7 +64,10 @@ class TestPartialDataFlow:
     
     @pytest.fixture
     def expected_optimization_with_caveats(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Expected optimization with caveats due to missing data."""
+    pass
         return {
             "recommendations": [
                 {
@@ -78,7 +92,10 @@ class TestPartialDataFlow:
     
     @pytest.fixture
     def expected_data_helper_request(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Expected data collection request from data helper."""
+    pass
         return {
             "data_request": {
                 "priority": "medium",
@@ -114,7 +131,10 @@ class TestPartialDataFlow:
     
     @pytest.fixture
     def expected_actions_with_phases(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Expected phased action plan."""
+    pass
         return {
             "implementation_plan": {
                 "phase_1_immediate": [
@@ -152,7 +172,10 @@ class TestPartialDataFlow:
     
     @pytest.fixture
     def expected_report_with_confidence(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Expected report showing confidence levels."""
+    pass
         return {
             "executive_summary": {
                 "current_understanding": "High-level cost issue identified",
@@ -184,7 +207,8 @@ class TestPartialDataFlow:
             
             async def track_execution(agent_name, *args, **kwargs):
                 execution_order.append(agent_name)
-                return ExecutionResult(
+                await asyncio.sleep(0)
+    return ExecutionResult(
                     success=True,
                     status="completed",
                     result={"agent": agent_name}
@@ -206,6 +230,7 @@ class TestPartialDataFlow:
     @pytest.mark.asyncio
     async def test_triage_identifies_partial_data(self, partial_user_request, expected_triage_output_partial):
         """Validate triage correctly identifies partial data scenario."""
+    pass
         from netra_backend.app.agents.triage.unified_triage_agent import UnifiedTriageAgent
         
         with patch.object(TriageSubAgent, 'llm_manager') as mock_llm_manager:
@@ -269,6 +294,7 @@ class TestPartialDataFlow:
     @pytest.mark.asyncio
     async def test_data_helper_generates_clear_requests(self, expected_data_helper_request):
         """Validate data helper creates clear, actionable data requests."""
+    pass
         from netra_backend.app.agents.data_helper_agent import DataHelperAgent
         
         with patch.object(DataHelperAgent, 'llm_manager') as mock_llm_manager:
@@ -362,6 +388,7 @@ class TestPartialDataFlow:
     @pytest.mark.asyncio
     async def test_report_shows_confidence_and_potential(self, expected_report_with_confidence):
         """Validate report clearly shows confidence levels and potential value."""
+    pass
         from netra_backend.app.agents.reporting_sub_agent import ReportingSubAgent
         
         with patch.object(ReportingSubAgent, 'llm_manager') as mock_llm_manager:
@@ -455,6 +482,7 @@ class TestPartialDataFlow:
     @pytest.mark.asyncio
     async def test_partial_flow_user_experience(self):
         """Test that partial flow maintains positive user experience."""
+    pass
         user_experience_criteria = {
             "immediate_value_delivery": True,
             "clear_data_requests": True,

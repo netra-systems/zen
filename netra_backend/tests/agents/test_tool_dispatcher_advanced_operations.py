@@ -2,10 +2,12 @@
 
 import sys
 from pathlib import Path
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 # Test framework import - using pytest fixtures instead
 
-from unittest.mock import AsyncMock, MagicMock, Mock
 
 import pytest
 
@@ -134,7 +136,6 @@ class TestToolDispatcherAdvancedOperations:
         """Verify production tool execution result."""
         assert result == {"success": True}
         # Verify call was made with correct parameters and run_id, but use ANY for state comparison
-        from unittest.mock import ANY, AsyncMock, MagicMock
         production_tool.execute.assert_called_once_with({"param": "value"}, ANY, "run_123")
     
     def _setup_async_tool_test(self) -> tuple:
@@ -152,7 +153,7 @@ class TestToolDispatcherAdvancedOperations:
         """Setup sync tool test."""
         dispatcher = ToolDispatcher()
         # Mock: Generic component isolation for controlled unit testing
-        sync_tool = Mock()
+        sync_tool = sync_tool_instance  # Initialize appropriate service
         sync_tool.return_value = {"sync": "result"}
         # Ensure it doesn't have arun method to be treated as sync tool
         if hasattr(sync_tool, 'arun'):

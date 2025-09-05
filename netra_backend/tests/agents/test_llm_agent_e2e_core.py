@@ -14,13 +14,17 @@ BVJ:
 
 import sys
 from pathlib import Path
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from test_framework.database.test_database_manager import TestDatabaseManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 import asyncio
 import json
 import time
 import uuid
 from datetime import datetime
-from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 import pytest_asyncio
@@ -152,11 +156,11 @@ async def test_agent_registry():
     db_session = AsyncMock(spec=AsyncSession)
     # Mock: LLM service isolation for fast testing without API calls or rate limits
     llm_manager = Mock(spec=LLMManager)
-    ws_manager = Mock()
-    tool_dispatcher = Mock()
+    ws_manager = UnifiedWebSocketManager()
+    tool_dispatcher = tool_dispatcher_instance  # Initialize appropriate service
     
     # Mock persistence to avoid hanging
-    mock_persistence = AsyncMock()
+    mock_persistence = AsyncNone  # TODO: Use real service instance
     mock_persistence.save_agent_state = AsyncMock(return_value=(True, "test_id"))
     mock_persistence.load_agent_state = AsyncMock(return_value=None)
     
@@ -179,16 +183,16 @@ async def test_basic_error_handling():
     # Mock: LLM service isolation for fast testing without API calls or rate limits
     llm_manager = Mock(spec=LLMManager)
     # Mock: Generic component isolation for controlled unit testing
-    ws_manager = Mock()
+    ws_manager = UnifiedWebSocketManager()
     # Mock: Tool execution isolation for predictable agent testing
-    tool_dispatcher = Mock()
+    tool_dispatcher = tool_dispatcher_instance  # Initialize appropriate service
     
     # Mock LLM to raise exception
     # Mock: LLM service isolation for fast testing without API calls or rate limits
     llm_manager.call_llm = AsyncMock(side_effect=Exception("LLM error"))
     
     # Mock: Generic component isolation for controlled unit testing
-    mock_persistence = AsyncMock()
+    mock_persistence = AsyncNone  # TODO: Use real service instance
     # Mock: Agent service isolation for testing without LLM agent execution
     mock_persistence.save_agent_state = AsyncMock(return_value=(True, "test_id"))
     # Mock: Agent service isolation for testing without LLM agent execution
@@ -252,7 +256,7 @@ def _setup_basic_llm_mock():
 def _setup_basic_persistence_mock():
     """Setup basic persistence mock"""
     # Mock: Generic component isolation for controlled unit testing
-    mock_persistence = AsyncMock()
+    mock_persistence = AsyncNone  # TODO: Use real service instance
     # Mock: Agent service isolation for testing without LLM agent execution
     mock_persistence.save_agent_state = AsyncMock(return_value=(True, "test_id"))
     # Mock: Agent service isolation for testing without LLM agent execution

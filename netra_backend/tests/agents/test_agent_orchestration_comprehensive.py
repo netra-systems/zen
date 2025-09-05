@@ -11,8 +11,13 @@ This test file focuses on orchestration gaps not covered by existing tests:
 
 import asyncio
 import time
-from unittest.mock import AsyncMock, MagicMock, patch
 from typing import Dict, Any
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from test_framework.database.test_database_manager import TestDatabaseManager
+from auth_service.core.auth_manager import AuthManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 import pytest
 
@@ -31,7 +36,7 @@ class MockAgentForTesting(AgentStateMixin, AgentCommunicationMixin):
         self.name = name
         self.agent_id = f"agent_{name}"
         self.state = SubAgentLifecycle.PENDING
-        self.logger = MagicMock()
+        self.logger = MagicNone  # TODO: Use real service instance
         self.websocket_manager = None
         self._user_id = "test_user_123"
         
@@ -160,7 +165,7 @@ class TestAgentCommunicationOrchestration:
         agent = MockAgentForTesting()
         
         # Mock WebSocket manager that fails initially then succeeds
-        websocket_manager = MagicMock()
+        websocket_manager = MagicNone  # TODO: Use real service instance
         websocket_manager.send_message = AsyncMock(side_effect=[
             ConnectionError("Connection lost"),  # First attempt fails
             ConnectionError("Still failing"),    # Second attempt fails  
@@ -180,7 +185,7 @@ class TestAgentCommunicationOrchestration:
         agent = MockAgentForTesting()
         
         # Mock WebSocket manager that always fails
-        websocket_manager = MagicMock()
+        websocket_manager = MagicNone  # TODO: Use real service instance
         websocket_manager.send_message = AsyncMock(side_effect=ConnectionError("Permanent failure"))
         agent.websocket_manager = websocket_manager
         
@@ -201,8 +206,8 @@ class TestAgentCommunicationOrchestration:
     async def test_agent_communication_event_types(self):
         """Test different agent communication event types used in orchestration"""
         agent = MockAgentForTesting()
-        websocket_manager = MagicMock()
-        websocket_manager.send_message = AsyncMock()
+        websocket_manager = MagicNone  # TODO: Use real service instance
+        websocket_manager.send_message = AsyncNone  # TODO: Use real service instance
         agent.websocket_manager = websocket_manager
         
         run_id = "run_test_123"

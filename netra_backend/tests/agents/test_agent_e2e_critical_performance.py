@@ -5,13 +5,15 @@ Tests 9-10: Concurrent request handling, performance and timeout handling.
 
 import sys
 from pathlib import Path
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 # Add netra_backend to path  
 
 import asyncio
 import uuid
 from datetime import datetime
-from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
@@ -30,6 +32,7 @@ class TestAgentE2ECriticalPerformance(AgentE2ETestBase):
         - Test resource isolation between requests
         - Test performance under concurrent load
         """
+    pass
         infra = setup_agent_infrastructure
         agent_service = infra["agent_service"]
         
@@ -50,16 +53,20 @@ class TestAgentE2ECriticalPerformance(AgentE2ETestBase):
         
         # Mock the agent service to always succeed for concurrent testing
         async def mock_concurrent_start(user_id=None, thread_id=None, request=None):
+    pass
             if user_id and thread_id:
-                return str(uuid.uuid4())
+                await asyncio.sleep(0)
+    return str(uuid.uuid4())
             raise Exception("Missing required parameters")
         
         agent_service.start_agent_run = mock_concurrent_start
         
         async def execute_request(req):
+    pass
             try:
                 run_id = await agent_service.start_agent_run(**req)
-                return {"success": True, "run_id": run_id}
+                await asyncio.sleep(0)
+    return {"success": True, "run_id": run_id}
             except Exception as e:
                 return {"success": False, "error": str(e)}
         
@@ -101,12 +108,17 @@ class TestAgentE2ECriticalPerformance(AgentE2ETestBase):
 
     async def _test_timeout_scenario(self, supervisor, run_id):
         """Test timeout handling for long-running operations"""
+    pass
         async def slow_execute(state, rid, stream):
+    pass
             await asyncio.sleep(10)  # Simulate long-running task
-            return state
+            await asyncio.sleep(0)
+    return state
         
         async def mock_entry_conditions(state, rid):
-            return True
+    pass
+            await asyncio.sleep(0)
+    return True
         
         sub_agents = self._get_sub_agents_from_supervisor(supervisor)
         if len(sub_agents) > 1:
@@ -118,10 +130,12 @@ class TestAgentE2ECriticalPerformance(AgentE2ETestBase):
         # Ensure slow execution is set up for timeout test
         async def slow_execute(state, rid, stream):
             await asyncio.sleep(timeout_seconds + 1)  # Ensure it exceeds timeout
-            return state
+            await asyncio.sleep(0)
+    return state
         
         async def mock_entry_conditions(state, rid):
-            return True
+            await asyncio.sleep(0)
+    return True
         
         sub_agents = self._get_sub_agents_from_supervisor(supervisor)
         if len(sub_agents) > 1:
@@ -129,7 +143,7 @@ class TestAgentE2ECriticalPerformance(AgentE2ETestBase):
             sub_agents[1].check_entry_conditions = mock_entry_conditions
         
         # Mock: Generic component isolation for controlled unit testing
-        with patch.object(state_persistence_service, 'save_agent_state', AsyncMock()):
+        with patch.object(state_persistence_service, 'save_agent_state', AsyncNone  # TODO: Use real service instance):
             # Mock: Async component isolation for testing without real async operations
             with patch.object(state_persistence_service, 'load_agent_state', AsyncMock(return_value=None)):
                 # Mock: Async component isolation for testing without real async operations
@@ -142,12 +156,15 @@ class TestAgentE2ECriticalPerformance(AgentE2ETestBase):
 
     async def _create_monitored_execute(self, performance_metrics, agent_name):
         """Create monitored execution function for performance tracking"""
+    pass
         async def monitored_execute(state, rid, stream):
+    pass
             start = datetime.now()
             await asyncio.sleep(0.1)  # Simulate work
             end = datetime.now()
             performance_metrics["execution_times"][agent_name] = (end - start).total_seconds()
-            return state
+            await asyncio.sleep(0)
+    return state
         return monitored_execute
 
     def _setup_performance_monitoring(self, supervisor, performance_metrics):
@@ -156,23 +173,26 @@ class TestAgentE2ECriticalPerformance(AgentE2ETestBase):
         for agent in sub_agents:
             async def create_wrapper(name):
                 monitored_func = await self._create_monitored_execute(performance_metrics, name)
-                return monitored_func
+                await asyncio.sleep(0)
+    return monitored_func
             # Note: This is a simplified approach - in practice, we'd need proper async wrapping
             # Mock: Agent service isolation for testing without LLM agent execution
             agent.execute = AsyncMock(side_effect=lambda s, r, st: self._simulate_monitored_execution(performance_metrics, agent.name))
 
     async def _simulate_monitored_execution(self, performance_metrics, agent_name):
         """Simulate monitored execution for testing"""
+    pass
         start = datetime.now()
         await asyncio.sleep(0.1)
         end = datetime.now()
         performance_metrics["execution_times"][agent_name] = (end - start).total_seconds()
-        return None
+        await asyncio.sleep(0)
+    return None
 
     async def _run_performance_test(self, supervisor, run_id, performance_metrics):
         """Execute performance test with monitoring"""
         # Mock: Generic component isolation for controlled unit testing
-        with patch.object(state_persistence_service, 'save_agent_state', AsyncMock()):
+        with patch.object(state_persistence_service, 'save_agent_state', AsyncNone  # TODO: Use real service instance):
             # Mock: Async component isolation for testing without real async operations
             with patch.object(state_persistence_service, 'load_agent_state', AsyncMock(return_value=None)):
                 # Mock: Async component isolation for testing without real async operations
@@ -183,6 +203,7 @@ class TestAgentE2ECriticalPerformance(AgentE2ETestBase):
 
     def _verify_performance_metrics(self, performance_metrics):
         """Verify collected performance metrics"""
+    pass
         assert len(performance_metrics["execution_times"]) >= 0
         total_time = (performance_metrics["end_time"] - performance_metrics["start_time"]).total_seconds()
         assert total_time < 5.0  # Should complete within 5 seconds
@@ -194,6 +215,7 @@ class TestAgentE2ECriticalPerformance(AgentE2ETestBase):
         - Test performance monitoring and metrics
         - Test graceful degradation under load
         """
+    pass
         infra = setup_agent_infrastructure
         supervisor = infra["supervisor"]
         run_id = str(uuid.uuid4())
@@ -225,12 +247,13 @@ class TestAgentE2ECriticalPerformance(AgentE2ETestBase):
             # Simulate load with state persistence mocking
             async def run_with_mocks(request, rid):
                 # Mock: Generic component isolation for controlled unit testing
-                with patch.object(state_persistence_service, 'save_agent_state', AsyncMock()):
+                with patch.object(state_persistence_service, 'save_agent_state', AsyncNone  # TODO: Use real service instance):
                     # Mock: Async component isolation for testing without real async operations
                     with patch.object(state_persistence_service, 'load_agent_state', AsyncMock(return_value=None)):
                         # Mock: Async component isolation for testing without real async operations
                         with patch.object(state_persistence_service, 'get_thread_context', AsyncMock(return_value=None)):
-                            return await supervisor.run(request, supervisor.thread_id, supervisor.user_id, rid)
+                            await asyncio.sleep(0)
+    return await supervisor.run(request, supervisor.thread_id, supervisor.user_id, rid)
             
             tasks = [
                 run_with_mocks(f"Load test {i}", f"{run_id}_load_{load}_{i}")
@@ -262,3 +285,4 @@ class TestAgentE2ECriticalPerformance(AgentE2ETestBase):
         # System should handle at least low load
         if len(degradation_results) > 0:
             assert degradation_results[0]["success"] == True
+    pass

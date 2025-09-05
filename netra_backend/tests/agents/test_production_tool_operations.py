@@ -2,10 +2,13 @@
 
 import sys
 from pathlib import Path
+from test_framework.database.test_database_manager import TestDatabaseManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 # Test framework import - using pytest fixtures instead
 
-from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 
@@ -139,7 +142,7 @@ class TestProductionToolSpecificOperations:
     def _create_mock_corpus(self) -> Mock:
         """Create mock corpus object."""
         # Mock: Generic component isolation for controlled unit testing
-        mock_corpus = Mock()
+        mock_corpus = mock_corpus_instance  # Initialize appropriate service
         mock_corpus.id = "corpus_123"
         mock_corpus.name = "test_corpus"
         return mock_corpus

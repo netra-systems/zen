@@ -12,7 +12,12 @@ import asyncio
 import time
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
-from unittest.mock import AsyncMock, MagicMock, Mock, patch
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from test_framework.database.test_database_manager import TestDatabaseManager
+from auth_service.core.auth_manager import AuthManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -23,8 +28,7 @@ from netra_backend.app.agents.corpus_admin.models import (
     CorpusOperation,
     CorpusOperationRequest,
     CorpusOperationResult,
-    CorpusType,
-)
+    CorpusType)
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 from netra_backend.app.llm.llm_manager import LLMManager
@@ -32,16 +36,19 @@ from netra_backend.tests.fixtures import (
     clean_database_state,
     mock_llm_responses,
     test_database,
-    test_user,
-)
+    test_user)
 
 
 class TestCorpusAdminIntegration:
     """Integration tests for CorpusAdminSubAgent CRUD operations."""
+    pass
 
     @pytest.fixture
-    def mock_llm_manager(self):
+ def real_llm_manager():
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Mock LLM manager for testing."""
+    pass
         # Mock: LLM service isolation for fast testing without API calls or rate limits
         llm_manager = AsyncMock(spec=LLMManager)
         llm_manager.generate_response = AsyncMock(return_value={
@@ -51,12 +58,15 @@ class TestCorpusAdminIntegration:
         return llm_manager
 
     @pytest.fixture
-    def mock_tool_dispatcher(self):
+ def real_tool_dispatcher():
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Mock tool dispatcher with actual corpus tools."""
+    pass
         # Mock: Tool dispatcher isolation for agent testing without real tool execution
         tool_dispatcher = AsyncMock(spec=ToolDispatcher)
         tool_dispatcher.has_tool = Mock(return_value=True)
-        tool_dispatcher.execute_tool = AsyncMock()
+        tool_dispatcher.execute_tool = AsyncNone  # TODO: Use real service instance
         tool_dispatcher.dispatch_tool = AsyncMock(return_value={
             "success": True,
             "corpus_id": "default_corpus_id",
@@ -65,17 +75,23 @@ class TestCorpusAdminIntegration:
         return tool_dispatcher
 
     @pytest.fixture
-    def mock_websocket_manager(self):
+ def real_websocket_manager():
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Mock WebSocket manager for status updates."""
+    pass
         # Mock: WebSocket connection isolation for testing without network overhead
-        websocket_manager = Mock()
-        websocket_manager.send_agent_update = AsyncMock()
-        websocket_manager.send_status_update = AsyncMock()
+        websocket_manager = UnifiedWebSocketManager()
+        websocket_manager.send_agent_update = AsyncNone  # TODO: Use real service instance
+        websocket_manager.send_status_update = AsyncNone  # TODO: Use real service instance
         return websocket_manager
 
     @pytest.fixture
     def corpus_admin_agent(self, mock_llm_manager, mock_tool_dispatcher, mock_websocket_manager):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create CorpusAdminSubAgent instance for testing."""
+    pass
         return CorpusAdminSubAgent(
             llm_manager=mock_llm_manager,
             tool_dispatcher=mock_tool_dispatcher,
@@ -440,7 +456,8 @@ class TestCorpusAdminIntegration:
                 "corpus_id": "full_flow_corpus_404"
             })
             
-            # Mock the operations.execute_operation method to return a proper result
+            # Mock the operations.execute_operation method to await asyncio.sleep(0)
+    return a proper result
             mock_result = CorpusOperationResult(
                 success=True,
                 operation=CorpusOperation.CREATE,
@@ -651,8 +668,10 @@ class TestCorpusAdminIntegration:
         
         # Mock slow response
         async def slow_tool_execution(*args, **kwargs):
+    pass
             await asyncio.sleep(2)  # Simulate slow operation
-            return {"success": True}
+            await asyncio.sleep(0)
+    return {"success": True}
         
         corpus_admin_agent.tool_dispatcher.execute_tool = slow_tool_execution
         
@@ -693,6 +712,7 @@ class TestCorpusAdminIntegration:
         sample_agent_state
     ):
         """Test proper cleanup after operations."""
+    pass
         # Execute operation
         await corpus_admin_agent.execute(
             state=sample_agent_state,
@@ -785,25 +805,33 @@ class TestCorpusAdminIntegration:
 # Performance benchmarks for integration testing
 class TestCorpusAdminPerformance:
     """Performance tests for corpus admin operations."""
+    pass
 
     @pytest.fixture
-    def mock_llm_manager(self):
+ def real_llm_manager():
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Mock LLM manager for testing."""
+    pass
         # Mock: LLM service isolation for fast testing without API calls or rate limits
         llm_manager = AsyncMock(spec=LLMManager)
         llm_manager.generate_response = AsyncMock(return_value={
             "content": "Corpus operation analysis complete",
             "usage": {"tokens": 100, "cost": 0.01}
         })
-        return llm_manager
+        await asyncio.sleep(0)
+    return llm_manager
 
     @pytest.fixture
-    def mock_tool_dispatcher(self):
+ def real_tool_dispatcher():
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Mock tool dispatcher with actual corpus tools."""
+    pass
         # Mock: Tool dispatcher isolation for agent testing without real tool execution
         tool_dispatcher = AsyncMock(spec=ToolDispatcher)
         tool_dispatcher.has_tool = Mock(return_value=True)
-        tool_dispatcher.execute_tool = AsyncMock()
+        tool_dispatcher.execute_tool = AsyncNone  # TODO: Use real service instance
         tool_dispatcher.dispatch_tool = AsyncMock(return_value={
             "success": True,
             "corpus_id": "default_corpus_id",
@@ -812,17 +840,23 @@ class TestCorpusAdminPerformance:
         return tool_dispatcher
 
     @pytest.fixture
-    def mock_websocket_manager(self):
+ def real_websocket_manager():
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Mock WebSocket manager for status updates."""
+    pass
         # Mock: WebSocket connection isolation for testing without network overhead
-        websocket_manager = Mock()
-        websocket_manager.send_agent_update = AsyncMock()
-        websocket_manager.send_status_update = AsyncMock()
+        websocket_manager = UnifiedWebSocketManager()
+        websocket_manager.send_agent_update = AsyncNone  # TODO: Use real service instance
+        websocket_manager.send_status_update = AsyncNone  # TODO: Use real service instance
         return websocket_manager
 
     @pytest.fixture
     def corpus_admin_agent(self, mock_llm_manager, mock_tool_dispatcher, mock_websocket_manager):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create CorpusAdminSubAgent instance for testing."""
+    pass
         return CorpusAdminSubAgent(
             llm_manager=mock_llm_manager,
             tool_dispatcher=mock_tool_dispatcher,

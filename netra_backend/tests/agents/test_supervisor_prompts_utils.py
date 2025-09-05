@@ -6,6 +6,11 @@ Test classes: TestAgentPromptsTemplateRendering, TestEnhancedPromptsContextBuild
 
 import sys
 from pathlib import Path
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from auth_service.core.auth_manager import AuthManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 # Test framework import - using pytest fixtures instead
 
@@ -13,7 +18,6 @@ import asyncio
 import json
 import time
 from datetime import datetime, timezone
-from unittest.mock import AsyncMock, MagicMock, Mock, patch, call, patch
 
 import pytest
 from netra_backend.app.schemas import (

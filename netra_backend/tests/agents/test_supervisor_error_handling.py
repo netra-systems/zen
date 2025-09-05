@@ -5,12 +5,14 @@ Coverage: Error handling, recovery mechanisms, and resilience patterns
 
 import sys
 from pathlib import Path
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 # Test framework import - using pytest fixtures instead
 
 import asyncio
 from datetime import datetime, timezone
-from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 from netra_backend.app.schemas import SubAgentLifecycle
@@ -183,7 +185,7 @@ class TestRetryMechanisms:
         await asyncio.sleep(0.15)
         agent = supervisor.agents["optimization"]
         # Mock: Generic component isolation for controlled unit testing
-        agent.execute = AsyncMock()
+        agent.execute = AsyncNone  # TODO: Use real service instance
         agent.execute.return_value = create_agent_state("Test", 
                                                        optimizations_result={"success": True})
         
@@ -207,7 +209,7 @@ class TestErrorPropagation:
         
         data_agent = supervisor.agents["data"]
         # Mock: Generic component isolation for controlled unit testing
-        data_agent.execute = AsyncMock()
+        data_agent.execute = AsyncNone  # TODO: Use real service instance
         data_agent.execute.return_value = create_agent_state("Test", 
                                                            data_result={"status": "healthy"})
         
@@ -231,7 +233,7 @@ class TestErrorPropagation:
         # Setup pipeline: triage (works) -> data (fails) -> optimization (works)
         triage_agent = supervisor.agents["triage"]
         # Mock: Generic component isolation for controlled unit testing
-        triage_agent.execute = AsyncMock()
+        triage_agent.execute = AsyncNone  # TODO: Use real service instance
         triage_agent.execute.return_value = create_agent_state("Test",
                                                              triage_result={"requires_data": True})
         
@@ -239,7 +241,7 @@ class TestErrorPropagation:
         
         opt_agent = supervisor.agents["optimization"]
         # Mock: Generic component isolation for controlled unit testing
-        opt_agent.execute = AsyncMock()
+        opt_agent.execute = AsyncNone  # TODO: Use real service instance
         opt_agent.execute.return_value = create_agent_state("Test",
                                                           optimizations_result={"fallback": True})
         
@@ -273,7 +275,7 @@ class TestErrorRecoveryStrategies:
         # Triage provides minimal response
         triage_agent = supervisor.agents["triage"]
         # Mock: Generic component isolation for controlled unit testing
-        triage_agent.execute = AsyncMock()
+        triage_agent.execute = AsyncNone  # TODO: Use real service instance
         triage_agent.execute.return_value = create_agent_state("Test",
                                                              triage_result={
                                                                  "message_type": "query",
@@ -301,7 +303,7 @@ class TestErrorRecoveryStrategies:
         # Mock a fallback data processing capability in optimization agent
         opt_agent = supervisor.agents["optimization"]
         # Mock: Generic component isolation for controlled unit testing
-        opt_agent.execute = AsyncMock()
+        opt_agent.execute = AsyncNone  # TODO: Use real service instance
         opt_agent.execute.return_value = create_agent_state("Test",
                                                           optimizations_result={
                                                               "fallback_data_processing": True,

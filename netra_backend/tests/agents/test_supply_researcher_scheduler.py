@@ -4,11 +4,14 @@ Tests for SupplyResearchScheduler functionality
 
 import sys
 from pathlib import Path
+from test_framework.database.test_database_manager import TestDatabaseManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 # Test framework import - using pytest fixtures instead
 
 from datetime import UTC, datetime, timedelta
-from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 from netra_backend.app.services.background_task_manager import BackgroundTaskManager
@@ -31,7 +34,7 @@ class TestSupplyResearchScheduler:
         """Test scheduler initializes with default schedules"""
         background_manager = BackgroundTaskManager()
         # Mock: LLM provider isolation to prevent external API usage and costs
-        llm_manager = Mock()
+        llm_manager = llm_manager_instance  # Initialize appropriate service
         
         scheduler = SupplyResearchScheduler(background_manager, llm_manager)
         
@@ -72,7 +75,7 @@ class TestSupplyResearchScheduler:
         """Test executing scheduled research task"""
         background_manager = BackgroundTaskManager()
         # Mock: LLM provider isolation to prevent external API usage and costs
-        llm_manager = Mock()
+        llm_manager = llm_manager_instance  # Initialize appropriate service
         scheduler = SupplyResearchScheduler(background_manager, llm_manager)
         
         schedule = ResearchSchedule(
@@ -85,7 +88,7 @@ class TestSupplyResearchScheduler:
         # Mock: Database access isolation for fast, reliable unit testing
         with patch('netra_backend.app.services.supply_research.research_executor.Database') as mock_db_manager:
             # Mock: Generic component isolation for controlled unit testing
-            mock_db = Mock()
+            mock_db = TestDatabaseManager().get_session()
             # Mock: Component isolation for controlled unit testing
             mock_db_manager.return_value.get_db.return_value.__enter__ = Mock(return_value=mock_db)
             # Mock: Component isolation for controlled unit testing
@@ -103,7 +106,7 @@ class TestSupplyResearchScheduler:
         """Test adding and removing schedules"""
         background_manager = BackgroundTaskManager()
         # Mock: LLM provider isolation to prevent external API usage and costs
-        llm_manager = Mock()
+        llm_manager = llm_manager_instance  # Initialize appropriate service
         scheduler = SupplyResearchScheduler(background_manager, llm_manager)
         
         initial_count = len(scheduler.schedules)
@@ -125,7 +128,7 @@ class TestSupplyResearchScheduler:
         """Test enabling and disabling schedules"""
         background_manager = BackgroundTaskManager()
         # Mock: LLM provider isolation to prevent external API usage and costs
-        llm_manager = Mock()
+        llm_manager = llm_manager_instance  # Initialize appropriate service
         scheduler = SupplyResearchScheduler(background_manager, llm_manager)
         
         # Disable a schedule
@@ -141,7 +144,7 @@ class TestSupplyResearchScheduler:
         """Test getting status of all schedules"""
         background_manager = BackgroundTaskManager()
         # Mock: LLM provider isolation to prevent external API usage and costs
-        llm_manager = Mock()
+        llm_manager = llm_manager_instance  # Initialize appropriate service
         scheduler = SupplyResearchScheduler(background_manager, llm_manager)
         
         status = scheduler.get_schedule_status()
@@ -156,13 +159,13 @@ class TestSupplyResearchScheduler:
         """Test scheduler integration with agent"""
         background_manager = BackgroundTaskManager()
         # Mock: LLM provider isolation to prevent external API usage and costs
-        llm_manager = Mock()
+        llm_manager = llm_manager_instance  # Initialize appropriate service
         scheduler = SupplyResearchScheduler(background_manager, llm_manager)
         
         # Mock: Database access isolation for fast, reliable unit testing
         with patch('netra_backend.app.db.postgres.Database') as mock_db_manager:
             # Mock: Generic component isolation for controlled unit testing
-            mock_db = Mock()
+            mock_db = TestDatabaseManager().get_session()
             # Mock: Component isolation for controlled unit testing
             mock_db_manager.return_value.get_db.return_value.__enter__ = Mock(return_value=mock_db)
             # Mock: Component isolation for controlled unit testing

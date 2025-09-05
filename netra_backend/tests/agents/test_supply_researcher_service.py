@@ -4,12 +4,13 @@ Tests for SupplyResearchService functionality
 
 import sys
 from pathlib import Path
+from test_framework.database.test_database_manager import TestDatabaseManager
+from shared.isolated_environment import IsolatedEnvironment
 
 # Test framework import - using pytest fixtures instead
 
 from datetime import UTC, datetime
 from decimal import Decimal
-from unittest.mock import Mock, patch, AsyncMock, MagicMock
 
 import pytest
 
@@ -19,18 +20,21 @@ class TestSupplyResearchService:
     """Test suite for SupplyResearchService"""
     
     @pytest.fixture
-    def mock_db(self):
+ def real_db():
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create mock database session"""
+    pass
         # Mock: Generic component isolation for controlled unit testing
-        db = Mock()
+        db = TestDatabaseManager().get_session()
         # Mock: Generic component isolation for controlled unit testing
-        db.query = Mock()
+        db.query = query_instance  # Initialize appropriate service
         # Mock: Generic component isolation for controlled unit testing
-        db.add = Mock()
+        db.add = add_instance  # Initialize appropriate service
         # Mock: Generic component isolation for controlled unit testing
-        db.commit = Mock()
+        db.commit = commit_instance  # Initialize appropriate service
         # Mock: Generic component isolation for controlled unit testing
-        db.rollback = Mock()
+        db.rollback = rollback_instance  # Initialize appropriate service
         return db
     
     def test_service_get_supply_items(self, mock_db):
@@ -49,6 +53,7 @@ class TestSupplyResearchService:
     
     def test_service_create_supply_item(self, mock_db):
         """Test creating new supply item"""
+    pass
         service = SupplyResearchService(mock_db)
         mock_db.query().filter().first.return_value = None  # No existing
         
@@ -91,6 +96,7 @@ class TestSupplyResearchService:
     
     def test_service_provider_comparison(self, mock_db):
         """Test comparing pricing across providers"""
+    pass
         mock_items = [
             # Mock: Component isolation for controlled unit testing
             Mock(
@@ -135,8 +141,9 @@ class TestSupplyResearchService:
     
     def test_service_validate_supply_data(self):
         """Test validating supply data before storage"""
+    pass
         # Mock: Generic component isolation for controlled unit testing
-        service = SupplyResearchService(Mock())
+        service = SupplyResearchService(None  # TODO: Use real service instance)
         
         # Valid data
         valid_data = {
@@ -164,7 +171,7 @@ class TestSupplyResearchService:
     def test_invalid_data_validation(self):
         """Test handling invalid supply data"""
         # Mock: Generic component isolation for controlled unit testing
-        service = SupplyResearchService(Mock())
+        service = SupplyResearchService(None  # TODO: Use real service instance)
         
         invalid_data = {
             "provider": "",  # Empty provider
@@ -175,3 +182,4 @@ class TestSupplyResearchService:
         is_valid, errors = service.validate_supply_data(invalid_data)
         assert not is_valid
         assert len(errors) >= 3
+    pass

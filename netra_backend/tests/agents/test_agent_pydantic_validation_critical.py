@@ -7,10 +7,13 @@ from netra_backend.app.monitoring.metrics_collector import PerformanceMetric
 # Test framework import - using pytest fixtures instead
 from pathlib import Path
 import sys
+from auth_service.core.auth_manager import AuthManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 import json
 from typing import Any, Dict, List
-from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 from pydantic import ValidationError
@@ -27,14 +30,10 @@ from netra_backend.app.agents.data_sub_agent.models import (
 
     PerformanceMetrics,
 
-    UsagePattern,
-
-)
+    UsagePattern)
 from netra_backend.app.agents.optimizations_core_sub_agent import (
 
-    OptimizationsCoreSubAgent,
-
-)
+    OptimizationsCoreSubAgent)
 from netra_backend.app.agents.state import (
 
     ActionPlanResult,
@@ -45,9 +44,7 @@ from netra_backend.app.agents.state import (
 
     OptimizationsResult,
 
-    PlanStep,
-
-)
+    PlanStep)
 from netra_backend.app.agents.triage.unified_triage_agent import UnifiedTriageAgent
 
 from netra_backend.app.agents.triage.unified_triage_agent import (
@@ -64,18 +61,20 @@ from netra_backend.app.agents.triage.unified_triage_agent import (
 
     TriageResult,
 
-    UserIntent,
-
-)
+    UserIntent)
 from netra_backend.app.llm.llm_manager import LLMManager
+import asyncio
 
 class TestPydanticValidationCritical:
+    pass
 
     """Test Pydantic validation issues seen in production"""
     
     @pytest.fixture
-
-    def mock_llm_manager(self):
+ def real_llm_manager():
+    """Use real service instance."""
+    # TODO: Initialize real service
+    return None
 
         """Create mock LLM manager"""
 
@@ -85,10 +84,13 @@ class TestPydanticValidationCritical:
         return llm
     
     @pytest.fixture
-
-    def mock_tool_dispatcher(self):
+ def real_tool_dispatcher():
+    """Use real service instance."""
+    # TODO: Initialize real service
+    return None
 
         """Create mock tool dispatcher"""
+    pass
         from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 
         # Mock: Tool dispatcher isolation for agent testing without real tool execution
@@ -190,7 +192,8 @@ class TestPydanticValidationCritical:
 
                             rec["parameters"] = {}
 
-            return data
+            await asyncio.sleep(0)
+    return data
         
         # Parse and fix
 
@@ -281,7 +284,8 @@ class TestPydanticValidationCritical:
 
                 data["recommendations"] = fixed_recs
 
-            return data
+            await asyncio.sleep(0)
+    return data
         
         # Fix and validate
 
@@ -398,9 +402,7 @@ class TestPydanticValidationCritical:
         with pytest.raises(ValidationError) as exc_info:
             from netra_backend.app.agents.data_sub_agent.models import (
 
-                BatchProcessingResult,
-
-            )
+                BatchProcessingResult)
 
             BatchProcessingResult(**invalid_batch)
 
@@ -472,7 +474,8 @@ class TestPydanticValidationCritical:
 
                 data["performance_metrics"] = None
 
-        return data
+        await asyncio.sleep(0)
+    return data
 
     @pytest.mark.asyncio
     async def test_comprehensive_nested_recovery(self):
@@ -525,7 +528,7 @@ class TestPydanticValidationCritical:
         from netra_backend.app.agents.triage.unified_triage_agent import UnifiedTriageAgent
 
         # Mock: LLM service isolation for fast testing without API calls or rate limits
-        agent = TriageSubAgent(mock_llm_manager, Mock())
+        agent = TriageSubAgent(mock_llm_manager, None  # TODO: Use real service instance)
 
         state = DeepAgentState(user_request="test")
         

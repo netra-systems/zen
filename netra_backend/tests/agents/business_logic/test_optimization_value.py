@@ -12,9 +12,12 @@ actionable recommendations with measurable ROI.
 
 import pytest
 from typing import Dict, Any, List, Optional
-from unittest.mock import AsyncMock, MagicMock, patch
 import json
 from decimal import Decimal
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 from netra_backend.app.agents.optimizations_core_sub_agent import OptimizationsCoreSubAgent
 from netra_backend.app.agents.actions_to_meet_goals_sub_agent import ActionsToMeetGoalsSubAgent
@@ -117,9 +120,9 @@ class TestOptimizationOutputQuality:
     @pytest.fixture
     async def optimization_agent(self):
         """Create optimization agent with mocked dependencies."""
-        llm_manager = AsyncMock()
-        tool_dispatcher = AsyncMock()
-        websocket_manager = AsyncMock()
+        llm_manager = AsyncNone  # TODO: Use real service instance
+        tool_dispatcher = AsyncNone  # TODO: Use real service instance
+        websocket_manager = AsyncNone  # TODO: Use real service instance
         
         agent = OptimizationsCoreSubAgent(
             llm_manager=llm_manager,
@@ -131,8 +134,8 @@ class TestOptimizationOutputQuality:
     @pytest.fixture
     async def actions_agent(self):
         """Create actions agent with mocked dependencies."""
-        llm_manager = AsyncMock()
-        tool_dispatcher = AsyncMock()
+        llm_manager = AsyncNone  # TODO: Use real service instance
+        tool_dispatcher = AsyncNone  # TODO: Use real service instance
         
         agent = ActionsToMeetGoalsSubAgent(
             llm_manager=llm_manager,

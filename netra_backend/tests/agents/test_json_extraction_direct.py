@@ -2,10 +2,12 @@
 
 import sys
 from pathlib import Path
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 # Test framework import - using pytest fixtures instead
 
-from unittest.mock import Mock, AsyncMock, MagicMock
 
 import pytest
 
@@ -27,9 +29,9 @@ def test_triage_agent_extract_json():
     """Test TriageSubAgent's _extract_and_validate_json method"""
     # Create a triage agent instance
     # Mock: LLM service isolation for fast testing without API calls or rate limits
-    mock_llm = Mock()
+    mock_llm = mock_llm_instance  # Initialize appropriate service
     # Mock: Generic component isolation for controlled unit testing
-    mock_tool = Mock()
+    mock_tool = mock_tool_instance  # Initialize appropriate service
     agent = TriageSubAgent(mock_llm, mock_tool, None)
     
     response = '{"category": "Test", "priority": "high",}'

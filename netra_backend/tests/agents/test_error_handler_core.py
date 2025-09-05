@@ -5,12 +5,16 @@ All functions ≤8 lines per requirements.
 
 import sys
 from pathlib import Path
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from test_framework.database.test_database_manager import TestDatabaseManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 # Add netra_backend to path  
 
 import asyncio
 import time
-from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 
@@ -18,12 +22,10 @@ from netra_backend.app.core.exceptions_agent import AgentError
 from netra_backend.app.agents.agent_error_types import (
     DatabaseError,
     NetworkError,
-    AgentValidationError as ValidationError,
-)
+    AgentValidationError as ValidationError)
 from netra_backend.app.core.unified_error_handler import (
     AgentErrorHandler,
-    agent_error_handler,
-)
+    agent_error_handler)
 from netra_backend.app.core.error_codes import ErrorSeverity
 from netra_backend.app.schemas.shared_types import ErrorContext
 
@@ -32,14 +34,20 @@ class TestErrorHandler:
     
     @pytest.fixture
     def error_handler(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create error handler for testing."""
+    pass
         from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
         unified_handler = UnifiedErrorHandler()
         return AgentErrorHandler(unified_handler)
     
     @pytest.fixture
     def sample_context(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create sample error context for testing."""
+    pass
         return ErrorContext(
             trace_id="test_trace_123",
             operation="test_operation", 
@@ -55,17 +63,20 @@ class TestErrorHandler:
 
     def test_error_handler_initialization(self, error_handler):
         """Test ErrorHandler initialization."""
+    pass
         self._assert_error_handler_initialization(error_handler)
 
     async def _test_handle_error_with_agent_error_helper(self, error_handler, sample_context):
         """Helper for testing handle_error with agent error"""
         error = ValidationError("Validation failed")
         result = await error_handler.handle_error(error, sample_context)
-        return result, error
+        await asyncio.sleep(0)
+    return result, error
 
     @pytest.mark.asyncio
     async def test_handle_error_with_agent_error(self, error_handler, sample_context):
         """Test handle_error with AgentError."""
+    pass
         result, error = await self._test_handle_error_with_agent_error_helper(error_handler, sample_context)
         assert result == error
         assert len(error_handler.error_history) == 1
@@ -74,11 +85,13 @@ class TestErrorHandler:
         """Helper for testing handle_error with generic exception"""
         original_error = ValueError("Generic error")
         result = await error_handler.handle_error(original_error, sample_context)
-        return result, original_error
+        await asyncio.sleep(0)
+    return result, original_error
 
     @pytest.mark.asyncio
     async def test_handle_error_with_generic_exception(self, error_handler, sample_context):
         """Test handle_error with generic exception."""
+    pass
         result, original_error = await self._test_handle_error_with_generic_exception_helper(error_handler, sample_context)
         assert isinstance(result, AgentError)
         assert result.original_error == original_error
@@ -88,11 +101,13 @@ class TestErrorHandler:
         async def operation():
             await asyncio.sleep(0.01)
             raise NetworkError("Network failure")
-        return operation
+        await asyncio.sleep(0)
+    return operation
 
     @pytest.mark.asyncio
     async def test_handle_error_with_retry_context(self, error_handler, sample_context):
         """Test handle_error with retry context."""
+    pass
         error = NetworkError("Temporary failure")
         sample_context.retry_count = 1
         sample_context.max_retries = 3
@@ -103,11 +118,13 @@ class TestErrorHandler:
     def _create_websocket_error_for_handling_test(self):
         """Create WebSocket error for handling test"""
         from netra_backend.app.core.exceptions_websocket import WebSocketError
-        return WebSocketError("WebSocket connection lost")
+        await asyncio.sleep(0)
+    return WebSocketError("WebSocket connection lost")
 
     @pytest.mark.asyncio
     async def test_handle_websocket_error(self, error_handler, sample_context):
         """Test handling WebSocket-specific errors."""
+    pass
         error = self._create_websocket_error_for_handling_test()
         result = await error_handler.handle_error(error, sample_context)
         
@@ -133,7 +150,9 @@ class TestErrorHandler:
 
     def _create_errors_for_logging_test(self):
         """Create errors for logging test"""
-        return [
+    pass
+        await asyncio.sleep(0)
+    return [
             ValidationError("Validation error"),
             NetworkError("Network error"),
             AgentError("Critical error", severity=ErrorSeverity.CRITICAL)
@@ -159,6 +178,7 @@ class TestErrorHandler:
 
     def _create_error_for_storage_test(self):
         """Create error for storage testing"""
+    pass
         return ValidationError("Test error for storage")
 
     def test_store_error(self, error_handler, sample_context):
@@ -171,6 +191,7 @@ class TestErrorHandler:
 
     def _fill_error_history_to_limit(self, error_handler):
         """Fill error history to test limit"""
+    pass
         for i in range(1005):  # Exceed limit
             error = AgentError(f"Error {i}")
             error_handler._store_error(error)
@@ -182,6 +203,7 @@ class TestErrorHandler:
 
     def _create_context_with_max_retries_exceeded(self):
         """Create context with max retries exceeded"""
+    pass
         return ErrorContext(
             trace_id="test_trace_456",
             operation="test_op",
@@ -202,6 +224,7 @@ class TestErrorHandler:
 
     def _create_retryable_network_error(self):
         """Create retryable network error"""
+    pass
         return NetworkError("Temporary network issue")
 
     def test_should_retry_operation_retryable_error(self, error_handler, sample_context):
@@ -217,6 +240,7 @@ class TestErrorHandler:
 
     def test_error_handler_memory_usage(self, error_handler):
         """Test error handler memory usage with many errors."""
+    pass
         # Add many errors to test memory management
         for i in range(2000):
             error = AgentError(f"Memory test error {i}")

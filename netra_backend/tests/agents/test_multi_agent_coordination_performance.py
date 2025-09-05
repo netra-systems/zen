@@ -6,9 +6,12 @@ Comprehensive testing of agent coordination patterns and performance characteris
 import asyncio
 import time
 import pytest
-from unittest.mock import AsyncMock, Mock, patch
 from typing import Dict, Any, List, Optional
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from test_framework.database.test_database_manager import TestDatabaseManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
@@ -19,23 +22,27 @@ from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 
 class TestMultiAgentCoordinationPerformance:
     """Test multi-agent coordination patterns and performance."""
+    pass
 
     @pytest.fixture
     def agent_pool(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create a pool of mock agents for testing."""
+    pass
         agents = {}
         
         # Supervisor agent
         supervisor = Mock(spec=SupervisorAgent)
-        supervisor.execute = AsyncMock()
+        supervisor.execute = AsyncNone  # TODO: Use real service instance
         supervisor.get_status = Mock(return_value="idle")
-        supervisor.delegate_task = AsyncMock()
+        supervisor.delegate_task = AsyncNone  # TODO: Use real service instance
         agents["supervisor"] = supervisor
         
         # Sub-agents
         for agent_type in ["triage", "data", "analysis", "research"]:
-            agent = Mock()
-            agent.execute = AsyncMock()
+            agent = AgentRegistry().get_agent("supervisor")
+            agent.execute = AsyncNone  # TODO: Use real service instance
             agent.get_status = Mock(return_value="idle")
             agent.get_capabilities = Mock(return_value=[f"{agent_type}_processing"])
             agent.estimate_execution_time = Mock(return_value=1.0)
@@ -45,13 +52,16 @@ class TestMultiAgentCoordinationPerformance:
 
     @pytest.fixture
     def coordination_manager(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create mock coordination manager."""
-        manager = Mock()
-        manager.coordinate_agents = AsyncMock()
-        manager.schedule_tasks = AsyncMock()
-        manager.monitor_progress = AsyncMock()
-        manager.handle_agent_failure = AsyncMock()
-        manager.balance_load = AsyncMock()
+    pass
+        manager = manager_instance  # Initialize appropriate service
+        manager.coordinate_agents = AsyncNone  # TODO: Use real service instance
+        manager.schedule_tasks = AsyncNone  # TODO: Use real service instance
+        manager.monitor_progress = AsyncNone  # TODO: Use real service instance
+        manager.handle_agent_failure = AsyncNone  # TODO: Use real service instance
+        manager.balance_load = AsyncNone  # TODO: Use real service instance
         return manager
 
     @pytest.mark.asyncio
@@ -84,7 +94,8 @@ class TestMultiAgentCoordinationPerformance:
             
             execution_times[f"{agent_name}_{task_name}"] = time.time() - start_time
             
-            return {
+            await asyncio.sleep(0)
+    return {
                 "status": "completed",
                 "agent": agent_name,
                 "task": task_name,
@@ -108,7 +119,8 @@ class TestMultiAgentCoordinationPerformance:
                 )
                 results.append(result)
             
-            return results
+            await asyncio.sleep(0)
+    return results
         
         coordination_manager.coordinate_agents.side_effect = mock_coordinate_sequential
         
@@ -136,6 +148,7 @@ class TestMultiAgentCoordinationPerformance:
     @pytest.mark.asyncio
     async def test_parallel_agent_coordination(self, agent_pool, coordination_manager):
         """Test parallel coordination of independent agents."""
+    pass
         # Define parallel workflow with independent tasks
         parallel_tasks = [
             {"agent": "data", "task": "fetch_user_data", "priority": 1},
@@ -153,6 +166,7 @@ class TestMultiAgentCoordinationPerformance:
         }
         
         async def mock_parallel_execute(agent_name, task_name, priority):
+    pass
             start_time = time.time()
             execution_tracking["start_times"][f"{agent_name}_{task_name}"] = start_time
             execution_tracking["concurrent_count"] += 1
@@ -168,7 +182,8 @@ class TestMultiAgentCoordinationPerformance:
             execution_tracking["concurrent_count"] -= 1
             execution_tracking["end_times"][f"{agent_name}_{task_name}"] = time.time()
             
-            return {
+            await asyncio.sleep(0)
+    return {
                 "agent": agent_name,
                 "task": task_name,
                 "priority": priority,
@@ -177,6 +192,7 @@ class TestMultiAgentCoordinationPerformance:
         
         # Configure parallel coordination
         async def mock_coordinate_parallel(tasks, state, run_id):
+    pass
             # Create concurrent tasks
             coroutines = [
                 mock_parallel_execute(task["agent"], task["task"], task["priority"])
@@ -185,7 +201,8 @@ class TestMultiAgentCoordinationPerformance:
             
             # Execute all tasks concurrently
             results = await asyncio.gather(*coroutines)
-            return results
+            await asyncio.sleep(0)
+    return results
         
         coordination_manager.coordinate_agents.side_effect = mock_coordinate_parallel
         
@@ -235,7 +252,8 @@ class TestMultiAgentCoordinationPerformance:
             
             # Success case
             failure_tracking["recoveries"].append((agent_name, task_name, attempt))
-            return {
+            await asyncio.sleep(0)
+    return {
                 "agent": agent_name,
                 "task": task_name,
                 "attempt": attempt,
@@ -272,7 +290,8 @@ class TestMultiAgentCoordinationPerformance:
                             # Brief delay before retry
                             await asyncio.sleep(0.01)
             
-            return results
+            await asyncio.sleep(0)
+    return results
         
         coordination_manager.coordinate_agents.side_effect = mock_coordinate_with_recovery
         
@@ -295,11 +314,12 @@ class TestMultiAgentCoordinationPerformance:
     @pytest.mark.asyncio
     async def test_load_balancing_across_agents(self, agent_pool, coordination_manager):
         """Test load balancing across multiple agent instances."""
+    pass
         # Create multiple instances of each agent type
         agent_instances = {
-            "data": [Mock() for _ in range(3)],
-            "analysis": [Mock() for _ in range(2)],
-            "research": [Mock() for _ in range(4)]
+            "data": [None  # TODO: Use real service instance for _ in range(3)],
+            "analysis": [None  # TODO: Use real service instance for _ in range(2)],
+            "research": [None  # TODO: Use real service instance for _ in range(4)]
         }
         
         # Track load distribution
@@ -314,10 +334,13 @@ class TestMultiAgentCoordinationPerformance:
                 instance_key = f"instance_{i}"
                 
                 async def make_execute_with_load_tracking(type_name, inst_key):
+    pass
                     async def execute_with_load_tracking(state, run_id, stream_updates):
+    pass
                         load_tracking[type_name][inst_key] += 1
                         await asyncio.sleep(0.05)  # Simulate processing time
-                        return {"status": "completed", "agent_instance": inst_key}
+                        await asyncio.sleep(0)
+    return {"status": "completed", "agent_instance": inst_key}
                     return execute_with_load_tracking
                 
                 agent.execute = await make_execute_with_load_tracking(agent_type, instance_key)
@@ -334,6 +357,7 @@ class TestMultiAgentCoordinationPerformance:
         
         # Configure load balancer
         async def mock_load_balanced_execution(tasks, state, run_id):
+    pass
             results = []
             
             # Simple round-robin load balancing
@@ -352,7 +376,8 @@ class TestMultiAgentCoordinationPerformance:
                 result = await selected_agent.execute(state, f"{run_id}_{task['task_id']}", True)
                 results.append(result)
             
-            return results
+            await asyncio.sleep(0)
+    return results
         
         coordination_manager.balance_load = AsyncMock(side_effect=mock_load_balanced_execution)
         
@@ -414,7 +439,8 @@ class TestMultiAgentCoordinationPerformance:
                     performance_metrics["min_response_time"], response_time
                 )
                 
-                return {
+                await asyncio.sleep(0)
+    return {
                     "request_id": request_id,
                     "status": "success",
                     "response_time": response_time
@@ -472,6 +498,7 @@ class TestMultiAgentCoordinationPerformance:
     @pytest.mark.asyncio
     async def test_resource_contention_handling(self, agent_pool, coordination_manager):
         """Test handling of resource contention between agents."""
+    pass
         # Simulate shared resources
         shared_resources = {
             "database_connections": 3,
@@ -491,6 +518,7 @@ class TestMultiAgentCoordinationPerformance:
         contention_events = []
         
         async def mock_execute_with_resource_management(agent_name, resource_requirements):
+    pass
             # Check resource availability
             for resource, required in resource_requirements.items():
                 if current_usage[resource] + required > shared_resources[resource]:
@@ -511,7 +539,8 @@ class TestMultiAgentCoordinationPerformance:
                 # Simulate work
                 await asyncio.sleep(0.1)
                 
-                return {
+                await asyncio.sleep(0)
+    return {
                     "agent": agent_name,
                     "status": "completed",
                     "resources_used": resource_requirements
@@ -532,13 +561,15 @@ class TestMultiAgentCoordinationPerformance:
         
         # Configure resource-aware coordination
         async def mock_coordinate_with_resources(agent_configs, state, run_id):
+    pass
             tasks = [
                 mock_execute_with_resource_management(config["agent"], config["resources"])
                 for config in agent_configs
             ]
             
             results = await asyncio.gather(*tasks)
-            return results
+            await asyncio.sleep(0)
+    return results
         
         coordination_manager.coordinate_with_resources = AsyncMock(
             side_effect=mock_coordinate_with_resources
@@ -602,3 +633,4 @@ class TestMultiAgentCoordinationPerformance:
         
         # This test serves as documentation for coordination patterns
         assert True
+    pass

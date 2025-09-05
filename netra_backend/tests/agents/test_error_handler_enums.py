@@ -5,6 +5,7 @@ All functions ≤8 lines per requirements.
 
 import sys
 from pathlib import Path
+from shared.isolated_environment import IsolatedEnvironment
 
 # Add netra_backend to path  
 

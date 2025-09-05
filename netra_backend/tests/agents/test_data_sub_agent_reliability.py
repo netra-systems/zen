@@ -5,11 +5,15 @@ Focuses on error handling and caching
 
 import sys
 from pathlib import Path
+from test_framework.database.test_database_manager import TestDatabaseManager
+from test_framework.redis.test_redis_manager import TestRedisManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 # Test framework import - using pytest fixtures instead
 
 import asyncio
-from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 
@@ -22,21 +26,25 @@ from netra_backend.tests.agents.helpers.shared_test_types import (
 # Test fixtures for shared test classes
 @pytest.fixture
 def service():
+    """Use real service instance."""
+    # TODO: Initialize real service
     """Service fixture for shared integration tests."""
     # Mock: LLM service isolation for fast testing without API calls or rate limits
-    mock_llm_manager = Mock()
+    mock_llm_manager = mock_llm_manager_instance  # Initialize appropriate service
     # Mock: Tool dispatcher isolation for agent testing without real tool execution
-    mock_tool_dispatcher = Mock()
+    mock_tool_dispatcher = mock_tool_dispatcher_instance  # Initialize appropriate service
     agent = DataSubAgent(mock_llm_manager, mock_tool_dispatcher)
     return agent
 
 @pytest.fixture
 def db_session():
+    """Use real service instance."""
+    # TODO: Initialize real service
     """Database session fixture for shared error handling tests."""
     # Mock: Generic component isolation for controlled unit testing
-    db_mock = Mock()
+    db_mock = TestDatabaseManager().get_session()
     # Mock: Generic component isolation for controlled unit testing
-    db_mock.query = Mock()
+    db_mock.query = query_instance  # Initialize appropriate service
     return db_mock
 
 class TestErrorHandling(SharedTestErrorHandling):
@@ -46,7 +54,7 @@ class TestErrorHandling(SharedTestErrorHandling):
         """Test graceful handling of database connection failures"""
         # DataSubAgent-specific implementation
         # Mock: ClickHouse database isolation for fast testing without external database dependency
-        mock_clickhouse = Mock()
+        mock_clickhouse = mock_clickhouse_instance  # Initialize appropriate service
         service.clickhouse_ops = mock_clickhouse
         # Mock: ClickHouse database isolation for fast testing without external database dependency
         mock_clickhouse.fetch_data = Mock(side_effect=Exception("Database unavailable"))
@@ -61,9 +69,9 @@ class TestErrorHandling(SharedTestErrorHandling):
     async def test_retry_on_failure(self):
         """Test retry mechanism on processing failure"""
         # Mock: LLM service isolation for fast testing without API calls or rate limits
-        mock_llm_manager = Mock()
+        mock_llm_manager = mock_llm_manager_instance  # Initialize appropriate service
         # Mock: Tool dispatcher isolation for agent testing without real tool execution
-        mock_tool_dispatcher = Mock()
+        mock_tool_dispatcher = mock_tool_dispatcher_instance  # Initialize appropriate service
         agent = DataSubAgent(mock_llm_manager, mock_tool_dispatcher)
         agent.config = {"max_retries": 3}  # Initialize config dict
         
@@ -84,9 +92,9 @@ class TestErrorHandling(SharedTestErrorHandling):
     async def test_max_retries_exceeded(self):
         """Test behavior when max retries exceeded"""
         # Mock: LLM service isolation for fast testing without API calls or rate limits
-        mock_llm_manager = Mock()
+        mock_llm_manager = mock_llm_manager_instance  # Initialize appropriate service
         # Mock: Tool dispatcher isolation for agent testing without real tool execution
-        mock_tool_dispatcher = Mock()
+        mock_tool_dispatcher = mock_tool_dispatcher_instance  # Initialize appropriate service
         agent = DataSubAgent(mock_llm_manager, mock_tool_dispatcher)
         agent.config = {"max_retries": 2}  # Initialize config dict
         
@@ -103,9 +111,9 @@ class TestErrorHandling(SharedTestErrorHandling):
     async def test_graceful_degradation(self):
         """Test graceful degradation on partial failure"""
         # Mock: LLM service isolation for fast testing without API calls or rate limits
-        mock_llm_manager = Mock()
+        mock_llm_manager = mock_llm_manager_instance  # Initialize appropriate service
         # Mock: Tool dispatcher isolation for agent testing without real tool execution
-        mock_tool_dispatcher = Mock()
+        mock_tool_dispatcher = mock_tool_dispatcher_instance  # Initialize appropriate service
         agent = DataSubAgent(mock_llm_manager, mock_tool_dispatcher)
         
         data_batch = [
@@ -135,9 +143,9 @@ class TestCaching:
     async def test_cache_hit(self):
         """Test cache hit for repeated data"""
         # Mock: LLM service isolation for fast testing without API calls or rate limits
-        mock_llm_manager = Mock()
+        mock_llm_manager = mock_llm_manager_instance  # Initialize appropriate service
         # Mock: Tool dispatcher isolation for agent testing without real tool execution
-        mock_tool_dispatcher = Mock()
+        mock_tool_dispatcher = mock_tool_dispatcher_instance  # Initialize appropriate service
         agent = DataSubAgent(mock_llm_manager, mock_tool_dispatcher)
         
         data = {"id": "cache_test", "content": "data"}
@@ -156,9 +164,9 @@ class TestCaching:
     async def test_cache_expiration(self):
         """Test cache expiration with real TTL"""
         # Mock: LLM service isolation for fast testing without API calls or rate limits
-        mock_llm_manager = Mock()
+        mock_llm_manager = mock_llm_manager_instance  # Initialize appropriate service
         # Mock: Tool dispatcher isolation for agent testing without real tool execution
-        mock_tool_dispatcher = Mock()
+        mock_tool_dispatcher = mock_tool_dispatcher_instance  # Initialize appropriate service
         agent = DataSubAgent(mock_llm_manager, mock_tool_dispatcher)
         agent.cache_ttl = 0.1  # 100ms TTL
         agent._cache = {}  # Initialize cache

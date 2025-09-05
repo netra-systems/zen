@@ -6,6 +6,11 @@ Split from oversized test_llm_agent_e2e_real.py
 
 import sys
 from pathlib import Path
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from test_framework.database.test_database_manager import TestDatabaseManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 # Test framework import - using pytest fixtures instead
 
@@ -14,7 +19,6 @@ import json
 import time
 import uuid
 from datetime import datetime
-from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 import pytest_asyncio
@@ -98,7 +102,7 @@ async def test_complex_multi_step_flow():
     setup_websocket_manager(ws_manager)
     
     # Mock: Generic component isolation for controlled unit testing
-    mock_persistence = AsyncMock()
+    mock_persistence = AsyncNone  # TODO: Use real service instance
     # Mock: Agent service isolation for testing without LLM agent execution
     mock_persistence.save_agent_state = AsyncMock(return_value=(True, "test_id"))
     # Mock: Agent service isolation for testing without LLM agent execution
@@ -131,7 +135,7 @@ async def test_flow_interruption_and_recovery():
     interrupted_state.triage_result = {"category": "optimization", "step": "analysis"}
     
     # Mock: Generic component isolation for controlled unit testing
-    mock_persistence = AsyncMock()
+    mock_persistence = AsyncNone  # TODO: Use real service instance
     # Mock: Agent service isolation for testing without LLM agent execution
     mock_persistence.load_agent_state = AsyncMock(return_value=interrupted_state)
     # Mock: Agent service isolation for testing without LLM agent execution
@@ -158,7 +162,7 @@ async def test_flow_performance_benchmarks():
 def _create_concurrent_persistence_mock():
     """Create persistence mock for concurrent testing"""
     # Mock: Generic component isolation for controlled unit testing
-    mock_persistence = AsyncMock()
+    mock_persistence = AsyncNone  # TODO: Use real service instance
     
     async def mock_save_agent_state(*args, **kwargs):
         if len(args) == 2:
@@ -220,7 +224,7 @@ def _create_e2e_test_infrastructure():
         # Mock: LLM service isolation for fast testing without API calls or rate limits
         'llm_manager': Mock(spec=LLMManager),
         # Mock: Generic component isolation for controlled unit testing
-        'ws_manager': Mock()
+        'ws_manager': None  # TODO: Use real service instance
     }
 
 def _setup_e2e_llm_responses(llm_manager):
@@ -247,12 +251,12 @@ def _setup_e2e_llm_responses(llm_manager):
 def _setup_e2e_websocket(ws_manager):
     """Setup WebSocket for E2E testing"""
     # Mock: Generic component isolation for controlled unit testing
-    ws_manager.send_message = AsyncMock()
+    ws_manager.send_message = AsyncNone  # TODO: Use real service instance
 
 def _create_e2e_supervisor(infrastructure):
     """Create supervisor for E2E testing"""
     # Mock: Generic component isolation for controlled unit testing
-    mock_persistence = AsyncMock()
+    mock_persistence = AsyncNone  # TODO: Use real service instance
     
     async def mock_save_agent_state(*args, **kwargs):
         if len(args) == 2:
@@ -336,7 +340,7 @@ def _create_benchmark_tasks(concurrency_level):
         setup_llm_responses(llm_manager)
         
         # Mock: Generic component isolation for controlled unit testing
-        mock_persistence = AsyncMock()
+        mock_persistence = AsyncNone  # TODO: Use real service instance
         # Mock: Agent service isolation for testing without LLM agent execution
         mock_persistence.save_agent_state = AsyncMock(return_value=(True, f"test_id_{i}"))
         # Mock: Agent service isolation for testing without LLM agent execution

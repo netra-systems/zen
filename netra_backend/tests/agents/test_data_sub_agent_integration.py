@@ -5,12 +5,17 @@ Focuses on integration with other components and performance
 
 import sys
 from pathlib import Path
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from test_framework.database.test_database_manager import TestDatabaseManager
+from test_framework.redis.test_redis_manager import TestRedisManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 # Test framework import - using pytest fixtures instead
 
 import asyncio
 from datetime import datetime
-from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 
@@ -26,15 +31,15 @@ class TestIntegration(SharedTestIntegration):
     async def test_integration_with_websocket(self):
         """Test integration with WebSocket for real-time updates"""
         # Mock: LLM service isolation for fast testing without API calls or rate limits
-        mock_llm_manager = Mock()
+        mock_llm_manager = mock_llm_manager_instance  # Initialize appropriate service
         # Mock: Tool dispatcher isolation for agent testing without real tool execution
-        mock_tool_dispatcher = Mock()
+        mock_tool_dispatcher = mock_tool_dispatcher_instance  # Initialize appropriate service
         agent = DataSubAgent(mock_llm_manager, mock_tool_dispatcher)
         
         # Mock: Generic component isolation for controlled unit testing
-        mock_ws = Mock()
+        mock_ws = UnifiedWebSocketManager()
         # Mock: Generic component isolation for controlled unit testing
-        mock_ws.send = AsyncMock()
+        mock_ws.send = AsyncNone  # TODO: Use real service instance
         
         data = {"content": "realtime data"}
         await agent.process_and_stream(data, mock_ws)
@@ -45,9 +50,9 @@ class TestIntegration(SharedTestIntegration):
     async def test_integration_with_database(self):
         """Test integration with database persistence"""
         # Mock: LLM service isolation for fast testing without API calls or rate limits
-        mock_llm_manager = Mock()
+        mock_llm_manager = mock_llm_manager_instance  # Initialize appropriate service
         # Mock: Tool dispatcher isolation for agent testing without real tool execution
-        mock_tool_dispatcher = Mock()
+        mock_tool_dispatcher = mock_tool_dispatcher_instance  # Initialize appropriate service
         agent = DataSubAgent(mock_llm_manager, mock_tool_dispatcher)
         
         # Mock the process_data method to return success  
@@ -75,16 +80,16 @@ class TestIntegration(SharedTestIntegration):
     async def test_integration_with_supervisor(self):
         """Test integration with supervisor agent"""
         # Mock: LLM service isolation for fast testing without API calls or rate limits
-        mock_llm_manager = Mock()
+        mock_llm_manager = mock_llm_manager_instance  # Initialize appropriate service
         # Mock: Tool dispatcher isolation for agent testing without real tool execution
-        mock_tool_dispatcher = Mock()
+        mock_tool_dispatcher = mock_tool_dispatcher_instance  # Initialize appropriate service
         agent = DataSubAgent(mock_llm_manager, mock_tool_dispatcher)
         
         supervisor_request = {
             "action": "process_data",
             "data": {"content": "from supervisor"},
             # Mock: Generic component isolation for controlled unit testing
-            "callback": AsyncMock()
+            "callback": AsyncNone  # TODO: Use real service instance
         }
         
         result = await agent.handle_supervisor_request(supervisor_request)
@@ -98,9 +103,9 @@ class TestPerformance:
     async def test_concurrent_processing(self):
         """Test concurrent data processing"""
         # Mock: LLM service isolation for fast testing without API calls or rate limits
-        mock_llm_manager = Mock()
+        mock_llm_manager = mock_llm_manager_instance  # Initialize appropriate service
         # Mock: Tool dispatcher isolation for agent testing without real tool execution
-        mock_tool_dispatcher = Mock()
+        mock_tool_dispatcher = mock_tool_dispatcher_instance  # Initialize appropriate service
         agent = DataSubAgent(mock_llm_manager, mock_tool_dispatcher)
         
         # Create 100 data items
@@ -117,9 +122,9 @@ class TestPerformance:
     async def test_memory_efficiency(self):
         """Test memory efficiency with large datasets"""
         # Mock: LLM service isolation for fast testing without API calls or rate limits
-        mock_llm_manager = Mock()
+        mock_llm_manager = mock_llm_manager_instance  # Initialize appropriate service
         # Mock: Tool dispatcher isolation for agent testing without real tool execution
-        mock_tool_dispatcher = Mock()
+        mock_tool_dispatcher = mock_tool_dispatcher_instance  # Initialize appropriate service
         agent = DataSubAgent(mock_llm_manager, mock_tool_dispatcher)
         
         # Process large dataset in chunks
@@ -142,9 +147,9 @@ class TestStateManagement:
     async def test_state_persistence(self):
         """Test agent state persistence"""
         # Mock: LLM service isolation for fast testing without API calls or rate limits
-        mock_llm_manager = Mock()
+        mock_llm_manager = mock_llm_manager_instance  # Initialize appropriate service
         # Mock: Tool dispatcher isolation for agent testing without real tool execution
-        mock_tool_dispatcher = Mock()
+        mock_tool_dispatcher = mock_tool_dispatcher_instance  # Initialize appropriate service
         agent = DataSubAgent(mock_llm_manager, mock_tool_dispatcher)
         
         # Initialize context dict for state storage (not the lifecycle state)
@@ -159,10 +164,10 @@ class TestStateManagement:
         # Mock: Redis external service isolation for fast, reliable tests without network dependency
         with patch('netra_backend.app.agents.data_sub_agent.agent.RedisManager') as MockRedis:
             # Mock: Redis external service isolation for fast, reliable tests without network dependency
-            mock_redis = Mock()
+            mock_redis = TestRedisManager().get_client()
             MockRedis.return_value = mock_redis
             # Mock: Redis external service isolation for fast, reliable tests without network dependency
-            mock_redis.set = AsyncMock()
+            mock_redis.set = AsyncNone  # TODO: Use real service instance
             # Mock: Redis external service isolation for fast, reliable tests without network dependency
             mock_redis.get = AsyncMock(return_value=None)  # Simulate no existing state
             
@@ -177,9 +182,9 @@ class TestStateManagement:
         
         # Create new agent and manually set loaded context
         # Mock: LLM service isolation for fast testing without API calls or rate limits
-        mock_llm_manager2 = Mock()
+        mock_llm_manager2 = mock_llm_manager2_instance  # Initialize appropriate service
         # Mock: Tool dispatcher isolation for agent testing without real tool execution
-        mock_tool_dispatcher2 = Mock()
+        mock_tool_dispatcher2 = mock_tool_dispatcher2_instance  # Initialize appropriate service
         new_agent = DataSubAgent(mock_llm_manager2, mock_tool_dispatcher2)
         new_agent.context = saved_context
         
@@ -191,9 +196,9 @@ class TestStateManagement:
     async def test_state_recovery(self):
         """Test state recovery after failure"""
         # Mock: LLM service isolation for fast testing without API calls or rate limits
-        mock_llm_manager = Mock()
+        mock_llm_manager = mock_llm_manager_instance  # Initialize appropriate service
         # Mock: Tool dispatcher isolation for agent testing without real tool execution
-        mock_tool_dispatcher = Mock()
+        mock_tool_dispatcher = mock_tool_dispatcher_instance  # Initialize appropriate service
         agent = DataSubAgent(mock_llm_manager, mock_tool_dispatcher)
         
         # Initialize context for checkpoint data
@@ -208,10 +213,10 @@ class TestStateManagement:
         # Mock: Redis external service isolation for fast, reliable tests without network dependency
         with patch('netra_backend.app.agents.data_sub_agent.agent.RedisManager') as MockRedis:
             # Mock: Redis external service isolation for fast, reliable tests without network dependency
-            mock_redis = Mock()
+            mock_redis = TestRedisManager().get_client()
             MockRedis.return_value = mock_redis
             # Mock: Redis external service isolation for fast, reliable tests without network dependency
-            mock_redis.set = AsyncMock()
+            mock_redis.set = AsyncNone  # TODO: Use real service instance
             
             # Simulate failure and recovery
             await agent.save_state()
@@ -221,9 +226,9 @@ class TestStateManagement:
         
         # Recovery
         # Mock: LLM service isolation for fast testing without API calls or rate limits
-        mock_llm_manager_recovered = Mock()
+        mock_llm_manager_recovered = mock_llm_manager_recovered_instance  # Initialize appropriate service
         # Mock: Tool dispatcher isolation for agent testing without real tool execution
-        mock_tool_dispatcher_recovered = Mock()
+        mock_tool_dispatcher_recovered = mock_tool_dispatcher_recovered_instance  # Initialize appropriate service
         recovered_agent = DataSubAgent(mock_llm_manager_recovered, mock_tool_dispatcher_recovered)
         
         # Mock the recover method to load our saved context

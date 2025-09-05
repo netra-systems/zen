@@ -8,7 +8,10 @@ import asyncio
 import os
 import sys
 import time
-from unittest.mock import AsyncMock, Mock
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 # Add the app directory to the Python path
 
@@ -32,11 +35,11 @@ async def test_initialization_manager():
         
         # Create mock dependencies
         # Mock: LLM service isolation for fast testing without API calls or rate limits
-        mock_llm_manager = Mock()
+        mock_llm_manager = mock_llm_manager_instance  # Initialize appropriate service
         mock_llm_manager.enabled = True
         
         # Mock: Tool dispatcher isolation for agent testing without real tool execution
-        mock_tool_dispatcher = Mock()
+        mock_tool_dispatcher = mock_tool_dispatcher_instance  # Initialize appropriate service
         
         # Create a simple mock agent class
         class MockAgent:
@@ -94,11 +97,11 @@ async def test_data_agent_modular():
         
         # Create mock dependencies
         # Mock: LLM service isolation for fast testing without API calls or rate limits
-        mock_llm_manager = Mock()
+        mock_llm_manager = mock_llm_manager_instance  # Initialize appropriate service
         mock_llm_manager.enabled = False  # Force fallback mode
         
         # Mock: Tool dispatcher isolation for agent testing without real tool execution
-        mock_tool_dispatcher = Mock()
+        mock_tool_dispatcher = mock_tool_dispatcher_instance  # Initialize appropriate service
         
         # Test initialization
         agent = DataSubAgent(mock_llm_manager, mock_tool_dispatcher)
@@ -114,7 +117,7 @@ async def test_data_agent_modular():
         from netra_backend.app.agents.state import DeepAgentState
         
         # Mock: Generic component isolation for controlled unit testing
-        mock_state = Mock()
+        mock_state = mock_state_instance  # Initialize appropriate service
         mock_state.user_request = "test request"
         
         context = agent._create_execution_context(mock_state, "test_run_123", False)
@@ -140,11 +143,11 @@ async def test_enhanced_registry():
         
         # Create mock dependencies
         # Mock: LLM service isolation for fast testing without API calls or rate limits
-        mock_llm_manager = Mock()
+        mock_llm_manager = mock_llm_manager_instance  # Initialize appropriate service
         mock_llm_manager.enabled = True
         
         # Mock: Tool dispatcher isolation for agent testing without real tool execution
-        mock_tool_dispatcher = Mock()
+        mock_tool_dispatcher = mock_tool_dispatcher_instance  # Initialize appropriate service
         
         # Create registry (now using consolidated AgentRegistry with enhanced features)
         registry = AgentRegistry(mock_llm_manager, mock_tool_dispatcher)

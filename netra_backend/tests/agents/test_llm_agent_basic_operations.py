@@ -6,6 +6,11 @@ Split from oversized test_llm_agent_e2e_real.py
 
 import sys
 from pathlib import Path
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from test_framework.database.test_database_manager import TestDatabaseManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 # Test framework import - using pytest fixtures instead
 
@@ -14,7 +19,6 @@ import json
 import time
 import uuid
 from datetime import datetime
-from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 import pytest_asyncio

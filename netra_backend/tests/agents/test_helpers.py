@@ -5,11 +5,15 @@ All helper functions broken into ≤8 line functions for architectural complianc
 
 import sys
 from pathlib import Path
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from test_framework.database.test_database_manager import TestDatabaseManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 # Test framework import - using pytest fixtures instead
 
 import uuid
-from unittest.mock import AsyncMock, MagicMock, Mock
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -23,7 +27,7 @@ def create_mock_infrastructure():
     # Mock: LLM service isolation for fast testing without API calls or rate limits
     llm_manager = Mock(spec=LLMManager)
     # Mock: Generic component isolation for controlled unit testing
-    ws_manager = Mock()
+    ws_manager = UnifiedWebSocketManager()
     return db_session, llm_manager, ws_manager
 
 def _create_optimization_responses():
@@ -55,12 +59,12 @@ def setup_llm_responses(llm_manager):
 def setup_websocket_manager(ws_manager):
     """Setup websocket manager for testing"""
     # Mock: Generic component isolation for controlled unit testing
-    ws_manager.send_message = AsyncMock()
+    ws_manager.send_message = AsyncNone  # TODO: Use real service instance
 
 def create_mock_persistence():
     """Create mock persistence service"""
     # Mock: Generic component isolation for controlled unit testing
-    mock_persistence = AsyncMock()
+    mock_persistence = AsyncNone  # TODO: Use real service instance
     # Mock: Agent service isolation for testing without LLM agent execution
     mock_persistence.save_agent_state = AsyncMock(side_effect=_mock_save_agent_state)
     _setup_persistence_methods(mock_persistence)

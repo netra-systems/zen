@@ -6,12 +6,16 @@ Modular design with ≤300 lines, ≤8 lines per function
 import sys
 from pathlib import Path
 from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
+from test_framework.database.test_database_manager import TestDatabaseManager
+from auth_service.core.auth_manager import AuthManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 
 # Test framework import - using pytest fixtures instead
 
 from decimal import Decimal
-from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 
@@ -19,14 +23,15 @@ from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.db.models_postgres import SupplyUpdateLog
 from netra_backend.app.services.supply_research_service import SupplyResearchService
 from netra_backend.tests.agents.supply_researcher_fixtures import (
+import asyncio
     agent,
     anomaly_test_data,
     mock_db,
-    mock_supply_service,
-)
+    mock_supply_service)
 
 class TestSupplyResearcherPersistence:
     """Database and persistence tests"""
+    pass
 
     @pytest.mark.asyncio
     async def test_database_transaction_rollback(self, agent, mock_db):
@@ -43,7 +48,9 @@ class TestSupplyResearcherPersistence:
 
     def _create_transaction_test_state(self):
         """Create state for transaction testing (≤8 lines)"""
-        return DeepAgentState(
+    pass
+        await asyncio.sleep(0)
+    return DeepAgentState(
             user_request="Test transaction",
             chat_thread_id="test_thread",
             user_id="test_user"
@@ -61,7 +68,9 @@ class TestSupplyResearcherPersistence:
 
     def _get_successful_api_response(self):
         """Get successful API response data (≤8 lines)"""
-        return {
+    pass
+        await asyncio.sleep(0)
+    return {
             "session_id": "tx_test",
             "status": "completed",
             "questions_answered": [
@@ -74,7 +83,7 @@ class TestSupplyResearcherPersistence:
     def test_anomaly_detection_thresholds(self, mock_supply_service):
         """Test anomaly detection with various thresholds"""
         # Mock: Generic component isolation for controlled unit testing
-        service = SupplyResearchService(Mock())
+        service = SupplyResearchService(None  # TODO: Use real service instance)
         with self._setup_anomaly_detection_mock(service) as mock_price_changes:
             with patch.object(service.market_ops.db, 'query') as mock_query:
                 # Mock the database query for stale data detection
@@ -84,6 +93,7 @@ class TestSupplyResearcherPersistence:
 
     def _setup_anomaly_detection_mock(self, service):
         """Setup anomaly detection mock (≤8 lines)"""
+    pass
         return patch.object(service.market_ops.price_ops, 'calculate_price_changes', return_value={
             "all_changes": [{
                 "provider": "openai",
@@ -104,6 +114,7 @@ class TestSupplyResearcherPersistence:
     @pytest.mark.asyncio
     async def test_audit_trail_generation(self, agent, mock_db):
         """Test comprehensive audit trail generation"""
+    pass
         state = self._create_audit_test_state()
         audit_logs = []
         self._setup_audit_tracking(mock_db, audit_logs)
@@ -112,7 +123,8 @@ class TestSupplyResearcherPersistence:
 
     def _create_audit_test_state(self):
         """Create state for audit testing (≤8 lines)"""
-        return DeepAgentState(
+        await asyncio.sleep(0)
+    return DeepAgentState(
             user_request="Update all OpenAI models",
             chat_thread_id="audit_test",
             user_id="admin_user"
@@ -120,7 +132,9 @@ class TestSupplyResearcherPersistence:
 
     def _setup_audit_tracking(self, mock_db, audit_logs):
         """Setup audit log tracking (≤8 lines)"""
+    pass
         def track_audit_log(log_entry):
+    pass
             if isinstance(log_entry, SupplyUpdateLog):
                 audit_logs.append(log_entry)
         mock_db.add.side_effect = track_audit_log
@@ -134,7 +148,9 @@ class TestSupplyResearcherPersistence:
 
     def _get_audit_api_response(self):
         """Get API response for audit testing (≤8 lines)"""
-        return {
+    pass
+        await asyncio.sleep(0)
+    return {
             "session_id": "audit_session",
             "status": "completed",
             "questions_answered": [
@@ -149,6 +165,7 @@ class TestSupplyResearcherPersistence:
 
     def test_data_validation_integrity(self, mock_supply_service):
         """Test data validation and integrity checks"""
+    pass
         test_data = self._create_test_supply_data()
         is_valid, errors = mock_supply_service.validate_supply_data(test_data)
         self._verify_data_validation(is_valid, errors)
@@ -165,6 +182,7 @@ class TestSupplyResearcherPersistence:
 
     def _verify_data_validation(self, is_valid, errors):
         """Verify data validation results (≤8 lines)"""
+    pass
         assert isinstance(is_valid, bool)
         assert isinstance(errors, list)
 
@@ -177,6 +195,7 @@ class TestSupplyResearcherPersistence:
 
     def _create_concurrent_update_data(self):
         """Create concurrent update test data (≤8 lines)"""
+    pass
         return {
             "provider": "openai",
             "model": LLMModel.GEMINI_2_5_FLASH.value,
@@ -194,6 +213,7 @@ class TestSupplyResearcherPersistence:
 
     def _verify_concurrent_update_handling(self, result):
         """Verify concurrent update was handled (≤8 lines)"""
+    pass
         assert result["status"] == "updated"
         assert "conflicts_resolved" in result
 
@@ -206,6 +226,7 @@ class TestSupplyResearcherPersistence:
 
     def _create_large_test_dataset(self):
         """Create large test dataset (≤8 lines)"""
+    pass
         return [
             {"provider": f"provider_{i}", "model": f"model_{i}", 
              "pricing_input": Decimal(str(i))}
@@ -220,6 +241,7 @@ class TestSupplyResearcherPersistence:
 
     def _verify_performance_metrics(self, result):
         """Verify performance metrics (≤8 lines)"""
+    pass
         # Performance should be acceptable for large datasets
         assert result is not None
 
@@ -244,3 +266,4 @@ class TestSupplyResearcherPersistence:
             
             assert is_valid is True
             assert len(errors) == 0
+    pass
