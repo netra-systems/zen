@@ -550,17 +550,30 @@ class DevelopmentConfig(AppConfig):
         super().__init__(**data)
     
     def _load_database_url_from_unified_config(self, data: dict) -> None:
-        """Load database URL from environment with fallback.
+        """Load database URL from environment using DatabaseURLBuilder SSOT.
         
-        Uses IsolatedEnvironment for consistent environment access.
+        Uses DatabaseURLBuilder to ensure SSOT compliance and proper URL construction.
         """
+        from shared.database_url_builder import DatabaseURLBuilder
+        
         # Use IsolatedEnvironment for database URL loading
         env = get_env()
-        env_db_url = env.get('DATABASE_URL')
-        if env_db_url:
-            data['database_url'] = env_db_url
-        elif 'database_url' not in data or data.get('database_url') is None:
-            data['database_url'] = "postgresql+asyncpg://postgres:postgres@localhost:5432/netra_dev"
+        
+        # Use DatabaseURLBuilder as the SINGLE SOURCE OF TRUTH
+        builder = DatabaseURLBuilder(env.as_dict())
+        
+        # Get URL for current environment (development config = development environment)
+        database_url = builder.development.auto_url
+        
+        # Set the database URL from builder - NO MANUAL FALLBACKS
+        if database_url:
+            data['database_url'] = database_url
+        else:
+            # Log critical error - let the system handle missing configuration properly
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.error("DatabaseURLBuilder failed to construct URL - check environment configuration")
+            # Don't set any fallback - let upstream handle the missing URL
     
     def _get_service_modes_from_unified_config(self) -> dict:
         """Get service modes from environment with fallback.
@@ -666,14 +679,35 @@ class StagingConfig(AppConfig):
             )
     
     def _load_database_url_from_unified_config_staging(self, data: dict) -> None:
-        """Load database URL from environment for staging with fallback.
+        """Load database URL from environment using DatabaseURLBuilder SSOT.
         
-        Uses IsolatedEnvironment for consistent environment access.
+        Uses DatabaseURLBuilder to ensure SSOT compliance for staging environment.
         """
+        from shared.database_url_builder import DatabaseURLBuilder
+        import logging
+        
+        logger = logging.getLogger(__name__)
+        
         # Use IsolatedEnvironment for staging database URL
         env = get_env()
-        if 'database_url' not in data and env.get('DATABASE_URL'):
-            data['database_url'] = env.get('DATABASE_URL')
+        
+        # Use DatabaseURLBuilder as the SINGLE SOURCE OF TRUTH
+        builder = DatabaseURLBuilder(env.as_dict())
+        
+        # Get URL for staging environment
+        database_url = builder.staging.auto_url
+        
+        # Set the database URL from builder - NO MANUAL FALLBACKS
+        if database_url:
+            data['database_url'] = database_url
+            logger.info(builder.get_safe_log_message())
+        else:
+            # Staging MUST have a database URL - this is critical
+            raise ValueError(
+                "DatabaseURLBuilder failed to construct URL for staging environment. "
+                "Ensure POSTGRES_HOST, POSTGRES_USER, POSTGRES_PASSWORD, and POSTGRES_DB are set, "
+                "or DATABASE_URL is provided."
+            )
 
 class NetraTestingConfig(AppConfig):
     """Testing-specific settings."""

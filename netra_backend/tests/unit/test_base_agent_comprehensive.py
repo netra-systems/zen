@@ -201,57 +201,40 @@ class TestBaseAgentComprehensive:
         """Test 5: Validates user ID assignment and WebSocket manager integration"""
         agent = ConcreteConcreteTestAgent(llm_manager=real_llm_manager, name="WebSocketConcreteTestAgent")
         
-        # Initial state - no user_id or websocket_manager
-        assert agent.user_id is None
-        assert agent.websocket_manager is None
+        # Initial state - no WebSocket context (modern pattern)
+        assert not agent.has_websocket_context()
         
-        # Test user ID assignment
-        test_user_id = "user_123"
-        agent.user_id = test_user_id
-        assert agent.user_id == test_user_id
+        # Test WebSocket bridge assignment (modern pattern)
+        mock_ws_bridge = Mock()
+        test_run_id = "run_123"
+        agent.set_websocket_bridge(mock_ws_bridge, test_run_id)
         
-        # Test WebSocket manager assignment
-        mock_ws_manager = Mock()
-        mock_ws_manager.send_message = Mock()
-        agent.websocket_manager = mock_ws_manager
-        assert agent.websocket_manager == mock_ws_manager
+        # Verify WebSocket context is established
+        assert agent.has_websocket_context()
+        assert agent._websocket_adapter._run_id == test_run_id
+        assert agent._websocket_adapter._websocket_bridge == mock_ws_bridge
         
-        # Test both working together
-        agent2 = ConcreteConcreteTestAgent(llm_manager=real_llm_manager, name="CompleteWSAgent")
-        agent2.user_id = "user_456"
-        agent2.websocket_manager = mock_ws_manager
+        # Test multiple agents with different contexts
+        agent2 = ConcreteConcreteTestAgent(llm_manager=real_llm_manager, name="SecondWSAgent")
+        mock_ws_bridge2 = Mock()
+        test_run_id2 = "run_456"
+        agent2.set_websocket_bridge(mock_ws_bridge2, test_run_id2)
         
-        # Verify they can be used together
-        can_send = False
-        if agent2.websocket_manager and agent2.user_id:
-            # This pattern is used in actual agent code
-            can_send = True
-        assert can_send is True
+        # Verify each agent has isolated WebSocket context
+        assert agent2.has_websocket_context()
+        assert agent2._websocket_adapter._run_id == test_run_id2
+        assert agent._websocket_adapter._run_id != agent2._websocket_adapter._run_id
         
-        # Test None handling
-        agent3 = ConcreteConcreteTestAgent(llm_manager=real_llm_manager, name="NoneWSAgent")
-        assert agent3.websocket_manager is None
-        assert agent3.user_id is None
+        # Test agent without WebSocket context
+        agent3 = ConcreteConcreteTestAgent(llm_manager=real_llm_manager, name="NoWSAgent")
+        assert not agent3.has_websocket_context()
         
-        # Test reassignment
-        agent3.user_id = "user_789"
-        agent3.websocket_manager = Mock()
-        assert agent3.user_id == "user_789"
-        
-        # Test clearing
-        agent3.user_id = None
-        agent3.websocket_manager = None
-        assert agent3.user_id is None
-        assert agent3.websocket_manager is None
-        
-        # Test edge case: empty string user_id
-        agent3.user_id = ""
-        assert agent3.user_id == ""
-        
-        # Test edge case: websocket manager without send_message method
-        mock_incomplete_ws = Mock(spec=[])  # No methods defined
-        agent3.websocket_manager = mock_incomplete_ws
-        assert agent3.websocket_manager == mock_incomplete_ws
+        # Test bridge assignment to previously unconnected agent
+        mock_ws_bridge3 = Mock()
+        test_run_id3 = "run_789"
+        agent3.set_websocket_bridge(mock_ws_bridge3, test_run_id3)
+        assert agent3.has_websocket_context()
+        assert agent3._websocket_adapter._run_id == test_run_id3
         
         # Test the condition logic handles falsy values correctly
         can_send_empty_user = False
