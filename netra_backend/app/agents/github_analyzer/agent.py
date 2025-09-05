@@ -448,3 +448,10 @@ class GitHubAnalyzerService(BaseAgent):
         file_paths = context.get("file_paths", [])
         patterns = await self.pattern_detector.quick_scan(file_paths)
         return self._create_success_result(patterns)
+
+
+# Create an alias for GitHubAnalyzerAgent to match expected import in agent_class_initialization.py
+GitHubAnalyzerAgent = GitHubAnalyzerService
+
+# Export both names for backwards compatibility
+__all__ = ["GitHubAnalyzerService", "GitHubAnalyzerAgent"]
