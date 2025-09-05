@@ -269,20 +269,47 @@ class AuthServiceSettings:
     max_retries: int = 3
     cache_ttl: int = 300
     circuit_breaker_enabled: bool = True
+    # FIX: Add 'enabled' field to match usage in auth_client_core.py
+    # This controls whether auth service integration is active
+    enabled: bool = True
+    
+    def __post_init__(self):
+        """Initialize settings from environment after dataclass init."""
+        from shared.isolated_environment import get_env
+        env = get_env()
+        
+        # Override with environment values if present
+        self.base_url = env.get("AUTH_SERVICE_URL", self.base_url)
+        self.timeout = int(env.get("AUTH_CLIENT_TIMEOUT", str(self.timeout)))
+        self.max_retries = int(env.get("AUTH_CLIENT_MAX_RETRIES", str(self.max_retries)))
+        self.cache_ttl = int(env.get("AUTH_CLIENT_CACHE_TTL", str(self.cache_ttl)))
+        self.circuit_breaker_enabled = env.get("AUTH_CLIENT_CIRCUIT_BREAKER", "true").lower() == "true"
+        
+        # Determine if auth service is enabled based on environment
+        # Default to True for production safety, can be disabled explicitly
+        auth_enabled_str = env.get("AUTH_SERVICE_ENABLED", "true")
+        self.enabled = auth_enabled_str.lower() == "true"
     
     @classmethod
     def from_env(cls) -> 'AuthServiceSettings':
         """Create settings from environment variables."""
+        # Simply create instance, __post_init__ will handle environment loading
+        return cls()
+    
+    def is_service_secret_configured(self) -> bool:
+        """Check if service secret is configured."""
         from shared.isolated_environment import get_env
         env = get_env()
-        
-        return cls(
-            base_url=env.get("AUTH_SERVICE_URL", "http://localhost:8081"),
-            timeout=int(env.get("AUTH_CLIENT_TIMEOUT", "30")),
-            max_retries=int(env.get("AUTH_CLIENT_MAX_RETRIES", "3")),
-            cache_ttl=int(env.get("AUTH_CLIENT_CACHE_TTL", "300")),
-            circuit_breaker_enabled=env.get("AUTH_CLIENT_CIRCUIT_BREAKER", "true").lower() == "true"
-        )
+        service_secret = env.get("SERVICE_SECRET", "")
+        return bool(service_secret)
+    
+    def get_service_credentials(self) -> tuple[str, str]:
+        """Get service ID and secret from environment."""
+        from shared.isolated_environment import get_env
+        env = get_env()
+        service_id = env.get("SERVICE_ID", "netra-backend")
+        service_secret = env.get("SERVICE_SECRET", "")
+        return service_id, service_secret
 
 
 # Alias for backward compatibility
