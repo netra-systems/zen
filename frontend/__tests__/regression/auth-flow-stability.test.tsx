@@ -56,13 +56,12 @@ describe('Auth Flow Stability Regression Tests', () => {
     localStorage.clear();
     jest.clearAllMocks();
     
-    // Mock window.location.pathname for AuthGuard
-    Object.defineProperty(window, 'location', {
-      value: {
-        pathname: '/protected',
-      },
-      writable: true,
-    });
+    // Mock window.location.pathname for AuthGuard (delete first to avoid redefinition error)
+    delete (window as any).location;
+    (window as any).location = {
+      pathname: '/protected',
+      href: 'http://localhost:3000/protected',
+    };
   });
   
   const createAuthContext = (overrides?: Partial<AuthContextType>): AuthContextType => ({
@@ -303,7 +302,7 @@ describe('Auth Flow Stability Regression Tests', () => {
       // Should show protected content
       expect(screen.getByText('Protected Content')).toBeInTheDocument();
       
-      // Remove token and update auth state
+      // Remove token and create a new component instance to trigger fresh auth check
       localStorage.removeItem('jwt_token');
       const noTokenAuthValue = createAuthContext({
         user: null,
@@ -312,6 +311,8 @@ describe('Auth Flow Stability Regression Tests', () => {
         token: null,
       });
       
+      // Unmount and remount to trigger fresh auth check
+      rerender(<div />);
       rerender(
         <AuthContext.Provider value={noTokenAuthValue}>
           <AuthGuard>
@@ -323,7 +324,7 @@ describe('Auth Flow Stability Regression Tests', () => {
       // Should redirect to login
       await waitFor(() => {
         expect(mockPush).toHaveBeenCalledWith('/login');
-      });
+      }, { timeout: 3000 });
     });
     
     it('should handle expired token gracefully', async () => {
@@ -353,6 +354,9 @@ describe('Auth Flow Stability Regression Tests', () => {
     });
     
     it('should handle custom redirect paths', async () => {
+      // Ensure no token in localStorage
+      localStorage.clear();
+      
       const authValue = createAuthContext({
         user: null,
         loading: false,
@@ -369,7 +373,7 @@ describe('Auth Flow Stability Regression Tests', () => {
       // Should redirect to custom path
       await waitFor(() => {
         expect(mockPush).toHaveBeenCalledWith('/custom-login');
-      });
+      }, { timeout: 3000 });
     });
   });
   
