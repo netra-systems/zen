@@ -201,9 +201,15 @@ class TestBaseAgentInfrastructureFixed:
         )
         
         # Execute using modern pattern  
-        result = await stress_agent.execute_modern(
-            state=state,
-            run_id=f"run_{uuid.uuid4().hex[:12]}"
+        context = UserExecutionContext(
+            user_id=state.user_id,
+            thread_id=state.thread_id,
+            run_id=f"run_{uuid.uuid4()}",
+            metadata={'agent_input': state.user_request}
+        )
+        result = await stress_agent.execute_with_context(
+            context=context,
+            stream_updates=False
         )
         
         # Verify result - handle different ExecutionResult types  
@@ -303,9 +309,35 @@ class TestDifficultEdgeCases:
             state.user_request = f"Cascade test {i}"
             
             try:
-                result = await stress_agent.execute_modern(
-                    state=state,
-                    run_id=f"cascade_run_{i}"
+
+            
+                context = UserExecutionContext(
+
+            
+                    user_id=state.user_id,
+
+            
+                    thread_id=state.thread_id,
+
+            
+                    run_id=f"cascade_run_{i}",
+
+            
+                    metadata={'agent_input': state.user_request}
+
+            
+                )
+
+            
+                result = await stress_agent.execute_with_context(
+
+            
+                    context=context,
+
+            
+                    stream_updates=False
+
+            
                 )
                 execution_results.append(("success", result))
             except Exception as e:
@@ -402,9 +434,35 @@ class TestDifficultEdgeCases:
             state.user_request = "Partial failure test"
             
             try:
-                result = await stress_agent.execute_modern(
-                    state=state,
-                    run_id="partial_failure_test"
+
+            
+                context = UserExecutionContext(
+
+            
+                    user_id=state.user_id,
+
+            
+                    thread_id=state.thread_id,
+
+            
+                    run_id="partial_failure_test",
+
+            
+                    metadata={'agent_input': state.user_request}
+
+            
+                )
+
+            
+                result = await stress_agent.execute_with_context(
+
+            
+                    context=context,
+
+            
+                    stream_updates=False
+
+            
                 )
                 # Execution might succeed despite monitor failure
                 execution_succeeded = True
@@ -523,10 +581,17 @@ class TestPerformanceBenchmarks:
             state.user_request = f"Memory leak test {i}"
             
             try:
-                await benchmark_agent.execute_modern(
-                    state=state,
-                    run_id=f"memory_test_{i}"
-                )
+                context = UserExecutionContext(
+            user_id=state.user_id,
+            thread_id=state.thread_id,
+            run_id=f"memory_test_{i}"
+                ,
+            metadata={'agent_input': state.user_request}
+        )
+        result = await benchmark_agent.execute_with_context(
+            context=context,
+            stream_updates=False
+        )
             except Exception:
                 pass  # Ignore failures for memory testing
             
@@ -774,9 +839,15 @@ class TestWebSocketIntegrationCriticalPaths:
             chat_thread_id="critical_ws_thread"
         )
         
-        result = await websocket_agent.execute_modern(
-            state=state,
-            run_id="critical_ws_run"
+        context = UserExecutionContext(
+            user_id=state.user_id,
+            thread_id=state.thread_id,
+            run_id="critical_ws_run",
+            metadata={'agent_input': state.user_request}
+        )
+        result = await websocket_agent.execute_with_context(
+            context=context,
+            stream_updates=False
         )
         
         # Verify execution succeeded
@@ -837,9 +908,15 @@ class TestWebSocketIntegrationCriticalPaths:
         state.user_request = "Error recovery test"
         
         # Should succeed despite WebSocket errors
-        result = await websocket_agent.execute_modern(
-            state=state,
-            run_id="error_recovery_run"
+        context = UserExecutionContext(
+            user_id=state.user_id,
+            thread_id=state.thread_id,
+            run_id="error_recovery_run",
+            metadata={'agent_input': state.user_request}
+        )
+        result = await websocket_agent.execute_with_context(
+            context=context,
+            stream_updates=False
         )
         
         # Verify execution succeeded despite WebSocket errors

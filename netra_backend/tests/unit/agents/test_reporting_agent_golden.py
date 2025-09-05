@@ -26,6 +26,7 @@ from unittest.mock import Mock, AsyncMock, patch, MagicMock, call
 from datetime import datetime, timezone
 
 from netra_backend.app.agents.reporting_sub_agent import ReportingSubAgent
+from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
 from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.agents.base.interface import ExecutionContext, ExecutionResult
 from netra_backend.app.agents.state import DeepAgentState, ReportResult
