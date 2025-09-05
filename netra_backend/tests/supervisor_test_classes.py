@@ -27,7 +27,7 @@ class QualitySupervisor:
 
 # Import real AdminToolDispatcher - tests should use actual implementation
 # If mocking is needed, use unittest.mock.Mock or pytest fixtures
-from netra_backend.app.agents.admin_tool_dispatcher import AdminToolDispatcher
+from netra_backend.app.admin.tools.unified_admin_dispatcher import UnifiedAdminToolDispatcher as AdminToolDispatcher
 
 class MockAdminToolDispatcher:
     """Mock AdminToolDispatcher for testing with required methods"""

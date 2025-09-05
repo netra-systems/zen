@@ -20,7 +20,8 @@ import json
 from decimal import Decimal
 
 from netra_backend.app.agents.reporting_sub_agent import ReportingSubAgent
-from netra_backend.app.agents.base.execution_context import ExecutionContext, ExecutionMetadata
+from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext as ExecutionContext
+from netra_backend.app.agents.base.execution_context import ExecutionMetadata
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.logging_config import central_logger
 
