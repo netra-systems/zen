@@ -36,7 +36,7 @@ from netra_backend.app.core.resilience.unified_retry_handler import (
 )
 from netra_backend.app.agents.base.executor import BaseExecutionEngine
 from netra_backend.app.agents.base.monitoring import ExecutionMonitor
-from netra_backend.app.agents.base.interface import ExecutionContext, ExecutionResult, ExecutionStatus as InterfaceExecutionStatus
+from netra_backend.app.agents.base.interface import ExecutionContext, ExecutionResult
 from netra_backend.app.schemas.core_enums import ExecutionStatus
 from netra_backend.app.core.unified_error_handler import agent_error_handler
 from netra_backend.app.redis_manager import RedisManager
@@ -971,7 +971,7 @@ class BaseAgent(ABC):
                 # Validate preconditions
                 if not await self.validate_preconditions(execution_context):
                     return ExecutionResult(
-                        status=InterfaceExecutionStatus.FAILED,
+                        status=ExecutionStatus.FAILED,
                         request_id=run_id,
                         data=None,
                         error_message="Precondition validation failed",
@@ -982,7 +982,7 @@ class BaseAgent(ABC):
                 result = await self.execute_core_logic(execution_context)
                 
                 return ExecutionResult(
-                    status=InterfaceExecutionStatus.SUCCESS,
+                    status=ExecutionStatus.SUCCESS,
                     request_id=run_id,
                     data=result,
                     error_message=None,
@@ -991,7 +991,7 @@ class BaseAgent(ABC):
                 
             except Exception as e:
                 return ExecutionResult(
-                    status=InterfaceExecutionStatus.FAILED,
+                    status=ExecutionStatus.FAILED,
                     request_id=run_id,
                     data=None,
                     error_message=str(e),
