@@ -56,6 +56,8 @@ bcrypt>=4.3.0
 cryptography>=45.0.6
 
 # --- HTTP & WebSockets ---
+# Requests is needed for wait_for_db.py script
+requests>=2.32.0
 # Modern async HTTP client, used by FastAPI's TestClient and many SDKs.
 httpx>=0.28.1
 # Another powerful async HTTP client/server library.

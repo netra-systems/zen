@@ -28,30 +28,30 @@ class TestHealthMonitoringBug:
         # HealthInterface is a class that should be instantiated or used as a class
         assert hasattr(HealthInterface, '__init__')
         
-        # Can create an instance
-        health_checker = HealthInterface()
+        # Can create an instance - service_name is required
+        health_checker = HealthInterface(service_name="test_service")
         assert health_checker is not None
+        assert health_checker.service_name == "test_service"
     
     @pytest.mark.asyncio
     async def test_monitoring_integration_bridge_error(self):
         """Test that reproduces the undefined 'bridge' error in monitoring integration."""
         from netra_backend.app.startup_module import initialize_monitoring_integration
         
-        # Mock the imports to avoid other dependencies
-        with patch('netra_backend.app.startup_module.chat_event_monitor') as mock_monitor:
-            with patch('netra_backend.app.startup_module.get_agent_websocket_bridge') as mock_get_bridge:
+        # Mock the actual imports used in initialize_monitoring_integration
+        with patch('netra_backend.app.websocket_core.event_monitor.chat_event_monitor') as mock_monitor:
+            with patch('netra_backend.app.services.agent_websocket_bridge.get_agent_websocket_bridge') as mock_get_bridge:
                 with patch('netra_backend.app.startup_module.central_logger.get_logger') as mock_logger:
                     mock_logger.return_value = MagicMock()
                     mock_monitor.start_monitoring = AsyncMock()
                     mock_monitor.register_component_for_monitoring = AsyncMock()
                     
-                    # This will currently fail because:
-                    # 1. It tries to import health_interface (lowercase) which doesn't exist
-                    # 2. It tries to use undefined 'bridge' variable
+                    # This should now work after the fixes - the function was corrected
+                    # to handle per-request bridge architecture properly
                     result = await initialize_monitoring_integration()
                     
-                    # Due to graceful error handling, it returns False on failure
-                    assert result == False
+                    # Should return True since the function was fixed
+                    assert result == True
     
     def test_undefined_bridge_variable(self):
         """Test that demonstrates the undefined bridge variable issue."""

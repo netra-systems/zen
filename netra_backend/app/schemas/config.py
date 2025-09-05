@@ -644,10 +644,44 @@ class ProductionConfig(AppConfig):
     
     def __init__(self, **data):
         """Initialize production config."""
-        # CRITICAL: Load database URL before calling parent init
+        # CRITICAL: Load secrets FIRST as they may be needed by database URL
+        self._load_secrets_from_environment(data)
+        # Load database URL after secrets are available
         self._load_database_url_from_unified_config_production(data)
         super().__init__(**data)
         # Validation moved to validate_mandatory_services() to be called after population
+    
+    def _load_secrets_from_environment(self, data: dict) -> None:
+        """Load critical secrets from environment variables.
+        
+        This ensures SERVICE_SECRET, JWT_SECRET_KEY, and other critical
+        secrets are loaded from Google Secret Manager or environment.
+        """
+        from shared.isolated_environment import get_env
+        import logging
+        
+        logger = logging.getLogger(__name__)
+        env = get_env()
+        
+        # Load critical secrets that may come from Google Secret Manager
+        critical_secrets = [
+            ('SERVICE_SECRET', 'service_secret'),
+            ('SERVICE_ID', 'service_id'),
+            ('JWT_SECRET_KEY', 'jwt_secret_key'),
+            ('SECRET_KEY', 'secret_key'),
+            ('FERNET_KEY', 'fernet_key'),
+        ]
+        
+        for env_name, config_name in critical_secrets:
+            # Use get() method which IsolatedEnvironment supports
+            env_value = env.get(env_name)
+            if env_value and config_name not in data:
+                data[config_name] = env_value
+                logger.info(f"Loaded {env_name} from environment")
+        
+        # Log what's loaded for debugging
+        logger.info(f"SERVICE_ID configured: {bool(data.get('service_id'))}")
+        logger.info(f"SERVICE_SECRET configured: {bool(data.get('service_secret'))}")
     
     def validate_mandatory_services(self):
         """Validate that all mandatory services are configured for production."""
@@ -685,10 +719,44 @@ class StagingConfig(AppConfig):
     
     def __init__(self, **data):
         """Initialize staging config."""
-        # CRITICAL: Load database URL before calling parent init
+        # CRITICAL: Load secrets FIRST as they may be needed by database URL
+        self._load_secrets_from_environment(data)
+        # Load database URL after secrets are available
         self._load_database_url_from_unified_config_staging(data)
         super().__init__(**data)
         # Validation moved to validate_mandatory_services() to be called after population
+    
+    def _load_secrets_from_environment(self, data: dict) -> None:
+        """Load critical secrets from environment variables.
+        
+        This ensures SERVICE_SECRET, JWT_SECRET_KEY, and other critical
+        secrets are loaded from Google Secret Manager or environment.
+        """
+        from shared.isolated_environment import get_env
+        import logging
+        
+        logger = logging.getLogger(__name__)
+        env = get_env()
+        
+        # Load critical secrets that may come from Google Secret Manager
+        critical_secrets = [
+            ('SERVICE_SECRET', 'service_secret'),
+            ('SERVICE_ID', 'service_id'),
+            ('JWT_SECRET_KEY', 'jwt_secret_key'),
+            ('SECRET_KEY', 'secret_key'),
+            ('FERNET_KEY', 'fernet_key'),
+        ]
+        
+        for env_name, config_name in critical_secrets:
+            # Use get() method which IsolatedEnvironment supports
+            env_value = env.get(env_name)
+            if env_value and config_name not in data:
+                data[config_name] = env_value
+                logger.info(f"Loaded {env_name} from environment")
+        
+        # Log what's loaded for debugging
+        logger.info(f"SERVICE_ID configured: {bool(data.get('service_id'))}")
+        logger.info(f"SERVICE_SECRET configured: {bool(data.get('service_secret'))}")
     
     def validate_mandatory_services(self):
         """Validate that all mandatory services are configured for staging."""

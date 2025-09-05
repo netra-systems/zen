@@ -45,9 +45,12 @@ class AsyncioTestUtils:
         """
         import ast
         import inspect
+        import textwrap
         
         try:
             source = inspect.getsource(func)
+            # Remove common leading whitespace to fix indentation issues
+            source = textwrap.dedent(source)
             tree = ast.parse(source)
             
             # Check for asyncio.run() inside async functions
