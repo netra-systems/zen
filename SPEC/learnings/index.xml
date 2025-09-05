@@ -2849,4 +2849,47 @@
             <learning-ref>websocket_handler_per_connection_critical.xml</learning-ref>
         </related-learnings>
     </learning>
+    
+    <learning id="docker-build-optimization-podman-2025-01-05">
+        <title>Docker Build Optimization Fails on Podman - Simple Builds Win</title>
+        <category>Infrastructure/Docker/Performance</category>
+        <keywords>docker, podman, build-optimization, buildkit, multi-stage, caching, performance</keywords>
+        <path>docker_build_optimization_podman_20250105.xml</path>
+        <critical-takeaway>
+            Complex Docker multi-stage builds with BuildKit features perform 30-75% SLOWER on Podman.
+            Podman doesn't support BuildKit cache mounts or advanced caching. Simple single-stage 
+            Dockerfiles are fastest (21.9s vs 95.2s). Alpine builds are 50% smaller but 5x slower 
+            to build initially. For Podman: simpler is better, avoid multi-stage complexity.
+        </critical-takeaway>
+        <severity>HIGH</severity>
+        <business-impact>Developer productivity - slow builds impact iteration speed</business-impact>
+        <prevention>
+            Use simple single-stage Dockerfiles with Podman. Reserve multi-stage builds for 
+            Docker+BuildKit environments only. Use Alpine only for production where size matters.
+            Optimize .dockerignore to reduce context size by 70%. Test build performance before
+            adopting complex Docker patterns.
+        </prevention>
+        <implementation-patterns>
+            <pattern>Podman: Single FROM, linear RUN commands, app code last</pattern>
+            <pattern>Docker+BuildKit: Multi-stage with cache mounts, tiered dependencies</pattern>
+            <pattern>Split requirements by change frequency only for Docker BuildKit</pattern>
+            <pattern>.dockerignore reduces context by 70% - works for both</pattern>
+        </implementation-patterns>
+        <testing-strategies>
+            <strategy>Measure initial build AND rebuild times</strategy>
+            <strategy>Test with actual container runtime (Podman vs Docker)</strategy>
+            <strategy>Compare simple vs complex Dockerfiles in target environment</strategy>
+            <strategy>Monitor image sizes vs build time tradeoffs</strategy>
+        </testing-strategies>
+        <metrics>
+            <metric>Baseline build: 21.9s (fastest)</metric>
+            <metric>Multi-stage build: 95.2s (4.3x slower)</metric>
+            <metric>Code change rebuild: 22-29s (all approaches similar)</metric>
+            <metric>Alpine size: 400MB vs 826MB baseline (50% smaller)</metric>
+        </metrics>
+        <related-learnings>
+            <learning-ref>docker_orchestration.md - Docker management architecture</learning-ref>
+            <learning-ref>unified_environment_management.xml - Environment configuration</learning-ref>
+        </related-learnings>
+    </learning>
 </specification>
