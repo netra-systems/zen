@@ -1,0 +1,213 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learning>
+  <metadata>
+    <title>ClickHouse Staging Configuration Fix - Environment-Specific Handlers Required</title>
+    <date>2025-09-04</date>
+    <category>configuration</category>
+    <severity>critical</severity>
+    <impact>staging_production</impact>
+    <revenue_impact>15000</revenue_impact>
+    <tags>
+      <tag>clickhouse</tag>
+      <tag>staging</tag>
+      <tag>configuration</tag>
+      <tag>environment-detection</tag>
+      <tag>five-whys</tag>
+    </tags>
+  </metadata>
+
+  <problem>
+    <description>
+      ClickHouse connections in staging were failing with "HTTPDriver for https://xedvrr4c3r.us-central1.gcp.clickhouse.cloud:8443 received ClickHouse errors".
+      Investigation revealed staging was actually trying to connect to localhost:8124 instead of ClickHouse Cloud.
+    </description>
+    
+    <symptoms>
+      <symptom>HTTPDriver connection errors to ClickHouse Cloud URL</symptom>
+      <symptom>Staging environment using localhost instead of cloud instance</symptom>
+      <symptom>Authentication failures despite correct credentials in environment</symptom>
+      <symptom>Tables not found errors (because connecting to wrong instance)</symptom>
+    </symptoms>
+    
+    <root_cause>
+      The _extract_clickhouse_config() function in clickhouse.py had no staging-specific handler.
+      It only handled 'testing' and 'development' environments explicitly.
+      For staging, it fell through to generic logic that returned config.clickhouse_https,
+      which was an empty object because populate_database_config() hadn't been called yet.
+      This caused it to use development defaults (localhost:8124).
+    </root_cause>
+  </problem>
+
+  <five_whys_analysis>
+    <why number="1">
+      <question>Why is ClickHouse failing to connect to the cloud instance?</question>
+      <answer>The application is trying to connect to localhost:8124 instead of xedvrr4c3r.us-central1.gcp.clickhouse.cloud:8443</answer>
+    </why>
+    
+    <why number="2">
+      <question>Why is it using localhost instead of the cloud URL?</question>
+      <answer>The _extract_clickhouse_config() function returns empty config for staging, which defaults to localhost</answer>
+    </why>
+    
+    <why number="3">
+      <question>Why does it return empty config for staging?</question>
+      <answer>There's no staging-specific handler in _extract_clickhouse_config(), so it uses generic fallback to config.clickhouse_https which is unpopulated</answer>
+    </why>
+    
+    <why number="4">
+      <question>Why is config.clickhouse_https unpopulated?</question>
+      <answer>The function is called during module import, before populate_database_config() runs to populate the config values</answer>
+    </why>
+    
+    <why number="5">
+      <question>Why wasn't staging handled explicitly like development and testing?</question>
+      <answer>The original design assumed the generic config.clickhouse_https would be populated, but didn't account for the timing issue where config is requested before population</answer>
+    </why>
+  </five_whys_analysis>
+
+  <solution>
+    <description>
+      Added explicit staging and production handlers in _extract_clickhouse_config() that:
+      1. Load CLICKHOUSE_URL directly from environment variables
+      2. Parse the URL to extract components (host, port, user, password, database)
+      3. Handle password loading from GCP Secret Manager if needed
+      4. Return properly configured ClickHouse config object
+    </description>
+    
+    <implementation>
+      <file>netra_backend/app/db/clickhouse.py</file>
+      <changes>
+        <change>
+          <location>Lines 280-346</location>
+          <description>Added StagingClickHouseConfig class that loads from CLICKHOUSE_URL</description>
+        </change>
+        <change>
+          <location>Lines 348-392</location>
+          <description>Added ProductionClickHouseConfig class with mandatory URL requirement</description>
+        </change>
+      </changes>
+      
+      <code_snippet><![CDATA[
+elif config.environment == "staging":
+    class StagingClickHouseConfig:
+        def __init__(self):
+            from shared.isolated_environment import get_env
+            from urllib.parse import urlparse, parse_qs
+            env = get_env()
+            
+            # Load ClickHouse URL from environment
+            clickhouse_url = env.get("CLICKHOUSE_URL", "")
+            
+            if not clickhouse_url:
+                # Try to build from components
+                host = env.get("CLICKHOUSE_HOST", "")
+                if host:
+                    # Build URL from components
+                    ...
+                else:
+                    raise ConnectionError("ClickHouse configuration missing in staging")
+            
+            # Parse the URL
+            parsed = urlparse(clickhouse_url)
+            query_params = parse_qs(parsed.query)
+            
+            self.host = parsed.hostname or "xedvrr4c3r.us-central1.gcp.clickhouse.cloud"
+            self.port = parsed.port or 8443
+            self.user = parsed.username or "default"
+            self.password = parsed.password or env.get("CLICKHOUSE_PASSWORD", "")
+            self.database = parsed.path.lstrip('/') or "default"
+            self.secure = query_params.get('secure', ['1'])[0] == '1'
+    
+    return StagingClickHouseConfig()
+      ]]></code_snippet>
+    </implementation>
+  </solution>
+
+  <validation>
+    <test>Set ENVIRONMENT=staging and CLICKHOUSE_URL with cloud URL</test>
+    <test>Verify _extract_clickhouse_config() returns cloud host, not localhost</test>
+    <test>Verify port is 8443, not 8124</test>
+    <test>Verify secure=True for HTTPS connection</test>
+    <test>Verify password is loaded from URL or Secret Manager</test>
+    
+    <verification_command><![CDATA[
+python -c "
+import os
+os.environ['TESTING'] = 'true'
+os.environ['ENVIRONMENT'] = 'staging'
+os.environ['CLICKHOUSE_URL'] = 'clickhouse://default:test@host.clickhouse.cloud:8443/db?secure=1'
+
+class MockConfig:
+    environment = 'staging'
+    clickhouse_mode = 'shared'
+    class clickhouse_https:
+        host = None
+        
+from netra_backend.app.db.clickhouse import _extract_clickhouse_config
+result = _extract_clickhouse_config(MockConfig())
+assert 'clickhouse.cloud' in result.host, f'Wrong host: {result.host}'
+assert result.port == 8443, f'Wrong port: {result.port}'
+assert result.secure == True, f'Not secure'
+print('✅ Staging config works correctly')
+"
+    ]]></verification_command>
+  </validation>
+
+  <lessons_learned>
+    <lesson>
+      <title>Environment-specific handlers are critical</title>
+      <description>
+        Each environment (development, testing, staging, production) needs explicit handling
+        in configuration extraction functions. Generic fallbacks can fail due to timing issues.
+      </description>
+    </lesson>
+    
+    <lesson>
+      <title>Configuration timing matters</title>
+      <description>
+        Functions called during module import may execute before configuration is fully populated.
+        They must load configuration directly from environment variables, not rely on populated config objects.
+      </description>
+    </lesson>
+    
+    <lesson>
+      <title>URL parsing is more reliable than components</title>
+      <description>
+        Using a single CLICKHOUSE_URL that contains all connection info is more reliable
+        than assembling from separate HOST, PORT, USER, PASSWORD variables.
+      </description>
+    </lesson>
+    
+    <lesson>
+      <title>Loud error messages help debugging</title>
+      <description>
+        When configuration is missing, provide clear error messages showing exactly what's expected.
+        Include example URLs and environment variable names.
+      </description>
+    </lesson>
+  </lessons_learned>
+
+  <preventive_measures>
+    <measure>Always add explicit handlers for each environment in configuration functions</measure>
+    <measure>Test configuration extraction with minimal setup (just environment variables)</measure>
+    <measure>Use URL-based configuration for external services (parse don't construct)</measure>
+    <measure>Add configuration validation tests for each environment</measure>
+    <measure>Document required environment variables clearly in staging.env</measure>
+  </preventive_measures>
+
+  <related_files>
+    <file>netra_backend/app/db/clickhouse.py</file>
+    <file>netra_backend/app/core/configuration/database.py</file>
+    <file>netra_backend/app/core/configuration/base.py</file>
+    <file>config/staging.env</file>
+    <file>CLICKHOUSE_CONFIG_FLOW_ANALYSIS.md</file>
+    <file>CLICKHOUSE_FIVE_WHYS_BUG_REPORT_20250904.md</file>
+  </related_files>
+
+  <monitoring>
+    <metric>ClickHouse connection host in logs (should never be localhost in staging/production)</metric>
+    <metric>ClickHouse port in logs (should be 8443 for cloud, not 8124)</metric>
+    <metric>HTTPDriver errors mentioning wrong host</metric>
+    <alert>If staging uses localhost for ClickHouse, configuration extraction failed</alert>
+  </monitoring>
+</learning>

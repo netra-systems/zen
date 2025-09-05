@@ -65,8 +65,13 @@ class UserConfig(BaseModel):
 class AgentConfig(BaseAgentConfig):
     """Extended agent configuration with additional components."""
     cache: AgentCacheConfig = Field(default_factory=AgentCacheConfig)
+    retry: RetryConfig = Field(default_factory=RetryConfig)
     timeout: TimeoutConfig = Field(default_factory=TimeoutConfig)
     user: UserConfig = Field(default_factory=UserConfig)
+    failure_threshold: int = Field(default=3, description="Circuit breaker failure threshold")
+    reset_timeout: float = Field(default=30.0, description="Circuit breaker reset timeout")
+    max_concurrent_operations: int = Field(default=10, description="Maximum concurrent operations")
+    batch_size: int = Field(default=100, description="Batch processing size")
     
     @classmethod
     def from_unified_config(cls) -> 'AgentConfig':
@@ -74,12 +79,17 @@ class AgentConfig(BaseAgentConfig):
         from netra_backend.app.core.config import get_config
         config = get_config()
         return cls(
+            name=getattr(config, 'agent_name', 'default_agent'),
+            enabled=getattr(config, 'agent_enabled', True),
+            timeout_seconds=getattr(config, 'agent_timeout_seconds', 30.0),
+            max_retries=getattr(config, 'agent_max_retries', 3),
+            parameters=getattr(config, 'agent_parameters', {}),
             cache=AgentCacheConfig.from_unified_config(),
             retry=RetryConfig(
-                max_retries=getattr(config, 'agent_max_retries', 3),
-                base_delay=getattr(config, 'agent_base_delay', 1.0),
-                max_delay=getattr(config, 'agent_max_delay', 60.0),
-                backoff_factor=getattr(config, 'agent_backoff_factor', 2.0)
+                max_attempts=getattr(config, 'agent_max_retries', 3),
+                base_delay_seconds=getattr(config, 'agent_base_delay', 1.0),
+                max_delay_seconds=getattr(config, 'agent_max_delay', 60.0),
+                backoff_multiplier=getattr(config, 'agent_backoff_factor', 2.0)
             ),
             timeout=TimeoutConfig.from_unified_config(),
             user=UserConfig.from_unified_config(),

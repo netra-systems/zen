@@ -1,403 +1,340 @@
-"""Execution context management for agent operations."""
+"""
+Execution Context Module
 
-import asyncio
-import time
-from datetime import datetime, timezone
-from typing import Dict, Any, Optional, List, Callable
-from dataclasses import dataclass, field
-from contextlib import asynccontextmanager
+Provides context management for agent execution.
+Tracks execution state, metadata, and resource usage.
+"""
+
 import logging
-
-from netra_backend.app.core.interfaces_execution import ExecutionStrategy
+import time
+import uuid
+from typing import Dict, Optional, Any, List
+from dataclasses import dataclass, field
+from enum import Enum
+import threading
 
 logger = logging.getLogger(__name__)
 
 
+class ExecutionStatus(Enum):
+    """Execution status states"""
+    PENDING = "pending"
+    RUNNING = "running"
+    COMPLETED = "completed"
+    FAILED = "failed"
+    CANCELLED = "cancelled"
+    TIMEOUT = "timeout"
+
+
 @dataclass
 class ExecutionMetadata:
-    """Metadata for execution context."""
-    
-    start_time: float = field(default_factory=time.time)
-    agent_id: Optional[str] = None
-    operation: Optional[str] = None
-    request_id: Optional[str] = None
+    """Metadata for execution tracking"""
     user_id: Optional[str] = None
     session_id: Optional[str] = None
-    parent_context_id: Optional[str] = None
-    tags: Dict[str, str] = field(default_factory=dict)
+    request_id: Optional[str] = None
+    agent_name: Optional[str] = None
+    tool_name: Optional[str] = None
+    start_time: Optional[float] = None
+    end_time: Optional[float] = None
+    duration: Optional[float] = None
+    custom_data: Dict[str, Any] = field(default_factory=dict)
     
+    def update_duration(self) -> None:
+        """Update duration based on start and end times"""
+        if self.start_time and self.end_time:
+            self.duration = self.end_time - self.start_time
+
+
+@dataclass
+class ResourceUsage:
+    """Resource usage tracking"""
+    cpu_time: float = 0.0
+    memory_peak: int = 0
+    network_requests: int = 0
+    database_queries: int = 0
+    llm_tokens: int = 0
+    cost_estimate: float = 0.0
+
 
 class ExecutionContext:
-    """Context manager for agent execution operations."""
+    """
+    Execution context for agent operations.
     
-    def __init__(
-        self,
-        context_id: str,
-        metadata: Optional[ExecutionMetadata] = None,
-        timeout: Optional[float] = None
-    ):
-        """Initialize execution context.
-        
-        Args:
-            context_id: Unique identifier for this context
-            metadata: Execution metadata
-            timeout: Execution timeout in seconds
-        """
-        self.context_id = context_id
+    Provides context management, tracking, and resource monitoring
+    for agent execution within the Netra platform.
+    """
+    
+    def __init__(self, 
+                 execution_id: Optional[str] = None,
+                 metadata: Optional[ExecutionMetadata] = None):
+        self.execution_id = execution_id or str(uuid.uuid4())
         self.metadata = metadata or ExecutionMetadata()
-        self.timeout = timeout
-        self.state: Dict[str, Any] = {}
-        self.results: Dict[str, Any] = {}
-        self.errors: List[Exception] = []
-        self.callbacks: List[Callable] = []
-        self._start_time = time.time()
-        self._end_time: Optional[float] = None
-        self._cancelled = False
-        # Add timestamp property for compatibility with error handling
-        self.timestamp = datetime.now(timezone.utc)
+        self.status = ExecutionStatus.PENDING
+        self.resource_usage = ResourceUsage()
         
-    @property
-    def duration(self) -> float:
-        """Get execution duration in seconds."""
-        end_time = self._end_time or time.time()
-        return end_time - self._start_time
+        # Context tracking
+        self._context_data: Dict[str, Any] = {}
+        self._error_info: Optional[Dict[str, Any]] = None
+        self._logs: List[str] = []
         
-    @property
+        # Thread safety
+        self._lock = threading.RLock()
+        
+        logger.debug(f"ExecutionContext created: {self.execution_id}")
+    
+    def start_execution(self) -> None:
+        """Mark execution as started"""
+        with self._lock:
+            self.status = ExecutionStatus.RUNNING
+            self.metadata.start_time = time.time()
+            self._add_log(f"Execution started: {self.execution_id}")
+    
+    def complete_execution(self, success: bool = True) -> None:
+        """Mark execution as completed"""
+        with self._lock:
+            self.metadata.end_time = time.time()
+            self.metadata.update_duration()
+            
+            if success:
+                self.status = ExecutionStatus.COMPLETED
+                self._add_log(f"Execution completed successfully: {self.execution_id}")
+            else:
+                self.status = ExecutionStatus.FAILED
+                self._add_log(f"Execution failed: {self.execution_id}")
+    
+    def fail_execution(self, error: Exception) -> None:
+        """Mark execution as failed with error info"""
+        with self._lock:
+            self.status = ExecutionStatus.FAILED
+            self.metadata.end_time = time.time()
+            self.metadata.update_duration()
+            
+            self._error_info = {
+                'type': type(error).__name__,
+                'message': str(error),
+                'timestamp': time.time()
+            }
+            
+            self._add_log(f"Execution failed with error: {error}")
+    
+    def cancel_execution(self) -> None:
+        """Mark execution as cancelled"""
+        with self._lock:
+            self.status = ExecutionStatus.CANCELLED
+            self.metadata.end_time = time.time()
+            self.metadata.update_duration()
+            self._add_log(f"Execution cancelled: {self.execution_id}")
+    
+    def timeout_execution(self) -> None:
+        """Mark execution as timed out"""
+        with self._lock:
+            self.status = ExecutionStatus.TIMEOUT
+            self.metadata.end_time = time.time()
+            self.metadata.update_duration()
+            self._add_log(f"Execution timed out: {self.execution_id}")
+    
+    def set_context_data(self, key: str, value: Any) -> None:
+        """Set context data"""
+        with self._lock:
+            self._context_data[key] = value
+    
+    def get_context_data(self, key: str, default: Any = None) -> Any:
+        """Get context data"""
+        with self._lock:
+            return self._context_data.get(key, default)
+    
+    def update_resource_usage(self, **kwargs) -> None:
+        """Update resource usage metrics"""
+        with self._lock:
+            for key, value in kwargs.items():
+                if hasattr(self.resource_usage, key):
+                    if key in ['network_requests', 'database_queries', 'llm_tokens']:
+                        # Increment counters
+                        current_value = getattr(self.resource_usage, key)
+                        setattr(self.resource_usage, key, current_value + value)
+                    else:
+                        # Set absolute values
+                        setattr(self.resource_usage, key, value)
+    
+    def _add_log(self, message: str) -> None:
+        """Add log entry"""
+        timestamp = time.strftime('%Y-%m-%d %H:%M:%S')
+        log_entry = f"[{timestamp}] {message}"
+        self._logs.append(log_entry)
+        
+        # Keep only last 100 log entries
+        if len(self._logs) > 100:
+            self._logs = self._logs[-100:]
+    
+    def get_status(self) -> ExecutionStatus:
+        """Get current execution status"""
+        return self.status
+    
+    def is_running(self) -> bool:
+        """Check if execution is currently running"""
+        return self.status == ExecutionStatus.RUNNING
+    
     def is_completed(self) -> bool:
-        """Check if execution is completed."""
-        return self._end_time is not None
-        
-    @property
-    def is_cancelled(self) -> bool:
-        """Check if execution was cancelled."""
-        return self._cancelled
-        
-    def set_state(self, key: str, value: Any):
-        """Set state value."""
-        self.state[key] = value
-        
-    def get_state(self, key: str, default: Any = None) -> Any:
-        """Get state value."""
-        return self.state.get(key, default)
-        
-    def set_result(self, key: str, value: Any):
-        """Set result value."""
-        self.results[key] = value
-        
-    def get_result(self, key: str, default: Any = None) -> Any:
-        """Get result value."""
-        return self.results.get(key, default)
-        
-    def add_error(self, error: Exception):
-        """Add error to context."""
-        self.errors.append(error)
-        logger.error(f"Error in execution context {self.context_id}: {error}")
-        
-    def add_callback(self, callback: Callable):
-        """Add completion callback."""
-        self.callbacks.append(callback)
-        
-    def cancel(self):
-        """Cancel the execution."""
-        self._cancelled = True
-        logger.warning(f"Execution context {self.context_id} cancelled")
-        
-    def complete(self):
-        """Mark execution as completed."""
-        if self._end_time is None:
-            self._end_time = time.time()
-            
-            # Execute callbacks
-            for callback in self.callbacks:
-                try:
-                    callback(self)
-                except Exception as e:
-                    logger.error(f"Callback error in context {self.context_id}: {e}")
-                    
-            logger.info(f"Execution context {self.context_id} completed in {self.duration:.3f}s")
-            
-    def to_dict(self) -> Dict[str, Any]:
-        """Convert context to dictionary."""
-        return {
-            "context_id": self.context_id,
-            "metadata": {
-                "start_time": self.metadata.start_time,
-                "agent_id": self.metadata.agent_id,
-                "operation": self.metadata.operation,
-                "request_id": self.metadata.request_id,
-                "user_id": self.metadata.user_id,
-                "session_id": self.metadata.session_id,
-                "parent_context_id": self.metadata.parent_context_id,
-                "tags": self.metadata.tags
-            },
-            "state": self.state,
-            "results": self.results,
-            "errors": [str(e) for e in self.errors],
-            "duration": self.duration,
-            "completed": self.is_completed,
-            "cancelled": self.is_cancelled,
-            "timestamp": self.timestamp.isoformat() if isinstance(self.timestamp, datetime) else self.timestamp
-        }
+        """Check if execution is completed (success or failure)"""
+        return self.status in [ExecutionStatus.COMPLETED, ExecutionStatus.FAILED]
+    
+    def get_summary(self) -> Dict[str, Any]:
+        """Get execution summary"""
+        with self._lock:
+            return {
+                'execution_id': self.execution_id,
+                'status': self.status.value,
+                'metadata': {
+                    'user_id': self.metadata.user_id,
+                    'session_id': self.metadata.session_id,
+                    'request_id': self.metadata.request_id,
+                    'agent_name': self.metadata.agent_name,
+                    'tool_name': self.metadata.tool_name,
+                    'start_time': self.metadata.start_time,
+                    'end_time': self.metadata.end_time,
+                    'duration': self.metadata.duration,
+                    'custom_data': self.metadata.custom_data.copy()
+                },
+                'resource_usage': {
+                    'cpu_time': self.resource_usage.cpu_time,
+                    'memory_peak': self.resource_usage.memory_peak,
+                    'network_requests': self.resource_usage.network_requests,
+                    'database_queries': self.resource_usage.database_queries,
+                    'llm_tokens': self.resource_usage.llm_tokens,
+                    'cost_estimate': self.resource_usage.cost_estimate
+                },
+                'error_info': self._error_info,
+                'log_count': len(self._logs),
+                'context_keys': list(self._context_data.keys())
+            }
+    
+    def get_logs(self, limit: Optional[int] = None) -> List[str]:
+        """Get execution logs"""
+        with self._lock:
+            if limit:
+                return self._logs[-limit:]
+            return self._logs.copy()
+    
+    def clear_logs(self) -> None:
+        """Clear execution logs"""
+        with self._lock:
+            self._logs.clear()
 
 
-class ContextManager:
-    """Global context manager for execution contexts."""
+class ExecutionContextManager:
+    """
+    Manager for execution contexts.
+    
+    Provides context lifecycle management and tracking
+    across multiple executions.
+    """
     
     def __init__(self):
         self._contexts: Dict[str, ExecutionContext] = {}
-        self._lock = asyncio.Lock()
+        self._lock = threading.RLock()
+        logger.info("ExecutionContextManager initialized")
+    
+    def create_context(self, 
+                      execution_id: Optional[str] = None,
+                      metadata: Optional[ExecutionMetadata] = None) -> ExecutionContext:
+        """Create a new execution context"""
+        context = ExecutionContext(execution_id, metadata)
         
-    async def create_context(
-        self,
-        context_id: str,
-        metadata: Optional[ExecutionMetadata] = None,
-        timeout: Optional[float] = None
-    ) -> ExecutionContext:
-        """Create new execution context.
+        with self._lock:
+            self._contexts[context.execution_id] = context
         
-        Args:
-            context_id: Unique identifier for context
-            metadata: Execution metadata
-            timeout: Execution timeout
-            
-        Returns:
-            Created execution context
-        """
-        async with self._lock:
-            if context_id in self._contexts:
-                raise ValueError(f"Context {context_id} already exists")
-                
-            context = ExecutionContext(context_id, metadata, timeout)
-            self._contexts[context_id] = context
-            
-            logger.debug(f"Created execution context: {context_id}")
-            return context
-            
-    async def get_context(self, context_id: str) -> Optional[ExecutionContext]:
-        """Get execution context by ID.
-        
-        Args:
-            context_id: Context identifier
-            
-        Returns:
-            Execution context if found
-        """
-        async with self._lock:
-            return self._contexts.get(context_id)
-            
-    async def complete_context(self, context_id: str):
-        """Complete and remove execution context.
-        
-        Args:
-            context_id: Context identifier
-        """
-        async with self._lock:
-            context = self._contexts.get(context_id)
-            if context:
-                context.complete()
-                del self._contexts[context_id]
-                logger.debug(f"Completed and removed context: {context_id}")
-                
-    async def cancel_context(self, context_id: str):
-        """Cancel execution context.
-        
-        Args:
-            context_id: Context identifier
-        """
-        async with self._lock:
-            context = self._contexts.get(context_id)
-            if context:
-                context.cancel()
-                
-    async def cleanup_completed(self):
-        """Clean up completed contexts."""
-        async with self._lock:
-            completed = [
-                ctx_id for ctx_id, ctx in self._contexts.items()
-                if ctx.is_completed or ctx.is_cancelled
+        return context
+    
+    def get_context(self, execution_id: str) -> Optional[ExecutionContext]:
+        """Get execution context by ID"""
+        with self._lock:
+            return self._contexts.get(execution_id)
+    
+    def remove_context(self, execution_id: str) -> bool:
+        """Remove execution context"""
+        with self._lock:
+            if execution_id in self._contexts:
+                del self._contexts[execution_id]
+                return True
+            return False
+    
+    def get_active_contexts(self) -> List[ExecutionContext]:
+        """Get all active (running) contexts"""
+        with self._lock:
+            return [
+                context for context in self._contexts.values()
+                if context.is_running()
             ]
+    
+    def get_all_contexts(self) -> List[ExecutionContext]:
+        """Get all contexts"""
+        with self._lock:
+            return list(self._contexts.values())
+    
+    def cleanup_completed(self, max_age_seconds: int = 3600) -> int:
+        """Clean up completed contexts older than max_age_seconds"""
+        current_time = time.time()
+        removed_count = 0
+        
+        with self._lock:
+            to_remove = []
             
-            for ctx_id in completed:
-                del self._contexts[ctx_id]
-                
-            if completed:
-                logger.debug(f"Cleaned up {len(completed)} completed contexts")
-                
-    def get_active_count(self) -> int:
-        """Get count of active contexts."""
-        return len(self._contexts)
-
-
-class AgentExecutionContext(ExecutionContext):
-    """Specialized execution context for agent operations."""
-    
-    def __init__(
-        self,
-        context_id: str,
-        agent_id: str,
-        operation: str,
-        metadata: Optional[ExecutionMetadata] = None,
-        timeout: Optional[float] = None
-    ):
-        """Initialize agent execution context.
+            for execution_id, context in self._contexts.items():
+                if (context.is_completed() and 
+                    context.metadata.end_time and
+                    current_time - context.metadata.end_time > max_age_seconds):
+                    to_remove.append(execution_id)
+            
+            for execution_id in to_remove:
+                del self._contexts[execution_id]
+                removed_count += 1
         
-        Args:
-            context_id: Unique identifier for context
-            agent_id: Agent identifier
-            operation: Operation being performed
-            metadata: Additional execution metadata
-            timeout: Execution timeout in seconds
-        """
-        if metadata is None:
-            metadata = ExecutionMetadata()
-        metadata.agent_id = agent_id
-        metadata.operation = operation
+        if removed_count > 0:
+            logger.info(f"Cleaned up {removed_count} completed execution contexts")
         
-        super().__init__(context_id, metadata, timeout)
-        self.agent_id = agent_id
-        self.operation = operation
-        self.metrics: Dict[str, Any] = {}
-        
-    def record_metric(self, key: str, value: Any):
-        """Record a metric for this execution."""
-        self.metrics[key] = value
-        
-    def get_metric(self, key: str, default: Any = None) -> Any:
-        """Get a recorded metric."""
-        return self.metrics.get(key, default)
-    
-    @property
-    def run_id(self) -> str:
-        """Get run_id from context_id for compatibility."""
-        return self.context_id
-        
-    def to_dict(self) -> Dict[str, Any]:
-        """Convert agent context to dictionary."""
-        base_dict = super().to_dict()
-        base_dict.update({
-            "agent_id": self.agent_id,
-            "operation": self.operation,
-            "metrics": self.metrics
-        })
-        return base_dict
+        return removed_count
 
 
-@dataclass 
-class AgentExecutionResult:
-    """Result of agent execution."""
-    
-    success: bool
-    result: Optional[Any] = None
-    error: Optional[str] = None
-    execution_time: float = 0.0
-    context_id: Optional[str] = None
-    metrics: Dict[str, Any] = field(default_factory=dict)
-    
-    def to_dict(self) -> Dict[str, Any]:
-        """Convert result to dictionary."""
-        return {
-            "success": self.success,
-            "result": self.result,
-            "error": self.error,
-            "execution_time": self.execution_time,
-            "context_id": self.context_id,
-            "metrics": self.metrics
-        }
+# Global context manager
+_context_manager = None
 
 
-@dataclass
-class PipelineStep:
-    """Pipeline step definition for agent execution."""
-    
-    step_id: str
-    name: str
-    description: str = ""
-    required: bool = True
-    timeout: Optional[float] = None
-    retry_count: int = 0
-    dependencies: List[str] = field(default_factory=list)
-    parameters: Dict[str, Any] = field(default_factory=dict)
-    metadata: Dict[str, Any] = field(default_factory=dict)
-    
-    def __post_init__(self):
-        if not self.step_id:
-            raise ValueError("step_id is required")
-        if not self.name:
-            raise ValueError("name is required")
-    
-    def to_dict(self) -> Dict[str, Any]:
-        """Convert pipeline step to dictionary."""
-        return {
-            "step_id": self.step_id,
-            "name": self.name,
-            "description": self.description,
-            "required": self.required,
-            "timeout": self.timeout,
-            "retry_count": self.retry_count,
-            "dependencies": self.dependencies,
-            "parameters": self.parameters,
-            "metadata": self.metadata
-        }
-    
-    @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> 'PipelineStep':
-        """Create pipeline step from dictionary."""
-        return cls(
-            step_id=data["step_id"],
-            name=data["name"],
-            description=data.get("description", ""),
-            required=data.get("required", True),
-            timeout=data.get("timeout"),
-            retry_count=data.get("retry_count", 0),
-            dependencies=data.get("dependencies", []),
-            parameters=data.get("parameters", {}),
-            metadata=data.get("metadata", {})
-        )
-
-
-# Global context manager instance
-_context_manager: Optional[ContextManager] = None
-
-
-def get_context_manager() -> ContextManager:
-    """Get global context manager instance."""
+def get_context_manager() -> ExecutionContextManager:
+    """Get global execution context manager"""
     global _context_manager
     if _context_manager is None:
-        _context_manager = ContextManager()
+        _context_manager = ExecutionContextManager()
     return _context_manager
 
 
-@asynccontextmanager
-async def execution_context(
-    context_id: str,
-    metadata: Optional[ExecutionMetadata] = None,
-    timeout: Optional[float] = None
-):
-    """Async context manager for execution contexts.
-    
-    Args:
-        context_id: Unique identifier for context
-        metadata: Execution metadata
-        timeout: Execution timeout
-        
-    Yields:
-        Execution context instance
+def create_execution_context(**kwargs) -> ExecutionContext:
+    """Convenience function to create execution context"""
+    return get_context_manager().create_context(**kwargs)
+
+
+class AgentExecutionContext(ExecutionContext):
     """
-    manager = get_context_manager()
-    context = await manager.create_context(context_id, metadata, timeout)
+    Agent-specific execution context.
     
-    try:
-        if timeout:
-            async with asyncio.timeout(timeout):
-                yield context
-        else:
-            yield context
-    except asyncio.TimeoutError:
-        logger.warning(f"Execution context {context_id} timed out after {timeout}s")
-        context.add_error(asyncio.TimeoutError(f"Execution timed out after {timeout}s"))
-        raise
-    except Exception as e:
-        context.add_error(e)
-        raise
-    finally:
-        await manager.complete_context(context_id)
+    Extends ExecutionContext with agent-specific functionality
+    and maintains backwards compatibility.
+    """
+    
+    def __init__(self, 
+                 execution_id: Optional[str] = None,
+                 metadata: Optional[ExecutionMetadata] = None):
+        super().__init__(execution_id, metadata)
+        # Add timestamp for backwards compatibility
+        self.timestamp = self.metadata.start_time or time.time()
+        logger.debug(f"AgentExecutionContext created: {self.execution_id}")
+    
+    def update_timestamp(self) -> None:
+        """Update timestamp to current time"""
+        self.timestamp = time.time()
+        if self.metadata.start_time is None:
+            self.metadata.start_time = self.timestamp
+
+
+def create_agent_execution_context(**kwargs) -> AgentExecutionContext:
+    """Convenience function to create agent execution context"""
+    return AgentExecutionContext(**kwargs)

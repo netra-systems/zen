@@ -19,6 +19,8 @@ from netra_backend.app.schemas import SubAgentLifecycle
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.agents.base.execution_context import (
     AgentExecutionContext,
+)
+from netra_backend.app.agents.base.interface import (
     AgentExecutionResult,
 )
 

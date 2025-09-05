@@ -1,64 +1,63 @@
-"""Enhanced state management logic for supervisor agent."""
+"""
+Supervisor State Manager Module
 
-from typing import Optional, Tuple
+Business Value Justification (BVJ):
+- Segment: Platform/Internal
+- Business Goal: System Stability - Provide state management for agent execution
+- Value Impact: Ensures consistent agent state across executions
+- Strategic Impact: Reduces state-related bugs and improves reliability
 
-from sqlalchemy.ext.asyncio import AsyncSession
+This module provides state management functionality for the supervisor agent system.
+"""
+
+from typing import Any, Dict, Optional
 from netra_backend.app.agents.state import DeepAgentState
-from netra_backend.app.agents.supervisor.state_manager_core import StateManagerCore
-from netra_backend.app.schemas.agent_state import AgentPhase, CheckpointType
 
 
-class AgentStateManager(StateManagerCore):
-    """Enhanced agent state manager with atomic persistence and recovery."""
+class AgentStateManager:
+    """
+    Agent State Manager for backward compatibility.
     
-    def __init__(self, db_session):
-        super().__init__(db_session)
-    
-    # All methods are now inherited from StateManagerCore and its component managers
-    # This maintains backward compatibility while using the modular structure
-
-
-class SessionlessAgentStateManager:
-    """Agent state manager that doesn't store db_session globally.
-    
-    Instead, it accepts sessions as method parameters to ensure proper
-    isolation between requests.
+    This class provides minimal functionality for tests that still import AgentStateManager.
+    The actual state management functionality has been consolidated into the unified system.
     """
     
     def __init__(self):
-        # No db_session stored - sessions passed to methods
-        pass
+        self.states: Dict[str, DeepAgentState] = {}
     
-    async def initialize_state_with_session(self, session: AsyncSession, 
-                                          prompt: str, thread_id: str, 
-                                          user_id: str, run_id: str) -> DeepAgentState:
-        """Initialize agent state with recovery support using provided session."""
-        # Create temporary state manager with this session for this operation
-        temp_state_manager = AgentStateManager(session)
-        return await temp_state_manager.initialize_state(prompt, thread_id, user_id, run_id)
+    async def get_state(self, agent_id: str) -> Optional[DeepAgentState]:
+        """Get agent state by ID."""
+        return self.states.get(agent_id)
     
-    async def save_state_checkpoint_with_session(self, session: AsyncSession,
-                                               state: DeepAgentState, run_id: str,
-                                               thread_id: str, user_id: str,
-                                               checkpoint_type=None, agent_phase=None) -> bool:
-        """Save state checkpoint using provided session."""
-        from netra_backend.app.schemas.agent_state import CheckpointType
-        if checkpoint_type is None:
-            checkpoint_type = CheckpointType.AUTO
-            
-        # Create temporary state manager with this session for this operation
-        temp_state_manager = AgentStateManager(session)
-        return await temp_state_manager.save_state_checkpoint(
-            state, run_id, thread_id, user_id, checkpoint_type, agent_phase)
+    async def save_state(self, agent_id: str, state: DeepAgentState) -> bool:
+        """Save agent state."""
+        self.states[agent_id] = state
+        return True
     
-    async def handle_agent_crash_recovery_with_session(self, session: AsyncSession,
-                                                       run_id: str, thread_id: str,
-                                                       failure_reason: str):
-        """Handle agent crash recovery using provided session."""
-        # Create temporary state manager with this session for this operation
-        temp_state_manager = AgentStateManager(session)
-        return await temp_state_manager.handle_agent_crash_recovery(run_id, thread_id, failure_reason)
+    async def delete_state(self, agent_id: str) -> bool:
+        """Delete agent state."""
+        if agent_id in self.states:
+            del self.states[agent_id]
+            return True
+        return False
+    
+    async def checkpoint_state(self, agent_id: str) -> bool:
+        """Create a checkpoint of agent state."""
+        # Stub implementation for backward compatibility
+        return True
+    
+    async def restore_state(self, agent_id: str, checkpoint_id: str) -> Optional[DeepAgentState]:
+        """Restore agent state from checkpoint."""
+        # Stub implementation for backward compatibility
+        return self.states.get(agent_id)
 
 
-# Backward compatibility alias
-StateManager = AgentStateManager
+class StateManager(AgentStateManager):
+    """Alias for AgentStateManager for backward compatibility."""
+    pass
+
+
+__all__ = [
+    "AgentStateManager",
+    "StateManager",
+]

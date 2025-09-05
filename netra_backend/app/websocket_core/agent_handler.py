@@ -17,7 +17,7 @@ from typing import Any, Dict, List, Optional
 from fastapi import WebSocket
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from netra_backend.app.dependencies import get_db_dependency
+from netra_backend.app.dependencies import get_request_scoped_db_session
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.services.message_handlers import MessageHandlerService
 from netra_backend.app.websocket_core.handlers import BaseMessageHandler
@@ -67,9 +67,9 @@ class AgentMessageHandler(BaseMessageHandler):
                     else:
                         logger.warning(f"Could not find connection ID for websocket of user {user_id}")
             
-            # Get database session using async context manager
-            # CRITICAL: Do NOT manually close the session - let the context manager handle it
-            async for db_session in get_db_dependency():
+            # Get database session using async generator pattern
+            # CRITICAL: Do NOT manually close the session - the generator handles cleanup
+            async for db_session in get_request_scoped_db_session():
                 try:
                     # Route message to appropriate handler
                     success = await self._route_agent_message(
@@ -87,11 +87,7 @@ class AgentMessageHandler(BaseMessageHandler):
                     self.processing_stats["errors"] += 1
                     logger.error(f"Error routing agent message from {user_id}: {e}", exc_info=True)
                     return False
-                # Session automatically closed when exiting async for loop
-            
-            # Should not reach here, but handle if no session obtained
-            logger.error(f"Failed to get database session for user {user_id}")
-            return False
+                # Session automatically closed when exiting async with block
                 
         except Exception as e:
             self.processing_stats["errors"] += 1

@@ -18,6 +18,11 @@ from netra_backend.app.services.metrics.exporter import MetricsExporter
 from netra_backend.app.services.metrics.quality_collector import QualityMetricsCollector
 from netra_backend.app.services.metrics.resource_monitor import ResourceMonitor
 from netra_backend.app.services.metrics.time_series import TimeSeriesStorage
+from netra_backend.app.services.metrics.circuit_breaker_metrics import (
+    CircuitBreakerMetrics,
+    CircuitBreakerMetricsCollector,
+    CircuitBreakerMetricsService
+)
 
 __all__ = [
     "CorpusMetricsCollector",
@@ -32,5 +37,8 @@ __all__ = [
     "AgentMetricType", 
     "FailureType",
     "agent_metrics_collector",
-    "AnalyticsCollector"
+    "AnalyticsCollector",
+    "CircuitBreakerMetrics",
+    "CircuitBreakerMetricsCollector",
+    "CircuitBreakerMetricsService"
 ]

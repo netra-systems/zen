@@ -3,7 +3,6 @@
     ":event",
     "_EVENT",
     "_event",
-    "_shutdown_event",
     "auth_event",
     "broadcast:",
     "business_event",
@@ -13,6 +12,7 @@
     "disconnect",
     "emit:",
     "emit_agent_event",
+    "emit_critical_event",
     "error",
     "filtered_by_event",
     "first_event",
@@ -33,6 +33,6 @@
     "subscribe",
     "trigger_event",
     "unsubscribe",
-    "validate_event"
+    "websocket_send_event"
   ]
 }

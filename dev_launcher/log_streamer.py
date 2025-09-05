@@ -1,357 +1,61 @@
 """
-Real-time log streaming and monitoring for development processes.
+Stub implementation for LogStreamer to fix broken imports.
+Functionality moved to log_buffer.py and log_filter.py.
 """
 
-import logging
-import subprocess
-import threading
-from collections import deque
-from typing import List, Optional
-
-logger = logging.getLogger(__name__)
-
-
-class LogStreamer(threading.Thread):
-    """
-    Streams process output in real-time with colored output and error detection.
-    
-    This class provides real-time streaming of subprocess output with
-    buffering for error detection and optional color coding.
-    """
-    
-    def __init__(self, 
-                 process: subprocess.Popen, 
-                 name: str, 
-                 color_code: Optional[str] = None,
-                 buffer_size: int = 100,
-                 silent_mode: bool = False):
-        """
-        Initialize the log streamer.
-        
-        Args:
-            process: The subprocess to stream output from
-            name: Name to prefix log lines with
-            color_code: ANSI color code for output
-            buffer_size: Number of recent lines to keep in buffer
-        """
-        super().__init__(daemon=True)
-        self.process = process
-        self.name = name
-        self.color_code = color_code or ""
-        self.reset_code = "\033[0m" if color_code else ""
-        self.running = True
-        self.silent_mode = silent_mode
-        self.lines_buffer = deque(maxlen=buffer_size)
-        self.error_keywords = ['error', 'exception', 'traceback', 'failed', 'fatal', 'critical']
-        self.warning_keywords = ['warning', 'warn', 'deprecated']
-        self.success_keywords = ['success', 'started', 'running', 'listening', 'ready']
-        
-    def run(self):
-        """Stream output from process."""
-        try:
-            for line in iter(self.process.stdout.readline, b''):
-                if not self.running:
-                    break
-                    
-                if line:
-                    decoded_line = self._decode_line(line)
-                    if decoded_line:
-                        # Add to buffer for error detection
-                        self.lines_buffer.append(decoded_line)
-                        
-                        # Print with color and prefix (unless in silent mode)
-                        if not self.silent_mode:
-                            self._print_line(decoded_line)
-                        
-        except Exception as e:
-            logger.error(f"[{self.name}] Stream error: {e}")
-    
-    def _decode_line(self, line: bytes) -> Optional[str]:
-        """Decode a line of output safely."""
-        try:
-            return line.decode('utf-8', errors='replace').rstrip()
-        except Exception as e:
-            logger.error(f"Failed to decode line: {e}")
-            return None
-    
-    def _is_informational_line(self, lower_line: str) -> bool:
-        """Check if line is informational despite containing error keywords."""
-        info_patterns = [
-            'critical secrets present',
-            'critical secrets loaded',
-            'critical secrets missing',
-            'registered startup component'
-        ]
-        return any(pattern in lower_line for pattern in info_patterns)
-    
-    def _get_line_emoji(self, line: str) -> str:
-        """Get emoji indicator for line type."""
-        lower_line = line.lower()
-        # Skip error detection for known informational patterns
-        if self._is_informational_line(lower_line):
-            return "✅ " if any(kw in lower_line for kw in self.success_keywords) else ""
-        if any(kw in lower_line for kw in self.error_keywords):
-            return "❌ "
-        elif any(kw in lower_line for kw in self.warning_keywords):
-            return "⚠️  "
-        elif any(kw in lower_line for kw in self.success_keywords):
-            return "✅ "
-        return ""
-    
-    def _format_content(self, line: str) -> str:
-        """Apply standard color based on content type."""
-        lower_line = line.lower()
-        # Skip error detection for known informational patterns
-        if self._is_informational_line(lower_line):
-            if any(kw in lower_line for kw in self.success_keywords):
-                return f"{Colors.GREEN}{line}{Colors.RESET}"
-            return line
-        # Apply appropriate color based on message type
-        if any(kw in lower_line for kw in self.error_keywords):
-            return f"{Colors.RED}{line}{Colors.RESET}"
-        elif any(kw in lower_line for kw in self.warning_keywords):
-            return f"{Colors.YELLOW}{line}{Colors.RESET}"
-        elif any(kw in lower_line for kw in self.success_keywords):
-            return f"{Colors.GREEN}{line}{Colors.RESET}"
-        # Default to white/normal text
-        return line
-    
-    def _print_line(self, line: str):
-        """Print a line with appropriate formatting."""
-        if self.silent_mode:
-            return  # Don't print in silent mode
-        emoji = self._get_line_emoji(line)
-        formatted_line = f"{self.color_code}[{self.name}]{self.reset_code} {emoji}{self._format_content(line)}"
-        print(formatted_line)
-    
-    def enable_silent_mode(self) -> None:
-        """Enable silent mode to suppress output."""
-        self.silent_mode = True
-    
-    def disable_silent_mode(self) -> None:
-        """Disable silent mode to resume output."""
-        self.silent_mode = False
-    
-    def is_silent(self) -> bool:
-        """Check if streamer is in silent mode."""
-        return self.silent_mode
-    
-    def stop(self):
-        """Stop streaming."""
-        self.running = False
-    
-    def get_recent_errors(self, lines: int = 20) -> List[str]:
-        """
-        Get recent error lines from buffer.
-        
-        Args:
-            lines: Maximum number of recent lines to check
-        
-        Returns:
-            List of error lines found
-        """
-        error_lines = []
-        recent = list(self.lines_buffer)[-lines:] if len(self.lines_buffer) > lines else list(self.lines_buffer)
-        
-        for line in recent:
-            lower_line = line.lower()
-            if any(keyword in lower_line for keyword in self.error_keywords):
-                error_lines.append(line)
-        
-        return error_lines
-    
-    def get_recent_lines(self, count: int = 10) -> List[str]:
-        """
-        Get recent lines from the buffer.
-        
-        Args:
-            count: Number of lines to retrieve
-        
-        Returns:
-            List of recent lines
-        """
-        return list(self.lines_buffer)[-count:] if len(self.lines_buffer) > count else list(self.lines_buffer)
-    
-    def has_errors(self) -> bool:
-        """Check if any errors have been detected in recent output."""
-        return len(self.get_recent_errors()) > 0
-    
+import asyncio
+import sys
+from typing import Optional, Any, Dict
+from pathlib import Path
+from dev_launcher.log_buffer import LogBuffer
+from dev_launcher.log_filter import LogFilter
 
 
 class LogManager:
-    """
-    Manages multiple log streamers and provides centralized logging functionality.
-    """
+    """Stub for backward compatibility - use LogBuffer and LogFilter directly."""
     
-    def __init__(self):
-        """Initialize the log manager."""
-        self.streamers: dict[str, LogStreamer] = {}
-        self.log_files: dict[str, object] = {}
-        
-    def add_streamer(self, 
-                     name: str, 
-                     process: subprocess.Popen,
-                     color_code: Optional[str] = None,
-                     silent_mode: bool = False) -> LogStreamer:
-        """
-        Add a new log streamer.
-        
-        Args:
-            name: Name for the streamer
-            process: Process to stream from
-            color_code: Optional ANSI color code
-        
-        Returns:
-            The created LogStreamer instance
-        """
-        streamer = LogStreamer(process, name, color_code, silent_mode=silent_mode)
-        streamer.start()
-        self.streamers[name] = streamer
-        return streamer
+    def __init__(self, config: Optional[Dict[str, Any]] = None):
+        self.config = config or {}
+        self.buffer = LogBuffer()
+        self.filter = LogFilter()
+        self.running = False
     
-    def enable_silent_mode(self, name: Optional[str] = None) -> None:
-        """Enable silent mode for specific streamer or all streamers."""
-        if name:
-            if name in self.streamers:
-                self.streamers[name].enable_silent_mode()
-        else:
-            for streamer in self.streamers.values():
-                streamer.enable_silent_mode()
+    async def start(self) -> None:
+        """Start log streaming."""
+        self.running = True
     
-    def disable_silent_mode(self, name: Optional[str] = None) -> None:
-        """Disable silent mode for specific streamer or all streamers."""
-        if name:
-            if name in self.streamers:
-                self.streamers[name].disable_silent_mode()
-        else:
-            for streamer in self.streamers.values():
-                streamer.disable_silent_mode()
+    async def stop(self) -> None:
+        """Stop log streaming."""
+        self.running = False
     
-    def stop_streamer(self, name: str):
-        """Stop a specific streamer."""
-        if name in self.streamers:
-            self.streamers[name].stop()
-            del self.streamers[name]
-    
-    def stop_all(self):
-        """Stop all active streamers."""
-        for name in list(self.streamers.keys()):
-            self.stop_streamer(name)
-    
-    def get_errors(self, name: str, lines: int = 20) -> List[str]:
-        """
-        Get recent errors from a specific streamer.
-        
-        Args:
-            name: Name of the streamer
-            lines: Number of recent lines to check
-        
-        Returns:
-            List of error lines
-        """
-        if name in self.streamers:
-            return self.streamers[name].get_recent_errors(lines)
-        return []
-    
-    def get_all_errors(self) -> dict[str, List[str]]:
-        """
-        Get recent errors from all streamers.
-        
-        Returns:
-            Dictionary mapping streamer names to error lists
-        """
-        errors = {}
-        for name, streamer in self.streamers.items():
-            streamer_errors = streamer.get_recent_errors()
-            if streamer_errors:
-                errors[name] = streamer_errors
-        return errors
+    def write(self, message: str) -> None:
+        """Write log message."""
+        if self.running:
+            print(message, file=sys.stderr)
 
 
-# ANSI color codes for different services
-class Colors:
-    """ANSI color codes for terminal output."""
-    # Service name colors (distinct)
-    BACKEND = "\033[96m"   # Bright Cyan
-    FRONTEND = "\033[95m"  # Bright Magenta
+class LogStreamer:
+    """Stub for backward compatibility."""
     
-    # Standard syntax colors
-    CYAN = "\033[36m"      # Numbers
-    MAGENTA = "\033[35m"   # Special
-    YELLOW = "\033[33m"    # Paths, warnings
-    GREEN = "\033[32m"     # Strings, success
-    RED = "\033[31m"       # Errors
-    BLUE = "\033[34m"      # Keywords
-    WHITE = "\033[37m"     # Default text
-    GRAY = "\033[90m"      # Comments, timestamps
+    def __init__(self, name: str = "default", log_file: Optional[Path] = None):
+        self.name = name
+        self.log_file = log_file
+        self.running = False
     
-    # Formatting
-    RESET = "\033[0m"
-    BOLD = "\033[1m"
-    DIM = "\033[2m"
-    ITALIC = "\033[3m"
-    UNDERLINE = "\033[4m"
+    async def start(self) -> None:
+        """Start streaming."""
+        self.running = True
     
-    @staticmethod
-    def get_service_color(service_name: str) -> str:
-        """Get appropriate color for a service."""
-        service_colors = {
-            "backend": Colors.BACKEND + Colors.BOLD,
-            "frontend": Colors.FRONTEND + Colors.BOLD,
-            "database": Colors.YELLOW,
-            "redis": Colors.GREEN,
-            "clickhouse": Colors.BLUE,
-            "postgres": Colors.CYAN,
-            "secret": Colors.GRAY,
-            "health": Colors.GREEN,
-        }
-        
-        service_lower = service_name.lower()
-        for key, color in service_colors.items():
-            if key in service_lower:
-                return color
-        
-        return Colors.WHITE  # Default white
+    async def stop(self) -> None:
+        """Stop streaming."""
+        self.running = False
+    
+    def write(self, message: str) -> None:
+        """Write message."""
+        if self.running:
+            print(f"[{self.name}] {message}")
 
 
-def setup_logging(verbose: bool = False):
-    """
-    Configure logging for the application.
-    
-    Args:
-        verbose: Whether to enable verbose logging
-    """
-    level = logging.DEBUG if verbose else logging.INFO
-    
-    # Configure root logger
-    # Custom formatter with colors
-    class ColoredFormatter(logging.Formatter):
-        COLORS = {
-            'DEBUG': Colors.GRAY,
-            'INFO': Colors.WHITE,
-            'WARNING': Colors.YELLOW,
-            'ERROR': Colors.RED,
-            'CRITICAL': Colors.RED + Colors.BOLD,
-        }
-        
-        def format(self, record):
-            color = self.COLORS.get(record.levelname, Colors.WHITE)
-            record.levelname = f"{color}{record.levelname}{Colors.RESET}"
-            record.asctime = f"{Colors.GRAY}{self.formatTime(record)}{Colors.RESET}"
-            return super().format(record)
-    
-    handler = logging.StreamHandler()
-    handler.setFormatter(ColoredFormatter(
-        '%(asctime)s | %(levelname)s | %(message)s',
-        datefmt='%H:%M:%S'
-    ))
-    
-    logging.basicConfig(
-        level=level,
-        handlers=[handler]
-    )
-    
-    # Suppress noisy loggers
-    if not verbose:
-        logging.getLogger('urllib3').setLevel(logging.WARNING)
-        logging.getLogger('google').setLevel(logging.WARNING)
+def setup_logging(config: Optional[Dict[str, Any]] = None) -> LogManager:
+    """Setup logging - returns LogManager instance."""
+    return LogManager(config)

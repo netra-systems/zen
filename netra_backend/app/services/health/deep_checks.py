@@ -298,7 +298,7 @@ class DeepHealthChecks:
         try:
             # Import WebSocket manager dynamically to avoid circular imports
             try:
-                from netra_backend.app.websocket_core.manager import WebSocketManager
+                from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager as WebSocketManager
             except ImportError as import_error:
                 return self._create_unavailable_result(
                     component_name, start_time, 

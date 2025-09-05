@@ -244,6 +244,9 @@ class StartupOrchestrator:
         """Phase 5: SERVICES - Chat Pipeline and critical services."""
         self.logger.info("PHASE 5: SERVICES - Chat Pipeline & Critical Services")
         
+        # Step 9.5: Initialize Agent Class Registry (CRITICAL - Must be done BEFORE any agent operations)
+        await self._initialize_agent_class_registry()
+        
         # Step 10: AgentWebSocketBridge Creation (CRITICAL - Must be created BEFORE tool dispatcher)
         await self._initialize_agent_websocket_bridge_basic()
         if not hasattr(self.app.state, 'agent_websocket_bridge') or self.app.state.agent_websocket_bridge is None:
@@ -322,9 +325,22 @@ class StartupOrchestrator:
         await self._apply_startup_validation_fixes()
         self.logger.info("  ✓ Step 23a: Startup validation fixes applied")
         
-        # Step 23b: Comprehensive startup validation
+        # Step 23b: Run comprehensive startup health checks (CRITICAL)
+        from netra_backend.app.startup_health_checks import validate_startup_health
+        self.logger.info("  🏥 Running comprehensive startup health checks...")
+        try:
+            health_ok = await validate_startup_health(self.app, fail_on_critical=True)
+            if health_ok:
+                self.logger.info("  ✓ Step 23b: All critical services passed health checks")
+            else:
+                self.logger.warning("  ⚠️ Step 23b: Some optional services are degraded but continuing")
+        except RuntimeError as e:
+            self.logger.error(f"  ❌ Step 23b: Critical services failed health checks: {e}")
+            raise DeterministicStartupError(f"Health check validation failed: {e}")
+        
+        # Step 23c: Comprehensive startup validation
         await self._run_comprehensive_validation()
-        self.logger.info("  ✓ Step 23b: Comprehensive validation completed")
+        self.logger.info("  ✓ Step 23c: Comprehensive validation completed")
         
         # Step 24: Critical path validation (CHAT FUNCTIONALITY)
         await self._run_critical_path_validation()
@@ -371,7 +387,8 @@ class StartupOrchestrator:
     async def _perform_complete_bridge_integration(self) -> None:
         """Complete AgentWebSocketBridge integration with all dependencies."""
         from netra_backend.app.services.agent_websocket_bridge import IntegrationState
-        from netra_backend.app.orchestration.agent_execution_registry import get_agent_execution_registry
+        # REMOVED: Singleton orchestrator import - replaced with per-request factory patterns
+        # from netra_backend.app.orchestration.agent_execution_registry import get_agent_execution_registry
         
         bridge = self.app.state.agent_websocket_bridge
         supervisor = self.app.state.agent_supervisor
@@ -381,19 +398,17 @@ class StartupOrchestrator:
         if not supervisor:
             raise DeterministicStartupError("Agent supervisor not available for integration")
         
-        # Get registry for enhanced integration
-        try:
-            registry = await get_agent_execution_registry()
-        except Exception as e:
-            # Registry is optional for basic integration
-            self.logger.warning(f"Agent execution registry not available for bridge: {e}")
-            registry = supervisor.registry if hasattr(supervisor, 'registry') else None
+        # REMOVED: Singleton registry usage - using per-request factory patterns
+        # Per-request isolation is handled through factory methods in bridge
+        # Registry is no longer needed with factory pattern - pass None
+        registry = None
+        self.logger.info("Using per-request factory patterns - no global registry needed")
         
         # Initialize complete integration with timeout
         integration_result = await asyncio.wait_for(
             bridge.ensure_integration(
                 supervisor=supervisor,
-                registry=registry,
+                registry=registry,  # None is acceptable with factory pattern
                 force_reinit=False
             ),
             timeout=30.0
@@ -777,8 +792,8 @@ class StartupOrchestrator:
             deps = status['dependencies']
             if not deps['websocket_manager_available']:
                 raise DeterministicStartupError("WebSocket manager not available in bridge")
-            if not deps['registry_available']:
-                raise DeterministicStartupError("Registry not available in bridge")
+            # Registry is no longer required with factory pattern - skip check
+            # Factory pattern ensures per-request isolation without global registry
             
         except DeterministicStartupError:
             raise
@@ -822,10 +837,8 @@ class StartupOrchestrator:
         """Initialize Redis connection - CRITICAL."""
         from netra_backend.app.redis_manager import redis_manager
         
-        # Test connection
-        await redis_manager.connect()
-        if not await redis_manager.ping():
-            raise DeterministicStartupError("Redis ping failed")
+        # Initialize Redis connection
+        await redis_manager.initialize()
         
         self.app.state.redis_manager = redis_manager
     
@@ -844,13 +857,13 @@ class StartupOrchestrator:
         from netra_backend.app.llm.llm_manager import LLMManager
         from netra_backend.app.services.security_service import SecurityService
         
-        self.app.state.llm_manager = LLMManager(settings)
+        self.app.state.llm_manager = LLMManager()
         self.app.state.security_service = SecurityService(self.app.state.key_manager)
     
     def _initialize_tool_registry(self) -> None:
         """Initialize tool registry and dispatcher with AgentWebSocketBridge support - CRITICAL."""
-        from netra_backend.app.agents.tool_registry_unified import UnifiedToolRegistry
-        from netra_backend.app.agents.tool_dispatcher import ToolDispatcher, create_legacy_tool_dispatcher
+        from netra_backend.app.core.registry.universal_registry import ToolRegistry
+        from netra_backend.app.agents.tool_dispatcher import ToolDispatcher, create_tool_dispatcher
         from netra_backend.app.agents.tools.langchain_wrappers import (
             DataHelperTool, DeepResearchTool, ReliabilityScorerTool, SandboxedInterpreterTool
         )
@@ -912,6 +925,33 @@ class StartupOrchestrator:
         manager = get_websocket_manager()
         if hasattr(manager, 'initialize'):
             await manager.initialize()
+    
+    async def _initialize_agent_class_registry(self) -> None:
+        """Initialize the global agent class registry with all agent types - CRITICAL."""
+        try:
+            from netra_backend.app.agents.supervisor.agent_class_initialization import initialize_agent_class_registry
+            
+            self.logger.info("  Initializing AgentClassRegistry...")
+            registry = initialize_agent_class_registry()
+            
+            # Validate registry is properly populated
+            if not registry or not registry.is_frozen():
+                raise DeterministicStartupError("AgentClassRegistry initialization failed - registry not frozen")
+            
+            agent_count = len(registry)
+            if agent_count == 0:
+                raise DeterministicStartupError("AgentClassRegistry is empty - no agents registered")
+            
+            # Store reference for health checks
+            self.app.state.agent_class_registry = registry
+            self.logger.info(f"  ✓ Step 9.5: AgentClassRegistry initialized with {agent_count} agent classes")
+            
+        except ImportError as e:
+            self.logger.error(f"  ❌ Failed to import agent class initialization: {e}")
+            raise DeterministicStartupError(f"Agent class initialization import failed: {e}")
+        except Exception as e:
+            self.logger.error(f"  ❌ Agent class registry initialization failed: {e}")
+            raise DeterministicStartupError(f"Agent class registry initialization failed: {e}")
     
     async def _initialize_agent_websocket_bridge_basic(self) -> None:
         """Create AgentWebSocketBridge instance - CRITICAL (Integration happens in Phase 4)."""
@@ -1129,36 +1169,70 @@ class StartupOrchestrator:
             raise DeterministicStartupError(f"WebSocket verification failed: {e}")
     
     async def _initialize_clickhouse(self) -> None:
-        """Initialize ClickHouse with robust retry logic and dependency validation."""
-        from netra_backend.app.core.clickhouse_connection_manager import (
-            initialize_clickhouse_with_retry,
-            get_clickhouse_connection_manager
-        )
+        """Initialize ClickHouse with clear status reporting and consistent error handling.
         
-        self.logger.info("Initializing ClickHouse with robust connection manager...")
+        CRITICAL FIX: Updated to use consistent error handling pattern from startup_module.py
+        """
+        # Use the improved initialization function from startup_module for consistency
+        from netra_backend.app.startup_module import initialize_clickhouse
         
-        # Use the robust connection manager with retry logic and health monitoring
-        success = await initialize_clickhouse_with_retry()
+        self.logger.info("Initializing ClickHouse with consistent error handling...")
         
-        if success:
-            # Store connection manager in app state for health checks
-            self.app.state.clickhouse_connection_manager = get_clickhouse_connection_manager()
+        try:
+            # Call the improved initialization function
+            result = await initialize_clickhouse(self.logger)
             
-            # Initialize ClickHouse tables after successful connection
-            try:
-                from netra_backend.app.db.clickhouse_init import initialize_clickhouse_tables
-                await asyncio.wait_for(initialize_clickhouse_tables(), timeout=30.0)
-                self.logger.info("  ✓ ClickHouse tables initialized")
-            except Exception as e:
-                self.logger.warning(f"  ⚠ ClickHouse table initialization failed: {e}")
-                # Don't fail startup for table creation issues
-        
-        else:
-            # Log failure but don't raise exception (ClickHouse is optional)
-            self.logger.warning("ClickHouse initialization failed - continuing without analytics")
+            # Handle the result based on status
+            if result["status"] == "connected":
+                self.logger.info("  ✓ ClickHouse connected successfully")
+                # Store success indicator in app state
+                self.app.state.clickhouse_available = True
+                self.app.state.clickhouse_connection_status = "connected"
+            elif result["status"] == "skipped":
+                self.logger.info("  ⚠ ClickHouse skipped (optional in this environment)")
+                self.app.state.clickhouse_available = False
+                self.app.state.clickhouse_connection_status = "skipped"
+            elif result["status"] == "failed":
+                if result["required"]:
+                    # Required but failed - this should have raised an exception already
+                    # but log additional context for deterministic startup
+                    self.logger.error(f"  ❌ ClickHouse required but failed: {result['error']}")
+                    raise DeterministicStartupError(f"ClickHouse initialization failed: {result['error']}")
+                else:
+                    # Optional and failed - log and continue
+                    self.logger.info(f"  ⚠ ClickHouse unavailable (optional): {result['error']}")
+                    self.app.state.clickhouse_available = False
+                    self.app.state.clickhouse_connection_status = "failed"
             
-            # Store a None connection manager to indicate ClickHouse is unavailable
-            self.app.state.clickhouse_connection_manager = None
+            # Store the full result for health checks
+            self.app.state.clickhouse_initialization_result = result
+            
+        except DeterministicStartupError:
+            # Re-raise deterministic errors (ClickHouse was required but failed)
+            raise
+        except Exception as e:
+            # Handle unexpected errors in the initialization process
+            self.logger.error(f"  ❌ Unexpected error in ClickHouse initialization: {e}")
+            # Check if ClickHouse is required for this environment
+            from shared.isolated_environment import get_env
+            config = get_config()
+            clickhouse_required = (
+                config.environment == "production" or
+                get_env().get("CLICKHOUSE_REQUIRED", "false").lower() == "true"
+            )
+            
+            if clickhouse_required:
+                raise DeterministicStartupError(f"ClickHouse initialization system error: {e}")
+            else:
+                # Optional - store failure state and continue
+                self.app.state.clickhouse_available = False
+                self.app.state.clickhouse_connection_status = "error"
+                self.app.state.clickhouse_initialization_result = {
+                    "service": "clickhouse",
+                    "required": False,
+                    "status": "failed",
+                    "error": f"Initialization system error: {e}"
+                }
     
     async def _initialize_monitoring(self) -> None:
         """Initialize monitoring - optional."""
@@ -1415,7 +1489,9 @@ class StartupOrchestrator:
             # 4. Initialize AgentInstanceFactory
             agent_instance_factory = await configure_agent_instance_factory(
                 websocket_bridge=self.app.state.agent_websocket_bridge,
-                websocket_manager=get_websocket_manager()
+                websocket_manager=get_websocket_manager(),
+                llm_manager=self.app.state.llm_manager,
+                tool_dispatcher=None  # Will be created per-request in UserExecutionContext pattern
             )
             self.app.state.agent_instance_factory = agent_instance_factory
             self.logger.info("    ✓ AgentInstanceFactory configured")

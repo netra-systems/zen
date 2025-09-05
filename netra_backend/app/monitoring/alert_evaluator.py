@@ -5,14 +5,16 @@ Handles the logic for evaluating alert rules against metrics data.
 
 import asyncio
 from datetime import UTC, datetime
-from typing import Any, Dict, Optional
+from typing import TYPE_CHECKING, Any, Dict, Optional
 
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.monitoring.alert_models import Alert, AlertLevel, AlertRule
-from netra_backend.app.services.metrics.agent_metrics import (
-    AgentMetrics,
-    AgentMetricsCollector,
-)
+
+if TYPE_CHECKING:
+    from netra_backend.app.services.metrics.agent_metrics import (
+        AgentMetrics,
+        AgentMetricsCollector,
+    )
 
 logger = central_logger.get_logger(__name__)
 
@@ -20,7 +22,7 @@ logger = central_logger.get_logger(__name__)
 class AlertEvaluator:
     """Evaluates alert rules against current metrics."""
     
-    def __init__(self, metrics_collector: AgentMetricsCollector):
+    def __init__(self, metrics_collector: "AgentMetricsCollector"):
         self.metrics_collector = metrics_collector
     
     async def evaluate_rule(self, rule: AlertRule) -> Optional[Alert]:
@@ -93,18 +95,18 @@ class AlertEvaluator:
                 return True
         return False
     
-    def _check_agent_against_rule(self, rule: AlertRule, metrics: AgentMetrics, threshold: float) -> bool:
+    def _check_agent_against_rule(self, rule: AlertRule, metrics: "AgentMetrics", threshold: float) -> bool:
         """Check if individual agent metrics trigger the rule."""
         rule_mapping = self._build_rule_mapping(metrics, threshold)
         return rule_mapping.get(rule.rule_id, False)
 
-    def _build_rule_mapping(self, metrics: AgentMetrics, threshold: float) -> Dict[str, bool]:
+    def _build_rule_mapping(self, metrics: "AgentMetrics", threshold: float) -> Dict[str, bool]:
         """Build mapping of rule IDs to their condition results."""
         error_rules = self._build_error_rate_rules(metrics, threshold)
         performance_rules = self._build_performance_rules(metrics, threshold)
         return {**error_rules, **performance_rules}
 
-    def _build_error_rate_rules(self, metrics: AgentMetrics, threshold: float) -> Dict[str, bool]:
+    def _build_error_rate_rules(self, metrics: "AgentMetrics", threshold: float) -> Dict[str, bool]:
         """Build error rate rule mappings."""
         return {
             "agent_high_error_rate": metrics.error_rate > threshold,
@@ -112,7 +114,7 @@ class AlertEvaluator:
             "agent_validation_error_spike": metrics.validation_error_count > threshold
         }
 
-    def _build_performance_rules(self, metrics: AgentMetrics, threshold: float) -> Dict[str, bool]:
+    def _build_performance_rules(self, metrics: "AgentMetrics", threshold: float) -> Dict[str, bool]:
         """Build performance rule mappings."""
         return {
             "agent_timeout_spike": metrics.timeout_count > threshold,
@@ -186,18 +188,18 @@ class AlertEvaluator:
                 return value, agent_name
         return None, None
     
-    def _get_metric_value_for_rule(self, rule_id: str, metrics: AgentMetrics) -> float:
+    def _get_metric_value_for_rule(self, rule_id: str, metrics: "AgentMetrics") -> float:
         """Get specific metric value for rule."""
         mapping = self._build_metric_value_mapping(metrics)
         return mapping.get(rule_id, 0.0)
 
-    def _build_metric_value_mapping(self, metrics: AgentMetrics) -> Dict[str, float]:
+    def _build_metric_value_mapping(self, metrics: "AgentMetrics") -> Dict[str, float]:
         """Build mapping of rule IDs to metric values."""
         error_mappings = self._build_error_metric_mappings(metrics)
         performance_mappings = self._build_performance_metric_mappings(metrics)
         return {**error_mappings, **performance_mappings}
 
-    def _build_error_metric_mappings(self, metrics: AgentMetrics) -> Dict[str, float]:
+    def _build_error_metric_mappings(self, metrics: "AgentMetrics") -> Dict[str, float]:
         """Build error metric mappings."""
         return {
             "agent_high_error_rate": metrics.error_rate,
@@ -205,7 +207,7 @@ class AlertEvaluator:
             "agent_validation_error_spike": float(metrics.validation_error_count)
         }
 
-    def _build_performance_metric_mappings(self, metrics: AgentMetrics) -> Dict[str, float]:
+    def _build_performance_metric_mappings(self, metrics: "AgentMetrics") -> Dict[str, float]:
         """Build performance metric mappings."""
         return {
             "agent_timeout_spike": float(metrics.timeout_count),

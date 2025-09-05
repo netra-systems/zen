@@ -11,6 +11,7 @@ This index serves as the **Single Source of Truth (SSOT)** for all agent-related
 
 | Document | Purpose | Status |
 |----------|---------|--------|
+| **[UVS Triage Architecture](./UVS_TRIAGE_ARCHITECTURE_TRANSITION.md)** | NEW: 2-agent model with data sufficiency validation | 🆕 Active |
 | [Agent Golden Pattern Guide](agent_golden_pattern_guide.md) | Complete implementation patterns and examples | ✅ Active |
 | [Agent Migration Checklist](agent_migration_checklist.md) | Step-by-step migration to BaseAgent infrastructure | ✅ Active |
 | [Agent Quick Reference](agent_quick_reference.md) | Quick lookup for common agent patterns | ✅ Active |
@@ -84,6 +85,16 @@ graph TD
 ---
 
 ## 🔑 Key Patterns
+
+### Agent Execution Order (CRITICAL)
+**⚠️ IMPORTANT**: Agents MUST execute in logical dependency order:
+1. **Triage** → Assess data availability
+2. **Data** → Collect and analyze metrics (MUST come before optimization!)
+3. **Optimization** → Generate strategies based on data
+4. **Actions** → Create implementation plans
+5. **Reporting** → Synthesize results
+
+See: [`SPEC/learnings/agent_execution_order_fix_20250904.xml`](../SPEC/learnings/agent_execution_order_fix_20250904.xml) for critical ordering requirements.
 
 ### BaseAgent Infrastructure
 ```python

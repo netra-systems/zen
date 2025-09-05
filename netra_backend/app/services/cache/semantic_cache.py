@@ -18,7 +18,9 @@ import numpy as np
 
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.redis_manager import redis_manager
-from netra_backend.app.services.cache.cache_manager import LLMCacheManager
+# Legacy import removed - use resource_cache instead
+# from netra_backend.app.services.cache.cache_manager import LLMCacheManager
+from netra_backend.app.llm.resource_cache import LRUCache as LLMCacheManager
 
 logger = central_logger.get_logger(__name__)
 

@@ -45,7 +45,12 @@
       "Bash(docker restart:*)",
       "Bash(npx cypress run:*)",
       "Bash(gcloud run services list:*)",
-      "Bash(grep:*)"
+      "Bash(grep:*)",
+      "Bash(PYTHONPATH=/Users/rindhujajohnson/Netra/GitHub/netra-apex python -c \"from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry; print(''AgentRegistry imported successfully'')\")",
+      "Bash(PYTHONPATH=/Users/rindhujajohnson/Netra/GitHub/netra-apex python -c \"from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry; print(''✅ AgentRegistry imported successfully - singleton storage removed'')\")",
+      "Bash(PYTHONPATH=/Users/rindhujajohnson/Netra/GitHub/netra-apex python -c \"from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry; print(''✅ AgentRegistry imported successfully - singleton storage removed'')\")",
+      "Bash(sed:*)",
+      "Bash(docker compose build:*)"
     ],
     "deny": []
   },

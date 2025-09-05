@@ -11,12 +11,14 @@ from netra_backend.app.services.cost_calculator import CostCalculatorService
 from netra_backend.app.schemas.llm_base_types import TokenUsage, LLMProvider
 
 
+@pytest.fixture
+def cost_calculator():
+    """Create cost calculator service instance."""
+    return CostCalculatorService()
+
+
 class TestFaultTolerance:
     """Test system fault tolerance capabilities."""
-
-    @pytest.fixture
-    def cost_calculator(self):
-        return CostCalculatorService()
 
     def test_graceful_degradation_under_stress(self, cost_calculator):
         """Test system graceful degradation under stress."""
@@ -252,7 +254,9 @@ class TestSystemLimitsAndBoundaries:
         for case in extreme_cases:
             try:
                 cost = cost_calculator.calculate_cost(case, LLMProvider.OPENAI, "gpt-3.5-turbo")
-                assert isinstance(cost, type(cost_calculator._default_costs.get("default", 0)))
+                # Cost should be a Decimal
+                from decimal import Decimal
+                assert isinstance(cost, Decimal)
                 assert cost >= 0, "Even extreme cases should produce valid costs"
             except Exception as e:
                 # Should fail gracefully with reasonable error

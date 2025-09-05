@@ -14,15 +14,20 @@ from netra_backend.app.logging_config import central_logger as logger
 from netra_backend.app.startup_checks.checker import StartupChecker
 
 
-async def run_startup_checks(app: FastAPI) -> Dict[str, Any]:
-    """Run all startup checks with improved error handling and reporting"""
+async def run_startup_checks(app: FastAPI, test_thread_aware: bool = False) -> Dict[str, Any]:
+    """Run all startup checks with improved error handling and reporting
+    
+    Args:
+        app: FastAPI application instance
+        test_thread_aware: If True, enables test thread detection to prevent false errors
+    """
     if _should_skip_startup_checks():
         return _create_skipped_result()
-    return await _perform_startup_checks(app)
+    return await _perform_startup_checks(app, test_thread_aware)
 
-async def _perform_startup_checks(app: FastAPI) -> Dict[str, Any]:
+async def _perform_startup_checks(app: FastAPI, test_thread_aware: bool = False) -> Dict[str, Any]:
     """Perform actual startup checks and handle results"""
-    results = await _execute_startup_checks(app)
+    results = await _execute_startup_checks(app, test_thread_aware)
     _handle_startup_results(results)
     return results
 
@@ -67,9 +72,9 @@ def _create_skipped_result() -> Dict[str, Any]:
     }
 
 
-async def _execute_startup_checks(app: FastAPI) -> Dict[str, Any]:
+async def _execute_startup_checks(app: FastAPI, test_thread_aware: bool = False) -> Dict[str, Any]:
     """Execute startup checks and return results"""
-    checker = StartupChecker(app)
+    checker = StartupChecker(app, test_thread_aware=test_thread_aware)
     return await checker.run_all_checks()
 
 

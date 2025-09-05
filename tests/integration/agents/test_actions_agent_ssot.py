@@ -42,13 +42,13 @@ from shared.isolated_environment import IsolatedEnvironment
 
 # Import production components for integration testing
 from netra_backend.app.agents.actions_to_meet_goals_sub_agent import ActionsToMeetGoalsSubAgent
-from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
+from netra_backend.app.core.registry.universal_registry import AgentRegistry
 from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
 from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier
 from netra_backend.app.agents.supervisor.agent_execution_core import AgentExecutionCore
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 from netra_backend.app.agents.unified_tool_execution import UnifiedToolExecutionEngine
-from netra_backend.app.websocket_core.manager import WebSocketManager
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager as WebSocketManager
 from netra_backend.app.llm.llm_manager import LLMManager
 
 # Import state and data types
@@ -345,7 +345,7 @@ class TestActionsAgentSupervisorIntegration:
         """CRITICAL: Test integration with AgentRegistry and proper initialization."""
         # Create tool dispatcher and registry
         tool_dispatcher = ToolDispatcher()
-        agent_registry = AgentRegistry(self.llm_manager, tool_dispatcher)
+        agent_registry = AgentRegistry()
         
         # Set WebSocket manager to enable event propagation
         agent_registry.set_websocket_manager(self.websocket_capture)
@@ -404,7 +404,7 @@ class TestActionsAgentSupervisorIntegration:
         """CRITICAL: Test coordination with ExecutionEngine."""
         # Create execution infrastructure
         tool_dispatcher = ToolDispatcher()
-        agent_registry = AgentRegistry(self.llm_manager, tool_dispatcher)
+        agent_registry = AgentRegistry()
         execution_engine = ExecutionEngine(agent_registry, self.websocket_capture)
         
         # Get ActionsAgent
@@ -452,7 +452,7 @@ class TestActionsAgentSupervisorIntegration:
     async def test_websocket_notifier_propagation(self):
         """CRITICAL: Test WebSocket event propagation through supervisor chain."""
         tool_dispatcher = ToolDispatcher()
-        agent_registry = AgentRegistry(self.llm_manager, tool_dispatcher)
+        agent_registry = AgentRegistry()
         
         # Setup WebSocket notifier chain
         notifier = WebSocketNotifier(self.websocket_capture)
@@ -539,7 +539,7 @@ class TestActionsAgentToolDispatcherIntegration:
         original_executor = tool_dispatcher.executor
         
         # Create agent registry and set WebSocket manager
-        agent_registry = AgentRegistry(self.llm_manager, tool_dispatcher)
+        agent_registry = AgentRegistry()
         agent_registry.set_websocket_manager(self.websocket_capture)
         
         # Verify tool dispatcher was enhanced
@@ -729,7 +729,7 @@ class TestActionsAgentErrorRecoveryIntegration:
     async def test_graceful_degradation_integration(self):
         """CRITICAL: Test graceful degradation with missing data integration."""
         tool_dispatcher = ToolDispatcher()
-        agent_registry = AgentRegistry(self.llm_manager, tool_dispatcher)
+        agent_registry = AgentRegistry()
         agent_registry.set_websocket_manager(self.websocket_capture)
         
         actions_agent = agent_registry.get_agent('actions')
@@ -963,7 +963,7 @@ class TestActionsAgentPerformanceIntegration:
         """CRITICAL: Test performance under realistic integration load."""
         # Create agent registry for realistic integration
         tool_dispatcher = ToolDispatcher()
-        agent_registry = AgentRegistry(self.llm_manager, tool_dispatcher)
+        agent_registry = AgentRegistry()
         agent_registry.set_websocket_manager(self.websocket_capture)
         
         actions_agent = agent_registry.get_agent('actions')
@@ -1076,7 +1076,7 @@ class TestActionsAgentIntegrationComprehensive:
             logger.info("🔍 Testing supervisor integration...")
             # Test supervisor integration
             tool_dispatcher = ToolDispatcher()
-            agent_registry = AgentRegistry(llm_manager, tool_dispatcher)
+            agent_registry = AgentRegistry()
             agent_registry.set_websocket_manager(websocket_capture)
             actions_agent = agent_registry.get_agent('actions')
             

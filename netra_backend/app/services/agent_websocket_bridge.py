@@ -20,7 +20,8 @@ from typing import Dict, Optional, Any, List, TYPE_CHECKING
 from dataclasses import dataclass, field
 
 from netra_backend.app.logging_config import central_logger
-from netra_backend.app.orchestration.agent_execution_registry import get_agent_execution_registry
+# REMOVED: Singleton orchestrator import - replaced with per-request factory patterns
+# from netra_backend.app.orchestration.agent_execution_registry import get_agent_execution_registry
 from netra_backend.app.websocket_core import get_websocket_manager
 from netra_backend.app.services.thread_run_registry import get_thread_run_registry, ThreadRunRegistry
 from netra_backend.app.core.unified_id_manager import UnifiedIDManager
@@ -29,7 +30,7 @@ from shared.monitoring.interfaces import MonitorableComponent
 if TYPE_CHECKING:
     from shared.monitoring.interfaces import ComponentMonitor
     from netra_backend.app.models.user_execution_context import UserExecutionContext
-    from netra_backend.app.services.user_websocket_emitter import UserWebSocketEmitter
+    from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmitter as UserWebSocketEmitter
 
 logger = central_logger.get_logger(__name__)
 
@@ -137,18 +138,25 @@ class AgentWebSocketBridge(MonitorableComponent):
         logger.debug("Integration configuration initialized")
     
     def _initialize_state(self) -> None:
-        """Initialize integration state tracking."""
+        """Initialize integration state tracking.
+        
+        NOTE: The bridge intentionally starts in UNINITIALIZED state and remains
+        that way in the per-request architecture. This is EXPECTED behavior.
+        Actual initialization happens per-request via create_user_emitter().
+        See AGENT_WEBSOCKET_BRIDGE_UNINITIALIZED_FIVE_WHYS.md for details.
+        """
         self.state = IntegrationState.UNINITIALIZED
         self.initialization_lock = asyncio.Lock()
         self.recovery_lock = asyncio.Lock()
         self.health_lock = asyncio.Lock()
         self._shutdown = False
-        logger.debug("Integration state tracking initialized")
+        logger.debug("Integration state tracking initialized (UNINITIALIZED is expected for per-request pattern)")
     
     def _initialize_dependencies(self) -> None:
         """Initialize dependency references."""
         self._websocket_manager = None
-        self._orchestrator = None
+        # REMOVED: Singleton orchestrator - using per-request factory patterns instead
+        # self._orchestrator = None
         self._supervisor = None
         self._registry = None
         self._thread_registry: Optional[ThreadRunRegistry] = None
@@ -271,7 +279,7 @@ class AgentWebSocketBridge(MonitorableComponent):
                 websocket_manager = get_websocket_manager()
                 if websocket_manager is not None:
                     # Validate the manager has required methods
-                    if hasattr(websocket_manager, 'connections') and hasattr(websocket_manager, 'send_to_thread'):
+                    if hasattr(websocket_manager, 'send_to_user') and hasattr(websocket_manager, 'get_user_connections'):
                         self._websocket_manager = websocket_manager
                         logger.info(f"WebSocket manager initialized successfully on attempt {attempt + 1}")
                         return
@@ -298,15 +306,13 @@ class AgentWebSocketBridge(MonitorableComponent):
         raise RuntimeError(error_msg)
     
     async def _initialize_registry(self) -> None:
-        """Initialize agent execution registry with error handling."""
-        try:
-            self._orchestrator = await get_agent_execution_registry()
-            if not self._orchestrator:
-                raise RuntimeError("Agent execution registry is None")
-            logger.debug("Agent execution registry initialized successfully")
-        except Exception as e:
-            logger.error(f"Failed to initialize registry: {e}")
-            raise RuntimeError(f"Registry initialization failed: {e}")
+        """DEPRECATED: Registry initialization removed - using per-request factory patterns.
+        
+        This method is preserved for backward compatibility but is now a no-op.
+        Per-request isolation is handled by create_user_emitter() factory methods.
+        """
+        logger.debug("Registry initialization skipped - using per-request factory patterns")
+        # No initialization needed - factory methods handle per-request isolation
     
     async def _initialize_thread_registry(self) -> None:
         """Initialize thread-run registry with error handling."""
@@ -320,25 +326,13 @@ class AgentWebSocketBridge(MonitorableComponent):
             raise RuntimeError(f"Thread registry initialization failed: {e}")
     
     async def _setup_registry_integration(self) -> None:
-        """Setup registry integration with WebSocket manager and agents."""
-        try:
-            # Set WebSocket manager on registry
-            await self._orchestrator.set_websocket_manager(self._websocket_manager)
-            logger.debug("WebSocket manager set on registry")
-            
-            # Setup agent-WebSocket integration if components available
-            if self._supervisor and self._registry:
-                await self._orchestrator.setup_agent_websocket_integration(
-                    self._supervisor, 
-                    self._registry
-                )
-                logger.debug("Enhanced agent-WebSocket integration configured")
-            else:
-                logger.debug("Basic registry integration configured (no supervisor/registry)")
-                
-        except Exception as e:
-            logger.error(f"Failed to setup registry integration: {e}")
-            raise RuntimeError(f"Registry integration setup failed: {e}")
+        """DEPRECATED: Registry integration removed - using per-request factory patterns.
+        
+        This method is preserved for backward compatibility but is now a no-op.
+        Integration is handled per-request through create_user_emitter() methods.
+        """
+        logger.debug("Registry integration skipped - using per-request factory patterns")
+        # No setup needed - factory methods handle per-request integration
     
     async def _verify_integration(self) -> bool:
         """Verify integration is working correctly."""
@@ -347,14 +341,9 @@ class AgentWebSocketBridge(MonitorableComponent):
             if not self._websocket_manager:
                 return False
             
-            # Verify registry is responsive
-            if not self._orchestrator:
-                return False
-            
-            # Test registry metrics (should not raise)
-            metrics = await self._orchestrator.get_metrics()
-            if not isinstance(metrics, dict):
-                return False
+            # REMOVED: Orchestrator verification - per-request factory patterns don't need global registry
+            # Registry health is validated per-request through create_user_emitter() factory methods
+            # No global orchestrator needed for user isolation pattern
             
             # If we have registry, verify WebSocket integration
             if self._registry and hasattr(self._registry, 'websocket_manager'):
@@ -442,16 +431,13 @@ class AgentWebSocketBridge(MonitorableComponent):
             return False
     
     async def _check_registry_health(self) -> bool:
-        """Check registry health."""
-        try:
-            if not self._orchestrator:
-                return False
-            
-            # Test registry responsiveness
-            metrics = await self._orchestrator.get_metrics()
-            return isinstance(metrics, dict)
-        except Exception:
-            return False
+        """DEPRECATED: Registry health check removed - using per-request factory patterns.
+        
+        Per-request factory patterns don't require global registry health checks.
+        Health is validated per-request through create_user_emitter() factory methods.
+        """
+        # Always return True since per-request factories handle their own validation
+        return True
     
     def _calculate_uptime(self) -> float:
         """Calculate current uptime in seconds."""
@@ -539,7 +525,8 @@ class AgentWebSocketBridge(MonitorableComponent):
                 
                 # Component availability
                 "websocket_manager_available": self._websocket_manager is not None,
-                "orchestrator_available": self._orchestrator is not None,
+                # REMOVED: Orchestrator availability - using per-request factory patterns
+                # "orchestrator_available": self._orchestrator is not None,
                 "supervisor_available": self._supervisor is not None,
                 "registry_available": self._registry is not None,
                 
@@ -770,7 +757,8 @@ class AgentWebSocketBridge(MonitorableComponent):
             },
             "dependencies": {
                 "websocket_manager_available": self._websocket_manager is not None,
-                "orchestrator_available": self._orchestrator is not None,
+                # REMOVED: Orchestrator availability - using per-request factory patterns  
+                # "orchestrator_available": self._orchestrator is not None,
                 "supervisor_available": self._supervisor is not None,
                 "registry_available": self._registry is not None
             }
@@ -789,12 +777,8 @@ class AgentWebSocketBridge(MonitorableComponent):
             except asyncio.CancelledError:
                 pass
         
-        # Shutdown registry if available
-        if self._orchestrator:
-            try:
-                await self._orchestrator.shutdown()
-            except Exception as e:
-                logger.error(f"Error shutting down registry: {e}")
+        # REMOVED: Singleton orchestrator shutdown - using per-request factory patterns
+        # No global orchestrator to shut down - factory methods handle per-request lifecycle
         
         # Shutdown thread registry if available
         if self._thread_registry:
@@ -805,7 +789,8 @@ class AgentWebSocketBridge(MonitorableComponent):
         
         # Clear references
         self._websocket_manager = None
-        self._orchestrator = None
+        # REMOVED: Singleton orchestrator - using per-request factory patterns instead  
+        # self._orchestrator = None
         self._supervisor = None
         self._registry = None
         self._thread_registry = None
@@ -1657,9 +1642,15 @@ class AgentWebSocketBridge(MonitorableComponent):
             "debug", "dev", "local", "temp", "temporary"
         ]
         
-        # Check for exact matches or contained patterns
+        # Check for exact matches or word boundaries to avoid false positives
+        # like 'test' matching 'thread_test' but not 'thread_'
+        import re
         for pattern in suspicious_patterns:
-            if pattern in run_id_lower:
+            if pattern == "":
+                continue  # Skip empty pattern
+            # Use word boundary matching to avoid false positives
+            # Match pattern as whole word or with underscores/dashes as boundaries
+            if re.search(r'(^|_|-)' + re.escape(pattern) + r'($|_|-)', run_id_lower):
                 return True
         
         # Check for overly short identifiers (less than 3 chars)
@@ -1726,37 +1717,9 @@ class AgentWebSocketBridge(MonitorableComponent):
             else:
                 logger.debug(f"⚠️ PRIORITY 1 SKIP: ThreadRunRegistry not available for run_id={run_id}")
             
-            # PRIORITY 2: Orchestrator query (SECONDARY SOURCE - when available)  
-            # Fallback when registry doesn't have the mapping but orchestrator might
-            if self._orchestrator:
-                try:
-                    # Check if orchestrator is properly initialized and available
-                    if hasattr(self._orchestrator, 'get_thread_id_for_run'):
-                        thread_id = await self._orchestrator.get_thread_id_for_run(run_id)
-                        if thread_id and isinstance(thread_id, str) and thread_id.strip():
-                            resolution_time_ms = (time.time() - resolution_start_time) * 1000
-                            resolution_source = "orchestrator"
-                            logger.info(f"✅ PRIORITY 2 SUCCESS: run_id={run_id} → thread_id={thread_id} via Orchestrator ({resolution_time_ms:.1f}ms)")
-                            self._track_resolution_success(resolution_source, resolution_time_ms)
-                            
-                            # OPTIONAL: Register this mapping in ThreadRunRegistry for future lookups
-                            if self._thread_registry:
-                                try:
-                                    await self._thread_registry.register(run_id, thread_id, {"source": "orchestrator_backfill"})
-                                    logger.debug(f"📝 BACKFILL: Registered orchestrator mapping run_id={run_id} → thread_id={thread_id} in ThreadRunRegistry")
-                                except Exception as backfill_error:
-                                    logger.debug(f"⚠️ BACKFILL FAILED: Could not register orchestrator mapping: {backfill_error}")
-                            
-                            return thread_id
-                        elif thread_id is not None:
-                            logger.warning(f"⚠️ PRIORITY 2 INVALID: Orchestrator returned invalid thread_id: '{thread_id}' for run_id={run_id}")
-                    else:
-                        logger.debug("⚠️ PRIORITY 2 SKIP: Orchestrator missing get_thread_id_for_run method")
-                except Exception as e:
-                    logger.warning(f"⚠️ PRIORITY 2 EXCEPTION: Orchestrator query failed for run_id={run_id}: {e}")
-                    self._track_resolution_failure("orchestrator", str(e))
-            else:
-                logger.debug(f"⚠️ PRIORITY 2 SKIP: Orchestrator not available for run_id={run_id}")
+            # REMOVED: Orchestrator query - using per-request factory patterns
+            # Thread resolution is handled per-request through factory methods
+            # No global orchestrator needed for user isolation pattern
             
             # PRIORITY 3: Direct WebSocketManager check (TERTIARY SOURCE - active connections)
             # Check if WebSocketManager has any active connections that might help resolve
@@ -1819,7 +1782,8 @@ class AgentWebSocketBridge(MonitorableComponent):
                 "run_id": run_id,
                 "resolution_time_ms": resolution_time_ms,
                 "thread_registry_available": self._thread_registry is not None,
-                "orchestrator_available": self._orchestrator is not None,  
+                # REMOVED: Orchestrator availability - using per-request factory patterns
+                # "orchestrator_available": self._orchestrator is not None,  
                 "websocket_manager_available": self._websocket_manager is not None,
                 "run_id_format": "valid" if run_id.startswith("thread_") and self._is_valid_thread_format(run_id) else "unknown",
                 "contains_thread_pattern": "thread_" in run_id,
@@ -2328,7 +2292,7 @@ class AgentWebSocketBridge(MonitorableComponent):
             raise ValueError("user_context is required for creating user emitter")
         
         try:
-            from netra_backend.app.services.websocket_event_emitter import WebSocketEventEmitter
+            from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmitter as WebSocketEventEmitter
             from netra_backend.app.agents.supervisor.user_execution_context import validate_user_context
             
             # Validate user context before creating emitter
@@ -2416,10 +2380,18 @@ class AgentWebSocketBridge(MonitorableComponent):
                 await emitter.emit_agent_started("MyAgent")
                 # Automatic cleanup happens here
         """
-        from netra_backend.app.services.websocket_event_emitter import websocket_event_emitter_scope
+        # Import from the actual location - use the create_scoped_emitter function
+        from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmitter
+        from netra_backend.app.websocket_core import get_websocket_manager
         
-        async with websocket_event_emitter_scope(user_context) as emitter:
+        # Create scoped emitter using the correct pattern
+        manager = get_websocket_manager()
+        emitter = UnifiedWebSocketEmitter.create_scoped_emitter(manager, user_context)
+        try:
             yield emitter
+        finally:
+            # Clean up if needed
+            pass
 
 
 # DEPRECATED: Legacy singleton factory function

@@ -321,14 +321,14 @@ class TestAgentDeathDetectionFixed:
     
     async def test_registry_health_includes_death_detection(self):
         """Test that AgentRegistry health includes death detection info"""
-        from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
+        from netra_backend.app.core.registry.universal_registry import AgentRegistry
         
         # Create mock dependencies
         mock_llm = MagicMock()
         mock_dispatcher = MagicMock()
         
         # Create registry
-        registry = AgentRegistry(mock_llm, mock_dispatcher)
+        registry = AgentRegistry()
         
         # Get health status
         health = registry.get_registry_health()

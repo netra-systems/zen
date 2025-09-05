@@ -38,7 +38,8 @@ import pytest
 from netra_backend.app.auth_integration.auth import get_current_user
 from netra_backend.app.clients.auth_client_core import auth_client
 
-# Removed broken import statement
+# Fix import path for WebSocketManagerInterface (now WebSocketManagerProtocol)
+from netra_backend.app.core.interfaces_websocket import WebSocketManagerProtocol
 from netra_backend.app.database import get_clickhouse_client
 from netra_backend.app.db.models_postgres import User
 from netra_backend.app.db.postgres import get_async_db as get_postgres_client

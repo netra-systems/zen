@@ -107,7 +107,7 @@ def test_critical_modules_have_required_imports():
     and caused production failures.
     """
     # Check TriageProcessor has ExecutionContext import
-    from netra_backend.app.agents.triage_sub_agent import processing
+    from netra_backend.app.agents.triage.unified_triage_agent import processing
     
     # Verify the module has the ExecutionContext in its namespace
     assert hasattr(processing, 'ExecutionContext') or 'ExecutionContext' in dir(processing), \

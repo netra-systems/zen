@@ -14,7 +14,7 @@ import pytest
 
 from netra_backend.app.agents.state import DeepAgentState
 
-from netra_backend.app.agents.triage_sub_agent.agent import TriageSubAgent
+from netra_backend.app.agents.triage.unified_triage_agent import UnifiedTriageAgent
 from netra_backend.tests.helpers.triage_test_helpers import (
     AssertionHelpers,
     TriageMockHelpers,

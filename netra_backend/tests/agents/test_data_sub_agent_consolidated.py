@@ -36,7 +36,7 @@ from netra_backend.app.agents.data_sub_agent.schema_cache import SchemaCache
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 from netra_backend.app.llm.llm_manager import LLMManager
-from netra_backend.app.schemas.strict_types import TypedAgentResult
+from netra_backend.app.schemas.agent_result_types import TypedAgentResult
 from netra_backend.app.services.llm.cost_optimizer import LLMCostOptimizer
 
 class TestDataSubAgentConsolidated:

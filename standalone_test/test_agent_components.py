@@ -98,7 +98,7 @@ class TestStandaloneAgentComponents:
     @pytest.mark.asyncio
     async def test_mock_triage_workflow(self):
         """Test mock triage workflow completes."""
-        from netra_backend.app.agents.triage_sub_agent import (
+        from netra_backend.app.agents.triage.unified_triage_agent import (
             TriageResult, UserIntent, Priority, Complexity, 
             ExtractedEntities, TriageMetadata
         )

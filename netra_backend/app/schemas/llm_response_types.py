@@ -9,7 +9,7 @@ from typing import Any, Dict, ForwardRef, List, Optional, Union
 
 from pydantic import BaseModel, Field
 
-from netra_backend.app.schemas.llm_base_types import LLMProvider, TokenUsage
+from netra_backend.app.schemas.llm_types import LLMProvider, TokenUsage
 
 # Forward reference for LLMRequest to avoid circular imports
 LLMRequest = ForwardRef('LLMRequest')

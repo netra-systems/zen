@@ -1,417 +1,354 @@
 """
-Comprehensive OpenTelemetry Manager for Netra Platform
-
-SSOT for distributed tracing with proper OTLP export configuration.
-Instruments all agent executions with spans for observability.
+Core telemetry and observability system.
+Provides distributed tracing, metrics collection, and monitoring capabilities.
 """
 
-import logging
-from typing import Dict, Optional, Any, Callable
+from typing import Any, Dict, Optional, List, Union
+from datetime import datetime
+import uuid
+import time
 from contextlib import contextmanager
-import os
+from dataclasses import dataclass
+from enum import Enum
 
-# OpenTelemetry imports
-from opentelemetry import trace
-from opentelemetry.sdk.trace import TracerProvider
-from opentelemetry.sdk.trace.export import BatchSpanProcessor, ConsoleSpanExporter
-from opentelemetry.sdk.resources import Resource, SERVICE_NAME, SERVICE_VERSION
-from opentelemetry.trace import Status, StatusCode, Span
-from opentelemetry.propagate import extract, inject
-from opentelemetry.trace.propagation.tracecontext import TraceContextTextMapPropagator
-
-# Exporters
-from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
-from opentelemetry.exporter.jaeger.thrift import JaegerExporter
-
-# Instrumentation
-from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
-from opentelemetry.instrumentation.requests import RequestsInstrumentor
-from opentelemetry.instrumentation.sqlalchemy import SQLAlchemyInstrumentor
-from opentelemetry.instrumentation.redis import RedisInstrumentor
-
-from netra_backend.app.core.config import get_config
 from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
-config = get_config()
+
+
+class TelemetryLevel(Enum):
+    """Telemetry collection levels."""
+    OFF = "off"
+    ERROR = "error"
+    WARN = "warn"
+    INFO = "info"
+    DEBUG = "debug"
+    TRACE = "trace"
+
+
+@dataclass
+class Span:
+    """Represents a span in distributed tracing."""
+    span_id: str
+    trace_id: str
+    operation_name: str
+    start_time: datetime
+    end_time: Optional[datetime] = None
+    duration_ms: Optional[float] = None
+    status: str = "active"
+    tags: Dict[str, Any] = None
+    logs: List[Dict[str, Any]] = None
+    parent_span_id: Optional[str] = None
+    
+    def __post_init__(self):
+        if self.tags is None:
+            self.tags = {}
+        if self.logs is None:
+            self.logs = []
+    
+    def add_tag(self, key: str, value: Any) -> None:
+        """Add a tag to the span."""
+        self.tags[key] = value
+    
+    def add_log(self, message: str, level: str = "info", **kwargs) -> None:
+        """Add a log entry to the span."""
+        log_entry = {
+            "timestamp": datetime.utcnow(),
+            "message": message,
+            "level": level,
+            **kwargs
+        }
+        self.logs.append(log_entry)
+    
+    def finish(self, status: str = "success") -> None:
+        """Mark span as finished."""
+        if self.end_time is None:
+            self.end_time = datetime.utcnow()
+            self.duration_ms = (self.end_time - self.start_time).total_seconds() * 1000
+            self.status = status
+    
+    def to_dict(self) -> Dict[str, Any]:
+        """Convert span to dictionary."""
+        return {
+            "span_id": self.span_id,
+            "trace_id": self.trace_id,
+            "operation_name": self.operation_name,
+            "start_time": self.start_time,
+            "end_time": self.end_time,
+            "duration_ms": self.duration_ms,
+            "status": self.status,
+            "tags": self.tags,
+            "logs": self.logs,
+            "parent_span_id": self.parent_span_id
+        }
+
+
+class TelemetryCollector:
+    """Collects and manages telemetry data."""
+    
+    def __init__(self, level: TelemetryLevel = TelemetryLevel.INFO):
+        self.level = level
+        self._spans: Dict[str, Span] = {}
+        self._active_spans: List[str] = []
+        self._metrics: List[Dict[str, Any]] = []
+        self._trace_context: Dict[str, str] = {}
+        
+        logger.debug(f"Initialized TelemetryCollector with level: {level.value}")
+    
+    def create_span(self, 
+                   operation_name: str,
+                   trace_id: Optional[str] = None,
+                   parent_span_id: Optional[str] = None,
+                   tags: Optional[Dict[str, Any]] = None) -> Span:
+        """Create a new span."""
+        span_id = str(uuid.uuid4())
+        
+        if trace_id is None:
+            trace_id = str(uuid.uuid4())
+        
+        span = Span(
+            span_id=span_id,
+            trace_id=trace_id,
+            operation_name=operation_name,
+            start_time=datetime.utcnow(),
+            parent_span_id=parent_span_id,
+            tags=tags or {}
+        )
+        
+        self._spans[span_id] = span
+        self._active_spans.append(span_id)
+        
+        logger.debug(f"Created span: {operation_name} (id: {span_id}, trace: {trace_id})")
+        return span
+    
+    def finish_span(self, span_id: str, status: str = "success") -> None:
+        """Finish a span."""
+        if span_id in self._spans:
+            self._spans[span_id].finish(status)
+            if span_id in self._active_spans:
+                self._active_spans.remove(span_id)
+            logger.debug(f"Finished span: {span_id} with status: {status}")
+    
+    def get_span(self, span_id: str) -> Optional[Span]:
+        """Get a span by ID."""
+        return self._spans.get(span_id)
+    
+    def get_active_spans(self) -> List[Span]:
+        """Get all currently active spans."""
+        return [self._spans[span_id] for span_id in self._active_spans if span_id in self._spans]
+    
+    def record_metric(self, 
+                     name: str,
+                     value: Union[int, float],
+                     tags: Optional[Dict[str, Any]] = None,
+                     timestamp: Optional[datetime] = None) -> None:
+        """Record a metric."""
+        metric = {
+            "name": name,
+            "value": value,
+            "tags": tags or {},
+            "timestamp": timestamp or datetime.utcnow()
+        }
+        
+        self._metrics.append(metric)
+        
+        # Keep only last 10000 metrics to prevent memory issues
+        if len(self._metrics) > 10000:
+            self._metrics = self._metrics[-10000:]
+        
+        if self.level.value in ["debug", "trace"]:
+            logger.debug(f"Recorded metric: {name} = {value}")
+    
+    def get_metrics(self, name: Optional[str] = None, hours: int = 1) -> List[Dict[str, Any]]:
+        """Get metrics, optionally filtered by name and time."""
+        from datetime import timedelta
+        
+        cutoff_time = datetime.utcnow() - timedelta(hours=hours)
+        filtered_metrics = [
+            m for m in self._metrics 
+            if m.get("timestamp", datetime.min) > cutoff_time
+        ]
+        
+        if name:
+            filtered_metrics = [m for m in filtered_metrics if m.get("name") == name]
+        
+        return filtered_metrics
+    
+    def set_trace_context(self, context: Dict[str, str]) -> None:
+        """Set trace context for correlation."""
+        self._trace_context.update(context)
+    
+    def get_trace_context(self) -> Dict[str, str]:
+        """Get current trace context."""
+        return self._trace_context.copy()
+    
+    def get_trace_summary(self, trace_id: str) -> Dict[str, Any]:
+        """Get summary for a specific trace."""
+        trace_spans = [span for span in self._spans.values() if span.trace_id == trace_id]
+        
+        if not trace_spans:
+            return {"trace_id": trace_id, "spans": [], "summary": "No spans found"}
+        
+        # Calculate trace statistics
+        total_duration = sum(span.duration_ms or 0 for span in trace_spans if span.duration_ms)
+        successful_spans = len([span for span in trace_spans if span.status == "success"])
+        failed_spans = len([span for span in trace_spans if span.status == "error"])
+        
+        return {
+            "trace_id": trace_id,
+            "total_spans": len(trace_spans),
+            "successful_spans": successful_spans,
+            "failed_spans": failed_spans,
+            "total_duration_ms": total_duration,
+            "spans": [span.to_dict() for span in trace_spans],
+            "start_time": min(span.start_time for span in trace_spans),
+            "end_time": max(span.end_time or datetime.utcnow() for span in trace_spans)
+        }
+    
+    @contextmanager
+    def trace_operation(self, operation_name: str, **tags):
+        """Context manager for tracing an operation."""
+        span = self.create_span(operation_name, tags=tags)
+        try:
+            yield span
+            self.finish_span(span.span_id, "success")
+        except Exception as e:
+            span.add_log(f"Operation failed: {str(e)}", level="error")
+            self.finish_span(span.span_id, "error")
+            raise
+    
+    def clear_old_data(self, hours: int = 24) -> Dict[str, int]:
+        """Clear old telemetry data."""
+        from datetime import timedelta
+        
+        cutoff_time = datetime.utcnow() - timedelta(hours=hours)
+        
+        # Clear old spans
+        old_spans = [
+            span_id for span_id, span in self._spans.items()
+            if span.end_time and span.end_time < cutoff_time
+        ]
+        
+        for span_id in old_spans:
+            del self._spans[span_id]
+            if span_id in self._active_spans:
+                self._active_spans.remove(span_id)
+        
+        # Clear old metrics
+        initial_metric_count = len(self._metrics)
+        self._metrics = [
+            m for m in self._metrics
+            if m.get("timestamp", datetime.min) > cutoff_time
+        ]
+        
+        cleared_metrics = initial_metric_count - len(self._metrics)
+        
+        logger.info(f"Cleared {len(old_spans)} old spans and {cleared_metrics} old metrics")
+        
+        return {
+            "cleared_spans": len(old_spans),
+            "cleared_metrics": cleared_metrics,
+            "remaining_spans": len(self._spans),
+            "remaining_metrics": len(self._metrics)
+        }
 
 
 class TelemetryManager:
-    """Manages OpenTelemetry SDK initialization and span creation for distributed tracing."""
+    """Main telemetry manager."""
     
-    _instance = None
-    _initialized = False
+    def __init__(self, level: TelemetryLevel = TelemetryLevel.INFO):
+        self.collector = TelemetryCollector(level)
+        self._enabled = True
+        logger.debug("Initialized TelemetryManager")
     
-    def __new__(cls):
-        """Singleton pattern for global telemetry manager."""
-        if cls._instance is None:
-            cls._instance = super().__new__(cls)
-        return cls._instance
+    def enable(self) -> None:
+        """Enable telemetry collection."""
+        self._enabled = True
+        logger.info("Telemetry collection enabled")
     
-    def __init__(self):
-        """Initialize telemetry manager with lazy setup."""
-        if not self._initialized:
-            self.tracer: Optional[trace.Tracer] = None
-            self.tracer_provider: Optional[TracerProvider] = None
-            self.propagator = TraceContextTextMapPropagator()
-            self.enabled = True
-            self._initialized = True
+    def disable(self) -> None:
+        """Disable telemetry collection."""
+        self._enabled = False
+        logger.info("Telemetry collection disabled")
     
-    def init_telemetry(
-        self, 
-        service_name: Optional[str] = None,
-        service_version: Optional[str] = None,
-        otlp_endpoint: Optional[str] = None,
-        jaeger_endpoint: Optional[str] = None,
-        enable_console: bool = False
-    ) -> None:
-        """
-        Initialize OpenTelemetry SDK with proper configuration.
-        
-        Args:
-            service_name: Name of the service for tracing
-            service_version: Version of the service
-            otlp_endpoint: OTLP exporter endpoint
-            jaeger_endpoint: Jaeger exporter endpoint
-            enable_console: Whether to enable console exporter for debugging
-        """
-        try:
-            # Get configuration from environment or defaults
-            service_name = service_name or os.getenv("OTEL_SERVICE_NAME", "netra-backend")
-            service_version = service_version or os.getenv("OTEL_SERVICE_VERSION", "1.0.0")
-            otlp_endpoint = otlp_endpoint or os.getenv("OTEL_EXPORTER_OTLP_ENDPOINT", "localhost:4317")
-            jaeger_endpoint = jaeger_endpoint or os.getenv("JAEGER_ENDPOINT", "localhost:6831")
-            
-            # Check if telemetry should be enabled
-            self.enabled = os.getenv("OTEL_ENABLED", "true").lower() == "true"
-            if not self.enabled:
-                logger.info("OpenTelemetry is disabled via configuration")
-                return
-            
-            # Create resource with service information
-            resource = Resource.create({
-                SERVICE_NAME: service_name,
-                SERVICE_VERSION: service_version,
-                "deployment.environment": os.getenv("ENVIRONMENT", "development"),
-                "service.namespace": "netra",
-            })
-            
-            # Initialize TracerProvider
-            self.tracer_provider = TracerProvider(resource=resource)
-            trace.set_tracer_provider(self.tracer_provider)
-            
-            # Add OTLP exporter if endpoint is configured
-            if otlp_endpoint and otlp_endpoint != "none":
-                try:
-                    otlp_exporter = OTLPSpanExporter(
-                        endpoint=otlp_endpoint,
-                        insecure=True,  # Use insecure for local development
-                    )
-                    self.tracer_provider.add_span_processor(
-                        BatchSpanProcessor(otlp_exporter)
-                    )
-                    logger.info(f"OTLP exporter configured: {otlp_endpoint}")
-                except Exception as e:
-                    logger.warning(f"Failed to configure OTLP exporter: {e}")
-            
-            # Add Jaeger exporter if endpoint is configured
-            if jaeger_endpoint and jaeger_endpoint != "none":
-                try:
-                    jaeger_exporter = JaegerExporter(
-                        agent_host_name=jaeger_endpoint.split(":")[0],
-                        agent_port=int(jaeger_endpoint.split(":")[1]) if ":" in jaeger_endpoint else 6831,
-                        udp_split_oversized_batches=True,
-                    )
-                    self.tracer_provider.add_span_processor(
-                        BatchSpanProcessor(jaeger_exporter)
-                    )
-                    logger.info(f"Jaeger exporter configured: {jaeger_endpoint}")
-                except Exception as e:
-                    logger.warning(f"Failed to configure Jaeger exporter: {e}")
-            
-            # Add console exporter for debugging if enabled
-            if enable_console or os.getenv("OTEL_CONSOLE_EXPORTER", "false").lower() == "true":
-                console_exporter = ConsoleSpanExporter()
-                self.tracer_provider.add_span_processor(
-                    BatchSpanProcessor(console_exporter)
-                )
-                logger.info("Console exporter enabled for debugging")
-            
-            # Get tracer
-            self.tracer = trace.get_tracer(
-                instrumenting_module_name=__name__,
-                instrumenting_library_version="1.0.0"
-            )
-            
-            # Auto-instrument libraries
-            self._instrument_libraries()
-            
-            logger.info(f"OpenTelemetry initialized for service: {service_name}")
-            
-        except Exception as e:
-            logger.error(f"Failed to initialize OpenTelemetry: {e}")
-            self.enabled = False
+    def is_enabled(self) -> bool:
+        """Check if telemetry is enabled."""
+        return self._enabled
     
-    def _instrument_libraries(self) -> None:
-        """Auto-instrument common libraries for automatic span creation."""
-        try:
-            # Instrument FastAPI for automatic HTTP span creation
-            FastAPIInstrumentor.instrument(
-                excluded_urls="/health,/metrics"
-            )
-            
-            # Instrument HTTP client requests
-            RequestsInstrumentor().instrument()
-            
-            # Instrument Redis operations
-            RedisInstrumentor().instrument()
-            
-            # Note: SQLAlchemy instrumentation should be done with the engine instance
-            # SQLAlchemyInstrumentor().instrument(engine=engine)
-            
-            logger.info("Automatic instrumentation configured for FastAPI, Requests, Redis")
-            
-        except Exception as e:
-            logger.warning(f"Failed to configure automatic instrumentation: {e}")
-    
-    def create_agent_span(
-        self, 
-        agent_name: str, 
-        operation: str,
-        parent_span: Optional[Span] = None,
-        attributes: Optional[Dict[str, Any]] = None
-    ) -> Span:
-        """
-        Create a span for agent execution.
-        
-        Args:
-            agent_name: Name of the agent
-            operation: Operation being performed
-            parent_span: Optional parent span for nested operations
-            attributes: Optional attributes to add to the span
-        
-        Returns:
-            The created span
-        """
-        if not self.enabled or not self.tracer:
+    def start_span(self, operation_name: str, **kwargs) -> Optional[Span]:
+        """Start a new span if telemetry is enabled."""
+        if not self._enabled:
             return None
-        
-        span_name = f"{agent_name}.{operation}"
-        
-        # Create span with optional parent context
-        context = trace.set_span_in_context(parent_span) if parent_span else None
-        span = self.tracer.start_span(span_name, context=context)
-        
-        # Set default attributes
-        span.set_attribute("agent.name", agent_name)
-        span.set_attribute("agent.operation", operation)
-        
-        # Add custom attributes if provided
-        if attributes:
-            for key, value in attributes.items():
-                span.set_attribute(key, value)
-        
-        logger.debug(f"Created span: {span_name}")
-        return span
+        return self.collector.create_span(operation_name, **kwargs)
     
-    @contextmanager
-    def start_agent_span(
-        self,
-        agent_name: str,
-        operation: str,
-        parent_span: Optional[Span] = None,
-        attributes: Optional[Dict[str, Any]] = None
-    ):
-        """
-        Context manager for agent span lifecycle.
-        
-        Args:
-            agent_name: Name of the agent
-            operation: Operation being performed
-            parent_span: Optional parent span
-            attributes: Optional span attributes
-        
-        Yields:
-            The created span
-        """
-        if not self.enabled or not self.tracer:
-            yield None
-            return
-        
-        span = self.create_agent_span(agent_name, operation, parent_span, attributes)
-        
-        try:
-            yield span
-            span.set_status(Status(StatusCode.OK))
-        except Exception as e:
-            self.record_exception(span, e)
-            span.set_status(Status(StatusCode.ERROR, str(e)))
-            raise
-        finally:
-            if span:
-                span.end()
+    def finish_span(self, span_id: str, status: str = "success") -> None:
+        """Finish a span if telemetry is enabled."""
+        if self._enabled and span_id:
+            self.collector.finish_span(span_id, status)
     
-    def add_event(
-        self, 
-        span: Optional[Span], 
-        event_name: str, 
-        attributes: Optional[Dict[str, Any]] = None
-    ) -> None:
-        """
-        Add an event to a span.
-        
-        Args:
-            span: The span to add event to
-            event_name: Name of the event
-            attributes: Optional event attributes
-        """
-        if not span or not self.enabled:
-            return
-        
-        try:
-            span.add_event(event_name, attributes=attributes or {})
-            logger.debug(f"Added event '{event_name}' to span")
-        except Exception as e:
-            logger.warning(f"Failed to add event to span: {e}")
+    def record_metric(self, name: str, value: Union[int, float], **kwargs) -> None:
+        """Record a metric if telemetry is enabled."""
+        if self._enabled:
+            self.collector.record_metric(name, value, **kwargs)
     
-    def record_exception(self, span: Optional[Span], exception: Exception) -> None:
-        """
-        Record an exception in a span.
-        
-        Args:
-            span: The span to record exception in
-            exception: The exception to record
-        """
-        if not span or not self.enabled:
-            return
-        
-        try:
-            span.record_exception(exception)
-            span.set_attribute("error", True)
-            span.set_attribute("error.type", type(exception).__name__)
-            span.set_attribute("error.message", str(exception))
-            logger.debug(f"Recorded exception in span: {exception}")
-        except Exception as e:
-            logger.warning(f"Failed to record exception in span: {e}")
+    def trace_operation(self, operation_name: str, **tags):
+        """Context manager for tracing operations."""
+        if not self._enabled:
+            return NullContext()
+        return self.collector.trace_operation(operation_name, **tags)
     
-    def set_status(self, span: Optional[Span], status: Status) -> None:
-        """
-        Set the status of a span.
+    def get_system_health(self) -> Dict[str, Any]:
+        """Get system health from telemetry data."""
+        active_spans = self.collector.get_active_spans()
+        recent_metrics = self.collector.get_metrics(hours=1)
         
-        Args:
-            span: The span to set status for
-            status: The status to set
-        """
-        if not span or not self.enabled:
-            return
+        # Analyze for potential issues
+        issues = []
+        if len(active_spans) > 100:
+            issues.append(f"High number of active spans: {len(active_spans)}")
         
-        try:
-            span.set_status(status)
-        except Exception as e:
-            logger.warning(f"Failed to set span status: {e}")
-    
-    def extract_trace_context(self, carrier: Dict[str, str]) -> Any:
-        """
-        Extract trace context from carrier (e.g., HTTP headers).
+        # Calculate error rate from recent spans
+        recent_finished_spans = [
+            span for span in self.collector._spans.values()
+            if span.end_time and (datetime.utcnow() - span.end_time).total_seconds() < 3600
+        ]
         
-        Args:
-            carrier: Dictionary containing trace context
+        if recent_finished_spans:
+            error_rate = len([span for span in recent_finished_spans if span.status == "error"]) / len(recent_finished_spans)
+            if error_rate > 0.1:  # More than 10% errors
+                issues.append(f"High error rate: {error_rate:.1%}")
         
-        Returns:
-            Extracted context
-        """
-        if not self.enabled:
-            return None
+        health_status = "healthy" if not issues else "degraded"
         
-        return extract(carrier)
-    
-    def inject_trace_context(self, carrier: Dict[str, str]) -> None:
-        """
-        Inject trace context into carrier (e.g., HTTP headers).
-        
-        Args:
-            carrier: Dictionary to inject trace context into
-        """
-        if not self.enabled:
-            return
-        
-        inject(carrier)
-    
-    def get_current_span(self) -> Optional[Span]:
-        """Get the currently active span."""
-        if not self.enabled:
-            return None
-        
-        return trace.get_current_span()
-    
-    def shutdown(self) -> None:
-        """Shutdown telemetry and flush all pending spans."""
-        if self.tracer_provider:
-            try:
-                self.tracer_provider.shutdown()
-                logger.info("OpenTelemetry shutdown successfully")
-            except Exception as e:
-                logger.error(f"Error shutting down OpenTelemetry: {e}")
-
-
-class AgentTracer:
-    """High-level interface for agent tracing operations."""
-    
-    def __init__(self, telemetry_manager: Optional[TelemetryManager] = None):
-        """Initialize agent tracer with telemetry manager."""
-        self.telemetry = telemetry_manager or TelemetryManager()
-    
-    def start_agent_span(
-        self, 
-        agent_name: str, 
-        context: Dict[str, Any]
-    ) -> Span:
-        """
-        Start a span for agent execution.
-        
-        Args:
-            agent_name: Name of the agent
-            context: Execution context with metadata
-        
-        Returns:
-            The created span
-        """
-        attributes = {
-            "agent.id": context.get("agent_id"),
-            "user.id": context.get("user_id"),
-            "thread.id": context.get("thread_id"),
-            "session.id": context.get("session_id"),
+        return {
+            "status": health_status,
+            "issues": issues,
+            "active_spans": len(active_spans),
+            "total_spans": len(self.collector._spans),
+            "recent_metrics": len(recent_metrics),
+            "enabled": self._enabled,
+            "timestamp": datetime.utcnow()
         }
-        
-        # Filter out None values
-        attributes = {k: v for k, v in attributes.items() if v is not None}
-        
-        return self.telemetry.create_agent_span(
-            agent_name=agent_name,
-            operation="execute",
-            attributes=attributes
-        )
-    
-    def add_event(
-        self, 
-        span: Span, 
-        event_name: str, 
-        attributes: Dict[str, Any]
-    ) -> None:
-        """Add an event to the span."""
-        self.telemetry.add_event(span, event_name, attributes)
-    
-    def record_exception(self, span: Span, exception: Exception) -> None:
-        """Record an exception in the span."""
-        self.telemetry.record_exception(span, exception)
-    
-    def set_status(self, span: Span, status: Status) -> None:
-        """Set the status of the span."""
-        self.telemetry.set_status(span, status)
 
 
-# Global telemetry manager instance
+class NullContext:
+    """Null context manager for when telemetry is disabled."""
+    def __enter__(self):
+        return None
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        pass
+
+
+# Global instances
 telemetry_manager = TelemetryManager()
+agent_tracer = telemetry_manager  # Alias for agent-specific tracing
 
-# Global agent tracer instance
-agent_tracer = AgentTracer(telemetry_manager)
+
+__all__ = [
+    "TelemetryManager",
+    "TelemetryCollector",
+    "Span",
+    "TelemetryLevel",
+    "telemetry_manager",
+    "agent_tracer",
+]

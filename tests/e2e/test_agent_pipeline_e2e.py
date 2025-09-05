@@ -51,7 +51,7 @@ from shared.isolated_environment import get_env
 
 # Import core agent pipeline components
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
-from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
+from netra_backend.app.core.registry.universal_registry import AgentRegistry
 from netra_backend.app.agents.supervisor.agent_class_registry import get_agent_class_registry
 from netra_backend.app.agents.supervisor.agent_instance_factory import get_agent_instance_factory
 from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
@@ -63,7 +63,7 @@ from netra_backend.app.agents.unified_tool_execution import UnifiedToolExecution
 from netra_backend.app.agents.state import DeepAgentState
 
 # WebSocket and real-time communication
-from netra_backend.app.websocket_core.manager import WebSocketManager
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager as WebSocketManager
 from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
 
 # LLM and core infrastructure
@@ -279,10 +279,7 @@ class AgentPipelineE2ETest:
 
     async def _setup_agent_registry(self) -> None:
         """Setup agent registry with all supported agent types."""
-        self.agent_registry = AgentRegistry(
-            llm_manager=self.llm_manager,
-            tool_dispatcher=self.tool_dispatcher
-        )
+        self.agent_registry = AgentRegistry()
         
         # Set WebSocket components
         self.agent_registry.set_websocket_manager(self.websocket_manager)

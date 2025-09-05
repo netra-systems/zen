@@ -36,7 +36,7 @@ if project_root not in sys.path:
 
 from shared.isolated_environment import get_env
 from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge, IntegrationState, IntegrationConfig
-from netra_backend.app.websocket_core.manager import WebSocketManager
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager as WebSocketManager
 from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
 from netra_backend.app.logging_config import central_logger
 

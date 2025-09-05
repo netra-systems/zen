@@ -97,7 +97,7 @@ def _import_base_agent_classes():
         warnings.warn(f"Cannot import DataSubAgent: {e}")
     
     try:
-        from netra_backend.app.agents.triage_sub_agent.agent import TriageSubAgent
+        from netra_backend.app.agents.triage.unified_triage_agent import UnifiedTriageAgent
         agents['triage'] = TriageSubAgent
     except ImportError as e:
         import warnings

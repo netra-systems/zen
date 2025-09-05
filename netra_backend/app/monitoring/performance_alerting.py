@@ -1,247 +1,248 @@
-"""Performance alerting and threshold management for Netra platform.
-
-This module provides comprehensive performance alerting capabilities including:
-- Alert rule definition and evaluation
-- Threshold-based monitoring
-- Alert cooldown management
-- Callback notification system
+"""
+Performance-based alerting system.
+Monitors performance metrics and triggers alerts based on thresholds.
 """
 
+from typing import Any, Dict, List, Optional
+from datetime import datetime, timedelta
 import asyncio
-from datetime import datetime
-from typing import Any, Callable, Dict, List, Optional
 
 from netra_backend.app.logging_config import central_logger
+from netra_backend.app.monitoring.alert_models import Alert, AlertLevel, AlertRule
 
 logger = central_logger.get_logger(__name__)
 
 
 class PerformanceAlertManager:
-    """Manages performance-related alerts and thresholds."""
+    """Manages performance-based alerts and threshold monitoring."""
     
-    def __init__(self, metrics_collector):
-        self.metrics_collector = metrics_collector
-        self.alert_rules = self._initialize_alert_rules()
-        self._alert_callbacks: List[Callable] = []
-        self._last_alerts: Dict[str, datetime] = {}
-        self._alert_cooldown = 300  # 5 minutes between same alerts
+    def __init__(self, config: Optional[Dict[str, Any]] = None):
+        self.config = config or {}
+        self._alert_rules: List[AlertRule] = []
+        self._active_alerts: List[Alert] = []
+        self._performance_history: List[Dict[str, Any]] = []
+        self._alert_cooldown_seconds = self.config.get("alert_cooldown_seconds", 300)  # 5 minutes
+        logger.debug("Initialized PerformanceAlertManager")
     
-    def _initialize_alert_rules(self) -> Dict[str, Dict[str, Any]]:
-        """Initialize performance alert rules."""
-        rule_creators = self._get_rule_creators()
-        return self._build_rules_from_creators(rule_creators)
-
-    def _get_rule_creators(self) -> Dict[str, Callable]:
-        """Get alert rule creator functions."""
-        resource_rules = self._get_resource_rule_creators()
-        database_rules = self._get_database_rule_creators()
-        return {**resource_rules, **database_rules}
-
-    def _get_resource_rule_creators(self) -> Dict[str, Callable]:
-        """Get resource-related rule creators."""
-        return {
-            "high_cpu": self._create_high_cpu_rule,
-            "high_memory": self._create_high_memory_rule,
-            "low_memory": self._create_low_memory_rule
+    async def initialize(self) -> None:
+        """Initialize the performance alert manager."""
+        self._setup_default_rules()
+        logger.info("PerformanceAlertManager initialized with default rules")
+    
+    def _setup_default_rules(self) -> None:
+        """Setup default performance alert rules."""
+        default_rules = [
+            AlertRule(
+                rule_id="high_response_time",
+                name="High Response Time",
+                description="Response time exceeds acceptable threshold",
+                threshold_value=5000.0,  # 5 seconds
+                level=AlertLevel.WARNING
+            ),
+            AlertRule(
+                rule_id="critical_response_time", 
+                name="Critical Response Time",
+                description="Response time critically high",
+                threshold_value=10000.0,  # 10 seconds
+                level=AlertLevel.CRITICAL
+            ),
+            AlertRule(
+                rule_id="high_error_rate",
+                name="High Error Rate",
+                description="Error rate exceeds acceptable threshold",
+                threshold_value=0.05,  # 5%
+                level=AlertLevel.ERROR
+            ),
+            AlertRule(
+                rule_id="low_throughput",
+                name="Low Throughput",
+                description="System throughput below expected level",
+                threshold_value=10.0,  # requests per minute
+                level=AlertLevel.WARNING
+            )
+        ]
+        
+        self._alert_rules.extend(default_rules)
+    
+    async def record_performance_metrics(self, metrics: Dict[str, Any]) -> None:
+        """Record performance metrics and check for alert conditions."""
+        metrics_with_timestamp = {
+            **metrics,
+            "timestamp": datetime.utcnow()
         }
-
-    def _get_database_rule_creators(self) -> Dict[str, Callable]:
-        """Get database-related rule creators."""
-        return {
-            "database_pool_exhaustion": self._create_pool_exhaustion_rule,
-            "low_cache_hit_ratio": self._create_cache_hit_rule
-        }
-
-    def _build_rules_from_creators(self, rule_creators: Dict[str, Callable]) -> Dict[str, Dict[str, Any]]:
-        """Build alert rules from creator functions."""
-        return {name: creator() for name, creator in rule_creators.items()}
+        
+        self._performance_history.append(metrics_with_timestamp)
+        
+        # Keep only last 1000 entries
+        if len(self._performance_history) > 1000:
+            self._performance_history = self._performance_history[-1000:]
+        
+        # Check for alert conditions
+        await self._evaluate_alert_conditions(metrics_with_timestamp)
+        
+        logger.debug(f"Recorded performance metrics and evaluated alerts")
     
-    def _create_high_cpu_rule(self) -> Dict[str, Any]:
-        """Create high CPU usage alert rule."""
-        return {
-            "metric": "system.cpu_percent",
-            "threshold": 80.0,
-            "operator": ">",
-            "duration": 60,  # seconds
-            "severity": "warning"
-        }
+    async def _evaluate_alert_conditions(self, current_metrics: Dict[str, Any]) -> None:
+        """Evaluate current metrics against alert rules."""
+        for rule in self._alert_rules:
+            if await self._should_trigger_alert(rule, current_metrics):
+                await self._trigger_alert(rule, current_metrics)
     
-    def _create_high_memory_rule(self) -> Dict[str, Any]:
-        """Create high memory usage alert rule."""
-        return {
-            "metric": "system.memory_percent", 
-            "threshold": 85.0,
-            "operator": ">",
-            "duration": 60,
-            "severity": "warning"
-        }
-    
-    def _create_low_memory_rule(self) -> Dict[str, Any]:
-        """Create low available memory alert rule."""
-        return {
-            "metric": "system.memory_available_mb",
-            "threshold": 512.0,
-            "operator": "<",
-            "duration": 30,
-            "severity": "critical"
-        }
-    
-    def _create_pool_exhaustion_rule(self) -> Dict[str, Any]:
-        """Create database pool exhaustion alert rule."""
-        return {
-            "metric": "database.pool_utilization",
-            "threshold": 0.9,
-            "operator": ">",
-            "duration": 30,
-            "severity": "critical"
-        }
-    
-    def _create_cache_hit_rule(self) -> Dict[str, Any]:
-        """Create low cache hit ratio alert rule."""
-        base_rule = self._get_cache_hit_base_rule()
-        return {**base_rule, "min_samples": 10}
-
-    def _get_cache_hit_base_rule(self) -> Dict[str, Any]:
-        """Get base cache hit ratio rule parameters."""
-        return {
-            "metric": "database.cache_hit_ratio",
-            "threshold": 0.5,
-            "operator": "<",
-            "duration": 300,
-            "severity": "warning"
-        }
-    
-    def add_alert_callback(self, callback: Callable[[str, Dict[str, Any]], None]) -> None:
-        """Add callback function for alert notifications."""
-        self._alert_callbacks.append(callback)
-    
-    async def check_alerts(self) -> List[Dict[str, Any]]:
-        """Check all alert rules and return triggered alerts."""
-        triggered_alerts = []
-        for alert_name, rule in self.alert_rules.items():
-            alert_data = await self._process_single_alert_rule(alert_name, rule)
-            self._add_alert_if_triggered(triggered_alerts, alert_data)
-        return triggered_alerts
-
-    def _add_alert_if_triggered(self, triggered_alerts: List, alert_data: Optional[Dict]) -> None:
-        """Add alert data to list if it was triggered."""
-        if alert_data:
-            triggered_alerts.append(alert_data)
-
-    async def _process_single_alert_rule(self, alert_name: str, rule: Dict[str, Any]) -> Optional[Dict[str, Any]]:
-        """Process a single alert rule and return alert data if triggered."""
-        try:
-            return await self._evaluate_and_notify_rule(alert_name, rule)
-        except Exception as e:
-            logger.error(f"Error evaluating alert rule {alert_name}: {e}")
-        return None
-
-    async def _evaluate_and_notify_rule(self, alert_name: str, rule: Dict[str, Any]) -> Optional[Dict[str, Any]]:
-        """Evaluate rule and notify if triggered."""
-        if await self._evaluate_alert_rule(alert_name, rule):
-            alert_data = self._create_alert_data(alert_name, rule)
-            self._notify_callbacks(alert_name, alert_data)
-            return alert_data
-        return None
-    
-    def _create_alert_data(self, alert_name: str, rule: Dict[str, Any]) -> Dict[str, Any]:
-        """Create alert data structure."""
-        return {
-            "name": alert_name,
-            "rule": rule,
-            "timestamp": datetime.now(),
-            "metric_summary": self.metrics_collector.get_metric_summary(rule["metric"])
-        }
-    
-    def _notify_callbacks(self, alert_name: str, alert_data: Dict[str, Any]) -> None:
-        """Notify all registered callbacks about alert."""
-        for callback in self._alert_callbacks:
-            self._safe_callback_execution(callback, alert_name, alert_data)
-
-    def _safe_callback_execution(self, callback, alert_name: str, alert_data: Dict[str, Any]) -> None:
-        """Execute callback with error handling."""
-        try:
-            callback(alert_name, alert_data)
-        except Exception as e:
-            logger.error(f"Error in alert callback: {e}")
-    
-    async def _evaluate_alert_rule(self, alert_name: str, rule: Dict[str, Any]) -> bool:
-        """Evaluate a single alert rule."""
-        if not self._check_cooldown(alert_name):
+    async def _should_trigger_alert(self, rule: AlertRule, metrics: Dict[str, Any]) -> bool:
+        """Check if alert rule should be triggered."""
+        # Check if we're in cooldown period
+        if self._is_in_cooldown(rule.rule_id):
             return False
         
-        metrics = self._get_rule_metrics(rule)
-        return self._validate_and_check_violations(metrics, rule, alert_name)
-
-    def _validate_and_check_violations(self, metrics: List, rule: Dict[str, Any], alert_name: str) -> bool:
-        """Validate metrics and check for threshold violations."""
-        if not self._validate_metrics(metrics, rule):
-            return False
-        return self._check_threshold_violations(metrics, rule, alert_name)
+        # Evaluate rule condition
+        return self._evaluate_rule_condition(rule, metrics)
     
-    def _check_cooldown(self, alert_name: str) -> bool:
-        """Check if alert is in cooldown period."""
-        if alert_name in self._last_alerts:
-            time_since_last = (datetime.now() - self._last_alerts[alert_name]).total_seconds()
-            return time_since_last >= self._alert_cooldown
-        return True
-    
-    def _get_rule_metrics(self, rule: Dict[str, Any]) -> List:
-        """Get metrics for alert rule evaluation."""
-        return self.metrics_collector.get_recent_metrics(
-            rule["metric"], 
-            rule.get("duration", 60)
-        )
-    
-    def _validate_metrics(self, metrics: List, rule: Dict[str, Any]) -> bool:
-        """Validate metrics meet minimum requirements."""
-        if not metrics:
-            return False
+    def _is_in_cooldown(self, rule_id: str) -> bool:
+        """Check if rule is in cooldown period."""
+        cutoff_time = datetime.utcnow() - timedelta(seconds=self._alert_cooldown_seconds)
         
-        min_samples = rule.get("min_samples", 0)
-        return len(metrics) >= min_samples
-    
-    def _check_threshold_violations(self, metrics: List, rule: Dict[str, Any], alert_name: str) -> bool:
-        """Check if threshold violations exceed trigger ratio."""
-        threshold = rule["threshold"]
-        operator = rule["operator"]
-        violation_count = self._count_violations(metrics, threshold, operator)
-        return self._check_violation_ratio(violation_count, len(metrics), alert_name)
-
-    def _check_violation_ratio(self, violation_count: int, total_count: int, alert_name: str) -> bool:
-        """Check if violation ratio exceeds threshold and update alert timestamp."""
-        violation_ratio = violation_count / total_count
+        for alert in self._active_alerts:
+            if (alert.rule_id == rule_id and 
+                alert.timestamp > cutoff_time):
+                return True
         
-        if violation_ratio > 0.5:
-            self._last_alerts[alert_name] = datetime.now()
-            return True
         return False
     
-    def _count_violations(self, metrics: List, threshold: float, operator: str) -> int:
-        """Count threshold violations in metrics."""
-        violation_count = 0
-        for metric in metrics:
-            violation_count += self._check_metric_violation(metric, threshold, operator)
-        return violation_count
-
-    def _check_metric_violation(self, metric, threshold: float, operator: str) -> int:
-        """Check if single metric violates threshold."""
-        return 1 if self._is_violation(metric.value, threshold, operator) else 0
-    
-    def _is_violation(self, value: float, threshold: float, operator: str) -> bool:
-        """Check if a single value violates threshold."""
-        operator_checks = self._get_operator_checks()
-        return self._evaluate_operator_check(operator_checks, operator, value, threshold)
-
-    def _get_operator_checks(self) -> Dict[str, Callable]:
-        """Get operator check functions."""
-        return {
-            ">": lambda v, t: v > t,
-            "<": lambda v, t: v < t,
-            "==": lambda v, t: v == t
+    def _evaluate_rule_condition(self, rule: AlertRule, metrics: Dict[str, Any]) -> bool:
+        """Evaluate if rule condition is met."""
+        rule_evaluators = {
+            "high_response_time": lambda m: m.get("response_time_ms", 0) > rule.threshold_value,
+            "critical_response_time": lambda m: m.get("response_time_ms", 0) > rule.threshold_value,
+            "high_error_rate": lambda m: m.get("error_rate", 0) > rule.threshold_value,
+            "low_throughput": lambda m: m.get("throughput_rpm", float('inf')) < rule.threshold_value
         }
+        
+        evaluator = rule_evaluators.get(rule.rule_id)
+        if evaluator:
+            return evaluator(metrics)
+        
+        return False
+    
+    async def _trigger_alert(self, rule: AlertRule, metrics: Dict[str, Any]) -> None:
+        """Trigger an alert based on rule and metrics."""
+        import uuid
+        
+        alert = Alert(
+            alert_id=str(uuid.uuid4()),
+            rule_id=rule.rule_id,
+            title=rule.name,
+            message=self._generate_alert_message(rule, metrics),
+            level=rule.level,
+            timestamp=datetime.utcnow(),
+            agent_name=metrics.get("agent_name"),
+            metric_name=rule.rule_id,
+            current_value=self._extract_metric_value(rule, metrics),
+            threshold_value=rule.threshold_value,
+            metadata={"metrics": metrics}
+        )
+        
+        self._active_alerts.append(alert)
+        logger.warning(f"Performance alert triggered: {alert.title} - {alert.message}")
+        
+        # Here you would typically send the alert to notification channels
+        await self._notify_alert(alert)
+    
+    def _generate_alert_message(self, rule: AlertRule, metrics: Dict[str, Any]) -> str:
+        """Generate alert message based on rule and current metrics."""
+        current_value = self._extract_metric_value(rule, metrics)
+        
+        return (
+            f"{rule.description}. "
+            f"Current value: {current_value}, "
+            f"Threshold: {rule.threshold_value}"
+        )
+    
+    def _extract_metric_value(self, rule: AlertRule, metrics: Dict[str, Any]) -> float:
+        """Extract relevant metric value for rule."""
+        metric_mappings = {
+            "high_response_time": "response_time_ms",
+            "critical_response_time": "response_time_ms", 
+            "high_error_rate": "error_rate",
+            "low_throughput": "throughput_rpm"
+        }
+        
+        metric_key = metric_mappings.get(rule.rule_id, "value")
+        return metrics.get(metric_key, 0.0)
+    
+    async def _notify_alert(self, alert: Alert) -> None:
+        """Send alert notification (stub implementation)."""
+        # In real implementation, this would integrate with notification system
+        logger.info(f"Alert notification: {alert.title} - {alert.message}")
+    
+    async def get_performance_summary(self, time_window_minutes: int = 60) -> Dict[str, Any]:
+        """Get performance summary for specified time window."""
+        cutoff_time = datetime.utcnow() - timedelta(minutes=time_window_minutes)
+        recent_metrics = [
+            m for m in self._performance_history 
+            if m.get("timestamp", datetime.min) > cutoff_time
+        ]
+        
+        if not recent_metrics:
+            return {
+                "summary": "No recent metrics available",
+                "metrics_count": 0,
+                "time_window_minutes": time_window_minutes
+            }
+        
+        return self._calculate_performance_stats(recent_metrics, time_window_minutes)
+    
+    def _calculate_performance_stats(self, metrics: List[Dict[str, Any]], time_window: int) -> Dict[str, Any]:
+        """Calculate performance statistics from metrics."""
+        response_times = [m.get("response_time_ms", 0) for m in metrics if "response_time_ms" in m]
+        error_rates = [m.get("error_rate", 0) for m in metrics if "error_rate" in m]
+        throughputs = [m.get("throughput_rpm", 0) for m in metrics if "throughput_rpm" in m]
+        
+        return {
+            "metrics_count": len(metrics),
+            "time_window_minutes": time_window,
+            "avg_response_time_ms": sum(response_times) / len(response_times) if response_times else 0,
+            "max_response_time_ms": max(response_times) if response_times else 0,
+            "avg_error_rate": sum(error_rates) / len(error_rates) if error_rates else 0,
+            "avg_throughput_rpm": sum(throughputs) / len(throughputs) if throughputs else 0,
+            "active_alerts_count": len(self._active_alerts)
+        }
+    
+    async def add_alert_rule(self, rule: AlertRule) -> None:
+        """Add a custom alert rule."""
+        self._alert_rules.append(rule)
+        logger.info(f"Added custom alert rule: {rule.rule_id}")
+    
+    async def remove_alert_rule(self, rule_id: str) -> bool:
+        """Remove an alert rule by ID."""
+        initial_count = len(self._alert_rules)
+        self._alert_rules = [r for r in self._alert_rules if r.rule_id != rule_id]
+        removed = len(self._alert_rules) < initial_count
+        
+        if removed:
+            logger.info(f"Removed alert rule: {rule_id}")
+        
+        return removed
+    
+    async def clear_alert(self, alert_id: str) -> bool:
+        """Clear an active alert."""
+        initial_count = len(self._active_alerts)
+        self._active_alerts = [a for a in self._active_alerts if a.alert_id != alert_id]
+        cleared = len(self._active_alerts) < initial_count
+        
+        if cleared:
+            logger.info(f"Cleared alert: {alert_id}")
+        
+        return cleared
+    
+    async def get_active_alerts(self) -> List[Alert]:
+        """Get all currently active alerts."""
+        return self._active_alerts.copy()
+    
+    async def get_alert_rules(self) -> List[AlertRule]:
+        """Get all configured alert rules."""
+        return self._alert_rules.copy()
 
-    def _evaluate_operator_check(self, operator_checks: Dict, operator: str, value: float, threshold: float) -> bool:
-        """Evaluate operator check for value and threshold."""
-        check_func = operator_checks.get(operator)
-        return check_func(value, threshold) if check_func else False
+
+__all__ = [
+    "PerformanceAlertManager",
+]

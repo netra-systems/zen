@@ -10,7 +10,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 # Import from the single source of truth for database sessions
 from netra_backend.app.database import get_db
 
-from netra_backend.app.llm.llm_manager import LLMManager
+from netra_backend.app.llm.client_factory import get_llm_client
+from netra_backend.app.llm.client_unified import ResilientLLMClient
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.services.security_service import SecurityService
 from netra_backend.app.websocket_core import get_websocket_manager
@@ -180,28 +181,40 @@ class RequestScopedContext:
         # CRITICAL: Log that this context contains NO database sessions
         logger.debug(f"Created RequestScopedContext {self.request_id} - NO sessions stored")
 
-@asynccontextmanager
 async def get_request_scoped_db_session() -> AsyncGenerator[AsyncSession, None]:
     """Create a request-scoped database session with proper lifecycle management.
     
     CRITICAL: This creates a fresh session for each request and ensures it's
     properly closed after the request completes. Sessions are NEVER stored globally.
     
-    Uses the single source of truth from netra_backend.app.database.
+    NOTE: No @asynccontextmanager decorator for FastAPI compatibility.
+    
+    Uses the enhanced RequestScopedSessionFactory for isolation and monitoring.
     """
-    logger.debug("Creating new request-scoped database session")
+    from netra_backend.app.database.request_scoped_session_factory import get_session_factory
+    
+    # Generate unique request ID for this session
+    request_id = f"req_{uuid.uuid4().hex[:12]}"
+    # Use placeholder user ID - will be overridden by actual user context when available
+    user_id = "system"  # This gets overridden in practice by request context
+    
+    logger.debug(f"Creating new request-scoped database session {request_id}")
     
     try:
-        async for session in get_db():
+        # Get the factory and use its method directly (which is decorated with @asynccontextmanager)
+        factory = await get_session_factory()
+        # Since factory.get_request_scoped_session is decorated with @asynccontextmanager,
+        # we use it with async with
+        async with factory.get_request_scoped_session(user_id, request_id) as session:
             _validate_session_type(session)
-            logger.debug(f"Created database session: {id(session)}")
+            logger.debug(f"Created database session: {id(session)} for request {request_id}")
             yield session
             logger.debug(f"Request-scoped session {id(session)} completed")
     except Exception as e:
-        logger.error(f"Failed to create request-scoped database session: {e}")
+        logger.error(f"Failed to create request-scoped database session {request_id}: {e}")
         raise
     finally:
-        logger.debug("Request-scoped database session lifecycle completed")
+        logger.debug(f"Request-scoped database session {request_id} lifecycle completed")
 
 async def get_db_dependency() -> AsyncGenerator[AsyncSession, None]:
     """Wrapper for database dependency with validation.
@@ -209,16 +222,83 @@ async def get_db_dependency() -> AsyncGenerator[AsyncSession, None]:
     DEPRECATED: Use get_request_scoped_db_session for new code.
     Uses the single source of truth from netra_backend.app.database.
     """
-    logger.warning("Using deprecated get_db_dependency - consider get_request_scoped_db_session")
-    async for session in get_db():
+    logger.warning("DEPRECATED: get_db_dependency() may cause _AsyncGeneratorContextManager errors. Use get_request_scoped_db_session() instead.")
+    # FIX: get_db() is already an async context manager, use it directly
+    async with get_db() as session:
         _validate_session_type(session)
         yield session
 
-DbDep = Annotated[AsyncSession, Depends(get_db_dependency)]
-RequestScopedDbDep = Annotated[AsyncSession, Depends(get_request_scoped_db_session)]
+# Enhanced session dependencies using RequestScopedSessionFactory
+async def get_user_scoped_db_session(
+    user_id: str = "system",
+    request_id: Optional[str] = None,
+    thread_id: Optional[str] = None
+) -> AsyncGenerator[AsyncSession, None]:
+    """Create a user-scoped database session with enhanced isolation.
+    
+    Args:
+        user_id: User identifier for session isolation
+        request_id: Request identifier (auto-generated if not provided)
+        thread_id: Thread identifier for WebSocket routing
+        
+    Yields:
+        AsyncSession: Isolated database session for the user
+    """
+    from netra_backend.app.database.request_scoped_session_factory import get_isolated_session
+    
+    if not request_id:
+        request_id = f"req_{uuid.uuid4().hex[:12]}"
+    
+    logger.debug(f"Creating user-scoped database session for user {user_id}, request {request_id}")
+    
+    try:
+        async with get_isolated_session(user_id, request_id, thread_id) as session:
+            _validate_session_type(session)
+            # Additional validation for user isolation
+            from netra_backend.app.database.request_scoped_session_factory import validate_session_isolation
+            await validate_session_isolation(session, user_id)
+            
+            logger.debug(f"Created user-scoped session {id(session)} for user {user_id}")
+            yield session
+            logger.debug(f"User-scoped session {id(session)} completed for user {user_id}")
+    except Exception as e:
+        logger.error(f"Failed to create user-scoped database session for user {user_id}: {e}")
+        raise
+    finally:
+        logger.debug(f"User-scoped database session lifecycle completed for user {user_id}")
 
-def get_llm_manager(request: Request) -> LLMManager:
-    return request.app.state.llm_manager
+
+async def get_request_scoped_db_session_for_fastapi() -> AsyncGenerator[AsyncSession, None]:
+    """FastAPI-compatible wrapper for get_request_scoped_db_session.
+    
+    CRITICAL: get_request_scoped_db_session is a plain async generator (no @asynccontextmanager).
+    This wrapper ensures proper usage pattern for FastAPI Depends() injection.
+    
+    Yields:
+        AsyncSession: Request-scoped database session compatible with FastAPI Depends()
+    """
+    logger.debug("Creating FastAPI-compatible request-scoped database session")
+    
+    try:
+        # Directly delegate to the async generator
+        async for session in get_request_scoped_db_session():
+            logger.debug(f"Yielding FastAPI-compatible session: {id(session)}")
+            yield session
+            logger.debug(f"FastAPI-compatible session {id(session)} completed")
+    except Exception as e:
+        logger.error(f"Failed to create FastAPI-compatible request-scoped database session: {e}")
+        raise
+
+
+# FIXED: Use async generator directly (no @asynccontextmanager)
+DbDep = Annotated[AsyncSession, Depends(get_request_scoped_db_session)]
+RequestScopedDbDep = Annotated[AsyncSession, Depends(get_request_scoped_db_session)]
+UserScopedDbDep = Annotated[AsyncSession, Depends(get_user_scoped_db_session)]
+
+def get_llm_client_from_app(request: Request) -> ResilientLLMClient:
+    """Get LLM client - updated from deleted LLMManager."""
+    from netra_backend.app.llm.client_factory import get_llm_client
+    return get_llm_client()
 
 # Legacy compatibility - DEPRECATED: use get_db_dependency() instead
 async def get_db_session() -> AsyncGenerator[AsyncSession, None]:
@@ -227,14 +307,15 @@ async def get_db_session() -> AsyncGenerator[AsyncSession, None]:
     This function is deprecated. Use get_db_dependency() or DbDep type annotation instead.
     Kept for backward compatibility with existing routes.
     """
-    async for session in get_db():
+    # FIX: get_db() is already an async context manager, use it directly
+    async with get_db() as session:
         yield session
 
 def get_security_service(request: Request) -> SecurityService:
     logger.debug("Getting security service from app state")
     return request.app.state.security_service
 
-LLMManagerDep = Annotated[LLMManager, Depends(get_llm_manager)]
+LLMClientDep = Annotated[ResilientLLMClient, Depends(get_llm_client_from_app)]
 
 def get_agent_supervisor(request: Request) -> "Supervisor":
     """Get agent supervisor from app state - LEGACY mode.
@@ -421,7 +502,7 @@ async def get_request_scoped_supervisor(
         )
         
         # Get required components from app state (these should be stateless)
-        llm_manager = get_llm_manager(request)
+        llm_client = get_llm_client_from_app(request)
         
         # Get WebSocket bridge from app state
         websocket_bridge = getattr(request.app.state, 'websocket_bridge', None)
@@ -452,7 +533,7 @@ async def get_request_scoped_supervisor(
         # Create isolated SupervisorAgent using factory method
         from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
         supervisor = await SupervisorAgent.create_with_user_context(
-            llm_manager=llm_manager,
+            llm_client=llm_client,
             websocket_bridge=websocket_bridge,
             tool_dispatcher=tool_dispatcher,
             user_context=user_context,
@@ -473,7 +554,7 @@ async def get_user_supervisor_factory(request: Request,
                                      user_id: str,
                                      thread_id: str,
                                      run_id: Optional[str] = None,
-                                     db_session: AsyncSession = Depends(get_db_dependency)) -> "Supervisor":
+                                     db_session: AsyncSession = Depends(get_request_scoped_db_session)) -> "Supervisor":
     """Factory to create per-request SupervisorAgent with UserExecutionContext.
     
     DEPRECATED: Use get_request_scoped_supervisor for new code.
@@ -734,6 +815,28 @@ def get_corpus_service(request: Request) -> "CorpusService":
     
     return corpus_service
 
+def get_llm_manager(request: Request):
+    """Get LLM manager from app state.
+    
+    CRITICAL: This service MUST be initialized during startup.
+    """
+    if not hasattr(request.app.state, 'llm_manager'):
+        logger.critical("CRITICAL: llm_manager not initialized - startup sequence failed!")
+        raise RuntimeError(
+            "CRITICAL STARTUP FAILURE: llm_manager is not initialized. "
+            "This indicates the application started in a degraded state."
+        )
+    
+    llm_manager = request.app.state.llm_manager
+    if llm_manager is None:
+        logger.critical("CRITICAL: llm_manager is None - initialization failed!")
+        raise RuntimeError(
+            "CRITICAL INITIALIZATION FAILURE: llm_manager is None. "
+            "Critical services must never be None."
+        )
+    
+    return llm_manager
+
 def get_message_handler_service(request: Request):
     """Get message handler service from app state or create one.
     
@@ -816,7 +919,7 @@ async def get_isolated_message_handler_service(user_id: str,
                                               thread_id: str,
                                               run_id: Optional[str],
                                               request: Request,
-                                              db_session: AsyncSession = Depends(get_db_dependency)):
+                                              db_session: AsyncSession = Depends(get_request_scoped_db_session)):
     """Create MessageHandlerService with isolated supervisor for this request.
     
     DEPRECATED: Use get_request_scoped_message_handler for new code.

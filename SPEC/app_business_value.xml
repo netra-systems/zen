@@ -46,14 +46,20 @@
       <scenario>
         <given>User submits complex optimization request</given>
         <when>Supervisor orchestrates multiple sub-agents</when>
-        <then>All agents execute in sequence and produce final report</then>
+        <then>All agents execute in CORRECT logical sequence and produce final report</then>
         <expected-output>
-          - Triage agent categorizes request
-          - Data agent collects relevant information
-          - Optimization agent generates recommendations
-          - Actions agent creates implementation plan
-          - Reporting agent compiles final report
+          - Triage agent categorizes request and assesses data availability
+          - Data agent collects and analyzes metrics (MUST run BEFORE optimization)
+          - Optimization agent generates recommendations BASED ON DATA INSIGHTS
+          - Actions agent creates implementation plan from optimization strategies
+          - Reporting agent compiles final report with all results
         </expected-output>
+        <critical-note>
+          EXECUTION ORDER IS CRITICAL FOR BUSINESS VALUE:
+          Data MUST be collected before optimization can analyze it.
+          See: SPEC/learnings/agent_execution_order_fix_20250904.xml
+          Wrong order = optimization without data = worthless recommendations
+        </critical-note>
       </scenario>
     </test>
 

@@ -23,7 +23,7 @@ from netra_backend.app.core.websocket_exceptions import (
     AgentCommunicationFailureError
 )
 from netra_backend.app.agents.unified_tool_execution import UnifiedToolExecutionEngine
-from netra_backend.app.agents.supervisor.agent_instance_factory import UserWebSocketEmitter
+from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmitter as UserWebSocketEmitter
 from netra_backend.app.websocket_core.message_buffer import WebSocketMessageBuffer, BufferConfig, BufferPriority
 
 

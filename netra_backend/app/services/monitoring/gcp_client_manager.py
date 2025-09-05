@@ -1,109 +1,202 @@
-"""GCP Client Management Module - Handles authentication and client creation.
+"""GCP Client Manager for monitoring and error reporting services.
 
-Business Value Justification (BVJ):
-1. Segment: Mid & Enterprise
-2. Business Goal: Secure and reliable GCP integration
-3. Value Impact: Ensures secure access to GCP Error Reporting API
-4. Revenue Impact: Supports $15K MRR reliability monitoring features
-
-CRITICAL ARCHITECTURAL COMPLIANCE:
-- Maximum file size: 300 lines (enforced)
-- Maximum function size: 8 lines (enforced)
-- Single responsibility: GCP client management only
+Manages Google Cloud Platform client connections and authentication
+for monitoring, error reporting, and logging services.
 """
 
-from typing import Optional
+import asyncio
+import logging
+from typing import Any, Dict, Optional, List
+from datetime import datetime, timezone
 
+# Mock google cloud imports for testing environments
 try:
-    from google.auth import default
     from google.cloud import error_reporting
+    from google.cloud import monitoring_v3
+    from google.cloud import logging as gcp_logging
     from google.oauth2 import service_account
-    GCP_AVAILABLE = True
+    GOOGLE_CLOUD_AVAILABLE = True
 except ImportError:
-    # Create stub classes for when GCP libraries are not available
-    GCP_AVAILABLE = False
-    
-    class StubCredentials:
-        pass
-    
-    class StubClient:
-        def __init__(self, *args, **kwargs):
-            self.project = "test-project"
-    
-    # Create namespace-like objects for the missing imports
-    class DefaultAuth:
-        @staticmethod
-        def default():
-            return StubCredentials(), "test-project"
-    
-    class ServiceAccount:
-        @staticmethod
-        def from_service_account_file(path):
-            return StubCredentials()
-        
-        Credentials = StubCredentials
-    
-    class ErrorReporting:
-        Client = StubClient
-    
-    default = DefaultAuth.default
-    service_account = ServiceAccount()
-    error_reporting = ErrorReporting()
+    # Fallback for testing/development environments
+    GOOGLE_CLOUD_AVAILABLE = False
+    error_reporting = None
+    monitoring_v3 = None
+    gcp_logging = None
+    service_account = None
 
-from netra_backend.app.core.error_codes import ErrorCode
-from netra_backend.app.core.exceptions_base import NetraException
-from netra_backend.app.schemas.monitoring_schemas import GCPErrorServiceConfig
+logger = logging.getLogger(__name__)
+
+
+class GCPCredentials:
+    """GCP credentials configuration."""
+    
+    def __init__(self, project_id: str, service_account_key: Optional[str] = None):
+        self.project_id = project_id
+        self.service_account_key = service_account_key
 
 
 class GCPClientManager:
-    """Manages GCP client creation and authentication."""
+    """Manages GCP client connections for monitoring services."""
     
-    def __init__(self, config: GCPErrorServiceConfig):
-        self.config = config
-        self.client: Optional[error_reporting.Client] = None
+    def __init__(self, credentials: GCPCredentials):
+        self.credentials = credentials
+        self._error_reporting_client: Optional[Any] = None
+        self._monitoring_client: Optional[Any] = None
+        self._logging_client: Optional[Any] = None
+        self._initialized = False
     
-    async def initialize_client(self) -> error_reporting.Client:
-        """Initialize and return GCP Error Reporting client."""
-        credentials = await self._get_credentials()
-        self.client = self._create_client(credentials)
-        await self._validate_connection()
-        return self.client
-    
-    async def _get_credentials(self) -> Optional[service_account.Credentials]:
-        """Get GCP credentials based on configuration."""
-        if self.config.credentials.use_default_credentials:
-            return await self._get_default_credentials()
-        return await self._get_service_account_credentials()
-    
-    async def _get_default_credentials(self) -> Optional[service_account.Credentials]:
-        """Get default application credentials."""
+    async def initialize(self):
+        """Initialize GCP clients."""
+        if self._initialized or not GOOGLE_CLOUD_AVAILABLE:
+            return
+        
         try:
-            credentials, _ = default()
-            return credentials
+            # Initialize clients based on available credentials
+            if self.credentials.service_account_key:
+                creds = service_account.Credentials.from_service_account_info(
+                    self.credentials.service_account_key
+                )
+            else:
+                creds = None  # Use default credentials
+            
+            self._error_reporting_client = error_reporting.Client(
+                project=self.credentials.project_id,
+                credentials=creds
+            )
+            
+            self._monitoring_client = monitoring_v3.MetricServiceClient(
+                credentials=creds
+            )
+            
+            self._logging_client = gcp_logging.Client(
+                project=self.credentials.project_id,
+                credentials=creds
+            )
+            
+            self._initialized = True
+            logger.info(f"GCP clients initialized for project {self.credentials.project_id}")
+            
         except Exception as e:
-            raise NetraException(f"Failed to get default credentials: {str(e)}", ErrorCode.AUTH_ERROR)
+            logger.error(f"Failed to initialize GCP clients: {e}")
+            raise
     
-    async def _get_service_account_credentials(self) -> service_account.Credentials:
-        """Get service account credentials from file."""
-        try:
-            return service_account.Credentials.from_service_account_file(
-                self.config.credentials.credentials_path)
-        except Exception as e:
-            raise NetraException(f"Failed to load service account: {str(e)}", ErrorCode.AUTH_ERROR)
+    def get_error_reporting_client(self):
+        """Get error reporting client."""
+        if not GOOGLE_CLOUD_AVAILABLE:
+            return MockErrorReportingClient()
+        
+        if not self._initialized:
+            raise RuntimeError("GCP clients not initialized")
+        
+        return self._error_reporting_client
     
-    def _create_client(self, credentials) -> error_reporting.Client:
-        """Create GCP Error Reporting client."""
-        try:
-            return error_reporting.Client(credentials=credentials)
-        except Exception as e:
-            raise NetraException(f"Failed to create GCP client: {str(e)}", ErrorCode.EXTERNAL_SERVICE_ERROR)
+    def get_monitoring_client(self):
+        """Get monitoring client."""
+        if not GOOGLE_CLOUD_AVAILABLE:
+            return MockMonitoringClient()
+        
+        if not self._initialized:
+            raise RuntimeError("GCP clients not initialized")
+        
+        return self._monitoring_client
     
-    async def _validate_connection(self) -> None:
-        """Validate GCP connection and permissions."""
+    def get_logging_client(self):
+        """Get logging client."""
+        if not GOOGLE_CLOUD_AVAILABLE:
+            return MockLoggingClient()
+        
+        if not self._initialized:
+            raise RuntimeError("GCP clients not initialized")
+        
+        return self._logging_client
+    
+    async def health_check(self) -> Dict[str, Any]:
+        """Perform health check on GCP services."""
+        if not GOOGLE_CLOUD_AVAILABLE:
+            return {
+                "status": "mock",
+                "available": False,
+                "message": "Google Cloud libraries not available"
+            }
+        
         try:
-            # For the error reporting Client, we can just check if the project is accessible
-            if not self.client.project:
-                raise NetraException("No project configured for GCP client", ErrorCode.EXTERNAL_SERVICE_ERROR)
-            # The client initialization itself validates the connection
+            if not self._initialized:
+                await self.initialize()
+            
+            # Simple health checks
+            return {
+                "status": "healthy",
+                "project_id": self.credentials.project_id,
+                "error_reporting": bool(self._error_reporting_client),
+                "monitoring": bool(self._monitoring_client),
+                "logging": bool(self._logging_client),
+                "timestamp": datetime.now(timezone.utc)
+            }
+            
         except Exception as e:
-            raise NetraException(f"GCP connection validation failed: {str(e)}", ErrorCode.EXTERNAL_SERVICE_ERROR)
+            return {
+                "status": "unhealthy",
+                "error": str(e),
+                "timestamp": datetime.now(timezone.utc)
+            }
+
+
+# Mock clients for testing/development
+class MockErrorReportingClient:
+    """Mock error reporting client for testing."""
+    
+    def report_exception(self, exception=None, request=None):
+        logger.debug(f"Mock error reporting: {exception}")
+        return True
+    
+    def report(self, message: str):
+        logger.debug(f"Mock error report: {message}")
+        return True
+
+
+class MockMonitoringClient:
+    """Mock monitoring client for testing."""
+    
+    def create_time_series(self, request=None):
+        logger.debug("Mock create time series")
+        return True
+    
+    def list_time_series(self, request=None):
+        logger.debug("Mock list time series")
+        return []
+
+
+class MockLoggingClient:
+    """Mock logging client for testing."""
+    
+    def logger(self, name: str):
+        return MockLogger(name)
+    
+    def list_entries(self, filter_=None):
+        logger.debug(f"Mock list entries with filter: {filter_}")
+        return []
+
+
+class MockLogger:
+    """Mock GCP logger for testing."""
+    
+    def __init__(self, name: str):
+        self.name = name
+    
+    def log_text(self, text: str, severity: str = "INFO"):
+        logger.debug(f"Mock log [{severity}] {self.name}: {text}")
+        return True
+    
+    def log_struct(self, info: Dict[str, Any], severity: str = "INFO"):
+        logger.debug(f"Mock log struct [{severity}] {self.name}: {info}")
+        return True
+
+
+# Factory function for easy instantiation
+def create_gcp_client_manager(project_id: str, service_account_key: Optional[Dict] = None) -> GCPClientManager:
+    """Create GCP client manager with credentials."""
+    credentials = GCPCredentials(
+        project_id=project_id,
+        service_account_key=service_account_key
+    )
+    return GCPClientManager(credentials)

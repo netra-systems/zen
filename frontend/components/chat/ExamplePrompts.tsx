@@ -10,12 +10,24 @@ import { Button } from '@/components/ui/button';
 import { ChevronDown, Send, Sparkles, Zap, TrendingUp, Shield, Database, Brain } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { logger } from '@/lib/logger';
+import { WebSocketMessageType } from '@/types/shared/enums';
 
-export const ExamplePrompts: React.FC = () => {
+export interface ExamplePromptsProps {
+  forceCollapsed?: boolean;
+}
+
+export const ExamplePrompts: React.FC<ExamplePromptsProps> = ({ forceCollapsed = false }) => {
   const { sendMessage } = useWebSocket();
   const { setProcessing, addMessage } = useUnifiedChatStore();
   const { isAuthenticated } = useAuthStore();
   const [isOpen, setIsOpen] = React.useState(true);
+
+  // Force collapse when user starts typing
+  React.useEffect(() => {
+    if (forceCollapsed) {
+      setIsOpen(false);
+    }
+  }, [forceCollapsed]);
 
   const handlePromptClick = (prompt: string) => {
     // Check if user is authenticated
@@ -38,7 +50,7 @@ export const ExamplePrompts: React.FC = () => {
     
     // Send start_agent message for example prompts (these start new conversations)
     sendMessage({ 
-      type: 'start_agent', 
+      type: WebSocketMessageType.START_AGENT, 
       payload: { 
         user_request: prompt,
         thread_id: null,
@@ -78,7 +90,7 @@ export const ExamplePrompts: React.FC = () => {
     <Collapsible 
       open={isOpen} 
       onOpenChange={setIsOpen} 
-      className="w-full px-6 py-6" 
+      className="w-full px-4 py-2" 
       data-testid="example-prompts"
       style={{
         background: 'linear-gradient(180deg, rgba(250, 250, 250, 0.95) 0%, rgba(255, 255, 255, 0.98) 100%)',
@@ -88,11 +100,11 @@ export const ExamplePrompts: React.FC = () => {
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.3 }}
-        className="flex items-center justify-between mb-4"
+        className="flex items-center justify-between mb-2"
       >
         <div className="flex items-center space-x-2">
           <Sparkles className="w-5 h-5 text-emerald-500" />
-          <h2 className="text-xl font-bold bg-gradient-to-r from-emerald-600 to-emerald-700 bg-clip-text text-transparent">
+          <h2 className="text-lg font-bold bg-gradient-to-r from-emerald-600 to-emerald-700 bg-clip-text text-transparent">
             Quick Start Examples
           </h2>
         </div>
@@ -117,7 +129,7 @@ export const ExamplePrompts: React.FC = () => {
               animate={{ opacity: 1, height: 'auto' }}
               exit={{ opacity: 0, height: 0 }}
               transition={{ duration: 0.3 }}
-              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
+              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3"
             >
               {examplePrompts.map((prompt, index) => (
                 <motion.div
@@ -134,8 +146,8 @@ export const ExamplePrompts: React.FC = () => {
                   >
                     <div className="absolute inset-0 bg-white opacity-0 group-hover:opacity-10 transition-opacity duration-300" />
                     
-                    <CardContent className="p-5 flex flex-col h-full">
-                      <div className="flex items-start justify-between mb-3">
+                    <CardContent className="p-4 flex flex-col h-full">
+                      <div className="flex items-start justify-between mb-2">
                         <div className={`p-2 rounded-lg bg-white/80 shadow-sm text-${['blue', 'purple', 'green', 'orange', 'cyan', 'yellow'][index % 6]}-600`}>
                           {getPromptIcon(index)}
                         </div>
@@ -151,7 +163,7 @@ export const ExamplePrompts: React.FC = () => {
                         {prompt}
                       </p>
                       
-                      <div className="mt-3 pt-3 border-t border-gray-200/50">
+                      <div className="mt-2 pt-2 border-t border-gray-200/50">
                         <div className="flex items-center justify-between">
                           <span className="text-xs text-gray-500 flex items-center">
                             <span className="mr-1">Click to start conversation</span>

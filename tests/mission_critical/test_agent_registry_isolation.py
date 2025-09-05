@@ -31,7 +31,7 @@ from unittest.mock import Mock, patch, MagicMock
 import uuid
 import pytest
 
-from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
+from netra_backend.app.core.registry.universal_registry import AgentRegistry
 from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
 from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
 from netra_backend.app.core.agent_execution_tracker import AgentExecutionTracker
@@ -164,7 +164,7 @@ async def test_websocket_bridge_shared_across_users_FAILING():
     registries = []
     for user in users:
         # This creates the same singleton instance every time - ISOLATION BUG!
-        registry = AgentRegistry(Mock(), Mock())
+        registry = AgentRegistry(), Mock())
         registries.append(registry)
         
         # Set up WebSocket bridge - but it's shared across ALL users
@@ -236,7 +236,7 @@ async def test_global_singleton_blocks_concurrent_users_FAILING():
         start_time = time.time()
         
         # Create singleton registry (same instance for all users - BUG!)
-        registry = AgentRegistry(Mock(), Mock())
+        registry = AgentRegistry(), Mock())
         
         # Simulate concurrent executions
         tasks = []
@@ -331,7 +331,7 @@ async def test_database_session_sharing_across_contexts_FAILING():
             })
     
     # Create registry and simulate database operations
-    registry = AgentRegistry(Mock(), Mock())
+    registry = AgentRegistry(), Mock())
     
     # Simulate concurrent database operations by different users
     async def simulate_database_operations(user: MockUser):
@@ -419,7 +419,7 @@ async def test_websocket_events_wrong_users_FAILING():
             event_deliveries[user_id].append(event_data)
     
     # Set up WebSocket bridge with event tracking
-    registry = AgentRegistry(Mock(), Mock())
+    registry = AgentRegistry(), Mock())
     bridge = Mock(spec=AgentWebSocketBridge)
     
     # Configure bridge to track event routing
@@ -520,7 +520,7 @@ async def test_thread_user_run_id_confusion_FAILING():
     execution_contexts = {}
     context_violations = []
     
-    registry = AgentRegistry(Mock(), Mock()) 
+    registry = AgentRegistry(), Mock()) 
     
     async def simulate_execution_with_context_tracking(user: MockUser):
         """Simulate execution while tracking context integrity."""
@@ -638,7 +638,7 @@ async def test_concurrent_execution_bottlenecks_FAILING():
         start_time = time.time()
         
         # Use the actual singleton registry (this is the bottleneck!)
-        registry = AgentRegistry(Mock(), Mock())
+        registry = AgentRegistry(), Mock())
         
         # Simulate realistic agent execution workload
         async def realistic_agent_workload(user: MockUser):
@@ -799,7 +799,7 @@ async def test_comprehensive_isolation_audit_FAILING():
         """Simulate comprehensive user interaction that exposes all isolation bugs."""
         
         # ISOLATION TEST 1: Registry singleton sharing
-        registry = AgentRegistry(Mock(), Mock())
+        registry = AgentRegistry(), Mock())
         initial_registry_id = id(registry)
         
         # ISOLATION TEST 2: WebSocket bridge sharing

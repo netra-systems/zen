@@ -25,7 +25,7 @@ export const SlowLayer: React.FC<SlowLayerProps> = ({ data, isCollapsed }) => {
         backdropFilter: 'blur(4px)'
       }}
     >
-      <div className="p-5 space-y-6">
+      <div className="p-3 space-y-3">
         {/* Enhanced Completed Agents Section */}
         {data.completedAgents && data.completedAgents.length > 0 && (
           <CompletedAgentsSection completedAgents={data.completedAgents} />

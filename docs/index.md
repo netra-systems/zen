@@ -4,14 +4,18 @@
 
 ### 🏗️ Core Architecture (Start Here)
 
+- **[SSOT Index](../SSOT_INDEX.md)** 🚨 - **ULTRA-CRITICAL**: Master index of all Single Source of Truth components ranked by criticality
 - **[User Context Architecture](../USER_CONTEXT_ARCHITECTURE.md)** ⭐ - **CRITICAL DOCUMENT**: Comprehensive guide to the Factory-based user isolation architecture with detailed diagrams
+- **[UVS Triage Architecture Transition](./UVS_TRIAGE_ARCHITECTURE_TRANSITION.md)** 🆕 - **NEW**: Unified Validation System with intelligent data sufficiency states and 2-agent model
 - **[Agent Architecture Disambiguation Guide](./AGENT_ARCHITECTURE_DISAMBIGUATION_GUIDE.md)** 🎯 - **ESSENTIAL**: Clarifies agent workflow architecture, relationships between components, and common confusion points
 - [Agent System Architecture](./AGENT_SYSTEM_ARCHITECTURE.md) - Complete agent execution pipeline documentation
 - [Agent Architecture Diagrams](./agent_architecture_mermaid.md) - Visual architecture representations
 
 ### 🔄 Migration Guides
 
+- **[SSOT Consolidation Status Report](../SSOT_CONSOLIDATION_STATUS_20250904.md)** ⭐ - **NEW**: Complete status of SSOT consolidations (91% code reduction)
 - **[Tool Dispatcher Migration Guide](../TOOL_DISPATCHER_MIGRATION_GUIDE.md)** - Migrate from singleton to request-scoped dispatchers
+- [Tool Dispatcher Consolidation Complete](../TOOL_DISPATCHER_CONSOLIDATION_COMPLETE.md) - Tool dispatcher SSOT success
 - [WebSocket Modernization Report](../WEBSOCKET_MODERNIZATION_REPORT.md) - WebSocket isolation implementation
 - [Agent Registry Split Migration](./AGENT_REGISTRY_SPLIT_MIGRATION_GUIDE.md) - Agent registry refactoring
 
@@ -25,6 +29,7 @@
 
 #### Agents & Tools
 - **[Agent Architecture Disambiguation Guide](./AGENT_ARCHITECTURE_DISAMBIGUATION_GUIDE.md)** - Comprehensive disambiguation of agent components
+- **[Orchestration Data Handling Patterns](../ORCHESTRATION_DATA_HANDLING_PATTERNS.md)** 🆕 - **CRITICAL**: Patterns for handling partial/insufficient data in agent orchestration
 - [Agent System Overview](./agents/AGENT_SYSTEM.md) - High-level agent system design
 - [Subagents Documentation](./agents/subagents-doc.md) - Subagent patterns and usage
 - [Agent Modernization Plan](./agents/AGENT_MODERNIZATION_PLAN.md) - Future improvements
@@ -33,6 +38,10 @@
 #### WebSocket & Real-time
 - [Actions Agent WebSocket Flow](./actions_agent_websocket_flow.md) - WebSocket event patterns
 - [WebSocket Bridge State Handling](./websocket_bridge_state_handling.md) - State management
+
+#### Frontend Architecture
+- **[Frontend Architecture Diagrams](../frontend/docs/FRONTEND_ARCHITECTURE_DIAGRAMS.md)** 📊 - Comprehensive Mermaid diagrams of frontend components, loading flows, and state management
+- [Frontend README](../frontend/README.md) - Frontend setup and structure
 
 #### Testing Infrastructure
 - **[Test Architecture Visual Overview](../tests/TEST_ARCHITECTURE_VISUAL_OVERVIEW.md)** - Complete test infrastructure guide

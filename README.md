@@ -1,5 +1,52 @@
 # Netra Core - Generation 1
 
+## 🔄 Recent Changes
+
+### January 2025: UVS Architecture Transition
+- **[NEW] Unified Validation System (UVS)** - Streamlined 2-agent triage model with data sufficiency validation
+  - See **[UVS Triage Architecture Transition Guide](./docs/UVS_TRIAGE_ARCHITECTURE_TRANSITION.md)** for complete details
+  - Data Intelligence Agent (formerly Data Helper) now PRIMARY agent handling 80% of requests
+  - Intelligent data sufficiency states: Insufficient → Minimal → Sufficient → Optimal
+  - Iterative data gathering until sufficient data achieved for analysis
+- **Simplified Agent Hierarchy** - Reduced from 3 triage agents to 1 unified triage agent
+- **Enhanced Data Processing** - Automatic data gathering when insufficient data detected
+
+## 📊 Business Context
+
+### Value Proposition
+The Netra Core platform delivers AI optimization value across all customer segments by providing:
+
+- **Cost Reduction**: 30-70% reduction in AI/LLM spending through intelligent model routing and optimization
+- **Performance Improvement**: 40-60% improvement in response times through caching and batching strategies
+- **Scale Enablement**: 10x scalability through efficient resource management
+- **Progressive Value Delivery**: Immediate value even with partial data (40-60% optimization possible)
+
+### Customer Segments & Data Handling
+
+| Segment | Data Completeness | Value Delivery Strategy |
+|---------|------------------|------------------------|
+| **Free** | <40% (Insufficient) | Education + Quick templates + Value demonstration |
+| **Early** | 40-79% (Partial) | Immediate wins + Progressive optimization + Data collection |
+| **Mid** | 60-85% (Mostly complete) | Phased implementation + Quality preservation |
+| **Enterprise** | 80-100% (Sufficient) | Full optimization + Compliance focus + Custom strategies |
+
+### Adaptive Workflow Architecture
+
+The platform implements **adaptive workflows** based on data completeness:
+
+1. **Sufficient Data (≥80%)**: Full optimization workflow with high confidence
+2. **Partial Data (40-79%)**: Modified workflow with caveats, immediate value, and progressive enhancement
+3. **Insufficient Data (<40%)**: Focus on education, data collection, and value demonstration
+
+See [Orchestration Data Handling Patterns](./ORCHESTRATION_DATA_HANDLING_PATTERNS.md) for comprehensive patterns and examples.
+
+### Key Business Metrics
+
+- **Conversion Rate**: Users providing data after initial insufficient data scenario
+- **Value Delivery Rate**: Successful optimizations despite incomplete data
+- **Confidence Accuracy**: Correlation between confidence scores and actual outcomes
+- **Time to Value**: <24 hours for initial recommendations, 1-3 weeks for full implementation
+
 ## 🏗️ Architecture Overview
 
 -- [Documentation Index](./index.md)
@@ -68,6 +115,8 @@ docker-compose up
 
 ### Architecture & Design
 - **[User Context Architecture](./USER_CONTEXT_ARCHITECTURE.md)** - Factory patterns and user isolation (START HERE)
+- **[UVS Triage Architecture Transition](./docs/UVS_TRIAGE_ARCHITECTURE_TRANSITION.md)** - NEW: Unified Validation System with data sufficiency states
+- **[Frontend Architecture Diagrams](./frontend/docs/FRONTEND_ARCHITECTURE_DIAGRAMS.md)** - Complete frontend architecture with loading flows, WebSocket events, and state management
 - [Agent System Architecture](./docs/AGENT_SYSTEM_ARCHITECTURE.md) - Agent execution pipeline
 - [Agent Architecture Diagrams](./docs/agent_architecture_mermaid.md) - Visual architecture guides
 

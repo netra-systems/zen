@@ -1,21 +1,34 @@
-# AI AGENT MODIFICATION METADATA
-# ================================
-# Timestamp: 2025-08-10T18:47:29.220184+00:00
-# Agent: Claude Opus 4.1 claude-opus-4-1-20250805
-# Context: Add baseline agent tracking to tool registry
-# Git: v6 | 2c55fb99 | dirty (23 uncommitted)
-# Change: Feature | Scope: Component | Risk: Medium
-# Session: 362336ba-746a-4268-87b7-5852bc463078 | Seq: 1
-# Review: Pending | Score: 85
-# ================================
-from typing import List
+"""Services Tool Registry - Delegates to UniversalRegistry.
+
+This module provides backward compatibility for the legacy AgentToolConfigRegistry
+while delegating all functionality to the new UniversalRegistry pattern.
+
+Business Value:
+- Maintains API compatibility for existing code
+- Leverages thread-safe UniversalRegistry implementation
+- Provides seamless migration path
+"""
+from typing import List, Optional, Dict, Any
 
 from langchain_core.tools import BaseTool
+from netra_backend.app.core.registry.universal_registry import ToolRegistry as UniversalToolRegistry
 
 
 class AgentToolConfigRegistry:
-    def __init__(self, db_session):
-        self.db_session = db_session
+    """Legacy compatibility layer that delegates to UniversalRegistry."""
+    
+    def __init__(self, db_session=None):
+        self.db_session = db_session  # Kept for compatibility but not used
+        
+        # Delegate to UniversalRegistry
+        self._registry = UniversalToolRegistry()
+        
+        # Legacy compatibility attributes
+        self.enable_validation = False
+        self.strict_security = False
+        self.performance_thresholds = {}
+        
+        # Tool categories for backward compatibility
         self._tool_configs = {
             "triage": [],
             "data": [],
@@ -23,31 +36,46 @@ class AgentToolConfigRegistry:
             "actions_to_meet_goals": [],
             "reporting": [],
         }
-        self.enable_validation = False
-        self.strict_security = False
-        self.performance_thresholds = {}
 
     def get_tools(self, tool_names: List[str]) -> List[BaseTool]:
         """Returns a list of tools for the given tool names."""
         tools = []
         for name in tool_names:
+            # First check categories (legacy support)
             if name in self._tool_configs:
                 tools.extend(self._tool_configs[name])
+            else:
+                # Try to get individual tool from registry
+                tool = self._registry.get(name)
+                if tool:
+                    tools.append(tool)
         return tools
 
     def get_all_tools(self) -> List[BaseTool]:
         """Get all tools from all categories."""
         all_tools = []
+        # Legacy categories
         for tools_list in self._tool_configs.values():
             all_tools.extend(tools_list)
+        # Plus all tools from registry
+        for tool_name in self._registry.list_keys():
+            tool = self._registry.get(tool_name)
+            if tool and tool not in all_tools:  # Avoid duplicates
+                all_tools.append(tool)
         return all_tools
 
     def register_tool(self, category: str, tool: BaseTool) -> None:
         """Register a tool in the specified category."""
         if self.enable_validation:
             self._validate_tool_registration(tool)
+        
+        # Register in both legacy category and new registry
         if category in self._tool_configs:
             self._tool_configs[category].append(tool)
+        
+        # Also register in UniversalRegistry with category tag
+        if hasattr(tool, 'name'):
+            self._registry.register(tool.name, tool, tags={category})
 
     def _validate_tool_registration(self, tool: BaseTool) -> None:
         """Validate tool before registration."""
@@ -157,6 +185,15 @@ class AgentToolConfigRegistry:
             }
             results.append(result)
         return results
+
+    def get_tool_count(self) -> int:
+        """Get total number of registered tools."""
+        # Count from both legacy categories and registry
+        legacy_count = sum(len(tools) for tools in self._tool_configs.values())
+        registry_count = len(self._registry)
+        
+        # Return the maximum to account for overlap
+        return max(legacy_count, registry_count)
 
 
 # Backward compatibility alias - DEPRECATED

@@ -1,266 +1,200 @@
-"""
-Reliability Types: Single Source of Truth for Circuit Breaker, Retry, and Reliability Models
+"""Reliability Types Schema Module
 
-This module contains all reliability-related models and state definitions used across 
-the Netra platform, ensuring consistency and preventing duplication.
+Business Value Justification (BVJ):
+- Segment: Platform/Internal
+- Business Goal: System Reliability - Provide type definitions for reliability components
+- Value Impact: Ensures type safety for reliability and circuit breaker patterns
+- Strategic Impact: Prevents runtime errors through strong typing
 
-CRITICAL ARCHITECTURAL COMPLIANCE:
-- All reliability model definitions MUST be imported from this module
-- NO duplicate reliability model definitions allowed anywhere else in codebase
-- This file maintains strong typing and single sources of truth
-- Maximum file size: 300 lines (currently under limit)
-
-Usage:
-    from netra_backend.app.schemas.reliability_types import CircuitBreaker, RetryConfig, RateLimiter
+This module provides type definitions for reliability, circuit breaker,
+rate limiting, and resilience components.
 """
 
-import asyncio
-import time
-from dataclasses import dataclass, field
-from datetime import datetime, timezone
+from abc import ABC, abstractmethod
 from enum import Enum
-from typing import Any, Callable, Dict, List, Optional, Protocol, TypeVar, Union
+from typing import Any, Dict, Optional, Protocol
 
-from pydantic import BaseModel, Field
-
-from netra_backend.app.core.exceptions_service import ServiceError
-
-T = TypeVar('T')
+from pydantic import BaseModel
 
 
-class CircuitState(Enum):
-    """Circuit breaker states with clear semantics."""
-    CLOSED = "closed"
-    OPEN = "open"
-    HALF_OPEN = "half_open"
-
-
-class BackoffStrategy(Enum):
-    """Backoff strategy enumeration."""
+class BackoffStrategy(str, Enum):
+    """Retry backoff strategies."""
     LINEAR = "linear"
     EXPONENTIAL = "exponential"
     FIXED = "fixed"
-    JITTERED = "jittered"
+    RANDOM = "random"
 
 
-class JitterType(Enum):
-    """Jitter type enumeration."""
+class JitterType(str, Enum):
+    """Jitter types for retry strategies."""
     NONE = "none"
     FULL = "full"
     EQUAL = "equal"
     DECORRELATED = "decorrelated"
 
 
-@dataclass
-class CircuitBreakerConfig:
-    """Unified configuration for circuit breaker behavior - consolidates all variants."""
-    # Basic circuit breaker settings
-    name: str
-    failure_threshold: int = 5
-    success_threshold: int = 3
-    recovery_timeout: float = 60.0
-    half_open_max_calls: int = 3
-    
-    # Advanced settings for adaptive behavior
-    timeout_seconds: float = 60.0
-    health_check_interval: int = 30
-    slow_call_threshold: float = 5.0
-    max_wait_duration: int = 300
-    adaptive_threshold: bool = True
-    
-    def __post_init__(self) -> None:
-        """Validate configuration parameters."""
-        self._validate_thresholds()
-        self._validate_timeouts()
-    
-    def _validate_thresholds(self) -> None:
-        """Validate threshold values are positive."""
-        if self.failure_threshold <= 0:
-            raise ValueError("failure_threshold must be positive")
-        if self.half_open_max_calls <= 0:
-            raise ValueError("half_open_max_calls must be positive")
-    
-    def _validate_timeouts(self) -> None:
-        """Validate timeout values are positive."""
-        if self.recovery_timeout <= 0:
-            raise ValueError("recovery_timeout must be positive")
-        if self.timeout_seconds <= 0:
-            raise ValueError("timeout_seconds must be positive")
-
-
-@dataclass
-class CircuitBreakerMetrics:
-    """Circuit breaker metrics for monitoring - consolidated from all variants."""
-    total_calls: int = 0
-    successful_calls: int = 0
-    failed_calls: int = 0
-    timeouts: int = 0
-    rejected_calls: int = 0
-    state_changes: int = 0
-    last_failure_time: Optional[float] = None
-    last_success_time: Optional[float] = None
-    failure_types: Dict[str, int] = field(default_factory=dict)
-    circuit_breaker_opens: int = 0
-    recovery_attempts: int = 0
-    error_types: Dict[str, int] = field(default_factory=dict)
-    
-    # Additional metrics for compatibility with UnifiedCircuitMetrics
-    consecutive_failures: int = 0
-    consecutive_successes: int = 0
-    current_error_rate: float = 0.0
-    average_response_time: float = 0.0
-
-
-class CircuitBreakerOpenError(ServiceError):
-    """Exception raised when circuit breaker is open."""
-    
-    def __init__(self, circuit_name: str) -> None:
-        super().__init__(f"Circuit breaker '{circuit_name}' is OPEN")
-        self.circuit_name = circuit_name
+class CircuitState(str, Enum):
+    """Circuit breaker states."""
+    CLOSED = "closed"
+    OPEN = "open"
+    HALF_OPEN = "half_open"
 
 
 class RetryConfig(BaseModel):
-    """Centralized retry configuration for all components."""
-    max_retries: int = Field(default=3, description="Maximum retry attempts")
-    base_delay: float = Field(default=1.0, description="Base delay between retries")
-    max_delay: float = Field(default=300.0, description="Maximum delay between retries")
-    backoff_strategy: BackoffStrategy = Field(default=BackoffStrategy.EXPONENTIAL, description="Backoff strategy")
-    jitter_type: JitterType = Field(default=JitterType.FULL, description="Jitter type")
-    backoff_factor: float = Field(default=2.0, description="Exponential backoff factor")
-    timeout_seconds: int = Field(default=600, description="Operation timeout")
-    jitter: bool = Field(default=True, description="Add jitter to delays")
+    """Configuration for retry behavior."""
+    max_attempts: int = 3
+    base_delay_seconds: float = 1.0
+    max_delay_seconds: float = 60.0
+    backoff_strategy: BackoffStrategy = BackoffStrategy.EXPONENTIAL
+    backoff_multiplier: float = 2.0
+    jitter_type: JitterType = JitterType.EQUAL
+    enabled: bool = True
+
+
+class CircuitBreakerConfig(BaseModel):
+    """Configuration for circuit breaker behavior."""
+    failure_threshold: int = 5
+    timeout_seconds: float = 30.0
+    success_threshold: int = 2
+    enabled: bool = True
+    state: CircuitState = CircuitState.CLOSED
+
+
+class CircuitBreakerMetrics(BaseModel):
+    """Metrics for circuit breaker monitoring."""
+    failure_count: int = 0
+    success_count: int = 0
+    total_requests: int = 0
+    state: CircuitState = CircuitState.CLOSED
+    last_failure_time: Optional[float] = None
+    state_changed_time: Optional[float] = None
 
 
 class RateLimitConfig(BaseModel):
-    """Rate limiter configuration."""
-    requests_per_second: float = Field(default=10.0, description="Requests per second limit")
-    burst_capacity: int = Field(default=20, description="Maximum burst size")
-    window_size: int = Field(default=60, description="Rate limiting window in seconds")
-    enable_adaptive: bool = Field(default=True, description="Enable adaptive rate limiting")
-    backoff_factor: float = Field(default=1.5, description="Backoff factor for adaptive limiting")
+    """Configuration for rate limiting."""
+    requests_per_second: float = 10.0
+    burst_capacity: int = 20
+    enabled: bool = True
 
 
-@dataclass
-class HealthCheckResult:
+class TokenBucket(BaseModel):
+    """Token bucket for rate limiting."""
+    capacity: int
+    tokens: float
+    refill_rate: float
+    last_refill_time: float
+
+
+class HealthCheckResult(BaseModel):
     """Result of a health check operation."""
-    status: str
-    response_time: float
-    details: Dict[str, Any] = field(default_factory=dict)
-    timestamp: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
+    is_healthy: bool
+    response_time_ms: float
+    error_message: Optional[str] = None
+    details: Dict[str, Any] = {}
 
 
-class HealthChecker(Protocol):
-    """Protocol for health checking implementations."""
+class CircuitBreakerOpenError(Exception):
+    """Raised when circuit breaker is open and requests are rejected."""
     
+    def __init__(self, service_name: str, state: CircuitState):
+        self.service_name = service_name
+        self.state = state
+        super().__init__(f"Circuit breaker for {service_name} is {state.value}")
+
+
+class HealthChecker(ABC):
+    """Abstract base class for health checkers."""
+    
+    @abstractmethod
     async def check_health(self) -> HealthCheckResult:
-        """Perform health check and return result."""
+        """Check the health of a service or component.
+        
+        Returns:
+            HealthCheckResult: The result of the health check
+        """
+        pass
+
+
+class MetricsCollectorProtocol(Protocol):
+    """Protocol for metrics collection."""
+    
+    def record_success(self, operation: str, duration: float) -> None:
+        """Record a successful operation."""
+        ...
+    
+    def record_failure(self, operation: str, error: str) -> None:
+        """Record a failed operation."""
+        ...
+    
+    def get_metrics(self, operation: str) -> Dict[str, Any]:
+        """Get metrics for an operation."""
         ...
 
 
 class RateLimiterProtocol(Protocol):
-    """Protocol for rate limiter implementations."""
+    """Protocol for rate limiting."""
     
-    async def acquire(self, tokens: int = 1) -> bool:
-        """Acquire tokens from rate limiter."""
+    def is_allowed(self, key: str) -> bool:
+        """Check if a request is allowed."""
         ...
     
-    async def reset(self) -> None:
-        """Reset rate limiter state."""
+    def consume(self, key: str, tokens: int = 1) -> bool:
+        """Consume tokens from the rate limiter."""
         ...
     
-    def get_stats(self) -> Dict[str, Union[int, float]]:
-        """Get rate limiter statistics."""
+    def get_remaining(self, key: str) -> int:
+        """Get remaining tokens."""
         ...
-
-
-class MetricsCollectorProtocol(Protocol):
-    """Protocol for metrics collection implementations."""
-    
-    def record_metric(self, name: str, value: Union[int, float], tags: Optional[Dict[str, str]] = None) -> None:
-        """Record a metric value."""
-        ...
-    
-    def increment_counter(self, name: str, tags: Optional[Dict[str, str]] = None) -> None:
-        """Increment a counter metric."""
-        ...
-    
-    def record_histogram(self, name: str, value: float, tags: Optional[Dict[str, str]] = None) -> None:
-        """Record a histogram value."""
-        ...
-    
-    def get_metrics(self) -> Dict[str, Any]:
-        """Get all collected metrics."""
-        ...
-
-
-@dataclass
-class TokenBucket:
-    """Token bucket rate limiter implementation."""
-    capacity: float
-    tokens: float
-    refill_rate: float
-    last_refill: float = field(default_factory=time.time)
-    
-    def consume(self, tokens: float = 1.0) -> bool:
-        """Consume tokens from bucket."""
-        self._refill()
-        if self.tokens >= tokens:
-            self.tokens -= tokens
-            return True
-        return False
-    
-    def _refill(self) -> None:
-        """Refill tokens based on elapsed time."""
-        now = time.time()
-        elapsed = now - self.last_refill
-        self.tokens = min(self.capacity, self.tokens + elapsed * self.refill_rate)
-        self.last_refill = now
 
 
 class ReliabilityManager:
-    """Unified reliability manager combining circuit breaker, retry, and rate limiting."""
+    """Manager for reliability components."""
     
-    def __init__(self, circuit_config: CircuitBreakerConfig, retry_config: RetryConfig, 
-                 rate_limit_config: Optional[RateLimitConfig] = None) -> None:
-        self.circuit_config = circuit_config
-        self.retry_config = retry_config
-        self.rate_limit_config = rate_limit_config
-        self._circuit_breaker: Optional[Any] = None
-        self._rate_limiter: Optional[TokenBucket] = None
-        self._initialize_components()
+    def __init__(self):
+        """Initialize reliability manager."""
+        self._circuit_breakers: Dict[str, CircuitBreakerConfig] = {}
+        self._rate_limiters: Dict[str, RateLimitConfig] = {}
+        self._retry_configs: Dict[str, RetryConfig] = {}
     
-    def _initialize_components(self) -> None:
-        """Initialize reliability components."""
-        if self.rate_limit_config:
-            self._rate_limiter = TokenBucket(
-                capacity=self.rate_limit_config.burst_capacity,
-                tokens=self.rate_limit_config.burst_capacity,
-                refill_rate=self.rate_limit_config.requests_per_second
-            )
+    def register_circuit_breaker(self, service_name: str, config: CircuitBreakerConfig) -> None:
+        """Register a circuit breaker for a service."""
+        self._circuit_breakers[service_name] = config
     
-    async def execute_with_reliability(self, func: Callable[[], T]) -> T:
-        """Execute function with full reliability protection."""
-        if self._rate_limiter and not self._rate_limiter.consume():
-            raise ServiceError("Rate limit exceeded")
-        
-        # Implementation would use circuit breaker and retry logic
-        return await func()
+    def register_rate_limiter(self, service_name: str, config: RateLimitConfig) -> None:
+        """Register a rate limiter for a service."""
+        self._rate_limiters[service_name] = config
+    
+    def register_retry_config(self, service_name: str, config: RetryConfig) -> None:
+        """Register retry configuration for a service."""
+        self._retry_configs[service_name] = config
+    
+    def get_circuit_breaker_config(self, service_name: str) -> Optional[CircuitBreakerConfig]:
+        """Get circuit breaker configuration for a service."""
+        return self._circuit_breakers.get(service_name)
+    
+    def get_rate_limit_config(self, service_name: str) -> Optional[RateLimitConfig]:
+        """Get rate limit configuration for a service."""
+        return self._rate_limiters.get(service_name)
+    
+    def get_retry_config(self, service_name: str) -> Optional[RetryConfig]:
+        """Get retry configuration for a service."""
+        return self._retry_configs.get(service_name)
 
 
-# Export all reliability types
+# Export all types
 __all__ = [
-    "CircuitState",
-    "BackoffStrategy", 
-    "JitterType",
+    "BackoffStrategy",
     "CircuitBreakerConfig",
     "CircuitBreakerMetrics",
     "CircuitBreakerOpenError",
-    "RetryConfig",
-    "RateLimitConfig",
-    "HealthCheckResult",
+    "CircuitState",
     "HealthChecker",
-    "RateLimiterProtocol",
+    "HealthCheckResult",
+    "JitterType",
     "MetricsCollectorProtocol",
+    "RateLimitConfig",
+    "RateLimiterProtocol",
+    "ReliabilityManager",
+    "RetryConfig",
     "TokenBucket",
-    "ReliabilityManager"
 ]

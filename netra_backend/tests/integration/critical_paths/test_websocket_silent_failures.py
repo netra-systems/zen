@@ -14,7 +14,7 @@ from typing import Dict, Any, Optional
 
 from netra_backend.app.agents.unified_tool_execution import UnifiedToolExecutionEngine
 from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier
-from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
+from netra_backend.app.core.registry.universal_registry import AgentRegistry
 from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
 from netra_backend.app.websocket_core.manager import WebSocketManager
 from netra_backend.app.websocket_core.event_monitor import ChatEventMonitor, HealthStatus

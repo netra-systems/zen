@@ -25,7 +25,7 @@ import asyncio
 import pytest
 import time
 
-from netra_backend.app.websocket_core.manager import WebSocketManager
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager as WebSocketManager
 from tests.e2e.concurrent_user_models import IsolationValidator
 from tests.e2e.concurrent_user_simulators import (
     ConcurrentUserSimulator,

@@ -1,203 +1,144 @@
-"""Alert management for quality monitoring"""
+"""Quality Monitoring Alert System
 
-import statistics
-from collections import deque
-from datetime import UTC, datetime
-from typing import Any, Dict, List, Optional
+Manages quality alerts for agent performance and system metrics.
+Provides threshold-based alerting for SLA compliance.
+"""
+
+from datetime import datetime
+from typing import Dict, List, Optional
 
 from netra_backend.app.core.health_types import AlertSeverity
-from netra_backend.app.logging_config import central_logger
-from netra_backend.app.services.quality_gate_service import QualityMetrics
 from netra_backend.app.services.quality_monitoring.models import (
-    MetricType,
     QualityAlert,
+    MetricType
 )
-
-logger = central_logger.get_logger(__name__)
 
 
 class QualityAlertManager:
-    """Manages quality alerts and thresholds"""
+    """Manages quality alerts for monitoring system.
     
-    ALERT_THRESHOLDS = {
-        MetricType.QUALITY_SCORE: {
-            AlertSeverity.WARNING: 0.5,
-            AlertSeverity.ERROR: 0.4,
-            AlertSeverity.CRITICAL: 0.3
-        },
-        MetricType.SLOP_DETECTION_RATE: {
-            AlertSeverity.WARNING: 0.1,
-            AlertSeverity.ERROR: 0.2,
-            AlertSeverity.CRITICAL: 0.3
-        },
-        MetricType.RETRY_RATE: {
-            AlertSeverity.WARNING: 0.15,
-            AlertSeverity.ERROR: 0.25,
-            AlertSeverity.CRITICAL: 0.4
-        },
-        MetricType.FALLBACK_RATE: {
-            AlertSeverity.WARNING: 0.1,
-            AlertSeverity.ERROR: 0.2,
-            AlertSeverity.CRITICAL: 0.3
-        },
-        MetricType.ERROR_RATE: {
-            AlertSeverity.WARNING: 0.05,
-            AlertSeverity.ERROR: 0.1,
-            AlertSeverity.CRITICAL: 0.2
-        }
-    }
+    Tracks performance degradations and SLA violations to protect
+    revenue and maintain service quality.
+    """
     
     def __init__(self):
-        self.alert_history = deque(maxlen=500)
-        self.active_alerts: Dict[str, QualityAlert] = {}
+        self.alerts: List[QualityAlert] = []
+        self.thresholds = {
+            'response_time': 2000,  # ms
+            'error_rate': 0.01,  # 1%
+            'availability': 99.9,  # percentage
+        }
     
-    async def check_thresholds(self, metrics_buffer: Dict) -> List[QualityAlert]:
-        """Check metrics against thresholds"""
-        new_alerts = []
-        for agent_name, events in metrics_buffer.items():
-            if not events:
-                continue
-            alerts = self._check_agent_thresholds(agent_name, list(events)[-20:])
-            new_alerts.extend(alerts)
-        self._store_alerts(new_alerts)
-        return new_alerts
-    
-    def _check_agent_thresholds(self, agent: str, events: List) -> List[QualityAlert]:
-        """Check thresholds for single agent"""
-        alerts = []
-        avg_quality = statistics.mean([e['quality_score'] for e in events])
-        alert = self._check_quality_score(agent, avg_quality)
-        if alert:
-            alerts.append(alert)
-        alert = self._check_slop_rate(agent, events)
-        if alert:
-            alerts.append(alert)
-        alert = self._check_circular_reasoning(agent, events)
-        if alert:
-            alerts.append(alert)
-        return alerts
-    
-    def _check_quality_score(self, agent: str, score: float) -> Optional[QualityAlert]:
-        """Check quality score threshold"""
-        return self._create_alert_if_needed(
-            MetricType.QUALITY_SCORE, score, agent,
-            f"Average quality score {score:.2f} for {agent}"
-        )
-    
-    def _check_slop_rate(self, agent: str, events: List) -> Optional[QualityAlert]:
-        """Check slop detection rate"""
-        slop = sum(1 for e in events if e['quality_level'] in ['poor', 'unacceptable'])
-        rate = slop / len(events) if events else 0
-        return self._create_alert_if_needed(
-            MetricType.SLOP_DETECTION_RATE, rate, agent,
-            f"Slop detection rate {rate:.1%} for {agent}"
-        )
-    
-    def _check_circular_reasoning(self, agent: str, events: List) -> Optional[QualityAlert]:
-        """Check for circular reasoning pattern"""
-        count = sum(1 for e in events if e.get('circular_reasoning', False))
-        if count > 3:
-            return QualityAlert(
-                id=f"circular_{agent}_{datetime.now(UTC).timestamp()}",
-                timestamp=datetime.now(UTC),
-                severity=AlertSeverity.WARNING,
-                metric_type=MetricType.QUALITY_SCORE,
-                agent=agent,
-                message=f"Repeated circular reasoning in {agent}",
-                current_value=count,
-                threshold=3,
-                details={'recent_count': count}
-            )
-        return None
-    
-    def _create_alert_if_needed(
-        self, metric_type: MetricType, value: float,
-        agent: str, message: str
-    ) -> Optional[QualityAlert]:
-        """Create alert if threshold exceeded"""
-        if metric_type not in self.ALERT_THRESHOLDS:
-            return None
-        thresholds = self.ALERT_THRESHOLDS[metric_type]
-        for severity in [AlertSeverity.CRITICAL, AlertSeverity.ERROR, AlertSeverity.WARNING]:
-            if severity not in thresholds:
-                continue
-            threshold = thresholds[severity]
-            if self._is_threshold_exceeded(metric_type, value, threshold):
-                return self._create_alert(
-                    metric_type, severity, agent, message, value, threshold
-                )
-        return None
-    
-    def _is_threshold_exceeded(self, metric: MetricType, value: float, threshold: float) -> bool:
-        """Check if threshold is exceeded"""
-        if metric == MetricType.QUALITY_SCORE:
-            return value < threshold
-        return value > threshold
-    
-    def _create_alert(
-        self, metric: MetricType, severity: AlertSeverity,
-        agent: str, message: str, value: float, threshold: float
+    def create_alert(
+        self, 
+        agent: str,
+        metric_type: MetricType,
+        message: str,
+        current_value: float,
+        threshold: float,
+        severity: AlertSeverity = AlertSeverity.INFO,
+        details: Optional[Dict] = None
     ) -> QualityAlert:
-        """Create new alert"""
-        return QualityAlert(
-            id=f"{metric.value}_{agent}_{datetime.now(UTC).timestamp()}",
-            timestamp=datetime.now(UTC),
+        """Create a new quality alert.
+        
+        Args:
+            agent: Agent name
+            metric_type: Type of metric that triggered alert
+            message: Alert message 
+            current_value: Current metric value
+            threshold: Threshold value
+            severity: Alert severity level
+            details: Additional alert details
+            
+        Returns:
+            Created quality alert
+        """
+        alert = QualityAlert(
+            id=f"alert_{len(self.alerts)}_{datetime.now().timestamp()}",
+            timestamp=datetime.now(),
             severity=severity,
-            metric_type=metric,
+            metric_type=metric_type,
             agent=agent,
             message=message,
-            current_value=value,
-            threshold=threshold
+            current_value=current_value,
+            threshold=threshold,
+            details=details or {}
         )
+        self.alerts.append(alert)
+        return alert
     
-    def _store_alerts(self, alerts: List[QualityAlert]):
-        """Store new alerts"""
-        for alert in alerts:
-            self.active_alerts[alert.id] = alert
-            self.alert_history.append(alert)
+    def check_thresholds(self, metrics: Dict) -> List[QualityAlert]:
+        """Check metrics against thresholds and create alerts.
+        
+        Args:
+            metrics: Current system metrics
+            
+        Returns:
+            List of alerts created for threshold violations
+        """
+        alerts = []
+        
+        # Check response time
+        if 'response_time' in metrics and 'agent' in metrics:
+            if metrics['response_time'] > self.thresholds['response_time']:
+                alert = self.create_alert(
+                    agent=metrics.get('agent', 'system'),
+                    metric_type=MetricType.RESPONSE_TIME,
+                    message=f"Response time {metrics['response_time']}ms exceeds threshold {self.thresholds['response_time']}ms",
+                    current_value=metrics['response_time'],
+                    threshold=self.thresholds['response_time'],
+                    severity=AlertSeverity.WARNING
+                )
+                alerts.append(alert)
+        
+        # Check error rate
+        if 'error_rate' in metrics and 'agent' in metrics:
+            if metrics['error_rate'] > self.thresholds['error_rate']:
+                alert = self.create_alert(
+                    agent=metrics.get('agent', 'system'),
+                    metric_type=MetricType.ERROR_RATE,
+                    message=f"Error rate {metrics['error_rate']*100:.2f}% exceeds threshold {self.thresholds['error_rate']*100:.2f}%",
+                    current_value=metrics['error_rate'],
+                    threshold=self.thresholds['error_rate'],
+                    severity=AlertSeverity.ERROR
+                )
+                alerts.append(alert)
+        
+        # Check availability
+        if 'availability' in metrics and 'agent' in metrics:
+            if metrics['availability'] < self.thresholds['availability']:
+                alert = self.create_alert(
+                    agent=metrics.get('agent', 'system'),
+                    metric_type=MetricType.ERROR_RATE,
+                    message=f"Availability {metrics['availability']:.2f}% below SLA target {self.thresholds['availability']}%",
+                    current_value=metrics['availability'],
+                    threshold=self.thresholds['availability'],
+                    severity=AlertSeverity.CRITICAL
+                )
+                alerts.append(alert)
+        
+        return alerts
     
-    async def check_immediate_alert(self, agent: str, metrics: QualityMetrics):
-        """Check for immediate alert conditions"""
-        if metrics.overall_score < 0.3:
-            alert = QualityAlert(
-                id=f"critical_{agent}_{datetime.now(UTC).timestamp()}",
-                timestamp=datetime.now(UTC),
-                severity=AlertSeverity.CRITICAL,
-                metric_type=MetricType.QUALITY_SCORE,
-                agent=agent,
-                message=f"Critical quality failure in {agent}: {metrics.overall_score:.2f}",
-                current_value=metrics.overall_score,
-                threshold=0.3,
-                details={'issues': metrics.issues}
-            )
-            self.active_alerts[alert.id] = alert
-            self.alert_history.append(alert)
-            await self._broadcast_critical(alert)
+    def get_active_alerts(self, severity: Optional[AlertSeverity] = None) -> List[QualityAlert]:
+        """Get active alerts, optionally filtered by severity.
+        
+        Args:
+            severity: Optional severity filter
+            
+        Returns:
+            List of active alerts
+        """
+        if severity:
+            return [a for a in self.alerts if a.severity == severity]
+        return self.alerts.copy()
     
-    async def _broadcast_critical(self, alert: QualityAlert):
-        """Broadcast critical alert"""
-        logger.critical(f"CRITICAL ALERT: {alert.message}")
-    
-    async def acknowledge(self, alert_id: str) -> bool:
-        """Acknowledge an alert"""
-        if alert_id in self.active_alerts:
-            self.active_alerts[alert_id].acknowledged = True
-            logger.info(f"Alert {alert_id} acknowledged")
-            return True
-        return False
-    
-    async def resolve(self, alert_id: str) -> bool:
-        """Resolve an alert"""
-        if alert_id in self.active_alerts:
-            self.active_alerts[alert_id].resolved = True
-            logger.info(f"Alert {alert_id} resolved")
-            return True
-        return False
-    
-    def get_active_alerts(self) -> List[QualityAlert]:
-        """Get all active alerts"""
-        return [a for a in self.active_alerts.values() if not a.resolved]
-    
-    def get_recent_alerts(self, limit: int = 10) -> List[QualityAlert]:
-        """Get recent alerts"""
-        return list(self.alert_history)[-limit:]
+    def clear_alerts(self, older_than: Optional[datetime] = None):
+        """Clear alerts older than specified time.
+        
+        Args:
+            older_than: Clear alerts older than this timestamp
+        """
+        if older_than:
+            self.alerts = [a for a in self.alerts if a.timestamp > older_than]
+        else:
+            self.alerts.clear()

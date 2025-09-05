@@ -1,0 +1,182 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<specification>
+    <metadata>
+        <name>First Interaction Hide UI/UX Specification</name>
+        <type>ui_ux_first_interaction</type>
+        <version>1.0</version>
+        <created>2025-09-04</created>
+        <updated>2025-09-04</updated>
+        <description>Specification for automatically hiding welcome messages and example prompts when user starts typing</description>
+        <business-value>Improves user experience by reducing visual clutter once user engagement begins</business-value>
+    </metadata>
+    
+    <primary-goal>Create a clean, focused chat interface that automatically hides onboarding elements (welcome message and example prompts) when the user demonstrates engagement by starting to type</primary-goal>
+    
+    <core-principles>
+        <principle id="progressive-disclosure">
+            <name>Progressive Disclosure</name>
+            <description>Show helpful onboarding content initially, but remove it once user shows they understand how to interact</description>
+            <rationale>Reduces cognitive load and visual clutter for engaged users</rationale>
+        </principle>
+        <principle id="focus-on-conversation">
+            <name>Focus on Conversation</name>
+            <description>Once typing begins, the interface should prioritize the conversation over onboarding elements</description>
+        </principle>
+        <principle id="smooth-transitions">
+            <name>Smooth Visual Transitions</name>
+            <description>Use animations to gracefully hide elements rather than jarring instant removal</description>
+        </principle>
+    </core-principles>
+    
+    <implementation-requirements>
+        <requirement id="detect-first-interaction" priority="critical">
+            <description>Detect when user starts typing in the message input field</description>
+            <trigger>onFocus and onChange events on MessageInput component</trigger>
+            <conditions>
+                <condition>Input field receives focus AND user types at least 1 character</condition>
+                <condition>Exclude navigation keys (arrows, tab) from triggering the hide</condition>
+            </conditions>
+        </requirement>
+        
+        <requirement id="hide-welcome-message" priority="critical">
+            <description>Hide the welcome message section when user starts typing</description>
+            <affected-elements>
+                <element>Welcome header with Netra AI branding</element>
+                <element>Tagline about optimization platform</element>
+                <element>"Get Started in 3 Easy Steps" section</element>
+            </affected-elements>
+            <animation>Fade out with slide up animation over 300ms</animation>
+        </requirement>
+        
+        <requirement id="hide-example-prompts" priority="critical">
+            <description>Hide or minimize example prompts when user starts typing</description>
+            <behavior>
+                <option selected="true">Automatically collapse ExamplePrompts to closed state</option>
+                <option>Completely hide ExamplePrompts component</option>
+            </behavior>
+            <animation>Smooth collapse animation matching existing CollapsibleContent behavior</animation>
+        </requirement>
+        
+        <requirement id="persistence" priority="high">
+            <description>Remember hide state during the session</description>
+            <scope>Per-thread basis - reset for new threads/conversations</scope>
+            <storage>Component state or Zustand store</storage>
+            <reset-conditions>
+                <condition>User starts a new chat/thread</condition>
+                <condition>User explicitly clicks to show examples again</condition>
+            </reset-conditions>
+        </requirement>
+        
+        <requirement id="restore-ability" priority="medium">
+            <description>Allow user to restore hidden elements if needed</description>
+            <implementation>
+                <option>Keep collapsed ExamplePrompts expandable via chevron button</option>
+                <option>Add subtle "Show examples" link if all onboarding is hidden</option>
+            </implementation>
+        </requirement>
+    </implementation-requirements>
+    
+    <technical-details>
+        <state-management>
+            <location>useUnifiedChatStore or local component state</location>
+            <state-variables>
+                <variable name="hasUserStartedTyping" type="boolean" default="false">Tracks if user has begun typing</variable>
+                <variable name="showWelcomeMessage" type="boolean" default="true">Controls welcome message visibility</variable>
+                <variable name="autoCollapseExamples" type="boolean" default="false">Auto-collapse examples after typing</variable>
+            </state-variables>
+        </state-management>
+        
+        <affected-components>
+            <component path="frontend/components/chat/MainChat.tsx">
+                <changes>
+                    <change>Add state for tracking first interaction</change>
+                    <change>Pass hide state to child components</change>
+                    <change>Conditionally render welcome section</change>
+                </changes>
+            </component>
+            <component path="frontend/components/chat/MessageInput.tsx">
+                <changes>
+                    <change>Add callback prop for onFirstInteraction</change>
+                    <change>Detect and emit first typing event</change>
+                </changes>
+            </component>
+            <component path="frontend/components/chat/ExamplePrompts.tsx">
+                <changes>
+                    <change>Accept prop to control collapsed state</change>
+                    <change>Auto-collapse when user starts typing</change>
+                </changes>
+            </component>
+        </affected-components>
+        
+        <event-flow>
+            <step order="1">User focuses MessageInput component</step>
+            <step order="2">User types first character (non-navigation key)</step>
+            <step order="3">MessageInput emits onFirstInteraction event</step>
+            <step order="4">MainChat updates hasUserStartedTyping state to true</step>
+            <step order="5">Welcome message fades out with animation</step>
+            <step order="6">ExamplePrompts automatically collapses</step>
+            <step order="7">State persists for remainder of thread</step>
+        </event-flow>
+    </technical-details>
+    
+    <visual-specifications>
+        <animations>
+            <animation id="welcome-fadeout">
+                <type>Framer Motion exit animation</type>
+                <duration>300ms</duration>
+                <properties>
+                    <property>opacity: 1 → 0</property>
+                    <property>y: 0 → -20px</property>
+                </properties>
+            </animation>
+            <animation id="examples-collapse">
+                <type>Existing CollapsibleContent animation</type>
+                <duration>300ms</duration>
+                <behavior>Reuse existing collapse animation for consistency</behavior>
+            </animation>
+        </animations>
+        
+        <timing>
+            <rule>Hide triggers immediately on first character typed</rule>
+            <rule>No delay between typing and hide action</rule>
+            <rule>Animations should feel responsive but smooth</rule>
+        </timing>
+    </visual-specifications>
+    
+    <testing-requirements>
+        <test-case id="first-type-hides">
+            <description>Verify welcome and examples hide on first character typed</description>
+            <steps>
+                <step>Load chat interface with no existing messages</step>
+                <step>Verify welcome message and examples are visible</step>
+                <step>Focus message input and type one character</step>
+                <step>Verify welcome message fades out</step>
+                <step>Verify example prompts collapse</step>
+            </steps>
+        </test-case>
+        
+        <test-case id="navigation-keys-no-trigger">
+            <description>Verify arrow keys and tab don't trigger hide</description>
+            <steps>
+                <step>Load fresh chat interface</step>
+                <step>Focus input and press arrow keys</step>
+                <step>Verify welcome content remains visible</step>
+            </steps>
+        </test-case>
+        
+        <test-case id="new-thread-reset">
+            <description>Verify state resets for new threads</description>
+            <steps>
+                <step>Hide welcome content by typing</step>
+                <step>Start a new chat/thread</step>
+                <step>Verify welcome content is visible again</step>
+            </steps>
+        </test-case>
+    </testing-requirements>
+    
+    <migration-notes>
+        <note>This is a new feature, no migration required</note>
+        <note>Backward compatible - degrades gracefully if not implemented</note>
+        <note>Consider A/B testing to measure engagement impact</note>
+    </migration-notes>
+</specification>

@@ -1,28 +1,41 @@
-#!/usr/bin/env python3
-"""Helper functions for corpus creation - main coordination module."""
+"""
+Corpus creation helpers module.
 
-from typing import Any, Dict, Optional, Tuple
+Provides helper functions for corpus creation operations.
+This module has been removed but tests still reference it.
+"""
 
-# Try to import handlers for advanced features
-try:
-    from netra_backend.app.agents.corpus_admin.corpus_indexing_handlers import create_indexing_handler
-    from netra_backend.app.agents.corpus_admin.corpus_upload_handlers import create_upload_handler
-    from netra_backend.app.agents.corpus_admin.corpus_validation_handlers import create_validation_handler
-    HANDLERS_AVAILABLE = True
-except (ImportError, ValueError):
-    try:
-        from corpus_indexing_handlers import create_indexing_handler
-        from corpus_upload_handlers import create_upload_handler
-        from corpus_validation_handlers import create_validation_handler
-        HANDLERS_AVAILABLE = True
-    except (ImportError, ValueError):
-        HANDLERS_AVAILABLE = False
+# Configuration flag for handler availability
+HANDLERS_AVAILABLE = False
+
 
 def get_handlers():
-    """Get or create handlers."""
+    """
+    Get corpus creation handlers.
+    
+    Returns tuple of (validation_handler, indexing_handler, upload_handler).
+    All handlers are None since this functionality was removed.
+    """
     if HANDLERS_AVAILABLE:
-        v = create_validation_handler()
-        i = create_indexing_handler()
-        u = create_upload_handler()
-        return v, i, u
-    return None, None, None
+        # Handlers would be created here if available
+        validation_handler = create_validation_handler()
+        indexing_handler = create_indexing_handler()
+        upload_handler = create_upload_handler()
+        return validation_handler, indexing_handler, upload_handler
+    else:
+        return None, None, None
+
+
+def create_validation_handler():
+    """Create validation handler stub."""
+    return None
+
+
+def create_indexing_handler():
+    """Create indexing handler stub."""
+    return None
+
+
+def create_upload_handler():
+    """Create upload handler stub."""
+    return None

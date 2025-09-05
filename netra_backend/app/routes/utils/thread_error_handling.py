@@ -79,10 +79,32 @@ def _raise_http_error(error_context: str) -> None:
 async def handle_route_with_error_logging(handler_func, error_context: str):
     """Handle route with standardized error logging."""
     from fastapi import HTTPException
+    from netra_backend.app.config import get_config
+    
     try:
         return await handler_func()
     except HTTPException:
         raise
     except Exception as e:
-        _log_route_error(error_context, e)
-        _raise_http_error(error_context)
+        # Get config to check environment
+        config = get_config()
+        
+        # Log with full stack trace
+        from netra_backend.app.logging_config import central_logger
+        logger = central_logger.get_logger(__name__)
+        
+        # In staging/development, log full exception details
+        if config.environment in ["development", "staging"]:
+            logger.error(f"Error {error_context}: {e}", exc_info=True)
+        else:
+            logger.error(f"Error {error_context}: {e}")
+        
+        # Provide more detailed error message in non-production
+        if config.environment in ["development", "staging"]:
+            clean_context = resolve_clean_context(error_context)
+            error_detail = f"Failed to {clean_context}. Error: {str(e)}"
+        else:
+            clean_context = resolve_clean_context(error_context)
+            error_detail = f"Failed to {clean_context}"
+        
+        raise HTTPException(status_code=500, detail=error_detail)

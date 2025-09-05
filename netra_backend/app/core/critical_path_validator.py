@@ -103,8 +103,32 @@ class CriticalPathValidator:
     async def _validate_websocket_bridge_chain(self, app) -> None:
         """Validate WebSocket bridge is properly supported by all agents."""
         try:
-            # Check if agents have the mixin
+            # With factory pattern, agents are created per-request, not stored globally
+            # Validate that the supervisor and bridge are available for factory creation
             if hasattr(app.state, 'agent_supervisor') and app.state.agent_supervisor:
+                # Factory pattern: No registry needed - agents created on demand
+                # Just verify supervisor has WebSocket bridge support
+                supervisor = app.state.agent_supervisor
+                
+                # Check if supervisor has WebSocket capabilities (BaseAgent pattern)
+                has_bridge_setter = hasattr(supervisor, 'set_websocket_bridge')
+                has_emit = hasattr(supervisor, 'emit_thinking')
+                has_propagate = hasattr(supervisor, 'propagate_websocket_context_to_state')
+                
+                if has_bridge_setter or has_emit or has_propagate:
+                    validation = CriticalPathValidation(
+                        component="WebSocket Bridge Chain",
+                        path="Supervisor -> AgentWebSocketBridge",
+                        check_type="bridge_support",
+                        passed=True,
+                        criticality=CriticalityLevel.CHAT_BREAKING,
+                        metadata={"factory_pattern": True, "supervisor_supported": True}
+                    )
+                    self.logger.info("✓ WebSocket bridge supported via factory pattern - supervisor ready")
+                    self.validations.append(validation)
+                    return  # Factory pattern validation complete
+                
+                # Legacy registry-based validation (deprecated - kept for backward compatibility)
                 if hasattr(app.state.agent_supervisor, 'registry'):
                     registry = app.state.agent_supervisor.registry
                     
@@ -171,11 +195,25 @@ class CriticalPathValidator:
                     
                     self.validations.append(validation)
                 else:
-                    self._add_critical_failure(
-                        "WebSocket Bridge Chain",
-                        "Registry not found - cannot validate bridge support",
-                        "Ensure agent_supervisor has registry attribute"
-                    )
+                    # No registry - this is expected with factory pattern
+                    # Validate bridge is available for factory use
+                    if hasattr(app.state, 'agent_websocket_bridge') and app.state.agent_websocket_bridge:
+                        validation = CriticalPathValidation(
+                            component="WebSocket Bridge Chain",
+                            path="Factory Pattern -> AgentWebSocketBridge",
+                            check_type="bridge_available",
+                            passed=True,
+                            criticality=CriticalityLevel.CHAT_BREAKING,
+                            metadata={"factory_pattern": True, "registry": False}
+                        )
+                        self.logger.info("✓ WebSocket bridge available for factory-based agent creation")
+                        self.validations.append(validation)
+                    else:
+                        self._add_critical_failure(
+                            "WebSocket Bridge Chain",
+                            "WebSocket bridge not available for factory pattern",
+                            "Ensure agent_websocket_bridge is initialized during startup"
+                        )
             else:
                 self._add_critical_failure(
                     "WebSocket Bridge Chain",
@@ -357,10 +395,16 @@ class CriticalPathValidator:
                 has_add_handler_method = hasattr(message_router, 'add_handler') and callable(getattr(message_router, 'add_handler'))
                 has_route_method = hasattr(message_router, 'route_message') and callable(getattr(message_router, 'route_message'))
                 
-                # Count default handlers (should include HeartbeatHandler, etc.)
-                default_handler_count = 0
-                if has_handlers_list:
-                    default_handler_count = len(message_router.handlers)
+                # CRITICAL FIX: Use grace period aware handler status checking
+                handler_status = None
+                if hasattr(message_router, 'check_handler_status_with_grace_period'):
+                    handler_status = message_router.check_handler_status_with_grace_period()
+                    default_handler_count = handler_status["handler_count"]
+                else:
+                    # Fallback to old method if grace period checking not available
+                    default_handler_count = 0
+                    if has_handlers_list:
+                        default_handler_count = len(message_router.handlers)
                 
                 # Validate infrastructure readiness
                 infrastructure_ready = has_handlers_list and has_add_handler_method and has_route_method
@@ -385,7 +429,36 @@ class CriticalPathValidator:
                         metadata={"missing_components": missing_components}
                     )
                     self.logger.error(f"❌ CRITICAL: MessageRouter infrastructure incomplete - missing: {missing_components}")
+                elif handler_status and handler_status["status"] == "initializing":
+                    # CRITICAL FIX: During grace period, don't warn about zero handlers
+                    validation = CriticalPathValidation(
+                        component="Message Handler Chain",
+                        path="MessageRouter.handlers",
+                        check_type="startup_grace_period",
+                        passed=True,  # This is expected during startup
+                        criticality=CriticalityLevel.WARNING,  # Reduced criticality during grace period
+                        metadata={
+                            "handler_status": handler_status,
+                            "grace_period_active": True,
+                            "message": handler_status["message"]
+                        }
+                    )
+                    self.logger.info(f"ℹ️ Handler registration: {handler_status['message']}")
+                elif handler_status and handler_status["status"] == "error":
+                    # CRITICAL FIX: Only warn AFTER grace period expires
+                    validation = CriticalPathValidation(
+                        component="Message Handler Chain",
+                        path="MessageRouter.handlers",
+                        check_type="default_handlers",
+                        passed=False,
+                        criticality=CriticalityLevel.CHAT_BREAKING,
+                        failure_reason=f"MessageRouter has no default handlers after grace period - basic message types won't be processed",
+                        remediation="Ensure MessageRouter initializes with default handlers (HeartbeatHandler, etc.)",
+                        metadata={"handler_status": handler_status}
+                    )
+                    self.logger.error(f"❌ CRITICAL: {handler_status['message']} - basic functionality broken")
                 elif default_handler_count == 0:
+                    # Fallback case when grace period checking is not available
                     validation = CriticalPathValidation(
                         component="Message Handler Chain",
                         path="MessageRouter.handlers",
@@ -398,7 +471,7 @@ class CriticalPathValidator:
                     )
                     self.logger.error("❌ CRITICAL: MessageRouter has no default handlers - basic functionality broken")
                 else:
-                    # Infrastructure is ready - this is what we expect during startup
+                    # Infrastructure is ready - handlers are properly registered
                     validation = CriticalPathValidation(
                         component="Message Handler Chain",
                         path="MessageRouter infrastructure",
@@ -408,10 +481,14 @@ class CriticalPathValidator:
                         metadata={
                             "default_handler_count": default_handler_count,
                             "can_accept_per_connection_handlers": True,
-                            "infrastructure_components": ["handlers_list", "add_handler_method", "route_message_method"]
+                            "infrastructure_components": ["handlers_list", "add_handler_method", "route_message_method"],
+                            "handler_status": handler_status
                         }
                     )
-                    self.logger.info(f"✓ Message handler infrastructure ready ({default_handler_count} default handlers, per-connection registration supported)")
+                    if handler_status:
+                        self.logger.info(f"✓ {handler_status['message']} - per-connection registration supported")
+                    else:
+                        self.logger.info(f"✓ Message handler infrastructure ready ({default_handler_count} default handlers, per-connection registration supported)")
                 
                 self.validations.append(validation)
             else:

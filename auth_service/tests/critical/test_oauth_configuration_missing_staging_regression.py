@@ -25,23 +25,10 @@ import pytest
 from unittest.mock import patch, MagicMock, AsyncMock
 from typing import Dict, Any, List
 
-# Mock database initialization before importing auth service modules
-@pytest.fixture(autouse=True, scope="module")
-def mock_database_initialization():
-    """Mock database initialization to prevent connection attempts"""
-    with patch('auth_service.auth_core.database.connection.auth_db') as mock_auth_db:
-        # Create a mock database that doesn't actually initialize
-        mock_auth_db._initialized = True
-        mock_auth_db.initialize = AsyncMock(return_value=None)
-        mock_auth_db.close = AsyncMock(return_value=None)
-        mock_auth_db.engine = MagicMock()
-        mock_auth_db.engine.begin = AsyncMock()
-        
-        # Mock the session-level database initialization
-        with patch('auth_service.tests.conftest.initialize_test_database'):
-            yield mock_auth_db
+# REAL SERVICES: Use actual conftest setup (no mocks per CLAUDE.md)
+# Database initialization handled by conftest.py real services setup
 
-from auth_service.auth_core.secret_loader import AuthSecretLoader
+from auth_service.auth_core.auth_environment import get_auth_env
 from auth_service.auth_core.oauth.google_oauth import GoogleOAuthProvider
 
 
@@ -74,8 +61,9 @@ class TestOAuthConfigurationMissingRegression:
             env_manager.set('GOOGLE_OAUTH_CLIENT_ID_STAGING', '', 'test_oauth_regression')
             env_manager.set('GOOGLE_CLIENT_ID', '', 'test_oauth_regression')  # Remove fallback too
             
-            # Act - Try to load OAuth credentials directly using AuthSecretLoader
-            client_id = AuthSecretLoader.get_google_client_id()
+            # Act - Try to load OAuth credentials directly using AuthEnvironment SSOT
+            auth_env = get_auth_env()
+            client_id = auth_env.get_oauth_google_client_id()
             
             # Assert - Client ID should be None/empty when not configured
             assert client_id is None or client_id == "", \
@@ -111,8 +99,9 @@ class TestOAuthConfigurationMissingRegression:
             env_manager.set('GOOGLE_OAUTH_CLIENT_SECRET_STAGING', '', 'test_oauth_regression')
             env_manager.set('GOOGLE_CLIENT_SECRET', '', 'test_oauth_regression')  # Remove fallback too
             
-            # Act - Try to load OAuth credentials directly using AuthSecretLoader
-            client_secret = AuthSecretLoader.get_google_client_secret()
+            # Act - Try to load OAuth credentials directly using AuthEnvironment SSOT
+            auth_env = get_auth_env()
+            client_secret = auth_env.get_oauth_google_client_secret()
             
             # Assert - Client secret should be None/empty when not configured
             assert client_secret is None or client_secret == "", \
@@ -204,9 +193,10 @@ class TestOAuthConfigurationMissingRegression:
             env_manager.set('GOOGLE_OAUTH_CLIENT_ID_STAGING', test_client_id, 'test_oauth_regression')
             env_manager.set('GOOGLE_OAUTH_CLIENT_SECRET_STAGING', test_client_secret, 'test_oauth_regression')
             
-            # Act - Initialize OAuth components directly using AuthSecretLoader
-            client_id = AuthSecretLoader.get_google_client_id()
-            client_secret = AuthSecretLoader.get_google_client_secret()
+            # Act - Initialize OAuth components directly using AuthEnvironment SSOT
+            auth_env = get_auth_env()
+            client_id = auth_env.get_oauth_google_client_id()
+            client_secret = auth_env.get_oauth_google_client_secret()
             
             # Assert - Credentials should load correctly
             assert client_id == test_client_id, \

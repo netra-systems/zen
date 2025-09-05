@@ -96,6 +96,11 @@ class ChatEventMonitor(ComponentMonitor):
         metadata: Optional[Dict] = None
     ) -> None:
         """Record an event occurrence and check for anomalies."""
+        # Skip monitoring for test threads to prevent false anomaly detection
+        if self._is_test_thread(thread_id):
+            logger.debug(f"Skipping event monitoring for test thread: {thread_id}")
+            return
+        
         now = time.time()
         
         # Track event
@@ -370,8 +375,45 @@ class ChatEventMonitor(ComponentMonitor):
         for key in keys_to_remove:
             self.last_event_time.pop(key, None)
     
+    def _is_test_thread(self, thread_id: str) -> bool:
+        """
+        Identify test threads to prevent false anomaly detection.
+        
+        Test threads created during health checks, unit tests, and system
+        validation should not be monitored for anomalies as they have
+        different lifecycle patterns than real user threads.
+        
+        Args:
+            thread_id: Thread identifier to check
+            
+        Returns:
+            bool: True if this is a test thread, False otherwise
+        """
+        if not isinstance(thread_id, str):
+            return False
+            
+        test_patterns = [
+            "startup_test_",
+            "health_check_", 
+            "test_",
+            "unit_test_",
+            "integration_test_",
+            "validation_",
+            "mock_"
+        ]
+        
+        return any(thread_id.startswith(pattern) for pattern in test_patterns)
+    
     def get_thread_status(self, thread_id: str) -> Dict[str, Any]:
         """Get detailed status for a specific thread."""
+        # Handle test threads specially
+        if self._is_test_thread(thread_id):
+            return {
+                "status": "test_thread", 
+                "thread_id": thread_id,
+                "message": "Test thread - not monitored for anomalies"
+            }
+            
         if thread_id not in self.thread_start_time:
             return {"status": "unknown", "thread_id": thread_id}
         
@@ -745,13 +787,21 @@ class ChatEventMonitor(ComponentMonitor):
             if len(self.component_health_history[component_id]) > self.max_health_history_per_component:
                 self.component_health_history[component_id] = self.component_health_history[component_id][-self.max_health_history_per_component:]
             
-            # Trigger alert if component becomes unhealthy
+            # Log component health status changes
             if not healthy:
-                logger.warning(
-                    f"🚨 Component {component_id} reported unhealthy status: "
-                    f"{health_data.get('state', 'unknown')}. "
-                    f"Error: {health_data.get('error_message', 'No details provided')}"
-                )
+                # Check if this is the expected uninitialized state for the bridge
+                if component_id == "agent_websocket_bridge" and health_data.get('state') == 'uninitialized':
+                    logger.info(
+                        f"ℹ️ Component {component_id} in expected uninitialized state. "
+                        f"This is normal - bridge uses per-request initialization. "
+                        f"See AGENT_WEBSOCKET_BRIDGE_UNINITIALIZED_FIVE_WHYS.md for details."
+                    )
+                else:
+                    logger.warning(
+                        f"🚨 Component {component_id} reported unhealthy status: "
+                        f"{health_data.get('state', 'unknown')}. "
+                        f"Error: {health_data.get('error_message', 'No details provided')}"
+                    )
                 
                 # Could trigger additional alert mechanisms here
                 # (e.g., notifications, automated recovery)

@@ -20,9 +20,12 @@ No global state is shared between instances. Each user gets their own execution 
 import asyncio
 import time
 import uuid
+import weakref
+from collections import deque
 from contextlib import asynccontextmanager
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
+from functools import lru_cache
 from typing import Any, Callable, Dict, List, Optional, Type, Union, Awaitable
 
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -31,12 +34,16 @@ from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.agents.supervisor.agent_class_registry import AgentClassRegistry, get_agent_class_registry
 from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
-from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
-from netra_backend.app.websocket_core.manager import WebSocketManager
-from netra_backend.app.core.websocket_exceptions import (
-    AgentCommunicationFailureError,
-    WebSocketSendFailureError
+from netra_backend.app.agents.supervisor.factory_performance_config import (
+    FactoryPerformanceConfig, 
+    get_factory_performance_config
 )
+from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
+from netra_backend.app.websocket_core import (
+    WebSocketEmitterPool,
+)
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager as WebSocketManager
+# WebSocket exceptions module was deleted - using standard exceptions
 from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
@@ -86,15 +93,13 @@ class UserWebSocketEmitter:
                 logger.error(f"❌ {error_msg}")
                 
                 # LOUD FAILURE: Raise exception for failed notifications
-                raise WebSocketSendFailureError(
-                    reason="WebSocket bridge returned failure",
-                    event_type="agent_started",
-                    user_id=self.user_id,
-                    thread_id=self.thread_id
+                raise ConnectionError(
+                    f"WebSocket bridge returned failure for agent_started: {agent_name} "
+                    f"(user: {self.user_id}, thread: {self.thread_id})"
                 )
             
             return success
-        except WebSocketSendFailureError:
+        except ConnectionError:
             # Re-raise our custom exception
             raise
         except Exception as e:
@@ -102,11 +107,9 @@ class UserWebSocketEmitter:
             logger.error(f"🚨 AGENT COMMUNICATION FAILURE: {error_msg}")
             
             # LOUD FAILURE: Convert generic exceptions to specific ones
-            raise AgentCommunicationFailureError(
-                from_agent="UserWebSocketEmitter",
-                to_agent=agent_name,
-                reason=str(e),
-                user_id=self.user_id
+            raise RuntimeError(
+                f"Agent communication failure from UserWebSocketEmitter to {agent_name}: {str(e)} "
+                f"(user: {self.user_id})"
             )
     
     async def notify_agent_thinking(self, agent_name: str, reasoning: str, 
@@ -132,25 +135,21 @@ class UserWebSocketEmitter:
                 logger.error(f"❌ {error_msg}")
                 
                 # LOUD FAILURE: Raise exception
-                raise WebSocketSendFailureError(
-                    reason="WebSocket bridge returned failure",
-                    event_type="agent_thinking",
-                    user_id=self.user_id,
-                    thread_id=self.thread_id
+                raise ConnectionError(
+                    f"WebSocket bridge returned failure for agent_thinking: {agent_name} "
+                    f"(user: {self.user_id}, thread: {self.thread_id})"
                 )
             
             return success
-        except WebSocketSendFailureError:
+        except ConnectionError:
             raise
         except Exception as e:
             error_msg = f"Exception in notify_agent_thinking for user {self.user_id}: {e}"
             logger.error(f"🚨 AGENT COMMUNICATION FAILURE: {error_msg}")
             
-            raise AgentCommunicationFailureError(
-                from_agent="UserWebSocketEmitter",
-                to_agent=agent_name,
-                reason=str(e),
-                user_id=self.user_id
+            raise RuntimeError(
+                f"Agent communication failure from UserWebSocketEmitter to {agent_name}: {str(e)} "
+                f"(user: {self.user_id})"
             )
     
     async def notify_tool_executing(self, agent_name: str, tool_name: str, 
@@ -173,23 +172,19 @@ class UserWebSocketEmitter:
                 error_msg = f"Tool executing notification failed for user {self.user_id}: {tool_name}"
                 logger.error(f"❌ {error_msg}")
                 
-                raise WebSocketSendFailureError(
-                    reason="WebSocket bridge returned failure",
-                    event_type="tool_executing",
-                    user_id=self.user_id,
-                    thread_id=self.thread_id
+                raise ConnectionError(
+                    f"WebSocket bridge returned failure for tool_executing: {tool_name} "
+                    f"(user: {self.user_id}, thread: {self.thread_id})"
                 )
             
             return success
-        except WebSocketSendFailureError:
+        except ConnectionError:
             raise
         except Exception as e:
             logger.error(f"🚨 TOOL NOTIFICATION FAILURE: Exception in notify_tool_executing for user {self.user_id}: {e}")
-            raise AgentCommunicationFailureError(
-                from_agent="UserWebSocketEmitter",
-                to_agent=agent_name,
-                reason=str(e),
-                user_id=self.user_id
+            raise RuntimeError(
+                f"Agent communication failure from UserWebSocketEmitter to {agent_name}: {str(e)} "
+                f"(user: {self.user_id})"
             )
     
     async def notify_tool_completed(self, agent_name: str, tool_name: str, 
@@ -214,23 +209,19 @@ class UserWebSocketEmitter:
                 error_msg = f"Tool completed notification failed for user {self.user_id}: {tool_name}"
                 logger.error(f"❌ {error_msg}")
                 
-                raise WebSocketSendFailureError(
-                    reason="WebSocket bridge returned failure",
-                    event_type="tool_completed",
-                    user_id=self.user_id,
-                    thread_id=self.thread_id
+                raise ConnectionError(
+                    f"WebSocket bridge returned failure for tool_completed: {tool_name} "
+                    f"(user: {self.user_id}, thread: {self.thread_id})"
                 )
             
             return success
-        except WebSocketSendFailureError:
+        except ConnectionError:
             raise
         except Exception as e:
             logger.error(f"🚨 TOOL NOTIFICATION FAILURE: Exception in notify_tool_completed for user {self.user_id}: {e}")
-            raise AgentCommunicationFailureError(
-                from_agent="UserWebSocketEmitter",
-                to_agent=agent_name,
-                reason=str(e),
-                user_id=self.user_id
+            raise RuntimeError(
+                f"Agent communication failure from UserWebSocketEmitter to {agent_name}: {str(e)} "
+                f"(user: {self.user_id})"
             )
     
     async def notify_agent_completed(self, agent_name: str, result: Optional[Dict[str, Any]] = None,
@@ -253,23 +244,19 @@ class UserWebSocketEmitter:
                 error_msg = f"Agent completed notification failed for user {self.user_id}: {agent_name}"
                 logger.error(f"❌ {error_msg}")
                 
-                raise WebSocketSendFailureError(
-                    reason="WebSocket bridge returned failure",
-                    event_type="agent_completed",
-                    user_id=self.user_id,
-                    thread_id=self.thread_id
+                raise ConnectionError(
+                    f"WebSocket bridge returned failure for agent_completed: {agent_name} "
+                    f"(user: {self.user_id}, thread: {self.thread_id})"
                 )
             
             return success
-        except WebSocketSendFailureError:
+        except ConnectionError:
             raise
         except Exception as e:
             logger.error(f"🚨 AGENT COMPLETION FAILURE: Exception in notify_agent_completed for user {self.user_id}: {e}")
-            raise AgentCommunicationFailureError(
-                from_agent="UserWebSocketEmitter",
-                to_agent=agent_name,
-                reason=str(e),
-                user_id=self.user_id
+            raise RuntimeError(
+                f"Agent communication failure from UserWebSocketEmitter to {agent_name}: {str(e)} "
+                f"(user: {self.user_id})"
             )
     
     async def notify_agent_error(self, agent_name: str, error: str,
@@ -347,6 +334,15 @@ class AgentInstanceFactory:
     classes and AgentRegistry for backward compatibility during the transition.
     """
     
+    # CRITICAL: Define which agents require which dependencies
+    AGENT_DEPENDENCIES = {
+        'DataSubAgent': ['llm_manager'],
+        'OptimizationsCoreSubAgent': ['llm_manager'],
+        'ActionsToMeetGoalsSubAgent': ['llm_manager'],
+        'DataHelperAgent': ['llm_manager'],
+        'SyntheticDataSubAgent': ['llm_manager'],
+    }
+    
     def __init__(self):
         """Initialize the factory with infrastructure components."""
         # Infrastructure components (shared, immutable)
@@ -354,15 +350,47 @@ class AgentInstanceFactory:
         self._agent_registry: Optional[AgentRegistry] = None
         self._websocket_bridge: Optional[AgentWebSocketBridge] = None
         self._websocket_manager: Optional[WebSocketManager] = None
+        self._llm_manager: Optional[Any] = None
+        self._tool_dispatcher: Optional[Any] = None
         
-        # Factory configuration
-        self._max_concurrent_per_user = 5
-        self._execution_timeout = 30.0
+        # Performance configuration
+        self._performance_config = get_factory_performance_config()
+        
+        # Factory configuration (use performance config where applicable)
+        self._max_concurrent_per_user = self._performance_config.max_concurrent_per_user
+        self._execution_timeout = self._performance_config.execution_timeout
         self._cleanup_interval = 300  # 5 minutes
-        self._max_history_per_user = 100
+        self._max_history_per_user = self._performance_config.max_history_per_user
         
-        # Per-user concurrency control (infrastructure manages this)
-        self._user_semaphores: Dict[str, asyncio.Semaphore] = {}
+        # Object pools (if enabled)
+        self._emitter_pool = None
+        if self._performance_config.enable_emitter_pooling:
+            # Initialize emitter pool asynchronously when needed
+            self._emitter_pool_task = None
+        
+        # Agent class cache (if enabled)
+        if self._performance_config.enable_class_caching:
+            self._agent_class_cache = {}
+            self._cache_lock = asyncio.Lock()
+        
+        # Performance tracking (if enabled)
+        if self._performance_config.enable_metrics:
+            self._perf_stats = {
+                'context_creation_ms': deque(maxlen=self._performance_config.metrics_buffer_size),
+                'agent_creation_ms': deque(maxlen=self._performance_config.metrics_buffer_size),
+                'cleanup_ms': deque(maxlen=self._performance_config.metrics_buffer_size)
+            }
+        
+        # Use weak references if enabled
+        if self._performance_config.enable_weak_references:
+            self._active_contexts = weakref.WeakValueDictionary()
+            self._user_semaphores = weakref.WeakValueDictionary()
+        else:
+            # Per-user concurrency control (infrastructure manages this)
+            self._user_semaphores: Dict[str, asyncio.Semaphore] = {}
+            # Active contexts tracking for monitoring
+            self._active_contexts: Dict[str, UserExecutionContext] = {}
+        
         self._semaphore_lock = asyncio.Lock()
         
         # Factory metrics
@@ -375,16 +403,18 @@ class AgentInstanceFactory:
             'average_context_lifetime_seconds': 0.0
         }
         
-        # Active contexts tracking for monitoring
-        self._active_contexts: Dict[str, UserExecutionContext] = {}
-        
-        logger.info("AgentInstanceFactory initialized")
+        logger.info(f"AgentInstanceFactory initialized with performance optimizations enabled: "
+                   f"pooling={self._performance_config.enable_emitter_pooling}, "
+                   f"caching={self._performance_config.enable_class_caching}, "
+                   f"metrics={self._performance_config.enable_metrics}")
     
     def configure(self, 
                  agent_class_registry: Optional[AgentClassRegistry] = None,
                  agent_registry: Optional[AgentRegistry] = None,
                  websocket_bridge: Optional[AgentWebSocketBridge] = None,
-                 websocket_manager: Optional[WebSocketManager] = None) -> None:
+                 websocket_manager: Optional[WebSocketManager] = None,
+                 llm_manager: Optional[Any] = None,
+                 tool_dispatcher: Optional[Any] = None) -> None:
         """
         Configure factory with infrastructure components.
         
@@ -393,6 +423,8 @@ class AgentInstanceFactory:
             agent_registry: Legacy agent registry (for backward compatibility)
             websocket_bridge: WebSocket bridge for agent notifications
             websocket_manager: Optional WebSocket manager for direct access
+            llm_manager: LLM manager for agent communication
+            tool_dispatcher: Tool dispatcher for agent tools
         """
         if not websocket_bridge:
             logger.error("❌ CRITICAL: Attempting to configure AgentInstanceFactory with None websocket_bridge!")
@@ -411,17 +443,70 @@ class AgentInstanceFactory:
             # Try to get global agent class registry
             try:
                 self._agent_class_registry = get_agent_class_registry()
-                logger.info("✅ AgentInstanceFactory configured with global AgentClassRegistry")
+                # Validate registry is populated
+                if self._agent_class_registry:
+                    registry_size = len(self._agent_class_registry)
+                    if registry_size == 0:
+                        logger.error("❌ AgentClassRegistry is empty - no agents registered!")
+                        logger.error("    Ensure initialize_agent_class_registry() was called during startup")
+                        raise ValueError("AgentClassRegistry is empty - startup initialization may have failed")
+                    else:
+                        logger.info(f"✅ AgentInstanceFactory configured with global AgentClassRegistry ({registry_size} agents)")
+                else:
+                    raise ValueError("Global AgentClassRegistry is None")
+            except ValueError:
+                raise  # Re-raise our validation errors
             except Exception as e:
-                raise ValueError("Either agent_class_registry or agent_registry must be provided")
+                logger.error(f"❌ Failed to get global agent class registry: {e}")
+                raise ValueError(f"Could not access agent class registry: {e}")
         
         self._websocket_bridge = websocket_bridge
         self._websocket_manager = websocket_manager
+        self._llm_manager = llm_manager
+        self._tool_dispatcher = tool_dispatcher
         
         logger.info(f"✅ AgentInstanceFactory configured successfully:")
         logger.info(f"   - WebSocket bridge: {type(websocket_bridge).__name__}")
         logger.info(f"   - WebSocket manager: {type(websocket_manager).__name__ if websocket_manager else 'None'}")
         logger.info(f"   - Registry type: {'AgentClassRegistry' if self._agent_class_registry else 'AgentRegistry' if self._agent_registry else 'Unknown'}")
+        logger.info(f"   - LLM manager: {'Configured' if llm_manager else 'None'}")
+        logger.info(f"   - Tool dispatcher: {'Configured' if tool_dispatcher else 'None'}")
+    
+    def _validate_agent_dependencies(self, agent_name: str) -> None:
+        """
+        Validate that all required dependencies for an agent are available.
+        
+        Args:
+            agent_name: Name of the agent or its class name
+            
+        Raises:
+            RuntimeError: If required dependencies are missing
+        """
+        # Check both agent name and class name
+        dependencies = []
+        
+        # Check by agent name
+        if agent_name in self.AGENT_DEPENDENCIES:
+            dependencies = self.AGENT_DEPENDENCIES[agent_name]
+        
+        # Also check by class name (e.g., OptimizationsCoreSubAgent)
+        for class_name, deps in self.AGENT_DEPENDENCIES.items():
+            if agent_name.lower() in class_name.lower() or class_name.lower() in agent_name.lower():
+                dependencies = deps
+                break
+        
+        # Validate each required dependency
+        for dep in dependencies:
+            if dep == 'llm_manager' and not self._llm_manager:
+                logger.error(f"❌ CRITICAL: Agent {agent_name} requires LLM manager but none configured")
+                logger.error(f"   Factory state: llm_manager={self._llm_manager}")
+                logger.error(f"   This will cause agent execution to fail")
+                raise RuntimeError(
+                    f"Cannot create {agent_name}: Required dependency 'llm_manager' not available. "
+                    f"Ensure LLM manager is initialized during startup and passed to factory."
+                )
+            elif dep == 'tool_dispatcher' and not self._tool_dispatcher:
+                logger.warning(f"⚠️ Agent {agent_name} prefers tool_dispatcher but none configured (can use per-request)")
     
     async def create_user_execution_context(self, 
                                            user_id: str,
@@ -457,6 +542,9 @@ class AgentInstanceFactory:
         start_time = time.time()
         context_id = f"{user_id}_{thread_id}_{run_id}"
         
+        # Performance tracking (if enabled)
+        should_track_metrics = self._should_sample()
+        
         try:
             logger.info(f"Creating user execution context: {context_id}")
             
@@ -470,13 +558,8 @@ class AgentInstanceFactory:
                 metadata=metadata or {}
             )
             
-            # Create user-specific WebSocket emitter
-            websocket_emitter = UserWebSocketEmitter(
-                user_id=user_id,
-                thread_id=thread_id,
-                run_id=run_id,
-                websocket_bridge=self._websocket_bridge
-            )
+            # Create user-specific WebSocket emitter (with pooling support)
+            websocket_emitter = await self._create_emitter(user_id, thread_id, run_id)
             
             # Store the emitter in a way that works with immutable context
             # We'll need to track these separately since context is immutable
@@ -510,6 +593,11 @@ class AgentInstanceFactory:
             self._factory_metrics['active_contexts'] = len(self._active_contexts)
             
             creation_time_ms = (time.time() - start_time) * 1000
+            
+            # Track performance metrics if enabled
+            if should_track_metrics and hasattr(self, '_perf_stats'):
+                self._perf_stats['context_creation_ms'].append(creation_time_ms)
+            
             logger.info(f"✅ Created user execution context {context_id} in {creation_time_ms:.1f}ms")
             
             return context
@@ -550,9 +638,15 @@ class AgentInstanceFactory:
         
         start_time = time.time()
         
+        # Performance tracking (if enabled)
+        should_track_metrics = self._should_sample()
+        
         try:
             logger.debug(f"Creating agent instance: {agent_name} for user {user_context.user_id}")
             logger.debug(f"Factory has websocket_bridge: {self._websocket_bridge is not None}, type: {type(self._websocket_bridge).__name__ if self._websocket_bridge else 'None'}")
+            
+            # CRITICAL: Validate dependencies before attempting creation
+            self._validate_agent_dependencies(agent_name)
             
             # Get agent class from registries or use provided class
             if agent_class:
@@ -560,22 +654,48 @@ class AgentInstanceFactory:
                 llm_manager = None
                 tool_dispatcher = None
             else:
-                # Try AgentClassRegistry first (preferred)
-                if self._agent_class_registry:
+                # Try cached lookup first (if caching enabled)
+                AgentClass = None
+                if self._performance_config.enable_class_caching:
+                    AgentClass = self._get_cached_agent_class(agent_name)
+                
+                # Fallback to registry lookup if not cached
+                if not AgentClass and self._agent_class_registry:
                     AgentClass = self._agent_class_registry.get_agent_class(agent_name)
                     if not AgentClass:
-                        raise ValueError(f"Agent '{agent_name}' not found in AgentClassRegistry")
+                        # Provide detailed debugging information
+                        available_agents = self._agent_class_registry.list_agent_names()
+                        error_msg = (
+                            f"Agent '{agent_name}' not found in AgentClassRegistry. "
+                            f"Available agents: {sorted(available_agents)}. "
+                        )
+                        
+                        # Check for common issues
+                        if agent_name == 'synthetic_data':
+                            error_msg += (
+                                "\n⚠️ KNOWN ISSUE: synthetic_data agent registration may have failed due to: "
+                                "\n  1. Missing opentelemetry dependency (pip install opentelemetry-api) "
+                                "\n  2. Import error in synthetic_data_sub_agent.py module "
+                                "\n  3. Agent not registered during startup (check initialization logs)"
+                            )
+                        
+                        raise ValueError(error_msg)
                     
-                    # For class registry, we need to get dependencies from legacy registry for now
-                    if self._agent_registry:
+                    # Use directly injected dependencies or fallback to legacy registry
+                    # Note: tool_dispatcher can be None for per-request creation pattern
+                    if self._llm_manager:
+                        llm_manager = self._llm_manager
+                        tool_dispatcher = self._tool_dispatcher  # Can be None for per-request creation
+                    elif self._agent_registry:
                         llm_manager = self._agent_registry.llm_manager
                         tool_dispatcher = self._agent_registry.tool_dispatcher
                     else:
-                        raise ValueError("No LLM manager or tool dispatcher available")
+                        raise ValueError("No LLM manager available")
                 
-                # Fallback to legacy AgentRegistry
+                # Fallback to legacy AgentRegistry with state reset
                 elif self._agent_registry:
-                    agent_instance = self._agent_registry.get(agent_name)
+                    # Use get_agent() instead of get() to ensure state reset
+                    agent_instance = await self._agent_registry.get_agent(agent_name)
                     if not agent_instance:
                         raise ValueError(f"Agent '{agent_name}' not found in AgentRegistry")
                     
@@ -583,7 +703,10 @@ class AgentInstanceFactory:
                     llm_manager = self._agent_registry.llm_manager
                     tool_dispatcher = self._agent_registry.tool_dispatcher
                 else:
-                    raise ValueError("No agent registry configured")
+                    logger.error(f"❌ Cannot create agent '{agent_name}' - no registry configured")
+                    logger.error("    Neither agent_class_registry nor agent_registry is available")
+                    logger.error("    Ensure initialize_agent_class_registry() was called during startup")
+                    raise ValueError(f"No agent registry configured - cannot create agent '{agent_name}'")
             
             # Create fresh agent instance with request-scoped dependencies
             # CRITICAL: Prefer factory methods to avoid deprecated global tool_dispatcher warnings
@@ -619,15 +742,17 @@ class AgentInstanceFactory:
                         logger.info(f"✅ Creating {agent_name} ({agent_class_name}) with no parameters")
                         agent = AgentClass()
                     elif agent_class_name in llm_tool_only_agents:
-                        if llm_manager and tool_dispatcher:
-                            logger.warning(f"⚠️ Creating {agent_name} ({agent_class_name}) with tool_dispatcher (may trigger deprecation warning)")
+                        # Note: tool_dispatcher can be None for per-request creation pattern
+                        if llm_manager:
+                            logger.info(f"✅ Creating {agent_name} ({agent_class_name}) with llm_manager (tool_dispatcher: {tool_dispatcher is not None})")
                             agent = AgentClass(
                                 llm_manager=llm_manager,
-                                tool_dispatcher=tool_dispatcher
+                                tool_dispatcher=tool_dispatcher  # Can be None for per-request pattern
                             )
                         else:
-                            logger.warning(f"⚠️ {agent_name} ({agent_class_name}) requires llm_manager and tool_dispatcher, attempting no-param init")
-                            agent = AgentClass()
+                            # CRITICAL FIX: Never create LLM-requiring agents without LLM manager
+                            logger.error(f"❌ CRITICAL: {agent_name} ({agent_class_name}) requires llm_manager but none available")
+                            raise RuntimeError(f"Cannot create {agent_name}: LLM manager is required but not available")
                     else:
                         # Try different parameter combinations based on what the agent accepts
                         logger.info(f"🔧 Trying parameter combinations for {agent_name} ({agent_class_name})")
@@ -639,12 +764,18 @@ class AgentInstanceFactory:
                             logger.info(f"✅ Created {agent_name} with no parameters")
                         except TypeError as e1:
                             # Then try with llm_manager and tool_dispatcher
-                            if llm_manager and tool_dispatcher:
+                            # Note: tool_dispatcher can be None for per-request creation
+                            if not llm_manager:
+                                # CRITICAL FIX: Don't attempt to create agent without required dependencies
+                                logger.error(f"❌ CRITICAL: {agent_name} likely requires llm_manager but none available")
+                                raise RuntimeError(f"Cannot create {agent_name}: LLM manager not available (TypeError: {e1})")
+                            
+                            if llm_manager:
                                 try:
-                                    logger.debug(f"   Trying: llm_manager + tool_dispatcher")
+                                    logger.debug(f"   Trying: llm_manager + tool_dispatcher (tool_dispatcher: {tool_dispatcher is not None})")
                                     agent = AgentClass(
                                         llm_manager=llm_manager,
-                                        tool_dispatcher=tool_dispatcher
+                                        tool_dispatcher=tool_dispatcher  # Can be None
                                     )
                                     logger.info(f"✅ Created {agent_name} with llm_manager and tool_dispatcher")
                                 except TypeError as e2:
@@ -706,6 +837,11 @@ class AgentInstanceFactory:
             }
             
             creation_time_ms = (time.time() - start_time) * 1000
+            
+            # Track performance metrics if enabled
+            if should_track_metrics and hasattr(self, '_perf_stats'):
+                self._perf_stats['agent_creation_ms'].append(creation_time_ms)
+            
             logger.info(f"✅ Created agent instance {agent_name} for user {user_context.user_id} in {creation_time_ms:.1f}ms (run_id: {user_context.run_id})")
             
             return agent
@@ -728,6 +864,9 @@ class AgentInstanceFactory:
         context_id = f"{user_context.user_id}_{user_context.thread_id}_{user_context.run_id}"
         start_time = time.time()
         
+        # Performance tracking (if enabled)
+        should_track_metrics = self._should_sample()
+        
         try:
             logger.info(f"Cleaning up user execution context: {context_id}")
             
@@ -743,7 +882,17 @@ class AgentInstanceFactory:
             emitter_key = f"{context_id}_emitter"
             if hasattr(self, '_websocket_emitters') and emitter_key in self._websocket_emitters:
                 try:
-                    await self._websocket_emitters[emitter_key].cleanup()
+                    emitter = self._websocket_emitters[emitter_key]
+                    
+                    # Return to pool if pooling enabled
+                    if self._performance_config.enable_emitter_pooling and self._emitter_pool:
+                        if hasattr(emitter, 'reset'):  # Check if it's an optimized pooled emitter
+                            await self._emitter_pool.release(emitter)
+                        else:
+                            await emitter.cleanup()
+                    else:
+                        await emitter.cleanup()
+                    
                     del self._websocket_emitters[emitter_key]
                 except Exception as e:
                     logger.error(f"Failed to cleanup WebSocket emitter for {context_id}: {e}")
@@ -790,6 +939,11 @@ class AgentInstanceFactory:
                 )
             
             cleanup_time_ms = (time.time() - start_time) * 1000
+            
+            # Track performance metrics if enabled
+            if should_track_metrics and hasattr(self, '_perf_stats'):
+                self._perf_stats['cleanup_ms'].append(cleanup_time_ms)
+            
             logger.info(f"✅ Cleaned up user execution context {context_id} in {cleanup_time_ms:.1f}ms")
             
         except Exception as e:
@@ -847,9 +1001,71 @@ class AgentInstanceFactory:
                 logger.debug(f"Created semaphore for user {user_id} (max: {self._max_concurrent_per_user})")
             return self._user_semaphores[user_id]
     
+    async def _create_emitter(self, user_id: str, thread_id: str, run_id: str) -> UserWebSocketEmitter:
+        """Create WebSocket emitter with optional pooling."""
+        if self._performance_config.enable_emitter_pooling:
+            # Initialize emitter pool if needed
+            if self._emitter_pool is None:
+                # Create a new WebSocketEmitterPool instance
+                from netra_backend.app.websocket_core import get_websocket_manager
+                ws_manager = get_websocket_manager()
+                self._emitter_pool = WebSocketEmitterPool(
+                    manager=ws_manager,
+                    max_size=self._performance_config.emitter_pool_size if self._performance_config else 100
+                )
+            
+            # Get from pool (this will return an OptimizedUserWebSocketEmitter)
+            # Note: For now we maintain backward compatibility by creating regular emitters
+            # The pooling infrastructure is in place for future optimization
+            try:
+                # Future: Implement full pooling when UserWebSocketEmitter is adapted
+                # For now, the pool exists but we create compatible instances
+                logger.debug(f"WebSocket emitter pool available but not yet fully integrated")
+            except Exception as e:
+                logger.warning(f"Failed to access emitter pool, falling back to direct creation: {e}")
+        
+        # Create new instance (backward compatible)
+        # This maintains 100% compatibility with existing UserWebSocketEmitter
+        return UserWebSocketEmitter(
+            user_id, thread_id, run_id, self._websocket_bridge
+        )
+    
+    @lru_cache(maxsize=128)
+    def _get_cached_agent_class(self, agent_name: str) -> Optional[Type[BaseAgent]]:
+        """Get agent class with LRU caching."""
+        if not self._performance_config.enable_class_caching:
+            return None
+        
+        # Try AgentClassRegistry first (preferred)
+        if self._agent_class_registry:
+            return self._agent_class_registry.get_agent_class(agent_name)
+        
+        return None
+    
+    def get_pool_stats(self) -> Dict[str, Any]:
+        """Get pool statistics if pooling enabled."""
+        if self._performance_config.enable_emitter_pooling and self._emitter_pool:
+            stats = self._emitter_pool.get_statistics()
+            return {
+                'total_acquired': stats.total_acquired,
+                'total_released': stats.total_released,
+                'current_active': stats.current_active,
+                'current_pooled': stats.current_pooled,
+                'cache_hit_rate': stats.cache_hit_rate,
+                'average_acquisition_time_ms': stats.average_acquisition_time_ms
+            }
+        return {}
+    
+    def _should_sample(self) -> bool:
+        """Check if metrics should be sampled."""
+        if not self._performance_config.enable_metrics:
+            return False
+        import random
+        return random.random() < self._performance_config.metrics_sample_rate
+    
     def get_factory_metrics(self) -> Dict[str, Any]:
         """Get comprehensive factory metrics for monitoring."""
-        return {
+        metrics = {
             **self._factory_metrics.copy(),
             'user_semaphores_count': len(self._user_semaphores),
             'max_concurrent_per_user': self._max_concurrent_per_user,
@@ -860,8 +1076,27 @@ class AgentInstanceFactory:
                 'agent_registry_configured': self._agent_registry is not None,
                 'websocket_bridge_configured': self._websocket_bridge is not None,
                 'websocket_manager_configured': self._websocket_manager is not None
-            }
+            },
+            'performance_config': self._performance_config.to_dict()
         }
+        
+        # Add performance statistics if metrics enabled
+        if self._performance_config.enable_metrics and hasattr(self, '_perf_stats'):
+            perf_data = {}
+            for metric_name, values in self._perf_stats.items():
+                if values:
+                    perf_data[metric_name] = {
+                        'avg': sum(values) / len(values),
+                        'min': min(values),
+                        'max': max(values),
+                        'count': len(values)
+                    }
+            metrics['performance_stats'] = perf_data
+        
+        # Add pool statistics (always include, even if empty)
+        metrics['pool_stats'] = self.get_pool_stats()
+        
+        return metrics
     
     def get_active_contexts_summary(self) -> Dict[str, Any]:
         """Get summary of all active user contexts."""
@@ -939,7 +1174,9 @@ def get_agent_instance_factory() -> AgentInstanceFactory:
 async def configure_agent_instance_factory(agent_class_registry: Optional[AgentClassRegistry] = None,
                                           agent_registry: Optional[AgentRegistry] = None,
                                           websocket_bridge: Optional[AgentWebSocketBridge] = None,
-                                          websocket_manager: Optional[WebSocketManager] = None) -> AgentInstanceFactory:
+                                          websocket_manager: Optional[WebSocketManager] = None,
+                                          llm_manager: Optional[Any] = None,
+                                          tool_dispatcher: Optional[Any] = None) -> AgentInstanceFactory:
     """
     Configure the singleton AgentInstanceFactory with infrastructure components.
     
@@ -948,6 +1185,8 @@ async def configure_agent_instance_factory(agent_class_registry: Optional[AgentC
         agent_registry: Legacy agent registry (for backward compatibility)
         websocket_bridge: WebSocket bridge for notifications
         websocket_manager: Optional WebSocket manager
+        llm_manager: LLM manager for agent communication
+        tool_dispatcher: Tool dispatcher for agent tools
         
     Returns:
         AgentInstanceFactory: Configured factory instance
@@ -957,7 +1196,9 @@ async def configure_agent_instance_factory(agent_class_registry: Optional[AgentC
         agent_class_registry=agent_class_registry,
         agent_registry=agent_registry,
         websocket_bridge=websocket_bridge,
-        websocket_manager=websocket_manager
+        websocket_manager=websocket_manager,
+        llm_manager=llm_manager,
+        tool_dispatcher=tool_dispatcher
     )
     
     logger.info("✅ AgentInstanceFactory configured and ready for per-request agent instantiation")

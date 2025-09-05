@@ -1,93 +1,82 @@
-"""Data models for DataSubAgent."""
+"""
+Data Sub-Agent Models for backward compatibility.
 
-from datetime import datetime
-from enum import Enum
-from typing import Any, Dict, List, Literal, Optional, Union
+Legacy models stub for tests that still import from this module.
+The actual data analysis models have been consolidated into the unified system.
+"""
 
-from pydantic import BaseModel, Field, field_validator
-
-from netra_backend.app.core.serialization.unified_json_handler import (
-    parse_dict_field,
-    parse_list_field as parse_string_list_field,
-)
-
-# Import shared models to avoid duplication
-from netra_backend.app.schemas.shared_types import (
-    AnomalyDetail,
-    AnomalyDetectionResponse,
-    AnomalySeverity,
-    CorrelationAnalysis,
-    DataAnalysisResponse,
-    DataQualityMetrics,
-    PerformanceMetrics,
-    UsagePattern,
-)
-
-# Shared models are now imported from app.schemas.shared_types
+from typing import Any, Dict, List, Optional, Union
+from pydantic import BaseModel, Field
 
 
-# Shared models are now imported from app.schemas.shared_types
-
-
-class BatchProcessingResult(BaseModel):
-    """Result of batch processing operations."""
-    total_items: int = Field(ge=0)
-    successful_items: int = Field(ge=0)
-    failed_items: int = Field(ge=0)
-    success_rate: float = Field(ge=0.0, le=100.0)
-    processing_time_ms: float = Field(ge=0.0)
-    errors: List[Dict[str, Any]] = Field(default_factory=list)
+class AnomalyDetectionResponse(BaseModel):
+    """Legacy anomaly detection response model."""
+    anomalies_found: bool = False
+    anomaly_count: int = 0
+    anomaly_details: List[Dict[str, Any]] = []
+    confidence_score: float = 0.0
     
-    @field_validator('success_rate')
-    @classmethod
-    def calculate_success_rate(cls, v: float) -> float:
-        """Validate success rate is between 0 and 100."""
-        if not 0.0 <= v <= 100.0:
-            raise ValueError('Success rate must be between 0 and 100')
-        return v
+
+class CorrelationAnalysis(BaseModel):
+    """Legacy correlation analysis model."""
+    correlations_found: bool = False
+    correlation_matrix: Dict[str, Dict[str, float]] = {}
+    significant_correlations: List[Dict[str, Any]] = []
 
 
-class CacheMetrics(BaseModel):
-    """Cache performance metrics."""
-    hit_rate: float = Field(ge=0.0, le=100.0)
-    miss_rate: float = Field(ge=0.0, le=100.0)
-    total_requests: int = Field(ge=0)
-    cache_hits: int = Field(ge=0)
-    cache_misses: int = Field(ge=0)
-    average_lookup_time_ms: float = Field(ge=0.0)
+class DataAnalysisResponse(BaseModel):
+    """Legacy data analysis response model."""
+    analysis_type: str = "legacy_stub"
+    results: Dict[str, Any] = {}
+    metrics: Dict[str, float] = {}
+    summary: str = "Legacy stub response"
     
-    @field_validator('miss_rate')
-    @classmethod
-    def calculate_miss_rate(cls, v: float) -> float:
-        """Validate miss rate is between 0 and 100."""
-        if not 0.0 <= v <= 100.0:
-            raise ValueError('Miss rate must be between 0 and 100')
-        return v
+
+class PerformanceInsights(BaseModel):
+    """Legacy performance insights model."""
+    insights: List[Dict[str, Any]] = []
+    recommendations: List[str] = []
+    performance_score: float = 0.0
 
 
-class DataValidationResult(BaseModel):
-    """Result of data validation operations."""
-    is_valid: bool
-    validation_errors: List[str] = Field(default_factory=list)
-    validation_warnings: List[str] = Field(default_factory=list)
-    schema_compliance: float = Field(ge=0.0, le=100.0, default=100.0)
-    data_types_valid: bool = True
-    constraints_satisfied: bool = True
-    validation_time_ms: float = Field(ge=0.0, default=0.0)
+class UsageAnalysisResponse(BaseModel):
+    """Legacy usage analysis response model."""
+    usage_patterns: Dict[str, Any] = {}
+    peak_times: List[str] = []
+    trends: Dict[str, Any] = {}
 
 
-class StreamProcessingMetrics(BaseModel):
-    """Metrics for stream processing operations."""
-    messages_processed: int = Field(ge=0)
-    processing_rate_per_second: float = Field(ge=0.0)
-    average_latency_ms: float = Field(ge=0.0)
-    error_count: int = Field(ge=0)
-    backpressure_events: int = Field(ge=0)
-    buffer_utilization: float = Field(ge=0.0, le=100.0)
-    uptime_percentage: float = Field(ge=0.0, le=100.0)
+class DataQualityMetrics(BaseModel):
+    """Legacy data quality metrics model."""
+    completeness_score: float = 0.0
+    accuracy_score: float = 0.0
+    consistency_score: float = 0.0
+    validity_score: float = 0.0
+    
+
+class PerformanceMetrics(BaseModel):
+    """Legacy performance metrics model."""
+    response_time_ms: float = 0.0
+    throughput_rps: float = 0.0
+    error_rate: float = 0.0
+    availability_percentage: float = 0.0
 
 
-# Type aliases for better readability
-AnalysisResult = Union[DataAnalysisResponse, AnomalyDetectionResponse, BatchProcessingResult]
-MetricsResult = Union[PerformanceMetrics, CacheMetrics, StreamProcessingMetrics]
-ValidationResult = Union[DataValidationResult, Dict[str, Any]]
+class UsagePattern(BaseModel):
+    """Legacy usage pattern model."""
+    pattern_type: str = "unknown"
+    frequency: str = "unknown"
+    peak_hours: List[int] = []
+    usage_volume: int = 0
+
+
+__all__ = [
+    "AnomalyDetectionResponse",
+    "CorrelationAnalysis", 
+    "DataAnalysisResponse",
+    "PerformanceInsights",
+    "UsageAnalysisResponse",
+    "DataQualityMetrics",
+    "PerformanceMetrics", 
+    "UsagePattern"
+]

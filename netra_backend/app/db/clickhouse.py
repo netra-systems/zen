@@ -277,6 +277,121 @@ def _extract_clickhouse_config(config):
         
         return DevClickHouseConfig()
     
+    # CRITICAL FIX: Handle staging environment explicitly
+    elif config.environment == "staging":
+        # For staging environment, use ClickHouse Cloud configuration
+        class StagingClickHouseConfig:
+            def __init__(self):
+                from shared.isolated_environment import get_env
+                from urllib.parse import urlparse, parse_qs
+                env = get_env()
+                
+                # Load ClickHouse URL from environment
+                clickhouse_url = env.get("CLICKHOUSE_URL", "")
+                
+                if not clickhouse_url:
+                    # Try to build from components
+                    host = env.get("CLICKHOUSE_HOST", "")
+                    if host:
+                        port = env.get("CLICKHOUSE_PORT", "8443")
+                        user = env.get("CLICKHOUSE_USER", "default")
+                        password = env.get("CLICKHOUSE_PASSWORD", "")
+                        database = env.get("CLICKHOUSE_DB", "default")
+                        secure = env.get("CLICKHOUSE_SECURE", "true").lower() == "true"
+                        
+                        # Build URL from components
+                        if password:
+                            clickhouse_url = f"clickhouse://{user}:{password}@{host}:{port}/{database}"
+                        else:
+                            clickhouse_url = f"clickhouse://{user}@{host}:{port}/{database}"
+                        if secure:
+                            clickhouse_url += "?secure=1"
+                    else:
+                        # CRITICAL: Must have ClickHouse configuration in staging
+                        logger.error("=" * 80)
+                        logger.error("CLICKHOUSE STAGING CONFIGURATION MISSING")
+                        logger.error("=" * 80)
+                        logger.error("Required: CLICKHOUSE_URL or CLICKHOUSE_HOST environment variable")
+                        logger.error("Expected: clickhouse://user:pass@xedvrr4c3r.us-central1.gcp.clickhouse.cloud:8443/default?secure=1")
+                        logger.error("=" * 80)
+                        raise ConnectionError(
+                            "ClickHouse configuration missing in staging. "
+                            "Set CLICKHOUSE_URL or CLICKHOUSE_HOST environment variable."
+                        )
+                
+                # Parse the URL
+                parsed = urlparse(clickhouse_url)
+                query_params = parse_qs(parsed.query)
+                
+                self.host = parsed.hostname or "xedvrr4c3r.us-central1.gcp.clickhouse.cloud"
+                self.port = parsed.port or 8443
+                self.user = parsed.username or "default"
+                self.password = parsed.password or env.get("CLICKHOUSE_PASSWORD", "")
+                self.database = parsed.path.lstrip('/') or "default"
+                self.secure = query_params.get('secure', ['1'])[0] == '1'
+                
+                # Load password from Secret Manager if not in URL
+                if not self.password:
+                    try:
+                        from netra_backend.app.core.configuration.secrets import SecretManager
+                        secret_manager = SecretManager()
+                        self.password = secret_manager.get_secret("CLICKHOUSE_PASSWORD") or ""
+                        if self.password:
+                            logger.info("[ClickHouse Staging Config] Loaded password from GCP Secret Manager")
+                    except Exception as e:
+                        logger.warning(f"[ClickHouse Staging Config] Could not load password from secrets: {e}")
+                
+                logger.info(f"[ClickHouse Staging Config] Using host={self.host}, port={self.port}, secure={self.secure}")
+        
+        return StagingClickHouseConfig()
+    
+    # CRITICAL FIX: Handle production environment explicitly
+    elif config.environment == "production":
+        # For production environment, use ClickHouse Cloud configuration
+        class ProductionClickHouseConfig:
+            def __init__(self):
+                from shared.isolated_environment import get_env
+                from urllib.parse import urlparse, parse_qs
+                env = get_env()
+                
+                # Load ClickHouse URL from environment (required in production)
+                clickhouse_url = env.get("CLICKHOUSE_URL", "")
+                
+                if not clickhouse_url:
+                    # Production MUST have ClickHouse URL
+                    raise ConnectionError(
+                        "CLICKHOUSE_URL is mandatory in production environment. "
+                        "Configure ClickHouse Cloud connection URL."
+                    )
+                
+                # Parse the URL
+                parsed = urlparse(clickhouse_url)
+                query_params = parse_qs(parsed.query)
+                
+                self.host = parsed.hostname
+                self.port = parsed.port or 8443
+                self.user = parsed.username or "default"
+                self.password = parsed.password or ""
+                self.database = parsed.path.lstrip('/') or "default"
+                self.secure = query_params.get('secure', ['1'])[0] == '1'
+                
+                # Load password from Secret Manager if not in URL
+                if not self.password:
+                    try:
+                        from netra_backend.app.core.configuration.secrets import SecretManager
+                        secret_manager = SecretManager()
+                        self.password = secret_manager.get_secret("CLICKHOUSE_PASSWORD") or ""
+                        if self.password:
+                            logger.info("[ClickHouse Production Config] Loaded password from GCP Secret Manager")
+                    except Exception as e:
+                        logger.error(f"[ClickHouse Production Config] Failed to load password: {e}")
+                        raise
+                
+                logger.info(f"[ClickHouse Production Config] Using host={self.host}, port={self.port}, secure={self.secure}")
+        
+        return ProductionClickHouseConfig()
+    
+    # Fallback for any other environment (shouldn't happen)
     # Use HTTP config for local development, HTTPS for production/remote
     if config.clickhouse_mode == "local":
         # Use HTTP port for local mode
@@ -542,6 +657,7 @@ def _handle_connection_error(e: Exception):
     
     environment = get_env().get("ENVIRONMENT", "development").lower()
     error_str = str(e).lower()
+    clickhouse_required = get_env().get("CLICKHOUSE_REQUIRED", "false").lower() == "true"
     
     # LOUD ERROR DIFFERENTIATION - Make errors super obvious per CLAUDE.md
     if "error code 60" in error_str or "unknown_table" in error_str or "table does not exist" in error_str:
@@ -563,6 +679,15 @@ def _handle_connection_error(e: Exception):
         logger.error(f"Environment: {environment}")
         logger.error(f"Full error: {str(e)}")
         logger.error("=" * 80)
+    elif "required secrets missing" in error_str or "clickhouse_url" in error_str.lower():
+        logger.error("=" * 80)
+        logger.error("CLICKHOUSE CONFIGURATION MISSING")
+        logger.error("=" * 80)
+        logger.error(f"CONFIGURATION ERROR: Required ClickHouse secrets/configuration missing!")
+        logger.error(f"ACTION REQUIRED: Check CLICKHOUSE_URL or CLICKHOUSE_HOST configuration")
+        logger.error(f"Environment: {environment}")
+        logger.error(f"Full error: {str(e)}")
+        logger.error("=" * 80)
     else:
         logger.error("=" * 80)
         logger.error("CLICKHOUSE CONNECTION ERROR")
@@ -572,19 +697,13 @@ def _handle_connection_error(e: Exception):
         logger.error(f"Full error: {str(e)}")
         logger.error("=" * 80)
     
-    # CRITICAL FIX: ClickHouse is always optional in staging - never block startup
-    if environment == "staging":
-        logger.warning("[ClickHouse] Continuing without ClickHouse in staging - analytics features disabled")
-        return  # Never raise in staging - ClickHouse is always optional
+    # CRITICAL FIX: ClickHouse is optional unless explicitly required
+    if not clickhouse_required:
+        logger.warning(f"[ClickHouse] Continuing without ClickHouse in {environment} - analytics features disabled (CLICKHOUSE_REQUIRED=false)")
+        return  # Never raise when ClickHouse is not required
     
-    # In development, ClickHouse is also optional unless explicitly required
-    if environment == "development":
-        clickhouse_required = get_env().get("CLICKHOUSE_REQUIRED", "false").lower() == "true"
-        if not clickhouse_required:
-            logger.warning("[ClickHouse] Continuing without ClickHouse in development - analytics features disabled")
-            return
-    
-    # Only raise in production or when explicitly required
+    # Only raise when ClickHouse is explicitly required
+    logger.error(f"[ClickHouse] ClickHouse connection failed and CLICKHOUSE_REQUIRED=true in {environment}")
     raise
 
 async def _cleanup_client_connection(client):
@@ -643,10 +762,13 @@ class ClickHouseService:
         """
         self.force_mock = force_mock
         self._client = None
+        from netra_backend.app.core.resilience.unified_circuit_breaker import UnifiedCircuitConfig
         self._circuit_breaker = UnifiedCircuitBreaker(
-            name="clickhouse",
-            failure_threshold=5,
-            recovery_timeout=30
+            UnifiedCircuitConfig(
+                name="clickhouse",
+                failure_threshold=5,
+                recovery_timeout=30
+            )
         )
         self._metrics = {"queries": 0, "failures": 0, "timeouts": 0}
     

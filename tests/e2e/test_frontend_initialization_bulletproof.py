@@ -35,9 +35,9 @@ if project_root not in sys.path:
     sys.path.insert(0, project_root)
 
 # Import production components - using real services
-from netra_backend.app.websocket_core.manager import WebSocketManager
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager as WebSocketManager
 from netra_backend.app.auth_integration.auth import AuthService, AuthUser
-from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
+from netra_backend.app.core.registry.universal_registry import AgentRegistry
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.main import app
 from fastapi.testclient import TestClient

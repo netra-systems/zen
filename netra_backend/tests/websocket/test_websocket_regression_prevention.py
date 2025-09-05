@@ -59,7 +59,7 @@ class TestCircularImportPrevention:
     def test_agent_registry_imports_successfully(self):
 
         """Ensure agent registry can be imported."""
-        from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
+        from netra_backend.app.core.registry.universal_registry import AgentRegistry
 
         assert AgentRegistry is not None
     
@@ -101,7 +101,7 @@ class TestAgentRegistration:
 
         llm_manager, tool_dispatcher, _ = real_components
         
-        registry = AgentRegistry(llm_manager, tool_dispatcher)
+        registry = AgentRegistry()
 
         registry.register_default_agents()
         

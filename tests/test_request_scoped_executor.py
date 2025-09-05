@@ -33,7 +33,7 @@ from netra_backend.app.agents.supervisor.user_execution_context import (
 )
 from netra_backend.app.agents.supervisor.execution_context import AgentExecutionResult
 from netra_backend.app.agents.state import DeepAgentState
-from netra_backend.app.services.websocket_event_emitter import WebSocketEventEmitter
+from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmitter as WebSocketEventEmitter
 
 
 class TestRequestScopedAgentExecutor:

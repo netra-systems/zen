@@ -103,7 +103,7 @@ class TestCircularImportRegression:
     def test_agent_registry_accessible_after_imports(self):
         """Verify agent registry is accessible after all imports."""
         # Import in problematic order
-        from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
+        from netra_backend.app.core.registry.universal_registry import AgentRegistry
         from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
         from netra_backend.app.websocket_core.manager import WebSocketManager
         
@@ -116,7 +116,7 @@ class TestCircularImportRegression:
         mock_llm = type('MockLLM', (), {})()
         mock_dispatcher = type('MockDispatcher', (), {})()
         
-        registry = AgentRegistry(mock_llm, mock_dispatcher)
+        registry = AgentRegistry()
         registry.register_default_agents()
         
         # Verify agents are registered

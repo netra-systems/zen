@@ -135,9 +135,11 @@ class ExecutionTracker:
         
         # Shutdown persistence
         if self._persistence:
-            from netra_backend.app.core.trace_persistence import get_execution_persistence
-            persistence = get_execution_persistence()
-            await persistence.shutdown()
+            # trace_persistence module removed - functionality disabled
+            # from netra_backend.app.core.trace_persistence import get_execution_persistence
+            # persistence = get_execution_persistence()
+            # await persistence.shutdown()
+            pass
     
     async def _monitor_executions(self):
         """Monitor all executions for timeouts and deaths."""
@@ -385,9 +387,11 @@ class ExecutionTracker:
         """Ensure persistence is initialized."""
         if not self._persistence:
             try:
-                from netra_backend.app.core.trace_persistence import get_execution_persistence
-                self._persistence = get_execution_persistence()
-                await self._persistence.ensure_started()
+                # trace_persistence module removed - functionality disabled
+                # from netra_backend.app.core.trace_persistence import get_execution_persistence
+                # self._persistence = get_execution_persistence()
+                # await self._persistence.ensure_started()
+                self._persistence = None
             except Exception as e:
                 logger.warning(f"Failed to initialize persistence: {e}")
                 self._persistence = None

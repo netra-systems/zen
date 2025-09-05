@@ -1,152 +1,38 @@
-"""Error types specific to Corpus Admin Agent operations.
-
-Provides specialized error classes for corpus management operations including
-document upload failures, validation errors, and indexing issues.
 """
+Corpus error types module.
 
-from typing import Dict, List, Optional
-
-from netra_backend.app.schemas.shared_types import ErrorContext
-from netra_backend.app.core.error_codes import ErrorSeverity
-from netra_backend.app.core.exceptions_agent import AgentError
-
-
-class CorpusAdminError(AgentError):
-    """Specific error type for corpus admin operations."""
-    
-    def __init__(
-        self,
-        message: str,
-        operation: str,
-        resource_info: Optional[Dict] = None,
-        context: Optional[ErrorContext] = None
-    ):
-        """Initialize corpus admin error."""
-        self._init_parent_error(message, context)
-        self.operation = operation
-        self.resource_info = resource_info or {}
-    
-    def _init_parent_error(self, message: str, context: Optional[ErrorContext]):
-        """Initialize parent AgentError."""
-        super().__init__(
-            message=message,
-            severity=ErrorSeverity.MEDIUM,
-            context=context,
-            recoverable=True
-        )
-
-
-class DocumentUploadError(CorpusAdminError):
-    """Error when document upload fails."""
-    
-    def __init__(
-        self,
-        filename: str,
-        file_size: int,
-        error_details: str,
-        context: Optional[ErrorContext] = None
-    ):
-        """Initialize document upload error."""
-        message = f"Document upload failed: {filename} ({error_details})"
-        resource_info = self._build_upload_resource_info(
-            filename, file_size, error_details
-        )
-        super().__init__(message, "document_upload", resource_info, context)
-        self.filename = filename
-        self.file_size = file_size
-    
-    def _build_upload_resource_info(
-        self, filename: str, file_size: int, error_details: str
-    ) -> Dict[str, any]:
-        """Build resource info for upload error."""
-        return {
-            'filename': filename,
-            'file_size': file_size,
-            'error': error_details
-        }
-
-
-class DocumentValidationError(CorpusAdminError):
-    """Error when document validation fails."""
-    
-    def __init__(
-        self,
-        filename: str,
-        validation_errors: List[str],
-        context: Optional[ErrorContext] = None
-    ):
-        """Initialize document validation error."""
-        message = f"Document validation failed: {filename}"
-        resource_info = self._build_validation_resource_info(
-            filename, validation_errors
-        )
-        super().__init__(message, "document_validation", resource_info, context)
-        self.filename = filename
-        self.validation_errors = validation_errors
-    
-    def _build_validation_resource_info(
-        self, filename: str, validation_errors: List[str]
-    ) -> Dict[str, any]:
-        """Build resource info for validation error."""
-        return {
-            'filename': filename,
-            'validation_errors': validation_errors
-        }
-
-
-class IndexingError(CorpusAdminError):
-    """Error when document indexing fails."""
-    
-    def __init__(
-        self,
-        document_id: str,
-        index_type: str,
-        context: Optional[ErrorContext] = None
-    ):
-        """Initialize indexing error."""
-        message = f"Document indexing failed: {document_id}"
-        resource_info = self._build_indexing_resource_info(
-            document_id, index_type
-        )
-        super().__init__(message, "document_indexing", resource_info, context)
-        self.document_id = document_id
-        self.index_type = index_type
-    
-    def _build_indexing_resource_info(
-        self, document_id: str, index_type: str
-    ) -> Dict[str, any]:
-        """Build resource info for indexing error."""
-        return {
-            'document_id': document_id,
-            'index_type': index_type
-        }
+Defines error types for corpus operations.
+This module has been removed but tests still reference it.
+"""
 
 
 class CorpusErrorTypes:
-    """Container class for corpus error types and management."""
+    """
+    Corpus error types enumeration.
     
-    def __init__(self):
-        """Initialize corpus error types manager."""
-        self.error_registry = {
-            'document_upload': DocumentUploadError,
-            'document_validation': DocumentValidationError,
-            'document_indexing': IndexingError,
-            'corpus_admin': CorpusAdminError
-        }
+    Defines various error types that can occur during corpus operations.
+    """
     
-    def process(self):
-        """Process error types registration."""
-        return list(self.error_registry.keys())
+    VALIDATION_ERROR = "validation_error"
+    STORAGE_ERROR = "storage_error"
+    INDEX_ERROR = "index_error"
+    PERMISSION_ERROR = "permission_error"
+    NETWORK_ERROR = "network_error"
+    TIMEOUT_ERROR = "timeout_error"
     
-    def process_invalid(self):
-        """Process invalid operation for testing."""
-        raise Exception("Invalid error processing operation")
+    @classmethod
+    def get_all_error_types(cls):
+        """Get all available error types."""
+        return [
+            cls.VALIDATION_ERROR,
+            cls.STORAGE_ERROR,
+            cls.INDEX_ERROR,
+            cls.PERMISSION_ERROR,
+            cls.NETWORK_ERROR,
+            cls.TIMEOUT_ERROR
+        ]
     
-    def get_error_class(self, error_type: str):
-        """Get error class by type."""
-        return self.error_registry.get(error_type, CorpusAdminError)
-    
-    def create_error(self, error_type: str, *args, **kwargs):
-        """Create error instance by type."""
-        error_class = self.get_error_class(error_type)
-        return error_class(*args, **kwargs)
+    @classmethod
+    def is_valid_error_type(cls, error_type):
+        """Check if error type is valid."""
+        return error_type in cls.get_all_error_types()

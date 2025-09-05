@@ -286,7 +286,24 @@ class ClickHouseConnectionManager:
         """
         try:
             # Import ClickHouse client dynamically to avoid startup issues
-            from netra_backend.app.db.clickhouse import get_clickhouse_client
+            from netra_backend.app.db.clickhouse import get_clickhouse_client, get_clickhouse_config
+            
+            # CRITICAL: Validate configuration before attempting connection
+            try:
+                config = get_clickhouse_config()
+                if not config or not hasattr(config, 'host') or not config.host:
+                    logger.error("=" * 80)
+                    logger.error("CLICKHOUSE CONFIGURATION MISSING")
+                    logger.error("=" * 80)
+                    logger.error("Required environment variables not set:")
+                    logger.error("  - CLICKHOUSE_URL or")
+                    logger.error("  - CLICKHOUSE_HOST, CLICKHOUSE_USER, CLICKHOUSE_PASSWORD")
+                    logger.error("Example: CLICKHOUSE_URL=clickhouse://user:pass@localhost:8123/database")
+                    logger.error("=" * 80)
+                    raise ConnectionError("ClickHouse configuration not found - check environment variables")
+            except Exception as config_error:
+                logger.error(f"[ClickHouse Connection Manager] Configuration validation failed: {config_error}")
+                raise
             
             # Test connection with a simple query
             # CRITICAL FIX: Use bypass_manager=True to prevent recursion
@@ -299,7 +316,24 @@ class ClickHouseConnectionManager:
                     logger.warning("[ClickHouse Connection Manager] Connection test query returned empty result")
                     return False
                     
+        except ConnectionError:
+            # Re-raise configuration errors as-is
+            raise
         except Exception as e:
+            # Enhanced error reporting for connection issues
+            error_str = str(e).lower()
+            if "connection refused" in error_str or "cannot connect" in error_str:
+                logger.error("=" * 80)
+                logger.error("CLICKHOUSE CONNECTION REFUSED")
+                logger.error("=" * 80)
+                logger.error("ClickHouse service is not accessible. Check:")
+                logger.error("  1. Is ClickHouse container/service running?")
+                logger.error("     Run: podman ps | grep clickhouse")
+                logger.error("  2. Are ports configured correctly?")
+                logger.error("     Expected: localhost:8124 (dev) or localhost:8125 (test)")
+                logger.error("  3. Start ClickHouse if needed:")
+                logger.error("     Run: podman start <clickhouse-container-name>")
+                logger.error("=" * 80)
             logger.debug(f"[ClickHouse Connection Manager] Connection attempt failed: {e}")
             raise
     

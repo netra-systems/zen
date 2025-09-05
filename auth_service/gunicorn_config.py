@@ -1,30 +1,54 @@
 """
 Gunicorn configuration for Auth Service
-Optimized for GCP Cloud Run with proper worker management
+Uses SSOT AuthEnvironment for all configuration access.
 """
 import os
 import multiprocessing
 import signal
 import sys
 
-# Import IsolatedEnvironment for consistent environment access
+# Use SSOT AuthEnvironment for all configuration
 try:
-    from shared.isolated_environment import get_env
+    from auth_service.auth_core.auth_environment import get_auth_env
+    auth_env = get_auth_env()
+    environment = auth_env.get_environment()
 except ImportError:
-    # Fallback for when imports may not be available during gunicorn setup
-    def get_env():
-        class FallbackEnv:
-            def get(self, key, default=None):
-                return get_env().get(key, default)
-        return FallbackEnv()
+    # Fallback for when AuthEnvironment is not available during bootstrap
+    environment = os.environ.get('ENVIRONMENT', 'development').lower()
+    if environment not in ['production', 'staging', 'development', 'test']:
+        environment = 'development'
 
-# Server socket
-bind = f"0.0.0.0:{get_env().get('PORT', '8080')}"
+# Server socket with environment-specific defaults using SSOT
+try:
+    port = str(auth_env.get_auth_service_port())
+    host = auth_env.get_auth_service_host()
+except (NameError, AttributeError):
+    # Fallback when AuthEnvironment not available
+    port = os.environ.get('PORT', '8081')
+    host = "0.0.0.0"
+
+bind = f"{host}:{port}"
 backlog = 2048
 
-# Worker processes
-# Cloud Run recommends 1-2 workers for CPU-optimized instances
-workers = int(get_env().get('GUNICORN_WORKERS', '2'))
+# Worker processes with environment-specific defaults
+try:
+    worker_count = os.environ.get('GUNICORN_WORKERS')
+    if not worker_count:
+        if environment == 'production':
+            workers = min(multiprocessing.cpu_count() * 2 + 1, 4)  # Production scaling
+        elif environment == 'staging':
+            workers = 2  # Moderate workers for staging
+        elif environment == 'development':
+            workers = 1  # Single worker for development
+        elif environment == 'test':
+            workers = 1  # Single worker for test isolation
+        else:
+            workers = 2  # Safe default
+    else:
+        workers = int(worker_count)
+except Exception:
+    workers = 2  # Safe fallback
+
 worker_class = 'uvicorn.workers.UvicornWorker'
 worker_connections = 1000
 max_requests = 1000  # Restart workers after this many requests to prevent memory leaks
@@ -33,23 +57,62 @@ timeout = 120  # Worker timeout
 graceful_timeout = 30  # Time to wait for workers to finish serving requests during restart
 keepalive = 5  # Seconds to wait for requests on Keep-Alive connections
 
-# Threading
-threads = int(get_env().get('GUNICORN_THREADS', '4'))
+# Threading with environment-specific defaults
+try:
+    thread_count = os.environ.get('GUNICORN_THREADS')
+    if not thread_count:
+        if environment == 'production':
+            threads = 4  # Standard threading for production
+        elif environment == 'staging':
+            threads = 4  # Production-like for staging
+        elif environment == 'development':
+            threads = 2  # Fewer threads for development
+        elif environment == 'test':
+            threads = 1  # Minimal threading for tests
+        else:
+            threads = 4  # Safe default
+    else:
+        threads = int(thread_count)
+except Exception:
+    threads = 4  # Safe fallback
+
 thread_type = 'gthread'
 
 # Process naming
 proc_name = 'netra-auth-service'
 
-# Logging
+# Logging with environment-specific defaults using SSOT
 accesslog = '-'
 errorlog = '-'
-loglevel = get_env().get('LOG_LEVEL', 'info').lower()
+
+try:
+    loglevel = auth_env.get_log_level().lower()
+except (NameError, AttributeError):
+    # Fallback when AuthEnvironment not available
+    log_level = os.environ.get('LOG_LEVEL')
+    if not log_level:
+        if environment == 'production':
+            loglevel = 'warning'  # Less verbose in production
+        elif environment == 'staging':
+            loglevel = 'info'     # Standard info level for staging
+        elif environment == 'development':
+            loglevel = 'debug'    # Verbose debugging in development
+        elif environment == 'test':
+            loglevel = 'error'    # Minimal logging in tests
+        else:
+            loglevel = 'info'     # Safe default
+    else:
+        loglevel = log_level.lower()
+
 access_log_format = '%(h)s %(l)s %(u)s %(t)s "%(r)s" %(s)s %(b)s "%(f)s" "%(a)s" %(D)s'
 
-# Stats
-statsd_host = get_env().get('STATSD_HOST', None)
+# Stats - only configure if explicitly set
+statsd_host = os.environ.get('STATSD_HOST')
 if statsd_host:
     statsd_prefix = 'netra.auth.gunicorn'
+else:
+    # No default statsd configuration - only use when explicitly configured
+    pass
 
 # Server mechanics
 daemon = False

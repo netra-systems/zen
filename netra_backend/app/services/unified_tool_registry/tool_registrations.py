@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING
 from netra_backend.app.services.unified_tool_registry.models import UnifiedTool
 
 if TYPE_CHECKING:
-    from netra_backend.app.services.unified_tool_registry.registry import UnifiedToolRegistry
+    from netra_backend.app.core.registry.universal_registry import ToolRegistry as UnifiedToolRegistry
 
 
 class ToolRegistrationMixin:

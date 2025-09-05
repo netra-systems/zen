@@ -38,7 +38,7 @@ export const FinalReportView: React.FC<FinalReportProps> = ({ reportData }) => {
   const toggleSection = createToggleSection(setExpandedSections);
 
   return (
-    <div className="w-full max-w-6xl mx-auto p-6 space-y-6">
+    <div className="w-full max-w-6xl mx-auto p-3 space-y-3">
       <ReportHeader reportData={reportData} />
       
       <ExecutiveSummary finalReport={reportData.final_report} />

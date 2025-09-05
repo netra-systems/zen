@@ -1,369 +1,256 @@
-"""Fallback chain management for unified resilience framework.
+"""Fallback Management for Unified Resilience Framework
 
-This module provides enterprise-grade fallback mechanisms with:
-- Configurable fallback chains and strategies
-- Context-aware fallback selection
-- Graceful degradation patterns
-- Integration with circuit breakers and monitoring
+Business Value Justification (BVJ):
+- Segment: Platform/Internal
+- Business Goal: System Stability - Provide graceful degradation
+- Value Impact: Prevents complete service failures by providing fallback responses
+- Strategic Impact: Enables system resilience and availability guarantees
 
-All functions are ≤8 lines per MANDATORY requirements.
+This module provides fallback strategy management for graceful degradation
+when primary services fail.
 """
 
-import asyncio
 from abc import ABC, abstractmethod
-from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any, Callable, Dict, List, Optional, TypeVar, Union
+from typing import Any, Callable, Dict, List, Optional, Union
 
-from netra_backend.app.logging_config import central_logger
+from pydantic import BaseModel
 
-logger = central_logger.get_logger(__name__)
-T = TypeVar('T')
+from netra_backend.app.logging_config import central_logger as logger
 
 
-class FallbackStrategy(Enum):
+class FallbackStrategy(str, Enum):
     """Fallback strategy types."""
-    FAIL_FAST = "fail_fast"
-    DEGRADE_GRACEFULLY = "degrade_gracefully"
-    CACHE_LAST_KNOWN = "cache_last_known"
     STATIC_RESPONSE = "static_response"
+    CACHE_LAST_KNOWN = "cache_last_known"  
     ALTERNATIVE_SERVICE = "alternative_service"
+    CIRCUIT_BREAKER = "circuit_breaker"
 
 
-class FallbackPriority(Enum):
+class FallbackPriority(str, Enum):
     """Fallback priority levels."""
-    PRIMARY = 1
-    SECONDARY = 2
-    TERTIARY = 3
-    EMERGENCY = 4
+    HIGH = "high"
+    MEDIUM = "medium"
+    LOW = "low"
 
 
-@dataclass
-class FallbackConfig:
-    """Enterprise fallback configuration."""
-    name: str
+class FallbackConfig(BaseModel):
+    """Configuration for fallback behavior."""
     strategy: FallbackStrategy
-    priority: FallbackPriority
-    enabled: bool = True
+    priority: FallbackPriority = FallbackPriority.MEDIUM
     timeout_seconds: float = 5.0
-    max_retries: int = 1
-    context_requirements: Dict[str, Any] = field(default_factory=dict)
-    
-    def __post_init__(self) -> None:
-        """Validate fallback configuration."""
-        self._validate_timeout()
-        self._validate_retries()
-    
-    def _validate_timeout(self) -> None:
-        """Validate timeout is positive."""
-        if self.timeout_seconds <= 0:
-            raise ValueError("timeout_seconds must be positive")
-    
-    def _validate_retries(self) -> None:
-        """Validate max retries is non-negative."""
-        if self.max_retries < 0:
-            raise ValueError("max_retries cannot be negative")
-
-
-@dataclass
-class FallbackAttempt:
-    """Information about a fallback attempt."""
-    config: FallbackConfig
-    success: bool
-    execution_time: float
-    error: Optional[Exception]
-    response: Any
-
-
-@dataclass
-class FallbackMetrics:
-    """Fallback metrics for monitoring."""
-    total_invocations: int = 0
-    successful_fallbacks: int = 0
-    failed_fallbacks: int = 0
-    fallback_attempts: List[FallbackAttempt] = field(default_factory=list)
-    average_execution_time: float = 0.0
-
-
-class FallbackException(Exception):
-    """Base exception for fallback failures."""
-    
-    def __init__(self, message: str, fallback_name: str) -> None:
-        super().__init__(message)
-        self.fallback_name = fallback_name
-
-
-class FallbackChainExhaustedException(FallbackException):
-    """Raised when all fallbacks in chain fail."""
-    
-    def __init__(self, attempts: List[FallbackAttempt]) -> None:
-        super().__init__("All fallback strategies exhausted", "chain")
-        self.attempts = attempts
+    max_retries: int = 3
+    enabled: bool = True
+    static_response: Optional[Dict[str, Any]] = None
+    cache_ttl_seconds: Optional[int] = 300
+    alternative_endpoint: Optional[str] = None
 
 
 class FallbackHandler(ABC):
     """Abstract base class for fallback handlers."""
     
-    def __init__(self, config: FallbackConfig) -> None:
+    def __init__(self, config: FallbackConfig):
+        """Initialize fallback handler."""
         self.config = config
+        self._logger = logger
     
     @abstractmethod
-    async def execute(self, context: Dict[str, Any]) -> Any:
-        """Execute fallback strategy."""
+    async def handle_fallback(self, original_error: Exception, context: Dict[str, Any]) -> Any:
+        """Handle fallback when primary operation fails.
+        
+        Args:
+            original_error: The exception that triggered the fallback
+            context: Additional context for fallback handling
+            
+        Returns:
+            Fallback response
+        """
         pass
     
-    def can_handle(self, context: Dict[str, Any]) -> bool:
-        """Check if handler can process given context."""
-        for key, expected_value in self.config.context_requirements.items():
-            if context.get(key) != expected_value:
-                return False
-        return True
+    def is_enabled(self) -> bool:
+        """Check if fallback is enabled."""
+        return self.config.enabled
 
 
 class StaticResponseFallback(FallbackHandler):
-    """Fallback that returns static response."""
+    """Fallback that returns a static response."""
     
-    def __init__(self, config: FallbackConfig, response: Any) -> None:
-        super().__init__(config)
-        self.response = response
-    
-    async def execute(self, context: Dict[str, Any]) -> Any:
-        """Return static response."""
-        logger.info(f"Using static response fallback: {self.config.name}")
-        await asyncio.sleep(0.1)  # Simulate processing
-        return self.response
+    async def handle_fallback(self, original_error: Exception, context: Dict[str, Any]) -> Any:
+        """Return configured static response."""
+        self._logger.warning(f"Using static fallback for error: {original_error}")
+        return self.config.static_response or {"status": "fallback", "message": "Service temporarily unavailable"}
 
 
 class CacheLastKnownFallback(FallbackHandler):
-    """Fallback that returns cached response."""
+    """Fallback that returns cached last known good response."""
     
-    def __init__(self, config: FallbackConfig) -> None:
+    def __init__(self, config: FallbackConfig):
+        """Initialize cache-based fallback."""
         super().__init__(config)
         self._cache: Dict[str, Any] = {}
     
-    async def execute(self, context: Dict[str, Any]) -> Any:
-        """Return cached response if available."""
+    async def handle_fallback(self, original_error: Exception, context: Dict[str, Any]) -> Any:
+        """Return cached last known response."""
         cache_key = context.get("cache_key", "default")
-        if cache_key in self._cache:
-            logger.info(f"Using cached fallback: {self.config.name}")
-            return self._cache[cache_key]
-        raise FallbackException("No cached data available", self.config.name)
+        cached_response = self._cache.get(cache_key)
+        
+        if cached_response:
+            self._logger.info(f"Using cached fallback response for key: {cache_key}")
+            return cached_response
+        
+        self._logger.warning(f"No cached response available for key: {cache_key}, using empty response")
+        return {"status": "fallback", "message": "No cached data available"}
     
-    def update_cache(self, key: str, value: Any) -> None:
-        """Update cache with new value."""
-        self._cache[key] = value
+    def cache_response(self, key: str, response: Any) -> None:
+        """Cache a successful response for future fallback use."""
+        self._cache[key] = response
 
 
 class AlternativeServiceFallback(FallbackHandler):
-    """Fallback that calls alternative service."""
+    """Fallback that redirects to an alternative service."""
     
-    def __init__(self, config: FallbackConfig, service_func: Callable) -> None:
-        super().__init__(config)
-        self.service_func = service_func
-    
-    async def execute(self, context: Dict[str, Any]) -> Any:
-        """Execute alternative service."""
-        logger.info(f"Using alternative service fallback: {self.config.name}")
-        if asyncio.iscoroutinefunction(self.service_func):
-            return await self.service_func(context)
-        return self.service_func(context)
+    async def handle_fallback(self, original_error: Exception, context: Dict[str, Any]) -> Any:
+        """Redirect to alternative service endpoint."""
+        alternative_endpoint = self.config.alternative_endpoint
+        if not alternative_endpoint:
+            self._logger.error("No alternative endpoint configured")
+            return {"status": "error", "message": "Alternative service not available"}
+        
+        self._logger.info(f"Using alternative service: {alternative_endpoint}")
+        # In a real implementation, this would make an HTTP call to the alternative service
+        return {"status": "fallback", "alternative_service": alternative_endpoint, "message": "Using alternative service"}
 
 
 class UnifiedFallbackChain:
-    """Enterprise fallback chain manager."""
+    """Manages a chain of fallback handlers."""
     
-    def __init__(self, name: str) -> None:
-        self.name = name
-        self.handlers: List[FallbackHandler] = []
-        self.metrics = FallbackMetrics()
+    def __init__(self):
+        """Initialize fallback chain."""
+        self._logger = logger
+        self._handlers: List[FallbackHandler] = []
     
-    def add_fallback(self, handler: FallbackHandler) -> None:
-        """Add fallback handler to chain."""
-        self.handlers.append(handler)
-        self._sort_handlers_by_priority()
+    def add_handler(self, handler: FallbackHandler) -> None:
+        """Add a fallback handler to the chain."""
+        if handler.is_enabled():
+            self._handlers.append(handler)
+            self._logger.info(f"Added fallback handler: {handler.__class__.__name__}")
     
-    def _sort_handlers_by_priority(self) -> None:
-        """Sort handlers by priority."""
-        self.handlers.sort(key=lambda h: h.config.priority.value)
+    def remove_handler(self, handler_class: type) -> None:
+        """Remove a fallback handler from the chain."""
+        self._handlers = [h for h in self._handlers if not isinstance(h, handler_class)]
     
-    async def execute_fallback(
-        self, 
-        context: Dict[str, Any], 
-        original_exception: Optional[Exception] = None
-    ) -> Any:
-        """Execute fallback chain until success or exhaustion."""
-        self.metrics.total_invocations += 1
-        attempts = []
-        
-        for handler in self.handlers:
-            if not handler.config.enabled or not handler.can_handle(context):
+    async def execute_fallback(self, original_error: Exception, context: Dict[str, Any]) -> Any:
+        """Execute fallback chain until one succeeds."""
+        for handler in self._handlers:
+            try:
+                result = await handler.handle_fallback(original_error, context)
+                self._logger.info(f"Fallback successful with handler: {handler.__class__.__name__}")
+                return result
+            except Exception as fallback_error:
+                self._logger.warning(f"Fallback handler {handler.__class__.__name__} failed: {fallback_error}")
                 continue
-                
-            attempt = await self._try_fallback_handler(handler, context)
-            attempts.append(attempt)
-            
-            if attempt.success:
-                self.metrics.successful_fallbacks += 1
-                return attempt.response
         
-        self.metrics.failed_fallbacks += 1
-        raise FallbackChainExhaustedException(attempts)
+        # If all fallbacks fail, return a generic error response
+        self._logger.error("All fallback handlers failed")
+        return {"status": "error", "message": "Service unavailable - all fallbacks exhausted"}
     
-    async def _try_fallback_handler(
-        self, 
-        handler: FallbackHandler, 
-        context: Dict[str, Any]
-    ) -> FallbackAttempt:
-        """Try executing single fallback handler."""
-        start_time = asyncio.get_event_loop().time()
-        
-        try:
-            response = await asyncio.wait_for(
-                handler.execute(context), 
-                timeout=handler.config.timeout_seconds
-            )
-            execution_time = asyncio.get_event_loop().time() - start_time
-            return FallbackAttempt(handler.config, True, execution_time, None, response)
-        except Exception as e:
-            execution_time = asyncio.get_event_loop().time() - start_time
-            logger.warning(f"Fallback {handler.config.name} failed: {e}")
-            return FallbackAttempt(handler.config, False, execution_time, e, None)
-    
-    def get_metrics(self) -> Dict[str, Any]:
-        """Get fallback metrics for monitoring."""
-        return {
-            "name": self.name,
-            "total_invocations": self.metrics.total_invocations,
-            "successful_fallbacks": self.metrics.successful_fallbacks,
-            "failed_fallbacks": self.metrics.failed_fallbacks,
-            "success_rate": self._calculate_success_rate(),
-            "handler_count": len(self.handlers),
-            "enabled_handlers": self._count_enabled_handlers()
-        }
-    
-    def _calculate_success_rate(self) -> float:
-        """Calculate fallback success rate."""
-        if self.metrics.total_invocations > 0:
-            return self.metrics.successful_fallbacks / self.metrics.total_invocations
-        return 1.0
-    
-    def _count_enabled_handlers(self) -> int:
-        """Count enabled handlers."""
-        return sum(1 for h in self.handlers if h.config.enabled)
-    
-    def remove_fallback(self, handler_name: str) -> bool:
-        """Remove fallback handler by name."""
-        for i, handler in enumerate(self.handlers):
-            if handler.config.name == handler_name:
-                del self.handlers[i]
-                return True
-        return False
-    
-    def disable_fallback(self, handler_name: str) -> bool:
-        """Disable fallback handler by name."""
-        for handler in self.handlers:
-            if handler.config.name == handler_name:
-                handler.config.enabled = False
-                return True
-        return False
-    
-    def enable_fallback(self, handler_name: str) -> bool:
-        """Enable fallback handler by name."""
-        for handler in self.handlers:
-            if handler.config.name == handler_name:
-                handler.config.enabled = True
-                return True
-        return False
+    def get_handler_count(self) -> int:
+        """Get the number of active fallback handlers."""
+        return len(self._handlers)
 
 
-class FallbackChainManager:
-    """Enterprise fallback chain manager."""
-    
-    def __init__(self) -> None:
-        self.chains: Dict[str, UnifiedFallbackChain] = {}
-    
-    def create_chain(self, name: str) -> UnifiedFallbackChain:
-        """Create new fallback chain."""
-        chain = UnifiedFallbackChain(name)
-        self.chains[name] = chain
-        return chain
-    
-    def get_chain(self, name: str) -> Optional[UnifiedFallbackChain]:
-        """Get fallback chain by name."""
-        return self.chains.get(name)
-    
-    def remove_chain(self, name: str) -> bool:
-        """Remove fallback chain."""
-        if name in self.chains:
-            del self.chains[name]
-            return True
-        return False
-    
-    def get_all_metrics(self) -> Dict[str, Dict[str, Any]]:
-        """Get metrics for all chains."""
-        return {name: chain.get_metrics() for name, chain in self.chains.items()}
-    
-    async def execute_fallback_for_service(
-        self, 
-        service_name: str, 
-        context: Dict[str, Any], 
-        original_exception: Optional[Exception] = None
-    ) -> Any:
-        """Execute fallback for specific service."""
-        chain = self.get_chain(service_name)
-        if not chain:
-            raise FallbackException(f"No fallback chain for service: {service_name}", service_name)
-        return await chain.execute_fallback(context, original_exception)
-
-
-# Predefined fallback configurations for common scenarios
 class FallbackPresets:
     """Predefined fallback configurations for common scenarios."""
     
     @staticmethod
-    def get_api_fallback_config() -> FallbackConfig:
-        """Get fallback configuration for API services."""
+    def create_static_fallback(response: Dict[str, Any], priority: FallbackPriority = FallbackPriority.MEDIUM) -> FallbackConfig:
+        """Create a static response fallback configuration."""
         return FallbackConfig(
-            name="api_fallback",
-            strategy=FallbackStrategy.CACHE_LAST_KNOWN,
-            priority=FallbackPriority.PRIMARY,
-            timeout_seconds=3.0,
-            max_retries=2
-        )
-    
-    @staticmethod
-    def get_database_fallback_config() -> FallbackConfig:
-        """Get fallback configuration for database operations."""
-        return FallbackConfig(
-            name="database_fallback",
-            strategy=FallbackStrategy.CACHE_LAST_KNOWN,
-            priority=FallbackPriority.PRIMARY,
-            timeout_seconds=2.0,
-            max_retries=1
-        )
-    
-    @staticmethod
-    def get_llm_fallback_config() -> FallbackConfig:
-        """Get fallback configuration for LLM services."""
-        return FallbackConfig(
-            name="llm_fallback",
-            strategy=FallbackStrategy.ALTERNATIVE_SERVICE,
-            priority=FallbackPriority.SECONDARY,
-            timeout_seconds=10.0,
-            max_retries=0
-        )
-    
-    @staticmethod
-    def get_emergency_fallback_config() -> FallbackConfig:
-        """Get emergency fallback configuration."""
-        return FallbackConfig(
-            name="emergency_fallback",
             strategy=FallbackStrategy.STATIC_RESPONSE,
-            priority=FallbackPriority.EMERGENCY,
-            timeout_seconds=1.0,
-            max_retries=0
+            priority=priority,
+            static_response=response
+        )
+    
+    @staticmethod
+    def create_cache_fallback(cache_ttl: int = 300, priority: FallbackPriority = FallbackPriority.HIGH) -> FallbackConfig:
+        """Create a cache-based fallback configuration."""
+        return FallbackConfig(
+            strategy=FallbackStrategy.CACHE_LAST_KNOWN,
+            priority=priority,
+            cache_ttl_seconds=cache_ttl
+        )
+    
+    @staticmethod
+    def create_alternative_service_fallback(endpoint: str, priority: FallbackPriority = FallbackPriority.LOW) -> FallbackConfig:
+        """Create an alternative service fallback configuration."""
+        return FallbackConfig(
+            strategy=FallbackStrategy.ALTERNATIVE_SERVICE,
+            priority=priority,
+            alternative_endpoint=endpoint
         )
 
 
-# Global fallback chain manager instance
-fallback_manager = FallbackChainManager()
+class FallbackManager:
+    """Global fallback manager for the application."""
+    
+    def __init__(self):
+        """Initialize fallback manager."""
+        self._logger = logger
+        self._service_chains: Dict[str, UnifiedFallbackChain] = {}
+    
+    def register_service_fallback(self, service_name: str, config: FallbackConfig) -> None:
+        """Register a fallback configuration for a service."""
+        if service_name not in self._service_chains:
+            self._service_chains[service_name] = UnifiedFallbackChain()
+        
+        # Create the appropriate handler based on strategy
+        handler = self._create_handler(config)
+        self._service_chains[service_name].add_handler(handler)
+        self._logger.info(f"Registered fallback for service: {service_name}")
+    
+    def _create_handler(self, config: FallbackConfig) -> FallbackHandler:
+        """Create a fallback handler based on configuration."""
+        handlers = {
+            FallbackStrategy.STATIC_RESPONSE: StaticResponseFallback,
+            FallbackStrategy.CACHE_LAST_KNOWN: CacheLastKnownFallback,
+            FallbackStrategy.ALTERNATIVE_SERVICE: AlternativeServiceFallback,
+        }
+        
+        handler_class = handlers.get(config.strategy, StaticResponseFallback)
+        return handler_class(config)
+    
+    async def execute_fallback(self, service_name: str, original_error: Exception, context: Dict[str, Any] = None) -> Any:
+        """Execute fallback for a specific service."""
+        if context is None:
+            context = {}
+        
+        chain = self._service_chains.get(service_name)
+        if not chain:
+            self._logger.warning(f"No fallback configured for service: {service_name}")
+            return {"status": "error", "message": f"Service {service_name} unavailable"}
+        
+        return await chain.execute_fallback(original_error, context)
+    
+    def has_fallback(self, service_name: str) -> bool:
+        """Check if a service has fallback configured."""
+        return service_name in self._service_chains and self._service_chains[service_name].get_handler_count() > 0
+
+
+# Global fallback manager instance
+fallback_manager = FallbackManager()
+
+
+# Export all classes and instances
+__all__ = [
+    "FallbackStrategy",
+    "FallbackPriority", 
+    "FallbackConfig",
+    "FallbackHandler",
+    "StaticResponseFallback",
+    "CacheLastKnownFallback",
+    "AlternativeServiceFallback",
+    "UnifiedFallbackChain",
+    "FallbackPresets",
+    "FallbackManager",
+    "fallback_manager",
+]

@@ -19,7 +19,7 @@ from datetime import datetime, timezone
 from typing import Dict, List, Optional, Tuple
 
 from auth_service.auth_core.core.jwt_handler import JWTHandler
-from auth_service.auth_core.core.session_manager import SessionManager
+# Session manager module was deleted - using AuthService session functionality
 from auth_service.auth_core.services.auth_service import AuthService
 from auth_service.auth_core.models.auth_models import (
     LoginRequest,
@@ -40,7 +40,7 @@ class UnifiedAuthInterface:
     def __init__(self):
         """Initialize unified auth with all core components."""
         self.jwt_handler = JWTHandler()
-        self.session_manager = SessionManager()
+        # Session functionality is now handled by auth_service directly
         self.auth_service = AuthService()
         
         # Security validation components

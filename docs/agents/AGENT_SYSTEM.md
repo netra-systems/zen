@@ -2,6 +2,14 @@
 
 Comprehensive documentation for the Netra Multi-Agent System architecture and orchestration patterns.
 
+> **📣 Architecture Update - January 2025**  
+> The agent system has transitioned to the **UVS (Unified Validation System)** architecture with:
+> - Streamlined 2-agent triage model (down from 3 agents)
+> - Data Intelligence Agent as PRIMARY agent (80% of requests)
+> - Intelligent data sufficiency validation states
+> 
+> See **[UVS Triage Architecture Transition Guide](../UVS_TRIAGE_ARCHITECTURE_TRANSITION.md)** for complete details.
+
 ## Table of Contents
 
 - [Overview](#overview)

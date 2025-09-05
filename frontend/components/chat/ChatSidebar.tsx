@@ -6,6 +6,7 @@ import { useAuthStore } from '@/store/authStore';
 import { useAuthState } from '@/hooks/useAuthState';
 import { useWebSocket } from '@/hooks/useWebSocket';
 import { useThreadSwitching } from '@/hooks/useThreadSwitching';
+import { ThreadOperationManager } from '@/lib/thread-operation-manager';
 import { AuthGate } from '@/components/auth/AuthGate';
 import { 
   useChatSidebarState, 
@@ -47,25 +48,52 @@ export const ChatSidebar: React.FC = () => {
 
   // Create thread click handler using the hook
   const handleThreadClick = useCallback(async (threadId: string) => {
-    // Prevent switching if already switching, processing, or same thread
-    if (threadId === activeThreadId || isProcessing || threadSwitchState.isLoading) {
+    // Prevent switching if already on the same thread
+    if (threadId === activeThreadId) {
       return;
     }
     
-    // Send WebSocket message for thread switch notification
-    sendMessage({
-      type: 'switch_thread',
-      payload: { thread_id: threadId }
-    });
+    // Use ThreadOperationManager to ensure atomic operation
+    const result = await ThreadOperationManager.startOperation(
+      'switch',
+      threadId,
+      async (signal) => {
+        // Check if another operation is blocking
+        if (ThreadOperationManager.isOperationInProgress('create')) {
+          return { success: false, error: new Error('New chat creation in progress') };
+        }
+        
+        // Check for abort
+        if (signal.aborted) {
+          return { success: false, error: new Error('Operation aborted') };
+        }
+        
+        // Send WebSocket message for thread switch notification
+        sendMessage({
+          type: 'switch_thread',
+          payload: { thread_id: threadId }
+        });
+        
+        // Use the hook to perform the actual thread switch
+        // The hook handles all state management, loading, and cleanup
+        const success = await switchToThread(threadId, {
+          clearMessages: true,
+          showLoadingIndicator: true,
+          updateUrl: true
+        });
+        
+        return { success, threadId };
+      },
+      {
+        timeoutMs: 5000,
+        retryAttempts: 2
+      }
+    );
     
-    // Use the hook to perform the actual thread switch
-    // The hook handles all state management, loading, and cleanup
-    await switchToThread(threadId, {
-      clearMessages: true,
-      showLoadingIndicator: true,
-      updateUrl: true
-    });
-  }, [activeThreadId, isProcessing, threadSwitchState.isLoading, sendMessage, switchToThread]);
+    if (!result.success) {
+      console.error('Failed to switch thread:', result.error);
+    }
+  }, [activeThreadId, sendMessage, switchToThread]);
   
   const { threads, isLoadingThreads, loadError, loadThreads } = useThreadLoader(
     showAllThreads,
@@ -76,33 +104,66 @@ export const ChatSidebar: React.FC = () => {
   
   // Handle new chat creation with proper thread switching
   const handleNewChat = useCallback(async () => {
-    // Prevent double-clicks and concurrent creation
-    if (isCreatingThread || isProcessing || threadSwitchState.isLoading) {
-      return;
-    }
+    // Use ThreadOperationManager to ensure atomic operation
+    const result = await ThreadOperationManager.startOperation(
+      'create',
+      null,
+      async (signal) => {
+        // Prevent double-clicks and concurrent creation
+        if (isCreatingThread || isProcessing || threadSwitchState.isLoading) {
+          return { success: false, error: new Error('Operation already in progress') };
+        }
+        
+        setIsCreatingThread(true);
+        try {
+          // Check for abort
+          if (signal.aborted) {
+            throw new Error('Operation aborted');
+          }
+          
+          // Create the new thread
+          const { ThreadService } = await import('@/services/threadService');
+          const newThread = await ThreadService.createThread();
+          
+          // Check for abort again
+          if (signal.aborted) {
+            throw new Error('Operation aborted');
+          }
+          
+          // Use the thread switching hook to properly navigate to the new thread
+          // Force the switch to ensure it happens even if another operation is pending
+          const switchSuccess = await switchToThread(newThread.id, {
+            clearMessages: true,
+            showLoadingIndicator: false, // We're already showing creation state
+            updateUrl: true, // Critical: ensures URL is updated
+            force: true // Force switch for new chat
+          });
+          
+          if (switchSuccess) {
+            // Reload the thread list to show the new thread
+            await loadThreads();
+            return { success: true, threadId: newThread.id };
+          } else {
+            return { success: false, error: new Error('Failed to switch to new thread') };
+          }
+        } catch (error) {
+          const errorMessage = error instanceof Error ? error.message : String(error);
+          const errorObj = error instanceof Error ? error : new Error(errorMessage);
+          console.error('Failed to create thread:', errorObj);
+          return { success: false, error: errorObj };
+        } finally {
+          setIsCreatingThread(false);
+        }
+      },
+      {
+        timeoutMs: 10000,
+        retryAttempts: 1,
+        force: true // Force new chat creation
+      }
+    );
     
-    setIsCreatingThread(true);
-    try {
-      // Create the new thread
-      const { ThreadService } = await import('@/services/threadService');
-      const newThread = await ThreadService.createThread();
-      
-      // Use the thread switching hook to properly navigate to the new thread
-      // This ensures URL is updated and all state is properly managed
-      await switchToThread(newThread.id, {
-        clearMessages: true,
-        showLoadingIndicator: false, // We're already showing creation state
-        updateUrl: true // Critical: ensures URL is updated
-      });
-      
-      // Reload the thread list to show the new thread
-      await loadThreads();
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      const errorObj = error instanceof Error ? error : new Error(errorMessage);
-      console.error('Failed to create thread:', errorObj);
-    } finally {
-      setIsCreatingThread(false);
+    if (!result.success) {
+      console.error('Failed to create new chat:', result.error);
     }
   }, [isCreatingThread, isProcessing, threadSwitchState.isLoading, switchToThread, loadThreads]);
   

@@ -24,7 +24,6 @@ from netra_backend.app.db.postgres_events import (
     setup_async_engine_events,
     setup_sync_engine_events,
 )
-from netra_backend.app.db.database_manager import DatabaseManager
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.core.configuration.base import get_unified_config
 
@@ -198,9 +197,10 @@ class AsyncDatabase:
         """Initialize AsyncDatabase with optional URL override.
         
         Args:
-            db_url: Optional database URL override. If None, uses DatabaseManager.
+            db_url: Optional database URL override. If None, uses SSOT method.
         """
-        self.db_url = db_url or DatabaseManager.get_application_url_async()
+        from netra_backend.app.database import get_database_url
+        self.db_url = db_url or get_database_url()
         self._engine: Optional[AsyncEngine] = None
         self._session_factory: Optional[async_sessionmaker] = None
         self._connection_lock = asyncio.Lock()
@@ -236,7 +236,7 @@ class AsyncDatabase:
         pool_class = AsyncAdaptedQueuePool if "sqlite" not in self.db_url else NullPool
         
         # Validate URL for asyncpg compatibility
-        if not DatabaseManager.validate_application_url(self.db_url):
+        if not self.db_url:
             raise RuntimeError(f"Database URL validation failed for asyncpg: {self.db_url}")
         
         engine_args = {
@@ -454,15 +454,16 @@ def _create_async_session_factory(engine: AsyncEngine):
 
 
 def _validate_database_url():
-    """Validate database URL configuration using DatabaseManager."""
+    """Validate database URL configuration using SSOT method."""
     try:
-        async_db_url = DatabaseManager.get_application_url_async()
+        from netra_backend.app.database import get_database_url
+        async_db_url = get_database_url()
         if not async_db_url:
             logger.warning("Database URL not configured")
             return None
         return async_db_url
     except Exception as e:
-        logger.error(f"Failed to get database URL from DatabaseManager: {e}")
+        logger.error(f"Failed to get database URL from SSOT: {e}")
         return None
 
 def _create_engine_components(async_db_url: str):
@@ -495,7 +496,7 @@ def _handle_engine_creation_error(e):
 def _create_and_setup_engine(async_db_url: str, engine_args: dict):
     """Create engine and setup global objects with resilient configuration."""
     # CRITICAL: Validate URL conversion to prevent sslmode regression
-    if not DatabaseManager.validate_application_url(async_db_url):
+    if not async_db_url:
         raise RuntimeError(f"CRITICAL: Database URL validation failed. "
                           f"URL may contain incompatible parameters for asyncpg. URL: {async_db_url}")
     
@@ -551,7 +552,8 @@ def get_converted_async_db_url() -> str:
     Returns:
         Converted URL safe for use with asyncpg (sslmode converted to ssl)
     """
-    return DatabaseManager.get_application_url_async()
+    from netra_backend.app.database import get_database_url
+    return get_database_url()
 
 
 def initialize_postgres():

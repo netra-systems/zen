@@ -24,12 +24,12 @@ from loguru import logger
 
 # Import actual production components
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
-from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
+from netra_backend.app.core.registry.universal_registry import AgentRegistry
 from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
 from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 from netra_backend.app.llm.llm_manager import LLMManager
-from netra_backend.app.websocket_core.manager import WebSocketManager
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager as WebSocketManager
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.services.message_processing import process_user_message_with_notifications
 
@@ -181,7 +181,7 @@ class TestCriticalAgentChatFlow:
         tool_dispatcher = ToolDispatcher()
         
         # Create and configure agent registry
-        registry = AgentRegistry(llm_manager, tool_dispatcher)
+        registry = AgentRegistry()
         registry.set_websocket_manager(ws_manager)  # This now enhances tool dispatcher!
         registry.register_default_agents()
         

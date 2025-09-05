@@ -28,7 +28,7 @@ from datetime import datetime, timezone
 from contextlib import asynccontextmanager
 
 if TYPE_CHECKING:
-    from netra_backend.app.websocket_core.manager import WebSocketManager
+    from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager as WebSocketManager
 
 from netra_backend.app.agents.unified_tool_execution import UnifiedToolExecutionEngine
 from netra_backend.app.agents.request_scoped_tool_dispatcher import RequestScopedToolDispatcher
@@ -36,10 +36,11 @@ from netra_backend.app.agents.supervisor.user_execution_context import (
     UserExecutionContext,
     validate_user_context
 )
-from netra_backend.app.services.websocket_event_emitter import (
+from netra_backend.app.websocket_core import (
     WebSocketEventEmitter,
-    WebSocketEventEmitterFactory
 )
+# WebSocketEventEmitterFactory is actually UnifiedWebSocketEmitter
+from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmitter as WebSocketEventEmitterFactory
 from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)

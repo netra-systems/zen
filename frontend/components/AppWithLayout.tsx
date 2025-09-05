@@ -21,14 +21,14 @@ export function AppWithLayout({ children }: AppWithLayoutProps) {
   return (
     <div
       className={cn(
-        'grid min-h-screen w-full',
+        'grid h-screen w-full overflow-hidden',
         showSidebar && 'md:grid-cols-[320px_1fr]'
       )}
     >
       {showSidebar && <ChatSidebar />}
-      <div className="flex flex-col">
+      <div className="flex flex-col h-full overflow-hidden">
         <Header toggleSidebar={toggleSidebar} />
-        <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6">
+        <main className="flex flex-1 flex-col overflow-hidden">
           {children}
         </main>
       </div>

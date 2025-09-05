@@ -73,7 +73,9 @@ class GCPDeployer:
         
         # Use gcloud.cmd on Windows
         self.gcloud_cmd = "gcloud.cmd" if sys.platform == "win32" else "gcloud"
-        self.docker_cmd = "docker" 
+        
+        # Detect container runtime (Docker or Podman)
+        self.docker_cmd = self._detect_container_runtime()
         self.use_shell = sys.platform == "win32"
         
         # Service configurations
@@ -150,13 +152,64 @@ class GCPDeployer:
                 cpu="1",
                 min_instances=1,
                 max_instances=10,
+                # ⚠️ CRITICAL: Frontend environment variables are MANDATORY for deployment
+                # These are duplicated in deploy_service() method for redundancy
+                # See also: frontend/.env.staging, SPEC/frontend_deployment_critical.xml
+                # NEVER REMOVE ANY OF THESE VARIABLES - Frontend will fail without them
                 environment_vars={
                     "NODE_ENV": "production",
-                    "NEXT_PUBLIC_API_URL": "https://api.staging.netrasystems.ai",
+                    "NEXT_PUBLIC_ENVIRONMENT": "staging",  # CRITICAL: Controls environment-specific behavior
+                    "NEXT_PUBLIC_API_URL": "https://api.staging.netrasystems.ai",  # CRITICAL: Backend API endpoint
+                    "NEXT_PUBLIC_WS_URL": "wss://api.staging.netrasystems.ai",  # CRITICAL: WebSocket endpoint
+                    "NEXT_PUBLIC_WEBSOCKET_URL": "wss://api.staging.netrasystems.ai",  # CRITICAL: Alternative WebSocket endpoint
+                    "NEXT_PUBLIC_AUTH_URL": "https://auth.staging.netrasystems.ai",  # CRITICAL: Auth service endpoint
+                    "NEXT_PUBLIC_AUTH_SERVICE_URL": "https://auth.staging.netrasystems.ai",  # CRITICAL: Auth service alternative
+                    "NEXT_PUBLIC_AUTH_API_URL": "https://auth.staging.netrasystems.ai",  # CRITICAL: Auth API endpoint
+                    "NEXT_PUBLIC_BACKEND_URL": "https://api.staging.netrasystems.ai",  # CRITICAL: Backend alternative endpoint
+                    "NEXT_PUBLIC_FRONTEND_URL": "https://app.staging.netrasystems.ai",  # CRITICAL: OAuth redirects
+                    "NEXT_PUBLIC_FORCE_HTTPS": "true",  # CRITICAL: Security enforcement
+                    "NEXT_PUBLIC_GTM_CONTAINER_ID": "GTM-WKP28PNQ",  # Analytics tracking
+                    "NEXT_PUBLIC_GTM_ENABLED": "true",  # Analytics enablement
+                    "NEXT_PUBLIC_GTM_DEBUG": "false",  # Analytics debug mode
                     "FORCE_HTTPS": "true",  # REQUIREMENT 6: FORCE_HTTPS for load balancer
                 }
             )
         ]
+    
+    def _detect_container_runtime(self) -> str:
+        """Detect available container runtime (Docker or Podman)."""
+        # First try Docker
+        try:
+            result = subprocess.run(
+                ["docker", "--version"],
+                capture_output=True,
+                text=True,
+                check=False,
+                shell=sys.platform == "win32"
+            )
+            if result.returncode == 0:
+                print("  Container runtime: Docker")
+                return "docker"
+        except (subprocess.SubprocessError, FileNotFoundError):
+            pass
+        
+        # Try Podman
+        try:
+            result = subprocess.run(
+                ["podman", "--version"],
+                capture_output=True,
+                text=True,
+                check=False,
+                shell=sys.platform == "win32"
+            )
+            if result.returncode == 0:
+                print("  Container runtime: Podman (Docker compatibility mode)")
+                return "podman"
+        except (subprocess.SubprocessError, FileNotFoundError):
+            pass
+        
+        print("  Warning: No container runtime detected, defaulting to 'docker'")
+        return "docker"
     
     def check_gcloud(self) -> bool:
         """Check if gcloud CLI is installed and configured."""
@@ -217,9 +270,63 @@ class GCPDeployer:
         print("🔍 Using centralized authentication configuration...")
         return GCPAuthConfig.ensure_authentication()
     
+    def validate_frontend_environment_variables(self) -> bool:
+        """
+        🚨 CRITICAL: Validate all required frontend environment variables are present.
+        Missing any of these will cause complete frontend failure.
+        Cross-reference: frontend/.env.staging, SPEC/frontend_deployment_critical.xml
+        """
+        required_frontend_vars = [
+            "NEXT_PUBLIC_ENVIRONMENT",
+            "NEXT_PUBLIC_API_URL", 
+            "NEXT_PUBLIC_AUTH_URL",
+            "NEXT_PUBLIC_WS_URL",
+            "NEXT_PUBLIC_WEBSOCKET_URL",
+            "NEXT_PUBLIC_AUTH_SERVICE_URL",
+            "NEXT_PUBLIC_AUTH_API_URL", 
+            "NEXT_PUBLIC_BACKEND_URL",
+            "NEXT_PUBLIC_FRONTEND_URL",
+            "NEXT_PUBLIC_FORCE_HTTPS",
+            "NEXT_PUBLIC_GTM_CONTAINER_ID",
+            "NEXT_PUBLIC_GTM_ENABLED",
+            "NEXT_PUBLIC_GTM_DEBUG"
+        ]
+        
+        # Find frontend service config
+        frontend_service = None
+        for service in self.services:
+            if service.name == "frontend":
+                frontend_service = service
+                break
+        
+        if not frontend_service:
+            print("  ❌ Frontend service configuration not found!")
+            return False
+        
+        missing_vars = []
+        for var in required_frontend_vars:
+            if var not in frontend_service.environment_vars:
+                missing_vars.append(var)
+        
+        if missing_vars:
+            print("  ❌ CRITICAL: Missing required frontend environment variables:")
+            for var in missing_vars:
+                print(f"     - {var}")
+            print("\n  🔴 DEPLOYMENT BLOCKED: Frontend will fail without these variables!")
+            print("  See: frontend/.env.staging for required values")
+            print("  See: SPEC/frontend_deployment_critical.xml for documentation")
+            return False
+        
+        print("  ✅ All required frontend environment variables present")
+        return True
+    
     def validate_deployment_configuration(self) -> bool:
         """Validate deployment configuration and environment variables."""
         print("\n🔍 Validating deployment configuration...")
+        
+        # CRITICAL: Validate frontend environment variables first
+        if not self.validate_frontend_environment_variables():
+            return False
         
         # CRITICAL: OAuth validation BEFORE deployment
         print("🔐 Validating OAuth configuration before deployment...")
@@ -413,27 +520,69 @@ class GCPDeployer:
         return True
     
     def configure_docker_auth(self) -> bool:
-        """Configure Docker authentication for Google Container Registry."""
+        """Configure Docker/Podman authentication for Google Container Registry."""
         try:
-            print("  Configuring Docker authentication for GCR...")
-            auth_cmd = [self.gcloud_cmd, "auth", "configure-docker", "gcr.io", "--quiet"]
-            result = subprocess.run(
-                auth_cmd, 
-                capture_output=True,
-                text=True,
-                check=False,
-                shell=self.use_shell
-            )
+            runtime_name = "Podman" if self.docker_cmd == "podman" else "Docker"
+            print(f"  Configuring {runtime_name} authentication for GCR...")
             
-            if result.returncode == 0:
-                print("  ✅ Docker authentication configured successfully")
-                return True
+            # For Podman, we need to login directly
+            if self.docker_cmd == "podman":
+                # First get an access token
+                token_cmd = [self.gcloud_cmd, "auth", "print-access-token"]
+                token_result = subprocess.run(
+                    token_cmd,
+                    capture_output=True,
+                    text=True,
+                    check=False,
+                    shell=self.use_shell
+                )
+                
+                if token_result.returncode != 0:
+                    print(f"  ❌ Failed to get access token: {token_result.stderr}")
+                    return False
+                
+                access_token = token_result.stdout.strip()
+                
+                # Login to GCR with Podman
+                login_cmd = [
+                    self.docker_cmd, "login", "gcr.io",
+                    "-u", "oauth2accesstoken",
+                    "-p", access_token
+                ]
+                login_result = subprocess.run(
+                    login_cmd,
+                    capture_output=True,
+                    text=True,
+                    check=False,
+                    shell=self.use_shell
+                )
+                
+                if login_result.returncode == 0:
+                    print(f"  ✅ {runtime_name} authentication configured successfully")
+                    return True
+                else:
+                    print(f"  ❌ Failed to configure {runtime_name} authentication: {login_result.stderr}")
+                    return False
             else:
-                print(f"  ❌ Failed to configure Docker authentication: {result.stderr}")
-                return False
+                # Use standard Docker configuration
+                auth_cmd = [self.gcloud_cmd, "auth", "configure-docker", "gcr.io", "--quiet"]
+                result = subprocess.run(
+                    auth_cmd, 
+                    capture_output=True,
+                    text=True,
+                    check=False,
+                    shell=self.use_shell
+                )
+                
+                if result.returncode == 0:
+                    print(f"  ✅ {runtime_name} authentication configured successfully")
+                    return True
+                else:
+                    print(f"  ❌ Failed to configure {runtime_name} authentication: {result.stderr}")
+                    return False
                 
         except Exception as e:
-            print(f"  ❌ Docker authentication error: {e}")
+            print(f"  ❌ Container runtime authentication error: {e}")
             return False
     
     def create_dockerfile(self, service: ServiceConfig) -> bool:
@@ -655,9 +804,11 @@ CMD ["npm", "start"]
         else:
             return self.build_image_cloud(service)
     
-    def deploy_service(self, service: ServiceConfig) -> Tuple[bool, Optional[str]]:
+    def deploy_service(self, service: ServiceConfig, no_traffic: bool = False) -> Tuple[bool, Optional[str]]:
         """Deploy service to Cloud Run."""
         print(f"\n🚀 Deploying {service.name} to Cloud Run...")
+        if no_traffic:
+            print(f"   ⚠️ Deploying with --no-traffic flag (revision won't receive traffic)")
         
         image_tag = f"{self.registry}/{service.cloud_run_name}:latest"
         
@@ -679,27 +830,46 @@ CMD ["npm", "start"]
             "--execution-environment", "gen2"  # Use 2nd generation execution environment
         ]
         
+        # Add no-traffic flag if requested
+        if no_traffic:
+            cmd.append("--no-traffic")
+        
         # Add environment variables
         env_vars = []
         for key, value in service.environment_vars.items():
             env_vars.append(f"{key}={value}")
         
-        # Add service-specific environment variables
+        # ⚠️ CRITICAL: Frontend environment variables - MANDATORY FOR DEPLOYMENT
+        # These variables MUST be present for frontend to function
+        # DO NOT REMOVE ANY OF THESE - See also: ServiceConfig initialization above
+        # Cross-reference: frontend/.env.staging, SPEC/frontend_deployment_critical.xml
         if service.name == "frontend":
-            # Frontend needs API URLs - use staging URLs for consistent configuration
+            # 🚨 CRITICAL: All these URLs are REQUIRED for frontend connectivity
+            # Missing any of these will cause complete frontend failure
             staging_api_url = "https://api.staging.netrasystems.ai"
             staging_auth_url = "https://auth.staging.netrasystems.ai"
-            staging_ws_url = "wss://api.staging.netrasystems.ai/ws"
-            env_vars.extend([
-                f"NEXT_PUBLIC_API_URL={staging_api_url}",
-                f"NEXT_PUBLIC_AUTH_URL={staging_auth_url}",
-                f"NEXT_PUBLIC_WS_URL={staging_ws_url}",
-                # GTM Configuration
+            staging_ws_url = "wss://api.staging.netrasystems.ai"
+            staging_frontend_url = "https://app.staging.netrasystems.ai"
+            
+            # 🔴 NEVER REMOVE: Each variable below is used by different frontend components
+            # Some may appear redundant but are required for backward compatibility
+            critical_frontend_vars = [
+                f"NEXT_PUBLIC_API_URL={staging_api_url}",  # Main API endpoint
+                f"NEXT_PUBLIC_AUTH_URL={staging_auth_url}",  # Auth service primary
+                f"NEXT_PUBLIC_WS_URL={staging_ws_url}",  # WebSocket primary
+                f"NEXT_PUBLIC_WEBSOCKET_URL={staging_ws_url}",  # WebSocket fallback
+                f"NEXT_PUBLIC_AUTH_SERVICE_URL={staging_auth_url}",  # Auth service fallback
+                f"NEXT_PUBLIC_AUTH_API_URL={staging_auth_url}",  # Auth API specific
+                f"NEXT_PUBLIC_BACKEND_URL={staging_api_url}",  # Backend fallback
+                f"NEXT_PUBLIC_FRONTEND_URL={staging_frontend_url}",  # OAuth & self-reference
+                "NEXT_PUBLIC_FORCE_HTTPS=true",  # Security requirement
+                # GTM Configuration - Required for analytics
                 "NEXT_PUBLIC_GTM_CONTAINER_ID=GTM-WKP28PNQ",
                 "NEXT_PUBLIC_GTM_ENABLED=true",
                 "NEXT_PUBLIC_GTM_DEBUG=false",
-                "NEXT_PUBLIC_ENVIRONMENT=staging"
-            ])
+                "NEXT_PUBLIC_ENVIRONMENT=staging"  # Environment detection
+            ]
+            env_vars.extend(critical_frontend_vars)
         
         if env_vars:
             cmd.extend(["--set-env-vars", ",".join(env_vars)])
@@ -744,8 +914,11 @@ CMD ["npm", "start"]
             if url:
                 print(f"   URL: {url}")
                 
-            # Ensure traffic is routed to the latest revision
-            self.update_traffic_to_latest(service.cloud_run_name)
+            # Ensure traffic is routed to the latest revision (unless no-traffic flag is set)
+            if not no_traffic:
+                self.update_traffic_to_latest(service.cloud_run_name)
+            else:
+                print(f"   ⚠️ Traffic not routed to new revision (--no-traffic flag set)")
             
             return True, url
             
@@ -1131,7 +1304,7 @@ CMD ["npm", "start"]
     
     def deploy_all(self, skip_build: bool = False, use_local_build: bool = False, 
                    run_checks: bool = False, service_filter: Optional[str] = None,
-                   skip_post_tests: bool = False) -> bool:
+                   skip_post_tests: bool = False, no_traffic: bool = False) -> bool:
         """Deploy all services to GCP.
         
         Args:
@@ -1140,12 +1313,15 @@ CMD ["npm", "start"]
             run_checks: Run pre-deployment checks
             service_filter: Deploy only specific service (e.g., 'frontend', 'backend', 'auth')
             skip_post_tests: Skip post-deployment authentication tests
+            no_traffic: Deploy without routing traffic to new revisions
         """
         print(f"🚀 Deploying Netra Apex Platform to GCP")
         print(f"   Project: {self.project_id}")
         print(f"   Region: {self.region}")
         print(f"   Build Mode: {'Local (Fast)' if use_local_build else 'Cloud Build'}")
         print(f"   Pre-checks: {'Enabled' if run_checks else 'Disabled'}")
+        if no_traffic:
+            print(f"   ⚠️ Traffic Mode: NO TRAFFIC (revisions won't receive traffic)")
         
         # CRITICAL: Validate ALL prerequisites BEFORE any build operations
         print("\n🔐 Phase 1: Validating Prerequisites...")
@@ -1206,7 +1382,7 @@ CMD ["npm", "start"]
                     
             # Deploy service
             print(f"   Deploying {service.name}...")
-            success, url = self.deploy_service(service)
+            success, url = self.deploy_service(service, no_traffic=no_traffic)
             if not success:
                 print(f"❌ Failed to deploy {service.name}")
                 return False
@@ -1443,6 +1619,8 @@ See SPEC/gcp_deployment.xml for detailed guidelines.
                        help="Deploy only specific service (frontend, backend, auth)")
     parser.add_argument("--skip-post-tests", action="store_true",
                        help="Skip post-deployment authentication tests")
+    parser.add_argument("--no-traffic", action="store_true",
+                       help="Deploy without routing traffic to the new revision (useful for testing)")
     
     args = parser.parse_args()
     
@@ -1463,7 +1641,8 @@ See SPEC/gcp_deployment.xml for detailed guidelines.
                 use_local_build=args.build_local,
                 run_checks=args.run_checks,
                 service_filter=args.service,
-                skip_post_tests=args.skip_post_tests
+                skip_post_tests=args.skip_post_tests,
+                no_traffic=args.no_traffic
             )
             
         sys.exit(0 if success else 1)

@@ -19,10 +19,10 @@ from unittest.mock import AsyncMock
 
 import pytest
 
-from netra_backend.app.agents.data_sub_agent.agent import DataSubAgent
+from netra_backend.app.agents.data_sub_agent import DataSubAgent
 from netra_backend.app.agents.reporting_sub_agent import ReportingSubAgent
 from netra_backend.app.agents.state import DeepAgentState
-from netra_backend.app.agents.triage_sub_agent.agent import TriageSubAgent
+from netra_backend.app.agents.triage.unified_triage_agent import UnifiedTriageAgent
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.schemas.agent import SubAgentLifecycle
 
@@ -54,7 +54,7 @@ class MinimalOrchestrationSuite:
         mock_tool_dispatcher = AsyncMock()  # TODO: Use real service instead of Mock
         
         self.agents = {
-            'triage': TriageSubAgent(
+            'triage': UnifiedTriageAgent(
                 llm_manager=self.llm_manager,
                 tool_dispatcher=mock_tool_dispatcher,
                 websocket_manager=self.websocket_manager

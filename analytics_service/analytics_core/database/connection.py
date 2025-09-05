@@ -1,8 +1,9 @@
 """
-Database Connection Management for Analytics Service
+Database Connection Management for Analytics Service - Stub Implementation
 
-Provides real connection factories for ClickHouse and Redis.
-Follows SPEC/unified_environment_management.xml patterns.
+IMPORTANT: This is a stub implementation since the original ClickHouseManager 
+and RedisManager were deleted. This provides basic compatibility while the 
+analytics service is being refactored.
 
 CRITICAL: Uses service-specific IsolatedEnvironment for independence.
 """
@@ -12,32 +13,124 @@ import asyncio
 from contextlib import asynccontextmanager
 
 from analytics_service.analytics_core.config import get_config
-from analytics_service.analytics_core.database.clickhouse_manager import ClickHouseManager
-from analytics_service.analytics_core.database.redis_manager import RedisManager
 
 logger = logging.getLogger(__name__)
 
+
+class StubClickHouseManager:
+    """Stub ClickHouse manager to prevent import errors."""
+    
+    def __init__(self, **kwargs):
+        """Initialize stub manager."""
+        self.host = kwargs.get("host", "localhost")
+        self.port = kwargs.get("port", 9000)
+        self.database = kwargs.get("database", "default")
+        self.user = kwargs.get("user", "default")
+        self.password = kwargs.get("password", "")
+        self.max_connections = kwargs.get("max_connections", 10)
+        self.query_timeout = kwargs.get("query_timeout", 30)
+        self._is_initialized = False
+    
+    async def initialize(self):
+        """Stub initialize method."""
+        logger.warning("Using stub ClickHouse manager - no actual connections")
+        self._is_initialized = True
+    
+    @asynccontextmanager
+    async def get_connection(self):
+        """Stub connection method."""
+        logger.warning("Stub ClickHouse connection - returning None")
+        yield None
+    
+    async def get_health_status(self):
+        """Stub health status method."""
+        return {
+            "is_healthy": False,
+            "host": self.host,
+            "port": self.port,
+            "database": self.database,
+            "pool_size": self.max_connections,
+            "error": "Using stub implementation"
+        }
+
+
+class StubRedisManager:
+    """Stub Redis manager to prevent import errors."""
+    
+    def __init__(self, **kwargs):
+        """Initialize stub manager."""
+        self.host = kwargs.get("host", "localhost")
+        self.port = kwargs.get("port", 6379)
+        self.db = kwargs.get("db", 0)
+        self.password = kwargs.get("password")
+        self.max_connections = kwargs.get("max_connections", 10)
+        self._is_connected = False
+        self._redis = None
+    
+    async def initialize(self):
+        """Stub initialize method."""
+        logger.warning("Using stub Redis manager - no actual connections")
+        self._is_connected = True
+        # Create a stub redis client-like object
+        self._redis = StubRedisClient()
+
+
+class StubRedisClient:
+    """Stub Redis client to prevent import errors."""
+    
+    async def ping(self):
+        """Stub ping method."""
+        logger.warning("Stub Redis ping - returning False")
+        return False
+
+
 # Global connection managers
-_clickhouse_manager: Optional[ClickHouseManager] = None
-_redis_manager: Optional[RedisManager] = None
+_clickhouse_manager: Optional[StubClickHouseManager] = None
+_redis_manager: Optional[StubRedisManager] = None
 
 
-def get_clickhouse_manager() -> ClickHouseManager:
+def get_clickhouse_manager() -> StubClickHouseManager:
     """Get or create ClickHouse manager singleton."""
     global _clickhouse_manager
     if _clickhouse_manager is None:
         config = get_config()
-        params = config.get_clickhouse_connection_params()
-        _clickhouse_manager = ClickHouseManager(
-            host=params["host"],
+        try:
+            params = config.get_clickhouse_connection_params()
+        except Exception as e:
+            logger.warning(f"Could not get ClickHouse params: {e}")
+            params = {"host": "localhost", "database": "default", "user": "default", "password": ""}
+        
+        _clickhouse_manager = StubClickHouseManager(
+            host=params.get("host", "localhost"),
             port=9000,  # Use native protocol port, not HTTP port
-            database=params["database"],
-            user=params["user"],
-            password=params["password"],
-            max_connections=config.connection_pool_size,
-            query_timeout=config.query_timeout_seconds
+            database=params.get("database", "default"),
+            user=params.get("user", "default"),
+            password=params.get("password", ""),
+            max_connections=getattr(config, 'connection_pool_size', 10),
+            query_timeout=getattr(config, 'query_timeout_seconds', 30)
         )
     return _clickhouse_manager
+
+
+def get_redis_manager() -> StubRedisManager:
+    """Get or create Redis manager singleton."""
+    global _redis_manager
+    if _redis_manager is None:
+        config = get_config()
+        try:
+            params = config.get_redis_connection_params()
+        except Exception as e:
+            logger.warning(f"Could not get Redis params: {e}")
+            params = {"host": "localhost", "port": 6379, "db": 0}
+        
+        _redis_manager = StubRedisManager(
+            host=params.get("host", "localhost"),
+            port=params.get("port", 6379),
+            db=params.get("db", 0),
+            password=params.get("password"),
+            max_connections=getattr(config, 'connection_pool_size', 10)
+        )
+    return _redis_manager
 
 
 @asynccontextmanager
@@ -56,22 +149,6 @@ async def get_clickhouse_session():
     # Get connection from pool
     async with manager.get_connection() as connection:
         yield connection
-
-
-def get_redis_manager() -> RedisManager:
-    """Get or create Redis manager singleton."""
-    global _redis_manager
-    if _redis_manager is None:
-        config = get_config()
-        params = config.get_redis_connection_params()
-        _redis_manager = RedisManager(
-            host=params["host"],
-            port=params["port"],
-            db=params["db"],
-            password=params.get("password"),
-            max_connections=config.connection_pool_size
-        )
-    return _redis_manager
 
 
 @asynccontextmanager
@@ -110,14 +187,14 @@ async def get_redis_connection_async():
 
 
 class ClickHouseHealthChecker:
-    """Health checker for ClickHouse database."""
+    """Health checker for ClickHouse database - Stub Implementation."""
     
     def __init__(self):
         """Initialize health checker."""
         self.manager = None
     
     async def check_health(self) -> Dict[str, Any]:
-        """Check ClickHouse health status using real connection."""
+        """Check ClickHouse health status using stub implementation."""
         try:
             manager = get_clickhouse_manager()
             
@@ -125,38 +202,19 @@ class ClickHouseHealthChecker:
             if not manager._is_initialized:
                 await manager.initialize()
             
-            # Get health status from manager
+            # Get health status from stub manager
             health_status = await manager.get_health_status()
             
-            # Perform actual query test
-            if health_status.get('is_healthy'):
-                async with manager.get_connection() as client:
-                    # Test with simple query
-                    import time
-                    start = time.time()
-                    result = await asyncio.to_thread(
-                        lambda: client.execute("SELECT 1")
-                    )
-                    latency_ms = (time.time() - start) * 1000
-                    
-                    if result == [(1,)]:
-                        return {
-                            "status": "healthy",
-                            "connection": True,
-                            "latency_ms": latency_ms,
-                            "host": health_status.get('host'),
-                            "port": health_status.get('port'),
-                            "database": health_status.get('database'),
-                            "pool_size": health_status.get('pool_size')
-                        }
-                    else:
-                        raise ValueError("Unexpected query result")
-            else:
-                return {
-                    "status": "unhealthy",
-                    "connection": False,
-                    "error": "Manager reports unhealthy status"
-                }
+            # Return stub health status
+            return {
+                "status": "unhealthy",
+                "connection": False,
+                "error": "Using stub ClickHouse implementation",
+                "host": health_status.get('host'),
+                "port": health_status.get('port'),
+                "database": health_status.get('database'),
+                "pool_size": health_status.get('pool_size')
+            }
                 
         except Exception as e:
             logger.error(f"ClickHouse health check failed: {e}")
@@ -168,14 +226,14 @@ class ClickHouseHealthChecker:
 
 
 class RedisHealthChecker:
-    """Health checker for Redis cache."""
+    """Health checker for Redis cache - Stub Implementation."""
     
     def __init__(self):
         """Initialize health checker."""
         self.manager = None
     
     async def check_health(self) -> Dict[str, Any]:
-        """Check Redis health status using real connection."""
+        """Check Redis health status using stub implementation."""
         try:
             manager = get_redis_manager()
             
@@ -183,31 +241,23 @@ class RedisHealthChecker:
             if not hasattr(manager, '_is_connected') or not manager._is_connected:
                 await manager.initialize()
             
-            # Perform actual ping test
-            import time
-            start = time.time()
-            
-            # Use the Redis client to ping
+            # Use the stub Redis client to ping
             if manager._redis:
                 pong = await manager._redis.ping()
-                latency_ms = (time.time() - start) * 1000
                 
-                if pong:
-                    return {
-                        "status": "healthy",
-                        "connection": True,
-                        "latency_ms": latency_ms,
-                        "host": manager.host,
-                        "port": manager.port,
-                        "db": manager.db
-                    }
-                else:
-                    raise ValueError("Ping failed")
+                return {
+                    "status": "unhealthy",
+                    "connection": False,
+                    "error": "Using stub Redis implementation",
+                    "host": manager.host,
+                    "port": manager.port,
+                    "db": manager.db
+                }
             else:
                 return {
                     "status": "unhealthy",
                     "connection": False,
-                    "error": "Redis client not initialized"
+                    "error": "Stub Redis client not initialized"
                 }
                 
         except Exception as e:

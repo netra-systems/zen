@@ -43,7 +43,7 @@ if project_root not in sys.path:
     sys.path.insert(0, project_root)
 
 from shared.isolated_environment import get_env
-from netra_backend.app.websocket_core.manager import WebSocketManager
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager as WebSocketManager
 from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)

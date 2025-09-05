@@ -165,6 +165,7 @@ async def get_async_db() -> AsyncGenerator[AsyncSession, None]:
     
     # Delegate to DatabaseManager via the single source of truth
     from netra_backend.app.database import get_db
+    # FIX: get_db() is now properly an async context manager after adding @asynccontextmanager decorator
     async with get_db() as session:
         try:
             # Mark connection as healthy on successful completion

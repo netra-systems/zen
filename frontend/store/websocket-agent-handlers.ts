@@ -26,10 +26,10 @@ import type {
 import type { UnifiedChatState } from '@/types/store-types';
 
 /**
- * Extracts agent started data from payload
+ * Extracts agent started data from event
  */
-export const extractAgentStartedData = (payload: any) => {
-  const mappedPayload = mapEventPayload('agent_started', payload);
+export const extractAgentStartedData = (event: any) => {
+  const mappedPayload = mapEventPayload('agent_started', event);
   const agentId = mappedPayload.agent_id || `agent-${mappedPayload.run_id}` || 'unknown';
   const timestamp = mappedPayload.timestamp ? parseTimestamp(mappedPayload.timestamp) : Date.now();
   const runId = mappedPayload.run_id || generateUniqueId('run');
@@ -113,22 +113,23 @@ export const handleAgentStarted = (
   set: (partial: Partial<UnifiedChatState>) => void,
   get: () => UnifiedChatState
 ): void => {
-  const agentData = extractAgentStartedData(event.payload as any);
+  const agentData = extractAgentStartedData(event);
   const { displayName, executedAgents, agentIterations } = processAgentIteration(agentData, state);
   createAgentStartedMessage(displayName, agentData.runId, get);
   updateAgentStartedState(displayName, agentData, executedAgents, agentIterations, set, state);
 };
 
 /**
- * Extracts agent thinking data from payload
+ * Extracts agent thinking data from event
  */
-export const extractThinkingData = (payload: any) => {
-  const mappedPayload = mapEventPayload('agent_thinking', payload);
+export const extractThinkingData = (event: any) => {
+  const mappedPayload = mapEventPayload('agent_thinking', event);
   return {
     thought: mappedPayload.thought || 'Processing...',
     agentId: mappedPayload.agent_id || 'Agent',
     stepNumber: mappedPayload.step_number || 0,
-    totalSteps: mappedPayload.total_steps || 0
+    totalSteps: mappedPayload.total_steps || 0,
+    progressPercentage: mappedPayload.progress_percentage || null
   };
 };
 
@@ -181,10 +182,10 @@ export const handleAgentThinking = (
 };
 
 /**
- * Extracts agent completed data from payload
+ * Extracts agent completed data from event
  */
-export const extractAgentCompletedData = (payload: any) => {
-  const mappedPayload = mapEventPayload('agent_completed', payload);
+export const extractAgentCompletedData = (event: any) => {
+  const mappedPayload = mapEventPayload('agent_completed', event);
   const agentId = mappedPayload.agent_id || 'unknown';
   const durationMs = mappedPayload.duration_ms || 0;
   const result = mappedPayload.result || {};
@@ -255,7 +256,7 @@ export const handleAgentCompleted = (
   set: (partial: Partial<UnifiedChatState>) => void,
   get: () => UnifiedChatState
 ): void => {
-  const agentData = extractAgentCompletedData(event.payload as any);
+  const agentData = extractAgentCompletedData(event);
   const { displayName, executedAgents } = updateAgentExecution(agentData, state);
   createAgentCompletedMessage(displayName, agentData, get);
   updateSlowLayerWithCompletedAgent(displayName, agentData, state, set);

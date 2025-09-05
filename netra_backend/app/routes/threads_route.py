@@ -121,8 +121,10 @@ async def get_thread_statistics(
     stats_request: dict,
     current_user = Depends(get_current_active_user)
 ):
-    """Get thread usage statistics"""
-    return thread_service.get_thread_statistics(stats_request)
+    """Get thread usage statistics - NOT IMPLEMENTED"""
+    # TODO: Implement thread statistics using ThreadRepository
+    from fastapi import HTTPException
+    raise HTTPException(status_code=501, detail="Thread statistics not implemented")
 
 @router.post("/analytics/dashboard")
 async def get_analytics_dashboard(
@@ -145,8 +147,10 @@ async def bulk_thread_operations(
     bulk_request: dict,
     current_user = Depends(get_current_active_user)
 ):
-    """Perform bulk operations on threads"""
-    return thread_service.bulk_operation(bulk_request)
+    """Perform bulk operations on threads - NOT IMPLEMENTED"""
+    # TODO: Implement bulk operations using ThreadRepository
+    from fastapi import HTTPException
+    raise HTTPException(status_code=501, detail="Bulk thread operations not implemented")
 
 @router.post("/sentiment")
 async def analyze_thread_sentiment(

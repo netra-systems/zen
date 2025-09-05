@@ -1,57 +1,19 @@
 """
-Core base type definitions for LLM operations.
-These are foundational types with no dependencies on other LLM schema modules.
+LLM Base Types
+Basic types for LLM operations that are shared across modules
 """
 
-from datetime import datetime
 from enum import Enum
-from typing import Any, Dict, List, Optional, Union
-from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
-
-
-from pydantic import BaseModel, Field
+from typing import Dict, Any
+from pydantic import BaseModel
 
 
 class LLMProvider(str, Enum):
-    """Supported LLM providers"""
+    """LLM provider types"""
     OPENAI = "openai"
-    ANTHROPIC = "anthropic" 
-    AZURE_OPENAI = "azure_openai"
-    BEDROCK = "bedrock"
-    VERTEXAI = "vertexai"
+    ANTHROPIC = "anthropic"
     GOOGLE = "google"
-    COHERE = "cohere"
-    HUGGINGFACE = "huggingface"
-    LOCAL = "local"
-
-
-class LLMModel(str, Enum):
-    """Available LLM models"""
-    GPT_4 = LLMModel.GEMINI_2_5_FLASH.value
-    GPT_4_TURBO = LLMModel.GEMINI_2_5_FLASH.value
-    GPT_35_TURBO = LLMModel.GEMINI_2_5_FLASH.value
-    CLAUDE_3_OPUS = LLMModel.GEMINI_2_5_FLASH.value
-    CLAUDE_3_SONNET = LLMModel.GEMINI_2_5_FLASH.value
-    CLAUDE_3_HAIKU = "claude-3-haiku"
-    CLAUDE_35_SONNET = "claude-3.5-sonnet"
-    GEMINI_PRO = "gemini-pro"
-    GEMINI_ULTRA = "gemini-ultra"
-    GEMINI_25_PRO = "gemini-2.5-pro"
-    GEMINI_25_FLASH = "gemini-2.5-flash"
-    GEMINI_20_FLASH = "gemini-2.0-flash"
-    LLAMA_3_70B = "llama-3-70b"
-    LLAMA_3_8B = "llama-3-8b"
-    MISTRAL_LARGE = "mistral-large"
-    MIXTRAL_8X7B = "mixtral-8x7b"
-
-
-class LLMRole(str, Enum):
-    """Message roles in LLM conversations"""
-    SYSTEM = "system"
-    USER = "user"
-    ASSISTANT = "assistant"
-    FUNCTION = "function"
-    TOOL = "tool"
+    AZURE = "azure"
 
 
 class TokenUsage(BaseModel):
@@ -59,86 +21,4 @@ class TokenUsage(BaseModel):
     prompt_tokens: int = 0
     completion_tokens: int = 0
     total_tokens: int = 0
-    cached_tokens: Optional[int] = None
-    
-    @property
-    def cost_estimate(self) -> Optional[float]:
-        """Estimate cost based on token usage"""
-        try:
-            calculator = self._create_cost_calculator()
-            return self._calculate_default_cost(calculator)
-        except ImportError:
-            return None
-    
-    def _create_cost_calculator(self):
-        """Create cost calculator instance."""
-        from netra_backend.app.services.cost_calculator import create_cost_calculator
-        return create_cost_calculator()
-    
-    def _calculate_default_cost(self, calculator) -> float:
-        """Calculate cost using default provider and model."""
-        cost = calculator.calculate_cost(self, LLMProvider.OPENAI, LLMModel.GEMINI_2_5_FLASH.value)
-        return float(cost)
-    
-    def calculate_precise_cost(self, provider: "LLMProvider", model: str) -> Optional[float]:
-        """Calculate precise cost for specific provider and model"""
-        try:
-            calculator = self._create_cost_calculator()
-            return self._calculate_cost_with_provider(calculator, provider, model)
-        except ImportError:
-            return None
-    
-    def _calculate_cost_with_provider(self, calculator, provider: "LLMProvider", model: str) -> float:
-        """Calculate cost with specific provider and model."""
-        cost = calculator.calculate_cost(self, provider, model)
-        return float(cost)
-
-
-class LLMMessage(BaseModel):
-    """Strongly typed LLM message"""
-    role: LLMRole
-    content: str
-    name: Optional[str] = None
-    function_call: Optional[Dict[str, Union[str, dict]]] = None
-    tool_calls: Optional[List[Dict[str, Union[str, dict]]]] = None
-    metadata: Dict[str, Union[str, int, float, bool]] = Field(default_factory=dict)
-
-
-class LLMError(BaseModel):
-    """Structured LLM error"""
-    error_type: str  # "api", "rate_limit", "timeout", "validation", "unknown"
-    message: str
-    provider: Optional[LLMProvider] = None
-    model: Optional[str] = None
-    request_id: Optional[str] = None
-    retry_after: Optional[int] = None  # Seconds to wait before retry
-    details: Dict[str, Any] = Field(default_factory=dict)
-
-
-class LLMHealthCheck(BaseModel):
-    """Health check result for LLM"""
-    config_name: str
-    healthy: bool
-    response_time_ms: float
-    last_checked: datetime
-    error: Optional[str] = None
-
-
-class LLMConfigInfo(BaseModel):
-    """Information about LLM configuration"""
-    name: str
-    provider: LLMProvider
-    model_name: str
-    api_key_configured: bool
-    generation_config: Dict[str, Any]
-    enabled: bool = True
-
-
-class LLMManagerStats(BaseModel):
-    """Statistics for LLM Manager"""
-    total_requests: int = 0
-    cached_responses: int = 0
-    cache_hit_rate: float = 0.0
-    average_response_time_ms: float = 0.0
-    active_configs: List[str] = Field(default_factory=list)
-    enabled: bool = True
+    estimated_cost: float = 0.0

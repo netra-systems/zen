@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<spec>
+  <title>🚨 CRITICAL: Frontend Deployment Environment Variables</title>
+  <version>1.0</version>
+  <date>2025-09-03</date>
+  <severity>CRITICAL</severity>
+  <category>deployment</category>
+  
+  <summary>
+    This specification documents the MANDATORY environment variables required for frontend deployment.
+    Missing ANY of these variables will cause complete frontend failure.
+  </summary>
+
+  <critical_warning>
+    🔴 NEVER REMOVE ANY OF THESE VARIABLES FROM DEPLOYMENT
+    🔴 FRONTEND WILL NOT CONNECT WITHOUT THESE
+    🔴 REGRESSION HAS OCCURRED MULTIPLE TIMES - BE VIGILANT
+  </critical_warning>
+
+  <cross_references>
+    <reference>scripts/deploy_to_gcp.py - ServiceConfig for frontend</reference>
+    <reference>scripts/deploy_to_gcp.py - deploy_service() method</reference>
+    <reference>frontend/.env.staging - Staging environment configuration</reference>
+    <reference>frontend/.env.production - Production environment configuration</reference>
+    <reference>docs/FRONTEND_DEPLOYMENT.md - Deployment documentation</reference>
+    <reference>SPEC/learnings/frontend_deployment.xml - Deployment learnings and troubleshooting</reference>
+  </cross_references>
+
+  <required_variables>
+    <variable name="NEXT_PUBLIC_ENVIRONMENT" critical="true">
+      <description>Controls environment-specific behavior (staging/production)</description>
+      <example>staging</example>
+      <used_by>All frontend components for environment detection</used_by>
+    </variable>
+
+    <variable name="NEXT_PUBLIC_API_URL" critical="true">
+      <description>Main backend API endpoint</description>
+      <example>https://api.staging.netrasystems.ai</example>
+      <used_by>API client, data fetching, agent communication</used_by>
+    </variable>
+
+    <variable name="NEXT_PUBLIC_AUTH_URL" critical="true">
+      <description>Auth service primary endpoint</description>
+      <example>https://auth.staging.netrasystems.ai</example>
+      <used_by>Authentication flow, OAuth, login/logout</used_by>
+    </variable>
+
+    <variable name="NEXT_PUBLIC_WS_URL" critical="true">
+      <description>WebSocket primary endpoint</description>
+      <example>wss://api.staging.netrasystems.ai</example>
+      <used_by>Real-time chat, agent updates, notifications</used_by>
+    </variable>
+
+    <variable name="NEXT_PUBLIC_WEBSOCKET_URL" critical="true">
+      <description>WebSocket fallback endpoint (backward compatibility)</description>
+      <example>wss://api.staging.netrasystems.ai</example>
+      <used_by>Legacy WebSocket connections, fallback logic</used_by>
+    </variable>
+
+    <variable name="NEXT_PUBLIC_AUTH_SERVICE_URL" critical="true">
+      <description>Auth service fallback URL</description>
+      <example>https://auth.staging.netrasystems.ai</example>
+      <used_by>Alternative auth endpoints, service discovery</used_by>
+    </variable>
+
+    <variable name="NEXT_PUBLIC_AUTH_API_URL" critical="true">
+      <description>Auth API specific endpoint</description>
+      <example>https://auth.staging.netrasystems.ai</example>
+      <used_by>Direct auth API calls, token refresh</used_by>
+    </variable>
+
+    <variable name="NEXT_PUBLIC_BACKEND_URL" critical="true">
+      <description>Backend fallback endpoint</description>
+      <example>https://api.staging.netrasystems.ai</example>
+      <used_by>Alternative API calls, legacy components</used_by>
+    </variable>
+
+    <variable name="NEXT_PUBLIC_FRONTEND_URL" critical="true">
+      <description>Frontend self-reference URL for OAuth redirects</description>
+      <example>https://app.staging.netrasystems.ai</example>
+      <used_by>OAuth callbacks, share links, redirects</used_by>
+    </variable>
+
+    <variable name="NEXT_PUBLIC_FORCE_HTTPS" critical="true">
+      <description>Security enforcement flag</description>
+      <example>true</example>
+      <used_by>Security middleware, protocol enforcement</used_by>
+    </variable>
+
+    <variable name="NEXT_PUBLIC_GTM_CONTAINER_ID">
+      <description>Google Tag Manager container ID</description>
+      <example>GTM-WKP28PNQ</example>
+      <used_by>Analytics tracking</used_by>
+    </variable>
+
+    <variable name="NEXT_PUBLIC_GTM_ENABLED">
+      <description>Enable/disable GTM tracking</description>
+      <example>true</example>
+      <used_by>Analytics initialization</used_by>
+    </variable>
+
+    <variable name="NEXT_PUBLIC_GTM_DEBUG">
+      <description>GTM debug mode</description>
+      <example>false</example>
+      <used_by>Analytics debugging</used_by>
+    </variable>
+  </required_variables>
+
+  <deployment_locations>
+    <location>
+      <file>scripts/deploy_to_gcp.py</file>
+      <line>155-175</line>
+      <description>ServiceConfig initialization - PRIMARY definition</description>
+    </location>
+    <location>
+      <file>scripts/deploy_to_gcp.py</file>
+      <line>782-812</line>
+      <description>deploy_service() method - REDUNDANT definition for safety</description>
+    </location>
+  </deployment_locations>
+
+  <validation>
+    <method>validate_frontend_environment_variables()</method>
+    <file>scripts/deploy_to_gcp.py</file>
+    <description>Validates all required variables are present before deployment</description>
+    <blocks_deployment>true</blocks_deployment>
+  </validation>
+
+  <regression_history>
+    <incident date="2025-09-03">
+      <description>
+        Frontend deployment regression where most environment variables were removed,
+        causing complete connection failure. Only NEXT_PUBLIC_API_URL was retained,
+        breaking WebSocket, auth, and other critical functionality.
+      </description>
+      <resolution>
+        Restored all variables with extensive documentation and validation.
+        Added redundant definitions and validation checks.
+      </resolution>
+    </incident>
+  </regression_history>
+
+  <testing>
+    <test_command>python scripts/deploy_to_gcp.py --project netra-staging --service frontend --dry-run</test_command>
+    <validation_command>python scripts/validate_frontend_env.py</validation_command>
+    <e2e_test>tests/e2e/test_frontend_connectivity.py</entml:parameter>
+</invoke>

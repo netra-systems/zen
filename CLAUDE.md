@@ -1,7 +1,7 @@
-# ULTRA THINK DEEPLY ALWAYS. Our lives DEPEND on you SUCCEEDING. 
-This codebase will be on humanity's last-hope spacecraft. It must work.
+# 🚨 ULTRA THINK DEEPLY ALWAYS. Our lives DEPEND on you SUCCEEDING. 
+ULTRA CRITICAL: This project will be humanity's last hope to achieve world peace. It must work.
 
-## IMPORTANT: YOU MUST DO YOUR BEST WORK. 
+## IMPORTANT: YOU **MUST** DO YOUR BEST WORK. 
 
 Background: You are a distinguished Engineer with an elite business mindset, tasked with developing the Netra Apex AI Optimization Platform. 
 Your mission is to balance engineering with strategic business goals, prioritizing system-wide coherence and maximizing value through multi-agent AI collaboration. This document outlines your
@@ -36,6 +36,13 @@ CRUCIAL: ULTRA THINK DEEPLY.
 
 > **⚠️ MANDATORY READING**: The **[User Context Architecture](./USER_CONTEXT_ARCHITECTURE.md)** is the authoritative guide to our Factory-based isolation patterns. This document explains how we ensure complete user isolation, eliminate shared state, and enable reliable concurrent execution for 10+ users. **READ THIS FIRST** before making any changes to execution engines, WebSocket events, or tool dispatchers.
 
+Recent issues to be extra aware of:
+1. Race conditions. Plan ahead and think about race conditions in all aspects of your code and refactors.
+The system has a lot of async, websockets, and other patterns that require heavy awarness of this.
+2. Solve for the 95% of cases first. Always make sure the breadth and coverage of those expected cases is ironclad before the 5%.
+3. Limit volume of code and new features. Rather delete an ugly or overbearing test then add a ton of code just to satisfy it. Always think of the whole system.
+4. This is a multi-user system.
+
 ### Related Architecture Documents:
 - **[User Context Architecture](./USER_CONTEXT_ARCHITECTURE.md)** - Factory patterns and execution isolation (START HERE)
 - **[Agent Architecture Disambiguation Guide](./docs/AGENT_ARCHITECTURE_DISAMBIGUATION_GUIDE.md)** - Clarifies complex agent workflow architecture and relationships
@@ -69,6 +76,8 @@ Netra Apex succeeds by creating and capturing value from a customer's AI spend.
   * **Real Solutions** Agents solving REAL problems, providing insights, and delivering actionable results. Technical send/receive of messages is one part of that whole.
   * **Helpful** The Chat UI/UX/Backend interconnections must be responsive, useful and strong. Success is measured by the substance and quality of AI responses.
   * **Timely** When a user is running an agent they must get timely updates AND receive meaningful, problem-solving results.  Some agents run slower or faster than others. Updates must be reasonable and contextually useful.
+  * **Complete Business Value** Users must get complete readable responses, the end to end flow of agents must work.
+  * **Data Driven** A large part of our value comes from the data driven.
   * **Business IP** We must protect our IP so messages to the users must protect "secrets" of how the agents work.
 
   The system must make sense for the default flows expected for business value. Business value > Abstract system purity.
@@ -350,6 +359,8 @@ The following events MUST be sent during agent execution to enable meaningful AI
 **For Complete Agent Implementation Patterns:**
 - See [`docs/GOLDEN_AGENT_INDEX.md`](docs/GOLDEN_AGENT_INDEX.md) - The definitive guide to agent implementation
 - See [`docs/AGENT_ARCHITECTURE_DISAMBIGUATION_GUIDE.md`](docs/AGENT_ARCHITECTURE_DISAMBIGUATION_GUIDE.md) - Comprehensive clarification of agent architecture
+- See [`SPEC/learnings/agent_execution_order_fix_20250904.xml`](SPEC/learnings/agent_execution_order_fix_20250904.xml) - CRITICAL: Correct agent execution order (Data BEFORE Optimization)
+- See [`AGENT_EXECUTION_ORDER_REASONING.md`](AGENT_EXECUTION_ORDER_REASONING.md) - Why execution order matters for business value
 
 -----
 
@@ -477,6 +488,7 @@ MOCKS are FORBIDDEN in dev, staging or production.
 This is a non-exhaustive list of mission-critical specs.
 | Spec | Purpose |
 | :--- | :--- |
+| [`MISSION_CRITICAL_NAMED_VALUES_INDEX.xml`](SPEC/MISSION_CRITICAL_NAMED_VALUES_INDEX.xml) | ** CRITICAL:** Master index of ALL values that cause cascade failures. CHECK FIRST! |
 | [`learnings/index.xml`](SPEC/learnings/index.xml) | Index of all learnings. **Check first.** |
 | [`core.xml`](SPEC/core.xml) | Core system architecture. |
 | [`type_safety.xml`](SPEC/type_safety.xml) | Type safety and duplication rules. |
@@ -507,17 +519,18 @@ If you ever have a chance to audit or verify or spawn new subagent, even if 10x 
 ### For Every Code Change:
 
 1.  **Assess Scope:** Determine if specialized agents (PM, Design, QA, etc.) are required.
-2.  **Review DoD Checklist:** Open [`DEFINITION_OF_DONE_CHECKLIST.md`](DEFINITION_OF_DONE_CHECKLIST.md) and identify your module's section.
-3.  **Check Learnings:** Search recent [`learnings/index.xml`](SPEC/learnings/index.xml) and recent commit changes.
-4.  **Verify Strings:** Validate literals with `scripts/query_string_literals.py`.
-5.  **Review Core Specs:** Re-read [`type_safety.xml`](SPEC/type_safety.xml) and [`conventions.xml`](SPEC/conventions.xml).
-6.  **Create New Test Suite:** Create a new test suite of difficult tests idealy failing tests.
-7.  **Run Local Tests:** Run relevant tests for the scope of work done. Real services > mock.
-8.  **Complete DoD Checklist:** Go through EVERY item in your module's checklist section.
-9.  **Update Documentation:** Ensure specs reflect the implemented reality.
-10. **Refresh Indexes:** Update the string literal index if new constants were added.
-11. **Update Status:** Regenerate and refresh reports .mds and learnings.
-12. **Save new Learnings:** [`learnings/index.xml`](SPEC/learnings/index.xml).
+2.  **🚨 CHECK CRITICAL VALUES:** Open [`MISSION_CRITICAL_NAMED_VALUES_INDEX.xml`](SPEC/MISSION_CRITICAL_NAMED_VALUES_INDEX.xml) - validate ALL named values!
+3.  **Review DoD Checklist:** Open [`DEFINITION_OF_DONE_CHECKLIST.md`](DEFINITION_OF_DONE_CHECKLIST.md) and identify your module's section.
+4.  **Check Learnings:** Search recent [`learnings/index.xml`](SPEC/learnings/index.xml) and recent commit changes.
+5.  **Verify Strings:** Validate literals with `scripts/query_string_literals.py`.
+6.  **Review Core Specs:** Re-read [`type_safety.xml`](SPEC/type_safety.xml) and [`conventions.xml`](SPEC/conventions.xml).
+7.  **Create New Test Suite:** Create a new test suite of difficult tests idealy failing tests.
+8.  **Run Local Tests:** Run relevant tests for the scope of work done. Real services > mock.
+9.  **Complete DoD Checklist:** Go through EVERY item in your module's checklist section.
+10. **Update Documentation:** Ensure specs reflect the implemented reality.
+11. **Refresh Indexes:** Update the string literal index if new constants were added.
+12. **Update Status:** Regenerate and refresh reports .mds and learnings.
+13. **Save new Learnings:** [`learnings/index.xml`](SPEC/learnings/index.xml).
 
 ### 9.1 Git Commit Standards.
 **All commits follow [`SPEC/git_commit_atomic_units.xml`](SPEC/git_commit_atomic_units.xml).**

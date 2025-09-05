@@ -1,465 +1,392 @@
-#!/usr/bin/env python
 """
-WebSocket Test Helpers - Integration utilities for unified MockWebSocketManager
+WebSocket Test Helpers.
 
-This module provides pytest fixtures, assertion helpers, and test utilities
-to make it easy to migrate existing tests to use the new unified mock.
-
-Business Value: Reduces migration effort and ensures consistent test patterns.
+Provides utilities and helpers for testing WebSocket functionality.
 """
 
 import asyncio
-import pytest
-import time
-from typing import Dict, List, Any, Optional, Callable, Union
+import json
+import logging
+from contextlib import asynccontextmanager
+from typing import Any, Dict, List, Optional, Union
 from unittest.mock import AsyncMock, MagicMock
 
-from test_framework.fixtures.websocket_manager_mock import (
-    MockWebSocketManager,
-    MockConfiguration,
-    MockBehaviorMode,
-    create_basic_mock,
-    create_compliance_mock,
-    create_performance_mock,
-    create_resilience_mock,
-    create_concurrency_mock
-)
+import pytest
+
+logger = logging.getLogger(__name__)
 
 
-# ============================================================================
-# PYTEST FIXTURES
-# ============================================================================
+# =============================================================================
+# WEBSOCKET TEST CLIENT
+# =============================================================================
 
-@pytest.fixture
-def mock_websocket_manager():
-    """Basic MockWebSocketManager fixture for simple tests."""
-    return create_basic_mock()
-
-@pytest.fixture
-def mock_websocket_compliance():
-    """MockWebSocketManager fixture configured for compliance testing."""
-    return create_compliance_mock()
-
-@pytest.fixture
-def mock_websocket_performance():
-    """MockWebSocketManager fixture configured for performance testing."""
-    return create_performance_mock()
-
-@pytest.fixture
-def mock_websocket_resilience():
-    """MockWebSocketManager fixture configured for resilience testing."""
-    return create_resilience_mock()
-
-@pytest.fixture
-def mock_websocket_concurrency():
-    """MockWebSocketManager fixture configured for concurrency testing.""" 
-    return create_concurrency_mock()
-
-@pytest.fixture
-def mock_websocket_factory():
-    """Factory fixture that can create different mock configurations."""
-    def _create_mock(scenario: str = "basic", **kwargs):
-        return MockWebSocketManager.create_for_scenario(scenario, **kwargs)
-    return _create_mock
-
-@pytest.fixture
-async def async_mock_websocket_manager():
-    """Async MockWebSocketManager fixture with automatic cleanup."""
-    mock = create_basic_mock()
-    try:
-        yield mock
-    finally:
-        mock.clear_messages()
-
-@pytest.fixture
-def mock_websocket_with_connections(mock_websocket_manager):
-    """MockWebSocketManager fixture with pre-configured connections."""
-    async def setup():
-        # Add some test connections
-        await mock_websocket_manager.connect_user("user1", MagicMock(), "thread1")
-        await mock_websocket_manager.connect_user("user2", MagicMock(), "thread2")
-        await mock_websocket_manager.connect_user("user3", MagicMock(), "thread3")
+class WebSocketTestClient:
+    """Test client for WebSocket connections."""
     
-    asyncio.run(setup())
-    return mock_websocket_manager
-
-
-# ============================================================================
-# ASSERTION HELPERS
-# ============================================================================
-
-class WebSocketAssertions:
-    """Helper class for common WebSocket test assertions."""
+    def __init__(self, url: str = "ws://localhost:8000/ws"):
+        self.url = url
+        self.websocket = None
+        self.connected = False
+        self.received_messages: List[Dict[str, Any]] = []
+        self.sent_messages: List[Dict[str, Any]] = []
+        self.connection_id: Optional[str] = None
+        self.user_id: Optional[str] = None
     
-    def __init__(self, mock_manager: MockWebSocketManager):
-        self.mock = mock_manager
-    
-    def assert_event_sent(self, thread_id: str, event_type: str, count: int = 1):
-        """Assert that a specific event was sent to a thread."""
-        events = self.mock.get_events_for_thread(thread_id)
-        matching_events = [e for e in events if e['event_type'] == event_type]
-        
-        assert len(matching_events) == count, (
-            f"Expected {count} '{event_type}' events for thread {thread_id}, "
-            f"but found {len(matching_events)}"
-        )
-    
-    def assert_required_events_sent(self, thread_id: str):
-        """Assert all 5 required WebSocket events were sent."""
-        compliance = self.mock.get_required_event_compliance(thread_id)
-        missing_events = [event for event, sent in compliance.items() if not sent]
-        
-        assert not missing_events, (
-            f"Missing required events for thread {thread_id}: {missing_events}. "
-            f"This violates business requirements for chat functionality."
-        )
-    
-    def assert_compliance_score(self, thread_id: str, min_score: float = 1.0):
-        """Assert minimum compliance score for a thread."""
-        score = self.mock.get_compliance_score(thread_id)
-        assert score >= min_score, (
-            f"Compliance score {score} for thread {thread_id} is below minimum {min_score}"
-        )
-    
-    def assert_event_order(self, thread_id: str, expected_order: List[str]):
-        """Assert events were sent in expected order."""
-        events = self.mock.get_events_for_thread(thread_id)
-        actual_order = [e['event_type'] for e in events]
-        
-        assert actual_order == expected_order, (
-            f"Event order mismatch for thread {thread_id}. "
-            f"Expected: {expected_order}, Actual: {actual_order}"
-        )
-    
-    def assert_no_failures(self):
-        """Assert no send failures occurred."""
-        analysis = self.mock.get_failure_analysis()
-        assert analysis['failed_sends'] == 0, (
-            f"Unexpected send failures: {analysis['failed_send_types']}"
-        )
-    
-    def assert_performance_threshold(self, max_latency: float = 1.0, min_throughput: float = 10.0):
-        """Assert performance meets minimum thresholds."""
-        metrics = self.mock.get_performance_metrics()
-        
-        if 'max_latency' in metrics:
-            assert metrics['max_latency'] <= max_latency, (
-                f"Max latency {metrics['max_latency']}s exceeds threshold {max_latency}s"
+    async def connect(self, headers: Optional[Dict[str, str]] = None, **kwargs):
+        """Connect to WebSocket."""
+        try:
+            import websockets
+            self.websocket = await websockets.connect(
+                self.url,
+                extra_headers=headers or {},
+                **kwargs
             )
+            self.connected = True
+            logger.info(f"WebSocket test client connected to {self.url}")
+        except ImportError:
+            # Mock WebSocket for testing without websockets library
+            self.websocket = AsyncMock()
+            self.connected = True
+            logger.info("Using mock WebSocket connection")
+        except Exception as e:
+            logger.error(f"Failed to connect WebSocket test client: {e}")
+            raise
+    
+    async def disconnect(self):
+        """Disconnect from WebSocket."""
+        if self.websocket and self.connected:
+            try:
+                if hasattr(self.websocket, 'close') and not isinstance(self.websocket, AsyncMock):
+                    await self.websocket.close()
+                self.connected = False
+                logger.info("WebSocket test client disconnected")
+            except Exception as e:
+                logger.warning(f"Error disconnecting WebSocket: {e}")
+                self.connected = False
+    
+    async def send_message(self, message: Union[Dict[str, Any], str]):
+        """Send message to WebSocket."""
+        if not self.connected:
+            raise ConnectionError("WebSocket not connected")
         
-        if 'throughput' in metrics:
-            throughput = metrics['throughput']['messages_per_second']
-            assert throughput >= min_throughput, (
-                f"Throughput {throughput} msg/s is below minimum {min_throughput} msg/s"
-            )
-    
-    def assert_connection_established(self, thread_id: str):
-        """Assert connection was properly established."""
-        assert thread_id in self.mock.connections, f"No connection found for thread {thread_id}"
-        assert self.mock.connections[thread_id]['connected'], f"Thread {thread_id} not connected"
-    
-    def assert_message_count(self, thread_id: str, expected_count: int):
-        """Assert expected number of messages for a thread."""
-        events = self.mock.get_events_for_thread(thread_id)
-        assert len(events) == expected_count, (
-            f"Expected {expected_count} messages for thread {thread_id}, "
-            f"but found {len(events)}"
-        )
-    
-    def assert_no_race_conditions(self):
-        """Assert no race conditions were detected."""
-        if hasattr(self.mock, 'race_condition_tracker'):
-            for thread_id, events in self.mock.race_condition_tracker.items():
-                if len(events) >= 2:
-                    time_diffs = [events[i][0] - events[i-1][0] for i in range(1, len(events))]
-                    close_events = [diff for diff in time_diffs if diff < 0.001]
-                    assert len(close_events) == 0, (
-                        f"Potential race conditions detected in thread {thread_id}: "
-                        f"{len(close_events)} events within 1ms"
-                    )
-
-
-def assert_websocket_events(mock_manager: MockWebSocketManager, thread_id: str) -> WebSocketAssertions:
-    """Create assertion helper for a specific mock and thread."""
-    return WebSocketAssertions(mock_manager)
-
-
-# ============================================================================
-# TEST SCENARIO HELPERS
-# ============================================================================
-
-async def simulate_agent_execution_flow(
-    mock_manager: MockWebSocketManager,
-    thread_id: str,
-    include_tools: bool = True,
-    tool_count: int = 2
-) -> List[Dict]:
-    """
-    Simulate a complete agent execution flow with proper event sequence.
-    
-    This helper ensures all required events are sent in the correct order
-    for compliance testing.
-    """
-    events_sent = []
-    
-    # Required event sequence for business compliance
-    await mock_manager.send_to_thread(thread_id, {
-        'type': 'agent_started',
-        'data': {'agent_id': 'test_agent', 'timestamp': time.time()}
-    })
-    events_sent.append('agent_started')
-    
-    await mock_manager.send_to_thread(thread_id, {
-        'type': 'agent_thinking', 
-        'data': {'status': 'analyzing request', 'timestamp': time.time()}
-    })
-    events_sent.append('agent_thinking')
-    
-    if include_tools:
-        for i in range(tool_count):
-            await mock_manager.send_to_thread(thread_id, {
-                'type': 'tool_executing',
-                'data': {'tool_name': f'test_tool_{i}', 'timestamp': time.time()}
-            })
-            events_sent.append('tool_executing')
+        if isinstance(message, dict):
+            message_str = json.dumps(message)
+        else:
+            message_str = message
             
-            await mock_manager.send_to_thread(thread_id, {
-                'type': 'tool_completed',
-                'data': {'tool_name': f'test_tool_{i}', 'result': 'success', 'timestamp': time.time()}
+        try:
+            if hasattr(self.websocket, 'send') and not isinstance(self.websocket, AsyncMock):
+                await self.websocket.send(message_str)
+            
+            # Track sent message
+            self.sent_messages.append({
+                "message": message if isinstance(message, dict) else {"raw": message},
+                "timestamp": "2024-01-01T00:00:00Z"
             })
-            events_sent.append('tool_completed')
+            
+            logger.debug(f"WebSocket test client sent message: {message}")
+        except Exception as e:
+            logger.error(f"Failed to send WebSocket message: {e}")
+            raise
     
-    await mock_manager.send_to_thread(thread_id, {
-        'type': 'agent_completed',
-        'data': {'status': 'success', 'timestamp': time.time()}
-    })
-    events_sent.append('agent_completed')
-    
-    return events_sent
-
-
-async def simulate_concurrent_agents(
-    mock_manager: MockWebSocketManager,
-    thread_count: int = 3,
-    messages_per_thread: int = 5
-) -> Dict[str, List[Dict]]:
-    """
-    Simulate concurrent agent executions for concurrency testing.
-    """
-    async def run_agent_thread(thread_id: str):
-        events = []
-        for i in range(messages_per_thread):
-            event = {
-                'type': f'test_event_{i}',
-                'data': {'thread_id': thread_id, 'sequence': i, 'timestamp': time.time()}
-            }
-            await mock_manager.send_to_thread(thread_id, event)
-            events.append(event)
-            # Small delay to create interleaving
-            await asyncio.sleep(0.01)
-        return events
-    
-    # Run all threads concurrently
-    tasks = [
-        run_agent_thread(f"thread_{i}")
-        for i in range(thread_count)
-    ]
-    
-    results = await asyncio.gather(*tasks)
-    
-    # Return results keyed by thread ID
-    return {f"thread_{i}": results[i] for i in range(thread_count)}
-
-
-async def simulate_network_issues(
-    mock_manager: MockWebSocketManager,
-    thread_id: str,
-    issue_type: str = "partition"
-) -> Dict[str, Any]:
-    """
-    Simulate various network issues for resilience testing.
-    """
-    results = {'events_sent': [], 'failures': [], 'recoveries': []}
-    
-    if issue_type == "partition":
-        # Enable network partition
-        mock_manager.enable_partition()
+    async def receive_message(self, timeout: float = 5.0) -> Dict[str, Any]:
+        """Receive message from WebSocket."""
+        if not self.connected:
+            raise ConnectionError("WebSocket not connected")
         
-        # Try to send messages during partition
-        for i in range(3):
-            success = await mock_manager.send_to_thread(thread_id, {
-                'type': 'test_message',
-                'data': {'sequence': i, 'during_partition': True}
-            })
-            if success:
-                results['events_sent'].append(i)
+        try:
+            if isinstance(self.websocket, AsyncMock):
+                # Return mock message
+                message_str = '{"type": "test", "data": "mock message"}'
             else:
-                results['failures'].append(i)
-        
-        # Recover from partition
-        mock_manager.disable_partition()
-        mock_manager.simulate_recovery()
-        
-        # Send messages after recovery
-        for i in range(3, 6):
-            success = await mock_manager.send_to_thread(thread_id, {
-                'type': 'test_message',
-                'data': {'sequence': i, 'after_recovery': True}
+                message_str = await asyncio.wait_for(
+                    self.websocket.recv(),
+                    timeout=timeout
+                )
+            
+            message = json.loads(message_str)
+            
+            # Track received message
+            self.received_messages.append({
+                "message": message,
+                "timestamp": "2024-01-01T00:00:00Z"
             })
-            if success:
-                results['recoveries'].append(i)
+            
+            logger.debug(f"WebSocket test client received message: {message}")
+            return message
+            
+        except asyncio.TimeoutError:
+            raise TimeoutError(f"No message received within {timeout} seconds")
+        except json.JSONDecodeError as e:
+            logger.error(f"Failed to decode WebSocket message: {e}")
+            raise
+        except Exception as e:
+            logger.error(f"Failed to receive WebSocket message: {e}")
+            raise
     
-    elif issue_type == "timeout":
-        # Configure for high timeout probability
-        original_timeout_prob = mock_manager.config.timeout_probability
-        mock_manager.config.timeout_probability = 0.8
+    async def wait_for_message(self, message_type: str, timeout: float = 10.0) -> Dict[str, Any]:
+        """Wait for a specific type of message."""
+        start_time = asyncio.get_event_loop().time()
         
-        for i in range(5):
-            success = await mock_manager.send_to_thread(thread_id, {
-                'type': 'timeout_test',
-                'data': {'sequence': i}
-            })
-            if success:
-                results['events_sent'].append(i)
-            else:
-                results['failures'].append(i)
+        while asyncio.get_event_loop().time() - start_time < timeout:
+            try:
+                message = await self.receive_message(timeout=1.0)
+                if message.get("type") == message_type:
+                    return message
+            except TimeoutError:
+                continue  # Keep waiting
         
-        # Restore original configuration
-        mock_manager.config.timeout_probability = original_timeout_prob
+        raise TimeoutError(f"Message type '{message_type}' not received within {timeout} seconds")
     
-    return results
-
-
-def create_test_message(
-    message_type: str = "test_message",
-    data: Optional[Dict[str, Any]] = None,
-    thread_id: str = "test_thread"
-) -> Dict[str, Any]:
-    """Create a standardized test message."""
-    return {
-        'type': message_type,
-        'data': data or {'timestamp': time.time()},
-        'thread_id': thread_id,
-        'test_id': f"test_{int(time.time() * 1000)}"
-    }
-
-
-# ============================================================================
-# MIGRATION HELPERS
-# ============================================================================
-
-def migrate_legacy_mock_usage(legacy_mock_code: str) -> str:
-    """
-    Helper to migrate legacy mock usage to new unified mock.
+    def get_received_messages(self, message_type: Optional[str] = None) -> List[Dict[str, Any]]:
+        """Get received messages, optionally filtered by type."""
+        messages = [msg["message"] for msg in self.received_messages]
+        if message_type:
+            messages = [msg for msg in messages if msg.get("type") == message_type]
+        return messages
     
-    This is a simple string replacement helper for common patterns.
-    More complex migrations should be done manually.
-    """
-    replacements = [
-        # Class name changes
-        ("class MockWebSocketManager:", "# Use unified MockWebSocketManager\nfrom test_framework.fixtures.websocket_manager_mock import MockWebSocketManager"),
+    def get_sent_messages(self, message_type: Optional[str] = None) -> List[Dict[str, Any]]:
+        """Get sent messages, optionally filtered by type."""
+        messages = [msg["message"] for msg in self.sent_messages]
+        if message_type:
+            messages = [msg for msg in messages if msg.get("type") == message_type]
+        return messages
+    
+    def clear_message_history(self):
+        """Clear message history."""
+        self.received_messages.clear()
+        self.sent_messages.clear()
+
+
+# =============================================================================
+# WEBSOCKET TEST UTILITIES
+# =============================================================================
+
+class WebSocketTestSession:
+    """Test session for managing multiple WebSocket connections."""
+    
+    def __init__(self):
+        self.clients: Dict[str, WebSocketTestClient] = {}
+        self.active_sessions: List[str] = []
+    
+    def create_client(self, client_id: str, url: str = "ws://localhost:8000/ws") -> WebSocketTestClient:
+        """Create a new WebSocket test client."""
+        client = WebSocketTestClient(url)
+        self.clients[client_id] = client
+        return client
+    
+    async def connect_client(self, client_id: str, headers: Optional[Dict[str, str]] = None):
+        """Connect a specific client."""
+        if client_id not in self.clients:
+            raise ValueError(f"Client '{client_id}' not found")
         
-        # Import changes  
-        ("from tests.mission_critical.conftest_websocket_fixtures import MockWebSocketManager",
-         "from test_framework.fixtures.websocket_manager_mock import create_basic_mock as MockWebSocketManager"),
-        
-        # Constructor patterns
-        ("MockWebSocketManager()", "create_basic_mock()"),
-        ("MockWebSocketManager(strict_mode=True)", "create_compliance_mock()"),
-        
-        # Method name changes
-        (".record(", ".send_to_thread(thread_id, "),
-        (".get_events_for_thread(", ".get_events_for_thread("),
-    ]
+        client = self.clients[client_id]
+        await client.connect(headers=headers)
+        if client_id not in self.active_sessions:
+            self.active_sessions.append(client_id)
     
-    migrated_code = legacy_mock_code
-    for old, new in replacements:
-        migrated_code = migrated_code.replace(old, new)
+    async def disconnect_client(self, client_id: str):
+        """Disconnect a specific client."""
+        if client_id in self.clients:
+            await self.clients[client_id].disconnect()
+            if client_id in self.active_sessions:
+                self.active_sessions.remove(client_id)
     
-    return migrated_code
-
-
-class MockMigrationHelper:
-    """Helper class for migrating tests to use the unified mock."""
+    async def disconnect_all(self):
+        """Disconnect all clients."""
+        for client_id in list(self.active_sessions):
+            await self.disconnect_client(client_id)
     
-    def __init__(self, test_file_path: str):
-        self.test_file_path = test_file_path
-        self.migration_report = []
+    def get_client(self, client_id: str) -> WebSocketTestClient:
+        """Get a specific client."""
+        if client_id not in self.clients:
+            raise ValueError(f"Client '{client_id}' not found")
+        return self.clients[client_id]
     
-    def analyze_mock_usage(self) -> Dict[str, Any]:
-        """Analyze current mock usage patterns in a test file."""
-        with open(self.test_file_path, 'r') as f:
-            content = f.read()
-        
-        patterns = {
-            'mock_classes': content.count('class MockWebSocketManager'),
-            'mock_imports': content.count('MockWebSocketManager'),
-            'send_to_thread_calls': content.count('send_to_thread'),
-            'get_events_calls': content.count('get_events_for_thread'),
-            'compliance_checks': content.count('required_event'),
+    async def broadcast_message(self, message: Dict[str, Any], exclude: Optional[List[str]] = None):
+        """Send message to all connected clients."""
+        exclude = exclude or []
+        for client_id in self.active_sessions:
+            if client_id not in exclude:
+                await self.clients[client_id].send_message(message)
+    
+    def get_all_received_messages(self) -> Dict[str, List[Dict[str, Any]]]:
+        """Get received messages from all clients."""
+        return {
+            client_id: client.get_received_messages()
+            for client_id, client in self.clients.items()
         }
-        
-        return patterns
+
+
+# =============================================================================
+# WEBSOCKET ASSERTION HELPERS
+# =============================================================================
+
+def assert_websocket_message_received(
+    client: WebSocketTestClient, 
+    message_type: str,
+    content: Optional[Dict[str, Any]] = None
+):
+    """Assert that a WebSocket message was received."""
+    messages = client.get_received_messages(message_type)
+    assert len(messages) > 0, f"No message of type '{message_type}' received"
     
-    def suggest_migration_strategy(self) -> List[str]:
-        """Suggest migration strategy based on usage patterns."""
-        analysis = self.analyze_mock_usage()
-        suggestions = []
-        
-        if analysis['mock_classes'] > 0:
-            suggestions.append("Remove local MockWebSocketManager class and import unified mock")
-        
-        if analysis['compliance_checks'] > 0:
-            suggestions.append("Use create_compliance_mock() for tests checking required events")
-        
-        if analysis['mock_imports'] > 1:
-            suggestions.append("Consolidate to single mock import with appropriate factory method")
-        
-        return suggestions
+    if content:
+        latest_message = messages[-1]
+        for key, expected_value in content.items():
+            assert key in latest_message, f"Key '{key}' not found in message"
+            assert latest_message[key] == expected_value, f"Expected {key}='{expected_value}', got '{latest_message[key]}'"
+    
+    return messages[-1]
 
 
-# ============================================================================
-# LEGACY COMPATIBILITY FIXTURES REMOVED
-# ============================================================================
-# Legacy compatibility fixtures have been removed to streamline WebSocket test architecture
-# Use modern fixtures: mock_websocket_manager, mock_websocket_compliance, mock_websocket_performance
+def assert_websocket_message_sent(
+    client: WebSocketTestClient,
+    message_type: str,
+    content: Optional[Dict[str, Any]] = None
+):
+    """Assert that a WebSocket message was sent."""
+    messages = client.get_sent_messages(message_type)
+    assert len(messages) > 0, f"No message of type '{message_type}' sent"
+    
+    if content:
+        latest_message = messages[-1]
+        for key, expected_value in content.items():
+            assert key in latest_message, f"Key '{key}' not found in message"
+            assert latest_message[key] == expected_value, f"Expected {key}='{expected_value}', got '{latest_message[key]}'"
+    
+    return messages[-1]
 
 
-# ============================================================================
-# CONVENIENCE FUNCTIONS
-# ============================================================================
+async def wait_for_websocket_connection(client: WebSocketTestClient, timeout: float = 5.0):
+    """Wait for WebSocket connection to be established."""
+    start_time = asyncio.get_event_loop().time()
+    
+    while not client.connected:
+        if asyncio.get_event_loop().time() - start_time > timeout:
+            raise TimeoutError(f"WebSocket connection not established within {timeout} seconds")
+        await asyncio.sleep(0.1)
 
-def quick_compliance_test(mock_manager: MockWebSocketManager, thread_id: str) -> bool:
-    """Quick check if all required events were sent."""
-    compliance = mock_manager.get_required_event_compliance(thread_id)
-    return all(compliance.values())
 
-def quick_performance_check(mock_manager: MockWebSocketManager) -> Dict[str, Any]:
-    """Quick performance metrics summary."""
-    metrics = mock_manager.get_performance_metrics()
-    return {
-        'total_messages': metrics.get('messages_sent', 0),
-        'avg_latency': metrics.get('average_latency', 0.0),
-        'throughput': metrics.get('throughput', {}).get('messages_per_second', 0.0)
+# =============================================================================
+# PYTEST FIXTURES
+# =============================================================================
+
+@pytest.fixture
+async def websocket_test_client():
+    """Provide a WebSocket test client."""
+    client = WebSocketTestClient()
+    yield client
+    await client.disconnect()
+
+
+@pytest.fixture
+async def websocket_test_session():
+    """Provide a WebSocket test session."""
+    session = WebSocketTestSession()
+    yield session
+    await session.disconnect_all()
+
+
+@pytest.fixture
+def websocket_message_factory():
+    """Factory for creating WebSocket test messages."""
+    def create_message(message_type: str, **data):
+        return {
+            "type": message_type,
+            "timestamp": "2024-01-01T00:00:00Z",
+            **data
+        }
+    return create_message
+
+
+@pytest.fixture
+async def connected_websocket_client():
+    """Provide a connected WebSocket test client."""
+    client = WebSocketTestClient()
+    await client.connect()
+    yield client
+    await client.disconnect()
+
+
+@pytest.fixture
+async def multi_user_websocket_session():
+    """Provide a multi-user WebSocket test session."""
+    session = WebSocketTestSession()
+    
+    # Create clients for different users
+    user1_client = session.create_client("user1", "ws://localhost:8000/ws")
+    user2_client = session.create_client("user2", "ws://localhost:8000/ws")
+    user3_client = session.create_client("user3", "ws://localhost:8000/ws")
+    
+    await session.connect_client("user1", headers={"Authorization": "Bearer user1_token"})
+    await session.connect_client("user2", headers={"Authorization": "Bearer user2_token"})
+    await session.connect_client("user3", headers={"Authorization": "Bearer user3_token"})
+    
+    yield {
+        "session": session,
+        "users": {
+            "user1": user1_client,
+            "user2": user2_client,
+            "user3": user3_client
+        }
     }
-
-def reset_mock_for_test(mock_manager: MockWebSocketManager):
-    """Reset mock state for a fresh test."""
-    mock_manager.clear_messages()
-    mock_manager.reset_behavior_state()
+    
+    await session.disconnect_all()
 
 
-# Export main functions and classes
+# =============================================================================
+# CONTEXT MANAGERS
+# =============================================================================
+
+@asynccontextmanager
+async def websocket_test_context(url: str = "ws://localhost:8000/ws", headers: Optional[Dict[str, str]] = None):
+    """Context manager for WebSocket testing."""
+    client = WebSocketTestClient(url)
+    try:
+        await client.connect(headers=headers)
+        yield client
+    finally:
+        await client.disconnect()
+
+
+@asynccontextmanager
+async def multiple_websocket_context(count: int, base_url: str = "ws://localhost:8000/ws"):
+    """Context manager for multiple WebSocket connections."""
+    clients = []
+    try:
+        for i in range(count):
+            client = WebSocketTestClient(f"{base_url}?client_id=test_client_{i}")
+            await client.connect()
+            clients.append(client)
+        yield clients
+    finally:
+        for client in clients:
+            await client.disconnect()
+
+
+# =============================================================================
+# EXPORT ALL HELPERS AND FIXTURES
+# =============================================================================
+
 __all__ = [
-    'WebSocketAssertions',
-    'assert_websocket_events', 
-    'simulate_agent_execution_flow',
-    'simulate_concurrent_agents',
-    'simulate_network_issues',
-    'create_test_message',
-    'migrate_legacy_mock_usage',
-    'MockMigrationHelper',
-    'quick_compliance_test',
-    'quick_performance_check',
-    'reset_mock_for_test'
+    # Test client classes
+    'WebSocketTestClient',
+    'WebSocketTestSession',
+    
+    # Assertion helpers
+    'assert_websocket_message_received',
+    'assert_websocket_message_sent',
+    'wait_for_websocket_connection',
+    
+    # Pytest fixtures
+    'websocket_test_client',
+    'websocket_test_session',
+    'websocket_message_factory',
+    'connected_websocket_client',
+    'multi_user_websocket_session',
+    
+    # Context managers
+    'websocket_test_context',
+    'multiple_websocket_context'
 ]

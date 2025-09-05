@@ -21,11 +21,11 @@ from netra_backend.app.agents.supervisor.execution_context import (
 from netra_backend.app.core.execution_tracker import get_execution_tracker, ExecutionState
 # DISABLED: Heartbeat hidden errors - see AGENT_RELIABILITY_ERROR_SUPPRESSION_ANALYSIS_20250903.md
 # from netra_backend.app.core.agent_heartbeat import AgentHeartbeat
-from netra_backend.app.core.trace_persistence import get_execution_persistence
+# DISABLED: trace_persistence module removed - functionality no longer needed
+# from netra_backend.app.core.trace_persistence import get_execution_persistence
 from netra_backend.app.core.unified_trace_context import (
     UnifiedTraceContext,
-    get_current_trace_context,
-    TraceContextManager
+    get_current_trace_context
 )
 from netra_backend.app.core.logging_context import (
     get_unified_trace_context,
@@ -47,7 +47,8 @@ class AgentExecutionCore:
         self.registry = registry
         self.websocket_bridge = websocket_bridge
         self.execution_tracker = get_execution_tracker()
-        self.persistence = get_execution_persistence()
+        # trace_persistence removed - no longer needed
+        self.persistence = None
         
     async def execute_agent(
         self, 

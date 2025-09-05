@@ -25,7 +25,7 @@ if project_root not in sys.path:
     sys.path.insert(0, project_root)
 
 # Import production components
-from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
+from netra_backend.app.core.registry.universal_registry import AgentRegistry
 from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
 from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
 from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier
@@ -34,7 +34,7 @@ from netra_backend.app.agents.unified_tool_execution import (
     UnifiedToolExecutionEngine,
     enhance_tool_dispatcher_with_notifications
 )
-from netra_backend.app.websocket_core.manager import WebSocketManager
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager as WebSocketManager
 from netra_backend.app.agents.state import DeepAgentState
 
 
@@ -74,7 +74,7 @@ def test_2_agent_registry_websocket_enhancement():
     tool_dispatcher = ToolDispatcher()
     original_executor = tool_dispatcher.executor
     
-    registry = AgentRegistry(MockLLM(), tool_dispatcher)
+    registry = AgentRegistry(), tool_dispatcher)
     ws_manager = WebSocketManager()
     
     # This is the critical call that was missing
@@ -100,7 +100,7 @@ def test_3_execution_engine_websocket_notifier():
     class MockLLM:
         pass
     
-    registry = AgentRegistry(MockLLM(), ToolDispatcher())
+    registry = AgentRegistry(), ToolDispatcher())
     ws_manager = WebSocketManager()
     
     engine = ExecutionEngine(registry, ws_manager)
@@ -245,7 +245,7 @@ async def test_6_regression_prevention():
         tool_dispatcher = ToolDispatcher()
         original_executor = tool_dispatcher.executor
         
-        registry = AgentRegistry(MockLLM(), tool_dispatcher)
+        registry = AgentRegistry(), tool_dispatcher)
         ws_manager = WebSocketManager()
         
         # This was the missing call

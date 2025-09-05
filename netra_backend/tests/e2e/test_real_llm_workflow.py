@@ -16,7 +16,7 @@ from typing import Any, Dict, List
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest
-from netra_backend.app.schemas import SubAgentLifecycle
+from netra_backend.app.schemas.agent import SubAgentLifecycle
 
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.services.quality_gate_service import (

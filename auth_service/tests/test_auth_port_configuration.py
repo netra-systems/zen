@@ -18,7 +18,7 @@ import pytest
 import os
 import asyncio
 from unittest.mock import patch, MagicMock
-from auth_service.auth_core.config import AuthConfig
+from auth_service.auth_core.auth_environment import get_auth_env
 from shared.isolated_environment import get_env
 
 
@@ -42,11 +42,14 @@ class TestAuthPortConfigurationConsistency:
         auth_port = env_manager.get("AUTH_PORT", "8081")  # Correct binding port
         port_from_main = env_manager.get("PORT", "8081")  # Container runtime port
         
-        # Get auth service URL configuration
-        auth_service_url = AuthConfig.get_auth_service_url()
+        # Get auth service configuration using SSOT AuthEnvironment
+        auth_env = get_auth_env()
+        auth_service_port = auth_env.get_auth_service_port()
+        auth_service_host = auth_env.get_auth_service_host()
+        auth_service_url = f"http://{auth_service_host}:{auth_service_port}"
         
         # In development, this should use the same port consistently
-        if AuthConfig.get_environment() == "development":
+        if auth_env.get_environment() == "development":
             # Extract port from URL
             if "localhost" in auth_service_url:
                 import re

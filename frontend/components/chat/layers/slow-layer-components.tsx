@@ -71,14 +71,14 @@ export const ExecutiveSummary: React.FC<{ data: ReportData }> = ({ data }) => {
     <motion.div
       initial={{ opacity: 0, y: -10 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-gradient-to-r from-emerald-50 to-teal-50 rounded-xl p-6 border border-emerald-200 mb-6"
+      className="bg-gradient-to-r from-emerald-50 to-teal-50 rounded-xl p-3 border border-emerald-200 mb-3"
     >
-      <h2 className="text-lg font-bold text-gray-900 mb-3 flex items-center">
+      <h2 className="text-lg font-bold text-gray-900 mb-2 flex items-center">
         <Target className="w-5 h-5 mr-2 text-emerald-600" />
         Executive Summary
       </h2>
       
-      <p className="text-sm text-gray-700 mb-4 leading-relaxed">
+      <p className="text-sm text-gray-700 mb-2 leading-relaxed">
         {data.finalReport.executive_summary}
       </p>
 
@@ -106,8 +106,8 @@ export const CostEntry: React.FC<{
 export const CostSection: React.FC<CostSectionProps> = ({ 
   title, costs, total, bgClass, titleClass, borderClass, colorClass 
 }) => (
-  <div className={`${bgClass} rounded-lg p-4`}>
-    <h4 className={`text-xs font-semibold ${titleClass} mb-3`}>{title}</h4>
+  <div className={`${bgClass} rounded-lg p-3`}>
+    <h4 className={`text-xs font-semibold ${titleClass} mb-2`}>{title}</h4>
     {Object.entries(costs).map(([service, cost]) => (
       <CostEntry
         key={service}
@@ -130,7 +130,7 @@ export const CostSection: React.FC<CostSectionProps> = ({
 
 // Savings Summary Component
 export const SavingsSummary: React.FC<{ monthlySavings: number }> = ({ monthlySavings }) => (
-  <div className="mt-4 bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg p-4 border border-green-200">
+  <div className="mt-3 bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg p-3 border border-green-200">
     <div className="flex items-center justify-between">
       <div>
         <p className="text-sm text-gray-600">Estimated Monthly Savings</p>
@@ -154,7 +154,7 @@ export const SectionHeader: React.FC<SectionHeaderProps> = ({
 }) => (
   <button
     onClick={onToggle}
-    className="w-full px-6 py-4 flex items-center justify-between hover:bg-gray-50 transition-colors"
+    className="w-full px-4 py-3 flex items-center justify-between hover:bg-gray-50 transition-colors"
   >
     <h3 className="text-sm font-semibold text-gray-800 flex items-center">
       {icon}
@@ -168,7 +168,7 @@ export const SectionHeader: React.FC<SectionHeaderProps> = ({
 export const PerformanceCard: React.FC<PerformanceCardProps> = ({ 
   title, icon, current, projected, improvement, bgClass, titleClass, borderClass, projectedClass 
 }) => (
-  <div className={`${bgClass} rounded-lg p-4`}>
+  <div className={`${bgClass} rounded-lg p-3`}>
     <div className="flex items-center justify-between mb-2">
       <span className={`text-xs font-semibold ${titleClass}`}>{title}</span>
       {icon}
@@ -279,7 +279,7 @@ export const TechnicalDetails: React.FC<{ technicalDetails: any }> = ({ technica
   <motion.div
     initial={{ opacity: 0 }}
     animate={{ opacity: 1 }}
-    className="bg-gray-900 text-gray-100 rounded-xl p-6"
+    className="bg-gray-900 text-gray-100 rounded-xl p-3"
   >
     <h3 className="text-sm font-semibold mb-4 flex items-center">
       <FileText className="w-4 h-4 mr-2 text-gray-400" />

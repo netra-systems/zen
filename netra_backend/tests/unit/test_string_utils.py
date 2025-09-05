@@ -23,14 +23,16 @@ class TestStringUtils:
     
     def test_core_functionality(self, instance):
         """Test core business logic"""
-        # Test happy path
-        result = instance.process()
-        assert result is not None
+        # Test HTML sanitization
+        result = instance.sanitize_html("<script>alert('test')</script>Hello")
+        assert "script" not in result
+        assert "Hello" in result
     
     def test_error_handling(self, instance):
         """Test error scenarios"""
-        with pytest.raises(Exception):
-            instance.process_invalid()
+        # Test with invalid input - should not raise exceptions
+        result = instance.sanitize_html(None)
+        assert result is None
     
     def test_edge_cases(self, instance):
         """Test boundary conditions"""

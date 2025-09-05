@@ -17,7 +17,7 @@ if TYPE_CHECKING:
     from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
     from netra_backend.app.database.session_manager import DatabaseSessionManager
 
-from netra_backend.app.agents.actions_goals_plan_builder import ActionPlanBuilder
+from netra_backend.app.agents.actions_goals_plan_builder_uvs import ActionPlanBuilderUVS
 from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.agents.input_validation import validate_agent_input
 from netra_backend.app.agents.prompts import actions_to_meet_goals_prompt_template
@@ -45,7 +45,12 @@ class ActionsToMeetGoalsSubAgent(BaseAgent):
     """
     
     def __init__(self, llm_manager: Optional[LLMManager] = None, tool_dispatcher: Optional[ToolDispatcher] = None):
-        """Initialize with BaseAgent infrastructure."""
+        """Initialize with BaseAgent infrastructure.
+        
+        CRITICAL: LLM manager is required for this agent to function.
+        During architectural migration, some instantiation paths don't provide it.
+        See FIVE_WHYS_ANALYSIS_20250904.md for root cause analysis.
+        """
         # Initialize BaseAgent with full infrastructure
         super().__init__(
             llm_manager=llm_manager,
@@ -55,9 +60,21 @@ class ActionsToMeetGoalsSubAgent(BaseAgent):
             enable_execution_engine=True, # Get modern execution patterns
             enable_caching=False,         # No caching needed for plan generation
         )
+        
+        # FIVE WHYS FIX: Validate critical dependency at construction time
+        if llm_manager is None:
+            import warnings
+            warnings.warn(
+                "ActionsToMeetGoalsSubAgent instantiated without LLMManager - "
+                "will fail at runtime if LLM operations are attempted. "
+                "This is a known issue from incomplete architectural migration.",
+                RuntimeWarning,
+                stacklevel=2
+            )
+        
         # Store business logic dependencies only
         self.tool_dispatcher = tool_dispatcher
-        self.action_plan_builder = ActionPlanBuilder()
+        self.action_plan_builder = ActionPlanBuilderUVS()  # UVS-enhanced for guaranteed value delivery
 
     async def validate_preconditions(self, context: 'UserExecutionContext') -> bool:
         """Validate execution preconditions for action plan generation."""
@@ -112,12 +129,13 @@ class ActionsToMeetGoalsSubAgent(BaseAgent):
         await self.emit_agent_completed(result_data)
         
         # CRITICAL: Store action plan result in context metadata for other agents
-        context.metadata['action_plan_result'] = action_plan_result
+        # Using SSOT method from base_agent for consistent metadata storage
+        self.store_metadata_result(context, 'action_plan_result', action_plan_result)
         
         return {"action_plan_result": action_plan_result}
 
     async def _generate_action_plan(self, context: 'UserExecutionContext') -> ActionPlanResult:
-        """Generate action plan from context data with tool execution transparency."""
+        """Generate action plan from context data with tool execution transparency using UVS."""
         run_id = context.run_id
         
         # Extract data from context metadata
@@ -125,19 +143,20 @@ class ActionsToMeetGoalsSubAgent(BaseAgent):
         data_result = context.metadata.get('data_result')
         
         # Show tool execution for transparency
-        await self.emit_tool_executing("prompt_builder", {"optimizations": bool(optimizations_result), "data": bool(data_result)})
-        prompt = self._build_action_plan_prompt(context)
-        await self.emit_tool_completed("prompt_builder", {"prompt_size_kb": len(prompt) / 1024})
+        await self.emit_tool_executing("uvs_plan_builder", {"optimizations": bool(optimizations_result), "data": bool(data_result)})
         
-        # LLM execution with transparency
-        await self.emit_tool_executing("llm_processor", {"config": "actions_to_meet_goals"})
-        llm_response = await self._get_llm_response_with_monitoring(prompt)
-        await self.emit_tool_completed("llm_processor", {"response_size_kb": len(llm_response) / 1024})
+        # Use UVS adaptive plan generation for guaranteed value delivery
+        result = await self.action_plan_builder.generate_adaptive_plan(context)
         
-        # Action plan processing
-        await self.emit_tool_executing("action_plan_processor", {})
-        result = await self.action_plan_builder.process_llm_response(llm_response, run_id)
-        await self.emit_tool_completed("action_plan_processor", {"steps_generated": len(result.plan_steps) if result.plan_steps else 0})
+        # Extract UVS mode and data state for transparency
+        uvs_mode = result.metadata.custom_fields.get('uvs_mode', 'unknown') if hasattr(result, 'metadata') else 'unknown'
+        data_state = result.metadata.custom_fields.get('data_state', 'unknown') if hasattr(result, 'metadata') else 'unknown'
+        
+        await self.emit_tool_completed("uvs_plan_builder", {
+            "steps_generated": len(result.plan_steps) if result.plan_steps else 0,
+            "uvs_mode": uvs_mode,
+            "data_state": data_state
+        })
         
         return result
         
@@ -154,17 +173,34 @@ class ActionsToMeetGoalsSubAgent(BaseAgent):
     async def _get_llm_response_with_monitoring(self, prompt: str) -> str:
         """Get LLM response with SSOT error handling."""
         try:
+            # CRITICAL: Validate LLM manager is available (Five Whys Fix)
+            if not self.llm_manager:
+                error_msg = (
+                    "❌ LLM manager is None - agent was instantiated without required dependency. "
+                    "This indicates incomplete architectural migration between legacy AgentRegistry "
+                    "and new factory patterns. See FIVE_WHYS_ANALYSIS_20250904.md"
+                )
+                self.logger.error(error_msg)
+                raise RuntimeError(error_msg)
+                
             # Use BaseAgent's LLM infrastructure
             response = await self.llm_manager.ask_llm(
                 prompt, llm_config_name='actions_to_meet_goals'
             )
             return response
         except Exception as e:
-            error_context = ErrorContext(
-                operation="llm_response_generation",
-                details={"prompt_size": len(prompt), "config": "actions_to_meet_goals"},
-                component="ActionsToMeetGoalsSubAgent"
-            )
+            # Try to create error context, but don't fail if it doesn't work
+            try:
+                error_context = ErrorContext(
+                    trace_id=ErrorContext.generate_trace_id(),
+                    operation="llm_response_generation",
+                    details={"prompt_size": len(prompt), "config": "actions_to_meet_goals"},
+                    component="ActionsToMeetGoalsSubAgent"
+                )
+            except Exception as ec_error:
+                # If ErrorContext creation fails, just log the error
+                self.logger.error(f"ErrorContext creation failed: {ec_error}")
+            
             self.logger.error(f"LLM request failed: {e}")
             # Re-raise with context - let BaseAgent's error handling manage it
             raise
@@ -182,12 +218,18 @@ class ActionsToMeetGoalsSubAgent(BaseAgent):
         try:
             # Validate preconditions with SSOT error handling
             if not await self.validate_preconditions(context):
-                # Create structured error for validation failure
-                error_context = ErrorContext(
-                    operation="precondition_validation",
-                    details={"run_id": context.run_id, "reason": "validation_failed"},
-                    component="ActionsToMeetGoalsSubAgent"
-                )
+                # Try to create structured error for validation failure
+                try:
+                    error_context = ErrorContext(
+                        trace_id=ErrorContext.generate_trace_id(),
+                        operation="precondition_validation",
+                        details={"run_id": context.run_id, "reason": "validation_failed"},
+                        component="ActionsToMeetGoalsSubAgent"
+                    )
+                except Exception as ec_error:
+                    # If ErrorContext creation fails, just log it
+                    self.logger.error(f"ErrorContext creation failed: {ec_error}")
+                
                 raise ValueError("Precondition validation failed for action plan generation")
             
             # Execute core logic
@@ -195,12 +237,18 @@ class ActionsToMeetGoalsSubAgent(BaseAgent):
             return result
             
         except Exception as e:
-            # Structured error handling with ErrorContext
-            error_context = ErrorContext(
-                operation="action_plan_execution",
-                details={"run_id": context.run_id, "stream_updates": stream_updates, "error": str(e)},
-                component="ActionsToMeetGoalsSubAgent"
-            )
+            # Try to create structured error handling with ErrorContext
+            try:
+                error_context = ErrorContext(
+                    trace_id=ErrorContext.generate_trace_id(),
+                    operation="action_plan_execution",
+                    details={"run_id": context.run_id, "stream_updates": stream_updates, "error": str(e)},
+                    component="ActionsToMeetGoalsSubAgent"
+                )
+            except Exception as ec_error:
+                # If ErrorContext creation fails, just log it and continue with fallback
+                self.logger.error(f"ErrorContext creation failed: {ec_error}")
+            
             # Fallback logic for errors with structured logging
             self.logger.warning(f"Action plan generation failed, using fallback: {e}")
             return await self._execute_fallback_logic(context, stream_updates)
@@ -208,13 +256,17 @@ class ActionsToMeetGoalsSubAgent(BaseAgent):
     # Removed _execute_main_logic - integrated into main execute method
         
     async def _execute_fallback_logic(self, context: 'UserExecutionContext', stream_updates: bool) -> Dict[str, Any]:
-        """Fallback execution with proper WebSocket events for user transparency."""
+        """Fallback execution with proper WebSocket events for user transparency using UVS."""
         if stream_updates:
             await self.emit_agent_started("Creating fallback action plan due to processing issues")
-            await self.emit_thinking("Switching to fallback action plan generation...")
+            await self.emit_thinking("Switching to UVS fallback action plan generation...")
             
-        self.logger.warning(f"Using fallback action plan for run_id: {context.run_id}")
-        fallback_plan = ActionPlanBuilder.get_default_action_plan()
+        self.logger.warning(f"Using UVS fallback action plan for run_id: {context.run_id}")
+        
+        # Use UVS builder's ultimate fallback for guaranteed value
+        fallback_plan = self.action_plan_builder._get_ultimate_fallback_plan(
+            "Fallback triggered due to processing issues"
+        )
         
         # Note: Fallback result will be returned directly rather than stored in context
         
@@ -222,12 +274,14 @@ class ActionsToMeetGoalsSubAgent(BaseAgent):
             await self.emit_agent_completed({
                 "success": True,
                 "fallback_used": True,
+                "uvs_enabled": True,
                 "steps_generated": len(fallback_plan.plan_steps) if fallback_plan.plan_steps else 0,
-                "message": "Action plan created using fallback method"
+                "message": "Action plan created using UVS fallback method with guaranteed value delivery"
             })
             
         # CRITICAL: Store fallback action plan in context metadata for other agents
-        context.metadata['action_plan_result'] = fallback_plan
+        # Using SSOT method from base_agent for consistent metadata storage
+        self.store_metadata_result(context, 'action_plan_result', fallback_plan)
             
         return {"action_plan_result": fallback_plan}
 
@@ -241,8 +295,8 @@ class ActionsToMeetGoalsSubAgent(BaseAgent):
             )
             # Note: Default values handled in metadata copy for isolation
             if 'optimizations_result' not in context.metadata:
-                # Since context.metadata should be mutable copy, this should work
-                context.metadata['optimizations_result'] = backend_json_handler.to_dict(default_optimization)
+                # Using SSOT method for consistent metadata storage
+                self.store_metadata_result(context, 'optimizations_result', default_optimization)
         
         if "data_result" in missing_deps and not context.metadata.get('data_result'):
             default_data = DataAnalysisResponse(
@@ -254,8 +308,8 @@ class ActionsToMeetGoalsSubAgent(BaseAgent):
             )
             # Note: Default values handled in metadata copy for isolation
             if 'data_result' not in context.metadata:
-                # Since context.metadata should be mutable copy, this should work
-                context.metadata['data_result'] = backend_json_handler.to_dict(default_data)
+                # Using SSOT method for consistent metadata storage
+                self.store_metadata_result(context, 'data_result', default_data)
     
     async def check_entry_conditions(self, context: 'UserExecutionContext') -> bool:
         """Entry condition check using UserExecutionContext."""

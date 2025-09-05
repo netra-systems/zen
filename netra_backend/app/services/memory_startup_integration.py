@@ -22,9 +22,18 @@ from netra_backend.app.logging_config import central_logger
 from netra_backend.app.services.memory_optimization_service import (
     get_memory_service, initialize_memory_service
 )
-from netra_backend.app.services.session_memory_manager import (
-    get_session_manager, initialize_session_manager
-)
+# Legacy import removed - session_memory_manager no longer exists
+# from netra_backend.app.services.session_memory_manager import (
+#     get_session_manager, initialize_session_manager
+# )
+# Create stubs for backward compatibility
+def get_session_manager():
+    """Stub for legacy session manager."""
+    return None
+
+def initialize_session_manager():
+    """Stub for legacy session manager initialization."""
+    pass
 from netra_backend.app.services.lazy_component_loader import (
     get_component_loader, initialize_component_loader, 
     ComponentPriority, LoadingStrategy, lazy_component

@@ -85,7 +85,7 @@ class TestSimpleAgentFlow:
     async def test_mock_agent_run_completion(self):
         """Test mock agent run completes successfully."""
         # Create simplified mock agent run
-        from netra_backend.app.agents.triage_sub_agent import (
+        from netra_backend.app.agents.triage.unified_triage_agent import (
             TriageResult, UserIntent, Priority, Complexity, 
             ExtractedEntities, TriageMetadata
         )
@@ -153,7 +153,7 @@ class TestSimpleAgentFlow:
     async def test_agent_state_transitions(self):
         """Test agent state transitions work correctly."""
         from netra_backend.app.agents.state import DeepAgentState
-        from netra_backend.app.agents.triage_sub_agent import TriageResult, UserIntent, Priority, Complexity
+        from netra_backend.app.agents.triage.unified_triage_agent import TriageResult, UserIntent, Priority, Complexity
         
         # Create initial state
         state = DeepAgentState(

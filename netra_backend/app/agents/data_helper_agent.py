@@ -127,6 +127,7 @@ class DataHelperAgent(BaseAgent):
         except Exception as e:
             # Use unified error handler with proper ErrorContext
             error_context = ErrorContext(
+                trace_id=ErrorContext.generate_trace_id(),
                 operation="data_request_generation",
                 details={"run_id": context.run_id, "error_type": type(e).__name__},
                 component="DataHelperAgent"

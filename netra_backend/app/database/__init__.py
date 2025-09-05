@@ -1,207 +1,137 @@
-"""Database Module - Single Source of Truth for Netra Backend Database Access
+"""Database module - Single Source of Truth (SSOT) for database operations.
 
-This module consolidates ALL database session management for netra_backend.
-CRITICAL: This is the ONLY location where database sessions should be defined.
+This module provides the canonical database interface for the Netra backend application.
+All database imports should come from this module to maintain SSOT compliance.
 
 Business Value Justification (BVJ):
-- Segment: Platform stability (all tiers)
-- Business Goal: Eliminate duplicate database session management code
-- Value Impact: Ensures system integrity and prevents SSOT violations per CLAUDE.md
-- Strategic Impact: Single canonical DatabaseManager implementation
-
-ATOMIC CONSOLIDATION: Uses DatabaseManager as the single source of truth
+- Segment: Platform/Internal
+- Business Goal: System Reliability & Development Velocity  
+- Value Impact: Eliminates circular imports and provides consistent database interface
+- Strategic Impact: Foundation for reliable database operations across all services
 """
 
-from typing import AsyncGenerator, Any, Dict, List, Optional
-from contextlib import asynccontextmanager
-from sqlalchemy.ext.asyncio import AsyncSession
 import asyncio
+import logging
+from contextlib import asynccontextmanager
+from typing import AsyncGenerator, Optional
 
-# SINGLE SOURCE OF TRUTH: Use DatabaseManager exclusively
-from netra_backend.app.db.database_manager import DatabaseManager
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
+from sqlalchemy.pool import NullPool
 
-# Import ClickHouse functionality
-try:
-    from netra_backend.app.db.clickhouse import get_clickhouse_client as _get_clickhouse_client
-    from netra_backend.app.db.clickhouse import get_clickhouse_config
-    _CLICKHOUSE_AVAILABLE = True
-except ImportError:
-    _CLICKHOUSE_AVAILABLE = False
-    _get_clickhouse_client = None
-    get_clickhouse_config = None
+from shared.isolated_environment import get_env
 
-# Compatibility function for legacy imports
-async def get_async_session() -> AsyncGenerator[AsyncSession, None]:
-    """Legacy compatibility function for get_async_session imports.
-    
-    SSOT COMPLIANCE: Delegates to get_db() for centralized session management.
-    """
-    async for session in get_db():
-        yield session
+logger = logging.getLogger(__name__)
 
-class UnifiedDatabaseManager:
-    """Unified database connection manager using DatabaseManager as single source of truth.
-    
-    This class delegates ALL operations to the canonical DatabaseManager implementation,
-    eliminating SSOT violations across the codebase.
-    """
-    
-    @staticmethod
-    async def postgres_session() -> AsyncGenerator[AsyncSession, None]:
-        """Get PostgreSQL session via DatabaseManager - single source of truth.
-        
-        SSOT COMPLIANCE: Delegates to get_db() to maintain single implementation.
-        This ensures all session management logic is centralized.
-        """
-        # Delegate to the primary get_db() function for true SSOT
-        async for session in get_db():
-            yield session
-    
-    @staticmethod
-    def clickhouse_client(bypass_manager: bool = False):
-        """Get ClickHouse client - single source of truth.
-        
-        Args:
-            bypass_manager: If True, bypasses the connection manager to avoid recursion
-        """
-        if not _CLICKHOUSE_AVAILABLE or not _get_clickhouse_client:
-            raise RuntimeError("ClickHouse client not available")
-        return _get_clickhouse_client(bypass_manager)
+# Global database engine and sessionmaker
+_engine = None
+_sessionmaker = None
 
-# Create singleton instance
-_db_manager = UnifiedDatabaseManager()
+def get_database_url() -> str:
+    """Get database URL from environment."""
+    env = get_env()
+    database_url = env.get("DATABASE_URL")
+    if not database_url:
+        # Fallback for development
+        database_url = "postgresql+asyncpg://netra:netra123@localhost:5433/netra_dev"
+        logger.warning(f"DATABASE_URL not set, using fallback: {database_url}")
+    return database_url
 
-# Session manager for compatibility
-class SessionManager:
-    """Session manager for database connections."""
-    
-    def __init__(self):
-        self.active_sessions = 0
-        self.total_sessions_created = 0
-    
-    async def get_session(self):
-        """Get a database session via DatabaseManager."""
-        async for session in get_db():
-            yield session
-    
-    def get_stats(self):
-        """Get session manager statistics."""
-        return {
-            'active_sessions': self.active_sessions,
-            'total_sessions_created': self.total_sessions_created
-        }
+def get_engine():
+    """Get or create database engine."""
+    global _engine
+    if _engine is None:
+        database_url = get_database_url()
+        _engine = create_async_engine(
+            database_url,
+            poolclass=NullPool,  # Use NullPool for now to avoid connection issues
+            echo=False,
+            future=True
+        )
+    return _engine
 
-session_manager = SessionManager()
-
-# SINGLE SOURCE OF TRUTH for PostgreSQL sessions in netra_backend
-async def get_db() -> AsyncGenerator[AsyncSession, None]:
-    """Primary PostgreSQL session provider using DatabaseManager.
-    
-    This is the SINGLE source of truth for PostgreSQL sessions in netra_backend.
-    All database access delegates to DatabaseManager implementation.
-    
-    CRITICAL FIX: Delegates to DatabaseManager.get_async_session() for proper handling.
-    """
-    # Delegate to DatabaseManager's implementation which has proper error handling
-    async with DatabaseManager.get_async_session() as session:
-        yield session
-
-# SINGLE SOURCE OF TRUTH for ClickHouse connections
-def get_clickhouse_client(bypass_manager: bool = False):
-    """Primary ClickHouse client provider for netra_backend service.
-    
-    This is the SINGLE source of truth for ClickHouse connections in netra_backend.
-    All imports should use this function instead of individual module imports.
-    Returns an async context manager for ClickHouse client access.
-    
-    Args:
-        bypass_manager: If True, bypasses the connection manager to avoid recursion
-    """
-    return _db_manager.clickhouse_client(bypass_manager)
-
-# ClickHouse configuration for compatibility
-def get_clickhouse_config():
-    """Get ClickHouse configuration - delegates to environment config."""
-    from netra_backend.app.core.configuration.base import get_unified_config
-    config = get_unified_config()
-    return {
-        'url': getattr(config, 'clickhouse_url', None),
-        'host': getattr(config, 'clickhouse_host', 'localhost'),
-        'port': getattr(config, 'clickhouse_port', 9000),
-        'database': getattr(config, 'clickhouse_database', 'default')
-    }
-
-# PostgreSQL Compatibility aliases - all delegate to the single source of truth
-async def get_postgres_db() -> AsyncGenerator[AsyncSession, None]:
-    """Compatibility alias - delegates to primary implementation."""
-    async for session in get_db():
-        yield session
-
-def get_db_session():
-    """Compatibility function - delegates to primary implementation."""
-    return get_db()
-
-def get_database_session():
-    """Compatibility function - delegates to primary implementation."""
-    return get_db()
+def get_sessionmaker():
+    """Get or create session maker."""
+    global _sessionmaker
+    if _sessionmaker is None:
+        engine = get_engine()
+        _sessionmaker = async_sessionmaker(
+            engine,
+            class_=AsyncSession,
+            expire_on_commit=False,
+            autoflush=False,
+            autocommit=False
+        )
+    return _sessionmaker
 
 @asynccontextmanager
-async def get_async_db() -> AsyncGenerator[AsyncSession, None]:
-    """Compatibility alias for get_async_db imports - delegates to primary implementation."""
-    async with DatabaseManager.get_async_session() as session:
-        yield session
-
-class DatabaseConfigManager:
-    """Database configuration manager for unified config system."""
+async def get_db() -> AsyncGenerator[AsyncSession, None]:
+    """
+    Get database session for dependency injection.
     
-    def populate_database_config(self, config):
-        """Populate database configuration."""
-        pass
+    This is the canonical SSOT function for database sessions.
+    All FastAPI routes should use this as a dependency.
     
-    def validate_database_consistency(self, config):
-        """Validate database configuration consistency."""
-        return []
+    Yields:
+        AsyncSession: Database session
+    """
+    sessionmaker = get_sessionmaker()
+    async with sessionmaker() as session:
+        try:
+            logger.debug("Created new database session")
+            yield session
+        except Exception as e:
+            logger.error(f"Database session error: {e}")
+            await session.rollback()
+            raise
+        finally:
+            await session.close()
+            logger.debug("Closed database session")
+
+class DatabaseManager:
+    """
+    Database Manager class for backward compatibility.
     
-    def refresh_environment(self):
-        """Refresh environment settings."""
-        pass
-
-# Re-export database components
-try:
-    from netra_backend.app.db.base import Base
-except ImportError:
-    Base = None
-
-try:
-    from netra_backend.app.db.models_postgres import *
-except ImportError:
-    pass
-
-try:
-    from netra_backend.app.services.database_env_service import (
-        DatabaseEnvService as DatabaseManager,
-    )
+    This class provides the DatabaseManager interface that other modules expect.
+    """
     
-    def get_database_manager():
-        """Get database manager."""
-        return DatabaseManager()
-        
-except ImportError:
-    def get_database_manager():
-        """Fallback database manager."""
-        return None
+    def __init__(self):
+        self._engine = None
+        self._sessionmaker = None
+    
+    @property
+    def engine(self):
+        """Get database engine."""
+        return get_engine()
+    
+    @property
+    def sessionmaker(self):
+        """Get session maker."""
+        return get_sessionmaker()
+    
+    async def get_session(self) -> AsyncSession:
+        """Get a new database session."""
+        sessionmaker = get_sessionmaker()
+        return sessionmaker()
+    
+    @asynccontextmanager
+    async def session_scope(self) -> AsyncGenerator[AsyncSession, None]:
+        """Context manager for database sessions."""
+        async with get_db() as session:
+            yield session
 
+# Default instance for backward compatibility
+database_manager = DatabaseManager()
+
+# Import ClickHouse utilities from db module
+from netra_backend.app.db.clickhouse import get_clickhouse_client
+
+# Export main functions and classes
 __all__ = [
-    'get_db',
-    'get_async_db',
-    'get_postgres_db',
-    'get_clickhouse_client',
-    'get_clickhouse_config', 
-    'get_db_session', 
-    'get_database_session',
-    'get_database_manager',
-    'UnifiedDatabaseManager',
-    'SessionManager',
-    'session_manager',
-    'Base'
+    "get_db",
+    "get_database_url", 
+    "get_engine",
+    "get_sessionmaker",
+    "DatabaseManager",
+    "database_manager",
+    "get_clickhouse_client"
 ]

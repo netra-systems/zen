@@ -31,7 +31,7 @@ from typing import Dict, Any, List
 from unittest.mock import Mock, AsyncMock, patch
 
 from netra_backend.app.agents.base_agent import BaseAgent
-from netra_backend.app.agents.triage_sub_agent.agent import TriageSubAgent
+from netra_backend.app.agents.triage.unified_triage_agent import UnifiedTriageAgent
 from netra_backend.app.agents.base.interface import ExecutionContext, ExecutionResult
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
@@ -106,21 +106,28 @@ class TestInitializationPerformance:
         print(f"Average initialization time: {avg_init_time:.3f}s")
         
     def test_triage_agent_initialization_time(self):
-        """Test TriageSubAgent initialization performance."""
+        """Test UnifiedTriageAgent initialization performance."""
         initialization_times = []
+        
+        # Create mock dependencies
+        mock_llm_manager = Mock()
+        mock_tool_dispatcher = Mock()
         
         for i in range(50):
             start_time = time.time()
             
-            agent = TriageSubAgent()
+            agent = UnifiedTriageAgent(
+                llm_manager=mock_llm_manager,
+                tool_dispatcher=mock_tool_dispatcher
+            )
             
             end_time = time.time()
             init_time = end_time - start_time
             initialization_times.append(init_time)
             
-            # Verify proper initialization - TriageSubAgent uses BaseAgent architecture
+            # Verify proper initialization - UnifiedTriageAgent uses BaseAgent architecture
             # triage_core and processor are created per-request for isolation
-            assert agent.name == "TriageSubAgent"
+            assert agent.name == "UnifiedTriageAgent"
             assert hasattr(agent, 'name')
         
         avg_init_time = sum(initialization_times) / len(initialization_times)

@@ -20,7 +20,7 @@ import os
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
 # Import from the main file instead of module
-from netra_backend.app.agents.triage_sub_agent import TriageSubAgent as ImportedAgent
+from netra_backend.app.agents.triage.unified_triage_agent import TriageSubAgent as ImportedAgent
 try:
     # Try import from main file location
     import sys
@@ -36,7 +36,7 @@ except Exception as e:
     # Fallback to whatever we could import
     print(f"Warning: Could not import TriageSubAgent directly: {e}")
     TriageSubAgent = ImportedAgent if 'ImportedAgent' in locals() else None
-from netra_backend.app.agents.triage_sub_agent.core import TriageCore
+from netra_backend.app.agents.triage.unified_triage_agent import TriageCore
 from netra_backend.app.agents.triage_sub_agent.processing import TriageProcessor
 from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
 
@@ -65,7 +65,7 @@ class TestTriageAgentSSOTViolations(unittest.TestCase):
         Location: netra_backend/app/agents/triage_sub_agent/cache_utils.py:31
         """
         # This test should FAIL if the violation exists
-        from netra_backend.app.agents.triage_sub_agent import cache_utils
+        from netra_backend.app.agents.triage.unified_triage_agent import cache_utils
         
         # Check if hashlib is imported (violation)
         self.assertIn('hashlib', dir(cache_utils), 
@@ -129,7 +129,7 @@ class TestTriageAgentSSOTViolations(unittest.TestCase):
         Location: netra_backend/app/agents/triage_sub_agent/core.py:25
         """
         # Check if the deprecated function is imported
-        import netra_backend.app.agents.triage_sub_agent.core as core_module
+        import netra_backend.app.agents.triage.unified_triage_agent.core as core_module
         
         # This should FAIL if still importing the old function
         self.assertNotIn('extract_json_from_response', core_module.__dict__,
@@ -219,7 +219,7 @@ class TestTriageAgentSSOTViolations(unittest.TestCase):
         VIOLATION: Direct os.environ access instead of IsolatedEnvironment
         """
         # Search for os.environ usage in the module
-        import netra_backend.app.agents.triage_sub_agent as triage_module
+        import netra_backend.app.agents.triage.unified_triage_agent as triage_module
         
         # Check all submodules for os.environ usage
         violations = []
@@ -292,7 +292,7 @@ class TestTriageAgentSSOTViolations(unittest.TestCase):
         from netra_backend.app.core.config import get_config
         
         # Verify no direct json.load of config files
-        import netra_backend.app.agents.triage_sub_agent.core as core_module
+        import netra_backend.app.agents.triage.unified_triage_agent.core as core_module
         source = str(core_module.__file__)
         
         # This is a simple check - in reality would parse AST

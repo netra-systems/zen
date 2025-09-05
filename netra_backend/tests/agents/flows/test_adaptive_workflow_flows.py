@@ -19,7 +19,7 @@ from datetime import datetime, timezone
 
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
 from netra_backend.app.agents.supervisor.workflow_orchestrator import WorkflowOrchestrator
-from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
+from netra_backend.app.core.registry.universal_registry import AgentRegistry
 from netra_backend.app.agents.base.interface import ExecutionContext, ExecutionResult
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.logging_config import central_logger
@@ -135,7 +135,7 @@ class TestAdaptiveWorkflowFlows:
         websocket_manager = AsyncMock()
         
         # Create agent registry
-        registry = AgentRegistry(llm_manager, tool_dispatcher)
+        registry = AgentRegistry()
         
         # Create supervisor
         supervisor = SupervisorAgent(

@@ -12,7 +12,7 @@ from sqlalchemy.orm import Session
 from netra_backend.app import schemas
 from netra_backend.app.auth_integration.auth import get_current_user
 from netra_backend.app.db.models_postgres import User
-from netra_backend.app.dependencies import get_db_dependency, get_db_session
+from netra_backend.app.dependencies import get_request_scoped_db_session, get_db_session
 from netra_backend.app.services.corpus_service import ContentSource, corpus_service
 from netra_backend.app.services.synthetic_data_service import SyntheticDataService
 

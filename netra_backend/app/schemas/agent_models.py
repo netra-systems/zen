@@ -22,11 +22,11 @@ from pydantic import BaseModel, Field, field_validator
 
 # Import forward-referenced types for type checking
 if TYPE_CHECKING:
-    from netra_backend.app.agents.triage_sub_agent.models import TriageResult
+    from netra_backend.app.agents.triage.unified_triage_agent import TriageResult
 else:
     # Runtime fallback for model instantiation
     try:
-        from netra_backend.app.agents.triage_sub_agent.models import TriageResult
+        from netra_backend.app.agents.triage.unified_triage_agent import TriageResult
     except ImportError:
         TriageResult = None  # type: ignore
 
@@ -307,6 +307,20 @@ class DeepAgentState(BaseModel):
         return {'step_count': step_count, 'metadata': metadata, **results}
 
 
+# Agent Execution Metrics
+class AgentExecutionMetrics(BaseModel):
+    """Metrics for agent execution tracking."""
+    
+    execution_time: Optional[float] = Field(None, description="Total execution time in seconds")
+    tool_calls_count: Optional[int] = Field(0, description="Number of tool calls made")
+    context_length: Optional[int] = Field(None, description="Context length used")
+    tokens_used: Optional[int] = Field(None, description="Total tokens consumed")
+    memory_usage_mb: Optional[float] = Field(None, description="Memory usage in MB")
+    error_count: Optional[int] = Field(0, description="Number of errors encountered")
+    retry_count: Optional[int] = Field(0, description="Number of retries attempted")
+    success: Optional[bool] = Field(True, description="Whether execution was successful")
+
+
 # Backward compatibility alias  
 AgentState = DeepAgentState
 
@@ -318,5 +332,6 @@ __all__ = [
     "AgentMetadata",
     "AgentResult", 
     "DeepAgentState",
-    "AgentState"
+    "AgentState",
+    "AgentExecutionMetrics"
 ]

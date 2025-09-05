@@ -111,6 +111,9 @@ const MainChat: React.FC = () => {
   const [testResults, setTestResults] = useState<any>(null);
   const [isRunningTests, setIsRunningTests] = useState(false);
   
+  // State for tracking first user interaction to hide welcome message
+  const [hasUserStartedTyping, setHasUserStartedTyping] = useState(false);
+  
   // Ref for MessageInput to enable focus from keyboard shortcuts
   const messageInputRef = useRef<MessageInputRef>(null);
   
@@ -165,6 +168,18 @@ const MainChat: React.FC = () => {
     }
   }, [isProcessing]);
 
+  // Reset first interaction state when starting new thread (no active thread)
+  useEffect(() => {
+    if (!activeThreadId && !currentThreadId && messages.length === 0) {
+      setHasUserStartedTyping(false);
+    }
+  }, [activeThreadId, currentThreadId, messages.length]);
+
+  // Callback for first user interaction
+  const handleFirstInteraction = () => {
+    setHasUserStartedTyping(true);
+  };
+
   // Keyboard shortcuts for panels and diagnostics
   useEffect(() => {
     const handleKeyDown = createKeyboardHandler(setIsOverflowOpen, setShowEventDiagnostics, messageInputRef);
@@ -177,7 +192,9 @@ const MainChat: React.FC = () => {
   const { status: wsStatus } = useWebSocket();
   
   // Show loading state while initializing
-  if (!isInitialized || shouldShowLoading) {
+  // Fixed: Only show loading if init is not complete, not based on shouldShowLoading
+  // which can get stuck after initialization completes
+  if (!isInitialized || phase !== 'ready') {
     return (
       <InitializationProgress 
         phase={phase}
@@ -189,16 +206,14 @@ const MainChat: React.FC = () => {
   }
 
   return (
-    <div className="flex h-full bg-gradient-to-br from-gray-50 via-white to-gray-50" data-testid="main-chat">
-      {/* Sidebar removed - handled by AppWithLayout */}
-      
-      <div className="flex flex-col flex-1 max-w-full">
-        {/* Chat Header */}
+    <div className="flex flex-col h-full bg-gradient-to-br from-gray-50 via-white to-gray-50 overflow-hidden" data-testid="main-chat">
+      {/* Chat Header - Fixed at top */}
+      <div className="flex-shrink-0">
         <ChatHeader />
-        
-        {/* Main Content Area */}
-        <div className="flex-grow overflow-hidden relative">
-          <div className="h-full overflow-y-auto" data-testid="main-content">
+      </div>
+      
+      {/* Scrollable Content Area - Only scrollable element */}
+      <div className="flex-1 overflow-y-auto overflow-x-hidden" data-testid="main-content">
             {/* Empty State with Example Prompts - shown when no thread is selected OR thread selected but no messages */}
             <AnimatePresence mode="wait">
               {(shouldShowEmptyState || shouldShowExamplePrompts) && (
@@ -207,28 +222,30 @@ const MainChat: React.FC = () => {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -20 }}
                   transition={{ duration: 0.3 }}
-                  className="flex flex-col h-full px-4 py-4"
+                  className="flex flex-col h-full"
                 >
-                  {/* Welcome Header - only show for empty state (no thread) */}
-                  {shouldShowEmptyState && (
-                    <motion.div
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: 0.1 }}
-                      className="text-center mb-8"
-                    >
-                      <div className="w-20 h-20 mx-auto bg-gradient-to-br from-emerald-100 to-purple-100 rounded-full flex items-center justify-center mb-6">
+                  {/* Welcome Header - only show for empty state (no thread) and user hasn't started typing */}
+                  <AnimatePresence>
+                    {shouldShowEmptyState && !hasUserStartedTyping && (
+                      <motion.div
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -20 }}
+                        transition={{ delay: 0.1, duration: 0.3 }}
+                        className="text-center mb-2 px-4"
+                      >
+                      <div className="w-16 h-16 mx-auto bg-gradient-to-br from-emerald-100 to-purple-100 rounded-full flex items-center justify-center mb-2">
                         <svg className="w-10 h-10 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                         </svg>
                       </div>
-                      <h1 className="text-3xl font-bold text-gray-900 mb-3">Welcome to Netra AI</h1>
-                      <p className="text-xl text-gray-600 mb-6">
+                      <h1 className="text-2xl font-bold text-gray-900 mb-1">Welcome to Netra AI</h1>
+                      <p className="text-lg text-gray-600 mb-2">
                         Your AI-powered optimization platform for reducing costs and improving performance
                       </p>
-                      <div className="bg-blue-50 rounded-lg p-6 mb-6 max-w-2xl mx-auto">
-                        <h3 className="text-lg font-semibold text-blue-900 mb-3">Get Started in 3 Easy Steps:</h3>
-                        <div className="space-y-3 text-left">
+                      <div className="bg-blue-50 rounded-lg p-3 mb-2 max-w-2xl mx-auto">
+                        <h3 className="text-base font-semibold text-blue-900 mb-1">Get Started in 3 Easy Steps:</h3>
+                        <div className="space-y-2 text-left">
                           <div className="flex items-center text-blue-800">
                             <span className="bg-blue-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold mr-3">1</span>
                             <span>Choose an example prompt below or type your own optimization request</span>
@@ -244,29 +261,35 @@ const MainChat: React.FC = () => {
                         </div>
                       </div>
                     </motion.div>
-                  )}
+                    )}
+                  </AnimatePresence>
                   
                   {/* Example Prompts Section */}
                   <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: shouldShowEmptyState ? 0.2 : 0 }}
-                    className="flex-grow"
+                    transition={{ delay: shouldShowEmptyState && !hasUserStartedTyping ? 0.2 : 0 }}
+                    className="mt-2"
                   >
-                    <ExamplePrompts />
+                    <ExamplePrompts forceCollapsed={hasUserStartedTyping} />
                   </motion.div>
                   
-                  {/* Quick tip */}
-                  <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: shouldShowEmptyState ? 0.4 : 0.2 }}
-                    className="text-center mt-6"
-                  >
-                    <p className="text-gray-500 text-sm">
-                      💡 Try typing something like: &quot;I need to reduce my AI costs by 30% while maintaining quality&quot;
-                    </p>
-                  </motion.div>
+                  {/* Quick tip - only show if user hasn't started typing */}
+                  <AnimatePresence>
+                    {!hasUserStartedTyping && (
+                      <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0, y: -10 }}
+                        transition={{ delay: shouldShowEmptyState ? 0.4 : 0.2, duration: 0.3 }}
+                        className="text-center mt-2 px-4"
+                      >
+                        <p className="text-gray-500 text-sm">
+                          💡 Try typing something like: &quot;I need to reduce my AI costs by 30% while maintaining quality&quot;
+                        </p>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                 </motion.div>
               )}
             </AnimatePresence>
@@ -280,7 +303,7 @@ const MainChat: React.FC = () => {
                 transition={{ duration: 0.3 }}
                 className="flex items-center justify-center h-32"
               >
-                <div className="flex flex-col items-center gap-3 p-6 bg-white/80 backdrop-blur-sm rounded-lg shadow-sm">
+                <div className="flex flex-col items-center gap-2 p-3 bg-white/80 backdrop-blur-sm rounded-lg shadow-sm">
                   <Loader2 className="h-6 w-6 animate-spin text-blue-600" />
                   <div className="text-sm text-gray-600">Loading conversation...</div>
                   {(activeThreadId || currentThreadId) && (
@@ -332,21 +355,22 @@ const MainChat: React.FC = () => {
                 </motion.div>
               )}
             </AnimatePresence>
-          </div>
-        </div>
-        
-        {/* Chat Input */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-          className="border-t bg-white/95 backdrop-blur-sm shadow-lg"
-        >
-          <div className="px-6 py-4 max-w-3xl mx-auto w-full">
-            <MessageInput ref={messageInputRef} />
-          </div>
-        </motion.div>
       </div>
+      
+      {/* Chat Input - Fixed at bottom */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.2 }}
+        className="flex-shrink-0 border-t bg-white/95 backdrop-blur-sm shadow-lg"
+      >
+        <div className="px-6 py-4 max-w-3xl mx-auto w-full">
+          <MessageInput 
+            ref={messageInputRef} 
+            onFirstInteraction={handleFirstInteraction}
+          />
+        </div>
+      </motion.div>
       
       {/* Overflow Debug Panel */}
       <OverflowPanel isOpen={isOverflowOpen} onClose={() => setIsOverflowOpen(false)} />

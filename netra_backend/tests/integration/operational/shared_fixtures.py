@@ -30,8 +30,8 @@ from netra_backend.app.services.quality_monitoring.service import (
 from netra_backend.app.services.supply_research_scheduler import SupplyResearchScheduler
 
 # Operational imports
-from netra_backend.app.services.unified_tool_registry.registry import (
-    UnifiedToolRegistry,
+from netra_backend.app.core.registry.universal_registry import (
+    ToolRegistry as UnifiedToolRegistry,
 )
 
 class MockOperationalInfrastructure:

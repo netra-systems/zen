@@ -12,7 +12,7 @@ def init_worker():
     """Initializes the generative model for each worker process."""
     global llm_manager
     try:
-        llm_manager = LLMManager(settings)
+        llm_manager = LLMManager()
     except Exception as e:
         logger.error(f"Worker initialization failed: {e}")
         raise

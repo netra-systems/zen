@@ -14,7 +14,7 @@ from netra_backend.app.agents.github_analyzer import GitHubAnalyzerService
 from netra_backend.app.agents.supervisor.agent_execution_core import AgentExecutionCore
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 from netra_backend.app.auth_integration.auth import get_current_user
-from netra_backend.app.database import get_db_session
+from netra_backend.app.database import get_db as get_db_session
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.logging_config import central_logger as logger
 from netra_backend.app.schemas.core_models import User

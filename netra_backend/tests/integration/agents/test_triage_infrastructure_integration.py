@@ -23,7 +23,7 @@ import time
 from typing import Dict, Any
 from unittest.mock import Mock, AsyncMock, patch, call
 
-from netra_backend.app.agents.triage_sub_agent.agent import TriageSubAgent
+from netra_backend.app.agents.triage.unified_triage_agent import UnifiedTriageAgent
 from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.agents.base.interface import ExecutionContext, ExecutionResult
 from netra_backend.app.agents.base.reliability_manager import ReliabilityManager

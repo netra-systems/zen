@@ -266,7 +266,7 @@ class TestRunIdSSotCompliance:
         
         for thread_id in test_thread_ids:
             # Generate run ID
-            run_id = UnifiedIDManager.generate_run_id(thread_id, "ssot_test")
+            run_id = UnifiedIDManager.generate_run_id(thread_id)
             
             # Verify format compliance
             assert run_id.startswith(RUN_ID_PREFIX), f"Run ID missing prefix: {run_id}"
@@ -554,21 +554,21 @@ class TestWebSocketEventDelivery:
                 "user_id": "user_123",
                 "session_id": "session_abc",
                 "thread_id": "thread_user_123_session_abc",
-                "run_id": UnifiedIDManager.generate_run_id("user_123_session_abc", "user_test"),
+                "run_id": UnifiedIDManager.generate_run_id("user_123_session_abc"),
                 "agent_name": "ChatAgent"
             },
             {
                 "user_id": "user_456", 
                 "session_id": "session_def",
                 "thread_id": "thread_user_456_session_def",
-                "run_id": UnifiedIDManager.generate_run_id("user_456_session_def", "user_test"),
+                "run_id": UnifiedIDManager.generate_run_id("user_456_session_def"),
                 "agent_name": "AnalysisAgent"
             },
             {
                 "user_id": "user_789",
                 "session_id": "session_ghi", 
                 "thread_id": "thread_user_789_session_ghi",
-                "run_id": UnifiedIDManager.generate_run_id("user_789_session_ghi", "user_test"),
+                "run_id": UnifiedIDManager.generate_run_id("user_789_session_ghi"),
                 "agent_name": "SupportAgent"
             }
         ]
@@ -623,7 +623,7 @@ class TestWebSocketEventDelivery:
         """CRITICAL: Test event delivery failure handling and recovery."""
         
         # Setup test scenario  
-        run_id = UnifiedIDManager.generate_run_id("recovery_test_user", "failure_test")
+        run_id = UnifiedIDManager.generate_run_id("recovery_test_user")
         thread_id = "thread_recovery_test_user"
         agent_name = "RecoveryTestAgent"
         
@@ -692,7 +692,7 @@ class TestWebSocketEventDelivery:
     async def test_high_frequency_event_delivery(self, websocket_bridge, real_websocket_manager, test_registry):
         """CRITICAL: Test high-frequency event delivery without loss."""
         
-        run_id = UnifiedIDManager.generate_run_id("high_frequency_user", "performance_test")
+        run_id = UnifiedIDManager.generate_run_id("high_frequency_user")
         thread_id = "thread_high_frequency_user"
         agent_name = "HighFrequencyAgent"
         
@@ -893,7 +893,7 @@ class TestConcurrentOperations:
                 "agent_id": f"agent_{i}",
                 "user_id": f"user_{i}",
                 "thread_id": f"thread_user_{i}_session",
-                "run_id": UnifiedIDManager.generate_run_id(f"user_{i}_session", "concurrent_test"),
+                "run_id": UnifiedIDManager.generate_run_id(f"user_{i}_session"),
                 "agent_name": f"ConcurrentAgent_{i}"
             }
             agent_scenarios.append(scenario)
@@ -992,9 +992,9 @@ class TestConcurrentOperations:
         
         # Setup initial mappings
         scenarios = [
-            {"run_id": UnifiedIDManager.generate_run_id("user_1_session", "reconnect_test"), "thread_id": "thread_user_1_session"},
-            {"run_id": UnifiedIDManager.generate_run_id("user_2_chat", "reconnect_test"), "thread_id": "thread_user_2_chat"},
-            {"run_id": UnifiedIDManager.generate_run_id("user_3_support", "reconnect_test"), "thread_id": "thread_user_3_support"}
+            {"run_id": UnifiedIDManager.generate_run_id("user_1_session"), "thread_id": "thread_user_1_session"},
+            {"run_id": UnifiedIDManager.generate_run_id("user_2_chat"), "thread_id": "thread_user_2_chat"},
+            {"run_id": UnifiedIDManager.generate_run_id("user_3_support"), "thread_id": "thread_user_3_support"}
         ]
         
         # Register mappings
@@ -1064,7 +1064,7 @@ class TestConcurrentOperations:
         for i in range(thread_count):
             scenario = {
                 "thread_id": f"thread_load_test_{i}",
-                "run_id": UnifiedIDManager.generate_run_id(f"load_test_user_{i}", "extreme_load"),
+                "run_id": UnifiedIDManager.generate_run_id(f"load_test_user_{i}"),
                 "agent_name": f"LoadTestAgent_{i}"
             }
             scenarios.append(scenario)
@@ -1181,7 +1181,7 @@ class TestBusinessMetrics:
             for i in range(scenario["thread_count"]):
                 thread_info = {
                     "thread_id": f"thread_{scenario['type']}_{i}",
-                    "run_id": UnifiedIDManager.generate_run_id(f"{scenario['type']}_{i}", "business_metrics"),
+                    "run_id": UnifiedIDManager.generate_run_id(f"{scenario['type']}_{i}"),
                     "agent_name": f"Agent_{scenario['type']}_{i}"
                 }
                 threads.append(thread_info)
@@ -1311,7 +1311,7 @@ class TestBusinessMetrics:
                 else:
                     # Use generated run_id for registry/orchestrator tests
                     thread_id = f"thread_{category}_{i}"
-                    run_id = UnifiedIDManager.generate_run_id(f"{category}_{i}", "resolution_accuracy")
+                    run_id = UnifiedIDManager.generate_run_id(f"{category}_{i}")
                 
                 # Setup according to test case
                 setup_result = test_case["setup"](run_id, thread_id)

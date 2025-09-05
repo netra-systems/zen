@@ -1,12 +1,5 @@
 """Supervisor Agent - UserExecutionContext Pattern Implementation
 
-Migrated supervisor agent using new UserExecutionContext pattern:
-- Uses UserExecutionContext for complete request isolation
-- DatabaseSessionManager for session management without global state
-- All legacy execute methods removed - no backward compatibility
-- Complete removal of DeepAgentState usage
-- All sub-agent calls use create_child_context() for proper isolation
-
 Business Value: Enables safe concurrent user operations with zero context leakage.
 BVJ: ALL segments | Platform Stability | Complete user isolation for production deployment
 """
@@ -50,16 +43,6 @@ logger = central_logger.get_logger(__name__)
 
 class SupervisorAgent(BaseAgent):
     """SupervisorAgent with UserExecutionContext pattern.
-    
-    CRITICAL: This supervisor uses the UserExecutionContext pattern to ensure:
-    - Complete user isolation (no shared state between requests)
-    - DatabaseSessionManager for session isolation
-    - ALL legacy execute methods removed - no backward compatibility
-    - UserExecutionContext passed through entire execution chain
-    - All sub-agents use create_child_context() for proper isolation
-    
-    The supervisor coordinates agent orchestration while maintaining strict
-    isolation boundaries to prevent user data leakage in concurrent scenarios.
     """
     
     def __init__(self, 
@@ -104,33 +87,27 @@ class SupervisorAgent(BaseAgent):
         try:
             # Pre-configure with just the websocket bridge (registries will be added in execute())
             # This is critical to prevent None bridge errors when creating sub-agents
+            # NOTE: tool_dispatcher is created per-request, NOT passed in constructor
             self.agent_instance_factory.configure(
                 websocket_bridge=websocket_bridge,
                 websocket_manager=getattr(websocket_bridge, 'websocket_manager', None),
-                agent_class_registry=self.agent_class_registry  # Use the class registry we just got
+                agent_class_registry=self.agent_class_registry,  # Use the class registry we just got
+                llm_manager=llm_manager,
+                tool_dispatcher=None  # Will be set per-request in execute()
             )
             logger.info(f"✅ Factory pre-configured with WebSocket bridge to prevent sub-agent event failures")
         except Exception as e:
-            logger.warning(f"⚠️ Could not pre-configure factory in init (will configure in execute): {e}")
+            # CRITICAL: Changed from warning to error - configuration failure should fail fast
+            logger.error(f"❌ Failed to pre-configure factory in init: {e}")
+            raise RuntimeError(f"Agent instance factory pre-configuration failed: {e}")
         
         # Store LLM manager for creating request-scoped registries
         self._llm_manager = llm_manager
         
-        # CRITICAL: Create a startup registry for validation and infrastructure setup
-        # This registry is used for startup validation and will be replaced per-request
-        # in execute() for complete user isolation
-        # Note: We create with a temporary tool dispatcher that will NOT be used for actual requests
-        from netra_backend.app.agents.tool_dispatcher import ToolDispatcher, create_legacy_tool_dispatcher
-        # Use legacy tool dispatcher for startup validation (avoids global state warnings) 
-        # create_legacy_tool_dispatcher is the proper startup method without warnings
-        startup_tool_dispatcher = create_legacy_tool_dispatcher(
-            tools=None,
-            websocket_bridge=websocket_bridge,
-            permission_service=None
-        )
-        self.registry = AgentRegistry(llm_manager, startup_tool_dispatcher)
-        self.registry.register_default_agents()
-        self.registry.set_websocket_bridge(websocket_bridge)
+        # REMOVED: Startup registry instantiation to eliminate singleton patterns
+        # Agent validation is now handled through AgentClassRegistry and 
+        # AgentInstanceFactory which provide proper isolation
+        # No startup AgentRegistry needed - factory handles agent creation per-request
         
         # Per-request execution lock (not global!)
         self._execution_lock = asyncio.Lock()
@@ -173,9 +150,7 @@ class SupervisorAgent(BaseAgent):
         async with self._execution_lock:
             try:
                 # Import here to avoid circular dependency
-                from netra_backend.app.agents.tool_dispatcher_core import ToolDispatcher
-                from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
-                from netra_backend.app.websocket_core.isolated_event_emitter import IsolatedWebSocketEventEmitter
+                from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmitter as IsolatedWebSocketEventEmitter
                 
                 # CRITICAL: Create WebSocket emitter BEFORE tool dispatcher
                 websocket_emitter = IsolatedWebSocketEventEmitter.create_for_user(
@@ -219,25 +194,24 @@ class SupervisorAgent(BaseAgent):
                 self.user_tool_registry = tool_system['registry']
                 self.user_tools = tool_system['tools']
                 
-                # Create request-scoped registry for this user
-                self.registry = AgentRegistry(self._llm_manager, self.tool_dispatcher)
-                self.registry.register_default_agents()
-                self.registry.set_websocket_bridge(self.websocket_bridge)
+                # REMOVED: Request-scoped registry creation to eliminate singleton patterns
+                # Factory handles agent creation with proper isolation without AgentRegistry
                 
-                # CRITICAL: Configure agent instance factory with the registry
-                logger.info(f"🔧 Configuring agent instance factory with registry for user {context.user_id}")
+                # CRITICAL: Configure agent instance factory directly for complete isolation
+                logger.info(f"🔧 Configuring agent instance factory for user {context.user_id}")
                 self.agent_instance_factory.configure(
-                    agent_registry=self.registry,
+                    agent_class_registry=self.agent_class_registry,
                     websocket_bridge=self.websocket_bridge,
-                    websocket_manager=getattr(self.websocket_bridge, 'websocket_manager', None)
+                    websocket_manager=getattr(self.websocket_bridge, 'websocket_manager', None),
+                    llm_manager=self._llm_manager,
+                    tool_dispatcher=self.tool_dispatcher
                 )
                 
-                # CRITICAL: Enhance tool dispatcher with WebSocket notifications
-                if hasattr(self.registry, 'set_websocket_manager'):
-                    # Use websocket_manager from bridge if available
-                    websocket_manager = getattr(self.websocket_bridge, 'websocket_manager', None)
-                    if websocket_manager:
-                        self.registry.set_websocket_manager(websocket_manager)
+                # CRITICAL: Enhance tool dispatcher with WebSocket notifications directly
+                websocket_manager = getattr(self.websocket_bridge, 'websocket_manager', None)
+                if websocket_manager and hasattr(self.tool_dispatcher, 'set_websocket_manager'):
+                    self.tool_dispatcher.set_websocket_manager(websocket_manager)
+                    logger.info(f"✅ Enhanced tool dispatcher with WebSocket for user {context.user_id}")
                 
                 # Create session manager for database operations
                 logger.info(f"📂 Creating managed session for user {context.user_id}")
@@ -257,7 +231,7 @@ class SupervisorAgent(BaseAgent):
             finally:
                 # Clean up request-scoped resources
                 self.tool_dispatcher = None
-                self.registry = None
+                # No registry cleanup needed - using factory pattern
     
     async def _orchestrate_agents(self, context: UserExecutionContext, 
                                  session_manager: DatabaseSessionManager, 
@@ -352,15 +326,24 @@ class SupervisorAgent(BaseAgent):
         return agent_instances
     
     def _get_required_agent_names(self) -> List[str]:
-        """Get list of required agent names for orchestration."""
-        # Core agents required for most workflows
-        core_agents = ["triage", "data", "optimization", "actions"]
+        """Get list of required agent names for orchestration.
         
-        # Optional agents that enhance functionality
-        optional_agents = ["reporting", "goals_triage", "data_helper", "synthetic_data"]
+        UVS SIMPLIFIED: Only 2 agents are truly required:
+        1. Triage - Determines what the user needs
+        2. Reporting (with UVS) - ALWAYS delivers value, handles all failures
         
-        # Return core agents first, then optionals
-        return core_agents + optional_agents
+        Default flow: Triage → Data Helper → Reporting (UVS)
+        All other agents are optional based on triage assessment.
+        """
+        # CRITICAL: Only these 2 agents are required for UVS
+        required_agents = ["triage", "reporting"]  # Reporting has UVS enhancements
+        
+        # Optional agents that may be invoked based on triage
+        # These are created but only used if triage determines they're needed
+        optional_agents = ["data_helper", "data", "optimization", "actions", "goals_triage", "synthetic_data"]
+        
+        # Return required first, then optionals
+        return required_agents + optional_agents
 
     def _validate_execution_preconditions(self, context: UserExecutionContext) -> bool:
         """Validate execution preconditions for supervisor orchestration.
@@ -447,31 +430,67 @@ class SupervisorAgent(BaseAgent):
         return lambda: self.websocket_bridge
 
     # Define agent dependencies with metadata keys (SSOT)
+    # UVS PRINCIPLE: Only Reporting is TRULY required - it can handle ANY scenario
+    # All other agents are optional enhancements that improve the quality of the response
     AGENT_DEPENDENCIES = {
         "triage": {
-            "required": [],
+            "required": [],  # Triage has no dependencies
             "optional": [],
-            "produces": ["triage_result", "goal_triage_results"]
-        },
-        "data": {
-            "required": [("triage", "triage_result")],
-            "optional": [],
-            "produces": ["data_result", "data_analysis_result"]
-        },
-        "optimization": {
-            "required": [("triage", "triage_result"), ("data", "data_result")],
-            "optional": [],
-            "produces": ["optimizations_result", "optimization_strategies"]
-        },
-        "actions": {
-            "required": [("triage", "triage_result"), ("data", "data_result")],
-            "optional": [("optimization", "optimizations_result")],
-            "produces": ["action_plan_result", "actions_result"]
+            "produces": ["triage_result", "goal_triage_results", "data_sufficiency", "user_intent"],
+            "priority": 0,  # Runs first if available
+            "can_fail": True  # System continues even if triage fails
         },
         "reporting": {
-            "required": [("triage", "triage_result")],
-            "optional": [("data", "data_result"), ("optimization", "optimizations_result"), ("actions", "action_plan_result")],
-            "produces": ["report_result", "final_report"]
+            "required": [],  # UVS: Reporting can work with NOTHING
+            "optional": [  # Better with these but not required
+                ("triage", "triage_result"),
+                ("data", "data_result"),
+                ("optimization", "optimizations_result"),
+                ("actions", "action_plan_result"),
+                ("data_helper", "data_helper_result")
+            ],
+            "produces": ["report_result", "final_report"],
+            "uvs_enabled": True,  # Flag indicating UVS enhancements
+            "priority": 999,  # Always runs last
+            "can_fail": False  # MUST succeed - this is the user's response
+        },
+        "data_helper": {
+            "required": [],  # Can work independently
+            "optional": [("triage", "triage_result")],
+            "produces": ["data_helper_result", "data_collection_guidance"],
+            "priority": 1,  # Early in pipeline for guidance
+            "can_fail": True  # Non-critical
+        },
+        "data": {
+            "required": [],  # Can attempt data collection independently  
+            "optional": [
+                ("triage", "triage_result"),
+                ("data_helper", "data_helper_result")
+            ],
+            "produces": ["data_result", "data_analysis_result"],
+            "priority": 2,  # After helper if present
+            "can_fail": True  # Non-critical - reporting handles absence
+        },
+        "optimization": {
+            "required": [],  # Changed: Can provide general optimization advice without data
+            "optional": [
+                ("data", "data_result"),  # Much better with data
+                ("triage", "triage_result")
+            ],
+            "produces": ["optimizations_result", "optimization_strategies"],
+            "priority": 3,  # After data if present
+            "can_fail": True  # Non-critical
+        },
+        "actions": {
+            "required": [],  # Can suggest generic actions
+            "optional": [
+                ("triage", "triage_result"),
+                ("data", "data_result"),
+                ("optimization", "optimizations_result")
+            ],
+            "produces": ["action_plan_result", "actions_result"],
+            "priority": 4,  # After optimization if present
+            "can_fail": True  # Non-critical
         }
     }
     
@@ -535,8 +554,37 @@ class SupervisorAgent(BaseAgent):
         results = {}
         completed_agents = set()
         failed_agents = set()
-        execution_order = ["triage", "data", "optimization", "actions", "reporting"]
         
+        # UVS SIMPLIFIED: Dynamic execution order based on triage
+        # Core principle: System works with ANY subset of agents
+        # Minimum viable: Just Reporting (with UVS enhancements)
+        # Optimal: Triage → (dynamic agents) → Reporting
+        
+        # Step 1: Attempt triage if available (can fail gracefully)
+        triage_result = None
+        if "triage" in agent_instances:
+            try:
+                logger.info("📊 Executing triage agent to determine optimal workflow...")
+                triage_result = await self._execute_single_agent(
+                    agent_instances["triage"], context, "triage", completed_agents, failed_agents
+                )
+                results["triage"] = triage_result
+                logger.info(f"✅ Triage completed. Data sufficiency: {triage_result.get('data_sufficiency', 'unknown')}")
+            except Exception as e:
+                logger.warning(f"⚠️ Triage failed (non-critical): {e}")
+                logger.info("📌 Continuing with UVS fallback workflow...")
+                results["triage"] = {
+                    "error": str(e), 
+                    "status": "failed",
+                    "fallback": "Using default workflow without triage insights"
+                }
+                failed_agents.add("triage")
+        
+        # Step 2: Determine dynamic execution order based on triage
+        execution_order = self._determine_execution_order(triage_result, context)
+        logger.info(f"Dynamic execution order based on triage: {execution_order}")
+        
+        # Step 3: Execute determined agents
         for agent_name in execution_order:
             # Skip if agent not available
             if agent_name not in agent_instances:
@@ -546,17 +594,14 @@ class SupervisorAgent(BaseAgent):
             # Check dependencies before execution (SSOT validation)
             can_execute, missing_deps = self._can_execute_agent(agent_name, completed_agents, context.metadata)
             if not can_execute:
-                logger.error(f"Cannot execute {agent_name}: missing dependencies: {missing_deps}")
+                # UVS: Dependencies not met is not a failure - just skip
+                logger.info(f"⏭️ Skipping {agent_name}: optional dependencies not met: {missing_deps}")
                 results[agent_name] = {
-                    "error": "Dependencies not met",
                     "status": "skipped",
+                    "reason": "Optional dependencies not available",
                     "missing_deps": missing_deps
                 }
-                failed_agents.add(agent_name)
-                # For critical agents, stop the workflow
-                if agent_name in ["triage", "data"]:
-                    logger.error(f"Critical agent {agent_name} failed. Stopping workflow.")
-                    break
+                # Don't add to failed_agents - this is expected behavior
                 continue
                 
             try:
@@ -604,17 +649,46 @@ class SupervisorAgent(BaseAgent):
                     await asyncio.sleep(delay)
                     
             except Exception as e:
-                logger.error(f"Agent {agent_name} failed for user {context.user_id}: {e}", exc_info=True)
-                results[agent_name] = {"error": str(e), "status": "failed"}
-                failed_agents.add(agent_name)
+                # Check if this agent can fail gracefully (UVS principle)
+                agent_config = self.AGENT_DEPENDENCIES.get(agent_name, {})
+                can_fail = agent_config.get("can_fail", True)
                 
-                # For critical agents (triage, data), stop the entire workflow
-                if agent_name in ["triage", "data"]:
-                    logger.error(f"Critical agent {agent_name} failed. Stopping workflow execution.")
-                    break
+                if can_fail:
+                    # Non-critical agent - log and continue
+                    logger.warning(f"⚠️ Optional agent {agent_name} failed (non-critical): {e}")
+                    results[agent_name] = {
+                        "error": str(e), 
+                        "status": "failed",
+                        "recoverable": True,
+                        "impact": "Minimal - other agents will compensate"
+                    }
+                    failed_agents.add(agent_name)
                     
-                # For non-critical agents, continue but log the impact
-                logger.warning(f"Non-critical agent {agent_name} failed. Continuing with degraded results.")
+                    # Emit user-friendly message
+                    await self._emit_thinking(context, 
+                        f"Note: {agent_name} encountered an issue but we're continuing with alternative approaches...")
+                else:
+                    # Critical agent (only reporting) - must handle specially
+                    logger.error(f"❌ CRITICAL: Required agent {agent_name} failed: {e}", exc_info=True)
+                    
+                    if agent_name == "reporting":
+                        # Reporting MUST succeed - attempt fallback
+                        logger.info("🔄 Attempting fallback reporting...")
+                        try:
+                            results["reporting"] = await self._create_fallback_report(context, results)
+                            logger.info("✅ Fallback reporting succeeded")
+                            completed_agents.add("reporting")
+                        except Exception as fallback_error:
+                            logger.error(f"❌ Fallback reporting also failed: {fallback_error}")
+                            # Last resort - create minimal report
+                            results["reporting"] = {
+                                "status": "emergency_fallback",
+                                "message": "System encountered an issue. Please try again.",
+                                "error": str(e)
+                            }
+                    else:
+                        results[agent_name] = {"error": str(e), "status": "failed"}
+                        failed_agents.add(agent_name)
         
         # Log workflow summary
         logger.info(f"Workflow completed. Successful: {completed_agents}, Failed: {failed_agents}")
@@ -809,6 +883,276 @@ class SupervisorAgent(BaseAgent):
         if generic_key not in produces_keys:
             context.metadata[generic_key] = result
             logger.debug(f"Stored {agent_name} result under generic key: {generic_key}")
+    
+    def _determine_execution_order(self, triage_result: Optional[Dict], context: UserExecutionContext) -> List[str]:
+        """Determine dynamic execution order based on triage results.
+        
+        UVS SIMPLIFIED FLOW:
+        - Reporting ALWAYS runs (it's the only truly required agent)
+        - Other agents run based on data availability and user intent
+        - Skip unnecessary agents for faster responses
+        
+        Args:
+            triage_result: Result from triage agent (may be None or failed)
+            context: User execution context
+            
+        Returns:
+            List of agent names to execute in order
+        """
+        execution_order = []
+        
+        # Check if triage provided guidance
+        if triage_result and isinstance(triage_result, dict):
+            # Extract workflow hints from triage
+            data_sufficiency = triage_result.get("data_sufficiency", "unknown")
+            user_intent = triage_result.get("intent", {})
+            next_agents = triage_result.get("next_agents", [])
+            
+            # Use triage's recommended workflow if available
+            if next_agents:
+                logger.info(f"Using triage-recommended workflow: {next_agents}")
+                execution_order = [agent for agent in next_agents if agent != "reporting"]
+            else:
+                # Determine workflow based on data sufficiency
+                if data_sufficiency == "sufficient":
+                    # Have data - selective pipeline based on intent
+                    execution_order = []
+                    
+                    # Only add agents that are actually needed
+                    if self._needs_data_analysis(user_intent, context):
+                        execution_order.append("data")
+                    
+                    if self._needs_optimization(user_intent, context):
+                        execution_order.append("optimization")
+                    
+                    if self._needs_action_plan(user_intent, context):
+                        execution_order.append("actions")
+                    
+                    # If no specific agents needed, use data helper for guidance
+                    if not execution_order:
+                        execution_order = ["data_helper"]
+                        
+                elif data_sufficiency == "partial":
+                    # Some data - augment with helper
+                    execution_order = ["data_helper"]
+                    
+                    # Add other agents if beneficial
+                    if self._needs_data_analysis(user_intent, context):
+                        execution_order.append("data")
+                    
+                    if self._needs_optimization(user_intent, context):
+                        execution_order.append("optimization")
+                        
+                else:
+                    # No data or unknown - guidance flow
+                    execution_order = ["data_helper"]
+        else:
+            # Triage failed or no result - minimal flow
+            logger.info("Triage unavailable. Using minimal UVS flow: Data Helper → Reporting")
+            execution_order = ["data_helper"]
+        
+        # CRITICAL: ALWAYS end with Reporting (UVS - can handle ANY scenario)
+        execution_order.append("reporting")
+        
+        # Log the dynamic workflow for debugging
+        logger.info(f"UVS Dynamic workflow determined: {' → '.join(execution_order)}")
+        logger.info(f"Workflow reasoning: data_sufficiency={triage_result.get('data_sufficiency', 'unknown') if triage_result else 'no_triage'}")
+        
+        return execution_order
+    
+    def _needs_data_analysis(self, user_intent: Dict, context: UserExecutionContext) -> bool:
+        """Check if data analysis is needed based on user intent.
+        
+        Args:
+            user_intent: Intent extracted by triage
+            context: User execution context
+            
+        Returns:
+            True if data analysis would add value
+        """
+        # Check intent signals
+        if isinstance(user_intent, dict):
+            primary_intent = user_intent.get("primary_intent", "").lower()
+            
+            # Keywords that suggest data analysis is needed
+            data_keywords = ["analyze", "trend", "pattern", "usage", "cost", 
+                           "performance", "metric", "statistic", "report", "insight"]
+            
+            if any(keyword in primary_intent for keyword in data_keywords):
+                return True
+        
+        # Check if user provided data in context
+        if context.metadata.get("usage_data") or context.metadata.get("cost_data"):
+            return True
+            
+        return False
+    
+    def _needs_optimization(self, user_intent: Dict, context: UserExecutionContext) -> bool:
+        """Check if optimization is needed based on user intent.
+        
+        Args:
+            user_intent: Intent extracted by triage
+            context: User execution context
+            
+        Returns:
+            True if optimization would add value
+        """
+        if isinstance(user_intent, dict):
+            primary_intent = user_intent.get("primary_intent", "").lower()
+            
+            # Keywords that suggest optimization is needed
+            opt_keywords = ["optimize", "improve", "reduce", "save", "efficient",
+                          "better", "enhance", "minimize", "maximize", "tune"]
+            
+            if any(keyword in primary_intent for keyword in opt_keywords):
+                return True
+        
+        return False
+    
+    def _needs_action_plan(self, user_intent: Dict, context: UserExecutionContext) -> bool:
+        """Check if action plan is needed based on user intent.
+        
+        Args:
+            user_intent: Intent extracted by triage
+            context: User execution context
+            
+        Returns:
+            True if action plan would add value
+        """
+        if isinstance(user_intent, dict):
+            primary_intent = user_intent.get("primary_intent", "").lower()
+            action_required = user_intent.get("action_required", False)
+            
+            # Direct signal from triage
+            if action_required:
+                return True
+            
+            # Keywords that suggest action plan is needed
+            action_keywords = ["implement", "deploy", "setup", "configure", "migrate",
+                             "plan", "roadmap", "steps", "guide", "how to"]
+            
+            if any(keyword in primary_intent for keyword in action_keywords):
+                return True
+        
+        return False
+    
+    async def _execute_single_agent(self, agent_instance: BaseAgent, 
+                                   context: UserExecutionContext,
+                                   agent_name: str,
+                                   completed_agents: set,
+                                   failed_agents: set) -> Dict[str, Any]:
+        """Execute a single agent and track its status.
+        
+        Args:
+            agent_instance: The agent to execute
+            context: User execution context
+            agent_name: Name of the agent
+            completed_agents: Set to track completed agents
+            failed_agents: Set to track failed agents
+            
+        Returns:
+            Agent execution result
+        """
+        try:
+            await self._emit_thinking(context, f"Running {agent_name}...")
+            
+            # Create child context for agent
+            child_context = context.create_child_context(
+                operation_name=f"{agent_name}_execution",
+                additional_metadata={"agent_name": agent_name}
+            )
+            
+            # Execute with retry
+            result = await self._execute_agent_with_retry(
+                agent_instance, child_context, agent_name
+            )
+            
+            # Mark as completed
+            completed_agents.add(agent_name)
+            
+            # Propagate metadata
+            self._merge_child_metadata_to_parent(context, child_context, agent_name)
+            self._store_agent_result(context, agent_name, result)
+            
+            logger.info(f"✅ Agent {agent_name} completed successfully")
+            return result
+            
+        except Exception as e:
+            logger.error(f"Agent {agent_name} failed: {e}")
+            failed_agents.add(agent_name)
+            raise
+    
+    async def _create_fallback_report(self, context: UserExecutionContext, results: Dict[str, Any]) -> Dict[str, Any]:
+        """Create a fallback report when the reporting agent fails.
+        
+        UVS principle: Always provide value to the user, even in failure scenarios.
+        
+        Args:
+            context: User execution context
+            results: Results from other agents (may be partial)
+            
+        Returns:
+            Fallback report dictionary
+        """
+        logger.info("Creating UVS fallback report...")
+        
+        # Gather any successful results
+        successful_agents = [name for name, result in results.items() 
+                           if isinstance(result, dict) and result.get("status") != "failed"]
+        
+        # Build a basic report
+        report = {
+            "status": "fallback",
+            "message": "Analysis completed with partial results.",
+            "summary": []
+        }
+        
+        # Add triage insights if available
+        if "triage" in results and results["triage"].get("status") != "failed":
+            triage = results["triage"]
+            report["summary"].append(f"Request type: {triage.get('category', 'General inquiry')}")
+            report["summary"].append(f"Priority: {triage.get('priority', 'Normal')}")
+            
+        # Add data helper guidance if available
+        if "data_helper" in results and results["data_helper"].get("status") != "failed":
+            report["summary"].append("Data collection guidance is available.")
+            report["data_guidance"] = results["data_helper"].get("guidance", "Please provide more data for detailed analysis.")
+            
+        # Add any data insights
+        if "data" in results and results["data"].get("status") != "failed":
+            report["summary"].append("Data analysis was performed.")
+            report["data_insights"] = results["data"].get("insights", [])
+            
+        # Add optimization suggestions if available
+        if "optimization" in results and results["optimization"].get("status") != "failed":
+            report["summary"].append("Optimization opportunities identified.")
+            report["optimizations"] = results["optimization"].get("strategies", [])
+            
+        # Add action plan if available
+        if "actions" in results and results["actions"].get("status") != "failed":
+            report["summary"].append("Action plan created.")
+            report["action_plan"] = results["actions"].get("plan", [])
+            
+        # If no agents succeeded, provide generic guidance
+        if not successful_agents:
+            report["summary"] = [
+                "System is operating with limited capabilities.",
+                "Please try rephrasing your request or provide more specific details.",
+                "For immediate assistance, consider:",
+                "• Checking your data sources are accessible",
+                "• Ensuring your request includes necessary context",
+                "• Breaking down complex requests into simpler parts"
+            ]
+            
+        report["metadata"] = {
+            "successful_agents": successful_agents,
+            "total_agents_attempted": len(results),
+            "fallback_reason": "Primary reporting agent unavailable",
+            "user_id": context.user_id,
+            "run_id": context.run_id
+        }
+        
+        return report
     
     def _is_recoverable_error(self, error: Exception) -> bool:
         """Determine if an error is recoverable and worth retrying.

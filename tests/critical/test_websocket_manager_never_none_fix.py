@@ -13,7 +13,7 @@ from unittest.mock import Mock, patch, MagicMock
 
 from netra_backend.app.websocket_core import get_websocket_manager
 from netra_backend.app.services.agent_websocket_bridge import get_agent_websocket_bridge
-from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
+from netra_backend.app.core.registry.universal_registry import AgentRegistry
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 
 
@@ -39,7 +39,7 @@ async def test_agent_registry_rejects_none_websocket_manager():
     mock_llm = Mock()
     mock_dispatcher = Mock()
     
-    registry = AgentRegistry(mock_llm, mock_dispatcher)
+    registry = AgentRegistry()
     
     # Should raise ValueError when trying to set None
     with pytest.raises(ValueError, match="WebSocketManager cannot be None"):
@@ -52,7 +52,7 @@ async def test_agent_registry_validates_websocket_manager():
     mock_llm = Mock()
     mock_dispatcher = Mock()
     
-    registry = AgentRegistry(mock_llm, mock_dispatcher)
+    registry = AgentRegistry()
     
     # Create incomplete WebSocket manager mock (missing required methods)
     incomplete_manager = Mock()
@@ -130,7 +130,7 @@ async def test_deterministic_startup_websocket_retry():
 @pytest.mark.asyncio
 async def test_websocket_manager_creation_failure_handling():
     """Test handling of WebSocket manager creation failures."""
-    from netra_backend.app.websocket_core.manager import WebSocketManager
+    from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager as WebSocketManager
     import netra_backend.app.websocket_core.manager as manager_module
     
     # Reset singleton

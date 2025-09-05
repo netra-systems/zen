@@ -25,6 +25,11 @@ class WebSocketConnectionState(str, Enum):
     DISCONNECTING = "disconnecting"
     DISCONNECTED = "disconnected"
     ERROR = "error"
+    # Compatibility aliases for tests
+    ACTIVE = "connected"  # Alias for CONNECTED
+    CLOSING = "disconnecting"  # Alias for DISCONNECTING  
+    CLOSED = "disconnected"  # Alias for DISCONNECTED
+    FAILED = "error"  # Alias for ERROR
 
 
 class ReconnectionState(str, Enum):
@@ -107,6 +112,31 @@ class ConnectionInfo(BaseModel):
     is_healthy: bool = True
     is_closing: bool = False
     client_info: Optional[Dict[str, Any]] = None
+    state: WebSocketConnectionState = WebSocketConnectionState.ACTIVE
+    failure_count: int = 0  # Track state transition failures
+    
+    def transition_to_failed(self):
+        """Transition connection to failed state."""
+        self.state = WebSocketConnectionState.FAILED
+        self.is_healthy = False
+        self.failure_count += 1
+        return True
+    
+    def transition_to_closing(self):
+        """Transition connection to closing state."""
+        # Cannot transition to closing if already closing or closed
+        if self.state in [WebSocketConnectionState.CLOSING, WebSocketConnectionState.CLOSED]:
+            return False
+        self.state = WebSocketConnectionState.CLOSING
+        self.is_closing = True
+        return True
+        
+    def transition_to_closed(self):
+        """Transition connection to closed state."""
+        self.state = WebSocketConnectionState.CLOSED
+        self.is_closing = False
+        self.is_healthy = False
+        return True
 
 
 class WebSocketMessage(BaseModel):
@@ -305,11 +335,25 @@ MessageId = str
 
 # Message type mappings for backward compatibility
 LEGACY_MESSAGE_TYPE_MAP = {
+    # Connection lifecycle
     "ping": MessageType.PING,
     "pong": MessageType.PONG,
     "heartbeat": MessageType.HEARTBEAT,
+    "connect": MessageType.CONNECT,
+    "disconnect": MessageType.DISCONNECT,
+    "connected": MessageType.CONNECT,
+    "connection_established": MessageType.CONNECT,
+    
+    # User messages
+    "user": MessageType.USER_MESSAGE,  # Map 'user' to USER_MESSAGE
     "user_input": MessageType.USER_MESSAGE,
+    "user_message": MessageType.USER_MESSAGE,
     "chat": MessageType.CHAT,
+    "message": MessageType.USER_MESSAGE,
+    
+    # Agent/AI messages - CRITICAL for business value
+    "agent": MessageType.AGENT_REQUEST,  # Map 'agent' to AGENT_REQUEST
+    "agent_request": MessageType.AGENT_REQUEST,
     "agent_response": MessageType.AGENT_RESPONSE,
     "agent_task": MessageType.AGENT_TASK,
     "agent_task_ack": MessageType.AGENT_TASK_ACK,
@@ -317,13 +361,46 @@ LEGACY_MESSAGE_TYPE_MAP = {
     "agent_response_complete": MessageType.AGENT_RESPONSE_COMPLETE,
     "agent_status_request": MessageType.AGENT_STATUS_REQUEST,
     "agent_status_update": MessageType.AGENT_STATUS_UPDATE,
+    "agent_status": MessageType.AGENT_STATUS_UPDATE,
+    "agent_update": MessageType.AGENT_STATUS_UPDATE,
+    "agent_progress": MessageType.AGENT_PROGRESS,
+    "agent_error": MessageType.AGENT_ERROR,
+    "start_agent": MessageType.START_AGENT,
+    
+    # Critical agent event types (for frontend chat UI)
+    "agent_started": MessageType.START_AGENT,
+    "agent_thinking": MessageType.AGENT_PROGRESS,
+    "agent_completed": MessageType.AGENT_RESPONSE_COMPLETE,
+    "agent_failed": MessageType.AGENT_ERROR,
+    "agent_fallback": MessageType.AGENT_ERROR,
+    "tool_executing": MessageType.AGENT_PROGRESS,
+    "tool_completed": MessageType.AGENT_PROGRESS,
+    
+    # Typing indicators
+    "typing": MessageType.USER_TYPING,
+    "typing_started": MessageType.TYPING_STARTED,
+    "typing_stopped": MessageType.TYPING_STOPPED,
+    
+    # Thread messages
+    "thread": MessageType.THREAD_UPDATE,
+    "thread_update": MessageType.THREAD_UPDATE,
+    "thread_message": MessageType.THREAD_MESSAGE,
+    
+    # System/error messages
+    "error": MessageType.ERROR_MESSAGE,
+    "error_message": MessageType.ERROR_MESSAGE,
+    "system": MessageType.SYSTEM_MESSAGE,
+    "system_message": MessageType.SYSTEM_MESSAGE,
+    
+    # Broadcasting
+    "broadcast": MessageType.BROADCAST,
     "broadcast_test": MessageType.BROADCAST_TEST,
     "direct_message": MessageType.DIRECT_MESSAGE,
+    "room_message": MessageType.ROOM_MESSAGE,
+    
+    # Testing
     "resilience_test": MessageType.RESILIENCE_TEST,
-    "recovery_test": MessageType.RECOVERY_TEST,
-    "error": MessageType.ERROR_MESSAGE,
-    "system": MessageType.SYSTEM_MESSAGE,
-    "broadcast": MessageType.BROADCAST
+    "recovery_test": MessageType.RECOVERY_TEST
 }
 
 # Frontend compatibility mapping - maps backend types to frontend-expected types

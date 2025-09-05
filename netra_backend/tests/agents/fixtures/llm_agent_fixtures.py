@@ -77,7 +77,7 @@ def _get_optimization_response() -> Dict[str, Any]:
 
 def _setup_triage_agent_responses(llm_manager: Mock) -> None:
     """Setup triage agent structured LLM responses."""
-    from netra_backend.app.agents.triage_sub_agent import (
+    from netra_backend.app.agents.triage.unified_triage_agent import (
         Complexity,
         ExtractedEntities,
         Priority,
@@ -89,7 +89,7 @@ def _setup_triage_agent_responses(llm_manager: Mock) -> None:
 
 def _create_triage_result() -> 'TriageResult':
     """Create mock triage result."""
-    from netra_backend.app.agents.triage_sub_agent import (
+    from netra_backend.app.agents.triage.unified_triage_agent import (
         Complexity,
         ExtractedEntities,
         Priority,
@@ -111,7 +111,7 @@ def _create_triage_result() -> 'TriageResult':
 
 def _create_extracted_entities() -> 'ExtractedEntities':
     """Create mock extracted entities."""
-    from netra_backend.app.agents.triage_sub_agent import ExtractedEntities
+    from netra_backend.app.agents.triage.unified_triage_agent import ExtractedEntities
     return ExtractedEntities(
         models_mentioned=["GPT-4", "Claude"],
         metrics_mentioned=["latency", "throughput"],
@@ -120,7 +120,7 @@ def _create_extracted_entities() -> 'ExtractedEntities':
 
 def _create_user_intent() -> 'UserIntent':
     """Create mock user intent."""
-    from netra_backend.app.agents.triage_sub_agent import UserIntent
+    from netra_backend.app.agents.triage.unified_triage_agent import UserIntent
     return UserIntent(
         primary_intent="optimize",
         secondary_intents=["analyze", "monitor"]
@@ -128,7 +128,7 @@ def _create_user_intent() -> 'UserIntent':
 
 def _create_triage_metadata() -> 'TriageMetadata':
     """Create mock triage metadata."""
-    from netra_backend.app.agents.triage_sub_agent import TriageMetadata
+    from netra_backend.app.agents.triage.unified_triage_agent import TriageMetadata
     return TriageMetadata(
         triage_duration_ms=150,
         cache_hit=False,

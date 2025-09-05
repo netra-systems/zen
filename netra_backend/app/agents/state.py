@@ -10,7 +10,7 @@ import warnings
 from pydantic import BaseModel, Field, field_validator
 
 # Import actual types needed at runtime
-from netra_backend.app.agents.triage_sub_agent.models import TriageResult
+from netra_backend.app.agents.triage.models import TriageResult
 from netra_backend.app.core.serialization.unified_json_handler import parse_list_field
 from netra_backend.app.schemas.agent_models import AgentMetadata
 from netra_backend.app.schemas.shared_types import (

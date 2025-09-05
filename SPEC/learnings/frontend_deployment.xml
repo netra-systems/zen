@@ -5,6 +5,7 @@
     <date>2025-08-23</date>
     <category>deployment</category>
     <tags>frontend, gcp, docker, next.js, cloud-run</tags>
+    <cross_reference>SPEC/frontend_deployment_critical.xml</cross_reference>
   </metadata>
 
   <critical_issues>

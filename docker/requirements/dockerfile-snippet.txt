@@ -1,0 +1,29 @@
+
+# Optimized dependency installation with tiered caching
+# Each RUN command creates a separate layer that can be cached independently
+
+# Layer 1: CORE dependencies
+COPY requirements-core.txt .
+RUN --mount=type=cache,target=/root/.cache/pip,id=pip-core \
+    pip install --user -r requirements-core.txt
+
+# Layer 2: INFRASTRUCTURE dependencies
+COPY requirements-infrastructure.txt .
+RUN --mount=type=cache,target=/root/.cache/pip,id=pip-infrastructure \
+    pip install --user -r requirements-infrastructure.txt
+
+# Layer 3: AI dependencies
+COPY requirements-ai.txt .
+RUN --mount=type=cache,target=/root/.cache/pip,id=pip-ai \
+    pip install --user -r requirements-ai.txt
+
+# Layer 4: ANALYTICS dependencies
+COPY requirements-analytics.txt .
+RUN --mount=type=cache,target=/root/.cache/pip,id=pip-analytics \
+    pip install --user -r requirements-analytics.txt
+
+# Layer 5: APP dependencies
+COPY requirements-app.txt .
+RUN --mount=type=cache,target=/root/.cache/pip,id=pip-app \
+    pip install --user -r requirements-app.txt
+

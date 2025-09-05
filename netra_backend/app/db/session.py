@@ -1,117 +1,111 @@
-import asyncio
+"""
+SSOT Database session management module.
+Consolidates session management functionality from postgres_session.py and database_manager.py.
+"""
+
 from contextlib import asynccontextmanager
-from typing import AsyncIterator, Optional
+from typing import AsyncGenerator, Optional, Any
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from netra_backend.app.database import get_async_db
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.db.postgres_session import (
+    validate_session,
+    safe_session_context,
+    handle_session_error
+)
 from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 
-class DatabaseSessionManager:
-    """Centralized database session management with connection pooling and monitoring."""
-    _instance: Optional['DatabaseSessionManager'] = None
-    _lock = asyncio.Lock()
-    
-    def __new__(cls):
-        if cls._instance is None:
-            cls._instance = super().__new__(cls)
-        return cls._instance
-    
-    def __init__(self):
-        if not hasattr(self, 'initialized'):
-            self.active_sessions = 0
-            self.total_sessions_created = 0
-            self.initialized = True
-    
-    async def _increment_session_counters(self) -> int:
-        """Increment session counters and return session ID."""
-        async with self._lock:
-            self.active_sessions += 1
-            self.total_sessions_created += 1
-            return self.total_sessions_created
-    
-    async def _decrement_session_counter(self, session_id: int):
-        """Decrement session counter and log closure."""
-        async with self._lock:
-            self.active_sessions -= 1
-        logger.debug(f"Closed session {session_id}, active: {self.active_sessions}")
-    
-    @asynccontextmanager
-    async def get_session(self) -> AsyncIterator[AsyncSession]:
-        """Get a database session with monitoring."""
-        session_id = await self._increment_session_counters()
-        logger.debug(f"Opening session {session_id}, active: {self.active_sessions}")
-        try:
-            async with get_async_db() as session:
-                yield session
-        finally:
-            await self._decrement_session_counter(session_id)
-    
-    def get_stats(self) -> dict:
-        """Get session manager statistics."""
-        return {
-            "active_sessions": self.active_sessions,
-            "total_sessions_created": self.total_sessions_created
-        }
 
-# Global session manager instance
-session_manager = DatabaseSessionManager()
+# Global database manager instance
+_db_manager: Optional[DatabaseManager] = None
 
-def _validate_session_factory():
-    """Validate that session factory is initialized."""
-    from netra_backend.app.db.postgres_core import async_session_factory
-    if async_session_factory is None:
-        logger.error("async_session_factory is not initialized")
-        raise RuntimeError("Database not configured. async_session_factory is not initialized.")
+
+def get_database_manager() -> DatabaseManager:
+    """Get or create the global database manager instance."""
+    global _db_manager
+    if _db_manager is None:
+        _db_manager = DatabaseManager()
+    return _db_manager
+
+
+async def get_session() -> AsyncSession:
+    """
+    Get a database session from the SSOT database manager.
+    
+    Returns:
+        AsyncSession: Database session for executing queries
+    """
+    db_manager = get_database_manager()
+    return await db_manager.get_session()
+
 
 @asynccontextmanager
-async def _get_validated_session() -> AsyncIterator[AsyncSession]:
-    """Get validated session for backward compatibility."""
-    _validate_session_factory()
-    async with session_manager.get_session() as session:
-        yield session
-
-@asynccontextmanager  
-async def get_db_session() -> AsyncIterator[AsyncSession]:
-    """Provide a transactional scope around a series of operations.
-    
-    REDIRECTED: This function now delegates to the single source of truth
-    in netra_backend.app.database to eliminate duplication.
+async def get_async_session() -> AsyncGenerator[AsyncSession, None]:
     """
-    from netra_backend.app.database import get_db
-    async for session in get_db():
+    Get an async database session context manager.
+    
+    Yields:
+        AsyncSession: Database session for executing queries
+    """
+    db_manager = get_database_manager()
+    async with db_manager.get_session_context() as session:
         yield session
 
-async def get_session_from_factory(db_session_or_factory) -> AsyncSession:
-    """Get database session from either a session or session factory.
-    
-    This utility handles the common pattern where code needs to work with both:
-    - An AsyncSession instance (already created session)
-    - An async_sessionmaker factory (needs to create a session)
+
+def get_session_from_factory(factory: Any) -> AsyncSession:
+    """
+    Get a session from a factory object (for testing and dependency injection).
     
     Args:
-        db_session_or_factory: Either an AsyncSession or async_sessionmaker instance
+        factory: Factory object that provides database sessions
         
     Returns:
-        AsyncSession: The database session to use
-        
-    Usage:
-        session = await get_session_from_factory(self.db_session)
-        # Use session for database operations
+        AsyncSession: Database session from the factory
     """
-    from sqlalchemy.ext.asyncio import async_sessionmaker
+    if hasattr(factory, 'get_db_session'):
+        return factory.get_db_session()
+    elif hasattr(factory, 'db_session'):
+        return factory.db_session
+    elif hasattr(factory, 'session'):
+        return factory.session
+    else:
+        # Fallback to global database manager
+        logger.warning(f"Factory {factory} does not have session method, using global manager")
+        return get_database_manager().get_sync_session()
+
+
+async def init_database(config: Optional[dict] = None) -> None:
+    """
+    Initialize the database connection and session factory.
     
-    # If it's already an AsyncSession, return it directly
-    if isinstance(db_session_or_factory, AsyncSession):
-        return db_session_or_factory
-    
-    # If it's an async_sessionmaker, create a new session
-    if isinstance(db_session_or_factory, async_sessionmaker):
-        # Create a new session that will be managed by the caller
-        return db_session_or_factory()
-    
-    # Fallback: assume it's a session
-    logger.debug(f"Unknown session type {type(db_session_or_factory)}, assuming it's a session")
-    return db_session_or_factory
+    Args:
+        config: Optional database configuration
+    """
+    db_manager = get_database_manager()
+    await db_manager.initialize(config)
+
+
+async def close_database() -> None:
+    """
+    Close the database connection and cleanup resources.
+    """
+    global _db_manager
+    if _db_manager:
+        await _db_manager.cleanup()
+        _db_manager = None
+
+
+# Re-export common functions from postgres_session for backward compatibility
+__all__ = [
+    'get_session',
+    'get_async_session', 
+    'get_session_from_factory',
+    'init_database',
+    'close_database',
+    'validate_session',
+    'safe_session_context',
+    'handle_session_error'
+]

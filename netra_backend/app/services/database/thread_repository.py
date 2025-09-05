@@ -23,31 +23,46 @@ class ThreadRepository(BaseRepository[Thread]):
         super().__init__(Thread)
     
     async def find_by_user(self, db: AsyncSession, user_id: str) -> List[Thread]:
-        """Find all threads for a user"""
+        """Find all threads for a user using JSONB query.
+        
+        SSOT: This is the canonical way to query threads by user_id.
+        No fallback queries or Python filtering - database query must work correctly.
+        """
         try:
+            # Ensure user_id is string format for consistent comparison
+            user_id_str = str(user_id).strip()
+            logger.debug(f"Finding threads for user_id: {user_id_str}")
+            
+            # Query using JSONB operators - this is the SSOT pattern
             result = await db.execute(
                 select(Thread).where(
-                    Thread.metadata_.op('->>')('user_id') == user_id
+                    Thread.metadata_.op('->>')('user_id') == user_id_str
                 ).order_by(Thread.created_at.desc())
             )
-            return list(result.scalars().all())
+            threads = list(result.scalars().all())
+            logger.info(f"Found {len(threads)} threads for user {user_id_str}")
+            return threads
         except Exception as e:
-            logger.error(f"Error finding threads for user {user_id}: {e}")
-            return []
+            logger.error(f"Error finding threads for user {user_id}: {e}", exc_info=True)
+            # Raise the error - no fallback, let caller handle it
+            raise
     
     async def get_or_create_for_user(self, db: AsyncSession, user_id: str) -> Optional[Thread]:
         """Get existing thread for user or create new one
         
         First checks for existing active threads for the user.
-        If none exist, creates a new thread with a unique UUID-based ID.
+        If none exist, creates a new thread using UnifiedIDManager for consistent ID generation.
         """
         # First check if user has any existing active threads
         existing_thread = await self.get_active_thread(db, user_id)
         if existing_thread:
             return existing_thread
         
-        # Create new thread with unique ID
-        thread_id = f"thread_{uuid.uuid4().hex[:16]}"
+        # Create new thread using UnifiedIDManager for SSOT compliance
+        from netra_backend.app.core.unified_id_manager import UnifiedIDManager
+        # UnifiedIDManager.generate_thread_id() returns unprefixed ID to prevent double prefixing
+        base_id = UnifiedIDManager.generate_thread_id()
+        thread_id = f"thread_{base_id}"
         
         return await self.create(
             db=db,
@@ -95,24 +110,17 @@ class ThreadRepository(BaseRepository[Thread]):
             return False
     
     async def get_active_threads(self, db: AsyncSession, user_id: str) -> List[Thread]:
-        """Get all active (non-soft-deleted) threads for a user"""
-        try:
-            result = await db.execute(
-                select(Thread).where(
-                    and_(
-                        Thread.metadata_.op('->>')('user_id') == user_id,
-                        Thread.deleted_at.is_(None)
-                    )
-                ).order_by(Thread.created_at.desc())
-            )
-            scalars = result.scalars()
-            # Handle potential mock coroutine issues
-            if hasattr(scalars, '__await__'):
-                scalars = await scalars
-            scalars_result = scalars.all()
-            if hasattr(scalars_result, '__await__'):
-                scalars_result = await scalars_result
-            return list(scalars_result)
-        except Exception as e:
-            logger.error(f"Error getting active threads for user {user_id}: {e}")
-            return []
+        """Get all active (non-soft-deleted) threads for a user.
+        
+        SSOT: Query pattern for active threads.
+        No mock workarounds - tests should use proper async mocking.
+        """
+        result = await db.execute(
+            select(Thread).where(
+                and_(
+                    Thread.metadata_.op('->>')('user_id') == user_id,
+                    Thread.deleted_at.is_(None)
+                )
+            ).order_by(Thread.created_at.desc())
+        )
+        return list(result.scalars().all())

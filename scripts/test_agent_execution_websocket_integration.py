@@ -33,7 +33,7 @@ from netra_backend.app.agents.unified_tool_execution import UnifiedToolExecution
 
 # Try to import agent registry and real agents
 try:
-    from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
+    from netra_backend.app.core.registry.universal_registry import AgentRegistry
     from netra_backend.app.agents.greeting.greeting_agent import GreetingAgent
     AGENT_REGISTRY_AVAILABLE = True
 except ImportError:

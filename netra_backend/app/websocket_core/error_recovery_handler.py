@@ -4,5 +4,5 @@ from netra_backend.app.schemas.shared_types import ErrorContext
 from netra_backend.app.schemas.startup_types import ErrorType
 
 # Alias for backward compatibility - map WebSocketErrorRecoveryHandler to WebSocketRecoveryManager
-from netra_backend.app.websocket_core.manager import WebSocketManager as WebSocketRecoveryManager
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager as WebSocketManager as WebSocketRecoveryManager
 WebSocketErrorRecoveryHandler = WebSocketRecoveryManager

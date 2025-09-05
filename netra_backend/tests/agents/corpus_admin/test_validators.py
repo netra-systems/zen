@@ -218,8 +218,7 @@ class TestApprovalRequirements:
         CorpusOperation.CREATE,
         CorpusOperation.SEARCH,
         CorpusOperation.ANALYZE,
-        CorpusOperation.EXPORT,
-        CorpusOperation.IMPORT,
+        CorpusOperation.INDEX,
         CorpusOperation.VALIDATE,
     ])
     @pytest.mark.asyncio

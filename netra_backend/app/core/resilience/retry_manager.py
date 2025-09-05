@@ -1,277 +1,224 @@
-"""Intelligent retry manager for unified resilience framework.
+"""Retry Manager for Unified Resilience Framework
 
-This module provides enterprise-grade retry strategies with:
-- Configurable backoff algorithms (exponential, linear, fixed)
-- Jitter to prevent thundering herd effects
-- Context-aware retry decisions
-- Integration with circuit breakers and monitoring
+Business Value Justification (BVJ):
+- Segment: Platform/Internal
+- Business Goal: System Stability - Provide intelligent retry strategies
+- Value Impact: Reduces transient failure impact through smart retry logic
+- Strategic Impact: Improves overall system reliability and user experience
 
-All functions are ≤8 lines per MANDATORY requirements.
+This module provides intelligent retry management with configurable strategies.
 """
 
 import asyncio
 import random
 import time
-from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any, Callable, Dict, List, Optional, TypeVar, Union
+from typing import Callable, Optional, Any
 
-from netra_backend.app.logging_config import central_logger
-from netra_backend.app.schemas.shared_types import RetryConfig
+from pydantic import BaseModel
 
-logger = central_logger.get_logger(__name__)
-T = TypeVar('T')
+from netra_backend.app.logging_config import central_logger as logger
 
 
-class BackoffStrategy(Enum):
-    """Retry backoff strategy types."""
-    EXPONENTIAL = "exponential"
+class BackoffStrategy(str, Enum):
+    """Retry backoff strategies."""
     LINEAR = "linear"
+    EXPONENTIAL = "exponential"
     FIXED = "fixed"
-    JITTERED_EXPONENTIAL = "jittered_exponential"
+    RANDOM = "random"
 
 
-class JitterType(Enum):
-    """Jitter types for backoff strategies."""
+class JitterType(str, Enum):
+    """Jitter types for retry strategies."""
     NONE = "none"
     FULL = "full"
     EQUAL = "equal"
     DECORRELATED = "decorrelated"
 
 
-# RetryConfig imported from canonical source (shared_types.py) above
-
-
-@dataclass
-class RetryAttempt:
-    """Information about a retry attempt."""
-    attempt: int
-    delay: float
-    exception: Optional[Exception]
-    timestamp: float
-    total_elapsed: float
-
-
-@dataclass
-class RetryMetrics:
-    """Retry metrics for monitoring."""
-    total_attempts: int = 0
-    successful_retries: int = 0
-    failed_retries: int = 0
-    total_delay: float = 0.0
-    attempt_history: List[RetryAttempt] = field(default_factory=list)
+class RetryConfig(BaseModel):
+    """Configuration for retry behavior."""
+    max_attempts: int = 3
+    base_delay_seconds: float = 1.0
+    max_delay_seconds: float = 60.0
+    backoff_strategy: BackoffStrategy = BackoffStrategy.EXPONENTIAL
+    backoff_multiplier: float = 2.0
+    jitter_type: JitterType = JitterType.EQUAL
+    enabled: bool = True
+    retry_on_exceptions: Optional[tuple] = None
 
 
 class RetryExhaustedException(Exception):
-    """Raised when retry attempts are exhausted."""
+    """Raised when all retry attempts are exhausted."""
     
-    def __init__(self, attempts: int, last_exception: Exception) -> None:
-        super().__init__(f"Retry exhausted after {attempts} attempts")
+    def __init__(self, attempts: int, last_exception: Exception):
         self.attempts = attempts
         self.last_exception = last_exception
+        super().__init__(f"All {attempts} retry attempts exhausted. Last error: {last_exception}")
 
 
 class UnifiedRetryManager:
-    """Enterprise retry manager with intelligent strategies."""
+    """Unified retry manager with configurable strategies."""
     
-    def __init__(self, config: RetryConfig) -> None:
+    def __init__(self, config: RetryConfig):
+        """Initialize retry manager."""
         self.config = config
-        self.metrics = RetryMetrics()
+        self._logger = logger
     
-    async def execute_with_retry(
-        self, 
-        func: Callable[[], T], 
-        context: Optional[Dict[str, Any]] = None
-    ) -> T:
-        """Execute function with retry logic."""
-        start_time = time.time()
+    async def execute_with_retry(self, func: Callable, *args, **kwargs) -> Any:
+        """Execute a function with retry logic.
+        
+        Args:
+            func: The function to execute
+            *args: Arguments to pass to the function
+            **kwargs: Keyword arguments to pass to the function
+            
+        Returns:
+            The result of the function execution
+            
+        Raises:
+            RetryExhaustedException: When all retry attempts are exhausted
+        """
+        if not self.config.enabled:
+            return await self._execute_function(func, *args, **kwargs)
+        
         last_exception = None
         
         for attempt in range(1, self.config.max_attempts + 1):
             try:
-                result = await self._execute_attempt(func, attempt)
-                self._record_success(attempt, start_time)
+                result = await self._execute_function(func, *args, **kwargs)
+                if attempt > 1:
+                    self._logger.info(f"Function succeeded on attempt {attempt}")
                 return result
             except Exception as e:
                 last_exception = e
-                if not self._should_retry(e, attempt):
-                    self._record_failure(attempt, start_time)
-                    raise
-                await self._handle_retry_delay(attempt, e, start_time)
+                
+                # Check if this exception type should be retried
+                if self.config.retry_on_exceptions and not isinstance(e, self.config.retry_on_exceptions):
+                    self._logger.info(f"Not retrying exception type: {type(e).__name__}")
+                    raise e
+                
+                if attempt < self.config.max_attempts:
+                    delay = self._calculate_delay(attempt)
+                    self._logger.warning(f"Attempt {attempt} failed: {e}. Retrying in {delay:.2f}s")
+                    await asyncio.sleep(delay)
+                else:
+                    self._logger.error(f"All {self.config.max_attempts} attempts failed. Last error: {e}")
         
-        self._record_exhausted_retry(start_time)
         raise RetryExhaustedException(self.config.max_attempts, last_exception)
     
-    async def _execute_attempt(self, func: Callable[[], T], attempt: int) -> T:
-        """Execute a single attempt."""
-        logger.debug(f"Retry attempt {attempt}/{self.config.max_attempts}")
+    async def _execute_function(self, func: Callable, *args, **kwargs) -> Any:
+        """Execute function, handling both sync and async."""
         if asyncio.iscoroutinefunction(func):
-            return await func()
-        return func()
-    
-    def _should_retry(self, exception: Exception, attempt: int) -> bool:
-        """Determine if exception should trigger retry."""
-        if attempt >= self.config.max_attempts:
-            return False
-        if not self.config.retryable_exceptions:
-            return True
-        return any(isinstance(exception, exc_type) 
-                  for exc_type in self.config.retryable_exceptions)
-    
-    async def _handle_retry_delay(
-        self, 
-        attempt: int, 
-        exception: Exception, 
-        start_time: float
-    ) -> None:
-        """Handle delay before next retry attempt."""
-        delay = self._calculate_delay(attempt)
-        self._record_attempt(attempt, delay, exception, start_time)
-        logger.info(f"Retrying after {delay:.2f}s due to: {type(exception).__name__}")
-        await asyncio.sleep(delay)
+            return await func(*args, **kwargs)
+        else:
+            return func(*args, **kwargs)
     
     def _calculate_delay(self, attempt: int) -> float:
-        """Calculate delay for given attempt."""
+        """Calculate retry delay based on strategy."""
         if self.config.backoff_strategy == BackoffStrategy.FIXED:
-            base_delay = self.config.base_delay
+            delay = self.config.base_delay_seconds
         elif self.config.backoff_strategy == BackoffStrategy.LINEAR:
-            base_delay = self.config.base_delay * attempt
-        else:  # EXPONENTIAL or JITTERED_EXPONENTIAL
-            base_delay = self.config.base_delay * (self.config.multiplier ** (attempt - 1))
+            delay = self.config.base_delay_seconds * attempt
+        elif self.config.backoff_strategy == BackoffStrategy.EXPONENTIAL:
+            delay = self.config.base_delay_seconds * (self.config.backoff_multiplier ** (attempt - 1))
+        elif self.config.backoff_strategy == BackoffStrategy.RANDOM:
+            delay = random.uniform(self.config.base_delay_seconds, self.config.max_delay_seconds)
+        else:
+            delay = self.config.base_delay_seconds
         
-        delay = min(base_delay, self.config.max_delay)
-        return self._apply_jitter(delay, attempt)
+        # Apply jitter
+        delay = self._apply_jitter(delay, attempt)
+        
+        # Cap at max delay
+        return min(delay, self.config.max_delay_seconds)
     
     def _apply_jitter(self, delay: float, attempt: int) -> float:
-        """Apply jitter to delay based on jitter type."""
+        """Apply jitter to delay."""
         if self.config.jitter_type == JitterType.NONE:
             return delay
         elif self.config.jitter_type == JitterType.FULL:
             return random.uniform(0, delay)
         elif self.config.jitter_type == JitterType.EQUAL:
-            return delay * 0.5 + random.uniform(0, delay * 0.5)
-        else:  # DECORRELATED
-            previous_delay = self.config.base_delay if attempt == 1 else delay
-            return random.uniform(self.config.base_delay, previous_delay * 3)
+            jitter = delay * 0.1  # 10% jitter
+            return delay + random.uniform(-jitter, jitter)
+        elif self.config.jitter_type == JitterType.DECORRELATED:
+            # Decorrelated jitter prevents thundering herd
+            return random.uniform(self.config.base_delay_seconds, delay * 3)
+        else:
+            return delay
     
-    def _record_attempt(
-        self, 
-        attempt: int, 
-        delay: float, 
-        exception: Exception, 
-        start_time: float
-    ) -> None:
-        """Record retry attempt for metrics."""
-        retry_attempt = RetryAttempt(
-            attempt=attempt,
-            delay=delay,
-            exception=exception,
-            timestamp=time.time(),
-            total_elapsed=time.time() - start_time
-        )
-        self.metrics.attempt_history.append(retry_attempt)
-        self.metrics.total_attempts += 1
-        self.metrics.total_delay += delay
-    
-    def _record_success(self, attempts: int, start_time: float) -> None:
-        """Record successful retry completion."""
-        if attempts > 1:
-            self.metrics.successful_retries += 1
-            elapsed = time.time() - start_time
-            logger.info(f"Retry succeeded after {attempts} attempts ({elapsed:.2f}s)")
-    
-    def _record_failure(self, attempts: int, start_time: float) -> None:
-        """Record retry failure (non-retryable exception)."""
-        elapsed = time.time() - start_time
-        logger.warning(f"Retry failed after {attempts} attempts ({elapsed:.2f}s)")
-    
-    def _record_exhausted_retry(self, start_time: float) -> None:
-        """Record exhausted retry attempts."""
-        self.metrics.failed_retries += 1
-        elapsed = time.time() - start_time
-        logger.error(f"Retry exhausted after {self.config.max_attempts} attempts ({elapsed:.2f}s)")
-    
-    def get_metrics(self) -> Dict[str, Any]:
-        """Get retry metrics for monitoring."""
-        avg_delay = (self.metrics.total_delay / self.metrics.total_attempts 
-                    if self.metrics.total_attempts > 0 else 0.0)
-        
-        return {
-            "total_attempts": self.metrics.total_attempts,
-            "successful_retries": self.metrics.successful_retries,
-            "failed_retries": self.metrics.failed_retries,
-            "success_rate": self._calculate_retry_success_rate(),
-            "average_delay": avg_delay,
-            "total_delay": self.metrics.total_delay,
-            "config": self._get_config_summary()
-        }
-    
-    def _calculate_retry_success_rate(self) -> float:
-        """Calculate retry success rate."""
-        total_retry_operations = self.metrics.successful_retries + self.metrics.failed_retries
-        if total_retry_operations > 0:
-            return self.metrics.successful_retries / total_retry_operations
-        return 1.0
-    
-    def _get_config_summary(self) -> Dict[str, Any]:
-        """Get configuration summary for metrics."""
-        return {
-            "max_attempts": self.config.max_attempts,
-            "base_delay": self.config.base_delay,
-            "max_delay": self.config.max_delay,
-            "backoff_strategy": self.config.backoff_strategy.value,
-            "jitter_type": self.config.jitter_type.value
-        }
-    
-    def reset_metrics(self) -> None:
-        """Reset retry metrics."""
-        self.metrics = RetryMetrics()
+    def update_config(self, config: RetryConfig) -> None:
+        """Update retry configuration."""
+        self.config = config
+        self._logger.info("Retry configuration updated")
 
 
-# Predefined retry configurations for common use cases
 class RetryPresets:
     """Predefined retry configurations for common scenarios."""
     
     @staticmethod
-    def get_database_retry() -> RetryConfig:
-        """Get retry configuration for database operations."""
+    def create_api_retry() -> RetryConfig:
+        """Create retry config optimized for API calls."""
         return RetryConfig(
-            max_attempts=5,
-            base_delay=0.5,
-            max_delay=30.0,
-            backoff_strategy=BackoffStrategy.JITTERED_EXPONENTIAL,
+            max_attempts=3,
+            base_delay_seconds=1.0,
+            max_delay_seconds=30.0,
+            backoff_strategy=BackoffStrategy.EXPONENTIAL,
+            backoff_multiplier=2.0,
             jitter_type=JitterType.EQUAL
         )
     
     @staticmethod
-    def get_api_retry() -> RetryConfig:
-        """Get retry configuration for API calls."""
+    def create_database_retry() -> RetryConfig:
+        """Create retry config optimized for database operations."""
         return RetryConfig(
-            max_attempts=3,
-            base_delay=1.0,
-            max_delay=60.0,
-            backoff_strategy=BackoffStrategy.EXPONENTIAL,
+            max_attempts=2,
+            base_delay_seconds=0.5,
+            max_delay_seconds=5.0,
+            backoff_strategy=BackoffStrategy.LINEAR,
+            backoff_multiplier=1.5,
             jitter_type=JitterType.FULL
         )
     
     @staticmethod
-    def get_llm_retry() -> RetryConfig:
-        """Get retry configuration for LLM calls."""
+    def create_llm_retry() -> RetryConfig:
+        """Create retry config optimized for LLM API calls."""
         return RetryConfig(
-            max_attempts=4,
-            base_delay=2.0,
-            max_delay=120.0,
-            backoff_strategy=BackoffStrategy.JITTERED_EXPONENTIAL,
+            max_attempts=3,
+            base_delay_seconds=2.0,
+            max_delay_seconds=120.0,
+            backoff_strategy=BackoffStrategy.EXPONENTIAL,
+            backoff_multiplier=2.5,
             jitter_type=JitterType.DECORRELATED
         )
     
     @staticmethod
-    def get_websocket_retry() -> RetryConfig:
-        """Get retry configuration for WebSocket connections."""
+    def create_quick_retry() -> RetryConfig:
+        """Create retry config for quick operations."""
         return RetryConfig(
-            max_attempts=10,
-            base_delay=1.0,
-            max_delay=30.0,
-            backoff_strategy=BackoffStrategy.LINEAR,
-            jitter_type=JitterType.EQUAL
+            max_attempts=2,
+            base_delay_seconds=0.1,
+            max_delay_seconds=1.0,
+            backoff_strategy=BackoffStrategy.FIXED,
+            jitter_type=JitterType.NONE
         )
+    
+    @staticmethod
+    def create_no_retry() -> RetryConfig:
+        """Create config that disables retries."""
+        return RetryConfig(
+            max_attempts=1,
+            enabled=False
+        )
+
+
+# Export all classes
+__all__ = [
+    "BackoffStrategy",
+    "JitterType",
+    "RetryConfig",
+    "RetryExhaustedException", 
+    "UnifiedRetryManager",
+    "RetryPresets",
+]

@@ -33,6 +33,12 @@ class OptimizationsCoreSubAgent(BaseAgent):
     def __init__(self, llm_manager: Optional[LLMManager] = None, 
                  tool_dispatcher: Optional[ToolDispatcher] = None,
                  websocket_manager: Optional[Any] = None):
+        """Initialize OptimizationsCoreSubAgent.
+        
+        CRITICAL: LLM manager is required for this agent to function.
+        During architectural migration, some instantiation paths don't provide it.
+        See FIVE_WHYS_ANALYSIS_20250904.md for root cause analysis.
+        """
         # Initialize BaseAgent with full infrastructure
         # Only pass tool_dispatcher if it's not None to avoid deprecation warning
         base_kwargs = {
@@ -43,6 +49,17 @@ class OptimizationsCoreSubAgent(BaseAgent):
             "enable_execution_engine": True, # Get modern execution patterns
             "enable_caching": True,          # Enable caching for optimization results
         }
+        
+        # FIVE WHYS FIX: Validate critical dependency at construction time
+        if llm_manager is None:
+            import warnings
+            warnings.warn(
+                "OptimizationsCoreSubAgent instantiated without LLMManager - "
+                "will fail at runtime if LLM operations are attempted. "
+                "This is a known issue from incomplete architectural migration.",
+                RuntimeWarning,
+                stacklevel=2
+            )
         
         # Only add tool_dispatcher if it's provided to avoid deprecation warning
         if tool_dispatcher is not None:
@@ -145,6 +162,16 @@ class OptimizationsCoreSubAgent(BaseAgent):
             })
         
         try:
+            # CRITICAL: Validate LLM manager is available (Five Whys Fix)
+            if not self.llm_manager:
+                error_msg = (
+                    "❌ LLM manager is None - agent was instantiated without required dependency. "
+                    "This indicates incomplete architectural migration between legacy AgentRegistry "
+                    "and new factory patterns. See FIVE_WHYS_ANALYSIS_20250904.md"
+                )
+                self.logger.error(error_msg)
+                raise RuntimeError(error_msg)
+                
             llm_response = await self.llm_manager.ask_llm(prompt, llm_config_name='optimizations_core')
             
             if stream_updates:

@@ -8,7 +8,7 @@ import pytest
 from typing import List, Set
 from unittest.mock import MagicMock, AsyncMock, patch
 
-from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
+from netra_backend.app.core.registry.universal_registry import AgentRegistry
 from netra_backend.app.agents.execution_engine import ExecutionEngine
 from netra_backend.app.services.tool_dispatcher import UnifiedToolDispatcher
 
@@ -117,9 +117,13 @@ class TestWebSocketEventReproduction:
     
     async def test_tool_dispatcher_websocket_enhancement(self):
         """Test that tool dispatcher is properly enhanced with WebSocket support."""
+        from netra_backend.app.agents.supervisor.user_execution_context import create_test_user_context
         
-        # Create tool dispatcher
-        dispatcher = UnifiedToolDispatcher()
+        # Create test user context for request-scoped dispatcher
+        user_context = create_test_user_context()
+        
+        # Create request-scoped tool dispatcher
+        dispatcher = UnifiedToolDispatcher.create_request_scoped(user_context)
         
         # Create mock WebSocket manager
         mock_ws_manager = MagicMock()

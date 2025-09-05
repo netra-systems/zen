@@ -215,7 +215,8 @@ async def websocket_endpoint(websocket: WebSocket):
                 # Register agent handler with message router
                 # CRITICAL FIX: Each connection needs its own handler to prevent WebSocket reference conflicts
                 # The handler will be cleaned up on disconnect to prevent accumulation
-                message_router.register_handler(agent_handler)
+                # CRITICAL FIX: Use add_handler() not register_handler() - MessageRouter from websocket_core/handlers.py
+                message_router.add_handler(agent_handler)
                 logger.info(f"Registered new AgentMessageHandler for connection (will cleanup on disconnect)")
                 
                 logger.info(f"Total handlers after registration: {len(message_router.handlers)}")
@@ -229,7 +230,8 @@ async def websocket_endpoint(websocket: WebSocket):
                     # Create fallback agent handler only for testing/development
                     # Each connection needs its own fallback handler
                     fallback_handler = _create_fallback_agent_handler(websocket)
-                    message_router.register_handler(fallback_handler)
+                    # CRITICAL FIX: Use add_handler() not register_handler() - MessageRouter from websocket_core/handlers.py
+                    message_router.add_handler(fallback_handler)
                     logger.info(f"Registered fallback AgentMessageHandler for {environment} environment")
                     
                     logger.info(f"Total handlers after fallback registration: {len(message_router.handlers)}")
@@ -263,7 +265,8 @@ async def websocket_endpoint(websocket: WebSocket):
                 # Create fallback agent handler only for testing/development
                 # Each connection needs its own fallback handler
                 fallback_handler = _create_fallback_agent_handler(websocket)
-                message_router.register_handler(fallback_handler)
+                # CRITICAL FIX: Use add_handler() not register_handler() - MessageRouter from websocket_core/handlers.py
+                message_router.add_handler(fallback_handler)
                 logger.info(f"🤖 Registered fallback AgentMessageHandler for {environment} - will handle CHAT messages!")
                 logger.info(f"🤖 Fallback handler can handle: {fallback_handler.supported_types}")
                 
@@ -970,6 +973,24 @@ async def websocket_test_endpoint(websocket: WebSocket):
     finally:
         if connection_id:
             logger.debug(f"Test WebSocket cleanup completed: {connection_id}")
+
+
+@router.get("/ws/beacon")
+@router.head("/ws/beacon") 
+@router.options("/ws/beacon")
+async def websocket_beacon():
+    """
+    WebSocket beacon endpoint for health monitoring.
+    
+    This lightweight endpoint is used by the frontend to check if the
+    WebSocket service is available before attempting connections.
+    """
+    return {
+        "status": "healthy",
+        "service": "websocket_beacon",
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "message": "WebSocket service is available"
+    }
 
 
 @router.get("/ws/stats")

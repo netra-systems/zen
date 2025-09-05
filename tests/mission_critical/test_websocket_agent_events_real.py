@@ -44,9 +44,9 @@ from tests.clients.backend_client import BackendTestClient
 from tests.clients.auth_client import AuthTestClient
 
 # Import production components for validation
-from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
+from netra_backend.app.core.registry.universal_registry import AgentRegistry
 from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
-from netra_backend.app.websocket_core.manager import WebSocketManager
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager as WebSocketManager
 
 
 # ============================================================================

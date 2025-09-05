@@ -36,7 +36,7 @@ from netra_backend.app.services.websocket_security_audit import (
 
 # Try to import the new WebSocketEventEmitter if it exists
 try:
-    from netra_backend.app.services.websocket_event_emitter import WebSocketEventEmitter
+    from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmitter as WebSocketEventEmitter
     NEW_EMITTER_AVAILABLE = True
 except ImportError:
     NEW_EMITTER_AVAILABLE = False
@@ -578,7 +578,7 @@ class TestRealComponentIntegration:
     async def test_real_websocket_manager_integration(self, user_context_1):
         """Test integration with real WebSocket manager if available."""
         try:
-            from netra_backend.app.websocket_core.manager import get_websocket_manager
+            from netra_backend.app.websocket_core.unified_manager import get_websocket_manager
             
             # Only run if WebSocket manager is available
             websocket_manager = get_websocket_manager()

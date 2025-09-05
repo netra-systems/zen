@@ -42,7 +42,7 @@ class TestDatabaseConnectionLeaks:
             sessions_created = []
             
             for _ in range(5):
-                async for session in get_db():
+                async with get_db() as session:
                     assert isinstance(session, AsyncSession)
                     result = await session.execute(text("SELECT 1"))
                     assert result.scalar() == 1

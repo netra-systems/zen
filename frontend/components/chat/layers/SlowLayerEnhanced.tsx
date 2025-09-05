@@ -21,7 +21,7 @@ export const SlowLayerEnhanced: React.FC<SlowLayerProps> = ({ data, isCollapsed 
 
   return (
     <div className="bg-gradient-to-b from-gray-50 to-white">
-      <div className="p-6 space-y-6">
+      <div className="p-3 space-y-3">
         <ExecutiveSummary data={reportData} />
         <CostAnalysis data={reportData} />
         <PerformanceMetrics data={reportData} />

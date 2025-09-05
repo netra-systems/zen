@@ -30,7 +30,7 @@ import logging
 
 from test_framework.environment_isolation import get_test_env_manager
 from test_framework.llm_config_manager import configure_llm_testing, LLMTestMode
-from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
+from netra_backend.app.core.registry.universal_registry import AgentRegistry
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.agents.config import AgentConfig
 from netra_backend.app.schemas.agent_models import AgentResult

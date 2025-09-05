@@ -11,7 +11,7 @@ from netra_backend.app.agents.data_sub_agent.data_sub_agent import DataSubAgent
 import sys
 import os
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
-from netra_backend.app.agents.triage_sub_agent import TriageSubAgent
+from netra_backend.app.agents.triage.unified_triage_agent import TriageSubAgent
 from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
 
 

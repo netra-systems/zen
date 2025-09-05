@@ -15,7 +15,7 @@ import pytest
 from pydantic import BaseModel, Field
 
 from netra_backend.app.schemas.config import AppConfig
-from netra_backend.app.schemas.llm_config_types import LLMConfig
+from netra_backend.app.schemas.config import LLMConfig
 
 
 class LLMTestResponse(BaseModel):

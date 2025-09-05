@@ -27,7 +27,7 @@ import time
 from contextlib import asynccontextmanager
 
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
-from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
+from netra_backend.app.core.registry.universal_registry import AgentRegistry
 from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
 from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
 from netra_backend.app.agents.tool_dispatcher_core import ToolDispatcher
@@ -241,8 +241,8 @@ class TestDatabaseSessionIsolation:
         tool_dispatcher = MagicMock()
         
         # Get the singleton instance
-        registry1 = AgentRegistry(llm_manager, tool_dispatcher)
-        registry2 = AgentRegistry(llm_manager, tool_dispatcher)
+        registry1 = AgentRegistry()
+        registry2 = AgentRegistry()
         
         # They should be different instances for proper isolation
         # But if they're the same, that's the anti-pattern

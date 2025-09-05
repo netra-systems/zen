@@ -7,20 +7,23 @@ Maximum 300 lines, functions ≤8 lines.
 import asyncio
 import time
 import uuid
-from typing import Dict, List
+from typing import Dict, List, TYPE_CHECKING
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
 from netra_backend.app.agents.actions_to_meet_goals_sub_agent import ActionsToMeetGoalsSubAgent
-from netra_backend.app.agents.data_sub_agent.agent import DataSubAgent
+from netra_backend.app.agents.data_sub_agent import DataSubAgent
 from netra_backend.app.agents.optimizations_core_sub_agent import OptimizationsCoreSubAgent
 from netra_backend.app.agents.reporting_sub_agent import ReportingSubAgent
-from netra_backend.app.agents.state import DeepAgentState
-from netra_backend.app.agents.triage_sub_agent.agent import TriageSubAgent
+from netra_backend.app.agents.triage.unified_triage_agent import UnifiedTriageAgent
 from netra_backend.app.websocket_core.manager import WebSocketManager as UnifiedWebSocketManager
 from netra_backend.app.llm.llm_manager import LLMManager
-from netra_backend.app.schemas import SubAgentLifecycle
+from netra_backend.app.schemas.agent import SubAgentLifecycle
+
+# Import DeepAgentState lazily to avoid circular import
+if TYPE_CHECKING:
+    from netra_backend.app.agents.state import DeepAgentState
 
 @pytest.fixture
 def orchestration_setup():
@@ -83,7 +86,7 @@ def _create_test_agents(mocks):
 
     return {
 
-        'triage': TriageSubAgent(mocks['llm'], mocks['dispatcher']),
+        'triage': UnifiedTriageAgent(mocks['llm'], mocks['dispatcher']),
 
         'data': DataSubAgent(mocks['llm'], mocks['dispatcher']),
 
@@ -109,6 +112,7 @@ class TestCompleteUserFlow:
     async def test_happy_path_complete_flow(self, orchestration_setup):
 
         """Test successful end-to-end orchestration workflow."""
+        from netra_backend.app.agents.state import DeepAgentState
 
         setup = orchestration_setup
 
@@ -120,7 +124,7 @@ class TestCompleteUserFlow:
 
         await self._validate_complete_workflow_results(results, setup)
     
-    async def _execute_complete_workflow(self, setup: Dict, state: DeepAgentState) -> List[Dict]:
+    async def _execute_complete_workflow(self, setup: Dict, state) -> List[Dict]:
 
         """Execute complete workflow and collect results."""
 
@@ -136,7 +140,7 @@ class TestCompleteUserFlow:
 
         return results
     
-    async def _execute_workflow_step(self, setup: Dict, agent_name: str, state: DeepAgentState) -> Dict:
+    async def _execute_workflow_step(self, setup: Dict, agent_name: str, state) -> Dict:
 
         """Execute single workflow step."""
 
@@ -152,7 +156,7 @@ class TestCompleteUserFlow:
     
     def _create_step_result(self, agent_name: str, agent_state: SubAgentLifecycle, 
 
-                           workflow_state: DeepAgentState) -> Dict:
+                           workflow_state) -> Dict:
 
         """Create result for workflow step."""
 
@@ -186,6 +190,7 @@ class TestAgentHandoffs:
     async def test_triage_to_data_handoff(self, orchestration_setup):
 
         """Test User Request → Triage → Data Analysis handoff with 5 assertions."""
+        from netra_backend.app.agents.state import DeepAgentState
 
         setup = orchestration_setup
 
@@ -199,7 +204,7 @@ class TestAgentHandoffs:
 
         await self._validate_data_handoff(data_result, state, triage_result)
     
-    async def _execute_agent_step(self, setup: Dict, agent_name: str, state: DeepAgentState) -> Dict:
+    async def _execute_agent_step(self, setup: Dict, agent_name: str, state) -> Dict:
 
         """Execute agent step and return results."""
 
@@ -211,7 +216,7 @@ class TestAgentHandoffs:
 
         return {'agent_state': agent.state, 'workflow_state': state}
     
-    async def _validate_triage_output(self, result: Dict, state: DeepAgentState):
+    async def _validate_triage_output(self, result: Dict, state):
 
         """Validate triage step output with 5 assertions."""
 
@@ -225,7 +230,7 @@ class TestAgentHandoffs:
 
         assert hasattr(state, 'metadata')  # Assertion 5 - check metadata exists
     
-    async def _validate_data_handoff(self, data_result: Dict, state: DeepAgentState, 
+    async def _validate_data_handoff(self, data_result: Dict, state, 
 
                                    triage_result: Dict):
 
@@ -249,6 +254,7 @@ class TestFailureRecovery:
     async def test_triage_failure_recovery(self, orchestration_setup):
 
         """Test recovery from triage agent failure."""
+        from netra_backend.app.agents.state import DeepAgentState
 
         setup = orchestration_setup
 
@@ -266,6 +272,7 @@ class TestFailureRecovery:
     async def test_optimization_timeout_handling(self, orchestration_setup):
 
         """Test timeout handling in optimization step."""
+        from netra_backend.app.agents.state import DeepAgentState
 
         setup = orchestration_setup
 
@@ -329,6 +336,7 @@ class TestConcurrentRequests:
     def _create_single_concurrent_task(self, setup, task_id: int):
 
         """Create single concurrent task for testing."""
+        from netra_backend.app.agents.state import DeepAgentState
 
         state = DeepAgentState(user_request=f"Optimize workload {task_id}")
 
@@ -350,6 +358,7 @@ class TestConcurrentRequests:
     async def test_resource_constraint_handling(self, orchestration_setup):
 
         """Test handling of resource constraints."""
+        from netra_backend.app.agents.state import DeepAgentState
 
         setup = orchestration_setup
 
@@ -373,6 +382,7 @@ class TestWebSocketIntegration:
     async def test_websocket_message_flow(self, orchestration_setup):
 
         """Test WebSocket messages during complete workflow."""
+        from netra_backend.app.agents.state import DeepAgentState
 
         setup = orchestration_setup
 
@@ -390,6 +400,7 @@ class TestWebSocketIntegration:
     async def test_websocket_error_handling(self, orchestration_setup):
 
         """Test WebSocket error handling during execution."""
+        from netra_backend.app.agents.state import DeepAgentState
 
         setup = orchestration_setup
 
@@ -422,6 +433,7 @@ class TestWorkflowValidation:
     async def test_complete_workflow_metrics(self, orchestration_setup):
 
         """Test metrics collection across complete workflow."""
+        from netra_backend.app.agents.state import DeepAgentState
 
         setup = orchestration_setup
 

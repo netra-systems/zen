@@ -26,7 +26,7 @@ from netra_backend.app.agents.state import (
     ReportSection,
     OptimizationsResult
 )
-from netra_backend.app.agents.triage_sub_agent.models import (
+from netra_backend.app.agents.triage.unified_triage_agent import (
     TriageResult,
     UserIntent,
     SuggestedWorkflow,

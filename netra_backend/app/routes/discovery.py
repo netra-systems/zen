@@ -11,6 +11,7 @@ from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 
 from netra_backend.app.routes.utils.error_handlers import handle_service_error
+from netra_backend.app.core.environment_constants import get_current_environment, Environment
 
 logger = logging.getLogger(__name__)
 
@@ -65,27 +66,82 @@ def get_fallback_service_info() -> Dict[str, ServiceInfo]:
     from datetime import datetime
     
     timestamp = datetime.now().isoformat()
+    environment = get_current_environment()
     
-    return {
-        "backend": ServiceInfo(
-            port=8000,
-            url="http://localhost:8000",
-            api_url="http://localhost:8000",
-            ws_url="ws://localhost:8000/ws",
-            timestamp=timestamp
-        ),
-        "frontend": ServiceInfo(
-            port=3000,
-            url="http://localhost:3000",
-            timestamp=timestamp
-        ),
-        "auth": ServiceInfo(
-            port=8081,
-            url="http://localhost:8081",
-            api_url="http://localhost:8081",
-            timestamp=timestamp
-        )
-    }
+    # Return environment-specific URLs
+    if environment == Environment.STAGING.value:
+        return {
+            "backend": ServiceInfo(
+                port=443,  # HTTPS port in staging
+                url="https://api.staging.netrasystems.ai",
+                api_url="https://api.staging.netrasystems.ai",
+                ws_url="wss://api.staging.netrasystems.ai/ws",
+                timestamp=timestamp
+            ),
+            "frontend": ServiceInfo(
+                port=443,  # HTTPS port in staging
+                url="https://app.staging.netrasystems.ai",
+                api_url=None,
+                ws_url=None,
+                timestamp=timestamp
+            ),
+            "auth": ServiceInfo(
+                port=443,  # HTTPS port in staging
+                url="https://auth.staging.netrasystems.ai",
+                api_url="https://auth.staging.netrasystems.ai",
+                ws_url=None,
+                timestamp=timestamp
+            )
+        }
+    elif environment == Environment.PRODUCTION.value:
+        return {
+            "backend": ServiceInfo(
+                port=443,  # HTTPS port in production
+                url="https://api.netrasystems.ai",
+                api_url="https://api.netrasystems.ai",
+                ws_url="wss://api.netrasystems.ai/ws",
+                timestamp=timestamp
+            ),
+            "frontend": ServiceInfo(
+                port=443,  # HTTPS port in production
+                url="https://app.netrasystems.ai",
+                api_url=None,
+                ws_url=None,
+                timestamp=timestamp
+            ),
+            "auth": ServiceInfo(
+                port=443,  # HTTPS port in production
+                url="https://auth.netrasystems.ai",
+                api_url="https://auth.netrasystems.ai",
+                ws_url=None,
+                timestamp=timestamp
+            )
+        }
+    else:
+        # Development/Testing environment - return localhost
+        return {
+            "backend": ServiceInfo(
+                port=8000,
+                url="http://localhost:8000",
+                api_url="http://localhost:8000",
+                ws_url="ws://localhost:8000/ws",
+                timestamp=timestamp
+            ),
+            "frontend": ServiceInfo(
+                port=3000,
+                url="http://localhost:3000",
+                api_url=None,
+                ws_url=None,
+                timestamp=timestamp
+            ),
+            "auth": ServiceInfo(
+                port=8081,
+                url="http://localhost:8081",
+                api_url="http://localhost:8081",
+                ws_url=None,
+                timestamp=timestamp
+            )
+        }
 
 
 @router.get("/services", response_model=ServicesResponse)

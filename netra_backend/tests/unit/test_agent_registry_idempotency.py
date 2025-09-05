@@ -9,7 +9,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
+from netra_backend.app.core.registry.universal_registry import AgentRegistry
 
 
 class TestAgentRegistryIdempotency:
@@ -28,7 +28,7 @@ class TestAgentRegistryIdempotency:
     @pytest.fixture
     def agent_registry(self, mock_llm_manager, mock_tool_dispatcher):
         """Create agent registry instance."""
-        return AgentRegistry(mock_llm_manager, mock_tool_dispatcher)
+        return AgentRegistry()
 
     def test_register_default_agents_idempotency(self, agent_registry):
         """Test that register_default_agents is idempotent."""

@@ -127,6 +127,7 @@ unified_db = UnifiedPostgresDB()
 
 
 # DEPRECATED: Redirects to DatabaseManager-based single source of truth
+@asynccontextmanager
 async def get_db():
     """DEPRECATED: Use netra_backend.app.database.get_db() for SSOT compliance.
     
@@ -141,7 +142,7 @@ async def get_db():
     )
     
     from netra_backend.app.database import get_db as _get_db
-    async for session in _get_db():
+    async with _get_db() as session:
         yield session
 
 # DEPRECATED: Backward compatibility alias

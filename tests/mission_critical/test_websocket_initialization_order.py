@@ -31,10 +31,10 @@ import os
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
 
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
-from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
+from netra_backend.app.core.registry.universal_registry import AgentRegistry
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
-from netra_backend.app.websocket_core.manager import WebSocketManager
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager as WebSocketManager
 from sqlalchemy.ext.asyncio import AsyncSession
 
 
@@ -120,7 +120,7 @@ class TestWebSocketInitializationOrder(unittest.TestCase):
             # Simulate no agents registered yet
             mock_get_agents.return_value = {}
             
-            registry = AgentRegistry(self.llm_manager, self.tool_dispatcher)
+            registry = AgentRegistry()
             
             # Try to set WebSocket manager with no agents (should handle gracefully)
             try:

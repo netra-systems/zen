@@ -6,7 +6,7 @@ Business Value: Long-term maintainability
 
 import pytest
 from unittest.mock import Mock, patch, MagicMock
-from netra_backend.app.agents.data_sub_agent.query_builder import QueryBuilder
+from netra_backend.app.services.query_builder import QueryBuilder
 
 class TestQueryBuilder:
     """Test suite for QueryBuilder"""

@@ -23,7 +23,7 @@ import pytest
 
 from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.agents.state import DeepAgentState
-from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
+from netra_backend.app.core.registry.universal_registry import AgentRegistry
 from netra_backend.app.agents.base.execution_context import AgentExecutionContext
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
 
@@ -199,7 +199,7 @@ def mock_agent_registry():
     # Mock: Tool dispatcher isolation for agent testing without real tool execution
     mock_tool_dispatcher = Mock()
     
-    registry = AgentRegistry(mock_llm_manager, mock_tool_dispatcher)
+    registry = AgentRegistry()
     
     # Register mock agents
     analysis_agent = MockAnalysisAgent()

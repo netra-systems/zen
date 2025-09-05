@@ -2,7 +2,7 @@
   "metadata": {
     "version": "3.0.0",
     "category": "events",
-    "generated_at": "2025-09-03T11:36:14.445467",
+    "generated_at": "2025-09-04T12:54:48.950183",
     "root_directory": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1",
     "total_literals": 34
   },
@@ -26,13 +26,6 @@
       "category": "events",
       "locations": [
         "scripts/scan_string_literals.py:134"
-      ]
-    },
-    "_shutdown_event": {
-      "value": "_shutdown_event",
-      "category": "events",
-      "locations": [
-        "netra_backend/app/websocket_core/manager.py:1355"
       ]
     },
     "auth_event": {
@@ -63,6 +56,7 @@
         "netra_backend/app/db/postgres_events.py:88",
         "netra_backend/app/db/postgres_events.py:144",
         "netra_backend/app/websocket_core/types.py:42",
+        "netra_backend/app/websocket_core/types.py:312",
         "auth_service/auth_core/database/connection_events.py:152",
         "scripts/scan_string_literals.py:138"
       ]
@@ -71,7 +65,7 @@
       "value": "cost_per_event",
       "category": "events",
       "locations": [
-        "netra_backend/app/agents/data_sub_agent/insights_usage_analyzer.py:82"
+        "netra_backend/app/agents/_legacy_backup/data_sub_agent_backup_20250904/insights_usage_analyzer.py:82"
       ]
     },
     "def\\s+process_event": {
@@ -85,8 +79,9 @@
       "value": "disconnect",
       "category": "events",
       "locations": [
-        "netra_backend/app/core/clickhouse_connection_manager.py:607",
+        "netra_backend/app/core/clickhouse_connection_manager.py:641",
         "netra_backend/app/websocket_core/types.py:43",
+        "netra_backend/app/websocket_core/types.py:313",
         "scripts/comprehensive_error_hunter.py:118",
         "scripts/scan_string_literals.py:138"
       ]
@@ -102,23 +97,30 @@
       "value": "emit_agent_event",
       "category": "events",
       "locations": [
-        "netra_backend/app/startup_module.py:785"
+        "netra_backend/app/startup_module.py:882"
+      ]
+    },
+    "emit_critical_event": {
+      "value": "emit_critical_event",
+      "category": "events",
+      "locations": [
+        "scripts/generate_websocket_mro_report.py:129"
       ]
     },
     "error": {
       "value": "error",
       "category": "events",
       "locations": [
-        "netra_backend/app/agents/actions_to_meet_goals_sub_agent.py:201",
-        "netra_backend/app/agents/admin_tool_dispatcher/dispatcher_core.py:230",
-        "netra_backend/app/agents/admin_tool_dispatcher/dispatcher_helpers.py:242",
-        "netra_backend/app/agents/admin_tool_dispatcher/execution_pattern_helpers.py:45",
-        "netra_backend/app/agents/admin_tool_dispatcher/modern_execution_helpers.py:52",
-        "netra_backend/app/agents/admin_tool_dispatcher/modern_execution_helpers.py:52",
-        "netra_backend/app/agents/admin_tool_dispatcher/operation_helpers.py:76",
-        "netra_backend/app/agents/admin_tool_dispatcher/tool_handler_helpers.py:207",
-        "netra_backend/app/agents/admin_tool_dispatcher/tool_handlers_core.py:83",
-        "netra_backend/app/agents/admin_tool_dispatcher/tool_handlers_core.py:140"
+        "netra_backend/app/admin/corpus/unified_corpus_admin.py:806",
+        "netra_backend/app/admin/tools/unified_admin_dispatcher.py:610",
+        "netra_backend/app/agents/_legacy_backup/data_sub_agent_backup_20250904/agent_data_processing.py:22",
+        "netra_backend/app/agents/_legacy_backup/data_sub_agent_backup_20250904/agent_data_processing.py:22",
+        "netra_backend/app/agents/_legacy_backup/data_sub_agent_backup_20250904/agent_data_processing.py:63",
+        "netra_backend/app/agents/_legacy_backup/data_sub_agent_backup_20250904/analysis_engine.py:91",
+        "netra_backend/app/agents/_legacy_backup/data_sub_agent_backup_20250904/analysis_engine.py:103",
+        "netra_backend/app/agents/_legacy_backup/data_sub_agent_backup_20250904/analysis_engine.py:179",
+        "netra_backend/app/agents/_legacy_backup/data_sub_agent_backup_20250904/clickhouse_operations.py:537",
+        "netra_backend/app/agents/_legacy_backup/data_sub_agent_backup_20250904/correlation_analysis.py:42"
       ]
     },
     "filtered_by_event": {
@@ -139,18 +141,17 @@
       "value": "high_cost_per_event",
       "category": "events",
       "locations": [
-        "netra_backend/app/agents/data_sub_agent/insights_recommendations.py:75",
-        "netra_backend/app/agents/data_sub_agent/insights_usage_analyzer.py:89"
+        "netra_backend/app/agents/_legacy_backup/data_sub_agent_backup_20250904/insights_recommendations.py:75",
+        "netra_backend/app/agents/_legacy_backup/data_sub_agent_backup_20250904/insights_usage_analyzer.py:89"
       ]
     },
     "last_event": {
       "value": "last_event",
       "category": "events",
       "locations": [
-        "netra_backend/app/core/websocket_exceptions.py:64",
         "netra_backend/app/monitoring/websocket_dashboard.py:269",
-        "netra_backend/app/websocket_core/event_monitor.py:232",
-        "netra_backend/app/websocket_core/event_monitor.py:399",
+        "netra_backend/app/websocket_core/event_monitor.py:237",
+        "netra_backend/app/websocket_core/event_monitor.py:441",
         "netra_backend/app/websocket_core/event_validation_framework.py:909"
       ]
     },
@@ -172,16 +173,16 @@
       "value": "message",
       "category": "events",
       "locations": [
-        "netra_backend/app/agents/actions_to_meet_goals_sub_agent.py:226",
-        "netra_backend/app/agents/admin_tool_dispatcher/dispatcher_core.py:209",
-        "netra_backend/app/agents/admin_tool_dispatcher/tool_handler_helpers.py:284",
-        "netra_backend/app/agents/admin_tool_executors.py:245",
-        "netra_backend/app/agents/agent_communication.py:61",
-        "netra_backend/app/agents/agent_communication.py:66",
-        "netra_backend/app/agents/agent_communication.py:82",
-        "netra_backend/app/agents/agent_lifecycle.py:169",
-        "netra_backend/app/agents/base/executor.py:392",
-        "netra_backend/app/agents/base_agent.py:395"
+        "netra_backend/app/agents/_legacy_backup/data_sub_agent_backup_20250904/agent_data_processing.py:63",
+        "netra_backend/app/agents/_legacy_backup/data_sub_agent_backup_20250904/agent_execution.py:205",
+        "netra_backend/app/agents/_legacy_backup/data_sub_agent_backup_20250904/anomaly_detection.py:120",
+        "netra_backend/app/agents/_legacy_backup/data_sub_agent_backup_20250904/core/data_analysis_core.py:68",
+        "netra_backend/app/agents/_legacy_backup/data_sub_agent_backup_20250904/core/data_analysis_core.py:96",
+        "netra_backend/app/agents/_legacy_backup/data_sub_agent_backup_20250904/core/data_analysis_core.py:123",
+        "netra_backend/app/agents/_legacy_backup/data_sub_agent_backup_20250904/core/data_analysis_core.py:150",
+        "netra_backend/app/agents/_legacy_backup/data_sub_agent_backup_20250904/data_fetching_operations.py:71",
+        "netra_backend/app/agents/_legacy_backup/data_sub_agent_backup_20250904/data_processing_operations.py:31",
+        "netra_backend/app/agents/_legacy_backup/data_sub_agent_backup_20250904/data_processing_operations.py:41"
       ]
     },
     "newest_event": {
@@ -224,15 +225,15 @@
       "category": "events",
       "locations": [
         "netra_backend/app/core/cross_service_validators/performance_validators.py:111",
-        "netra_backend/app/routes/health.py:791",
-        "netra_backend/app/routes/health.py:803",
+        "netra_backend/app/routes/health.py:795",
+        "netra_backend/app/routes/health.py:807",
         "netra_backend/app/routes/mcp/websocket_handler.py:86",
         "netra_backend/app/routes/mcp/websocket_handler.py:141",
         "netra_backend/app/routes/utils/websocket_helpers.py:207",
         "netra_backend/app/routes/utils/websocket_helpers.py:278",
-        "netra_backend/app/routes/websocket.py:852",
+        "netra_backend/app/routes/websocket.py:890",
         "netra_backend/app/routes/websocket_factory.py:265",
-        "netra_backend/app/schemas/core_enums.py:62"
+        "netra_backend/app/routes/websocket_isolated.py:248"
       ]
     },
     "pong": {
@@ -243,12 +244,12 @@
         "netra_backend/app/routes/mcp/websocket_handler.py:145",
         "netra_backend/app/routes/utils/websocket_helpers.py:199",
         "netra_backend/app/routes/utils/websocket_helpers.py:311",
-        "netra_backend/app/routes/websocket.py:466",
-        "netra_backend/app/routes/websocket.py:855",
+        "netra_backend/app/routes/websocket.py:500",
+        "netra_backend/app/routes/websocket.py:893",
         "netra_backend/app/routes/websocket_factory.py:268",
+        "netra_backend/app/routes/websocket_isolated.py:251",
         "netra_backend/app/schemas/core_enums.py:63",
-        "netra_backend/app/schemas/core_enums.py:172",
-        "netra_backend/app/websocket_core/types.py:47"
+        "netra_backend/app/schemas/core_enums.py:172"
       ]
     },
     "privacy_event": {
@@ -262,7 +263,6 @@
       "value": "security_event",
       "category": "events",
       "locations": [
-        "netra_backend/app/core/security_monitoring.py:233",
         "netra_backend/app/monitoring/websocket_logging_enhanced.py:533"
       ]
     },
@@ -293,11 +293,12 @@
         "scripts/scan_string_literals.py:138"
       ]
     },
-    "validate_event": {
-      "value": "validate_event",
+    "websocket_send_event": {
+      "value": "websocket_send_event",
       "category": "events",
       "locations": [
-        "netra_backend/app/websocket_core/validation_integration.py:551"
+        "scripts/performance_profiler.py:61",
+        "scripts/performance_profiler.py:236"
       ]
     }
   }

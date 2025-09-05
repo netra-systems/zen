@@ -29,7 +29,7 @@ from tests.e2e.jwt_token_helpers import JWTTestHelper
 from tests.e2e.config import TestTokenManager, TEST_SECRETS
 from test_framework.websocket_helpers import MockWebSocket
 from netra_backend.app.logging_config import central_logger
-from netra_backend.app.websocket_core.manager import get_websocket_manager
+from netra_backend.app.websocket_core.unified_manager import get_websocket_manager
 from unittest.mock import patch, AsyncMock
 
 logger = central_logger.get_logger(__name__)

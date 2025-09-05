@@ -5,7 +5,7 @@ from unittest.mock import MagicMock, AsyncMock
 # Test imports
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 from netra_backend.app.agents.unified_tool_execution import UnifiedToolExecutionEngine
-from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
+from netra_backend.app.core.registry.universal_registry import AgentRegistry
 
 
 def test_tool_dispatcher_creation_with_websocket():
@@ -77,7 +77,7 @@ def test_agent_registry_set_websocket():
     dispatcher = ToolDispatcher(websocket_manager=mock_ws_manager)
     
     # Create registry
-    registry = AgentRegistry(mock_llm_manager, dispatcher)
+    registry = AgentRegistry()
     
     # Set WebSocket manager (should not try to enhance)
     try:

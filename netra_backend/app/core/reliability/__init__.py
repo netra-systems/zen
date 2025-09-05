@@ -5,7 +5,6 @@ This package contains the unified reliability manager and related components.
 
 from .unified_reliability_manager import (
     get_reliability_manager,
-    create_agent_reliability_manager,
     UnifiedReliabilityManager
 )
 
@@ -48,7 +47,6 @@ AgentReliabilityWrapper = UnifiedReliabilityManager
 
 __all__ = [
     'get_reliability_manager',
-    'create_agent_reliability_manager', 
     'UnifiedReliabilityManager',
     'AgentReliabilityWrapper',
     'get_reliability_wrapper', 

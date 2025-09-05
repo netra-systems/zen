@@ -15,7 +15,7 @@ from auth_service.auth_core.database.repository import AuthUserRepository
 # Import test framework for isolated environment and repository factory
 from test_framework.environment_isolation import isolated_test_env
 from auth_service.tests.helpers.test_repository_factory import (
-    TestRepositoryFactory,
+    RepositoryFactory,
     mock_user_repository,
     real_user_repository
 )
@@ -31,7 +31,7 @@ def auth_service():
 @pytest.fixture
 async def real_repository_factory(isolated_test_env):
     """Create real repository factory with test environment"""
-    factory = TestRepositoryFactory(use_real_db=True)
+    factory = RepositoryFactory(use_real_db=True)
     await factory.initialize()
     yield factory
     await factory.cleanup()
@@ -40,7 +40,7 @@ async def real_repository_factory(isolated_test_env):
 @pytest.fixture
 async def mock_repository_factory():
     """Create mock repository factory"""
-    factory = TestRepositoryFactory(use_real_db=False)
+    factory = RepositoryFactory(use_real_db=False)
     await factory.initialize()
     yield factory
     await factory.cleanup()

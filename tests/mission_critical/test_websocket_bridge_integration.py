@@ -258,7 +258,7 @@ class TestWebSocketBridgeIntegration(unittest.IsolatedAsyncioTestCase):
     async def test_agent_registry_bridge_propagation(self):
         """CRITICAL: AgentRegistry must propagate bridge to registered agents."""
         try:
-            from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
+            from netra_backend.app.core.registry.universal_registry import AgentRegistry
             from netra_backend.app.agents.base_agent import BaseAgent
             from netra_backend.app.llm.llm_manager import LLMManager
             from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
@@ -278,7 +278,7 @@ class TestWebSocketBridgeIntegration(unittest.IsolatedAsyncioTestCase):
         mock_dispatcher.executor = MagicMock()
         mock_dispatcher.diagnose_websocket_wiring = MagicMock(return_value={"critical_issues": []})
         
-        registry = AgentRegistry(mock_llm, mock_dispatcher)
+        registry = AgentRegistry()
         
         # Register test agent
         test_agent = RegistryTestAgent(mock_llm, mock_dispatcher)

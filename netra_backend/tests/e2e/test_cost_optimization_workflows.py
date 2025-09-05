@@ -4,11 +4,6 @@ Tests real LLM agents with complete data flow validation.
 Maximum 300 lines, functions ≤8 lines.
 """
 
-from netra_backend.app.websocket_core.manager import WebSocketManager
-# Test framework import - using pytest fixtures instead
-from pathlib import Path
-import sys
-
 import asyncio
 import uuid
 from decimal import Decimal
@@ -16,12 +11,12 @@ from typing import Dict, List, Optional
 
 import pytest
 import pytest_asyncio
-from netra_backend.app.schemas import SubAgentLifecycle
+from netra_backend.app.schemas.agent import SubAgentLifecycle
 
-from netra_backend.app.agents.data_sub_agent.agent import DataSubAgent
+from netra_backend.app.agents.data_sub_agent import DataSubAgent
 from netra_backend.app.agents.state import DeepAgentState
 
-from netra_backend.app.agents.triage_sub_agent.agent import TriageSubAgent
+from netra_backend.app.agents.triage.unified_triage_agent import UnifiedTriageAgent
 from netra_backend.app.core.exceptions import NetraException
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.services.quality_gate_service import (
@@ -33,6 +28,7 @@ from netra_backend.app.services.quality_gate_service import (
     QualityLevel,
 
 )
+from netra_backend.app.websocket_core.manager import WebSocketManager
 
 @pytest.fixture
 
@@ -54,7 +50,7 @@ def cost_optimization_setup(real_llm_manager, real_websocket_manager, real_tool_
     
     agents = {
 
-        'triage': TriageSubAgent(real_llm_manager, real_tool_dispatcher),
+        'triage': UnifiedTriageAgent(real_llm_manager, real_tool_dispatcher),
 
         'data': DataSubAgent(real_llm_manager, real_tool_dispatcher),
 

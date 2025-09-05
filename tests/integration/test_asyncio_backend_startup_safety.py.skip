@@ -147,9 +147,8 @@ class TestDatabaseConnectionAsyncioSafety:
             # This should work without nested loops
             with AsyncioTestUtils.assert_no_nested_asyncio_run():
                 try:
-                    async for session in get_db():
+                    async with get_db() as session:
                         assert session is not None
-                        break  # Just test the first session
                 except Exception:
                     # Expected to fail in test environment without real DB
                     pass

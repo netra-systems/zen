@@ -33,7 +33,7 @@ if project_root not in sys.path:
 import pytest
 
 # Import production components
-from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
+from netra_backend.app.core.registry.universal_registry import AgentRegistry
 from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
 from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
 from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier
@@ -42,7 +42,7 @@ from netra_backend.app.agents.unified_tool_execution import (
     UnifiedToolExecutionEngine,
     enhance_tool_dispatcher_with_notifications
 )
-from netra_backend.app.websocket_core.manager import WebSocketManager
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager as WebSocketManager
 from netra_backend.app.agents.state import DeepAgentState
 
 
@@ -190,7 +190,7 @@ class TestMissionCriticalWebSocketEvents:
             pass
         
         tool_dispatcher = ToolDispatcher()
-        registry = AgentRegistry(MockLLM(), tool_dispatcher)
+        registry = AgentRegistry(), tool_dispatcher)
         ws_manager = WebSocketManager()
         
         # Set WebSocket manager
@@ -206,7 +206,7 @@ class TestMissionCriticalWebSocketEvents:
         class MockLLM:
             pass
         
-        registry = AgentRegistry(MockLLM(), ToolDispatcher())
+        registry = AgentRegistry(), ToolDispatcher())
         ws_manager = WebSocketManager()
         
         engine = ExecutionEngine(registry, ws_manager)
@@ -348,7 +348,7 @@ class TestMissionCriticalWebSocketEvents:
         tool_dispatcher = ToolDispatcher()
         
         # Create registry with WebSocket
-        registry = AgentRegistry(llm, tool_dispatcher)
+        registry = AgentRegistry()
         registry.set_websocket_manager(ws_manager)
         
         # Create and register a test agent

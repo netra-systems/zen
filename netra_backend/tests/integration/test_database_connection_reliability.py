@@ -199,7 +199,7 @@ class TestDatabaseConnectionReliability:
         
         # They should all use the same underlying implementation
         # This is verified by checking that get_db delegates to get_async_db
-        async for session1 in get_db():
+        async with get_db() as session1:
             assert session1 is not None
             break
         

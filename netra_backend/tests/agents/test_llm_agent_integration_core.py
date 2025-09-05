@@ -20,7 +20,7 @@ from netra_backend.app.agents.state import DeepAgentState
 
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
-from netra_backend.app.agents.triage_sub_agent import (
+from netra_backend.app.agents.triage.unified_triage_agent import (
     Complexity,
     ExtractedEntities,
     Priority,
@@ -59,7 +59,7 @@ class LLMAgentIntegrationCoreTests:
         }))
         
         # Mock structured LLM for triage agent
-        from netra_backend.app.agents.triage_sub_agent import (
+        from netra_backend.app.agents.triage.unified_triage_agent import (
             Complexity,
             ExtractedEntities,
             Priority,

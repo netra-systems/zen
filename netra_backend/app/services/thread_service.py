@@ -39,9 +39,8 @@ async def uow_context():
 class ThreadService(IThreadService):
     """Service for managing conversation threads and messages"""
     
-    async def _send_thread_created_event(self, user_id: str) -> None:
-        """Send thread created WebSocket event"""
-        thread_id = f"thread_{user_id}"
+    async def _send_thread_created_event(self, user_id: str, thread_id: str) -> None:
+        """Send thread created WebSocket event with actual thread ID"""
         await manager.send_to_user(user_id, {"type": "thread_created", "payload": {"thread_id": thread_id, "timestamp": time.time()}})
     
     async def _execute_with_uow(self, operation, db: Optional[AsyncSession] = None, *args, **kwargs):
@@ -55,7 +54,7 @@ class ThreadService(IThreadService):
         thread = await uow.threads.get_or_create_for_user(uow.session, user_id)
         if not thread:
             raise DatabaseError(message=f"Failed to get or create thread for user {user_id}", context={"user_id": user_id})
-        await self._send_thread_created_event(user_id)
+        await self._send_thread_created_event(user_id, thread.id)
         return thread
     
     async def get_or_create_thread(self, user_id: str, db: Optional[AsyncSession] = None) -> Thread:
@@ -119,7 +118,7 @@ class ThreadService(IThreadService):
     
     def _prepare_run_data(self, thread_id: str, assistant_id: str, model: str, instructions: Optional[str]) -> tuple[str, Dict[str, Any]]:
         """Prepare run data for creation"""
-        run_id = UnifiedIDManager.generate_run_id(thread_id, "thread_service_run")
+        run_id = UnifiedIDManager.generate_run_id(thread_id)
         base_data = {"id": run_id, "object": "thread.run", "created_at": int(time.time()), "thread_id": thread_id}
         extended_data = {"assistant_id": assistant_id, "status": "in_progress", "model": model, "instructions": instructions, "tools": [], "file_ids": [], "metadata_": {}}
         return run_id, {**base_data, **extended_data}
@@ -216,229 +215,6 @@ class ThreadService(IThreadService):
             logger.error(f"Failed to delete thread {thread_id}: {e}")
             return False
 
-# Stub functions for testing compatibility
-def cleanup_old_threads(cleanup_request: dict) -> dict:
-    """Cleanup old threads - placeholder implementation"""
-    return {"status": "not_implemented"}
-
-def get_thread_activity(activity_request: dict) -> dict:
-    """Get thread activity - placeholder implementation"""
-    return {"status": "not_implemented"}
-
-def batch_update_threads(update_request: dict) -> dict:
-    """Batch update threads - placeholder implementation"""
-    return {"status": "not_implemented"}
-
-def merge_threads(merge_request: dict) -> dict:
-    """Merge threads - placeholder implementation"""
-    return {"status": "not_implemented"}
-
-def get_thread_recommendations(recommendation_request: dict) -> dict:
-    """Get thread recommendations - placeholder implementation"""
-    return {"status": "not_implemented"}
-
-def get_thread_insights(insights_request: dict) -> dict:
-    """Get thread insights - placeholder implementation"""
-    return {"status": "not_implemented"}
-
-def export_threads(export_request: dict) -> dict:
-    """Export threads - placeholder implementation"""
-    return {"status": "not_implemented"}
-
-def get_thread_statistics(stats_request: dict) -> dict:
-    """Get thread statistics - placeholder implementation"""
-    return {"status": "not_implemented"}
-
-def get_thread_by_id(thread_id: str) -> dict:
-    """Get thread by ID - placeholder implementation"""
-    return {
-        "id": thread_id,
-        "title": f"Thread {thread_id}",
-        "messages": [],
-        "created_at": "2024-01-01T00:00:00Z",
-        "updated_at": "2024-01-01T00:00:00Z",
-        "status": "active"
-    }
-
-def duplicate_thread(thread_id: str, options: dict = None) -> dict:
-    """Duplicate a thread - placeholder implementation"""
-    return {
-        "original_id": thread_id,
-        "new_id": f"{thread_id}_copy",
-        "title": f"Copy of Thread {thread_id}",
-        "messages": [],
-        "created_at": "2024-01-01T00:00:00Z",
-        "status": "duplicated"
-    }
-
-def delete_thread(thread_id: str) -> bool:
-    """Delete a thread - placeholder implementation"""
-    # Simulate successful deletion
-    return True
-
-def update_thread(thread_id: str, update_data: dict) -> dict:
-    """Update a thread - placeholder implementation"""
-    return {
-        "id": thread_id,
-        "title": update_data.get("title", f"Updated Thread {thread_id}"),
-        "updated_at": "2024-01-01T00:00:00Z",
-        "status": "updated"
-    }
-
-def add_message_to_thread(thread_id: str, message: dict) -> dict:
-    """Add message to thread - placeholder implementation"""
-    return {
-        "thread_id": thread_id,
-        "message_id": "msg_new",
-        "content": message.get("content", ""),
-        "timestamp": "2024-01-01T00:00:00Z",
-        "status": "added"
-    }
-
-def search_threads(query: str, filters: dict = None) -> list:
-    """Search threads - placeholder implementation"""
-    return [
-        {
-            "id": "thread1",
-            "title": f"Search result for: {query}",
-            "relevance_score": 0.95,
-            "snippet": "Matching content snippet..."
-        }
-    ]
-
-def update_thread_status(thread_id: str, status: str) -> dict:
-    """Update thread status - placeholder implementation"""
-    return {
-        "id": thread_id,
-        "status": status,
-        "updated_at": "2024-01-01T00:00:00Z"
-    }
-
-def update_thread_metadata(thread_id: str, metadata: dict) -> dict:
-    """Update thread metadata - placeholder implementation"""
-    return {
-        "id": thread_id,
-        "metadata": metadata,
-        "updated_at": "2024-01-01T00:00:00Z"
-    }
-
-def get_thread_messages(thread_id: str, page: int = 1, limit: int = 10) -> list:
-    """Get thread messages - placeholder implementation"""
-    return [
-        {
-            "id": f"msg{i}",
-            "thread_id": thread_id,
-            "content": f"Message {i}",
-            "timestamp": "2024-01-01T00:00:00Z"
-        }
-        for i in range(limit)
-    ]
-
-def bulk_operation(bulk_request: dict) -> dict:
-    """Perform bulk operations on threads - placeholder implementation"""
-    return {
-        "operation": bulk_request.get("operation", "unknown"),
-        "total_requested": len(bulk_request.get("thread_ids", [])),
-        "successful": 0,
-        "failed": 0,
-        "results": {},
-        "operation_id": "bulk_op_placeholder"
-    }
-
-def analyze_sentiment(sentiment_request: dict) -> dict:
-    """Analyze thread sentiment - placeholder implementation"""
-    return {
-        "analysis_id": "sentiment_placeholder",
-        "results": {},
-        "summary": {
-            "avg_sentiment_score": 0.0,
-            "positive_threads": 0,
-            "neutral_threads": 0,
-            "negative_threads": 0
-        }
-    }
-
-def get_performance_metrics(metrics_request: dict) -> dict:
-    """Get thread performance metrics - placeholder implementation"""
-    return {
-        "timeframe": metrics_request.get("timeframe", "unknown"),
-        "granularity": metrics_request.get("granularity", "unknown"),
-        "metrics": {
-            "response_time": {
-                "avg": 0.0,
-                "p50": 0.0,
-                "p95": 0.0,
-                "p99": 0.0
-            },
-            "message_frequency": {
-                "messages_per_hour": 0.0,
-                "peak_hour": 12,
-                "off_peak_hour": 3
-            },
-            "user_engagement": {
-                "active_threads_per_hour": 0.0,
-                "avg_session_duration": 0.0,
-                "bounce_rate": 0.0
-            },
-            "completion_rate": {
-                "threads_completed": 0.0,
-                "avg_messages_to_completion": 0.0,
-                "user_satisfaction": 0.0
-            }
-        },
-        "trends": {
-            "response_time": "stable",
-            "user_engagement": "stable",
-            "completion_rate": "stable"
-        }
-    }
-
-def search_messages_in_thread(thread_id: str, search_query: dict) -> dict:
-    """Search messages within a specific thread - placeholder implementation"""
-    return {
-        "messages": [
-            {
-                "id": "msg123",
-                "content": f"This message contains the search query: {search_query.get('query', '')}",
-                "sender": "user",
-                "timestamp": "2024-01-15T10:30:00Z",
-                "relevance_score": 0.95
-            },
-            {
-                "id": "msg124", 
-                "content": f"Another message matching: {search_query.get('query', '')}",
-                "sender": "assistant",
-                "timestamp": "2024-01-16T11:15:00Z",
-                "relevance_score": 0.87
-            }
-        ],
-        "total_matches": 2,
-        "query": search_query.get("query", "")
-    }
-
-def add_message_reaction(message_id: str, reaction_type: str, user_id: str) -> dict:
-    """Add a reaction to a message - placeholder implementation"""
-    from datetime import datetime
-    return {
-        "message_id": message_id,
-        "reaction_type": reaction_type,
-        "user_id": user_id,
-        "added_at": datetime.now().isoformat()
-    }
-
-def add_reply_to_message(thread_id: str, parent_message_id: str, reply_data: dict) -> dict:
-    """Add a reply to a message - placeholder implementation"""
-    from datetime import datetime
-    return {
-        "message_id": f"msg_{uuid.uuid4()}",
-        "thread_id": thread_id,
-        "parent_message_id": parent_message_id,
-        "content": reply_data.get("content", ""),
-        "sender": reply_data.get("sender", "user"),
-        "timestamp": datetime.now().isoformat(),
-        "reply_level": 1,
-        "message_type": reply_data.get("message_type", "reply")
-    }
 # Create service instances for backward compatibility
 thread_service = ThreadService()
 

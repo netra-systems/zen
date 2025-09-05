@@ -130,10 +130,12 @@ class ExampleMessageHandler:
         except ValidationError as e:
             # Handle validation errors through error handling system
             error_context = ErrorContext(
+                trace_id=ErrorContext.generate_trace_id(),
+                operation='validation',
                 user_id=raw_message.get('user_id'),
-                message_id=raw_message.get('example_message_id'),
-                category=raw_message.get('example_message_metadata', {}).get('category'),
-                processing_stage='validation'
+                correlation_id=raw_message.get('example_message_id'),
+                details={'category': raw_message.get('example_message_metadata', {}).get('category'), 'processing_stage': 'validation'},
+                component='ExampleMessageHandler'
             )
             error_info = await handle_example_message_error(e, error_context)
             
@@ -146,10 +148,12 @@ class ExampleMessageHandler:
         except Exception as e:
             # Handle general errors through error handling system
             error_context = ErrorContext(
+                trace_id=ErrorContext.generate_trace_id(),
+                operation='processing',
                 user_id=raw_message.get('user_id'),
-                message_id=raw_message.get('example_message_id'),
-                category=raw_message.get('example_message_metadata', {}).get('category'),
-                processing_stage='processing'
+                correlation_id=raw_message.get('example_message_id'),
+                details={'category': raw_message.get('example_message_metadata', {}).get('category'), 'processing_stage': 'processing'},
+                component='ExampleMessageHandler'
             )
             error_info = await handle_example_message_error(e, error_context)
             

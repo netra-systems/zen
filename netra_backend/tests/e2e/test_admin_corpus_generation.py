@@ -103,7 +103,7 @@ class TestAdminCorpusGeneration:
         # Run the agent to get real results
         await agent.execute(state, f"run-{request.session_id}", stream_updates=True)
         # Validate the agent ran successfully
-        from netra_backend.app.schemas.unified_tools import SubAgentLifecycle
+        from netra_backend.app.schemas.agent import SubAgentLifecycle
         assert agent.state in [SubAgentLifecycle.COMPLETED, SubAgentLifecycle.FAILED], "Agent should complete execution"
     
     @pytest.mark.asyncio
@@ -155,7 +155,7 @@ class TestAdminCorpusGeneration:
         # Run the agent for corpus generation
         await agent.execute(state, f"gen-{request.session_id}", stream_updates=True)
         # Validate the agent completed successfully
-        from netra_backend.app.schemas.unified_tools import SubAgentLifecycle
+        from netra_backend.app.schemas.agent import SubAgentLifecycle
         assert agent.state in [SubAgentLifecycle.COMPLETED, SubAgentLifecycle.FAILED], "Generation should complete"
     
     @pytest.mark.asyncio

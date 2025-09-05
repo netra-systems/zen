@@ -7,23 +7,33 @@ import uuid
 from abc import ABC, abstractmethod
 from datetime import UTC, datetime
 from typing import Any, Dict, Generic, List, Optional, TypeVar, Union
+from enum import Enum
 
 from pydantic import BaseModel, Field
 
-# Import base types (no circular dependencies)
-from netra_backend.app.schemas.llm_base_types import (
-    LLMConfigInfo,
-    LLMError,
-    LLMHealthCheck,
-    LLMManagerStats,
-    LLMMessage,
-    LLMModel,
-    LLMProvider,
-    LLMRole,
-    TokenUsage,
-)
+
+class LLMProvider(str, Enum):
+    """LLM provider enum for LLM types (local to avoid circular imports)."""
+    OPENAI = "openai"
+    GOOGLE = "google"
+    ANTHROPIC = "anthropic"
+    COHERE = "cohere"
+    MOCK = "mock"
 
 T = TypeVar('T', bound=BaseModel)
+
+
+class TokenUsage(BaseModel):
+    """Token usage information from LLM calls."""
+    prompt_tokens: int = Field(0, description="Number of tokens in prompt")
+    completion_tokens: int = Field(0, description="Number of tokens in completion")
+    total_tokens: int = Field(0, description="Total tokens used")
+    cost_usd: Optional[float] = Field(None, description="Cost in USD if available")
+    
+    @property
+    def total(self) -> int:
+        """Total tokens used."""
+        return self.prompt_tokens + self.completion_tokens
 
 
 class LLMResponse(BaseModel):
@@ -130,6 +140,28 @@ class LLMInstance(ABC, Generic[T]):
     def clear_cache(self) -> None:
         """Clear response cache"""
         self._cache.clear()
+
+
+class LLMHealthCheck(BaseModel):
+    """Health check result for LLM configuration."""
+    config_name: str = Field(description="Configuration name")
+    healthy: bool = Field(description="Whether the configuration is healthy")
+    response_time_ms: float = Field(description="Response time in milliseconds")
+    last_checked: datetime = Field(description="When the check was performed")
+    error: Optional[str] = Field(default=None, description="Error message if unhealthy")
+
+
+class LLMManagerStats(BaseModel):
+    """Statistics for LLM manager operations."""
+    total_requests: int = Field(default=0, description="Total number of requests")
+    cached_responses: int = Field(default=0, description="Number of cached responses")
+    cache_hit_rate: float = Field(default=0.0, ge=0.0, le=1.0, description="Cache hit rate")
+    average_response_time_ms: float = Field(default=0.0, description="Average response time")
+    active_configs: List[str] = Field(default_factory=list, description="Active configuration names")
+    enabled: bool = Field(default=True, description="Whether manager is enabled")
+
+
+# LLMConfigInfo is imported from config_types to avoid duplication
 
 
 class LLMValidationError(Exception):

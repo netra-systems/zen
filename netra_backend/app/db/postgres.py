@@ -5,6 +5,8 @@ Maintains backward compatibility while adhering to modular architecture.
 Now enhanced with resilience patterns for pragmatic rigor and degraded operation.
 """
 
+from contextlib import asynccontextmanager
+
 # Import configuration
 from netra_backend.app.db.postgres_config import DatabaseConfig
 
@@ -55,9 +57,12 @@ async def get_postgres_db():
     
     Uses resilient session if available, otherwise falls back to standard session.
     """
-    async for session in get_resilient_postgres_session():
+    # FIX: get_resilient_postgres_session() is an async context manager that yields once
+    # Use async with, not async for
+    async with get_resilient_postgres_session() as session:
         yield session
 
+@asynccontextmanager
 async def get_resilient_postgres_session():
     """Get PostgreSQL session with resilience patterns if available."""
     if _RESILIENCE_AVAILABLE and resilient_postgres_session:

@@ -86,7 +86,7 @@ class TestOptimizationRecommendationsBusiness:
         }
         
         # Setup triage results
-        from netra_backend.app.agents.triage_sub_agent.models import TriageResult, ValidationStatus
+        from netra_backend.app.agents.triage.unified_triage_agent import TriageResult, ValidationStatus
         state.triage_result = TriageResult(
             category="performance_optimization",
             confidence_score=0.85,
@@ -177,7 +177,7 @@ class TestOptimizationRecommendationsBusiness:
             }
         }
         
-        from netra_backend.app.agents.triage_sub_agent.models import TriageResult, ValidationStatus
+        from netra_backend.app.agents.triage.unified_triage_agent import TriageResult, ValidationStatus
         state.triage_result = TriageResult(
             category="cost_optimization",
             confidence_score=0.90,
@@ -249,7 +249,7 @@ class TestOptimizationRecommendationsBusiness:
             ]
         }
         
-        from netra_backend.app.agents.triage_sub_agent.models import TriageResult
+        from netra_backend.app.agents.triage.unified_triage_agent import TriageResult
         state.triage_result = TriageResult(
             category="performance_optimization",
             confidence_score=0.88,
@@ -648,7 +648,7 @@ class TestReportingBusinessValue:
         )
         
         # Setup complete pipeline results from previous stages
-        from netra_backend.app.agents.triage_sub_agent.models import TriageResult
+        from netra_backend.app.agents.triage.unified_triage_agent import TriageResult
         state.triage_result = TriageResult(
             category="cost_optimization",
             confidence_score=0.87,
@@ -739,7 +739,7 @@ class TestReportingBusinessValue:
         state.user_request = "What's the ROI of implementing AI optimization recommendations?"
         
         # Setup results with quantifiable impacts from pipeline stages
-        from netra_backend.app.agents.triage_sub_agent.models import TriageResult  
+        from netra_backend.app.agents.triage.unified_triage_agent import TriageResult  
         state.triage_result = TriageResult(
             category="roi_analysis",
             confidence_score=0.91,
@@ -838,7 +838,7 @@ class TestReportingBusinessValue:
         )
         
         # Setup high-impact, high-risk scenario from pipeline analysis
-        from netra_backend.app.agents.triage_sub_agent.models import TriageResult
+        from netra_backend.app.agents.triage.unified_triage_agent import TriageResult
         state.triage_result = TriageResult(
             category="high_impact_optimization",
             confidence_score=0.75,  # Lower confidence for risky changes

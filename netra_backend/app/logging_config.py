@@ -24,10 +24,14 @@ from netra_backend.app.core.unified_logging import (
 # Create alias for backward compatibility
 CentralLogger = UnifiedLogger
 
+# Aliases for backward compatibility with tests
+get_logger = get_central_logger
+
 # Re-export for backward compatibility
 __all__ = [
     'central_logger',
     'get_central_logger',
+    'get_logger',
     'log_execution_time',
     'request_id_context',
     'user_id_context',

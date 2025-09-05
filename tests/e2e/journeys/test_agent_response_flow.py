@@ -32,7 +32,7 @@ from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.quality.quality_gate_service import QualityGateService
 from netra_backend.app.schemas.agent import SubAgentLifecycle
 from netra_backend.app.schemas.user_plan import PlanTier
-from netra_backend.app.websocket_core.manager import WebSocketManager
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager as WebSocketManager
 UnifiedWebSocketManager = WebSocketManager  # Alias for backward compatibility
 
 

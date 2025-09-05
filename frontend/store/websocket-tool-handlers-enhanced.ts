@@ -11,10 +11,10 @@ import type { ToolExecutionStatus } from '@/types/layer-types';
 import type { UnifiedChatState } from '@/types/store-types';
 
 /**
- * Extracts tool data from payload with enhanced validation
+ * Extracts tool data from event with enhanced validation
  */
-export const extractToolData = (payload: any) => {
-  const mappedPayload = mapEventPayload('tool_executing', payload);
+export const extractToolData = (event: any) => {
+  const mappedPayload = mapEventPayload('tool_executing', event);
   return {
     toolName: mappedPayload.tool_name || 'unknown-tool',
     timestamp: mappedPayload.timestamp || Date.now(),
@@ -97,7 +97,7 @@ export const handleToolExecutingEnhanced = (
   state: UnifiedChatState,
   set: (partial: Partial<UnifiedChatState>) => void
 ): void => {
-  const { toolName, timestamp } = extractToolData(event.payload as any);
+  const { toolName, timestamp } = extractToolData(event);
   const currentFastLayer = ensureFastLayerExists(state.fastLayerData);
   startToolExecution(toolName, timestamp, currentFastLayer, set);
 };
@@ -105,8 +105,8 @@ export const handleToolExecutingEnhanced = (
 /**
  * Extracts completed tool name with enhanced validation
  */
-export const extractCompletedToolName = (payload: any): string => {
-  const mappedPayload = mapEventPayload('tool_completed', payload);
+export const extractCompletedToolName = (event: any): string => {
+  const mappedPayload = mapEventPayload('tool_completed', event);
   return mappedPayload.tool_name || mappedPayload.name || 'unknown-tool';
 };
 
@@ -138,7 +138,7 @@ export const handleToolCompletedEnhanced = (
   state: UnifiedChatState,
   set: (partial: Partial<UnifiedChatState>) => void
 ): void => {
-  const toolName = extractCompletedToolName(event.payload as any);
+  const toolName = extractCompletedToolName(event);
   const currentFastLayer = ensureFastLayerExists(state.fastLayerData);
   completeToolExecution(toolName, currentFastLayer, set);
 };

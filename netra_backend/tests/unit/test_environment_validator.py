@@ -1,6 +1,5 @@
 from shared.isolated_environment import get_env
 """
-env = get_env()
 Unit tests for Environment Validator
 
 Tests the environment validation logic to ensure test variables
@@ -19,6 +18,7 @@ from netra_backend.app.core.environment_validator import (
     is_safe_for_staging,
     get_environment_report
 )
+env = get_env()
 
 
 class TestEnvironmentValidator:

@@ -1,0 +1,427 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<spec>
+  <title>🚨 MISSION CRITICAL NAMED VALUES INDEX</title>
+  <version>1.1</version>
+  <date>2025-09-05</date>
+  <severity>ULTRA_CRITICAL</severity>
+  <category>configuration</category>
+  
+  <summary>
+    This index contains ALL mission-critical named values where a single typo, mismatch, or misconfiguration
+    causes CASCADE FAILURES throughout the entire system. These are the "single points of failure" that
+    MUST be correct across all services, environments, and deployments.
+  </summary>
+
+  <critical_warning>
+    🔴 EVERY VALUE IN THIS INDEX CAN BREAK THE ENTIRE SYSTEM
+    🔴 ONE TYPO = CASCADE FAILURE = NO CHAT VALUE DELIVERY
+    🔴 ALWAYS VALIDATE AGAINST THIS INDEX BEFORE DEPLOYMENT
+    🔴 NEVER CHANGE VALUES WITHOUT UPDATING ALL REFERENCES
+  </critical_warning>
+
+  <cross_references>
+    <!-- Top 10 Critical Locations -->
+    <reference priority="1">scripts/deploy_to_gcp.py - Deployment configuration</reference>
+    <reference priority="2">frontend/.env.staging - Frontend staging environment</reference>
+    <reference priority="3">frontend/.env.production - Frontend production environment</reference>
+    <reference priority="4">netra_backend/app/routes/discovery.py - Service discovery endpoint</reference>
+    <reference priority="5">shared/cors_config_builder.py - CORS allowed origins</reference>
+    <reference priority="6">netra_backend/app/core/configuration/services.py - Service URLs</reference>
+    <reference priority="7">auth_service/auth_core/configuration.py - Auth configuration</reference>
+    <reference priority="8">docker-compose.yml - Local development services</reference>
+    <reference priority="9">tests/mission_critical/test_frontend_deployment_env_regression.py - Deployment tests</reference>
+    <reference priority="10">netra_backend/app/websocket_core/agent_handler.py - WebSocket endpoints</reference>
+    
+    <!-- SSOT Index Reference -->
+    <reference priority="11">SSOT_INDEX.md - Master index of all SSOT components</reference>
+  </cross_references>
+
+  <!-- SECTION 1: ENVIRONMENT VARIABLE NAMES -->
+  <environment_variables>
+    <category name="Frontend Critical Variables">
+      <variable name="NEXT_PUBLIC_API_URL" type="env_var">
+        <description>Main backend API endpoint URL</description>
+        <cascade_impact>Without this: No API calls work, no agents run, no data fetched</cascade_impact>
+        <example_values>
+          <staging>https://api.staging.netrasystems.ai</staging>
+          <production>https://api.netrasystems.ai</production>
+          <development>http://localhost:8000</development>
+        </example_values>
+        <used_in>
+          <location>scripts/deploy_to_gcp.py:162</location>
+          <location>frontend/.env.staging</location>
+          <location>frontend/src/services/api.ts</location>
+        </used_in>
+      </variable>
+      
+      <variable name="NEXT_PUBLIC_WS_URL" type="env_var">
+        <description>Primary WebSocket endpoint URL</description>
+        <cascade_impact>Without this: No real-time updates, no agent thinking messages, chat appears frozen</cascade_impact>
+        <example_values>
+          <staging>wss://api.staging.netrasystems.ai</staging>
+          <production>wss://api.netrasystems.ai</production>
+          <development>ws://localhost:8000</development>
+        </example_values>
+        <used_in>
+          <location>scripts/deploy_to_gcp.py:163</location>
+          <location>frontend/src/providers/WebSocketProvider.tsx</location>
+        </used_in>
+      </variable>
+      
+      <variable name="NEXT_PUBLIC_AUTH_URL" type="env_var">
+        <description>Primary auth service endpoint</description>
+        <cascade_impact>Without this: No login, no authentication, users cannot access system</cascade_impact>
+        <example_values>
+          <staging>https://auth.staging.netrasystems.ai</staging>
+          <production>https://auth.netrasystems.ai</production>
+          <development>http://localhost:8081</development>
+        </example_values>
+        <used_in>
+          <location>scripts/deploy_to_gcp.py:165</location>
+          <location>frontend/src/services/auth.ts</location>
+        </used_in>
+      </variable>
+      
+      <variable name="NEXT_PUBLIC_ENVIRONMENT" type="env_var">
+        <description>Environment identifier</description>
+        <cascade_impact>Without this: Wrong URLs used, staging/production confusion, data corruption</cascade_impact>
+        <values>staging, production, development</values>
+      </variable>
+    </category>
+    
+    <category name="Backend Critical Variables">
+      <variable name="ENVIRONMENT" type="env_var">
+        <description>Backend environment identifier</description>
+        <cascade_impact>Wrong database, wrong URLs, wrong configurations loaded</cascade_impact>
+        <values>staging, production, development</values>
+      </variable>
+      
+      <variable name="DATABASE_URL" type="env_var">
+        <description>PostgreSQL connection string</description>
+        <cascade_impact>No database connection, complete backend failure</cascade_impact>
+      </variable>
+      
+      <variable name="REDIS_URL" type="env_var">
+        <description>Redis connection string</description>
+        <cascade_impact>No caching, no session management, performance degradation</cascade_impact>
+      </variable>
+    </category>
+  </environment_variables>
+
+  <!-- SECTION 2: API ENDPOINTS AND ROUTES -->
+  <api_endpoints>
+    <endpoint path="/api/discovery" critical="true">
+      <description>Service discovery endpoint</description>
+      <cascade_impact>Frontend cannot find services, no agent list, no tools available</cascade_impact>
+      <returns>Service URLs and configurations</returns>
+      <implementation>netra_backend/app/routes/discovery.py</implementation>
+    </endpoint>
+    
+    <endpoint path="/ws" critical="true">
+      <description>WebSocket connection endpoint</description>
+      <cascade_impact>No real-time communication, chat appears broken</cascade_impact>
+      <implementation>netra_backend/app/routes/websocket.py</implementation>
+    </endpoint>
+    
+    <endpoint path="/api/auth/refresh" critical="true">
+      <description>Token refresh endpoint</description>
+      <cascade_impact>Users get logged out, authentication breaks</cascade_impact>
+      <implementation>auth_service/auth_core/routes/auth_routes.py</implementation>
+    </endpoint>
+  </api_endpoints>
+
+  <!-- SECTION 3: DATABASE TABLES AND COLUMNS -->
+  <database_schema>
+    <table name="users" critical="true">
+      <cascade_impact>No user management, authentication fails</cascade_impact>
+      <critical_columns>
+        <column>user_id</column>
+        <column>email</column>
+        <column>auth_provider</column>
+      </critical_columns>
+    </table>
+    
+    <table name="threads" critical="true">
+      <cascade_impact>No conversation history, chat state lost</cascade_impact>
+      <critical_columns>
+        <column>thread_id</column>
+        <column>user_id</column>
+        <column>created_at</column>
+      </critical_columns>
+    </table>
+    
+    <table name="messages" critical="true">
+      <cascade_impact>No message storage, chat history lost</cascade_impact>
+      <critical_columns>
+        <column>message_id</column>
+        <column>thread_id</column>
+        <column>run_id</column>
+      </critical_columns>
+    </table>
+  </database_schema>
+
+  <!-- SECTION 4: WEBSOCKET EVENT NAMES -->
+  <websocket_events>
+    <event name="agent_started" critical="true">
+      <cascade_impact>User doesn't know agent is working, appears frozen</cascade_impact>
+      <payload_requires>run_id, agent_name</payload_requires>
+    </event>
+    
+    <event name="agent_thinking" critical="true">
+      <cascade_impact>No visibility into agent reasoning, user confusion</cascade_impact>
+      <payload_requires>run_id, thought</payload_requires>
+    </event>
+    
+    <event name="tool_executing" critical="true">
+      <cascade_impact>No visibility into tool usage, appears stuck</cascade_impact>
+      <payload_requires>run_id, tool_name, args</payload_requires>
+    </event>
+    
+    <event name="tool_completed" critical="true">
+      <cascade_impact>No tool results shown, incomplete responses</cascade_impact>
+      <payload_requires>run_id, tool_name, result</payload_requires>
+    </event>
+    
+    <event name="agent_completed" critical="true">
+      <cascade_impact>User doesn't know response is ready</cascade_impact>
+      <payload_requires>run_id, result</payload_requires>
+    </event>
+  </websocket_events>
+
+  <!-- SECTION 5: SERVICE NAMES AND IDENTIFIERS -->
+  <service_identifiers>
+    <service name="backend" id="netra-backend-staging">
+      <cloud_run_name>netra-backend-staging</cloud_run_name>
+      <docker_service_name>backend</docker_service_name>
+      <port>8000</port>
+    </service>
+    
+    <service name="auth" id="netra-auth-staging">
+      <cloud_run_name>netra-auth-staging</cloud_run_name>
+      <docker_service_name>auth</docker_service_name>
+      <port>8081</port>
+    </service>
+    
+    <service name="frontend" id="netra-frontend-staging">
+      <cloud_run_name>netra-frontend-staging</cloud_run_name>
+      <docker_service_name>frontend</docker_service_name>
+      <port>3000</port>
+    </service>
+  </service_identifiers>
+
+  <!-- SECTION 6: CONFIGURATION KEYS -->
+  <configuration_keys>
+    <key name="cors.allowed_origins" critical="true">
+      <cascade_impact>Frontend blocked by CORS, no API access</cascade_impact>
+      <staging_values>
+        <value>https://app.staging.netrasystems.ai</value>
+        <value>https://api.staging.netrasystems.ai</value>
+        <value>https://auth.staging.netrasystems.ai</value>
+      </staging_values>
+    </key>
+    
+    <key name="auth.jwt_secret_key" critical="true">
+      <cascade_impact>Token validation fails, all authentication broken</cascade_impact>
+      <note>Must be same across all services</note>
+    </key>
+  </configuration_keys>
+
+  <!-- SECTION 7: AGENT AND TOOL NAMES -->
+  <agent_identifiers>
+    <agent name="supervisor" type="orchestrator">
+      <cascade_impact>No agent orchestration, complex tasks fail</cascade_impact>
+      <websocket_events>All events</websocket_events>
+      <critical_imports>
+        <import>netra_backend.app.agents.supervisor_consolidated.SupervisorAgent</import>
+        <import>netra_backend.app.agents.supervisor.user_execution_context.UserExecutionContext</import>
+      </critical_imports>
+    </agent>
+    
+    <agent name="triage_agent" type="router">
+      <cascade_impact>Requests not properly routed, wrong agent selected</cascade_impact>
+      <execution_order>1</execution_order>
+    </agent>
+    
+    <agent name="data_agent" type="data_processor">
+      <cascade_impact>No data processing capabilities, analytics fail</cascade_impact>
+      <execution_order>2</execution_order>
+    </agent>
+    
+    <agent name="optimization_agent" type="optimizer">
+      <cascade_impact>No optimization suggestions, reduced value</cascade_impact>
+      <execution_order>3</execution_order>
+    </agent>
+    
+    <agent name="actions_agent" type="executor">
+      <cascade_impact>No actions taken, agents cannot complete tasks</cascade_impact>
+    </agent>
+    
+    <agent name="memory_agent" type="storage">
+      <cascade_impact>No context retention, agents forget everything</cascade_impact>
+    </agent>
+  </agent_identifiers>
+
+  <!-- SECTION 8: CRITICAL SSOT COMPONENTS -->
+  <ssot_components>
+    <component name="UserExecutionContext" critical="true">
+      <location>netra_backend/app/agents/supervisor/user_execution_context.py</location>
+      <cascade_impact>User context leakage, multi-user failures, security breach</cascade_impact>
+      <required_attributes>
+        <attribute>user_id</attribute>
+        <attribute>thread_id</attribute>
+        <attribute>run_id</attribute>
+        <attribute>db_session</attribute>
+        <attribute>tool_dispatcher</attribute>
+      </required_attributes>
+    </component>
+    
+    <component name="AgentInstanceFactory" critical="true">
+      <location>netra_backend/app/agents/supervisor/agent_instance_factory.py</location>
+      <cascade_impact>Sub-agents created without proper context, WebSocket events fail</cascade_impact>
+      <singleton_access>get_agent_instance_factory()</singleton_access>
+    </component>
+    
+    <component name="DatabaseSessionManager" critical="true">
+      <location>netra_backend/app/database/session_manager.py</location>
+      <cascade_impact>Database sessions leak between users, data corruption</cascade_impact>
+      <context_manager>managed_session()</context_manager>
+    </component>
+    
+    <component name="TelemetryManager" critical="false">
+      <location>netra_backend/app/core/health/telemetry.py</location>
+      <cascade_impact>Health monitoring degraded, no critical failures</cascade_impact>
+      <note>New stub implementation for backward compatibility</note>
+    </component>
+    
+    <component name="RedisSessionManager" critical="false">
+      <location>netra_backend/app/services/redis/session_manager.py</location>
+      <cascade_impact>None - stub implementation for backward compatibility</cascade_impact>
+      <note>Actual session management via DatabaseSessionManager</note>
+    </component>
+  </ssot_components>
+
+  <!-- SECTION 9: URL DOMAINS -->
+  <domain_configuration>
+    <environment name="staging">
+      <frontend>app.staging.netrasystems.ai</frontend>
+      <api>api.staging.netrasystems.ai</api>
+      <auth>auth.staging.netrasystems.ai</auth>
+      <cascade_note>MUST use api.staging subdomain, NOT staging.netrasystems.ai</cascade_note>
+    </environment>
+    
+    <environment name="production">
+      <frontend>app.netrasystems.ai</frontend>
+      <api>api.netrasystems.ai</api>
+      <auth>auth.netrasystems.ai</auth>
+    </environment>
+    
+    <environment name="development">
+      <frontend>localhost:3000</frontend>
+      <api>localhost:8000</api>
+      <auth>localhost:8081</auth>
+      <cascade_note>NEVER use localhost in staging/production</cascade_note>
+    </environment>
+  </domain_configuration>
+
+  <!-- VALIDATION AND TESTING -->
+  <validation>
+    <automated_tests>
+      <test>tests/mission_critical/test_frontend_deployment_env_regression.py</test>
+      <test>tests/integration/test_discovery_endpoint_urls.py</test>
+      <test>tests/mission_critical/test_websocket_agent_events_suite.py</test>
+    </automated_tests>
+    
+    <validation_commands>
+      <command>python scripts/validate_staging_urls.py</command>
+      <command>python scripts/deploy_to_gcp.py --dry-run --validate-only</command>
+    </validation_commands>
+  </validation>
+
+  <prevention_strategy>
+    <rule id="1">
+      <description>ALWAYS run mission-critical tests before deployment</description>
+      <implementation>CI/CD pipeline must run test_frontend_deployment_env_regression.py</implementation>
+    </rule>
+    
+    <rule id="2">
+      <description>Use centralized configuration with validation</description>
+      <implementation>All services must use shared configuration builders with built-in validation</implementation>
+    </rule>
+    
+    <rule id="3">
+      <description>Implement startup validation</description>
+      <implementation>Services must validate critical configs at startup and fail fast if misconfigured</implementation>
+    </rule>
+    
+    <rule id="4">
+      <description>Monitor for silent failures</description>
+      <implementation>Health checks must verify actual functionality, not just service availability</implementation>
+    </rule>
+    
+    <rule id="5">
+      <description>Document all named values in this index</description>
+      <implementation>Any new critical value must be added to this index with cascade impact analysis</implementation>
+    </rule>
+  </prevention_strategy>
+
+  <common_failure_patterns>
+    <pattern>
+      <name>Staging URL Confusion</name>
+      <incorrect>staging.netrasystems.ai</incorrect>
+      <correct>api.staging.netrasystems.ai</correct>
+      <cascade_failure>API calls fail, WebSocket won't connect</cascade_failure>
+    </pattern>
+    
+    <pattern>
+      <name>Missing WebSocket URLs</name>
+      <missing>NEXT_PUBLIC_WS_URL, NEXT_PUBLIC_WEBSOCKET_URL</missing>
+      <cascade_failure>No real-time updates, chat appears broken</cascade_failure>
+    </pattern>
+    
+    <pattern>
+      <name>localhost in Production</name>
+      <incorrect>http://localhost:8000 in staging/production</incorrect>
+      <cascade_failure>Frontend cannot reach backend</cascade_failure>
+    </pattern>
+    
+    <pattern>
+      <name>Missing run_id in WebSocket</name>
+      <missing>run_id in WebSocket event payload</missing>
+      <cascade_failure>Events not routed to correct user, messages lost</cascade_failure>
+    </pattern>
+  </common_failure_patterns>
+
+  <incident_history>
+    <incident date="2025-09-05" severity="CRITICAL">
+      <description>Agent execution order incorrect (Optimization before Data)</description>
+      <impact>Empty optimization results, no business value delivered</impact>
+      <root_cause>Wrong execution order in agent flow</root_cause>
+      <fix>Data agent MUST run before Optimization agent</fix>
+    </incident>
+    
+    <incident date="2025-09-04" severity="CRITICAL">
+      <description>WebSocket bridge not configured in sub-agents</description>
+      <impact>No WebSocket events from sub-agents, chat appears frozen</impact>
+      <root_cause>AgentInstanceFactory not pre-configured with WebSocket bridge</root_cause>
+      <fix>Pre-configure factory in SupervisorAgent.__init__</fix>
+    </incident>
+    
+    <incident date="2025-09-03" severity="CRITICAL">
+      <description>Frontend deployment missing most environment variables</description>
+      <impact>Complete frontend failure, no WebSocket, no auth</impact>
+      <root_cause>Variables removed from deploy_to_gcp.py</root_cause>
+    </incident>
+    
+    <incident date="2025-09-03" severity="CRITICAL">
+      <description>WebSocket events missing run_id</description>
+      <impact>Sub-agent messages not delivered to users</impact>
+      <root_cause>Sub-agents created without UserExecutionContext</root_cause>
+    </incident>
+    
+    <incident date="2025-09-02" severity="HIGH">
+      <description>Discovery endpoint returning localhost URLs in staging</description>
+      <impact>Frontend cannot connect to services</impact>
+      <root_cause>Environment detection failure</root_cause>
+    </incident>
+  </incident_history>
+</spec>

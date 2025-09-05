@@ -74,7 +74,7 @@ async def test_session_cancellation_handling():
         
         async def use_session():
             """Function that uses session and gets cancelled."""
-            async for session in get_db():
+            async with get_db() as session:
                 # Simulate work being cancelled
                 raise asyncio.CancelledError()
         
@@ -104,7 +104,7 @@ async def test_session_normal_exception_handling():
         
         async def use_session_with_error():
             """Function that raises an error during session use."""
-            async for session in get_db():
+            async with get_db() as session:
                 raise ValueError("Test error")
         
         # Run and expect ValueError
@@ -134,7 +134,7 @@ async def test_session_successful_commit():
         
         async def use_session_successfully():
             """Function that uses session successfully."""
-            async for session in get_db():
+            async with get_db() as session:
                 # Simulate successful work
                 assert session == mock_session
                 return "success"
@@ -170,7 +170,7 @@ async def test_concurrent_session_generators():
         
         async def use_session(delay: float, should_fail: bool = False):
             """Use session with configurable delay and failure."""
-            async for session in get_db():
+            async with get_db() as session:
                 await asyncio.sleep(delay)
                 if should_fail:
                     raise ValueError(f"Session {session.id} failed")
@@ -213,7 +213,7 @@ async def test_session_no_transaction_skip_operations():
         
         async def use_session():
             """Use session without active transaction."""
-            async for session in get_db():
+            async with get_db() as session:
                 return "done"
         
         result = await use_session()

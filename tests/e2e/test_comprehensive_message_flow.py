@@ -44,10 +44,10 @@ from loguru import logger
 
 # Real services imports - NO MOCKS
 from shared.isolated_environment import get_env
-from netra_backend.app.websocket_core.manager import WebSocketManager, get_websocket_manager
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager as WebSocketManager, get_websocket_manager
 from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier
 from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
-from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
+from netra_backend.app.core.registry.universal_registry import AgentRegistry
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 from netra_backend.app.schemas.websocket_models import WebSocketMessage, WebSocketStats
 from netra_backend.app.schemas.registry import ServerMessage

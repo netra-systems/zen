@@ -93,7 +93,7 @@ class RealLLMBenchmark:
             # Initialize with real dependencies
             init_start = time.perf_counter()
             
-            async for db in get_async_db():
+            async with get_async_db() as db:
                 agent = SupervisorAgent(
                     llm_client=self.llm_client,
                     db_session=db,

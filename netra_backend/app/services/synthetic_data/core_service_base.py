@@ -18,8 +18,21 @@ from netra_backend.app.services.synthetic_data.generation_engine import Generati
 from netra_backend.app.services.synthetic_data.generation_utilities import (
     GenerationUtilities,
 )
-from netra_backend.app.services.synthetic_data.ingestion_manager import IngestionManager
-from netra_backend.app.services.synthetic_data.job_manager import JobManager
+# Deleted modules - using stubs instead  
+# from netra_backend.app.services.synthetic_data.ingestion_manager import IngestionManager
+# from netra_backend.app.services.synthetic_data.job_manager import JobManager
+
+# Minimal stub implementations for deleted classes
+class IngestionManager:
+    """Stub implementation for deleted IngestionManager"""
+    def __init__(self):
+        pass
+
+class JobManager:
+    """Stub implementation for deleted JobManager"""
+    def __init__(self):
+        pass
+
 from netra_backend.app.services.synthetic_data.recovery import RecoveryMixin
 from netra_backend.app.services.synthetic_data.tools import initialize_default_tools
 

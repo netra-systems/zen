@@ -119,7 +119,7 @@ async def netra_backend_db_session():
     """
     try:
         from netra_backend.app.database import get_db
-        async for session in get_db():
+        async with get_db() as session:
             try:
                 yield session
             finally:

@@ -23,8 +23,13 @@ export interface MessageInputRef {
   focus: () => void;
 }
 
-export const MessageInput = forwardRef<MessageInputRef>((props, ref) => {
+export interface MessageInputProps {
+  onFirstInteraction?: () => void;
+}
+
+export const MessageInput = forwardRef<MessageInputRef, MessageInputProps>(({ onFirstInteraction }, ref) => {
   const [message, setMessage] = useState('');
+  const [hasTriggeredFirstInteraction, setHasTriggeredFirstInteraction] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   
   const { activeThreadId, isProcessing } = useUnifiedChatStore();
@@ -62,6 +67,19 @@ export const MessageInput = forwardRef<MessageInputRef>((props, ref) => {
   const resetMessageState = (): void => {
     setMessage('');
   };
+
+  // Reset first interaction state when starting new thread (message cleared externally)
+  useEffect(() => {
+    if (message === '' && hasTriggeredFirstInteraction) {
+      // Only reset if this is likely a new thread (not just user clearing input)
+      const timer = setTimeout(() => {
+        if (message === '') {
+          setHasTriggeredFirstInteraction(false);
+        }
+      }, 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [message, hasTriggeredFirstInteraction]);
 
   const onSend = async (): Promise<void> => {
     const trimmedMessage = message.trim();
@@ -107,6 +125,15 @@ export const MessageInput = forwardRef<MessageInputRef>((props, ref) => {
   const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>): void => {
     handleEnterKey(e);
     handleArrowKeys(e);
+    
+    // Detect first real typing (not navigation keys)
+    if (!hasTriggeredFirstInteraction && onFirstInteraction) {
+      const isRealTyping = !['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Tab', 'Shift', 'Control', 'Alt', 'Meta', 'Escape', 'Enter'].includes(e.key);
+      if (isRealTyping && e.key.length === 1) { // Single character keys only
+        setHasTriggeredFirstInteraction(true);
+        onFirstInteraction();
+      }
+    }
   };
 
   const placeholder = getPlaceholder(isAuthenticated, isProcessing, message.length);

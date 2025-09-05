@@ -112,8 +112,8 @@ export const MessageActionButtons: React.FC<MessageActionButtonsProps> = ({
   onSend,
 }) => (
   <div className="flex items-center gap-1">
-    <FileAttachmentButton isDisabled={isDisabled} />
-    <VoiceInputButton isDisabled={isDisabled} />
+    <FileAttachmentButton isDisabled={true} />
+    <VoiceInputButton isDisabled={true} />
     <SendButton canSend={canSend} isSending={isSending} onSend={onSend} />
   </div>
 );

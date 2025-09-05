@@ -1,333 +1,294 @@
-"""
-Cypress Configuration Manager.
+"""Cypress configuration manager for E2E testing.
 
-Generates dynamic Cypress configuration based on service availability
-and environment-specific overrides for E2E test execution.
+This module manages Cypress test configuration, including environment setup,
+test data, and browser configuration for E2E tests.
 """
 
 import json
+import os
 import logging
-from dataclasses import dataclass, asdict
 from pathlib import Path
 from typing import Dict, List, Optional, Any
 
-from shared.isolated_environment import get_env
 
 logger = logging.getLogger(__name__)
 
 
-@dataclass
-class CypressConfig:
-    """Cypress configuration data structure."""
-    
-    # Base configuration
-    base_url: str = "http://localhost:3000"
-    api_url: str = "http://localhost:8000"
-    
-    # Timeouts (in milliseconds)
-    default_command_timeout: int = 10000  # 10 seconds
-    page_load_timeout: int = 30000  # 30 seconds
-    request_timeout: int = 10000  # 10 seconds
-    response_timeout: int = 30000  # 30 seconds
-    
-    # Viewport
-    viewport_width: int = 1280
-    viewport_height: int = 720
-    
-    # Test execution
-    watch_for_file_changes: bool = False
-    video: bool = False
-    screenshot_on_run_failure: bool = True
-    retry_runs: int = 2
-    retry_opens: int = 0
-    
-    # Environment variables for tests
-    env_vars: Dict[str, Any] = None
-    
-    # Service URLs
-    service_urls: Dict[str, str] = None
-    
-    def __post_init__(self):
-        if self.env_vars is None:
-            self.env_vars = {}
-        if self.service_urls is None:
-            self.service_urls = {}
-
-
 class CypressConfigManager:
-    """
-    Manages dynamic Cypress configuration generation.
+    """Manages Cypress test configuration."""
     
-    Generates configuration based on:
-    - Service availability and URLs
-    - Environment-specific overrides
-    - Test execution context
-    """
-    
-    def __init__(self, project_root: Path):
-        """
-        Initialize config manager.
+    def __init__(self, project_root: Optional[Path] = None):
+        """Initialize Cypress config manager.
         
         Args:
-            project_root: Root directory of the project
+            project_root: Optional project root path
         """
-        self.project_root = project_root
-        self.frontend_path = project_root / "frontend"
-        self.env = get_env()
-        
-        # Load base configuration from existing cypress.config.ts if available
-        self.base_config = self._load_base_config()
-        
-    def _load_base_config(self) -> Dict[str, Any]:
-        """
-        Load base configuration from existing Cypress config.
+        self.project_root = project_root or Path(__file__).parent.parent.parent
+        self.cypress_dir = self.project_root / "cypress"
+        self.config = self._load_default_config()
+        self.environment_config = self._load_environment_config()
+    
+    def _load_default_config(self) -> Dict:
+        """Load default Cypress configuration.
         
         Returns:
-            Base configuration dictionary
+            Default configuration dictionary
         """
-        config_path = self.frontend_path / "cypress.config.ts"
-        
-        # For now, return default config
-        # In a more sophisticated implementation, we could parse the TS config
         return {
+            "baseUrl": os.getenv("CYPRESS_BASE_URL", "http://localhost:3000"),
+            "viewportWidth": int(os.getenv("CYPRESS_VIEWPORT_WIDTH", "1280")),
+            "viewportHeight": int(os.getenv("CYPRESS_VIEWPORT_HEIGHT", "720")),
+            "video": os.getenv("CYPRESS_VIDEO", "false").lower() == "true",
+            "screenshotOnRunFailure": True,
+            "defaultCommandTimeout": int(os.getenv("CYPRESS_COMMAND_TIMEOUT", "10000")),
+            "pageLoadTimeout": int(os.getenv("CYPRESS_PAGE_LOAD_TIMEOUT", "30000")),
+            "requestTimeout": int(os.getenv("CYPRESS_REQUEST_TIMEOUT", "5000")),
+            "responseTimeout": int(os.getenv("CYPRESS_RESPONSE_TIMEOUT", "30000")),
+            "retries": {
+                "runMode": int(os.getenv("CYPRESS_RUN_RETRIES", "2")),
+                "openMode": int(os.getenv("CYPRESS_OPEN_RETRIES", "0"))
+            },
             "e2e": {
-                "baseUrl": "http://localhost:3000",
-                "supportFile": "cypress/support/e2e.ts",
-                "specPattern": "cypress/e2e/**/*.{js,jsx,ts,tsx}",
-                "watchForFileChanges": False,
-                "video": False,
-                "screenshotOnRunFailure": False
-            }
+                "setupNodeEvents": None,
+                "specPattern": "cypress/e2e/**/*.cy.{js,jsx,ts,tsx}",
+                "supportFile": "cypress/support/e2e.{js,jsx,ts,tsx}"
+            },
+            "env": {}
+        }
+    
+    def _load_environment_config(self) -> Dict:
+        """Load environment-specific configuration.
+        
+        Returns:
+            Environment configuration dictionary
+        """
+        env_config = {
+            "ENVIRONMENT": os.getenv("ENVIRONMENT", "local"),
+            "API_BASE_URL": os.getenv("API_BASE_URL", "http://localhost:8000"),
+            "AUTH_BASE_URL": os.getenv("AUTH_BASE_URL", "http://localhost:8081"),
+            "WEBSOCKET_URL": os.getenv("WEBSOCKET_URL", "ws://localhost:8000/ws"),
         }
         
-    def generate_config(self, service_status: Dict[str, Any]) -> Dict[str, Any]:
-        """
-        Generate dynamic Cypress configuration.
+        # Add test user credentials (for test environment only)
+        if env_config["ENVIRONMENT"] in ["local", "test", "development"]:
+            env_config.update({
+                "TEST_USER_EMAIL": os.getenv("TEST_USER_EMAIL", "test@netra.ai"),
+                "TEST_USER_PASSWORD": os.getenv("TEST_USER_PASSWORD", "testpassword"),
+                "ADMIN_USER_EMAIL": os.getenv("ADMIN_USER_EMAIL", "admin@netra.ai"),
+                "ADMIN_USER_PASSWORD": os.getenv("ADMIN_USER_PASSWORD", "adminpassword"),
+            })
         
-        Args:
-            service_status: Current status of all services
-            
+        return env_config
+    
+    def get_config(self) -> Dict:
+        """Get complete Cypress configuration.
+        
         Returns:
-            Complete Cypress configuration
+            Complete configuration dictionary
         """
-        logger.info("Generating dynamic Cypress configuration...")
+        config = self.config.copy()
+        config["env"].update(self.environment_config)
+        return config
+    
+    def get_environment_variables(self) -> Dict:
+        """Get environment variables for Cypress.
         
-        # Start with base config
-        config = CypressConfig()
-        
-        # Update service URLs based on actual service status
-        service_urls = self._extract_service_urls(service_status)
-        config.service_urls = service_urls
-        
-        # Set base URL from frontend service
-        if "frontend" in service_urls:
-            config.base_url = service_urls["frontend"]
-            
-        # Set API URL from backend service
-        if "backend" in service_urls:
-            config.api_url = service_urls["backend"]
-            
-        # Environment-specific overrides
-        self._apply_environment_overrides(config)
-        
-        # Generate environment variables for Cypress tests
-        config.env_vars = self._generate_env_vars(service_status, service_urls)
-        
-        # Convert to Cypress format
-        cypress_config = self._to_cypress_format(config)
-        
-        logger.info(f"Generated Cypress config with base URL: {config.base_url}")
-        
-        return cypress_config
-        
-    def _extract_service_urls(self, service_status: Dict[str, Any]) -> Dict[str, str]:
-        """
-        Extract service URLs from service status.
-        
-        Args:
-            service_status: Service status dictionary
-            
-        Returns:
-            Dictionary of service URLs
-        """
-        urls = {}
-        
-        for service_name, status in service_status.items():
-            if status.get("healthy") and status.get("url"):
-                urls[service_name] = status["url"]
-                
-        return urls
-        
-    def _apply_environment_overrides(self, config: CypressConfig):
-        """
-        Apply environment-specific configuration overrides.
-        
-        Args:
-            config: Config object to modify
-        """
-        # Check for environment overrides
-        env_base_url = self.env.get("CYPRESS_BASE_URL")
-        if env_base_url:
-            config.base_url = env_base_url
-            logger.info(f"Using environment override for base URL: {env_base_url}")
-            
-        env_api_url = self.env.get("CYPRESS_API_URL")
-        if env_api_url:
-            config.api_url = env_api_url
-            logger.info(f"Using environment override for API URL: {env_api_url}")
-            
-        # Timeout overrides
-        env_timeout = self.env.get("CYPRESS_DEFAULT_COMMAND_TIMEOUT")
-        if env_timeout:
-            try:
-                config.default_command_timeout = int(env_timeout)
-            except ValueError:
-                logger.warning(f"Invalid timeout value: {env_timeout}")
-                
-        # Video recording for CI
-        if self.env.get("CI") or self.env.get("CYPRESS_RECORD"):
-            config.video = True
-            logger.info("Enabling video recording for CI environment")
-            
-        # Retry configuration for CI
-        if self.env.get("CI"):
-            config.retry_runs = 3  # More retries in CI
-            logger.info("Increasing retry count for CI environment")
-            
-    def _generate_env_vars(self, service_status: Dict[str, Any], service_urls: Dict[str, str]) -> Dict[str, Any]:
-        """
-        Generate environment variables for Cypress tests.
-        
-        Args:
-            service_status: Service status dictionary
-            service_urls: Service URLs dictionary
-            
         Returns:
             Environment variables dictionary
         """
-        env_vars = {}
-        
-        # Service URLs
-        env_vars.update(service_urls)
-        
-        # API configuration
-        if "backend" in service_urls:
-            env_vars["API_BASE_URL"] = service_urls["backend"]
-            env_vars["API_HEALTH_URL"] = f"{service_urls['backend']}/api/health"
-            
-        # Database connection info (for tests that need it)
-        if service_status.get("postgres", {}).get("healthy"):
-            postgres_status = service_status["postgres"]
-            env_vars["DATABASE_URL"] = postgres_status.get("url", "")
-            
-        # Redis connection info
-        if service_status.get("redis", {}).get("healthy"):
-            redis_status = service_status["redis"]
-            env_vars["REDIS_URL"] = redis_status.get("url", "")
-            
-        # Test environment markers
-        env_vars["TEST_ENVIRONMENT"] = "e2e"
-        env_vars["CYPRESS_RUN"] = "true"
-        
-        # Authentication test credentials (if needed)
-        env_vars["TEST_USER_EMAIL"] = self.env.get("TEST_USER_EMAIL", "test@netra.ai")
-        env_vars["TEST_USER_PASSWORD"] = self.env.get("TEST_USER_PASSWORD", "testpassword123")
-        
-        # Feature flags for testing
-        env_vars["ENABLE_TEST_FEATURES"] = "true"
-        
-        return env_vars
-        
-    def _to_cypress_format(self, config: CypressConfig) -> Dict[str, Any]:
-        """
-        Convert config object to Cypress configuration format.
+        return self.environment_config.copy()
+    
+    def update_config(self, updates: Dict):
+        """Update configuration with new values.
         
         Args:
-            config: Config object
-            
-        Returns:
-            Cypress configuration dictionary
+            updates: Dictionary of configuration updates
         """
-        cypress_config = {
-            "config": {
-                "baseUrl": config.base_url,
-                "defaultCommandTimeout": config.default_command_timeout,
-                "pageLoadTimeout": config.page_load_timeout,
-                "requestTimeout": config.request_timeout,
-                "responseTimeout": config.response_timeout,
-                "viewportWidth": config.viewport_width,
-                "viewportHeight": config.viewport_height,
-                "watchForFileChanges": config.watch_for_file_changes,
-                "video": config.video,
-                "screenshotOnRunFailure": config.screenshot_on_run_failure,
-                "retries": {
-                    "runMode": config.retry_runs,
-                    "openMode": config.retry_opens
-                }
-            },
-            "env": config.env_vars
+        self.config.update(updates)
+    
+    def set_base_url(self, url: str):
+        """Set base URL for Cypress tests.
+        
+        Args:
+            url: Base URL to set
+        """
+        self.config["baseUrl"] = url
+        self.environment_config["BASE_URL"] = url
+    
+    def set_api_base_url(self, url: str):
+        """Set API base URL for tests.
+        
+        Args:
+            url: API base URL to set
+        """
+        self.environment_config["API_BASE_URL"] = url
+    
+    def enable_video_recording(self, enabled: bool = True):
+        """Enable or disable video recording.
+        
+        Args:
+            enabled: Whether to enable video recording
+        """
+        self.config["video"] = enabled
+    
+    def set_viewport(self, width: int, height: int):
+        """Set viewport dimensions.
+        
+        Args:
+            width: Viewport width
+            height: Viewport height
+        """
+        self.config["viewportWidth"] = width
+        self.config["viewportHeight"] = height
+    
+    def set_timeouts(self, command: Optional[int] = None, page_load: Optional[int] = None, 
+                    request: Optional[int] = None, response: Optional[int] = None):
+        """Set various timeout values.
+        
+        Args:
+            command: Default command timeout in ms
+            page_load: Page load timeout in ms
+            request: Request timeout in ms
+            response: Response timeout in ms
+        """
+        if command is not None:
+            self.config["defaultCommandTimeout"] = command
+        if page_load is not None:
+            self.config["pageLoadTimeout"] = page_load
+        if request is not None:
+            self.config["requestTimeout"] = request
+        if response is not None:
+            self.config["responseTimeout"] = response
+    
+    def set_retry_count(self, run_mode: int = 2, open_mode: int = 0):
+        """Set retry counts for different modes.
+        
+        Args:
+            run_mode: Retries for run mode
+            open_mode: Retries for open mode
+        """
+        self.config["retries"] = {
+            "runMode": run_mode,
+            "openMode": open_mode
         }
-        
-        return cypress_config
-        
-    def save_config_file(self, config: Dict[str, Any], filename: str = "cypress.generated.json") -> Path:
-        """
-        Save generated configuration to file.
+    
+    def add_environment_variable(self, key: str, value: str):
+        """Add environment variable.
         
         Args:
-            config: Configuration to save
-            filename: Output filename
-            
-        Returns:
-            Path to saved configuration file
+            key: Environment variable key
+            value: Environment variable value
         """
-        config_path = self.frontend_path / filename
+        self.environment_config[key] = value
+    
+    def write_cypress_config(self) -> Path:
+        """Write Cypress configuration to file.
+        
+        Returns:
+            Path to written configuration file
+        """
+        config_path = self.project_root / "cypress.config.js"
+        
+        # Generate JS config file content
+        config = self.get_config()
+        
+        js_content = f"""const {{ defineConfig }} = require('cypress');
+
+module.exports = defineConfig({{
+  e2e: {{
+    baseUrl: '{config["baseUrl"]}',
+    viewportWidth: {config["viewportWidth"]},
+    viewportHeight: {config["viewportHeight"]},
+    video: {str(config["video"]).lower()},
+    screenshotOnRunFailure: {str(config["screenshotOnRunFailure"]).lower()},
+    defaultCommandTimeout: {config["defaultCommandTimeout"]},
+    pageLoadTimeout: {config["pageLoadTimeout"]},
+    requestTimeout: {config["requestTimeout"]},
+    responseTimeout: {config["responseTimeout"]},
+    retries: {{
+      runMode: {config["retries"]["runMode"]},
+      openMode: {config["retries"]["openMode"]}
+    }},
+    specPattern: '{config["e2e"]["specPattern"]}',
+    supportFile: '{config["e2e"]["supportFile"]}',
+    setupNodeEvents(on, config) {{
+      // implement node event listeners here
+    }},
+  }},
+  env: {json.dumps(config["env"], indent=4)}
+}});
+"""
         
         with open(config_path, 'w') as f:
-            json.dump(config, f, indent=2)
-            
-        logger.info(f"Saved Cypress configuration to: {config_path}")
-        return config_path
+            f.write(js_content)
         
-    def get_spec_patterns(self, category: Optional[str] = None) -> List[str]:
+        logger.info(f"Wrote Cypress configuration to {config_path}")
+        return config_path
+    
+    def write_env_file(self) -> Path:
+        """Write environment variables to cypress.env.json.
+        
+        Returns:
+            Path to written environment file
         """
-        Get spec patterns for different test categories.
+        env_path = self.project_root / "cypress.env.json"
+        
+        with open(env_path, 'w') as f:
+            json.dump(self.environment_config, f, indent=2)
+        
+        logger.info(f"Wrote Cypress environment to {env_path}")
+        return env_path
+    
+    def get_spec_files(self, pattern: Optional[str] = None) -> List[Path]:
+        """Get list of Cypress spec files.
         
         Args:
-            category: Test category (e.g., 'critical', 'smoke', 'auth')
+            pattern: Optional glob pattern to filter specs
             
         Returns:
-            List of spec patterns
+            List of spec file paths
         """
-        if not category:
-            return ["cypress/e2e/**/*.cy.{js,ts}"]
-            
-        patterns = {
-            "critical": [
-                "cypress/e2e/critical-*.cy.{js,ts}",
-                "cypress/e2e/critical-tests-index.cy.{js,ts}"
-            ],
-            "smoke": [
-                "cypress/e2e/critical-basic-flow.cy.{js,ts}",
-                "cypress/e2e/basic-ui-test.cy.{js,ts}"
-            ],
-            "auth": [
-                "cypress/e2e/auth*.cy.{js,ts}",
-                "cypress/e2e/complete-auth-flow.cy.{js,ts}",
-                "cypress/e2e/critical-auth-flow.cy.{js,ts}"
-            ],
-            "chat": [
-                "cypress/e2e/chat*.cy.{js,ts}",
-                "cypress/e2e/demo-chat-*.cy.{js,ts}"
-            ],
-            "agent": [
-                "cypress/e2e/agent-*.cy.{js,ts}",
-                "cypress/e2e/critical-agent-*.cy.{js,ts}"
-            ],
-            "websocket": [
-                "cypress/e2e/*websocket*.cy.{js,ts}",
-                "cypress/e2e/critical-websocket-*.cy.{js,ts}"
-            ]
-        }
+        cypress_e2e = self.cypress_dir / "e2e"
+        if not cypress_e2e.exists():
+            return []
         
-        return patterns.get(category, [f"cypress/e2e/*{category}*.cy.{{js,ts}}"])
+        if pattern:
+            return list(cypress_e2e.glob(pattern))
+        else:
+            # Default patterns
+            patterns = ["**/*.cy.js", "**/*.cy.jsx", "**/*.cy.ts", "**/*.cy.tsx"]
+            spec_files = []
+            for pattern in patterns:
+                spec_files.extend(cypress_e2e.glob(pattern))
+            return spec_files
+    
+    def validate_config(self) -> List[str]:
+        """Validate Cypress configuration.
+        
+        Returns:
+            List of validation errors (empty if valid)
+        """
+        errors = []
+        
+        # Check required directories
+        required_dirs = ["cypress", "cypress/e2e", "cypress/support"]
+        for dir_name in required_dirs:
+            dir_path = self.project_root / dir_name
+            if not dir_path.exists():
+                errors.append(f"Required directory missing: {dir_path}")
+        
+        # Check base URL is accessible
+        base_url = self.config.get("baseUrl")
+        if not base_url:
+            errors.append("baseUrl is not configured")
+        
+        # Check timeout values are reasonable
+        timeouts = ["defaultCommandTimeout", "pageLoadTimeout", "requestTimeout", "responseTimeout"]
+        for timeout_name in timeouts:
+            timeout_value = self.config.get(timeout_name, 0)
+            if timeout_value < 1000:  # Less than 1 second
+                errors.append(f"{timeout_name} is too low: {timeout_value}ms")
+            elif timeout_value > 300000:  # More than 5 minutes
+                errors.append(f"{timeout_name} is too high: {timeout_value}ms")
+        
+        return errors

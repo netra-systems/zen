@@ -36,78 +36,80 @@ from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 from netra_backend.app.redis_manager import RedisManager
 
 
+# Module-level fixtures for shared access across all test classes
+@pytest.fixture
+def mock_llm_manager():
+    """Create mock LLM manager."""
+    llm = Mock(spec=LLMManager)
+    llm.ask_llm = AsyncMock(return_value='{"report": "Test report", "sections": ["intro"], "metadata": {}}')
+    return llm
+
+@pytest.fixture
+def mock_tool_dispatcher():
+    """Create mock tool dispatcher."""
+    dispatcher = Mock(spec=ToolDispatcher)
+    dispatcher.dispatch = AsyncMock()
+    return dispatcher
+
+@pytest.fixture
+def mock_websocket_manager():
+    """Create mock WebSocket manager."""
+    manager = Mock()
+    manager.send_to_thread = AsyncMock(return_value=True)
+    manager.notify_agent_thinking = AsyncMock()
+    manager.notify_agent_completed = AsyncMock()
+    manager.notify_tool_executing = AsyncMock()
+    manager.notify_tool_completed = AsyncMock()
+    return manager
+
+@pytest.fixture
+def reporting_agent(mock_llm_manager, mock_tool_dispatcher):
+    """Create ReportingSubAgent for testing."""
+    agent = ReportingSubAgent()
+    # Mock the dependencies that BaseAgent initializes
+    agent.llm_manager = mock_llm_manager
+    agent.tool_dispatcher = mock_tool_dispatcher
+    return agent
+
+@pytest.fixture
+def complete_state():
+    """Create complete state with all required analysis results."""
+    state = DeepAgentState()
+    state.user_request = "Generate a comprehensive report of our analysis"
+    state.action_plan_result = {"plan": "Detailed action plan"}
+    state.optimizations_result = {"optimizations": "Performance improvements"}
+    state.data_result = {"data": "Analysis data"}
+    state.triage_result = {"category": "optimization", "priority": "high"}
+    state.thread_id = "test-thread-123"
+    state.user_id = "test-user-456"
+    return state
+
+@pytest.fixture
+def incomplete_state():
+    """Create incomplete state missing some analysis results."""
+    state = DeepAgentState()
+    state.user_request = "Generate report"
+    state.action_plan_result = {"plan": "Some plan"}
+    # Missing: optimizations_result, data_result, triage_result
+    state.thread_id = "test-thread-123"
+    return state
+
+@pytest.fixture
+def execution_context(complete_state):
+    """Create execution context for testing."""
+    return ExecutionContext(
+        run_id="test-run-123",
+        agent_name="ReportingSubAgent",
+        state=complete_state,
+        stream_updates=True,
+        thread_id="test-thread-123",
+        start_time=datetime.now(timezone.utc),
+        correlation_id="test-correlation-123"
+    )
+
+
 class TestReportingSubAgentGoldenPattern:
     """Test ReportingSubAgent follows golden pattern requirements."""
-
-    @pytest.fixture
-    def mock_llm_manager(self):
-        """Create mock LLM manager."""
-        llm = Mock(spec=LLMManager)
-        llm.ask_llm = AsyncMock(return_value='{"report": "Test report", "sections": ["intro"], "metadata": {}}')
-        return llm
-
-    @pytest.fixture
-    def mock_tool_dispatcher(self):
-        """Create mock tool dispatcher."""
-        dispatcher = Mock(spec=ToolDispatcher)
-        dispatcher.dispatch = AsyncMock()
-        return dispatcher
-
-    @pytest.fixture
-    def mock_websocket_manager(self):
-        """Create mock WebSocket manager."""
-        manager = Mock()
-        manager.send_to_thread = AsyncMock(return_value=True)
-        manager.notify_agent_thinking = AsyncMock()
-        manager.notify_agent_completed = AsyncMock()
-        manager.notify_tool_executing = AsyncMock()
-        manager.notify_tool_completed = AsyncMock()
-        return manager
-
-    @pytest.fixture
-    def reporting_agent(self, mock_llm_manager, mock_tool_dispatcher):
-        """Create ReportingSubAgent for testing."""
-        agent = ReportingSubAgent()
-        # Mock the dependencies that BaseAgent initializes
-        agent.llm_manager = mock_llm_manager
-        agent.tool_dispatcher = mock_tool_dispatcher
-        return agent
-
-    @pytest.fixture
-    def complete_state(self):
-        """Create complete state with all required analysis results."""
-        state = DeepAgentState()
-        state.user_request = "Generate a comprehensive report of our analysis"
-        state.action_plan_result = {"plan": "Detailed action plan"}
-        state.optimizations_result = {"optimizations": "Performance improvements"}
-        state.data_result = {"data": "Analysis data"}
-        state.triage_result = {"category": "optimization", "priority": "high"}
-        state.thread_id = "test-thread-123"
-        state.user_id = "test-user-456"
-        return state
-
-    @pytest.fixture
-    def incomplete_state(self):
-        """Create incomplete state missing some analysis results."""
-        state = DeepAgentState()
-        state.user_request = "Generate report"
-        state.action_plan_result = {"plan": "Some plan"}
-        # Missing: optimizations_result, data_result, triage_result
-        state.thread_id = "test-thread-123"
-        return state
-
-    @pytest.fixture
-    def execution_context(self, complete_state):
-        """Create execution context for testing."""
-        return ExecutionContext(
-            run_id="test-run-123",
-            agent_name="ReportingSubAgent",
-            state=complete_state,
-            stream_updates=True,
-            thread_id="test-thread-123",
-            start_time=datetime.now(timezone.utc),
-            correlation_id="test-correlation-123"
-        )
 
 
 class TestBaseAgentInheritanceSSOT:

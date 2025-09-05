@@ -47,7 +47,7 @@ from netra_backend.app.core.resilience.unified_retry_handler import UnifiedRetry
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.schemas.core_enums import ExecutionStatus
 from netra_backend.app.schemas.agent import SubAgentLifecycle
-from netra_backend.app.schemas.strict_types import TypedAgentResult
+from netra_backend.app.schemas.agent_result_types import TypedAgentResult
 
 
 class MockWebSocketBridge:

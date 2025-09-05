@@ -1,0 +1,58 @@
+# WSL2 Configuration for Docker Resource Management
+# Place this file in your Windows user directory: %USERPROFILE%\.wslconfig
+# Based on DOCKER_CRASH_DEEP_10_WHYS_ANALYSIS.md recommendations
+#
+# This configuration prevents WSL2 from consuming excessive system memory
+# and helps prevent Docker crashes due to resource exhaustion
+
+[wsl2]
+# Memory limit for WSL2 VM - prevents exhaustion
+# Set to 6GB to leave headroom for Windows and other applications
+memory=6GB
+
+# CPU cores available to WSL2
+# Limit to prevent CPU contention
+processors=4
+
+# Swap configuration
+# Disabled to prevent thrashing and improve predictability
+swap=0
+
+# Disk size for WSL2 VM
+# Optional: uncomment if disk space is a concern
+# diskSizeGB=64
+
+# Enable localhost forwarding (required for Docker)
+localhostForwarding=true
+
+# Additional experimental features for better Docker performance
+[experimental]
+# Sparse VHD - reduces disk usage
+sparseVhd=true
+
+# Auto memory reclaim - helps with memory management
+autoMemoryReclaim=gradual
+
+# Network improvements
+networkingMode=mirrored
+dnsTunneling=true
+firewall=true
+autoProxy=true
+
+# Notes:
+# 1. After creating/modifying this file, restart WSL2:
+#    - Open PowerShell as Administrator
+#    - Run: wsl --shutdown
+#    - Wait a few seconds
+#    - Start Docker Desktop or run: wsl
+#
+# 2. Verify settings took effect:
+#    - In WSL2 terminal: free -h
+#    - Should show ~6GB total memory
+#
+# 3. Monitor memory usage:
+#    - Windows: Task Manager > Performance > Memory
+#    - WSL2: watch -n 1 free -h
+#    - Docker: docker stats --no-stream
+#
+# 4. If you still experience crashes, reduce memory to 4GB

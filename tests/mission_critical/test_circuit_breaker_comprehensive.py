@@ -56,7 +56,7 @@ from netra_backend.app.core.resilience.unified_circuit_breaker import (
     get_unified_circuit_breaker_manager
 )
 from netra_backend.app.agents.base_agent import BaseAgent
-from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
+from netra_backend.app.core.registry.universal_registry import AgentRegistry
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 from netra_backend.app.llm.llm_manager import LLMManager
 

@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learning>
+    <metadata>
+        <title>MessageRouter SSOT Violation - Critical Production Bug</title>
+        <date>2025-09-03</date>
+        <severity>CRITICAL</severity>
+        <category>SSOT_VIOLATION</category>
+        <environments>staging, production</environments>
+        <components>websocket, message_router</components>
+    </metadata>
+
+    <problem>
+        <description>
+            Two MessageRouter classes exist with different interfaces, causing AttributeError
+            in staging/production when trying to register AgentMessageHandler.
+        </description>
+        
+        <error_message>
+            Failed to register AgentMessageHandler in staging: 'MessageRouter' object has no attribute 'register_handler'
+            WebSocket error: AgentMessageHandler registration failed in staging - this is a critical error
+        </error_message>
+        
+        <root_cause>
+            SSOT violation - duplicate classes with same name but different interfaces:
+            1. netra_backend/app/services/websocket/message_router.py - Has register_handler()
+            2. netra_backend/app/websocket_core/handlers.py - Has add_handler()
+            
+            The websocket.py endpoint was importing from websocket_core but expecting
+            the interface from services/websocket.
+        </root_cause>
+    </problem>
+
+    <five_whys>
+        <why number="1">
+            <question>Why is the registration failing?</question>
+            <answer>MessageRouter object does not have a 'register_handler' attribute</answer>
+        </why>
+        <why number="2">
+            <question>Why doesn't MessageRouter have register_handler?</question>
+            <answer>Wrong MessageRouter class being used (websocket_core instead of services)</answer>
+        </why>
+        <why number="3">
+            <question>Why is the code expecting register_handler to exist?</question>
+            <answer>Developer assumed single MessageRouter class (SSOT principle violated)</answer>
+        </why>
+        <why number="4">
+            <question>Why wasn't this caught by existing tests?</question>
+            <answer>Tests use different imports or are not covering this integration point</answer>
+        </why>
+        <why number="5">
+            <question>Why did this work before but fail in staging?</question>
+            <answer>Recent refactoring introduced the duplicate class without proper migration</answer>
+        </why>
+    </five_whys>
+
+    <solution>
+        <immediate_fix>
+            <!-- Quick fix for production stability -->
+            <action>Change method calls from register_handler() to add_handler()</action>
+            <files_modified>
+                <file>netra_backend/app/routes/websocket.py (3 locations)</file>
+            </files_modified>
+            <validation>All tests pass, no AttributeError, handlers properly registered</validation>
+        </immediate_fix>
+        
+        <long_term_fix>
+            <!-- Proper SSOT compliance -->
+            <action>Consolidate both MessageRouter classes into single implementation</action>
+            <requirements>
+                - Merge functionality from both classes
+                - Update all imports to use single source
+                - Ensure backward compatibility
+                - Add integration tests
+            </requirements>
+        </long_term_fix>
+    </solution>
+
+    <lessons_learned>
+        <lesson>ALWAYS check for duplicate class names across the codebase</lesson>
+        <lesson>Import paths matter - verify the correct class is being imported</lesson>
+        <lesson>SSOT violations cause critical production issues</lesson>
+        <lesson>Integration tests must cover all critical paths</lesson>
+        <lesson>Five Whys method effectively identifies root causes</lesson>
+    </lessons_learned>
+
+    <prevention>
+        <action>Add linting rule to detect duplicate class names</action>
+        <action>Create architecture compliance check for SSOT</action>
+        <action>Mandatory integration tests for all WebSocket handlers</action>
+        <action>Code review checklist: verify single implementation per concept</action>
+    </prevention>
+
+    <related_files>
+        <file>tests/mission_critical/test_message_router_bug.py</file>
+        <file>tests/mission_critical/test_message_router_fix.py</file>
+        <file>AGENT_MESSAGE_HANDLER_BUG_FIX.md</file>
+    </related_files>
+</learning>

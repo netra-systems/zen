@@ -73,9 +73,9 @@ class SessionInfo(BaseModel):
 
 @router.get("/profile")
 async def get_user_profile(
+    db: DbDep,
     current_user: Dict = Depends(get_current_user),
-    request: Request = None,
-    db: AsyncSession = Depends(DbDep)
+    request: Request = None
 ) -> UserProfile:
     """Get current user profile information with distributed tracing support."""
     try:
@@ -129,8 +129,8 @@ async def get_user_profile(
 @router.patch("/profile")
 async def update_user_profile(
     profile_data: UserProfile,
-    current_user: Dict = Depends(get_current_user),
-    db: AsyncSession = Depends(DbDep)
+    db: DbDep,
+    current_user: Dict = Depends(get_current_user)
 ) -> Dict[str, str]:
     """Update user profile information."""
     try:
@@ -165,8 +165,8 @@ async def update_user_profile(
 
 @router.get("/settings")
 async def get_user_settings(
-    current_user: Dict = Depends(get_current_user),
-    db: AsyncSession = Depends(DbDep)
+    db: DbDep,
+    current_user: Dict = Depends(get_current_user)
 ) -> UserSettings:
     """Get current user settings."""
     try:
@@ -186,8 +186,8 @@ async def get_user_settings(
 @router.patch("/settings")
 async def update_user_settings(
     settings_data: UserSettings,
-    current_user: Dict = Depends(get_current_user),
-    db: AsyncSession = Depends(DbDep)
+    db: DbDep,
+    current_user: Dict = Depends(get_current_user)
 ) -> Dict[str, str]:
     """Update user settings."""
     try:
@@ -205,8 +205,8 @@ async def update_user_settings(
 
 @router.get("/api-keys")
 async def list_api_keys(
-    current_user: Dict = Depends(get_current_user),
-    db: AsyncSession = Depends(DbDep)
+    db: DbDep,
+    current_user: Dict = Depends(get_current_user)
 ) -> List[ApiKeyResponse]:
     """List user's API keys."""
     try:

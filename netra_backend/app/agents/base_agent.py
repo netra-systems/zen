@@ -6,6 +6,7 @@ Main base agent class that composes functionality from focused modular component
 
 from abc import ABC, abstractmethod
 from typing import Dict, Optional, Any, List, Callable, Awaitable
+import asyncio
 import time
 
 # Remove mixin imports since we're using single inheritance now
@@ -35,7 +36,7 @@ from netra_backend.app.core.resilience.unified_retry_handler import (
 )
 from netra_backend.app.agents.base.executor import BaseExecutionEngine
 from netra_backend.app.agents.base.monitoring import ExecutionMonitor
-from netra_backend.app.agents.base.interface import ExecutionContext, ExecutionResult
+from netra_backend.app.agents.base.interface import ExecutionContext, ExecutionResult, ExecutionStatus as InterfaceExecutionStatus
 from netra_backend.app.schemas.core_enums import ExecutionStatus
 from netra_backend.app.core.unified_error_handler import agent_error_handler
 from netra_backend.app.redis_manager import RedisManager
@@ -56,7 +57,30 @@ from netra_backend.app.schemas.shared_types import RetryConfig as SharedRetryCon
 
 # Import telemetry components for distributed tracing
 from netra_backend.app.core.telemetry import telemetry_manager, agent_tracer
-from opentelemetry.trace import Status, StatusCode
+
+# Make opentelemetry import optional to prevent startup failures
+try:
+    from opentelemetry.trace import Status, StatusCode
+    TELEMETRY_AVAILABLE = True
+except ImportError:
+    # Fallback when opentelemetry is not installed
+    from enum import Enum
+    
+    class StatusCode(Enum):
+        OK = 'ok'
+        ERROR = 'error'
+    
+    class Status:
+        def __init__(self, status_code: StatusCode, description: str = None):
+            self.status_code = status_code
+            self.description = description
+    
+    TELEMETRY_AVAILABLE = False
+    import logging
+    logging.getLogger(__name__).warning(
+        "OpenTelemetry not available - telemetry features disabled. "
+        "Install with: pip install opentelemetry-api opentelemetry-sdk"
+    )
 
 # CRITICAL: Import session management for proper per-request isolation
 # Use TYPE_CHECKING imports to avoid circular dependency
@@ -146,19 +170,10 @@ class BaseAgent(ABC):
         
         # Initialize circuit breaker for agent-specific reliability
         self.circuit_breaker = AgentCircuitBreaker(
-            name=name,
-            config=AgentCircuitBreakerConfig(
-                failure_threshold=5,
-                recovery_timeout_seconds=60.0,
-                success_threshold=3,
-                task_timeout_seconds=120.0,
-                sliding_window_size=10,
-                error_rate_threshold=0.5,
-                slow_task_threshold_seconds=120.0,
-                max_backoff_seconds=300.0,
-                preserve_context_on_failure=True,
-                nested_task_support=True
-            )
+            agent_name=name,
+            failure_threshold=5,
+            recovery_timeout_seconds=60,
+            half_open_max_calls=2
         )
         # Store the original name for test compatibility
         self.circuit_breaker.name = name  # Override the prefixed name for test compatibility
@@ -168,17 +183,11 @@ class BaseAgent(ABC):
         # Store monitor as _execution_monitor for property access
         self._execution_monitor = self.monitor
         
-        # Initialize reliability manager with circuit breaker and retry config
+        # Initialize reliability manager with simple parameters
         self._reliability_manager_instance = ReliabilityManager(
-            circuit_breaker_config=self.circuit_breaker.config,
-            retry_config=SharedRetryConfig(
-                max_retries=3,
-                backoff_multiplier=2.0,
-                base_delay=1.0,
-                max_delay=30.0,
-                retryable_exceptions=["TimeoutError", "ConnectionError"],
-                non_retryable_exceptions=["ValueError", "TypeError"]
-            )
+            failure_threshold=5,
+            recovery_timeout=60,
+            half_open_max_calls=2
         )
         
         # Connect circuit breaker to reliability manager
@@ -285,6 +294,76 @@ class BaseAgent(ABC):
         """Log agent completion event."""
         if self._subagent_logging_enabled:
             self.logger.info(f"{self.name} {status} for run_id: {run_id}")
+    
+    # === Metadata Storage Methods (SSOT) ===
+    
+    def store_metadata_result(self, context: 'UserExecutionContext', key: str, value: Any, 
+                             ensure_serializable: bool = True) -> None:
+        """SSOT method for storing results in context metadata.
+        
+        This method provides a centralized, consistent way to store agent results
+        in the execution context metadata, ensuring proper serialization for
+        WebSocket transmission and preventing JSON serialization errors.
+        
+        Args:
+            context: The user execution context
+            key: The metadata key (e.g., 'action_plan_result', 'data_result')
+            value: The value to store (can be Pydantic model, dict, or any JSON-serializable type)
+            ensure_serializable: If True, converts Pydantic models to JSON-serializable dicts
+                                following websocket_json_serialization.xml learning
+        
+        Examples:
+            # Store a Pydantic model result
+            self.store_metadata_result(context, 'action_plan_result', action_plan)
+            
+            # Store a dict without conversion
+            self.store_metadata_result(context, 'config', {'key': 'value'}, ensure_serializable=False)
+        """
+        if ensure_serializable and hasattr(value, 'model_dump'):
+            # CRITICAL: Use mode='json' to prevent datetime serialization errors
+            # Following SPEC/learnings/websocket_json_serialization.xml
+            value = value.model_dump(mode='json', exclude_none=True)
+        
+        context.metadata[key] = value
+        
+        # Log for observability
+        self.logger.debug(f"{self.name} stored metadata: {key}")
+    
+    def store_metadata_batch(self, context: 'UserExecutionContext', 
+                            data: Dict[str, Any], ensure_serializable: bool = True) -> None:
+        """Store multiple metadata entries at once.
+        
+        This batch method reduces code duplication when storing multiple
+        related results and ensures consistent serialization across all entries.
+        
+        Args:
+            context: The user execution context
+            data: Dictionary of key-value pairs to store
+            ensure_serializable: If True, converts all Pydantic models in values
+        
+        Example:
+            self.store_metadata_batch(context, {
+                'triage_result': triage_result,
+                'workflow_path': workflow_path,
+                'priority': priority_level
+            })
+        """
+        for key, value in data.items():
+            self.store_metadata_result(context, key, value, ensure_serializable)
+    
+    def get_metadata_value(self, context: 'UserExecutionContext', key: str, 
+                          default: Any = None) -> Any:
+        """Safely retrieve a value from context metadata.
+        
+        Args:
+            context: The user execution context
+            key: The metadata key to retrieve
+            default: Default value if key doesn't exist
+            
+        Returns:
+            The metadata value or default if not found
+        """
+        return context.metadata.get(key, default)
     
     # === Session Isolation Methods ===
     
@@ -508,6 +587,160 @@ class BaseAgent(ABC):
         except Exception:
             return True  # Default to enabled if config unavailable
 
+    async def reset_state(self) -> None:
+        """Reset agent to clean state for safe restart after failures.
+        
+        This method clears all persistent state, error flags, caches, and resets 
+        the agent to a clean state that's safe to reuse across requests.
+        
+        CRITICAL: This addresses the bug where agent singletons persist error 
+        state across requests, causing restart failures.
+        
+        Components reset:
+        - Agent lifecycle state
+        - Context and internal caches
+        - WebSocket state and bridge connections
+        - Circuit breaker and reliability manager state
+        - Execution engine and monitoring data
+        - Timing collector state
+        - Error flags and exception state
+        """
+        self.logger.info(f"Resetting agent state for {self.name}")
+        
+        try:
+            # 1. Reset agent lifecycle state to clean PENDING state
+            self.state = SubAgentLifecycle.PENDING
+            self.start_time = None
+            self.end_time = None
+            
+            # 2. Clear context and internal caches safely
+            try:
+                self.context.clear()
+            except Exception as e:
+                self.logger.warning(f"Error clearing context during reset: {e}")
+                # Recreate context dict if clearing failed
+                self.context = {}
+            
+            # 3. Reset WebSocket state and bridge connections
+            try:
+                if hasattr(self, '_websocket_adapter') and self._websocket_adapter:
+                    # Reset WebSocket adapter to clean state
+                    self._websocket_adapter = WebSocketBridgeAdapter()
+                if hasattr(self, '_websocket_context'):
+                    self._websocket_context = {}
+            except Exception as e:
+                self.logger.warning(f"Error resetting WebSocket state during reset: {e}")
+            
+            # 4. Reset circuit breaker to closed/healthy state
+            try:
+                if hasattr(self, 'circuit_breaker') and self.circuit_breaker:
+                    # Check if circuit breaker has a reset method, otherwise it resets itself through state transitions
+                    if hasattr(self.circuit_breaker, 'reset'):
+                        if asyncio.iscoroutinefunction(self.circuit_breaker.reset):
+                            await self.circuit_breaker.reset()
+                        else:
+                            self.circuit_breaker.reset()
+                        self.logger.debug(f"Circuit breaker reset for {self.name}")
+                    elif hasattr(self.circuit_breaker, '_circuit_breaker') and hasattr(self.circuit_breaker._circuit_breaker, 'reset'):
+                        # Try underlying circuit breaker reset
+                        if asyncio.iscoroutinefunction(self.circuit_breaker._circuit_breaker.reset):
+                            await self.circuit_breaker._circuit_breaker.reset()
+                        else:
+                            self.circuit_breaker._circuit_breaker.reset()
+                        self.logger.debug(f"Underlying circuit breaker reset for {self.name}")
+                    else:
+                        # Circuit breaker will naturally recover through its own mechanisms
+                        self.logger.debug(f"Circuit breaker for {self.name} will recover through natural mechanisms")
+            except Exception as e:
+                self.logger.warning(f"Error resetting circuit breaker during reset: {e}")
+            
+            # 5. Reset reliability manager state
+            try:
+                if hasattr(self, '_reliability_manager_instance') and self._reliability_manager_instance:
+                    # Reset reliability manager metrics and state
+                    if hasattr(self._reliability_manager_instance, 'reset_metrics'):
+                        self._reliability_manager_instance.reset_metrics()
+                    # Reset circuit breaker connection
+                    if hasattr(self._reliability_manager_instance, 'circuit_breaker'):
+                        self._reliability_manager_instance.circuit_breaker = self.circuit_breaker._circuit_breaker
+            except Exception as e:
+                self.logger.warning(f"Error resetting reliability manager during reset: {e}")
+            
+            # 6. Reset unified reliability handler
+            try:
+                if hasattr(self, '_unified_reliability_handler') and self._unified_reliability_handler:
+                    # Circuit breaker reset handled above, just clear any cached state
+                    if hasattr(self._unified_reliability_handler, 'reset'):
+                        self._unified_reliability_handler.reset()
+            except Exception as e:
+                self.logger.warning(f"Error resetting unified reliability handler during reset: {e}")
+            
+            # 7. Reset execution engine and monitoring data
+            try:
+                if hasattr(self, 'monitor') and self.monitor:
+                    # Clear execution history and metrics
+                    if hasattr(self.monitor, 'reset'):
+                        self.monitor.reset()
+                    elif hasattr(self.monitor, 'clear_history'):
+                        self.monitor.clear_history()
+                    
+                if hasattr(self, '_execution_monitor') and self._execution_monitor:
+                    if hasattr(self._execution_monitor, 'reset'):
+                        self._execution_monitor.reset()
+                    elif hasattr(self._execution_monitor, 'clear_history'):
+                        self._execution_monitor.clear_history()
+                        
+                if hasattr(self, '_execution_engine') and self._execution_engine:
+                    if hasattr(self._execution_engine, 'reset'):
+                        self._execution_engine.reset()
+            except Exception as e:
+                self.logger.warning(f"Error resetting execution infrastructure during reset: {e}")
+            
+            # 8. Reset timing collector state
+            try:
+                if hasattr(self, 'timing_collector') and self.timing_collector:
+                    # Complete any pending timing tree and reset
+                    if hasattr(self.timing_collector, 'current_tree') and self.timing_collector.current_tree:
+                        self.timing_collector.complete_execution()
+                    if hasattr(self.timing_collector, 'reset'):
+                        self.timing_collector.reset()
+                    else:
+                        # Recreate timing collector if no reset method
+                        self.timing_collector = ExecutionTimingCollector(agent_name=self.name)
+            except Exception as e:
+                self.logger.warning(f"Error resetting timing collector during reset: {e}")
+            
+            # 9. Clear any cached LLM correlation IDs and generate new ones
+            try:
+                self.correlation_id = generate_llm_correlation_id()
+            except Exception as e:
+                self.logger.warning(f"Error generating new correlation ID during reset: {e}")
+            
+            # 10. Reset any user execution context (if present)
+            try:
+                if hasattr(self, '_user_execution_context'):
+                    # Don't clear the context itself, but clear any cached state derived from it
+                    pass  # Context should be set fresh for each request
+                if hasattr(self, '_user_context'):
+                    pass  # Context should be set fresh for each request
+            except Exception as e:
+                self.logger.warning(f"Error handling user context during reset: {e}")
+            
+            # 11. Validate session isolation after reset
+            try:
+                self._validate_session_isolation()
+            except Exception as e:
+                self.logger.warning(f"Session isolation validation failed after reset: {e}")
+            
+            self.logger.info(f"✅ Agent state reset completed successfully for {self.name}")
+            
+        except Exception as e:
+            # If reset fails, log the error but don't raise - agent should still be usable
+            self.logger.error(f"❌ Critical error during agent state reset for {self.name}: {e}")
+            self.logger.error(f"Agent may be in inconsistent state - consider creating new instance")
+            # Still set state to PENDING to allow retry attempts
+            self.state = SubAgentLifecycle.PENDING
+
     async def shutdown(self) -> None:
         """Graceful shutdown of the agent."""
         # Make shutdown idempotent - avoid multiple shutdowns
@@ -692,6 +925,86 @@ class BaseAgent(ABC):
     
     # === SSOT Standardized Execution Patterns ===
     
+    async def execute_modern(self, state: 'DeepAgentState', run_id: str) -> ExecutionResult:
+        """Legacy compatibility method for execute_modern.
+        
+        This method provides backward compatibility for tests that still use
+        the execute_modern pattern. It bridges to the modern execution system.
+        
+        Args:
+            state: Legacy DeepAgentState object
+            run_id: Execution run ID
+            
+        Returns:
+            ExecutionResult from the execution
+            
+        Warning:
+            This method is for test compatibility only and should not be used
+            in production code. Use execute_with_context() instead.
+        """
+        import warnings
+        warnings.warn(
+            "execute_modern() is deprecated - use execute_with_context() instead",
+            DeprecationWarning,
+            stacklevel=2
+        )
+        
+        # Create temporary execution context for legacy bridge
+        # Create a simple mock context object with the needed attributes
+        class MockExecutionContext:
+            def __init__(self, run_id, state, agent_name, correlation_id):
+                self.request_id = run_id
+                self.run_id = run_id
+                self.state = state
+                self.agent_name = agent_name
+                self.correlation_id = correlation_id
+                self.user_id = getattr(state, 'user_id', None)
+                self.thread_id = getattr(state, 'chat_thread_id', None)
+                self.stream_updates = False
+                self.start_time = time.time()
+                self.metadata = {}
+                self.parameters = {}
+        
+        execution_context = MockExecutionContext(run_id, state, self.name, self.correlation_id)
+        
+        # Use the execution engine if available, otherwise direct execution
+        if self._execution_engine and False:  # Disable execution engine path for now
+            return await self._execution_engine.execute(self, execution_context)
+        else:
+            # Direct execution for backward compatibility
+            try:
+                start_time = time.time()
+                
+                # Validate preconditions
+                if not await self.validate_preconditions(execution_context):
+                    return ExecutionResult(
+                        status=InterfaceExecutionStatus.FAILED,
+                        request_id=run_id,
+                        data=None,
+                        error_message="Precondition validation failed",
+                        execution_time_ms=(time.time() - start_time) * 1000
+                    )
+                
+                # Execute core logic
+                result = await self.execute_core_logic(execution_context)
+                
+                return ExecutionResult(
+                    status=InterfaceExecutionStatus.SUCCESS,
+                    request_id=run_id,
+                    data=result,
+                    error_message=None,
+                    execution_time_ms=(time.time() - start_time) * 1000
+                )
+                
+            except Exception as e:
+                return ExecutionResult(
+                    status=InterfaceExecutionStatus.FAILED,
+                    request_id=run_id,
+                    data=None,
+                    error_message=str(e),
+                    execution_time_ms=(time.time() - start_time) * 1000
+                )
+    
     async def execute_with_reliability(self, 
                                       operation: Callable[[], Awaitable[Any]], 
                                       operation_name: str,
@@ -768,7 +1081,7 @@ class BaseAgent(ABC):
         
         # Get circuit breaker status (primary component)
         if hasattr(self, 'circuit_breaker') and self.circuit_breaker:
-            cb_state = self.circuit_breaker.get_state()
+            cb_state = self.circuit_breaker.get_status().get("state", "unknown")
             health_status["circuit_breaker"] = {
                 "state": cb_state,
                 "can_execute": self.circuit_breaker.can_execute()
@@ -777,8 +1090,12 @@ class BaseAgent(ABC):
         
         # Get reliability manager status
         if hasattr(self, '_reliability_manager_instance') and self._reliability_manager_instance:
-            rm_health = self._reliability_manager_instance.get_health_status()
-            health_status["reliability_manager"] = rm_health
+            if hasattr(self._reliability_manager_instance, 'get_health_status'):
+                rm_health = self._reliability_manager_instance.get_health_status()
+                health_status["reliability_manager"] = rm_health
+            else:
+                # Basic health status if method doesn't exist
+                rm_health = {"status": "active", "instance": "available"}
             # Extract key metrics for flat structure
             if isinstance(rm_health, dict):
                 for key in ['total_executions', 'success_rate', 'circuit_breaker_state']:
@@ -1164,3 +1481,44 @@ class BaseAgent(ABC):
             "validation_timestamp": time.time(),
             "compliance_details": validation
         }
+    
+    @classmethod
+    def create_agent_with_context(cls, context: 'UserExecutionContext') -> 'BaseAgent':
+        """Factory method for creating BaseAgent with UserExecutionContext.
+        
+        This is the PREFERRED method for creating agent instances as it ensures
+        proper user isolation and prevents global state contamination.
+        
+        Args:
+            context: UserExecutionContext containing request-scoped data
+            
+        Returns:
+            BaseAgent instance configured with the provided context
+            
+        Example:
+            >>> from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
+            >>> context = UserExecutionContext(
+            ...     user_id="user123",
+            ...     thread_id="thread456", 
+            ...     run_id="run789"
+            ... )
+            >>> agent = BaseAgent.create_agent_with_context(context)
+        """
+        # Create agent without deprecated tool_dispatcher to avoid warnings
+        agent = cls(
+            name=f"{cls.__name__}",
+            description=f"Instance of {cls.__name__} with user context isolation",
+            user_id=context.user_id,
+            enable_reliability=True,
+            enable_execution_engine=True,
+            enable_caching=False,
+            tool_dispatcher=None  # Avoid deprecated parameter
+        )
+        
+        # Store context for request-scoped operations
+        agent._user_execution_context = context
+        
+        logger.info(f"✅ Created {cls.__name__} with UserExecutionContext: "
+                   f"user={context.user_id}, thread={context.thread_id}, run={context.run_id}")
+        
+        return agent

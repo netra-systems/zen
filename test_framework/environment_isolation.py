@@ -1,431 +1,479 @@
 """
-Test environment isolation utilities.
+Environment Isolation for Testing.
 
-This module provides centralized utilities for managing test environment isolation,
-ensuring compliance with unified_environment_management.xml specification.
-
-Business Value: Platform/Internal - Test Stability  
-Prevents test environment pollution and ensures reliable test execution.
+This module provides environment isolation capabilities for tests,
+ensuring that test environments don't interfere with each other
+and with production environments.
 """
+
+import logging
 import os
-import pytest
-from typing import Dict, Optional, Any, Union
-from pathlib import Path
-import sys
+import tempfile
+import threading
+from contextlib import contextmanager
+from dataclasses import dataclass
+from typing import Any, Dict, Optional, Set, Callable, Generator
+from unittest.mock import patch
 
-# Add project root for imports
+logger = logging.getLogger(__name__)
 
-# Conditional import to avoid dev_launcher environment setup during pytest
-def get_env():
-    """Get appropriate environment manager based on context."""
-    # Check if we're in pytest environment
-    if 'pytest' in sys.modules or os.environ.get("PYTEST_CURRENT_TEST"):  # @marked: Test framework detection
-        # During pytest, use a minimal environment wrapper that doesn't trigger dev setup
-        class TestEnvironmentWrapper:
-            def get(self, key: str, default=None):
-                return os.environ.get(key, default)  # @marked: Test wrapper for isolated access
-            def set(self, key: str, value: str, source: str = "test"):
-                os.environ[key] = value  # @marked: Test wrapper for isolated access
-            def get_all(self):
-                return dict(os.environ)  # @marked: Test wrapper for isolated access
-            def delete(self, key: str, source: str = "test"):
-                if key in os.environ:  # @marked: Test wrapper for isolated access
-                    del os.environ[key]  # @marked: Test wrapper for isolated access
-            def get_subprocess_env(self, additional_vars=None):
-                env = dict(os.environ)  # @marked: Test wrapper for isolated access
-                if additional_vars:
-                    env.update(additional_vars)
-                return env
-            def is_isolation_enabled(self):
-                # Always return True for test environment wrapper
-                return True
-            def enable_isolation(self, backup_original=False):
-                # No-op for test environment wrapper since isolation is already enabled
-                pass
-            def reset_to_original(self):
-                # No-op for test environment wrapper
-                pass
-            def disable_isolation(self, restore_original=False):
-                # No-op for test environment wrapper
-                pass
-        return TestEnvironmentWrapper()
-    else:
-        # Normal execution, use dev_launcher environment
-        from shared.isolated_environment import get_env as dev_get_env
-        return dev_get_env()
 
-# Import IsolatedEnvironment only when not in pytest to avoid triggering dev setup
-# Create type aliases for better type annotations and prevent TypeError
-try:
-    if 'pytest' not in sys.modules and not os.environ.get("PYTEST_CURRENT_TEST"):  # @marked: Test framework detection
-        from shared.isolated_environment import IsolatedEnvironment
-        EnvironmentType = IsolatedEnvironment
-    else:
-        # Create a substitute IsolatedEnvironment class for tests that prevents TypeError
-        class TestIsolatedEnvironmentSubstitute:
-            """Substitute for IsolatedEnvironment during pytest to prevent TypeError."""
-            
-            def __new__(cls, *args, **kwargs):
-                # Return TestEnvironmentWrapper when IsolatedEnvironment() is called
-                return get_env()
-        
-        IsolatedEnvironment = TestIsolatedEnvironmentSubstitute
-        
-        # Create a type alias that represents the actual runtime type during tests
-        from typing import TYPE_CHECKING, Any
-        if TYPE_CHECKING:
-            # For type checking, use forward reference
-            EnvironmentType = 'IsolatedEnvironment'
-        else:
-            # At runtime, this will be the actual TestEnvironmentWrapper
-            EnvironmentType = Any
-except ImportError:
-    # Same substitute for import errors
-    class TestIsolatedEnvironmentSubstitute:
-        """Substitute for IsolatedEnvironment when import fails."""
-        
-        def __new__(cls, *args, **kwargs):
-            return get_env()
-    
-    IsolatedEnvironment = TestIsolatedEnvironmentSubstitute
-    from typing import Any
-    EnvironmentType = Any
-
+# =============================================================================
+# TEST ENVIRONMENT MANAGER
+# =============================================================================
 
 class TestEnvironmentManager:
     """
-    Centralized test environment management with automatic isolation.
+    Manages isolated environment variables for testing.
     
-    Ensures all test environment configuration goes through IsolatedEnvironment,
-    preventing global os.environ pollution.
+    This class provides environment isolation for tests, ensuring that
+    environment variable changes don't leak between tests or to production.
     """
     
-    # Default test environment variables (will be modified based on USE_REAL_SERVICES)
-    BASE_TEST_ENV = {
-        "TESTING": "1",
-        "NETRA_ENV": "testing", 
-        "ENVIRONMENT": "testing",
-        "LOG_LEVEL": "ERROR",
-        "TEST_COLLECTION_MODE": "0",
+    def __init__(self):
+        self.env = None
+        self.original_env = {}
+        self.isolated_vars: Set[str] = set()
+        self.isolation_enabled = False
+        self._lock = threading.Lock()
         
-        # Database configuration - will be set dynamically based on USE_REAL_SERVICES
-        # For test environment without real services, DatabaseURLBuilder's TestBuilder will use SQLite memory
-        # For real services, we'll use actual PostgreSQL
-        # Note: These will be overridden in _ensure_database_config_consistency()
-        # "USE_MEMORY_DB": "true",  # Don't set by default - let _ensure_database_config_consistency handle it
-        # Don't clear database config here - let _ensure_database_config_consistency handle it
+        # Initialize with isolated environment
+        try:
+            from shared.isolated_environment import get_env
+            self.env = get_env()
+            if hasattr(self.env, 'enable_isolation'):
+                self.env.enable_isolation()
+                self.isolation_enabled = True
+        except ImportError:
+            # Fallback to basic environment wrapper
+            self.env = EnvironmentWrapper()
+    
+    def enable_isolation(self):
+        """Enable environment isolation for tests."""
+        with self._lock:
+            if not self.isolation_enabled:
+                if hasattr(self.env, 'enable_isolation'):
+                    self.env.enable_isolation()
+                self.isolation_enabled = True
+                logger.debug("Environment isolation enabled")
+    
+    def disable_isolation(self):
+        """Disable environment isolation."""
+        with self._lock:
+            if self.isolation_enabled:
+                if hasattr(self.env, 'disable_isolation'):
+                    self.env.disable_isolation()
+                self.isolation_enabled = False
+                logger.debug("Environment isolation disabled")
+    
+    def save_env_var(self, key: str):
+        """Save original value of environment variable."""
+        if key not in self.original_env:
+            self.original_env[key] = os.environ.get(key)
+            self.isolated_vars.add(key)
+    
+    def restore_env_vars(self):
+        """Restore all saved environment variables."""
+        for key in self.isolated_vars:
+            original_value = self.original_env.get(key)
+            if original_value is None:
+                os.environ.pop(key, None)
+            else:
+                os.environ[key] = original_value
         
-        # Redis configuration
-        "REDIS_URL": "redis://localhost:6379/1",
-        "REDIS_HOST": "localhost",
-        "REDIS_PORT": "6379",
-        
-        # ClickHouse configuration
-        "CLICKHOUSE_HOST": "localhost",
-        
-        # Authentication secrets
-        "JWT_SECRET_KEY": "test-jwt-secret-key-for-testing-only-must-be-32-chars",
-        "SERVICE_SECRET": "test-service-secret-for-cross-service-auth-32-chars-minimum-length",
-        "SECRET_KEY": "test-secret-key-for-testing-only",
-        "FERNET_KEY": "iZAG-Kz661gRuJXEGzxgghUFnFRamgDrjDXZE6HdJkw=",
-        "ENCRYPTION_KEY": "test-encryption-key-32-chars-long",
-        
-        # Service configuration
-        "DEV_MODE_DISABLE_CLICKHOUSE": "true",
-        "CLICKHOUSE_ENABLED": "false",
-        "TEST_DISABLE_REDIS": "true",
-        
-        # OAuth test credentials
-        "GOOGLE_CLIENT_ID": "test-google-client-id-for-integration-testing",
-        "GOOGLE_CLIENT_SECRET": "test-google-client-secret-for-integration-testing",
-        
-        # LLM test keys
-        "GEMINI_API_KEY": "test-gemini-api-key",
-        "GOOGLE_API_KEY": "test-gemini-api-key",
-        "OPENAI_API_KEY": "test-openai-api-key",
-        "ANTHROPIC_API_KEY": "test-anthropic-api-key",
-    }
+        self.original_env.clear()
+        self.isolated_vars.clear()
+    
+    def set_test_var(self, key: str, value: str, source: str = "test"):
+        """Set environment variable for testing."""
+        self.save_env_var(key)
+        if self.env:
+            self.env.set(key, value, source)
+        else:
+            os.environ[key] = value
+    
+    def get_test_var(self, key: str, default: Any = None) -> Any:
+        """Get environment variable value."""
+        if self.env:
+            return self.env.get(key, default)
+        return os.environ.get(key, default)
+    
+    def delete_test_var(self, key: str, source: str = "test"):
+        """Delete environment variable."""
+        self.save_env_var(key)
+        if self.env and hasattr(self.env, 'delete'):
+            self.env.delete(key, source)
+        else:
+            os.environ.pop(key, None)
+
+
+class EnvironmentWrapper:
+    """
+    Fallback environment wrapper when isolated_environment is not available.
+    """
     
     def __init__(self):
-        """Initialize test environment manager."""
-        self.env = get_env()
-        self.original_state = None
-        
-    def setup_test_environment(
-        self, 
-        additional_vars: Optional[Dict[str, str]] = None,
-        enable_real_llm: bool = False
-    ) -> EnvironmentType:
-        """
-        Set up isolated test environment.
-        
-        Args:
-            additional_vars: Additional environment variables to set
-            enable_real_llm: Whether to enable real LLM testing
-            
-        Returns:
-            Configured IsolatedEnvironment instance
-        """
-        # Enable isolation mode
-        self.env.enable_isolation(backup_original=True)
-        
-        # Set base test environment
-        for key, value in self.BASE_TEST_ENV.items():
-            self.env.set(key, value, source="test_environment_manager")
-        
-        # Apply additional variables before database conflict check
-        if additional_vars:
-            for key, value in additional_vars.items():
-                self.env.set(key, value, source="test_additional_vars")
-        
-        # Ensure database configuration consistency 
-        self._ensure_database_config_consistency()
-        
-        # Handle real LLM testing
-        if enable_real_llm:
-            self._configure_real_llm()
-        
-        return self.env
+        self._vars: Dict[str, str] = {}
     
-    def _ensure_database_config_consistency(self) -> None:
-        """
-        Ensure database configuration consistency per database_connectivity_architecture.xml.
-        
-        For test environments:
-        - Clear any legacy DATABASE_URL to ensure central config manager is used
-        - DatabaseURLBuilder's TestBuilder will handle SQLite memory database
-        - USE_MEMORY_DB=true ensures tests use SQLite in-memory
-        - UNLESS USE_REAL_SERVICES=true, then use real PostgreSQL
-        """
-        # Check if real services are requested
-        use_real_services = self.env.get("USE_REAL_SERVICES", "false").lower() == "true"
-        
-        if use_real_services:
-            # Real services requested - preserve PostgreSQL configuration
-            # Clear USE_MEMORY_DB to allow real database
-            self.env.set("USE_MEMORY_DB", "false", source="real_services_config")
-            
-            # Ensure real PostgreSQL configuration is set
-            if not self.env.get("DATABASE_URL"):
-                # Set real PostgreSQL URL for testing
-                test_postgres_host = self.env.get("TEST_POSTGRES_HOST", "localhost")
-                test_postgres_port = self.env.get("TEST_POSTGRES_PORT", "5433")
-                test_postgres_user = self.env.get("TEST_POSTGRES_USER", "test_user")
-                test_postgres_password = self.env.get("TEST_POSTGRES_PASSWORD", "test_pass")
-                test_postgres_db = self.env.get("TEST_POSTGRES_DB", "netra_test")
-                
-                database_url = f"postgresql://{test_postgres_user}:{test_postgres_password}@{test_postgres_host}:{test_postgres_port}/{test_postgres_db}"
-                self.env.set("DATABASE_URL", database_url, source="real_services_postgres_url")
-                print(f"[INFO] Using real PostgreSQL for testing: {database_url}")
-            
-            # Also ensure Redis is configured for real services
-            if not self.env.get("REDIS_URL") or self.env.get("REDIS_URL") == "redis://localhost:6379/1":
-                test_redis_host = self.env.get("TEST_REDIS_HOST", "localhost")
-                test_redis_port = self.env.get("TEST_REDIS_PORT", "6381")
-                redis_url = f"redis://{test_redis_host}:{test_redis_port}/1"
-                self.env.set("REDIS_URL", redis_url, source="real_services_redis_url")
-                print(f"[INFO] Using real Redis for testing: {redis_url}")
-                
-            return  # Don't clear PostgreSQL config for real services
-        
-        # Not using real services - use memory database as before
-        # Clear any legacy DATABASE_URL to prevent conflicts
-        database_url = self.env.get("DATABASE_URL")
-        if database_url and database_url.strip():
-            self.env.set("DATABASE_URL", "", source="database_config_consistency_clear")
-            print("[INFO] Cleared legacy DATABASE_URL to use central config manager")
-        
-        # Ensure test environment uses memory database
-        environment = self.env.get("ENVIRONMENT", "").lower()
-        if environment in ["test", "testing"]:
-            # Ensure USE_MEMORY_DB is set for test environment
-            if not self.env.get("USE_MEMORY_DB"):
-                self.env.set("USE_MEMORY_DB", "true", source="test_memory_db_config")
-            
-            # Clear all PostgreSQL config to ensure memory database is used
-            postgres_vars = [
-                "POSTGRES_HOST", "POSTGRES_USER", "POSTGRES_PASSWORD", 
-                "POSTGRES_DB", "POSTGRES_PORT"
-            ]
-            for var in postgres_vars:
-                if self.env.get(var):
-                    self.env.set(var, "", source="test_clear_postgres_config")
+    def get(self, key: str, default: Any = None) -> Any:
+        """Get environment variable value."""
+        return self._vars.get(key, os.environ.get(key, default))
     
-    def _configure_real_llm(self) -> None:
-        """Configure environment for real LLM testing.
-        
-        DEPRECATED: LLM configuration has been consolidated into llm_config_manager.py
-        This method is maintained for backward compatibility only.
-        """
-        from test_framework.llm_config_manager import configure_llm_testing, LLMTestMode
-        
-        import warnings
-        warnings.warn(
-            "_configure_real_llm in environment_isolation.py is deprecated. "
-            "Use test_framework.llm_config_manager.configure_llm_testing instead",
-            DeprecationWarning,
-            stacklevel=2
-        )
-        
-        # Use the canonical configuration system
-        configure_llm_testing(mode=LLMTestMode.REAL)
+    def set(self, key: str, value: str, source: str = "wrapper"):
+        """Set environment variable."""
+        self._vars[key] = value
+        os.environ[key] = value
     
-    def teardown_test_environment(self) -> None:
-        """Clean up test environment and restore original state."""
-        # Clear all test variables
-        self.env.reset_to_original()
-        
-        # Disable isolation mode
-        self.env.disable_isolation(restore_original=True)
+    def delete(self, key: str, source: str = "wrapper"):
+        """Delete environment variable."""
+        self._vars.pop(key, None)
+        os.environ.pop(key, None)
     
-    def get_subprocess_env(self, additional_vars: Optional[Dict[str, str]] = None) -> Dict[str, str]:
-        """
-        Get environment for subprocess execution.
-        
-        Args:
-            additional_vars: Additional variables for subprocess
-            
-        Returns:
-            Complete environment dictionary
-        """
-        return self.env.get_subprocess_env(additional_vars)
+    def enable_isolation(self):
+        """Enable isolation (no-op for wrapper)."""
+        pass
+    
+    def disable_isolation(self):
+        """Disable isolation (no-op for wrapper)."""
+        pass
 
 
-# Global test environment manager instance
-_test_env_manager = TestEnvironmentManager()
+# =============================================================================
+# GLOBAL INSTANCE
+# =============================================================================
+
+_test_env_manager: Optional[TestEnvironmentManager] = None
+_manager_lock = threading.Lock()
 
 
 def get_test_env_manager() -> TestEnvironmentManager:
-    """Get the global test environment manager instance."""
+    """Get or create the global test environment manager."""
+    global _test_env_manager
+    
+    if _test_env_manager is None:
+        with _manager_lock:
+            if _test_env_manager is None:
+                _test_env_manager = TestEnvironmentManager()
+    
     return _test_env_manager
 
 
-# Pytest fixtures for automatic test isolation
-@pytest.fixture(scope="session")
-def isolated_test_session():
-    """
-    Session-scoped fixture for test environment isolation.
-    
-    Sets up isolated environment for entire test session.
-    """
-    manager = get_test_env_manager()
-    env = manager.setup_test_environment()
-    
-    yield env
-    
-    # Cleanup after all tests
-    manager.teardown_test_environment()
+# =============================================================================
+# SESSION AND TEST ISOLATION
+# =============================================================================
 
-
-@pytest.fixture(scope="function")
-def isolated_test_env():
-    """
-    Function-scoped fixture for test environment isolation.
+@dataclass
+class IsolatedSession:
+    """Represents an isolated test session."""
+    session_id: str
+    temp_dir: str
+    env_vars: Dict[str, str]
+    cleanup_funcs: list
     
-    Provides fresh isolated environment for each test.
-    """
-    env = get_env()
-    
-    # Backup current state
-    original_isolation = env.is_isolation_enabled()
-    original_vars = env.get_all().copy()
-    
-    # Enable isolation
-    env.enable_isolation()
-    
-    # Set test environment
-    manager = get_test_env_manager()
-    for key, value in manager.BASE_TEST_ENV.items():
-        env.set(key, value, source="isolated_test_env_fixture")
-    
-    # Ensure database configuration consistency using the manager's method
-    manager = get_test_env_manager()
-    manager.env = env  # Use the current env instance
-    manager._ensure_database_config_consistency()
-    
-    yield env
-    
-    # Restore original state
-    if original_isolation:
-        # Was already isolated, just restore vars
-        env._isolated_vars = original_vars
-    else:
-        # Restore and disable isolation
-        env.disable_isolation()
-        for key in list(env.get_all().keys()):
-            if key not in original_vars:
-                env.delete(key, source="isolated_test_env_cleanup")
-        for key, value in original_vars.items():
-            env.set(key, value, source="isolated_test_env_restore")
-
-
-@pytest.fixture
-def test_env_with_llm(isolated_test_env):
-    """
-    Test environment with real LLM configuration.
-    
-    Extends isolated_test_env with real LLM API keys if available.
-    """
-    manager = get_test_env_manager()
-    manager._configure_real_llm()
-    
-    return isolated_test_env
-
-
-@pytest.fixture
-def test_env_with_custom(isolated_test_env, request):
-    """
-    Test environment with custom variables.
-    
-    Usage:
-        @pytest.mark.parametrize("test_env_with_custom", [
-            {"CUSTOM_VAR": "value"}
-        ], indirect=True)
-        def test_something(test_env_with_custom):
-            ...
-    """
-    custom_vars = request.param if hasattr(request, "param") else {}
-    
-    for key, value in custom_vars.items():
-        isolated_test_env.set(key, value, source="test_env_with_custom")
-    
-    return isolated_test_env
-
-
-# Helper functions for common test patterns
-def with_test_environment(func):
-    """
-    Decorator to run function with isolated test environment.
-    
-    Usage:
-        @with_test_environment
-        def test_something():
-            # Test code here
-            pass
-    """
-    def wrapper(*args, **kwargs):
-        manager = get_test_env_manager()
-        env = manager.setup_test_environment()
+    def cleanup(self):
+        """Clean up session resources."""
+        for cleanup_func in reversed(self.cleanup_funcs):
+            try:
+                cleanup_func()
+            except Exception as e:
+                logger.warning(f"Session cleanup error: {e}")
         
+        # Clean up temp directory
+        import shutil
         try:
-            return func(*args, **kwargs)
-        finally:
-            manager.teardown_test_environment()
-    
-    return wrapper
+            shutil.rmtree(self.temp_dir, ignore_errors=True)
+        except Exception as e:
+            logger.warning(f"Failed to clean up temp directory {self.temp_dir}: {e}")
 
+
+@contextmanager
+def isolated_test_session(session_id: str = None) -> Generator[IsolatedSession, None, None]:
+    """
+    Create an isolated test session with its own environment and temporary directory.
+    
+    Args:
+        session_id: Optional session identifier
+        
+    Yields:
+        IsolatedSession: The isolated session
+    """
+    if session_id is None:
+        import uuid
+        session_id = f"test_session_{uuid.uuid4().hex[:8]}"
+    
+    # Create temporary directory for session
+    temp_dir = tempfile.mkdtemp(prefix=f"netra_test_{session_id}_")
+    
+    # Create session
+    session = IsolatedSession(
+        session_id=session_id,
+        temp_dir=temp_dir,
+        env_vars={},
+        cleanup_funcs=[]
+    )
+    
+    # Set up environment isolation
+    manager = get_test_env_manager()
+    manager.enable_isolation()
+    
+    # Set session-specific environment variables
+    session_env_vars = {
+        "TEST_SESSION_ID": session_id,
+        "TEST_TEMP_DIR": temp_dir,
+        "TEST_ISOLATION": "1",
+        "NETRA_ENV": "testing",
+        "ENVIRONMENT": "testing"
+    }
+    
+    for key, value in session_env_vars.items():
+        manager.set_test_var(key, value, f"session_{session_id}")
+        session.env_vars[key] = value
+    
+    try:
+        logger.info(f"Created isolated test session: {session_id}")
+        yield session
+    finally:
+        # Clean up session
+        session.cleanup()
+        
+        # Restore environment
+        manager.restore_env_vars()
+        logger.info(f"Cleaned up isolated test session: {session_id}")
+
+
+@contextmanager
+def isolated_test_env(**env_vars) -> Generator[TestEnvironmentManager, None, None]:
+    """
+    Create an isolated environment for a single test.
+    
+    Args:
+        **env_vars: Environment variables to set for the test
+        
+    Yields:
+        TestEnvironmentManager: The environment manager
+    """
+    manager = get_test_env_manager()
+    manager.enable_isolation()
+    
+    # Set test-specific environment variables
+    for key, value in env_vars.items():
+        manager.set_test_var(key, str(value), "isolated_test")
+    
+    try:
+        yield manager
+    finally:
+        # Restore environment
+        manager.restore_env_vars()
+
+
+# =============================================================================
+# ENVIRONMENT SETUP HELPERS
+# =============================================================================
 
 def ensure_test_isolation():
-    """
-    Ensure test isolation is enabled.
+    """Ensure that test environment isolation is enabled."""
+    manager = get_test_env_manager()
+    manager.enable_isolation()
     
-    Call this at the start of test modules to guarantee isolation.
+    # Set basic test environment variables
+    test_vars = {
+        "TESTING": "1",
+        "ENVIRONMENT": "testing",
+        "NETRA_ENV": "testing",
+        "LOG_LEVEL": "INFO"
+    }
+    
+    for key, value in test_vars.items():
+        if not manager.get_test_var(key):
+            manager.set_test_var(key, value, "test_isolation")
+
+
+def setup_mock_environment():
+    """Set up a mock environment for testing."""
+    manager = get_test_env_manager()
+    manager.enable_isolation()
+    
+    mock_vars = {
+        "USE_REAL_SERVICES": "false",
+        "SKIP_SERVICE_HEALTH_CHECK": "true", 
+        "TEST_DISABLE_CLICKHOUSE": "true",
+        "TEST_DISABLE_REDIS": "true",
+        "TEST_DISABLE_POSTGRES": "true",
+        "MOCK_MODE": "true"
+    }
+    
+    for key, value in mock_vars.items():
+        manager.set_test_var(key, value, "mock_environment")
+    
+    logger.info("Mock environment configured")
+
+
+def setup_real_services_environment():
+    """Set up environment for real services testing."""
+    manager = get_test_env_manager()
+    manager.enable_isolation()
+    
+    real_service_vars = {
+        "USE_REAL_SERVICES": "true",
+        "SKIP_MOCKS": "true",
+        "TEST_DISABLE_CLICKHOUSE": "false",
+        "TEST_DISABLE_REDIS": "false", 
+        "TEST_DISABLE_POSTGRES": "false",
+        "CLICKHOUSE_ENABLED": "true"
+    }
+    
+    for key, value in real_service_vars.items():
+        manager.set_test_var(key, value, "real_services_environment")
+    
+    logger.info("Real services environment configured")
+
+
+# =============================================================================
+# ENVIRONMENT PATCHES
+# =============================================================================
+
+@contextmanager
+def patch_environment(**env_vars):
     """
-    env = get_env()
-    if not env.is_isolation_enabled():
-        env.enable_isolation()
+    Context manager to temporarily patch environment variables.
+    
+    Args:
+        **env_vars: Environment variables to patch
         
-        # Set basic test environment
-        manager = get_test_env_manager()
-        for key, value in manager.BASE_TEST_ENV.items():
-            env.set(key, value, source="ensure_test_isolation")
+    Yields:
+        None
+    """
+    patches = []
+    
+    for key, value in env_vars.items():
+        patcher = patch.dict(os.environ, {key: str(value)})
+        patches.append(patcher)
+        patcher.start()
+    
+    try:
+        yield
+    finally:
+        for patcher in reversed(patches):
+            patcher.stop()
+
+
+def create_test_environment_patch(env_vars: Dict[str, str]):
+    """
+    Create a patch for environment variables that can be used as a decorator.
+    
+    Args:
+        env_vars: Environment variables to patch
+        
+    Returns:
+        patch.dict: The environment patch
+    """
+    return patch.dict(os.environ, env_vars)
+
+
+# =============================================================================
+# SECURITY HELPERS
+# =============================================================================
+
+def setup_test_security_environment():
+    """Set up secure environment variables for testing."""
+    manager = get_test_env_manager()
+    
+    security_vars = {
+        "JWT_SECRET_KEY": "test-jwt-secret-key-32-characters-long-for-testing-only",
+        "SERVICE_SECRET": "test-service-secret-32-characters-long-for-cross-service-auth",
+        "FERNET_KEY": "test-fernet-key-for-encryption-32-characters-long-base64-encoded=",
+        "ENCRYPTION_KEY": "test-encryption-key-32-chars-long",
+        "GOOGLE_CLIENT_ID": "test-google-client-id",
+        "GOOGLE_CLIENT_SECRET": "test-google-client-secret",
+        "GEMINI_API_KEY": "test-gemini-api-key",
+        "GOOGLE_API_KEY": "test-google-api-key",
+        "ANTHROPIC_API_KEY": "test-anthropic-api-key",
+        "OPENAI_API_KEY": "test-openai-api-key"
+    }
+    
+    for key, value in security_vars.items():
+        manager.set_test_var(key, value, "test_security")
+    
+    logger.debug("Test security environment configured")
+
+
+def validate_test_environment():
+    """Validate that test environment is properly configured."""
+    manager = get_test_env_manager()
+    
+    required_vars = [
+        "TESTING",
+        "ENVIRONMENT", 
+        "JWT_SECRET_KEY",
+        "SERVICE_SECRET"
+    ]
+    
+    missing_vars = []
+    for var in required_vars:
+        if not manager.get_test_var(var):
+            missing_vars.append(var)
+    
+    if missing_vars:
+        raise RuntimeError(f"Missing required test environment variables: {missing_vars}")
+    
+    # Validate environment value
+    env_value = manager.get_test_var("ENVIRONMENT")
+    if env_value not in ["testing", "test"]:
+        logger.warning(f"ENVIRONMENT is '{env_value}', expected 'testing' or 'test'")
+    
+    logger.debug("Test environment validation passed")
+
+
+# =============================================================================
+# LEGACY COMPATIBILITY FUNCTIONS
+# =============================================================================
+
+def setup_test_environment():
+    """Legacy function for setting up test environment."""
+    ensure_test_isolation()
+    setup_test_security_environment()
+    logger.debug("Legacy test environment setup completed")
+
+
+def teardown_test_environment():
+    """Legacy function for tearing down test environment."""
+    manager = get_test_env_manager()
+    manager.restore_env_vars()
+    manager.disable_isolation()
+    logger.debug("Legacy test environment teardown completed")
+
+
+# =============================================================================
+# EXPORT ALL FUNCTIONS AND CLASSES
+# =============================================================================
+
+__all__ = [
+    # Main classes
+    'TestEnvironmentManager',
+    'EnvironmentWrapper',
+    'IsolatedSession',
+    
+    # Global instance
+    'get_test_env_manager',
+    
+    # Context managers
+    'isolated_test_session',
+    'isolated_test_env',
+    'patch_environment',
+    
+    # Setup helpers
+    'ensure_test_isolation',
+    'setup_mock_environment',
+    'setup_real_services_environment',
+    'setup_test_security_environment',
+    
+    # Legacy compatibility
+    'setup_test_environment',
+    'teardown_test_environment',
+    
+    # Validation
+    'validate_test_environment',
+    
+    # Patches
+    'create_test_environment_patch'
+]

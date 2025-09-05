@@ -16,10 +16,11 @@ from netra_backend.app.services.synthetic_data.enums import (
 )
 from netra_backend.app.core.unified_error_handler import agent_error_handler as global_agent_error_handler
 from netra_backend.app.services.synthetic_data.generation_engine import GenerationEngine
-from netra_backend.app.services.synthetic_data.ingestion_manager import IngestionManager
-
-# Advanced functionality imports
-from netra_backend.app.services.synthetic_data.job_manager import JobManager
+# Import stubs for deleted modules
+from netra_backend.app.services.synthetic_data.core_service_base import (
+    IngestionManager,
+    JobManager
+)
 from netra_backend.app.services.synthetic_data.synthetic_data_service_main import (
     SyntheticDataService as MainSyntheticDataService,
 )

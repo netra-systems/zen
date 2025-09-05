@@ -14,7 +14,7 @@ from typing import Dict, Any
 
 from netra_backend.app.agents.triage_sub_agent.config import TriageConfig
 from netra_backend.app.agents.triage_sub_agent.llm_processor import TriageLLMProcessor
-from netra_backend.app.agents.triage_sub_agent.models import TriageResult
+from netra_backend.app.agents.triage.unified_triage_agent import TriageResult
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.llm.llm_defaults import LLMModel
 from netra_backend.app.schemas.llm_types import LLMProvider

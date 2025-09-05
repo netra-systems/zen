@@ -1,32 +1,46 @@
 # AI AGENT MODIFICATION METADATA
 # ================================
-# Timestamp: 2025-08-10T21:05:00.000000+00:00
-# Agent: Claude Opus 4.1 claude-opus-4-1-20250805
-# Context: Creating CorpusAdminsubAgent for corpus management
-# Git: v8 | dirty
-# Change: New Feature | Scope: Component | Risk: Medium
-# Session: corpus-admin-agent-creation | Seq: 1
-# Review: Pending | Score: 85
+# Timestamp: 2025-09-04T12:30:00.000000+00:00
+# Agent: Claude Opus 4.1
+# Context: SSOT Consolidation - Redirecting to UnifiedCorpusAdmin
+# Git: critical-remediation-20250823
+# Change: Refactor | Scope: Major | Risk: High
+# Session: corpus-admin-ssot-consolidation | Seq: 1
+# Review: Pending | Score: 90
 # ================================
 
 """
-Corpus Admin Sub Agent - Legacy Compatibility Module
+Corpus Admin Sub Agent - SSOT Redirection Module
 
-This module maintains backward compatibility while delegating to the new
-modular corpus_admin package. All functionality has been moved to focused
-modules under 300 lines each.
+This module redirects all corpus admin imports to the new SSOT UnifiedCorpusAdmin.
+Part of the corpus admin consolidation effort (30 files → 1 file).
+
+CRITICAL: This is a compatibility layer during migration to UnifiedCorpusAdmin.
+All functionality has been consolidated into netra_backend.app.admin.corpus.unified_corpus_admin
 """
 
-# Import from modular implementation
-from netra_backend.app.agents.corpus_admin.agent import CorpusAdminSubAgent
-from netra_backend.app.agents.corpus_admin.models import (
-    CorpusMetadata,
+import warnings
+
+# Import from NEW SSOT unified implementation
+from netra_backend.app.admin.corpus.compatibility import (
+    CorpusAdminSubAgent,  # Compatibility wrapper
     CorpusOperation,
+    CorpusType,
+    CorpusMetadata,
     CorpusOperationRequest,
     CorpusOperationResult,
-    CorpusStatistics,
-    CorpusType,
 )
+
+# CorpusStatistics is in UnifiedCorpusAdmin but not exported via compatibility
+# Create a simple alias for backward compatibility
+class CorpusStatistics:
+    """Deprecated: Use CorpusMetadata from UnifiedCorpusAdmin instead."""
+    def __init__(self, *args, **kwargs):
+        warnings.warn(
+            "CorpusStatistics is deprecated. Use CorpusMetadata instead.",
+            DeprecationWarning,
+            stacklevel=2
+        )
 
 # Maintain backward compatibility - all legacy code removed
 # All classes and functions now imported from corpus_admin module

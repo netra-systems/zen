@@ -156,7 +156,42 @@ class CentralConfigurationValidator:
             error_message="GEMINI_API_KEY required in staging/production. Cannot be placeholder value."
         ),
         
-        # OAuth Configuration (HIGH PRIORITY)
+        # OAuth Configuration (HIGH PRIORITY) - SSOT for all environments
+        # Development Environment OAuth
+        ConfigRule(
+            env_var="GOOGLE_OAUTH_CLIENT_ID_DEVELOPMENT",
+            requirement=ConfigRequirement.REQUIRED,
+            environments={Environment.DEVELOPMENT},
+            forbidden_values={"", "your-client-id", "REPLACE_WITH"},
+            error_message="GOOGLE_OAUTH_CLIENT_ID_DEVELOPMENT required in development environment."
+        ),
+        ConfigRule(
+            env_var="GOOGLE_OAUTH_CLIENT_SECRET_DEVELOPMENT",
+            requirement=ConfigRequirement.REQUIRED,
+            environments={Environment.DEVELOPMENT},
+            min_length=10,
+            forbidden_values={"", "your-client-secret", "REPLACE_WITH"},
+            error_message="GOOGLE_OAUTH_CLIENT_SECRET_DEVELOPMENT required in development environment."
+        ),
+        
+        # Test Environment OAuth (uses explicit test configs, not fallbacks)
+        ConfigRule(
+            env_var="GOOGLE_OAUTH_CLIENT_ID_TEST",
+            requirement=ConfigRequirement.REQUIRED,
+            environments={Environment.TEST},
+            forbidden_values={"", "your-client-id", "REPLACE_WITH"},
+            error_message="GOOGLE_OAUTH_CLIENT_ID_TEST required in test environment."
+        ),
+        ConfigRule(
+            env_var="GOOGLE_OAUTH_CLIENT_SECRET_TEST",
+            requirement=ConfigRequirement.REQUIRED,
+            environments={Environment.TEST},
+            min_length=10,
+            forbidden_values={"", "your-client-secret", "REPLACE_WITH"},
+            error_message="GOOGLE_OAUTH_CLIENT_SECRET_TEST required in test environment."
+        ),
+        
+        # Staging Environment OAuth
         ConfigRule(
             env_var="GOOGLE_OAUTH_CLIENT_ID_STAGING",
             requirement=ConfigRequirement.REQUIRED,
@@ -171,6 +206,23 @@ class CentralConfigurationValidator:
             min_length=10,
             forbidden_values={"", "your-client-secret", "REPLACE_WITH"},
             error_message="GOOGLE_OAUTH_CLIENT_SECRET_STAGING required in staging environment."
+        ),
+        
+        # Production Environment OAuth
+        ConfigRule(
+            env_var="GOOGLE_OAUTH_CLIENT_ID_PRODUCTION",
+            requirement=ConfigRequirement.REQUIRED,
+            environments={Environment.PRODUCTION},
+            forbidden_values={"", "your-client-id", "REPLACE_WITH"},
+            error_message="GOOGLE_OAUTH_CLIENT_ID_PRODUCTION required in production environment."
+        ),
+        ConfigRule(
+            env_var="GOOGLE_OAUTH_CLIENT_SECRET_PRODUCTION",
+            requirement=ConfigRequirement.REQUIRED_SECURE,
+            environments={Environment.PRODUCTION},
+            min_length=10,
+            forbidden_values={"", "your-client-secret", "REPLACE_WITH"},
+            error_message="GOOGLE_OAUTH_CLIENT_SECRET_PRODUCTION required in production environment."
         ),
     ]
     
@@ -430,6 +482,55 @@ class CentralConfigurationValidator:
         
         return credentials
     
+    def get_oauth_credentials(self) -> Dict[str, str]:
+        """
+        SSOT: Get validated OAuth credentials for the current environment.
+        
+        This replaces all service-specific OAuth credential loading logic.
+        Each environment has explicit, named OAuth configurations - NO fallbacks.
+        
+        Returns:
+            Dict containing 'client_id' and 'client_secret' for OAuth
+        """
+        environment = self.get_environment()
+        
+        if environment == Environment.DEVELOPMENT:
+            client_id = self.get_validated_config("GOOGLE_OAUTH_CLIENT_ID_DEVELOPMENT")
+            client_secret = self.get_validated_config("GOOGLE_OAUTH_CLIENT_SECRET_DEVELOPMENT")
+        elif environment == Environment.TEST:
+            client_id = self.get_validated_config("GOOGLE_OAUTH_CLIENT_ID_TEST")
+            client_secret = self.get_validated_config("GOOGLE_OAUTH_CLIENT_SECRET_TEST")
+        elif environment == Environment.STAGING:
+            client_id = self.get_validated_config("GOOGLE_OAUTH_CLIENT_ID_STAGING")
+            client_secret = self.get_validated_config("GOOGLE_OAUTH_CLIENT_SECRET_STAGING")
+        elif environment == Environment.PRODUCTION:
+            client_id = self.get_validated_config("GOOGLE_OAUTH_CLIENT_ID_PRODUCTION")
+            client_secret = self.get_validated_config("GOOGLE_OAUTH_CLIENT_SECRET_PRODUCTION")
+        else:
+            raise ValueError(f"Unknown environment for OAuth configuration: {environment}")
+        
+        if not client_id or not client_secret:
+            raise ValueError(f"OAuth credentials not properly configured for {environment.value} environment")
+        
+        return {
+            "client_id": client_id,
+            "client_secret": client_secret
+        }
+    
+    def get_oauth_client_id(self) -> str:
+        """
+        SSOT: Get validated OAuth client ID for the current environment.
+        """
+        credentials = self.get_oauth_credentials()
+        return credentials["client_id"]
+    
+    def get_oauth_client_secret(self) -> str:
+        """
+        SSOT: Get validated OAuth client secret for the current environment.
+        """
+        credentials = self.get_oauth_credentials()
+        return credentials["client_secret"]
+    
     def validate_startup_requirements(self) -> None:
         """
         Validate all startup requirements before service initialization.
@@ -550,3 +651,34 @@ def get_llm_credentials() -> Dict[str, str]:
     """
     validator = get_central_validator()
     return validator.get_llm_credentials()
+
+
+def get_oauth_credentials() -> Dict[str, str]:
+    """
+    SSOT: Get validated OAuth credentials for the current environment.
+    
+    Replaces all service-specific OAuth configuration logic.
+    Returns dict with 'client_id' and 'client_secret'.
+    """
+    validator = get_central_validator()
+    return validator.get_oauth_credentials()
+
+
+def get_oauth_client_id() -> str:
+    """
+    SSOT: Get validated OAuth client ID for the current environment.
+    
+    Replaces all service-specific OAuth client ID loading logic.
+    """
+    validator = get_central_validator()
+    return validator.get_oauth_client_id()
+
+
+def get_oauth_client_secret() -> str:
+    """
+    SSOT: Get validated OAuth client secret for the current environment.
+    
+    Replaces all service-specific OAuth client secret loading logic.
+    """
+    validator = get_central_validator()
+    return validator.get_oauth_client_secret()

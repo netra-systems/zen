@@ -350,3 +350,7 @@ class ClickHouseIndexOptimizer:
         except Exception as e:
             logger.error(f"Error getting ClickHouse optimization summary: {e}")
             return {"error": str(e)}
+    
+    async def optimize(self) -> Dict[str, bool]:
+        """Optimize ClickHouse database (wrapper for backward compatibility)."""
+        return await self.optimize_table_engines()

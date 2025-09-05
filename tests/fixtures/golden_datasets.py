@@ -16,7 +16,7 @@ from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List
 
 from netra_backend.app.agents.state import DeepAgentState
-from netra_backend.app.agents.triage_sub_agent.models import TriageResult, TriageMetadata, Priority, Complexity
+from netra_backend.app.agents.triage.unified_triage_agent import TriageResult, TriageMetadata, Priority, Complexity
 from netra_backend.app.schemas.agent_state import (
     CheckpointType,
     StatePersistenceRequest,

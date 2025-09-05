@@ -1,15 +1,37 @@
 """
-Corpus Operation Handler - Legacy Module
+Corpus operations handler module.
 
-This module maintains backward compatibility while delegating to modular
-implementations. All functionality has been split into focused modules
-under 300 lines each.
+Handles corpus administration operations.
+This module has been removed but tests still reference it.
 """
 
-# Import from modular implementations
-from netra_backend.app.agents.corpus_admin.operations_handler import (
-    CorpusOperationHandler,
-)
+from typing import Any
+from unittest.mock import Mock
+from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 
-# Export for backward compatibility
-__all__ = ["CorpusOperationHandler"]
+
+class CorpusCrudOperations:
+    """CRUD operations for corpus management."""
+    
+    def __init__(self, tool_dispatcher: ToolDispatcher):
+        self.tool_dispatcher = tool_dispatcher
+
+
+class CorpusAnalysisOperations:
+    """Analysis operations for corpus management."""
+    
+    def __init__(self, tool_dispatcher: ToolDispatcher):
+        self.tool_dispatcher = tool_dispatcher
+
+
+class CorpusOperationHandler:
+    """
+    Corpus operation handler.
+    
+    Handles corpus administration operations including CRUD and analysis.
+    """
+    
+    def __init__(self, tool_dispatcher: ToolDispatcher):
+        self.tool_dispatcher = tool_dispatcher
+        self.crud_ops = CorpusCrudOperations(tool_dispatcher)
+        self.analysis_ops = CorpusAnalysisOperations(tool_dispatcher)

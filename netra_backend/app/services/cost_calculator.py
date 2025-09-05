@@ -1,243 +1,202 @@
-"""
-Cost calculation service for LLM operations.
-Provides accurate cost tracking and budget management.
-Maximum 300 lines, functions ≤8 lines.
+"""Cost Calculator Service
+
+Calculates LLM usage costs based on token consumption and provider pricing.
 """
 
-from decimal import ROUND_HALF_UP, Decimal
+import logging
+from decimal import Decimal
 from enum import Enum
-from typing import Dict, Optional, Tuple
-from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
+from typing import Dict, Any, Optional
+from dataclasses import dataclass
+
+from netra_backend.app.schemas.llm_types import LLMProvider, TokenUsage
+
+logger = logging.getLogger(__name__)
 
 
-from pydantic import BaseModel
-
-from netra_backend.app.schemas.llm_base_types import LLMProvider, TokenUsage
-
-
-class CostTier(str, Enum):
-    """Cost tier categories for model selection"""
-    ECONOMY = "economy"      # Lowest cost models
-    BALANCED = "balanced"    # Good cost-performance ratio
-    PREMIUM = "premium"      # Highest performance models
+class CostTier(Enum):
+    """Cost tiers for different customer segments."""
+    FREE = "free"
+    EARLY = "early" 
+    MID = "mid"
+    ENTERPRISE = "enterprise"
 
 
-class ModelCostInfo(BaseModel):
-    """Cost information for a specific model"""
-    provider: LLMProvider
+@dataclass
+class ModelCostInfo:
+    """Cost information for a specific model."""
+    prompt_cost_per_1k: Decimal
+    completion_cost_per_1k: Decimal
     model_name: str
-    prompt_cost_per_1k: Decimal  # Cost per 1k prompt tokens
-    completion_cost_per_1k: Decimal  # Cost per 1k completion tokens
-    cost_tier: CostTier
-    performance_score: float  # 0-100, higher = better performance
+    provider: LLMProvider
+    
+    def calculate_cost(self, usage: TokenUsage) -> Decimal:
+        """Calculate cost for token usage."""
+        prompt_cost = (Decimal(usage.prompt_tokens) / 1000) * self.prompt_cost_per_1k
+        completion_cost = (Decimal(usage.completion_tokens) / 1000) * self.completion_cost_per_1k
+        return prompt_cost + completion_cost
 
 
 class CostCalculatorService:
-    """Service for calculating LLM usage costs"""
+    """Service for calculating LLM usage costs."""
     
     def __init__(self):
-        self._model_pricing = self._initialize_pricing()
-        self._default_costs = self._get_default_costs()
+        self._model_costs = self._initialize_model_costs()
     
-    def calculate_cost(self, usage: TokenUsage, provider: LLMProvider, model: str) -> Decimal:
-        """Calculate cost for token usage"""
-        pricing = self._get_model_pricing(provider, model)
-        prompt_cost = self._calculate_prompt_cost(usage.prompt_tokens, pricing)
-        completion_cost = self._calculate_completion_cost(usage.completion_tokens, pricing)
-        return prompt_cost + completion_cost
-    
-    def get_cost_optimal_model(self, provider: LLMProvider, cost_tier: CostTier) -> Optional[str]:
-        """Get most cost-optimal model for provider and tier"""
-        models = self._get_models_by_tier(provider, cost_tier)
-        return self._select_best_cost_performance(models)
-    
-    def estimate_budget_impact(self, token_count: int, provider: LLMProvider, model: str) -> Decimal:
-        """Estimate budget impact for projected token usage"""
-        pricing = self._get_model_pricing(provider, model)
-        # Assume 70% prompt, 30% completion tokens for estimation
-        prompt_tokens = int(token_count * 0.7)
-        completion_tokens = int(token_count * 0.3)
-        return self._calculate_total_cost(prompt_tokens, completion_tokens, pricing)
-    
-    def _get_openai_pricing(self) -> Dict[str, ModelCostInfo]:
-        """Get OpenAI model pricing configuration."""
+    def _initialize_model_costs(self) -> Dict[str, ModelCostInfo]:
+        """Initialize model cost information."""
         return {
-            "openai_gpt-4": ModelCostInfo(
-                provider=LLMProvider.OPENAI, model_name="gpt-4",
-                prompt_cost_per_1k=Decimal("0.03"), completion_cost_per_1k=Decimal("0.06"),
-                cost_tier=CostTier.PREMIUM, performance_score=95.0
+            # OpenAI models
+            "gpt-4": ModelCostInfo(
+                prompt_cost_per_1k=Decimal("0.03"),
+                completion_cost_per_1k=Decimal("0.06"),
+                model_name="gpt-4",
+                provider=LLMProvider.OPENAI
             ),
-            "openai_gpt-4-turbo": ModelCostInfo(
-                provider=LLMProvider.OPENAI, model_name="gpt-4-turbo",
-                prompt_cost_per_1k=Decimal("0.01"), completion_cost_per_1k=Decimal("0.03"),
-                cost_tier=CostTier.BALANCED, performance_score=92.0
+            "gpt-3.5-turbo": ModelCostInfo(
+                prompt_cost_per_1k=Decimal("0.001"),
+                completion_cost_per_1k=Decimal("0.002"),
+                model_name="gpt-3.5-turbo",
+                provider=LLMProvider.OPENAI
             ),
-            "openai_gpt-3.5-turbo": ModelCostInfo(
-                provider=LLMProvider.OPENAI, model_name="gpt-3.5-turbo",
-                prompt_cost_per_1k=Decimal("0.00165"), completion_cost_per_1k=Decimal("0.00165"),
-                cost_tier=CostTier.ECONOMY, performance_score=75.0
-            )
+            # Anthropic models
+            "claude-3-opus": ModelCostInfo(
+                prompt_cost_per_1k=Decimal("0.015"),
+                completion_cost_per_1k=Decimal("0.075"),
+                model_name="claude-3-opus",
+                provider=LLMProvider.ANTHROPIC
+            ),
+            "claude-3-sonnet": ModelCostInfo(
+                prompt_cost_per_1k=Decimal("0.003"),
+                completion_cost_per_1k=Decimal("0.015"),
+                model_name="claude-3-sonnet",
+                provider=LLMProvider.ANTHROPIC
+            ),
+            # Default fallback
+            "default": ModelCostInfo(
+                prompt_cost_per_1k=Decimal("0.001"),
+                completion_cost_per_1k=Decimal("0.002"),
+                model_name="default",
+                provider=LLMProvider.OPENAI
+            ),
         }
     
-    def _get_anthropic_pricing(self) -> Dict[str, ModelCostInfo]:
-        """Get Anthropic model pricing configuration."""
-        return {
-            "anthropic_claude-3-opus": ModelCostInfo(
-                provider=LLMProvider.ANTHROPIC, model_name="claude-3-opus",
-                prompt_cost_per_1k=Decimal("0.015"), completion_cost_per_1k=Decimal("0.075"),
-                cost_tier=CostTier.PREMIUM, performance_score=96.0
-            ),
-            "anthropic_claude-3.5-sonnet": ModelCostInfo(
-                provider=LLMProvider.ANTHROPIC, model_name="claude-3.5-sonnet",
-                prompt_cost_per_1k=Decimal("0.003"), completion_cost_per_1k=Decimal("0.015"),
-                cost_tier=CostTier.BALANCED, performance_score=90.0
-            ),
-            "anthropic_claude-3-haiku": ModelCostInfo(
-                provider=LLMProvider.ANTHROPIC, model_name="claude-3-haiku",
-                prompt_cost_per_1k=Decimal("0.00025"), completion_cost_per_1k=Decimal("0.00125"),
-                cost_tier=CostTier.ECONOMY, performance_score=70.0
-            )
-        }
-    
-    def _get_google_pricing(self) -> Dict[str, ModelCostInfo]:
-        """Get Google/Gemini model pricing configuration."""
-        return {
-            "google_gemini-2.5-pro": ModelCostInfo(
-                provider=LLMProvider.GOOGLE, model_name="gemini-2.5-pro",
-                prompt_cost_per_1k=Decimal("0.0035"), completion_cost_per_1k=Decimal("0.0105"),
-                cost_tier=CostTier.BALANCED, performance_score=88.0
-            ),
-            "google_gemini-2.5-flash": ModelCostInfo(
-                provider=LLMProvider.GOOGLE, model_name="gemini-2.5-flash",
-                prompt_cost_per_1k=Decimal("0.000075"), completion_cost_per_1k=Decimal("0.0003"),
-                cost_tier=CostTier.ECONOMY, performance_score=72.0
-            )
-        }
-    
-    def _initialize_pricing(self) -> Dict[str, ModelCostInfo]:
-        """Initialize model pricing database"""
-        pricing = {}
-        pricing.update(self._get_openai_pricing())
-        pricing.update(self._get_anthropic_pricing())
-        pricing.update(self._get_google_pricing())
-        return pricing
-    
-    def _get_default_costs(self) -> ModelCostInfo:
-        """Get default cost structure for unknown models"""
-        return ModelCostInfo(
-            provider=LLMProvider.OPENAI, model_name="unknown",
-            prompt_cost_per_1k=Decimal("0.001"), completion_cost_per_1k=Decimal("0.002"),
-            cost_tier=CostTier.ECONOMY, performance_score=50.0
+    def calculate_cost(
+        self, 
+        usage: TokenUsage, 
+        provider: LLMProvider, 
+        model_name: str,
+        tier: CostTier = CostTier.MID
+    ) -> Decimal:
+        """Calculate cost for LLM usage.
+        
+        Args:
+            usage: Token usage statistics
+            provider: LLM provider
+            model_name: Name of the model used
+            tier: Customer tier for pricing
+            
+        Returns:
+            Decimal: Cost in USD
+        """
+        # Validate inputs
+        if usage.total_tokens <= 0:
+            return Decimal("0")
+        
+        # Get model cost info
+        model_key = f"{model_name}".lower()
+        model_cost = self._model_costs.get(model_key, self._model_costs["default"])
+        
+        # Calculate base cost
+        base_cost = model_cost.calculate_cost(usage)
+        
+        # Apply tier multiplier
+        tier_multiplier = self._get_tier_multiplier(tier)
+        final_cost = base_cost * tier_multiplier
+        
+        logger.debug(
+            f"Cost calculation: {usage.total_tokens} tokens, "
+            f"model={model_name}, tier={tier.value}, cost=${final_cost}"
         )
+        
+        return final_cost
     
-    def _get_model_pricing(self, provider: LLMProvider, model: str) -> ModelCostInfo:
-        """Get pricing info for specific model"""
-        key = f"{provider.value}_{model}"
-        return self._model_pricing.get(key, self._default_costs)
+    def _get_tier_multiplier(self, tier: CostTier) -> Decimal:
+        """Get pricing multiplier for customer tier."""
+        multipliers = {
+            CostTier.FREE: Decimal("2.0"),  # Higher cost to encourage upgrades
+            CostTier.EARLY: Decimal("0.8"),  # 20% discount
+            CostTier.MID: Decimal("1.0"),    # Standard pricing
+            CostTier.ENTERPRISE: Decimal("0.6"),  # 40% discount
+        }
+        return multipliers.get(tier, Decimal("1.0"))
     
-    def _calculate_prompt_cost(self, tokens: int, pricing: ModelCostInfo) -> Decimal:
-        """Calculate cost for prompt tokens"""
-        if tokens <= 0:
-            return Decimal("0")
-        return (Decimal(tokens) / Decimal("1000")) * pricing.prompt_cost_per_1k
+    def get_model_info(self, model_name: str) -> Optional[ModelCostInfo]:
+        """Get cost information for a specific model."""
+        return self._model_costs.get(model_name.lower())
     
-    def _calculate_completion_cost(self, tokens: int, pricing: ModelCostInfo) -> Decimal:
-        """Calculate cost for completion tokens"""
-        if tokens <= 0:
-            return Decimal("0")
-        return (Decimal(tokens) / Decimal("1000")) * pricing.completion_cost_per_1k
+    def estimate_monthly_cost(
+        self, 
+        daily_usage: TokenUsage, 
+        provider: LLMProvider,
+        model_name: str,
+        tier: CostTier = CostTier.MID
+    ) -> Decimal:
+        """Estimate monthly cost based on daily usage."""
+        daily_cost = self.calculate_cost(daily_usage, provider, model_name, tier)
+        return daily_cost * Decimal("30")  # Approximate month
     
-    def _calculate_total_cost(self, prompt_tokens: int, completion_tokens: int, pricing: ModelCostInfo) -> Decimal:
-        """Calculate total cost for token usage"""
-        prompt_cost = self._calculate_prompt_cost(prompt_tokens, pricing)
-        completion_cost = self._calculate_completion_cost(completion_tokens, pricing)
-        return prompt_cost + completion_cost
+    def get_available_models(self) -> Dict[str, ModelCostInfo]:
+        """Get all available models and their cost information."""
+        return self._model_costs.copy()
     
-    def _get_models_by_tier(self, provider: LLMProvider, tier: CostTier) -> list[ModelCostInfo]:
-        """Get models by provider and cost tier"""
-        return [
-            info for info in self._model_pricing.values() 
-            if info.provider == provider and info.cost_tier == tier
-        ]
-    
-    def _select_best_cost_performance(self, models: list[ModelCostInfo]) -> Optional[str]:
-        """Select model with best cost-performance ratio"""
-        if not models:
-            return None
-        # Sort by performance score descending, then by cost ascending
-        best_model = max(models, key=lambda m: m.performance_score)
-        return best_model.model_name
+    def calculate_savings(
+        self,
+        usage: TokenUsage,
+        current_tier: CostTier,
+        target_tier: CostTier,
+        provider: LLMProvider,
+        model_name: str
+    ) -> Dict[str, Any]:
+        """Calculate potential savings from tier upgrade."""
+        current_cost = self.calculate_cost(usage, provider, model_name, current_tier)
+        target_cost = self.calculate_cost(usage, provider, model_name, target_tier)
+        
+        savings = current_cost - target_cost
+        savings_percentage = (savings / current_cost * 100) if current_cost > 0 else Decimal("0")
+        
+        return {
+            "current_cost": current_cost,
+            "target_cost": target_cost,
+            "savings": savings,
+            "savings_percentage": savings_percentage,
+            "recommended": savings > Decimal("10.0")  # Recommend if saves $10+
+        }
 
 
-class BudgetManager:
-    """Manages budget constraints and spending tracking"""
-    
-    def __init__(self, daily_budget: Decimal = Decimal("100.00")):
-        self.daily_budget = daily_budget
-        self.current_spending = Decimal("0.00")
-        self.cost_calculator = CostCalculatorService()
-    
-    def check_budget_impact(self, usage: TokenUsage, provider: LLMProvider, model: str) -> bool:
-        """Check if operation would exceed budget"""
-        cost = self.cost_calculator.calculate_cost(usage, provider, model)
-        return (self.current_spending + cost) <= self.daily_budget
-    
-    def record_usage(self, usage: TokenUsage, provider: LLMProvider, model: str) -> Decimal:
-        """Record usage and return cost"""
-        cost = self.cost_calculator.calculate_cost(usage, provider, model)
-        self.current_spending += cost
-        return cost
-    
-    def get_remaining_budget(self) -> Decimal:
-        """Get remaining budget amount"""
-        return max(Decimal("0"), self.daily_budget - self.current_spending)
-    
-    def _calculate_remaining_ratio(self) -> Decimal:
-        """Calculate remaining budget ratio."""
-        return self.get_remaining_budget() / self.daily_budget
-    
-    def recommend_cost_tier(self) -> CostTier:
-        """Recommend cost tier based on remaining budget"""
-        remaining_ratio = self._calculate_remaining_ratio()
-        if remaining_ratio > Decimal("0.5"):
-            return CostTier.BALANCED
-        elif remaining_ratio > Decimal("0.2"):
-            return CostTier.ECONOMY
-        else:
-            return CostTier.ECONOMY
-    
-    def reset_daily_spending(self):
-        """Reset daily spending counter"""
-        self.current_spending = Decimal("0.00")
+# Global instance
+_cost_calculator_service: Optional[CostCalculatorService] = None
 
 
-def create_cost_calculator() -> CostCalculatorService:
-    """Factory function for cost calculator"""
-    return CostCalculatorService()
-
-
-def create_budget_manager(daily_budget: Optional[Decimal] = None) -> BudgetManager:
-    """Factory function for budget manager"""
-    budget = daily_budget or Decimal("100.00")
-    return BudgetManager(budget)
-
-
-# Cost optimization utilities
-def optimize_model_selection(
-    provider: LLMProvider, 
-    target_cost_tier: CostTier, 
-    calculator: CostCalculatorService
-) -> Optional[str]:
-    """Optimize model selection based on cost tier"""
-    return calculator.get_cost_optimal_model(provider, target_cost_tier)
+def get_cost_calculator() -> CostCalculatorService:
+    """Get global cost calculator service instance."""
+    global _cost_calculator_service
+    if _cost_calculator_service is None:
+        _cost_calculator_service = CostCalculatorService()
+    return _cost_calculator_service
 
 
 def calculate_cost_savings(
-    original_usage: TokenUsage, original_provider: LLMProvider, original_model: str,
-    optimized_usage: TokenUsage, optimized_provider: LLMProvider, optimized_model: str,
-    calculator: CostCalculatorService
-) -> Decimal:
-    """Calculate cost savings from optimization"""
-    original_cost = calculator.calculate_cost(original_usage, original_provider, original_model)
-    optimized_cost = calculator.calculate_cost(optimized_usage, optimized_provider, optimized_model)
-    return original_cost - optimized_cost
+    usage: TokenUsage,
+    current_tier: CostTier,
+    target_tier: CostTier,
+    provider: LLMProvider,
+    model_name: str
+) -> Dict[str, Any]:
+    """Convenience function to calculate cost savings."""
+    return get_cost_calculator().calculate_savings(usage, current_tier, target_tier, provider, model_name)
+
+
+def create_cost_calculator() -> CostCalculatorService:
+    """Factory function to create a cost calculator instance."""
+    return CostCalculatorService()

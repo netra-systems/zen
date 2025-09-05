@@ -48,7 +48,7 @@ from netra_backend.app.agents.supervisor.execution_factory import (
     UserExecutionContext,
     ExecutionStatus
 )
-from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
+from netra_backend.app.core.registry.universal_registry import AgentRegistry
 from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
 
 

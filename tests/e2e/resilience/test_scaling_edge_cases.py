@@ -14,10 +14,10 @@ setup_test_path()
 
 import pytest
 
-from netra_backend.app.agents.data_sub_agent.data_sub_agent import DataSubAgent
+from netra_backend.app.agents.data_sub_agent import DataSubAgent
 
 # Add project root to path
-from netra_backend.app.agents.triage_sub_agent.agent import TriageSubAgent
+from netra_backend.app.agents.triage.unified_triage_agent import UnifiedTriageAgent
 # from scaling_test_helpers - using fixtures instead
 # (create_declining_usage_state, create_extreme_usage_state, 
 #  create_scaling_setup, execute_scaling_workflow,
@@ -27,7 +27,7 @@ from netra_backend.app.agents.triage_sub_agent.agent import TriageSubAgent
 def scaling_analysis_setup(real_llm_manager, real_websocket_manager, real_tool_dispatcher):
     """Setup real agent environment for scaling impact analysis testing."""
     agents = {
-        'triage': TriageSubAgent(real_llm_manager, real_tool_dispatcher),
+        'triage': UnifiedTriageAgent(real_llm_manager, real_tool_dispatcher),
         'data': DataSubAgent(real_llm_manager, real_tool_dispatcher)
     }
     # return create_scaling_setup(agents, real_llm_manager, real_websocket_manager)  # Commented out - missing import

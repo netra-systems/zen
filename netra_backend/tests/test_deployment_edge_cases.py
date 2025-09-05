@@ -132,12 +132,19 @@ class TestStartupTimeoutEdgeCases(BaseTestCase):
 
     async def _simulate_database_dependent_startup(self):
         """Simulate startup that depends on database."""
-        # Database connection should be attempted
-        from netra_backend.app.db.postgres import get_postgres_db
-        async for db in get_postgres_db():
-            # Use the database session
-            break
-        return True
+        # Database connection should be attempted - use proper context manager pattern
+        from netra_backend.app.database import get_db
+        # FIX: Use async context manager directly to prevent cleanup issues
+        # This avoids the "aclose(): asynchronous generator is already running" errors
+        try:
+            async with get_db() as db_session:
+                # Use the database session properly
+                from sqlalchemy import text
+                await db_session.execute(text("SELECT 1"))  # Simple test query
+                return True
+        except Exception as e:
+            # Database connection failed during startup simulation
+            raise RuntimeError(f"Database connection failed during startup: {e}")
 
     async def _simulate_service_registration(self):
         """Simulate service registration process."""

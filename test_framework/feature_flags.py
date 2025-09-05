@@ -1,255 +1,233 @@
-from shared.isolated_environment import get_env
-"""Test feature flags configuration and management.
+"""Feature flag management for test execution.
 
-This module provides a robust feature flagging system for tests, enabling:
-1. TDD workflow with tests for features in development
-2. 100% pass rate for enabled features
-3. Clear visibility of disabled/in-progress features
-4. Environment-based flag overrides
-5. Feature readiness tracking
+This module provides feature flag functionality to control test execution
+and enable TDD workflows with conditional test skipping.
 """
 
-import json
 import os
-from dataclasses import asdict, dataclass
 from enum import Enum
+from typing import Dict, List, Optional, Set
+import json
 from pathlib import Path
-from typing import Any, Dict, Optional, Set
 
 
-class FeatureStatus(str, Enum):
-    """Feature development status."""
-    ENABLED = "enabled"          # Feature is complete and tests should pass
-    IN_DEVELOPMENT = "in_development"  # Feature in progress, tests may fail
-    DISABLED = "disabled"        # Feature disabled, tests should be skipped
-    EXPERIMENTAL = "experimental"  # Feature is experimental, tests are optional
-
-
-@dataclass
-class FeatureFlag:
-    """Feature flag configuration."""
-    name: str
-    status: FeatureStatus
-    description: str
-    owner: Optional[str] = None
-    target_release: Optional[str] = None
-    dependencies: Optional[Set[str]] = None
-    metadata: Optional[Dict[str, Any]] = None
-    
-    def is_enabled(self) -> bool:
-        """Check if feature is enabled for testing."""
-        return self.status == FeatureStatus.ENABLED
-    
-    def should_skip(self) -> bool:
-        """Check if tests should be skipped."""
-        return self.status in [FeatureStatus.DISABLED, FeatureStatus.IN_DEVELOPMENT]
+class FeatureStatus(Enum):
+    """Feature flag status enumeration."""
+    ENABLED = "enabled"
+    DISABLED = "disabled"
+    IN_DEVELOPMENT = "in_development"
 
 
 class FeatureFlagManager:
-    """Manages feature flags for testing."""
+    """Manages feature flags for test execution control."""
     
-    def __init__(self, config_path: Optional[Path] = None):
+    def __init__(self, config_path: Optional[str] = None):
         """Initialize feature flag manager.
         
         Args:
-            config_path: Path to feature flags config file
+            config_path: Optional path to feature flag configuration file
         """
-        self.config_path = config_path or self._get_default_config_path()
-        self.flags: Dict[str, FeatureFlag] = {}
-        self._load_flags()
-        self._apply_env_overrides()
+        self.flags: Dict[str, FeatureStatus] = {}
+        self._load_default_flags()
+        if config_path:
+            self._load_config(config_path)
     
-    def _get_default_config_path(self) -> Path:
-        """Get default config path."""
-        project_root = Path(__file__).parent.parent
-        return project_root / "test_feature_flags.json"
-    
-    def _load_flags(self):
-        """Load feature flags from config file."""
-        if self.config_path.exists():
-            with open(self.config_path, 'r') as f:
-                data = json.load(f)
-                for name, config in data.get("features", {}).items():
-                    self.flags[name] = FeatureFlag(
-                        name=name,
-                        status=FeatureStatus(config["status"]),
-                        description=config.get("description", ""),
-                        owner=config.get("owner"),
-                        target_release=config.get("target_release"),
-                        dependencies=set(config.get("dependencies", [])),
-                        metadata=config.get("metadata", {})
-                    )
-    
-    def _apply_env_overrides(self):
-        """Apply environment variable overrides.
+    def _load_default_flags(self):
+        """Load default feature flags from environment variables."""
+        # Check for common environment variables that might control features
+        env_features = {
+            "real_services": os.getenv("TEST_REAL_SERVICES", "false").lower() == "true",
+            "real_llm": os.getenv("TEST_REAL_LLM", "false").lower() == "true",
+            "fast_tests": os.getenv("TEST_FAST", "false").lower() == "true",
+            "integration_tests": os.getenv("TEST_INTEGRATION", "true").lower() == "true",
+            "e2e_tests": os.getenv("TEST_E2E", "true").lower() == "true",
+        }
         
-        Environment variables format:
-        TEST_FEATURE_<FEATURE_NAME>=enabled|disabled|in_development|experimental
+        for feature, enabled in env_features.items():
+            if enabled:
+                self.flags[feature] = FeatureStatus.ENABLED
+            else:
+                self.flags[feature] = FeatureStatus.DISABLED
+    
+    def _load_config(self, config_path: str):
+        """Load feature flags from configuration file.
+        
+        Args:
+            config_path: Path to JSON configuration file
         """
-        for key, value in os.environ.items():
-            if key.startswith("TEST_FEATURE_"):
-                feature_name = key[13:].lower()  # Remove prefix
-                if feature_name in self.flags:
-                    try:
-                        self.flags[feature_name].status = FeatureStatus(value.lower())
-                    except ValueError:
-                        pass  # Invalid status, ignore
+        try:
+            config_file = Path(config_path)
+            if config_file.exists():
+                with open(config_file, 'r') as f:
+                    config = json.load(f)
+                    
+                features = config.get("features", {})
+                for feature, status in features.items():
+                    if isinstance(status, str):
+                        try:
+                            self.flags[feature] = FeatureStatus(status)
+                        except ValueError:
+                            self.flags[feature] = FeatureStatus.DISABLED
+                    elif isinstance(status, bool):
+                        self.flags[feature] = FeatureStatus.ENABLED if status else FeatureStatus.DISABLED
+        except (json.JSONDecodeError, IOError):
+            # If config file is malformed or unreadable, continue with defaults
+            pass
     
     def is_enabled(self, feature_name: str) -> bool:
         """Check if a feature is enabled.
         
         Args:
-            feature_name: Name of the feature
+            feature_name: Name of the feature to check
             
         Returns:
             True if feature is enabled, False otherwise
         """
-        if feature_name not in self.flags:
-            # Default to enabled if not configured
-            return True
-        return self.flags[feature_name].is_enabled()
+        status = self.flags.get(feature_name, FeatureStatus.DISABLED)
+        return status == FeatureStatus.ENABLED
     
-    def should_skip(self, feature_name: str) -> bool:
-        """Check if tests for a feature should be skipped.
+    def is_in_development(self, feature_name: str) -> bool:
+        """Check if a feature is in development.
         
         Args:
-            feature_name: Name of the feature
+            feature_name: Name of the feature to check
+            
+        Returns:
+            True if feature is in development, False otherwise
+        """
+        status = self.flags.get(feature_name, FeatureStatus.DISABLED)
+        return status == FeatureStatus.IN_DEVELOPMENT
+    
+    def should_skip(self, feature_name: str) -> bool:
+        """Determine if tests for a feature should be skipped.
+        
+        Args:
+            feature_name: Name of the feature to check
             
         Returns:
             True if tests should be skipped, False otherwise
         """
-        if feature_name not in self.flags:
-            return False
-        return self.flags[feature_name].should_skip()
+        status = self.flags.get(feature_name, FeatureStatus.DISABLED)
+        return status in [FeatureStatus.DISABLED, FeatureStatus.IN_DEVELOPMENT]
     
-    def get_skip_reason(self, feature_name: str) -> str:
-        """Get reason for skipping tests.
+    def get_enabled_features(self) -> Set[str]:
+        """Get set of enabled features.
+        
+        Returns:
+            Set of feature names that are enabled
+        """
+        return {name for name, status in self.flags.items() if status == FeatureStatus.ENABLED}
+    
+    def get_disabled_features(self) -> Set[str]:
+        """Get set of disabled features.
+        
+        Returns:
+            Set of feature names that are disabled
+        """
+        return {name for name, status in self.flags.items() if status == FeatureStatus.DISABLED}
+    
+    def get_in_development_features(self) -> Set[str]:
+        """Get set of features in development.
+        
+        Returns:
+            Set of feature names that are in development
+        """
+        return {name for name, status in self.flags.items() if status == FeatureStatus.IN_DEVELOPMENT}
+    
+    def set_feature(self, feature_name: str, status: FeatureStatus):
+        """Set the status of a feature flag.
         
         Args:
             feature_name: Name of the feature
-            
-        Returns:
-            Human-readable skip reason
+            status: New status for the feature
         """
-        if feature_name not in self.flags:
-            return ""
-        
-        flag = self.flags[feature_name]
-        if flag.status == FeatureStatus.IN_DEVELOPMENT:
-            reason = f"Feature '{feature_name}' is in development"
-            if flag.target_release:
-                reason += f" (target: {flag.target_release})"
-        elif flag.status == FeatureStatus.DISABLED:
-            reason = f"Feature '{feature_name}' is disabled"
-        elif flag.status == FeatureStatus.EXPERIMENTAL:
-            reason = f"Feature '{feature_name}' is experimental"
-        else:
-            reason = ""
-        
-        return reason
-    
-    def get_enabled_features(self) -> Set[str]:
-        """Get set of enabled features."""
-        return {name for name, flag in self.flags.items() if flag.is_enabled()}
-    
-    def get_in_development_features(self) -> Set[str]:
-        """Get set of features in development."""
-        return {name for name, flag in self.flags.items() 
-                if flag.status == FeatureStatus.IN_DEVELOPMENT}
-    
-    def get_disabled_features(self) -> Set[str]:
-        """Get set of disabled features."""
-        return {name for name, flag in self.flags.items() 
-                if flag.status == FeatureStatus.DISABLED}
-    
-    def get_feature_summary(self) -> Dict:
-        """Get summary of all feature flags."""
-        return {
-            "enabled": list(self.get_enabled_features()),
-            "in_development": list(self.get_in_development_features()),
-            "disabled": list(self.get_disabled_features()),
-            "experimental": list({name for name, flag in self.flags.items() 
-                                 if flag.status == FeatureStatus.EXPERIMENTAL}),
-            "total": len(self.flags)
-        }
-    
-    def save_flags(self):
-        """Save current flags to config file."""
-        data = {
-            "features": {
-                name: {
-                    "status": flag.status.value,
-                    "description": flag.description,
-                    "owner": flag.owner,
-                    "target_release": flag.target_release,
-                    "dependencies": list(flag.dependencies) if flag.dependencies else [],
-                    "metadata": flag.metadata or {}
-                }
-                for name, flag in self.flags.items()
-            }
-        }
-        
-        with open(self.config_path, 'w') as f:
-            json.dump(data, f, indent=2)
-    
-    def add_flag(self, flag: FeatureFlag):
-        """Add or update a feature flag.
-        
-        Args:
-            flag: Feature flag to add
-        """
-        self.flags[flag.name] = flag
+        self.flags[feature_name] = status
     
     def enable_feature(self, feature_name: str):
-        """Enable a feature for testing.
+        """Enable a feature flag.
         
         Args:
             feature_name: Name of the feature to enable
         """
-        if feature_name in self.flags:
-            self.flags[feature_name].status = FeatureStatus.ENABLED
+        self.flags[feature_name] = FeatureStatus.ENABLED
     
     def disable_feature(self, feature_name: str):
-        """Disable a feature for testing.
+        """Disable a feature flag.
         
         Args:
             feature_name: Name of the feature to disable
         """
-        if feature_name in self.flags:
-            self.flags[feature_name].status = FeatureStatus.DISABLED
+        self.flags[feature_name] = FeatureStatus.DISABLED
 
 
-# Global instance for easy access
-_manager: Optional[FeatureFlagManager] = None
+# Global feature flag manager instance
+_global_manager: Optional[FeatureFlagManager] = None
 
 
 def get_feature_flag_manager() -> FeatureFlagManager:
-    """Get the global feature flag manager instance."""
-    global _manager
-    if _manager is None:
-        _manager = FeatureFlagManager()
-    return _manager
+    """Get the global feature flag manager instance.
+    
+    Returns:
+        Global FeatureFlagManager instance
+    """
+    global _global_manager
+    if _global_manager is None:
+        _global_manager = FeatureFlagManager()
+    return _global_manager
 
 
 def is_feature_enabled(feature_name: str) -> bool:
     """Check if a feature is enabled.
     
     Args:
-        feature_name: Name of the feature
+        feature_name: Name of the feature to check
         
     Returns:
         True if feature is enabled, False otherwise
     """
-    return get_feature_flag_manager().is_enabled(feature_name)
+    manager = get_feature_flag_manager()
+    return manager.is_enabled(feature_name)
 
 
 def should_skip_feature(feature_name: str) -> bool:
-    """Check if tests for a feature should be skipped.
+    """Determine if tests for a feature should be skipped.
     
     Args:
-        feature_name: Name of the feature
+        feature_name: Name of the feature to check
         
     Returns:
         True if tests should be skipped, False otherwise
     """
-    return get_feature_flag_manager().should_skip(feature_name)
+    manager = get_feature_flag_manager()
+    return manager.should_skip(feature_name)
+
+
+def set_feature_status(feature_name: str, status: FeatureStatus):
+    """Set the status of a feature flag.
+    
+    Args:
+        feature_name: Name of the feature
+        status: New status for the feature
+    """
+    manager = get_feature_flag_manager()
+    manager.set_feature(feature_name, status)
+
+
+def enable_feature(feature_name: str):
+    """Enable a feature flag.
+    
+    Args:
+        feature_name: Name of the feature to enable
+    """
+    manager = get_feature_flag_manager()
+    manager.enable_feature(feature_name)
+
+
+def disable_feature(feature_name: str):
+    """Disable a feature flag.
+    
+    Args:
+        feature_name: Name of the feature to disable
+    """
+    manager = get_feature_flag_manager()
+    manager.disable_feature(feature_name)

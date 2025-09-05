@@ -20,7 +20,7 @@ from enum import Enum
 
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.schemas.registry import ServerMessage, WebSocketMessage
-from netra_backend.app.core.websocket_exceptions import WebSocketBufferOverflowError
+# WebSocket exceptions module was deleted - using standard exceptions
 
 logger = central_logger.get_logger(__name__)
 
@@ -184,7 +184,7 @@ class WebSocketMessageBuffer:
                 self.stats['messages_dropped'] += 1
                 
                 # LOUD FAILURE: Raise exception instead of silent return
-                raise WebSocketBufferOverflowError(
+                raise OverflowError(
                     buffer_size=self.config.max_message_size_bytes,
                     message_size=buffered_msg.size_bytes,
                     user_id=user_id
@@ -212,7 +212,7 @@ class WebSocketMessageBuffer:
             logger.debug(f"Buffered message for user {user_id}: {buffered_msg.id}")
             return True
             
-        except WebSocketBufferOverflowError:
+        except OverflowError:
             # Re-raise our custom exception
             raise
         except Exception as e:
