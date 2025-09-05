@@ -7,6 +7,7 @@ This document provides comprehensive patterns and examples for handling partial 
 ## Cross-References
 
 ### Critical Documentation
+- **🆕 UVS Architecture**: [`docs/UVS_TRIAGE_ARCHITECTURE_TRANSITION.md`](docs/UVS_TRIAGE_ARCHITECTURE_TRANSITION.md) - **NEW: Unified Validation System with data sufficiency states**
 - **Learnings Entry**: [`SPEC/learnings/orchestration_data_handling_patterns_20250904.xml`](SPEC/learnings/orchestration_data_handling_patterns_20250904.xml)
 - **🚨 Agent Execution Order Fix**: [`SPEC/learnings/agent_execution_order_fix_20250904.xml`](SPEC/learnings/agent_execution_order_fix_20250904.xml) - **CRITICAL: Data MUST be collected BEFORE optimization**
 - **Execution Order Reasoning**: [`AGENT_EXECUTION_ORDER_REASONING.md`](AGENT_EXECUTION_ORDER_REASONING.md) - Why order matters for business value
@@ -44,7 +45,10 @@ Any deviation from this order results in optimization strategies based on assump
 
 ## Data Sufficiency Levels
 
-### 1. Sufficient Data (80-100% Complete)
+> **📌 NOTE**: These levels align with the UVS (Unified Validation System) data sufficiency states.  
+> See [UVS Triage Architecture](docs/UVS_TRIAGE_ARCHITECTURE_TRANSITION.md) for implementation details.
+
+### 1. Sufficient Data (80-100% Complete) - UVS "OPTIMAL" State
 - Full optimization possible
 - High confidence recommendations
 - Precise metrics and projections

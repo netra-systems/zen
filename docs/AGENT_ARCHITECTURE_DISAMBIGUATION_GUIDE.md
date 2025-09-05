@@ -1,8 +1,11 @@
 # Netra Apex Agent Architecture Disambiguation Guide
 
-**Version**: 1.0.0  
-**Last Updated**: 2025-09-03  
+**Version**: 1.1.0  
+**Last Updated**: 2025-01-05  
 **Audience**: Engineering Teams, New Developers, Senior Architects
+
+> **📣 NEW: UVS Architecture Update**  
+> See **[UVS Triage Architecture Transition Guide](./UVS_TRIAGE_ARCHITECTURE_TRANSITION.md)** for the latest 2-agent model with intelligent data sufficiency validation and Data Intelligence Agent (formerly Data Helper) as PRIMARY agent.
 
 ---
 

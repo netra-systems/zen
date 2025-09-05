@@ -1,6 +1,10 @@
 # Agent Execution Order Fix - Reasoning Document
 
 ## Date: 2025-09-04
+## Updated: 2025-01-05
+
+> **📣 UVS Architecture Update**  
+> The new **[UVS Triage Architecture](docs/UVS_TRIAGE_ARCHITECTURE_TRANSITION.md)** further enhances this correct execution order with intelligent data sufficiency validation, ensuring data collection is not just ordered correctly but also **sufficient** before optimization begins.
 
 ## Executive Summary
 

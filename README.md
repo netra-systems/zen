@@ -1,5 +1,16 @@
 # Netra Core - Generation 1
 
+## 🔄 Recent Changes
+
+### January 2025: UVS Architecture Transition
+- **[NEW] Unified Validation System (UVS)** - Streamlined 2-agent triage model with data sufficiency validation
+  - See **[UVS Triage Architecture Transition Guide](./docs/UVS_TRIAGE_ARCHITECTURE_TRANSITION.md)** for complete details
+  - Data Intelligence Agent (formerly Data Helper) now PRIMARY agent handling 80% of requests
+  - Intelligent data sufficiency states: Insufficient → Minimal → Sufficient → Optimal
+  - Iterative data gathering until sufficient data achieved for analysis
+- **Simplified Agent Hierarchy** - Reduced from 3 triage agents to 1 unified triage agent
+- **Enhanced Data Processing** - Automatic data gathering when insufficient data detected
+
 ## 📊 Business Context
 
 ### Value Proposition
@@ -104,6 +115,7 @@ docker-compose up
 
 ### Architecture & Design
 - **[User Context Architecture](./USER_CONTEXT_ARCHITECTURE.md)** - Factory patterns and user isolation (START HERE)
+- **[UVS Triage Architecture Transition](./docs/UVS_TRIAGE_ARCHITECTURE_TRANSITION.md)** - NEW: Unified Validation System with data sufficiency states
 - **[Frontend Architecture Diagrams](./frontend/docs/FRONTEND_ARCHITECTURE_DIAGRAMS.md)** - Complete frontend architecture with loading flows, WebSocket events, and state management
 - [Agent System Architecture](./docs/AGENT_SYSTEM_ARCHITECTURE.md) - Agent execution pipeline
 - [Agent Architecture Diagrams](./docs/agent_architecture_mermaid.md) - Visual architecture guides

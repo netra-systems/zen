@@ -11,6 +11,7 @@ This index serves as the **Single Source of Truth (SSOT)** for all agent-related
 
 | Document | Purpose | Status |
 |----------|---------|--------|
+| **[UVS Triage Architecture](./UVS_TRIAGE_ARCHITECTURE_TRANSITION.md)** | NEW: 2-agent model with data sufficiency validation | 🆕 Active |
 | [Agent Golden Pattern Guide](agent_golden_pattern_guide.md) | Complete implementation patterns and examples | ✅ Active |
 | [Agent Migration Checklist](agent_migration_checklist.md) | Step-by-step migration to BaseAgent infrastructure | ✅ Active |
 | [Agent Quick Reference](agent_quick_reference.md) | Quick lookup for common agent patterns | ✅ Active |
