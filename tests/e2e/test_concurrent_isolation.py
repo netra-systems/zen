@@ -41,7 +41,7 @@ from netra_backend.app.agents.supervisor.agent_instance_factory import AgentInst
 from netra_backend.app.core.registry.universal_registry import AgentRegistry
 from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.agents.triage.unified_triage_agent import UnifiedTriageAgent
-from netra_backend.app.agents.data_sub_agent.agent import DataSubAgent
+from netra_backend.app.agents.data_sub_agent import DataSubAgent
 from netra_backend.app.agents.optimizations_sub_agent.agent import OptimizationsSubAgent
 from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager as WebSocketManager
@@ -109,7 +109,7 @@ class TestE2EConcurrentIsolation:
                 )
                 
                 with patch.object(factory, '_get_agent_class') as mock_get_triage:
-                    mock_get_triage.return_value = TriageSubAgent
+                    mock_get_triage.return_value = UnifiedTriageAgent
                     triage_agent = await factory.create_agent_instance("triage", triage_context)
                     
                     # Set user-specific state for contamination detection
@@ -351,7 +351,7 @@ class TestE2EConcurrentIsolation:
                     )
                     
                     # Create agent with WebSocket integration
-                    agent_class = {"triage": TriageSubAgent, "data": DataSubAgent, "optimizations": OptimizationsSubAgent}[agent_type]
+                    agent_class = {"triage": UnifiedTriageAgent, "data": DataSubAgent, "optimizations": OptimizationsSubAgent}[agent_type]
                     
                     with patch.object(factory, '_get_agent_class') as mock_get_class:
                         mock_get_class.return_value = agent_class
@@ -486,7 +486,7 @@ class TestE2EConcurrentIsolation:
                         run_id=f"db_{agent_type}_run_{uuid.uuid4()}"
                     )
                     
-                    agent_class = {"triage": TriageSubAgent, "data": DataSubAgent, "optimizations": OptimizationsSubAgent}[agent_type]
+                    agent_class = {"triage": UnifiedTriageAgent, "data": DataSubAgent, "optimizations": OptimizationsSubAgent}[agent_type]
                     
                     with patch.object(factory, '_get_agent_class') as mock_get_class:
                         mock_get_class.return_value = agent_class
@@ -603,7 +603,7 @@ class TestE2EConcurrentIsolation:
                     context_refs.append(weakref.ref(context))
                     
                     with patch.object(factory, '_get_agent_class') as mock_get_class:
-                        mock_get_class.return_value = TriageSubAgent
+                        mock_get_class.return_value = UnifiedTriageAgent
                         agent = await factory.create_agent_instance("triage", context)
                         agent_refs.append(weakref.ref(agent))
                         

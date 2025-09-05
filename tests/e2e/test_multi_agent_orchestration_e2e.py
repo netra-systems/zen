@@ -32,7 +32,7 @@ from unittest.mock import AsyncMock, Mock
 
 from netra_backend.app.agents.actions_to_meet_goals_sub_agent import ActionsToMeetGoalsSubAgent
 from netra_backend.app.agents.corpus_admin.agent import CorpusAdminSubAgent
-from netra_backend.app.agents.data_sub_agent.agent import DataSubAgent
+from netra_backend.app.agents.data_sub_agent import DataSubAgent
 from netra_backend.app.agents.optimizations_core_sub_agent import OptimizationsCoreSubAgent
 from netra_backend.app.agents.reporting_sub_agent import ReportingSubAgent
 from netra_backend.app.agents.state import DeepAgentState
@@ -101,7 +101,7 @@ class MultiAgentOrchestrationSuite:
         mock_tool_dispatcher.get_available_tools = AsyncMock(return_value=[])
         
         self.agents = {
-            'triage': TriageSubAgent(
+            'triage': UnifiedTriageAgent(
                 llm_manager=self.llm_manager,
                 tool_dispatcher=mock_tool_dispatcher,
                 websocket_manager=self.websocket_manager

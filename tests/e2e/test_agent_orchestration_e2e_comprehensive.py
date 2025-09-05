@@ -52,7 +52,7 @@ from netra_backend.app.agents.unified_tool_execution import (
 )
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.agents.triage.unified_triage_agent import UnifiedTriageAgent
-from netra_backend.app.agents.data_sub_agent.agent import DataSubAgent
+from netra_backend.app.agents.data_sub_agent import DataSubAgent
 from netra_backend.app.agents.optimizations_core_sub_agent import OptimizationsCoreSubAgent
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager as WebSocketManager

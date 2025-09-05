@@ -27,7 +27,7 @@ import json
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
 from netra_backend.app.agents.triage.unified_triage_agent import UnifiedTriageAgent
-from netra_backend.app.agents.data_sub_agent.data_sub_agent import DataSubAgent
+from netra_backend.app.agents.data_sub_agent import DataSubAgent
 from netra_backend.app.agents.optimizations_core_sub_agent import OptimizationsCoreSubAgent  
 from netra_backend.app.agents.actions_to_meet_goals_sub_agent import ActionsToMeetGoalsSubAgent
 from netra_backend.app.agents.reporting_sub_agent import ReportingSubAgent
@@ -137,7 +137,7 @@ class TestAgentPipelineCritical:
         tool_dispatcher = ToolDispatcher()
         
         # Create all agents with real dependencies
-        triage_agent = TriageSubAgent(
+        triage_agent = UnifiedTriageAgent(
             llm_manager=real_llm_manager,
             tool_dispatcher=tool_dispatcher,
             redis_manager=redis_manager
