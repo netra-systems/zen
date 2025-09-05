@@ -42,7 +42,7 @@ from sqlalchemy.orm import sessionmaker
 
 # Real service imports - NO MOCKS
 from netra_backend.app.core.configuration.base import get_unified_config
-from netra_backend.app.database import get_db_session
+from netra_backend.app.database import get_db
 
 
 class TestAdvancedUserManagement:

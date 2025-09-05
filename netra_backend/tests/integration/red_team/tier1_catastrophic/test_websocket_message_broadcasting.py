@@ -34,14 +34,14 @@ from sqlalchemy.orm import sessionmaker
 # Real service imports - NO MOCKS
 from netra_backend.app.main import app
 from netra_backend.app.core.configuration.base import get_unified_config
-from netra_backend.app.websocket_core.manager import WebSocketManager
-from netra_backend.app.websocket_core.manager import WebSocketManager as WebSocketConnectionManager
+from netra_backend.app.websocket_core import WebSocketManager
+from netra_backend.app.websocket_core import WebSocketManager as WebSocketConnectionManager
 from netra_backend.app.services.agent_service import AgentService
 from netra_backend.app.db.models_user import User
 # AgentRun model - creating mock for tests
 from unittest.mock import Mock, AsyncMock, MagicMock
 AgentRun = Mock
-from netra_backend.app.database import get_db_session
+from netra_backend.app.database import get_db
 
 
 class TestWebSocketMessageBroadcasting:

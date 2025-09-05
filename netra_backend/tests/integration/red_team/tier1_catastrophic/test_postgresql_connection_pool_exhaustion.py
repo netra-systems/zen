@@ -37,7 +37,7 @@ from sqlalchemy.pool import QueuePool, NullPool
 # Real service imports - NO MOCKS
 from netra_backend.app.main import app
 from netra_backend.app.core.configuration.base import get_unified_config
-from netra_backend.app.database import get_db_session
+from netra_backend.app.database import get_db
 from netra_backend.app.db.postgres import initialize_postgres, async_engine, async_session_factory
 
 
