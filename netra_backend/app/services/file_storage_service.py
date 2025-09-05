@@ -401,11 +401,12 @@ class FileStorageService(ServiceMixin):
             return metadata
         return None
     
-    async def delete_file(self, file_id: str) -> Dict[str, Any]:
-        """Delete a stored file.
+    async def delete_file(self, file_id: str, user_id: Optional[str] = None) -> Dict[str, Any]:
+        """Delete a stored file with access control.
         
         Args:
             file_id: Unique file identifier
+            user_id: User ID for access control
             
         Returns:
             Dictionary with deletion status and details
@@ -417,6 +418,14 @@ class FileStorageService(ServiceMixin):
                     "status": "not_found",
                     "file_id": file_id,
                     "message": "File not found"
+                }
+            
+            # Validate access permissions
+            if not self._validate_file_access(metadata, user_id):
+                return {
+                    "status": "unauthorized",
+                    "file_id": file_id,
+                    "message": "Access denied"
                 }
             
             storage_path = Path(metadata["storage_path"])
