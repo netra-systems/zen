@@ -517,9 +517,15 @@ class TestModernExecutionPatterns:
         state.user_id = "user_456"
         
         # Execute using modern pattern
-        result = await triage_agent.execute_modern(
-            state=state,
+        from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
+        context = UserExecutionContext(
+            user_id=state.user_id,
+            thread_id=state.thread_id,
             run_id="modern_exec_test",
+            metadata={'agent_input': state.user_request}
+        )
+        result = await triage_agent.execute_with_context(
+            context=context,
             stream_updates=True
         )
         
@@ -541,9 +547,14 @@ class TestModernExecutionPatterns:
         state.thread_id = "context_thread_789"
         state.user_id = "context_user_012"
         
-        result = await triage_agent.execute_modern(
-            state=state,
+        context = UserExecutionContext(
+            user_id=state.user_id,
+            thread_id=state.thread_id,
             run_id="context_test_run",
+            metadata={'agent_input': state.user_request}
+        )
+        result = await triage_agent.execute_with_context(
+            context=context,
             stream_updates=False
         )
         
@@ -561,9 +572,15 @@ class TestModernExecutionPatterns:
         valid_state = DeepAgentState()
         valid_state.user_request = "Valid triage request"
         
-        valid_result = await triage_agent.execute_modern(
-            state=valid_state,
-            run_id="valid_precond_test"
+        context = UserExecutionContext(
+            user_id=valid_state.user_id,
+            thread_id=valid_state.thread_id,
+            run_id="valid_precond_test",
+            metadata={'agent_input': valid_state.user_request}
+        )
+        valid_result = await triage_agent.execute_with_context(
+            context=context,
+            stream_updates=False
         )
         
         assert valid_result.success is True
@@ -572,9 +589,15 @@ class TestModernExecutionPatterns:
         invalid_state = DeepAgentState()
         invalid_state.user_request = ""  # Empty request should fail validation
         
-        invalid_result = await triage_agent.execute_modern(
-            state=invalid_state,
-            run_id="invalid_precond_test"
+        context = UserExecutionContext(
+            user_id=invalid_state.user_id,
+            thread_id=invalid_state.thread_id,
+            run_id="invalid_precond_test",
+            metadata={'agent_input': invalid_state.user_request}
+        )
+        invalid_result = await triage_agent.execute_with_context(
+            context=context,
+            stream_updates=False
         )
         
         assert invalid_result.success is False
@@ -592,9 +615,15 @@ class TestModernExecutionPatterns:
         
         # Execute multiple times
         for i in range(3):
-            result = await triage_agent.execute_modern(
-                state=state,
-                run_id=f"monitoring_test_{i}"
+            context = UserExecutionContext(
+            user_id=state.user_id,
+            thread_id=state.thread_id,
+            run_id=f"monitoring_test_{i}",
+            metadata={'agent_input': state.user_request}
+        )
+            result = await triage_agent.execute_with_context(
+                context=context,
+                stream_updates=False
             )
             assert result.success is True
         
@@ -619,9 +648,15 @@ class TestModernExecutionPatterns:
         triage_agent.timing_collector._aggregated_stats.clear()
         
         # Execute with timing
-        result = await triage_agent.execute_modern(
-            state=state,
-            run_id="timing_test"
+        context = UserExecutionContext(
+            user_id=state.user_id,
+            thread_id=state.thread_id,
+            run_id="timing_test",
+            metadata={'agent_input': state.user_request}
+        )
+        result = await triage_agent.execute_with_context(
+            context=context,
+            stream_updates=False
         )
         
         assert result.success is True
@@ -691,9 +726,14 @@ class TestEndToEndIntegration:
         state.user_id = "user_e2e_test"
         
         # Execute complete workflow
-        result = await agent.execute_modern(
-            state=state,
+        context = UserExecutionContext(
+            user_id=state.user_id,
+            thread_id=state.thread_id,
             run_id="e2e_workflow_test",
+            metadata={'agent_input': state.user_request}
+        )
+        result = await agent.execute_with_context(
+            context=context,
             stream_updates=True
         )
         
