@@ -30,6 +30,7 @@
     "pong",
     "privacy_event",
     "security_event",
+    "send_event",
     "subscribe",
     "trigger_event",
     "unsubscribe",

@@ -1,0 +1,8 @@
+{
+  "values": [
+    "api.staging.netrasystems.ai",
+    "app.staging.netrasystems.ai",
+    "auth.staging.netrasystems.ai",
+    "wss://api.staging.netrasystems.ai"
+  ]
+}
