@@ -37,7 +37,7 @@ class StagingHealthValidator:
     
     STAGING_SERVICES = {
         'backend': 'https://netra-backend-staging-pnovr5vsba-uc.a.run.app',
-        'auth': 'https://netra-auth-service-pnovr5vsba-uc.a.run.app',
+        'auth': 'https://auth.staging.netrasystems.ai',
         'frontend': 'https://netra-frontend-staging-pnovr5vsba-uc.a.run.app'
     }
     
