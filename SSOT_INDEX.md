@@ -3,6 +3,8 @@
 ## Executive Summary
 This document provides a comprehensive index of all SSOT components in the Netra system, ranked by criticality and business impact. Each SSOT is documented with its purpose, dependencies, and integration patterns.
 
+**📌 NEW**: [Tier 4 Operational Components](./SSOT_INDEX_TIER_4.md) - 15 additional critical SSOT components for execution, monitoring, and resilience.
+
 ## Critical Ranking (1-10 Scale)
 
 ### 🔴 TIER 1: ULTRA-CRITICAL (10/10)
@@ -600,8 +602,27 @@ python tests/unified_test_runner.py --real-services
 4. `netra_backend/app/db/database_manager.py` - Database operations
 5. `netra_backend/app/core/managers/*.py` - Unified managers
 
+## 🔵 TIER 4: OPERATIONAL COMPONENTS (5-6/10)
+*See [SSOT_INDEX_TIER_4.md](./SSOT_INDEX_TIER_4.md) for complete documentation*
+
+**Summary**: 15 operational SSOT components critical for:
+- Agent execution orchestration (ExecutionEngine, WorkflowOrchestrator)
+- User isolation and context management (UserExecutionContext, RequestScopedToolDispatcher)
+- Real-time notifications (WebSocketNotifier, MessageRouter, EventValidator)
+- System resilience (CircuitBreaker, ConfigurationValidator, MigrationTracker)
+- Monitoring and observability (AgentHealthMonitor, AgentExecutionTracker, ResourceMonitor)
+- Service orchestration (StartupOrchestrator, ToolExecutorFactory)
+
+**Business Impact**: Without Tier 4 components, the platform would experience:
+- No agent execution or workflow coordination
+- Loss of real-time chat updates
+- Inability to isolate user requests
+- No fault tolerance or circuit breaking
+- Flying blind without monitoring
+- Manual service startup and configuration
+
 ---
 
-**Last Updated**: 2025-01-04
+**Last Updated**: 2025-01-05
 **Next Review**: Quarterly or when approaching size limits
 **Owner**: Principal Engineer Role

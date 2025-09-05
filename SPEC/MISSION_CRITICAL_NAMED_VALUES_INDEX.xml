@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <spec>
   <title>🚨 MISSION CRITICAL NAMED VALUES INDEX</title>
-  <version>1.0</version>
-  <date>2025-09-03</date>
+  <version>1.1</version>
+  <date>2025-09-05</date>
   <severity>ULTRA_CRITICAL</severity>
   <category>configuration</category>
   
@@ -31,6 +31,9 @@
     <reference priority="8">docker-compose.yml - Local development services</reference>
     <reference priority="9">tests/mission_critical/test_frontend_deployment_env_regression.py - Deployment tests</reference>
     <reference priority="10">netra_backend/app/websocket_core/agent_handler.py - WebSocket endpoints</reference>
+    
+    <!-- SSOT Index Reference -->
+    <reference priority="11">SSOT_INDEX.md - Master index of all SSOT components</reference>
   </cross_references>
 
   <!-- SECTION 1: ENVIRONMENT VARIABLE NAMES -->
@@ -228,6 +231,25 @@
     <agent name="supervisor" type="orchestrator">
       <cascade_impact>No agent orchestration, complex tasks fail</cascade_impact>
       <websocket_events>All events</websocket_events>
+      <critical_imports>
+        <import>netra_backend.app.agents.supervisor_consolidated.SupervisorAgent</import>
+        <import>netra_backend.app.agents.supervisor.user_execution_context.UserExecutionContext</import>
+      </critical_imports>
+    </agent>
+    
+    <agent name="triage_agent" type="router">
+      <cascade_impact>Requests not properly routed, wrong agent selected</cascade_impact>
+      <execution_order>1</execution_order>
+    </agent>
+    
+    <agent name="data_agent" type="data_processor">
+      <cascade_impact>No data processing capabilities, analytics fail</cascade_impact>
+      <execution_order>2</execution_order>
+    </agent>
+    
+    <agent name="optimization_agent" type="optimizer">
+      <cascade_impact>No optimization suggestions, reduced value</cascade_impact>
+      <execution_order>3</execution_order>
     </agent>
     
     <agent name="actions_agent" type="executor">
@@ -239,7 +261,46 @@
     </agent>
   </agent_identifiers>
 
-  <!-- SECTION 8: URL DOMAINS -->
+  <!-- SECTION 8: CRITICAL SSOT COMPONENTS -->
+  <ssot_components>
+    <component name="UserExecutionContext" critical="true">
+      <location>netra_backend/app/agents/supervisor/user_execution_context.py</location>
+      <cascade_impact>User context leakage, multi-user failures, security breach</cascade_impact>
+      <required_attributes>
+        <attribute>user_id</attribute>
+        <attribute>thread_id</attribute>
+        <attribute>run_id</attribute>
+        <attribute>db_session</attribute>
+        <attribute>tool_dispatcher</attribute>
+      </required_attributes>
+    </component>
+    
+    <component name="AgentInstanceFactory" critical="true">
+      <location>netra_backend/app/agents/supervisor/agent_instance_factory.py</location>
+      <cascade_impact>Sub-agents created without proper context, WebSocket events fail</cascade_impact>
+      <singleton_access>get_agent_instance_factory()</singleton_access>
+    </component>
+    
+    <component name="DatabaseSessionManager" critical="true">
+      <location>netra_backend/app/database/session_manager.py</location>
+      <cascade_impact>Database sessions leak between users, data corruption</cascade_impact>
+      <context_manager>managed_session()</context_manager>
+    </component>
+    
+    <component name="TelemetryManager" critical="false">
+      <location>netra_backend/app/core/health/telemetry.py</location>
+      <cascade_impact>Health monitoring degraded, no critical failures</cascade_impact>
+      <note>New stub implementation for backward compatibility</note>
+    </component>
+    
+    <component name="RedisSessionManager" critical="false">
+      <location>netra_backend/app/services/redis/session_manager.py</location>
+      <cascade_impact>None - stub implementation for backward compatibility</cascade_impact>
+      <note>Actual session management via DatabaseSessionManager</note>
+    </component>
+  </ssot_components>
+
+  <!-- SECTION 9: URL DOMAINS -->
   <domain_configuration>
     <environment name="staging">
       <frontend>app.staging.netrasystems.ai</frontend>
@@ -331,6 +392,20 @@
   </common_failure_patterns>
 
   <incident_history>
+    <incident date="2025-09-05" severity="CRITICAL">
+      <description>Agent execution order incorrect (Optimization before Data)</description>
+      <impact>Empty optimization results, no business value delivered</impact>
+      <root_cause>Wrong execution order in agent flow</root_cause>
+      <fix>Data agent MUST run before Optimization agent</fix>
+    </incident>
+    
+    <incident date="2025-09-04" severity="CRITICAL">
+      <description>WebSocket bridge not configured in sub-agents</description>
+      <impact>No WebSocket events from sub-agents, chat appears frozen</impact>
+      <root_cause>AgentInstanceFactory not pre-configured with WebSocket bridge</root_cause>
+      <fix>Pre-configure factory in SupervisorAgent.__init__</fix>
+    </incident>
+    
     <incident date="2025-09-03" severity="CRITICAL">
       <description>Frontend deployment missing most environment variables</description>
       <impact>Complete frontend failure, no WebSocket, no auth</impact>

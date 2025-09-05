@@ -4,6 +4,7 @@
 
 ### 🏗️ Core Architecture (Start Here)
 
+- **[SSOT Index](../SSOT_INDEX.md)** 🚨 - **ULTRA-CRITICAL**: Master index of all Single Source of Truth components ranked by criticality
 - **[User Context Architecture](../USER_CONTEXT_ARCHITECTURE.md)** ⭐ - **CRITICAL DOCUMENT**: Comprehensive guide to the Factory-based user isolation architecture with detailed diagrams
 - **[Agent Architecture Disambiguation Guide](./AGENT_ARCHITECTURE_DISAMBIGUATION_GUIDE.md)** 🎯 - **ESSENTIAL**: Clarifies agent workflow architecture, relationships between components, and common confusion points
 - [Agent System Architecture](./AGENT_SYSTEM_ARCHITECTURE.md) - Complete agent execution pipeline documentation
