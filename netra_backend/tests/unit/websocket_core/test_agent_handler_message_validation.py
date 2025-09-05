@@ -8,6 +8,7 @@ critical for reliable agent communication.
 import asyncio
 import uuid
 import json
+import time
 from typing import Dict, Any, Optional
 from unittest.mock import Mock, patch, AsyncMock, call
 from datetime import datetime
@@ -68,7 +69,7 @@ class TestMessageHandling:
                                 type=MessageType.START_AGENT,
                                 payload={"user_request": "Start test"},
                                 thread_id="thread-1",
-                                timestamp=datetime.utcnow().isoformat()
+                                timestamp=time.time()
                             )
                             
                             await handler.handle_message("user1", self.mock_websocket, start_message)
@@ -81,7 +82,7 @@ class TestMessageHandling:
                                 type=MessageType.USER_MESSAGE,
                                 payload={"message": "User test"},
                                 thread_id="thread-2",
-                                timestamp=datetime.utcnow().isoformat()
+                                timestamp=time.time()
                             )
                             
                             await handler.handle_message("user2", self.mock_websocket, user_message)
@@ -94,7 +95,7 @@ class TestMessageHandling:
                                 type=MessageType.CHAT,
                                 payload={"content": "Chat test"},
                                 thread_id="thread-3",
-                                timestamp=datetime.utcnow().isoformat()
+                                timestamp=time.time()
                             )
                             
                             await handler.handle_message("user3", self.mock_websocket, chat_message)
@@ -139,7 +140,7 @@ class TestMessageHandling:
                                 type=MessageType.START_AGENT,
                                 payload={"user_request": "Error test"},
                                 thread_id="thread-error",
-                                timestamp=datetime.utcnow().isoformat()
+                                timestamp=time.time()
                             )
                             
                             await handler.handle_message("user-error", self.mock_websocket, error_message)
@@ -177,7 +178,7 @@ class TestMessageHandling:
                                 type=MessageType.START_AGENT,
                                 payload={"user_request": "Test", "thread_id": "thread-123"},
                                 thread_id="thread-123",
-                                timestamp=datetime.utcnow().isoformat()
+                                timestamp=time.time()
                             )
                             
                             await handler.handle_message("user-test", self.mock_websocket, message)
@@ -226,7 +227,7 @@ class TestMessageHandling:
                                     type=MessageType.START_AGENT,
                                     payload={"user_request": "Test"},
                                     thread_id="thread-error",
-                                    timestamp=datetime.utcnow().isoformat()
+                                    timestamp=time.time()
                                 )
                                 
                                 result = await handler.handle_message("user-error", self.mock_websocket, message)
@@ -248,7 +249,7 @@ class TestMessageHandling:
                                 type=MessageType.START_AGENT,
                                 payload={"user_request": "Test"},
                                 thread_id="thread-notify-fail",
-                                timestamp=datetime.utcnow().isoformat()
+                                timestamp=time.time()
                             )
                             
                             # Should complete without raising notification error
@@ -358,7 +359,7 @@ class TestMessageHandling:
                                     type=MessageType.USER_MESSAGE,
                                     payload=payload,
                                     thread_id=f"thread-user-{uuid.uuid4()}",
-                                    timestamp=datetime.utcnow().isoformat()
+                                    timestamp=time.time()
                                 )
                                 
                                 result = await handler.handle_message("test-user", self.mock_websocket, user_msg)
@@ -373,7 +374,7 @@ class TestMessageHandling:
                                     type=MessageType.CHAT,
                                     payload=payload,
                                     thread_id=f"thread-chat-{uuid.uuid4()}",
-                                    timestamp=datetime.utcnow().isoformat()
+                                    timestamp=time.time()
                                 )
                                 
                                 result = await handler.handle_message("test-user", self.mock_websocket, chat_msg)
