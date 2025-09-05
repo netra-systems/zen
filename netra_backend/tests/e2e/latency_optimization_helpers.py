@@ -4,13 +4,12 @@ Shared utilities for latency optimization workflow tests.
 Maximum 300 lines, functions ≤8 lines.
 """
 
-from netra_backend.app.agents.data_sub_agent.data_sub_agent import DataSubAgent
+from netra_backend.app.agents.data_sub_agent import DataSubAgent
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.agents.triage.unified_triage_agent import UnifiedTriageAgent
 from netra_backend.app.llm.llm_manager import LLMManager
-from netra_backend.app.schemas.unified_tools import SubAgentLifecycle
+from netra_backend.app.schemas.agent import SubAgentLifecycle
 from netra_backend.app.websocket_core.manager import WebSocketManager
-from netra_backend.app.websocket_core.manager import WebSocketManager as WebSocketManager
 from typing import Dict, List, Optional, Tuple
 import time
 import uuid

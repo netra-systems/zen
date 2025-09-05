@@ -7,7 +7,7 @@ import uuid
 from typing import Dict, List
 
 from netra_backend.app.agents.state import DeepAgentState
-from netra_backend.app.schemas.unified_tools import SubAgentLifecycle
+from netra_backend.app.schemas.agent import SubAgentLifecycle
 
 def create_scaling_setup(agents: Dict, llm, ws) -> Dict:
     """Build complete setup dictionary."""

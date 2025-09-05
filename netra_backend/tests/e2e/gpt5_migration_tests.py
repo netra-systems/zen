@@ -6,7 +6,7 @@ Tests for GPT-5 migration workflows and tool selection
 from typing import Dict, List
 
 from netra_backend.app.agents.state import AgentMetadata, DeepAgentState
-from netra_backend.app.schemas.unified_tools import SubAgentLifecycle
+from netra_backend.app.schemas.agent import SubAgentLifecycle
 from netra_backend.tests.e2e.model_effectiveness_tests import (
     _execute_model_selection_workflow,
 )

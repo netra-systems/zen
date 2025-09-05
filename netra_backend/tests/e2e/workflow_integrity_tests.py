@@ -9,7 +9,7 @@ from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
 
 from netra_backend.app.agents.state import AgentMetadata, DeepAgentState
 from netra_backend.app.core.exceptions import NetraException
-from netra_backend.app.schemas.unified_tools import SubAgentLifecycle
+from netra_backend.app.schemas.agent import SubAgentLifecycle
 from netra_backend.tests.e2e.model_effectiveness_tests import (
     _create_model_effectiveness_state,
     _execute_model_selection_workflow,

@@ -10,7 +10,7 @@ from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
 import pytest
 
 from netra_backend.app.agents.state import AgentMetadata, DeepAgentState
-from netra_backend.app.schemas.unified_tools import SubAgentLifecycle
+from netra_backend.app.schemas.agent import SubAgentLifecycle
 
 class TestModelEffectivenessAnalysis:
     """Test model effectiveness analysis workflows."""

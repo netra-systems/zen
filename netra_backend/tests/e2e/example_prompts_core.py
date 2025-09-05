@@ -10,7 +10,7 @@ from netra_backend.app.agents.supervisor_consolidated import (
     SupervisorAgent as Supervisor,
 )
 from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
-from netra_backend.app.websocket_core.manager import WebSocketManager as WebSocketManager
+from netra_backend.app.websocket_core.manager import WebSocketManager
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import Any, Dict, List, Optional
 import pytest
@@ -18,15 +18,10 @@ import uuid
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.services.quality_gate_service import (
-
     ContentType,
-
     QualityGateService,
-
     QualityLevel,
-
 )
-from netra_backend.app.websocket_core.manager import WebSocketManager
 
 # The 9 example prompts from EXAMPLE_PROMPTS list
 
