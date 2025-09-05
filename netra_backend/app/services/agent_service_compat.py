@@ -36,7 +36,7 @@ async def generate_stream(message: str, thread_id: Optional[str] = None) -> Asyn
 
 async def _execute_module_generate_stream(db, message: str, thread_id: Optional[str]) -> AsyncGenerator[Dict[str, Any], None]:
     """Execute module-level stream generation."""
-    llm_manager = LLMManager(settings)
+    llm_manager = LLMManager()
     agent_service = get_agent_service(db, llm_manager)
     async for chunk in agent_service.generate_stream(message, thread_id):
         yield chunk

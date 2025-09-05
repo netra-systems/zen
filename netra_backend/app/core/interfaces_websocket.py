@@ -47,129 +47,94 @@ class WebSocketConnectionProtocol(Protocol):
     async def send(self, message: Dict[str, Any]) -> bool:
         """Send message through this connection."""
         ...
-    
-    async def close(self) -> None:
-        """Close this connection."""
-        ...
 
 
 class WebSocketEventHandler(ABC):
     """Base class for WebSocket event handlers."""
     
     @abstractmethod
-    async def handle_connect(self, connection: WebSocketConnectionProtocol) -> bool:
-        """Handle new connection event."""
+    async def handle_message(self, connection_id: str, message: Dict[str, Any]) -> None:
+        """Handle incoming WebSocket message."""
         pass
     
     @abstractmethod
-    async def handle_disconnect(self, connection: WebSocketConnectionProtocol) -> None:
-        """Handle connection disconnect event."""
+    async def handle_connection(self, connection_id: str, user_id: str) -> None:
+        """Handle new WebSocket connection."""
         pass
     
     @abstractmethod
-    async def handle_message(self, connection: WebSocketConnectionProtocol, 
-                           message: Dict[str, Any]) -> bool:
-        """Handle incoming message."""
+    async def handle_disconnection(self, connection_id: str) -> None:
+        """Handle WebSocket disconnection."""
         pass
 
 
 class WebSocketBridge(ABC):
-    """Bridge interface for WebSocket event emission."""
+    """Abstract bridge for WebSocket operations."""
     
     @abstractmethod
-    async def notify_agent_started(self, user_id: str, agent_name: str, 
-                                 metadata: Optional[Dict[str, Any]] = None) -> bool:
-        """Notify that an agent has started."""
+    async def send_agent_update(
+        self, 
+        run_id: str, 
+        event_type: str, 
+        data: Dict[str, Any],
+        thread_id: Optional[str] = None
+    ) -> bool:
+        """Send agent update via WebSocket."""
         pass
     
     @abstractmethod
-    async def notify_agent_thinking(self, user_id: str, agent_name: str, 
-                                  thought: str) -> bool:
-        """Notify that an agent is thinking/reasoning."""
-        pass
-    
-    @abstractmethod
-    async def notify_tool_executing(self, user_id: str, agent_name: str,
-                                  tool_name: str, tool_input: Optional[Dict] = None) -> bool:
-        """Notify that a tool is being executed."""
-        pass
-    
-    @abstractmethod
-    async def notify_tool_completed(self, user_id: str, agent_name: str,
-                                  tool_name: str, success: bool,
-                                  result_summary: Optional[str] = None) -> bool:
-        """Notify that a tool execution completed."""
-        pass
-    
-    @abstractmethod  
-    async def notify_agent_completed(self, user_id: str, agent_name: str,
-                                   result: Dict[str, Any], success: bool = True) -> bool:
-        """Notify that an agent has completed."""
+    async def notify_progress(
+        self,
+        run_id: str,
+        progress: int,
+        message: str,
+        thread_id: Optional[str] = None
+    ) -> bool:
+        """Notify progress update."""
         pass
 
-
-# Compatibility types and classes
 
 class ConnectionInfo:
     """Information about a WebSocket connection."""
     
-    def __init__(self, connection_id: str, user_id: str, 
-                 connected_at: Optional[datetime] = None):
+    def __init__(
+        self,
+        connection_id: str,
+        user_id: str,
+        connected_at: datetime,
+        last_ping: Optional[datetime] = None
+    ):
         self.connection_id = connection_id
         self.user_id = user_id
-        self.connected_at = connected_at or datetime.now()
-        self.last_activity = self.connected_at
+        self.connected_at = connected_at
+        self.last_ping = last_ping or connected_at
+        self.is_active = True
     
-    def update_activity(self) -> None:
-        """Update last activity timestamp."""
-        self.last_activity = datetime.now()
-    
-    def get_age_seconds(self) -> float:
-        """Get connection age in seconds."""
-        return (datetime.now() - self.connected_at).total_seconds()
+    def update_ping(self) -> None:
+        """Update last ping timestamp."""
+        self.last_ping = datetime.utcnow()
 
 
 class WebSocketState:
-    """WebSocket connection state tracking."""
+    """Represents the state of WebSocket operations."""
     
     CONNECTING = "connecting"
-    CONNECTED = "connected"
+    CONNECTED = "connected" 
     DISCONNECTING = "disconnecting"
     DISCONNECTED = "disconnected"
     ERROR = "error"
-    
-    def __init__(self, initial_state: str = CONNECTING):
-        self.current_state = initial_state
-        self.state_history: List[tuple] = [(initial_state, datetime.now())]
-    
-    def transition_to(self, new_state: str) -> None:
-        """Transition to new state."""
-        self.current_state = new_state
-        self.state_history.append((new_state, datetime.now()))
-    
-    def is_active(self) -> bool:
-        """Check if connection is in active state."""
-        return self.current_state == self.CONNECTED
-    
-    def get_state_duration(self) -> float:
-        """Get duration in current state (seconds)."""
-        if not self.state_history:
-            return 0.0
-        last_transition = self.state_history[-1][1]
-        return (datetime.now() - last_transition).total_seconds()
 
 
-# Event types for WebSocket messages
 class WebSocketEventTypes:
-    """Standard WebSocket event type constants."""
+    """Standard WebSocket event types."""
     
-    # Agent events
+    # Agent execution events
     AGENT_STARTED = "agent_started"
-    AGENT_THINKING = "agent_thinking"  
+    AGENT_THINKING = "agent_thinking"
     AGENT_COMPLETED = "agent_completed"
     AGENT_ERROR = "agent_error"
     
-    # Tool events
+    # Tool execution events
     TOOL_EXECUTING = "tool_executing"
     TOOL_COMPLETED = "tool_completed"
     
@@ -184,6 +149,11 @@ class WebSocketEventTypes:
     STATUS_UPDATE = "status_update"
 
 
+# Compatibility aliases for interface imports
+WebSocketManagerInterface = WebSocketManagerProtocol
+WebSocketServiceInterface = WebSocketEventHandler  # Most appropriate mapping
+
+
 # Compatibility exports
 __all__ = [
     'WebSocketManagerProtocol',
@@ -192,5 +162,8 @@ __all__ = [
     'WebSocketBridge',
     'ConnectionInfo',
     'WebSocketState',
-    'WebSocketEventTypes'
+    'WebSocketEventTypes',
+    # Compatibility aliases
+    'WebSocketManagerInterface',
+    'WebSocketServiceInterface'
 ]

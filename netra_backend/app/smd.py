@@ -859,7 +859,7 @@ class StartupOrchestrator:
         from netra_backend.app.llm.llm_manager import LLMManager
         from netra_backend.app.services.security_service import SecurityService
         
-        self.app.state.llm_manager = LLMManager(settings)
+        self.app.state.llm_manager = LLMManager()
         self.app.state.security_service = SecurityService(self.app.state.key_manager)
     
     def _initialize_tool_registry(self) -> None:
