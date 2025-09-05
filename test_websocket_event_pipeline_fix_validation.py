@@ -376,7 +376,7 @@ def main():
     
     results = []
     for test_name, test_func in tests:
-        print(f"\n🔍 Running: {test_name}")
+        print(f"\n[RUNNING] Running: {test_name}")
         try:
             result = test_func()
             results.append((test_name, result))
@@ -388,7 +388,7 @@ def main():
     
     # Summary
     print("\n" + "=" * 80)
-    print("🏁 VALIDATION SUMMARY")
+    print("[SUMMARY] VALIDATION SUMMARY")
     print("=" * 80)
     
     passed = sum(1 for _, result in results if result)
@@ -401,10 +401,10 @@ def main():
     print(f"\nOverall: {passed}/{total} tests passed")
     
     if passed == total:
-        print("🎉 ALL TESTS PASSED - WebSocket event pipeline is working!")
+        print("[SUCCESS] ALL TESTS PASSED - WebSocket event pipeline is working!")
         return True
     else:
-        print("💥 TESTS FAILED - WebSocket event pipeline needs fixes")
+        print("[FAILURE] TESTS FAILED - WebSocket event pipeline needs fixes")
         return False
 
 

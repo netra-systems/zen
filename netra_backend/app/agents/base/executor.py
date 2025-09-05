@@ -420,11 +420,10 @@ class BaseExecutionEngine:
         """Create successful execution result."""
         execution_time = self._calculate_execution_time(context)
         return ExecutionResult(
-            success=True,
             status=ExecutionStatus.COMPLETED,
-            result=result_data,
+            request_id=context.request_id,
+            data=result_data,
             execution_time_ms=execution_time,
-            retry_count=context.retry_count,
             metrics=self.monitor.get_execution_metrics(context)
         )
     

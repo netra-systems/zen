@@ -8,7 +8,7 @@ import pytest
 from netra_backend.app.config import get_config
 from netra_backend.app.db.clickhouse_base import ClickHouseDatabase
 from netra_backend.app.db.clickhouse_query_fixer import ClickHouseQueryInterceptor
-from shared.isolated_environment import IsolatedEnvironment
+from shared.isolated_environment import IsolatedEnvironment, get_env
 
 # CRITICAL: Set ClickHouse configuration BEFORE any imports that trigger config loading
 env = IsolatedEnvironment()

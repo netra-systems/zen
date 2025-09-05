@@ -294,10 +294,12 @@ class UnifiedLifecycleManager:
             
             # Phase 1: Component validation
             if not await self._phase_validate_components():
+                await self._set_phase(LifecyclePhase.ERROR)
                 return False
             
             # Phase 2: Initialize components
             if not await self._phase_initialize_components():
+                await self._set_phase(LifecyclePhase.ERROR)
                 return False
             
             # Phase 3: Start health monitoring
@@ -305,6 +307,7 @@ class UnifiedLifecycleManager:
             
             # Phase 4: Validate system readiness
             if not await self._phase_validate_readiness():
+                await self._set_phase(LifecyclePhase.ERROR)
                 return False
             
             # Phase 5: Execute custom startup handlers
@@ -748,6 +751,12 @@ class UnifiedLifecycleManager:
                     await self._health_check_task
                 except asyncio.CancelledError:
                     pass
+                except Exception as e:
+                    logger.warning(f"Error waiting for health check task: {e}")
+                finally:
+                    self._health_check_task = None
+            elif self._health_check_task:
+                # Task is already done, just clean up
                 self._health_check_task = None
             
             # Cancel any background tasks

@@ -110,7 +110,9 @@ class TestSecurityHeadersMiddleware:
         
         # Original headers should be preserved
         assert response.headers["custom-header"] == "custom-value"
-        assert response.headers["cache-control"] == "no-store"
+        # Cache control should be enhanced for security (not just preserved)
+        assert "no-store" in response.headers["cache-control"]
+        assert "no-cache" in response.headers["cache-control"]
         
         # Security headers should be added
         assert "x-content-type-options" in response.headers
