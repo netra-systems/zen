@@ -45,7 +45,7 @@ from netra_backend.app.websocket_core.user_context_extractor import (
 
 # Backward compatibility aliases
 WebSocketManager = UnifiedWebSocketManager
-websocket_manager = get_websocket_manager()
+# SECURITY FIX: Removed singleton websocket_manager - use create_websocket_manager() instead
 WebSocketEventEmitter = UnifiedWebSocketEmitter
 IsolatedWebSocketEventEmitter = UnifiedWebSocketEmitter
 UserWebSocketEmitter = UnifiedWebSocketEmitter
@@ -157,8 +157,8 @@ __all__ = [
     
     # Backward compatibility
     "WebSocketManager",
-    "websocket_manager",
-    "get_websocket_manager",
+    # SECURITY FIX: Removed websocket_manager singleton export
+    # SECURITY: get_websocket_manager removed - causes multi-user data leakage
     "WebSocketEventEmitter",
     "IsolatedWebSocketEventEmitter",
     "UserWebSocketEmitter",

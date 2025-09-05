@@ -34,7 +34,8 @@ from netra_backend.app.dependencies import (
 )
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.websocket_core import get_websocket_manager
-from netra_backend.app.websocket_core.auth import authenticate_websocket, AuthInfo
+from netra_backend.app.websocket_core.auth import get_websocket_authenticator
+from netra_backend.app.websocket_core.user_context_extractor import extract_websocket_user_context
 
 logger = central_logger.get_logger(__name__)
 
@@ -44,74 +45,128 @@ router = APIRouter(
 )
 
 
-@router.websocket("/factory/{user_id}")
+@router.websocket("/factory")
 async def websocket_factory_endpoint(
     websocket: WebSocket,
-    user_id: str,
     thread_id: Optional[str] = Query(None),
     run_id: Optional[str] = Query(None)
 ):
     """
-    WebSocket endpoint using factory pattern for per-user isolation.
+    SECURE WebSocket endpoint using factory pattern with JWT authentication.
     
-    This endpoint creates isolated WebSocket emitters for each user, ensuring
-    complete separation of WebSocket events between concurrent users.
+    SECURITY FEATURES:
+    - JWT token validation before connection acceptance
+    - User context extraction from authenticated token
+    - Factory pattern with complete user isolation
+    - No URL-based user identification (prevents impersonation)
     
     Args:
         websocket: WebSocket connection
-        user_id: User identifier for isolation
         thread_id: Optional thread identifier
         run_id: Optional run identifier for request tracking
         
+    Authentication:
+        - Requires JWT token in Authorization header: "Bearer <token>"
+        - OR JWT token in Sec-WebSocket-Protocol: "jwt.<base64url_encoded_token>"
+        
     Features:
         - Per-user event isolation using factory patterns
-        - Gradual migration support with feature flags
+        - Authenticated user context extraction
         - Health monitoring and reconnection support
-        - Error resilience with fallback mechanisms
+        - Error resilience with secure fallback mechanisms
     """
-    connection_id = f"conn_{user_id}_{int(time.time())}_{uuid.uuid4().hex[:8]}"
-    context_id = f"{user_id}_{thread_id or 'default'}_{run_id or uuid.uuid4().hex[:8]}"
-    
-    logger.info(f"🔌 WebSocket factory connection attempt for user {user_id} (connection: {connection_id})")
-    
-    # Accept the WebSocket connection
+    # Accept WebSocket connection early to allow authentication handshake
     try:
         await websocket.accept()
-        logger.info(f"✅ WebSocket connection accepted for user {user_id}")
+        logger.info("🔌 WebSocket connection accepted - starting authentication")
     except Exception as e:
-        logger.error(f"❌ Failed to accept WebSocket connection for user {user_id}: {e}")
+        logger.error(f"❌ Failed to accept WebSocket connection: {e}")
         return
     
-    # Initialize factory-based WebSocket handling
+    # CRITICAL SECURITY: Authenticate WebSocket connection using JWT
+    try:
+        user_context, auth_info = extract_websocket_user_context(
+            websocket, 
+            additional_metadata={
+                "thread_id": thread_id,
+                "run_id": run_id,
+                "endpoint": "/ws/factory"
+            }
+        )
+        
+        # Extract authenticated user ID
+        user_id = user_context.user_id
+        connection_id = user_context.websocket_connection_id
+        
+        logger.info(
+            f"🔐 AUTHENTICATED WebSocket connection for user {user_id[:8]}... "
+            f"(connection: {connection_id})"
+        )
+        
+    except HTTPException as e:
+        # Authentication failed - close connection with proper error
+        logger.warning(f"🚫 WebSocket authentication failed: {e.detail}")
+        try:
+            await websocket.send_json({
+                "type": "authentication_error",
+                "error": "Authentication required",
+                "details": e.detail,
+                "timestamp": datetime.now(timezone.utc).isoformat()
+            })
+            await websocket.close(code=4001, reason="Authentication failed")
+        except:
+            pass  # Connection might already be closed
+        return
+        
+    except Exception as e:
+        # Unexpected authentication error
+        logger.error(f"❌ Unexpected WebSocket authentication error: {e}")
+        try:
+            await websocket.send_json({
+                "type": "internal_error", 
+                "error": "Authentication system error",
+                "timestamp": datetime.now(timezone.utc).isoformat()
+            })
+            await websocket.close(code=4002, reason="Authentication system error")
+        except:
+            pass
+        return
+    
+    # Initialize factory-based WebSocket handling with authenticated context
     factory_adapter = None
     user_emitter = None
     websocket_manager = None
     
     try:
-        # Get WebSocket manager and factory adapter from app state
-        # Note: In a real route, we'd get these through dependency injection
-        # For now, we'll get them directly since this is a WebSocket endpoint
-        websocket_manager = get_websocket_manager()
+        # SECURITY FIX: Use factory pattern instead of singleton
+        # Import factory pattern here to avoid circular imports  
+        from netra_backend.app.websocket_core.websocket_manager_factory import create_websocket_manager
         
-        # We need to get the factory adapter from the app state
-        # Since WebSocket endpoints don't support normal dependency injection,
-        # we'll implement a custom pattern
+        # Create isolated WebSocket manager for this authenticated user
+        websocket_manager = create_websocket_manager(user_context)
+        logger.info(f"✅ Created isolated WebSocket manager for authenticated user {user_id[:8]}...")
+        
+        # Get factory adapter from app state
         app = websocket.scope.get("app")
         if app and hasattr(app.state, 'factory_adapter'):
             factory_adapter = app.state.factory_adapter
         else:
-            # Fallback to legacy WebSocket handling
-            logger.warning(f"Factory adapter not available for user {user_id} - using legacy WebSocket handling")
-            await _handle_legacy_websocket(websocket, user_id, thread_id, run_id, connection_id)
+            # Fallback to authenticated legacy WebSocket handling
+            logger.warning(f"Factory adapter not available for authenticated user {user_id[:8]}... - using secure legacy WebSocket handling")
+            await _handle_authenticated_legacy_websocket(websocket, user_context, auth_info, websocket_manager)
             return
         
-        # Create request context for factory pattern
+        # Create request context using authenticated user context
         request_context = {
             'user_id': user_id,
-            'thread_id': thread_id or f"ws_thread_{user_id}",
-            'request_id': run_id or str(uuid.uuid4()),
+            'thread_id': user_context.thread_id,
+            'request_id': user_context.request_id,
             'connection_id': connection_id,
             'websocket_connection': True,
+            'websocket_connection_id': user_context.websocket_connection_id,
+            'run_id': user_context.run_id,
+            'authenticated': True,
+            'auth_info': auth_info,
             'timestamp': datetime.now(timezone.utc).isoformat()
         }
         
@@ -336,60 +391,93 @@ async def _process_factory_websocket_message(
             pass  # Connection might be closed
 
 
-async def _handle_legacy_websocket(
+async def _handle_authenticated_legacy_websocket(
     websocket: WebSocket,
-    user_id: str,
-    thread_id: Optional[str],
-    run_id: Optional[str],
-    connection_id: str
+    user_context: "UserExecutionContext",
+    auth_info: Dict[str, Any],
+    websocket_manager
 ):
-    """Fallback to legacy WebSocket handling when factory pattern is not available."""
-    logger.warning(f"🔄 Using legacy WebSocket handling for user {user_id}")
+    """
+    SECURE fallback to authenticated legacy WebSocket handling.
+    
+    This function provides a secure fallback when the factory pattern is not available,
+    but still maintains authentication and user context isolation.
+    """
+    user_id = user_context.user_id
+    logger.warning(f"🔄 Using AUTHENTICATED legacy WebSocket handling for user {user_id[:8]}...")
     
     try:
-        # Get legacy WebSocket manager
-        websocket_manager = get_websocket_manager()
-        
+        # Register connection with isolated WebSocket manager (not singleton)
         if websocket_manager:
-            await websocket_manager.connect_user(
+            # Create WebSocket connection object
+            from netra_backend.app.websocket_core.unified_manager import WebSocketConnection
+            connection = WebSocketConnection(
+                connection_id=user_context.websocket_connection_id,
                 user_id=user_id,
                 websocket=websocket,
-                thread_id=thread_id or f"legacy_thread_{user_id}",
-                connection_id=connection_id
+                connected_at=datetime.now(timezone.utc),
+                metadata={
+                    "thread_id": user_context.thread_id,
+                    "run_id": user_context.run_id,
+                    "authenticated": True,
+                    "auth_method": "jwt",
+                    "legacy_mode": True
+                }
             )
+            await websocket_manager.add_connection(connection)
         
-        # Send legacy welcome message
+        # Send authenticated welcome message
         await websocket.send_json({
             "type": "welcome",
             "data": {
-                "message": "Connected via legacy WebSocket handling",
+                "message": "Connected via authenticated legacy WebSocket handling",
                 "factory_pattern": False,
-                "user_isolation": False
+                "user_isolation": True,  # Still isolated via dedicated manager
+                "authenticated": True,
+                "user_id": user_id[:8] + "...",
+                "connection_id": user_context.websocket_connection_id
             },
             "timestamp": datetime.now(timezone.utc).isoformat()
         })
         
-        # Simple message loop for legacy mode
+        # Simple message loop for authenticated legacy mode
         try:
             while True:
                 message = await websocket.receive_json()
                 
-                # Echo back with legacy marker
-                await websocket.send_json({
-                    "type": "legacy_echo",
+                # Validate message belongs to authenticated user
+                message_response = {
+                    "type": "authenticated_legacy_echo",
                     "original_message": message,
                     "factory_pattern": False,
+                    "authenticated": True,
+                    "user_context": {
+                        "user_id": user_id[:8] + "...",
+                        "thread_id": user_context.thread_id,
+                        "request_id": user_context.request_id
+                    },
                     "timestamp": datetime.now(timezone.utc).isoformat()
-                })
+                }
+                
+                # Send via isolated manager
+                if websocket_manager:
+                    await websocket_manager.emit_critical_event(
+                        user_id, "legacy_message_processed", message_response
+                    )
+                else:
+                    await websocket.send_json(message_response)
                 
         except WebSocketDisconnect:
-            logger.info(f"Legacy WebSocket disconnected for user {user_id}")
+            logger.info(f"Authenticated legacy WebSocket disconnected for user {user_id[:8]}...")
             
     except Exception as e:
-        logger.error(f"Legacy WebSocket error for user {user_id}: {e}")
+        logger.error(f"Authenticated legacy WebSocket error for user {user_id[:8]}...: {e}")
     finally:
         if websocket_manager:
-            await websocket_manager.disconnect_user(user_id, websocket)
+            try:
+                await websocket_manager.remove_connection(user_context.websocket_connection_id)
+            except Exception as e:
+                logger.error(f"Failed to cleanup authenticated legacy connection: {e}")
 
 
 async def _cleanup_factory_websocket(

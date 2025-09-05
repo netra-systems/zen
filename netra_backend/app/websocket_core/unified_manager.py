@@ -1187,33 +1187,43 @@ class UnifiedWebSocketManager:
 
 def get_websocket_manager() -> UnifiedWebSocketManager:
     """
-    DEPRECATED: Get the global WebSocket manager instance.
+    🚨 SECURITY DEPRECATED: This function is DEPRECATED and UNSAFE.
     
-    WARNING: This function creates a non-isolated manager instance that can cause
-    CRITICAL SECURITY VULNERABILITIES in multi-user environments. It should only
-    be used for backward compatibility in legacy code that cannot be immediately
-    migrated to the factory pattern.
+    This function has been DISABLED because it creates critical security vulnerabilities
+    in multi-user environments, causing user data leakage and authentication bypass.
     
-    For new code, use:
-    - create_websocket_manager(user_context) for isolated managers
-    - WebSocketManagerFactory for advanced factory operations
+    REQUIRED MIGRATION:
+    - For authenticated WebSocket connections: Use create_websocket_manager(user_context)
+    - For factory patterns: Use WebSocketManagerFactory
+    - For testing: Create dedicated test instances with proper user context
     
-    Returns:
-        UnifiedWebSocketManager: A NEW instance (not singleton) for basic compatibility
+    SECURITY ISSUE: This function was creating shared state between users,
+    allowing User A to see User B's messages and data.
     """
     from netra_backend.app.logging_config import central_logger
-    import warnings
+    import inspect
     
     logger = central_logger.get_logger(__name__)
     
-    warnings.warn(
-        "SECURITY WARNING: Using deprecated get_websocket_manager() function. "
-        "This creates a non-isolated manager that can leak data between users. "
-        "Migrate to create_websocket_manager(user_context) for proper isolation.",
-        UserWarning,
-        stacklevel=2
+    # Get caller information for debugging
+    frame = inspect.currentframe()
+    caller_info = "unknown"
+    if frame and frame.f_back:
+        caller_info = f"{frame.f_back.f_code.co_filename}:{frame.f_back.f_lineno}"
+    
+    # FAIL LOUDLY to prevent silent security vulnerabilities
+    error_message = (
+        f"🚨 CRITICAL SECURITY ERROR: get_websocket_manager() has been DISABLED due to "
+        f"critical multi-user security vulnerabilities. Called from: {caller_info}\n\n"
+        f"REQUIRED FIX:\n"
+        f"1. For authenticated connections: Use create_websocket_manager(user_context)\n"
+        f"2. For factory patterns: Use WebSocketManagerFactory\n"
+        f"3. For testing: Create test instances with proper context\n\n"
+        f"SECURITY RISK: This function caused USER DATA LEAKAGE between different users.\n"
+        f"Migration guide: /docs/websocket_migration.md"
     )
     
-    # Return a NEW instance each time to prevent shared state
-    # This is still not ideal but safer than a true singleton
-    return UnifiedWebSocketManager()
+    logger.critical(error_message)
+    
+    # Fail loudly instead of creating security vulnerabilities
+    raise RuntimeError(error_message)
