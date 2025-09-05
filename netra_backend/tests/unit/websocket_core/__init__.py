@@ -1,1 +1,1 @@
-"""Unit tests for WebSocket core functionality."""
+# WebSocket Core Unit Tests
