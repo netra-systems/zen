@@ -389,7 +389,7 @@ class TestAgentHandler(BaseMessageHandler):
             logger.info(f"Broadcasting message from {user_id} to all clients: {broadcast_message}")
             
             # Get WebSocket manager for broadcasting
-            from netra_backend.app.websocket_core.manager import get_websocket_manager
+            from netra_backend.app.websocket_core.unified_manager import get_websocket_manager
             ws_manager = get_websocket_manager()
             
             # Create broadcast message

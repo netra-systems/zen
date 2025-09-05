@@ -1,5 +1,6 @@
 # Shim module for backward compatibility
-from netra_backend.app.websocket_core.manager import WebSocketManager as ConnectionExecutor
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager as ConnectionExecutor
+WebSocketManager = ConnectionExecutor  # Backward compatibility alias
 
 
 class ConnectionOperationBuilder:
