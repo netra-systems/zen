@@ -1427,8 +1427,13 @@ class WebSocketService {
     const cleanToken = bearerToken.startsWith('Bearer ') ? bearerToken.substring(7) : bearerToken;
     
     try {
-      // Base64URL encode the token to ensure it's safe for subprotocol
-      const encodedToken = btoa(cleanToken).replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
+      // Properly encode token as base64url to match backend's urlsafe_b64decode
+      // Convert string to Uint8Array then to base64url
+      const encoder = new TextEncoder();
+      const data = encoder.encode(cleanToken);
+      const base64 = btoa(String.fromCharCode(...data));
+      // Convert to base64url format (URL-safe)
+      const encodedToken = base64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
       
       // Build protocols array with auth and compression support
       const protocols = [`jwt-auth`, `jwt.${encodedToken}`];

@@ -5,6 +5,7 @@ Implements a robust message queue with retry logic and error handling.
 
 import asyncio
 import json
+import random
 import uuid
 from dataclasses import dataclass, field
 from datetime import UTC, datetime, timedelta
@@ -30,6 +31,8 @@ class MessageStatus(Enum):
     COMPLETED = "completed"
     FAILED = "failed"
     RETRYING = "retrying"
+    RECOVERABLE_FAILED = "recoverable_failed"
+    CIRCUIT_BREAKER_OPEN = "circuit_breaker_open"
 
 @dataclass
 class QueuedMessage:
@@ -46,6 +49,16 @@ class QueuedMessage:
     processing_started_at: Optional[datetime] = None
     completed_at: Optional[datetime] = None
     error: Optional[str] = None
+    
+    # Enhanced retry attributes
+    last_retry_at: Optional[datetime] = None
+    next_retry_at: Optional[datetime] = None
+    backoff_multiplier: float = 1.5
+    base_retry_delay: int = 1  # seconds
+    max_retry_delay: int = 300  # 5 minutes
+    recovery_attempts: int = 0
+    max_recovery_attempts: int = 10
+    permanent_failure: bool = False
     
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary for serialization"""
