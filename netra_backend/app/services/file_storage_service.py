@@ -72,15 +72,47 @@ class FileStorageService(ServiceMixin):
         """Generate a unique file ID."""
         return str(uuid.uuid4())
     
-    def _get_file_path(self, file_id: str, filename: str) -> Path:
-        """Get the storage path for a file."""
+    def _sanitize_filename(self, filename: str) -> str:
+        """Sanitize filename to prevent path traversal attacks."""
+        if not filename:
+            raise ValueError("Filename cannot be empty")
+        
+        # Remove path separators and dangerous characters
+        dangerous_chars = ['/', '\\', '..', '~', '$', '&', '|', ';', ':', '<', '>', '?', '*', '"', "'"]
+        sanitized = filename
+        
+        for char in dangerous_chars:
+            sanitized = sanitized.replace(char, '_')
+        
+        # Remove leading/trailing whitespace and dots
+        sanitized = sanitized.strip('. ')
+        
+        # Ensure filename is not empty after sanitization
+        if not sanitized:
+            sanitized = "unnamed_file"
+        
+        # Limit filename length
+        if len(sanitized) > 200:  # Leave room for file_id prefix
+            name, ext = os.path.splitext(sanitized)
+            sanitized = name[:190] + ext
+        
+        return sanitized
+    
+    def _get_file_path(self, file_id: str, filename: str, user_id: Optional[str] = None) -> Path:
+        """Get the storage path for a file with user isolation and path traversal protection."""
+        # Sanitize filename to prevent path traversal
+        sanitized_filename = self._sanitize_filename(filename)
+        
+        # Create user-specific directory for isolation
+        user_dir = f"user_{user_id}" if user_id else "system"
+        
         # Create subdirectory based on first 2 characters of file_id for better organization
         subdir = file_id[:2]
-        storage_dir = self.storage_root / subdir
-        storage_dir.mkdir(exist_ok=True)
+        storage_dir = self.storage_root / user_dir / subdir
+        storage_dir.mkdir(parents=True, exist_ok=True)
         
         # Use file_id as prefix to avoid filename conflicts
-        safe_filename = f"{file_id}_{filename}"
+        safe_filename = f"{file_id}_{sanitized_filename}"
         return storage_dir / safe_filename
     
     def _calculate_checksum(self, file_path: Path) -> str:
@@ -95,9 +127,10 @@ class FileStorageService(ServiceMixin):
         self, 
         file_stream: BinaryIO, 
         filename: str, 
-        content_type: str
+        content_type: str,
+        user_id: Optional[str] = None
     ) -> None:
-        """Validate file upload parameters."""
+        """Validate file upload parameters with security checks."""
         if not filename:
             raise ValueError("Filename cannot be empty")
         
@@ -107,8 +140,23 @@ class FileStorageService(ServiceMixin):
         if len(filename) > 255:
             raise ValueError("Filename too long (max 255 characters)")
         
+        # Check for path traversal attempts
+        if '..' in filename or '/' in filename or '\\' in filename:
+            raise ValueError("Filename contains invalid path characters")
+        
+        # Check for null bytes
+        if '\0' in filename:
+            raise ValueError("Filename contains null bytes")
+        
+        # Validate user_id if provided
+        if user_id is not None:
+            if not user_id.isalnum():
+                raise ValueError("User ID must be alphanumeric")
+            if len(user_id) > 50:
+                raise ValueError("User ID too long")
+        
         # Check for dangerous file extensions (basic security)
-        dangerous_extensions = {'.exe', '.bat', '.cmd', '.com', '.pif', '.scr', '.vbs', '.js'}
+        dangerous_extensions = {'.exe', '.bat', '.cmd', '.com', '.pif', '.scr', '.vbs', '.js', '.php', '.sh'}
         file_extension = Path(filename).suffix.lower()
         if file_extension in dangerous_extensions:
             raise ValueError(f"File type not allowed: {file_extension}")
@@ -120,35 +168,37 @@ class FileStorageService(ServiceMixin):
             if not content_type:
                 content_type = "application/octet-stream"
         
-        logger.debug(f"Validated upload params: filename={filename}, content_type={content_type}")
+        logger.debug(f"Validated upload params: filename={filename}, content_type={content_type}, user_id={user_id}")
     
     async def upload_file(
         self,
         file_stream: BinaryIO,
         filename: str,
         content_type: str,
-        metadata: Optional[Dict[str, Any]] = None
+        metadata: Optional[Dict[str, Any]] = None,
+        user_id: Optional[str] = None
     ) -> Dict[str, Any]:
-        """Upload a file and return storage information.
+        """Upload a file and return storage information with user isolation.
         
         Args:
             file_stream: Binary file stream to upload
             filename: Original filename
             content_type: MIME content type
             metadata: Optional metadata dictionary
+            user_id: Optional user ID for isolation
             
         Returns:
             Dictionary containing file_id, storage_path, file_size, and metadata
         """
         try:
             # Validate parameters
-            self._validate_file_upload_params(file_stream, filename, content_type)
+            self._validate_file_upload_params(file_stream, filename, content_type, user_id)
             
             # Generate unique file ID
             file_id = self._generate_file_id()
             
-            # Get storage path
-            storage_path = self._get_file_path(file_id, filename)
+            # Get storage path with user isolation
+            storage_path = self._get_file_path(file_id, filename, user_id)
             
             # Write file to storage
             file_size = 0
@@ -165,11 +215,13 @@ class FileStorageService(ServiceMixin):
                 "file_id": file_id,
                 "filename": filename,
                 "original_filename": filename,
+                "sanitized_filename": self._sanitize_filename(filename),
                 "content_type": content_type,
                 "file_size": file_size,
                 "storage_path": str(storage_path),
                 "checksum": checksum,
                 "uploaded_at": datetime.now(timezone.utc).isoformat(),
+                "user_id": user_id,
                 "metadata": metadata or {}
             }
             
@@ -200,9 +252,10 @@ class FileStorageService(ServiceMixin):
         content_type: str,
         file_size: int,
         chunk_size: int = 1024 * 1024,
-        metadata: Optional[Dict[str, Any]] = None
+        metadata: Optional[Dict[str, Any]] = None,
+        user_id: Optional[str] = None
     ) -> Dict[str, Any]:
-        """Upload a large file with progress tracking and validation.
+        """Upload a large file with progress tracking and validation with user isolation.
         
         Args:
             file_stream: Binary file stream to upload
@@ -211,13 +264,14 @@ class FileStorageService(ServiceMixin):
             file_size: Expected file size in bytes
             chunk_size: Chunk size for reading (default 1MB)
             metadata: Optional metadata dictionary
+            user_id: Optional user ID for isolation
             
         Returns:
             Dictionary containing file_id, storage_path, file_size, and metadata
         """
         try:
             # Validate parameters
-            self._validate_file_upload_params(file_stream, filename, content_type)
+            self._validate_file_upload_params(file_stream, filename, content_type, user_id)
             
             if file_size <= 0:
                 raise ValueError("File size must be positive")
@@ -237,8 +291,8 @@ class FileStorageService(ServiceMixin):
             # Generate unique file ID
             file_id = self._generate_file_id()
             
-            # Get storage path
-            storage_path = self._get_file_path(file_id, filename)
+            # Get storage path with user isolation
+            storage_path = self._get_file_path(file_id, filename, user_id)
             
             # Write file with progress tracking
             written_bytes = 0
@@ -289,6 +343,7 @@ class FileStorageService(ServiceMixin):
                 "file_id": file_id,
                 "filename": filename,
                 "original_filename": filename,
+                "sanitized_filename": self._sanitize_filename(filename),
                 "content_type": content_type,
                 "file_size": written_bytes,
                 "storage_path": str(storage_path),
@@ -296,6 +351,7 @@ class FileStorageService(ServiceMixin):
                 "uploaded_at": datetime.now(timezone.utc).isoformat(),
                 "upload_type": "large_file",
                 "chunk_size": chunk_size,
+                "user_id": user_id,
                 "metadata": metadata or {}
             }
             
@@ -319,22 +375,38 @@ class FileStorageService(ServiceMixin):
                 context={"filename": filename, "content_type": content_type, "file_size": file_size}
             )
     
-    async def get_file_metadata(self, file_id: str) -> Optional[Dict[str, Any]]:
-        """Get metadata for a stored file.
+    def _validate_file_access(self, file_metadata: Dict[str, Any], requesting_user_id: Optional[str]) -> bool:
+        """Validate if user has access to the file."""
+        file_user_id = file_metadata.get("user_id")
+        
+        # System files (no user_id) can be accessed by anyone
+        if file_user_id is None:
+            return True
+            
+        # User can only access their own files
+        return file_user_id == requesting_user_id
+    
+    async def get_file_metadata(self, file_id: str, user_id: Optional[str] = None) -> Optional[Dict[str, Any]]:
+        """Get metadata for a stored file with access control.
         
         Args:
             file_id: Unique file identifier
+            user_id: User ID for access control
             
         Returns:
-            File metadata dictionary or None if not found
+            File metadata dictionary or None if not found/unauthorized
         """
-        return self._file_metadata.get(file_id)
+        metadata = self._file_metadata.get(file_id)
+        if metadata and self._validate_file_access(metadata, user_id):
+            return metadata
+        return None
     
-    async def delete_file(self, file_id: str) -> Dict[str, Any]:
-        """Delete a stored file.
+    async def delete_file(self, file_id: str, user_id: Optional[str] = None) -> Dict[str, Any]:
+        """Delete a stored file with access control.
         
         Args:
             file_id: Unique file identifier
+            user_id: User ID for access control
             
         Returns:
             Dictionary with deletion status and details
@@ -346,6 +418,14 @@ class FileStorageService(ServiceMixin):
                     "status": "not_found",
                     "file_id": file_id,
                     "message": "File not found"
+                }
+            
+            # Validate access permissions
+            if not self._validate_file_access(metadata, user_id):
+                return {
+                    "status": "unauthorized",
+                    "file_id": file_id,
+                    "message": "Access denied"
                 }
             
             storage_path = Path(metadata["storage_path"])

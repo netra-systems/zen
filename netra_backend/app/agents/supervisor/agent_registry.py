@@ -32,10 +32,13 @@ if TYPE_CHECKING:
     # MIGRATED: Use UnifiedToolDispatcher as SSOT for tool dispatching
     from netra_backend.app.core.tools.unified_tool_dispatcher import UnifiedToolDispatcher
     from netra_backend.app.llm.llm_manager import LLMManager
-    from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
+    from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge, create_agent_websocket_bridge
     from netra_backend.app.websocket_core.manager import WebSocketManager
     from netra_backend.app.agents.supervisor.execution_factory import UserExecutionContext
     from netra_backend.app.agents.base_agent import BaseAgent
+else:
+    # Import at runtime to avoid circular imports
+    create_agent_websocket_bridge = None
 
 from netra_backend.app.logging_config import central_logger
 
@@ -66,16 +69,31 @@ class UserAgentSession:
         
         logger.info(f"✅ Created isolated UserAgentSession for user {user_id}")
         
-    def set_websocket_manager(self, manager):
-        """Set user-specific WebSocket bridge."""
-        from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
-        self._websocket_manager = manager
-        bridge = AgentWebSocketBridge()
+    async def set_websocket_manager(self, manager, user_context: Optional['UserExecutionContext'] = None):
+        """Set user-specific WebSocket bridge using factory pattern.
         
-        # For now, store the bridge instance - actual emitter creation will happen
-        # when we have a proper user context in agent creation
+        Args:
+            manager: WebSocket manager instance
+            user_context: Optional user execution context for proper isolation.
+                         If not provided, creates a minimal context.
+        """
+        from netra_backend.app.services.agent_websocket_bridge import create_agent_websocket_bridge
+        from netra_backend.app.agents.supervisor.execution_factory import UserExecutionContext
+        
+        self._websocket_manager = manager
+        
+        # Create user context if not provided
+        if user_context is None:
+            user_context = UserExecutionContext(
+                user_id=self.user_id,
+                request_id=f"session_{self.user_id}_{id(self)}",
+                thread_id=f"thread_{self.user_id}_{id(self)}"
+            )
+        
+        # Use factory to create properly isolated bridge
+        bridge = await create_agent_websocket_bridge(user_context)
         self._websocket_bridge = bridge
-        logger.debug(f"WebSocket bridge set for user {self.user_id}")
+        logger.debug(f"Factory-created WebSocket bridge set for user {self.user_id}")
         
     async def create_agent_execution_context(self, agent_type: str, 
                                            user_context: 'UserExecutionContext') -> 'UserExecutionContext':
@@ -337,7 +355,8 @@ class AgentRegistry(UniversalAgentRegistry):
         
         # Set WebSocket manager if provided
         if websocket_manager:
-            user_session.set_websocket_manager(websocket_manager)
+            # Use asyncio.create_task to handle async method
+            asyncio.create_task(user_session.set_websocket_manager(websocket_manager, user_context))
         
         # Create isolated execution context
         execution_context = await user_session.create_agent_execution_context(

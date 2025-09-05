@@ -219,6 +219,27 @@ class TracingManager:
         
         for tracer in self._tracers.values():
             tracer.clear_spans()
+    
+    def inject_trace_headers(self) -> Dict[str, str]:
+        """Inject trace headers for distributed tracing.
+        
+        Returns:
+            Dict of headers with trace context
+        """
+        headers = {}
+        tracer = self._default_tracer
+        
+        # Add trace ID if available
+        if tracer.context.trace_id:
+            headers['X-Trace-Id'] = str(tracer.context.trace_id)
+        
+        # Add current span ID if available
+        if tracer.context.current_span:
+            headers['X-Span-Id'] = str(tracer.context.current_span.span_id)
+            if tracer.context.current_span.parent_span_id:
+                headers['X-Parent-Span-Id'] = str(tracer.context.current_span.parent_span_id)
+        
+        return headers
 
 
 # Global tracing manager

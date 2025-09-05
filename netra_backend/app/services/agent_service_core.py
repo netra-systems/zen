@@ -17,7 +17,8 @@ from netra_backend.app.agents.supervisor_consolidated import (
     SupervisorAgent as Supervisor,
 )
 from netra_backend.app.logging_config import central_logger
-from netra_backend.app.services.agent_websocket_bridge import get_agent_websocket_bridge
+from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
+from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
 from netra_backend.app.services.message_handlers import MessageHandlerService
 from netra_backend.app.services.service_interfaces import IAgentService
 from netra_backend.app.services.streaming_service import (
@@ -51,8 +52,8 @@ class AgentService(IAgentService):
     async def _initialize_bridge_integration(self) -> None:
         """Initialize WebSocket-Agent integration through bridge (SSOT for integration)."""
         try:
-            # Get singleton bridge instance
-            self._bridge = await get_agent_websocket_bridge()
+            # Create non-singleton bridge instance (SECURITY CRITICAL: prevents cross-user leakage)
+            self._bridge = AgentWebSocketBridge()
             
             # Ensure complete integration with all components
             registry = getattr(self.supervisor, 'registry', None)
@@ -109,8 +110,8 @@ class AgentService(IAgentService):
     async def _recover_bridge_integration(self) -> bool:
         """Idempotent bridge integration recovery."""
         try:
-            # Get/re-get bridge instance
-            self._bridge = await get_agent_websocket_bridge()
+            # Create new bridge instance (SECURITY CRITICAL: prevents cross-user leakage)
+            self._bridge = AgentWebSocketBridge()
             
             # Ensure integration with all components (idempotent)
             registry = getattr(self.supervisor, 'registry', None)

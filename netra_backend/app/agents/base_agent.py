@@ -124,7 +124,8 @@ class BaseAgent(ABC):
                  enable_execution_engine: bool = True,
                  enable_caching: bool = False,
                  tool_dispatcher: Optional[ToolDispatcher] = None,  # DEPRECATED: Use create_agent_with_context() factory
-                 redis_manager: Optional[RedisManager] = None):
+                 redis_manager: Optional[RedisManager] = None,
+                 user_context: Optional['UserExecutionContext'] = None):
         
         # Initialize with simple single inheritance pattern
         super().__init__()
@@ -147,6 +148,10 @@ class BaseAgent(ABC):
         
         # Initialize WebSocket bridge adapter (SSOT for WebSocket events)
         self._websocket_adapter = WebSocketBridgeAdapter()
+        
+        # Store user context for isolated WebSocket events (factory pattern)
+        self.user_context = user_context
+        self._websocket_emitter = None  # Will be created when user_context is available
         
         # Initialize timing collector
         self.timing_collector = ExecutionTimingCollector(agent_name=name)
@@ -360,7 +365,11 @@ class BaseAgent(ABC):
         Returns:
             The metadata value or default if not found
         """
-        return context.metadata.get(key, default)
+        if hasattr(context, 'metadata'):
+            return context.metadata.get(key, default)
+        elif hasattr(context, 'agent_context'):
+            return context.agent_context.get(key, default)
+        return default
     
     # === Token Management and Cost Optimization Methods ===
     
@@ -422,7 +431,7 @@ class BaseAgent(ABC):
         )
         
         # Get optimization metrics for logging
-        optimizations = enhanced_context.metadata.get("prompt_optimizations", [])
+        optimizations = self.get_metadata_value(enhanced_context, "prompt_optimizations", [])
         if optimizations:
             latest_optimization = optimizations[-1]
             self.logger.info(
@@ -452,7 +461,7 @@ class BaseAgent(ABC):
         )
         
         # Get suggestions from enhanced context
-        suggestions_data = enhanced_context.metadata.get("cost_optimization_suggestions", {})
+        suggestions_data = self.get_metadata_value(enhanced_context, "cost_optimization_suggestions", {})
         suggestions = suggestions_data.get("suggestions", [])
         
         return enhanced_context, suggestions
@@ -656,7 +665,7 @@ class BaseAgent(ABC):
             
             # Create temporary DeepAgentState bridge (DEPRECATED - will be removed)
             temp_state = DeepAgentState(
-                user_request=context.metadata.get('user_request', 'default_request'),
+                user_request=context.metadata.get('user_request', context.metadata.get('agent_input', 'default_request')),
                 chat_thread_id=context.thread_id,
                 user_id=context.user_id,
                 run_id=context.run_id
@@ -1386,28 +1395,65 @@ class BaseAgent(ABC):
     
     # === SSOT WebSocket Update Infrastructure ===
     
-    async def _send_update(self, run_id: str, update: Dict[str, Any]) -> None:
-        """Send update via AgentWebSocketBridge for standardized emission (SSOT pattern)."""
-        try:
-            from netra_backend.app.services.agent_websocket_bridge import get_agent_websocket_bridge
+    async def _get_user_emitter(self):
+        """Get user-isolated WebSocket emitter using factory pattern."""
+        if not self.user_context:
+            return None
             
-            bridge = await get_agent_websocket_bridge()
+        # Create emitter if not already created (lazy initialization)
+        if not self._websocket_emitter:
+            try:
+                from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
+                bridge = AgentWebSocketBridge()
+                self._websocket_emitter = await bridge.create_user_emitter(self.user_context)
+            except Exception as e:
+                self.logger.debug(f"Failed to create user emitter: {e}")
+                return None
+                
+        return self._websocket_emitter
+    
+    def set_user_context(self, user_context: 'UserExecutionContext') -> None:
+        """Set user context for isolated WebSocket events (factory pattern).
+        
+        Args:
+            user_context: User execution context for event isolation
+        """
+        self.user_context = user_context
+        # Reset emitter to force recreation with new context
+        self._websocket_emitter = None
+    
+    async def _send_update(self, run_id: str, update: Dict[str, Any]) -> None:
+        """Send update via AgentWebSocketBridge factory pattern for user isolation."""
+        try:
+            # Get user-isolated emitter (factory pattern)
+            emitter = await self._get_user_emitter()
+            if not emitter:
+                self.logger.debug("No user context available for WebSocket updates - skipping")
+                return
+                
             status = update.get('status', 'processing')
             message = update.get('message', '')
+            metadata = {"agent_name": self.name, "message": message}
             
-            # Map update status to appropriate bridge notification
+            # Map update status to appropriate emitter notification
             if status == 'processing':
-                await bridge.notify_agent_thinking(run_id, self.name, message)
+                await emitter.emit_agent_thinking(self.name, metadata)
             elif status == 'completed' or status == 'completed_with_fallback':
-                await bridge.notify_agent_completed(run_id, self.name, 
-                                                   result=update.get('result'), 
-                                                   execution_time_ms=None)
+                await emitter.emit_agent_completed(self.name, {
+                    "result": update.get('result'), 
+                    "execution_time_ms": None,
+                    "agent_name": self.name
+                })
             else:
                 # Custom status updates
-                await bridge.notify_custom(run_id, self.name, f"agent_{status}", update)
+                await emitter.emit_custom_event(f"agent_{status}", {
+                    "agent_name": self.name,
+                    "status": status,
+                    **update
+                })
             
         except Exception as e:
-            self.logger.debug(f"Failed to send WebSocket update via bridge: {e}")
+            self.logger.debug(f"Failed to send WebSocket update via factory pattern: {e}")
     
     async def send_processing_update(self, run_id: str, message: str = "") -> None:
         """Send processing status update (SSOT pattern)."""

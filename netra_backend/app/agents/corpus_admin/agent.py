@@ -7,9 +7,12 @@ This module provides minimal functionality for test compatibility.
 
 import time
 from typing import Any, Dict, Optional
-from unittest.mock import Mock
 
 from netra_backend.app.agents.base_agent import BaseAgent
+from netra_backend.app.agents.base.executor import (
+    BaseExecutionEngine, ExecutionStrategy, ExecutionWorkflowBuilder,
+    AgentMethodExecutionPhase
+)
 from netra_backend.app.agents.base.interface import ExecutionContext, ExecutionResult, ExecutionStatus
 from netra_backend.app.agents.base.errors import ValidationError
 from netra_backend.app.agents.base.monitoring import ExecutionMonitor
@@ -67,8 +70,11 @@ class CorpusAdminSubAgent(BaseAgent):
     
     def __init__(self, llm_manager: LLMManager, tool_dispatcher: ToolDispatcher, 
                  websocket_manager: Optional[Any] = None):
-        super().__init__()
-        self.llm_manager = llm_manager
+        super().__init__(
+            llm_manager=llm_manager,
+            name="CorpusAdminSubAgent",
+            description="Agent specialized in corpus management and administration"
+        )
         self.tool_dispatcher = tool_dispatcher
         self.websocket_manager = websocket_manager
         
@@ -77,22 +83,9 @@ class CorpusAdminSubAgent(BaseAgent):
         self.validator = CorpusValidator()
         self.operations = CorpusOperations(tool_dispatcher)
         
-        # Initialize modern execution infrastructure
-        self.monitor = ExecutionMonitor(self.__class__.__name__)
-        self.reliability_manager = ReliabilityManager(self.__class__.__name__)
-        self.execution_engine = Mock()  # BaseExecutionEngine placeholder
-        self.error_handler = agent_error_handler
+        # Initialize BaseExecutionEngine with corpus admin phases
+        self._init_execution_engine()
         
-    @property
-    def name(self) -> str:
-        """Agent name."""
-        return "CorpusAdminSubAgent"
-    
-    @property
-    def description(self) -> str:
-        """Agent description."""
-        return "Agent specialized in corpus management and administration"
-    
     async def check_entry_conditions(self, state: DeepAgentState, run_id: str) -> bool:
         """Check if agent should handle this request."""
         if not state or not state.user_request:
@@ -332,12 +325,12 @@ class CorpusAdminSubAgent(BaseAgent):
     
     def get_health_status(self) -> Dict[str, Any]:
         """Get health status."""
-        return {
+        health_status = super().get_health_status()
+        health_status.update({
             "agent_health": "healthy",
-            "monitor": self.monitor.get_health_status(),
-            "error_handler": self.error_handler.get_health_status(),
-            "reliability": self.reliability_manager.get_health_status()
-        }
+            "execution_engine": self.execution_engine.get_health_status() if self.execution_engine and hasattr(self.execution_engine, 'get_health_status') else "healthy"
+        })
+        return health_status
     
     # Stub methods for WebSocket updates
     async def send_status_update(self, message: str, context: ExecutionContext):
@@ -355,3 +348,75 @@ class CorpusAdminSubAgent(BaseAgent):
     async def _send_completion_update(self):
         """Send completion update."""
         pass
+    
+    def _init_execution_engine(self) -> None:
+        """Initialize BaseExecutionEngine with corpus admin phases."""
+        # Create execution phases for corpus admin workflow
+        phase_1 = AgentMethodExecutionPhase("parsing", self, "_execute_parsing_phase")
+        phase_2 = AgentMethodExecutionPhase("validation", self, "_execute_validation_phase", ["parsing"])
+        phase_3 = AgentMethodExecutionPhase("operation", self, "_execute_operation_phase", ["validation"])
+        phase_4 = AgentMethodExecutionPhase("finalization", self, "_execute_finalization_phase", ["operation"])
+        
+        # Build execution engine with sequential strategy
+        self._execution_engine = ExecutionWorkflowBuilder() \
+            .add_phases([phase_1, phase_2, phase_3, phase_4]) \
+            .set_strategy(ExecutionStrategy.SEQUENTIAL) \
+            .add_pre_execution_hook(self._pre_execution_hook) \
+            .add_post_execution_hook(self._post_execution_hook) \
+            .build()
+    
+    async def _execute_parsing_phase(self, context: ExecutionContext, previous_results: Dict[str, Any]) -> Dict[str, Any]:
+        """Phase 1: Parse corpus operation request."""
+        request = context.state.user_request or "Default corpus operation"
+        parsed_request = self.parser.parse_operation_request(request)
+        return {"parsed_request": parsed_request, "original_request": request}
+    
+    async def _execute_validation_phase(self, context: ExecutionContext, previous_results: Dict[str, Any]) -> Dict[str, Any]:
+        """Phase 2: Validate operation and check approval requirements."""
+        parsed_request = previous_results["parsing"]["parsed_request"]
+        approval_required = self.validator.validate_approval_required(
+            parsed_request, context.state, context.run_id, context.stream_updates
+        )
+        return {"approval_required": approval_required, "validated": True}
+    
+    async def _execute_operation_phase(self, context: ExecutionContext, previous_results: Dict[str, Any]) -> Dict[str, Any]:
+        """Phase 3: Execute corpus operation."""
+        parsed_request = previous_results["parsing"]["parsed_request"]
+        approval_required = previous_results["validation"]["approval_required"]
+        
+        if not approval_required:
+            operation_result = self.operations.execute_operation(
+                parsed_request, context.run_id, context.stream_updates
+            )
+            return {"operation_result": operation_result, "executed": True}
+        else:
+            return {"operation_result": None, "executed": False, "reason": "approval_required"}
+    
+    async def _execute_finalization_phase(self, context: ExecutionContext, previous_results: Dict[str, Any]) -> Dict[str, Any]:
+        """Phase 4: Finalize operation and update state."""
+        operation_result = previous_results["operation"]["operation_result"]
+        
+        if operation_result and operation_result.success:
+            # Set result on state
+            if hasattr(context.state, 'corpus_admin_result') or True:  # Allow setting attribute
+                context.state.corpus_admin_result = {
+                    "operation": operation_result.operation.value,
+                    "success": operation_result.success,
+                    "corpus_metadata": {
+                        "corpus_name": operation_result.corpus_metadata.corpus_name if operation_result.corpus_metadata else None
+                    }
+                }
+            
+            return {"finalized": True, "result": context.state.corpus_admin_result}
+        else:
+            return {"finalized": False, "error": "Operation failed or not executed"}
+    
+    async def _pre_execution_hook(self, context: ExecutionContext) -> None:
+        """Pre-execution hook for setup."""
+        logger.info(f"Starting corpus admin operation for run_id: {context.run_id}")
+        await self.send_status_update("Initializing corpus administration", context)
+    
+    async def _post_execution_hook(self, context: ExecutionContext, phase_results: Dict[str, Any]) -> None:
+        """Post-execution hook for cleanup."""
+        logger.info(f"Corpus admin operation completed for run_id: {context.run_id}")
+        await self.send_status_update("Corpus administration completed", context)

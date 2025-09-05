@@ -7,17 +7,29 @@ from starlette.websockets import WebSocketDisconnect
 
 from netra_backend.app.db.models_postgres import Run, Thread
 from netra_backend.app.logging_config import central_logger
-from netra_backend.app.websocket_core import get_websocket_manager
-manager = get_websocket_manager()
+from netra_backend.app.websocket_core import create_websocket_manager
+from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
 
 logger = central_logger.get_logger(__name__)
 
 async def send_agent_started_notification(
-    user_id: str, thread: Optional[Thread], run: Optional[Run]
+    user_id: str, thread: Optional[Thread], run: Optional[Run], user_context: Optional[UserExecutionContext] = None
 ) -> None:
     """Send agent_started notification to frontend"""
     thread_id = thread.id if thread else None
     run_id = run.id if run else None
+    
+    # Create user context if not provided
+    if not user_context:
+        user_context = UserExecutionContext(
+            user_id=user_id,
+            thread_id=thread_id,
+            run_id=run_id
+        )
+    
+    # Create isolated manager for this user
+    manager = create_websocket_manager(user_context)
+    
     await manager.send_message(user_id, {
         "type": "agent_started",
         "payload": {"thread_id": thread_id, "run_id": run_id}
@@ -32,19 +44,32 @@ async def process_user_message_with_notifications(
         # Don't process if thread creation failed
         if thread is None:
             logger.error(f"Cannot process message without thread for user {user_id}")
-            await send_error_safely(user_id, "Failed to create or access thread")
+            # Create minimal context for error handling
+            error_context = UserExecutionContext(user_id=user_id)
+            await send_error_safely(user_id, "Failed to create or access thread", error_context)
             return
+        
+        # Create user context for this message processing
+        user_context = UserExecutionContext(
+            user_id=user_id,
+            thread_id=thread.id if thread else None,
+            run_id=run.id if run else None,
+            db_session=db_session
+        )
             
-        # Send agent_started notification
-        await send_agent_started_notification(user_id, thread, run)
+        # Send agent_started notification with user context
+        await send_agent_started_notification(user_id, thread, run, user_context)
         response = await execute_and_persist(
             supervisor, text, user_id, thread, run, db_session, thread_service
         )
-        await send_response_safely(user_id, response)
+        await send_response_safely(user_id, response, user_context)
     except WebSocketDisconnect:
         handle_disconnect(user_id)
     except Exception as e:
-        await handle_processing_error(user_id, e)
+        # Create context for error handling if not already created
+        if 'user_context' not in locals():
+            user_context = UserExecutionContext(user_id=user_id)
+        await handle_processing_error(user_id, e, user_context)
 
 async def execute_and_persist(
     supervisor, user_id: str, text: str, thread: Optional[Thread],
@@ -60,38 +85,21 @@ async def execute_and_persist(
     # CRITICAL: Register run-thread mapping for WebSocket routing
     # This ensures all agent events reach the correct user
     try:
-        from netra_backend.app.services.agent_websocket_bridge import get_agent_websocket_bridge
-        bridge = await get_agent_websocket_bridge()
+        from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
+        bridge = AgentWebSocketBridge()
         
-        # Register the mapping BEFORE execution
-        success = await bridge.register_run_thread_mapping(
-            run_id=run_id,
-            thread_id=thread_id,
-            metadata={
-                "user_id": user_id,
-                "user_request": text[:100] if text else "",
-                "source": "message_processing"
-            }
-        )
+        # MIGRATION NOTE: register_run_thread_mapping is deprecated in factory pattern
+        # Event routing is now handled automatically through UserExecutionContext  
+        logger.info(f"ℹ️ Bridge created for user isolation - run_id={run_id} → thread_id={thread_id}")
         
-        if success:
-            logger.info(f"✅ Registered run-thread mapping: run_id={run_id} → thread_id={thread_id}")
-        else:
-            logger.warning(f"⚠️ Failed to register run-thread mapping for run_id={run_id}")
-            
-        # Set WebSocket bridge on supervisor if possible
-        if hasattr(supervisor, 'set_websocket_bridge'):
-            supervisor.set_websocket_bridge(bridge, run_id)
-            logger.info(f"✅ Set WebSocket bridge on supervisor for run_id={run_id}")
-        else:
-            logger.warning(f"⚠️ Supervisor doesn't have set_websocket_bridge method")
+        # Store bridge for later use with UserExecutionContext
+        bridge_for_emitter = bridge
             
     except Exception as e:
         logger.error(f"🚨 Error registering run-thread mapping: {e}")
         # Continue execution even if registration fails
     
-    # Create UserExecutionContext for the new pattern
-    from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
+    # UserExecutionContext already imported at top of file
     
     try:
         # Create context with proper metadata using db_session
@@ -106,6 +114,26 @@ async def execute_and_persist(
             }
         )
         logger.info(f"✅ Created UserExecutionContext for user={user_id}, thread={thread_id}, run={run_id}")
+        
+        # CRITICAL: Create per-user WebSocket emitter (SECURITY: prevents cross-user leakage)
+        if 'bridge_for_emitter' in locals():
+            try:
+                user_emitter = await bridge_for_emitter.create_user_emitter(context)
+                
+                # Set user-specific emitter on supervisor for real-time events
+                if hasattr(supervisor, 'set_websocket_emitter'):
+                    supervisor.set_websocket_emitter(user_emitter)
+                    logger.info(f"✅ Set user-specific WebSocket emitter on supervisor for run_id={run_id}")
+                elif hasattr(supervisor, 'set_websocket_bridge'):
+                    # Backward compatibility: use bridge if emitter method not available
+                    supervisor.set_websocket_bridge(bridge_for_emitter, run_id)
+                    logger.warning(f"⚠️ Using legacy bridge method - supervisor should be updated to use set_websocket_emitter")
+                else:
+                    logger.warning(f"⚠️ Supervisor doesn't have WebSocket emitter or bridge methods")
+                    
+            except Exception as emitter_error:
+                logger.error(f"🚨 Failed to create user emitter: {emitter_error}")
+                # Continue execution without WebSocket events rather than failing completely
         
         # Check if supervisor has execute method
         if not hasattr(supervisor, 'execute'):
@@ -160,10 +188,14 @@ async def mark_run_completed(run: Run, db_session: AsyncSession, thread_service)
         run.id, status="completed", db=db_session
     )
 
-async def send_response_safely(user_id: str, response: Any) -> None:
+async def send_response_safely(user_id: str, response: Any, user_context: UserExecutionContext) -> None:
     """Send response to user with error handling"""
     from netra_backend.app.services.message_handler_base import MessageHandlerBase
     response_data = MessageHandlerBase.convert_response_to_dict(response)
+    
+    # Create isolated manager for this user
+    manager = create_websocket_manager(user_context)
+    
     try:
         await manager.send_message(
             user_id, {"type": "agent_completed", "payload": response_data}
@@ -175,21 +207,24 @@ def handle_disconnect(user_id: str) -> None:
     """Handle WebSocket disconnection"""
     logger.info(f"WebSocket disconnected for user {user_id} during processing")
 
-async def handle_processing_error(user_id: str, error: Exception) -> None:
+async def handle_processing_error(user_id: str, error: Exception, user_context: UserExecutionContext) -> None:
     """Handle errors during message processing"""
     if isinstance(error, RuntimeError) and is_connection_error(error):
         logger.info(f"WebSocket already closed for user {user_id}: {error}")
     else:
         logger.error(f"Error processing user message: {error}")
-        await send_error_safely(user_id, error)
+        await send_error_safely(user_id, error, user_context)
 
 def is_connection_error(error: RuntimeError) -> bool:
     """Check if runtime error is connection related"""
     error_str = str(error)
     return "Cannot call" in error_str or "close" in error_str.lower()
 
-async def send_error_safely(user_id: str, error: Exception) -> None:
+async def send_error_safely(user_id: str, error: Exception, user_context: UserExecutionContext) -> None:
     """Send error message to user safely"""
+    # Create isolated manager for this user
+    manager = create_websocket_manager(user_context)
+    
     try:
         await manager.send_error(user_id, f"Internal server error: {str(error)}")
     except Exception:

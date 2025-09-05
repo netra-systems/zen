@@ -65,7 +65,7 @@ jobs:
   
   determine-strategy:
     name: Determine Test Strategy
-    runs-on: ubuntu-latest
+    runs-on: warp-custom-test
     timeout-minutes: 5
     outputs:
       test_level: ${{ steps.strategy.outputs.test_level }}
@@ -187,7 +187,7 @@ jobs:
   
   setup-services:
     name: Setup Test Services
-    runs-on: ubuntu-latest
+    runs-on: warp-custom-test
     needs: determine-strategy
     if: needs.determine-strategy.outputs.real_services == 'true'
     timeout-minutes: 10
@@ -244,7 +244,7 @@ jobs:
   
   python-tests:
     name: Python Tests
-    runs-on: ubuntu-latest
+    runs-on: warp-custom-test
     needs: [determine-strategy, setup-services]
     if: always() && needs.determine-strategy.result == 'success'
     timeout-minutes: 30
@@ -363,7 +363,7 @@ jobs:
   
   frontend-tests:
     name: Frontend Tests
-    runs-on: ubuntu-latest
+    runs-on: warp-custom-test
     needs: determine-strategy
     if: |
       always() && 
@@ -429,7 +429,7 @@ jobs:
   
   e2e-tests:
     name: E2E Tests
-    runs-on: ubuntu-latest
+    runs-on: warp-custom-test
     needs: [determine-strategy, python-tests, frontend-tests]
     if: |
       always() && 
@@ -437,31 +437,6 @@ jobs:
       needs.python-tests.result == 'success' &&
       needs.determine-strategy.outputs.should_run_e2e == 'true'
     timeout-minutes: 45
-    
-    services:
-      postgres:
-        image: postgres:17-alpine
-        env:
-          POSTGRES_DB: netra_e2e
-          POSTGRES_USER: e2e_user
-          POSTGRES_PASSWORD: e2e_password
-        ports:
-          - 5435:5432
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-          
-      redis:
-        image: redis:7-alpine
-        ports:
-          - 6382:6379
-        options: >-
-          --health-cmd "redis-cli ping"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
     
     steps:
       - name: Checkout code
@@ -490,43 +465,74 @@ jobs:
           # Frontend dependencies
           cd frontend && npm ci && cd ..
       
-      - name: Build and start services
+      - name: Start services with Docker Compose
         run: |
-          echo "=== Starting Services for E2E Tests ==="
+          echo "=== Starting Services with Docker Compose for E2E Tests ==="
           
-          # Set E2E environment variables
-          export DATABASE_URL="postgresql://e2e_user:e2e_password@localhost:5435/netra_e2e"
-          export REDIS_URL="redis://localhost:6382/0"
-          export BACKEND_PORT=8001
-          export AUTH_PORT=8082
-          export FRONTEND_PORT=3001
+          # Use Alpine test compose for faster startup in CI
+          docker compose -f docker-compose.alpine-test.yml up -d
           
-          # Start backend services
-          python netra_backend/app/main.py &
-          BACKEND_PID=$!
+          # Wait for PostgreSQL to be healthy
+          echo "Waiting for PostgreSQL..."
+          for i in {1..30}; do
+            if docker compose -f docker-compose.alpine-test.yml exec -T postgres pg_isready -U test_user; then
+              echo "PostgreSQL is ready!"
+              break
+            fi
+            echo "PostgreSQL not ready yet..."
+            sleep 2
+          done
           
-          python auth_service/main.py &
-          AUTH_PID=$!
+          # Wait for Redis to be healthy
+          echo "Waiting for Redis..."
+          for i in {1..30}; do
+            if docker compose -f docker-compose.alpine-test.yml exec -T redis redis-cli ping; then
+              echo "Redis is ready!"
+              break
+            fi
+            echo "Redis not ready yet..."
+            sleep 2
+          done
           
-          # Start frontend
-          cd frontend && npm run dev &
-          FRONTEND_PID=$!
-          cd ..
+          # Wait for Backend to be healthy
+          echo "Waiting for Backend..."
+          for i in {1..30}; do
+            if curl -f http://localhost:8000/health 2>/dev/null; then
+              echo "Backend is ready!"
+              break
+            fi
+            echo "Backend not ready yet..."
+            sleep 2
+          done
           
-          # Wait for services to be ready
-          echo "Waiting for services to start..."
-          sleep 30
+          # Wait for Auth service to be healthy
+          echo "Waiting for Auth service..."
+          for i in {1..30}; do
+            if curl -f http://localhost:8081/health 2>/dev/null; then
+              echo "Auth service is ready!"
+              break
+            fi
+            echo "Auth service not ready yet..."
+            sleep 2
+          done
           
-          # Save PIDs for cleanup
-          echo $BACKEND_PID > backend.pid
-          echo $AUTH_PID > auth.pid
-          echo $FRONTEND_PID > frontend.pid
+          # Show service status
+          docker compose -f docker-compose.alpine-test.yml ps
       
       - name: Run E2E tests
         run: |
           echo "=== Running E2E Tests ==="
           
-          # Run E2E test suite
+          # Set test environment variables for Docker Compose services
+          export USE_REAL_SERVICES=true
+          export DATABASE_URL="postgresql://test_user:test_password@localhost:5434/netra_test"
+          export REDIS_URL="redis://:test_password@localhost:6381/0"
+          export BACKEND_URL="http://localhost:8000"
+          export AUTH_URL="http://localhost:8081"
+          export TEST_MODE=ci
+          export CI_MODE=true
+          
+          # Run E2E test suite with proper configuration
           python tests/unified_test_runner.py \
             --category e2e \
             --real-services \
@@ -543,20 +549,13 @@ jobs:
       - name: Cleanup services
         if: always()
         run: |
-          echo "=== Cleaning up services ==="
+          echo "=== Cleaning up Docker services ==="
           
-          # Kill services
-          if [ -f backend.pid ]; then
-            kill $(cat backend.pid) || true
-          fi
+          # Collect logs before cleanup
+          docker compose -f docker-compose.alpine-test.yml logs --tail=50 > docker-logs.txt || true
           
-          if [ -f auth.pid ]; then
-            kill $(cat auth.pid) || true
-          fi
-          
-          if [ -f frontend.pid ]; then
-            kill $(cat frontend.pid) || true
-          fi
+          # Stop and remove containers
+          docker compose -f docker-compose.alpine-test.yml down -v || true
       
       - name: Upload E2E test results
         if: always()
@@ -576,7 +575,7 @@ jobs:
   
   mission-critical-tests:
     name: Mission Critical Tests
-    runs-on: ubuntu-latest
+    runs-on: warp-custom-test
     needs: [determine-strategy, python-tests]
     if: |
       always() && 
@@ -626,7 +625,7 @@ jobs:
   
   report:
     name: Test Report
-    runs-on: ubuntu-latest
+    runs-on: warp-custom-test
     needs: [determine-strategy, python-tests, frontend-tests, e2e-tests, mission-critical-tests]
     if: always()
     timeout-minutes: 5

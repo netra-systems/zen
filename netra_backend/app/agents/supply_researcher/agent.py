@@ -89,6 +89,9 @@ class SupplyResearcherAgent(BaseAgent):
         # Validate context
         context = validate_user_context(context)
         
+        # Set user context for factory pattern WebSocket events
+        self.set_user_context(context)
+        
         try:
             # Create database session manager
             session_mgr = DatabaseSessionManager(context)
@@ -451,31 +454,45 @@ class SupplyResearcherAgent(BaseAgent):
         )
     
     async def _send_update(self, run_id: str, update: Dict[str, Any]) -> None:
-        """Send update via AgentWebSocketBridge for crystal clear emission paths."""
+        """Send update via factory pattern for user isolation (inherits from BaseAgent)."""
         try:
-            from netra_backend.app.services.agent_websocket_bridge import get_agent_websocket_bridge
-            
-            bridge = await get_agent_websocket_bridge()
+            # Use BaseAgent's factory pattern method for user isolation
+            emitter = await self._get_user_emitter()
+            if not emitter:
+                logger.debug("No user context available for SupplyResearcherAgent WebSocket updates - skipping")
+                return
             status = update.get('status', 'processing')
             message = update.get('message', '')
+            metadata = {"agent_name": "SupplyResearcherAgent", "message": message}
             
-            # Map update status to appropriate bridge notification
+            # Map update status to appropriate emitter notification
             if status == 'parsing':
-                await bridge.notify_agent_thinking(run_id, "SupplyResearcherAgent", message)
+                await emitter.emit_agent_thinking("SupplyResearcherAgent", metadata)
             elif status == 'researching':
-                await bridge.notify_tool_executing(run_id, "SupplyResearcherAgent", "deep_research", 
-                                                  {"research_type": message})
+                await emitter.emit_tool_executing("deep_research", {
+                    "research_type": message,
+                    "agent_name": "SupplyResearcherAgent"
+                })
             elif status == 'processing':
-                await bridge.notify_agent_thinking(run_id, "SupplyResearcherAgent", message)
+                await emitter.emit_agent_thinking("SupplyResearcherAgent", metadata)
             elif status == 'completed':
-                await bridge.notify_agent_completed(run_id, "SupplyResearcherAgent", 
-                                                   result=update.get('result'), 
-                                                   execution_time_ms=None)
+                await emitter.emit_agent_completed("SupplyResearcherAgent", {
+                    "result": update.get('result'), 
+                    "execution_time_ms": None,
+                    "agent_name": "SupplyResearcherAgent"
+                })
             elif status == 'failed':
-                await bridge.notify_agent_error(run_id, "SupplyResearcherAgent", message)
+                await emitter.emit_custom_event("agent_error", {
+                    "agent_name": "SupplyResearcherAgent",
+                    "error_message": message
+                })
             else:
                 # Custom status updates
-                await bridge.notify_custom(run_id, "SupplyResearcherAgent", f"supply_{status}", update)
+                await emitter.emit_custom_event(f"supply_{status}", {
+                    "agent_name": "SupplyResearcherAgent",
+                    "status": status,
+                    **update
+                })
             
         except Exception as e:
-            logger.error(f"Failed to send WebSocket update via bridge: {e}")
+            logger.error(f"Failed to send WebSocket update via factory pattern: {e}")

@@ -167,8 +167,26 @@ async def websocket_endpoint(websocket: WebSocket):
             await websocket.accept()
             logger.debug("WebSocket accepted without subprotocol")
         
-        # Get service instances
-        ws_manager = get_websocket_manager()
+        # CRITICAL SECURITY FIX: Use factory pattern instead of singleton
+        # This eliminates the security vulnerabilities in the singleton pattern
+        from netra_backend.app.websocket_core.user_context_extractor import extract_websocket_user_context
+        from netra_backend.app.websocket_core.websocket_manager_factory import create_websocket_manager
+        
+        # Extract user context from WebSocket connection (JWT authentication)
+        try:
+            user_context, auth_info = extract_websocket_user_context(websocket)
+            logger.info(f"Extracted user context for WebSocket: {user_context}")
+        except Exception as e:
+            logger.error(f"Failed to extract user context from WebSocket: {e}")
+            # Use legacy fallback with warning for backward compatibility during migration
+            logger.warning("MIGRATION: Falling back to singleton pattern - this is insecure!")
+            ws_manager = get_websocket_manager()
+        else:
+            # Create isolated WebSocket manager for this user context
+            ws_manager = create_websocket_manager(user_context)
+            logger.info(f"Created isolated WebSocket manager for user {user_context.user_id[:8]}... (manager_id: {id(ws_manager)})")
+        
+        # Get shared services (these remain singleton as they don't hold user state)
         message_router = get_message_router()
         connection_monitor = get_connection_monitor()
         
@@ -247,8 +265,9 @@ async def websocket_endpoint(websocket: WebSocket):
         # Create MessageHandlerService and AgentMessageHandler if dependencies exist
         if supervisor is not None and thread_service is not None:
             try:
-                # CRITICAL FIX: Pass WebSocket manager to enable real-time agent events
-                message_handler_service = MessageHandlerService(supervisor, thread_service, ws_manager)
+                # CRITICAL FIX: MessageHandlerService only takes supervisor and thread_service
+                # WebSocket manager is injected separately via supervisor
+                message_handler_service = MessageHandlerService(supervisor, thread_service)
                 agent_handler = AgentMessageHandler(message_handler_service, websocket)
                 
                 # Register agent handler with message router
@@ -316,85 +335,127 @@ async def websocket_endpoint(websocket: WebSocket):
                     handler_types = getattr(handler, 'supported_types', [])
                     logger.info(f"  Handler {idx}: {handler.__class__.__name__} - supports {handler_types}")
         
-        # Authenticate and establish secure connection AFTER accepting
-        # CRITICAL FIX: Handle authentication errors gracefully without breaking message loop
+        # CRITICAL SECURITY FIX: Enhanced authentication with isolated manager
+        # User context extraction was done above, now establish secure connection
         try:
-            async with secure_websocket_context(websocket) as (auth_info, security_manager):
-                user_id = auth_info.user_id
+            # If we have user context from factory pattern, use it
+            if 'user_context' in locals():
+                user_id = user_context.user_id
                 authenticated = True
                 
-                # Set GCP error reporting context
-                set_request_context(
+                # Get security manager (still uses singleton as it doesn't hold user state)
+                from netra_backend.app.websocket_core import get_connection_security_manager
+                security_manager = get_connection_security_manager()
+                
+                logger.info(f"WebSocket authenticated using factory pattern for user: {user_id[:8]}...")
+                
+            else:
+                # Fallback to legacy authentication for backward compatibility
+                logger.warning("MIGRATION: Using legacy authentication - less secure!")
+                async with secure_websocket_context(websocket) as (auth_info, security_manager):
+                    user_id = auth_info.user_id
+                    authenticated = True
+                
+            # Set GCP error reporting context
+            set_request_context(
+                user_id=user_id,
+                http_context={
+                    'method': 'WEBSOCKET',
+                    'url': '/ws',
+                    'userAgent': websocket.headers.get('user-agent', '') if hasattr(websocket, 'headers') else '',
+                }
+            )
+            
+            connection_start_time = time.time()
+            logger.info(f"WebSocket authenticated for user: {user_id} at {datetime.now(timezone.utc).isoformat()}")
+            
+            # CRITICAL SECURITY FIX: Register connection with isolated or legacy manager
+            if 'user_context' in locals():
+                # Factory pattern: Create WebSocketConnection and add to isolated manager
+                from netra_backend.app.websocket_core.unified_manager import WebSocketConnection
+                connection = WebSocketConnection(
+                    connection_id=user_context.websocket_connection_id,
                     user_id=user_id,
-                    http_context={
-                        'method': 'WEBSOCKET',
-                        'url': '/ws',
-                        'userAgent': websocket.headers.get('user-agent', '') if hasattr(websocket, 'headers') else '',
-                    }
+                    websocket=websocket,
+                    connected_at=datetime.utcnow()
                 )
-                
-                connection_start_time = time.time()
-                logger.info(f"WebSocket authenticated for user: {user_id} at {datetime.now(timezone.utc).isoformat()}")
-                
-                # CRITICAL FIX: Register connection with manager and ensure it's ready
-                # This prevents the race condition in staging where messages are sent before connection is registered
+                await ws_manager.add_connection(connection)
+                connection_id = user_context.websocket_connection_id
+                logger.info(f"Registered connection with isolated manager: {connection_id}")
+            else:
+                # Legacy pattern: Use old connect_user method
                 connection_id = await ws_manager.connect_user(user_id, websocket)
+                logger.info(f"Registered connection with legacy manager: {connection_id}")
                 
-                # Small delay to ensure connection is fully propagated
-                # This is especially important in Cloud Run where there may be additional latency
-                if environment in ["staging", "production"]:
-                    await asyncio.sleep(0.05)  # 50ms delay for Cloud Run environments
-                
-                # Register with security manager
+            # Small delay to ensure connection is fully propagated
+            # This is especially important in Cloud Run where there may be additional latency
+            if environment in ["staging", "production"]:
+                await asyncio.sleep(0.05)  # 50ms delay for Cloud Run environments
+            
+            # Register with security manager
+            if 'user_context' in locals():
+                # Factory pattern: Create auth_info from user_context and extracted auth_info
+                factory_auth_info = type('AuthInfo', (), {
+                    'user_id': user_id,
+                    'permissions': auth_info.get('permissions', []),
+                    'roles': auth_info.get('roles', []),
+                    'token_expires_at': auth_info.get('token_expires_at'),
+                    'session_id': auth_info.get('session_id')
+                })()
+                security_manager.register_connection(connection_id, factory_auth_info, websocket)
+            else:
+                # Legacy pattern: Use existing auth_info from secure_websocket_context
                 security_manager.register_connection(connection_id, auth_info, websocket)
                 
-                # Register with connection monitor
-                connection_monitor.register_connection(connection_id, user_id, websocket)
-                
-                # Start heartbeat monitoring with staging-optimized timeout
-                heartbeat = WebSocketHeartbeat(
-                    interval=WEBSOCKET_CONFIG.heartbeat_interval_seconds,
-                    timeout=HEARTBEAT_TIMEOUT_SECONDS
-                )
-                await heartbeat.start(websocket)
-                
-                # Send welcome message with connection confirmation
-                # CRITICAL FIX: This serves as connection confirmation that the client can wait for
-                welcome_msg = create_server_message(
-                    MessageType.SYSTEM_MESSAGE,
-                    {
-                        "event": "connection_established",
-                        "connection_id": connection_id,
-                        "user_id": user_id,
-                        "server_time": datetime.now(timezone.utc).isoformat(),
-                        "connection_ready": True,  # CRITICAL: Indicates connection is ready for messages
-                        "environment": environment,
-                        "startup_complete": getattr(websocket.app.state, 'startup_complete', False),
-                        "config": {
-                            "heartbeat_interval": WEBSOCKET_CONFIG.heartbeat_interval_seconds,
-                            "max_message_size": WEBSOCKET_CONFIG.max_message_size_bytes
-                        }
-                    }
-                )
-                await safe_websocket_send(websocket, welcome_msg.model_dump())
-                
-                # CRITICAL FIX: Log successful connection establishment for debugging
-                logger.info(f"WebSocket connection fully established for user {user_id} in {environment}")
-                
-                logger.debug(f"WebSocket ready: {connection_id} - Processing any queued messages...")
-                
-                # The UnifiedWebSocketManager will automatically process queued messages
-                # when the connection is added, but we log it here for visibility
-                
-                # Main message handling loop
-                logger.debug(f"Starting message handling loop for connection: {connection_id}")
-                # Debug: Check WebSocket state before entering loop
-                logger.debug(f"WebSocket state before loop - client_state: {getattr(websocket, 'client_state', 'N/A')}, application_state: {getattr(websocket, 'application_state', 'N/A')}")
-                await _handle_websocket_messages(
-                    websocket, user_id, connection_id, ws_manager, 
-                    message_router, connection_monitor, security_manager, heartbeat
-                )
-                logger.debug(f"Message handling loop ended for connection: {connection_id}")
+            # Register with connection monitor
+            connection_monitor.register_connection(connection_id, user_id, websocket)
+            
+            # Start heartbeat monitoring with staging-optimized timeout
+            heartbeat = WebSocketHeartbeat(
+                interval=WEBSOCKET_CONFIG.heartbeat_interval_seconds,
+                timeout=HEARTBEAT_TIMEOUT_SECONDS
+            )
+            await heartbeat.start(websocket)
+            
+            # Send welcome message with connection confirmation
+            # CRITICAL FIX: This serves as connection confirmation that the client can wait for
+            welcome_msg = create_server_message(
+                MessageType.SYSTEM_MESSAGE,
+                {
+                    "event": "connection_established",
+                    "connection_id": connection_id,
+                    "user_id": user_id,
+                    "server_time": datetime.now(timezone.utc).isoformat(),
+                    "connection_ready": True,  # CRITICAL: Indicates connection is ready for messages
+                    "environment": environment,
+                    "startup_complete": getattr(websocket.app.state, 'startup_complete', False),
+                    "config": {
+                        "heartbeat_interval": WEBSOCKET_CONFIG.heartbeat_interval_seconds,
+                        "max_message_size": WEBSOCKET_CONFIG.max_message_size_bytes
+                    },
+                    "factory_pattern_enabled": 'user_context' in locals()  # Indicate if factory pattern is active
+                }
+            )
+            await safe_websocket_send(websocket, welcome_msg.model_dump())
+            
+            # CRITICAL FIX: Log successful connection establishment for debugging
+            security_pattern = "FACTORY_PATTERN" if 'user_context' in locals() else "LEGACY_SINGLETON"
+            logger.info(f"WebSocket connection fully established for user {user_id} in {environment} using {security_pattern}")
+            
+            logger.debug(f"WebSocket ready: {connection_id} - Processing any queued messages...")
+            
+            # The isolated/unified WebSocket manager will automatically process queued messages
+            # when the connection is added, but we log it here for visibility
+            
+            # Main message handling loop
+            logger.debug(f"Starting message handling loop for connection: {connection_id}")
+            # Debug: Check WebSocket state before entering loop
+            logger.debug(f"WebSocket state before loop - client_state: {getattr(websocket, 'client_state', 'N/A')}, application_state: {getattr(websocket, 'application_state', 'N/A')}")
+            await _handle_websocket_messages(
+                websocket, user_id, connection_id, ws_manager, 
+                message_router, connection_monitor, security_manager, heartbeat
+            )
+            logger.debug(f"Message handling loop ended for connection: {connection_id}")
                 
         except HTTPException as auth_error:
             # CRITICAL FIX: Authentication failed after WebSocket was accepted
@@ -474,18 +535,30 @@ async def websocket_endpoint(websocket: WebSocket):
         
         if connection_id and user_id and authenticated:
             try:
-                ws_manager = get_websocket_manager()
-                connection_monitor = get_connection_monitor()
-                security_manager = get_connection_security_manager()
+                # CRITICAL SECURITY FIX: Use appropriate cleanup for factory vs legacy pattern
+                if 'user_context' in locals() and 'ws_manager' in locals() and hasattr(ws_manager, 'remove_connection'):
+                    # Factory pattern: Remove connection from isolated manager
+                    logger.info(f"Cleaning up isolated WebSocket manager for user {user_id[:8]}...")
+                    await ws_manager.remove_connection(connection_id)
+                    # Note: Isolated manager will handle its own cleanup automatically
+                else:
+                    # Legacy pattern: Use old disconnect_user method
+                    logger.info(f"Cleaning up legacy WebSocket manager for user {user_id[:8]}...")
+                    if 'ws_manager' not in locals():
+                        ws_manager = get_websocket_manager()
+                    await ws_manager.disconnect_user(user_id, websocket, 1000, "Normal closure")
                 
-                # Disconnect from manager
-                await ws_manager.disconnect_user(user_id, websocket, 1000, "Normal closure")
+                # Clean up shared services (these are still singleton)
+                if 'connection_monitor' not in locals():
+                    connection_monitor = get_connection_monitor()
+                if 'security_manager' not in locals():
+                    security_manager = get_connection_security_manager()
                 
-                # Unregister from monitoring
                 connection_monitor.unregister_connection(connection_id)
                 security_manager.unregister_connection(connection_id)
                 
-                logger.debug(f"WebSocket cleanup completed: {connection_id}")
+                cleanup_pattern = "FACTORY_PATTERN" if ('user_context' in locals() and hasattr(ws_manager, 'remove_connection')) else "LEGACY_SINGLETON"
+                logger.debug(f"WebSocket cleanup completed: {connection_id} using {cleanup_pattern}")
             except Exception as cleanup_error:
                 logger.warning(f"Error during WebSocket cleanup: {cleanup_error}")
 

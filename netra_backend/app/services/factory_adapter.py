@@ -131,7 +131,7 @@ class FactoryAdapter:
         
         # Legacy components (for backward compatibility)
         self._legacy_execution_engine: Optional['ExecutionEngine'] = None
-        self._legacy_websocket_bridge: Optional['AgentWebSocketBridge'] = None
+        # REMOVED: _legacy_websocket_bridge caching - factory pattern creates isolated instances
         
         # Migration tracking
         self.metrics = MigrationMetrics()
@@ -385,21 +385,39 @@ class FactoryAdapter:
                 raise RuntimeError(f"Factory WebSocket emitter creation failed: {e}")
                 
     async def _get_legacy_websocket_bridge(self, **legacy_kwargs) -> 'AgentWebSocketBridge':
-        """Get WebSocket bridge using legacy singleton pattern."""
+        """Get WebSocket bridge using factory pattern (FIXED: removed singleton usage)."""
         start_time = time.time()
         
         try:
-            if not self._legacy_websocket_bridge:
-                # Import here to avoid circular imports
-                from netra_backend.app.services.agent_websocket_bridge import get_agent_websocket_bridge
-                self._legacy_websocket_bridge = await get_agent_websocket_bridge()
+            # CRITICAL FIX: Always create new instances instead of using singleton
+            # Import here to avoid circular imports
+            from netra_backend.app.services.agent_websocket_bridge import create_agent_websocket_bridge
+            from netra_backend.app.agents.supervisor.execution_factory import UserExecutionContext
+            import uuid
+            
+            # Create a user context for the factory method
+            # Try to extract from legacy_kwargs if available, otherwise use defaults
+            user_id = legacy_kwargs.get('user_id', f"legacy_user_{uuid.uuid4()}")
+            request_id = legacy_kwargs.get('request_id', f"legacy_req_{uuid.uuid4()}")
+            thread_id = legacy_kwargs.get('thread_id', f"legacy_thread_{uuid.uuid4()}")
+            
+            # Create user context for factory pattern
+            user_context = UserExecutionContext(
+                user_id=user_id,
+                request_id=request_id,
+                thread_id=thread_id
+            )
+            
+            # CRITICAL: Use factory method with user context for proper isolation
+            # Pass the user_context to ensure complete isolation
+            bridge = await create_agent_websocket_bridge(user_context)
             
             creation_time_ms = (time.time() - start_time) * 1000
             
             if self.config.log_legacy_calls:
-                logger.warning(f"⚠️ Legacy WebSocket bridge used - consider migrating to factory pattern (retrieved in {creation_time_ms:.1f}ms)")
+                logger.warning(f"⚠️ Legacy WebSocket bridge using factory pattern for user {user_id} (created in {creation_time_ms:.1f}ms)")
             
-            return self._legacy_websocket_bridge
+            return bridge
             
         except Exception as e:
             creation_time_ms = (time.time() - start_time) * 1000

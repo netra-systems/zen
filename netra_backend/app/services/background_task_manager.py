@@ -60,7 +60,10 @@ class BackgroundTaskManager:
             if asyncio.iscoroutinefunction(coro):
                 bg_task._task = asyncio.create_task(coro())
             else:
-                bg_task._task = asyncio.create_task(asyncio.coroutine(coro)())
+                # Convert regular callable to coroutine
+                async def wrapper():
+                    return coro()
+                bg_task._task = asyncio.create_task(wrapper())
             
             bg_task.status = TaskStatus.RUNNING
             logger.info(f"Started background task: {task_id} ({name})")

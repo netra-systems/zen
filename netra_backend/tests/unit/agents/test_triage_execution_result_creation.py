@@ -10,6 +10,10 @@ Tests cover:
 2. _create_failure_execution_result method (if exists)
 3. Status handling consistency
 4. Data structure compatibility
+
+NOTE: These tests are skipped because the tested functionality was removed
+during SSOT consolidation. The UnifiedTriageAgent uses different result
+creation patterns that are tested in test_triage_agent_golden.py
 """
 
 import pytest
@@ -17,7 +21,10 @@ from datetime import datetime
 from unittest.mock import Mock, AsyncMock, patch
 from typing import Dict, Any
 
-from netra_backend.app.agents.triage.triage_sub_agent import TriageSubAgent
+from netra_backend.app.agents.triage.unified_triage_agent import UnifiedTriageAgent as TriageSubAgent
+
+# Skip all tests in this file since functionality was removed during SSOT consolidation
+pytestmark = pytest.mark.skip(reason="Functionality removed during SSOT consolidation - tested in test_triage_agent_golden.py")
 from netra_backend.app.agents.base.interface import ExecutionResult
 from netra_backend.app.schemas.core_enums import ExecutionStatus
 from netra_backend.app.agents.triage.models import TriageResult, Priority, Complexity

@@ -112,6 +112,11 @@ class ExecutionResult:
     def result(self) -> Optional[Dict[str, Any]]:
         """Get result data (compatibility property)"""
         return self.data
+    
+    @property
+    def success(self) -> bool:
+        """Get success status (compatibility property)"""
+        return self.is_success
 
 
 # Type aliases for backward compatibility

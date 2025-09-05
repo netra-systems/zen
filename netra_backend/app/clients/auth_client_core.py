@@ -64,6 +64,20 @@ class AuthServiceClient:
         self.service_id = config.service_id or "netra-backend"
         self.service_secret = config.service_secret
         
+        # CRITICAL FIX: Fallback to environment if config doesn't have service_secret
+        # This ensures we always get the secret even if config loading fails
+        if not self.service_secret:
+            env = get_env()
+            env_service_secret = env.get('SERVICE_SECRET')
+            if env_service_secret:
+                self.service_secret = env_service_secret
+                logger.info("Loaded SERVICE_SECRET from environment as auth client fallback")
+            else:
+                logger.error("SERVICE_SECRET not found in config or environment - auth will fail")
+        
+        # Log initialization status for debugging
+        logger.info(f"AuthServiceClient initialized - Service ID: {self.service_id}, Service Secret configured: {bool(self.service_secret)}")
+        
         # PRODUCTION SECURITY: Validate auth service requirements in production
         # Check both unified config and environment variable for robust production detection
         env = get_env()
@@ -104,6 +118,13 @@ class AuthServiceClient:
         if self.service_id and self.service_secret:
             headers["X-Service-ID"] = self.service_id
             headers["X-Service-Secret"] = self.service_secret
+        else:
+            # Log detailed diagnostic info when service auth is missing
+            logger.warning(f"Service auth headers not set - ID: {bool(self.service_id)}, Secret: {bool(self.service_secret)}")
+            if not self.service_id:
+                logger.warning("SERVICE_ID is missing - using default 'netra-backend'")
+            if not self.service_secret:
+                logger.error("SERVICE_SECRET is missing - auth service calls will fail")
         return headers
     
     def _get_request_headers(self, include_auth: bool = True, bearer_token: str = None) -> Dict[str, str]:

@@ -73,7 +73,7 @@ jobs:
   
   pre-deployment-checks:
     name: Pre-Deployment Validation
-    runs-on: ubuntu-latest
+    runs-on: warp-custom-default
     timeout-minutes: 15
     outputs:
       ready_to_deploy: ${{ steps.validation.outputs.ready }}
@@ -147,7 +147,7 @@ jobs:
     name: Build Backend Services
     needs: pre-deployment-checks
     if: needs.pre-deployment-checks.outputs.ready_to_deploy == 'true'
-    runs-on: ubuntu-latest
+    runs-on: warp-custom-default
     timeout-minutes: 20
     outputs:
       backend_image: ${{ steps.build.outputs.image }}
@@ -211,7 +211,7 @@ jobs:
     name: Build Frontend
     needs: pre-deployment-checks
     if: needs.pre-deployment-checks.outputs.ready_to_deploy == 'true'
-    runs-on: ubuntu-latest
+    runs-on: warp-custom-default
     timeout-minutes: 20
     outputs:
       frontend_image: ${{ steps.build.outputs.image }}
@@ -273,7 +273,7 @@ jobs:
   migrate-database:
     name: Run Database Migrations
     needs: [build-backend, build-frontend]
-    runs-on: ubuntu-latest
+    runs-on: warp-custom-default
     timeout-minutes: 10
     
     steps:
@@ -318,7 +318,7 @@ jobs:
   deploy-backend:
     name: Deploy Backend Services
     needs: [build-backend, migrate-database]
-    runs-on: ubuntu-latest
+    runs-on: warp-custom-default
     timeout-minutes: 15
     environment:
       name: staging
@@ -372,7 +372,7 @@ jobs:
   deploy-frontend:
     name: Deploy Frontend
     needs: [build-frontend, deploy-backend]
-    runs-on: ubuntu-latest
+    runs-on: warp-custom-default
     timeout-minutes: 15
     environment:
       name: staging
@@ -409,7 +409,7 @@ jobs:
   validate-deployment:
     name: Validate Deployment
     needs: [deploy-backend, deploy-frontend]
-    runs-on: ubuntu-latest
+    runs-on: warp-custom-default
     timeout-minutes: 10
     
     steps:
@@ -477,7 +477,7 @@ jobs:
     name: Send Deployment Notification
     needs: [validate-deployment]
     if: always()
-    runs-on: ubuntu-latest
+    runs-on: warp-custom-default
     
     steps:
       - name: Deployment Status

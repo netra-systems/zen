@@ -53,11 +53,11 @@ class SemanticCache(LLMCacheManager):
         }
     
     async def get_semantic(self, query: str, intent: str, 
-                          threshold: float = None) -> Optional[Dict]:
-        """Get semantically similar cached result."""
+                          threshold: float = None, user_id: Optional[str] = None) -> Optional[Dict]:
+        """Get semantically similar cached result with user isolation."""
         threshold = threshold or self.similarity_threshold
         query_vector = await self._get_query_vector(query)
-        similar_keys = await self._find_similar_keys(query_vector, intent, threshold)
+        similar_keys = await self._find_similar_keys(query_vector, intent, threshold, user_id)
         if similar_keys:
             return await self._get_best_match(similar_keys)
         return None
@@ -82,9 +82,10 @@ class SemanticCache(LLMCacheManager):
         return vector + [0.0] * (self.vector_dimension - len(vector))
     
     async def _find_similar_keys(self, query_vector: List[float], 
-                                intent: str, threshold: float) -> List[tuple]:
-        """Find semantically similar cache keys."""
-        pattern = f"{self.semantic_prefix}{intent}:*"
+                                intent: str, threshold: float, user_id: Optional[str] = None) -> List[tuple]:
+        """Find semantically similar cache keys with user isolation."""
+        user_prefix = f"user:{user_id}:" if user_id else "system:"
+        pattern = f"{user_prefix}{self.semantic_prefix}{intent}:*"
         keys = await self.redis.keys(pattern)
         similar = []
         for key in keys[:100]:  # Limit search
@@ -125,18 +126,19 @@ class SemanticCache(LLMCacheManager):
         return None
     
     async def set_semantic(self, query: str, intent: str, 
-                         result: Dict, ttl: Optional[int] = None) -> None:
-        """Store result with semantic indexing."""
+                         result: Dict, ttl: Optional[int] = None, user_id: Optional[str] = None) -> None:
+        """Store result with semantic indexing and user isolation."""
         ttl = ttl or self.ttl_policies.get(intent, 3600)
-        key = self._generate_semantic_key(query, intent)
+        key = self._generate_semantic_key(query, intent, user_id)
         vector = await self._get_query_vector(query)
         await self._store_with_vector(key, result, vector, ttl)
     
-    def _generate_semantic_key(self, query: str, intent: str) -> str:
-        """Generate semantic cache key."""
+    def _generate_semantic_key(self, query: str, intent: str, user_id: Optional[str] = None) -> str:
+        """Generate semantic cache key with user isolation."""
         query_hash = hashlib.sha256(query.encode()).hexdigest()[:16]
         timestamp = datetime.now().strftime("%Y%m%d%H")
-        return f"{self.semantic_prefix}{intent}:{timestamp}:{query_hash}"
+        user_prefix = f"user:{user_id}:" if user_id else "system:"
+        return f"{user_prefix}{self.semantic_prefix}{intent}:{timestamp}:{query_hash}"
     
     async def _store_with_vector(self, key: str, result: Dict, 
                                 vector: List[float], ttl: int) -> None:
@@ -153,16 +155,17 @@ class SemanticCache(LLMCacheManager):
             "cache_version": "semantic_v1"
         }
     
-    async def invalidate_semantic(self, intent: str) -> int:
-        """Invalidate semantic cache for specific intent."""
-        pattern = f"{self.semantic_prefix}{intent}:*"
+    async def invalidate_semantic(self, intent: str, user_id: Optional[str] = None) -> int:
+        """Invalidate semantic cache for specific intent with user isolation."""
+        user_prefix = f"user:{user_id}:" if user_id else "user:*:"
+        pattern = f"{user_prefix}{self.semantic_prefix}{intent}:*"
         keys = await self.redis.keys(pattern)
         deleted = 0
         for key in keys:
             await self.redis.delete(key)
             await self.redis.delete(f"{key}:vector")
             deleted += 1
-        logger.info(f"Invalidated {deleted} semantic cache entries for {intent}")
+        logger.info(f"Invalidated {deleted} semantic cache entries for {intent} (user: {user_id or 'all'})")
         return deleted
     
     def get_ttl_for_intent(self, intent: str) -> int:

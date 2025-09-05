@@ -56,7 +56,7 @@ jobs:
   
   validate-request:
     name: Validate Production Deployment
-    runs-on: ubuntu-latest
+    runs-on: warp-custom-default
     timeout-minutes: 5
     outputs:
       approved: ${{ steps.validate.outputs.approved }}
@@ -96,7 +96,7 @@ jobs:
     if: |
       needs.validate-request.outputs.approved == 'true' &&
       inputs.skip_staging_check != true
-    runs-on: ubuntu-latest
+    runs-on: warp-custom-default
     timeout-minutes: 15
     
     steps:
@@ -147,7 +147,7 @@ jobs:
   pre-deployment-tests:
     name: Pre-Deployment Tests
     needs: [validate-request, verify-staging]
-    runs-on: ubuntu-latest
+    runs-on: warp-custom-default
     timeout-minutes: 30
     
     steps:
@@ -193,7 +193,7 @@ jobs:
   approval:
     name: Manual Approval Required
     needs: pre-deployment-tests
-    runs-on: ubuntu-latest
+    runs-on: warp-custom-default
     environment:
       name: production-approval
     steps:
@@ -218,7 +218,7 @@ jobs:
   build-production:
     name: Build Production Images
     needs: approval
-    runs-on: ubuntu-latest
+    runs-on: warp-custom-default
     timeout-minutes: 30
     outputs:
       backend_image: ${{ steps.build-backend.outputs.image }}
@@ -332,7 +332,7 @@ jobs:
   database-operations:
     name: Database Backup & Migration
     needs: build-production
-    runs-on: ubuntu-latest
+    runs-on: warp-custom-default
     timeout-minutes: 20
     
     steps:
@@ -371,7 +371,7 @@ jobs:
   deploy-blue-green:
     name: Blue-Green Deployment
     needs: database-operations
-    runs-on: ubuntu-latest
+    runs-on: warp-custom-default
     timeout-minutes: 30
     environment:
       name: production
@@ -508,7 +508,7 @@ jobs:
   validate-production:
     name: Validate Production Deployment
     needs: deploy-blue-green
-    runs-on: ubuntu-latest
+    runs-on: warp-custom-default
     timeout-minutes: 15
     
     steps:
@@ -559,7 +559,7 @@ jobs:
   prepare-rollback:
     name: Prepare Rollback Plan
     needs: validate-production
-    runs-on: ubuntu-latest
+    runs-on: warp-custom-default
     
     steps:
       - name: Document Rollback Plan

@@ -9,8 +9,9 @@ import { ChatMessage, MessageSendingParams, MESSAGE_INPUT_CONSTANTS } from '../t
 import { optimisticMessageManager } from '@/services/optimistic-updates';
 import { logger } from '@/lib/logger';
 import { useGTMEvent } from '@/hooks/useGTMEvent';
-import { getUnifiedApiConfig } from '@/lib/unified-api-config';
+import { getUnifiedApiConfig, shouldUseV2AgentApi } from '@/lib/unified-api-config';
 import { WebSocketMessageType } from '@/types/shared/enums';
+import { AgentServiceV2, type AgentExecutionResult } from '@/services/agentServiceV2';
 
 // Constants for error handling and recovery
 const MESSAGE_TIMEOUT = 15000; // 15 second timeout
@@ -137,48 +138,64 @@ export const useMessageSending = () => {
     return threadMessages.length === 0;
   };
 
-  const sendRestApiMessage = async (message: string, threadId: string): Promise<void> => {
-    // Get API configuration
-    const config = getUnifiedApiConfig();
-    const apiUrl = config.urls.api;
-    
-    // Use REST API for testing scenarios
+  const sendRestApiMessage = async (message: string, threadId: string): Promise<AgentExecutionResult | void> => {
+    // Use REST API for testing scenarios or when v2 API is enabled
     const isTestMode = message.toLowerCase().includes('test') || 
                       message.toLowerCase().includes('analyze') ||
                       message.toLowerCase().includes('optimize') ||
                       message.toLowerCase().includes('process');
     
-    if (isTestMode) {
+    if (isTestMode || shouldUseV2AgentApi()) {
       // Determine agent type based on message content
-      let agentType = 'triage'; // default
+      let agentType: 'data' | 'optimization' | 'triage' | 'supervisor' = 'triage'; // default
       if (message.toLowerCase().includes('data') || message.toLowerCase().includes('dataset')) {
         agentType = 'data';
       } else if (message.toLowerCase().includes('optimize') || message.toLowerCase().includes('cost')) {
         agentType = 'optimization';
       }
 
-      const response = await fetch(`${apiUrl}/api/agents/${agentType}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          type: agentType,
-          message: message,
-          context: {},
-          simulate_delay: false,
-          force_failure: false,
-          force_retry: false
-        })
-      });
+      try {
+        // Use v2 Agent Service for all REST API calls
+        const result = await AgentServiceV2.executeAgent(
+          agentType,
+          message,
+          threadId,
+          {
+            timeout: MESSAGE_TIMEOUT,
+            includeMetrics: true
+          }
+        );
 
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.error || `HTTP ${response.status}`);
+        logger.info('Agent execution completed via REST API', {
+          agent_type: agentType,
+          api_version: result.api_version,
+          success: result.success,
+          request_id: result.request_id,
+          thread_id: threadId
+        });
+
+        // If there are warnings, log them
+        if (result.warnings && result.warnings.length > 0) {
+          logger.warn('Agent execution warnings', {
+            warnings: result.warnings,
+            request_id: result.request_id
+          });
+        }
+
+        // Throw error if execution failed
+        if (!result.success) {
+          throw new Error(result.error || 'Agent execution failed');
+        }
+
+        return result;
+      } catch (error) {
+        logger.error('Agent execution failed via REST API', error, {
+          agent_type: agentType,
+          thread_id: threadId,
+          message_length: message.length
+        });
+        throw error;
       }
-
-      const data = await response.json();
-      return data;
     }
   };
 
@@ -191,15 +208,24 @@ export const useMessageSending = () => {
       }, MESSAGE_TIMEOUT);
 
       try {
-        // Try REST API first for testing scenarios
+        // Try REST API first for testing scenarios or when v2 API is enabled
         const isTestMode = message.toLowerCase().includes('test') || 
                           message.toLowerCase().includes('analyze') ||
                           message.toLowerCase().includes('optimize') ||
                           message.toLowerCase().includes('process');
 
-        if (isTestMode) {
-          await sendRestApiMessage(message, threadId);
+        if (isTestMode || shouldUseV2AgentApi()) {
+          const result = await sendRestApiMessage(message, threadId);
           clearTimeout(timeoutId);
+          
+          // Log successful REST API execution
+          if (result) {
+            logger.info('WebSocket message completed via REST API fallback', {
+              request_id: result.request_id,
+              api_version: result.api_version
+            });
+          }
+          
           resolve();
           return;
         }

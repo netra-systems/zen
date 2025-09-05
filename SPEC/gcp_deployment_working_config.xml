@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<spec>
+  <id>gcp_deployment_working_config</id>
+  <version>1.0.0</version>
+  <last_updated>2025-09-05</last_updated>
+  <status>CRITICAL</status>
+  <business_value>
+    <segment>Platform/Internal</segment>
+    <goal>Maintain proven working deployment configuration</goal>
+    <impact>Prevents deployment failures and service outages</impact>
+  </business_value>
+
+  <overview>
+    <title>GCP Staging Deployment - Proven Working Configuration</title>
+    <description>
+      This specification documents the EXACT configuration that successfully deployed
+      to GCP staging as revision netra-backend-staging-00035-fnj. This configuration
+      is PROVEN to work and must be preserved to prevent regressions.
+    </description>
+    <critical_warning>
+      DO NOT modify this configuration without thorough testing in an isolated environment.
+      Any deviation from this spec has caused deployment failures in the past.
+    </critical_warning>
+  </overview>
+
+  <working_deployment>
+    <revision>netra-backend-staging-00035-fnj</revision>
+    <date>2025-09-05</date>
+    <status>FULLY OPERATIONAL</status>
+    <environment>staging</environment>
+    <project>netra-staging</project>
+    <region>us-central1</region>
+  </working_deployment>
+
+  <environment_variables>
+    <category name="Core Settings">
+      <var name="ENVIRONMENT">staging</var>
+      <var name="PYTHONUNBUFFERED">1</var>
+    </category>
+    
+    <category name="Service URLs">
+      <var name="AUTH_SERVICE_URL">https://auth.staging.netrasystems.ai</var>
+      <var name="AUTH_SERVICE_ENABLED">true</var>
+      <var name="FRONTEND_URL">https://app.staging.netrasystems.ai</var>
+      <var name="FORCE_HTTPS">true</var>
+      <var name="GCP_PROJECT_ID">netra-staging</var>
+    </category>
+    
+    <category name="ClickHouse">
+      <var name="CLICKHOUSE_HOST">xedvrr4c3r.us-central1.gcp.clickhouse.cloud</var>
+      <var name="CLICKHOUSE_PORT">8443</var>
+      <var name="CLICKHOUSE_USER">default</var>
+      <var name="CLICKHOUSE_DB">default</var>
+      <var name="CLICKHOUSE_SECURE">true</var>
+    </category>
+    
+    <category name="WebSocket">
+      <var name="WEBSOCKET_CONNECTION_TIMEOUT">900</var>
+      <var name="WEBSOCKET_HEARTBEAT_INTERVAL">25</var>
+      <var name="WEBSOCKET_HEARTBEAT_TIMEOUT">75</var>
+      <var name="WEBSOCKET_CLEANUP_INTERVAL">180</var>
+      <var name="WEBSOCKET_STALE_TIMEOUT">900</var>
+    </category>
+  </environment_variables>
+
+  <secret_manager_references>
+    <secret env_var="POSTGRES_HOST">postgres-host-staging:latest</secret>
+    <secret env_var="POSTGRES_PORT">postgres-port-staging:latest</secret>
+    <secret env_var="POSTGRES_DB">postgres-db-staging:latest</secret>
+    <secret env_var="POSTGRES_USER">postgres-user-staging:latest</secret>
+    <secret env_var="POSTGRES_PASSWORD">postgres-password-staging:latest</secret>
+    <secret env_var="REDIS_HOST">redis-host-staging:latest</secret>
+    <secret env_var="REDIS_PORT">redis-port-staging:latest</secret>
+    <secret env_var="REDIS_URL">redis-url-staging:latest</secret>
+    <secret env_var="REDIS_PASSWORD">redis-password-staging:latest</secret>
+    <secret env_var="JWT_SECRET_STAGING">jwt-secret-staging:latest</secret>
+    <secret env_var="JWT_SECRET_KEY">jwt-secret-key-staging:latest</secret>
+    <secret env_var="SECRET_KEY">secret-key-staging:latest</secret>
+    <secret env_var="SERVICE_SECRET">service-secret-staging:latest</secret>
+    <secret env_var="SERVICE_ID">service-id-staging:latest</secret>
+    <secret env_var="FERNET_KEY">fernet-key-staging:latest</secret>
+    <secret env_var="OPENAI_API_KEY">openai-api-key-staging:latest</secret>
+    <secret env_var="ANTHROPIC_API_KEY">anthropic-api-key-staging:latest</secret>
+    <secret env_var="GEMINI_API_KEY">gemini-api-key-staging:latest</secret>
+    <secret env_var="CLICKHOUSE_PASSWORD">clickhouse-password-staging:latest</secret>
+  </secret_manager_references>
+
+  <cloud_run_settings>
+    <memory>4Gi</memory>
+    <cpu>2</cpu>
+    <min_instances>1</min_instances>
+    <max_instances>10</max_instances>
+    <concurrency>100</concurrency>
+    <timeout>900s</timeout>
+  </cloud_run_settings>
+
+  <critical_patterns>
+    <pattern>
+      <name>Secret Reference Format</name>
+      <description>All secrets MUST use the format: {secret-name}:latest</description>
+      <example>postgres-host-staging:latest</example>
+    </pattern>
+    <pattern>
+      <name>Environment Isolation</name>
+      <description>Staging secrets MUST use -staging suffix</description>
+      <example>jwt-secret-staging NOT jwt-secret</example>
+    </pattern>
+    <pattern>
+      <name>URL Scheme</name>
+      <description>All service URLs MUST use HTTPS in staging/production</description>
+      <example>https://auth.staging.netrasystems.ai</example>
+    </pattern>
+  </critical_patterns>
+
+  <validation_commands>
+    <command>
+      <description>Validate configuration before deployment</description>
+      <code>python scripts/validate_deployment_config.py --environment staging</code>
+    </command>
+    <command>
+      <description>Check if secrets exist in GCP</description>
+      <code>python scripts/validate_deployment_config.py --environment staging --check-secrets</code>
+    </command>
+    <command>
+      <description>Deploy with proven configuration</description>
+      <code>python scripts/deploy_to_gcp.py --project netra-staging --build-local</code>
+    </command>
+  </validation_commands>
+
+  <related_files>
+    <file>docs/GCP_STAGING_DEPLOYMENT_CONFIG.md</file>
+    <file>scripts/deployment/staging_config.yaml</file>
+    <file>scripts/validate_deployment_config.py</file>
+    <file>scripts/deploy_to_gcp.py</file>
+    <file>deployment/secrets_config.py</file>
+  </related_files>
+
+  <learnings>
+    <lesson>Missing OAuth credentials caused 503 errors - always validate all secrets</lesson>
+    <lesson>Environment-specific configs are NOT duplicates - each env needs separate credentials</lesson>
+    <lesson>Silent fallbacks hide configuration errors - fail fast instead</lesson>
+    <lesson>One missing secret can cascade to complete service failure</lesson>
+  </learnings>
+</spec>

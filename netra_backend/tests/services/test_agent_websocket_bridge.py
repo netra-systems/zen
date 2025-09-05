@@ -18,7 +18,7 @@ import uuid
 
 from netra_backend.app.services.agent_websocket_bridge import (
     AgentWebSocketBridge,
-    get_agent_websocket_bridge,
+    create_agent_websocket_bridge,
     IntegrationState,
     IntegrationResult,
     HealthStatus,
@@ -424,18 +424,27 @@ class TestAgentWebSocketBridgeAsync:
         yield bridge
         await bridge.shutdown()
 
-    async def test_singleton_factory_function(self):
-        """Test get_agent_websocket_bridge factory function."""
-        # Reset singleton
-        AgentWebSocketBridge._instance = None
+    async def test_factory_function(self):
+        """Test create_agent_websocket_bridge factory function."""
+        from netra_backend.app.agents.supervisor.execution_factory import UserExecutionContext
         
-        bridge1 = await get_agent_websocket_bridge()
-        bridge2 = await get_agent_websocket_bridge()
+        # Create user context for testing
+        user_context = UserExecutionContext(
+            user_id="test_user",
+            request_id="test_request",
+            thread_id="test_thread"
+        )
         
-        assert bridge1 is bridge2
+        bridge1 = await create_agent_websocket_bridge(user_context)
+        bridge2 = await create_agent_websocket_bridge(user_context)
+        
+        # Factory should create separate instances for isolation
+        assert bridge1 is not bridge2
         assert isinstance(bridge1, AgentWebSocketBridge)
+        assert isinstance(bridge2, AgentWebSocketBridge)
         
         await bridge1.shutdown()
+        await bridge2.shutdown()
 
     @patch('netra_backend.app.services.agent_websocket_bridge.get_websocket_manager')
     @patch('netra_backend.app.services.agent_websocket_bridge.get_agent_execution_registry')

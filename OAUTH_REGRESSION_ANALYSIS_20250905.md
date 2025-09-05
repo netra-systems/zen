@@ -1,5 +1,12 @@
 # OAuth Regression Analysis - September 5, 2025
 
+> **🚨 CRITICAL UPDATE 2025-09-05**: This OAuth failure may have been a SYMPTOM of the systemic 
+> circuit breaker issue. See [Permanent Failure State Pattern](SPEC/learnings/permanent_failure_state_pattern_20250905.xml)
+> for the discovery that auth failures were actually caused by MockCircuitBreaker opening permanently
+> with no recovery mechanism. Missing OAuth credentials would trigger the first error, then the
+> circuit breaker would open PERMANENTLY, making all subsequent auth attempts fail even if credentials
+> were added. This is a perfect example of "the error behind the error" - OAuth wasn't the root cause!
+
 ## Executive Summary
 
 The OAuth login functionality is failing due to missing environment-specific OAuth credentials in the test environment. The system requires `GOOGLE_OAUTH_CLIENT_ID_TEST` and `GOOGLE_OAUTH_CLIENT_SECRET_TEST` environment variables but these are not configured, causing a 503 Service Unavailable error when attempting OAuth login.

@@ -25,12 +25,15 @@ class LLMCacheCore:
         self.default_ttl = default_ttl
 
     def generate_cache_key(self, prompt: str, llm_config_name: str, 
-                          generation_config: Optional[Dict[str, Any]] = None) -> str:
-        """Generate a unique cache key for the prompt and configuration."""
+                          generation_config: Optional[Dict[str, Any]] = None,
+                          user_id: Optional[str] = None) -> str:
+        """Generate a unique cache key for the prompt and configuration with user isolation."""
         key_data = self._prepare_key_data(prompt, llm_config_name, generation_config)
         key_string = json.dumps(key_data, sort_keys=True)
         key_hash = hashlib.sha256(key_string.encode()).hexdigest()
-        return f"{self.cache_prefix}{llm_config_name}:{key_hash[:16]}"
+        # Ensure user isolation by prefixing with user_id
+        user_prefix = f"user:{user_id}:" if user_id else "system:"
+        return f"{user_prefix}{self.cache_prefix}{llm_config_name}:{key_hash[:16]}"
 
     def _prepare_key_data(self, prompt: str, llm_config_name: str, 
                          generation_config: Optional[Dict[str, Any]]) -> Dict[str, Any]:
@@ -42,9 +45,10 @@ class LLMCacheCore:
         }
 
     async def get_cached_response(self, prompt: str, llm_config_name: str, 
-                                generation_config: Optional[Dict[str, Any]] = None) -> Optional[str]:
-        """Get cached response if available."""
-        cache_key = self.generate_cache_key(prompt, llm_config_name, generation_config)
+                                generation_config: Optional[Dict[str, Any]] = None,
+                                user_id: Optional[str] = None) -> Optional[str]:
+        """Get cached response if available with user isolation."""
+        cache_key = self.generate_cache_key(prompt, llm_config_name, generation_config, user_id)
         redis_client = await self._get_redis_client()
         if not redis_client:
             return None
@@ -80,9 +84,9 @@ class LLMCacheCore:
 
     async def cache_response(self, prompt: str, response: str, llm_config_name: str,
                            generation_config: Optional[Dict[str, Any]] = None,
-                           ttl: Optional[int] = None) -> bool:
-        """Cache an LLM response."""
-        cache_key = self.generate_cache_key(prompt, llm_config_name, generation_config)
+                           ttl: Optional[int] = None, user_id: Optional[str] = None) -> bool:
+        """Cache an LLM response with user isolation."""
+        cache_key = self.generate_cache_key(prompt, llm_config_name, generation_config, user_id)
         cache_entry = self._create_cache_entry(response, prompt, llm_config_name)
         cache_ttl = ttl or self.default_ttl
         return await self._store_cache_entry(cache_key, cache_entry, cache_ttl)
@@ -119,19 +123,20 @@ class LLMCacheCore:
             logger.error(f"Error caching response: {e}")
             return False
 
-    async def clear_cache(self, llm_config_name: Optional[str] = None) -> int:
-        """Clear cache entries."""
-        pattern = self._build_clear_pattern(llm_config_name)
+    async def clear_cache(self, llm_config_name: Optional[str] = None, user_id: Optional[str] = None) -> int:
+        """Clear cache entries with user isolation."""
+        pattern = self._build_clear_pattern(llm_config_name, user_id)
         redis_client = await self._get_redis_client()
         if not redis_client:
             return 0
         return await self._execute_cache_clear(redis_client, pattern)
 
-    def _build_clear_pattern(self, llm_config_name: Optional[str]) -> str:
-        """Build pattern for cache clearing."""
+    def _build_clear_pattern(self, llm_config_name: Optional[str], user_id: Optional[str] = None) -> str:
+        """Build pattern for cache clearing with user isolation."""
+        user_prefix = f"user:{user_id}:" if user_id else "user:*:"
         if llm_config_name:
-            return f"{self.cache_prefix}{llm_config_name}:*"
-        return f"{self.cache_prefix}*"
+            return f"{user_prefix}{self.cache_prefix}{llm_config_name}:*"
+        return f"{user_prefix}{self.cache_prefix}*"
 
     async def _execute_cache_clear(self, redis_client, pattern: str) -> int:
         """Execute cache clearing operation."""

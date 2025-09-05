@@ -54,8 +54,9 @@ from netra_backend.app.websocket_core import (
     WebSocketConfig
 )
 
-# Import agent integration
-from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
+# Import agent integration with factory pattern
+from netra_backend.app.services.agent_websocket_bridge import create_agent_websocket_bridge
+from netra_backend.app.agents.supervisor.execution_factory import UserExecutionContext
 
 logger = central_logger.get_logger(__name__)
 router = APIRouter(tags=["WebSocket-Isolated"])
@@ -164,8 +165,16 @@ async def isolated_websocket_endpoint(websocket: WebSocket):
             )
             await heartbeat.start()
             
-            # Set up agent integration for this user only
-            agent_bridge = AgentWebSocketBridge()
+            # Set up agent integration for this user only with factory pattern
+            # Create user context for proper isolation
+            user_context = UserExecutionContext(
+                user_id=user_id,
+                request_id=connection_id,  # Use connection_id as request_id
+                thread_id=thread_id
+            )
+            
+            # Use factory to create isolated bridge instance
+            agent_bridge = await create_agent_websocket_bridge(user_context)
             user_emitter = agent_bridge.create_user_emitter(
                 user_id=user_id,
                 connection_id=connection_id,

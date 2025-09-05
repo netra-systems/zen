@@ -1075,13 +1075,39 @@ class UnifiedWebSocketManager:
         logger.info("Background task monitoring shutdown complete")
 
 
-# Global instance
-_manager_instance = None
-
+# SECURITY FIX: Replace singleton with factory pattern
+# Global instance removed to prevent multi-user data leakage
+# Use create_websocket_manager(user_context) instead
 
 def get_websocket_manager() -> UnifiedWebSocketManager:
-    """Get the global WebSocket manager instance."""
-    global _manager_instance
-    if _manager_instance is None:
-        _manager_instance = UnifiedWebSocketManager()
-    return _manager_instance
+    """
+    DEPRECATED: Get the global WebSocket manager instance.
+    
+    WARNING: This function creates a non-isolated manager instance that can cause
+    CRITICAL SECURITY VULNERABILITIES in multi-user environments. It should only
+    be used for backward compatibility in legacy code that cannot be immediately
+    migrated to the factory pattern.
+    
+    For new code, use:
+    - create_websocket_manager(user_context) for isolated managers
+    - WebSocketManagerFactory for advanced factory operations
+    
+    Returns:
+        UnifiedWebSocketManager: A NEW instance (not singleton) for basic compatibility
+    """
+    from netra_backend.app.logging_config import central_logger
+    import warnings
+    
+    logger = central_logger.get_logger(__name__)
+    
+    warnings.warn(
+        "SECURITY WARNING: Using deprecated get_websocket_manager() function. "
+        "This creates a non-isolated manager that can leak data between users. "
+        "Migrate to create_websocket_manager(user_context) for proper isolation.",
+        UserWarning,
+        stacklevel=2
+    )
+    
+    # Return a NEW instance each time to prevent shared state
+    # This is still not ideal but safer than a true singleton
+    return UnifiedWebSocketManager()

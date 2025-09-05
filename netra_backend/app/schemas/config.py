@@ -779,7 +779,8 @@ class ProductionConfig(AppConfig):
         for env_name, config_name in critical_secrets:
             # Use get() method which IsolatedEnvironment supports
             env_value = env.get(env_name)
-            if env_value and config_name not in data:
+            # CRITICAL FIX: Always override with env value if present, even if data has None
+            if env_value:
                 data[config_name] = env_value
                 logger.info(f"Loaded {env_name} from environment")
         
@@ -956,7 +957,8 @@ class StagingConfig(AppConfig):
         for env_name, config_name in critical_secrets:
             # Use get() method which IsolatedEnvironment supports
             env_value = env.get(env_name)
-            if env_value and config_name not in data:
+            # CRITICAL FIX: Always override with env value if present, even if data has None
+            if env_value:
                 data[config_name] = env_value
                 logger.info(f"Loaded {env_name} from environment")
         

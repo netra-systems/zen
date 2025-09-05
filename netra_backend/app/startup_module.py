@@ -657,15 +657,12 @@ async def initialize_clickhouse(logger: logging.Logger) -> dict:
     except Exception:
         pass  # Ignore container check errors
     
-    # CRITICAL FIX: Make ClickHouse optional in development when not explicitly required
-    if config.environment == "development" and not clickhouse_required:
+    # CRITICAL FIX: Make ClickHouse optional in development and staging when not explicitly required
+    if config.environment in ["development", "staging"] and not clickhouse_required:
         result["status"] = "skipped"
         logger.info(f"ℹ️ ClickHouse not required in {config.environment} environment - skipping initialization")
         logger.info("ℹ️ System continuing without analytics")
         return result
-    elif config.environment == "staging":
-        logger.debug(f"ClickHouse initialization required in {config.environment} environment")
-        # Proceed with real connection for staging
     
     # CRITICAL FIX: Check if conditions prevent connection attempt
     if 'pytest' in sys.modules or clickhouse_mode in ['disabled', 'mock']:
@@ -749,12 +746,13 @@ async def _setup_clickhouse_tables(logger: logging.Logger, mode: str) -> None:
         logger.info("🚀 Ensuring ClickHouse critical tables exist...")
         from netra_backend.app.db.clickhouse_table_initializer import ensure_clickhouse_tables
         
-        # Get ClickHouse connection details
+        # Get ClickHouse connection details from environment
         config = get_config()
-        host = 'dev-clickhouse' if environment == 'development' else 'localhost'
-        port = 9000  # Native protocol port
-        user = 'netra'
-        password = ''
+        # Use environment variables for ClickHouse connection
+        host = get_env().get('CLICKHOUSE_HOST', 'dev-clickhouse' if environment == 'development' else 'localhost')
+        port = int(get_env().get('CLICKHOUSE_PORT', '9000'))  # Native protocol port
+        user = get_env().get('CLICKHOUSE_USER', 'default')
+        password = get_env().get('CLICKHOUSE_PASSWORD', '')
         
         try:
             # Ensure critical tables exist (fail_fast=False for backward compatibility)
@@ -1191,7 +1189,6 @@ async def initialize_monitoring_integration(handlers: dict = None) -> bool:
         
         # Import monitoring components
         from netra_backend.app.websocket_core.event_monitor import chat_event_monitor
-        from netra_backend.app.services.agent_websocket_bridge import get_agent_websocket_bridge
         
         # Initialize ChatEventMonitor independently first
         await chat_event_monitor.start_monitoring()

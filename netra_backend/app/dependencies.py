@@ -10,7 +10,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 # Import from the single source of truth for database sessions
 from netra_backend.app.database import get_db
 
-from netra_backend.app.llm.client_factory import get_llm_client
 from netra_backend.app.llm.client_unified import ResilientLLMClient
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.services.security_service import SecurityService
@@ -302,8 +301,9 @@ UserScopedDbDep = Annotated[AsyncSession, Depends(get_user_scoped_db_session)]
 
 def get_llm_client_from_app(request: Request) -> ResilientLLMClient:
     """Get LLM client - updated from deleted LLMManager."""
-    from netra_backend.app.llm.client_factory import get_llm_client
-    return get_llm_client()
+    from netra_backend.app.llm.client_unified import ResilientLLMClient
+    llm_manager = get_llm_manager(request)
+    return ResilientLLMClient(llm_manager)
 
 # Legacy compatibility - DEPRECATED: use get_db_dependency() instead
 async def get_db_session() -> AsyncGenerator[AsyncSession, None]:
@@ -478,6 +478,8 @@ async def get_request_scoped_supervisor(
     CRITICAL: This function ensures database sessions are NEVER stored globally.
     The supervisor is created fresh for each request with proper session lifecycle.
     
+    Updated to use create_supervisor_core for consistency with WebSocket pattern.
+    
     Args:
         request: FastAPI request object
         context: Request-scoped context (contains no sessions)
@@ -496,15 +498,6 @@ async def get_request_scoped_supervisor(
             raise RuntimeError("Database sessions must be request-scoped only")
             
         logger.debug(f"Creating request-scoped supervisor for user {context.user_id}, session {id(db_session)}")
-        
-        # Create UserExecutionContext with request-scoped session
-        user_context = create_user_execution_context(
-            user_id=context.user_id,
-            thread_id=context.thread_id,
-            run_id=context.run_id,
-            db_session=db_session,  # This session will be closed after request
-            websocket_connection_id=context.websocket_connection_id
-        )
         
         # Get required components from app state (these should be stateless)
         llm_client = get_llm_client_from_app(request)
@@ -528,24 +521,20 @@ async def get_request_scoped_supervisor(
                 detail="Tool dispatcher not configured"
             )
         
-        # CRITICAL: Create session factory that returns the request-scoped session
-        # This session will be automatically closed when the request completes
-        async def request_scoped_session_factory():
-            """Returns the request-scoped session - never creates new sessions."""
-            logger.debug(f"Returning request-scoped session {id(db_session)} to supervisor")
-            return db_session
-        
-        # Create isolated SupervisorAgent using factory method
-        from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
-        supervisor = await SupervisorAgent.create_with_user_context(
+        # Use core supervisor factory for consistency with WebSocket pattern
+        from netra_backend.app.core.supervisor_factory import create_supervisor_core
+        supervisor = await create_supervisor_core(
+            user_id=context.user_id,
+            thread_id=context.thread_id,
+            run_id=context.run_id,
+            db_session=db_session,
+            websocket_connection_id=context.websocket_connection_id,
             llm_client=llm_client,
             websocket_bridge=websocket_bridge,
-            tool_dispatcher=tool_dispatcher,
-            user_context=user_context,
-            db_session_factory=request_scoped_session_factory  # Returns request-scoped session
+            tool_dispatcher=tool_dispatcher
         )
         
-        logger.info(f"✅ Created request-scoped SupervisorAgent for user {context.user_id}, run {context.run_id}")
+        logger.info(f"✅ Created request-scoped SupervisorAgent for user {context.user_id}, run {context.run_id} using core factory")
         return supervisor
         
     except Exception as e:
