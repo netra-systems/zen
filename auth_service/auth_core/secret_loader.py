@@ -87,91 +87,61 @@ class AuthSecretLoader:
     
     @staticmethod
     def get_google_client_id() -> str:
-        """Get Google OAuth client ID with proper fallback chain.
+        """Get Google OAuth client ID using SSOT central configuration validator.
         
-        TOMBSTONE: GOOGLE_CLIENT_ID variable superseded by environment-specific variables:
-        - GOOGLE_OAUTH_CLIENT_ID_DEVELOPMENT
-        - GOOGLE_OAUTH_CLIENT_ID_STAGING
-        - GOOGLE_OAUTH_CLIENT_ID_PRODUCTION
+        REFACTORED: Uses central configuration validator (SSOT) for OAuth credentials.
+        Each environment has explicit, named OAuth configurations - NO fallbacks.
+        
+        Environment-specific variables:
+        - GOOGLE_OAUTH_CLIENT_ID_DEVELOPMENT (for development)
+        - GOOGLE_OAUTH_CLIENT_ID_TEST (for test)
+        - GOOGLE_OAUTH_CLIENT_ID_STAGING (for staging)
+        - GOOGLE_OAUTH_CLIENT_ID_PRODUCTION (for production)
         """
-        env_manager = get_env()
-        env = env_manager.get("ENVIRONMENT", "development").lower()
+        if get_central_validator is not None:
+            # Use central validator (SSOT)
+            try:
+                validator = get_central_validator(lambda key, default=None: get_env().get(key, default))
+                client_id = validator.get_oauth_client_id()
+                env = validator.get_environment().value
+                logger.info(f"✅ Using SSOT OAuth Client ID for {env} environment (length={len(client_id)})")
+                return client_id
+            except Exception as e:
+                logger.error(f"❌ SSOT OAuth Client ID validation failed: {e}")
+                # Hard fail - no legacy fallback
+                raise ValueError(f"OAuth client ID configuration failed via SSOT: {e}")
         
-        # Environment-specific with higher priority than generic
-        if env in ["development", "test"]:
-            # Test environment uses same config as development
-            # First check development-specific env var
-            client_id = env_manager.get("GOOGLE_OAUTH_CLIENT_ID_DEVELOPMENT")
-            if client_id:
-                logger.info(f"Using GOOGLE_OAUTH_CLIENT_ID_DEVELOPMENT from environment for {env}")
-                return client_id
-        elif env == "staging":
-            # First check staging-specific env var
-            client_id = env_manager.get("GOOGLE_OAUTH_CLIENT_ID_STAGING")
-            if client_id:
-                # CRITICAL: Log full client ID for staging debugging
-                logger.info(f"🔍 STAGING OAuth: Using GOOGLE_OAUTH_CLIENT_ID_STAGING = {client_id}")
-                logger.info(f"🔍 STAGING OAuth: Client ID length = {len(client_id)}")
-                logger.info(f"🔍 STAGING OAuth: Client ID starts with: {client_id[:30]}...")
-                return client_id
-            else:
-                # Log what variables are available
-                logger.error("❌ STAGING OAuth: GOOGLE_OAUTH_CLIENT_ID_STAGING is NOT set!")
-                available_vars = [k for k in env_manager.get_all().keys() if 'GOOGLE' in k and 'CLIENT' in k]
-                logger.error(f"❌ STAGING OAuth: Available Google client vars: {available_vars}")
-        elif env == "production":
-            client_id = env_manager.get("GOOGLE_OAUTH_CLIENT_ID_PRODUCTION")
-            if client_id:
-                logger.info("Using GOOGLE_OAUTH_CLIENT_ID_PRODUCTION from environment")
-                return client_id
-        
-        # No fallback to generic GOOGLE_CLIENT_ID - use environment-specific variables only
-        logger.error(f"❌ CRITICAL: No Google Client ID found for {env} environment")
-        logger.error(f"❌ CRITICAL: Expected variable for {env}: GOOGLE_OAUTH_CLIENT_ID_{env.upper()}")
-        return ""
+        # If central validator not available, raise error - no legacy fallback
+        raise ValueError("Central configuration validator not available for OAuth configuration")
     
     @staticmethod
     def get_google_client_secret() -> str:
-        """Get Google OAuth client secret with proper fallback chain.
+        """Get Google OAuth client secret using SSOT central configuration validator.
         
-        TOMBSTONE: GOOGLE_CLIENT_SECRET variable superseded by environment-specific variables:
-        - GOOGLE_OAUTH_CLIENT_SECRET_DEVELOPMENT
-        - GOOGLE_OAUTH_CLIENT_SECRET_STAGING
-        - GOOGLE_OAUTH_CLIENT_SECRET_PRODUCTION
+        REFACTORED: Uses central configuration validator (SSOT) for OAuth credentials.
+        Each environment has explicit, named OAuth configurations - NO fallbacks.
+        
+        Environment-specific variables:
+        - GOOGLE_OAUTH_CLIENT_SECRET_DEVELOPMENT (for development)
+        - GOOGLE_OAUTH_CLIENT_SECRET_TEST (for test)
+        - GOOGLE_OAUTH_CLIENT_SECRET_STAGING (for staging)
+        - GOOGLE_OAUTH_CLIENT_SECRET_PRODUCTION (for production)
         """
-        env_manager = get_env()
-        env = env_manager.get("ENVIRONMENT", "development").lower()
+        if get_central_validator is not None:
+            # Use central validator (SSOT)
+            try:
+                validator = get_central_validator(lambda key, default=None: get_env().get(key, default))
+                client_secret = validator.get_oauth_client_secret()
+                env = validator.get_environment().value
+                logger.info(f"✅ Using SSOT OAuth Client Secret for {env} environment (length={len(client_secret)})")
+                return client_secret
+            except Exception as e:
+                logger.error(f"❌ SSOT OAuth Client Secret validation failed: {e}")
+                # Hard fail - no legacy fallback
+                raise ValueError(f"OAuth client secret configuration failed via SSOT: {e}")
         
-        # Environment-specific with higher priority than generic
-        if env in ["development", "test"]:
-            # Test environment uses same config as development
-            # First check development-specific env var
-            secret = env_manager.get("GOOGLE_OAUTH_CLIENT_SECRET_DEVELOPMENT")
-            if secret:
-                logger.info(f"Using GOOGLE_OAUTH_CLIENT_SECRET_DEVELOPMENT from environment for {env}")
-                return secret
-        elif env == "staging":
-            # First check staging-specific env var
-            secret = env_manager.get("GOOGLE_OAUTH_CLIENT_SECRET_STAGING")
-            if secret:
-                # CRITICAL: Log secret presence for staging debugging (not the actual secret)
-                logger.info(f"🔍 STAGING OAuth: Using GOOGLE_OAUTH_CLIENT_SECRET_STAGING (length={len(secret)})")
-                logger.info(f"🔍 STAGING OAuth: Secret starts with: {secret[:5]}...")
-                return secret
-            else:
-                logger.error("❌ STAGING OAuth: GOOGLE_OAUTH_CLIENT_SECRET_STAGING is NOT set!")
-                available_vars = [k for k in env_manager.get_all().keys() if 'GOOGLE' in k and 'SECRET' in k]
-                logger.error(f"❌ STAGING OAuth: Available Google secret vars: {available_vars}")
-        elif env == "production":
-            secret = env_manager.get("GOOGLE_OAUTH_CLIENT_SECRET_PRODUCTION")
-            if secret:
-                logger.info("Using GOOGLE_OAUTH_CLIENT_SECRET_PRODUCTION from environment")
-                return secret
-        
-        # No fallback to generic GOOGLE_CLIENT_SECRET - use environment-specific variables only
-        logger.error(f"❌ CRITICAL: No Google Client Secret found for {env} environment")
-        logger.error(f"❌ CRITICAL: Expected variable for {env}: GOOGLE_OAUTH_CLIENT_SECRET_{env.upper()}")
-        return ""
+        # If central validator not available, raise error - no legacy fallback
+        raise ValueError("Central configuration validator not available for OAuth configuration")
     
     @staticmethod
     def get_database_url() -> str:
