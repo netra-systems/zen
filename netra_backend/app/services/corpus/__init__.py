@@ -16,10 +16,12 @@ from netra_backend.app.services.corpus.clickhouse_operations import (
     CorpusClickHouseOperations,
 )
 from netra_backend.app.services.corpus.core_unified import CorpusService
-from netra_backend.app.services.corpus.corpus_manager import CorpusManager
-from netra_backend.app.services.corpus.document_manager import DocumentManager
+from netra_backend.app.services.corpus.base_service import (
+    CorpusManager,
+    DocumentManager,
+    ValidationManager
+)
 from netra_backend.app.services.corpus.search_operations import SearchOperations
-from netra_backend.app.services.corpus.validation import ValidationManager
 
 # Create singleton instance
 corpus_service = CorpusService()
