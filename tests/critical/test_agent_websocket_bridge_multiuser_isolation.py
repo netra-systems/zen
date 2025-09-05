@@ -1,3 +1,26 @@
+class TestWebSocketConnection:
+    """Real WebSocket connection for testing instead of mocks."""
+    
+    def __init__(self):
+        self.messages_sent = []
+        self.is_connected = True
+        self._closed = False
+        
+    async def send_json(self, message: dict):
+        """Send JSON message."""
+        if self._closed:
+            raise RuntimeError("WebSocket is closed")
+        self.messages_sent.append(message)
+        
+    async def close(self, code: int = 1000, reason: str = "Normal closure"):
+        """Close WebSocket connection."""
+        self._closed = True
+        self.is_connected = False
+        
+    def get_messages(self) -> list:
+        """Get all sent messages."""
+        return self.messages_sent.copy()
+
 """
 CRITICAL: Multi-user isolation test suite for AgentWebSocketBridge
 This test suite demonstrates and validates that the singleton pattern
@@ -9,7 +32,12 @@ import json
 import uuid
 from typing import Dict, List, Optional, Set
 from datetime import datetime, timezone
-from unittest.mock import AsyncMock, MagicMock, patch
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from test_framework.database.test_database_manager import TestDatabaseManager
+from auth_service.core.auth_manager import AuthManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 import pytest
 from websocket import WebSocket
@@ -20,6 +48,10 @@ from netra_backend.app.services.agent_websocket_bridge import (
 )
 from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
 from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmitter
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
+from shared.isolated_environment import get_env
 
 
 class WebSocketEventCollector:
@@ -81,7 +113,7 @@ class TestAgentWebSocketBridgeMultiUserIsolation:
         
         # Simulate WebSocket manager with both connections
         with patch('netra_backend.app.websocket_core.unified_manager.get_websocket_manager') as mock_ws_mgr:
-            mock_manager = AsyncMock()
+            websocket = TestWebSocketConnection()
             mock_ws_mgr.return_value = mock_manager
             
             # Mock get_connection to return different collectors for different users
@@ -144,7 +176,7 @@ class TestAgentWebSocketBridgeMultiUserIsolation:
         bridge = AgentWebSocketBridge()
         
         with patch('netra_backend.app.websocket_core.unified_manager.get_websocket_manager') as mock_ws_mgr:
-            mock_manager = AsyncMock()
+            websocket = TestWebSocketConnection()
             mock_ws_mgr.return_value = mock_manager
             
             # Mock connections for both users
@@ -214,7 +246,7 @@ class TestAgentWebSocketBridgeMultiUserIsolation:
         bridge = AgentWebSocketBridge()
         
         with patch('netra_backend.app.websocket_core.unified_manager.get_websocket_manager') as mock_ws_mgr:
-            mock_manager = AsyncMock()
+            websocket = TestWebSocketConnection()
             mock_ws_mgr.return_value = mock_manager
             
             # Setup connection mapping
@@ -288,7 +320,7 @@ class TestAgentWebSocketBridgeMultiUserIsolation:
         bridge = AgentWebSocketBridge()
         
         with patch('netra_backend.app.websocket_core.unified_manager.get_websocket_manager') as mock_ws_mgr:
-            mock_manager = AsyncMock()
+            websocket = TestWebSocketConnection()
             mock_ws_mgr.return_value = mock_manager
             mock_manager.get_connection = AsyncMock(return_value=collector)
             
@@ -349,7 +381,7 @@ class TestAgentWebSocketBridgeMultiUserIsolation:
         bridge = AgentWebSocketBridge()
         
         with patch('netra_backend.app.websocket_core.unified_manager.get_websocket_manager') as mock_ws_mgr:
-            mock_manager = AsyncMock()
+            websocket = TestWebSocketConnection()
             mock_ws_mgr.return_value = mock_manager
             
             # Setup error for user1, normal for user2
@@ -394,7 +426,7 @@ class TestAgentWebSocketBridgeMultiUserIsolation:
         collector = WebSocketEventCollector("cleanup_user")
         
         with patch('netra_backend.app.websocket_core.unified_manager.get_websocket_manager') as mock_ws_mgr:
-            mock_manager = AsyncMock()
+            websocket = TestWebSocketConnection()
             mock_ws_mgr.return_value = mock_manager
             mock_manager.get_connection = AsyncMock(return_value=collector)
             

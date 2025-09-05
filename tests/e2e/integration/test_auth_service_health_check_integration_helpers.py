@@ -5,6 +5,7 @@ Original content had structural issues that prevented parsing.
 """
 
 from typing import Any, Dict, List, Optional
+from shared.isolated_environment import IsolatedEnvironment
 
 import pytest
 

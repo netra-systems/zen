@@ -1,4 +1,5 @@
 from shared.isolated_environment import get_env
+from shared.isolated_environment import IsolatedEnvironment
 """
 MISSION CRITICAL: WebSocket Event Validation During Page Refresh
 
@@ -35,7 +36,6 @@ from playwright.async_api import Page, Browser, WebSocket
 import os
 import sys
 import uuid
-from unittest.mock import AsyncMock, MagicMock
 
 # Add project root to path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
@@ -50,6 +50,9 @@ from netra_backend.app.services.websocket_bridge_factory import (
     WebSocketConnectionPool
 )
 from netra_backend.app.agents.supervisor.execution_factory import (
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
     ExecutionEngineFactory,
     UserExecutionContext,
     ExecutionStatus
@@ -85,6 +88,7 @@ class WebSocketEventValidation:
     }
     
     def __init__(self):
+    pass
         self.frontend_url = get_env().get('FRONTEND_URL', 'http://localhost:3000')
         self.jwt_secret = get_env().get('JWT_SECRET', 'test-secret-key')
         self.test_results: Dict[str, Any] = {
@@ -135,8 +139,7 @@ class WebSocketEventValidation:
                 
             @property
             def application_state(self):
-                return MagicMock() if self.is_connected else None
-                
+                return Magic                
         class MockConnectionPool:
             def __init__(self):
                 self.connections = {}
@@ -146,9 +149,9 @@ class WebSocketEventValidation:
                 if key not in self.connections:
                     self.connections[key] = MockWebSocketConnection(user_id, connection_id)
                 
-                connection_info = MagicMock()
-                connection_info.websocket = self.connections[key]
-                return connection_info
+                connection_info = Magic                connection_info.websocket = self.connections[key]
+                await asyncio.sleep(0)
+    return connection_info
                 
             def get_mock_connection(self, user_id: str, connection_id: str):
                 key = f"{user_id}:{connection_id}"
@@ -156,6 +159,7 @@ class WebSocketEventValidation:
                 
             def simulate_disconnect(self, user_id: str, connection_id: str):
                 """Simulate connection disconnect for refresh testing."""
+    pass
                 key = f"{user_id}:{connection_id}"
                 if key in self.connections:
                     self.connections[key].is_connected = False
@@ -171,10 +175,39 @@ class WebSocketEventValidation:
     
     async def test_events_preserved_after_refresh(self, page: Page) -> bool:
         """
+    pass
         Test that WebSocket events continue to be sent after page refresh.
         """
         test_name = "events_preserved_after_refresh"
-        print(f"\n🔍 Testing: {test_name}")
+        print(f"
+
+class TestWebSocketConnection:
+    """Real WebSocket connection for testing instead of mocks."""
+    
+    def __init__(self):
+    pass
+        self.messages_sent = []
+        self.is_connected = True
+        self._closed = False
+        
+    async def send_json(self, message: dict):
+        """Send JSON message."""
+        if self._closed:
+            raise RuntimeError("WebSocket is closed")
+        self.messages_sent.append(message)
+        
+    async def close(self, code: int = 1000, reason: str = "Normal closure"):
+        """Close WebSocket connection."""
+    pass
+        self._closed = True
+        self.is_connected = False
+        
+    def get_messages(self) -> list:
+        """Get all sent messages."""
+        await asyncio.sleep(0)
+    return self.messages_sent.copy()
+
+🔍 Testing: {test_name}")
         
         try:
             events_before_refresh: List[str] = []
@@ -182,7 +215,9 @@ class WebSocketEventValidation:
             
             # Setup WebSocket monitoring
             def handle_websocket(ws: WebSocket):
+    pass
                 def on_message(message: str):
+    pass
                     try:
                         data = json.loads(message)
                         event_type = data.get('type', '')
@@ -278,16 +313,19 @@ class WebSocketEventValidation:
         Test that WebSocket reconnection follows proper event sequence.
         """
         test_name = "reconnection_event_sequence"
-        print(f"\n🔍 Testing: {test_name}")
+        print(f"
+🔍 Testing: {test_name}")
         
         try:
             event_sequence: List[tuple] = []
             
             # Monitor WebSocket events with timestamps
             def handle_websocket(ws: WebSocket):
+    pass
                 connection_time = time.time()
                 
                 def on_message(message: str):
+    pass
                     try:
                         data = json.loads(message)
                         event_type = data.get('type', '')
@@ -300,6 +338,7 @@ class WebSocketEventValidation:
                         pass
                 
                 def on_close():
+    pass
                     event_sequence.append((
                         'connection_closed',
                         time.time() - connection_time,
@@ -370,7 +409,8 @@ class WebSocketEventValidation:
         Test that events are not duplicated after page refresh.
         """
         test_name = "no_duplicate_events_after_refresh"
-        print(f"\n🔍 Testing: {test_name}")
+        print(f"
+🔍 Testing: {test_name}")
         
         try:
             message_ids: Set[str] = set()
@@ -378,7 +418,9 @@ class WebSocketEventValidation:
             
             # Monitor for duplicate message IDs
             def handle_websocket(ws: WebSocket):
+    pass
                 def on_message(message: str):
+    pass
                     try:
                         data = json.loads(message)
                         payload = data.get('payload', {})
@@ -448,16 +490,19 @@ class WebSocketEventValidation:
         Test that events are sent with appropriate timing after refresh.
         """
         test_name = "event_timing_after_refresh"
-        print(f"\n🔍 Testing: {test_name}")
+        print(f"
+🔍 Testing: {test_name}")
         
         try:
             event_timings: Dict[str, List[float]] = {}
             
             # Monitor event timing
             def handle_websocket(ws: WebSocket):
+    pass
                 start_time = time.time()
                 
                 def on_message(message: str):
+    pass
                     try:
                         data = json.loads(message)
                         event_type = data.get('type', '')
@@ -538,7 +583,8 @@ class WebSocketEventValidation:
     async def test_factory_websocket_event_persistence(self) -> bool:
         """Test factory-based WebSocket event persistence during simulated refresh."""
         test_name = "factory_websocket_event_persistence"
-        print(f"\n🔍 Testing: {test_name}")
+        print(f"
+🔍 Testing: {test_name}")
         
         try:
             # Configure factory
@@ -636,7 +682,8 @@ class WebSocketEventValidation:
     async def test_factory_json_serialization_during_refresh(self) -> bool:
         """Test JSON serialization remains intact during refresh scenarios."""
         test_name = "factory_json_serialization_during_refresh"
-        print(f"\n🔍 Testing: {test_name}")
+        print(f"
+🔍 Testing: {test_name}")
         
         try:
             # Configure factory
@@ -742,7 +789,8 @@ class WebSocketEventValidation:
             
     async def run_all_validations(self, browser: Browser) -> Dict[str, Any]:
         """Run all WebSocket event validations including factory-based tests."""
-        print("\n" + "=" * 70)
+        print("
+" + "=" * 70)
         print("🔍 WebSocket Event Validation During Refresh (Browser + Factory)")
         print("=" * 70)
         
@@ -752,7 +800,8 @@ class WebSocketEventValidation:
             self.test_factory_json_serialization_during_refresh
         ]
         
-        print("\n🏭 Running Factory-Based Tests...")
+        print("
+🏭 Running Factory-Based Tests...")
         for test_func in factory_tests:
             try:
                 await test_func()
@@ -769,7 +818,8 @@ class WebSocketEventValidation:
             self.test_event_timing_after_refresh
         ]
         
-        print("\n🌐 Running Browser-Based Tests...")
+        print("
+🌐 Running Browser-Based Tests...")
         for test_func in browser_tests:
             context = await browser.new_context()
             page = await context.new_page()
@@ -784,7 +834,8 @@ class WebSocketEventValidation:
                 await context.close()
         
         # Print summary
-        print("\n" + "=" * 70)
+        print("
+" + "=" * 70)
         print("📊 VALIDATION RESULTS SUMMARY")
         print("=" * 70)
         print(f"Total Tests: {self.test_results['total']}")
@@ -793,14 +844,16 @@ class WebSocketEventValidation:
         
         # Factory test results
         if self.test_results['factory_tests']:
-            print("\n🏭 FACTORY TEST DETAILS:")
+            print("
+🏭 FACTORY TEST DETAILS:")
             for test_name, test_data in self.test_results['factory_tests'].items():
                 print(f"  {test_name}:")
                 for key, value in test_data.items():
                     print(f"    {key}: {value}")
         
         if self.test_results['missing_events']:
-            print("\n⚠️ MISSING REQUIRED EVENTS:")
+            print("
+⚠️ MISSING REQUIRED EVENTS:")
             for missing in self.test_results['missing_events']:
                 print(f"  - {missing['test']}: {', '.join(missing['missing'])}")
         
@@ -815,7 +868,8 @@ class WebSocketEventValidation:
         captured_required = all_captured_events & self.REQUIRED_EVENTS
         missing_required = self.REQUIRED_EVENTS - captured_required
         
-        print(f"\n📋 REQUIRED EVENT COMPLIANCE:")
+        print(f"
+📋 REQUIRED EVENT COMPLIANCE:")
         print(f"  Captured: {len(captured_required)}/{len(self.REQUIRED_EVENTS)}")
         if missing_required:
             print(f"  Missing: {', '.join(missing_required)}")
@@ -831,7 +885,8 @@ class WebSocketEventValidation:
         if factory_events:
             factory_captured = factory_events & self.REQUIRED_EVENTS
             factory_missing = self.REQUIRED_EVENTS - factory_captured
-            print(f"\n🏭 FACTORY PATTERN COMPLIANCE:")
+            print(f"
+🏭 FACTORY PATTERN COMPLIANCE:")
             print(f"  Captured: {len(factory_captured)}/{len(self.REQUIRED_EVENTS)}")
             if factory_missing:
                 print(f"  Missing: {', '.join(factory_missing)}")
@@ -847,19 +902,22 @@ class WebSocketEventValidation:
         factory_missing = self.REQUIRED_EVENTS - factory_events if factory_events else set()
         
         if self.test_results['failed'] == 0 and not missing_required and not factory_missing:
-            print("\n✅ ALL VALIDATIONS PASSED - WebSocket events working correctly!")
+            print("
+✅ ALL VALIDATIONS PASSED - WebSocket events working correctly!")
             print("  ✅ Browser tests passed")
             print("  ✅ Factory tests passed")
             print("  ✅ All required events validated")
         elif missing_required or factory_missing:
             all_missing = missing_required | factory_missing
-            print(f"\n❌ CRITICAL: Missing required events - {all_missing}")
+            print(f"
+❌ CRITICAL: Missing required events - {all_missing}")
             if missing_required:
                 print(f"  Browser missing: {missing_required}")
             if factory_missing:
                 print(f"  Factory missing: {factory_missing}")
         else:
-            print(f"\n⚠️ {self.test_results['failed']} validations failed - Review event handling")
+            print(f"
+⚠️ {self.test_results['failed']} validations failed - Review event handling")
         
         return self.test_results
 
@@ -935,3 +993,5 @@ if __name__ == "__main__":
                 await browser.close()
     
     asyncio.run(main())
+
+    pass

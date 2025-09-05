@@ -24,31 +24,38 @@ def run_quick_ssot_validation():
     suite = SSotComplianceSuite()
     
     # Run core validations (skip WebSocket events test)
-    print("\n1. WebSocket Manager Consolidation")
+    print("
+1. WebSocket Manager Consolidation")
     websocket_violations = suite.validate_websocket_manager_consolidation()
     print(f"   Violations: {len(websocket_violations)}")
     
-    print("\n2. JWT Validation Security")
+    print("
+2. JWT Validation Security")
     jwt_violations = suite.validate_jwt_validation_security()  
     print(f"   Violations: {len(jwt_violations)}")
     
-    print("\n3. Agent Registry Consolidation")
+    print("
+3. Agent Registry Consolidation")
     agent_violations = suite.validate_agent_registry_consolidation()
     print(f"   Violations: {len(agent_violations)}")
     
-    print("\n4. IsolatedEnvironment Consolidation")
+    print("
+4. IsolatedEnvironment Consolidation")
     env_violations = suite.validate_isolated_environment_consolidation()
     print(f"   Violations: {len(env_violations)}")
     
-    print("\n5. Session Management Consolidation")
+    print("
+5. Session Management Consolidation")
     session_violations = suite.validate_session_management_consolidation()
     print(f"   Violations: {len(session_violations)}")
     
-    print("\n6. Tool Execution Consolidation")
+    print("
+6. Tool Execution Consolidation")
     tool_violations = suite.validate_tool_execution_consolidation()
     print(f"   Violations: {len(tool_violations)}")
     
-    print("\n7. Direct os.environ Access")
+    print("
+7. Direct os.environ Access")
     os_violations = suite.validate_direct_os_environ_access()
     print(f"   Violations: {len(os_violations)}")
     
@@ -68,7 +75,8 @@ def run_quick_ssot_validation():
     
     compliance_score = max(0, max_score - deductions)
     
-    print(f"\n" + "=" * 50)
+    print(f"
+" + "=" * 50)
     print(f"SSOT COMPLIANCE RESULTS:")
     print(f"  Total violations: {len(all_violations)}")
     print(f"  Critical violations: {critical_count}")
@@ -78,13 +86,15 @@ def run_quick_ssot_validation():
     # Show critical violations details
     critical_violations = [v for v in all_violations if v.severity == 'CRITICAL']
     if critical_violations:
-        print(f"\nCRITICAL VIOLATIONS (TOP 10):")
+        print(f"
+CRITICAL VIOLATIONS (TOP 10):")
         for i, violation in enumerate(critical_violations[:10], 1):
             print(f"  {i}. {violation.violation_type}")
             print(f"     File: {violation.file_path}")
             print(f"     Impact: {violation.business_impact}")
     
-    print(f"\n" + "=" * 50)
+    print(f"
+" + "=" * 50)
     
     if compliance_score >= 85:
         print("STATUS: PASSED - Ready for deployment")
@@ -97,3 +107,5 @@ def run_quick_ssot_validation():
 if __name__ == '__main__':
     success = run_quick_ssot_validation()
     sys.exit(0 if success else 1)
+
+    pass

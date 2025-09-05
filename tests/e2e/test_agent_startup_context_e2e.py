@@ -18,6 +18,7 @@ Compliance: <300 lines, <8 lines per function, NO MOCKS, Real services only
 import asyncio
 import time
 from typing import Any, Dict
+from shared.isolated_environment import IsolatedEnvironment
 
 import pytest
 

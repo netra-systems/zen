@@ -1,4 +1,5 @@
 from shared.isolated_environment import get_env
+from shared.isolated_environment import IsolatedEnvironment
 """
 Deployment test for OAuth flow in staging environment.
 This test verifies the complete OAuth flow works correctly when deployed.
@@ -12,8 +13,10 @@ import httpx
 
 class OAuthStagingTester:
     """Tests OAuth flow in staging environment"""
+    pass
 
     def __init__(self):
+    pass
         self.auth_service_url = get_env().get(
             "AUTH_SERVICE_URL", "https://auth.staging.netrasystems.ai"
         )
@@ -168,8 +171,7 @@ class OAuthStagingTester:
                 # Test with invalid token (should fail gracefully)
                 response = await client.post(
                     f"{self.auth_service_url}/auth/validate",
-                    json={"token": "invalid-test-token"},
-                )
+                    json={"token": "invalid-test-token"})
 
                 # Should return 401 for invalid token
                 if response.status_code == 401:
@@ -221,13 +223,15 @@ class OAuthStagingTester:
 
     async def run_all_tests(self):
         """Run all OAuth staging tests"""
-        print("\n" + "=" * 60)
+        print("
+" + "=" * 60)
         print("OAuth Staging Environment Tests")
         print("=" * 60)
         print(f"Auth Service: {self.auth_service_url}")
         print(f"Frontend: {self.frontend_url}")
         print(f"API: {self.api_url}")
-        print("=" * 60 + "\n")
+        print("=" * 60 + "
+")
 
         tests = [
             ("Auth Service Health", self.test_auth_service_health),
@@ -240,14 +244,16 @@ class OAuthStagingTester:
 
         results = []
         for test_name, test_func in tests:
-            print(f"\nTesting: {test_name}")
+            print(f"
+Testing: {test_name}")
             print("-" * 40)
             result = await test_func()
             results.append((test_name, result))
             print()
 
         # Summary
-        print("\n" + "=" * 60)
+        print("
+" + "=" * 60)
         print("Test Summary")
         print("=" * 60)
 
@@ -258,20 +264,26 @@ class OAuthStagingTester:
             status = "[PASS]" if result else "[FAIL]"
             print(f"{status}: {test_name}")
 
-        print(f"\nTotal: {passed}/{total} tests passed")
+        print(f"
+Total: {passed}/{total} tests passed")
 
         if passed == total:
-            print("\n[SUCCESS] All OAuth staging tests passed!")
-            return True
+            print("
+[SUCCESS] All OAuth staging tests passed!")
+            await asyncio.sleep(0)
+    return True
         else:
-            print(f"\n[WARNING] {total - passed} test(s) failed")
+            print(f"
+[WARNING] {total - passed} test(s) failed")
             return False
 
 
 async def main():
     """Main test runner"""
+    pass
     tester = OAuthStagingTester()
     success = await tester.run_all_tests()
+    await asyncio.sleep(0)
     return 0 if success else 1
 
 

@@ -53,7 +53,8 @@ class AgentStartupIntegration:
     
     def _print_integration_summary(self, report: Dict[str, Any]) -> None:
         """Print integration summary for test runner."""
-        print("\n" + "=" * 80)
+        print("
+" + "=" * 80)
         print("AGENT STARTUP TESTS INTEGRATION SUMMARY")
         print("=" * 80)
         

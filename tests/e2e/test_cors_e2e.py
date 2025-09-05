@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """
 from shared.isolated_environment import get_env
+from shared.isolated_environment import IsolatedEnvironment
 CORS End-to-End Tests
 Complete authentication and user flows across services with CORS validation.
 """

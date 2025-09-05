@@ -35,6 +35,7 @@ from typing import Dict, List, Set, Any, Optional, Tuple
 import base64
 import jwt
 import random
+from shared.isolated_environment import IsolatedEnvironment
 
 # CRITICAL: Add project root to Python path for imports
 project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
@@ -71,6 +72,7 @@ class SecurityTestUser:
     """Represents a test user for multi-user security testing."""
     
     def __init__(self, user_id: str, email: str, is_admin: bool = False):
+    pass
         self.user_id = user_id
         self.email = email
         self.is_admin = is_admin
@@ -109,6 +111,7 @@ class MultiUserSecurityTester:
     """Orchestrates multi-user security vulnerability testing."""
     
     def __init__(self, config: RealWebSocketTestConfig):
+    pass
         self.config = config
         self.users: List[SecurityTestUser] = []
         self.vulnerability_findings: List[Dict] = []
@@ -206,10 +209,12 @@ class TestWebSocketAuthenticationVulnerabilities:
         """Create a security tester instance."""
         config = RealWebSocketTestConfig()
         await config.ensure_services_ready()
-        return MultiUserSecurityTester(config)
+        await asyncio.sleep(0)
+    return MultiUserSecurityTester(config)
     
     async def test_invalid_token_rejection(self, security_tester: MultiUserSecurityTester):
         """Test that invalid tokens are properly rejected."""
+    pass
         logger.info("🔒 Testing invalid token rejection...")
         
         invalid_tokens = [
@@ -334,6 +339,7 @@ class TestWebSocketAuthenticationVulnerabilities:
     
     async def test_concurrent_authentication_race_conditions(self, security_tester: MultiUserSecurityTester):
         """Test for race conditions in concurrent authentication."""
+    pass
         logger.info("🏃‍♂️ Testing concurrent authentication race conditions...")
         
         users = security_tester.create_test_users(count=3)
@@ -365,7 +371,8 @@ class TestWebSocketAuthenticationVulnerabilities:
                 
                 await connection.close()
                 
-                return {
+                await asyncio.sleep(0)
+    return {
                     "user_id": user.user_id,
                     "attempt_id": attempt_id,
                     "success": True,
@@ -444,10 +451,12 @@ class TestUserIsolationVulnerabilities:
         await config.ensure_services_ready()
         tester = MultiUserSecurityTester(config)
         tester.create_test_users(count=4)
-        return tester
+        await asyncio.sleep(0)
+    return tester
     
     async def test_websocket_message_isolation(self, security_tester: MultiUserSecurityTester):
         """Test that WebSocket messages don't leak between users."""
+    pass
         logger.info("🔐 Testing WebSocket message isolation...")
         
         # Establish connections for all users
@@ -471,7 +480,8 @@ class TestUserIsolationVulnerabilities:
         async def send_user_message(user: SecurityTestUser, message: Dict):
             """Send message for a specific user."""
             if not user.connections:
-                return {"user_id": user.user_id, "error": "No connections"}
+                await asyncio.sleep(0)
+    return {"user_id": user.user_id, "error": "No connections"}
             
             connection = user.connections[0]  # Use first connection
             try:
@@ -555,6 +565,7 @@ class TestUserIsolationVulnerabilities:
     
     async def test_agent_response_user_isolation(self, security_tester: MultiUserSecurityTester):
         """Test that agent responses are correctly isolated per user."""
+    pass
         logger.info("🤖 Testing agent response user isolation...")
         
         connections = await security_tester.establish_concurrent_connections()
@@ -580,7 +591,8 @@ class TestUserIsolationVulnerabilities:
         async def get_agent_response(user: SecurityTestUser, request: Dict):
             """Get agent response for a specific user."""
             if not user.connections:
-                return None
+                await asyncio.sleep(0)
+    return None
             
             connection = user.connections[0]
             try:
@@ -674,6 +686,7 @@ class TestUserIsolationVulnerabilities:
     
     async def test_llm_conversation_isolation(self, security_tester: MultiUserSecurityTester):
         """Test that LLM conversations don't mix between users."""
+    pass
         logger.info("🧠 Testing LLM conversation isolation...")
         
         connections = await security_tester.establish_concurrent_connections()
@@ -711,7 +724,8 @@ class TestUserIsolationVulnerabilities:
         async def conduct_conversation(user: SecurityTestUser, messages: List[Dict]):
             """Conduct a conversation with the LLM for a specific user."""
             if not user.connections:
-                return None
+                await asyncio.sleep(0)
+    return None
             
             connection = user.connections[0]
             conversation_responses = []
@@ -808,10 +822,12 @@ class TestSingletonPatternVulnerabilities:
         """Create a security tester instance."""
         config = RealWebSocketTestConfig()
         await config.ensure_services_ready()
-        return MultiUserSecurityTester(config)
+        await asyncio.sleep(0)
+    return MultiUserSecurityTester(config)
     
     async def test_websocket_manager_isolation(self, security_tester: MultiUserSecurityTester):
         """Test that WebSocket managers are properly isolated per user."""
+    pass
         logger.info("📡 Testing WebSocket manager isolation...")
         
         users = security_tester.create_test_users(count=3)
@@ -825,7 +841,8 @@ class TestSingletonPatternVulnerabilities:
         async def test_manager_isolation(user: SecurityTestUser):
             """Test manager isolation for a specific user."""
             if not user.connections:
-                return None
+                await asyncio.sleep(0)
+    return None
             
             connection = user.connections[0]
             manager_test_messages = [
@@ -910,6 +927,7 @@ class TestSingletonPatternVulnerabilities:
     
     async def test_execution_engine_isolation(self, security_tester: MultiUserSecurityTester):
         """Test that execution engines are properly isolated per user."""
+    pass
         logger.info("⚙️ Testing execution engine isolation...")
         
         users = security_tester.create_test_users(count=4)
@@ -945,7 +963,8 @@ class TestSingletonPatternVulnerabilities:
         async def test_execution_isolation(user: SecurityTestUser, test_data: Dict):
             """Test execution engine isolation for a user."""
             if not user.connections:
-                return None
+                await asyncio.sleep(0)
+    return None
             
             connection = user.connections[0]
             responses = []
@@ -1029,6 +1048,7 @@ class TestSingletonPatternVulnerabilities:
     
     async def test_cache_isolation(self, security_tester: MultiUserSecurityTester):
         """Test that cache systems are properly scoped per user."""
+    pass
         logger.info("💾 Testing cache isolation...")
         
         users = security_tester.create_test_users(count=3)
@@ -1067,7 +1087,8 @@ class TestSingletonPatternVulnerabilities:
         async def test_cache_isolation(user: SecurityTestUser, test_data: Dict):
             """Test cache isolation for a user."""
             if not user.connections:
-                return None
+                await asyncio.sleep(0)
+    return None
             
             connection = user.connections[0]
             responses = []
@@ -1147,10 +1168,12 @@ class TestAdminPrivilegeVulnerabilities:
         """Create security tester with admin and regular users."""
         config = RealWebSocketTestConfig()
         await config.ensure_services_ready()
-        return MultiUserSecurityTester(config)
+        await asyncio.sleep(0)
+    return MultiUserSecurityTester(config)
     
     async def test_client_side_admin_flag_validation(self, security_tester: MultiUserSecurityTester):
         """Test that client-side admin flags are validated server-side."""
+    pass
         logger.info("👑 Testing client-side admin flag validation...")
         
         # Create regular users
@@ -1340,6 +1363,7 @@ class TestAdminPrivilegeVulnerabilities:
         
         async def test_admin_operation(user: SecurityTestUser, operation: Dict):
             """Test admin operation access for a user."""
+    pass
             try:
                 connection = await websockets.connect(
                     security_tester.config.websocket_url,
@@ -1367,7 +1391,8 @@ class TestAdminPrivilegeVulnerabilities:
                 operation_allowed = any(indicator in response_text for indicator in operation_success_indicators)
                 operation_denied = any(indicator in response_text for indicator in operation_denied_indicators)
                 
-                return {
+                await asyncio.sleep(0)
+    return {
                     "user_id": user.user_id,
                     "is_admin": user.is_admin,
                     "operation": operation["operation"],
@@ -1445,10 +1470,12 @@ class TestRaceConditionVulnerabilities:
         """Create security tester for race condition testing."""
         config = RealWebSocketTestConfig()
         await config.ensure_services_ready()
-        return MultiUserSecurityTester(config)
+        await asyncio.sleep(0)
+    return MultiUserSecurityTester(config)
     
     async def test_concurrent_connection_race_conditions(self, security_tester: MultiUserSecurityTester):
         """Test for race conditions in concurrent WebSocket connections."""
+    pass
         logger.info("🏃‍♂️ Testing concurrent connection race conditions...")
         
         users = security_tester.create_test_users(count=5)
@@ -1513,7 +1540,8 @@ class TestRaceConditionVulnerabilities:
                     except:
                         pass
                 
-                return {
+                await asyncio.sleep(0)
+    return {
                     "user_id": user.user_id,
                     "sequence_id": sequence_id,
                     "connections_established": len(successful_connections),
@@ -1620,6 +1648,7 @@ class TestRaceConditionVulnerabilities:
     
     async def test_memory_leak_detection(self, security_tester: MultiUserSecurityTester):
         """Test for memory leaks in singleton patterns during high concurrency."""
+    pass
         logger.info("🧠 Testing memory leak detection in concurrent scenarios...")
         
         users = security_tester.create_test_users(count=3)
@@ -1676,7 +1705,8 @@ class TestRaceConditionVulnerabilities:
                 # Close connection
                 await connection.close()
                 
-                return {"success": True, "cycle_id": cycle_id}
+                await asyncio.sleep(0)
+    return {"success": True, "cycle_id": cycle_id}
                 
             except Exception as e:
                 memory_metrics["connection_failures"] += 1
@@ -1761,42 +1791,61 @@ def generate_vulnerability_report(security_tester: MultiUserSecurityTester) -> s
     if not security_tester.vulnerability_findings:
         return "✅ NO SECURITY VULNERABILITIES DETECTED - All tests passed!"
     
-    report = "🚨 CRITICAL SECURITY VULNERABILITIES DETECTED 🚨\n"
-    report += "=" * 60 + "\n\n"
+    report = "🚨 CRITICAL SECURITY VULNERABILITIES DETECTED 🚨
+"
+    report += "=" * 60 + "
+
+"
     
     # Group vulnerabilities by severity
     critical_vulns = [v for v in security_tester.vulnerability_findings if v["severity"] == "CRITICAL"]
     high_vulns = [v for v in security_tester.vulnerability_findings if v["severity"] == "HIGH"]
     medium_vulns = [v for v in security_tester.vulnerability_findings if v["severity"] == "MEDIUM"]
     
-    report += f"SUMMARY:\n"
-    report += f"- CRITICAL vulnerabilities: {len(critical_vulns)}\n"
-    report += f"- HIGH vulnerabilities: {len(high_vulns)}\n" 
-    report += f"- MEDIUM vulnerabilities: {len(medium_vulns)}\n"
-    report += f"- TOTAL vulnerabilities: {len(security_tester.vulnerability_findings)}\n\n"
+    report += f"SUMMARY:
+"
+    report += f"- CRITICAL vulnerabilities: {len(critical_vulns)}
+"
+    report += f"- HIGH vulnerabilities: {len(high_vulns)}
+" 
+    report += f"- MEDIUM vulnerabilities: {len(medium_vulns)}
+"
+    report += f"- TOTAL vulnerabilities: {len(security_tester.vulnerability_findings)}
+
+"
     
     # Detailed vulnerability descriptions
     for severity, vulns in [("CRITICAL", critical_vulns), ("HIGH", high_vulns), ("MEDIUM", medium_vulns)]:
         if vulns:
-            report += f"{severity} VULNERABILITIES:\n"
-            report += "-" * 40 + "\n"
+            report += f"{severity} VULNERABILITIES:
+"
+            report += "-" * 40 + "
+"
             
             for i, vuln in enumerate(vulns, 1):
-                report += f"{i}. {vuln['type']}: {vuln['description']}\n"
-                report += f"   Timestamp: {vuln['timestamp']}\n"
-                report += f"   Test ID: {vuln['test_id']}\n"
+                report += f"{i}. {vuln['type']}: {vuln['description']}
+"
+                report += f"   Timestamp: {vuln['timestamp']}
+"
+                report += f"   Test ID: {vuln['test_id']}
+"
                 
                 # Include key evidence
                 if vuln.get("evidence"):
                     evidence = vuln["evidence"]
                     if "victim_user" in evidence:
-                        report += f"   Affected User: {evidence['victim_user']}\n"
+                        report += f"   Affected User: {evidence['victim_user']}
+"
                     if "leaked_from_user" in evidence:
-                        report += f"   Data Leaked From: {evidence['leaked_from_user']}\n"
+                        report += f"   Data Leaked From: {evidence['leaked_from_user']}
+"
                 
-                report += "\n"
+                report += "
+"
     
-    report += "\n" + "=" * 60 + "\n"
+    report += "
+" + "=" * 60 + "
+"
     report += "⚠️  DEPLOYMENT MUST BE BLOCKED UNTIL ALL VULNERABILITIES ARE FIXED ⚠️"
     
     return report
@@ -1872,7 +1921,8 @@ async def test_comprehensive_security_suite():
     
     # Generate final vulnerability report
     vulnerability_report = generate_vulnerability_report(security_tester)
-    print("\n" + vulnerability_report)
+    print("
+" + vulnerability_report)
     
     # Log summary
     total_vulnerabilities = len(security_tester.vulnerability_findings)
@@ -1887,3 +1937,4 @@ async def test_comprehensive_security_suite():
         raise AssertionError(f"CRITICAL SECURITY VULNERABILITIES DETECTED: {vulnerability_report}")
     else:
         logger.success("✅ All multi-user security isolation tests passed!")
+    pass

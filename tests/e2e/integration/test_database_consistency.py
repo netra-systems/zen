@@ -27,6 +27,7 @@ import pytest_asyncio
 import asyncio
 from tests.e2e.database_sync_fixtures import DatabaseSyncValidator
 from tests.e2e.fixtures.integration.database_consistency_fixtures import DatabaseConsistencyTester
+from shared.isolated_environment import IsolatedEnvironment
 
 def create_test_user_data(identifier: str):
     """Create test user data for testing."""

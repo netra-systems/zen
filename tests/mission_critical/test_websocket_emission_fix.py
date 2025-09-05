@@ -1,3 +1,26 @@
+class TestWebSocketConnection:
+    """Real WebSocket connection for testing instead of mocks."""
+    
+    def __init__(self):
+        self.messages_sent = []
+        self.is_connected = True
+        self._closed = False
+        
+    async def send_json(self, message: dict):
+        """Send JSON message."""
+        if self._closed:
+            raise RuntimeError("WebSocket is closed")
+        self.messages_sent.append(message)
+        
+    async def close(self, code: int = 1000, reason: str = "Normal closure"):
+        """Close WebSocket connection."""
+        self._closed = True
+        self.is_connected = False
+        
+    def get_messages(self) -> list:
+        """Get all sent messages."""
+        return self.messages_sent.copy()
+
 """
 Mission Critical Test: WebSocket Emission Method Fix
 Verifies that SupervisorAgent correctly uses emit_agent_event
@@ -5,8 +28,13 @@ Verifies that SupervisorAgent correctly uses emit_agent_event
 
 import pytest
 import asyncio
-from unittest.mock import AsyncMock, MagicMock, patch
 from datetime import datetime, timezone
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from test_framework.database.test_database_manager import TestDatabaseManager
+from auth_service.core.auth_manager import AuthManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 # Add paths
 import sys
@@ -17,6 +45,10 @@ sys.path.insert(0, str(root_dir))
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
 from netra_backend.app.models.user_execution_context import UserExecutionContext
 from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
+from shared.isolated_environment import get_env
 
 
 class TestWebSocketEmissionFix:
@@ -31,11 +63,10 @@ class TestWebSocketEmissionFix:
         mock_bridge.emit_agent_event = AsyncMock(return_value=True)
         
         # Create mock dependencies
-        mock_llm = AsyncMock()
+        websocket = TestWebSocketConnection()
         mock_llm.invoke = AsyncMock(return_value=MagicMock(content="Test response"))
         
-        mock_tool_dispatcher = AsyncMock()
-        mock_agent_registry = AsyncMock()
+        websocket = TestWebSocketConnection()
         
         # Create supervisor
         supervisor = SupervisorAgent.create(
@@ -76,9 +107,7 @@ class TestWebSocketEmissionFix:
         
         # Create supervisor
         supervisor = SupervisorAgent.create(
-            llm_client=AsyncMock(),
-            tool_dispatcher=AsyncMock(),
-            agent_registry=AsyncMock(),
+            websocket=TestWebSocketConnection(),
             websocket_bridge=mock_bridge
         )
         
@@ -104,12 +133,10 @@ class TestWebSocketEmissionFix:
         
         # Create supervisor with proper bridge
         mock_bridge = AsyncMock(spec=AgentWebSocketBridge)
-        mock_bridge.emit_agent_event = AsyncMock()
+        mock_bridge.websocket = TestWebSocketConnection()
         
         supervisor = SupervisorAgent.create(
-            llm_client=AsyncMock(),
-            tool_dispatcher=AsyncMock(),
-            agent_registry=AsyncMock(),
+            websocket=TestWebSocketConnection(),
             websocket_bridge=mock_bridge
         )
         
@@ -124,16 +151,14 @@ class TestWebSocketEmissionFix:
         """Test that the fix works with real AgentWebSocketBridge structure."""
         
         # Create a mock that mimics real bridge
-        mock_bridge = AsyncMock()
+        websocket = TestWebSocketConnection()
         mock_bridge.emit_agent_event = AsyncMock(return_value=True)
         mock_bridge._validate_event_context = MagicMock(return_value=True)
         mock_bridge._resolve_thread_id_from_run_id = AsyncMock(return_value="test_thread")
         
         # Create supervisor
         supervisor = SupervisorAgent.create(
-            llm_client=AsyncMock(),
-            tool_dispatcher=AsyncMock(),
-            agent_registry=AsyncMock(),
+            websocket=TestWebSocketConnection(),
             websocket_bridge=mock_bridge
         )
         

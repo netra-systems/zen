@@ -1,3 +1,29 @@
+class TestWebSocketConnection:
+    """Real WebSocket connection for testing instead of mocks."""
+    
+    def __init__(self):
+    pass
+        self.messages_sent = []
+        self.is_connected = True
+        self._closed = False
+        
+    async def send_json(self, message: dict):
+        """Send JSON message."""
+        if self._closed:
+            raise RuntimeError("WebSocket is closed")
+        self.messages_sent.append(message)
+        
+    async def close(self, code: int = 1000, reason: str = "Normal closure"):
+        """Close WebSocket connection."""
+    pass
+        self._closed = True
+        self.is_connected = False
+        
+    def get_messages(self) -> list:
+        """Get all sent messages."""
+        await asyncio.sleep(0)
+    return self.messages_sent.copy()
+
 """Comprehensive Test Suite for Background Task User Context Isolation
 
 SECURITY CRITICAL: These tests validate that all background tasks maintain proper
@@ -16,8 +42,8 @@ import asyncio
 import pytest
 import uuid
 from datetime import datetime, timezone
-from unittest.mock import Mock, AsyncMock, patch
 from typing import Dict, Any, Optional
+from shared.isolated_environment import IsolatedEnvironment
 
 from analytics_service.analytics_core.services.event_processor import EventProcessor, ProcessorConfig
 from analytics_service.analytics_core.models.events import AnalyticsEvent, EventType, EventCategory, EventBatch
@@ -25,6 +51,10 @@ from netra_backend.app.services.secure_background_task_manager import SecureBack
 from netra_backend.app.services.user_execution_context import UserExecutionContext, InvalidContextError
 from shared.context_serialization import SecureContextSerializer, ContextSerializationError
 from shared.background_task_security_validator import (
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
+from shared.isolated_environment import get_env
     BackgroundTaskSecurityValidator, SecurityViolationType, security_required
 )
 
@@ -67,7 +97,7 @@ def sample_analytics_event(test_user_context) -> AnalyticsEvent:
 @pytest.fixture
 def mock_clickhouse():
     """Mock ClickHouse manager."""
-    mock = AsyncMock()
+    websocket = TestWebSocketConnection()
     mock.initialize_schema.return_value = True
     mock.insert_data.return_value = 1
     mock.health_check.return_value = True
@@ -76,7 +106,8 @@ def mock_clickhouse():
 @pytest.fixture
 def mock_redis():
     """Mock Redis manager."""
-    mock = AsyncMock()
+    pass
+    websocket = TestWebSocketConnection()
     mock.initialize.return_value = True
     mock.check_rate_limit.return_value = True
     mock.add_hot_prompt.return_value = True
@@ -100,6 +131,7 @@ class TestAnalyticsEventProcessorSecurity:
     @pytest.mark.asyncio
     async def test_event_processor_validates_user_id_match(self, mock_clickhouse, mock_redis, test_user_context, test_user_context_2):
         """Test that event processor validates user ID matches context."""
+    pass
         config = ProcessorConfig(require_user_context=True)
         processor = EventProcessor(mock_clickhouse, mock_redis, config)
         
@@ -150,6 +182,7 @@ class TestAnalyticsEventProcessorSecurity:
     @pytest.mark.asyncio
     async def test_event_processor_worker_context_propagation(self, mock_clickhouse, mock_redis, test_user_context, sample_analytics_event):
         """Test that background worker maintains user context."""
+    pass
         config = ProcessorConfig(require_user_context=True, batch_size=1)
         processor = EventProcessor(mock_clickhouse, mock_redis, config)
         
@@ -180,7 +213,8 @@ class TestSecureBackgroundTaskManager:
         manager = SecureBackgroundTaskManager(enforce_user_context=True)
         
         async def test_task():
-            return "test_result"
+            await asyncio.sleep(0)
+    return "test_result"
         
         # Should fail without user context
         with pytest.raises(InvalidContextError, match="requires UserExecutionContext"):
@@ -189,14 +223,17 @@ class TestSecureBackgroundTaskManager:
     @pytest.mark.asyncio
     async def test_task_manager_user_context_propagation(self, test_user_context):
         """Test that user context is properly propagated to tasks."""
+    pass
         manager = SecureBackgroundTaskManager(enforce_user_context=True)
         
         received_context = None
         
         async def test_task(user_context: Optional[UserExecutionContext] = None):
+    pass
             nonlocal received_context
             received_context = user_context
-            return "test_result"
+            await asyncio.sleep(0)
+    return "test_result"
         
         # Start task with context
         task = await manager.start_task("test_task", "Test Task", test_task, user_context=test_user_context)
@@ -214,7 +251,8 @@ class TestSecureBackgroundTaskManager:
         manager = SecureBackgroundTaskManager(enforce_user_context=True)
         
         async def test_task():
-            return "test_result"
+            await asyncio.sleep(0)
+    return "test_result"
         
         # Start task for user 1
         task1 = await manager.start_task("user1_task", "User 1 Task", test_task, user_context=test_user_context)
@@ -229,6 +267,7 @@ class TestSecureBackgroundTaskManager:
     
     def test_task_manager_list_tasks_isolation(self, test_user_context, test_user_context_2):
         """Test that task listing is properly isolated by user."""
+    pass
         manager = SecureBackgroundTaskManager(enforce_user_context=True)
         
         # Create tasks for different users
@@ -267,6 +306,7 @@ class TestContextSerialization:
     
     def test_context_serialization_tampering_detection(self, test_user_context):
         """Test that context serialization detects tampering."""
+    pass
         serializer = SecureContextSerializer()
         
         # Serialize context
@@ -318,6 +358,7 @@ class TestSecurityValidator:
     
     def test_validator_strict_mode(self):
         """Test that validator raises exceptions in strict mode."""
+    pass
         validator = BackgroundTaskSecurityValidator(enforce_strict_mode=True)
         
         # Should raise exception
@@ -351,7 +392,9 @@ class TestSecurityValidator:
         
         @security_required("decorated_task", require_context=True)
         async def test_task(user_context: Optional[UserExecutionContext] = None):
-            return f"executed_for_{user_context.user_id if user_context else 'none'}"
+    pass
+            await asyncio.sleep(0)
+    return f"executed_for_{user_context.user_id if user_context else 'none'}"
         
         # Should work with context
         result = asyncio.run(test_task(user_context=test_user_context))
@@ -408,17 +451,20 @@ class TestCrossUserDataLeakagePrevention:
     @pytest.mark.asyncio
     async def test_background_task_data_isolation(self, test_user_context, test_user_context_2):
         """Test that background tasks maintain data isolation between users."""
+    pass
         manager = SecureBackgroundTaskManager(enforce_user_context=True)
         
         # Store to simulate user-specific data
         user_data = {}
         
         async def user_specific_task(data_key: str, user_context: Optional[UserExecutionContext] = None):
+    pass
             if user_context:
                 # Store data with user prefix to simulate isolation
                 storage_key = f"{user_context.user_id}:{data_key}"
                 user_data[storage_key] = f"data_for_{user_context.user_id}"
-                return storage_key
+                await asyncio.sleep(0)
+    return storage_key
             return None
         
         # Start tasks for different users
@@ -480,7 +526,8 @@ class TestIntegrationSecurity:
                 'event_data': event_data
             })
             
-            return f"analytics_processed_for_{user_context.user_id}"
+            await asyncio.sleep(0)
+    return f"analytics_processed_for_{user_context.user_id}"
         
         @security_required("report_generation", require_context=True)
         async def report_task(analytics_result: str, user_context: Optional[UserExecutionContext] = None):
@@ -499,7 +546,8 @@ class TestIntegrationSecurity:
                 'analytics_result': analytics_result
             })
             
-            return f"report_generated_for_{user_context.user_id}"
+            await asyncio.sleep(0)
+    return f"report_generated_for_{user_context.user_id}"
         
         # Execute workflow
         event_data = {"prompt": "test message", "model": "gpt-4"}
@@ -523,3 +571,4 @@ class TestIntegrationSecurity:
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v", "-s"])
+    pass

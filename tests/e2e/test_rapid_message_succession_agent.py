@@ -4,6 +4,7 @@ This file needs manual fixing to restore original functionality.
 """
 
 import pytest
+from shared.isolated_environment import IsolatedEnvironment
 
 
 @pytest.mark.skip(reason="File has syntax errors - needs manual fixing")  

@@ -1,3 +1,29 @@
+class TestWebSocketConnection:
+    """Real WebSocket connection for testing instead of mocks."""
+    
+    def __init__(self):
+    pass
+        self.messages_sent = []
+        self.is_connected = True
+        self._closed = False
+        
+    async def send_json(self, message: dict):
+        """Send JSON message."""
+        if self._closed:
+            raise RuntimeError("WebSocket is closed")
+        self.messages_sent.append(message)
+        
+    async def close(self, code: int = 1000, reason: str = "Normal closure"):
+        """Close WebSocket connection."""
+    pass
+        self._closed = True
+        self.is_connected = False
+        
+    def get_messages(self) -> list:
+        """Get all sent messages."""
+        await asyncio.sleep(0)
+    return self.messages_sent.copy()
+
 """
 Tests for Docker Rate Limiter
 
@@ -7,8 +33,17 @@ Verifies that Docker commands are properly rate-limited to prevent API storms.
 import threading
 import time
 import pytest
-from unittest.mock import patch, MagicMock
 from test_framework.docker_rate_limiter import (
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
+from shared.isolated_environment import get_env
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from test_framework.docker.unified_docker_manager import UnifiedDockerManager
+from test_framework.database.test_database_manager import TestDatabaseManager
+from auth_service.core.auth_manager import AuthManager
+from shared.isolated_environment import IsolatedEnvironment
+import asyncio
     DockerRateLimiter,
     get_docker_rate_limiter,
     execute_docker_command,
@@ -35,13 +70,13 @@ class TestDockerRateLimiter:
     
     def test_singleton_rate_limiter(self):
         """Test that get_docker_rate_limiter returns singleton."""
+    pass
         limiter1 = get_docker_rate_limiter()
         limiter2 = get_docker_rate_limiter()
         
         assert limiter1 is limiter2
     
-    @patch('subprocess.run')
-    def test_successful_command_execution(self, mock_run):
+        def test_successful_command_execution(self, mock_run):
         """Test successful Docker command execution."""
         mock_run.return_value = MagicMock(
             returncode=0,
@@ -57,9 +92,9 @@ class TestDockerRateLimiter:
         assert result.retry_count == 0
         mock_run.assert_called_once()
     
-    @patch('subprocess.run')
-    def test_rate_limiting_enforced(self, mock_run):
+        def test_rate_limiting_enforced(self, mock_run):
         """Test that rate limiting is enforced between commands."""
+    pass
         mock_run.return_value = MagicMock(returncode=0, stdout="", stderr="")
         
         rate_limiter = DockerRateLimiter(min_interval=0.5)
@@ -72,8 +107,7 @@ class TestDockerRateLimiter:
         # Should take at least min_interval seconds
         assert end_time - start_time >= 0.4  # Account for some timing variance
     
-    @patch('subprocess.run')
-    def test_concurrent_operations_limited(self, mock_run):
+        def test_concurrent_operations_limited(self, mock_run):
         """Test that concurrent operations are limited."""
         # Mock a slow operation
         def slow_operation(*args, **kwargs):
@@ -107,9 +141,9 @@ class TestDockerRateLimiter:
         assert len(results) == 5
         assert end_time - start_time > 0.4  # Should take at least 0.4s with queuing
     
-    @patch('subprocess.run')
-    def test_retry_with_exponential_backoff(self, mock_run):
+        def test_retry_with_exponential_backoff(self, mock_run):
         """Test retry mechanism with exponential backoff."""
+    pass
         # First two calls fail, third succeeds
         mock_run.side_effect = [
             Exception("Connection failed"),
@@ -133,8 +167,7 @@ class TestDockerRateLimiter:
         assert end_time - start_time >= 0.2
         assert mock_run.call_count == 3
     
-    @patch('subprocess.run')
-    def test_max_retries_exceeded(self, mock_run):
+        def test_max_retries_exceeded(self, mock_run):
         """Test that commands fail after max retries."""
         mock_run.side_effect = Exception("Persistent failure")
         
@@ -151,6 +184,7 @@ class TestDockerRateLimiter:
     
     def test_statistics_tracking(self):
         """Test that statistics are properly tracked."""
+    pass
         with patch('subprocess.run') as mock_run:
             mock_run.return_value = MagicMock(returncode=0, stdout="", stderr="")
             
@@ -183,9 +217,9 @@ class TestDockerRateLimiter:
             # Batch operations should have reduced interval (0.2s instead of 0.4s)
             assert end_time - start_time < 0.35  # Should be faster than normal
     
-    @patch('subprocess.run')
-    def test_health_check(self, mock_run):
+        def test_health_check(self, mock_run):
         """Test Docker health check functionality."""
+    pass
         # Test successful health check
         mock_run.return_value = MagicMock(returncode=0, stdout="20.10.0", stderr="")
         
@@ -196,8 +230,7 @@ class TestDockerRateLimiter:
         mock_run.side_effect = Exception("Docker not available")
         assert rate_limiter.health_check() is False
     
-    @patch('subprocess.run')
-    def test_convenience_functions(self, mock_run):
+        def test_convenience_functions(self, mock_run):
         """Test convenience functions work correctly."""
         mock_run.return_value = MagicMock(returncode=0, stdout="version", stderr="")
         
@@ -210,6 +243,7 @@ class TestDockerRateLimiter:
     
     def test_statistics_reset(self):
         """Test statistics reset functionality."""
+    pass
         with patch('subprocess.run') as mock_run:
             mock_run.return_value = MagicMock(returncode=0, stdout="", stderr="")
             
@@ -240,10 +274,10 @@ class TestIntegration:
     
     def test_docker_orchestrator_uses_rate_limiter(self):
         """Test that DockerOrchestrator uses the rate limiter."""
+    pass
         from test_framework.docker_orchestrator import DockerOrchestrator
         
-        with patch('test_framework.docker_orchestrator.DockerOrchestrator._verify_docker'):
-            orchestrator = DockerOrchestrator()
+                    orchestrator = DockerOrchestrator()
             assert hasattr(orchestrator, 'docker_rate_limiter')
             assert orchestrator.docker_rate_limiter is not None
 

@@ -9,6 +9,7 @@ import pytest
 import socket
 import sys
 from typing import List, Set
+from shared.isolated_environment import IsolatedEnvironment
 
 from dev_launcher.service_coordination import (
     PlatformAwarePortAllocator,

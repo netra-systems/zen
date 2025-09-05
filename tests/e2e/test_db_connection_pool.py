@@ -5,6 +5,7 @@ backpressure validation, and graceful degradation under load.
 
 Business Value: Ensures Enterprise SLA compliance and prevents $12K MRR loss
 from database instability under high load conditions.
+from shared.isolated_environment import IsolatedEnvironment
 """
 
 import asyncio

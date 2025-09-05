@@ -24,6 +24,7 @@ import time
 import httpx
 import websockets
 from typing import Dict, Any
+from shared.isolated_environment import IsolatedEnvironment
 
 from tests.e2e.config import TEST_CONFIG
 from tests.e2e.real_services_manager import RealServicesManager

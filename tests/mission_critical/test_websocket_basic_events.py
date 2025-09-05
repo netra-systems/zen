@@ -10,6 +10,7 @@ import json
 import time
 import uuid
 from typing import Dict, List, Any
+from shared.isolated_environment import IsolatedEnvironment
 
 import pytest
 from loguru import logger

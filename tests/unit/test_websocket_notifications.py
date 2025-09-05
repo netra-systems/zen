@@ -1,20 +1,54 @@
+class TestWebSocketConnection:
+    """Real WebSocket connection for testing instead of mocks."""
+    
+    def __init__(self):
+    pass
+        self.messages_sent = []
+        self.is_connected = True
+        self._closed = False
+        
+    async def send_json(self, message: dict):
+        """Send JSON message."""
+        if self._closed:
+            raise RuntimeError("WebSocket is closed")
+        self.messages_sent.append(message)
+        
+    async def close(self, code: int = 1000, reason: str = "Normal closure"):
+        """Close WebSocket connection."""
+    pass
+        self._closed = True
+        self.is_connected = False
+        
+    def get_messages(self) -> list:
+        """Get all sent messages."""
+        await asyncio.sleep(0)
+    return self.messages_sent.copy()
+
 """Unit tests for WebSocket notification functionality."""
 
 import asyncio
-from unittest.mock import AsyncMock, MagicMock, patch
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from test_framework.database.test_database_manager import TestDatabaseManager
+from auth_service.core.auth_manager import AuthManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 import pytest
 
 from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
 from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
+from shared.isolated_environment import get_env
 
 
 @pytest.mark.asyncio
 async def test_websocket_notifier_sends_all_events():
     """Test that WebSocketNotifier sends all required event types."""
     # Create mock WebSocket manager
-    mock_ws_manager = MagicMock()
-    mock_ws_manager.send_to_thread = AsyncMock()
+    mock_ws_manager = Magic    mock_ws_manager.websocket = TestWebSocketConnection()
     
     # Create notifier
     notifier = WebSocketNotifier(mock_ws_manager)
@@ -82,6 +116,7 @@ async def test_websocket_notifier_sends_all_events():
 @pytest.mark.asyncio
 async def test_websocket_notifier_handles_missing_manager():
     """Test that notifier handles missing WebSocket manager gracefully."""
+    pass
     # Create notifier without manager
     notifier = WebSocketNotifier(None)
     
@@ -109,26 +144,17 @@ async def test_enhanced_execution_engine_sends_notifications():
     from netra_backend.app.agents.state import DeepAgentState
     
     # Create mocks
-    mock_registry = MagicMock()
-    mock_ws_manager = MagicMock()
-    mock_ws_manager.send_to_thread = AsyncMock()
+    mock_registry = Magic    mock_ws_manager = Magic    mock_ws_manager.websocket = TestWebSocketConnection()
     
     # Add required methods for AgentWebSocketBridge
-    mock_ws_manager.notify_agent_started = AsyncMock()
-    mock_ws_manager.notify_agent_thinking = AsyncMock()
-    mock_ws_manager.notify_progress_update = AsyncMock()
-    mock_ws_manager.notify_tool_executing = AsyncMock()
-    mock_ws_manager.notify_agent_completed = AsyncMock()
-    mock_ws_manager.notify_agent_error = AsyncMock()
-    mock_ws_manager.notify_agent_death = AsyncMock()
+    mock_ws_manager.websocket = TestWebSocketConnection()
     mock_ws_manager.get_metrics = AsyncMock(return_value={})
     
     # Create execution engine using the factory method
     engine = ExecutionEngine._init_from_factory(mock_registry, mock_ws_manager)
     
     # Mock agent execution
-    mock_agent = MagicMock()
-    mock_agent.execute = AsyncMock()
+    mock_agent = Magic    mock_agent.websocket = TestWebSocketConnection()
     mock_registry.get.return_value = mock_agent
     
     # Create test context and state
@@ -143,7 +169,8 @@ async def test_enhanced_execution_engine_sends_notifications():
     state.user_request = "Test prompt"
     state.final_report = "Test answer"
     
-    # Mock the agent core to return success
+    # Mock the agent core to await asyncio.sleep(0)
+    return success
     with patch.object(engine.agent_core, 'execute_agent') as mock_execute:
         from netra_backend.app.agents.supervisor.execution_context import AgentExecutionResult
         mock_result = AgentExecutionResult(
@@ -189,3 +216,4 @@ async def test_enhanced_execution_engine_sends_notifications():
 if __name__ == "__main__":
     asyncio.run(test_websocket_notifier_sends_all_events())
     print("All WebSocket notification tests passed!")
+    pass

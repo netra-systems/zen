@@ -25,6 +25,7 @@ from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Optional
+from shared.isolated_environment import IsolatedEnvironment
 
 import httpx
 import pytest
@@ -54,6 +55,7 @@ class TestDevModeer:
     """Comprehensive dev mode testing utility"""
     
     def __init__(self):
+    pass
         self.config = get_config()
         self.backend_port = 8001  # Dynamic port allocation
         self.frontend_port = 3000
@@ -62,7 +64,8 @@ class TestDevModeer:
         
     async def run_all_tests(self) -> Dict[str, Any]:
         """Run complete test suite"""
-        print("\n[TEST] Starting Comprehensive DEV MODE Test Suite")
+        print("
+[TEST] Starting Comprehensive DEV MODE Test Suite")
         print("=" * 60)
         
         # Test 1: Basic System Startup
@@ -84,7 +87,8 @@ class TestDevModeer:
     
     async def _test_system_startup(self) -> DevModeTestResult:
         """Test 1: Verify all services start correctly"""
-        print("\n[1] Test 1: System Startup")
+        print("
+[1] Test 1: System Startup")
         start_time = time.time()
         
         try:
@@ -131,7 +135,8 @@ class TestDevModeer:
     
     async def _test_websocket_connection(self) -> DevModeTestResult:
         """Test 2: Verify WebSocket connection works"""
-        print("\n[2] Test 2: WebSocket Connection")
+        print("
+[2] Test 2: WebSocket Connection")
         start_time = time.time()
         
         try:
@@ -177,7 +182,8 @@ class TestDevModeer:
     
     async def _test_example_message_flow(self) -> DevModeTestResult:
         """Test 3: Test example message processing"""
-        print("\n[3] Test 3: Example Message Flow")
+        print("
+[3] Test 3: Example Message Flow")
         start_time = time.time()
         
         try:
@@ -226,7 +232,8 @@ class TestDevModeer:
     
     async def _test_agent_response_flow(self) -> DevModeTestResult:
         """Test 4: Verify agent response flow"""
-        print("\n[4] Test 4: Agent Response Flow")
+        print("
+[4] Test 4: Agent Response Flow")
         start_time = time.time()
         
         try:
@@ -282,7 +289,8 @@ class TestDevModeer:
     
     async def _test_cors_configuration(self) -> DevModeTestResult:
         """Test 5: Verify CORS and service configuration"""
-        print("\n[5] Test 5: CORS & Service Configuration")
+        print("
+[5] Test 5: CORS & Service Configuration")
         start_time = time.time()
         
         try:
@@ -382,12 +390,14 @@ class TestDevModeer:
     
     def _generate_test_report(self) -> Dict[str, Any]:
         """Generate comprehensive test report"""
+    pass
         total_tests = len(self.test_results)
         passed_tests = sum(1 for r in self.test_results if r.success)
         failed_tests = total_tests - passed_tests
         total_duration = sum(r.duration for r in self.test_results)
         
-        print("\n" + "=" * 60)
+        print("
+" + "=" * 60)
         print("[SUMMARY] TEST RESULTS")
         print("=" * 60)
         print(f"Total Tests: {total_tests}")
@@ -397,7 +407,8 @@ class TestDevModeer:
         print(f"Total Duration: {total_duration:.2f}s")
         
         if failed_tests > 0:
-            print("\n[WARNING] Failed Tests:")
+            print("
+[WARNING] Failed Tests:")
             for result in self.test_results:
                 if not result.success:
                     print(f"  - {result.test_name}: {result.error or 'Check details'}")
@@ -435,6 +446,7 @@ async def test_dev_mode_comprehensive():
 
 async def main():
     """Run tests standalone"""
+    pass
     tester = DevModeTester()
     report = await tester.run_all_tests()
     

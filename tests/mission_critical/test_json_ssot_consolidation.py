@@ -21,6 +21,7 @@ from pathlib import Path
 from uuid import UUID, uuid4
 import pytest
 from typing import Any, Dict, List
+from shared.isolated_environment import IsolatedEnvironment
 
 # We'll test against the unified handler
 from netra_backend.app.core.serialization.unified_json_handler import (
@@ -43,6 +44,7 @@ class TestUnifiedJSONHandler:
     @pytest.fixture
     def complex_data(self):
         """Create complex test data with various types."""
+    pass
         return {
             "string": "test",
             "integer": 42,
@@ -72,6 +74,7 @@ class TestUnifiedJSONHandler:
     
     def test_datetime_serialization(self, handler):
         """Test datetime serialization to ISO format."""
+    pass
         dt = datetime(2025, 8, 30, 12, 0, 0, tzinfo=timezone.utc)
         data = {"timestamp": dt}
         json_str = handler.dumps(data)
@@ -87,6 +90,7 @@ class TestUnifiedJSONHandler:
     
     def test_decimal_serialization(self, handler):
         """Test Decimal serialization."""
+    pass
         data = {"amount": Decimal("123.45")}
         json_str = handler.dumps(data)
         parsed = json.loads(json_str)
@@ -101,6 +105,7 @@ class TestUnifiedJSONHandler:
     
     def test_path_serialization(self, handler):
         """Test Path object serialization."""
+    pass
         data = {"file": Path("/test/path/file.txt")}
         json_str = handler.dumps(data)
         parsed = json.loads(json_str)
@@ -116,6 +121,7 @@ class TestUnifiedJSONHandler:
     
     def test_deserialization(self, handler):
         """Test JSON deserialization."""
+    pass
         json_str = '{"key": "value", "number": 42}'
         data = handler.loads(json_str)
         assert data == {"key": "value", "number": 42}
@@ -127,10 +133,12 @@ class TestUnifiedJSONHandler:
     
     def test_pretty_format(self, handler):
         """Test pretty formatting with indentation."""
+    pass
         data = {"key": "value", "nested": {"inner": "data"}}
         formatted = handler.pretty_format(data)
         assert "  " in formatted  # Check for indentation
-        assert formatted.count("\n") > 2  # Multiple lines
+        assert formatted.count("
+") > 2  # Multiple lines
     
     def test_compact_format(self, handler):
         """Test compact formatting without whitespace."""
@@ -141,6 +149,7 @@ class TestUnifiedJSONHandler:
     
     def test_validate_json_string(self, handler):
         """Test JSON string validation."""
+    pass
         assert handler.validate_json_string('{"valid": true}') is True
         assert handler.validate_json_string('{invalid}') is False
         assert handler.validate_json_string('not json at all') is False
@@ -155,6 +164,7 @@ class TestUnifiedJSONHandler:
     
     def test_file_operations(self, handler):
         """Test JSON file I/O operations."""
+    pass
         data = {"test": "data", "number": 42}
         
         with tempfile.NamedTemporaryFile(suffix=".json", delete=False) as f:
@@ -205,13 +215,18 @@ class TestLLMResponseParsing:
         # Use the unified handler's safe_json_parse method
         safe_json_parse = llm_parser.safe_json_parse
         
-        markdown = '```json\n{"key": "value"}\n```'
+        markdown = '```json
+{"key": "value"}
+```'
         result = safe_json_parse(markdown)
         # This should handle markdown extraction internally
-        assert result == '```json\n{"key": "value"}\n```' or result == {"key": "value"}
+        assert result == '```json
+{"key": "value"}
+```' or result == {"key": "value"}
     
     def test_parse_truncated_json(self):
         """Test recovery of truncated JSON."""
+    pass
         from netra_backend.app.core.serialization.unified_json_handler import llm_parser
         
         # Use the unified handler's safe_json_parse method
@@ -235,6 +250,7 @@ class TestLLMResponseParsing:
     
     def test_command_line_format_detection(self):
         """Test detection of command-line argument format."""
+    pass
         from netra_backend.app.core.serialization.unified_json_handler import llm_parser
         
         # Use the unified handler's safe_json_parse method
@@ -283,6 +299,7 @@ class TestCircularReferenceHandling:
     
     def test_circular_list_reference(self):
         """Test handling of circular references in lists."""
+    pass
         from netra_backend.app.utils.json_utils import JsonUtils
         
         utils = JsonUtils()
@@ -328,6 +345,7 @@ class TestJSONErrorRecovery:
     
     def test_fix_single_quotes(self):
         """Test conversion of single quotes to double quotes."""
+    pass
         from netra_backend.app.agents.utils_json_validators import fix_common_json_errors
         
         single_quoted = "{'key': 'value'}"
@@ -346,6 +364,7 @@ class TestJSONErrorRecovery:
     
     def test_structure_balance_counting(self):
         """Test counting of unbalanced structures."""
+    pass
         from netra_backend.app.agents.utils_json_validators import count_structure_balance
         
         unbalanced = '{"key": ["value"'
@@ -379,6 +398,7 @@ class TestEdgeCases:
     
     def test_unicode_handling(self):
         """Test Unicode character handling."""
+    pass
         handler = UnifiedJSONHandler()
         
         data = {
@@ -406,6 +426,7 @@ class TestEdgeCases:
     
     def test_special_string_values(self):
         """Test special string values that might be confused with JSON."""
+    pass
         handler = UnifiedJSONHandler()
         
         data = {
@@ -437,6 +458,7 @@ class TestPerformance:
     
     def test_deeply_nested_structure(self):
         """Test deeply nested structure handling."""
+    pass
         handler = UnifiedJSONHandler()
         
         # Create nested structure

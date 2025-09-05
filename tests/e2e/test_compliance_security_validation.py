@@ -15,6 +15,7 @@ import hashlib
 import json
 import re
 from typing import Dict, Any, List, Optional
+from shared.isolated_environment import IsolatedEnvironment
 
 from netra_backend.app.core.unified_logging import get_logger
 from netra_backend.app.guardrails.input_filters import InputFilters

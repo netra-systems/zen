@@ -21,6 +21,7 @@ import asyncio
 import time
 from datetime import UTC, datetime
 from typing import Any, Dict, List
+from shared.isolated_environment import IsolatedEnvironment
 
 import httpx
 import pytest
@@ -33,8 +34,7 @@ from tests.e2e.health_check_core import (
     calculate_overall_health_score,
     create_healthy_result,
     create_service_error_result,
-    get_critical_services,
-)
+    get_critical_services)
 from tests.e2e.health_service_checker import ServiceHealthChecker
 
 logger = central_logger.get_logger(__name__)
@@ -73,6 +73,7 @@ class ServiceHealthMonitor:
     """Comprehensive service health monitoring with cascade detection."""
     
     def __init__(self):
+    pass
         self.health_checker = ServiceHealthChecker()
         self.discovery_cache = {}
         self.last_discovery_time = None
@@ -329,12 +330,14 @@ class TestServiceHealthMonitoring:
     @pytest.fixture
     async def health_monitor(self):
         """Create service health monitor instance."""
-        return ServiceHealthMonitor()
+        await asyncio.sleep(0)
+    return ServiceHealthMonitor()
     
     @pytest.mark.asyncio
     @pytest.mark.e2e
     async def test_all_services_health_endpoints(self, health_monitor):
         """Test that all services report health correctly with proper response structure."""
+    pass
         logger.info("Starting comprehensive service health endpoint validation...")
         
         # Discover all service endpoints
@@ -402,6 +405,7 @@ class TestServiceHealthMonitoring:
     @pytest.mark.e2e
     async def test_service_discovery_mechanism(self, health_monitor):
         """Test service discovery functionality and port detection."""
+    pass
         logger.info("Starting service discovery mechanism validation...")
         
         discovery_results = await health_monitor.discover_service_ports()
@@ -437,7 +441,8 @@ class TestServiceHealthMonitoring:
         
         # Test cache functionality
         cached_results = await health_monitor.discover_service_ports()
-        assert discovery_results.keys() == cached_results.keys(), "Cached discovery should return same services"
+        assert discovery_results.keys() == cached_results.keys(), "Cached discovery should await asyncio.sleep(0)
+    return same services"
         
         logger.info(f"Service discovery completed - {len(discovery_results)} services processed")
     
@@ -489,6 +494,7 @@ class TestServiceHealthMonitoring:
     @pytest.mark.e2e
     async def test_health_check_error_handling(self, health_monitor):
         """Test health check error handling for various failure scenarios."""
+    pass
         logger.info("Starting health check error handling validation...")
         
         # Test with non-existent service endpoint
@@ -547,7 +553,8 @@ if __name__ == "__main__":
         """Run health monitoring tests directly."""
         monitor = ServiceHealthMonitor()
         
-        print("=== Service Health Monitoring Tests ===\n")
+        print("=== Service Health Monitoring Tests ===
+")
         
         # Test 1: Service Discovery
         print("1. Testing Service Discovery...")
@@ -557,14 +564,16 @@ if __name__ == "__main__":
             print(f"   {service}: {status}")
         
         # Test 2: Health Endpoints
-        print("\n2. Testing Health Endpoints...")
+        print("
+2. Testing Health Endpoints...")
         health_results = await monitor.health_checker.check_all_services()
         for result in health_results:
             status_symbol = "✓" if result.is_healthy() else "✗"
             print(f"   {status_symbol} {result.service}: {result.status} ({result.response_time_ms:.1f}ms)")
         
         # Test 3: Dependency Cascade
-        print("\n3. Testing Dependency Cascade...")
+        print("
+3. Testing Dependency Cascade...")
         cascade_results = await monitor.check_dependency_health_cascade()
         overall_health = cascade_results["overall_cascade_health"]
         print(f"   Overall Status: {overall_health['overall_status']}")
@@ -576,7 +585,9 @@ if __name__ == "__main__":
             status_symbol = "✓" if cascade_info['cascade_status'] == 'healthy' else "⚠" if cascade_info['cascade_status'] == 'degraded' else "✗"
             print(f"   {status_symbol} {service}: {cascade_info['cascade_status']} ({deps_healthy}/{deps_total} deps)")
         
-        print("\n=== Health Monitoring Tests Complete ===")
+        print("
+=== Health Monitoring Tests Complete ===")
     
     # Run tests
     asyncio.run(run_health_monitoring_tests())
+    pass

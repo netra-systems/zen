@@ -22,6 +22,7 @@ import pytest
 import sys
 from pathlib import Path
 from typing import Dict, Any
+from shared.isolated_environment import IsolatedEnvironment
 
 # Add project root to path
 PROJECT_ROOT = Path(__file__).parent.parent.parent
@@ -62,6 +63,7 @@ class TestBasicSSOTFunctionality:
     
     def test_singleton_pattern_works(self):
         """Test that singleton pattern works correctly."""
+    pass
         config1 = OrchestrationConfig()
         config2 = OrchestrationConfig()
         config3 = get_orchestration_config()
@@ -89,6 +91,7 @@ class TestBasicSSOTFunctionality:
     
     def test_orchestration_config_methods_work(self):
         """Test that OrchestrationConfig methods work."""
+    pass
         config = OrchestrationConfig()
         
         # Test methods return expected types
@@ -126,6 +129,7 @@ class TestBasicSSOTFunctionality:
     
     def test_enums_have_expected_members(self):
         """Test that enums have expected members."""
+    pass
         # BackgroundTaskStatus should have these members
         expected_statuses = ['QUEUED', 'STARTING', 'RUNNING', 'COMPLETED', 'FAILED', 'CANCELLED', 'TIMEOUT']
         actual_statuses = [status.name for status in BackgroundTaskStatus]
@@ -162,6 +166,7 @@ class TestBasicSSOTFunctionality:
     
     def test_progress_output_modes_complete(self):
         """Test that ProgressOutputMode has all expected modes."""
+    pass
         expected_modes = ['CONSOLE', 'JSON', 'WEBSOCKET', 'LOG', 'SILENT']
         actual_modes = [mode.name for mode in ProgressOutputMode]
         
@@ -182,6 +187,7 @@ class TestBasicSSOTFunctionality:
     
     def test_configuration_validation_works(self):
         """Test that configuration validation works."""
+    pass
         config = OrchestrationConfig()
         
         # Validation should return a list
@@ -227,14 +233,17 @@ if __name__ == "__main__":
     result = pytest.main(pytest_args)
     
     if result == 0:
-        print("\n" + "=" * 60)
+        print("
+" + "=" * 60)
         print("BASIC SSOT VALIDATION PASSED")
         print("SSOT orchestration fundamentals working!")
         print("=" * 60)
     else:
-        print("\n" + "=" * 60)
+        print("
+" + "=" * 60)
         print("BASIC SSOT VALIDATION FAILED")
         print("Fix basic issues before running complex tests")
         print("=" * 60)
     
     sys.exit(result)
+    pass

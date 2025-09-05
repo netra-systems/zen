@@ -14,6 +14,7 @@ import sys
 from pathlib import Path
 from typing import List, Set
 import pytest
+from shared.isolated_environment import IsolatedEnvironment
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent.absolute()
 
@@ -156,6 +157,7 @@ class TestSSOTTestRunnerEnforcement:
     
     def test_no_duplicate_test_runners(self):
         """Ensure no duplicate test runners exist."""
+    pass
         all_test_runners = find_all_test_runners()
         
         # Filter out allowed files
@@ -176,15 +178,27 @@ class TestSSOTTestRunnerEnforcement:
         
         if unauthorized_runners:
             failure_msg = (
-                "CRITICAL SSOT VIOLATION: Unauthorized test runners found!\n"
-                "The spacecraft test execution requires a Single Source of Truth.\n"
-                "Only tests/unified_test_runner.py is allowed.\n\n"
-                "Unauthorized runners found:\n" +
-                "\n".join(f"  - {runner}" for runner in unauthorized_runners) +
-                "\n\nREMEDIATION:\n"
-                "1. Remove unauthorized test runners\n"
-                "2. Update scripts to use: python tests/unified_test_runner.py\n"
-                "3. For service-specific tests use: --service backend|frontend\n"
+                "CRITICAL SSOT VIOLATION: Unauthorized test runners found!
+"
+                "The spacecraft test execution requires a Single Source of Truth.
+"
+                "Only tests/unified_test_runner.py is allowed.
+
+"
+                "Unauthorized runners found:
+" +
+                "
+".join(f"  - {runner}" for runner in unauthorized_runners) +
+                "
+
+REMEDIATION:
+"
+                "1. Remove unauthorized test runners
+"
+                "2. Update scripts to use: python tests/unified_test_runner.py
+"
+                "3. For service-specific tests use: --service backend|frontend
+"
                 "4. For legacy compatibility, create deprecation wrappers only"
             )
             pytest.fail(failure_msg)
@@ -202,18 +216,27 @@ class TestSSOTTestRunnerEnforcement:
         
         if failures:
             failure_msg = (
-                "CRITICAL: Legacy wrapper files are not proper deprecation wrappers!\n"
-                "They must:\n"
-                "1. Show DEPRECATION WARNING\n"
-                "2. Redirect to tests/unified_test_runner.py\n"
-                "3. Not contain substantial test logic\n\n"
-                "Invalid wrappers:\n" +
-                "\n".join(f"  - {wrapper}" for wrapper in failures)
+                "CRITICAL: Legacy wrapper files are not proper deprecation wrappers!
+"
+                "They must:
+"
+                "1. Show DEPRECATION WARNING
+"
+                "2. Redirect to tests/unified_test_runner.py
+"
+                "3. Not contain substantial test logic
+
+"
+                "Invalid wrappers:
+" +
+                "
+".join(f"  - {wrapper}" for wrapper in failures)
             )
             pytest.fail(failure_msg)
     
     def test_unified_runner_has_service_compatibility(self):
         """Verify unified runner supports legacy --service argument."""
+    pass
         content = ALLOWED_TEST_RUNNER.read_text(encoding='utf-8', errors='ignore')
         
         assert '--service' in content, (
@@ -262,10 +285,16 @@ class TestSSOTTestRunnerEnforcement:
         
         if problematic_files:
             warning_msg = (
-                "WARNING: CI/CD scripts may reference old test runners.\n"
-                "Consider updating to use tests/unified_test_runner.py:\n\n" +
-                "\n".join(f"  - {issue}" for issue in problematic_files) +
-                "\n\nThis is a warning, not a failure, but should be addressed."
+                "WARNING: CI/CD scripts may reference old test runners.
+"
+                "Consider updating to use tests/unified_test_runner.py:
+
+" +
+                "
+".join(f"  - {issue}" for issue in problematic_files) +
+                "
+
+This is a warning, not a failure, but should be addressed."
             )
             print(warning_msg)
 
@@ -290,16 +319,21 @@ if __name__ == "__main__":
         else:
             print(f"  [FAIL] {runner} (UNAUTHORIZED - VIOLATION)")
     
-    print(f"\nSSOT Runner: {ALLOWED_TEST_RUNNER}")
+    print(f"
+SSOT Runner: {ALLOWED_TEST_RUNNER}")
     print(f"Exists: {ALLOWED_TEST_RUNNER.exists()}")
     
     if all_runners:
         unauthorized = [r for r in all_runners 
                        if r != ALLOWED_TEST_RUNNER and r not in ALLOWED_LEGACY_WRAPPERS]
         if unauthorized:
-            print(f"\n[FAIL] SSOT VIOLATION: {len(unauthorized)} unauthorized test runners found!")
+            print(f"
+[FAIL] SSOT VIOLATION: {len(unauthorized)} unauthorized test runners found!")
             sys.exit(1)
         else:
-            print(f"\n[OK] SSOT COMPLIANCE: Only authorized test runners found")
+            print(f"
+[OK] SSOT COMPLIANCE: Only authorized test runners found")
     else:
-        print("\n[WARN] No test runners found")
+        print("
+[WARN] No test runners found")
+    pass

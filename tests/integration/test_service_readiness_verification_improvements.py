@@ -25,12 +25,15 @@ from contextlib import asynccontextmanager
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional, Set, Callable
 from enum import Enum
-from unittest.mock import AsyncMock, MagicMock, patch
 import pytest
 import httpx
 import json
+from shared.isolated_environment import IsolatedEnvironment
 
 from shared.isolated_environment import get_env
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
 
 logger = logging.getLogger(__name__)
 
@@ -79,6 +82,7 @@ class ImprovedReadinessVerifier:
     """Improved service readiness verification with better failure detection."""
     
     def __init__(self):
+    pass
         self.readiness_configs = {
             'auth_service': ReadinessConfiguration(
                 service_name='auth_service',
@@ -621,7 +625,8 @@ class TestServiceReadinessVerificationImprovements:
     async def test_improved_readiness_verification_comprehensive(self):
         """Test comprehensive improved readiness verification."""
         
-        print(f"\n=== COMPREHENSIVE READINESS VERIFICATION TEST ===")
+        print(f"
+=== COMPREHENSIVE READINESS VERIFICATION TEST ===")
         
         verifier = ImprovedReadinessVerifier()
         
@@ -629,7 +634,8 @@ class TestServiceReadinessVerificationImprovements:
         service_results = {}
         
         for service_name in verifier.readiness_configs.keys():
-            print(f"\nTesting {service_name} readiness...")
+            print(f"
+Testing {service_name} readiness...")
             
             result = await verifier.perform_readiness_check(service_name)
             service_results[service_name] = result
@@ -657,7 +663,8 @@ class TestServiceReadinessVerificationImprovements:
         ready_services = [name for name, result in service_results.items() if result.success]
         not_ready_services = [name for name, result in service_results.items() if not result.success]
         
-        print(f"\n=== READINESS SUMMARY ===")
+        print(f"
+=== READINESS SUMMARY ===")
         print(f"Ready services ({len(ready_services)}): {', '.join(ready_services) if ready_services else 'None'}")
         print(f"Not ready services ({len(not_ready_services)}): {', '.join(not_ready_services) if not_ready_services else 'None'}")
         
@@ -672,12 +679,14 @@ class TestServiceReadinessVerificationImprovements:
     async def test_readiness_vs_health_check_differences(self):
         """Test differences between readiness and health checks."""
         
-        print(f"\n=== READINESS VS HEALTH CHECK COMPARISON ===")
+        print(f"
+=== READINESS VS HEALTH CHECK COMPARISON ===")
         
         services_to_test = ['auth_service', 'backend']
         
         for service_name in services_to_test:
-            print(f"\nTesting {service_name}:")
+            print(f"
+Testing {service_name}:")
             
             base_url = get_env().get(f'{service_name.upper()}_URL', 'http://localhost:8000')
             
@@ -728,7 +737,8 @@ class TestServiceReadinessVerificationImprovements:
                         except:
                             health_data = {'status': 'ok'}
                         
-                        return {
+                        await asyncio.sleep(0)
+    return {
                             'healthy': True,
                             'endpoint': endpoint,
                             'response_time': time.time() - start_time,
@@ -748,7 +758,8 @@ class TestServiceReadinessVerificationImprovements:
     async def test_resilient_readiness_check_improvements(self):
         """Test resilient readiness check implementations."""
         
-        print(f"\n=== RESILIENT READINESS CHECK TEST ===")
+        print(f"
+=== RESILIENT READINESS CHECK TEST ===")
         
         # Test services with resilient readiness checks
         test_services = [
@@ -757,7 +768,8 @@ class TestServiceReadinessVerificationImprovements:
         ]
         
         for service_config in test_services:
-            print(f"\nTesting resilient readiness check for {service_config['name']}:")
+            print(f"
+Testing resilient readiness check for {service_config['name']}:")
             
             # Create resilient readiness check
             resilient_check = ReadinessVerificationImprover.create_resilient_readiness_check(
@@ -790,14 +802,16 @@ class TestServiceReadinessVerificationImprovements:
     def test_readiness_configuration_validation(self):
         """Test readiness configuration validation and improvements."""
         
-        print(f"\n=== READINESS CONFIGURATION VALIDATION ===")
+        print(f"
+=== READINESS CONFIGURATION VALIDATION ===")
         
         verifier = ImprovedReadinessVerifier()
         
         print("Service readiness configurations:")
         
         for service_name, config in verifier.readiness_configs.items():
-            print(f"\n{service_name}:")
+            print(f"
+{service_name}:")
             print(f"  Base URL: {config.base_url}")
             print(f"  Readiness endpoints: {config.readiness_endpoints}")
             print(f"  Timeout: {config.timeout}s")
@@ -835,13 +849,15 @@ class TestServiceReadinessVerificationImprovements:
     async def test_readiness_trending_and_history(self):
         """Test readiness trending and historical analysis."""
         
-        print(f"\n=== READINESS TRENDING TEST ===")
+        print(f"
+=== READINESS TRENDING TEST ===")
         
         verifier = ImprovedReadinessVerifier()
         
         # Perform multiple readiness checks to build history
         for i in range(3):
-            print(f"\nReadiness check round {i + 1}:")
+            print(f"
+Readiness check round {i + 1}:")
             
             for service_name in ['auth_service', 'backend']:
                 result = await verifier.perform_readiness_check(service_name)
@@ -852,12 +868,14 @@ class TestServiceReadinessVerificationImprovements:
                 await asyncio.sleep(0.5)
         
         # Analyze trends
-        print(f"\n=== READINESS TRENDS ===")
+        print(f"
+=== READINESS TRENDS ===")
         
         for service_name in verifier.readiness_configs.keys():
             trends = verifier.get_readiness_trends(service_name)
             
-            print(f"\n{service_name} trends:")
+            print(f"
+{service_name} trends:")
             print(f"  Trend: {trends['trend']}")
             print(f"  Recent success rate: {trends['recent_success_rate']:.1f}%")
             print(f"  Total checks: {trends['total_checks']}")
@@ -887,3 +905,4 @@ class TestServiceReadinessVerificationImprovements:
 if __name__ == "__main__":
     # Run service readiness verification improvement tests
     pytest.main([__file__, "-v", "-s", "--tb=short"])
+    pass

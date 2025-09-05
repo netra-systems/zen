@@ -25,6 +25,7 @@ import logging
 import pytest
 import time
 from typing import Dict, Optional
+from shared.isolated_environment import IsolatedEnvironment
 
 # CLAUDE.md compliance: absolute imports only
 from test_framework.unified_docker_manager import (

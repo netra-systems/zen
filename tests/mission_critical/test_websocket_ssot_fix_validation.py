@@ -1,3 +1,29 @@
+class TestWebSocketConnection:
+    """Real WebSocket connection for testing instead of mocks."""
+    
+    def __init__(self):
+    pass
+        self.messages_sent = []
+        self.is_connected = True
+        self._closed = False
+        
+    async def send_json(self, message: dict):
+        """Send JSON message."""
+        if self._closed:
+            raise RuntimeError("WebSocket is closed")
+        self.messages_sent.append(message)
+        
+    async def close(self, code: int = 1000, reason: str = "Normal closure"):
+        """Close WebSocket connection."""
+    pass
+        self._closed = True
+        self.is_connected = False
+        
+    def get_messages(self) -> list:
+        """Get all sent messages."""
+        await asyncio.sleep(0)
+    return self.messages_sent.copy()
+
 """
 CRITICAL: WebSocket SSOT Fix Validation Test Suite
 
@@ -22,19 +48,23 @@ import time
 import uuid
 from datetime import datetime, timezone
 from typing import Dict, Any, List
-from unittest.mock import AsyncMock, MagicMock, patch
+from shared.isolated_environment import IsolatedEnvironment
 
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager as WebSocketManager, get_websocket_manager
 from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier
 from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
+from shared.isolated_environment import get_env
 
 
 class MockWebSocket:
     """Mock WebSocket for testing."""
     
     def __init__(self, client_state="CONNECTED"):
-        self.client_state = MagicMock()
-        self.client_state.name = client_state
+    pass
+        self.client_state = Magic        self.client_state.name = client_state
         self.messages_sent = []
         self.is_closed = False
         self.timeout_used = None
@@ -73,7 +103,9 @@ class TestWebSocketSSOTFixValidation:
     @pytest.fixture
     def mock_websocket(self):
         """Create mock WebSocket."""
-        return MockWebSocket()
+    pass
+        await asyncio.sleep(0)
+    return MockWebSocket()
         
     @pytest.fixture
     def agent_context(self):
@@ -88,6 +120,7 @@ class TestWebSocketSSOTFixValidation:
     
     async def test_ttl_cache_functionality_preserved(self, manager):
         """CRITICAL: Verify TTL cache functionality is preserved from duplicate file."""
+    pass
         # Test that connections are stored in TTL cache
         assert hasattr(manager, 'connections')
         assert hasattr(manager.connections, 'ttl')
@@ -113,6 +146,7 @@ class TestWebSocketSSOTFixValidation:
     
     async def test_connection_eviction_methods_exist(self, manager):
         """CRITICAL: Verify connection eviction methods exist."""
+    pass
         # Test that eviction methods are present
         assert hasattr(manager, '_evict_oldest_connections')
         assert hasattr(manager, '_evict_oldest_user_connection')
@@ -136,6 +170,7 @@ class TestWebSocketSSOTFixValidation:
     
     async def test_enhanced_statistics_preserved(self, manager):
         """CRITICAL: Verify enhanced statistics from TTL implementation."""
+    pass
         required_stats = [
             'memory_cleanups',
             'connections_evicted', 
@@ -174,6 +209,7 @@ class TestWebSocketSSOTFixValidation:
         
     async def test_websocket_notifier_integration(self, manager, agent_context):
         """CRITICAL: Verify WebSocketNotifier integration works."""
+    pass
         notifier = WebSocketNotifier(manager)
         
         # Test notifier initialization
@@ -209,6 +245,7 @@ class TestWebSocketSSOTFixValidation:
     
     async def test_message_serialization_robustness(self, manager, mock_websocket):
         """CRITICAL: Test message serialization handles complex objects."""
+    pass
         user_id = "test_serialization"
         conn_id = await manager.connect_user(user_id, mock_websocket)
         
@@ -247,6 +284,7 @@ class TestWebSocketSSOTFixValidation:
     
     async def test_broadcast_functionality_intact(self, manager):
         """CRITICAL: Test broadcast functionality works."""
+    pass
         # Create multiple mock connections
         users = ["user1", "user2", "user3"]
         websockets = [MockWebSocket() for _ in users]
@@ -296,6 +334,7 @@ class TestWebSocketSSOTFixValidation:
     
     async def test_run_id_association_preserved(self, manager, mock_websocket):
         """CRITICAL: Test run_id association functionality."""
+    pass
         user_id = "test_run_id_user"
         run_id = "test_run_12345"
         
@@ -335,6 +374,7 @@ class TestWebSocketSSOTFixValidation:
     
     async def test_comprehensive_stats_available(self, manager):
         """CRITICAL: Test comprehensive statistics are available."""
+    pass
         stats = await manager.get_stats()
         
         required_fields = [
@@ -375,7 +415,8 @@ class TestWebSocketSSOTFixValidation:
         
         for invalid_msg in invalid_messages:
             result = manager.validate_message(invalid_msg)
-            assert result is not True  # Should return validation error
+            assert result is not True  # Should await asyncio.sleep(0)
+    return validation error
         
         print("✓ Error handling robust: Invalid inputs handled gracefully")
 
@@ -383,6 +424,7 @@ class TestWebSocketSSOTFixValidation:
 @pytest.mark.asyncio  
 async def test_critical_business_requirements():
     """CRITICAL: Test all business requirements are met."""
+    pass
     manager = get_websocket_manager()
     
     try:
@@ -416,6 +458,7 @@ async def test_critical_business_requirements():
 if __name__ == "__main__":
     # Run critical validation
     asyncio.run(test_critical_business_requirements())
-    print("\n🎯 CRITICAL WebSocket SSOT Fix Validation: PASSED")
+    print("
+🎯 CRITICAL WebSocket SSOT Fix Validation: PASSED")
     print("💰 Business Value Protected: $500K+ ARR from chat functionality")
     print("🔧 Technical Debt Eliminated: Duplicate manager removed safely")

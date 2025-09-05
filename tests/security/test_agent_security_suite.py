@@ -18,7 +18,7 @@ import pytest
 import time
 from datetime import UTC, datetime, timedelta
 from typing import Any, Dict
-from unittest.mock import AsyncMock, MagicMock, patch
+from shared.isolated_environment import IsolatedEnvironment
 
 from netra_backend.app.agents.security import (
     ResourceGuard, ResourceLimits, SecurityManager, SecurityConfig,
@@ -26,6 +26,10 @@ from netra_backend.app.agents.security import (
 )
 from netra_backend.app.agents.security.security_manager import ExecutionRequest, ExecutionPermission
 from netra_backend.app.agents.unified_tool_execution import UnifiedToolExecutionEngine
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
+from shared.isolated_environment import get_env
 
 
 class TestTimeoutEnforcement:

@@ -19,6 +19,7 @@ mechanisms against real service failures, ensuring business continuity.
 
 import asyncio
 import logging
+from shared.isolated_environment import IsolatedEnvironment
 
 # Add project root to path
 import sys

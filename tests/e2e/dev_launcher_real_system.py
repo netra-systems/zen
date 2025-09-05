@@ -268,7 +268,8 @@ class DevLauncherRealSystem:
                     shell=True, capture_output=True, text=True
                 )
                 if result.stdout:
-                    lines = result.stdout.strip().split('\n')
+                    lines = result.stdout.strip().split('
+')
                     for line in lines:
                         parts = line.split()
                         if len(parts) >= 5:
@@ -285,7 +286,8 @@ class DevLauncherRealSystem:
                     shell=True, capture_output=True, text=True
                 )
                 if result.stdout:
-                    pids = result.stdout.strip().split('\n')
+                    pids = result.stdout.strip().split('
+')
                     for pid in pids:
                         if pid.isdigit():
                             subprocess.run(f"kill -9 {pid}", shell=True)

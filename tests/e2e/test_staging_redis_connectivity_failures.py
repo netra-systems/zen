@@ -94,6 +94,7 @@ class RedisConfigurationValidation:
 @pytest.mark.e2e
 class TestStagingRedisConnectivityFailures:
     """Test suite for Redis connectivity failures and inappropriate fallback behavior in staging."""
+    pass
 
     def setup_method(self):
         """Setup isolated test environment."""
@@ -103,6 +104,7 @@ class TestStagingRedisConnectivityFailures:
         
     def teardown_method(self):
         """Clean up test environment."""
+    pass
         if hasattr(self, 'env'):
             self.env.reset_to_original()
 
@@ -120,6 +122,7 @@ class TestStagingRedisConnectivityFailures:
         Anti-Pattern: Silent fallbacks in staging hide production readiness problems
         Business Impact: Performance degradation, session persistence broken, cache misses
         """
+    pass
         # Test Redis configuration loading and validation
         redis_url = self.env.get("REDIS_URL")
         redis_fallback_enabled = self.env.get("REDIS_FALLBACK_ENABLED", "true").lower() == "true"
@@ -178,16 +181,28 @@ class TestStagingRedisConnectivityFailures:
             connection_time = time.time() - start_time
             assert False, (
                 f"CRITICAL REDIS CONNECTIVITY TIMEOUT: Cannot connect to Redis at {redis_host}:{redis_port} "
-                f"after {connection_time:.2f}s timeout.\n\n"
-                f"Business Impact:\n"
-                f"  - Cache system non-functional (performance degradation)\n"
-                f"  - Session persistence broken (user re-authentication required)\n"
-                f"  - Rate limiting bypassed (security risk)\n"
-                f"  - Real-time features degraded\n\n"
-                f"Root Cause Investigation:\n"
-                f"  1. Check Redis service provisioning in staging\n"
-                f"  2. Verify network connectivity and firewall rules\n"
-                f"  3. Validate Redis authentication if required\n"
+                f"after {connection_time:.2f}s timeout.
+
+"
+                f"Business Impact:
+"
+                f"  - Cache system non-functional (performance degradation)
+"
+                f"  - Session persistence broken (user re-authentication required)
+"
+                f"  - Rate limiting bypassed (security risk)
+"
+                f"  - Real-time features degraded
+
+"
+                f"Root Cause Investigation:
+"
+                f"  1. Check Redis service provisioning in staging
+"
+                f"  2. Verify network connectivity and firewall rules
+"
+                f"  3. Validate Redis authentication if required
+"
                 f"  4. Test DNS resolution for Redis host"
             )
             
@@ -216,6 +231,7 @@ class TestStagingRedisConnectivityFailures:
         
         Session Impact: User sessions not persisted, cache misses reduce performance
         """
+    pass
         # Test Redis client import and instantiation
         try:
             from netra_backend.app.redis_manager import RedisManager as RedisClient
@@ -246,7 +262,8 @@ class TestStagingRedisConnectivityFailures:
             
             # Connection succeeded
             assert ping_result is True, (
-                "Redis client ping should return True on successful connection"
+                "Redis client ping should await asyncio.sleep(0)
+    return True on successful connection"
             )
             assert connection_time < 3.0, (
                 f"Redis client connection too slow: {connection_time:.2f}s. "
@@ -259,12 +276,20 @@ class TestStagingRedisConnectivityFailures:
             connection_time = time.time() - start_time
             assert False, (
                 f"CRITICAL REDIS CLIENT TIMEOUT: Client ping timed out after {connection_time:.2f}s. "
-                f"This causes session management to degrade and cache functionality to fail.\n\n"
-                f"Business Impact:\n"
-                f"  - User sessions not persisted across requests\n"
-                f"  - Cache misses cause 5-10x slower response times\n"
-                f"  - Rate limiting bypassed (security vulnerability)\n"
-                f"  - Real-time features become unreliable\n\n"
+                f"This causes session management to degrade and cache functionality to fail.
+
+"
+                f"Business Impact:
+"
+                f"  - User sessions not persisted across requests
+"
+                f"  - Cache misses cause 5-10x slower response times
+"
+                f"  - Rate limiting bypassed (security vulnerability)
+"
+                f"  - Real-time features become unreliable
+
+"
                 f"Service continues in degraded mode masking this critical infrastructure issue."
             )
             
@@ -312,6 +337,7 @@ class TestStagingRedisConnectivityFailures:
         Staging/Production Drift: Dev (optional Redis) != Staging (should require Redis) != Prod (requires Redis)
         Anti-Pattern: Silent degradation in staging hides production readiness issues
         """
+    pass
         # Test environment detection for staging
         netra_env = self.env.get("NETRA_ENVIRONMENT", "development")
         k_service = self.env.get("K_SERVICE")  # Cloud Run service indicator
@@ -374,6 +400,7 @@ class TestStagingRedisConnectivityFailures:
         
         Configuration Cascade: Missing REDIS_URL -> localhost fallback -> wrong Redis -> cache broken
         """
+    pass
         # Test Redis URL configuration
         redis_url = self.env.get("REDIS_URL")
         
@@ -434,6 +461,7 @@ class TestStagingRedisConnectivityFailures:
         
         Infrastructure Gap: Staging Redis service provisioning incomplete
         """
+    pass
         redis_url = self.env.get("REDIS_URL")
         
         if not redis_url:
@@ -469,7 +497,8 @@ class TestStagingRedisConnectivityFailures:
                 
                 if not result.success:
                     # First failure point indicates infrastructure gap
-                    progressive_report = "\n".join(
+                    progressive_report = "
+".join(
                         f"  {r['test']}: {'PASS' if r['success'] else 'FAIL'} "
                         f"({r['response_time']:.2f}s)" + 
                         (f" - {r['error']}" if not r['success'] else "")
@@ -478,8 +507,13 @@ class TestStagingRedisConnectivityFailures:
                     
                     assert False, (
                         f"CRITICAL REDIS PROVISIONING FAILURE at {test_name.upper()}: "
-                        f"{result.error_message}\n\n"
-                        f"Progressive connectivity test results:\n{progressive_report}\n\n"
+                        f"{result.error_message}
+
+"
+                        f"Progressive connectivity test results:
+{progressive_report}
+
+"
                         f"This indicates Redis service provisioning gap in staging infrastructure. "
                         f"Business Impact: {result.business_impact}"
                     )
@@ -512,6 +546,7 @@ class TestStagingRedisConnectivityFailures:
         
         Performance Impact: Connection pool exhaustion causes application slowdown
         """
+    pass
         # Test Redis client availability and connection pool behavior
         try:
             from netra_backend.app.redis_manager import RedisManager as RedisClient
@@ -588,6 +623,7 @@ class TestStagingRedisConnectivityFailures:
         
         Session Impact: Users lose session state, forced re-authentication, poor UX
         """
+    pass
         # Test session persistence configuration
         session_config_vars = {
             'SESSION_STORE_TYPE': {
@@ -639,14 +675,24 @@ class TestStagingRedisConnectivityFailures:
         
         # Report session configuration failures
         if session_config_failures:
-            failure_report = "\n".join(f"  - {failure}" for failure in session_config_failures)
+            failure_report = "
+".join(f"  - {failure}" for failure in session_config_failures)
             assert False, (
-                f"CRITICAL SESSION PERSISTENCE CONFIGURATION FAILURES:\n{failure_report}\n\n"
-                f"These configuration issues cause session persistence to fail or degrade:\n"
-                f"  - Users lose session state between requests\n"
-                f"  - Forced re-authentication reduces user experience\n"
-                f"  - Session-based features become unreliable\n"
-                f"  - Load balancing breaks without sticky sessions\n\n"
+                f"CRITICAL SESSION PERSISTENCE CONFIGURATION FAILURES:
+{failure_report}
+
+"
+                f"These configuration issues cause session persistence to fail or degrade:
+"
+                f"  - Users lose session state between requests
+"
+                f"  - Forced re-authentication reduces user experience
+"
+                f"  - Session-based features become unreliable
+"
+                f"  - Load balancing breaks without sticky sessions
+
+"
                 f"Staging should validate session persistence requirements for production readiness."
             )
 
@@ -663,6 +709,7 @@ class TestStagingRedisConnectivityFailures:
         
         Performance Impact: API response times increase from 100ms to 1000ms+ without cache
         """
+    pass
         # Test cache configuration and performance requirements
         cache_config_vars = {
             'CACHE_TYPE': {
@@ -759,14 +806,24 @@ class TestStagingRedisConnectivityFailures:
         
         # Report cache configuration and performance failures
         if cache_config_failures:
-            failure_report = "\n".join(f"  - {failure}" for failure in cache_config_failures)
+            failure_report = "
+".join(f"  - {failure}" for failure in cache_config_failures)
             assert False, (
-                f"CRITICAL REDIS CACHE DEGRADATION:\n{failure_report}\n\n"
-                f"These issues cause significant performance degradation:\n"
-                f"  - API response times increase 5-10x without cache\n"
-                f"  - Database load increases causing cascade failures\n"
-                f"  - User experience degrades with slow page loads\n"
-                f"  - System scalability reduced without caching layer\n\n"
+                f"CRITICAL REDIS CACHE DEGRADATION:
+{failure_report}
+
+"
+                f"These issues cause significant performance degradation:
+"
+                f"  - API response times increase 5-10x without cache
+"
+                f"  - Database load increases causing cascade failures
+"
+                f"  - User experience degrades with slow page loads
+"
+                f"  - System scalability reduced without caching layer
+
+"
                 f"Staging must validate cache performance requirements for production readiness."
             )
 
@@ -783,6 +840,7 @@ class TestStagingRedisConnectivityFailures:
         
         Security Impact: Redis authentication required in staging for production parity
         """
+    pass
         redis_url = self.env.get("REDIS_URL")
         
         if not redis_url:
@@ -852,7 +910,8 @@ class TestStagingRedisConnectivityFailures:
         try:
             socket.gethostbyname(host)
             response_time = time.time() - start_time
-            return RedisConnectivityResult(
+            await asyncio.sleep(0)
+    return RedisConnectivityResult(
                 test_type="dns_resolution",
                 host=host,
                 port=port,
@@ -909,7 +968,8 @@ class TestStagingRedisConnectivityFailures:
             sock = socket.create_connection((host, port), timeout=5.0)
             
             # Send Redis PING command
-            sock.send(b"PING\r\n")
+            sock.send(b"PING\r
+")
             response = sock.recv(1024)
             sock.close()
             
@@ -956,6 +1016,7 @@ async def test_redis_staging_connectivity_quick_validation():
     EXPECTED TO FAIL: Quick validation of Redis connectivity and fallback configuration
     Purpose: Rapid feedback on Redis provisioning and staging configuration
     """
+    pass
     env = IsolatedEnvironment()
     
     try:
@@ -993,6 +1054,7 @@ async def test_redis_session_store_validation_quick():
     EXPECTED TO FAIL: Quick validation of Redis session storage configuration
     Purpose: Rapid feedback on session persistence setup
     """
+    pass
     env = IsolatedEnvironment()
     
     try:

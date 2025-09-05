@@ -1,4 +1,5 @@
 from shared.isolated_environment import get_env
+from shared.isolated_environment import IsolatedEnvironment
 """Additional security and configuration test variations for staging issues.
 
 These tests provide additional test cases for security and configuration 

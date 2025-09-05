@@ -1,5 +1,32 @@
+class TestWebSocketConnection:
+    """Real WebSocket connection for testing instead of mocks."""
+    
+    def __init__(self):
+    pass
+        self.messages_sent = []
+        self.is_connected = True
+        self._closed = False
+        
+    async def send_json(self, message: dict):
+        """Send JSON message."""
+        if self._closed:
+            raise RuntimeError("WebSocket is closed")
+        self.messages_sent.append(message)
+        
+    async def close(self, code: int = 1000, reason: str = "Normal closure"):
+        """Close WebSocket connection."""
+    pass
+        self._closed = True
+        self.is_connected = False
+        
+    def get_messages(self) -> list:
+        """Get all sent messages."""
+        await asyncio.sleep(0)
+    return self.messages_sent.copy()
+
 """
 from shared.isolated_environment import get_env
+from shared.isolated_environment import IsolatedEnvironment
 E2E Test Suite for Protocol Edge Cases
 
 This test suite covers additional edge cases and boundary conditions for mixed content/HTTPS
@@ -25,10 +52,12 @@ import time
 import urllib.parse
 from pathlib import Path
 from typing import Dict, List, Any, Optional, Tuple
-from unittest.mock import patch
 import pytest
 import websockets
 from test_framework.base_integration_test import BaseIntegrationTest
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
 
 
 @pytest.mark.e2e
@@ -74,6 +103,7 @@ class TestProtocolEdgeCases(BaseIntegrationTest):
     @pytest.mark.e2e
     def test_websocket_reconnection_protocol_upgrade_EDGE_CASE(self):
         """
+    pass
         EDGE CASE: WebSocket reconnection with protocol upgrade (WS to WSS).
         
         This test validates proper handling when a WebSocket connection needs to
@@ -160,12 +190,16 @@ class TestProtocolEdgeCases(BaseIntegrationTest):
         self.websocket_issues.extend(websocket_upgrade_failures)
         
         assert len(websocket_upgrade_failures) == 0, (
-            f"WebSocket protocol upgrade failed for {len(websocket_upgrade_failures)} scenarios:\n" +
-            '\n'.join([
+            f"WebSocket protocol upgrade failed for {len(websocket_upgrade_failures)} scenarios:
+" +
+            '
+'.join([
                 f"  {failure['scenario']}: {failure['issue']}"
                 for failure in websocket_upgrade_failures
             ]) +
-            f"\n\nWebSocket connections must handle protocol upgrades gracefully."
+            f"
+
+WebSocket connections must handle protocol upgrades gracefully."
         )
     
     @pytest.mark.e2e
@@ -178,6 +212,7 @@ class TestProtocolEdgeCases(BaseIntegrationTest):
         
         Similar Pattern: OAuth configured for HTTP -> production uses HTTPS -> OAuth fails
         """
+    pass
         # OAuth provider configurations with potential mismatches
         oauth_configs = [
             {
@@ -238,12 +273,16 @@ class TestProtocolEdgeCases(BaseIntegrationTest):
                 })
         
         assert len(oauth_redirect_failures) == 0, (
-            f"OAuth redirect URI validation failed for {len(oauth_redirect_failures)} providers:\n" +
-            '\n'.join([
+            f"OAuth redirect URI validation failed for {len(oauth_redirect_failures)} providers:
+" +
+            '
+'.join([
                 f"  {failure['provider']}: {failure['issue']}"
                 for failure in oauth_redirect_failures
             ]) +
-            f"\n\nOAuth redirect URI mismatches must be properly detected and handled."
+            f"
+
+OAuth redirect URI mismatches must be properly detected and handled."
         )
     
     @pytest.mark.e2e
@@ -256,6 +295,7 @@ class TestProtocolEdgeCases(BaseIntegrationTest):
         
         Similar Pattern: CORS works in dev (HTTP) -> fails in staging (HTTPS)
         """
+    pass
         # CORS test scenarios with protocol variations
         cors_scenarios = [
             {
@@ -327,12 +367,16 @@ class TestProtocolEdgeCases(BaseIntegrationTest):
         self.cors_violations.extend(cors_configuration_failures)
         
         assert len(cors_configuration_failures) == 0, (
-            f"CORS configuration failed for {len(cors_configuration_failures)} scenarios:\n" +
-            '\n'.join([
+            f"CORS configuration failed for {len(cors_configuration_failures)} scenarios:
+" +
+            '
+'.join([
                 f"  {failure['scenario']}: {failure['issue']}"
                 for failure in cors_configuration_failures
             ]) +
-            f"\n\nCORS must handle protocol transitions and domain variations correctly."
+            f"
+
+CORS must handle protocol transitions and domain variations correctly."
         )
     
     @pytest.mark.e2e
@@ -345,6 +389,7 @@ class TestProtocolEdgeCases(BaseIntegrationTest):
         
         Similar Pattern: HTTPS page -> loads HTTP images -> browser blocks/warns
         """
+    pass
         # Asset loading scenarios with mixed content potential
         asset_scenarios = [
             {
@@ -445,12 +490,16 @@ class TestProtocolEdgeCases(BaseIntegrationTest):
         self.asset_loading_failures.extend(asset_loading_issues)
         
         assert len(asset_loading_issues) == 0, (
-            f"Asset loading mixed content handling failed for {len(asset_loading_issues)} scenarios:\n" +
-            '\n'.join([
+            f"Asset loading mixed content handling failed for {len(asset_loading_issues)} scenarios:
+" +
+            '
+'.join([
                 f"  {failure['scenario']}: {failure['issue']}"
                 for failure in asset_loading_issues
             ]) +
-            f"\n\nMixed content asset loading must be properly detected and handled."
+            f"
+
+Mixed content asset loading must be properly detected and handled."
         )
     
     @pytest.mark.e2e
@@ -463,6 +512,7 @@ class TestProtocolEdgeCases(BaseIntegrationTest):
         
         Similar Pattern: Service worker works in dev -> fails in prod due to HTTPS requirement
         """
+    pass
         # Service worker scenarios with protocol requirements
         sw_scenarios = [
             {
@@ -538,12 +588,16 @@ class TestProtocolEdgeCases(BaseIntegrationTest):
                 })
         
         assert len(service_worker_failures) == 0, (
-            f"Service worker HTTPS requirements failed for {len(service_worker_failures)} scenarios:\n" +
-            '\n'.join([
+            f"Service worker HTTPS requirements failed for {len(service_worker_failures)} scenarios:
+" +
+            '
+'.join([
                 f"  {failure['scenario']}: {failure['issue']}"
                 for failure in service_worker_failures
             ]) +
-            f"\n\nService worker registration must enforce HTTPS requirements correctly."
+            f"
+
+Service worker registration must enforce HTTPS requirements correctly."
         )
     
     @pytest.mark.e2e
@@ -556,6 +610,7 @@ class TestProtocolEdgeCases(BaseIntegrationTest):
         
         Similar Pattern: User visits HTTP URL -> redirects to HTTPS -> WebSocket connection broken
         """
+    pass
         # Redirect scenarios affecting WebSocket connections
         redirect_scenarios = [
             {
@@ -638,15 +693,18 @@ class TestProtocolEdgeCases(BaseIntegrationTest):
         self.redirect_problems.extend(redirect_websocket_issues)
         
         assert len(redirect_websocket_issues) == 0, (
-            f"HTTP to HTTPS redirect WebSocket handling failed for {len(redirect_websocket_issues)} scenarios:\n" +
-            '\n'.join([
+            f"HTTP to HTTPS redirect WebSocket handling failed for {len(redirect_websocket_issues)} scenarios:
+" +
+            '
+'.join([
                 f"  {failure['scenario']}: {failure['issue']}"
                 for failure in redirect_websocket_issues
             ]) +
-            f"\n\nWebSocket connections must adapt properly to page redirects."
+            f"
+
+WebSocket connections must adapt properly to page redirects."
         )
     
-    @patch.dict('os.environ', {'ENVIRONMENT': 'staging', 'TESTING': '0'})
     @pytest.mark.e2e
     def test_certificate_validation_staging_production_EDGE_CASE(self):
         """
@@ -657,6 +715,7 @@ class TestProtocolEdgeCases(BaseIntegrationTest):
         
         Similar Pattern: App works with self-signed cert in staging -> fails in prod
         """
+    pass
         # Certificate scenarios for different environments
         cert_scenarios = [
             {
@@ -732,12 +791,16 @@ class TestProtocolEdgeCases(BaseIntegrationTest):
                 })
         
         assert len(certificate_validation_failures) == 0, (
-            f"Certificate validation failed for {len(certificate_validation_failures)} scenarios:\n" +
-            '\n'.join([
+            f"Certificate validation failed for {len(certificate_validation_failures)} scenarios:
+" +
+            '
+'.join([
                 f"  {failure['scenario']}: {failure['issue']}"
                 for failure in certificate_validation_failures
             ]) +
-            f"\n\nSSL certificate validation must handle all certificate scenarios correctly."
+            f"
+
+SSL certificate validation must handle all certificate scenarios correctly."
         )
     
     @pytest.mark.e2e
@@ -750,6 +813,7 @@ class TestProtocolEdgeCases(BaseIntegrationTest):
         
         Similar Pattern: Load balancer terminates SSL -> backend gets HTTP -> mixed content
         """
+    pass
         # Load balancer SSL termination scenarios
         lb_scenarios = [
             {
@@ -836,12 +900,16 @@ class TestProtocolEdgeCases(BaseIntegrationTest):
                 })
         
         assert len(lb_ssl_failures) == 0, (
-            f"Load balancer SSL termination failed for {len(lb_ssl_failures)} scenarios:\n" +
-            '\n'.join([
+            f"Load balancer SSL termination failed for {len(lb_ssl_failures)} scenarios:
+" +
+            '
+'.join([
                 f"  {failure['scenario']}: {failure['issue']}"
                 for failure in lb_ssl_failures
             ]) +
-            f"\n\nLoad balancer SSL termination must be handled correctly by backend."
+            f"
+
+Load balancer SSL termination must be handled correctly by backend."
         )
     
     # Helper methods for protocol edge case testing
@@ -1196,30 +1264,36 @@ class TestProtocolEdgeCases(BaseIntegrationTest):
         
         # Report findings for debugging
         if self.protocol_failures:
-            print(f"\n=== Protocol Failures ===")
+            print(f"
+=== Protocol Failures ===")
             for failure in self.protocol_failures:
                 print(f"  {failure}")
         
         if self.websocket_issues:
-            print(f"\n=== WebSocket Issues ===")
+            print(f"
+=== WebSocket Issues ===")
             for issue in self.websocket_issues:
                 print(f"  {issue['scenario']}: {issue['issue']}")
         
         if self.cors_violations:
-            print(f"\n=== CORS Violations ===")
+            print(f"
+=== CORS Violations ===")
             for violation in self.cors_violations:
                 print(f"  {violation['scenario']}: {violation['issue']}")
         
         if self.asset_loading_failures:
-            print(f"\n=== Asset Loading Failures ===")
+            print(f"
+=== Asset Loading Failures ===")
             for failure in self.asset_loading_failures:
                 print(f"  {failure['scenario']}: {failure['issue']}")
         
         if self.redirect_problems:
-            print(f"\n=== Redirect Problems ===")
+            print(f"
+=== Redirect Problems ===")
             for problem in self.redirect_problems:
                 print(f"  {problem['scenario']}: {problem['issue']}")
 
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])
+    pass

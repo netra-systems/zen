@@ -19,6 +19,7 @@ import pytest
 import time
 from datetime import datetime, timedelta, timezone
 from typing import Dict, Optional
+from shared.isolated_environment import IsolatedEnvironment
 
 from tests.e2e.token_lifecycle_helpers import (
     TokenLifecycleManager, WebSocketSessionManager,

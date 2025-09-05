@@ -33,8 +33,8 @@ from concurrent.futures import ThreadPoolExecutor
 from contextlib import asynccontextmanager
 from datetime import datetime, timedelta, timezone
 from typing import Dict, List, Set, Any, Optional, Callable, Tuple
-from unittest.mock import AsyncMock, Mock, patch
 import threading
+from shared.isolated_environment import IsolatedEnvironment
 
 import pytest
 from loguru import logger
@@ -55,6 +55,10 @@ from netra_backend.app.core.reliability_retry import (
 from netra_backend.app.agents.base.retry_manager import RetryManager
 from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.schemas.shared_types import RetryConfig as SharedRetryConfig
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
+from shared.isolated_environment import get_env
 
 
 # ============================================================================

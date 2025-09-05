@@ -16,6 +16,7 @@ import json
 import os
 import time
 from typing import Any, Dict, List, Optional
+from shared.isolated_environment import IsolatedEnvironment
 
 import aiohttp
 import pytest
@@ -25,6 +26,7 @@ class StandaloneHealthChecker:
     """Completely standalone health checker for E2E validation."""
     
     def __init__(self):
+    pass
         self.services = {
             "backend": {
                 "url": "http://localhost:8000",
@@ -165,6 +167,7 @@ class TestStandaloneHealthE2E:
     @pytest.mark.e2e
     async def test_service_connectivity_checks(self):
         """Test service connectivity - passes regardless of service status."""
+    pass
         checker = StandaloneHealthChecker()
         
         # Run connectivity checks
@@ -178,7 +181,8 @@ class TestStandaloneHealthE2E:
         summary = checker.get_summary(results)
         
         # Log results for debugging
-        print(f"\n=== Service Connectivity Summary ===")
+        print(f"
+=== Service Connectivity Summary ===")
         print(f"Total services: {summary['total_services']}")
         print(f"Accessible services: {summary['accessible_services']}")
         print(f"Healthy services: {summary['healthy_services']}")
@@ -187,7 +191,8 @@ class TestStandaloneHealthE2E:
         
         # Detailed results
         for service_name, result in results.items():
-            print(f"\n--- Service: {service_name} ---")
+            print(f"
+--- Service: {service_name} ---")
             print(f"URL: {result['url']}")
             print(f"Accessible: {result['accessible']}")
             print(f"Healthy: {result['healthy']}")
@@ -212,7 +217,8 @@ class TestStandaloneHealthE2E:
             # Basic validation
             assert "status" in health_data, "Health response should include status"
             
-            print(f"\n[PASS] Auth service validation passed:")
+            print(f"
+[PASS] Auth service validation passed:")
             print(f"   Status: {health_data.get('status')}")
             print(f"   Response time: {result['response_time']:.3f}s")
             
@@ -222,7 +228,8 @@ class TestStandaloneHealthE2E:
             if "version" in health_data:
                 print(f"   Version: {health_data.get('version')}")
         else:
-            print(f"\n[WARN] Auth service not accessible or unhealthy:")
+            print(f"
+[WARN] Auth service not accessible or unhealthy:")
             print(f"   Error: {result.get('error', 'Unknown')}")
             print(f"   This is OK - service might not be running")
     
@@ -230,6 +237,7 @@ class TestStandaloneHealthE2E:
     @pytest.mark.e2e
     async def test_backend_service_if_accessible(self):
         """Test backend service health if accessible."""
+    pass
         checker = StandaloneHealthChecker()
         result = await checker.check_service("backend")
         
@@ -240,7 +248,8 @@ class TestStandaloneHealthE2E:
             # Basic validation
             assert "status" in health_data, "Health response should include status"
             
-            print(f"\n[PASS] Backend service validation passed:")
+            print(f"
+[PASS] Backend service validation passed:")
             print(f"   Status: {health_data.get('status')}")
             print(f"   Response time: {result['response_time']:.3f}s")
             
@@ -249,7 +258,8 @@ class TestStandaloneHealthE2E:
                 if field in health_data:
                     print(f"   {field.capitalize()}: {health_data.get(field)}")
         else:
-            print(f"\n[WARN] Backend service not accessible or unhealthy:")
+            print(f"
+[WARN] Backend service not accessible or unhealthy:")
             print(f"   Error: {result.get('error', 'Unknown')}")
             print(f"   This is OK - service might not be running")
     
@@ -270,11 +280,13 @@ class TestStandaloneHealthE2E:
                 # For the test, we just verify the session can be created
                 assert session is not None
                 
-            print(f"\n[PASS] Async HTTP infrastructure test passed")
+            print(f"
+[PASS] Async HTTP infrastructure test passed")
             
         except Exception as e:
             # Even if external calls fail, the infrastructure should work
-            print(f"\n[WARN] HTTP infrastructure test had issues: {e}")
+            print(f"
+[WARN] HTTP infrastructure test had issues: {e}")
             print("This is OK if network connectivity is limited")
         
         # Test should pass regardless - we're testing the infrastructure
@@ -284,16 +296,19 @@ class TestStandaloneHealthE2E:
 # Standalone runner
 async def run_standalone_health_checks():
     """Run health checks as standalone function."""
+    pass
     checker = StandaloneHealthChecker()
     results = await checker.check_all_services()
     summary = checker.get_summary(results)
     
-    print("\n=== STANDALONE HEALTH CHECK RESULTS ===")
+    print("
+=== STANDALONE HEALTH CHECK RESULTS ===")
     print(json.dumps({
         "summary": summary,
         "results": results
     }, indent=2, default=str))
     
+    await asyncio.sleep(0)
     return {
         "results": results,
         "summary": summary,

@@ -12,6 +12,7 @@ COMPLIANCE: File size <300 lines, Functions <8 lines, Real workflow testing
 import asyncio
 import time
 from typing import Any, Dict, List
+from shared.isolated_environment import IsolatedEnvironment
 
 import pytest
 

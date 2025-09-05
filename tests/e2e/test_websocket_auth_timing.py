@@ -31,6 +31,7 @@ import time
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional
+from shared.isolated_environment import IsolatedEnvironment
 
 import pytest
 import websockets
@@ -47,6 +48,7 @@ except ImportError:
     # For newer versions of websockets
     class InvalidStatusCode(WebSocketException):
         def __init__(self, status_code):
+    pass
             self.status_code = status_code
             super().__init__(f"Invalid status code: {status_code}")
 
@@ -99,6 +101,7 @@ class TestWebSocketAuthTiminger:
     @pytest.mark.auth
     async def test_websocket_connection_without_token(self) -> WebSocketAuthTestResult:
         """Test #1: WebSocket connection without token fails with error 1008."""
+    pass
         result = WebSocketAuthTestResult()
         start_time = time.time()
         
@@ -399,6 +402,7 @@ async def test_websocket_connection_without_token():
     This reproduces the exact issue reported in DevLauncher startup where
     the frontend attempts WebSocket connection before JWT token is available.
     """
+    pass
     tester = WebSocketAuthTimingTester()
     result = await tester.test_websocket_connection_without_token()
     
@@ -445,6 +449,7 @@ async def test_websocket_connection_with_null_token():
     Tests the specific case where frontend passes token=null during
     initialization phase of DevLauncher startup.
     """
+    pass
     tester = WebSocketAuthTimingTester()
     result = await tester.test_websocket_connection_with_null_token()
     
@@ -481,6 +486,7 @@ async def test_websocket_connection_timing_race():
     Simulates the timing issue where DevLauncher WebSocket connection starts
     before authentication flow completes, then token becomes available.
     """
+    pass
     tester = WebSocketAuthTimingTester()
     result = await tester.test_websocket_connection_timing_race()
     
@@ -514,6 +520,7 @@ async def test_websocket_origin_none_handling():
     Tests WebSocket behavior with null Origin header, which commonly occurs
     in desktop applications like DevLauncher.
     """
+    pass
     tester = WebSocketAuthTimingTester()
     result = await tester.test_websocket_origin_none_handling()
     
@@ -548,6 +555,7 @@ async def test_websocket_auth_recovery():
     Tests the ability to establish WebSocket connection after initial
     authentication failure, simulating user retry after DevLauncher startup.
     """
+    pass
     tester = WebSocketAuthTimingTester()
     result = await tester.test_websocket_auth_recovery()
     
@@ -584,6 +592,7 @@ async def test_complete_websocket_auth_timing_suite():
     Runs all timing-related authentication tests to provide comprehensive
     coverage of the WebSocket auth timing issues in DevLauncher startup.
     """
+    pass
     tester = WebSocketAuthTimingTester()
     suite_result = WebSocketTimingTestSuite()
     start_time = time.time()
@@ -628,7 +637,8 @@ async def test_complete_websocket_auth_timing_suite():
         print(f"[CRITICAL] Security vulnerabilities found: {critical_vulnerabilities}")
     
     # Generate comprehensive report
-    print(f"\n[WEBSOCKET AUTH TIMING TEST SUITE REPORT]")
+    print(f"
+[WEBSOCKET AUTH TIMING TEST SUITE REPORT]")
     print(f"Total Execution Time: {suite_result.total_execution_time:.2f}s")
     print(f"Tests Completed: 5/5")
     print(f"Vulnerabilities Found: {len(suite_result.vulnerabilities_found)}")

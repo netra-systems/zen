@@ -6,6 +6,7 @@ from tests.e2e.config import get_test_environment_config, TestEnvironmentType
 from tests.e2e.harness_utils import UnifiedTestHarnessComplete 
 from tests.e2e.jwt_token_helpers import JWTTestHelper
 from tests.e2e.database_sync_fixtures import create_test_user_data
+from shared.isolated_environment import IsolatedEnvironment
 
 
 @pytest.mark.e2e

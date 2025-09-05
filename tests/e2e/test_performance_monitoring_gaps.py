@@ -15,6 +15,7 @@ import time
 import json
 from typing import Dict, List, Any, Optional
 from statistics import mean, median
+from shared.isolated_environment import IsolatedEnvironment
 
 
 @pytest.mark.asyncio

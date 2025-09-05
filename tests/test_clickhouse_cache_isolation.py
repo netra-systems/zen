@@ -14,6 +14,7 @@ Business Value Justification (BVJ):
 import pytest
 import hashlib
 from typing import Dict, Any, Optional
+from shared.isolated_environment import IsolatedEnvironment
 
 from netra_backend.app.db.clickhouse import ClickHouseCache, _clickhouse_cache
 

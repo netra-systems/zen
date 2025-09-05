@@ -21,7 +21,7 @@ import pytest
 import asyncio
 import logging
 from sqlalchemy.exc import OperationalError
-from unittest.mock import patch
+from shared.isolated_environment import IsolatedEnvironment
 
 from shared.isolated_environment import get_env
 
@@ -29,6 +29,9 @@ from test_framework.environment_markers import env, env_requires
 from tests.e2e.helpers.auth.auth_service_helpers import AuthServiceIndependenceValidator as AuthServiceTestHelper
 from tests.e2e.helpers.core.service_independence_helpers import ServiceIndependenceHelper
 from tests.e2e.staging_test_helpers import StagingTestSuite
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
 
 logger = logging.getLogger(__name__)
 

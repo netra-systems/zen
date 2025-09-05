@@ -22,6 +22,7 @@ This test protects the entire free-to-paid conversion funnel.
 Without effective limit enforcement, free users never convert.
 """
 import pytest
+from shared.isolated_environment import IsolatedEnvironment
 
 from tests.e2e.auth_flow_manager import AuthCompleteFlowManager
 from tests.e2e.free_tier_limit_managers import LimitEnforcementManager

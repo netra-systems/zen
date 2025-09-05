@@ -18,6 +18,7 @@ import json
 from typing import Dict, List, Optional, Any
 import time
 import uuid
+from shared.isolated_environment import IsolatedEnvironment
 
 logger = logging.getLogger(__name__)
 

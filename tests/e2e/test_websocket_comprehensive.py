@@ -1,4 +1,5 @@
 from shared.isolated_environment import get_env
+from shared.isolated_environment import IsolatedEnvironment
 
 """Comprehensive WebSocket Connection Test Suite - Designed to FAIL and Expose Issues
 
@@ -129,6 +130,7 @@ class WebSocketTestClient:
     """Enhanced WebSocket test client with realistic connection patterns."""
     
     def __init__(self, base_url: str, token: str, user_id: str):
+    pass
         self.base_url = base_url
         self.token = token
         self.user_id = user_id
@@ -307,20 +309,23 @@ class WebSocketTestClient:
 @pytest.mark.e2e
 async def test_user_with_token():
     """Create test user and get authentication token."""
+    pass
     user_data = create_test_user()
     
     # Get authentication token - THIS MIGHT FAIL if auth service is down
     token = await get_auth_token(user_data["email"], user_data["password"])
     
     if token:
-        return {
+        await asyncio.sleep(0)
+    return {
             "user_id": str(user_data["id"]),
             "email": user_data["email"], 
             "token": token
         }
     else:
         # Provide more detailed error information for debugging
-        print("\n" + "="*60)
+        print("
+" + "="*60)
         print("AUTHENTICATION FAILURE DETAILS:")
         print("="*60)
         print(f"- Attempted to authenticate user: {user_data['email']}")
@@ -341,7 +346,8 @@ async def websocket_config():
             response = await client.get("http://localhost:8000" + WEBSOCKET_CONFIG_ENDPOINT)
             
             if response.status_code == 200:
-                return response.json()
+                await asyncio.sleep(0)
+    return response.json()
             else:
                 pytest.fail(f"Failed to get WebSocket config: {response.status_code}")
                 
@@ -386,6 +392,7 @@ class TestWebSocketConnectionEstablishment:
     @pytest.mark.e2e
     async def test_websocket_config_discovery_mock(self):
         """Test WebSocket config parsing logic with mocked response."""
+    pass
         # Mock a successful config response to test the logic
         mock_config = {
             "websocket_config": {
@@ -439,7 +446,8 @@ class TestWebSocketConnectionEstablishment:
                 }
         
         # Print comprehensive service discovery results  
-        print("\nSERVICE DISCOVERY RESULTS:")
+        print("
+SERVICE DISCOVERY RESULTS:")
         all_available = True
         
         for service_name, status in service_status.items():
@@ -457,6 +465,7 @@ class TestWebSocketConnectionEstablishment:
     @pytest.mark.e2e
     async def test_websocket_automatic_connection_after_login(self, test_user_with_token):
         """Test that WebSocket connects automatically after user login - LIKELY TO FAIL."""
+    pass
         client = WebSocketTestClient(
             "http://localhost:8000",
             test_user_with_token["token"], 
@@ -508,6 +517,7 @@ class TestWebSocketConnectionEstablishment:
     @pytest.mark.e2e
     async def test_websocket_authentication_subprotocol_method(self, test_user_with_token):
         """Test WebSocket authentication via Sec-WebSocket-Protocol - LIKELY TO FAIL."""
+    pass
         client = WebSocketTestClient(
             "http://localhost:8000", 
             test_user_with_token["token"],
@@ -594,6 +604,7 @@ class TestWebSocketMessageRouting:
     @pytest.mark.e2e
     async def test_message_delivery_guarantees(self, test_user_with_token):
         """Test that messages are delivered reliably - EXPECTED TO FAIL."""
+    pass
         client = WebSocketTestClient(
             "http://localhost:8000",
             test_user_with_token["token"], 
@@ -712,6 +723,7 @@ class TestWebSocketBroadcasting:
     @pytest.mark.e2e
     async def test_concurrent_connections_same_user(self, test_user_with_token):
         """Test multiple connections from same user - MIGHT FAIL due to connection limits."""
+    pass
         clients = []
         
         try:
@@ -802,6 +814,7 @@ class TestWebSocketReconnectionResilience:
     @pytest.mark.e2e
     async def test_state_recovery_after_reconnection(self, test_user_with_token):
         """Test that connection state is recovered after reconnection - EXPECTED TO FAIL."""
+    pass
         client = WebSocketTestClient(
             "http://localhost:8000",
             test_user_with_token["token"],
@@ -952,6 +965,7 @@ class TestWebSocketErrorHandling:
     @pytest.mark.e2e
     async def test_rate_limiting_enforcement(self, test_user_with_token):
         """Test rate limiting prevents message spam - MIGHT NOT BE IMPLEMENTED."""
+    pass
         client = WebSocketTestClient(
             "http://localhost:8000",
             test_user_with_token["token"], 
@@ -1119,6 +1133,7 @@ class TestWebSocketHeartbeatMonitoring:
     @pytest.mark.e2e
     async def test_zombie_connection_detection(self, test_user_with_token):
         """Test detection of zombie connections - LIKELY TO FAIL."""
+    pass
         client = WebSocketTestClient(
             "http://localhost:8000",
             test_user_with_token["token"],
@@ -1245,14 +1260,16 @@ class TestWebSocketIssuesSummary:
     @pytest.mark.e2e
     async def test_websocket_issues_summary(self):
         """Comprehensive summary of all WebSocket issues discovered."""
-        print("\n" + "="*80)
+        print("
+" + "="*80)
         print("WEBSOCKET COMPREHENSIVE TEST SUITE - ISSUES EXPOSED")
         print("="*80)
         
         issues_discovered = []
         
         # 1. Service Availability Issues
-        print("\n1. SERVICE AVAILABILITY ISSUES:")
+        print("
+1. SERVICE AVAILABILITY ISSUES:")
         try:
             async with httpx.AsyncClient(follow_redirects=True) as client:
                 services = {
@@ -1277,7 +1294,8 @@ class TestWebSocketIssuesSummary:
             issues_discovered.append(f"Service discovery completely failed: {e}")
         
         # 2. WebSocket Library Availability
-        print("\n2. WEBSOCKET CLIENT LIBRARY AVAILABILITY:")
+        print("
+2. WEBSOCKET CLIENT LIBRARY AVAILABILITY:")
         if WEBSOCKETS_AVAILABLE:
             print("   [OK] websockets library available for testing")
         else:
@@ -1285,7 +1303,8 @@ class TestWebSocketIssuesSummary:
             issues_discovered.append("websockets library not available for real connection testing")
         
         # 3. Authentication Flow Issues  
-        print("\n3. AUTHENTICATION FLOW ISSUES:")
+        print("
+3. AUTHENTICATION FLOW ISSUES:")
         user_data = create_test_user()
         token = await get_auth_token(user_data["email"], user_data["password"])
         
@@ -1296,7 +1315,8 @@ class TestWebSocketIssuesSummary:
             issues_discovered.append("Authentication service unavailable - cannot test authenticated WebSocket connections")
         
         # 4. Expected WebSocket Connection Issues (when services are available)
-        print("\n4. EXPECTED WEBSOCKET CONNECTION ISSUES (when services are running):")
+        print("
+4. EXPECTED WEBSOCKET CONNECTION ISSUES (when services are running):")
         print("   [EXPECTED] WebSocket not automatically connecting after login")
         print("   [EXPECTED] WebSocket authentication handshake failures")
         print("   [EXPECTED] Message routing and delivery issues")
@@ -1307,7 +1327,8 @@ class TestWebSocketIssuesSummary:
         print("   [EXPECTED] Heartbeat/zombie connection detection not working")
         
         # 5. Test Infrastructure Issues
-        print("\n5. TEST INFRASTRUCTURE STATUS:")
+        print("
+5. TEST INFRASTRUCTURE STATUS:")
         print("   [OK] Test framework can create mock users")
         print("   [OK] Test framework can simulate WebSocket clients")
         print("   [OK] Test framework can detect service availability")
@@ -1319,15 +1340,18 @@ class TestWebSocketIssuesSummary:
             issues_discovered.append("websockets library missing for real connection tests")
         
         # Summary
-        print(f"\n6. SUMMARY:")
+        print(f"
+6. SUMMARY:")
         print(f"   Total issues discovered: {len(issues_discovered)}")
         
         if issues_discovered:
-            print("\n   CRITICAL ISSUES TO FIX:")
+            print("
+   CRITICAL ISSUES TO FIX:")
             for i, issue in enumerate(issues_discovered, 1):
                 print(f"     {i}. {issue}")
                 
-            print(f"\n   NEXT STEPS:")
+            print(f"
+   NEXT STEPS:")
             print(f"     1. Start backend services: python scripts/dev_launcher.py")
             print(f"     2. Install missing dependencies: pip install websockets")  
             print(f"     3. Re-run WebSocket tests to expose connection/auth issues")
@@ -1337,7 +1361,8 @@ class TestWebSocketIssuesSummary:
             print("   [UNEXPECTED] No critical infrastructure issues found")
             print("   Ready to test actual WebSocket functionality")
         
-        print("\n" + "="*80)
+        print("
+" + "="*80)
         print("END OF WEBSOCKET ISSUES SUMMARY")
         print("="*80)
         
@@ -1348,3 +1373,4 @@ class TestWebSocketIssuesSummary:
 if __name__ == "__main__":
     # Run specific test for development
     pytest.main([__file__ + "::TestWebSocketIssuesSummary::test_websocket_issues_summary", "-v", "-s"])
+    pass

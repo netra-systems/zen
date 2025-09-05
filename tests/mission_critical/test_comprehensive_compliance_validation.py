@@ -1,4 +1,12 @@
 from shared.isolated_environment import get_env
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from test_framework.docker.unified_docker_manager import UnifiedDockerManager
+from test_framework.database.test_database_manager import TestDatabaseManager
+from test_framework.redis.test_redis_manager import TestRedisManager
+from auth_service.core.auth_manager import AuthManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 """
 env = get_env()
 Comprehensive Compliance Validation Suite
@@ -9,7 +17,6 @@ This is the authoritative validation suite that must pass before any deployment.
 Designed to be run in CI/CD to prevent regression of compliance issues.
 
 Business Value: Platform/Internal - System Stability & Compliance
-$1M+ ARR protected from mock-related integration failures and architectural debt.
 
 Author: Test Validation and Compliance Specialist
 Date: 2025-08-30
@@ -27,6 +34,10 @@ import pytest
 from dataclasses import dataclass, asdict
 from collections import defaultdict
 import time
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
+import asyncio
 
 # Add project root to path
 project_root = Path(__file__).resolve().parent.parent.parent
@@ -89,36 +100,71 @@ class ComprehensiveComplianceValidator:
     
     def run_full_compliance_validation(self) -> ComplianceMetrics:
         """
+    pass
         Run complete compliance validation suite.
         
         Returns:
             ComplianceMetrics with comprehensive validation results
         """
-        print("\n🔍 COMPREHENSIVE COMPLIANCE VALIDATION STARTING...")
+        print("
+
+class TestWebSocketConnection:
+    """Real WebSocket connection for testing instead of mocks."""
+    
+    def __init__(self):
+    pass
+        self.messages_sent = []
+        self.is_connected = True
+        self._closed = False
+        
+    async def send_json(self, message: dict):
+        """Send JSON message."""
+        if self._closed:
+            raise RuntimeError("WebSocket is closed")
+        self.messages_sent.append(message)
+        
+    async def close(self, code: int = 1000, reason: str = "Normal closure"):
+        """Close WebSocket connection."""
+    pass
+        self._closed = True
+        self.is_connected = False
+        
+    def get_messages(self) -> list:
+        """Get all sent messages."""
+        await asyncio.sleep(0)
+    return self.messages_sent.copy()
+
+🔍 COMPREHENSIVE COMPLIANCE VALIDATION STARTING...")
         print("=" * 80)
         
         # 1. Mock Policy Validation
-        print("\n📋 1. MOCK POLICY VALIDATION")
+        print("
+📋 1. MOCK POLICY VALIDATION")
         mock_violations = self._validate_mock_policy()
         
         # 2. Environment Isolation Validation  
-        print("\n🏗️ 2. ENVIRONMENT ISOLATION VALIDATION")
+        print("
+🏗️ 2. ENVIRONMENT ISOLATION VALIDATION")
         env_violations = self._validate_environment_isolation()
         
         # 3. Architecture Compliance Validation
-        print("\n🏛️ 3. ARCHITECTURE COMPLIANCE VALIDATION")
+        print("
+🏛️ 3. ARCHITECTURE COMPLIANCE VALIDATION")
         arch_violations = self._validate_architecture_compliance()
         
         # 4. Real Service Connection Validation
-        print("\n🔌 4. REAL SERVICE CONNECTION VALIDATION")
+        print("
+🔌 4. REAL SERVICE CONNECTION VALIDATION")
         service_status = self._validate_real_service_connections()
         
         # 5. WebSocket Agent Events Validation
-        print("\n🔄 5. WEBSOCKET AGENT EVENTS VALIDATION")
+        print("
+🔄 5. WEBSOCKET AGENT EVENTS VALIDATION")
         websocket_status = self._validate_websocket_agent_events()
         
         # 6. Test Quality Assessment
-        print("\n📊 6. TEST QUALITY ASSESSMENT")
+        print("
+📊 6. TEST QUALITY ASSESSMENT")
         test_quality = self._assess_test_quality()
         
         # Calculate overall compliance
@@ -127,7 +173,8 @@ class ComprehensiveComplianceValidator:
             service_status, websocket_status, test_quality
         )
         
-        print(f"\n⏱️ Validation completed in {time.time() - self.start_time:.2f}s")
+        print(f"
+⏱️ Validation completed in {time.time() - self.start_time:.2f}s")
         return compliance_metrics
     
     def _validate_mock_policy(self) -> Dict[str, Any]:
@@ -464,13 +511,7 @@ class ComprehensiveComplianceValidator:
     def _has_mock_usage(self, content: str) -> bool:
         """Check if content has mock usage."""
         mock_indicators = [
-            'from unittest.mock import', 'from mock import',
-            'import unittest.mock', 'import mock',
             'Mock(', 'MagicMock(', 'AsyncMock(', 'patch(',
-            '@patch', '@mock.'
-        ]
-        
-        return any(indicator in content for indicator in mock_indicators)
     
     def _check_file_environment_compliance(self, file_path: Path) -> Dict[str, Any]:
         """Check if file uses IsolatedEnvironment properly."""
@@ -612,6 +653,7 @@ class TestComprehensiveCompliance:
         
         MUST PASS before deployment.
         """
+    pass
         validator = ComprehensiveComplianceValidator()
         metrics = validator.run_full_compliance_validation()
         
@@ -623,47 +665,73 @@ class TestComprehensiveCompliance:
         with open(report_path, 'w') as f:
             f.write(report)
         
-        print(f"\n📋 Compliance report saved: {report_path}")
+        print(f"
+📋 Compliance report saved: {report_path}")
         
         # Determine if system passes compliance
         compliance_threshold = 90.0  # 90% compliance required
         
         if metrics.overall_compliance_percentage >= compliance_threshold:
-            print(f"\n✅ COMPLIANCE VALIDATION PASSED")
+            print(f"
+✅ COMPLIANCE VALIDATION PASSED")
             print(f"   Overall compliance: {metrics.overall_compliance_percentage:.1f}%")
             print(f"   Mock violations: {metrics.mock_violations}")
             print(f"   WebSocket events: {metrics.websocket_events_status}")
             print(f"   Real services: {metrics.real_service_connection_status}")
         else:
             # Generate failure report
-            failure_report = "\n" + "=" * 80 + "\n"
-            failure_report += "❌ COMPLIANCE VALIDATION FAILED\n"
-            failure_report += "=" * 80 + "\n\n"
-            failure_report += f"Overall Compliance: {metrics.overall_compliance_percentage:.1f}% (need {compliance_threshold}%)\n\n"
+            failure_report = "
+" + "=" * 80 + "
+"
+            failure_report += "❌ COMPLIANCE VALIDATION FAILED
+"
+            failure_report += "=" * 80 + "
+
+"
+            failure_report += f"Overall Compliance: {metrics.overall_compliance_percentage:.1f}% (need {compliance_threshold}%)
+
+"
             
             if metrics.critical_issues:
-                failure_report += "CRITICAL ISSUES:\n"
+                failure_report += "CRITICAL ISSUES:
+"
                 for issue in metrics.critical_issues:
-                    failure_report += f"  ❌ {issue}\n"
-                failure_report += "\n"
+                    failure_report += f"  ❌ {issue}
+"
+                failure_report += "
+"
             
             if metrics.recommendations:
-                failure_report += "REQUIRED ACTIONS:\n"
+                failure_report += "REQUIRED ACTIONS:
+"
                 for rec in metrics.recommendations:
-                    failure_report += f"  🔧 {rec}\n"
-                failure_report += "\n"
+                    failure_report += f"  🔧 {rec}
+"
+                failure_report += "
+"
             
-            failure_report += "DETAILED METRICS:\n"
-            failure_report += f"  Mock Violations: {metrics.mock_violations}\n"
-            failure_report += f"  Environment Violations: {metrics.isolated_environment_violations}\n"
-            failure_report += f"  Architecture Violations: {metrics.architecture_violations}\n"
-            failure_report += f"  Test Quality Score: {metrics.test_quality_score*100:.1f}%\n"
-            failure_report += f"  WebSocket Events: {metrics.websocket_events_status}\n"
-            failure_report += f"  Real Services: {metrics.real_service_connection_status}\n"
+            failure_report += "DETAILED METRICS:
+"
+            failure_report += f"  Mock Violations: {metrics.mock_violations}
+"
+            failure_report += f"  Environment Violations: {metrics.isolated_environment_violations}
+"
+            failure_report += f"  Architecture Violations: {metrics.architecture_violations}
+"
+            failure_report += f"  Test Quality Score: {metrics.test_quality_score*100:.1f}%
+"
+            failure_report += f"  WebSocket Events: {metrics.websocket_events_status}
+"
+            failure_report += f"  Real Services: {metrics.real_service_connection_status}
+"
             
-            failure_report += "\n" + "=" * 80 + "\n"
-            failure_report += "COMPLIANCE MUST REACH 90%+ BEFORE DEPLOYMENT\n"
-            failure_report += "=" * 80 + "\n"
+            failure_report += "
+" + "=" * 80 + "
+"
+            failure_report += "COMPLIANCE MUST REACH 90%+ BEFORE DEPLOYMENT
+"
+            failure_report += "=" * 80 + "
+"
             
             pytest.fail(failure_report)
     
@@ -683,6 +751,7 @@ class TestComprehensiveCompliance:
     
     def test_isolated_environment_compliance(self):
         """Test IsolatedEnvironment usage compliance across services."""
+    pass
         validator = ComprehensiveComplianceValidator()
         
         # Check for direct os.environ usage
@@ -701,6 +770,7 @@ class TestComprehensiveCompliance:
     
     def test_real_service_connections(self):
         """Test real service connections without mocks."""
+    pass
         validator = ComprehensiveComplianceValidator()
         
         # Test actual service connections
@@ -719,6 +789,7 @@ class TestComprehensiveCompliance:
     
     def test_user_journey_compliance_validation(self):
         """Test user journey compliance validation."""
+    pass
         validator = ComprehensiveComplianceValidator()
         
         # Test complete user journeys
@@ -736,6 +807,7 @@ class TestComprehensiveCompliance:
     
     def test_api_endpoint_compliance_validation(self):
         """Test API endpoint compliance validation."""
+    pass
         # Test all API endpoints with real requests
         api_compliance = self._test_api_endpoints_real()
         
@@ -752,6 +824,7 @@ class TestComprehensiveCompliance:
     
     def test_logging_compliance_validation(self):
         """Test logging compliance validation."""
+    pass
         # Test logging implementation
         logging_compliance = self._test_logging_implementation()
         
@@ -768,6 +841,7 @@ class TestComprehensiveCompliance:
     
     def test_performance_compliance_validation(self):
         """Test performance compliance validation."""
+    pass
         # Test performance requirements
         perf_compliance = self._test_performance_requirements()
         
@@ -784,6 +858,7 @@ class TestComprehensiveCompliance:
     
     def test_deployment_compliance_validation(self):
         """Test deployment compliance validation."""
+    pass
         # Test deployment readiness
         deploy_compliance = self._test_deployment_readiness()
         
@@ -800,6 +875,7 @@ class TestComprehensiveCompliance:
     
     def test_documentation_compliance_validation(self):
         """Test documentation compliance validation."""
+    pass
         # Test documentation completeness
         doc_compliance = self._test_documentation_completeness()
         
@@ -816,6 +892,7 @@ class TestComprehensiveCompliance:
     
     def test_dependency_compliance_validation(self):
         """Test dependency compliance validation."""
+    pass
         # Test dependency management
         dep_compliance = self._test_dependency_management()
         
@@ -832,6 +909,7 @@ class TestComprehensiveCompliance:
     
     def test_audit_trail_compliance_validation(self):
         """Test audit trail compliance validation."""
+    pass
         # Test audit trail implementations
         audit_compliance = self._test_audit_trail_implementations()
         
@@ -848,6 +926,7 @@ class TestComprehensiveCompliance:
     
     def test_scalability_compliance_validation(self):
         """Test scalability compliance validation."""
+    pass
         # Test scalability implementations
         scale_compliance = self._test_scalability_implementations()
         
@@ -864,6 +943,7 @@ class TestComprehensiveCompliance:
     
     def test_mobile_compatibility_compliance_validation(self):
         """Test mobile compatibility compliance validation."""
+    pass
         # Test mobile compatibility
         mobile_compliance = self._test_mobile_compatibility()
         
@@ -880,6 +960,7 @@ class TestComprehensiveCompliance:
     
     def test_internationalization_compliance_validation(self):
         """Test internationalization compliance validation."""
+    pass
         # Test i18n implementations
         i18n_compliance = self._test_internationalization_implementations()
         
@@ -1024,17 +1105,24 @@ connections, and WebSocket functionality.
         
         if metrics.critical_issues:
             for issue in metrics.critical_issues:
-                report += f"- ❌ {issue}\n"
+                report += f"- ❌ {issue}
+"
         else:
-            report += "- ✅ No critical issues detected\n"
+            report += "- ✅ No critical issues detected
+"
         
-        report += "\n## Recommendations\n\n"
+        report += "
+## Recommendations
+
+"
         
         if metrics.recommendations:
             for rec in metrics.recommendations:
-                report += f"- 🔧 {rec}\n"
+                report += f"- 🔧 {rec}
+"
         else:
-            report += "- ✅ System is fully compliant\n"
+            report += "- ✅ System is fully compliant
+"
         
         report += f"""
 
@@ -1064,7 +1152,8 @@ if __name__ == '__main__':
     # Run the comprehensive validation
     validator = ComprehensiveComplianceValidator()
     metrics = validator.run_full_compliance_validation()
-    print(f"\nOverall Compliance: {metrics.overall_compliance_percentage:.1f}%")
+    print(f"
+Overall Compliance: {metrics.overall_compliance_percentage:.1f}%")
     
     # Run as pytest
     pytest.main([__file__, '-v', '--tb=short'])

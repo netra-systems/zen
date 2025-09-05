@@ -9,6 +9,7 @@ import time
 from decimal import Decimal
 from typing import Any, Dict, List, Optional
 from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
+from shared.isolated_environment import IsolatedEnvironment
 
 
 import pytest

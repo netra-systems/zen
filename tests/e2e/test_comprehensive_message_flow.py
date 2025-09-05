@@ -33,6 +33,9 @@ from datetime import datetime, timezone, timedelta
 from typing import Dict, List, Set, Any, Optional, Union
 from dataclasses import dataclass, field
 from enum import Enum
+from test_framework.docker.unified_docker_manager import UnifiedDockerManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from shared.isolated_environment import IsolatedEnvironment
 
 # Add project root to path
 project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
@@ -440,6 +443,7 @@ This is a **comprehensive** test of markdown parsing and *rendering* capabilitie
 
 ```python
 def hello_world():
+    pass
     print("Hello, World!")
     return True
 ```
@@ -489,14 +493,15 @@ from dataclasses import dataclass
 
 @dataclass
 class MessageProcessor:
-    \"\"\"Process WebSocket messages with validation.\"\"\"
+    """Process WebSocket messages with validation."""
     
     def __init__(self, config: Dict[str, Any]):
+    pass
         self.config = config
         self.processors = {}
     
     async def process_message(self, message: Dict[str, Any]) -> Optional[Dict]:
-        \"\"\"Process a single message.\"\"\"
+        """Process a single message."""
         try:
             message_type = message.get("type")
             if message_type not in self.processors:
@@ -827,7 +832,30 @@ Deutsch: Hallo, das ist eine Testnachricht.
             "status": "completed",
             "response": {
                 "summary": "WebSocket technology has evolved significantly with HTTP/3 and WebRTC integration.",
-                "content": "# WebSocket Technology Developments\n\n## Recent Advances\n\n1. **HTTP/3 Integration**\n   - Improved performance over QUIC\n   - Better handling of packet loss\n   - Enhanced security features\n\n2. **WebRTC Integration**\n   - Real-time communication improvements\n   - Better peer-to-peer connections\n   - Enhanced multimedia support\n\n3. **Performance Optimizations**\n   - Compression improvements\n   - Binary frame optimization\n   - Connection multiplexing\n\n## Implementation Considerations\n\n- Backward compatibility maintained\n- Progressive enhancement strategies\n- Security considerations for new features",
+                "content": "# WebSocket Technology Developments
+
+## Recent Advances
+
+1. **HTTP/3 Integration**
+   - Improved performance over QUIC
+   - Better handling of packet loss
+   - Enhanced security features
+
+2. **WebRTC Integration**
+   - Real-time communication improvements
+   - Better peer-to-peer connections
+   - Enhanced multimedia support
+
+3. **Performance Optimizations**
+   - Compression improvements
+   - Binary frame optimization
+   - Connection multiplexing
+
+## Implementation Considerations
+
+- Backward compatibility maintained
+- Progressive enhancement strategies
+- Security considerations for new features",
                 "sources": [
                     {"title": "WebSocket Protocol RFC 6455", "url": "https://tools.ietf.org/rfc/rfc6455.txt"},
                     {"title": "HTTP/3 and WebSockets", "url": "https://example.com/http3-websockets"},
@@ -1030,6 +1058,7 @@ class MessageFlowValidator:
     """Validates message flow through the entire stack."""
     
     def __init__(self):
+    pass
         self.corruption_detectors = {
             "truncation": self._detect_truncation,
             "encoding": self._detect_encoding_corruption,
@@ -1266,6 +1295,7 @@ class ComprehensiveMessageFlowTester:
     """Comprehensive message flow tester for the entire Netra stack."""
     
     def __init__(self):
+    pass
         self.validator = MessageFlowValidator()
         self.websocket_manager = None
         self.docker_manager = None
@@ -1305,6 +1335,7 @@ class ComprehensiveMessageFlowTester:
         
     async def cleanup_services(self):
         """Cleanup real services."""
+    pass
         if self.docker_manager:
             try:
                 await self.docker_manager.cleanup_services()
@@ -1414,7 +1445,8 @@ class ComprehensiveMessageFlowTester:
                 len(transformations_applied) > 0
             )
             
-            return MessageFlowResult(
+            await asyncio.sleep(0)
+    return MessageFlowResult(
                 test_case=test_case,
                 success=success,
                 metrics=metrics,
@@ -1802,6 +1834,7 @@ class TestComprehensiveMessageFlow:
     @pytest.mark.timeout(300)  # 5 minutes for comprehensive testing
     async def test_all_message_types_comprehensive(self):
         """Test all 20+ message types through complete stack flow."""
+    pass
         logger.info("Starting comprehensive test of all message types")
         
         summary = await self.tester.run_comprehensive_tests()
@@ -1895,6 +1928,7 @@ class TestComprehensiveMessageFlow:
     @pytest.mark.timeout(120)  # 2 minutes
     async def test_message_corruption_detection(self):
         """Test message corruption detection across all corruption types."""
+    pass
         logger.info("Testing comprehensive message corruption detection")
         
         # Test corruption detection with various message types
@@ -2034,6 +2068,7 @@ class TestComprehensiveMessageFlow:
     @pytest.mark.timeout(120)  # 2 minutes
     async def test_message_transformations_comprehensive(self):
         """Test all message transformations: serialization, encoding, compression, validation."""
+    pass
         logger.info("Testing comprehensive message transformations")
         
         # Test cases that exercise different transformation types
@@ -2153,6 +2188,7 @@ class TestComprehensiveMessageFlow:
 
 async def run_comprehensive_message_flow_tests():
     """Standalone execution of comprehensive message flow tests."""
+    pass
     logger.info("=" * 80)
     logger.info("COMPREHENSIVE MESSAGE FLOW TEST SUITE - STANDALONE EXECUTION")
     logger.info("=" * 80)
@@ -2164,7 +2200,8 @@ async def run_comprehensive_message_flow_tests():
         
         summary = await tester.run_comprehensive_tests()
         
-        print("\n" + "=" * 80)
+        print("
+" + "=" * 80)
         print("COMPREHENSIVE MESSAGE FLOW TEST RESULTS")
         print("=" * 80)
         print(f"Total Tests: {summary['test_execution']['total_tests']}")
@@ -2173,13 +2210,15 @@ async def run_comprehensive_message_flow_tests():
         print(f"Transformations Tested: {summary['transformation_coverage']['unique_transformations']}")
         print(f"Corruption Detection Rate: {summary['corruption_testing']['corruption_detection_rate']:.1%}")
         
-        print("\nPerformance Requirements:")
+        print("
+Performance Requirements:")
         perf_reqs = summary['performance_metrics']['performance_requirements']
         print(f"  Processing <100ms: {perf_reqs['processing_under_100ms']} tests")
         print(f"  E2E <500ms: {perf_reqs['e2e_under_500ms']} tests")
         print(f"  Batch <2s: {perf_reqs['batch_under_2s']} tests")
         
-        print("\nSize Category Analysis:")
+        print("
+Size Category Analysis:")
         for category, stats in summary['size_category_analysis'].items():
             success_rate = stats['successful'] / stats['total'] if stats['total'] > 0 else 0
             print(f"  {category.capitalize()}: {stats['successful']}/{stats['total']} "
@@ -2192,10 +2231,12 @@ async def run_comprehensive_message_flow_tests():
             summary['performance_metrics']['avg_e2e_delivery_time_ms'] < 1000
         )
         
-        print(f"\n{'✅ OVERALL ASSESSMENT: PASSED' if overall_success else '❌ OVERALL ASSESSMENT: FAILED'}")
+        print(f"
+{'✅ OVERALL ASSESSMENT: PASSED' if overall_success else '❌ OVERALL ASSESSMENT: FAILED'}")
         print("=" * 80)
         
-        return overall_success
+        await asyncio.sleep(0)
+    return overall_success
         
     finally:
         await tester.cleanup_services()

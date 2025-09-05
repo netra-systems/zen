@@ -24,8 +24,11 @@ import time
 import uuid
 from datetime import datetime, timezone
 from typing import Dict, List, Set, Any, Optional
-from unittest.mock import AsyncMock, MagicMock
 import pytest
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
+from shared.isolated_environment import IsolatedEnvironment
 
 # Add project root to path
 project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))

@@ -3,6 +3,7 @@ import asyncio
 import pytest
 from fastapi.testclient import TestClient
 from shared.isolated_environment import get_env
+from shared.isolated_environment import IsolatedEnvironment
 
 # Set environment to development for dev login endpoint to work
 env.set("NETRA_ENVIRONMENT", "development", "test")

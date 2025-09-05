@@ -10,7 +10,10 @@ import asyncio
 import time
 from datetime import UTC, datetime
 from typing import Any, Dict, List
-from unittest.mock import MagicMock
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
+from shared.isolated_environment import get_env
 
 # Import utilities with fallbacks
 try:

@@ -1,4 +1,5 @@
 from shared.isolated_environment import get_env
+from shared.isolated_environment import IsolatedEnvironment
 #!/usr/bin/env python
 """MINIMAL WebSocket Bridge Lifecycle Test
 
@@ -18,8 +19,10 @@ This is a regression test to catch any future breaks in bridge propagation.
 import sys
 import os
 import unittest
-from unittest.mock import MagicMock, AsyncMock, patch
 from typing import Dict, List, Any
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
 
 # Add project root to path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))

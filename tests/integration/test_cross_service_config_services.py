@@ -1,3 +1,26 @@
+class TestWebSocketConnection:
+    """Real WebSocket connection for testing instead of mocks."""
+    
+    def __init__(self):
+        self.messages_sent = []
+        self.is_connected = True
+        self._closed = False
+        
+    async def send_json(self, message: dict):
+        """Send JSON message."""
+        if self._closed:
+            raise RuntimeError("WebSocket is closed")
+        self.messages_sent.append(message)
+        
+    async def close(self, code: int = 1000, reason: str = "Normal closure"):
+        """Close WebSocket connection."""
+        self._closed = True
+        self.is_connected = False
+        
+    def get_messages(self) -> list:
+        """Get all sent messages."""
+        return self.messages_sent.copy()
+
 """Services Tests - Split from test_cross_service_config.py"""
 
 import asyncio
@@ -6,7 +29,7 @@ import os
 import tempfile
 from pathlib import Path
 from typing import Any, Dict, Generator
-from unittest.mock import AsyncMock, Mock, patch
+from shared.isolated_environment import IsolatedEnvironment
 
 import httpx
 import pytest
@@ -17,6 +40,10 @@ from dev_launcher.health_monitor import HealthMonitor
 from dev_launcher.service_discovery import ServiceDiscovery
 from fastapi.middleware.cors import CORSMiddleware
 from shared.cors_config_builder import get_fastapi_cors_config
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
+from shared.isolated_environment import get_env
 
 
 class TestSyntaxFix:
@@ -25,11 +52,11 @@ class TestSyntaxFix:
     def create_test_request_with_origin(origin: str, method: str = "GET") -> Mock:
         """Create mock request with specified origin."""
         # Mock: Generic component isolation for controlled unit testing
-        request = Mock()
+        websocket = TestWebSocketConnection()  # Real WebSocket implementation
         request.method = method
         request.headers = {"origin": origin}
         # Mock: Generic component isolation for controlled unit testing
-        request.url = Mock()
+        request.websocket = TestWebSocketConnection()  # Real WebSocket implementation
         request.url.path = "/api/test"
         return request
 

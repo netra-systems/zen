@@ -69,7 +69,8 @@ class StagingE2ETester:
     
     async def test_health_endpoints(self):
         """Test all health-related endpoints."""
-        print("\n=== HEALTH ENDPOINTS ===")
+        print("
+=== HEALTH ENDPOINTS ===")
         
         # Basic health
         status, data = await self.make_request("GET", "/health")
@@ -110,7 +111,8 @@ class StagingE2ETester:
     
     async def test_api_endpoints(self):
         """Test critical API endpoints."""
-        print("\n=== API ENDPOINTS ===")
+        print("
+=== API ENDPOINTS ===")
         
         # Test API root
         status, data = await self.make_request("GET", "/api/")
@@ -141,7 +143,8 @@ class StagingE2ETester:
     
     async def test_auth_endpoints(self):
         """Test authentication-related endpoints."""
-        print("\n=== AUTHENTICATION ENDPOINTS ===")
+        print("
+=== AUTHENTICATION ENDPOINTS ===")
         
         # Test auth health (if available)
         status, data = await self.make_request("GET", "/auth/health")
@@ -173,7 +176,8 @@ class StagingE2ETester:
     
     async def test_websocket_info(self):
         """Test WebSocket-related information endpoints."""
-        print("\n=== WEBSOCKET INFO ===")
+        print("
+=== WEBSOCKET INFO ===")
         
         # Test WebSocket info endpoint if available
         status, data = await self.make_request("GET", "/ws/info")
@@ -189,7 +193,8 @@ class StagingE2ETester:
     
     async def test_cors_configuration(self):
         """Test CORS configuration."""
-        print("\n=== CORS CONFIGURATION ===")
+        print("
+=== CORS CONFIGURATION ===")
         
         # Test CORS preflight
         headers = {
@@ -207,7 +212,8 @@ class StagingE2ETester:
     
     async def test_database_operations(self):
         """Test database-related operations indirectly."""
-        print("\n=== DATABASE OPERATIONS ===")
+        print("
+=== DATABASE OPERATIONS ===")
         
         # Test schema validation endpoint
         status, data = await self.make_request("GET", "/health/schema-validation")
@@ -221,7 +227,8 @@ class StagingE2ETester:
     
     async def test_error_handling(self):
         """Test error handling for non-existent endpoints."""
-        print("\n=== ERROR HANDLING ===")
+        print("
+=== ERROR HANDLING ===")
         
         # Test 404 handling
         status, data = await self.make_request("GET", "/nonexistent-endpoint")
@@ -260,7 +267,8 @@ class StagingE2ETester:
     
     def generate_summary(self):
         """Generate test summary report."""
-        print(f"\n{'='*60}")
+        print(f"
+{'='*60}")
         print("TEST EXECUTION SUMMARY")
         print(f"{'='*60}")
         
@@ -274,12 +282,14 @@ class StagingE2ETester:
         print(f"Success Rate: {(passed_tests/total_tests*100):.1f}%")
         
         if failed_tests > 0:
-            print(f"\nFAILED TESTS:")
+            print(f"
+FAILED TESTS:")
             for result in self.test_results:
                 if not result["success"]:
                     print(f"  [FAIL] {result['test_name']}: {result.get('error', 'Unknown error')}")
         
-        print(f"\nCRITICAL SERVICES STATUS:")
+        print(f"
+CRITICAL SERVICES STATUS:")
         health_tests = [r for r in self.test_results if "Health" in r["test_name"]]
         health_passed = sum(1 for r in health_tests if r["success"])
         print(f"  Health Endpoints: {health_passed}/{len(health_tests)} working")
@@ -290,13 +300,16 @@ class StagingE2ETester:
         
         # Overall recommendation
         if passed_tests / total_tests >= 0.8:
-            print(f"\n[HEALTHY] STAGING STATUS: HEALTHY - {passed_tests}/{total_tests} tests passing")
+            print(f"
+[HEALTHY] STAGING STATUS: HEALTHY - {passed_tests}/{total_tests} tests passing")
             print("   Recommendation: Staging environment is ready for testing")
         elif passed_tests / total_tests >= 0.6:
-            print(f"\n[DEGRADED] STAGING STATUS: DEGRADED - {passed_tests}/{total_tests} tests passing")
+            print(f"
+[DEGRADED] STAGING STATUS: DEGRADED - {passed_tests}/{total_tests} tests passing")
             print("   Recommendation: Some issues need attention but core functionality works")
         else:
-            print(f"\n[UNHEALTHY] STAGING STATUS: UNHEALTHY - {passed_tests}/{total_tests} tests passing")
+            print(f"
+[UNHEALTHY] STAGING STATUS: UNHEALTHY - {passed_tests}/{total_tests} tests passing")
             print("   Recommendation: Significant issues need resolution")
         
         # Save results
@@ -314,7 +327,8 @@ class StagingE2ETester:
                 },
                 "test_results": self.test_results
             }, f, indent=2)
-        print(f"\n[RESULTS] Detailed results saved to: {results_file}")
+        print(f"
+[RESULTS] Detailed results saved to: {results_file}")
 
 
 async def main():

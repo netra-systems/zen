@@ -16,11 +16,11 @@ Architecture: E2E tests with actual business value validation through WebSocket 
 import asyncio
 import pytest
 from typing import Any, Dict
+from shared.isolated_environment import IsolatedEnvironment
 
 # Absolute imports per CLAUDE.md import_management_architecture.xml
 from tests.e2e.agent_orchestration_fixtures import (
     failure_recovery_data,
-    real_supervisor_agent,  # Changed from mock_supervisor_agent
     real_websocket,
     sample_agent_state,
 )

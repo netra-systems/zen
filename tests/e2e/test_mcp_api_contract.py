@@ -5,6 +5,7 @@ This test demonstrates the architectural mismatch causing 404 errors in staging.
 
 import sys
 import os
+from shared.isolated_environment import IsolatedEnvironment
 
 import pytest
 import httpx
@@ -29,6 +30,7 @@ class TestMCPAPIContract:
     @pytest.mark.e2e
     def test_frontend_expects_servers_endpoint(self, client):
         """
+    pass
         FAILING TEST: Frontend expects /api/mcp/servers endpoint.
         Frontend calls this to list available MCP servers.
         """
@@ -53,6 +55,7 @@ class TestMCPAPIContract:
         FAILING TEST: Frontend expects /api/mcp/servers/{name}/status endpoint.
         Frontend calls this to check individual server status.
         """
+    pass
         server_name = "test-server"
         response = client.get(f"/api/mcp/servers/{server_name}/status")
         
@@ -69,6 +72,7 @@ class TestMCPAPIContract:
         FAILING TEST: Frontend expects /api/mcp/tools/discover endpoint.
         Frontend calls this to discover available tools.
         """
+    pass
         response = client.get("/api/mcp/tools/discover")
         
         # This SHOULD return 200 with discovered tools
@@ -89,6 +93,7 @@ class TestMCPAPIContract:
         PASSING TEST: Backend implements different MCP endpoints.
         This shows what the backend actually provides.
         """
+    pass
         # Backend actual endpoints (from mcp/main.py router)
         actual_endpoints = [
             "/api/mcp/info",
@@ -114,6 +119,7 @@ class TestMCPAPIContract:
         Frontend assumes external server management model.
         Backend implements internal service model.
         """
+    pass
         # Frontend model: Managing external MCP servers
         frontend_endpoints = {
             "/api/mcp/servers": "List external MCP servers",
@@ -140,7 +146,9 @@ class TestMCPAPIContract:
         # This test documents the mismatch
         assert len(mismatches) == 0, (
             f"API Contract Mismatch - Frontend expects {len(mismatches)} "
-            f"endpoints that don't exist:\n" + "\n".join(mismatches)
+            f"endpoints that don't exist:
+" + "
+".join(mismatches)
         )
 
 
@@ -150,6 +158,7 @@ class TestMCPEdgeCases:
     
     @pytest.fixture
     def client(self):
+    pass
         return TestClient(app)
     
     @pytest.mark.e2e
@@ -158,6 +167,7 @@ class TestMCPEdgeCases:
         TEST: Verify MCP feature is consistently enabled/disabled.
         Edge case: Feature might be enabled in frontend but not backend.
         """
+    pass
         # Check if backend has MCP enabled
         response = client.get("/api/mcp/info")
         backend_enabled = response.status_code != 404
@@ -177,6 +187,7 @@ class TestMCPEdgeCases:
         TEST: Verify consistent auth requirements for MCP endpoints.
         Edge case: Auth might be required in backend but not expected by frontend.
         """
+    pass
         # Test without auth header
         response = client.get("/api/mcp/tools")
         
@@ -192,6 +203,7 @@ class TestMCPEdgeCases:
         TEST: Verify error response format matches frontend expectations.
         Edge case: Frontend expects specific error format for proper handling.
         """
+    pass
         # Force an error by calling non-existent endpoint
         response = client.get("/api/mcp/servers")
         

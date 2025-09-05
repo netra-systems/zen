@@ -8,6 +8,7 @@ import asyncio
 import json
 import time
 from typing import List
+from shared.isolated_environment import IsolatedEnvironment
 
 from tests.e2e.staging_test_base import StagingTestBase, staging_test
 

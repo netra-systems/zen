@@ -18,6 +18,7 @@ import asyncio
 import time
 from typing import Dict, Any, List
 import pytest_asyncio
+from shared.isolated_environment import IsolatedEnvironment
 
 from tests.e2e.config import TEST_USERS, TEST_ENDPOINTS
 from test_framework.http_client import UnifiedHTTPClient as RealWebSocketClient

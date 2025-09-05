@@ -85,7 +85,8 @@ class SSOTTestRunner:
             print(f"Test file not found: {test_file}")
             return 1
         
-        print(f"\nRunning {suite_name} tests: {suite_info['description']}")
+        print(f"
+Running {suite_name} tests: {suite_info['description']}")
         print("=" * 80)
         
         # Build pytest command
@@ -138,7 +139,8 @@ class SSOTTestRunner:
     
     def print_summary(self, results: Dict[str, int]):
         """Print test results summary."""
-        print("\n" + "=" * 80)
+        print("
+" + "=" * 80)
         print("SSOT ORCHESTRATION TEST RESULTS SUMMARY")
         print("=" * 80)
         
@@ -162,10 +164,12 @@ class SSOTTestRunner:
         print(f"Failed: {len(failed_suites)}")
         
         if len(failed_suites) == 0:
-            print("\nALL SSOT ORCHESTRATION TESTS PASSED!")
+            print("
+ALL SSOT ORCHESTRATION TESTS PASSED!")
             print("SSOT Orchestration consolidation is BULLETPROOF!")
         else:
-            print(f"\nFAILED SUITES: {', '.join(failed_suites)}")
+            print(f"
+FAILED SUITES: {', '.join(failed_suites)}")
             print("Fix failures before deploying!")
         
         return len(failed_suites) == 0

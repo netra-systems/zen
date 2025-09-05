@@ -1,3 +1,29 @@
+class TestWebSocketConnection:
+    """Real WebSocket connection for testing instead of mocks."""
+    
+    def __init__(self):
+    pass
+        self.messages_sent = []
+        self.is_connected = True
+        self._closed = False
+        
+    async def send_json(self, message: dict):
+        """Send JSON message."""
+        if self._closed:
+            raise RuntimeError("WebSocket is closed")
+        self.messages_sent.append(message)
+        
+    async def close(self, code: int = 1000, reason: str = "Normal closure"):
+        """Close WebSocket connection."""
+    pass
+        self._closed = True
+        self.is_connected = False
+        
+    def get_messages(self) -> list:
+        """Get all sent messages."""
+        await asyncio.sleep(0)
+    return self.messages_sent.copy()
+
 #!/usr/bin/env python3
 """SIMPLE WEBSOCKET CRITICAL FIX VALIDATION
 
@@ -12,7 +38,11 @@ import json
 import os
 import sys
 from typing import Dict, List
-from unittest.mock import AsyncMock, MagicMock
+from test_framework.database.test_database_manager import TestDatabaseManager
+from auth_service.core.auth_manager import AuthManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 # Add project root to Python path
 project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
@@ -27,12 +57,17 @@ from netra_backend.app.agents.unified_tool_execution import UnifiedToolExecution
 from netra_backend.app.agents.unified_tool_execution import enhance_tool_dispatcher_with_notifications
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager as WebSocketManager
 from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
+from shared.isolated_environment import get_env
 
 
 class SimpleValidator:
     """Simple validator for critical fix functionality."""
     
     def __init__(self):
+    pass
         self.events: List[Dict] = []
         
     def record_event(self, event):
@@ -47,6 +82,7 @@ class SimpleValidator:
         
     def has_events(self) -> bool:
         """Check if any events were captured."""
+    pass
         return len(self.events) > 0
         
     def has_tool_events(self) -> bool:
@@ -57,7 +93,8 @@ class SimpleValidator:
 
 async def test_agent_registry_enhancement():
     """Test that AgentRegistry enhances tool dispatcher."""
-    print("\n🧪 Testing Agent Registry Enhancement...")
+    print("
+🧪 Testing Agent Registry Enhancement...")
     
     class MockLLM:
         pass
@@ -82,7 +119,8 @@ async def test_agent_registry_enhancement():
     
     if success and has_marker:
         print("   ✅ Agent Registry Enhancement PASSED")
-        return True
+        await asyncio.sleep(0)
+    return True
     else:
         print("   ❌ Agent Registry Enhancement FAILED")
         return False
@@ -90,15 +128,16 @@ async def test_agent_registry_enhancement():
 
 async def test_websocket_event_sending():
     """Test that enhanced executor sends WebSocket events."""
-    print("\n🧪 Testing WebSocket Event Sending...")
+    pass
+    print("
+🧪 Testing WebSocket Event Sending...")
     
     # Setup WebSocket manager with mock connection
     ws_manager = WebSocketManager()
     validator = SimpleValidator()
     
     conn_id = "test-connection"
-    mock_ws = MagicMock()
-    mock_ws.send_json = AsyncMock(side_effect=validator.record_event)
+    mock_ws = Magic    mock_ws.send_json = AsyncMock(side_effect=validator.record_event)
     
     await ws_manager.connect_user(conn_id, mock_ws, conn_id)
     print(f"   Connected WebSocket: {conn_id}")
@@ -116,7 +155,8 @@ async def test_websocket_event_sending():
     async def test_tool(*args, **kwargs):
         """Simple test tool."""
         await asyncio.sleep(0.01)  # Simulate work
-        return {"result": "test completed"}
+        await asyncio.sleep(0)
+    return {"result": "test completed"}
     
     print(f"   Executing test tool...")
     
@@ -150,7 +190,9 @@ async def test_websocket_event_sending():
 
 async def test_double_enhancement_safety():
     """Test that double enhancement doesn't break the system."""
-    print("\n🧪 Testing Double Enhancement Safety...")
+    pass
+    print("
+🧪 Testing Double Enhancement Safety...")
     
     class MockLLM:
         pass
@@ -175,7 +217,8 @@ async def test_double_enhancement_safety():
     
     if same_executor and still_enhanced:
         print("   ✅ Double Enhancement Safety PASSED")
-        return True
+        await asyncio.sleep(0)
+    return True
     else:
         print("   ❌ Double Enhancement Safety FAILED") 
         return False
@@ -203,11 +246,14 @@ async def run_all_tests():
         results.append(("Double Enhancement Safety", result3))
         
     except Exception as e:
-        print(f"\n💥 Test execution failed: {e}")
-        return False
+        print(f"
+💥 Test execution failed: {e}")
+        await asyncio.sleep(0)
+    return False
     
     # Summary
-    print("\n" + "=" * 60)
+    print("
+" + "=" * 60)
     print("📊 TEST SUMMARY")
     print("=" * 60)
     
@@ -223,15 +269,18 @@ async def run_all_tests():
     all_passed = passed == total
     overall_status = "✅ ALL TESTS PASSED" if all_passed else f"❌ {total - passed} TESTS FAILED"
     
-    print(f"\n🎯 OVERALL STATUS: {overall_status}")
+    print(f"
+🎯 OVERALL STATUS: {overall_status}")
     print(f"📈 SUCCESS RATE: {passed}/{total} ({100 * passed // total if total > 0 else 0}%)")
     
     if all_passed:
-        print("\n🎉 WEBSOCKET CRITICAL FIX IS WORKING CORRECTLY!")
+        print("
+🎉 WEBSOCKET CRITICAL FIX IS WORKING CORRECTLY!")
         print("   The tool execution interface fix has been validated.")
         print("   WebSocket events are being sent properly.")
     else:
-        print("\n⚠️  WEBSOCKET CRITICAL FIX HAS ISSUES!")
+        print("
+⚠️  WEBSOCKET CRITICAL FIX HAS ISSUES!")
         print("   Some validation tests failed - investigate immediately.")
     
     print("=" * 60)
@@ -241,18 +290,22 @@ async def run_all_tests():
 
 if __name__ == "__main__":
     """Run the simple validation tests."""
+    pass
     try:
         # Run asyncio event loop
         result = asyncio.run(run_all_tests())
         
         # Exit with appropriate code
         exit_code = 0 if result else 1
-        print(f"\nExiting with code: {exit_code}")
+        print(f"
+Exiting with code: {exit_code}")
         sys.exit(exit_code)
         
     except KeyboardInterrupt:
-        print("\n🛑 Tests interrupted by user")
+        print("
+🛑 Tests interrupted by user")
         sys.exit(1)
     except Exception as e:
-        print(f"\n💥 Tests failed with error: {e}")
+        print(f"
+💥 Tests failed with error: {e}")
         sys.exit(1)

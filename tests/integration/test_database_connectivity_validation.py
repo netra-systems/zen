@@ -21,10 +21,10 @@ import time
 import sys
 from pathlib import Path
 from typing import Dict, Any, Optional, Tuple
-from unittest.mock import patch
 import asyncpg
 import psycopg2
 from clickhouse_driver import Client as ClickHouseNativeClient
+from shared.isolated_environment import IsolatedEnvironment
 
 # Add project root to path for imports
 project_root = Path(__file__).parent.parent.parent
@@ -34,12 +34,16 @@ from netra_backend.app.core.configuration.database import DatabaseConfigManager
 from shared.database_url_builder import DatabaseURLBuilder
 from shared.isolated_environment import get_env
 from test_framework.environment_markers import env
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
 
 
 class DatabaseConnectivityValidator:
     """Comprehensive database connectivity validation."""
     
     def __init__(self):
+    pass
         self.env = get_env()
         self.results = {}
     
@@ -247,6 +251,7 @@ class TestDatabaseConnectivityValidation:
     
     @pytest.fixture(scope="class")
     def validator(self):
+    pass
         return DatabaseConnectivityValidator()
     
     @pytest.mark.asyncio
@@ -257,10 +262,12 @@ class TestDatabaseConnectivityValidation:
         This test validates the fix for PostgreSQL port configuration,
         ensuring the database is accessible on the correct port with proper credentials.
         """
+    pass
         config = validator.get_postgres_config()
         result = await validator.validate_postgres_asyncpg(config)
         
-        print(f"\n=== POSTGRESQL ASYNCPG CONNECTIVITY TEST ===")
+        print(f"
+=== POSTGRESQL ASYNCPG CONNECTIVITY TEST ===")
         print(f"Host: {config['host']}")
         print(f"Port: {config['port']}")
         print(f"User: {config['user']}")
@@ -275,16 +282,26 @@ class TestDatabaseConnectivityValidation:
         
         # Assert connectivity works
         assert result['success'], (
-            f"PostgreSQL asyncpg connectivity FAILED:\n"
-            f"Host: {config['host']}:{config['port']}\n"
-            f"User: {config['user']}\n"
-            f"Database: {config['database']}\n"
-            f"Error: {result['error']}\n\n"
+            f"PostgreSQL asyncpg connectivity FAILED:
+"
+            f"Host: {config['host']}:{config['port']}
+"
+            f"User: {config['user']}
+"
+            f"Database: {config['database']}
+"
+            f"Error: {result['error']}
+
+"
             f"This indicates the PostgreSQL database is not accessible with the "
-            f"configured credentials on port {config['port']}. Ensure:\n"
-            f"1. PostgreSQL is running on port {config['port']}\n"
-            f"2. User '{config['user']}' exists and has access\n"
-            f"3. Database '{config['database']}' exists\n"
+            f"configured credentials on port {config['port']}. Ensure:
+"
+            f"1. PostgreSQL is running on port {config['port']}
+"
+            f"2. User '{config['user']}' exists and has access
+"
+            f"3. Database '{config['database']}' exists
+"
             f"4. Network connectivity is available"
         )
         
@@ -301,10 +318,12 @@ class TestDatabaseConnectivityValidation:
         This test validates that migration operations can connect using the
         synchronous psycopg2 driver on the correct port.
         """
+    pass
         config = validator.get_postgres_config()
         result = validator.validate_postgres_psycopg2(config)
         
-        print(f"\n=== POSTGRESQL PSYCOPG2 CONNECTIVITY TEST ===")
+        print(f"
+=== POSTGRESQL PSYCOPG2 CONNECTIVITY TEST ===")
         print(f"Host: {config['host']}")
         print(f"Port: {config['port']}")
         print(f"User: {config['user']}")
@@ -319,11 +338,17 @@ class TestDatabaseConnectivityValidation:
         
         # Assert connectivity works
         assert result['success'], (
-            f"PostgreSQL psycopg2 connectivity FAILED:\n"
-            f"Host: {config['host']}:{config['port']}\n"
-            f"User: {config['user']}\n"
-            f"Database: {config['database']}\n"
-            f"Error: {result['error']}\n\n"
+            f"PostgreSQL psycopg2 connectivity FAILED:
+"
+            f"Host: {config['host']}:{config['port']}
+"
+            f"User: {config['user']}
+"
+            f"Database: {config['database']}
+"
+            f"Error: {result['error']}
+
+"
             f"This indicates the PostgreSQL database is not accessible for migration "
             f"operations using psycopg2 driver. Both asyncpg and psycopg2 must work."
         )
@@ -335,10 +360,12 @@ class TestDatabaseConnectivityValidation:
         This test validates that ClickHouse is accessible via HTTP interface
         with proper authentication credentials.
         """
+    pass
         config = validator.get_clickhouse_config()
         result = validator.validate_clickhouse_http(config)
         
-        print(f"\n=== CLICKHOUSE HTTP CONNECTIVITY TEST ===")
+        print(f"
+=== CLICKHOUSE HTTP CONNECTIVITY TEST ===")
         print(f"Host: {config['host']}")
         print(f"HTTP Port: {config['http_port']}")
         print(f"User: {config['user']}")
@@ -353,15 +380,25 @@ class TestDatabaseConnectivityValidation:
         
         # ClickHouse is now properly configured for local development
         assert result['success'], (
-            f"ClickHouse HTTP connectivity FAILED:\n"
-            f"Host: {config['host']}:{config['http_port']}\n"
-            f"User: {config['user']}\n"
-            f"Database: {config['database']}\n"
-            f"Error: {result['error']}\n\n"
-            f"This indicates ClickHouse is not accessible via HTTP interface. Ensure:\n"
-            f"1. ClickHouse is running on port {config['http_port']}\n"
-            f"2. HTTP interface is enabled\n"
-            f"3. User '{config['user']}' has proper authentication\n"
+            f"ClickHouse HTTP connectivity FAILED:
+"
+            f"Host: {config['host']}:{config['http_port']}
+"
+            f"User: {config['user']}
+"
+            f"Database: {config['database']}
+"
+            f"Error: {result['error']}
+
+"
+            f"This indicates ClickHouse is not accessible via HTTP interface. Ensure:
+"
+            f"1. ClickHouse is running on port {config['http_port']}
+"
+            f"2. HTTP interface is enabled
+"
+            f"3. User '{config['user']}' has proper authentication
+"
             f"4. Database '{config['database']}' exists"
         )
     
@@ -371,10 +408,12 @@ class TestDatabaseConnectivityValidation:
         
         This test validates ClickHouse native protocol access for high-performance operations.
         """
+    pass
         config = validator.get_clickhouse_config()
         result = validator.validate_clickhouse_native(config)
         
-        print(f"\n=== CLICKHOUSE NATIVE CONNECTIVITY TEST ===")
+        print(f"
+=== CLICKHOUSE NATIVE CONNECTIVITY TEST ===")
         print(f"Host: {config['host']}")
         print(f"Native Port: {config['native_port']}")
         print(f"User: {config['user']}")
@@ -389,11 +428,17 @@ class TestDatabaseConnectivityValidation:
         
         # ClickHouse is now properly configured for local development
         assert result['success'], (
-            f"ClickHouse native connectivity FAILED:\n"
-            f"Host: {config['host']}:{config['native_port']}\n"
-            f"User: {config['user']}\n"
-            f"Database: {config['database']}\n"
-            f"Error: {result['error']}\n\n"
+            f"ClickHouse native connectivity FAILED:
+"
+            f"Host: {config['host']}:{config['native_port']}
+"
+            f"User: {config['user']}
+"
+            f"Database: {config['database']}
+"
+            f"Error: {result['error']}
+
+"
             f"This indicates ClickHouse native protocol is not working properly."
         )
     
@@ -404,6 +449,7 @@ class TestDatabaseConnectivityValidation:
         This test validates that the DatabaseURLBuilder fixes are working correctly
         and producing consistent URLs for both async and sync operations.
         """
+    pass
         env_vars = validator.env.get_all()
         builder = DatabaseURLBuilder(env_vars)
         
@@ -411,7 +457,8 @@ class TestDatabaseConnectivityValidation:
         async_url = builder.get_url_for_environment(sync=False)
         sync_url = builder.get_url_for_environment(sync=True)
         
-        print(f"\n=== DATABASE URL BUILDER CONSISTENCY TEST ===")
+        print(f"
+=== DATABASE URL BUILDER CONSISTENCY TEST ===")
         print(f"Environment: {env_vars.get('ENVIRONMENT', 'unknown')}")
         print(f"Async URL: {DatabaseURLBuilder.mask_url_for_logging(async_url)}")
         print(f"Sync URL: {DatabaseURLBuilder.mask_url_for_logging(sync_url)}")
@@ -450,6 +497,7 @@ class TestDatabaseConnectivityValidation:
         This test performs a complete health check of all database connections
         to ensure the system can start up successfully with all databases accessible.
         """
+    pass
         health_results = {
             'postgres_asyncpg': None,
             'postgres_psycopg2': None,
@@ -493,7 +541,8 @@ class TestDatabaseConnectivityValidation:
                 health_results['overall_health'] = False
                 health_results['issues'].append(f"ClickHouse native: {clickhouse_native_result['error']}")
         
-        print(f"\n=== COMPREHENSIVE DATABASE HEALTH CHECK ===")
+        print(f"
+=== COMPREHENSIVE DATABASE HEALTH CHECK ===")
         print(f"PostgreSQL asyncpg: {'✅ OK' if postgres_asyncpg_result['success'] else '❌ FAILED'}")
         print(f"PostgreSQL psycopg2: {'✅ OK' if postgres_psycopg2_result['success'] else '❌ FAILED'}")
         
@@ -512,8 +561,13 @@ class TestDatabaseConnectivityValidation:
         
         # Assert overall health
         assert health_results['overall_health'], (
-            f"DATABASE HEALTH CHECK FAILED:\n"
-            f"Issues found:\n" + "\n".join(f"  - {issue}" for issue in health_results['issues']) + "\n\n"
+            f"DATABASE HEALTH CHECK FAILED:
+"
+            f"Issues found:
+" + "
+".join(f"  - {issue}" for issue in health_results['issues']) + "
+
+"
             f"All configured databases must be accessible for the system to function properly. "
             f"Fix the database connectivity issues before proceeding."
         )
@@ -525,6 +579,7 @@ class TestDatabaseConnectivityValidation:
         This test validates that the DatabaseConfigManager correctly uses
         the fixed database configuration and can provide proper URLs.
         """
+    pass
         try:
             # Initialize the DatabaseConfigManager
             manager = DatabaseConfigManager()
@@ -532,7 +587,8 @@ class TestDatabaseConnectivityValidation:
             # Test that it can get PostgreSQL configuration without errors
             postgres_url = manager.get_postgres_url()
             
-            print(f"\n=== DATABASE CONFIG MANAGER TEST ===")
+            print(f"
+=== DATABASE CONFIG MANAGER TEST ===")
             print(f"PostgreSQL URL obtained: {bool(postgres_url)}")
             if postgres_url:
                 print(f"PostgreSQL URL (masked): {DatabaseURLBuilder.mask_url_for_logging(postgres_url)}")
@@ -566,6 +622,7 @@ class TestDatabaseConfigurationRegression:
         This test prevents regression of the port configuration issue where
         sync URLs ignored the POSTGRES_PORT environment variable.
         """
+    pass
         from shared.isolated_environment import get_env
         env = get_env()
         
@@ -609,6 +666,7 @@ class TestDatabaseConfigurationRegression:
         
         This test prevents regression of ClickHouse authentication issues.
         """
+    pass
         from shared.isolated_environment import get_env
         env = get_env()
         
@@ -636,6 +694,7 @@ class TestDatabaseConfigurationRegression:
         This test validates that sslmode is converted to ssl for asyncpg
         and ssl is converted to sslmode for psycopg2 as needed.
         """
+    pass
         # Test URL with sslmode parameter
         test_url = "postgresql://user:pass@host:5432/db?sslmode=require"
         
@@ -669,12 +728,14 @@ if __name__ == "__main__":
     import asyncio
     
     async def main():
+    pass
         print("=== DATABASE CONNECTIVITY VALIDATION ===")
         validator = DatabaseConnectivityValidator()
         
         # Test PostgreSQL
         postgres_config = validator.get_postgres_config()
-        print(f"\nTesting PostgreSQL on {postgres_config['host']}:{postgres_config['port']}")
+        print(f"
+Testing PostgreSQL on {postgres_config['host']}:{postgres_config['port']}")
         
         asyncpg_result = await validator.validate_postgres_asyncpg(postgres_config)
         print(f"AsyncPG: {'OK' if asyncpg_result['success'] else 'FAILED'}")
@@ -689,7 +750,8 @@ if __name__ == "__main__":
         # Test ClickHouse
         clickhouse_config = validator.get_clickhouse_config()
         if clickhouse_config['host']:
-            print(f"\nTesting ClickHouse on {clickhouse_config['host']}")
+            print(f"
+Testing ClickHouse on {clickhouse_config['host']}")
             
             http_result = validator.validate_clickhouse_http(clickhouse_config)
             print(f"HTTP ({clickhouse_config['http_port']}): {'OK' if http_result['success'] else 'FAILED'}")
@@ -701,6 +763,7 @@ if __name__ == "__main__":
             if not native_result['success']:
                 print(f"  Error: {native_result['error']}")
         else:
-            print("\nClickHouse not configured")
+            print("
+ClickHouse not configured")
     
     asyncio.run(main())

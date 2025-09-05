@@ -7,6 +7,7 @@ Business Value: Ensures agent execution pipeline works correctly.
 import asyncio
 import json
 import time
+from shared.isolated_environment import IsolatedEnvironment
 
 import pytest
 from tests.e2e.staging_test_base import StagingTestBase, staging_test

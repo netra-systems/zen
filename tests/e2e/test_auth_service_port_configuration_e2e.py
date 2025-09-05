@@ -11,6 +11,7 @@ import os
 import httpx
 import pytest
 from typing import Dict, List, Any
+from shared.isolated_environment import IsolatedEnvironment
 
 # Test configurations that represent the current inconsistent state
 PORT_CONFIGURATIONS = [
@@ -46,6 +47,7 @@ class AuthServicePortConfigurationValidator:
     """Validates auth service port configuration consistency across the system."""
     
     def __init__(self):
+    pass
         self.results: List[Dict[str, Any]] = []
     
     async def validate_all_port_configurations(self) -> Dict[str, Any]:
@@ -167,17 +169,20 @@ async def test_auth_service_port_consistency_validation():
     Expected Failure: This test should fail with port mismatch errors demonstrating
     the need to standardize port configurations across the system.
     """
+    pass
     validator = AuthServicePortConfigurationValidator()
     results = await validator.validate_all_port_configurations()
     
     # Print detailed results for debugging
-    print(f"\n=== AUTH SERVICE PORT CONFIGURATION VALIDATION ===")
+    print(f"
+=== AUTH SERVICE PORT CONFIGURATION VALIDATION ===")
     print(f"Configurations tested: {results['configurations_tested']}")
     print(f"Working configurations: {results['working_configurations']}")
     print(f"Failed configurations: {results['failed_configurations']}")
     print(f"Port mismatch detected: {results['port_mismatch_detected']}")
     
-    print(f"\n=== DETAILED RESULTS ===")
+    print(f"
+=== DETAILED RESULTS ===")
     for config_result in results['configuration_results']:
         status = "✅ WORKING" if config_result['connection_successful'] else "❌ FAILED"
         print(f"{status} {config_result['configuration_name']} (port {config_result['expected_port']})")
@@ -189,7 +194,8 @@ async def test_auth_service_port_consistency_validation():
         print()
     
     if results['recommended_fix']:
-        print(f"\n=== RECOMMENDED FIX ===")
+        print(f"
+=== RECOMMENDED FIX ===")
         fix = results['recommended_fix']
         print(f"Issue: {fix['issue']}")
         print(f"Recommended action: {fix['recommended_action']}")
@@ -217,6 +223,7 @@ async def test_specific_port_8001_expectation():
     This test will FAIL if auth service is not running on port 8001,
     exposing the mismatch with E2E test expectations.
     """
+    pass
     expected_port = 8001
     health_url = f"http://localhost:{expected_port}/health"
     
@@ -254,6 +261,7 @@ async def test_specific_port_8081_expectation():
     This test will FAIL if auth service is not running on port 8081,
     exposing the mismatch with dev launcher expectations.
     """
+    pass
     expected_port = 8081
     health_url = f"http://localhost:{expected_port}/health"
     
@@ -284,6 +292,7 @@ async def test_specific_port_8081_expectation():
 if __name__ == "__main__":
     # Run the validator directly for debugging
     async def main():
+    pass
         validator = AuthServicePortConfigurationValidator()
         results = await validator.validate_all_port_configurations()
         

@@ -14,6 +14,7 @@ import asyncio
 import json
 import logging
 import time
+from shared.isolated_environment import IsolatedEnvironment
 
 import pytest
 

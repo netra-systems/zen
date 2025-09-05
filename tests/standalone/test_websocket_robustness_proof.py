@@ -29,6 +29,7 @@ from dataclasses import dataclass
 import random
 import traceback
 import gc
+from shared.isolated_environment import IsolatedEnvironment
 
 # Add project root to Python path
 project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))

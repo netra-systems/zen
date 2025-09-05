@@ -21,7 +21,7 @@ import pytest
 import time
 from datetime import datetime, timezone
 from typing import Dict, Any, List, Optional
-from unittest.mock import AsyncMock, MagicMock, patch
+from shared.isolated_environment import IsolatedEnvironment
 
 # Import execution tracking and agent components
 from netra_backend.app.core.agent_execution_tracker import (
@@ -33,12 +33,17 @@ from netra_backend.app.agents.execution_tracking.tracker import (
 from netra_backend.app.agents.execution_tracking.registry import ExecutionState
 from netra_backend.app.agents.execution_tracking.heartbeat import HeartbeatMonitor
 from netra_backend.app.agents.execution_tracking.timeout import TimeoutManager
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
+from shared.isolated_environment import get_env
 
 
 class MockWebSocketBridge:
     """Mock WebSocket bridge that captures notifications for testing"""
     
     def __init__(self):
+    pass
         self.notifications = []
         self.is_connected = True
         
@@ -111,7 +116,8 @@ class MockWebSocketBridge:
         
     def get_notifications_by_type(self, notification_type: str) -> List[Dict[str, Any]]:
         """Get all notifications of a specific type"""
-        return [n for n in self.notifications if n['type'] == notification_type]
+        await asyncio.sleep(0)
+    return [n for n in self.notifications if n['type'] == notification_type]
         
     def clear_notifications(self):
         """Clear all recorded notifications"""
@@ -122,6 +128,7 @@ class AgentSimulator:
     """Simulates agent behavior for testing death scenarios"""
     
     def __init__(self, execution_tracker: ExecutionTracker):
+    pass
         self.tracker = execution_tracker
         self.is_alive = True
         self.execution_id = None
@@ -129,10 +136,12 @@ class AgentSimulator:
     async def start_execution(self, run_id: str, agent_name: str, context: AgentExecutionContext):
         """Start a simulated agent execution"""
         self.execution_id = await self.tracker.start_execution(run_id, agent_name, context)
-        return self.execution_id
+        await asyncio.sleep(0)
+    return self.execution_id
         
     async def do_work_phases(self, phases: List[Dict[str, Any]]):
         """Simulate agent doing work in phases"""
+    pass
         for phase in phases:
             if not self.is_alive:
                 break
@@ -153,6 +162,7 @@ class AgentSimulator:
         
     async def complete_successfully(self, result_data: Any = None):
         """Simulate agent completing successfully"""
+    pass
         if self.execution_id and self.is_alive:
             result = AgentExecutionResult(
                 success=True,
@@ -175,11 +185,13 @@ class TestAgentDeathRecoveryIntegration:
     @pytest.fixture
     async def websocket_bridge(self):
         """Create mock WebSocket bridge for testing"""
-        return MockWebSocketBridge()
+        await asyncio.sleep(0)
+    return MockWebSocketBridge()
     
     @pytest.fixture
     async def execution_tracker(self, websocket_bridge):
         """Create ExecutionTracker with WebSocket integration"""
+    pass
         tracker = ExecutionTracker(
             websocket_bridge=websocket_bridge,
             heartbeat_interval=1.0,  # Fast for testing
@@ -193,7 +205,8 @@ class TestAgentDeathRecoveryIntegration:
         self, execution_tracker, websocket_bridge
     ):
         """Test that agent death is detected and WebSocket notifications are sent"""
-        print("\n" + "="*80)
+        print("
+" + "="*80)
         print("INTEGRATION TEST: Agent Death Detection with WebSocket")
         print("="*80)
         
@@ -243,7 +256,8 @@ class TestAgentDeathRecoveryIntegration:
         print("✅ Agent confirmed alive and working")
         
         # AGENT DEATH SIMULATION
-        print("\\n💀 SIMULATING AGENT DEATH...")
+        print("\
+💀 SIMULATING AGENT DEATH...")
         await simulator.die_silently()
         
         # Wait for death detection
@@ -290,7 +304,8 @@ class TestAgentDeathRecoveryIntegration:
     @pytest.mark.asyncio
     async def test_multiple_agent_death_scenarios(self, execution_tracker, websocket_bridge):
         """Test multiple agents dying in different ways"""
-        print("\n" + "="*80)
+        print("
+" + "="*80)
         print("INTEGRATION TEST: Multiple Agent Death Scenarios")
         print("="*80)
         
@@ -334,7 +349,8 @@ class TestAgentDeathRecoveryIntegration:
         print("✅ All agents started working")
         
         # Kill agents in different ways
-        print("\\n💀 Killing agents with different scenarios...")
+        print("\
+💀 Killing agents with different scenarios...")
         
         # Agent 0: Silent death (heartbeat failure)
         await simulators[0].die_silently()
@@ -387,7 +403,9 @@ class TestAgentDeathRecoveryIntegration:
     @pytest.mark.asyncio
     async def test_agent_recovery_after_death_detection(self, execution_tracker, websocket_bridge):
         """Test recovery mechanisms after agent death is detected"""
-        print("\n" + "="*80)
+    pass
+        print("
+" + "="*80)
         print("INTEGRATION TEST: Agent Recovery After Death Detection")
         print("="*80)
         
@@ -396,6 +414,7 @@ class TestAgentDeathRecoveryIntegration:
         
         # Mock recovery callback
         async def mock_recovery_callback(execution_id: str, error: Exception):
+    pass
             recovery_events.append({
                 'execution_id': execution_id,
                 'error': str(error),
@@ -443,7 +462,8 @@ class TestAgentDeathRecoveryIntegration:
         assert death_detected, "Death was not detected"
         
         # Simulate recovery attempt (new execution)
-        print("\\n🔄 Attempting recovery...")
+        print("\
+🔄 Attempting recovery...")
         
         recovery_simulator = AgentSimulator(execution_tracker)
         recovery_context = AgentExecutionContext(
@@ -488,7 +508,8 @@ class TestAgentDeathRecoveryIntegration:
     @pytest.mark.asyncio
     async def test_health_monitoring_integration(self, execution_tracker, websocket_bridge):
         """Test health monitoring integration with execution tracking"""
-        print("\n" + "="*80)
+        print("
+" + "="*80)
         print("INTEGRATION TEST: Health Monitoring Integration")
         print("="*80)
         
@@ -528,7 +549,8 @@ class TestAgentDeathRecoveryIntegration:
         
         # Check health with active executions
         active_health = await execution_tracker.get_health_status()
-        print(f"\\n📊 Health with active executions:")
+        print(f"\
+📊 Health with active executions:")
         print(f"   Status: {active_health['status']}")
         print(f"   Active executions: {active_health['active_executions']}")
         print(f"   Dead agents: {active_health['dead_agents']}")
@@ -546,7 +568,8 @@ class TestAgentDeathRecoveryIntegration:
         
         # Check health after deaths
         death_health = await execution_tracker.get_health_status()
-        print(f"\\n💀 Health after agent deaths:")
+        print(f"\
+💀 Health after agent deaths:")
         print(f"   Status: {death_health['status']}")
         print(f"   Active executions: {death_health['active_executions']}")
         print(f"   Dead agents: {death_health['dead_agents']}")
@@ -562,7 +585,8 @@ class TestAgentDeathRecoveryIntegration:
         # Final health check
         await asyncio.sleep(2)  # Let cleanup happen
         final_health = await execution_tracker.get_health_status()
-        print(f"\\n🏁 Final health status:")
+        print(f"\
+🏁 Final health status:")
         print(f"   Status: {final_health['status']}")
         print(f"   Active executions: {final_health['active_executions']}")
         
@@ -572,7 +596,9 @@ class TestAgentDeathRecoveryIntegration:
     @pytest.mark.asyncio
     async def test_execution_metrics_during_death_scenarios(self, execution_tracker, websocket_bridge):
         """Test that execution metrics are accurate during death scenarios"""
-        print("\n" + "="*80)
+    pass
+        print("
+" + "="*80)
         print("INTEGRATION TEST: Execution Metrics During Death Scenarios")
         print("="*80)
         
@@ -623,7 +649,8 @@ class TestAgentDeathRecoveryIntegration:
             ])
         
         # Execute different outcomes
-        print("\\n📊 Executing different scenarios...")
+        print("\
+📊 Executing different scenarios...")
         
         # Success cases
         await simulators[0].complete_successfully({"test": "success1"})
@@ -646,7 +673,8 @@ class TestAgentDeathRecoveryIntegration:
         final_metrics = await execution_tracker.get_tracker_metrics()
         tracker_metrics = final_metrics['tracker_metrics']
         
-        print(f"\\n📊 Final metrics:")
+        print(f"\
+📊 Final metrics:")
         print(f"   Total executions: {tracker_metrics['total_executions_started']}")
         print(f"   Successful: {tracker_metrics['successful_executions']}")
         print(f"   Failed: {tracker_metrics['failed_executions']}")
@@ -675,7 +703,8 @@ class TestAgentDeathRecoveryIntegration:
     @pytest.mark.asyncio 
     async def test_concurrent_agent_deaths(self, execution_tracker, websocket_bridge):
         """Test handling of multiple simultaneous agent deaths"""
-        print("\n" + "="*80)
+        print("
+" + "="*80)
         print("INTEGRATION TEST: Concurrent Agent Deaths")
         print("="*80)
         
@@ -717,7 +746,8 @@ class TestAgentDeathRecoveryIntegration:
         
         # Kill most agents simultaneously
         kill_count = 6  # Kill 6 out of 8
-        print(f"\\n💀 Killing {kill_count} agents simultaneously...")
+        print(f"\
+💀 Killing {kill_count} agents simultaneously...")
         
         # Kill agents at the same time
         kill_tasks = []
@@ -735,7 +765,8 @@ class TestAgentDeathRecoveryIntegration:
         print(f"✅ {num_agents - kill_count} agents completed successfully")
         
         # Wait for all deaths to be detected
-        print("\\n🔍 Waiting for death detection...")
+        print("\
+🔍 Waiting for death detection...")
         deaths_detected = 0
         max_wait_seconds = 20
         
@@ -762,7 +793,8 @@ class TestAgentDeathRecoveryIntegration:
             if status and status.execution_record.state in [ExecutionState.FAILED, ExecutionState.TIMEOUT]:
                 final_deaths_detected += 1
         
-        print(f"\\n📊 Final results:")
+        print(f"\
+📊 Final results:")
         print(f"   Agents killed: {kill_count}")
         print(f"   Deaths detected: {final_deaths_detected}")
         print(f"   Detection rate: {final_deaths_detected/kill_count:.1%}")
@@ -791,11 +823,14 @@ if __name__ == "__main__":
     # Run integration tests
     import sys
     
-    print("\n" + "="*80)
+    print("
+" + "="*80)
     print("AGENT DEATH RECOVERY INTEGRATION TEST SUITE")
     print("="*80)
     print("Testing integration of execution tracking with agent death recovery")
     print("These tests verify end-to-end agent failure handling")
-    print("="*80 + "\n")
+    print("="*80 + "
+")
     
     pytest.main([__file__, "-v", "--tb=short", "-s"])
+    pass

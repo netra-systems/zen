@@ -28,6 +28,7 @@ import time
 import uuid
 from datetime import datetime, timezone
 from typing import Dict, Any, List, Optional
+from shared.isolated_environment import IsolatedEnvironment
 
 import pytest
 import pytest_asyncio

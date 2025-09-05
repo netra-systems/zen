@@ -119,7 +119,8 @@ def run_all_agent_orchestration_tests(concurrent_load: int = 10, detailed_report
     # Run performance tests
     perf_result = run_performance_tests(concurrent_load, detailed_reports)
     
-    print("\n")
+    print("
+")
     
     # Run error recovery tests
     recovery_result = run_error_recovery_tests(detailed_reports)
@@ -128,7 +129,8 @@ def run_all_agent_orchestration_tests(concurrent_load: int = 10, detailed_report
     end_time = time.time()
     duration = end_time - start_time
     
-    print("\n" + "=" * 80)
+    print("
+" + "=" * 80)
     print("TEST SUITE SUMMARY")
     print("=" * 80)
     print(f"Duration: {duration:.1f} seconds")
@@ -138,9 +140,11 @@ def run_all_agent_orchestration_tests(concurrent_load: int = 10, detailed_report
     overall_result = 0 if (perf_result == 0 and recovery_result == 0) else 1
     
     if overall_result == 0:
-        print("\n[SUCCESS] ALL AGENT ORCHESTRATION TESTS PASSED!")
+        print("
+[SUCCESS] ALL AGENT ORCHESTRATION TESTS PASSED!")
     else:
-        print("\n[WARNING] SOME TESTS FAILED - CHECK OUTPUT ABOVE")
+        print("
+[WARNING] SOME TESTS FAILED - CHECK OUTPUT ABOVE")
     
     print("=" * 80)
     
@@ -170,15 +174,18 @@ def run_quick_validation():
         "-v", "--asyncio-mode=auto", "--tb=short", "-x"
     ]
     
-    print("\nRunning quick error recovery validation...")
+    print("
+Running quick error recovery validation...")
     recovery_result = subprocess.run(cmd_recovery, capture_output=False)
     
     overall_result = 0 if (perf_result.returncode == 0 and recovery_result.returncode == 0) else 1
     
     if overall_result == 0:
-        print("\n[SUCCESS] Quick validation passed - full test suite should work")
+        print("
+[SUCCESS] Quick validation passed - full test suite should work")
     else:
-        print("\n[FAILED] Quick validation failed - check environment setup")
+        print("
+[FAILED] Quick validation failed - check environment setup")
     
     return overall_result
 
@@ -249,10 +256,12 @@ def main():
             return run_all_agent_orchestration_tests(args.concurrent_load, args.detailed_reports)
             
     except KeyboardInterrupt:
-        print("\n[WARNING] Test execution interrupted by user")
+        print("
+[WARNING] Test execution interrupted by user")
         return 1
     except Exception as e:
-        print(f"\n[ERROR] Test execution failed: {e}")
+        print(f"
+[ERROR] Test execution failed: {e}")
         return 1
 
 

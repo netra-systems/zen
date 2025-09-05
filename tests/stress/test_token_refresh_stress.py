@@ -11,7 +11,7 @@ import time
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timedelta
 from typing import Any, Dict, List, Optional, Tuple
-from unittest.mock import AsyncMock, patch
+from shared.isolated_environment import IsolatedEnvironment
 
 import jwt
 import pytest
@@ -21,6 +21,9 @@ from httpx import AsyncClient
 from netra_backend.app.core.configuration import get_configuration
 from test_framework.auth_jwt_test_manager import AuthJWTTestManager
 from test_framework.services import ServiceManager, get_service_manager
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from shared.isolated_environment import get_env
 
 
 class StressTestMetrics:

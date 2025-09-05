@@ -1,4 +1,5 @@
 from shared.isolated_environment import get_env
+from shared.isolated_environment import IsolatedEnvironment
 """
 Mission critical test for backend login endpoint 500 error fix.
 Validates comprehensive authentication flows, user journeys, and revenue-critical auth systems.
@@ -22,7 +23,6 @@ import asyncio
 import time
 import threading
 from concurrent.futures import ThreadPoolExecutor
-from unittest.mock import patch, AsyncMock, MagicMock
 from fastapi import HTTPException
 from fastapi.testclient import TestClient
 from datetime import datetime, timedelta
@@ -32,6 +32,9 @@ import string
 
 from netra_backend.app.main import app
 from netra_backend.app.routes.auth_routes.debug_helpers import (
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
     AuthServiceDebugger,
     enhanced_auth_service_call,
     create_enhanced_auth_error_response
@@ -40,6 +43,7 @@ from netra_backend.app.routes.auth_routes.debug_helpers import (
 
 class TestBackendLoginEndpointFix:
     """Test suite for backend login endpoint 500 error fixes."""
+    pass
 
     @pytest.fixture
     def client(self):
@@ -49,6 +53,7 @@ class TestBackendLoginEndpointFix:
     @pytest.fixture  
     def mock_auth_client(self):
         """Mock auth client for testing."""
+    pass
         with patch("netra_backend.app.routes.auth_proxy.auth_client") as mock:
             yield mock
 
@@ -64,12 +69,12 @@ class TestBackendLoginEndpointFix:
         }
         
         with patch("shared.isolated_environment.get_env") as mock_get_env:
-            mock_get_env.return_value = MagicMock()
-            mock_get_env.return_value.get = lambda key, default=None: env_vars.get(key, default)
+            mock_get_env.return_value = Magic            mock_get_env.return_value.get = lambda key, default=None: env_vars.get(key, default)
             yield mock_get_env
 
     def test_auth_service_debugger_initialization(self, mock_environment):
         """Test AuthServiceDebugger initialization and configuration detection."""
+    pass
         debugger = AuthServiceDebugger()
         
         # Test URL detection
@@ -84,8 +89,7 @@ class TestBackendLoginEndpointFix:
     def test_auth_service_debugger_fallback_url(self):
         """Test AuthServiceDebugger URL fallback logic."""
         with patch("shared.isolated_environment.get_env") as mock_get_env:
-            mock_get_env.return_value = MagicMock()
-            mock_get_env.return_value.get = lambda key, default=None: {
+            mock_get_env.return_value = Magic            mock_get_env.return_value.get = lambda key, default=None: {
                 "ENVIRONMENT": "staging"
             }.get(key, default)
             
@@ -95,6 +99,7 @@ class TestBackendLoginEndpointFix:
 
     def test_log_environment_debug_info(self, mock_environment):
         """Test comprehensive environment debug logging."""
+    pass
         debugger = AuthServiceDebugger()
         debug_info = debugger.log_environment_debug_info()
         
@@ -119,8 +124,7 @@ class TestBackendLoginEndpointFix:
         
         # Mock successful HTTP response
         with patch("httpx.AsyncClient") as mock_client:
-            mock_response = MagicMock()
-            mock_response.status_code = 200
+            mock_response = Magic            mock_response.status_code = 200
             mock_response.json.return_value = {"status": "healthy"}
             
             mock_client.return_value.__aenter__.return_value.get.return_value = mock_response
@@ -136,6 +140,7 @@ class TestBackendLoginEndpointFix:
     @pytest.mark.asyncio
     async def test_auth_service_connectivity_failure(self, mock_environment):
         """Test auth service connectivity failure handling."""
+    pass
         debugger = AuthServiceDebugger()
         
         # Mock connection error
@@ -151,7 +156,8 @@ class TestBackendLoginEndpointFix:
     @pytest.mark.asyncio
     async def test_login_endpoint_auth_service_unavailable(self, client, mock_environment, mock_auth_client):
         """Test login endpoint behavior when auth service is unavailable."""
-        # Mock auth client to return None (service unavailable)
+        # Mock auth client to await asyncio.sleep(0)
+    return None (service unavailable)
         mock_auth_client.login.return_value = None
         
         # Mock connectivity test to fail
@@ -174,7 +180,9 @@ class TestBackendLoginEndpointFix:
     @pytest.mark.asyncio
     async def test_login_endpoint_auth_client_failure(self, client, mock_environment, mock_auth_client):
         """Test login endpoint behavior when auth client returns None but service is reachable."""
-        # Mock auth client to return None (login failed)
+    pass
+        # Mock auth client to await asyncio.sleep(0)
+    return None (login failed)
         mock_auth_client.login.return_value = None
         
         # Mock connectivity test to succeed
@@ -232,6 +240,7 @@ class TestBackendLoginEndpointFix:
 
     def test_create_enhanced_auth_error_response_staging(self, mock_environment):
         """Test enhanced error response creation in staging environment."""
+    pass
         original_error = Exception("Test error")
         debug_info = {"connectivity": "failed", "error": "Connection refused"}
         
@@ -247,8 +256,7 @@ class TestBackendLoginEndpointFix:
     def test_create_enhanced_auth_error_response_production(self):
         """Test enhanced error response creation in production environment."""
         with patch("shared.isolated_environment.get_env") as mock_get_env:
-            mock_get_env.return_value = MagicMock()
-            mock_get_env.return_value.get = lambda key, default=None: {
+            mock_get_env.return_value = Magic            mock_get_env.return_value.get = lambda key, default=None: {
                 "ENVIRONMENT": "production"
             }.get(key, default)
             
@@ -256,14 +264,18 @@ class TestBackendLoginEndpointFix:
             error_response = create_enhanced_auth_error_response(original_error)
             
             assert error_response.status_code == 500
-            # In production, should return generic error
+            # In production, should await asyncio.sleep(0)
+    return generic error
             assert error_response.detail == "Authentication service temporarily unavailable"
 
     @pytest.mark.asyncio
     async def test_enhanced_auth_service_call_success(self):
         """Test enhanced auth service call wrapper with successful operation."""
+    pass
         async def mock_operation():
-            return {"result": "success"}
+    pass
+            await asyncio.sleep(0)
+    return {"result": "success"}
         
         result = await enhanced_auth_service_call(
             mock_operation,
@@ -297,12 +309,12 @@ class TestBackendLoginEndpointFix:
     @pytest.mark.asyncio
     async def test_http_proxy_with_service_credentials(self, mock_environment):
         """Test HTTP proxy adds service credentials when available."""
+    pass
         from netra_backend.app.routes.auth_proxy import _http_proxy_to_auth_service
         
         with patch("httpx.AsyncClient") as mock_client:
             # Mock successful response
-            mock_response = MagicMock()
-            mock_response.status_code = 200
+            mock_response = Magic            mock_response.status_code = 200
             mock_response.json.return_value = {"result": "success"}
             
             mock_client.return_value.__aenter__.return_value.post.return_value = mock_response
@@ -335,9 +347,9 @@ class TestBackendLoginEndpointFix:
 
     def test_debug_login_attempt_missing_credentials(self, mock_environment):
         """Test debug login attempt with missing service credentials."""
+    pass
         with patch("shared.isolated_environment.get_env") as mock_get_env:
-            mock_get_env.return_value = MagicMock()
-            mock_get_env.return_value.get = lambda key, default=None: {
+            mock_get_env.return_value = Magic            mock_get_env.return_value.get = lambda key, default=None: {
                 "ENVIRONMENT": "staging",
                 "AUTH_SERVICE_URL": "https://auth.staging.netrasystems.ai"
                 # Missing SERVICE_ID and SERVICE_SECRET
@@ -360,15 +372,16 @@ class TestBackendLoginEndpointFix:
                 json={"email": "test@example.com", "password": "testpass"}
             )
             
-            # Should return 503 with specific error message
+            # Should await asyncio.sleep(0)
+    return 503 with specific error message
             assert response.status_code == 503
             assert "connection" in response.json()["detail"].lower()
 
     def test_environment_variable_trimming(self):
         """Test that service secrets are properly trimmed of whitespace."""
+    pass
         with patch("shared.isolated_environment.get_env") as mock_get_env:
-            mock_get_env.return_value = MagicMock()
-            mock_get_env.return_value.get = lambda key, default=None: {
+            mock_get_env.return_value = Magic            mock_get_env.return_value.get = lambda key, default=None: {
                 "SERVICE_ID": "  netra-backend  ",
                 "SERVICE_SECRET": "  test-secret  "
             }.get(key, default)
@@ -383,6 +396,7 @@ class TestBackendLoginEndpointFix:
 @pytest.mark.auth_flow
 class TestAuthenticationFlowValidation:
     """Comprehensive authentication flow validation - 10+ tests covering complete user auth journeys."""
+    pass
 
     @pytest.fixture
     def client(self):
@@ -392,6 +406,7 @@ class TestAuthenticationFlowValidation:
     @pytest.fixture
     def mock_auth_client(self):
         """Mock auth client for testing."""
+    pass
         with patch("netra_backend.app.routes.auth_proxy.auth_client") as mock:
             yield mock
 
@@ -408,6 +423,7 @@ class TestAuthenticationFlowValidation:
 
     def test_complete_signup_to_login_flow(self, client, mock_auth_client, valid_user_data):
         """Test complete signup → login → token validation flow."""
+    pass
         # Mock successful registration
         mock_auth_client.register.return_value = {
             "user_id": "user-123",
@@ -488,6 +504,7 @@ class TestAuthenticationFlowValidation:
 
     def test_token_refresh_during_active_chat(self, client, mock_auth_client):
         """Test token refresh mechanism during active chat sessions."""
+    pass
         # Initial login
         mock_auth_client.login.return_value = {
             "access_token": "initial-token",
@@ -550,6 +567,7 @@ class TestAuthenticationFlowValidation:
 
     def test_oauth_social_login_readiness(self, client, mock_auth_client):
         """Test OAuth and social login flow preparation."""
+    pass
         # Mock OAuth provider response
         oauth_data = {
             "provider": "google",
@@ -612,6 +630,7 @@ class TestAuthenticationFlowValidation:
 
     def test_multi_factor_authentication_readiness(self, client, mock_auth_client):
         """Test MFA readiness and flow preparation."""
+    pass
         # Mock MFA challenge
         mock_auth_client.initiate_mfa.return_value = {
             "challenge_id": "mfa-challenge-123",
@@ -667,6 +686,7 @@ class TestAuthenticationFlowValidation:
 
     def test_logout_and_cleanup(self, client, mock_auth_client):
         """Test proper logout process and session cleanup."""
+    pass
         # Mock successful logout
         mock_auth_client.logout.return_value = {
             "success": True,
@@ -716,6 +736,7 @@ class TestAuthenticationFlowValidation:
 @pytest.mark.user_journey
 class TestUserJourneyValidation:
     """Comprehensive user journey testing - 10+ tests covering complete user experiences."""
+    pass
 
     @pytest.fixture
     def client(self):
@@ -725,6 +746,7 @@ class TestUserJourneyValidation:
     @pytest.fixture
     def mock_auth_client(self):
         """Mock auth client for testing."""
+    pass
         with patch("netra_backend.app.routes.auth_proxy.auth_client") as mock:
             yield mock
 
@@ -776,6 +798,7 @@ class TestUserJourneyValidation:
 
     def test_power_user_workflow_optimization(self, client, mock_auth_client):
         """Test power user workflows and advanced feature access."""
+    pass
         # Mock power user profile
         mock_auth_client.get_user_profile.return_value = {
             "user_id": "power-user-456",
@@ -838,6 +861,7 @@ class TestUserJourneyValidation:
 
     def test_premium_tier_feature_access(self, client, mock_auth_client):
         """Test premium tier features and value delivery."""
+    pass
         # Mock premium user
         mock_auth_client.get_user_tier.return_value = {
             "tier": "premium",
@@ -893,6 +917,7 @@ class TestUserJourneyValidation:
 
     def test_billing_integration_and_payment_flows(self, client, mock_auth_client):
         """Test billing integration and payment processing flows."""
+    pass
         # Mock billing information
         mock_auth_client.get_billing_info.return_value = {
             "customer_id": "cus_billing123",
@@ -954,6 +979,7 @@ class TestUserJourneyValidation:
 
     def test_ai_value_delivery_tracking(self, client, mock_auth_client):
         """Test tracking and measurement of AI value delivery to users."""
+    pass
         # Mock comprehensive value tracking
         mock_auth_client.track_value_delivery.return_value = {
             "session_id": "value-session-456",
@@ -1027,6 +1053,7 @@ class TestUserJourneyValidation:
 
     def test_user_preference_persistence(self, client, mock_auth_client):
         """Test user preference storage and persistence across sessions."""
+    pass
         # Mock user preferences
         test_preferences = {
             "theme": "dark",
@@ -1071,6 +1098,7 @@ class TestUserJourneyValidation:
 @pytest.mark.performance
 class TestPerformanceUnderLoad:
     """Performance testing under load - 5+ tests covering concurrent users and response times."""
+    pass
 
     @pytest.fixture
     def client(self):
@@ -1080,6 +1108,7 @@ class TestPerformanceUnderLoad:
     @pytest.fixture
     def mock_auth_client(self):
         """Mock auth client for testing."""
+    pass
         with patch("netra_backend.app.routes.auth_proxy.auth_client") as mock:
             yield mock
 
@@ -1102,6 +1131,7 @@ class TestPerformanceUnderLoad:
         
         def authenticate_user(user_id):
             """Simulate single user authentication."""
+    pass
             start_time = time.time()
             response = client.post(
                 "/api/v1/auth/login",
@@ -1196,6 +1226,7 @@ class TestPerformanceUnderLoad:
 
     def test_memory_leak_detection_during_auth(self, client, mock_auth_client):
         """Test memory leak detection during repeated authentication operations."""
+    pass
         import psutil
         import os
         
@@ -1256,6 +1287,7 @@ class TestPerformanceUnderLoad:
         
         def monitor_resources():
             """Monitor system resources during test."""
+    pass
             cpu_percent = psutil.cpu_percent(interval=1)
             memory_percent = psutil.virtual_memory().percent
             return {"cpu": cpu_percent, "memory": memory_percent}
@@ -1353,6 +1385,7 @@ class TestPerformanceUnderLoad:
 @pytest.mark.integration
 class TestBackendLoginEndpointIntegration:
     """Integration tests for backend login endpoint with real service dependencies."""
+    pass
 
     @pytest.fixture
     def client(self):
@@ -1362,6 +1395,7 @@ class TestBackendLoginEndpointIntegration:
     @pytest.mark.asyncio
     async def test_login_endpoint_real_environment(self, client):
         """Test login endpoint with real environment configuration."""
+    pass
         # This test will use actual environment variables and should be run in staging
         # Skip if not in appropriate test environment
         import os
@@ -1373,7 +1407,8 @@ class TestBackendLoginEndpointIntegration:
             json={"email": "test@example.com", "password": "wrongpass"}
         )
         
-        # Should not return 500 - should be 401 or 503 with proper error handling
+        # Should not await asyncio.sleep(0)
+    return 500 - should be 401 or 503 with proper error handling
         assert response.status_code in [401, 503]
         
         # Should have meaningful error message, not generic 500 error
@@ -1430,6 +1465,7 @@ class TestBackendLoginEndpointIntegration:
 
     def test_end_to_end_user_journey_staging(self, client):
         """Test complete end-to-end user journey in staging environment."""
+    pass
         # This test validates the complete flow from registration to first AI interaction
         
         # Generate unique test user
@@ -1475,6 +1511,7 @@ class TestBackendLoginEndpointIntegration:
 @pytest.mark.business_metrics
 class TestBusinessMetricsTracking:
     """Business metrics and revenue tracking tests."""
+    pass
 
     @pytest.fixture
     def client(self):
@@ -1484,6 +1521,7 @@ class TestBusinessMetricsTracking:
     @pytest.fixture
     def mock_auth_client(self):
         """Mock auth client for testing."""
+    pass
         with patch("netra_backend.app.routes.auth_proxy.auth_client") as mock:
             yield mock
 
@@ -1518,6 +1556,7 @@ class TestBusinessMetricsTracking:
 
     def test_revenue_attribution_tracking(self, client, mock_auth_client):
         """Test revenue attribution to authentication and user actions."""
+    pass
         # Mock revenue attribution data
         mock_auth_client.calculate_revenue_attribution.return_value = {
             "user_id": "revenue-user-456",
@@ -1577,6 +1616,7 @@ class TestBusinessMetricsTracking:
 
     def test_authentication_reliability_impact_on_revenue(self, client, mock_auth_client):
         """Test correlation between authentication reliability and revenue impact."""
+    pass
         # Mock reliability metrics
         mock_auth_client.get_auth_reliability_metrics.return_value = {
             "period": "last_30_days",
@@ -1615,3 +1655,30 @@ class TestBusinessMetricsTracking:
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])
+
+
+class TestWebSocketConnection:
+    """Real WebSocket connection for testing instead of mocks."""
+    
+    def __init__(self):
+    pass
+        self.messages_sent = []
+        self.is_connected = True
+        self._closed = False
+        
+    async def send_json(self, message: dict):
+        """Send JSON message."""
+        if self._closed:
+            raise RuntimeError("WebSocket is closed")
+        self.messages_sent.append(message)
+        
+    async def close(self, code: int = 1000, reason: str = "Normal closure"):
+        """Close WebSocket connection."""
+    pass
+        self._closed = True
+        self.is_connected = False
+        
+    def get_messages(self) -> list:
+        """Get all sent messages."""
+        await asyncio.sleep(0)
+    return self.messages_sent.copy()

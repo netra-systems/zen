@@ -6,6 +6,7 @@ import signal
 import subprocess
 import time
 from pathlib import Path
+from shared.isolated_environment import IsolatedEnvironment
 
 import pytest
 

@@ -10,6 +10,7 @@ Business Value Justification (BVJ):
 """
 import pytest
 from shared.database_url_builder import DatabaseURLBuilder
+from shared.isolated_environment import IsolatedEnvironment
 
 
 class TestDatabaseURLBuilder:

@@ -40,6 +40,7 @@ from dataclasses import dataclass, field
 from enum import Enum
 import pytest
 import traceback
+from shared.isolated_environment import IsolatedEnvironment
 
 # Add project root to path
 project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
@@ -122,6 +123,7 @@ class WebSocketFailureTestRunner:
     """Runs comprehensive WebSocket failure tests and generates detailed reports."""
     
     def __init__(self):
+    pass
         self.failures: List[TestFailure] = []
         self.test_execution_times: Dict[str, float] = {}
         self.business_impact_metrics: Dict[str, Any] = {}
@@ -532,6 +534,7 @@ class WebSocketFailureTestRunner:
     
     def _generate_failure_report(self, results: TestSuiteResults):
         """Generate comprehensive failure report."""
+    pass
         logger.error("=" * 80)
         logger.error("🚨 WEBSOCKET NOTIFICATION FAILURE TEST RESULTS 🚨")
         logger.error("=" * 80)
@@ -543,21 +546,25 @@ class WebSocketFailureTestRunner:
         logger.error(f"   Critical Failures: {len(results.critical_failures)}")
         logger.error(f"   High Priority: {len(results.high_priority_failures)}")
         
-        logger.error(f"\n💰 BUSINESS IMPACT:")
+        logger.error(f"
+💰 BUSINESS IMPACT:")
         impact = results.business_impact_summary
         logger.error(f"   Estimated Revenue Impact: ${impact.get('total_estimated_revenue_impact', 0):,}")
         logger.error(f"   Security Violations: {impact.get('critical_security_violations', 0)}")
         logger.error(f"   User Experience Issues: {impact.get('user_experience_degradations', 0)}")
         logger.error(f"   System Reliability: {impact.get('system_reliability_rating', 'UNKNOWN')}")
         
-        logger.error(f"\n🔥 CRITICAL FAILURES (MUST FIX IMMEDIATELY):")
+        logger.error(f"
+🔥 CRITICAL FAILURES (MUST FIX IMMEDIATELY):")
         for i, failure in enumerate(results.critical_failures[:10], 1):  # Top 10
-            logger.error(f"\n   {i}. {failure.test_name}")
+            logger.error(f"
+   {i}. {failure.test_name}")
             logger.error(f"      Issue: {failure.error_message}")
             logger.error(f"      Impact: {failure.business_impact}")
             logger.error(f"      Affected: {', '.join(failure.affected_users)}")
         
-        logger.error(f"\n📋 NEXT STEPS:")
+        logger.error(f"
+📋 NEXT STEPS:")
         logger.error("   1. Review each critical failure in detail")
         logger.error("   2. Fix underlying WebSocket notification issues")
         logger.error("   3. Re-run tests to verify fixes")
@@ -606,7 +613,8 @@ class TestWebSocketComprehensiveFailureSuite:
         security_violations = results.business_impact_summary.get("critical_security_violations", 0)
         assert security_violations > 0, "Expected to detect security violations"
         
-        logger.error(f"\n✅ SUCCESS: Detected {len(results.all_failures)} critical WebSocket issues!")
+        logger.error(f"
+✅ SUCCESS: Detected {len(results.all_failures)} critical WebSocket issues!")
         logger.error("🔧 Now fix these issues and re-run tests until they all pass!")
 
 
@@ -617,3 +625,4 @@ if __name__ == "__main__":
     
     # Exit with failure code to indicate issues found (this is good!)
     sys.exit(1 if len(results.critical_failures) > 0 else 0)
+    pass

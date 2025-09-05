@@ -8,6 +8,7 @@ Business Value: Ensures source reliability scoring accuracy.
 
 import pytest
 from datetime import datetime, timedelta
+from shared.isolated_environment import IsolatedEnvironment
 
 from netra_backend.app.tools.reliability_scorer import ReliabilityScorer
 

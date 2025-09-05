@@ -1,6 +1,7 @@
 """E2E Test: Agent Workflow Validation with Real LLM Integration
 
 from shared.isolated_environment import get_env
+from shared.isolated_environment import IsolatedEnvironment
 CRITICAL E2E test for complete agent workflow validation with real LLM.
 Tests all agent lifecycle stages, state management, and data flow validation.
 

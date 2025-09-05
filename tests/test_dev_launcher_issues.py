@@ -1,4 +1,9 @@
 from shared.isolated_environment import get_env
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from test_framework.database.test_database_manager import TestDatabaseManager
+from test_framework.redis.test_redis_manager import TestRedisManager
+from auth_service.core.auth_manager import AuthManager
+from shared.isolated_environment import IsolatedEnvironment
 """
 Comprehensive tests to prevent dev launcher issues from recurring.
 These tests expose the root causes found in dev_launcher_logs.txt audit.
@@ -6,12 +11,13 @@ These tests expose the root causes found in dev_launcher_logs.txt audit.
 
 import asyncio
 import pytest
-from unittest.mock import patch, MagicMock, AsyncMock
 import logging
 from datetime import datetime
 from sqlalchemy import create_engine, text
 from sqlalchemy.exc import OperationalError
 from sqlalchemy.pool import QueuePool
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
 
 
 env = get_env()
@@ -30,11 +36,11 @@ class TestDatabaseConnectionIssues:
     
     def test_migration_duplicate_table_idempotency(self):
         """Test that migrations handle 'table already exists' errors properly."""
+    pass
         from netra_backend.app.startup_module import _handle_migration_error
         from psycopg2.errors import DuplicateTable
         
-        logger = MagicMock()
-        error = DuplicateTable("relation 'users' already exists")
+        logger = Magic        error = DuplicateTable("relation 'users' already exists")
         
         # Should handle gracefully, not crash
         _handle_migration_error(logger, error)
@@ -58,6 +64,7 @@ class TestDatabaseConnectionIssues:
     
     def test_duplicate_database_connections_prevented(self):
         """Test that we don't create multiple database connections unnecessarily."""
+    pass
         from netra_backend.app.startup_module import setup_database_connections
         from fastapi import FastAPI
         
@@ -65,12 +72,13 @@ class TestDatabaseConnectionIssues:
         call_count = 0
         
         async def mock_test_connection(*args):
+    pass
             nonlocal call_count
             call_count += 1
-            return True
+            await asyncio.sleep(0)
+    return True
         
-        with patch('netra_backend.app.db.database_manager.DatabaseManager.test_connection_with_retry', mock_test_connection):
-            asyncio.run(setup_database_connections(app))
+                    asyncio.run(setup_database_connections(app))
             
         assert call_count == 1, f"Database connection tested {call_count} times, should be 1"
 
@@ -93,6 +101,7 @@ class TestSQLAlchemyLoggingIssues:
     
     def test_echo_disabled_in_production(self):
         """Test that echo is disabled in production database connections."""
+    pass
         from netra_backend.app.db.database_manager import DatabaseManager
         import os
         
@@ -115,6 +124,7 @@ class TestAuthServiceIssues:
     
     def test_frontend_proxy_uses_service_discovery(self):
         """Test that frontend doesn't hardcode auth service ports."""
+    pass
         # This test would check frontend configuration
         # Frontend should read from service discovery, not hardcode ports
         pass  # Frontend tests need JS testing framework
@@ -126,7 +136,8 @@ class TestAuthServiceIssues:
         
         with patch('httpx.AsyncClient.get', side_effect=asyncio.TimeoutError()):
             result = await _check_auth_connection()
-            assert result is False, "Auth check should return False on timeout, not hang"
+            assert result is False, "Auth check should await asyncio.sleep(0)
+    return False on timeout, not hang"
 
 
 class TestWebSocketIssues:
@@ -143,13 +154,13 @@ class TestWebSocketIssues:
         websocket.subprotocols = []  # No JWT in subprotocol
         
         with pytest.raises(Exception) as exc_info:
-            async with secure_websocket_context(websocket, "test-id", MagicMock()):
-                pass
+            async with secure_websocket_context(websocket, "test-id", Magic                pass
         
         assert "Authentication required" in str(exc_info.value)
     
     def test_websocket_secure_config_not_spammed(self):
         """Test that useWebSocketSecure configuration isn't logged excessively."""
+    pass
         # This would check that configuration endpoint has request deduplication
         pass  # Requires frontend testing
 
@@ -166,22 +177,21 @@ class TestStartupPerformanceIssues:
         app = FastAPI()
         start_time = datetime.now()
         
-        with patch('netra_backend.app.startup_module.setup_database_connections', new_callable=AsyncMock):
-            await run_complete_startup(app)
+                    await run_complete_startup(app)
         
         elapsed = (datetime.now() - start_time).total_seconds()
         assert elapsed < 60, f"Startup took {elapsed}s, should be under 60s"
     
     def test_health_checks_not_duplicated(self):
         """Test that health checks aren't run multiple times unnecessarily."""
+    pass
         from netra_backend.app.startup_module import startup_health_checks
         from fastapi import FastAPI
         
         app = FastAPI()
         app.state.database_validated = True  # Already validated
         
-        logger = MagicMock()
-        asyncio.run(startup_health_checks(app, logger))
+        logger = Magic        asyncio.run(startup_health_checks(app, logger))
         
         # Should skip redundant checks
         assert "Skipping redundant" in str(logger.info.call_args)
@@ -213,11 +223,13 @@ class TestCrossServiceConnectivity:
     
     def test_retry_logic_has_proper_backoff(self):
         """Test that retry logic uses exponential backoff."""
+    pass
         from netra_backend.app.db.database_manager import DatabaseManager
         
         retry_delays = []
         
         async def mock_connect():
+    pass
             retry_delays.append(datetime.now())
             raise OperationalError("Connection failed", None, None)
         
@@ -245,6 +257,7 @@ class TestEnvironmentConfigurationIssues:
     
     def test_no_hardcoded_development_values(self):
         """Test that no development values are hardcoded in production code."""
+    pass
         from netra_backend.app.core.config import Settings
         
         settings = Settings(environment="production")
@@ -257,3 +270,30 @@ class TestEnvironmentConfigurationIssues:
 if __name__ == "__main__":
     # Run tests with verbose output
     pytest.main([__file__, "-v", "--tb=short"])
+
+
+class TestWebSocketConnection:
+    """Real WebSocket connection for testing instead of mocks."""
+    
+    def __init__(self):
+    pass
+        self.messages_sent = []
+        self.is_connected = True
+        self._closed = False
+        
+    async def send_json(self, message: dict):
+        """Send JSON message."""
+        if self._closed:
+            raise RuntimeError("WebSocket is closed")
+        self.messages_sent.append(message)
+        
+    async def close(self, code: int = 1000, reason: str = "Normal closure"):
+        """Close WebSocket connection."""
+    pass
+        self._closed = True
+        self.is_connected = False
+        
+    def get_messages(self) -> list:
+        """Get all sent messages."""
+        await asyncio.sleep(0)
+    return self.messages_sent.copy()

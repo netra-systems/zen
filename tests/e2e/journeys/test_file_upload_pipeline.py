@@ -12,6 +12,7 @@ Modular architecture following 450-line and 25-line function limits.
 """
 
 import asyncio
+from shared.isolated_environment import IsolatedEnvironment
 
 import pytest
 

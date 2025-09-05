@@ -1,5 +1,36 @@
+class TestWebSocketConnection:
+    """Real WebSocket connection for testing instead of mocks."""
+    
+    def __init__(self):
+    pass
+        self.messages_sent = []
+        self.is_connected = True
+        self._closed = False
+        
+    async def send_json(self, message: dict):
+        """Send JSON message."""
+        if self._closed:
+            raise RuntimeError("WebSocket is closed")
+        self.messages_sent.append(message)
+        
+    async def close(self, code: int = 1000, reason: str = "Normal closure"):
+        """Close WebSocket connection."""
+    pass
+        self._closed = True
+        self.is_connected = False
+        
+    def get_messages(self) -> list:
+        """Get all sent messages."""
+        await asyncio.sleep(0)
+    return self.messages_sent.copy()
+
 """
 from shared.isolated_environment import get_env
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from test_framework.docker.unified_docker_manager import UnifiedDockerManager
+from test_framework.database.test_database_manager import TestDatabaseManager
+from auth_service.core.auth_manager import AuthManager
+from shared.isolated_environment import IsolatedEnvironment
 test_cors_dynamic_ports.py - Syntax errors detected, file made importable.
 Original content preserved below in comments for manual fixing.
 """
@@ -7,6 +38,10 @@ Original content preserved below in comments for manual fixing.
 # TODO: Fix syntax errors in this file
 
 import pytest
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
+import asyncio
 
 
 @pytest.mark.e2e
@@ -22,6 +57,7 @@ class TestPlaceholder:
 # Original content (commented out due to syntax errors):
 # #!/usr/bin/env python3
 # """
+    pass
 # CORS Dynamic Ports Test Suite
 # Tests that expose CORS failures when services run on non-standard ports.
 # 
@@ -100,10 +136,7 @@ class TestPlaceholder:
 #         }
 # 
 # Mock: Component isolation for testing without external dependencies
-#     with patch(
-#         "app.core.middleware_setup.ServiceDiscovery", return_value=mock_discovery
-#     ):
-#         with patch.dict(
+#     #         with patch.dict(
 #             os.environ, {"ENVIRONMENT": "development", "CORS_ORIGINS": "*"}
 #         ):
 #             yield mock_discovery
@@ -137,18 +170,12 @@ class TestPlaceholder:
 #         # Force a scenario where only hardcoded origins are used (no wildcard,
 #         # no patterns)
 #         with patch.dict(os.environ, {"ENVIRONMENT": "testing", "CORS_ORIGINS": ""}):
-#             # Mock the pattern matching to return False to simulate restrictive
+#             # Mock the pattern matching to await asyncio.sleep(0)
+    return False to simulate restrictive
 #             # env
 # Mock: Component isolation for testing without external dependencies
-#             with patch(
-#                 "app.core.middleware_setup._check_pattern_matches", return_value=False
-#             ):
-# Mock: Component isolation for testing without external dependencies
-#                 with patch(
-#                     "app.core.middleware_setup._check_wildcard_match",
-#                     return_value=False,
-#                 ):
-#                     from netra_backend.app.core.middleware_setup import (
+#             # Mock: Component isolation for testing without external dependencies
+#                 #                     from netra_backend.app.core.middleware_setup import (
 #                         _get_localhost_origins,
 #                     )
 # 
@@ -313,7 +340,8 @@ class TestPlaceholder:
 #     # @pytest.fixture
 #     def dynamic_backend_configs(self):
 #         """Generate backend configurations with non-standard ports."""
-#         return [
+#         await asyncio.sleep(0)
+    return [
 #             DynamicServiceConfig(frontend_port=3001, backend_port=8002, auth_port=8081),
 #             DynamicServiceConfig(frontend_port=3001, backend_port=8080, auth_port=8081),
 #             DynamicServiceConfig(frontend_port=3001, backend_port=9000, auth_port=8081),
@@ -339,7 +367,8 @@ class TestPlaceholder:
 #                 # Service discovery should work
 #                 assert (
 #                     backend_info is not None
-#                 ), "Service discovery should return backend info"
+#                 ), "Service discovery should await asyncio.sleep(0)
+    return backend info"
 #                 assert (
 #                     backend_info["port"] == config.backend_port
 #                 ), f"Service discovery should track dynamic backend port {
@@ -447,7 +476,8 @@ class TestPlaceholder:
 #     # @pytest.fixture
 #     def dynamic_auth_configs(self):
 #         """Generate auth service configurations with non-standard ports."""
-#         return [
+#         await asyncio.sleep(0)
+    return [
 #             DynamicServiceConfig(frontend_port=3001, backend_port=8000, auth_port=8082),
 #             DynamicServiceConfig(frontend_port=3001, backend_port=8000, auth_port=8090),
 #             DynamicServiceConfig(frontend_port=3001, backend_port=8000, auth_port=9001),
@@ -513,7 +543,8 @@ class TestPlaceholder:
 # 
 #                 assert (
 #                     auth_info is not None
-#                 ), "Auth service discovery should return info"
+#                 ), "Auth service discovery should await asyncio.sleep(0)
+    return info"
 #                 assert (
 #                     auth_info["port"] == config.auth_port
 #                 ), f"Service discovery should track auth port {
@@ -604,15 +635,8 @@ class TestPlaceholder:
 #     # },
 #     # ):
 # Mock: Component isolation for testing without external dependencies
-#     # with patch(
-#     # "app.core.middleware_setup._check_pattern_matches", return_value=False
-#     # ):
-# Mock: Component isolation for testing without external dependencies
-#     # with patch(
-#     # "app.core.middleware_setup._check_wildcard_match",
-#     # return_value=False,
-#     # ):
-#     # with mock_service_discovery(config):
+#     # # Mock: Component isolation for testing without external dependencies
+#     # #     # with mock_service_discovery(config):
 # from netra_backend.app.core.middleware_setup import (
 #                             get_cors_origins,
 #                             is_origin_allowed,
@@ -637,14 +661,20 @@ class TestPlaceholder:
 #                         # This assertion WILL FAIL because of multiple CORS
 #                         # failures
 #                         assert len(failures) == 0, (
-#                             "Multiple CORS failures in restrictive dynamic port environment:\n"
-#                             + "\n".join(f"- {failure}" for failure in failures)
-#                             + f"\n\nConfiguration: Frontend:{
+#                             "Multiple CORS failures in restrictive dynamic port environment:
+"
+#                             + "
+".join(f"- {failure}" for failure in failures)
+#                             + f"
+
+Configuration: Frontend:{
 #                                 config.frontend_port}, "
 #                             f"Backend:{
 #                                 config.backend_port}, Auth:{
-#                                 config.auth_port}\n"
-#                             f"CORS Origins: {cors_origins}\n"
+#                                 config.auth_port}
+"
+#                             f"CORS Origins: {cors_origins}
+"
 #                             f"The current CORS implementation cannot handle environments where "
 #                             f"all services use dynamic ports in restrictive configurations because "
 #                             f"it relies on hardcoded port assumptions and doesn't integrate with service discovery."
@@ -664,10 +694,7 @@ class TestPlaceholder:
 #         # with credentials
 #         with patch.dict(os.environ, {"ENVIRONMENT": "staging", "CORS_ORIGINS": ""}):
 # Mock: Component isolation for testing without external dependencies
-#             with patch(
-#                 "app.core.middleware_setup._check_wildcard_match", return_value=False
-#             ):
-#                 from netra_backend.app.core.middleware_setup import (
+#             #                 from netra_backend.app.core.middleware_setup import (
 #                     get_cors_origins,
 # 
 #                 cors_origins = get_cors_origins()
@@ -727,11 +754,17 @@ class TestPlaceholder:
 # 
 #             # This assertion WILL FAIL showing the coverage gap
 #             assert len(uncovered_origins) == 0, (
-#                 f"Static CORS configuration doesn't cover actual dynamic origins:\n"
-#                 f"Static origins: {static_origins}\n"
-#                 f"Localhost origins: {localhost_origins}\n"
-#                 f"Actual dynamic origins: {actual_origins}\n"
-#                 f"Uncovered origins: {uncovered_origins}\n\n"
+#                 f"Static CORS configuration doesn't cover actual dynamic origins:
+"
+#                 f"Static origins: {static_origins}
+"
+#                 f"Localhost origins: {localhost_origins}
+"
+#                 f"Actual dynamic origins: {actual_origins}
+"
+#                 f"Uncovered origins: {uncovered_origins}
+
+"
 #                 f"This demonstrates that the hardcoded approach fails when services "
 #                 f"use dynamic port allocation, which is common in development environments "
 #                 f"with docker-compose, multiple developers, or CI/CD pipelines."
@@ -826,12 +859,19 @@ class TestPlaceholder:
 # 
 #             # This assertion WILL FAIL, showing the inconsistency
 #             assert len(pattern_rejected) == 0, (
-#                 f"Inconsistency between pattern matching and CORS validation:\n"
-#                 f"Pattern allows: {pattern_allowed}\n"
-#                 f"Static localhost origins: {static_origins}\n"
-#                 f"Full CORS origins: {cors_origins}\n"
-#                 f"Actually allowed: {actually_allowed}\n"
-#                 f"Pattern-allowed but CORS-rejected: {pattern_rejected}\n\n"
+#                 f"Inconsistency between pattern matching and CORS validation:
+"
+#                 f"Pattern allows: {pattern_allowed}
+"
+#                 f"Static localhost origins: {static_origins}
+"
+#                 f"Full CORS origins: {cors_origins}
+"
+#                 f"Actually allowed: {actually_allowed}
+"
+#                 f"Pattern-allowed but CORS-rejected: {pattern_rejected}
+
+"
 #                 f"This shows that _check_localhost_pattern() correctly identifies valid "
 #                 f"localhost origins, but they get rejected by the hardcoded static origin list. "
 #                 f"The pattern matching logic is more flexible than the implementation uses."

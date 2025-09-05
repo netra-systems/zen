@@ -28,6 +28,7 @@ Maximum 300 lines, async/await patterns, real service validation
 import asyncio
 import logging
 import socket
+from shared.isolated_environment import IsolatedEnvironment
 
 # Add project root for imports
 import sys

@@ -1,4 +1,5 @@
 from shared.isolated_environment import get_env
+from shared.isolated_environment import IsolatedEnvironment
 """
 Comprehensive Authentication and OAuth Flow Test Suite - Updated for GCP Staging
 

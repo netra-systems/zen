@@ -1,3 +1,29 @@
+class TestWebSocketConnection:
+    """Real WebSocket connection for testing instead of mocks."""
+    
+    def __init__(self):
+    pass
+        self.messages_sent = []
+        self.is_connected = True
+        self._closed = False
+        
+    async def send_json(self, message: dict):
+        """Send JSON message."""
+        if self._closed:
+            raise RuntimeError("WebSocket is closed")
+        self.messages_sent.append(message)
+        
+    async def close(self, code: int = 1000, reason: str = "Normal closure"):
+        """Close WebSocket connection."""
+    pass
+        self._closed = True
+        self.is_connected = False
+        
+    def get_messages(self) -> list:
+        """Get all sent messages."""
+        await asyncio.sleep(0)
+    return self.messages_sent.copy()
+
 """
 Regression tests for configuration secret loading.
 
@@ -16,8 +42,13 @@ This test prevents regression of this critical issue.
 
 import pytest
 import os
-from unittest.mock import patch, MagicMock
 from netra_backend.app.schemas.config import (
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
+from shared.isolated_environment import get_env
+from shared.isolated_environment import IsolatedEnvironment
+import asyncio
     StagingConfig,
     ProductionConfig,
     NetraTestingConfig,
@@ -44,8 +75,7 @@ class TestSecretLoadingRegression:
         
         with patch('netra_backend.app.schemas.config.get_env') as mock_get_env:
             # Configure mock to return our test environment
-            mock_env_obj = MagicMock()
-            mock_env_obj.get = lambda key, default=None: mock_env.get(key, default)
+            mock_env_obj = Magic            mock_env_obj.get = lambda key, default=None: mock_env.get(key, default)
             mock_env_obj.__contains__ = lambda key: key in mock_env
             mock_env_obj.as_dict = lambda: mock_env
             mock_get_env.return_value = mock_env_obj
@@ -67,6 +97,7 @@ class TestSecretLoadingRegression:
     
     def test_production_config_loads_service_secret(self):
         """Test that ProductionConfig loads SERVICE_SECRET from environment."""
+    pass
         # Mock environment with secrets
         mock_env = {
             'ENVIRONMENT': 'production',
@@ -81,8 +112,7 @@ class TestSecretLoadingRegression:
         
         with patch('netra_backend.app.schemas.config.get_env') as mock_get_env:
             # Configure mock to return our test environment
-            mock_env_obj = MagicMock()
-            mock_env_obj.get = lambda key, default=None: mock_env.get(key, default)
+            mock_env_obj = Magic            mock_env_obj.get = lambda key, default=None: mock_env.get(key, default)
             mock_env_obj.__contains__ = lambda key: key in mock_env
             mock_env_obj.as_dict = lambda: mock_env
             mock_get_env.return_value = mock_env_obj
@@ -114,6 +144,7 @@ class TestSecretLoadingRegression:
     
     def test_production_config_has_load_secrets_method(self):
         """Test that ProductionConfig has the _load_secrets_from_environment method."""
+    pass
         assert hasattr(ProductionConfig, '_load_secrets_from_environment'), \
             "ProductionConfig missing _load_secrets_from_environment method!"
         
@@ -127,6 +158,7 @@ class TestSecretLoadingRegression:
         
         This is critical because database password might come from secrets.
         """
+    pass
         mock_env = {
             'ENVIRONMENT': 'staging',
             'SERVICE_SECRET': 'test-secret',
@@ -135,8 +167,7 @@ class TestSecretLoadingRegression:
         }
         
         with patch('netra_backend.app.schemas.config.get_env') as mock_get_env:
-            mock_env_obj = MagicMock()
-            mock_env_obj.get = lambda key, default=None: mock_env.get(key, default)
+            mock_env_obj = Magic            mock_env_obj.get = lambda key, default=None: mock_env.get(key, default)
             mock_env_obj.__contains__ = lambda key: key in mock_env
             mock_env_obj.as_dict = lambda: mock_env
             mock_get_env.return_value = mock_env_obj
@@ -149,10 +180,12 @@ class TestSecretLoadingRegression:
             original_load_db = StagingConfig._load_database_url_from_unified_config_staging
             
             def track_secrets(self, data):
+    pass
                 call_order.append('secrets')
                 return original_load_secrets(self, data)
             
             def track_db(self, data):
+    pass
                 call_order.append('database')
                 return original_load_db(self, data)
             
@@ -172,15 +205,13 @@ class TestSecretLoadingRegression:
         }
         
         with patch('netra_backend.app.schemas.config.get_env') as mock_get_env:
-            mock_env_obj = MagicMock()
-            mock_env_obj.get = lambda key, default=None: mock_env.get(key, default)
+            mock_env_obj = Magic            mock_env_obj.get = lambda key, default=None: mock_env.get(key, default)
             mock_env_obj.__contains__ = lambda key: key in mock_env
             mock_env_obj.as_dict = lambda: mock_env
             mock_get_env.return_value = mock_env_obj
             
             with patch('netra_backend.app.schemas.config.logging.getLogger') as mock_logger:
-                logger_instance = MagicMock()
-                mock_logger.return_value = logger_instance
+                logger_instance = Magic                mock_logger.return_value = logger_instance
                 
                 # Create config without SERVICE_SECRET
                 config = StagingConfig()
@@ -194,6 +225,7 @@ class TestSecretLoadingRegression:
     
     def test_all_critical_secrets_are_loaded(self):
         """Test that ALL critical secrets defined in the code are loaded."""
+    pass
         # This list must match what's in the _load_secrets_from_environment method
         critical_secrets = [
             ('SERVICE_SECRET', 'service_secret'),
@@ -210,8 +242,7 @@ class TestSecretLoadingRegression:
         mock_env['DATABASE_URL'] = 'postgresql://test:test@localhost/test'
         
         with patch('netra_backend.app.schemas.config.get_env') as mock_get_env:
-            mock_env_obj = MagicMock()
-            mock_env_obj.get = lambda key, default=None: mock_env.get(key, default)
+            mock_env_obj = Magic            mock_env_obj.get = lambda key, default=None: mock_env.get(key, default)
             mock_env_obj.__contains__ = lambda key: key in mock_env
             mock_env_obj.as_dict = lambda: mock_env
             mock_get_env.return_value = mock_env_obj
@@ -236,6 +267,7 @@ class TestGoogleSecretManagerIntegration:
         This test simulates the GCP Cloud Run environment where secrets
         are mounted as environment variables by the deployment process.
         """
+    pass
         # Simulate GCP environment where GSM secrets are mounted as env vars
         mock_env = {
             'ENVIRONMENT': 'staging',
@@ -250,8 +282,7 @@ class TestGoogleSecretManagerIntegration:
         }
         
         with patch('netra_backend.app.schemas.config.get_env') as mock_get_env:
-            mock_env_obj = MagicMock()
-            mock_env_obj.get = lambda key, default=None: mock_env.get(key, default)
+            mock_env_obj = Magic            mock_env_obj.get = lambda key, default=None: mock_env.get(key, default)
             mock_env_obj.__contains__ = lambda key: key in mock_env
             mock_env_obj.as_dict = lambda: mock_env
             mock_get_env.return_value = mock_env_obj

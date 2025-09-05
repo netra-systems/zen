@@ -460,13 +460,15 @@ class UnifiedTestRunner:
                     "args": vars(args),
                     "execution_plan": self.execution_plan.to_dict() if self.execution_plan and hasattr(self.execution_plan, 'to_dict') else None
                 })
-                print(f"\nSession Summary: {session_summary['total_tests']} tests, "
+                print(f"
+Session Summary: {session_summary['total_tests']} tests, "
                       f"{session_summary['passed']} passed, {session_summary['failed']} failed, "
                       f"Pass rate: {session_summary['pass_rate']:.1f}%")
                 
                 # Show test tracking report if verbose
                 if args.verbose:
-                    print("\n" + self.test_tracker.generate_report())
+                    print("
+" + self.test_tracker.generate_report())
             
             return 0 if all(r["success"] for r in results.values()) else 1
         
@@ -501,7 +503,8 @@ class UnifiedTestRunner:
             return
             
         # First, try to use the simple Docker manager for automatic startup
-        print("\n" + "="*60)
+        print("
+" + "="*60)
         print("DOCKER SERVICE INITIALIZATION")
         print("="*60)
         
@@ -526,21 +529,27 @@ class UnifiedTestRunner:
             can_proceed, details = guardian.pre_flight_check()
             
             if not can_proceed:
-                print("\n" + "="*60)
+                print("
+" + "="*60)
                 print("⚠️  MEMORY CHECK FAILED")
                 print("="*60)
-                print(f"\n{details['message']}")
-                print(f"\nProfile: {profile.value}")
+                print(f"
+{details['message']}")
+                print(f"
+Profile: {profile.value}")
                 print(f"Required: {details['required_mb']:,} MB")
                 print(f"Available: {details['system_available_mb']:,} MB")
                 
                 if details.get('alternatives'):
-                    print("\nAlternative profiles that could work:")
+                    print("
+Alternative profiles that could work:")
                     for alt in details['alternatives']:
                         print(f"  - {alt['profile']}: {alt['description']} ({alt['required_mb']}MB)")
                 
-                print("\nTo proceed anyway, set: TEST_SKIP_MEMORY_CHECK=true")
-                print("="*60 + "\n")
+                print("
+To proceed anyway, set: TEST_SKIP_MEMORY_CHECK=true")
+                print("="*60 + "
+")
                 
                 # Check if we should skip the check
                 if env.get('TEST_SKIP_MEMORY_CHECK', 'false').lower() != 'true':
@@ -620,22 +629,28 @@ class UnifiedTestRunner:
                     
                     # Wait again
                     if not self.docker_manager.wait_for_services(timeout=30):
-                        print("\n" + "="*60)
+                        print("
+" + "="*60)
                         print("❌ DOCKER SERVICES UNHEALTHY")
                         print("="*60)
-                        print("\nSome services failed health checks. To fix:")
+                        print("
+Some services failed health checks. To fix:")
                         print("  1. python scripts/docker.py health       # Check service health")
                         print("  2. python scripts/docker.py restart      # Restart all services")
                         print("  3. python scripts/docker.py logs backend # Check logs for errors")
-                        print("="*60 + "\n")
+                        print("="*60 + "
+")
                         raise RuntimeError("Docker services not healthy for testing")
                         
         except Exception as e:
-            print(f"\n[ERROR] Docker environment setup failed: {e}")
-            print("\nTo manually manage Docker services:")
+            print(f"
+[ERROR] Docker environment setup failed: {e}")
+            print("
+To manually manage Docker services:")
             print("  python scripts/docker.py start     # Start services")
             print("  python scripts/docker.py status    # Check status")
-            print("  python scripts/docker.py help      # Get help\n")
+            print("  python scripts/docker.py help      # Get help
+")
             
             if running_e2e or args.real_services:
                 raise  # Re-raise for E2E/real service testing
@@ -697,7 +712,8 @@ class UnifiedTestRunner:
                 ], capture_output=True, text=True, timeout=30)
                 
                 if result.returncode == 0 and result.stdout.strip():
-                    container_ids = result.stdout.strip().split('\n')
+                    container_ids = result.stdout.strip().split('
+')
                     print(f"[INFO] Found {len(container_ids)} test containers to remove")
                     
                     # Remove containers
@@ -725,7 +741,8 @@ class UnifiedTestRunner:
                 ], capture_output=True, text=True, timeout=30)
                 
                 if result.returncode == 0 and result.stdout.strip():
-                    network_ids = result.stdout.strip().split('\n')
+                    network_ids = result.stdout.strip().split('
+')
                     print(f"[INFO] Found {len(network_ids)} test networks to remove")
                     
                     # Remove networks
@@ -757,7 +774,8 @@ class UnifiedTestRunner:
                 ], capture_output=True, text=True, timeout=30)
                 
                 if result.returncode == 0 and result.stdout.strip():
-                    volume_names = result.stdout.strip().split('\n')
+                    volume_names = result.stdout.strip().split('
+')
                     print(f"[INFO] Found {len(volume_names)} dangling test volumes to remove")
                     
                     # Remove volumes
@@ -1221,11 +1239,15 @@ class UnifiedTestRunner:
             print(f"[OK] All required services are available: {', '.join(required_services)}")
             
         except ServiceUnavailableError as e:
-            print(f"\n[FAIL] SERVICE AVAILABILITY CHECK FAILED\n")
+            print(f"
+[FAIL] SERVICE AVAILABILITY CHECK FAILED
+")
             print(str(e))
-            print(f"\nTIP: For mock testing, remove --real-services or --real-llm flags")
+            print(f"
+TIP: For mock testing, remove --real-services or --real-llm flags")
             print(f"TIP: For quick development setup, run: python scripts/dev_launcher.py")
-            print(f"TIP: To use Alpine-based services: docker-compose -f docker-compose.alpine-test.yml up -d\n")
+            print(f"TIP: To use Alpine-based services: docker-compose -f docker-compose.alpine-test.yml up -d
+")
             
             # Exit immediately - don't waste time on tests that will fail
             import sys
@@ -1369,7 +1391,8 @@ class UnifiedTestRunner:
         if not execution_plan or not execution_plan.phases:
             return
         
-        print(f"\n{'='*60}")
+        print(f"
+{'='*60}")
         print("EXECUTION PLAN")
         print(f"{'='*60}")
         print(f"Total Categories: {len(execution_plan.execution_order)}")
@@ -1377,7 +1400,8 @@ class UnifiedTestRunner:
         print(f"Estimated Duration: {execution_plan.total_estimated_duration}")
         
         for phase_num, phase_categories in enumerate(execution_plan.phases):
-            print(f"\nPhase {phase_num + 1}: {len(phase_categories)} categories")
+            print(f"
+Phase {phase_num + 1}: {len(phase_categories)} categories")
             for category_name in phase_categories:
                 category = self.category_system.get_category(category_name)
                 if category:
@@ -1385,14 +1409,17 @@ class UnifiedTestRunner:
                     priority = category.priority.name
                     print(f"  - {category_name} ({priority}, ~{duration})")
         
-        print(f"\n{'='*60}\n")
+        print(f"
+{'='*60}
+")
     
     def _execute_categories_by_phases(self, execution_plan: ExecutionPlan, args: argparse.Namespace) -> Dict:
         """Execute categories according to the execution plan."""
         results = {}
         
         for phase_num, phase_categories in enumerate(execution_plan.phases):
-            print(f"\n{'='*40}")
+            print(f"
+{'='*40}")
             print(f"PHASE {phase_num + 1}: {len(phase_categories)} categories")
             print(f"{'='*40}")
             
@@ -1417,7 +1444,8 @@ class UnifiedTestRunner:
                         current_stats=self.progress_tracker.get_current_progress() if self.progress_tracker else None
                     )
                     if should_stop and decision:
-                        print(f"\nStopping execution: {decision.reason}")
+                        print(f"
+Stopping execution: {decision.reason}")
                         # Mark remaining categories as skipped
                         for remaining_phase in execution_plan.phases[phase_num + 1:]:
                             for category_name in remaining_phase:
@@ -1437,7 +1465,8 @@ class UnifiedTestRunner:
         results = {}
         
         for category_name in category_names:
-            print(f"\nExecuting category: {category_name}")
+            print(f"
+Executing category: {category_name}")
             
             # Start category tracking
             if self.progress_tracker:
@@ -1490,8 +1519,10 @@ class UnifiedTestRunner:
             
             # Combine results
             overall_success = all(r["success"] for r in all_results.values())
-            combined_output = "\n".join(r.get("output", "") for r in all_results.values())
-            combined_errors = "\n".join(r.get("errors", "") for r in all_results.values())
+            combined_output = "
+".join(r.get("output", "") for r in all_results.values())
+            combined_errors = "
+".join(r.get("errors", "") for r in all_results.values())
             total_duration = sum(r.get("duration", 0) for r in all_results.values())
             
             return {
@@ -1711,9 +1742,11 @@ class UnifiedTestRunner:
         if not docker_available and not (local_postgres and local_redis):
             raise RuntimeError(
                 "HARD FAIL: Cannot run E2E tests - Docker Desktop not running and "
-                "required local services not available.\n"
+                "required local services not available.
+"
                 f"Either start Docker Desktop or run local PostgreSQL (port {postgres_port}) "
-                f"and Redis (port {redis_port}) services.\n"
+                f"and Redis (port {redis_port}) services.
+"
                 "Quick fix: python scripts/docker.py start"
             )
         
@@ -1741,13 +1774,17 @@ class UnifiedTestRunner:
             print(f"[INFO] {message}")
         except RuntimeError as e:
             # Hard failure for E2E tests when services unavailable
-            print(f"\n[ERROR] {str(e)}")
-            print("\n[HARD FAIL] E2E tests cannot proceed without required services.")
-            print("\nTo fix this issue:")
+            print(f"
+[ERROR] {str(e)}")
+            print("
+[HARD FAIL] E2E tests cannot proceed without required services.")
+            print("
+To fix this issue:")
             print("  1. Quick fix: python scripts/docker.py start")
             print("  2. Start Docker Desktop if not running")
             print("  3. OR manually start required services locally")
-            print("\nFor more help: python scripts/docker.py help")
+            print("
+For more help: python scripts/docker.py help")
             raise SystemExit(1)  # Hard exit with error code
         
         try:
@@ -2163,14 +2200,16 @@ class UnifiedTestRunner:
             json.dump(report_data, f, indent=2, default=str)
         
         # Print summary
-        print(f"\n{'='*60}")
+        print(f"
+{'='*60}")
         print("TEST EXECUTION SUMMARY")
         print(f"{'='*60}")
         print(f"Environment: {args.env}")
         print(f"Total Duration: {report_data['total_duration']:.2f}s")
         print(f"Categories Executed: {len(results)}")
         
-        print(f"\nCategory Results:")
+        print(f"
+Category Results:")
         for category_name, result in results.items():
             status = "✅ PASSED" if result["success"] else "❌ FAILED"
             if result.get("skipped"):
@@ -2178,7 +2217,8 @@ class UnifiedTestRunner:
             self._safe_print_unicode(f"  {category_name:15} {status:15} ({result['duration']:.2f}s)")
         
         overall_status = "✅ PASSED" if report_data['overall_success'] else "❌ FAILED"
-        self._safe_print_unicode(f"\nOverall: {overall_status}")
+        self._safe_print_unicode(f"
+Overall: {overall_status}")
         print(f"Report: {json_report}")
 
 
@@ -2201,7 +2241,8 @@ async def execute_orchestration_mode(args) -> int:
     
     # Handle orchestration status command
     if args.orchestration_status:
-        print("\n" + "="*60)
+        print("
+" + "="*60)
         print("ORCHESTRATION STATUS")
         print("="*60)
         print("Feature: Show running orchestration status")
@@ -2288,7 +2329,8 @@ async def execute_orchestration_mode(args) -> int:
         success = results.get("success", False)
         
         if success:
-            print("\n" + "="*60)
+            print("
+" + "="*60)
             print("🎉 Orchestrated test execution completed successfully!")
             print("="*60)
             
@@ -2307,7 +2349,8 @@ async def execute_orchestration_mode(args) -> int:
             
             return 0
         else:
-            print("\n" + "="*60)
+            print("
+" + "="*60)
             print("❌ Orchestrated test execution failed")
             print("="*60)
             error = results.get("error")
@@ -2791,14 +2834,16 @@ def main():
         config_loader = CategoryConfigLoader(PROJECT_ROOT)
         category_system = config_loader.create_category_system()
         
-        print(f"\n{'='*60}")
+        print(f"
+{'='*60}")
         print("AVAILABLE TEST CATEGORIES")
         print(f"{'='*60}")
         
         for priority in CategoryPriority:
             categories = category_system.get_categories_by_priority(priority)
             if categories:
-                print(f"\n{priority.name} Priority:")
+                print(f"
+{priority.name} Priority:")
                 for category in sorted(categories, key=lambda x: x.name):
                     print(f"  {category.name:15} - {category.description}")
                     if category.dependencies:
@@ -2807,7 +2852,8 @@ def main():
                         print(f"                    Conflicts: {', '.join(category.conflicts)}")
                     print(f"                    Est. Duration: {category.estimated_duration}")
         
-        print(f"\nTotal Categories: {len(category_system.categories)}")
+        print(f"
+Total Categories: {len(category_system.categories)}")
         return 0
     
     if args.show_category_stats:
@@ -2815,7 +2861,8 @@ def main():
         category_system = config_loader.create_category_system()
         stats = category_system.get_category_statistics()
         
-        print(f"\n{'='*60}")
+        print(f"
+{'='*60}")
         print("CATEGORY STATISTICS")
         print(f"{'='*60}")
         print(f"Total Categories: {stats['total_categories']}")
@@ -2829,11 +2876,13 @@ def main():
         print(f"Categories with History: {stats['categories_with_history']}")
         print(f"Average Success Rate: {stats['average_success_rate']:.2%}")
         
-        print(f"\nBy Priority:")
+        print(f"
+By Priority:")
         for priority, count in stats['by_priority'].items():
             print(f"  {priority:10}: {count}")
         
-        print(f"\nBy Type:")
+        print(f"
+By Type:")
         for cat_type, count in stats['by_type'].items():
             print(f"  {cat_type:12}: {count}")
         
@@ -2908,7 +2957,8 @@ def main():
         # Show Docker statistics if requested
         if hasattr(args, 'docker_stats') and args.docker_stats and runner.docker_manager:
             stats = runner.docker_manager.get_statistics()
-            print("\n[DOCKER STATISTICS]")
+            print("
+[DOCKER STATISTICS]")
             print(json.dumps(stats, indent=2))
         
         return exit_code

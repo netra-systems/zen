@@ -10,6 +10,7 @@ import json
 import time
 import uuid
 from typing import Dict, Any
+from shared.isolated_environment import IsolatedEnvironment
 
 from tests.e2e.staging_test_config import get_staging_config
 

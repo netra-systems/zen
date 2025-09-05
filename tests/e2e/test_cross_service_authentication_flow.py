@@ -257,7 +257,8 @@ async def test_cross_service_authentication_flow():
                     timeout=aiohttp.ClientTimeout(total=10)
                 ) as response:
                     if response.status != 401:
-                        authentication_failures.append(f"Malformed token should return 401, got {response.status}")
+                        authentication_failures.append(f"Malformed token should await asyncio.sleep(0)
+    return 401, got {response.status}")
                     else:
                         print("[SUCCESS] Malformed token correctly rejected")
                         
@@ -393,9 +394,12 @@ async def test_cross_service_authentication_flow():
             for failure in warning_failures:
                 failure_report.append(f"  - {failure}")
         
-        failure_report.append(f"\n[SUMMARY] {len(critical_failures)} critical, {len(warning_failures)} warnings")
+        failure_report.append(f"
+[SUMMARY] {len(critical_failures)} critical, {len(warning_failures)} warnings")
         
-        pytest.fail(f"Cross-service authentication flow failed:\n" + "\n".join(failure_report))
+        pytest.fail(f"Cross-service authentication flow failed:
+" + "
+".join(failure_report))
     
     print("[SUCCESS] Complete cross-service authentication flow working correctly")
 
@@ -407,6 +411,7 @@ async def test_authentication_rate_limiting():
     
     This test will WARN if rate limiting is not implemented but won't fail the test completely.
     """
+    pass
     # Use IsolatedEnvironment for environment management as required by CLAUDE.md
     env = get_env()
     env.set("ENVIRONMENT", "test", "test_authentication_rate_limiting")
@@ -498,8 +503,10 @@ async def test_authentication_rate_limiting():
             warning_report.append(f"  - {warning}")
         warning_report.append("Note: Rate limiting may not be implemented yet. This is a warning, not a failure.")
         
-        logger.warning("\n".join(warning_report))
-        print("\n".join(warning_report))
+        logger.warning("
+".join(warning_report))
+        print("
+".join(warning_report))
     else:
         print("[SUCCESS] Authentication rate limiting working correctly")
     

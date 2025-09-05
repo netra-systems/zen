@@ -15,7 +15,10 @@ REQUIREMENTS:
 import asyncio
 import re
 from typing import Dict, List, Optional
-from unittest.mock import AsyncMock, MagicMock
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
+from shared.isolated_environment import get_env
 
 
 class MockEmailService:

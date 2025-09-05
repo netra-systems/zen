@@ -20,6 +20,7 @@ ARCHITECTURAL COMPLIANCE:
 
 import asyncio
 from typing import Any, Dict
+from shared.isolated_environment import IsolatedEnvironment
 
 import pytest
 

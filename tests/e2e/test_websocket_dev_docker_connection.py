@@ -17,6 +17,7 @@ import os
 import sys
 import time
 from typing import Any, Dict, Optional
+from shared.isolated_environment import IsolatedEnvironment
 
 import httpx
 import pytest
@@ -42,6 +43,7 @@ class TestWebSocketConnection:
         
     def on_message(self, ws, message):
         """Handle WebSocket messages."""
+    pass
         print(f"WebSocket message received: {message}")
         
     def on_error(self, ws, error):
@@ -57,6 +59,7 @@ class TestWebSocketConnection:
         
     def on_close(self, ws, close_status_code, close_msg):
         """Handle WebSocket close."""
+    pass
         print(f"WebSocket closed - Code: {close_status_code}, Message: {close_msg}")
         if close_status_code:
             self.error_logs.append({
@@ -73,7 +76,9 @@ class TestWebSocketConnection:
     @pytest.mark.websocket
     def test_basic_connection(self) -> Dict[str, Any]:
         """Test basic WebSocket connection without authentication."""
-        print(f"\nTesting WebSocket connection to: {self.ws_url}")
+    pass
+        print(f"
+Testing WebSocket connection to: {self.ws_url}")
         
         try:
             # Test raw WebSocket connection
@@ -88,6 +93,7 @@ class TestWebSocketConnection:
             # Run with timeout
             import threading
             def run_ws():
+    pass
                 self.ws_app.run_forever(ping_interval=30, ping_timeout=10)
             
             ws_thread = threading.Thread(target=run_ws)
@@ -122,7 +128,8 @@ class TestWebSocketConnection:
     @pytest.mark.websocket
     def test_cors_headers(self) -> Dict[str, Any]:
         """Test WebSocket CORS configuration."""
-        print("\nTesting WebSocket CORS headers...")
+        print("
+Testing WebSocket CORS headers...")
         
         cors_issues = []
         
@@ -175,7 +182,8 @@ class TestWebSocketConnection:
     @pytest.mark.websocket
     def test_backend_availability(self) -> Dict[str, Any]:
         """Check if backend services are running."""
-        print("\nChecking backend service availability...")
+        print("
+Checking backend service availability...")
         
         service_status = {}
         
@@ -233,20 +241,24 @@ class TestWebSocketDevDockerConnection:
         - CORS origin validation errors
         - WebSocket handshake failures
         """
+    pass
         test_harness = WebSocketConnectionTest()
         test_harness.setup_method()
         
         # Check backend availability first
         backend_status = test_harness.test_backend_availability()
-        print(f"\nBackend Status: {json.dumps(backend_status, indent=2)}")
+        print(f"
+Backend Status: {json.dumps(backend_status, indent=2)}")
         
         # Test basic connection (expected to fail)
         connection_result = test_harness.test_basic_connection()
-        print(f"\nConnection Test Result: {json.dumps(connection_result, indent=2)}")
+        print(f"
+Connection Test Result: {json.dumps(connection_result, indent=2)}")
         
         # Test CORS configuration
         cors_result = test_harness.test_cors_headers()
-        print(f"\nCORS Test Result: {json.dumps(cors_result, indent=2)}")
+        print(f"
+CORS Test Result: {json.dumps(cors_result, indent=2)}")
         
         # Compile all errors
         all_errors = {
@@ -257,25 +269,30 @@ class TestWebSocketDevDockerConnection:
         }
         
         # Print summary
-        print("\n" + "="*60)
+        print("
+" + "="*60)
         print("WebSocket Connection Test Summary")
         print("="*60)
         
         if connection_result["connection_errors"]:
-            print(f"\n❌ Connection Errors Found ({len(connection_result['connection_errors'])} total):")
+            print(f"
+❌ Connection Errors Found ({len(connection_result['connection_errors'])} total):")
             for error in connection_result["connection_errors"]:
                 print(f"  - {error}")
                 
         if cors_result["cors_issues"]:
-            print(f"\n❌ CORS Issues Found ({len(cors_result['cors_issues'])} total):")
+            print(f"
+❌ CORS Issues Found ({len(cors_result['cors_issues'])} total):")
             for issue in cors_result["cors_issues"]:
                 print(f"  - Origin: {issue.get('origin', 'N/A')}, Error: {issue.get('error', 'Unknown')}")
                 
         if not backend_status.get("backend_http", {}).get("available"):
-            print(f"\n❌ Backend HTTP not available")
+            print(f"
+❌ Backend HTTP not available")
             
         if not backend_status.get("websocket_endpoint", {}).get("reachable"):
-            print(f"\n❌ WebSocket endpoint not reachable")
+            print(f"
+❌ WebSocket endpoint not reachable")
             
         # This assertion is expected to FAIL, demonstrating the issue
         assert len(connection_result["connection_errors"]) == 0, (
@@ -314,7 +331,8 @@ class TestWebSocketCORSValidation:
         
         errors = []
         for description, ws_url, should_work, details in test_cases:
-            print(f"\nTesting: {description} - {details}")
+            print(f"
+Testing: {description} - {details}")
             print(f"URL: {ws_url}")
                 
             try:
@@ -341,7 +359,9 @@ class TestWebSocketCORSValidation:
                     errors.append(error_msg)
                     
         # This assertion is expected to FAIL if WebSocket connections don't work
-        assert len(errors) == 0, f"WebSocket connection errors:\n" + "\n".join(errors)
+        assert len(errors) == 0, f"WebSocket connection errors:
+" + "
+".join(errors)
 
 
 @pytest.mark.e2e  
@@ -354,7 +374,8 @@ async def test_websocket_connection_with_retry():
     connection_attempts = []
     
     for attempt in range(max_retries):
-        print(f"\nConnection attempt {attempt + 1}/{max_retries}")
+        print(f"
+Connection attempt {attempt + 1}/{max_retries}")
         
         try:
             # Don't set explicit Origin header to avoid duplicates with websocket-client library
@@ -397,8 +418,10 @@ async def test_websocket_connection_with_retry():
     
     # This assertion is expected to FAIL if WebSocket is not working
     assert not all_failed, (
-        f"All {max_retries} WebSocket connection attempts failed:\n" +
-        "\n".join([f"  Attempt {a['attempt']}: {a.get('error', 'Unknown error')}" 
+        f"All {max_retries} WebSocket connection attempts failed:
+" +
+        "
+".join([f"  Attempt {a['attempt']}: {a.get('error', 'Unknown error')}" 
                   for a in connection_attempts if not a["success"]])
     )
 
@@ -413,13 +436,19 @@ if __name__ == "__main__":
     
     # Run all tests
     backend_status = test.test_backend_availability()
-    print(f"\nBackend Status:\n{json.dumps(backend_status, indent=2)}")
+    print(f"
+Backend Status:
+{json.dumps(backend_status, indent=2)}")
     
     connection_result = test.test_basic_connection()
-    print(f"\nConnection Result:\n{json.dumps(connection_result, indent=2)}")
+    print(f"
+Connection Result:
+{json.dumps(connection_result, indent=2)}")
     
     cors_result = test.test_cors_headers()
-    print(f"\nCORS Result:\n{json.dumps(cors_result, indent=2)}")
+    print(f"
+CORS Result:
+{json.dumps(cors_result, indent=2)}")
     
     # Run async test
     import asyncio

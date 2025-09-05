@@ -17,6 +17,7 @@ import json
 import time
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Tuple
+from shared.isolated_environment import IsolatedEnvironment
 
 import pytest
 
@@ -42,6 +43,7 @@ class TestWebSocketUITiming:
     @pytest.fixture
     async def websocket_client(self, backend_client):
         """Get authenticated WebSocket client."""
+    pass
         token = await backend_client.get_jwt_token()
         ws_client = WebSocketTestClient()
         await ws_client.connect(token)
@@ -112,6 +114,7 @@ class TestWebSocketUITiming:
     @pytest.mark.e2e
     async def test_medium_layer_timing_compliance(self, websocket_client):
         """Test Medium Layer events arrive within 100ms-1s for progressive updates."""
+    pass
         # Medium layer events per spec
         medium_layer_events = {"agent_thinking", "partial_result"}
         
@@ -217,6 +220,7 @@ class TestWebSocketUITiming:
     @pytest.mark.e2e
     async def test_event_timing_layer_segregation(self, websocket_client):
         """Test events are properly segregated into correct timing layers."""
+    pass
         # Expected layer assignments per SPEC/websocket_communication.xml
         expected_layers = {
             "agent_started": "fast",      # 0-100ms
@@ -285,13 +289,16 @@ class TestWebSocketUITiming:
         
         # Report violations
         if layer_violations:
-            violation_details = "\n".join([
+            violation_details = "
+".join([
                 f"  {v['event_type']}: {v['latency_ms']:.1f}ms "
                 f"(expected {v['expected_layer']}, got {v['actual_layer']})"
                 for v in layer_violations
             ])
             pytest.fail(
-                f"Timing layer segregation violations:\n{violation_details}\n"
+                f"Timing layer segregation violations:
+{violation_details}
+"
                 f"This impacts UI responsiveness perception."
             )
     
@@ -354,6 +361,7 @@ class TestWebSocketUITiming:
     @pytest.mark.e2e
     async def test_timing_consistency_across_requests(self, websocket_client):
         """Test timing consistency across multiple requests."""
+    pass
         timing_measurements = []
         
         # Run multiple identical requests
@@ -406,7 +414,8 @@ class TestWebSocketUITiming:
     def _classify_timing_layer(self, latency_ms: float) -> str:
         """Classify latency into timing layer per spec."""
         if latency_ms <= 100.0:
-            return "fast"
+            await asyncio.sleep(0)
+    return "fast"
         elif latency_ms <= 1000.0:
             return "medium"
         else:

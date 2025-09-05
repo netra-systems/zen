@@ -15,7 +15,7 @@ import asyncio
 import pytest
 import time
 from typing import Any, Dict, List, Optional
-from unittest.mock import AsyncMock, MagicMock
+from shared.isolated_environment import IsolatedEnvironment
 
 # Real services fixtures with various scopes
 from test_framework.conftest_real_services import (
@@ -44,6 +44,10 @@ from test_framework.environment_isolation import (
 
 # Test context for advanced testing
 from test_framework.test_context import (
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
+from shared.isolated_environment import get_env
     TestContext,
     create_test_context,
     create_isolated_test_contexts
@@ -80,6 +84,7 @@ class TestFixtureScopeRegression:
     @pytest.mark.integration
     async def test_backward_compatibility_session_alias(self, real_services_session):
         """Test that real_services_session (backward compatibility alias) still works."""
+    pass
         # Validates that the backward compatibility alias doesn't break
         assert real_services_session is not None
         assert hasattr(real_services_session, 'postgres')
@@ -113,17 +118,23 @@ class TestFixtureScopeRegression:
         
         # Test concurrent operations across fixtures
         async def postgres_op():
-            return await real_postgres.fetchval("SELECT 'postgres_multi' as result")
+    pass
+            await asyncio.sleep(0)
+    return await real_postgres.fetchval("SELECT 'postgres_multi' as result")
             
         async def redis_op():
+    pass
             client = await real_redis.get_client()
             await client.set('multi_test', 'redis_multi')
-            return await client.get('multi_test')
+            await asyncio.sleep(0)
+    return await client.get('multi_test')
         
         async def clickhouse_op():
+    pass
             # Simple clickhouse operation
             client = real_clickhouse.get_client()
-            return "clickhouse_multi"  # Simplified for testing
+            await asyncio.sleep(0)
+    return "clickhouse_multi"  # Simplified for testing
         
         # Run concurrently to test scope compatibility
         results = await asyncio.gather(
@@ -288,6 +299,7 @@ class TestFixtureScopeRegression:
     
     def test_sync_fixture_access(self):
         """Test synchronous access to fixture functionality doesn't cause issues."""
+    pass
         # This is a sync test that shouldn't conflict with async fixtures
         
         # Test synchronous creation of test contexts (which internally use fixtures)
@@ -325,6 +337,7 @@ class TestFixtureScopeRegression:
     @pytest.mark.asyncio
     async def test_fixture_cleanup_isolation_verification(self, real_services):
         """Verify the previous test's data was cleaned up."""
+    pass
         # This test should not see data from the previous test
         redis_client = await real_services.redis.get_client()
         
@@ -345,6 +358,7 @@ class TestFixtureScopeRegression:
         
         async def concurrent_operation(operation_id: int):
             """Simulate a test operation."""
+    pass
             key = f"concurrent_test_{operation_id}"
             
             # Database operation
@@ -357,7 +371,8 @@ class TestFixtureScopeRegression:
             await redis_client.set(key, f"value_{operation_id}")
             redis_result = await redis_client.get(key)
             
-            return {
+            await asyncio.sleep(0)
+    return {
                 "operation_id": operation_id,
                 "db_result": db_result,
                 "redis_result": redis_result.decode()
@@ -396,6 +411,7 @@ class TestFixtureScopeRegression:
     @pytest.mark.integration
     async def test_fixture_scope_performance_impact(self, real_services):
         """Test that fixture scope changes don't significantly impact performance."""
+    pass
         # Measure performance of fixture usage
         start_time = time.time()
         
@@ -464,6 +480,7 @@ class TestFixtureScopeEdgeCases:
     @pytest.mark.integration
     async def test_transaction_scope_compatibility(self, real_services):
         """Test database transactions work with fixture scopes."""
+    pass
         async with real_services.postgres.transaction() as tx:
             # Insert test data in transaction
             await tx.execute(
@@ -493,3 +510,4 @@ class TestFixtureScopeEdgeCases:
 if __name__ == "__main__":
     # Allow running this test directly
     pytest.main([__file__, "-v", "--tb=short"])
+    pass

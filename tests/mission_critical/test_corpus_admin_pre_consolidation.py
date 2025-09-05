@@ -12,7 +12,7 @@ import sys
 from pathlib import Path
 from typing import Any, Dict, List
 import unittest
-from unittest.mock import Mock, patch, AsyncMock
+from shared.isolated_environment import IsolatedEnvironment
 
 # Add project root to path
 project_root = Path(__file__).parent.parent.parent.absolute()
@@ -20,6 +20,10 @@ sys.path.insert(0, str(project_root))
 
 # Standard unittest imports
 import unittest
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
+from shared.isolated_environment import get_env
 
 class TestCorpusAdminPreConsolidation(unittest.IsolatedAsyncioTestCase):
     """

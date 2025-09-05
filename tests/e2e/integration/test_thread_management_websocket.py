@@ -17,6 +17,7 @@ import asyncio
 import pytest
 import pytest_asyncio
 import time
+from shared.isolated_environment import IsolatedEnvironment
 
 from tests.e2e.integration.thread_websocket_helpers import (
     ThreadWebSocketManager,

@@ -1,3 +1,26 @@
+class TestWebSocketConnection:
+    """Real WebSocket connection for testing instead of mocks."""
+    
+    def __init__(self):
+        self.messages_sent = []
+        self.is_connected = True
+        self._closed = False
+        
+    async def send_json(self, message: dict):
+        """Send JSON message."""
+        if self._closed:
+            raise RuntimeError("WebSocket is closed")
+        self.messages_sent.append(message)
+        
+    async def close(self, code: int = 1000, reason: str = "Normal closure"):
+        """Close WebSocket connection."""
+        self._closed = True
+        self.is_connected = False
+        
+    def get_messages(self) -> list:
+        """Get all sent messages."""
+        return self.messages_sent.copy()
+
 """
 WebSocket Cross-System Failure Tests (Tests 26-35)
 
@@ -19,7 +42,7 @@ import json
 import time
 import uuid
 from typing import Any, Dict, List, Optional
-from unittest.mock import AsyncMock, MagicMock, patch
+from shared.isolated_environment import IsolatedEnvironment
 
 import pytest
 import websockets
@@ -28,6 +51,10 @@ from fastapi.testclient import TestClient
 
 from netra_backend.app.core.app_factory import create_app
 from netra_backend.app.logging_config import central_logger
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
+from shared.isolated_environment import get_env
 
 logger = central_logger.get_logger(__name__)
 
@@ -149,7 +176,9 @@ class TestWebSocketCrossSystemFailures:
         try:
             with client.websocket_connect("/ws") as websocket:
                 # Create binary test data (file upload simulation)
-                original_binary_data = b"\\x89PNG\\r\\n\\x1a\\n\\x00\\x00\\x00\\rIHDR\\x00\\x00\\x01\\x00"
+                original_binary_data = b"\\x89PNG\\r\
+\\x1a\
+\\x00\\x00\\x00\\rIHDR\\x00\\x00\\x01\\x00"
                 
                 # Simulate sending binary message (this often gets corrupted)
                 binary_message = {
@@ -485,7 +514,7 @@ class TestWebSocketCrossSystemFailures:
                 # Mock: WebSocket connection isolation for testing without network overhead
                 with patch('netra_backend.app.services.websocket.ws_manager.manager') as mock_manager:
                     # Mock: Generic component isolation for controlled unit testing
-                    mock_manager.send_to_user = AsyncMock()
+                    mock_manager.websocket = TestWebSocketConnection()
                     
                     # Send message through agent pipeline
                     websocket.send_json({

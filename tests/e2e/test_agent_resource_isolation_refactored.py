@@ -22,6 +22,7 @@ The original test_agent_resource_isolation.py (1640 lines) has been refactored i
 
 import pytest
 import logging
+from shared.isolated_environment import IsolatedEnvironment
 
 logger = logging.getLogger(__name__)
 

@@ -1,4 +1,5 @@
 from shared.isolated_environment import get_env
+from shared.isolated_environment import IsolatedEnvironment
 """
 Critical Cold Start Integration Tests
 Tests the most common and difficult initialization issues that occur during system startup.

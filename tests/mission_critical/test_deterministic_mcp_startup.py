@@ -9,6 +9,7 @@ import os
 import json
 import asyncio
 from pathlib import Path
+from shared.isolated_environment import IsolatedEnvironment
 
 # Add parent to path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
@@ -120,17 +121,20 @@ def main():
     results = []
     
     # Test 1: Direct MCP service creation
-    print("\nTest 1: Direct MCP Service Creation")
+    print("
+Test 1: Direct MCP Service Creation")
     print("-" * 40)
     results.append(test_mcp_service_deterministic_creation())
     
     # Test 2: Service factory validation
-    print("\nTest 2: Service Factory Validation")
+    print("
+Test 2: Service Factory Validation")
     print("-" * 40)
     results.append(test_mcp_service_factory_validation())
     
     # Summary
-    print("\n" + "=" * 60)
+    print("
+" + "=" * 60)
     print("Test Summary")
     print("=" * 60)
     
@@ -148,3 +152,4 @@ def main():
 
 if __name__ == "__main__":
     exit(main())
+    pass

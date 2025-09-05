@@ -15,6 +15,7 @@ import asyncio
 import time
 import pytest
 from typing import Dict, Any
+from shared.isolated_environment import IsolatedEnvironment
 
 from tests.e2e.config import TEST_USERS
 from tests.e2e.websocket_guarantees_helpers import (

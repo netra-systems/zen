@@ -120,7 +120,8 @@ class MissionCriticalWebSocketValidator:
         is_valid, failures = self.validate_mission_critical_requirements()
         
         report = [
-            "\\n" + "=" * 80,
+            "\
+" + "=" * 80,
             "MISSION CRITICAL WEBSOCKET VALIDATION REPORT",
             "=" * 80,
             f"Status: {'✅ PASSED - WebSocket functionality operational' if is_valid else '❌ FAILED - WebSocket functionality BROKEN'}",
@@ -146,7 +147,8 @@ class MissionCriticalWebSocketValidator:
             report.extend([f"  - {e}" for e in self.errors])
         
         report.append("=" * 80)
-        return "\\n".join(report)
+        return "\
+".join(report)
 
 
 class InMemoryWebSocketConnection:
@@ -326,7 +328,9 @@ async def test_websocket_core_event_flow():
         is_valid, failures = validator.validate_mission_critical_requirements()
         
         # Assert mission-critical requirements
-        assert is_valid, f"CORE WEBSOCKET TEST FAILED:\\n{report}\\nFailures: {failures}"
+        assert is_valid, f"CORE WEBSOCKET TEST FAILED:\
+{report}\
+Failures: {failures}"
         
         received_events = ws_conn.received_events
         assert len(received_events) >= 6, f"Expected at least 6 WebSocket events, got {len(received_events)}. Events: {[e.get('type') for e in received_events]}"

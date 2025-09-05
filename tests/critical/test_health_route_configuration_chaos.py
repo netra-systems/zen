@@ -1,4 +1,5 @@
 from shared.isolated_environment import get_env
+from shared.isolated_environment import IsolatedEnvironment
 """
 Test suite to expose health route configuration and environment chaos.
 
@@ -20,7 +21,6 @@ import sys
 import time
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Set, Tuple
-from unittest.mock import AsyncMock, MagicMock, patch
 from datetime import datetime, timezone
 import tempfile
 
@@ -32,6 +32,9 @@ from fastapi.testclient import TestClient
 
 from auth_service.main import app as auth_app
 from netra_backend.app.core.app_factory import create_app
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
 
 pytestmark = pytest.mark.asyncio
 
@@ -40,6 +43,7 @@ class HealthConfigurationChaosDetector:
     """Detector for health route configuration chaos across environments."""
     
     def __init__(self):
+    pass
         self.config_conflicts = []
         self.env_inconsistencies = []
         self.timeout_conflicts = []
@@ -57,6 +61,7 @@ class HealthConfigurationChaosDetector:
         
     def add_env_inconsistency(self, environment: str, inconsistency: Dict[str, Any]):
         """Add an environment-specific inconsistency."""
+    pass
         self.env_inconsistencies.append({
             'environment': environment,
             'inconsistency': inconsistency,
@@ -83,6 +88,7 @@ class TestHealthRouteConfigurationChaos:
     @pytest.fixture
     def backend_app_dev(self):
         """Create backend app with development configuration."""
+    pass
         with patch.dict('os.environ', {
             'ENVIRONMENT': 'development',
             'SKIP_STARTUP_TASKS': 'true',
@@ -108,6 +114,7 @@ class TestHealthRouteConfigurationChaos:
     @pytest.fixture
     def backend_app_prod(self):
         """Create backend app with production-like configuration."""
+    pass
         with patch.dict('os.environ', {
             'ENVIRONMENT': 'production',
             'SKIP_STARTUP_TASKS': 'true',
@@ -136,8 +143,7 @@ class TestHealthRouteConfigurationChaos:
         for env_name, client in environments.items():
             try:
                 # Mock: Component isolation for testing without external dependencies
-                with patch('netra_backend.app.dependencies.get_db_dependency'):
-                    health_resp = client.get('/health')
+                                    health_resp = client.get('/health')
                     ready_resp = client.get('/ready')
                     
                     health_responses[env_name] = {
@@ -189,7 +195,35 @@ class TestHealthRouteConfigurationChaos:
             
             # Look for environment-specific conditionals
             env_conditionals = []
-            lines = content.split('\n')
+            lines = content.split('
+
+class TestWebSocketConnection:
+    """Real WebSocket connection for testing instead of mocks."""
+    
+    def __init__(self):
+    pass
+        self.messages_sent = []
+        self.is_connected = True
+        self._closed = False
+        
+    async def send_json(self, message: dict):
+        """Send JSON message."""
+        if self._closed:
+            raise RuntimeError("WebSocket is closed")
+        self.messages_sent.append(message)
+        
+    async def close(self, code: int = 1000, reason: str = "Normal closure"):
+        """Close WebSocket connection."""
+    pass
+        self._closed = True
+        self.is_connected = False
+        
+    def get_messages(self) -> list:
+        """Get all sent messages."""
+        await asyncio.sleep(0)
+    return self.messages_sent.copy()
+
+')
             for i, line in enumerate(lines):
                 if 'environment' in line.lower() and any(word in line for word in ['if', 'config', 'development', 'staging', 'production']):
                     env_conditionals.append({
@@ -324,6 +358,7 @@ class TestHealthRouteConfigurationChaos:
     
     async def test_health_check_timeout_configuration_conflicts(self, chaos_detector):
         """Test that health check timeout configurations conflict - SHOULD FAIL."""
+    pass
         project_root = Path(__file__).parent.parent.parent
         
         timeout_conflicts = []
@@ -456,7 +491,8 @@ class TestHealthRouteConfigurationChaos:
                 r'backend.*ready'
             ]
             
-            for i, line in enumerate(content.split('\n')):
+            for i, line in enumerate(content.split('
+')):
                 for pattern in startup_patterns:
                     if re.search(pattern, line, re.IGNORECASE):
                         startup_order.append({
@@ -477,7 +513,8 @@ class TestHealthRouteConfigurationChaos:
                 r'health.*dependency'
             ]
             
-            for i, line in enumerate(content.split('\n')):
+            for i, line in enumerate(content.split('
+')):
                 for pattern in dependency_patterns:
                     if re.search(pattern, line, re.IGNORECASE):
                         health_dependencies.append({
@@ -507,7 +544,8 @@ class TestHealthRouteConfigurationChaos:
             
             # Look for health check ordering or priorities
             health_check_order = []
-            lines = content.split('\n')
+            lines = content.split('
+')
             
             for i, line in enumerate(lines):
                 if any(db in line.lower() for db in ['postgres', 'redis', 'clickhouse']) and 'check' in line.lower():
@@ -570,6 +608,7 @@ class TestHealthRouteConfigurationChaos:
     
     async def test_circuit_breaker_health_check_interactions(self, chaos_detector):
         """Test that circuit breaker and health checks have problematic interactions - SHOULD FAIL."""
+    pass
         project_root = Path(__file__).parent.parent.parent
         
         circuit_breaker_issues = []
@@ -756,8 +795,7 @@ class TestHealthRouteConfigurationChaos:
                     
                     # Test health endpoint with conflicting configuration
                     # Mock: Component isolation for testing without external dependencies
-                    with patch('netra_backend.app.dependencies.get_db_dependency'):
-                        response = client.get('/health')
+                                            response = client.get('/health')
                         
                         # Check if conflicting env vars cause issues
                         if response.status_code not in [200, 503]:  # Unexpected status
@@ -970,6 +1008,7 @@ class TestHealthRouteConfigurationConsistency:
     
     async def test_logging_configuration_inconsistencies_in_health(self):
         """Test that health routes have inconsistent logging configurations - SHOULD FAIL."""
+    pass
         project_root = Path(__file__).parent.parent.parent
         
         logging_inconsistencies = []

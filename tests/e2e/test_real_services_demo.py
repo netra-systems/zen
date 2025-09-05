@@ -5,6 +5,7 @@ This is a demonstration of the real services infrastructure.
 
 import asyncio
 from pathlib import Path
+from shared.isolated_environment import IsolatedEnvironment
 
 import pytest
 

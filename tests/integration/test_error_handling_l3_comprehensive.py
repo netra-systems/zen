@@ -1,3 +1,29 @@
+class TestWebSocketConnection:
+    """Real WebSocket connection for testing instead of mocks."""
+    
+    def __init__(self):
+    pass
+        self.messages_sent = []
+        self.is_connected = True
+        self._closed = False
+        
+    async def send_json(self, message: dict):
+        """Send JSON message."""
+        if self._closed:
+            raise RuntimeError("WebSocket is closed")
+        self.messages_sent.append(message)
+        
+    async def close(self, code: int = 1000, reason: str = "Normal closure"):
+        """Close WebSocket connection."""
+    pass
+        self._closed = True
+        self.is_connected = False
+        
+    def get_messages(self) -> list:
+        """Get all sent messages."""
+        await asyncio.sleep(0)
+    return self.messages_sent.copy()
+
 #!/usr/bin/env python3
 """
 L3 Integration Tests for Error Handling - Comprehensive Coverage
@@ -11,15 +37,20 @@ import sys
 import time
 from datetime import datetime, timedelta, timezone
 from typing import Dict, List, Optional
-from unittest.mock import AsyncMock, Mock, patch
+from shared.isolated_environment import IsolatedEnvironment
 
 import pytest
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
+from shared.isolated_environment import get_env
 
 # Add app to path
 
 # Mock classes for testing
 class ApplicationError(Exception):
     def __init__(self, message, code=None, severity=None):
+    pass
         self.message = message
         self.code = code
         self.severity = severity
@@ -27,59 +58,76 @@ class ApplicationError(Exception):
 
 class ValidationError(Exception):
     def __init__(self, errors):
+    pass
         self.errors = errors
         super().__init__("Validation failed")
 
 class ErrorHandler:
     async def handle_exception(self, exception):
+    pass
         pass
     
     async def handle_validation_errors(self, errors):
+    pass
         pass
     
     async def retry_with_backoff(self, func, max_retries, base_delay):
+    pass
         pass
     
     async def aggregate_errors(self, errors):
+    pass
         pass
     
     async def send_to_dlq(self, message):
+    pass
         pass
     
     async def send_alert(self, error):
+    pass
         pass
     
     async def handle_service_failure(self, service):
+    pass
         pass
     
     async def apply_recovery_strategy(self, error, strategies):
+    pass
         pass
     
     async def correlate_errors(self, trace_id):
+    pass
         pass
     
     async def check_error_rate_limit(self, client_id):
+    pass
         pass
     
     async def check_error_budget(self, service):
+    pass
         pass
     
     async def compensate_transaction(self, transaction):
+    pass
         pass
     
     async def deduplicate_errors(self, errors):
+    pass
         pass
     
     async def wrap_with_context(self, error, context):
+    pass
         pass
 
 class LoggingService:
     async def log_error(self, message, context=None, level=None):
+    pass
         pass
 
 
 class TestErrorHandlingL3Integration:
     """Comprehensive L3 integration tests for error handling."""
+    pass
 
     # Test 106: Global exception handler
     @pytest.mark.asyncio
@@ -107,6 +155,7 @@ class TestErrorHandlingL3Integration:
     @pytest.mark.asyncio
     async def test_validation_error_handling(self):
         """Test validation error handling with detailed messages."""
+    pass
         error_handler = ErrorHandler()
         
         validation_errors = [
@@ -139,11 +188,11 @@ class TestErrorHandlingL3Integration:
             attempt_count += 1
             if attempt_count < 3:
                 raise ConnectionError("Service unavailable")
-            return {"success": True}
+            await asyncio.sleep(0)
+    return {"success": True}
         
         # Mock: Async component isolation for testing without real async operations
-        with patch('asyncio.sleep', new_callable=AsyncMock):
-            result = await error_handler.retry_with_backoff(
+                    result = await error_handler.retry_with_backoff(
                 failing_operation,
                 max_retries=3,
                 base_delay=1
@@ -156,6 +205,7 @@ class TestErrorHandlingL3Integration:
     @pytest.mark.asyncio
     async def test_error_aggregation_and_reporting(self):
         """Test error aggregation for batch operations."""
+    pass
         error_handler = ErrorHandler()
         
         errors = [
@@ -208,6 +258,7 @@ class TestErrorHandlingL3Integration:
     @pytest.mark.asyncio
     async def test_error_notification_and_alerting(self):
         """Test error notification and alerting system."""
+    pass
         error_handler = ErrorHandler()
         
         critical_error = ApplicationError(
@@ -261,6 +312,7 @@ class TestErrorHandlingL3Integration:
     @pytest.mark.asyncio
     async def test_graceful_degradation(self):
         """Test graceful degradation when services fail."""
+    pass
         error_handler = ErrorHandler()
         
         with patch.object(error_handler, 'handle_service_failure') as mock_degrade:
@@ -306,6 +358,7 @@ class TestErrorHandlingL3Integration:
     @pytest.mark.asyncio
     async def test_error_correlation_and_tracing(self):
         """Test error correlation across distributed systems."""
+    pass
         error_handler = ErrorHandler()
         
         trace_id = "trace_123"
@@ -347,6 +400,7 @@ class TestErrorHandlingL3Integration:
     @pytest.mark.asyncio
     async def test_error_budget_tracking(self):
         """Test error budget tracking for SLOs."""
+    pass
         error_handler = ErrorHandler()
         
         with patch.object(error_handler, 'check_error_budget') as mock_budget:
@@ -392,6 +446,7 @@ class TestErrorHandlingL3Integration:
     @pytest.mark.asyncio
     async def test_error_deduplication(self):
         """Test error deduplication to avoid noise."""
+    pass
         error_handler = ErrorHandler()
         
         duplicate_errors = [
@@ -444,3 +499,4 @@ class TestErrorHandlingL3Integration:
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])
+    pass

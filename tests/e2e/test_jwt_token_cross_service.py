@@ -8,6 +8,7 @@ CRITICAL: NO MOCKING of internal services - uses real HTTP calls and WebSocket c
 Maximum 300 lines enforced - core tests only, see jwt_token_helpers.py for utilities
 """
 import time
+from shared.isolated_environment import IsolatedEnvironment
 
 import httpx
 import jwt

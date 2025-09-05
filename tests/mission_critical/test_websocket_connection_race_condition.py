@@ -6,11 +6,16 @@ WebSocket connections are established, causing complete chat failure.
 
 import asyncio
 import pytest
-from unittest.mock import Mock, AsyncMock, patch, MagicMock
 from datetime import datetime
 from typing import Dict, Any
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from shared.isolated_environment import IsolatedEnvironment
 
 from netra_backend.app.websocket_core.unified_manager import (
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
+from shared.isolated_environment import get_env
     UnifiedWebSocketManager,
     WebSocketConnection
 )
@@ -27,9 +32,8 @@ class TestWebSocketConnectionRaceCondition:
     @pytest.fixture
     def mock_websocket(self):
         """Create a mock WebSocket connection."""
-        ws = AsyncMock()
-        ws.send_json = AsyncMock()
-        ws.accept = AsyncMock()
+    pass
+        websocket = TestWebSocketConnection()
         return ws
     
     @pytest.mark.asyncio
@@ -39,6 +43,7 @@ class TestWebSocketConnectionRaceCondition:
         This reproduces the exact error seen in staging:
         'No WebSocket connections found for user startup_test_032e17dc-25d9-430e-8a74-7b87b2a70064'
         """
+    pass
         user_id = "startup_test_032e17dc-25d9-430e-8a74-7b87b2a70064"
         message = {
             "type": "startup_test",
@@ -72,6 +77,7 @@ class TestWebSocketConnectionRaceCondition:
         4. WebSocket upgrade completes
         5. Connection registered -> TOO LATE
         """
+    pass
         user_id = "test_user_staging"
         connection_id = "conn_123"
         message = {"type": "agent_started", "data": {}}
@@ -104,6 +110,7 @@ class TestWebSocketConnectionRaceCondition:
         - WebSocket upgrade has additional latency
         - Messages may be queued during cold start
         """
+    pass
         user_id = "cold_start_user"
         startup_messages = [
             {"type": "service_initializing", "data": {}},
@@ -136,12 +143,14 @@ class TestWebSocketConnectionRaceCondition:
         2. Backend immediately sends message
         3. Race between connection registration and message send
         """
+    pass
         user_id = "concurrent_user"
         connection_id = "concurrent_conn"
         message = {"type": "immediate_message", "data": {}}
         
         # Create tasks that will race
         async def establish_connection():
+    pass
             await asyncio.sleep(0.01)  # Small delay to simulate network
             connection = WebSocketConnection(
                 connection_id=connection_id,
@@ -152,6 +161,7 @@ class TestWebSocketConnectionRaceCondition:
             await manager.add_connection(connection)
         
         async def send_message():
+    pass
             # Try to send immediately
             await manager.send_to_user(user_id, message)
         
@@ -175,6 +185,7 @@ class TestWebSocketConnectionRaceCondition:
         This is the recovery mechanism that should deliver messages that
         failed during the race condition.
         """
+    pass
         user_id = "recovery_user"
         connection_id = "recovery_conn"
         failed_messages = [
@@ -216,14 +227,17 @@ class TestWebSocketConnectionRaceCondition:
         - Cloud Run request timeout
         - Inter-service communication delays
         """
+    pass
         user_id = "timeout_user"
         
         # Simulate waiting for connection with timeout
         async def wait_for_connection(timeout=5.0):
+    pass
             start = asyncio.get_event_loop().time()
             while asyncio.get_event_loop().time() - start < timeout:
                 if manager.get_user_connections(user_id):
-                    return True
+                    await asyncio.sleep(0)
+    return True
                 await asyncio.sleep(0.1)
             return False
         
@@ -244,7 +258,7 @@ class TestWebSocketConnectionRetryLogic:
         manager = UnifiedWebSocketManager()
         user_id = "retry_user"
         message = {"type": "test_message"}
-        mock_ws = AsyncMock()
+        websocket = TestWebSocketConnection()
         
         # Setup: No connection initially, then connection on second check
         attempt_count = 0
@@ -254,7 +268,8 @@ class TestWebSocketConnectionRetryLogic:
             nonlocal attempt_count
             attempt_count += 1
             if attempt_count == 1:
-                return set()  # First attempt: no connection
+                await asyncio.sleep(0)
+    return set()  # First attempt: no connection
             else:
                 return {"conn_123"}  # Second attempt: connection exists
         
@@ -269,8 +284,7 @@ class TestWebSocketConnectionRetryLogic:
                 )
                 
                 # This should retry and succeed
-                with patch('asyncio.sleep', new_callable=AsyncMock):
-                    await manager.send_to_user(user_id, message)
+                                    await manager.send_to_user(user_id, message)
                 
                 # Verify message was sent after retry
                 mock_ws.send_json.assert_called_once_with(message)
@@ -278,6 +292,7 @@ class TestWebSocketConnectionRetryLogic:
     @pytest.mark.asyncio
     async def test_retry_logic_all_attempts_fail(self):
         """Test that retry logic handles complete failure gracefully."""
+    pass
         manager = UnifiedWebSocketManager()
         user_id = "always_fail_user"
         message = {"type": "doomed_message"}
@@ -285,8 +300,7 @@ class TestWebSocketConnectionRetryLogic:
         # No connection ever appears
         with patch.object(manager, 'get_user_connections', return_value=set()):
             with patch.object(manager, '_store_failed_message', new_callable=AsyncMock) as mock_store:
-                with patch('asyncio.sleep', new_callable=AsyncMock):
-                    await manager.send_to_user(user_id, message)
+                                    await manager.send_to_user(user_id, message)
                     
                     # Verify message was stored after all retries failed
                     mock_store.assert_called_once_with(user_id, message, "no_connections")

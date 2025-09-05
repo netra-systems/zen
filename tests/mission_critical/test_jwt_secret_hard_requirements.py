@@ -7,6 +7,7 @@ import threading
 from datetime import datetime, timedelta
 from typing import Dict, Any, List, Optional
 from shared.isolated_environment import get_env
+from shared.isolated_environment import IsolatedEnvironment
 #!/usr/bin/env python3
 """
 Mission Critical: JWT Secret Hard Requirements Test
@@ -23,7 +24,9 @@ import sys
 import pytest
 import tempfile
 from pathlib import Path
-from unittest.mock import patch
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
 
 # Add project root to path
 project_root = Path(__file__).parent.parent.parent
@@ -57,6 +60,7 @@ class TestJWTSecretHardRequirements:
     
     def teardown_method(self):
         """Restore original environment after each test."""
+    pass
         # Clear all JWT vars
         for key in list(os.environ.keys()):
             if 'JWT' in key or key == 'ENVIRONMENT':
@@ -92,6 +96,7 @@ class TestJWTSecretHardRequirements:
     
     def test_staging_backend_service_requires_jwt_secret_staging(self):
         """Test backend service FAILS HARD without JWT_SECRET_STAGING in staging."""
+    pass
         os.environ['ENVIRONMENT'] = 'staging'
         # Explicitly NOT setting JWT_SECRET_STAGING
         
@@ -113,6 +118,7 @@ class TestJWTSecretHardRequirements:
     
     def test_production_backend_service_requires_jwt_secret_production(self):
         """Test backend service FAILS HARD without JWT_SECRET_PRODUCTION in production."""
+    pass
         os.environ['ENVIRONMENT'] = 'production'
         # Explicitly NOT setting JWT_SECRET_PRODUCTION
         
@@ -134,6 +140,7 @@ class TestJWTSecretHardRequirements:
     
     def test_development_backend_service_requires_jwt_secret_key(self):
         """Test backend service FAILS HARD without JWT_SECRET_KEY in development."""
+    pass
         os.environ['ENVIRONMENT'] = 'development'
         # Explicitly NOT setting JWT_SECRET_KEY
         
@@ -165,6 +172,7 @@ class TestJWTSecretHardRequirements:
     
     def test_development_services_use_same_secret_when_properly_configured(self):
         """Test that both services use the same JWT secret when properly configured for development."""
+    pass
         dev_secret = "test-development-jwt-secret-key-64-characters-long-for-testing"
         
         os.environ['ENVIRONMENT'] = 'development'
@@ -202,6 +210,7 @@ class TestJWTSecretHardRequirements:
     
     def test_no_fallback_to_jwt_secret_key_in_production(self):
         """Test that production environment does NOT fallback to JWT_SECRET_KEY."""
+    pass
         os.environ['ENVIRONMENT'] = 'production'
         os.environ['JWT_SECRET_KEY'] = 'should-not-be-used-in-production-fallback'
         # Explicitly NOT setting JWT_SECRET_PRODUCTION
@@ -282,6 +291,7 @@ class TestJWTSecretHardRequirements:
     
     def test_concurrent_user_auth_with_jwt_secrets(self):
         """Test concurrent user authentication with proper JWT secret handling."""
+    pass
         staging_secret = "concurrent-test-jwt-secret-86-characters-long-for-load-testing-validation"
         os.environ['ENVIRONMENT'] = 'staging'
         os.environ['JWT_SECRET_STAGING'] = staging_secret
@@ -341,7 +351,7 @@ class TestJWTSecretHardRequirements:
         # Launch concurrent authentication attempts
         threads = []
         for i in range(concurrent_users):
-            thread = threading.Thread(target=authenticate_user, args=(i,))
+            thread = threading.Thread(target=authenticate_user, args=(i))
             threads.append(thread)
             thread.start()
         
@@ -354,7 +364,8 @@ class TestJWTSecretHardRequirements:
         successful_auths = [r for r in auth_results if r['success']]
         avg_auth_time = sum(r['auth_time'] for r in successful_auths) / len(successful_auths) if successful_auths else float('inf')
         
-        print(f"\n🔄 Concurrent Authentication Results:")
+        print(f"
+🔄 Concurrent Authentication Results:")
         print(f"  - Total users: {concurrent_users}")
         print(f"  - Successful auths: {success_count}")
         print(f"  - Failed auths: {failure_count}")
@@ -367,6 +378,7 @@ class TestJWTSecretHardRequirements:
     
     def test_multi_environment_jwt_isolation(self):
         """Test JWT secret isolation across different environments."""
+    pass
         environments = {
             'development': {
                 'secret_key': 'JWT_SECRET_KEY',
@@ -539,6 +551,7 @@ class TestJWTSecretHardRequirements:
     
     def test_jwt_secret_security_requirements(self):
         """Test JWT secret security requirements and entropy."""
+    pass
         import hashlib
         import re
         
@@ -668,6 +681,7 @@ class TestJWTSecretHardRequirements:
     
     def test_user_journey_with_jwt_validation(self):
         """Test complete user journey with JWT secret validation at each step."""
+    pass
         journey_secret = "journey-jwt-secret-86-characters-long-for-complete-user-journey-testing"
         os.environ['ENVIRONMENT'] = 'staging'
         os.environ['JWT_SECRET_STAGING'] = journey_secret
@@ -745,7 +759,8 @@ class TestJWTSecretHardRequirements:
             
             total_journey_time = time.time() - start_time
             
-            print(f"\n🚀 Complete User Journey Results:")
+            print(f"
+🚀 Complete User Journey Results:")
             print(f"  - Total journey time: {total_journey_time:.3f}s")
             for step in journey_timeline:
                 print(f"  - {step['step']}: {step['time']:.3f}s")
@@ -761,7 +776,8 @@ class TestJWTSecretHardRequirements:
                 assert required_step in completed_steps, f"Critical step missing: {required_step}"
             
         except Exception as e:
-            print(f"\n❌ User Journey Failed:")
+            print(f"
+❌ User Journey Failed:")
             print(f"  - Error: {e}")
             print(f"  - Timeline: {journey_timeline}")
             pytest.fail(f"User journey with JWT validation failed: {e}")
@@ -787,6 +803,7 @@ class TestJWTSecretHardRequirements:
         
         def jwt_operations_worker(worker_id, operations_per_worker):
             """Perform JWT operations in a worker thread."""
+    pass
             nonlocal performance_metrics
             
             try:
@@ -832,7 +849,8 @@ class TestJWTSecretHardRequirements:
         operations_per_worker = 20
         total_expected_operations = num_workers * operations_per_worker
         
-        print(f"\n⚡ Starting JWT Performance Load Test:")
+        print(f"
+⚡ Starting JWT Performance Load Test:")
         print(f"  - Workers: {num_workers}")
         print(f"  - Operations per worker: {operations_per_worker}")
         print(f"  - Total expected operations: {total_expected_operations}")
@@ -867,17 +885,20 @@ class TestJWTSecretHardRequirements:
         p95_token_generation = sorted(performance_metrics['token_generation_times'])[int(len(performance_metrics['token_generation_times']) * 0.95)] if performance_metrics['token_generation_times'] else 0
         p95_token_validation = sorted(performance_metrics['token_validation_times'])[int(len(performance_metrics['token_validation_times']) * 0.95)] if performance_metrics['token_validation_times'] else 0
         
-        print(f"\n📊 JWT Performance Results:")
+        print(f"
+📊 JWT Performance Results:")
         print(f"  - Total test time: {total_test_time:.3f}s")
         print(f"  - Successful operations: {successful_operations}")
         print(f"  - Failed operations: {performance_metrics['failed_operations']}")
         print(f"  - Failure rate: {failure_rate:.2%}")
         print(f"  - Operations per second: {operations_per_second:.1f}")
-        print(f"\n⏱️  Average Timings:")
+        print(f"
+⏱️  Average Timings:")
         print(f"  - Secret loading: {avg_secret_loading:.6f}s")
         print(f"  - Token generation: {avg_token_generation:.6f}s")
         print(f"  - Token validation: {avg_token_validation:.6f}s")
-        print(f"\n📈 P95 Timings:")
+        print(f"
+📈 P95 Timings:")
         print(f"  - Secret loading P95: {p95_secret_loading:.6f}s")
         print(f"  - Token generation P95: {p95_token_generation:.6f}s")
         print(f"  - Token validation P95: {p95_token_validation:.6f}s")
@@ -935,6 +956,7 @@ class TestJWTSecretHardRequirements:
     
     def test_enterprise_multi_tenant_jwt_isolation(self):
         """Test JWT secret isolation for enterprise multi-tenant scenarios."""
+    pass
         # Test tenant A
         os.environ['ENVIRONMENT'] = 'production'  
         tenant_a_secret = f"tenant_a_prod_{hashlib.sha256(b'tenant_a_isolation').hexdigest()[:32]}"
@@ -1034,6 +1056,7 @@ class TestJWTSecretHardRequirements:
     
     def test_api_key_jwt_hybrid_authentication(self):
         """Test hybrid authentication using both API keys and JWT tokens."""
+    pass
         os.environ['ENVIRONMENT'] = 'staging'
         hybrid_secret = f"hybrid_staging_{hashlib.sha256(b'api_jwt_hybrid_2024').hexdigest()[:32]}"
         os.environ['JWT_SECRET_STAGING'] = hybrid_secret
@@ -1213,6 +1236,7 @@ class TestJWTSecretHardRequirements:
     
     def test_jwt_cross_service_validation_stress_test(self):
         """Stress test JWT validation across multiple services simultaneously."""
+    pass
         os.environ['ENVIRONMENT'] = 'staging'
         stress_secret = f"stress_staging_{hashlib.sha256(b'cross_service_stress_2024').hexdigest()[:32]}"
         os.environ['JWT_SECRET_STAGING'] = stress_secret
@@ -1313,7 +1337,8 @@ class TestJWTSecretHardRequirements:
                 avg_validation_time = sum(r['validation_time'] for r in successful_results) / len(successful_results)
                 max_validation_time = max(r['validation_time'] for r in successful_results)
                 
-                print(f"\n📊 {service.upper()} Stress Test Results:")
+                print(f"
+📊 {service.upper()} Stress Test Results:")
                 print(f"  - Successful validations: {len(successful_results)}/{len(results)}")
                 print(f"  - Failed validations: {len(failed_results)}")
                 print(f"  - Average validation time: {avg_validation_time:.6f}s")
@@ -1330,6 +1355,7 @@ class TestJWTSecretHardRequirements:
     
     def test_jwt_security_headers_and_csrf_protection(self):
         """Test JWT security headers and CSRF protection mechanisms."""
+    pass
         os.environ['ENVIRONMENT'] = 'production'
         security_secret = f"security_prod_{hashlib.sha256(b'security_headers_csrf_2024').hexdigest()[:32]}"
         os.environ['JWT_SECRET_PRODUCTION'] = security_secret
@@ -1486,6 +1512,7 @@ class TestJWTSecretHardRequirements:
         
         def execute_sla_test_operation(operation_data):
             """Execute a complete JWT operation for SLA testing."""
+    pass
             try:
                 operation_start = time.time()
                 
@@ -1572,7 +1599,8 @@ class TestJWTSecretHardRequirements:
             avg_generation = float('inf')
             avg_validation = float('inf')
         
-        print(f"\n🎯 Revenue-Critical SLA Compliance Results:")
+        print(f"
+🎯 Revenue-Critical SLA Compliance Results:")
         print(f"  - Total operations: {sla_metrics['total_operations']}")
         print(f"  - Successful operations: {sla_metrics['successful_operations']}")
         print(f"  - Failed operations: {sla_metrics['failed_operations']}")
@@ -1597,7 +1625,8 @@ class TestJWTSecretHardRequirements:
         assert tokens_per_second >= sla_requirements['tokens_per_second'], \
             f"SLA VIOLATION: Throughput {tokens_per_second:.1f} tokens/s below required {sla_requirements['tokens_per_second']}"
         
-        print(f"\n✅ ALL REVENUE-CRITICAL SLA REQUIREMENTS MET!")
+        print(f"
+✅ ALL REVENUE-CRITICAL SLA REQUIREMENTS MET!")
         print(f"💰 Authentication system certified for production scaling!")
     
     # Helper methods for comprehensive testing
@@ -1613,6 +1642,7 @@ class TestJWTSecretHardRequirements:
     
     def _get_allowed_origins_for_client(self, client_type):
         """Get allowed origins based on client type."""
+    pass
         if client_type == 'web_browser':
             return ['https://app.netrasystems.ai', 'https://staging.netrasystems.ai']
         elif client_type == 'mobile_app':
@@ -1660,7 +1690,8 @@ if __name__ == "__main__":
     failed = 0
     
     # Run original tests
-    print("\n📋 ORIGINAL JWT SECRET HARD REQUIREMENT TESTS:")
+    print("
+📋 ORIGINAL JWT SECRET HARD REQUIREMENT TESTS:")
     print("=" * 50)
     
     for test_name, test_func in original_tests:
@@ -1676,7 +1707,8 @@ if __name__ == "__main__":
             failed += 1
     
     # Run comprehensive tests
-    print("\n🚀 COMPREHENSIVE AUTHENTICATION FLOW TESTS:")
+    print("
+🚀 COMPREHENSIVE AUTHENTICATION FLOW TESTS:")
     print("=" * 50)
     
     for test_name, test_func in comprehensive_tests:
@@ -1691,25 +1723,30 @@ if __name__ == "__main__":
             print(f"❌ {test_name}: {e}")
             failed += 1
     
-    print(f"\n📊 FINAL RESULTS: {passed} passed, {failed} failed")
+    print(f"
+📊 FINAL RESULTS: {passed} passed, {failed} failed")
     print("=" * 80)
     
     if failed == 0:
         print("🎉 ALL JWT TESTS PASSED - Authentication system is BULLETPROOF!")
-        print("\n✨ CRITICAL SUCCESS METRICS:")
+        print("
+✨ CRITICAL SUCCESS METRICS:")
         print("  🔒 JWT secret security requirements: VALIDATED")
         print("  🚀 Complete authentication flows: VALIDATED")
         print("  ⚡ Performance under load: VALIDATED")
         print("  🔄 Multi-environment isolation: VALIDATED")
         print("  👥 Concurrent user handling: VALIDATED")
         print("  🎯 User journey completion: VALIDATED")
-        print("\n💰 REVENUE IMPACT: Authentication system ready for scaling!")
+        print("
+💰 REVENUE IMPACT: Authentication system ready for scaling!")
         sys.exit(0)
     else:
         print("💥 SOME JWT TESTS FAILED - Authentication vulnerabilities detected!")
-        print("\n⚠️  CRITICAL FAILURES:")
+        print("
+⚠️  CRITICAL FAILURES:")
         print("  🚨 JWT secret configuration issues may block user access")
         print("  🚨 Authentication flow failures will impact revenue")
         print("  🚨 Performance issues will degrade user experience")
-        print("\n🔧 ACTION REQUIRED: Fix authentication issues before deployment!")
+        print("
+🔧 ACTION REQUIRED: Fix authentication issues before deployment!")
         sys.exit(1)

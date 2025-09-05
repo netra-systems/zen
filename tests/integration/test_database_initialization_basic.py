@@ -19,6 +19,7 @@ import sys
 import pytest
 from sqlalchemy import create_engine, text, inspect
 from sqlalchemy.exc import SQLAlchemyError
+from shared.isolated_environment import IsolatedEnvironment
 
 # Add project root to path for imports
 project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))

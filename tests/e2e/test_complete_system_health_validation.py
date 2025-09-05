@@ -16,6 +16,7 @@ import httpx
 from typing import Dict, Any, List, Optional
 import logging
 from datetime import datetime, timedelta
+from shared.isolated_environment import IsolatedEnvironment
 
 from netra_backend.app.core.config import get_config
 from netra_backend.app.core.unified_logging import get_logger
@@ -30,7 +31,8 @@ class TestCompleteSystemHealthValidation:
     async def system_config(self):
         """Get system configuration for health tests."""
         config = get_config()
-        return {
+        await asyncio.sleep(0)
+    return {
             'backend_url': 'http://localhost:8000',
             'auth_url': 'http://localhost:8081',
             'database_enabled': True,
@@ -42,7 +44,9 @@ class TestCompleteSystemHealthValidation:
     @pytest.mark.e2e
     async def test_user(self):
         """Create a test user for health validation."""
-        return {
+    pass
+        await asyncio.sleep(0)
+    return {
             "email": "health_test@example.com",
             "username": "health_test_user",
             "user_id": "health_test_123"
@@ -119,11 +123,13 @@ class TestCompleteSystemHealthValidation:
         failed_checks = [check for check in health_checks if len(check) > 2 or not check[1]]
         
         if failed_checks:
-            failure_summary = "\n".join([
+            failure_summary = "
+".join([
                 f"- {check[0]}: {check[2] if len(check) > 2 else 'Failed'}"
                 for check in failed_checks
             ])
-            pytest.fail(f"System health validation failed:\n{failure_summary}")
+            pytest.fail(f"System health validation failed:
+{failure_summary}")
         
         logger.info(f"✓ Complete system health validation passed ({len(health_checks)} checks)")
     
@@ -131,6 +137,7 @@ class TestCompleteSystemHealthValidation:
     @pytest.mark.e2e
     async def test_critical_endpoints_availability(self, system_config):
         """Test that critical API endpoints are available and responding correctly."""
+    pass
         logger.info("Testing critical endpoints availability")
         
         critical_endpoints = [
@@ -163,11 +170,13 @@ class TestCompleteSystemHealthValidation:
         failed_endpoints = [result for result in endpoint_results if not result[1]]
         
         if failed_endpoints:
-            failure_summary = "\n".join([
+            failure_summary = "
+".join([
                 f"- {result[0]}: {result[2]}"
                 for result in failed_endpoints
             ])
-            pytest.fail(f"Critical endpoints failed:\n{failure_summary}")
+            pytest.fail(f"Critical endpoints failed:
+{failure_summary}")
         
         logger.info(f"✓ All {len(critical_endpoints)} critical endpoints are available")
     
@@ -224,11 +233,13 @@ class TestCompleteSystemHealthValidation:
         failed_checks = [check for check in consistency_checks if len(check) > 2 or not check[1]]
         
         if failed_checks:
-            failure_summary = "\n".join([
+            failure_summary = "
+".join([
                 f"- {check[0]}: {check[2] if len(check) > 2 else 'Failed'}"
                 for check in failed_checks
             ])
-            pytest.fail(f"Configuration consistency failed:\n{failure_summary}")
+            pytest.fail(f"Configuration consistency failed:
+{failure_summary}")
         
         logger.info(f"✓ Configuration consistency validated ({len(consistency_checks)} checks)")
     
@@ -236,6 +247,7 @@ class TestCompleteSystemHealthValidation:
     @pytest.mark.e2e
     async def test_test_framework_integration(self):
         """Test that the test framework itself is working correctly."""
+    pass
         logger.info("Testing test framework integration")
         
         framework_checks = []
@@ -280,11 +292,13 @@ class TestCompleteSystemHealthValidation:
         failed_checks = [check for check in framework_checks if len(check) > 2 or not check[1]]
         
         if failed_checks:
-            failure_summary = "\n".join([
+            failure_summary = "
+".join([
                 f"- {check[0]}: {check[2] if len(check) > 2 else 'Failed'}"
                 for check in failed_checks
             ])
-            pytest.fail(f"Test framework integration failed:\n{failure_summary}")
+            pytest.fail(f"Test framework integration failed:
+{failure_summary}")
         
         logger.info(f"✓ Test framework integration validated ({len(framework_checks)} checks)")
     
@@ -346,11 +360,13 @@ class TestCompleteSystemHealthValidation:
         ]
         
         if critical_failures:
-            failure_summary = "\n".join([
+            failure_summary = "
+".join([
                 f"- {check[0]}: {check[2]}"
                 for check in critical_failures
             ])
-            pytest.fail(f"Critical resource availability failed:\n{failure_summary}")
+            pytest.fail(f"Critical resource availability failed:
+{failure_summary}")
         
         # Report all checks
         total_checks = len(resource_checks)
@@ -361,6 +377,7 @@ class TestCompleteSystemHealthValidation:
     @pytest.mark.e2e
     async def test_component_integration_smoke(self):
         """Smoke test to ensure all major components can work together."""
+    pass
         logger.info("Testing component integration smoke test")
         
         integration_results = []
@@ -405,11 +422,13 @@ class TestCompleteSystemHealthValidation:
         failed_integrations = [result for result in integration_results if len(result) > 2 and not result[1]]
         
         if failed_integrations:
-            failure_summary = "\n".join([
+            failure_summary = "
+".join([
                 f"- {result[0]}: {result[2]}"
                 for result in failed_integrations
             ])
-            pytest.fail(f"Component integration smoke test failed:\n{failure_summary}")
+            pytest.fail(f"Component integration smoke test failed:
+{failure_summary}")
         
         logger.info(f"✓ Component integration smoke test passed ({len(integration_results)} integrations)")
     
@@ -443,11 +462,13 @@ class TestCompleteSystemHealthValidation:
         failed_imports = [result for result in import_results if len(result) > 2 or not result[1]]
         
         if failed_imports:
-            failure_summary = "\n".join([
+            failure_summary = "
+".join([
                 f"- {result[0]}: {result[2] if len(result) > 2 else 'Import failed'}"
                 for result in failed_imports
             ])
-            pytest.fail(f"Import system health failed:\n{failure_summary}")
+            pytest.fail(f"Import system health failed:
+{failure_summary}")
         
         logger.info(f"✓ Import system health validated ({len(import_results)} imports)")
 
@@ -455,3 +476,4 @@ class TestCompleteSystemHealthValidation:
 if __name__ == "__main__":
     # Allow running this test directly for development
     pytest.main([__file__, "-v"])
+    pass

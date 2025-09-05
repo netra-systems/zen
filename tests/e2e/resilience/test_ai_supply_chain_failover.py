@@ -16,6 +16,7 @@ import pytest
 import asyncio
 import time
 from typing import Dict, Any
+from shared.isolated_environment import IsolatedEnvironment
 
 from tests.e2e.ai_supply_chain_helpers import (
     ProviderSimulator, ProviderStatus, FailoverMetrics, SLAValidator, CostOptimizer, QualityMonitor,

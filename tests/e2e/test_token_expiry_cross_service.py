@@ -10,6 +10,7 @@ Business Value Justification (BVJ):
 import asyncio
 import time
 from datetime import datetime, timedelta, timezone
+from shared.isolated_environment import IsolatedEnvironment
 
 import httpx
 import pytest

@@ -1,3 +1,29 @@
+class TestWebSocketConnection:
+    """Real WebSocket connection for testing instead of mocks."""
+    
+    def __init__(self):
+    pass
+        self.messages_sent = []
+        self.is_connected = True
+        self._closed = False
+        
+    async def send_json(self, message: dict):
+        """Send JSON message."""
+        if self._closed:
+            raise RuntimeError("WebSocket is closed")
+        self.messages_sent.append(message)
+        
+    async def close(self, code: int = 1000, reason: str = "Normal closure"):
+        """Close WebSocket connection."""
+    pass
+        self._closed = True
+        self.is_connected = False
+        
+    def get_messages(self) -> list:
+        """Get all sent messages."""
+        await asyncio.sleep(0)
+    return self.messages_sent.copy()
+
 """
 Focused Test Suite for WebSocket Mock Request Remediation
 
@@ -8,17 +34,26 @@ that matches the actual code structure.
 import pytest
 import asyncio
 import os
-from unittest.mock import Mock, AsyncMock, patch, MagicMock
 from datetime import datetime
 from starlette.requests import Request
 from starlette.websockets import WebSocket, WebSocketState
 from sqlalchemy.ext.asyncio import AsyncSession
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from test_framework.database.test_database_manager import TestDatabaseManager
+from auth_service.core.auth_manager import AuthManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 # Import the implemented WebSocket classes
 from netra_backend.app.websocket_core.context import WebSocketContext
 from netra_backend.app.websocket_core.supervisor_factory import get_websocket_scoped_supervisor
 from netra_backend.app.websocket_core.agent_handler import AgentMessageHandler
 from netra_backend.app.dependencies import get_request_scoped_supervisor
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
+from shared.isolated_environment import get_env
 
 
 class TestWebSocketRemediationCore:
@@ -30,6 +65,7 @@ class TestWebSocketRemediationCore:
         Test that WebSocketContext is honest about being WebSocket-specific.
         This is the foundation of the remediation - no mock objects.
         """
+    pass
         mock_websocket = Mock(spec=WebSocket)
         mock_websocket.client_state = WebSocketState.CONNECTED
         
@@ -65,6 +101,7 @@ class TestWebSocketRemediationCore:
         Test that demonstrates problems with mock Request objects.
         This shows why the old pattern was problematic.
         """
+    pass
         # Create a mock request like the old anti-pattern did
         mock_scope = {"type": "http", "headers": [], "method": "GET"}  # Include method
         mock_request = Request(mock_scope, receive=None, send=None)
@@ -84,6 +121,7 @@ class TestWebSocketRemediationCore:
         Test that WebSocket and HTTP supervisor factories accept different parameter types.
         This proves protocol separation is working.
         """
+    pass
         import inspect
         
         # WebSocket factory should accept WebSocketContext
@@ -112,6 +150,7 @@ class TestWebSocketRemediationCore:
         """
         Test WebSocket context lifecycle management.
         """
+    pass
         mock_websocket = Mock(spec=WebSocket)
         
         # Test active connection
@@ -143,6 +182,7 @@ class TestWebSocketRemediationCore:
         """
         Test WebSocket context validation functionality.
         """
+    pass
         mock_websocket = Mock(spec=WebSocket)
         mock_websocket.client_state = WebSocketState.CONNECTED
         
@@ -168,6 +208,7 @@ class TestWebSocketRemediationCore:
         """
         Test that WebSocket contexts generate unique isolation keys.
         """
+    pass
         mock_websocket = Mock(spec=WebSocket)
         mock_websocket.client_state = WebSocketState.CONNECTED
         
@@ -195,6 +236,7 @@ class TestWebSocketRemediationCore:
         """
         Test the WebSocketContext factory method.
         """
+    pass
         mock_websocket = Mock(spec=WebSocket)
         mock_websocket.client_state = WebSocketState.CONNECTED
         
@@ -230,6 +272,7 @@ class TestWebSocketRemediationCore:
         """
         Test WebSocket context validation error handling.
         """
+    pass
         mock_websocket = Mock(spec=WebSocket)
         mock_websocket.client_state = WebSocketState.CONNECTED
         
@@ -260,6 +303,7 @@ class TestWebSocketRemediationCore:
         Test that the AgentMessageHandler can detect different patterns.
         This validates the feature flag infrastructure is in place.
         """
+    pass
         from netra_backend.app.services.message_handlers import MessageHandlerService
         mock_service = Mock(spec=MessageHandlerService)
         handler = AgentMessageHandler(message_handler_service=mock_service)
@@ -302,6 +346,7 @@ class TestWebSocketRemediationCore:
         Test that WebSocket supervisor factory function exists and has correct signature.
         This is a smoke test to ensure the factory infrastructure exists.
         """
+    pass
         # Verify the factory function exists
         assert callable(get_websocket_scoped_supervisor), "WebSocket supervisor factory should be callable"
         
@@ -346,12 +391,15 @@ class TestWebSocketRemediationCore:
         """
         Test that multiple WebSocket contexts remain isolated from each other.
         """
+    pass
         mock_websocket = Mock(spec=WebSocket)
         mock_websocket.client_state = WebSocketState.CONNECTED
         
         # Create multiple contexts concurrently
         async def create_context(user_id):
-            return WebSocketContext.create_for_user(
+    pass
+            await asyncio.sleep(0)
+    return WebSocketContext.create_for_user(
                 websocket=mock_websocket,
                 user_id=f"user_{user_id}",
                 thread_id=f"thread_{user_id}"

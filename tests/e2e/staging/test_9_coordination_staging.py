@@ -7,6 +7,7 @@ Business Value: Complex workflows
 import asyncio
 import uuid
 from typing import List, Dict
+from shared.isolated_environment import IsolatedEnvironment
 
 from tests.e2e.staging_test_base import StagingTestBase, staging_test
 

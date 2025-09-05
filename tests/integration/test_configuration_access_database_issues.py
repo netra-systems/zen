@@ -24,12 +24,14 @@ import os
 import sys
 from pathlib import Path
 from typing import Dict, Any, List
-from unittest.mock import patch, MagicMock, AsyncMock
 import pytest
 import tempfile
 import logging
 
 from shared.isolated_environment import IsolatedEnvironment, get_env
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
 
 logger = logging.getLogger(__name__)
 
@@ -38,6 +40,7 @@ class ConfigurationAccessAnalyzer:
     """Analyzes configuration access patterns causing database connection issues."""
     
     def __init__(self):
+    pass
         self.project_root = Path(__file__).parent.parent.parent
         self.config_issues = []
         self.database_patterns = []
@@ -74,7 +77,8 @@ class ConfigurationAccessAnalyzer:
     
     def _analyze_file_config_patterns(self, file_path: Path, content: str, patterns: Dict[str, List[str]]):
         """Analyze individual file for configuration patterns."""
-        lines = content.split('\n')
+        lines = content.split('
+')
         
         for i, line in enumerate(lines, 1):
             line = line.strip()
@@ -99,6 +103,7 @@ class ConfigurationAccessAnalyzer:
     
     def validate_database_url_patterns(self, patterns: Dict[str, List[str]]) -> List[Dict[str, Any]]:
         """Validate database URL construction patterns for common issues."""
+    pass
         issues = []
         
         # Issue 1: Direct os.environ usage in database connections
@@ -138,6 +143,7 @@ class DatabaseConfigurationTester:
     """Tests specific database configuration scenarios that cause connection issues."""
     
     def __init__(self):
+    pass
         self.test_env = IsolatedEnvironment()
     
     async def test_postgres_url_construction(self, config_vars: Dict[str, str]) -> Dict[str, Any]:
@@ -298,10 +304,12 @@ class TestConfigurationAccessDatabaseIssues:
         analyzer = ConfigurationAccessAnalyzer()
         patterns = analyzer.scan_database_configuration_patterns()
         
-        print(f"\n=== CONFIGURATION ACCESS PATTERN ANALYSIS ===")
+        print(f"
+=== CONFIGURATION ACCESS PATTERN ANALYSIS ===")
         
         for pattern_type, occurrences in patterns.items():
-            print(f"\n{pattern_type.upper()}: {len(occurrences)} occurrences")
+            print(f"
+{pattern_type.upper()}: {len(occurrences)} occurrences")
             for occurrence in occurrences[:5]:  # Show first 5 examples
                 print(f"  - {occurrence}")
             if len(occurrences) > 5:
@@ -310,9 +318,11 @@ class TestConfigurationAccessDatabaseIssues:
         # Validate patterns for issues
         issues = analyzer.validate_database_url_patterns(patterns)
         
-        print(f"\n=== CONFIGURATION ISSUES DETECTED ===")
+        print(f"
+=== CONFIGURATION ISSUES DETECTED ===")
         for issue in issues:
-            print(f"\nIssue: {issue['type']} (Severity: {issue['severity']})")
+            print(f"
+Issue: {issue['type']} (Severity: {issue['severity']})")
             print(f"Count: {issue['count']}")
             print(f"Description: {issue['description']}")
             if issue['examples']:
@@ -326,15 +336,18 @@ class TestConfigurationAccessDatabaseIssues:
     @pytest.mark.asyncio
     async def test_database_url_construction_patterns(self):
         """Test various database URL construction patterns for connection issues."""
+    pass
         tester = DatabaseConfigurationTester()
         
         # Test different configuration scenarios
         scenarios = await tester.test_database_connection_scenarios()
         
-        print(f"\n=== DATABASE URL CONSTRUCTION TEST RESULTS ===")
+        print(f"
+=== DATABASE URL CONSTRUCTION TEST RESULTS ===")
         
         for scenario_name, results in scenarios.items():
-            print(f"\nScenario: {scenario_name}")
+            print(f"
+Scenario: {scenario_name}")
             
             if 'success' in results and not results['success']:
                 print(f"  FAILED: {results.get('error', 'Unknown error')}")
@@ -367,7 +380,8 @@ class TestConfigurationAccessDatabaseIssues:
                     if isinstance(result, dict) and not result.get('success') and result.get('error'):
                         critical_failures.append(f"{scenario_name}:{method}")
         
-        print(f"\n=== CRITICAL CONFIGURATION FAILURES ===")
+        print(f"
+=== CRITICAL CONFIGURATION FAILURES ===")
         if critical_failures:
             print(f"Found {len(critical_failures)} critical failures:")
             for failure in critical_failures:
@@ -388,7 +402,8 @@ class TestConfigurationAccessDatabaseIssues:
             'POSTGRES_PORT': '5432'
         }
         
-        print(f"\n=== ENVIRONMENT ACCESS CONSISTENCY TEST ===")
+        print(f"
+=== ENVIRONMENT ACCESS CONSISTENCY TEST ===")
         
         # Test with os.environ
         with patch.dict(os.environ, test_vars, clear=False):
@@ -429,22 +444,27 @@ class TestConfigurationAccessDatabaseIssues:
                 })
         
         if inconsistencies:
-            print(f"\nINCONSISTENCIES DETECTED: {len(inconsistencies)}")
+            print(f"
+INCONSISTENCIES DETECTED: {len(inconsistencies)}")
             for inconsistency in inconsistencies:
                 print(f"  {inconsistency['key']}: os.environ='{inconsistency['os_environ']}', isolated='{inconsistency['isolated_env']}'")
         else:
-            print("\n✅ No inconsistencies detected between environment access methods")
+            print("
+✅ No inconsistencies detected between environment access methods")
         
-        # Environment access should be consistent - both methods should return the same values
+        # Environment access should be consistent - both methods should await asyncio.sleep(0)
+    return the same values
         # Note: IsolatedEnvironment may sync to os.environ in test mode, which is expected behavior
         if inconsistencies:
-            print(f"\nINCONSISTENCIES DETECTED: {len(inconsistencies)}")
+            print(f"
+INCONSISTENCIES DETECTED: {len(inconsistencies)}")
             for inconsistency in inconsistencies:
                 print(f"  {inconsistency['key']}: os.environ='{inconsistency['os_environ']}', isolated='{inconsistency['isolated_env']}'")
             # This may be expected behavior if IsolatedEnvironment syncs to os.environ
             logger.warning(f"Environment access inconsistencies: {inconsistencies}")
         else:
-            print("\n✅ No inconsistencies detected between environment access methods")
+            print("
+✅ No inconsistencies detected between environment access methods")
         
         # Test passes regardless - this is documenting behavior
         assert True, "Environment consistency test completed"
@@ -459,7 +479,8 @@ class TestConfigurationAccessDatabaseIssues:
         for key in postgres_keys:
             original_postgres_vars[key] = env.get(key)
         
-        print(f"\n=== DATABASE CONFIG ISOLATION TEST ===")
+        print(f"
+=== DATABASE CONFIG ISOLATION TEST ===")
         print("Original environment values:")
         for key, value in original_postgres_vars.items():
             print(f"  {key}: {value if value else '(not set)'}")
@@ -478,14 +499,16 @@ class TestConfigurationAccessDatabaseIssues:
         for key, value in test_values.items():
             test_env.set(key, value, source="isolation_test")
         
-        print("\nIsolated test values:")
+        print("
+Isolated test values:")
         for key, value in test_values.items():
             retrieved_value = test_env.get(key)
             print(f"  {key}: {retrieved_value}")
             assert retrieved_value == value, f"Isolation failed for {key}: expected {value}, got {retrieved_value}"
         
         # Verify original environment is unchanged
-        print("\nVerifying original environment unchanged:")
+        print("
+Verifying original environment unchanged:")
         for key, original_value in original_postgres_vars.items():
             current_value = env.get(key)
             print(f"  {key}: {current_value if current_value else '(not set)'}")
@@ -496,7 +519,8 @@ class TestConfigurationAccessDatabaseIssues:
             else:
                 assert current_value == original_value, f"Original environment changed for {key}"
         
-        print("\n✅ Database configuration isolation working correctly")
+        print("
+✅ Database configuration isolation working correctly")
 
 
 if __name__ == "__main__":

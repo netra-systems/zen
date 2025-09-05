@@ -1,4 +1,5 @@
 from shared.isolated_environment import get_env
+from shared.isolated_environment import IsolatedEnvironment
 """
 E2E Tests for Windows Subprocess Execution
 Tests Windows-specific subprocess handling for frontend and service management.

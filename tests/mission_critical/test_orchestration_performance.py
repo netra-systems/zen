@@ -48,7 +48,12 @@ from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
 from typing import Dict, List, Any, Optional, Callable, Tuple
-from unittest.mock import Mock, patch
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
+from shared.isolated_environment import get_env
+from test_framework.docker.unified_docker_manager import UnifiedDockerManager
+from shared.isolated_environment import IsolatedEnvironment
 
 # Add project root to path for imports
 PROJECT_ROOT = Path(__file__).parent.parent.parent
@@ -141,6 +146,7 @@ class TestLoadBalancingPerformance:
     
     def test_load_balancing_algorithm_performance(self, load_balancer_cluster):
         """CRITICAL: Test performance of different load balancing algorithms."""
+    pass
         algorithms_to_test = [
             LoadBalancingAlgorithm.ROUND_ROBIN,
             LoadBalancingAlgorithm.LEAST_CONNECTIONS,
@@ -430,6 +436,7 @@ class TestLoadBalancingPerformance:
 
     def test_auto_scaling_performance(self, load_balancer_cluster):
         """CRITICAL: Test auto-scaling trigger accuracy and response times."""
+    pass
         # Auto-scaling configuration
         scaling_config = {
             "min_nodes": 2,
@@ -859,7 +866,8 @@ if __name__ == "__main__":
     result = pytest.main(pytest_args)
     
     if result == 0:
-        print("\n" + "=" * 95)
+        print("
+" + "=" * 95)
         print("✅ ALL PERFORMANCE & LOAD BALANCING TESTS PASSED")
         print("🚀 Orchestration system PERFORMANCE-VALIDATED for enterprise deployment")
         print("⚡ Load balancing: <5ms overhead, accurate distribution, fast failover")
@@ -868,7 +876,8 @@ if __name__ == "__main__":
         print("🏆 ENTERPRISE-READY for production-scale workloads and strict SLAs")
         print("=" * 95)
     else:
-        print("\n" + "=" * 95)
+        print("
+" + "=" * 95)
         print("❌ PERFORMANCE & LOAD BALANCING TESTS FAILED")
         print("🚨 Orchestration system NOT ready for enterprise-scale deployment")
         print("⚠️  Performance issues detected: slow failover, poor load distribution, or scaling problems")
@@ -877,3 +886,4 @@ if __name__ == "__main__":
         print("=" * 95)
     
     sys.exit(result)
+    pass

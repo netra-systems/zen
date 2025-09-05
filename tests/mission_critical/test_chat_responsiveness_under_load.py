@@ -35,7 +35,7 @@ from typing import Dict, List, Set, Any, Optional, Tuple, Union
 import threading
 import random
 from dataclasses import dataclass, field
-from unittest.mock import MagicMock, AsyncMock
+from netra_backend.app.core.agent_registry import AgentRegistry
 
 # Add project root to Python path for imports
 project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
@@ -64,6 +64,10 @@ from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
 from netra_backend.app.schemas.websocket_models import WebSocketMessage
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
+from shared.isolated_environment import get_env
 
 
 @dataclass
@@ -144,6 +148,7 @@ class TestAuthenticationFlowValidation:
     """Comprehensive authentication flow validation - 10+ tests covering complete user auth journeys."""
     
     def __init__(self):
+    pass
         self.real_services = None
         self.auth_metrics = AuthenticationFlowMetrics()
         self.test_users = []
@@ -162,6 +167,7 @@ class TestAuthenticationFlowValidation:
     
     async def teardown(self):
         """Clean up authentication test resources."""
+    pass
         if self.real_services:
             await self.real_services.close_all()
     
@@ -179,7 +185,8 @@ class TestAuthenticationFlowValidation:
             "sub": user_data["user_id"]
         }
         
-        return jwt.encode(payload, self.jwt_secret, algorithm="HS256")
+        await asyncio.sleep(0)
+    return jwt.encode(payload, self.jwt_secret, algorithm="HS256")
     
     async def test_complete_signup_to_chat_flow(self) -> Dict[str, Any]:
         """Test complete signup → email verification → login → first chat flow."""
@@ -608,6 +615,7 @@ class TestUserJourneyValidation:
     """Comprehensive user journey validation - 10+ tests covering complete user experiences."""
     
     def __init__(self):
+    pass
         self.real_services = None
         self.journey_metrics = {}
         self.business_metrics = BusinessMetrics()
@@ -619,6 +627,7 @@ class TestUserJourneyValidation:
     
     async def teardown(self):
         """Clean up journey test resources."""
+    pass
         if self.real_services:
             await self.real_services.close_all()
     
@@ -650,7 +659,8 @@ class TestUserJourneyValidation:
             
             if not connected:
                 results["errors"].append("Failed to connect new user")
-                return results
+                await asyncio.sleep(0)
+    return results
             
             # Welcome message sequence
             welcome_messages = [
@@ -947,6 +957,7 @@ class TestPerformanceUnderLoad:
     """Performance testing under concurrent load - 5+ tests with 50+ concurrent users."""
     
     def __init__(self):
+    pass
         self.real_services = None
         self.load_metrics = LoadTestMetrics()
         self.business_metrics = BusinessMetrics()
@@ -958,6 +969,7 @@ class TestPerformanceUnderLoad:
     
     async def teardown(self):
         """Clean up performance test resources."""
+    pass
         if self.real_services:
             await self.real_services.close_all()
     
@@ -1085,7 +1097,8 @@ class TestPerformanceUnderLoad:
             results["status"] = "error"
             results["errors"].append(f"50-user load test failed: {e}")
         
-        return results
+        await asyncio.sleep(0)
+    return results
     
     async def test_memory_leak_detection_under_load(self) -> Dict[str, Any]:
         """Test for memory leaks during sustained chat load."""
@@ -1217,7 +1230,8 @@ class TestPerformanceUnderLoad:
         """Send a message after a specified delay."""
         await asyncio.sleep(delay)
         if hasattr(client, 'connected') and client.connected:
-            return await client.send_message(message)
+            await asyncio.sleep(0)
+    return await client.send_message(message)
         return False
 
 
@@ -1233,6 +1247,7 @@ class ChatResponsivenessTestClient:
     }
     
     def __init__(self, user_id: str, ws_manager: Optional[WebSocketManager] = None):
+    pass
         self.user_id = user_id
         self.ws_manager = ws_manager
         self.websocket = None
@@ -1298,8 +1313,10 @@ class ChatResponsivenessTestClient:
     
     async def send_message(self, content: str) -> bool:
         """Send a chat message and record timing."""
+    pass
         if not self.connected or not self.websocket:
-            return False
+            await asyncio.sleep(0)
+    return False
             
         try:
             message = {
@@ -1321,7 +1338,8 @@ class ChatResponsivenessTestClient:
     async def simulate_network_disruption(self, duration_seconds: float = 2.0):
         """Simulate a network disruption and measure recovery."""
         if not self.websocket:
-            return
+            await asyncio.sleep(0)
+    return
             
         logger.info(f"User {self.user_id} simulating {duration_seconds}s network disruption")
         
@@ -1351,6 +1369,7 @@ class ChatResponsivenessTestClient:
     
     def validate_events(self) -> Tuple[bool, List[str]]:
         """Validate that all required events were received."""
+    pass
         received_types = set(self.event_tracker.keys())
         missing = self.REQUIRED_EVENTS - received_types
         
@@ -1369,6 +1388,7 @@ class ChatLoadTestOrchestrator:
     """Orchestrates comprehensive load testing scenarios."""
     
     def __init__(self):
+    pass
         self.real_services = None
         self.ws_manager = None
         self.agent_registry = None
@@ -1409,6 +1429,7 @@ class ChatLoadTestOrchestrator:
     
     async def teardown(self):
         """Clean up all resources."""
+    pass
         # Disconnect all clients
         for client in self.clients:
             await client.disconnect()
@@ -1446,7 +1467,8 @@ class ChatLoadTestOrchestrator:
         
         if self.metrics.successful_connections == 0:
             logger.error("No users connected successfully!")
-            return self.metrics
+            await asyncio.sleep(0)
+    return self.metrics
         
         logger.info(f"Connected {self.metrics.successful_connections}/{user_count} users")
         
@@ -1694,7 +1716,8 @@ class ChatLoadTestOrchestrator:
     
     def _log_test_results(self, test_name: str):
         """Log comprehensive test results."""
-        logger.info(f"\n{'='*60}")
+        logger.info(f"
+{'='*60}")
         logger.info(f"{test_name} Results")
         logger.info(f"{'='*60}")
         logger.info(f"Concurrent Users: {self.metrics.concurrent_users}")
@@ -1705,7 +1728,8 @@ class ChatLoadTestOrchestrator:
         logger.info(f"Message Loss: {self.metrics.message_loss_count}")
         
         if self.metrics.response_times:
-            logger.info(f"\nResponse Times:")
+            logger.info(f"
+Response Times:")
             logger.info(f"  Average: {self.metrics.avg_response_time_ms:.2f}ms")
             logger.info(f"  Min: {self.metrics.min_response_time_ms:.2f}ms")
             logger.info(f"  Max: {self.metrics.max_response_time_ms:.2f}ms")
@@ -1713,16 +1737,20 @@ class ChatLoadTestOrchestrator:
             logger.info(f"  P99: {self.metrics.p99_response_time_ms:.2f}ms")
         
         if self.metrics.events_received:
-            logger.info(f"\nWebSocket Events:")
+            logger.info(f"
+WebSocket Events:")
             for event_type, count in self.metrics.events_received.items():
                 logger.info(f"  {event_type}: {count}")
         
         if self.metrics.missing_events:
-            logger.info(f"\nMissing Required Events: {self.metrics.missing_events}")
+            logger.info(f"
+Missing Required Events: {self.metrics.missing_events}")
         
-        logger.info(f"\nTest Duration: {self.metrics.test_duration_seconds:.2f}s")
+        logger.info(f"
+Test Duration: {self.metrics.test_duration_seconds:.2f}s")
         logger.info(f"Error Rate: {self.metrics.error_rate:.2%}")
-        logger.info(f"{'='*60}\n")
+        logger.info(f"{'='*60}
+")
 
 
 # ============================================================================
@@ -1734,6 +1762,7 @@ class ChatLoadTestOrchestrator:
 @pytest.mark.timeout(30)
 async def test_auth_signup_to_first_chat_complete_flow():
     """Test 1: Complete signup → verification → login → first chat authentication flow."""
+    pass
     auth_validator = TestAuthenticationFlowValidation()
     await auth_validator.setup()
     
@@ -1780,6 +1809,7 @@ async def test_jwt_token_lifecycle_complete():
 @pytest.mark.timeout(40)
 async def test_multi_device_session_coordination():
     """Test 3: Multi-device authentication and session coordination."""
+    pass
     auth_validator = TestAuthenticationFlowValidation()
     await auth_validator.setup()
     
@@ -1826,6 +1856,7 @@ async def test_mfa_authentication_readiness():
 @pytest.mark.timeout(45)
 async def test_enterprise_team_authentication_permissions():
     """Test 5: Enterprise team authentication with role-based permissions."""
+    pass
     auth_validator = TestAuthenticationFlowValidation()
     await auth_validator.setup()
     
@@ -1872,6 +1903,7 @@ async def test_first_time_user_onboarding_complete():
 @pytest.mark.timeout(50)
 async def test_free_to_premium_upgrade_journey():
     """Test 7: User journey from free tier limits to premium upgrade decision."""
+    pass
     journey_validator = TestUserJourneyValidation()
     await journey_validator.setup()
     
@@ -1918,6 +1950,7 @@ async def test_enterprise_team_collaboration_journey():
 @pytest.mark.timeout(120)
 async def test_concurrent_chat_responsiveness_50_users():
     """Test 9: Chat responsiveness with 50 concurrent users - critical performance test."""
+    pass
     performance_validator = TestPerformanceUnderLoad()
     await performance_validator.setup()
     
@@ -1966,6 +1999,7 @@ async def test_memory_leak_detection_sustained_load():
 @pytest.mark.timeout(25)
 async def test_oauth_social_login_integration():
     """Test 11: OAuth and social media login integration flows."""
+    pass
     auth_validator = TestAuthenticationFlowValidation()
     await auth_validator.setup()
     
@@ -2039,6 +2073,7 @@ async def test_session_timeout_and_renewal():
 @pytest.mark.timeout(30)
 async def test_cross_service_authentication():
     """Test 13: Authentication across multiple services (backend, auth, frontend)."""
+    pass
     auth_validator = TestAuthenticationFlowValidation()
     await auth_validator.setup()
     
@@ -2115,6 +2150,7 @@ async def test_permission_escalation_prevention():
 @pytest.mark.timeout(25)
 async def test_concurrent_login_rate_limiting():
     """Test 15: Rate limiting for concurrent login attempts."""
+    pass
     auth_validator = TestAuthenticationFlowValidation()
     await auth_validator.setup()
     
@@ -2201,6 +2237,7 @@ async def test_power_user_workflow_optimization():
 @pytest.mark.timeout(35)
 async def test_billing_integration_user_journey():
     """Test 17: Billing integration and payment flow user journey."""
+    pass
     journey_validator = TestUserJourneyValidation()
     await journey_validator.setup()
     
@@ -2319,6 +2356,7 @@ async def test_ai_value_tracking_and_attribution():
 @pytest.mark.timeout(50)
 async def test_multi_tier_feature_progression():
     """Test 19: Multi-tier feature progression and upgrade incentives."""
+    pass
     journey_validator = TestUserJourneyValidation()
     await journey_validator.setup()
     
@@ -2435,6 +2473,7 @@ async def test_user_preference_persistence():
 @pytest.mark.timeout(90)
 async def test_burst_traffic_handling():
     """Test 21: Burst traffic handling - sudden spikes in chat volume."""
+    pass
     performance_validator = TestPerformanceUnderLoad()
     await performance_validator.setup()
     
@@ -2604,6 +2643,7 @@ async def test_sustained_high_load_stability():
 @pytest.mark.timeout(60)
 async def test_resource_scaling_efficiency():
     """Test 23: Resource scaling efficiency under varying load."""
+    pass
     performance_validator = TestPerformanceUnderLoad()
     await performance_validator.setup()
     
@@ -2757,6 +2797,7 @@ async def test_concurrent_user_journey_completion():
 @pytest.mark.timeout(75)
 async def test_comprehensive_load_performance_metrics():
     """Test 25: Comprehensive load performance metrics and business impact."""
+    pass
     performance_validator = TestPerformanceUnderLoad()
     await performance_validator.setup()
     
@@ -2882,7 +2923,8 @@ async def _execute_complete_user_journey(self, user_id: str, journey_index: int)
         connected = await client.connect()
         
         if not connected:
-            return {"status": "error", "error": "Connection failed"}
+            await asyncio.sleep(0)
+    return {"status": "error", "error": "Connection failed"}
         
         # Journey phases
         phases = [
@@ -2935,6 +2977,7 @@ async def test_concurrent_user_load():
     ✅ All required WebSocket events are received
     ✅ Zero message loss
     """
+    pass
     orchestrator = ChatLoadTestOrchestrator()
     
     try:
@@ -2982,6 +3025,7 @@ async def test_agent_processing_backlog():
     ✅ Messages processed in order
     ✅ All messages receive feedback
     """
+    pass
     orchestrator = ChatLoadTestOrchestrator()
     
     try:
@@ -3034,6 +3078,7 @@ async def test_websocket_connection_recovery():
     ✅ Messages continue after recovery
     ✅ No data loss during recovery
     """
+    pass
     orchestrator = ChatLoadTestOrchestrator()
     
     try:
@@ -3080,6 +3125,7 @@ async def test_comprehensive_load_scenario():
     This test runs all three scenarios in sequence to validate
     the system under comprehensive load conditions.
     """
+    pass
     orchestrator = ChatLoadTestOrchestrator()
     
     try:
@@ -3093,7 +3139,8 @@ async def test_comprehensive_load_scenario():
         
         # Test 1: Concurrent Users
         try:
-            logger.info("\n[1/3] Running Concurrent User Load Test...")
+            logger.info("
+[1/3] Running Concurrent User Load Test...")
             metrics1 = await orchestrator.test_concurrent_user_load(user_count=5)
             
             assert metrics1.successful_connections >= 4
@@ -3111,7 +3158,8 @@ async def test_comprehensive_load_scenario():
         
         # Test 2: Agent Backlog
         try:
-            logger.info("\n[2/3] Running Agent Processing Backlog Test...")
+            logger.info("
+[2/3] Running Agent Processing Backlog Test...")
             metrics2 = await orchestrator.test_agent_processing_backlog(queue_size=10)
             
             assert metrics2.messages_sent == 10
@@ -3130,7 +3178,8 @@ async def test_comprehensive_load_scenario():
         
         # Test 3: Connection Recovery
         try:
-            logger.info("\n[3/3] Running WebSocket Connection Recovery Test...")
+            logger.info("
+[3/3] Running WebSocket Connection Recovery Test...")
             metrics3 = await orchestrator.test_websocket_connection_recovery(disruption_count=3)
             
             assert len(metrics3.recovery_times) > 0
@@ -3143,7 +3192,8 @@ async def test_comprehensive_load_scenario():
             all_passed = False
         
         # Final summary
-        logger.info("\n" + "="*80)
+        logger.info("
+" + "="*80)
         if all_passed:
             logger.info("✅ COMPREHENSIVE LOAD TEST SUITE: ALL TESTS PASSED")
         else:

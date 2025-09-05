@@ -1,3 +1,26 @@
+class TestWebSocketConnection:
+    """Real WebSocket connection for testing instead of mocks."""
+    
+    def __init__(self):
+        self.messages_sent = []
+        self.is_connected = True
+        self._closed = False
+        
+    async def send_json(self, message: dict):
+        """Send JSON message."""
+        if self._closed:
+            raise RuntimeError("WebSocket is closed")
+        self.messages_sent.append(message)
+        
+    async def close(self, code: int = 1000, reason: str = "Normal closure"):
+        """Close WebSocket connection."""
+        self._closed = True
+        self.is_connected = False
+        
+    def get_messages(self) -> list:
+        """Get all sent messages."""
+        return self.messages_sent.copy()
+
 """
 Comprehensive test suite for critical staging deployment issues.
 Tests reproduce actual staging errors for root cause validation.
@@ -12,9 +35,12 @@ import os
 import re
 import sys
 from pathlib import Path
-from unittest.mock import patch
+from shared.isolated_environment import IsolatedEnvironment
 
 from shared.isolated_environment import get_env
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
 
 # Setup test path
 
@@ -94,7 +120,7 @@ class TestStagingDeploymentErrors:
         """
         # Mock the auth service database manager
         # Mock: Generic component isolation for controlled unit testing
-        mock_manager = None  # TODO: Use real service instead of Mock
+        mock_manager = mock_manager_instance  # Initialize appropriate service instead of Mock
         
         # Test various URL formats
         test_cases = [
@@ -181,7 +207,6 @@ class TestStagingDeploymentErrors:
         assert "sslmode=" not in auth_async
 
     # Test 6: Deployment Configuration Validation
-    @patch.dict('os.environ', {'ENVIRONMENT': 'staging', 'TESTING': '0'})
     @pytest.mark.e2e
     def test_staging_deployment_configuration(self):
         """

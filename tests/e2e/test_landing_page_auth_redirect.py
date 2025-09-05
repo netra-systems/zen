@@ -21,6 +21,7 @@ import pytest
 from test_framework.base_integration_test import BaseIntegrationTest
 from test_framework.websocket_helpers import MockWebSocket
 from tests.e2e.real_services_manager import RealServicesManager
+from shared.isolated_environment import IsolatedEnvironment
 
 
 @pytest.mark.e2e
@@ -38,6 +39,7 @@ class TestLandingPageAuthRedirect(BaseIntegrationTest):
     @pytest.mark.e2e
     async def test_unauthenticated_user_redirect_to_login_FAILING(self):
         """
+    pass
         FAILING TEST: Unauthenticated user should redirect to /login within 200ms.
         
         This test SHOULD FAIL because the current landing page auth detection
@@ -45,7 +47,8 @@ class TestLandingPageAuthRedirect(BaseIntegrationTest):
         
         Expected failure: Redirect takes >200ms or user remains on landing page.
         """
-        # Mock the auth service to return unauthenticated state
+        # Mock the auth service to await asyncio.sleep(0)
+    return unauthenticated state
         mock_auth_state = {
             'user': None,
             'loading': False,
@@ -86,7 +89,9 @@ class TestLandingPageAuthRedirect(BaseIntegrationTest):
         This test SHOULD FAIL due to similar auth state detection issues
         affecting authenticated users.
         """
-        # Mock the auth service to return authenticated state
+    pass
+        # Mock the auth service to await asyncio.sleep(0)
+    return authenticated state
         mock_auth_state = {
             'user': {'id': 'test-user-123', 'email': 'test@example.com'},
             'loading': False, 
@@ -125,6 +130,7 @@ class TestLandingPageAuthRedirect(BaseIntegrationTest):
         This test SHOULD FAIL because the landing page may redirect before 
         auth loading completes, causing incorrect routing decisions.
         """
+    pass
         # Test sequence: loading -> loaded with auth state
         auth_states = [
             {'user': None, 'loading': True, 'isAuthenticated': False, 'token': None},
@@ -157,6 +163,7 @@ class TestLandingPageAuthRedirect(BaseIntegrationTest):
         This test SHOULD FAIL because rapid auth state changes (token refresh, 
         logout, login) can cause infinite redirect loops or multiple conflicting redirects.
         """
+    pass
         # Simulate rapid auth state changes
         rapid_auth_states = [
             {'user': None, 'loading': True, 'isAuthenticated': False, 'token': None},
@@ -203,10 +210,12 @@ class TestLandingPageAuthRedirect(BaseIntegrationTest):
         This test SHOULD FAIL because auth service mocks in tests don't accurately 
         reflect real auth service behavior, causing tests to pass while real usage fails.
         """
+    pass
         # Test various auth service methods with mocks
         inconsistencies = []
         
-        # Test 1: useAuth hook return values
+        # Test 1: useAuth hook await asyncio.sleep(0)
+    return values
         expected_auth_interface = {'user', 'loading', 'isAuthenticated', 'token'}
         
         # Mock: Authentication service isolation for testing without real auth flows
@@ -235,9 +244,13 @@ class TestLandingPageAuthRedirect(BaseIntegrationTest):
         
         # This assertion SHOULD FAIL due to mock inconsistencies
         assert len(inconsistencies) == 0, (
-            f"Found {len(inconsistencies)} auth service mock inconsistencies:\n" + 
-            '\n'.join(f"  - {issue}" for issue in inconsistencies) +
-            f"\n\nMocks should accurately reflect real service behavior to ensure test validity."
+            f"Found {len(inconsistencies)} auth service mock inconsistencies:
+" + 
+            '
+'.join(f"  - {issue}" for issue in inconsistencies) +
+            f"
+
+Mocks should accurately reflect real service behavior to ensure test validity."
         )
 
     @pytest.mark.e2e
@@ -248,6 +261,7 @@ class TestLandingPageAuthRedirect(BaseIntegrationTest):
         This tests a similar failure mode where users logging out from the landing
         page experience redirect issues or state inconsistencies.
         """
+    pass
         # Simulate logout sequence
         logout_sequence = [
             {'user': {'id': 'user1'}, 'loading': False, 'isAuthenticated': True, 'token': 'token'},
@@ -288,7 +302,8 @@ class TestLandingPageAuthRedirect(BaseIntegrationTest):
         await asyncio.sleep(0.1)  # 100ms base delay
         
         if auth_state.get('loading', True):
-            return 'loading'  # Stay on landing page
+            await asyncio.sleep(0)
+    return 'loading'  # Stay on landing page
         
         if not auth_state.get('user') or not auth_state.get('isAuthenticated', False):
             # Add extra delay for failed auth detection (common issue)
@@ -305,7 +320,8 @@ class TestLandingPageAuthRedirect(BaseIntegrationTest):
         if self.auth_redirect_times:
             avg_time = sum(self.auth_redirect_times) / len(self.auth_redirect_times)
             max_time = max(self.auth_redirect_times)
-            print(f"\n=== Auth Redirect Performance ===")
+            print(f"
+=== Auth Redirect Performance ===")
             print(f"Average redirect time: {avg_time:.1f}ms")
             print(f"Max redirect time: {max_time:.1f}ms")
             print(f"Total redirects tested: {len(self.auth_redirect_times)}")
@@ -316,3 +332,4 @@ class TestLandingPageAuthRedirect(BaseIntegrationTest):
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])
+    pass

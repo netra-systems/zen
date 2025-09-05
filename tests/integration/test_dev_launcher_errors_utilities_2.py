@@ -16,6 +16,7 @@ from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 from queue import Empty, Queue
 from typing import Dict, List, Optional, Pattern, Tuple
+from shared.isolated_environment import IsolatedEnvironment
 
 import pytest
 import requests

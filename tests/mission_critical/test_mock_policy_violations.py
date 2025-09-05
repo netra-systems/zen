@@ -22,6 +22,10 @@ from typing import List, Tuple, Dict, Set
 import pytest
 from dataclasses import dataclass
 from collections import defaultdict
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
+import asyncio
 
 # Add project root to path
 project_root = Path(__file__).resolve().parent.parent.parent
@@ -38,6 +42,7 @@ class MockViolation:
     service: str
     
     def __str__(self):
+    pass
         return f"{self.file_path}:{self.line_number} - {self.violation_type}"
 
 
@@ -45,10 +50,6 @@ class MockDetector(ast.NodeVisitor):
     """AST visitor to detect mock usage patterns."""
     
     MOCK_MODULES = {
-        'unittest.mock', 'mock', 'pytest_mock', 'mocker',
-        'unittest.mock.Mock', 'unittest.mock.MagicMock',
-        'unittest.mock.AsyncMock', 'unittest.mock.patch',
-        'pytest_mock', 'asynctest'
     }
     
     MOCK_FUNCTIONS = {
@@ -65,12 +66,13 @@ class MockDetector(ast.NodeVisitor):
     }
     
     def __init__(self, file_path: str):
+    pass
         self.file_path = file_path
         self.violations = []
         self.imports = set()
         
     def visit_ImportFrom(self, node):
-        """Detect 'from unittest.mock import ...' patterns."""
+    pass
         if node.module and any(mock in node.module for mock in self.MOCK_MODULES):
             for alias in node.names:
                 self.violations.append(MockViolation(
@@ -84,7 +86,7 @@ class MockDetector(ast.NodeVisitor):
         self.generic_visit(node)
         
     def visit_Import(self, node):
-        """Detect 'import unittest.mock' patterns."""
+    pass
         for alias in node.names:
             if any(mock in alias.name for mock in self.MOCK_MODULES):
                 self.violations.append(MockViolation(
@@ -111,7 +113,6 @@ class MockDetector(ast.NodeVisitor):
         self.generic_visit(node)
         
     def visit_FunctionDef(self, node):
-        """Detect @patch decorators."""
         for decorator in node.decorator_list:
             dec_name = self._get_decorator_name(decorator)
             if 'patch' in dec_name or dec_name in self.imports:
@@ -126,6 +127,7 @@ class MockDetector(ast.NodeVisitor):
         
     def visit_Attribute(self, node):
         """Detect mock attribute access like mock.patch or mock.return_value."""
+    pass
         attr_name = node.attr
         if attr_name in self.MOCK_FUNCTIONS:
             self.violations.append(MockViolation(
@@ -153,7 +155,8 @@ class MockDetector(ast.NodeVisitor):
         self.generic_visit(node)
         
     def visit_Assign(self, node):
-        """Detect mock assignments like mock = Mock()."""
+        """Detect mock assignments like websocket = TestWebSocketConnection()  # Real WebSocket implementation."""
+    pass
         if isinstance(node.value, ast.Call):
             func_name = self._get_func_name(node.value.func)
             if func_name in self.MOCK_FUNCTIONS or func_name in self.imports:
@@ -225,6 +228,7 @@ class TestMockPolicyCompliance:
         
     def scan_for_mock_usage(self, directory: Path) -> List[MockViolation]:
         """Scan directory for mock usage violations."""
+    pass
         violations = []
         
         for py_file in directory.rglob('*.py'):
@@ -255,11 +259,38 @@ class TestMockPolicyCompliance:
     def _regex_mock_detection(self, py_file: Path, content: str) -> List[MockViolation]:
         """Use regex to catch mock patterns that AST might miss."""
         violations = []
-        lines = content.split('\n')
+        lines = content.split('
+
+class TestWebSocketConnection:
+    """Real WebSocket connection for testing instead of mocks."""
+    
+    def __init__(self):
+    pass
+        self.messages_sent = []
+        self.is_connected = True
+        self._closed = False
+        
+    async def send_json(self, message: dict):
+        """Send JSON message."""
+        if self._closed:
+            raise RuntimeError("WebSocket is closed")
+        self.messages_sent.append(message)
+        
+    async def close(self, code: int = 1000, reason: str = "Normal closure"):
+        """Close WebSocket connection."""
+    pass
+        self._closed = True
+        self.is_connected = False
+        
+    def get_messages(self) -> list:
+        """Get all sent messages."""
+        await asyncio.sleep(0)
+    return self.messages_sent.copy()
+
+')
         
         # Patterns to detect various mock usage
         mock_patterns = [
-            (r'@patch\s*\(', 'Patch Decorator'),
             (r'@mock\.patch', 'Mock Patch Decorator'),
             (r'Mock\s*\(', 'Mock Constructor'),
             (r'MagicMock\s*\(', 'MagicMock Constructor'),
@@ -314,20 +345,31 @@ class TestMockPolicyCompliance:
         Violation: 23 test files currently using mocks
         Impact: False authentication test confidence
         """
+    pass
         auth_tests = self.project_root / 'auth_service' / 'tests'
         violations = self.scan_for_mock_usage(auth_tests)
         
         if violations:
-            report = "\n\nMock Policy Violations in auth_service:\n"
-            report += "=" * 60 + "\n"
+            report = "
+
+Mock Policy Violations in auth_service:
+"
+            report += "=" * 60 + "
+"
             for v in violations[:10]:  # Show first 10 violations
-                report += f"  ❌ {v}\n"
+                report += f"  ❌ {v}
+"
             if len(violations) > 10:
-                report += f"  ... and {len(violations) - 10} more violations\n"
-            report += "\nRequired Action: Replace ALL mocks with real service tests\n"
-            report += "Use IsolatedEnvironment from test_framework/environment_isolation.py\n"
+                report += f"  ... and {len(violations) - 10} more violations
+"
+            report += "
+Required Action: Replace ALL mocks with real service tests
+"
+            report += "Use IsolatedEnvironment from test_framework/environment_isolation.py
+"
             
-            pytest.fail(f"{report}\nTotal violations: {len(violations)}")
+            pytest.fail(f"{report}
+Total violations: {len(violations)}")
     
     def test_no_mock_imports_in_analytics_service(self):
         """
@@ -337,19 +379,29 @@ class TestMockPolicyCompliance:
         Violation: 136 mock instances across 6 files
         Impact: Hidden analytics integration failures
         """
+    pass
         analytics_tests = self.project_root / 'analytics_service' / 'tests'
         violations = self.scan_for_mock_usage(analytics_tests)
         
         if violations:
-            report = "\n\nMock Policy Violations in analytics_service:\n"
-            report += "=" * 60 + "\n"
+            report = "
+
+Mock Policy Violations in analytics_service:
+"
+            report += "=" * 60 + "
+"
             for v in violations[:10]:
-                report += f"  ❌ {v}\n"
+                report += f"  ❌ {v}
+"
             if len(violations) > 10:
-                report += f"  ... and {len(violations) - 10} more violations\n"
-            report += "\nRequired Action: Use real ClickHouse/Redis for testing\n"
+                report += f"  ... and {len(violations) - 10} more violations
+"
+            report += "
+Required Action: Use real ClickHouse/Redis for testing
+"
             
-            pytest.fail(f"{report}\nTotal violations: {len(violations)}")
+            pytest.fail(f"{report}
+Total violations: {len(violations)}")
     
     def test_no_mock_imports_in_netra_backend(self):
         """
@@ -359,19 +411,29 @@ class TestMockPolicyCompliance:
         Violation: 20+ test files using mocks
         Impact: WebSocket and agent failures not detected
         """
+    pass
         backend_tests = self.project_root / 'netra_backend' / 'tests'
         violations = self.scan_for_mock_usage(backend_tests)
         
         if violations:
-            report = "\n\nMock Policy Violations in netra_backend:\n"
-            report += "=" * 60 + "\n"
+            report = "
+
+Mock Policy Violations in netra_backend:
+"
+            report += "=" * 60 + "
+"
             for v in violations[:10]:
-                report += f"  ❌ {v}\n"
+                report += f"  ❌ {v}
+"
             if len(violations) > 10:
-                report += f"  ... and {len(violations) - 10} more violations\n"
-            report += "\nRequired Action: Use real WebSocket connections and databases\n"
+                report += f"  ... and {len(violations) - 10} more violations
+"
+            report += "
+Required Action: Use real WebSocket connections and databases
+"
             
-            pytest.fail(f"{report}\nTotal violations: {len(violations)}")
+            pytest.fail(f"{report}
+Total violations: {len(violations)}")
     
     def test_comprehensive_mock_audit(self):
         """
@@ -380,6 +442,7 @@ class TestMockPolicyCompliance:
         This test scans ALL test directories and provides a complete
         violation report across all services.
         """
+    pass
         all_violations = []
         service_violations = defaultdict(list)
         
@@ -391,15 +454,26 @@ class TestMockPolicyCompliance:
                     service_violations[v.service].append(v)
         
         if all_violations:
-            report = "\n" + "=" * 80 + "\n"
-            report += "COMPREHENSIVE MOCK POLICY VIOLATION REPORT\n"
-            report += "=" * 80 + "\n\n"
-            report += f"Total Violations: {len(all_violations)}\n"
-            report += f"Services Affected: {len(service_violations)}\n\n"
+            report = "
+" + "=" * 80 + "
+"
+            report += "COMPREHENSIVE MOCK POLICY VIOLATION REPORT
+"
+            report += "=" * 80 + "
+
+"
+            report += f"Total Violations: {len(all_violations)}
+"
+            report += f"Services Affected: {len(service_violations)}
+
+"
             
             for service, violations in service_violations.items():
-                report += f"\n{service.upper()} ({len(violations)} violations):\n"
-                report += "-" * 40 + "\n"
+                report += f"
+{service.upper()} ({len(violations)} violations):
+"
+                report += "-" * 40 + "
+"
                 
                 # Group by violation type
                 by_type = defaultdict(list)
@@ -407,19 +481,30 @@ class TestMockPolicyCompliance:
                     by_type[v.violation_type].append(v)
                 
                 for vtype, vlist in by_type.items():
-                    report += f"  {vtype}: {len(vlist)} occurrences\n"
+                    report += f"  {vtype}: {len(vlist)} occurrences
+"
                     for v in vlist[:3]:  # Show first 3 of each type
-                        report += f"    • {v.file_path.split('/netra-apex/')[-1]}:{v.line_number}\n"
+                        report += f"    • {v.file_path.split('/netra-apex/')[-1]}:{v.line_number}
+"
                     if len(vlist) > 3:
-                        report += f"    ... and {len(vlist) - 3} more\n"
+                        report += f"    ... and {len(vlist) - 3} more
+"
             
-            report += "\n" + "=" * 80 + "\n"
-            report += "REQUIRED ACTIONS:\n"
-            report += "1. Replace ALL mocks with real service tests\n"
-            report += "2. Use IsolatedEnvironment for test isolation\n"
-            report += "3. Use docker-compose for service dependencies\n"
-            report += "4. Implement real WebSocket/database connections\n"
-            report += "=" * 80 + "\n"
+            report += "
+" + "=" * 80 + "
+"
+            report += "REQUIRED ACTIONS:
+"
+            report += "1. Replace ALL mocks with real service tests
+"
+            report += "2. Use IsolatedEnvironment for test isolation
+"
+            report += "3. Use docker-compose for service dependencies
+"
+            report += "4. Implement real WebSocket/database connections
+"
+            report += "=" * 80 + "
+"
             
             pytest.fail(report)
     
@@ -430,6 +515,7 @@ class TestMockPolicyCompliance:
         Policy: All environment access through IsolatedEnvironment
         Impact: Test pollution and flaky tests
         """
+    pass
         violations = []
         
         for test_dir in self.test_directories:
@@ -454,14 +540,22 @@ class TestMockPolicyCompliance:
                     print(f"Warning: Could not read {py_file}: {e}")
                     
         if violations:
-            report = "\n\nDirect os.environ Access Violations:\n"
-            report += "=" * 60 + "\n"
+            report = "
+
+Direct os.environ Access Violations:
+"
+            report += "=" * 60 + "
+"
             for file_path, count in violations[:10]:
                 short_path = file_path.split('/netra-apex/')[-1]
-                report += f"  ❌ {short_path}: {count} occurrences\n"
+                report += f"  ❌ {short_path}: {count} occurrences
+"
             if len(violations) > 10:
-                report += f"  ... and {len(violations) - 10} more files\n"
-            report += "\nRequired: Use IsolatedEnvironment from test_framework\n"
+                report += f"  ... and {len(violations) - 10} more files
+"
+            report += "
+Required: Use IsolatedEnvironment from test_framework
+"
             
             pytest.fail(report)
     
@@ -472,6 +566,7 @@ class TestMockPolicyCompliance:
         Policy: Real databases, real Redis, real services
         Impact: Integration issues not caught by tests
         """
+    pass
         required_patterns = {
             'IsolatedEnvironment': 'Using IsolatedEnvironment for test isolation',
             'docker-compose': 'Using docker-compose for service dependencies',
@@ -498,60 +593,39 @@ class TestMockPolicyCompliance:
                         missing_patterns[service_name].append(description)
         
         if missing_patterns:
-            report = "\n\nReal Service Configuration Missing:\n"
-            report += "=" * 60 + "\n"
+            report = "
+
+Real Service Configuration Missing:
+"
+            report += "=" * 60 + "
+"
             for service, missing in missing_patterns.items():
-                report += f"\n{service}:\n"
+                report += f"
+{service}:
+"
                 for item in missing:
-                    report += f"  ❌ Missing: {item}\n"
-            report += "\nRequired: Configure tests to use real services\n"
-            
-            # This is a warning, not a failure yet
-            print(report)
-    
-    def test_mock_free_test_examples(self):
-        """
-        Verify existence of mock-free test examples.
-        
-        Each service should have at least one example of proper
-        real service testing without mocks.
-        """
-        good_examples = []
-        
-        # Look for test files that don't use mocks
-        for test_dir in self.test_directories:
-            if not test_dir.exists():
-                continue
-                
-            for py_file in test_dir.rglob('test_*.py'):
-                try:
-                    with open(py_file, 'r', encoding='utf-8') as f:
-                        content = f.read()
-                        
-                    # Check if file uses IsolatedEnvironment and no mocks
-                    has_isolated_env = 'IsolatedEnvironment' in content or 'isolated_test_env' in content
-                    has_no_mocks = not any(mock in content for mock in [
-                        'Mock(', 'MagicMock(', 'AsyncMock(', 'patch(',
-                        'from unittest.mock', 'from mock import'
-                    ])
-                    
-                    if has_isolated_env and has_no_mocks:
-                        good_examples.append(str(py_file))
-                        
-                except Exception:
-                    continue
-        
-        if len(good_examples) < 5:
-            report = "\n\nInsufficient Mock-Free Test Examples:\n"
-            report += "=" * 60 + "\n"
-            report += f"Found only {len(good_examples)} mock-free test files\n"
-            report += "Each service needs proper examples of real service testing\n"
+                    report += f"  ❌ Missing: {item}
+"
+            report += "
+Required: Configure tests to use real services
+
+Insufficient Mock-Free Test Examples:
+"
+            report += "=" * 60 + "
+"
+            report += f"Found only {len(good_examples)} mock-free test files
+"
+            report += "Each service needs proper examples of real service testing
+"
             
             if good_examples:
-                report += "\nGood examples found:\n"
+                report += "
+Good examples found:
+"
                 for example in good_examples:
                     short_path = example.split('/netra-apex/')[-1]
-                    report += f"  ✅ {short_path}\n"
+                    report += f"  ✅ {short_path}
+"
             
             # This is informational
             print(report)
@@ -563,6 +637,7 @@ class TestMockPolicyCompliance:
         This test always passes but generates a report file
         with specific remediation steps for each service.
         """
+    pass
         report_path = self.project_root / 'MOCK_REMEDIATION_PLAN.md'
         
         all_violations = []
@@ -577,67 +652,122 @@ class TestMockPolicyCompliance:
         
         # Generate remediation plan
         with open(report_path, 'w') as f:
-            f.write("# Mock Usage Remediation Plan\n\n")
-            f.write("## Executive Summary\n\n")
-            f.write(f"- **Total Violations**: {len(all_violations)}\n")
-            f.write(f"- **Services Affected**: {len(service_violations)}\n")
-            f.write("- **Estimated Effort**: 2-3 days with multi-agent approach\n\n")
+            f.write("# Mock Usage Remediation Plan
+
+")
+            f.write("## Executive Summary
+
+")
+            f.write(f"- **Total Violations**: {len(all_violations)}
+")
+            f.write(f"- **Services Affected**: {len(service_violations)}
+")
+            f.write("- **Estimated Effort**: 2-3 days with multi-agent approach
+
+")
             
-            f.write("## Remediation Strategy\n\n")
-            f.write("1. Use multi-agent team (3-7 agents) per service\n")
-            f.write("2. Replace mocks with real service connections\n")
-            f.write("3. Use IsolatedEnvironment for test isolation\n")
-            f.write("4. Implement docker-compose for service dependencies\n\n")
+            f.write("## Remediation Strategy
+
+")
+            f.write("1. Use multi-agent team (3-7 agents) per service
+")
+            f.write("2. Replace mocks with real service connections
+")
+            f.write("3. Use IsolatedEnvironment for test isolation
+")
+            f.write("4. Implement docker-compose for service dependencies
+
+")
             
-            f.write("## Service-Specific Plans\n\n")
+            f.write("## Service-Specific Plans
+
+")
             
             for service, violations in service_violations.items():
-                f.write(f"### {service}\n\n")
-                f.write(f"**Violations**: {len(violations)}\n\n")
+                f.write(f"### {service}
+
+")
+                f.write(f"**Violations**: {len(violations)}
+
+")
                 
                 # Group by file
                 by_file = defaultdict(list)
                 for v in violations:
                     by_file[v.file_path].append(v)
                 
-                f.write("**Files to Fix**:\n\n")
+                f.write("**Files to Fix**:
+
+")
                 for file_path, file_violations in list(by_file.items())[:10]:
                     short_path = file_path.split('/netra-apex/')[-1]
-                    f.write(f"- `{short_path}` ({len(file_violations)} violations)\n")
+                    f.write(f"- `{short_path}` ({len(file_violations)} violations)
+")
                 
                 if len(by_file) > 10:
-                    f.write(f"- ... and {len(by_file) - 10} more files\n")
+                    f.write(f"- ... and {len(by_file) - 10} more files
+")
                 
-                f.write("\n**Replacement Strategy**:\n\n")
+                f.write("
+**Replacement Strategy**:
+
+")
                 if service == 'auth_service':
-                    f.write("- Replace AsyncMock with real PostgreSQL connections\n")
-                    f.write("- Use real Redis for session management\n")
-                    f.write("- Implement real JWT validation\n")
+                    f.write("- Replace AsyncMock with real PostgreSQL connections
+")
+                    f.write("- Use real Redis for session management
+")
+                    f.write("- Implement real JWT validation
+")
                 elif service == 'analytics_service':
-                    f.write("- Use real ClickHouse connections\n")
-                    f.write("- Implement real event processing\n")
-                    f.write("- Use docker-compose for ClickHouse setup\n")
+                    f.write("- Use real ClickHouse connections
+")
+                    f.write("- Implement real event processing
+")
+                    f.write("- Use docker-compose for ClickHouse setup
+")
                 elif service == 'netra_backend':
-                    f.write("- Replace WebSocket mocks with real connections\n")
-                    f.write("- Use real agent execution\n")
-                    f.write("- Implement real database connections\n")
+                    f.write("- Replace WebSocket mocks with real connections
+")
+                    f.write("- Use real agent execution
+")
+                    f.write("- Implement real database connections
+")
                 
-                f.write("\n---\n\n")
+                f.write("
+---
+
+")
             
-            f.write("## Implementation Order\n\n")
-            f.write("1. **Phase 1**: auth_service (highest risk)\n")
-            f.write("2. **Phase 2**: netra_backend (WebSocket critical)\n")
-            f.write("3. **Phase 3**: analytics_service\n")
-            f.write("4. **Phase 4**: Integration tests\n\n")
+            f.write("## Implementation Order
+
+")
+            f.write("1. **Phase 1**: auth_service (highest risk)
+")
+            f.write("2. **Phase 2**: netra_backend (WebSocket critical)
+")
+            f.write("3. **Phase 3**: analytics_service
+")
+            f.write("4. **Phase 4**: Integration tests
+
+")
             
-            f.write("## Success Criteria\n\n")
-            f.write("- [ ] All mock imports removed\n")
-            f.write("- [ ] All tests use IsolatedEnvironment\n")
-            f.write("- [ ] Docker-compose configured for dependencies\n")
-            f.write("- [ ] All tests pass with real services\n")
-            f.write("- [ ] Architecture compliance > 90%\n")
+            f.write("## Success Criteria
+
+")
+            f.write("- [ ] All mock imports removed
+")
+            f.write("- [ ] All tests use IsolatedEnvironment
+")
+            f.write("- [ ] Docker-compose configured for dependencies
+")
+            f.write("- [ ] All tests pass with real services
+")
+            f.write("- [ ] Architecture compliance > 90%
+")
         
-        print(f"\n✅ Remediation plan generated: {report_path}")
+        print(f"
+✅ Remediation plan generated: {report_path}")
 
 
 if __name__ == '__main__':

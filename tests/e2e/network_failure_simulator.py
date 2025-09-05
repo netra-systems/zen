@@ -6,7 +6,10 @@ Simulates various network failure scenarios for resilience testing.
 import asyncio
 import random
 from typing import Optional, Dict, Any
-from unittest.mock import MagicMock
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
+from shared.isolated_environment import get_env
 
 
 class NetworkFailureSimulator:

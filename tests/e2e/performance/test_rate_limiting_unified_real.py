@@ -29,6 +29,7 @@ import uuid
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
+from shared.isolated_environment import IsolatedEnvironment
 
 import httpx
 import pytest

@@ -1,3 +1,26 @@
+class TestWebSocketConnection:
+    """Real WebSocket connection for testing instead of mocks."""
+    
+    def __init__(self):
+        self.messages_sent = []
+        self.is_connected = True
+        self._closed = False
+        
+    async def send_json(self, message: dict):
+        """Send JSON message."""
+        if self._closed:
+            raise RuntimeError("WebSocket is closed")
+        self.messages_sent.append(message)
+        
+    async def close(self, code: int = 1000, reason: str = "Normal closure"):
+        """Close WebSocket connection."""
+        self._closed = True
+        self.is_connected = False
+        
+    def get_messages(self) -> list:
+        """Get all sent messages."""
+        return self.messages_sent.copy()
+
 """
 WebSocket Authentication Handshake Complete Flow Integration Test
 
@@ -20,7 +43,7 @@ import time
 from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional
-from unittest.mock import AsyncMock, patch
+from shared.isolated_environment import IsolatedEnvironment
 
 import pytest
 import websockets
@@ -28,6 +51,10 @@ import websockets
 from test_framework.base_integration_test import BaseIntegrationTest
 # Removed mock import - using real service testing per CLAUDE.md "MOCKS = Abomination"
 from test_framework.real_services import get_real_services
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
+from shared.isolated_environment import get_env
 
 
 @dataclass
@@ -201,7 +228,7 @@ class TestWebSocketAuthHandshakeCompleteFlow(BaseIntegrationTest):
         # Mock: Component isolation for testing without external dependencies
 # COMMENTED OUT: Mock-dependent test -         with patch('websockets.connect') as mock_connect:
             # Mock: Generic component isolation for controlled unit testing
-# COMMENTED OUT: Mock-dependent test -             mock_ws = AsyncMock()
+# COMMENTED OUT: Mock-dependent test -             websocket = TestWebSocketConnection()
 # COMMENTED OUT: Mock-dependent test -             mock_ws.recv.return_value = json.dumps({
 # COMMENTED OUT: Mock-dependent test -                 "type": "auth_success",
 # COMMENTED OUT: Mock-dependent test -                 "session_id": "session_123",
@@ -248,7 +275,7 @@ class TestWebSocketAuthHandshakeCompleteFlow(BaseIntegrationTest):
         # Mock: Component isolation for testing without external dependencies
 # COMMENTED OUT: Mock-dependent test -         with patch('websockets.connect') as mock_connect:
             # Mock: Generic component isolation for controlled unit testing
-# COMMENTED OUT: Mock-dependent test -             mock_ws = AsyncMock()
+# COMMENTED OUT: Mock-dependent test -             websocket = TestWebSocketConnection()
 # COMMENTED OUT: Mock-dependent test -             mock_ws.recv.return_value = json.dumps({
 # COMMENTED OUT: Mock-dependent test -                 "type": "auth_error",
 # COMMENTED OUT: Mock-dependent test -                 "error": "Token expired"
@@ -278,7 +305,7 @@ class TestWebSocketAuthHandshakeCompleteFlow(BaseIntegrationTest):
         # Mock: Component isolation for testing without external dependencies
 # COMMENTED OUT: Mock-dependent test -         with patch('websockets.connect') as mock_connect:
             # Mock: Generic component isolation for controlled unit testing
-# COMMENTED OUT: Mock-dependent test -             mock_ws = AsyncMock()
+# COMMENTED OUT: Mock-dependent test -             websocket = TestWebSocketConnection()
 # COMMENTED OUT: Mock-dependent test -             mock_ws.recv.return_value = json.dumps({
 # COMMENTED OUT: Mock-dependent test -                 "type": "auth_success",
 # COMMENTED OUT: Mock-dependent test -                 "session_id": "session_concurrent",
@@ -320,7 +347,7 @@ class TestWebSocketAuthHandshakeCompleteFlow(BaseIntegrationTest):
         # Mock: Component isolation for testing without external dependencies
 # COMMENTED OUT: Mock-dependent test -         with patch('websockets.connect') as mock_connect:
             # Mock: Generic component isolation for controlled unit testing
-# COMMENTED OUT: Mock-dependent test -             mock_ws = AsyncMock()
+# COMMENTED OUT: Mock-dependent test -             websocket = TestWebSocketConnection()
 # COMMENTED OUT: Mock-dependent test -             mock_ws.recv.return_value = json.dumps({
 # COMMENTED OUT: Mock-dependent test -                 "type": "auth_success",
 # COMMENTED OUT: Mock-dependent test -                 "session_id": "session_1",
@@ -339,7 +366,7 @@ class TestWebSocketAuthHandshakeCompleteFlow(BaseIntegrationTest):
         # Mock: Component isolation for testing without external dependencies
 # COMMENTED OUT: Mock-dependent test -         with patch('websockets.connect') as mock_connect:
             # Mock: Generic component isolation for controlled unit testing
-# COMMENTED OUT: Mock-dependent test -             mock_ws = AsyncMock()
+# COMMENTED OUT: Mock-dependent test -             websocket = TestWebSocketConnection()
 # COMMENTED OUT: Mock-dependent test -             mock_ws.recv.return_value = json.dumps({
 # COMMENTED OUT: Mock-dependent test -                 "type": "auth_success",
 # COMMENTED OUT: Mock-dependent test -                 "session_id": "session_2",
@@ -362,7 +389,7 @@ class TestWebSocketAuthHandshakeCompleteFlow(BaseIntegrationTest):
         # Mock: Component isolation for testing without external dependencies
 # COMMENTED OUT: Mock-dependent test -         with patch('websockets.connect') as mock_connect:
             # Mock: Generic component isolation for controlled unit testing
-# COMMENTED OUT: Mock-dependent test -             mock_ws = AsyncMock()
+# COMMENTED OUT: Mock-dependent test -             websocket = TestWebSocketConnection()
             # Return malformed response
 # COMMENTED OUT: Mock-dependent test -             mock_ws.recv.return_value = "not valid json"
 # COMMENTED OUT: Mock-dependent test -             mock_connect.return_value.__aenter__.return_value = mock_ws

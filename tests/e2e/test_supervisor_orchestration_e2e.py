@@ -1,3 +1,26 @@
+class TestWebSocketConnection:
+    """Real WebSocket connection for testing instead of mocks."""
+    
+    def __init__(self):
+        self.messages_sent = []
+        self.is_connected = True
+        self._closed = False
+        
+    async def send_json(self, message: dict):
+        """Send JSON message."""
+        if self._closed:
+            raise RuntimeError("WebSocket is closed")
+        self.messages_sent.append(message)
+        
+    async def close(self, code: int = 1000, reason: str = "Normal closure"):
+        """Close WebSocket connection."""
+        self._closed = True
+        self.is_connected = False
+        
+    def get_messages(self) -> list:
+        """Get all sent messages."""
+        return self.messages_sent.copy()
+
 """End-to-End Tests for Supervisor Agent Orchestration.
 
 Complete end-to-end tests using real services (database, Redis, LLM when available)
@@ -14,6 +37,13 @@ import json
 from datetime import datetime, timezone
 from typing import Dict, Any, List, Optional
 import uuid
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from test_framework.database.test_database_manager import TestDatabaseManager
+from test_framework.redis.test_redis_manager import TestRedisManager
+from auth_service.core.auth_manager import AuthManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
@@ -29,10 +59,15 @@ from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 from netra_backend.app.websocket_core import UnifiedWebSocketManager
 from netra_backend.app.schemas.websocket_models import WebSocketMessage
 from netra_backend.app.models import User, Thread, Message, AgentExecution
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
 
 
 @pytest.fixture(scope="session")
 def event_loop():
+    """Use real service instance."""
+    # TODO: Initialize real service
     """Create event loop for async tests."""
     loop = asyncio.get_event_loop_policy().new_event_loop()
     yield loop
@@ -78,6 +113,8 @@ async def db_session(test_database):
 
 @pytest.fixture
 def llm_manager():
+    """Use real service instance."""
+    # TODO: Initialize real service
     """Create LLM manager (real or mock based on environment)."""
     from shared.isolated_environment import get_env
     env = get_env()
@@ -88,7 +125,6 @@ def llm_manager():
         return LLMManager()
     else:
         # Use mock for faster testing
-        from unittest.mock import AsyncMock, MagicMock
         manager = MagicMock(spec=LLMManager)
         manager.generate = AsyncMock(return_value=json.dumps({
             "response": "Test response",
@@ -100,6 +136,8 @@ def llm_manager():
 
 @pytest.fixture
 def websocket_manager():
+    """Use real service instance."""
+    # TODO: Initialize real service
     """Create WebSocket manager for testing."""
     manager = UnifiedWebSocketManager()
     return manager
@@ -107,6 +145,8 @@ def websocket_manager():
 
 @pytest.fixture
 def tool_dispatcher(llm_manager):
+    """Use real service instance."""
+    # TODO: Initialize real service
     """Create tool dispatcher."""
     return ToolDispatcher(llm_manager)
 

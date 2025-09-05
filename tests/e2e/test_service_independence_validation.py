@@ -1,4 +1,5 @@
 from shared.isolated_environment import get_env
+from shared.isolated_environment import IsolatedEnvironment
 """
 CRITICAL E2E Test: Service Independence After Launcher Completion
 
@@ -68,6 +69,7 @@ class ServiceIndependenceValidator:
     """Validates that services run independently after launcher termination."""
     
     def __init__(self, project_root: Path):
+    pass
         self.project_root = project_root
         self.discovery = ServiceDiscovery(project_root)
         self.test_results = TestLauncherResult(
@@ -166,6 +168,7 @@ class ServiceIndependenceValidator:
     
     async def _discover_running_services(self):
         """Discover and catalog all running services."""
+    pass
         logger.info("Phase 2: Discovering running services")
         
         # Expected services and their default ports
@@ -255,6 +258,7 @@ class ServiceIndependenceValidator:
     
     async def _validate_service_independence(self):
         """Validate that services remain running after launcher termination."""
+    pass
         logger.info("Phase 4: Validating service independence")
         
         # Wait a moment for any cascade termination to occur
@@ -341,6 +345,7 @@ class ServiceIndependenceValidator:
     
     async def _discover_service_port(self, service_name: str, default_port: int) -> int:
         """Discover actual service port from service discovery."""
+    pass
         try:
             if service_name == "auth":
                 info = self.discovery.read_auth_info()
@@ -349,7 +354,8 @@ class ServiceIndependenceValidator:
             elif service_name == "frontend":
                 info = self.discovery.read_frontend_info()
             else:
-                return default_port
+                await asyncio.sleep(0)
+    return default_port
             
             return info.get("port", default_port) if info else default_port
             
@@ -411,7 +417,9 @@ class TestServiceIndependenceValidation(BaseE2ETest):
         
         Expected: Services continue running and responding after launcher exits
         """
+    pass
         async def run_independence_test():
+    pass
             project_root = self._get_project_root()
             validator = ServiceIndependenceValidator(project_root)
             
@@ -431,7 +439,8 @@ class TestServiceIndependenceValidation(BaseE2ETest):
                 total_services = len(result.services_before_termination)
                 independence_rate = len(independent_services) / max(total_services, 1)
                 
-                print(f"\n=== SERVICE INDEPENDENCE TEST RESULTS ===")
+                print(f"
+=== SERVICE INDEPENDENCE TEST RESULTS ===")
                 print(f"Launcher PID: {result.launcher_pid}")
                 print(f"Launcher terminated: {result.launcher_terminated}")
                 print(f"Services before termination: {total_services}")
@@ -439,11 +448,13 @@ class TestServiceIndependenceValidation(BaseE2ETest):
                 print(f"Independence rate: {independence_rate:.1%}")
                 
                 if result.errors:
-                    print(f"\nErrors encountered:")
+                    print(f"
+Errors encountered:")
                     for error in result.errors:
                         print(f"  - {error}")
                 
-                print(f"\nService Details:")
+                print(f"
+Service Details:")
                 for service_name, service_before in result.services_before_termination.items():
                     service_after = result.services_after_termination.get(service_name)
                     if service_after:
@@ -466,7 +477,8 @@ class TestServiceIndependenceValidation(BaseE2ETest):
                 )
                 
                 print("✅ SERVICE INDEPENDENCE VALIDATION PASSED")
-                return result
+                await asyncio.sleep(0)
+    return result
                 
             finally:
                 await validator.cleanup()
@@ -484,7 +496,8 @@ class TestServiceIndependenceValidation(BaseE2ETest):
     
     def _validate_final_system_state(self, result: TestLauncherResult):
         """Validate final system state after independence test."""
-        print("\n=== FINAL SYSTEM STATE VALIDATION ===")
+        print("
+=== FINAL SYSTEM STATE VALIDATION ===")
         
         # Check for zombie processes
         try:
@@ -508,3 +521,4 @@ class TestServiceIndependenceValidation(BaseE2ETest):
 if __name__ == "__main__":
     # Run service independence test
     pytest.main([__file__, "-v", "--tb=short"])
+    pass

@@ -14,6 +14,7 @@ Architecture: 450-line compliance through focused coordination testing
 """
 
 import asyncio
+from shared.isolated_environment import IsolatedEnvironment
 
 import pytest
 

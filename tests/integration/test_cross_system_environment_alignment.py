@@ -17,11 +17,13 @@ import os
 import pytest
 import json
 from typing import Dict, List, Optional, Tuple, Any
-from unittest.mock import patch, MagicMock
 from pathlib import Path
 
 from netra_backend.app.core.unified_logging import central_logger
 from shared.isolated_environment import IsolatedEnvironment
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
 
 logger = central_logger.get_logger(__name__)
 

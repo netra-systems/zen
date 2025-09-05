@@ -3,8 +3,11 @@
 import os
 import pytest
 import logging
-from unittest.mock import patch
 from shared.isolated_environment import get_env
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
+from shared.isolated_environment import IsolatedEnvironment
 
 logger = logging.getLogger(__name__)
 
@@ -46,7 +49,7 @@ async def test_staging_auth_config_no_dev_login():
         # Create mock request
         class MockRequest:
             def __init__(self):
-                self.client = type('obj', (object,), {'host': '127.0.0.1'})()
+                self.client = type('obj', (object), {'host': '127.0.0.1'})()
                 self.headers = {}
                 self.cookies = {}
         
@@ -89,7 +92,8 @@ async def test_dev_login_blocked_in_staging():
         # Create mock request and client info
         class MockRequest:
             def __init__(self):
-                self.client = type('obj', (object,), {'host': '127.0.0.1'})()
+    pass
+                self.client = type('obj', (object), {'host': '127.0.0.1'})()
                 self.headers = {"user-agent": "test"}
                 self.cookies = {}
         
@@ -144,6 +148,8 @@ if __name__ == "__main__":
         await test_staging_auth_config_no_dev_login()
         await test_dev_login_blocked_in_staging()
         await test_production_auth_config_no_dev_login()
-        print("\nAll tests passed ✓")
+        print("
+All tests passed ✓")
     
     asyncio.run(run_tests())
+    pass

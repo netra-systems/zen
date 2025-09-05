@@ -1,4 +1,5 @@
 from shared.isolated_environment import get_env
+from shared.isolated_environment import IsolatedEnvironment
 """
 Test suite to expose health route duplication and legacy issues.
 
@@ -15,7 +16,6 @@ import json
 import sys
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Set
-from unittest.mock import AsyncMock, MagicMock, patch
 
 import httpx
 import pytest
@@ -26,6 +26,9 @@ from fastapi.testclient import TestClient
 
 from auth_service.main import app as auth_app
 from netra_backend.app.core.app_factory import create_app
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
 
 pytestmark = pytest.mark.asyncio
 
@@ -34,6 +37,7 @@ class HealthEndpointAuditor:
     """Auditor to detect health endpoint issues."""
     
     def __init__(self):
+    pass
         self.issues = []
         self.duplicate_endpoints = {}
         self.inconsistent_formats = {}
@@ -58,6 +62,7 @@ class HealthEndpointAuditor:
                     
     def audit_response_format(self, service_name: str, endpoint: str, response: Dict[str, Any]):
         """Check for inconsistent response formats."""
+    pass
         expected_fields = {'status', 'service', 'timestamp'}
         actual_fields = set(response.keys())
         
@@ -99,6 +104,7 @@ class TestHealthRouteDuplicationAudit:
     @pytest.fixture
     def backend_app(self):
         """Create backend FastAPI app."""
+    pass
         with patch.dict('os.environ', {
             'SKIP_STARTUP_TASKS': 'true',
             'DATABASE_URL': 'postgresql://test:test@localhost/test'
@@ -116,6 +122,7 @@ class TestHealthRouteDuplicationAudit:
     
     async def test_duplicate_health_endpoints_in_backend(self, backend_app, auditor):
         """Test that backend has duplicate health endpoints - SHOULD FAIL."""
+    pass
         client = TestClient(backend_app)
         
         # Collect all health-related endpoints
@@ -154,6 +161,7 @@ class TestHealthRouteDuplicationAudit:
     
     async def test_inconsistent_endpoint_naming(self, backend_app, auth_test_app):
         """Test that endpoint naming is consistent across services - SHOULD FAIL."""
+    pass
         backend_client = TestClient(backend_app)
         auth_client = TestClient(auth_test_app)
         
@@ -190,10 +198,8 @@ class TestHealthRouteDuplicationAudit:
         
         # Mock database connections
         # Mock: Component isolation for testing without external dependencies
-        with patch('netra_backend.app.db.postgres.async_engine'):
-            # Mock: Component isolation for testing without external dependencies
-            with patch('auth_service.auth_core.database.connection.auth_db'):
-                # Get health responses
+                    # Mock: Component isolation for testing without external dependencies
+                            # Get health responses
                 backend_health = backend_client.get('/health')
                 auth_health = auth_client.get('/health')
                 
@@ -208,6 +214,7 @@ class TestHealthRouteDuplicationAudit:
     
     async def test_legacy_import_patterns(self, auditor):
         """Test for legacy import patterns - SHOULD FAIL."""
+    pass
         project_root = Path(__file__).parent.parent.parent
         
         # Check for legacy imports in known files
@@ -248,6 +255,7 @@ class TestHealthRouteDuplicationAudit:
     
     async def test_health_route_collision(self, backend_app):
         """Test that there are no route collisions for health endpoints - SHOULD FAIL."""
+    pass
         routes_by_path = {}
         collisions = []
         
@@ -287,6 +295,7 @@ class TestHealthRouteDuplicationAudit:
     
     async def test_health_dependency_circular_imports(self):
         """Test for circular import dependencies in health modules - SHOULD FAIL."""
+    pass
         import_graph = {}
         circular_deps = []
         
@@ -306,7 +315,35 @@ class TestHealthRouteDuplicationAudit:
                 imports = []
                 
                 # Extract imports
-                for line in content.split('\n'):
+                for line in content.split('
+
+class TestWebSocketConnection:
+    """Real WebSocket connection for testing instead of mocks."""
+    
+    def __init__(self):
+    pass
+        self.messages_sent = []
+        self.is_connected = True
+        self._closed = False
+        
+    async def send_json(self, message: dict):
+        """Send JSON message."""
+        if self._closed:
+            raise RuntimeError("WebSocket is closed")
+        self.messages_sent.append(message)
+        
+    async def close(self, code: int = 1000, reason: str = "Normal closure"):
+        """Close WebSocket connection."""
+    pass
+        self._closed = True
+        self.is_connected = False
+        
+    def get_messages(self) -> list:
+        """Get all sent messages."""
+        await asyncio.sleep(0)
+    return self.messages_sent.copy()
+
+'):
                     if 'from netra_backend' in line and 'health' in line:
                         imports.append(line.strip())
                 
@@ -314,6 +351,7 @@ class TestHealthRouteDuplicationAudit:
         
         # Check for circular dependencies
         def has_circular_dep(module, visited=None):
+    pass
             if visited is None:
                 visited = set()
             if module in visited:
@@ -379,6 +417,7 @@ class TestHealthEndpointPerformance:
     
     async def test_health_check_database_connections(self):
         """Test that health checks don't leak database connections - SHOULD FAIL."""
+    pass
         # This test would need actual database setup to properly test
         # For now, we check for proper connection cleanup patterns
         

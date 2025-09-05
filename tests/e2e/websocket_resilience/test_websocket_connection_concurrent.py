@@ -16,6 +16,7 @@ import hashlib
 import secrets
 from datetime import datetime, timezone, timedelta
 from typing import Dict, List, Any, Optional, Tuple
+from shared.isolated_environment import IsolatedEnvironment
 
 import pytest
 import jwt

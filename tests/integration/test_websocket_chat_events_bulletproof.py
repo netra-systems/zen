@@ -28,6 +28,8 @@ import pytest
 from loguru import logger
 import websockets
 from websockets.exceptions import WebSocketException
+from netra_backend.app.core.agent_registry import AgentRegistry
+from shared.isolated_environment import IsolatedEnvironment
 
 # Add project root to Python path
 project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))

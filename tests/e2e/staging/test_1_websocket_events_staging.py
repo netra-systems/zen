@@ -8,6 +8,7 @@ import asyncio
 import json
 import time
 from typing import Dict, List, Set
+from shared.isolated_environment import IsolatedEnvironment
 
 import pytest
 import websockets

@@ -1,4 +1,5 @@
 from shared.isolated_environment import get_env
+from shared.isolated_environment import IsolatedEnvironment
 """LLM Initialization Test Implementer - Real API Integration Testing
 
 BVJ: Growth & Enterprise segments | $100K+ MRR depends on real LLM responses

@@ -24,6 +24,7 @@ ARCHITECTURAL COMPLIANCE:
 import asyncio
 import pytest
 import time
+from shared.isolated_environment import IsolatedEnvironment
 
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager as WebSocketManager
 from tests.e2e.concurrent_user_models import IsolationValidator

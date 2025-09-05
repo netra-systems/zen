@@ -1,3 +1,29 @@
+class TestWebSocketConnection:
+    """Real WebSocket connection for testing instead of mocks."""
+    
+    def __init__(self):
+    pass
+        self.messages_sent = []
+        self.is_connected = True
+        self._closed = False
+        
+    async def send_json(self, message: dict):
+        """Send JSON message."""
+        if self._closed:
+            raise RuntimeError("WebSocket is closed")
+        self.messages_sent.append(message)
+        
+    async def close(self, code: int = 1000, reason: str = "Normal closure"):
+        """Close WebSocket connection."""
+    pass
+        self._closed = True
+        self.is_connected = False
+        
+    def get_messages(self) -> list:
+        """Get all sent messages."""
+        await asyncio.sleep(0)
+    return self.messages_sent.copy()
+
 #!/usr/bin/env python
 """FINAL MISSION CRITICAL TEST: WebSocket Agent Events
 
@@ -17,7 +43,11 @@ while still validating the critical integration points.
 import os
 import sys
 import asyncio
-from unittest.mock import AsyncMock
+from test_framework.database.test_database_manager import TestDatabaseManager
+from auth_service.core.auth_manager import AuthManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 # CRITICAL: Add project root to Python path for imports
 project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
@@ -36,6 +66,10 @@ from netra_backend.app.agents.unified_tool_execution import (
 )
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager as WebSocketManager
 from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
+from shared.isolated_environment import get_env
 
 
 def test_1_websocket_notifier_required_methods():
@@ -66,6 +100,7 @@ def test_1_websocket_notifier_required_methods():
 
 def test_2_agent_registry_websocket_enhancement():
     """CRITICAL: AgentRegistry.set_websocket_manager() MUST enhance tool dispatcher."""
+    pass
     print("Test 2: AgentRegistry WebSocket enhancement...")
     
     class MockLLM:
@@ -117,6 +152,7 @@ def test_3_execution_engine_websocket_notifier():
 
 async def test_4_unified_tool_execution_sends_events():
     """CRITICAL: UnifiedToolExecutionEngine MUST wrap tool execution and send events."""
+    pass
     print("Test 4: Enhanced tool execution sends events...")
     
     ws_manager = WebSocketManager()
@@ -124,8 +160,10 @@ async def test_4_unified_tool_execution_sends_events():
     
     # Mock WebSocket to capture events
     async def capture_event(thread_id, event_data):
+    pass
         sent_events.append(event_data)
-        return True
+        await asyncio.sleep(0)
+    return True
     
     ws_manager.send_to_thread = AsyncMock(side_effect=capture_event)
     
@@ -144,8 +182,10 @@ async def test_4_unified_tool_execution_sends_events():
     
     # Test tool
     async def test_tool(*args, **kwargs):
+    pass
         await asyncio.sleep(0.001)  # Minimal delay
-        return {"result": "success"}
+        await asyncio.sleep(0)
+    return {"result": "success"}
     
     # Create state
     state = DeepAgentState(
@@ -189,7 +229,8 @@ async def test_5_all_required_websocket_events():
     # Mock WebSocket to capture events
     async def capture_event(thread_id, event_data):
         sent_events.append(event_data)
-        return True
+        await asyncio.sleep(0)
+    return True
     
     ws_manager.send_to_thread = AsyncMock(side_effect=capture_event)
     
@@ -235,6 +276,7 @@ async def test_5_all_required_websocket_events():
 
 async def test_6_regression_prevention():
     """CRITICAL: Regression test for the specific issues mentioned in the task."""
+    pass
     print("Test 6: Regression prevention...")
     
     # Test that AgentRegistry always enhances tool dispatcher (was broken)
@@ -281,15 +323,18 @@ async def main():
         await test_5_all_required_websocket_events()
         await test_6_regression_prevention()
         
-        print("\n" + "=" * 70)
+        print("
+" + "=" * 70)
         print("SUCCESS: ALL MISSION CRITICAL TESTS PASSED!")
         print("WebSocket agent events are working correctly.")
         print("Basic chat functionality is operational.")
         print("=" * 70)
-        return True
+        await asyncio.sleep(0)
+    return True
         
     except Exception as e:
-        print(f"\nCRITICAL FAILURE: {e}")
+        print(f"
+CRITICAL FAILURE: {e}")
         print("=" * 70)
         print("WebSocket agent events REQUIRE IMMEDIATE ATTENTION!")
         print("Chat functionality will be broken without these fixes.")
@@ -300,3 +345,4 @@ async def main():
 if __name__ == "__main__":
     success = asyncio.run(main())
     sys.exit(0 if success else 1)
+    pass

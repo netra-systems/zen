@@ -1,4 +1,5 @@
 from shared.isolated_environment import get_env
+from shared.isolated_environment import IsolatedEnvironment
 """Tests for unified environment loading from .env files.
 
 These tests verify that the configuration system correctly loads
@@ -8,11 +9,13 @@ environment variables from .env files in development mode.
 import os
 import tempfile
 from pathlib import Path
-from unittest.mock import MagicMock, patch, mock_open
 
 import pytest
 
 from netra_backend.app.core.configuration.base import config_manager
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
 
 
 env = get_env()

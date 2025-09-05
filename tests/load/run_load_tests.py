@@ -127,10 +127,12 @@ def main():
         return result.returncode
         
     except KeyboardInterrupt:
-        print("\n🛑 Load tests interrupted by user")
+        print("
+🛑 Load tests interrupted by user")
         return 1
     except Exception as e:
-        print(f"\n💥 Error running load tests: {e}")
+        print(f"
+💥 Error running load tests: {e}")
         return 1
 
 

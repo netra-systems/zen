@@ -27,6 +27,7 @@ from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
 from typing import Dict, List, Optional, Any, Tuple
 import pytest
+from shared.isolated_environment import IsolatedEnvironment
 
 from netra_backend.app.websocket_core.manager import (
     WebSocketHeartbeatManager,

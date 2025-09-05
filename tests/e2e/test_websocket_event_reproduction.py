@@ -1,3 +1,29 @@
+class TestWebSocketConnection:
+    """Real WebSocket connection for testing instead of mocks."""
+    
+    def __init__(self):
+    pass
+        self.messages_sent = []
+        self.is_connected = True
+        self._closed = False
+        
+    async def send_json(self, message: dict):
+        """Send JSON message."""
+        if self._closed:
+            raise RuntimeError("WebSocket is closed")
+        self.messages_sent.append(message)
+        
+    async def close(self, code: int = 1000, reason: str = "Normal closure"):
+        """Close WebSocket connection."""
+    pass
+        self._closed = True
+        self.is_connected = False
+        
+    def get_messages(self) -> list:
+        """Get all sent messages."""
+        await asyncio.sleep(0)
+    return self.messages_sent.copy()
+
 """
 Test to reproduce WebSocket event emission failure in agent execution.
 This test validates that all required WebSocket events are emitted during agent lifecycle.
@@ -6,11 +32,20 @@ This test validates that all required WebSocket events are emitted during agent 
 import asyncio
 import pytest
 from typing import List, Set
-from unittest.mock import MagicMock, AsyncMock, patch
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from test_framework.database.test_database_manager import TestDatabaseManager
+from auth_service.core.auth_manager import AuthManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 from netra_backend.app.core.registry.universal_registry import AgentRegistry
 from netra_backend.app.agents.execution_engine import ExecutionEngine
 from netra_backend.app.services.tool_dispatcher import UnifiedToolDispatcher
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
+from shared.isolated_environment import get_env
 
 
 @pytest.mark.asyncio
@@ -30,12 +65,12 @@ class TestWebSocketEventReproduction:
         Reproduce the missing WebSocket events issue.
         This test should FAIL initially, demonstrating the problem.
         """
+    pass
         # Track emitted events
         emitted_events: List[str] = []
         
         # Create mock WebSocket manager that tracks events
-        mock_ws_manager = MagicMock()
-        mock_ws_manager.send_event = AsyncMock(side_effect=lambda event_type, **kwargs: 
+        mock_ws_manager = Magic        mock_ws_manager.send_event = AsyncMock(side_effect=lambda event_type, **kwargs: 
                                               emitted_events.append(event_type))
         
         # Set up agent registry with WebSocket manager
@@ -117,6 +152,7 @@ class TestWebSocketEventReproduction:
     
     async def test_tool_dispatcher_websocket_enhancement(self):
         """Test that tool dispatcher is properly enhanced with WebSocket support."""
+    pass
         from netra_backend.app.agents.supervisor.user_execution_context import create_test_user_context
         
         # Create test user context for request-scoped dispatcher
@@ -126,8 +162,7 @@ class TestWebSocketEventReproduction:
         dispatcher = UnifiedToolDispatcher.create_request_scoped(user_context)
         
         # Create mock WebSocket manager
-        mock_ws_manager = MagicMock()
-        mock_ws_manager.send_event = AsyncMock()
+        mock_ws_manager = Magic        mock_ws_manager.websocket = TestWebSocketConnection()
         
         # Enhance dispatcher with WebSocket
         dispatcher.set_websocket_manager(mock_ws_manager)
@@ -154,8 +189,7 @@ class TestWebSocketEventReproduction:
         """Test that AgentRegistry doesn't use placeholder run_id."""
         
         registry = AgentRegistry()
-        mock_ws_manager = MagicMock()
-        
+        mock_ws_manager = Magic        
         # Set WebSocket manager
         registry.set_websocket_manager(mock_ws_manager)
         

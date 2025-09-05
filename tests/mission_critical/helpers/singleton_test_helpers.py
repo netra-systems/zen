@@ -1,4 +1,26 @@
-"""
+class TestWebSocketConnection:
+    """Real WebSocket connection for testing instead of mocks."""
+    
+    def __init__(self):
+        self.messages_sent = []
+        self.is_connected = True
+        self._closed = False
+        
+    async def send_json(self, message: dict):
+        """Send JSON message."""
+        if self._closed:
+            raise RuntimeError("WebSocket is closed")
+        self.messages_sent.append(message)
+        
+    async def close(self, code: int = 1000, reason: str = "Normal closure"):
+        """Close WebSocket connection."""
+        self._closed = True
+        self.is_connected = False
+        
+    def get_messages(self) -> list:
+        """Get all sent messages."""
+        return self.messages_sent.copy()
+\n"""
 Singleton Test Helpers - Utilities for validating singleton removal
 
 BUSINESS VALUE JUSTIFICATION:
@@ -31,13 +53,16 @@ import os
 import threading
 import random
 from typing import Dict, List, Optional, Set, Any, Tuple, Callable
-from unittest.mock import Mock, AsyncMock, MagicMock
 from dataclasses import dataclass, field
 from collections import defaultdict
 from datetime import datetime, timezone
 from concurrent.futures import ThreadPoolExecutor
 import weakref
 import inspect
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
+from shared.isolated_environment import get_env
 
 
 @dataclass
@@ -80,13 +105,13 @@ class MockUserContext:
     def __post_init__(self):
         """Initialize mock WebSocket with proper async methods"""
         if not hasattr(self.websocket, 'send_json'):
-            self.websocket.send_json = AsyncMock()
+            self.websocket.websocket = TestWebSocketConnection()
         if not hasattr(self.websocket, 'send_text'):
-            self.websocket.send_text = AsyncMock()
+            self.websocket.websocket = TestWebSocketConnection()
         if not hasattr(self.websocket, 'close'):
-            self.websocket.close = AsyncMock()
+            self.websocket.websocket = TestWebSocketConnection()
         if not hasattr(self.websocket, 'receive_json'):
-            self.websocket.receive_json = AsyncMock()
+            self.websocket.websocket = TestWebSocketConnection()
     
     def add_event(self, event: Dict[str, Any]) -> None:
         """Add received event to tracking"""
@@ -362,11 +387,11 @@ class ConcurrentUserSimulator:
             run_id = f"run_{user_id}_{uuid.uuid4().hex[:8]}"
             
             # Create mock WebSocket
-            websocket = Mock()
-            websocket.send_json = AsyncMock()
-            websocket.send_text = AsyncMock()
-            websocket.close = AsyncMock()
-            websocket.receive_json = AsyncMock()
+            websocket = TestWebSocketConnection()  # Real WebSocket implementation
+            websocket.websocket = TestWebSocketConnection()
+            websocket.websocket = TestWebSocketConnection()
+            websocket.websocket = TestWebSocketConnection()
+            websocket.websocket = TestWebSocketConnection()
             
             # User-specific data that should never be shared
             session_data = {

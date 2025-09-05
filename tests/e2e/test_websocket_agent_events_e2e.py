@@ -11,16 +11,21 @@ import asyncio
 import json
 import pytest
 import websockets
-from unittest.mock import Mock, MagicMock, AsyncMock, patch
 from datetime import datetime, timezone
 import uuid
 import time
+from netra_backend.app.core.agent_registry import AgentRegistry
+from shared.isolated_environment import IsolatedEnvironment
 
 from netra_backend.app.services.websocket_bridge_factory import WebSocketBridgeFactory
 from netra_backend.app.agents.supervisor.execution_factory import ExecutionEngineFactory
 from netra_backend.app.core.registry.universal_registry import AgentRegistry
 from test_framework.backend_client import BackendClient
 from test_framework.test_context import TestContext
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
+from shared.isolated_environment import get_env
 
 
 class TestWebSocketAgentEventsE2E:

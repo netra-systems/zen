@@ -29,7 +29,7 @@ import time
 from typing import Dict, Any
 import pytest
 import pytest_asyncio
-from unittest.mock import patch
+from shared.isolated_environment import IsolatedEnvironment
 
 from tests.e2e.agent_billing_test_helpers import (
     AgentBillingTestCore, AgentRequestSimulator, BillingFlowValidator, AgentBillingTestUtils,
@@ -39,6 +39,10 @@ from tests.e2e.agent_billing_test_helpers import (
     AgentBillingTestUtils
 )
 from netra_backend.app.schemas.user_plan import PlanTier
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
+from shared.isolated_environment import get_env
 
 @pytest.mark.asyncio
 @pytest.mark.e2e

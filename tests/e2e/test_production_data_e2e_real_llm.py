@@ -1,6 +1,7 @@
 """E2E Test: Production-Like Data Testing with Real LLM Integration
 
 from shared.isolated_environment import get_env
+from shared.isolated_environment import IsolatedEnvironment
 CRITICAL E2E test for production-scale data processing with real LLM.
 Tests realistic workload scenarios, data volumes, and edge cases with actual AI models.
 

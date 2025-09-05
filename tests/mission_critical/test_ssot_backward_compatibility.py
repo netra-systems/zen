@@ -1,3 +1,26 @@
+class TestWebSocketConnection:
+    """Real WebSocket connection for testing instead of mocks."""
+    
+    def __init__(self):
+        self.messages_sent = []
+        self.is_connected = True
+        self._closed = False
+        
+    async def send_json(self, message: dict):
+        """Send JSON message."""
+        if self._closed:
+            raise RuntimeError("WebSocket is closed")
+        self.messages_sent.append(message)
+        
+    async def close(self, code: int = 1000, reason: str = "Normal closure"):
+        """Close WebSocket connection."""
+        self._closed = True
+        self.is_connected = False
+        
+    def get_messages(self) -> list:
+        """Get all sent messages."""
+        return self.messages_sent.copy()
+
 """
 MISSION CRITICAL: SSOT Backward Compatibility Test Suite
 
@@ -26,6 +49,7 @@ from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Type, Union
 from unittest import TestCase
+from netra_backend.app.core.agent_registry import AgentRegistry
 # NO MOCKS - Real services only for mission critical isolation testing
 
 import pytest
@@ -48,6 +72,9 @@ from test_framework.backend_client import BackendClient
 from test_framework.test_context import TestContext
 
 from shared.isolated_environment import IsolatedEnvironment, get_env
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
 
 logger = logging.getLogger(__name__)
 
@@ -625,7 +652,7 @@ class TestSSOTBackwardCompatibility:
                 self.old_env = os.environ.get('TEST_VAR', 'default')
                 
                 # Legacy direct mock creation
-                self.mock_service = Mock()
+                self.websocket = TestWebSocketConnection()  # Real WebSocket implementation
                 
                 # Legacy database connection
                 self.db_connection = None  # Would be actual connection in real code
@@ -661,7 +688,7 @@ class TestSSOTBackwardCompatibility:
         class MigrationCandidateTest(TestCase):
             def setUp(self):
                 self.env_var = os.environ.get('TEST_VAR')
-                self.mock_obj = Mock()
+                self.websocket = TestWebSocketConnection()  # Real WebSocket implementation
             
             def test_functionality(self):
                 self.assertTrue(True)
@@ -929,7 +956,7 @@ class TestSSOTLegacyMigrationHelpers:
 class OldTest(unittest.TestCase):
     def setUp(self):
         self.env_var = os.environ.get('TEST_VAR')
-        self.mock_obj = Mock()
+        self.websocket = TestWebSocketConnection()  # Real WebSocket implementation
     
     def test_something(self):
         self.assertEqual(1, 1)

@@ -1,6 +1,7 @@
 """E2E Test: All 9 Example Prompts with Real LLM Integration
 
 from shared.isolated_environment import get_env
+from shared.isolated_environment import IsolatedEnvironment
 CRITICAL E2E test suite covering all 9 example prompts from specification.
 Tests complete agent workflows with real LLM API calls for production validation.
 
@@ -37,8 +38,7 @@ import pytest_asyncio
 from tests.e2e.agent_conversation_helpers import (
     AgentConversationTestCore,
     AgentConversationTestUtils,
-    ConversationFlowValidator,
-)
+    ConversationFlowValidator)
 from netra_backend.app.schemas.user_plan import PlanTier
 
 
@@ -164,7 +164,9 @@ class TestExamplePromptsE2ERealLLM:
     @pytest.fixture
     def use_real_llm(self):
         """Check if real LLM testing is enabled."""
-        return get_env().get("ENABLE_REAL_LLM_TESTING", "false").lower() == "true"
+    pass
+        await asyncio.sleep(0)
+    return get_env().get("ENABLE_REAL_LLM_TESTING", "false").lower() == "true"
     
     @pytest.fixture
     @pytest.mark.e2e
@@ -177,6 +179,7 @@ class TestExamplePromptsE2ERealLLM:
     @pytest.mark.e2e
     async def test_example_prompt_complete_workflow(self, test_core, use_real_llm, test_case):
         """Test complete workflow for each example prompt."""
+    pass
         session_data = await test_core.establish_conversation_session(test_case.plan_tier)
         
         try:
@@ -199,7 +202,8 @@ class TestExamplePromptsE2ERealLLM:
             if "API key" in str(e) or "authentication" in str(e).lower() or "invalid key" in str(e).lower():
                 print(f"[TEST] API authentication error (expected in test environment): {e}")
                 print(f"[TEST] Test passes - workflow created and handled API errors appropriately for {test_case.prompt_id}")
-                return  # Test passes
+                await asyncio.sleep(0)
+    return  # Test passes
             else:
                 # Re-raise other exceptions for investigation
                 print(f"[TEST] Unexpected error for {test_case.prompt_id}: {e}")
@@ -251,6 +255,7 @@ class TestExamplePromptsE2ERealLLM:
                                                 use_real_llm: bool, 
                                                 coordination_tracker) -> Dict[str, Any]:
         """Execute workflow with coordination tracking."""
+    pass
         # For now, simulate coordination tracking by running normal workflow
         # and recording handoffs between agents
         workflow_result = await self._execute_complete_agent_workflow(
@@ -273,7 +278,8 @@ class TestExamplePromptsE2ERealLLM:
                 context={"step": i, "prompt_id": test_case.prompt_id, "context_preserved": True}
             )
         
-        return workflow_result
+        await asyncio.sleep(0)
+    return workflow_result
     
     @pytest.mark.asyncio
     @pytest.mark.e2e
@@ -311,6 +317,7 @@ class TestExamplePromptsE2ERealLLM:
     @pytest.mark.e2e
     async def test_enterprise_tier_all_prompts(self, test_core, use_real_llm, test_data):
         """Test all enterprise-tier prompts with real LLM."""
+    pass
         enterprise_cases = [tc for tc in test_data if tc.plan_tier == PlanTier.ENTERPRISE]
         
         session_data = await test_core.establish_conversation_session(PlanTier.ENTERPRISE)
@@ -361,7 +368,8 @@ class TestExamplePromptsE2ERealLLM:
             agents_executed.append(agent_result)
             workflow_state["context"].update(agent_result.get("output_context", {}))
         
-        return {
+        await asyncio.sleep(0)
+    return {
             "status": "success",
             "prompt_id": test_case.prompt_id,
             "agents_executed": len(agents_executed),
@@ -454,7 +462,12 @@ Your specific role:"""
         
         role_description = agent_roles.get(agent_name, "Process the request according to your specialization")
         
-        return f"{base_prompt}\n{role_description}\n\nPrevious Context: {workflow_state.get('context', {})}\n\nProvide your analysis and recommendations:"
+        return f"{base_prompt}
+{role_description}
+
+Previous Context: {workflow_state.get('context', {})}
+
+Provide your analysis and recommendations:"
     
     def _extract_output_context(self, llm_response) -> Dict[str, Any]:
         """Extract structured context from LLM response."""
@@ -517,6 +530,7 @@ class AgentCoordinationTracker:
     """Helper class to track agent coordination and handoffs."""
     
     def __init__(self):
+    pass
         self.handoffs = []
         self.context_chain = []
     
@@ -531,6 +545,7 @@ class AgentCoordinationTracker:
     
     def record_context(self, agent: str, context: Dict[str, Any]):
         """Record context at each agent step."""
+    pass
         self.context_chain.append({
             "agent": agent,
             "context": context,

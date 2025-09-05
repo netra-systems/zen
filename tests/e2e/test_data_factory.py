@@ -1,6 +1,7 @@
 """Test Data Factory for E2E Tests
 
 from shared.isolated_environment import get_env
+from shared.isolated_environment import IsolatedEnvironment
 Core factory for generating unique test data for unified E2E testing.
 Focused on user, message, and thread creation with JWT token support.
 

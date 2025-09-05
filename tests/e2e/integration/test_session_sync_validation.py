@@ -12,6 +12,7 @@ import json
 import time
 import uuid
 from typing import Any, Dict, Optional, Tuple
+from shared.isolated_environment import IsolatedEnvironment
 
 import httpx
 import pytest

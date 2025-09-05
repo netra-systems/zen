@@ -1,3 +1,26 @@
+class TestWebSocketConnection:
+    """Real WebSocket connection for testing instead of mocks."""
+    
+    def __init__(self):
+        self.messages_sent = []
+        self.is_connected = True
+        self._closed = False
+        
+    async def send_json(self, message: dict):
+        """Send JSON message."""
+        if self._closed:
+            raise RuntimeError("WebSocket is closed")
+        self.messages_sent.append(message)
+        
+    async def close(self, code: int = 1000, reason: str = "Normal closure"):
+        """Close WebSocket connection."""
+        self._closed = True
+        self.is_connected = False
+        
+    def get_messages(self) -> list:
+        """Get all sent messages."""
+        return self.messages_sent.copy()
+
 """
 End-to-End (E2E) testing fixtures and environment validation.
 
@@ -16,12 +39,14 @@ import logging
 import time
 from contextlib import asynccontextmanager
 from typing import Any, Dict, Optional
-from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
 # Import environment management with lazy loading
 from shared.isolated_environment import get_env
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
 
 # Lazy import flag to prevent heavy imports during collection
 _HEAVY_IMPORTS_LOADED = False
@@ -432,8 +457,7 @@ async def high_volume_server():
         await server.stop()
     except ImportError:
         # Mock server if performance_base not available
-        yield MagicMock()
-
+        yield Magic
 @pytest.fixture
 @memory_profile("High-volume throughput client for performance testing", "VERY_HIGH")
 async def throughput_client(test_user_token, high_volume_server):
@@ -463,9 +487,7 @@ async def throughput_client(test_user_token, high_volume_server):
         
     except ImportError:
         # Mock client if performance_base not available
-        mock_client = AsyncMock()
-        mock_client.disconnect = AsyncMock()
-        mock_client.close = AsyncMock()
+        websocket = TestWebSocketConnection()
         try:
             yield mock_client
         finally:

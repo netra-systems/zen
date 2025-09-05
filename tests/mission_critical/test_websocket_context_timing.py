@@ -1,3 +1,26 @@
+class TestWebSocketConnection:
+    """Real WebSocket connection for testing instead of mocks."""
+    
+    def __init__(self):
+        self.messages_sent = []
+        self.is_connected = True
+        self._closed = False
+        
+    async def send_json(self, message: dict):
+        """Send JSON message."""
+        if self._closed:
+            raise RuntimeError("WebSocket is closed")
+        self.messages_sent.append(message)
+        
+    async def close(self, code: int = 1000, reason: str = "Normal closure"):
+        """Close WebSocket connection."""
+        self._closed = True
+        self.is_connected = False
+        
+    def get_messages(self) -> list:
+        """Get all sent messages."""
+        return self.messages_sent.copy()
+
 """
 Mission-critical WebSocket context timing tests.
 Tests race conditions and timing scenarios in WebSocket thread association.
@@ -15,13 +38,21 @@ import asyncio
 import time
 import uuid
 from typing import Any, Dict, Optional
-from unittest.mock import MagicMock, patch, AsyncMock
 import pytest
 import json
+from test_framework.database.test_database_manager import TestDatabaseManager
+from auth_service.core.auth_manager import AuthManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager as WebSocketManager, get_websocket_manager
 from fastapi import WebSocket
 from fastapi.websockets import WebSocketState
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
+from shared.isolated_environment import get_env
 
 
 class TestWebSocketContextTiming:
@@ -35,9 +66,7 @@ class TestWebSocketContextTiming:
         
         # Create mock WebSocket connection
         mock_ws = AsyncMock(spec=WebSocket)
-        mock_ws.send_text = AsyncMock()
-        mock_ws.send_json = AsyncMock()
-        mock_ws.close = AsyncMock()
+        mock_ws.websocket = TestWebSocketConnection()
         mock_ws.client_state = WebSocketState.CONNECTED
         
         # Generate test IDs
@@ -190,8 +219,7 @@ class TestWebSocketContextTiming:
         connections = []
         for i in range(5):
             mock_ws = AsyncMock(spec=WebSocket)
-            mock_ws.send_json = AsyncMock()
-            mock_ws.close = AsyncMock()
+            mock_ws.websocket = TestWebSocketConnection()
             mock_ws.client_state = WebSocketState.CONNECTED
             user_id = str(uuid.uuid4())
             
@@ -374,8 +402,7 @@ class TestWebSocketContextTiming:
         
         # Reconnect
         new_mock_ws = AsyncMock(spec=WebSocket)
-        new_mock_ws.send_json = AsyncMock()
-        new_mock_ws.close = AsyncMock()
+        new_mock_ws.websocket = TestWebSocketConnection()
         new_mock_ws.client_state = WebSocketState.CONNECTED
         new_connection_id = await manager.connect_user(user_id, new_mock_ws, thread_id=thread_id)
         

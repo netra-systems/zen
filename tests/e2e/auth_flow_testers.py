@@ -1,3 +1,26 @@
+class TestWebSocketConnection:
+    """Real WebSocket connection for testing instead of mocks."""
+    
+    def __init__(self):
+        self.messages_sent = []
+        self.is_connected = True
+        self._closed = False
+        
+    async def send_json(self, message: dict):
+        """Send JSON message."""
+        if self._closed:
+            raise RuntimeError("WebSocket is closed")
+        self.messages_sent.append(message)
+        
+    async def close(self, code: int = 1000, reason: str = "Normal closure"):
+        """Close WebSocket connection."""
+        self._closed = True
+        self.is_connected = False
+        
+    def get_messages(self) -> list:
+        """Get all sent messages."""
+        return self.messages_sent.copy()
+
 """
 Authentication Flow Core Tester - E2E Test Infrastructure
 
@@ -13,9 +36,12 @@ REQUIREMENTS:
 - 450-line file limit, 25-line function limit
 """
 from typing import Dict
-from unittest.mock import AsyncMock, MagicMock
 
 from tests.e2e.jwt_token_helpers import JWTSecurityTester, JWTTestHelper
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
+from shared.isolated_environment import get_env
 
 
 class AuthFlowE2ETester:
@@ -37,31 +63,28 @@ class AuthFlowE2ETester:
     async def _setup_auth_service_mock(self) -> None:
         """Setup auth service with real JWT logic."""
         # Mock: Authentication service isolation for testing without real auth flows
-        self.mock_services["auth"] = MagicMock()
-        # Mock: Authentication service isolation for testing without real auth flows
+        self.mock_services["auth"] = Magic        # Mock: Authentication service isolation for testing without real auth flows
         self.mock_services["auth"].validate_token = AsyncMock(return_value=True)
         # Mock: Authentication service isolation for testing without real auth flows
-        self.mock_services["auth"].create_user = AsyncMock()
+        self.mock_services["auth"].websocket = TestWebSocketConnection()
         # Mock: Authentication service isolation for testing without real auth flows
-        self.mock_services["auth"].authenticate = AsyncMock()
+        self.mock_services["auth"].websocket = TestWebSocketConnection()
     
     async def _setup_websocket_manager_mock(self) -> None:
         """Setup WebSocket manager with real connection logic."""
         # Mock: WebSocket infrastructure isolation for unit tests without real connections
-        self.mock_services["websocket"] = MagicMock()
-        # Mock: WebSocket infrastructure isolation for unit tests without real connections
+        self.mock_services["websocket"] = Magic        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         self.mock_services["websocket"].connect = AsyncMock(return_value=True)
         # Mock: WebSocket infrastructure isolation for unit tests without real connections
-        self.mock_services["websocket"].send_message = AsyncMock()
+        self.mock_services["websocket"].websocket = TestWebSocketConnection()
         
     async def _setup_database_operations(self) -> None:
         """Setup database operations for user management."""
         # Mock: Generic component isolation for controlled unit testing
-        self.mock_services["db"] = MagicMock()
+        self.mock_services["db"] = Magic        # Mock: Generic component isolation for controlled unit testing
+        self.mock_services["db"].websocket = TestWebSocketConnection()
         # Mock: Generic component isolation for controlled unit testing
-        self.mock_services["db"].create_user = AsyncMock()
-        # Mock: Generic component isolation for controlled unit testing
-        self.mock_services["db"].get_user = AsyncMock()
+        self.mock_services["db"].websocket = TestWebSocketConnection()
 
     async def cleanup_services(self) -> None:
         """Cleanup all test services."""

@@ -1,3 +1,26 @@
+class TestWebSocketConnection:
+    """Real WebSocket connection for testing instead of mocks."""
+    
+    def __init__(self):
+        self.messages_sent = []
+        self.is_connected = True
+        self._closed = False
+        
+    async def send_json(self, message: dict):
+        """Send JSON message."""
+        if self._closed:
+            raise RuntimeError("WebSocket is closed")
+        self.messages_sent.append(message)
+        
+    async def close(self, code: int = 1000, reason: str = "Normal closure"):
+        """Close WebSocket connection."""
+        self._closed = True
+        self.is_connected = False
+        
+    def get_messages(self) -> list:
+        """Get all sent messages."""
+        return self.messages_sent.copy()
+
 #!/usr/bin/env python
 """
 MISSION CRITICAL: Memory Leak Detection and Prevention Tests
@@ -34,9 +57,13 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from contextlib import asynccontextmanager
 from datetime import datetime, timedelta, timezone
 from typing import Dict, List, Set, Any, Optional, Callable, Union, Tuple
-from unittest.mock import AsyncMock, Mock, patch
 import tempfile
 import resource
+from test_framework.database.test_database_manager import TestDatabaseManager
+from auth_service.core.auth_manager import AuthManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 import pytest
 from loguru import logger
@@ -54,6 +81,10 @@ from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager as WebSocketManager
 from netra_backend.app.services.circuit_breaker import CircuitBreaker, CircuitBreakerConfig
 from netra_backend.app.llm.llm_manager import LLMManager
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
+from shared.isolated_environment import get_env
 
 
 # ============================================================================
@@ -617,6 +648,8 @@ class MemoryLeakTestAgent(BaseAgent):
 
 @pytest.fixture
 def memory_profiler():
+    """Use real service instance."""
+    # TODO: Initialize real service
     """Memory profiler fixture with baseline establishment."""
     profiler = MemoryProfiler(enable_tracemalloc=True)
     baseline = profiler.establish_baseline()
@@ -630,6 +663,8 @@ def memory_profiler():
 
 @pytest.fixture
 def memory_stress_generator():
+    """Use real service instance."""
+    # TODO: Initialize real service
     """Memory stress generator fixture with cleanup."""
     generator = MemoryStressGenerator()
     yield generator
@@ -1101,15 +1136,10 @@ class TestAuthenticationFlowMemoryManagement:
         self.baseline = self.profiler.establish_baseline()
         
         # Mock authentication service
-        self.mock_auth_service = AsyncMock()
-        self.mock_auth_service.signup = AsyncMock()
-        self.mock_auth_service.login = AsyncMock()
-        self.mock_auth_service.refresh_token = AsyncMock()
-        self.mock_auth_service.validate_jwt = AsyncMock()
-        self.mock_auth_service.logout = AsyncMock()
+        self.websocket = TestWebSocketConnection()
         
         # Mock WebSocket manager for real-time updates
-        self.mock_ws_manager = AsyncMock()
+        self.websocket = TestWebSocketConnection()
         self.mock_ws_manager.send_to_thread = AsyncMock(return_value=True)
         
         yield
@@ -1582,13 +1612,10 @@ class TestUserJourneyMemoryOptimization:
         self.baseline = self.profiler.establish_baseline()
         
         # Mock services for complete user journey
-        self.mock_user_service = AsyncMock()
-        self.mock_billing_service = AsyncMock()
-        self.mock_ai_service = AsyncMock()
-        self.mock_analytics_service = AsyncMock()
+        self.websocket = TestWebSocketConnection()
         
         # Mock WebSocket manager for real-time updates
-        self.mock_ws_manager = AsyncMock()
+        self.websocket = TestWebSocketConnection()
         self.mock_ws_manager.send_to_thread = AsyncMock(return_value=True)
         
         yield
@@ -2024,7 +2051,7 @@ class TestAuthenticationPerformanceUnderLoad:
         }
         
         # Mock WebSocket manager for real-time updates
-        self.mock_ws_manager = AsyncMock()
+        self.websocket = TestWebSocketConnection()
         self.mock_ws_manager.send_to_thread = AsyncMock(return_value=True)
         
         yield

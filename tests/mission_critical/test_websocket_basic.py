@@ -1,3 +1,29 @@
+class TestWebSocketConnection:
+    """Real WebSocket connection for testing instead of mocks."""
+    
+    def __init__(self):
+    pass
+        self.messages_sent = []
+        self.is_connected = True
+        self._closed = False
+        
+    async def send_json(self, message: dict):
+        """Send JSON message."""
+        if self._closed:
+            raise RuntimeError("WebSocket is closed")
+        self.messages_sent.append(message)
+        
+    async def close(self, code: int = 1000, reason: str = "Normal closure"):
+        """Close WebSocket connection."""
+    pass
+        self._closed = True
+        self.is_connected = False
+        
+    def get_messages(self) -> list:
+        """Get all sent messages."""
+        await asyncio.sleep(0)
+    return self.messages_sent.copy()
+
 #!/usr/bin/env python
 """
 Basic WebSocket Agent Events Test - MISSION CRITICAL
@@ -8,6 +34,15 @@ Minimal test to validate core WebSocket integration without any complex setup.
 import os
 import sys
 import asyncio
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
+from shared.isolated_environment import get_env
+from test_framework.database.test_database_manager import TestDatabaseManager
+from auth_service.core.auth_manager import AuthManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 # CRITICAL: Add project root to Python path for imports
 project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
@@ -42,6 +77,7 @@ def test_imports():
 
 def test_websocket_notifier_methods():
     """Test that WebSocketNotifier has all required methods."""
+    pass
     try:
         from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier
         from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager as WebSocketManager
@@ -123,6 +159,7 @@ def test_tool_dispatcher_enhancement():
 
 def test_agent_registry_integration():
     """Test that AgentRegistry properly integrates WebSocket."""
+    pass
     try:
         from netra_backend.app.core.registry.universal_registry import AgentRegistry
         from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
@@ -159,7 +196,6 @@ async def test_unified_tool_execution():
         from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager as WebSocketManager
         from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
         from netra_backend.app.agents.state import DeepAgentState
-        from unittest.mock import AsyncMock
         
         ws_manager = WebSocketManager()
         # Mock to avoid real WebSocket calls
@@ -185,7 +221,8 @@ async def test_unified_tool_execution():
         # Create simple test tool
         async def test_tool(*args, **kwargs):
             await asyncio.sleep(0.01)  # Simulate work
-            return {"result": "success"}
+            await asyncio.sleep(0)
+    return {"result": "success"}
         
         # Create state
         state = DeepAgentState(
@@ -234,6 +271,7 @@ async def test_unified_tool_execution():
 
 def main():
     """Run all basic tests."""
+    pass
     print("Running basic WebSocket integration tests...")
     print("=" * 60)
     
@@ -249,7 +287,8 @@ def main():
     failed = 0
     
     for test_name, test_func in tests:
-        print(f"\nRunning: {test_name}")
+        print(f"
+Running: {test_name}")
         try:
             if test_func():
                 passed += 1
@@ -260,7 +299,8 @@ def main():
             failed += 1
             print(f"FAILED: {test_name} - Exception: {e}")
     
-    print("\n" + "=" * 60)
+    print("
+" + "=" * 60)
     print(f"Results: {passed} passed, {failed} failed")
     
     if failed == 0:

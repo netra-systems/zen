@@ -33,6 +33,7 @@ import aiohttp
 import logging
 import time
 from contextlib import asynccontextmanager
+from shared.isolated_environment import IsolatedEnvironment
 
 from test_framework.base_integration_test import BaseIntegrationTest
 

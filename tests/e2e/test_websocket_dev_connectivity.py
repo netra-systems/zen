@@ -17,6 +17,7 @@ from datetime import datetime
 from typing import Dict, Any, Optional
 import time
 import uuid
+from shared.isolated_environment import IsolatedEnvironment
 
 
 @pytest.mark.e2e

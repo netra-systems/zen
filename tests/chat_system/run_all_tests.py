@@ -16,7 +16,8 @@ from pathlib import Path
 
 def run_command(cmd: str, description: str) -> bool:
     """Run a command and return success status."""
-    print(f"\n{'='*60}")
+    print(f"
+{'='*60}")
     print(f"Running: {description}")
     print(f"Command: {cmd}")
     print('='*60)
@@ -68,7 +69,8 @@ def main():
         results.append((description, success))
     
     # Summary
-    print("\n" + "="*60)
+    print("
+" + "="*60)
     print("📊 TEST SUMMARY")
     print("="*60)
     
@@ -89,10 +91,12 @@ def main():
     print(f"Failed: {failed}")
     
     if failed == 0:
-        print("\n🎉 All tests passed! NACIS system is ready.")
+        print("
+🎉 All tests passed! NACIS system is ready.")
         return 0
     else:
-        print(f"\n⚠️  {failed} test(s) failed. Please review the errors above.")
+        print(f"
+⚠️  {failed} test(s) failed. Please review the errors above.")
         return 1
 
 

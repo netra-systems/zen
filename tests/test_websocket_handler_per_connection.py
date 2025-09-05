@@ -1,18 +1,53 @@
+class TestWebSocketConnection:
+    """Real WebSocket connection for testing instead of mocks."""
+    
+    def __init__(self):
+    pass
+        self.messages_sent = []
+        self.is_connected = True
+        self._closed = False
+        
+    async def send_json(self, message: dict):
+        """Send JSON message."""
+        if self._closed:
+            raise RuntimeError("WebSocket is closed")
+        self.messages_sent.append(message)
+        
+    async def close(self, code: int = 1000, reason: str = "Normal closure"):
+        """Close WebSocket connection."""
+    pass
+        self._closed = True
+        self.is_connected = False
+        
+    def get_messages(self) -> list:
+        """Get all sent messages."""
+        await asyncio.sleep(0)
+    return self.messages_sent.copy()
+
 """
 Test to verify WebSocket handlers are properly managed per-connection.
 Ensures no handler accumulation and no connection interference.
 """
 import sys
 import os
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from test_framework.database.test_database_manager import TestDatabaseManager
+from auth_service.core.auth_manager import AuthManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 sys.path.insert(0, os.path.abspath(os.path.dirname(os.path.dirname(__file__))))
 
 import asyncio
 import pytest
-from unittest.mock import MagicMock, AsyncMock, patch
 from fastapi import WebSocket
 from netra_backend.app.websocket_core.handlers import MessageRouter
 from netra_backend.app.websocket_core.agent_handler import AgentMessageHandler
 from netra_backend.app.services.message_handlers import MessageHandlerService
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
+from shared.isolated_environment import get_env
 
 
 @pytest.mark.asyncio
@@ -31,10 +66,7 @@ class TestWebSocketHandlerPerConnection:
         ws3 = MagicMock(spec=WebSocket)
         
         # Create mock services
-        mock_supervisor = MagicMock()
-        mock_thread_service = MagicMock()
-        mock_ws_manager = MagicMock()
-        
+        mock_supervisor = Magic        mock_thread_service = Magic        mock_ws_manager = Magic        
         # Create handlers for each connection
         service1 = MessageHandlerService(mock_supervisor, mock_thread_service, mock_ws_manager)
         handler1 = AgentMessageHandler(service1, ws1)
@@ -67,6 +99,7 @@ class TestWebSocketHandlerPerConnection:
     
     async def test_handler_cleanup_on_disconnect(self):
         """Verify handlers are properly cleaned up when connections close."""
+    pass
         # Create mock components
         message_router = MessageRouter()
         
@@ -76,10 +109,7 @@ class TestWebSocketHandlerPerConnection:
         ws3 = MagicMock(spec=WebSocket)
         
         # Create mock services
-        mock_supervisor = MagicMock()
-        mock_thread_service = MagicMock()
-        mock_ws_manager = MagicMock()
-        
+        mock_supervisor = Magic        mock_thread_service = Magic        mock_ws_manager = Magic        
         # Add handlers
         service1 = MessageHandlerService(mock_supervisor, mock_thread_service, mock_ws_manager)
         handler1 = AgentMessageHandler(service1, ws1)
@@ -123,10 +153,7 @@ class TestWebSocketHandlerPerConnection:
         for i in range(10):
             # Create connection
             ws = MagicMock(spec=WebSocket)
-            mock_supervisor = MagicMock()
-            mock_thread_service = MagicMock()
-            mock_ws_manager = MagicMock()
-            
+            mock_supervisor = Magic            mock_thread_service = Magic            mock_ws_manager = Magic            
             service = MessageHandlerService(mock_supervisor, mock_thread_service, mock_ws_manager)
             handler = AgentMessageHandler(service, ws)
             message_router.add_handler(handler)
@@ -145,6 +172,7 @@ class TestWebSocketHandlerPerConnection:
     
     async def test_concurrent_connections_receive_own_events(self):
         """Verify each connection receives only its own events."""
+    pass
         # Create mock components
         message_router = MessageRouter()
         
@@ -181,7 +209,8 @@ class TestWebSocketHandlerPerConnection:
                 self.websocket = websocket
             
             async def handle_message(self, user_id, websocket, message):
-                return True
+                await asyncio.sleep(0)
+    return True
         
         message_router = MessageRouter()
         
@@ -217,3 +246,4 @@ if __name__ == "__main__":
     asyncio.run(TestWebSocketHandlerPerConnection().test_handler_cleanup_on_disconnect())
     asyncio.run(TestWebSocketHandlerPerConnection().test_no_handler_accumulation())
     print("✅ All WebSocket handler per-connection tests passed!")
+    pass

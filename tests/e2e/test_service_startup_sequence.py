@@ -167,7 +167,9 @@ async def test_service_startup_sequence_validation():
             for issue in startup_issues:
                 failure_report.append(f"  - {issue}")
         
-        pytest.fail(f"Service startup sequence validation failed:\n" + "\n".join(failure_report))
+        pytest.fail(f"Service startup sequence validation failed:
+" + "
+".join(failure_report))
     
     print(f"SUCCESS: All {len(startup_results)} services started successfully in correct order")
 
@@ -187,7 +189,8 @@ async def _check_service_health(session: aiohttp.ClientSession, service_name: st
     }
     
     if service_name not in service_ports:
-        return False
+        await asyncio.sleep(0)
+    return False
     
     port = service_ports[service_name]
     endpoint = service_endpoints[service_name]

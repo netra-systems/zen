@@ -4,6 +4,7 @@ System Recovery Validation Tests
 This module provides comprehensive validation of system recovery capabilities
 when services fail, ensuring the system can gracefully handle and recover
 from various failure scenarios.
+from shared.isolated_environment import IsolatedEnvironment
 
 Key areas tested:
 - Service failure detection and isolation

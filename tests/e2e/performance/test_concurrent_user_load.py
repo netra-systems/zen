@@ -15,6 +15,7 @@ import pytest
 from typing import Dict, List, Any, Optional
 from dataclasses import dataclass
 import psutil
+from shared.isolated_environment import IsolatedEnvironment
 
 # Add project root to path
 from test_framework import setup_test_path

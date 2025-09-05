@@ -5,6 +5,7 @@ This test simulates the actual logic flow for both example prompts and message i
 
 import unittest
 from enum import Enum
+from shared.isolated_environment import IsolatedEnvironment
 
 # Simulate the WebSocketMessageType enum
 class WebSocketMessageType(Enum):

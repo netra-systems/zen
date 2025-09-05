@@ -18,6 +18,7 @@ import asyncio
 import uuid
 from datetime import datetime, timedelta
 from typing import Dict, Optional, Tuple
+from shared.isolated_environment import IsolatedEnvironment
 
 import jwt
 import pytest

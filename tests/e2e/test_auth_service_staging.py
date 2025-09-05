@@ -27,6 +27,7 @@ import os
 import time
 import uuid
 from typing import Any, Dict, Optional
+from shared.isolated_environment import IsolatedEnvironment
 
 import httpx
 import pytest

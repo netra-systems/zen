@@ -15,6 +15,7 @@ REQUIREMENTS:
 - Multi-device session security validation
 """
 import time
+from shared.isolated_environment import IsolatedEnvironment
 
 import pytest
 

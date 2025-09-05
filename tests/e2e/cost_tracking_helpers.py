@@ -18,7 +18,6 @@ import json
 import time
 from decimal import Decimal
 from typing import Any, Dict, List, Optional
-from unittest.mock import AsyncMock, patch
 from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
 
 
@@ -28,6 +27,10 @@ from netra_backend.app.services.cost_calculator import CostCalculatorService
 from tests.e2e.config import TEST_USERS
 from tests.e2e.clickhouse_billing_helper import ClickHouseBillingHelper
 from tests.e2e.websocket_resilience_core import WebSocketResilienceTestCore
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
+from shared.isolated_environment import get_env
 
 
 class CostTrackingTestCore:

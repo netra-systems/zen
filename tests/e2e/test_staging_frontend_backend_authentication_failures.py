@@ -28,6 +28,7 @@ import json
 import time
 import uuid
 from typing import Dict, Optional
+from shared.isolated_environment import IsolatedEnvironment
 
 import httpx
 import pytest

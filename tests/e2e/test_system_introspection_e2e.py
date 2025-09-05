@@ -7,6 +7,7 @@ Tests health checks, configuration validation, and dependency status endpoints.
 import pytest
 import httpx
 from typing import Dict, Any
+from shared.isolated_environment import IsolatedEnvironment
 
 
 @pytest.mark.e2e

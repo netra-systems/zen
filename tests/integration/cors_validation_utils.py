@@ -173,9 +173,12 @@ def assert_cors_valid(response, request_origin: str, environment: str = "develop
     validation = validate_cors_headers(headers, request_origin, environment)
     
     if not validation["valid"]:
-        error_msg = f"CORS validation failed for origin {request_origin}:\n"
-        error_msg += f"Errors: {validation['errors']}\n"
-        error_msg += f"Missing headers: {validation['missing_headers']}\n"
+        error_msg = f"CORS validation failed for origin {request_origin}:
+"
+        error_msg += f"Errors: {validation['errors']}
+"
+        error_msg += f"Missing headers: {validation['missing_headers']}
+"
         error_msg += f"Found headers: {validation['headers_found']}"
         raise AssertionError(error_msg)
     

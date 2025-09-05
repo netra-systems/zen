@@ -1,5 +1,6 @@
 """Comprehensive CORS E2E Tests for Final Implementation Agent
 from shared.isolated_environment import get_env
+from shared.isolated_environment import IsolatedEnvironment
 
 Business Value Justification (BVJ):
 1. Segment: All customer segments (Free, Early, Mid, Enterprise)

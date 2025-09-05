@@ -50,6 +50,7 @@ class AuthBackendIntegrationTester:
     """
     
     def __init__(self):
+    pass
         # Service URLs for real running services
         self.auth_service_url = "http://localhost:8081"  # Standard auth service port
         self.backend_service_url = "http://localhost:8000"  # Standard backend service port
@@ -486,17 +487,23 @@ async def test_auth_backend_integration_core():
                 for failure in warning_failures:
                     failure_report.append(f"  - {failure}")
             
-            failure_report.append(f"\n[SUMMARY] {len(critical_failures)} critical failures, {len(warning_failures)} warnings")
-            pytest.fail("Auth-Backend Integration failed:\n" + "\n".join(failure_report))
+            failure_report.append(f"
+[SUMMARY] {len(critical_failures)} critical failures, {len(warning_failures)} warnings")
+            pytest.fail("Auth-Backend Integration failed:
+" + "
+".join(failure_report))
         
         elif warning_failures:
             warning_report = ["[WARNING] Auth-Backend Integration Issues:"]
             for failure in warning_failures:
                 warning_report.append(f"  - {failure}")
-            warning_report.append(f"\n[SUMMARY] {len(warning_failures)} warnings (not critical)")
+            warning_report.append(f"
+[SUMMARY] {len(warning_failures)} warnings (not critical)")
             
-            logger.warning("\n".join(warning_report))
-            print("\n".join(warning_report))
+            logger.warning("
+".join(warning_report))
+            print("
+".join(warning_report))
     
     logger.info("[SUCCESS] Auth-Backend Integration test completed successfully")
 
@@ -553,7 +560,8 @@ async def test_auth_backend_database_isolation():
         failure_report = ["Database isolation test failures:"]
         for failure in isolation_failures:
             failure_report.append(f"  - {failure}")
-        pytest.fail("\n".join(failure_report))
+        pytest.fail("
+".join(failure_report))
     
     logger.info("[SUCCESS] Database isolation test completed successfully")
 

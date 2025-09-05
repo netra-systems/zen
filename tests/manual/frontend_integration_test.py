@@ -312,7 +312,8 @@ async def main():
                 "results": tester.results
             }, f, indent=2)
         
-        print(f"\nDetailed results saved to: frontend_integration_results.json")
+        print(f"
+Detailed results saved to: frontend_integration_results.json")
         return 0 if success else 1
 
 if __name__ == "__main__":

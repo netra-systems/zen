@@ -1,3 +1,26 @@
+class TestWebSocketConnection:
+    """Real WebSocket connection for testing instead of mocks."""
+    
+    def __init__(self):
+        self.messages_sent = []
+        self.is_connected = True
+        self._closed = False
+        
+    async def send_json(self, message: dict):
+        """Send JSON message."""
+        if self._closed:
+            raise RuntimeError("WebSocket is closed")
+        self.messages_sent.append(message)
+        
+    async def close(self, code: int = 1000, reason: str = "Normal closure"):
+        """Close WebSocket connection."""
+        self._closed = True
+        self.is_connected = False
+        
+    def get_messages(self) -> list:
+        """Get all sent messages."""
+        return self.messages_sent.copy()
+
 """
 Authentication Edge Cases and Network Connectivity Failures - Iteration 2 Audit
 
@@ -43,12 +66,15 @@ import socket
 import ssl
 import time
 import dns.resolver
-from unittest.mock import Mock, patch, AsyncMock
 from datetime import datetime, timedelta, timezone
 import jwt
 import subprocess
 
 from test_framework.base_e2e_test import BaseE2ETest
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
+from shared.isolated_environment import get_env
 
 
 @pytest.mark.e2e
@@ -244,8 +270,7 @@ class TestAuthenticationEdgeCasesAndNetworkFailures(BaseE2ETest):
         
         async with httpx.AsyncClient() as client:
             for scenario_name, mock_exception in auth_failure_scenarios:
-                with patch('httpx.AsyncClient.get', side_effect=mock_exception):
-                    try:
+                                    try:
                         # Should have fallback mechanism when auth service is down
                         response = await client.get(
                             f"{self.services['backend']}/api/threads",

@@ -25,6 +25,7 @@ from datetime import datetime, timedelta, timezone
 from typing import Dict, List, Set, Any, Optional, Tuple
 import random
 import traceback
+from shared.isolated_environment import IsolatedEnvironment
 
 # Add project root to Python path
 project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
@@ -78,6 +79,7 @@ class BulletproofEventValidator:
     }
     
     def __init__(self):
+    pass
         self.user_events: Dict[str, List[Dict]] = {}  # user_id -> events
         self.event_timeline: List[Tuple[float, str, str, Dict]] = []  # timestamp, user_id, event_type, event
         self.event_counts: Dict[str, int] = {}
@@ -226,7 +228,8 @@ class BulletproofEventValidator:
         is_valid, errors, diagnostics = self.validate_comprehensive()
         
         report_lines = [
-            "\n" + "=" * 80,
+            "
+" + "=" * 80,
             "BULLETPROOF WEBSOCKET FACTORY VALIDATION REPORT",
             "=" * 80,
             f"Overall Status: {'✅ PASSED' if is_valid else '❌ FAILED'}",
@@ -263,7 +266,8 @@ class BulletproofEventValidator:
             report_lines.extend(["", "WARNINGS:"] + [f"  - {w}" for w in diagnostics["warnings"]])
         
         report_lines.append("=" * 80)
-        return "\n".join(report_lines)
+        return "
+".join(report_lines)
 
 
 # ============================================================================
@@ -301,6 +305,7 @@ class TestBulletproofWebSocketChat:
     
     async def cleanup_all_emitters(self):
         """Clean up all test emitters."""
+    pass
         for emitter in self.user_emitters.values():
             try:
                 await emitter.cleanup()
@@ -319,7 +324,8 @@ class TestBulletproofWebSocketChat:
         )
         
         self.user_emitters[user_id] = emitter
-        return emitter
+        await asyncio.sleep(0)
+    return emitter
     
     @pytest.mark.asyncio
     @pytest.mark.critical
@@ -370,6 +376,7 @@ class TestBulletproofWebSocketChat:
     @pytest.mark.critical
     async def test_concurrent_users_complete_isolation(self):
         """Test that concurrent users have complete isolation with factory pattern."""
+    pass
         validator = BulletproofEventValidator()
         
         # Create multiple users with their own emitters
@@ -383,6 +390,7 @@ class TestBulletproofWebSocketChat:
         
         # Send events for each user concurrently
         async def send_user_events(user_id: str, emitter: UserWebSocketEmitter):
+    pass
             run_id = f"run_{user_id}_{uuid.uuid4().hex[:8]}"
             agent_name = f"Agent_{user_id}"
             
@@ -510,6 +518,7 @@ class TestBulletproofWebSocketChat:
     @pytest.mark.critical
     async def test_performance_under_concurrent_load(self):
         """Test WebSocket performance with concurrent users and high message volume."""
+    pass
         start_time = time.time()
         validator = BulletproofEventValidator()
         
@@ -531,6 +540,7 @@ class TestBulletproofWebSocketChat:
         
         # Send high volume of events
         async def send_user_load(user_id: str, emitter: UserWebSocketEmitter):
+    pass
             run_id = f"load_test_{user_id}"
             agent_name = f"LoadTestAgent_{user_id}"
             
@@ -629,6 +639,7 @@ class TestBulletproofWebSocketChat:
     @pytest.mark.critical  
     async def test_factory_resource_management_under_stress(self):
         """Test that factory manages resources properly under stress."""
+    pass
         initial_metrics = self.factory.get_factory_metrics()
         
         # Create and destroy many emitters rapidly
@@ -691,7 +702,8 @@ class TestAdvancedEdgeCasesFactoryPattern:
         """Test that factory singleton works correctly under concurrent access."""
         # Get factory instances concurrently
         async def get_factory_instance():
-            return get_websocket_bridge_factory()
+            await asyncio.sleep(0)
+    return get_websocket_bridge_factory()
         
         tasks = [get_factory_instance() for _ in range(10)]
         factory_instances = await asyncio.gather(*tasks)
@@ -707,6 +719,7 @@ class TestAdvancedEdgeCasesFactoryPattern:
     @pytest.mark.critical
     async def test_user_context_isolation_stress(self):
         """Stress test user context isolation with rapid creation/destruction."""
+    pass
         contexts_created = 0
         contexts_isolated = 0
         
@@ -796,3 +809,4 @@ class TestAdvancedEdgeCasesFactoryPattern:
 if __name__ == "__main__":
     # Run with: python tests/mission_critical/test_websocket_chat_bulletproof.py
     pytest.main([__file__, "-v", "-s", "--tb=short", "-m", "critical"])
+    pass

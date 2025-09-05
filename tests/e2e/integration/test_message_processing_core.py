@@ -9,6 +9,7 @@ Business Value: Ensures reliable core message processing
 import asyncio
 from datetime import datetime, timezone
 from uuid import uuid4
+from shared.isolated_environment import IsolatedEnvironment
 
 import pytest
 

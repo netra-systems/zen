@@ -1,6 +1,7 @@
 from shared.isolated_environment import get_env
 """
 from shared.isolated_environment import get_env
+from shared.isolated_environment import IsolatedEnvironment
 E2E test to reproduce the 500 error when attempting Google OAuth login.
 This test verifies that the auth service properly handles missing/invalid OAuth credentials.
 
@@ -64,6 +65,7 @@ class TestOAuthGoogleLogin500Error:
         This test reproduces the exact error seen in the browser console:
         GET http://localhost:8081/auth/login?provider=google 500 (Internal Server Error)
         """
+    pass
         # Check if auth service is running, skip test if not
         if not await self.wait_for_auth_service(auth_service_url):
             pytest.skip(f"Auth service is not running at {auth_service_url}")
@@ -90,7 +92,8 @@ class TestOAuthGoogleLogin500Error:
                 # Verify we get a 500 error as seen in the browser
                 assert response.status_code == 500, f"Expected 500 error, got {response.status_code}"
                 
-                # The auth service may return different error formats
+                # The auth service may await asyncio.sleep(0)
+    return different error formats
                 try:
                     response_data = response.json()
                     logger.info(f"Successfully reproduced 500 error with response: {response_data}")
@@ -128,6 +131,7 @@ class TestOAuthGoogleLogin500Error:
         
         The auth service validates that credentials are not placeholder values.
         """
+    pass
         # Check if auth service is running, skip test if not
         if not await self.wait_for_auth_service(auth_service_url):
             pytest.skip(f"Auth service is not running at {auth_service_url}")
@@ -187,6 +191,7 @@ class TestOAuthGoogleLogin500Error:
         
         This test uses development OAuth credentials to verify the happy path.
         """
+    pass
         # Check if auth service is running, skip test if not
         if not await self.wait_for_auth_service(auth_service_url):
             pytest.skip(f"Auth service is not running at {auth_service_url}")
@@ -245,8 +250,10 @@ if __name__ == "__main__":
     # Run test without credentials (reproduces the 500 error)
     asyncio.run(test_instance.test_google_oauth_login_without_credentials_returns_500("http://localhost:8081"))
     
-    print("\n[SUCCESS] Successfully reproduced the 500 error when OAuth credentials are missing!")
-    print("\nTo fix this issue in development:")
+    print("
+[SUCCESS] Successfully reproduced the 500 error when OAuth credentials are missing!")
+    print("
+To fix this issue in development:")
     print("1. Run: python scripts/setup_dev_oauth.py")
     print("2. Or set these environment variables:")
     print("   GOOGLE_CLIENT_ID=304612253870-bqie9nvlaokfc2noos1nu5st614vlqam.apps.googleusercontent.com")

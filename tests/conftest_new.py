@@ -288,7 +288,8 @@ def pytest_collection_modifyitems(config, items):
 # Hook to provide memory usage report at end of session  
 def pytest_sessionfinish(session, exitstatus):
     """Report memory usage at end of test session."""
-    print(f"\n=== Memory Usage Report ===")
+    print(f"
+=== Memory Usage Report ===")
     print(f"Loaded fixture modules: {', '.join(_loaded_modules) if _loaded_modules else 'base only'}")
     
     try:

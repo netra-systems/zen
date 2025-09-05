@@ -9,6 +9,7 @@ Business Value: Ensures all modules can be imported without errors.
 import sys
 import os
 from pathlib import Path
+from shared.isolated_environment import IsolatedEnvironment
 
 # Use test framework's environment setup
 project_root = Path(__file__).parent.parent.parent
@@ -62,6 +63,7 @@ class TestNACISImports:
     
     def test_agent_imports(self):
         """Test all agent imports."""
+    pass
         from netra_backend.app.agents.researcher import ResearcherAgent
         from netra_backend.app.agents.analyst import AnalystAgent
         from netra_backend.app.agents.validator import ValidatorAgent
@@ -86,6 +88,7 @@ class TestNACISImports:
     
     def test_tools_imports(self):
         """Test tools imports."""
+    pass
         from netra_backend.app.tools import (
             DeepResearchAPI,
             ReliabilityScorer,
@@ -108,6 +111,7 @@ class TestNACISImports:
     
     def test_semantic_cache_import(self):
         """Test semantic cache import."""
+    pass
         from netra_backend.app.services.cache.semantic_cache import SemanticCache
         
         assert SemanticCache is not None
@@ -126,6 +130,7 @@ class TestNACISImports:
     
     def test_enum_imports(self):
         """Test enum imports work correctly."""
+    pass
         from netra_backend.app.agents.chat_orchestrator.intent_classifier import IntentType
         from netra_backend.app.agents.chat_orchestrator.confidence_manager import ConfidenceLevel
         from netra_backend.app.agents.chat_orchestrator.model_cascade import ModelTier
@@ -156,7 +161,9 @@ class TestNACISImports:
 
 def test_all_imports_in_function():
     """Test all imports work when done inside a function."""
+    pass
     def import_all_modules():
+    pass
         # Chat orchestrator modules
         from netra_backend.app.agents.chat_orchestrator import ChatOrchestrator
         from netra_backend.app.agents.chat_orchestrator.intent_classifier import IntentClassifier
@@ -238,4 +245,5 @@ if __name__ == "__main__":
     test_all_imports_in_function()
     print("✓ Function-scoped imports successful")
     
-    print("\n✅ All import tests passed!")
+    print("
+✅ All import tests passed!")

@@ -5,7 +5,7 @@ This test verifies that the auth service uses the correct redirect URI for OAuth
 import os
 import sys
 import pytest
-from unittest.mock import patch
+from shared.isolated_environment import IsolatedEnvironment
 
 from shared.isolated_environment import get_env
 
@@ -14,6 +14,9 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..',
 
 from auth_service.auth_core.config import AuthConfig
 from auth_service.auth_core.routes.auth_routes import _determine_urls
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
 
 
 @pytest.mark.critical
@@ -67,6 +70,7 @@ class TestOAuthRedirectURIConfiguration:
     @pytest.mark.e2e
     def test_oauth_login_generates_correct_redirect_uri(self):
         """Test that /auth/login endpoint generates correct redirect URI"""
+    pass
         from fastapi.testclient import TestClient
         from auth_service.auth_core.main import app
         
@@ -131,7 +135,8 @@ if __name__ == "__main__":
     # Run the test to demonstrate the failure
     test = TestOAuthRedirectURIConfiguration()
     
-    print("\n" + "="*80)
+    print("
+" + "="*80)
     print("CRITICAL OAUTH CONFIGURATION BUG TEST")
     print("="*80)
     
@@ -140,10 +145,13 @@ if __name__ == "__main__":
         print("ERROR: Test unexpectedly passed - bug might be fixed")
     except AssertionError as e:
         print(f"SUCCESS: Test failed as expected: {e}")
-        print("\nThis confirms the OAuth redirect URI bug exists!")
+        print("
+This confirms the OAuth redirect URI bug exists!")
     
-    print("\nREQUIRED FIX:")
+    print("
+REQUIRED FIX:")
     print("1. Change auth_routes.py lines 242, 676, 906 to use AUTH SERVICE URL")
     print("2. Update Google OAuth Console to authorize auth service URLs")
     print("3. Ensure auth service redirects to frontend after processing")
     print("="*80)
+    pass

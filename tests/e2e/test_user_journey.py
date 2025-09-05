@@ -17,6 +17,7 @@ from typing import Dict, List, Optional
 import uuid
 import time
 from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
+from shared.isolated_environment import IsolatedEnvironment
 
 
 

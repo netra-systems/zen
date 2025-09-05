@@ -17,6 +17,7 @@ import redis.asyncio as redis
 from typing import Dict, List, Optional
 import docker
 import time
+from shared.isolated_environment import IsolatedEnvironment
 
 
 @pytest.mark.e2e

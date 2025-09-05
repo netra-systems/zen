@@ -11,6 +11,7 @@ import time
 import uuid
 from typing import Dict, Any, List
 from datetime import datetime
+from shared.isolated_environment import IsolatedEnvironment
 
 from tests.e2e.staging_test_config import get_staging_config
 

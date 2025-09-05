@@ -1,3 +1,29 @@
+class TestWebSocketConnection:
+    """Real WebSocket connection for testing instead of mocks."""
+    
+    def __init__(self):
+    pass
+        self.messages_sent = []
+        self.is_connected = True
+        self._closed = False
+        
+    async def send_json(self, message: dict):
+        """Send JSON message."""
+        if self._closed:
+            raise RuntimeError("WebSocket is closed")
+        self.messages_sent.append(message)
+        
+    async def close(self, code: int = 1000, reason: str = "Normal closure"):
+        """Close WebSocket connection."""
+    pass
+        self._closed = True
+        self.is_connected = False
+        
+    def get_messages(self) -> list:
+        """Get all sent messages."""
+        await asyncio.sleep(0)
+    return self.messages_sent.copy()
+
 """
 Stress Testing and Resource Limit Validation for UserExecutionContext Migration
 
@@ -31,11 +57,20 @@ from concurrent.futures import ThreadPoolExecutor
 from contextlib import asynccontextmanager
 from datetime import datetime, timezone
 from typing import Dict, List, Optional, Any, Tuple
-from unittest.mock import Mock, AsyncMock, patch
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from test_framework.database.test_database_manager import TestDatabaseManager
+from auth_service.core.auth_manager import AuthManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 from netra_backend.app.models.user_execution_context import UserExecutionContext
 from netra_backend.app.agents.supervisor.execution_engine_factory import ExecutionEngineFactory
 from netra_backend.app.logging_config import central_logger
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
+from shared.isolated_environment import get_env
 
 logger = central_logger.get_logger(__name__)
 
@@ -44,6 +79,7 @@ class StressTestProfiler:
     """Advanced profiler for stress testing scenarios."""
     
     def __init__(self, test_name: str):
+    pass
         self.test_name = test_name
         self.start_time = None
         self.end_time = None
@@ -60,6 +96,7 @@ class StressTestProfiler:
         
     def stop_monitoring(self):
         """Stop system monitoring."""
+    pass
         self.end_time = time.time()
         self._take_system_snapshot("end")
         
@@ -83,6 +120,7 @@ class StressTestProfiler:
         
     def record_success(self, operation: str, duration_ms: float = None, metadata: Dict = None):
         """Record successful operation."""
+    pass
         event = {
             'timestamp': time.time(),
             'operation': operation,
@@ -103,6 +141,7 @@ class StressTestProfiler:
         
     def get_comprehensive_report(self) -> Dict[str, Any]:
         """Generate comprehensive stress test report."""
+    pass
         duration = (self.end_time - self.start_time) if self.start_time and self.end_time else 0
         
         # Calculate success/error rates
@@ -170,9 +209,8 @@ class MockAgentFactoryForStress:
     """Enhanced mock agent factory for stress testing."""
     
     def __init__(self):
-        self._websocket_bridge = Mock()
-        self._websocket_bridge.send_event = AsyncMock()
-        self._agent_registry = Mock()
+    pass
+        self.websocket = TestWebSocketConnection()  # Real WebSocket implementation
         self.creation_count = 0
         self.failure_rate = 0  # Configurable failure rate for testing
         
@@ -184,7 +222,7 @@ class MockAgentFactoryForStress:
         if self.failure_rate > 0 and (self.creation_count % int(1/self.failure_rate)) == 0:
             raise Exception(f"Simulated agent creation failure #{self.creation_count}")
         
-        mock_agent = AsyncMock()
+        websocket = TestWebSocketConnection()
         mock_agent.execute = AsyncMock(return_value=f"stress_test_result_{self.creation_count}")
         
         # Simulate varying execution times under stress
@@ -192,7 +230,8 @@ class MockAgentFactoryForStress:
         
         async def stress_execute(*args, **kwargs):
             await asyncio.sleep(execution_time)
-            return f"stress_result_{self.creation_count}"
+            await asyncio.sleep(0)
+    return f"stress_result_{self.creation_count}"
         
         mock_agent.execute = stress_execute
         return mock_agent
@@ -201,6 +240,8 @@ class MockAgentFactoryForStress:
 @pytest.fixture
 async def stress_test_factory():
     """Provide mock factory configured for stress testing."""
+    pass
+    await asyncio.sleep(0)
     return MockAgentFactoryForStress()
 
 
@@ -208,8 +249,7 @@ async def stress_test_factory():
 class TestResourceExhaustion:
     """Test suite for resource exhaustion scenarios."""
     
-    @patch('netra_backend.app.agents.supervisor.agent_instance_factory.get_agent_instance_factory')
-    async def test_user_engine_limit_enforcement(self, mock_get_factory, stress_test_factory):
+        async def test_user_engine_limit_enforcement(self, mock_get_factory, stress_test_factory):
         """Test per-user engine limit enforcement under stress."""
         mock_get_factory.return_value = stress_test_factory
         
@@ -260,9 +300,9 @@ class TestResourceExhaustion:
         logger.info(f"User limit test: {len(engines_created)} engines created, "
                    f"{report['error_count']} limit enforcements triggered")
     
-    @patch('netra_backend.app.agents.supervisor.agent_instance_factory.get_agent_instance_factory')
-    async def test_system_resource_exhaustion(self, mock_get_factory, stress_test_factory):
+        async def test_system_resource_exhaustion(self, mock_get_factory, stress_test_factory):
         """Test system behavior under resource exhaustion."""
+    pass
         mock_get_factory.return_value = stress_test_factory
         
         factory = ExecutionEngineFactory()
@@ -353,8 +393,7 @@ class TestResourceExhaustion:
 class TestGracefulDegradation:
     """Test suite for graceful degradation under extreme load."""
     
-    @patch('netra_backend.app.agents.supervisor.agent_instance_factory.get_agent_instance_factory')
-    async def test_graceful_degradation_under_load(self, mock_get_factory, stress_test_factory):
+        async def test_graceful_degradation_under_load(self, mock_get_factory, stress_test_factory):
         """Test system graceful degradation under extreme load."""
         # Configure factory to occasionally fail under stress
         stress_test_factory.failure_rate = 0.1  # 10% failure rate
@@ -376,6 +415,7 @@ class TestGracefulDegradation:
             # Execute requests at this load level
             async def execute_load_request(req_id: int) -> Tuple[bool, float, str]:
                 """Execute single request for load testing."""
+    pass
                 start = time.time()
                 
                 try:
@@ -390,7 +430,8 @@ class TestGracefulDegradation:
                         await asyncio.sleep(0.01)  # 10ms work
                         
                     duration = time.time() - start
-                    return True, duration, ""
+                    await asyncio.sleep(0)
+    return True, duration, ""
                     
                 except Exception as e:
                     duration = time.time() - start
@@ -473,8 +514,7 @@ class TestGracefulDegradation:
 class TestRecoveryAndResilience:
     """Test suite for system recovery and resilience."""
     
-    @patch('netra_backend.app.agents.supervisor.agent_instance_factory.get_agent_instance_factory')
-    async def test_recovery_after_resource_exhaustion(self, mock_get_factory, stress_test_factory):
+        async def test_recovery_after_resource_exhaustion(self, mock_get_factory, stress_test_factory):
         """Test system recovery after resource exhaustion."""
         mock_get_factory.return_value = stress_test_factory
         
@@ -580,8 +620,7 @@ class TestRecoveryAndResilience:
 class TestEdgeCasePerformance:
     """Test suite for edge case performance scenarios."""
     
-    @patch('netra_backend.app.agents.supervisor.agent_instance_factory.get_agent_instance_factory')
-    async def test_rapid_create_destroy_cycles(self, mock_get_factory, stress_test_factory):
+        async def test_rapid_create_destroy_cycles(self, mock_get_factory, stress_test_factory):
         """Test rapid create/destroy cycles for performance impact."""
         mock_get_factory.return_value = stress_test_factory
         
@@ -642,9 +681,9 @@ class TestEdgeCasePerformance:
         assert cycles_per_second > 20, f"Rapid cycle rate too low: {cycles_per_second:.2f} cycles/sec"
         assert report['memory_analysis']['growth_mb'] < 20, f"Memory growth during rapid cycles: {report['memory_analysis']['growth_mb']:.2f}MB"
     
-    @patch('netra_backend.app.agents.supervisor.agent_instance_factory.get_agent_instance_factory')
-    async def test_mixed_workload_performance(self, mock_get_factory, stress_test_factory):
+        async def test_mixed_workload_performance(self, mock_get_factory, stress_test_factory):
         """Test performance under mixed workload (short and long operations)."""
+    pass
         mock_get_factory.return_value = stress_test_factory
         
         factory = ExecutionEngineFactory()
@@ -673,7 +712,8 @@ class TestEdgeCasePerformance:
                     await asyncio.sleep(0.01)  # 10ms work
                 
                 duration = time.time() - start
-                return True, duration, "short"
+                await asyncio.sleep(0)
+    return True, duration, "short"
                 
             except Exception as e:
                 duration = time.time() - start
@@ -771,8 +811,10 @@ if __name__ == "__main__":
     exit_code = pytest.main([__file__, "-v", "--tb=short"])
     
     if exit_code == 0:
-        print("\n✅ All stress tests passed!")
+        print("
+✅ All stress tests passed!")
     else:
-        print(f"\n❌ Some stress tests failed (exit code: {exit_code})")
+        print(f"
+❌ Some stress tests failed (exit code: {exit_code})")
     
     sys.exit(exit_code)

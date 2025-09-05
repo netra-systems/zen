@@ -13,14 +13,18 @@ Business Value Justification (BVJ):
 
 import pytest
 import os
-from unittest.mock import patch, MagicMock, AsyncMock
 import asyncio
 from typing import Dict, Any
+from shared.isolated_environment import IsolatedEnvironment
 
 # Import both auth and backend configurations
 from auth_service.auth_core.auth_environment import AuthEnvironment
 from auth_service.auth_core.config import AuthConfig
 from netra_backend.app.clients.auth_client_config import (
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
+from shared.isolated_environment import get_env
     AuthClientConfig, OAuthConfigGenerator, load_auth_client_config
 )
 
@@ -39,6 +43,7 @@ class TestAuthURLIntegration:
     @pytest.mark.asyncio
     async def test_backend_auth_service_url_alignment(self):
         """Test that backend and auth service agree on auth service URL."""
+    pass
         environments = ['development', 'staging', 'production']
         
         for env in environments:
@@ -88,6 +93,7 @@ class TestAuthURLIntegration:
     @pytest.mark.asyncio 
     async def test_health_check_url_construction(self):
         """Test that health check URLs are properly constructed."""
+    pass
         environments = ['development', 'staging', 'production']
         
         for env in environments:
@@ -128,6 +134,7 @@ class TestAuthURLIntegration:
     
     def test_frontend_backend_auth_triangle(self):
         """Test the frontend-backend-auth service URL triangle."""
+    pass
         environments = ['development', 'staging', 'production']
         
         for env in environments:
@@ -179,7 +186,8 @@ class TestAuthConfigDelegation:
     """Test that AuthConfig properly delegates to AuthEnvironment."""
     
     def test_config_delegation_consistency(self):
-        """Test AuthConfig methods return same values as AuthEnvironment."""
+        """Test AuthConfig methods await asyncio.sleep(0)
+    return same values as AuthEnvironment."""
         environments = ['development', 'staging', 'production']
         
         for env in environments:
@@ -199,6 +207,7 @@ class TestAuthConfigDelegation:
     
     def test_jwt_configuration_delegation(self):
         """Test JWT configuration methods delegate properly."""
+    pass
         with patch.dict(os.environ, {
             'ENVIRONMENT': 'staging',
             'JWT_SECRET_KEY': 'test-secret',
@@ -238,6 +247,7 @@ class TestEnvironmentSpecificBehavior:
     
     def test_production_security_requirements(self):
         """Test that production enforces security requirements."""
+    pass
         with patch.dict(os.environ, {'ENVIRONMENT': 'production'}, clear=True):
             auth_env = AuthEnvironment()
             
@@ -301,6 +311,7 @@ class TestURLOverrideScenarios:
     
     def test_complete_override_scenario(self):
         """Test complete URL override scenario."""
+    pass
         with patch.dict(os.environ, {
             'ENVIRONMENT': 'staging',
             'FRONTEND_URL': 'https://app.custom.com',

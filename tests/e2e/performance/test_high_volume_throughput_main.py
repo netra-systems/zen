@@ -3,6 +3,7 @@ Main High-Volume Throughput Test Suite - E2E Implementation
 
 This file imports and runs all throughput-related tests that were split
 from the original test_high_volume_throughput.py to comply with size limits.
+from shared.isolated_environment import IsolatedEnvironment
 
 Business Value Justification (BVJ):
 - Segment: Enterprise/Mid

@@ -14,7 +14,6 @@ import os
 import sys
 import uuid
 from typing import Optional, Dict, Any, List
-from unittest.mock import AsyncMock, MagicMock
 from pathlib import Path
 from datetime import datetime, timezone
 
@@ -27,6 +26,9 @@ from test_framework.environment_isolation import (
     setup_test_environment,
     teardown_test_environment
 )
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
 
 # Memory profiling decorator
 def memory_profile(description: str = ""):

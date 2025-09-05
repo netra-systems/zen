@@ -230,7 +230,8 @@ def format_health_summary(results: list[HealthCheckResult]) -> str:
         if result.details:
             summary_lines.append(f"    Details: {result.details}")
     
-    return "\n".join(summary_lines)
+    return "
+".join(summary_lines)
 
 
 # Export all public components

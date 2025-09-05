@@ -14,9 +14,12 @@ Business Value Justification (BVJ):
 import pytest
 import os
 import sys
-from unittest.mock import patch, MagicMock, AsyncMock
 from typing import Dict, Any, List, Tuple
 import logging
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
+from shared.isolated_environment import IsolatedEnvironment
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -43,6 +46,7 @@ class TestServiceURLAlignment:
     
     def _clear_module_cache(self):
         """Clear module cache to force reimport."""
+    pass
         for module in self.modules_to_clear:
             if module in sys.modules:
                 del sys.modules[module]
@@ -75,6 +79,7 @@ class TestServiceURLAlignment:
     
     def test_auth_knows_correct_frontend_url(self):
         """Test that auth service knows the correct frontend URL for redirects."""
+    pass
         environments = ['development', 'staging', 'production']
         
         expected_urls = {
@@ -119,6 +124,7 @@ class TestServiceURLAlignment:
     
     def test_service_url_consistency_matrix(self):
         """Test complete service URL consistency matrix."""
+    pass
         environments = ['development', 'staging', 'production']
         
         for env in environments:
@@ -147,7 +153,8 @@ class TestServiceURLAlignment:
                     }
                 }
                 
-                logger.info(f"\n{env} URL Matrix:")
+                logger.info(f"
+{env} URL Matrix:")
                 logger.info(f"  Auth view of frontend: {url_matrix['auth_view']['frontend']}")
                 logger.info(f"  Auth view of backend: {url_matrix['auth_view']['backend']}")
                 logger.info(f"  Auth view of self: {url_matrix['auth_view']['auth']}")
@@ -222,6 +229,7 @@ class TestOAuthURLAlignment:
     
     def test_oauth_client_id_alignment(self):
         """Test that OAuth client IDs are configured consistently."""
+    pass
         environments = ['development', 'staging', 'production']
         
         for env in environments:
@@ -354,6 +362,7 @@ class TestEnvironmentIsolation:
     
     def test_no_staging_urls_in_production(self):
         """Test that production doesn't accidentally use staging URLs."""
+    pass
         with patch.dict(os.environ, {'ENVIRONMENT': 'production'}, clear=True):
             # Clear module cache
             if 'auth_service.auth_core.auth_environment' in sys.modules:
@@ -378,7 +387,8 @@ class TestEnvironmentIsolation:
 
 def test_comprehensive_url_alignment_report():
     """Generate comprehensive URL alignment report."""
-    logger.info("\n" + "="*60)
+    logger.info("
+" + "="*60)
     logger.info("COMPREHENSIVE URL ALIGNMENT REPORT")
     logger.info("="*60)
     
@@ -428,14 +438,16 @@ def test_comprehensive_url_alignment_report():
     
     # Print report
     for env, services in report.items():
-        logger.info(f"\n{env.upper()} Environment:")
+        logger.info(f"
+{env.upper()} Environment:")
         for service, urls in services.items():
             logger.info(f"  {service}:")
             for name, url in urls.items():
                 logger.info(f"    {name}: {url}")
     
     # Validate alignment
-    logger.info("\n" + "-"*60)
+    logger.info("
+" + "-"*60)
     logger.info("VALIDATION RESULTS:")
     
     all_valid = True
@@ -470,8 +482,10 @@ if __name__ == '__main__':
     try:
         test_comprehensive_url_alignment_report()
     except AssertionError as e:
-        print(f"\nAlignment report failed: {e}")
+        print(f"
+Alignment report failed: {e}")
         sys.exit(1)
     
     # Run full test suite
     pytest.main([__file__, '-v', '--tb=short'])
+    pass

@@ -46,6 +46,7 @@ from contextlib import asynccontextmanager
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
+from shared.isolated_environment import IsolatedEnvironment
 
 import httpx
 import pytest

@@ -1,3 +1,26 @@
+class TestWebSocketConnection:
+    """Real WebSocket connection for testing instead of mocks."""
+    
+    def __init__(self):
+        self.messages_sent = []
+        self.is_connected = True
+        self._closed = False
+        
+    async def send_json(self, message: dict):
+        """Send JSON message."""
+        if self._closed:
+            raise RuntimeError("WebSocket is closed")
+        self.messages_sent.append(message)
+        
+    async def close(self, code: int = 1000, reason: str = "Normal closure"):
+        """Close WebSocket connection."""
+        self._closed = True
+        self.is_connected = False
+        
+    def get_messages(self) -> list:
+        """Get all sent messages."""
+        return self.messages_sent.copy()
+
 """
 Comprehensive test for the critical agent_handler async context manager fix.
 
@@ -10,12 +33,21 @@ Tests the actual message flow through the agent handler to ensure:
 
 import pytest
 import asyncio
-from unittest.mock import AsyncMock, MagicMock, patch, Mock
 from contextlib import asynccontextmanager
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from test_framework.database.test_database_manager import TestDatabaseManager
+from auth_service.core.auth_manager import AuthManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 from netra_backend.app.websocket_core.agent_handler import AgentMessageHandler
 from netra_backend.app.websocket_core.types import MessageType, WebSocketMessage
 from netra_backend.app.services.message_handlers import MessageHandlerService
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
+from shared.isolated_environment import get_env
 
 
 @pytest.mark.asyncio
@@ -37,13 +69,10 @@ class TestAgentHandlerComprehensiveFix:
         )
         
         # Mock WebSocket
-        mock_websocket = AsyncMock()
-        mock_websocket.send_json = AsyncMock()
+        websocket = TestWebSocketConnection()
         
         # Mock database session
-        mock_session = AsyncMock()
-        mock_session.execute = AsyncMock(return_value=Mock())
-        mock_session.commit = AsyncMock()
+        websocket = TestWebSocketConnection()
         
         # Create the async context manager for database session
         @asynccontextmanager
@@ -55,9 +84,9 @@ class TestAgentHandlerComprehensiveFix:
                 await mock_session.close()
         
         # Mock WebSocket manager
-        mock_ws_manager = AsyncMock()
+        websocket = TestWebSocketConnection()
         mock_ws_manager.get_connection_id_by_websocket = Mock(return_value="conn_test_123")
-        mock_ws_manager.update_connection_thread = Mock()
+        mock_ws_manager.websocket = TestWebSocketConnection()  # Real WebSocket implementation
         
         with patch('netra_backend.app.websocket_core.agent_handler.get_request_scoped_db_session') as mock_getter:
             mock_getter.return_value = mock_get_request_scoped_db_session()
@@ -67,7 +96,7 @@ class TestAgentHandlerComprehensiveFix:
                 
                 with patch('netra_backend.app.websocket_core.agent_handler.MessageHandlerService') as mock_service_class:
                     # Mock the message handler service
-                    mock_service = AsyncMock()
+                    websocket = TestWebSocketConnection()
                     mock_service.handle_start_agent = AsyncMock(return_value={
                         "success": True,
                         "run_id": "run_test_456",
@@ -111,8 +140,7 @@ class TestAgentHandlerComprehensiveFix:
         for msg_type, payload in message_types_to_test:
             message = WebSocketMessage(type=msg_type, payload=payload)
             
-            mock_websocket = AsyncMock()
-            mock_session = AsyncMock()
+            websocket = TestWebSocketConnection()
             
             @asynccontextmanager
             async def mock_get_request_scoped_db_session():
@@ -122,7 +150,7 @@ class TestAgentHandlerComprehensiveFix:
                 mock_getter.return_value = mock_get_request_scoped_db_session()
                 
                 with patch('netra_backend.app.websocket_core.agent_handler.MessageHandlerService') as mock_service_class:
-                    mock_service = AsyncMock()
+                    websocket = TestWebSocketConnection()
                     
                     # Set up appropriate mock responses
                     if msg_type == MessageType.START_AGENT:
@@ -159,8 +187,7 @@ class TestAgentHandlerComprehensiveFix:
             payload={"agent_name": "triage", "user_request": "test"}
         )
         
-        mock_websocket = AsyncMock()
-        mock_session = AsyncMock()
+        websocket = TestWebSocketConnection()
         
         @asynccontextmanager
         async def mock_get_request_scoped_db_session():
@@ -171,7 +198,7 @@ class TestAgentHandlerComprehensiveFix:
             
             with patch('netra_backend.app.websocket_core.agent_handler.MessageHandlerService') as mock_service_class:
                 # Make the service raise an error
-                mock_service = AsyncMock()
+                websocket = TestWebSocketConnection()
                 mock_service.handle_start_agent = AsyncMock(
                     side_effect=Exception("Service error")
                 )
@@ -201,8 +228,7 @@ class TestAgentHandlerComprehensiveFix:
                 payload={"agent_name": f"agent_{msg_id}", "user_request": f"test_{msg_id}"}
             )
             
-            mock_websocket = AsyncMock()
-            mock_session = AsyncMock()
+            websocket = TestWebSocketConnection()
             
             @asynccontextmanager
             async def mock_get_request_scoped_db_session():
@@ -212,7 +238,7 @@ class TestAgentHandlerComprehensiveFix:
                 mock_getter.return_value = mock_get_request_scoped_db_session()
                 
                 with patch('netra_backend.app.websocket_core.agent_handler.MessageHandlerService') as mock_service_class:
-                    mock_service = AsyncMock()
+                    websocket = TestWebSocketConnection()
                     mock_service.handle_start_agent = AsyncMock(return_value={
                         "success": True,
                         "run_id": f"run_{msg_id}",

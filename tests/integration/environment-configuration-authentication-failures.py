@@ -38,12 +38,14 @@ import os
 import pytest
 import tempfile
 import json
-from unittest.mock import Mock, patch, MagicMock
 from pathlib import Path
 
 from shared.isolated_environment import IsolatedEnvironment
 from netra_backend.app.core.config import get_unified_config
 from shared.isolated_environment import IsolatedEnvironment as AuthIsolatedEnvironment
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
 
 
 class TestEnvironmentConfigurationAuthenticationFailures:

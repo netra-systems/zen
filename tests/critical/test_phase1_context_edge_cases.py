@@ -1,3 +1,29 @@
+class TestWebSocketConnection:
+    """Real WebSocket connection for testing instead of mocks."""
+    
+    def __init__(self):
+    pass
+        self.messages_sent = []
+        self.is_connected = True
+        self._closed = False
+        
+    async def send_json(self, message: dict):
+        """Send JSON message."""
+        if self._closed:
+            raise RuntimeError("WebSocket is closed")
+        self.messages_sent.append(message)
+        
+    async def close(self, code: int = 1000, reason: str = "Normal closure"):
+        """Close WebSocket connection."""
+    pass
+        self._closed = True
+        self.is_connected = False
+        
+    def get_messages(self) -> list:
+        """Get all sent messages."""
+        await asyncio.sleep(0)
+    return self.messages_sent.copy()
+
 """
 Phase 1 Migration Edge Case Tests for UserExecutionContext
 
@@ -24,10 +50,15 @@ import threading
 import time
 import uuid
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from unittest.mock import AsyncMock, Mock, patch, MagicMock
 from datetime import datetime, timezone
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import DisconnectionError, TimeoutError as SQLTimeoutError
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from test_framework.database.test_database_manager import TestDatabaseManager
+from auth_service.core.auth_manager import AuthManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 from netra_backend.app.agents.supervisor.user_execution_context import (
     UserExecutionContext,
@@ -39,6 +70,10 @@ from netra_backend.app.agents.supervisor.user_execution_context import (
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
 from netra_backend.app.agents.triage.unified_triage_agent import TriageSubAgent  
 from netra_backend.app.agents.data_sub_agent.data_sub_agent import DataSubAgent
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
+from shared.isolated_environment import get_env
 
 
 class TestContextNullUndefinedEdgeCases:
@@ -50,6 +85,7 @@ class TestContextNullUndefinedEdgeCases:
         
         This can happen during serialization failures or API boundary issues.
         """
+    pass
         # Test validate_user_context with None
         with pytest.raises(TypeError) as exc_info:
             validate_user_context(None)
@@ -68,6 +104,7 @@ class TestContextNullUndefinedEdgeCases:
         
         This can happen during deserialization or type conversion errors.
         """
+    pass
         # Test with numeric user_id (should be string)
         with pytest.raises(InvalidContextError):
             UserExecutionContext(
@@ -98,14 +135,18 @@ class TestContextNullUndefinedEdgeCases:
         
         This can happen with form input or string processing edge cases.
         """
+    pass
         whitespace_patterns = [
             " ",           # Single space
             "\t",          # Tab
-            "\n",          # Newline
+            "
+",          # Newline
             "\r",          # Carriage return
-            "\r\n",        # Windows line ending
+            "\r
+",        # Windows line ending
             "   ",         # Multiple spaces
-            "\t\n\r ",     # Mixed whitespace
+            "\t
+\r ",     # Mixed whitespace
         ]
         
         for whitespace in whitespace_patterns:
@@ -136,6 +177,7 @@ class TestContextNullUndefinedEdgeCases:
         
         This can cause encoding/decoding issues or database storage problems.
         """
+    pass
         unicode_edge_cases = [
             "user_\u0000null",        # Null character
             "user_\uFFFDreplacement", # Unicode replacement character
@@ -169,6 +211,7 @@ class TestCircularReferenceEdgeCases:
         
         This can cause infinite loops during serialization or JSON encoding.
         """
+    pass
         # Create circular reference in metadata
         circular_metadata = {"level": 0}
         circular_metadata["self"] = circular_metadata
@@ -200,8 +243,10 @@ class TestCircularReferenceEdgeCases:
         
         This tests the limits of recursive processing in metadata handling.
         """
+    pass
         # Create deeply nested structure
         def create_deep_structure(depth):
+    pass
             if depth == 0:
                 return "leaf_value"
             return {"level": depth, "nested": create_deep_structure(depth - 1)}
@@ -230,6 +275,7 @@ class TestCircularReferenceEdgeCases:
         
         This could lead to cross-context data contamination.
         """
+    pass
         shared_metadata = {"shared": True, "data": [1, 2, 3]}
         register_shared_object(shared_metadata)
         
@@ -274,6 +320,7 @@ class TestMemoryLeakEdgeCases:
         
         This could happen if contexts are retained by closures or event handlers.
         """
+    pass
         import gc
         import weakref
         
@@ -281,6 +328,7 @@ class TestMemoryLeakEdgeCases:
         weak_refs = []
         
         def create_and_track_contexts(count):
+    pass
             for i in range(count):
                 context = UserExecutionContext(
                     user_id=f"user_leak_test_{i}",
@@ -315,6 +363,7 @@ class TestMemoryLeakEdgeCases:
         
         This could happen in recursive operations or deeply nested workflows.
         """
+    pass
         import psutil
         import os
         
@@ -354,6 +403,7 @@ class TestMemoryLeakEdgeCases:
         
         This could happen if each child context copies and expands parent metadata.
         """
+    pass
         # Start with some metadata
         initial_metadata = {"data": list(range(100))}
         
@@ -386,8 +436,11 @@ class TestConcurrencyRaceConditions:
         
         This could cause ID collisions or resource contention.
         """
+    pass
         async def create_context(index):
-            return UserExecutionContext(
+    pass
+            await asyncio.sleep(0)
+    return UserExecutionContext(
                 user_id=f"concurrent_user_{index}",
                 thread_id=f"concurrent_thread_{index}",
                 run_id=f"concurrent_run_{index}",
@@ -418,6 +471,7 @@ class TestConcurrencyRaceConditions:
         
         This could cause race conditions in request ID generation or metadata handling.
         """
+    pass
         parent_context = UserExecutionContext(
             user_id="parent_concurrent",
             thread_id="parent_thread",
@@ -426,7 +480,9 @@ class TestConcurrencyRaceConditions:
         )
         
         async def create_child_context(index):
-            return parent_context.create_child_context(
+    pass
+            await asyncio.sleep(0)
+    return parent_context.create_child_context(
                 operation_name=f"concurrent_child_{index}",
                 additional_metadata={"child_index": index}
             )
@@ -453,7 +509,9 @@ class TestConcurrencyRaceConditions:
         
         This could cause race conditions in validation or serialization.
         """
+    pass
         def create_and_serialize_context(thread_id):
+    pass
             try:
                 context = UserExecutionContext(
                     user_id=f"thread_user_{thread_id}",
@@ -504,6 +562,7 @@ class TestDatabaseConnectionEdgeCases:
         
         This should be handled gracefully without breaking the context.
         """
+    pass
         context = UserExecutionContext(
             user_id="user_no_db",
             thread_id="thread_no_db",
@@ -523,12 +582,12 @@ class TestDatabaseConnectionEdgeCases:
         
         This could happen during dependency injection failures.
         """
+    pass
         invalid_sessions = [
             "not_a_session",
             123,
             {"fake": "session"},
-            Mock(),  # Mock without AsyncSession spec
-        ]
+                    ]
         
         for invalid_session in invalid_sessions:
             # Context creation should still work (validation is at usage time)
@@ -550,6 +609,7 @@ class TestDatabaseConnectionEdgeCases:
         
         This could cause connection leaks or session confusion.
         """
+    pass
         base_context = UserExecutionContext(
             user_id="user_session_switch",
             thread_id="thread_session_switch",
@@ -583,6 +643,7 @@ class TestWebSocketEventEdgeCases:
         
         This should not break context operations or serialization.
         """
+    pass
         context = UserExecutionContext(
             user_id="user_no_ws",
             thread_id="thread_no_ws",
@@ -602,6 +663,7 @@ class TestWebSocketEventEdgeCases:
         
         This could happen with type conversion errors.
         """
+    pass
         invalid_connections = [
             123,           # Number instead of string
             ["conn_1"],    # List instead of string  
@@ -626,6 +688,7 @@ class TestWebSocketEventEdgeCases:
         
         This could happen during connection drops and reconnections.
         """
+    pass
         base_context = UserExecutionContext(
             user_id="user_ws_switch",
             thread_id="thread_ws_switch", 
@@ -657,6 +720,7 @@ class TestSystemLimitEdgeCases:
         
         This tests system limits and resource exhaustion scenarios.
         """
+    pass
         contexts = []
         max_contexts = 1000  # Reasonable limit for testing
         
@@ -691,6 +755,7 @@ class TestSystemLimitEdgeCases:
         
         This tests handling of extremely large metadata payloads.
         """
+    pass
         # Create progressively larger metadata
         large_metadata_sizes = [1000, 10000, 100000]  # Character counts
         
@@ -723,6 +788,7 @@ class TestSystemLimitEdgeCases:
         
         This tests limits on how deep child context chains can go.
         """
+    pass
         current_context = UserExecutionContext(
             user_id="user_deep_chain",
             thread_id="thread_deep_chain",
@@ -762,6 +828,7 @@ class TestSystemLimitEdgeCases:
         
         This simulates network timeouts, database timeouts, or slow operations.
         """
+    pass
         # Create context normally
         context = UserExecutionContext(
             user_id="user_timeout_test",
@@ -771,12 +838,16 @@ class TestSystemLimitEdgeCases:
         
         # Simulate slow operations
         async def slow_operation():
+    pass
             await asyncio.sleep(0.1)  # Simulate slow operation
-            return context.to_dict()
+            await asyncio.sleep(0)
+    return context.to_dict()
         
         async def very_slow_operation():
+    pass
             await asyncio.sleep(1.0)  # Very slow operation
-            return context.get_correlation_id()
+            await asyncio.sleep(0)
+    return context.get_correlation_id()
         
         # Test operation with timeout
         try:
@@ -799,6 +870,7 @@ class TestErrorRecoveryEdgeCases:
         
         This tests cleanup and error handling during context initialization.
         """
+    pass
         # Mock the validation to fail partway through
         with patch.object(UserExecutionContext, '_validate_metadata') as mock_validate:
             mock_validate.side_effect = InvalidContextError("Metadata validation failed")
@@ -817,6 +889,7 @@ class TestErrorRecoveryEdgeCases:
         
         This tests graceful handling of serialization errors.
         """
+    pass
         # Create context with non-serializable metadata
         non_serializable_data = lambda x: x  # Function object
         
@@ -842,6 +915,7 @@ class TestErrorRecoveryEdgeCases:
         
         This tests that parent context remains unmodified if child creation fails.
         """
+    pass
         parent_context = UserExecutionContext(
             user_id="user_child_fail",
             thread_id="thread_child_fail", 

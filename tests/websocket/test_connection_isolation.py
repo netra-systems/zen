@@ -22,6 +22,7 @@ import pytest
 from concurrent.futures import ThreadPoolExecutor
 import threading
 import random
+from shared.isolated_environment import IsolatedEnvironment
 
 import websockets
 from websockets.exceptions import ConnectionClosed

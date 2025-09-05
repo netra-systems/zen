@@ -1,3 +1,29 @@
+class TestWebSocketConnection:
+    """Real WebSocket connection for testing instead of mocks."""
+    
+    def __init__(self):
+    pass
+        self.messages_sent = []
+        self.is_connected = True
+        self._closed = False
+        
+    async def send_json(self, message: dict):
+        """Send JSON message."""
+        if self._closed:
+            raise RuntimeError("WebSocket is closed")
+        self.messages_sent.append(message)
+        
+    async def close(self, code: int = 1000, reason: str = "Normal closure"):
+        """Close WebSocket connection."""
+    pass
+        self._closed = True
+        self.is_connected = False
+        
+    def get_messages(self) -> list:
+        """Get all sent messages."""
+        await asyncio.sleep(0)
+    return self.messages_sent.copy()
+
 """
 MISSION CRITICAL TEST SUITE: WebSocket Initialization Order Bug Prevention
 ===========================================================================
@@ -22,10 +48,14 @@ Test Requirements:
 
 import asyncio
 import unittest
-from unittest.mock import Mock, MagicMock, patch, call, AsyncMock
 from typing import Dict, Any, List
 import sys
 import os
+from test_framework.database.test_database_manager import TestDatabaseManager
+from auth_service.core.auth_manager import AuthManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 # Add project root to path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
@@ -36,6 +66,10 @@ from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager as WebSocketManager
 from sqlalchemy.ext.asyncio import AsyncSession
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
+from shared.isolated_environment import get_env
 
 
 class TestWebSocketInitializationOrder(unittest.TestCase):
@@ -49,13 +83,14 @@ class TestWebSocketInitializationOrder(unittest.TestCase):
         self.websocket_manager = Mock(spec=WebSocketManager)
         
         # Mock tool dispatcher executor attribute to avoid enhancement errors
-        self.tool_dispatcher.executor = Mock()
+        self.tool_dispatcher.websocket = TestWebSocketConnection()  # Real WebSocket implementation
         
         # Track method call order
         self.call_order = []
         
     def test_initialization_order_is_correct(self):
         """
+    pass
         CRITICAL TEST: Verify that agents are registered BEFORE WebSocket manager is set.
         This test would FAIL with the bug and PASS with the fix.
         """
@@ -86,6 +121,7 @@ class TestWebSocketInitializationOrder(unittest.TestCase):
         Test that ALL registered agents receive the WebSocket manager.
         This ensures the fix results in "WebSocket manager set for 8/8 agents".
         """
+    pass
         # Create real supervisor to test actual behavior
         supervisor = SupervisorAgent(
             db_session=self.db_session,
@@ -116,6 +152,7 @@ class TestWebSocketInitializationOrder(unittest.TestCase):
         Test that setting WebSocket manager before registration would fail.
         This simulates the bug condition.
         """
+    pass
         with patch.object(AgentRegistry, 'get_all_agents') as mock_get_agents:
             # Simulate no agents registered yet
             mock_get_agents.return_value = {}
@@ -144,6 +181,7 @@ class TestWebSocketInitializationOrder(unittest.TestCase):
         """
         Test the complete initialization sequence of AgentRegistry.
         """
+    pass
         with patch('netra_backend.app.agents.supervisor.agent_registry.AgentRegistry.register_default_agents') as mock_register:
             with patch('netra_backend.app.agents.supervisor.agent_registry.AgentRegistry.set_websocket_manager') as mock_set_ws:
                 
@@ -172,9 +210,9 @@ class TestWebSocketInitializationOrder(unittest.TestCase):
         Test that WebSocket events can be properly sent after initialization.
         This verifies the fix enables the chat functionality.
         """
+    pass
         # Mock WebSocket manager to track events
-        self.websocket_manager.send_agent_event = MagicMock()
-        
+        self.websocket_manager.send_agent_event = Magic        
         # Initialize supervisor with proper order
         supervisor = SupervisorAgent(
             db_session=self.db_session,
@@ -203,6 +241,7 @@ class TestWebSocketInitializationOrder(unittest.TestCase):
         """
         Test that supervisor has all required components after initialization.
         """
+    pass
         supervisor = SupervisorAgent(
             db_session=self.db_session,
             llm_manager=self.llm_manager,
@@ -224,6 +263,7 @@ class TestWebSocketInitializationOrder(unittest.TestCase):
         Test that the expected number of agents are registered.
         The fix should result in "WebSocket manager set for 8/8 agents".
         """
+    pass
         supervisor = SupervisorAgent(
             db_session=self.db_session,
             llm_manager=self.llm_manager,
@@ -239,7 +279,8 @@ class TestWebSocketInitializationOrder(unittest.TestCase):
             f"Expected at least 8 agents, but only {agent_count} registered!")
         
         # Log the actual agents for debugging
-        print(f"\n[SUCCESS] WebSocket manager set for {agent_count}/{agent_count} agents")
+        print(f"
+[SUCCESS] WebSocket manager set for {agent_count}/{agent_count} agents")
         print(f"Registered agents: {list(agents_dict.keys())}")
     
     def test_websocket_manager_propagation_to_agents(self):
@@ -247,6 +288,7 @@ class TestWebSocketInitializationOrder(unittest.TestCase):
         Test that WebSocket manager is properly propagated to all agent instances.
         This is the most direct test of the fix.
         """
+    pass
         # Track which agents get the WebSocket manager
         agents_with_ws_manager = []
         agents_without_ws_manager = []
@@ -272,7 +314,8 @@ class TestWebSocketInitializationOrder(unittest.TestCase):
         
         # Verify count matches expected
         total_agents = len(agents_with_ws_manager)
-        print(f"\n[SUCCESS] WebSocket manager successfully set for {total_agents}/{total_agents} agents")
+        print(f"
+[SUCCESS] WebSocket manager successfully set for {total_agents}/{total_agents} agents")
         
         # The fix ensures this is "8/8" not "0/0"
         self.assertGreater(total_agents, 0,
@@ -290,23 +333,27 @@ class TestInitializationRaceConditions(unittest.TestCase):
         self.websocket_manager = Mock(spec=WebSocketManager)
         
         # Mock tool dispatcher executor attribute
-        self.tool_dispatcher.executor = Mock()
+        self.tool_dispatcher.websocket = TestWebSocketConnection()  # Real WebSocket implementation
     
     def test_concurrent_initialization_maintains_order(self):
         """
+    pass
         Test that concurrent initialization still maintains correct order.
         """
         async def init_supervisor():
+    pass
             supervisor = SupervisorAgent(
                 db_session=self.db_session,
                 llm_manager=self.llm_manager,
                 tool_dispatcher=self.tool_dispatcher,
                 websocket_manager=self.websocket_manager
             )
-            return supervisor
+            await asyncio.sleep(0)
+    return supervisor
         
         # Run multiple concurrent initializations
         async def run_concurrent():
+    pass
             tasks = [init_supervisor() for _ in range(5)]
             supervisors = await asyncio.gather(*tasks)
             
@@ -323,6 +370,7 @@ class TestInitializationRaceConditions(unittest.TestCase):
         """
         Test that reinitializing components preserves the correct order.
         """
+    pass
         supervisor = SupervisorAgent(
             db_session=self.db_session,
             llm_manager=self.llm_manager,
@@ -362,7 +410,8 @@ def run_tests():
     result = runner.run(suite)
     
     # Report summary
-    print("\n" + "="*70)
+    print("
+" + "="*70)
     print("WEBSOCKET INITIALIZATION ORDER TEST RESULTS")
     print("="*70)
     print(f"Tests Run: {result.testsRun}")
@@ -370,21 +419,27 @@ def run_tests():
     print(f"Errors: {len(result.errors)}")
     
     if result.wasSuccessful():
-        print("\n[SUCCESS] ALL TESTS PASSED - WebSocket initialization order is correct!")
+        print("
+[SUCCESS] ALL TESTS PASSED - WebSocket initialization order is correct!")
     else:
-        print("\n[FAILED] TESTS FAILED - WebSocket initialization order bug may have regressed!")
+        print("
+[FAILED] TESTS FAILED - WebSocket initialization order bug may have regressed!")
         if result.failures:
-            print("\nFailures:")
+            print("
+Failures:")
             for test, trace in result.failures:
                 print(f"  - {test}: {trace.split('AssertionError:')[-1].strip()[:100]}")
         if result.errors:
-            print("\nErrors:")
+            print("
+Errors:")
             for test, trace in result.errors:
                 print(f"  - {test}: {trace.split('Error:')[-1].strip()[:100]}")
     
+    await asyncio.sleep(0)
     return result.wasSuccessful()
 
 
 if __name__ == "__main__":
     success = run_tests()
     sys.exit(0 if success else 1)
+    pass

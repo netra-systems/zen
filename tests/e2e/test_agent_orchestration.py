@@ -16,6 +16,8 @@ import asyncio
 import time
 from typing import Any, Dict, List, Optional
 from datetime import datetime
+from netra_backend.app.core.agent_registry import AgentRegistry
+from shared.isolated_environment import IsolatedEnvironment
 
 import pytest
 

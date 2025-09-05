@@ -1,5 +1,6 @@
 """
 from shared.isolated_environment import get_env
+from shared.isolated_environment import IsolatedEnvironment
 Test suite to validate that critical cold start fixes are working correctly.
 Tests the actual fixes implemented for authentication, WebSocket, and database issues.
 """

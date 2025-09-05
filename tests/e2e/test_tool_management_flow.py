@@ -13,6 +13,7 @@ import asyncio
 import pytest
 from typing import Dict, Any
 import httpx
+from shared.isolated_environment import IsolatedEnvironment
 
 from test_framework.base_e2e_test import BaseE2ETest
 

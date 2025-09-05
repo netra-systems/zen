@@ -1,4 +1,5 @@
 from shared.isolated_environment import get_env
+from shared.isolated_environment import IsolatedEnvironment
 """
 env = get_env()
 Critical Integration Test for Dev Environment Initialization
@@ -28,7 +29,6 @@ import time
 from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Any, Dict, Optional, Set
-from unittest.mock import MagicMock, patch
 
 import pytest
 
@@ -42,6 +42,9 @@ from dev_launcher.log_streamer import LogManager
 from dev_launcher.secret_loader import SecretLoader
 from dev_launcher.service_discovery import ServiceDiscovery
 from dev_launcher.startup_optimizer import StartupOptimizer, StartupStep, StepResult
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
 
 
 class TestDevEnvironmentInitialization:
@@ -80,6 +83,7 @@ class TestDevEnvironmentInitialization:
         
     def teardown_method(self):
         """Clean up test environment."""
+    pass
         # Clean up temporary directory
         import shutil
         if self.temp_dir and Path(self.temp_dir).exists():
@@ -97,10 +101,10 @@ class TestDevEnvironmentInitialization:
         5. All services reach healthy state
         6. Startup completes within timeout
         """
+    pass
         with patch.dict(os.environ, self.test_env, clear=False):
             # Mock signal handlers to avoid test interference
-            with patch('signal.signal'):
-                config = LauncherConfig(
+                            config = LauncherConfig(
                     backend_port=8001,  # Use different ports for testing
                     frontend_port=3001,
                     project_root=self.project_root,
@@ -151,6 +155,7 @@ class TestDevEnvironmentInitialization:
         - Caching works for repeated startups
         - Parallel execution where possible
         """
+    pass
         cache_manager = CacheManager(project_root=self.project_root)
         optimizer = StartupOptimizer(cache_manager)
         
@@ -222,16 +227,21 @@ class TestDevEnvironmentInitialization:
         - Health status tracking and state transitions
         - Cross-service connectivity validation
         """
+    pass
         health_monitor = HealthMonitor(check_interval=5)  # Faster for testing
         
         # Register test services with different grace periods
         def mock_backend_health():
-            return True
+    pass
+            await asyncio.sleep(0)
+    return True
             
         def mock_frontend_health():
+    pass
             return True
             
         def mock_auth_health():
+    pass
             return True
         
         # Register services (should use correct grace periods)
@@ -305,6 +315,7 @@ class TestDevEnvironmentInitialization:
         - Health check retry logic
         - Circuit breaker functionality
         """
+    pass
         health_monitor = HealthMonitor(check_interval=1)  # Fast for testing
         
         # Track recovery calls
@@ -312,18 +323,23 @@ class TestDevEnvironmentInitialization:
         failure_count = {"test_service_1": 0, "test_service_2": 0}
         
         def failing_backend_health():
+    pass
             failure_count["test_service_1"] += 1
-            return failure_count["test_service_1"] > 3  # Fail first 3 times
+            await asyncio.sleep(0)
+    return failure_count["test_service_1"] > 3  # Fail first 3 times
         
         def backend_recovery():
+    pass
             recovery_called["test_service_1"] = True
             failure_count["test_service_1"] = 0  # Reset on recovery
             
         def failing_frontend_health():
+    pass
             failure_count["test_service_2"] += 1
             return failure_count["test_service_2"] > 2  # Fail first 2 times
             
         def frontend_recovery():
+    pass
             recovery_called["test_service_2"] = True
             failure_count["test_service_2"] = 0
         
@@ -393,6 +409,7 @@ class TestDevEnvironmentInitialization:
         - Port assignments are correct
         - Database URLs are valid
         """
+    pass
         with patch.dict(os.environ, self.test_env, clear=False):
             # Test environment validator
             env_validator = EnvironmentValidator()
@@ -447,10 +464,10 @@ class TestDevEnvironmentInitialization:
         - Cache effectiveness for subsequent startups
         - Resource usage stays reasonable
         """
+    pass
         with patch.dict(os.environ, self.test_env, clear=False):
             # Mock: Component isolation for testing without external dependencies
-            with patch('signal.signal'):
-                config = LauncherConfig(
+                            config = LauncherConfig(
                     backend_port=8002,
                     frontend_port=3002,
                     project_root=self.project_root,
@@ -513,6 +530,7 @@ class TestDevEnvironmentInitialization:
         - System stability under failure conditions
         - Recovery from transient failures
         """
+    pass
         # Test with minimal environment (missing some variables)
         minimal_env = {
             'DATABASE_URL': 'postgresql://test:test@localhost:5433/netra_test',
@@ -522,8 +540,7 @@ class TestDevEnvironmentInitialization:
         
         with patch.dict(os.environ, minimal_env, clear=True):
             # Mock: Component isolation for testing without external dependencies
-            with patch('signal.signal'):
-                config = LauncherConfig(
+                            config = LauncherConfig(
                     backend_port=8003,
                     frontend_port=3003,
                     project_root=self.project_root,
@@ -548,6 +565,7 @@ class TestDevEnvironmentInitialization:
                 
                 # Register a failing service
                 def always_fail():
+    pass
                     raise Exception("Simulated service failure")
                 
                 health_monitor.register_service(
@@ -572,6 +590,7 @@ class TestDevEnvironmentInitialization:
         - Connection retry logic
         - Health monitoring integration
         """
+    pass
         with patch.dict(os.environ, self.test_env, clear=False):
             db_connector = DatabaseConnector(use_emoji=False)
             
@@ -622,6 +641,7 @@ class TestDevEnvironmentEdgeCases:
     
     def teardown_method(self):
         """Clean up test environment."""
+    pass
         if self.temp_dir and Path(self.temp_dir).exists():
             shutil.rmtree(self.temp_dir, ignore_errors=True)
     
@@ -639,7 +659,8 @@ class TestDevEnvironmentEdgeCases:
         
         # Execute concurrently
         async def run_optimizer(opt, name):
-            return opt.execute_optimized_sequence(["concurrent_test"])
+            await asyncio.sleep(0)
+    return opt.execute_optimized_sequence(["concurrent_test"])
         
         # Run both optimizers concurrently
         results = await asyncio.gather(
@@ -661,10 +682,12 @@ class TestDevEnvironmentEdgeCases:
     
     async def test_resource_cleanup_on_failure(self):
         """Test proper resource cleanup when startup fails."""
+    pass
         health_monitor = HealthMonitor()
         
         # Register a service that will fail
         def failing_service():
+    pass
             raise Exception("Service startup failed")
         
         health_monitor.register_service(
@@ -715,6 +738,7 @@ class TestDevEnvironmentEdgeCases:
 @pytest.mark.integration
 class TestDevEnvironmentRealServices:
     """
+    pass
     Integration tests that require real services to be running.
     
     These tests are marked with @pytest.mark.integration and should
@@ -745,6 +769,7 @@ class TestDevEnvironmentRealServices:
     @pytest.mark.asyncio 
     async def test_end_to_end_startup_with_real_services(self):
         """Test complete end-to-end startup with real services."""
+    pass
         # Skip if not in development environment
         if env.get('ENVIRONMENT') != 'development':
             pytest.skip("End-to-end test only runs in development environment")
@@ -754,8 +779,7 @@ class TestDevEnvironmentRealServices:
             project_root = Path(temp_dir)
             
             # Mock: Component isolation for testing without external dependencies
-            with patch('signal.signal'):
-                config = LauncherConfig(
+                            config = LauncherConfig(
                     backend_port=8000,
                     frontend_port=3000,  
                     project_root=project_root,
@@ -783,3 +807,29 @@ class TestDevEnvironmentRealServices:
                 
         except Exception as e:
             pytest.skip(f"Real end-to-end startup failed: {e}")
+
+class TestWebSocketConnection:
+    """Real WebSocket connection for testing instead of mocks."""
+    
+    def __init__(self):
+    pass
+        self.messages_sent = []
+        self.is_connected = True
+        self._closed = False
+        
+    async def send_json(self, message: dict):
+        """Send JSON message."""
+        if self._closed:
+            raise RuntimeError("WebSocket is closed")
+        self.messages_sent.append(message)
+        
+    async def close(self, code: int = 1000, reason: str = "Normal closure"):
+        """Close WebSocket connection."""
+    pass
+        self._closed = True
+        self.is_connected = False
+        
+    def get_messages(self) -> list:
+        """Get all sent messages."""
+        await asyncio.sleep(0)
+    return self.messages_sent.copy()

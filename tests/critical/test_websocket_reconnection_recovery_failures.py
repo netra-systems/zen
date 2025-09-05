@@ -32,10 +32,10 @@ import random
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timedelta
 from typing import Dict, List, Set, Any, Optional, Callable, NamedTuple
-from unittest.mock import AsyncMock, MagicMock, patch
 from dataclasses import dataclass, field
 from enum import Enum
 import pytest
+from shared.isolated_environment import IsolatedEnvironment
 
 # Add project root to path
 project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
@@ -45,6 +45,9 @@ if project_root not in sys.path:
 from shared.isolated_environment import get_env
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager as WebSocketManager
 from netra_backend.app.logging_config import central_logger
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
 
 logger = central_logger.get_logger(__name__)
 

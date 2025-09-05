@@ -25,6 +25,7 @@ CRITICAL REQUIREMENTS:
 import asyncio
 import json
 import logging
+from shared.isolated_environment import IsolatedEnvironment
 
 # Add project root to path for imports
 import sys

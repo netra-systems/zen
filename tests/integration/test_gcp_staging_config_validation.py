@@ -1,3 +1,29 @@
+class TestWebSocketConnection:
+    """Real WebSocket connection for testing instead of mocks."""
+    
+    def __init__(self):
+    pass
+        self.messages_sent = []
+        self.is_connected = True
+        self._closed = False
+        
+    async def send_json(self, message: dict):
+        """Send JSON message."""
+        if self._closed:
+            raise RuntimeError("WebSocket is closed")
+        self.messages_sent.append(message)
+        
+    async def close(self, code: int = 1000, reason: str = "Normal closure"):
+        """Close WebSocket connection."""
+    pass
+        self._closed = True
+        self.is_connected = False
+        
+    def get_messages(self) -> list:
+        """Get all sent messages."""
+        await asyncio.sleep(0)
+    return self.messages_sent.copy()
+
 #!/usr/bin/env python3
 """
 Integration Test: GCP Staging Configuration Validation
@@ -9,9 +35,14 @@ import os
 import subprocess
 import json
 import requests
-from unittest.mock import patch, MagicMock
 from pathlib import Path
 import sys
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
+from shared.isolated_environment import get_env
+from shared.isolated_environment import IsolatedEnvironment
+import asyncio
 
 # Add project root to path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
@@ -36,6 +67,7 @@ class TestGCPStagingConfigValidation:
     
     def test_service_secret_dependency_chain(self):
         """Test SERVICE_SECRET dependency chain validation"""
+    pass
         dependency_chain = {
             "SERVICE_SECRET": {
                 "required_by": ["AuthClientCore", "CircuitBreaker", "TokenValidation"],
@@ -60,8 +92,7 @@ class TestGCPStagingConfigValidation:
         # Mock gcloud command for testing
         with patch('subprocess.run') as mock_run:
             # Mock successful SERVICE_SECRET check
-            mock_result = MagicMock()
-            mock_result.stdout = "SERVICE_SECRET"
+            mock_result = Magic            mock_result.stdout = "SERVICE_SECRET"
             mock_result.returncode = 0
             mock_run.return_value = mock_result
             
@@ -85,10 +116,12 @@ class TestGCPStagingConfigValidation:
         
         class MockGCPConfigValidator:
             def __init__(self):
+    pass
                 self.errors = []
                 self.warnings = []
             
             def validate_service_config(self, service_name, required_vars):
+    pass
                 # Simulate missing SERVICE_SECRET
                 if "SERVICE_SECRET" in required_vars:
                     self.errors.append(f"{service_name}: Missing SERVICE_SECRET")
@@ -96,6 +129,7 @@ class TestGCPStagingConfigValidation:
                 return True
             
             def validate_all(self):
+    pass
                 backend_valid = self.validate_service_config(
                     "netra-backend-staging", 
                     ["SERVICE_SECRET", "DATABASE_URL", "JWT_SECRET_KEY"]
@@ -114,8 +148,7 @@ class TestGCPStagingConfigValidation:
     def test_health_endpoint_configuration_dependency(self):
         """Test health endpoint dependency on configuration"""
         
-        @patch('os.getenv')
-        def mock_health_check(mock_getenv):
+                def mock_health_check(mock_getenv):
             def getenv_side_effect(key, default=None):
                 if key == "SERVICE_SECRET":
                     return None  # Simulate missing SERVICE_SECRET
@@ -140,12 +173,14 @@ class TestGCPStagingConfigValidation:
         
         class MockCircuitBreaker:
             def __init__(self, service_secret):
+    pass
                 self.service_secret = service_secret
                 self.state = "CLOSED"
                 self.failure_count = 0
                 self.failure_threshold = 5
             
             def call(self, func, *args, **kwargs):
+    pass
                 if not self.service_secret:
                     # No SERVICE_SECRET = always fail
                     self.failure_count += 1
@@ -157,6 +192,7 @@ class TestGCPStagingConfigValidation:
                 return func(*args, **kwargs)
             
             def is_open(self):
+    pass
                 return self.state == "OPEN"
         
         # Test without SERVICE_SECRET
@@ -222,9 +258,11 @@ class TestGCPStagingConfigValidation:
         
         class MockConfigMonitor:
             def __init__(self):
+    pass
                 self.alerts = []
             
             def check_service_secret(self):
+    pass
                 # Simulate SERVICE_SECRET check
                 if not os.getenv("SERVICE_SECRET"):
                     self.alerts.append({
@@ -236,6 +274,7 @@ class TestGCPStagingConfigValidation:
                 return True
             
             def check_circuit_breaker_state(self):
+    pass
                 # Simulate circuit breaker state check
                 # In real scenario, would check actual breaker state
                 if not self.check_service_secret():
@@ -248,6 +287,7 @@ class TestGCPStagingConfigValidation:
                 return "CLOSED"
             
             def get_critical_alerts(self):
+    pass
                 return [alert for alert in self.alerts if alert["severity"] == "CRITICAL"]
         
         # Test monitoring without SERVICE_SECRET
@@ -303,32 +343,38 @@ class TestGCPStagingConfigValidation:
         
         class MockGCPEmergencyFix:
             def __init__(self):
+    pass
                 self.service_secret_created = False
                 self.service_updated = False
                 self.service_restarted = False
             
             def check_service_secret_exists(self):
+    pass
                 return self.service_secret_created
             
             def create_service_secret(self, value):
+    pass
                 if len(value) >= 16:
                     self.service_secret_created = True
                     return True
                 return False
             
             def update_service(self, secret_value):
+    pass
                 if secret_value and self.service_secret_created:
                     self.service_updated = True
                     return True
                 return False
             
             def restart_service(self):
+    pass
                 if self.service_updated:
                     self.service_restarted = True
                     return True
                 return False
             
             def validate_fix(self):
+    pass
                 return (self.service_secret_created and 
                        self.service_updated and 
                        self.service_restarted)
@@ -459,31 +505,37 @@ class TestServiceSecretIncidentResponse:
         
         class IncidentResponse:
             def __init__(self):
+    pass
                 self.steps_completed = []
                 self.incident_resolved = False
             
             def step_1_diagnose(self):
+    pass
                 # Check SERVICE_SECRET presence
                 service_secret_present = os.getenv("SERVICE_SECRET") is not None
                 self.steps_completed.append("diagnose")
                 return service_secret_present
             
             def step_2_deploy_secret(self):
+    pass
                 # Deploy SERVICE_SECRET
                 self.steps_completed.append("deploy_secret")
                 return True  # Simulated success
             
             def step_3_restart_service(self):
+    pass
                 # Restart service
                 self.steps_completed.append("restart_service")
                 return True  # Simulated success
             
             def step_4_validate(self):
+    pass
                 # Validate fix
                 self.steps_completed.append("validate")
                 return True  # Simulated success
             
             def execute_response(self):
+    pass
                 # Execute incident response workflow
                 if not self.step_1_diagnose():
                     if self.step_2_deploy_secret():

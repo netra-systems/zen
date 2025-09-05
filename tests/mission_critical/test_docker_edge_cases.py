@@ -43,7 +43,8 @@ import uuid
 import signal
 import sys
 import os
-from unittest.mock import patch
+from test_framework.docker.unified_docker_manager import UnifiedDockerManager
+from shared.isolated_environment import IsolatedEnvironment
 
 # Add parent directory to path for absolute imports
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
@@ -67,6 +68,9 @@ from test_framework.dynamic_port_allocator import (
     release_test_ports
 )
 from shared.isolated_environment import get_env
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
 
 # Configure logging for maximum visibility
 logging.basicConfig(level=logging.DEBUG)
@@ -107,6 +111,7 @@ class DockerEdgeCaseFramework:
     
     def create_orphaned_container(self, container_name: str) -> bool:
         """Create a container that will become orphaned."""
+    pass
         try:
             result = execute_docker_command([
                 'docker', 'create', '--name', container_name,
@@ -254,6 +259,7 @@ class DockerEdgeCaseFramework:
 @pytest.fixture
 def edge_case_framework():
     """Pytest fixture providing Docker edge case test framework."""
+    pass
     framework = DockerEdgeCaseFramework()
     yield framework
     framework.cleanup()
@@ -304,6 +310,7 @@ class TestOrphanedResourceRecovery:
     
     def test_orphaned_network_with_dependencies(self, edge_case_framework):
         """Test orphaned network cleanup with container dependencies."""
+    pass
         logger.info("🌐 Testing orphaned network cleanup with dependencies")
         
         # Create network
@@ -474,6 +481,7 @@ class TestInterruptedOperations:
     
     def test_interrupted_image_pull_recovery(self, edge_case_framework):
         """Test recovery from interrupted image pull operations."""
+    pass
         logger.info("📥 Testing interrupted image pull recovery")
         
         # Use a small image for faster testing
@@ -648,6 +656,7 @@ class TestPortConflictResolution:
     
     def test_dynamic_port_allocation_conflicts(self, edge_case_framework):
         """Test dynamic port allocation with potential conflicts."""
+    pass
         logger.info("🎯 Testing dynamic port allocation conflict handling")
         
         # Create multiple containers with dynamic port allocation
@@ -690,7 +699,8 @@ class TestPortConflictResolution:
         
         for container_name, port_output in containers_with_ports:
             # Parse port output to extract host ports
-            lines = port_output.strip().split('\n')
+            lines = port_output.strip().split('
+')
             for line in lines:
                 if '->' in line:
                     host_part = line.split('->')[0].strip()
@@ -778,6 +788,7 @@ class TestContainerNameConflicts:
     
     def test_concurrent_name_generation(self, edge_case_framework):
         """Test concurrent container creation with name generation."""
+    pass
         logger.info("🚀 Testing concurrent name generation")
         
         def create_container_with_generated_name(thread_id: int) -> Tuple[bool, str]:
@@ -861,6 +872,7 @@ class TestDockerDaemonRestart:
     
     def test_operation_retry_after_daemon_issues(self, edge_case_framework):
         """Test operation retry mechanisms after potential daemon issues."""
+    pass
         logger.info("🔄 Testing operation retry after daemon issues")
         
         # Test with operations that might fail due to daemon issues
@@ -973,6 +985,7 @@ class TestResourceLimitBoundaries:
     
     def test_cpu_limit_boundary_conditions(self, edge_case_framework):
         """Test CPU limits at boundary conditions."""
+    pass
         logger.info("⚙️ Testing CPU limit boundary conditions")
         
         cpu_tests = [
@@ -1162,6 +1175,7 @@ class TestNetworkEdgeCases:
     
     def test_network_name_conflicts_and_resolution(self, edge_case_framework):
         """Test network name conflicts and resolution strategies."""
+    pass
         logger.info("🌐 Testing network name conflicts and resolution")
         
         base_network_name = f'network_conflict_{uuid.uuid4().hex[:8]}'
@@ -1352,6 +1366,7 @@ class TestVolumeEdgeCases:
     
     def test_volume_cleanup_with_dependency_chains(self, edge_case_framework):
         """Test volume cleanup with complex dependency chains."""
+    pass
         logger.info("🔗 Testing volume cleanup with dependency chains")
         
         # Create a chain of volumes and containers with dependencies
@@ -1520,6 +1535,7 @@ class TestContainerLifecycleEdgeCases:
     
     def test_container_exit_code_edge_cases(self, edge_case_framework):
         """Test handling of various container exit codes."""
+    pass
         logger.info("🚪 Testing container exit code edge cases")
         
         exit_code_tests = [
