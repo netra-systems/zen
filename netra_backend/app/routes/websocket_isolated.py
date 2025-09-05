@@ -148,7 +148,7 @@ async def isolated_websocket_endpoint(websocket: WebSocket):
                    f"thread_id: {thread_id}")
         
         # CRITICAL: Use connection-scoped manager for complete isolation
-        async with connection_scoped_manager(websocket, user_id, thread_id=thread_id) as isolated_manager:
+        async with connection_scope(websocket, user_id, thread_id=thread_id) as isolated_manager:
             manager = isolated_manager
             connection_id = manager.connection_id
             

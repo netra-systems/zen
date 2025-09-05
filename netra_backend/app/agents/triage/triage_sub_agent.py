@@ -13,7 +13,8 @@ from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
 
 from netra_backend.app.agents.base_agent import BaseAgent
-from netra_backend.app.agents.base.interface import ExecutionContext, ExecutionResult, ExecutionStatus
+from netra_backend.app.agents.base.interface import ExecutionContext, ExecutionResult
+from netra_backend.app.schemas.core_enums import ExecutionStatus
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.schemas.agent import SubAgentLifecycle
 from netra_backend.app.agents.triage.models import (
@@ -315,7 +316,7 @@ class TriageSubAgent(BaseAgent):
     def _create_success_execution_result(self, result: Dict[str, Any], execution_time: float) -> ExecutionResult:
         """Create successful execution result"""
         return ExecutionResult(
-            status=ExecutionStatus.SUCCESS,
+            status=ExecutionStatus.COMPLETED,
             request_id=getattr(self, '_current_request_id', 'unknown'),
             data=result,
             execution_time_ms=execution_time,
