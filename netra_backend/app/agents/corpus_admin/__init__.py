@@ -1,32 +1,7 @@
 """
-Corpus Admin Sub-Agent Module
+Corpus admin agent module.
 
-Provides corpus management and administration functionality with 
-modular architecture under 450-line limit.
+Provides functionality for corpus management and administration.
 """
 
-from netra_backend.app.agents.corpus_admin.agent import CorpusAdminSubAgent
-from netra_backend.app.agents.corpus_admin.models import (
-    CorpusMetadata,
-    CorpusOperation,
-    CorpusOperationRequest,
-    CorpusOperationResult,
-    CorpusStatistics,
-    CorpusType,
-)
-from netra_backend.app.agents.corpus_admin.operations import CorpusOperationHandler
-from netra_backend.app.agents.corpus_admin.parsers import CorpusRequestParser
-from netra_backend.app.agents.corpus_admin.validators import CorpusApprovalValidator
-
-__all__ = [
-    "CorpusAdminSubAgent",
-    "CorpusOperation",
-    "CorpusType", 
-    "CorpusMetadata",
-    "CorpusOperationRequest",
-    "CorpusOperationResult",
-    "CorpusStatistics",
-    "CorpusOperationHandler",
-    "CorpusRequestParser",
-    "CorpusApprovalValidator"
-]
+__all__ = []

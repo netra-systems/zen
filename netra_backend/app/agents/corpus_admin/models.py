@@ -1,81 +1,74 @@
 """
-Corpus Admin Data Models
+Corpus admin models.
 
-Pydantic models and enums for corpus management operations.
-All models follow type safety requirements under 300 lines.
+Data models for corpus administration operations.
 """
 
-from datetime import datetime
 from enum import Enum
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, Optional
+from dataclasses import dataclass
 
-from pydantic import BaseModel, Field
+
+class CorpusType(Enum):
+    """Corpus type enumeration."""
+    DOCUMENTATION = "documentation"
+    KNOWLEDGE_BASE = "knowledge_base"
+    REFERENCE = "reference"
+    CUSTOM = "custom"
 
 
-class CorpusOperation(str, Enum):
-    """Types of corpus operations"""
+class CorpusOperation(Enum):
+    """Corpus operation enumeration."""
     CREATE = "create"
     UPDATE = "update"
     DELETE = "delete"
+    INDEX = "index"
+    VALIDATE = "validate"
     SEARCH = "search"
     ANALYZE = "analyze"
     EXPORT = "export"
     IMPORT = "import"
-    VALIDATE = "validate"
 
 
-class CorpusType(str, Enum):
-    """Types of corpus data"""
-    DOCUMENTATION = "documentation"
-    KNOWLEDGE_BASE = "knowledge_base"
-    TRAINING_DATA = "training_data"
-    REFERENCE_DATA = "reference_data"
-    EMBEDDINGS = "embeddings"
-
-
-class CorpusMetadata(BaseModel):
-    """Metadata for corpus entries"""
-    corpus_id: Optional[str] = None
+@dataclass
+class CorpusMetadata:
+    """Corpus metadata model."""
     corpus_name: str
     corpus_type: CorpusType
     description: Optional[str] = None
-    tags: List[str] = Field(default_factory=list)
-    created_at: Optional[datetime] = None
-    updated_at: Optional[datetime] = None
-    size_bytes: Optional[int] = None
+    created_at: Optional[str] = None
+    updated_at: Optional[str] = None
     document_count: Optional[int] = None
-    version: str = Field(default="1.0")
-    access_level: str = Field(default="private")
 
 
-class CorpusOperationRequest(BaseModel):
-    """Request for corpus operation"""
+@dataclass 
+class CorpusOperationRequest:
+    """Corpus operation request model."""
     operation: CorpusOperation
     corpus_metadata: CorpusMetadata
-    filters: Dict[str, Any] = Field(default_factory=dict)
-    content: Optional[Any] = None
-    options: Dict[str, Any] = Field(default_factory=dict)
-    requires_approval: bool = False
+    parameters: Optional[Dict[str, Any]] = None
+    user_id: Optional[str] = None
+    thread_id: Optional[str] = None
 
 
-class CorpusOperationResult(BaseModel):
-    """Result of corpus operation"""
+@dataclass
+class CorpusOperationResult:
+    """Corpus operation result model."""
     success: bool
     operation: CorpusOperation
-    corpus_metadata: CorpusMetadata
-    affected_documents: int = 0
-    result_data: Optional[Any] = None
-    errors: List[str] = Field(default_factory=list)
-    warnings: List[str] = Field(default_factory=list)
-    requires_approval: bool = False
-    approval_message: Optional[str] = None
-    metadata: Dict[str, Any] = Field(default_factory=dict)
+    corpus_metadata: Optional[CorpusMetadata] = None
+    affected_documents: Optional[int] = None
+    error_message: Optional[str] = None
+    execution_time: Optional[float] = None
 
 
-class CorpusStatistics(BaseModel):
-    """Statistics about corpus"""
-    total_corpora: int = 0
+@dataclass
+class CorpusStatistics:
+    """Corpus statistics model."""
     total_documents: int = 0
     total_size_bytes: int = 0
-    corpora_by_type: Dict[str, int] = Field(default_factory=dict)
-    recent_operations: List[Dict[str, Any]] = Field(default_factory=list)
+    indexed_documents: int = 0
+    processed_documents: int = 0
+    failed_documents: int = 0
+    last_updated: Optional[str] = None
+    processing_time_seconds: Optional[float] = None
