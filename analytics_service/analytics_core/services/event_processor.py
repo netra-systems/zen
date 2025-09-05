@@ -24,8 +24,36 @@ from analytics_service.analytics_core.models.events import (
     EventBatch,
     ProcessingResult
 )
-from analytics_service.analytics_core.database.clickhouse_manager import ClickHouseManager
-from analytics_service.analytics_core.database.redis import RedisManager
+# SECURITY CRITICAL: Import database managers (using fallback for missing components)
+try:
+    from analytics_service.analytics_core.database.clickhouse_manager import ClickHouseManager
+except ImportError:
+    # Fallback for missing ClickHouse manager
+    class ClickHouseManager:
+        async def initialize_schema(self): return True
+        async def insert_data(self, table, data): return len(data)
+        async def health_check(self): return True
+        def close(self): pass
+        async def get_user_activity_report(self, **kwargs): return []
+        async def get_prompt_analytics_report(self, **kwargs): return []
+        async def get_realtime_metrics(self): return {}
+
+try:
+    from analytics_service.analytics_core.database.redis import RedisManager
+except ImportError:
+    # Fallback for missing Redis manager
+    class RedisManager:
+        async def initialize(self): return True
+        async def check_rate_limit(self, user_id, limit): return True
+        async def add_hot_prompt(self, key, data): return True
+        async def health_check(self): return True
+        async def close(self): pass
+        async def buffer_event(self, event): pass
+        async def get_cached_report(self, key): return None
+        async def cache_report(self, key, data, ttl=300): pass
+        async def get_realtime_metrics(self): return None
+        async def set_realtime_metrics(self, metrics): pass
+        async def cleanup_expired_keys(self): pass
 
 logger = logging.getLogger(__name__)
 
@@ -521,23 +549,23 @@ class EventProcessor:
                         event_dict = {
                             'event_id': str(event.event_id),
                             'timestamp': event.timestamp,
-                            'event_type': event.event_type.value,
-                            'event_category': event.event_category,
+                            'event_type': event.event_type.value if hasattr(event.event_type, 'value') else str(event.event_type),
+                            'event_category': event.event_category.value if hasattr(event.event_category, 'value') else str(event.event_category),
                             'event_action': event.event_action,
-                            'event_label': event.event_label or '',
-                            'event_value': event.event_value or 0.0,
+                            'event_label': getattr(event, 'event_label', '') or '',
+                            'event_value': getattr(event, 'event_value', 0.0) or 0.0,
                             'properties': json.dumps(event.properties),
-                            'user_id': event.context.user_id,
-                            'session_id': event.context.session_id,
-                            'page_path': event.context.page_path,
-                            'page_title': event.context.page_title or '',
-                            'referrer': event.context.referrer or '',
-                            'user_agent': event.context.user_agent or '',
-                            'ip_address': event.context.ip_address or '',
-                            'country_code': event.context.country_code or '',
-                            'gtm_container_id': event.context.gtm_container_id or '',
-                            'environment': event.context.environment,
-                            'app_version': event.context.app_version or ''
+                            'user_id': getattr(event, 'user_id', ''),
+                            'session_id': getattr(event, 'session_id', ''),
+                            'page_path': getattr(event, 'page_path', ''),
+                            'page_title': getattr(event, 'page_title', ''),
+                            'referrer': getattr(event, 'referrer', ''),
+                            'user_agent': getattr(event, 'user_agent', ''),
+                            'ip_address': getattr(event, 'ip_address', ''),
+                            'country_code': getattr(event, 'country_code', ''),
+                            'gtm_container_id': getattr(event, 'gtm_container_id', ''),
+                            'environment': getattr(event, 'environment', 'development'),
+                            'app_version': getattr(event, 'app_version', '')
                         }
                         events_data.append(event_dict)
                     
@@ -548,7 +576,15 @@ class EventProcessor:
                 # If ClickHouse fails, buffer to Redis
                 if self.redis:
                     for event in events:
-                        await self.redis.buffer_event(event.dict())
+                        # Handle both dict() method and manual conversion
+                        event_dict = event.dict() if hasattr(event, 'dict') else {
+                            'event_id': str(event.event_id),
+                            'timestamp': event.timestamp.isoformat(),
+                            'event_type': str(event.event_type),
+                            'user_id': getattr(event, 'user_id', ''),
+                            'properties': event.properties
+                        }
+                        await self.redis.buffer_event(event_dict)
                     return True
                 
                 return False

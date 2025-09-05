@@ -203,7 +203,10 @@ class SecureBackgroundTaskManager:
                 if asyncio.iscoroutinefunction(coro):
                     bg_task._task = asyncio.create_task(coro())
                 else:
-                    bg_task._task = asyncio.create_task(asyncio.coroutine(coro)())
+                    # Convert regular callable to coroutine
+                    async def wrapper():
+                        return coro()
+                    bg_task._task = asyncio.create_task(wrapper())
             
             bg_task.status = TaskStatus.RUNNING
             bg_task.started_at = datetime.now(timezone.utc)
@@ -261,7 +264,10 @@ class SecureBackgroundTaskManager:
                     )
                     result = await coro()
             else:
-                result = await asyncio.coroutine(coro)()
+                # Convert regular callable to coroutine
+                async def wrapper():
+                    return coro()
+                result = await wrapper()
             
             logger.debug(f"Secure task {task_id} completed successfully for user {user_context.user_id}")
             return result

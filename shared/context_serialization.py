@@ -23,6 +23,7 @@ for transmission across async boundaries, Redis queues, and background task syst
 
 import json
 import hashlib
+import hmac
 import base64
 import logging
 from typing import Dict, Any, Optional, Union
@@ -209,8 +210,6 @@ class SecureContextSerializer:
     
     def _generate_integrity_hash(self, data: str) -> str:
         """Generate HMAC-SHA256 integrity hash for data."""
-        import hmac
-        
         hash_obj = hmac.new(
             self.secret_key.encode('utf-8'),
             data.encode('utf-8'),
