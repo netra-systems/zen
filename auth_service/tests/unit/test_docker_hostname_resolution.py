@@ -119,16 +119,19 @@ class TestDockerHostnameResolution(unittest.TestCase):
         # Setup mocks - no Docker indicators
         mock_exists.return_value = False
         
-        # Set environment variables for test (no Docker indicators)
-        env.set('POSTGRES_HOST', 'localhost', 'test')
-        env.set('POSTGRES_PORT', '5432', 'test')
-        env.set('POSTGRES_DB', 'test_db', 'test')
-        env.set('POSTGRES_USER', 'test_user', 'test')
-        env.set('POSTGRES_PASSWORD', 'test_pass', 'test')
-        env.set('ENVIRONMENT', 'development', 'test')
+        # Create environment variables dict for testing (no Docker indicators)
+        env_vars = {
+            'POSTGRES_HOST': 'localhost',
+            'POSTGRES_PORT': '5432',
+            'POSTGRES_DB': 'test_db',
+            'POSTGRES_USER': 'test_user',
+            'POSTGRES_PASSWORD': 'test_pass',
+            'ENVIRONMENT': 'development'
+        }
         
-        # Get database URL
-        db_url = AuthConfig.get_database_url()
+        # Create DatabaseURLBuilder instance and test directly
+        builder = DatabaseURLBuilder(env_vars)
+        db_url = builder.get_url_for_environment(sync=False)
         
         # Should keep 'localhost' when not in Docker
         self.assertIn('@localhost:', db_url)
@@ -140,17 +143,20 @@ class TestDockerHostnameResolution(unittest.TestCase):
         # Setup mocks - Docker environment
         mock_exists.return_value = True  # .dockerenv exists
         
-        # Set environment variables for test with custom host
-        env.set('RUNNING_IN_DOCKER', 'true', 'test')
-        env.set('POSTGRES_HOST', 'custom-db-host.example.com', 'test')
-        env.set('POSTGRES_PORT', '5432', 'test')
-        env.set('POSTGRES_DB', 'test_db', 'test')
-        env.set('POSTGRES_USER', 'test_user', 'test')
-        env.set('POSTGRES_PASSWORD', 'test_pass', 'test')
-        env.set('ENVIRONMENT', 'development', 'test')
+        # Create environment variables dict for testing with custom host
+        env_vars = {
+            'RUNNING_IN_DOCKER': 'true',
+            'POSTGRES_HOST': 'custom-db-host.example.com',
+            'POSTGRES_PORT': '5432',
+            'POSTGRES_DB': 'test_db',
+            'POSTGRES_USER': 'test_user',
+            'POSTGRES_PASSWORD': 'test_pass',
+            'ENVIRONMENT': 'development'
+        }
         
-        # Get database URL
-        db_url = AuthConfig.get_database_url()
+        # Create DatabaseURLBuilder instance and test directly
+        builder = DatabaseURLBuilder(env_vars)
+        db_url = builder.get_url_for_environment(sync=False)
         
         # Should keep custom host even in Docker
         self.assertIn('@custom-db-host.example.com:', db_url)
@@ -162,18 +168,21 @@ class TestDockerHostnameResolution(unittest.TestCase):
         # Setup mocks - Docker environment
         mock_exists.return_value = True  # .dockerenv exists
         
-        # Set environment variables for test with DATABASE_URL
-        env.set('RUNNING_IN_DOCKER', 'true', 'test')
-        env.set('POSTGRES_HOST', 'localhost', 'test')
-        env.set('POSTGRES_PORT', '5432', 'test')
-        env.set('POSTGRES_DB', 'test_db', 'test')
-        env.set('POSTGRES_USER', 'test_user', 'test')
-        env.set('POSTGRES_PASSWORD', 'test_pass', 'test')
-        env.set('ENVIRONMENT', 'development', 'test')
-        env.set('DATABASE_URL', 'postgresql://custom_user:custom_pass@custom_host:5433/custom_db', 'test')
+        # Create environment variables dict for testing with DATABASE_URL
+        env_vars = {
+            'RUNNING_IN_DOCKER': 'true',
+            'POSTGRES_HOST': 'localhost',
+            'POSTGRES_PORT': '5432',
+            'POSTGRES_DB': 'test_db',
+            'POSTGRES_USER': 'test_user',
+            'POSTGRES_PASSWORD': 'test_pass',
+            'ENVIRONMENT': 'development',
+            'DATABASE_URL': 'postgresql://custom_user:custom_pass@custom_host:5433/custom_db'
+        }
         
-        # Get database URL
-        db_url = AuthConfig.get_database_url()
+        # Create DatabaseURLBuilder instance and test directly
+        builder = DatabaseURLBuilder(env_vars)
+        db_url = builder.get_url_for_environment(sync=False)
         
         # Should use the provided DATABASE_URL
         self.assertIn('@custom_host:', db_url)
@@ -186,17 +195,20 @@ class TestDockerHostnameResolution(unittest.TestCase):
         # Setup mocks - Docker environment
         mock_exists.return_value = True  # .dockerenv exists
         
-        # Set environment variables for test in PRODUCTION
-        env.set('RUNNING_IN_DOCKER', 'true', 'test')
-        env.set('POSTGRES_HOST', 'localhost', 'test')
-        env.set('POSTGRES_PORT', '5432', 'test')
-        env.set('POSTGRES_DB', 'prod_db', 'test')
-        env.set('POSTGRES_USER', 'prod_user', 'test')
-        env.set('POSTGRES_PASSWORD', 'prod_pass', 'test')
-        env.set('ENVIRONMENT', 'production', 'test')  # Production environment
+        # Create environment variables dict for testing in PRODUCTION
+        env_vars = {
+            'RUNNING_IN_DOCKER': 'true',
+            'POSTGRES_HOST': 'localhost',
+            'POSTGRES_PORT': '5432',
+            'POSTGRES_DB': 'prod_db',
+            'POSTGRES_USER': 'prod_user',
+            'POSTGRES_PASSWORD': 'prod_pass',
+            'ENVIRONMENT': 'production'  # Production environment
+        }
         
-        # Get database URL
-        db_url = AuthConfig.get_database_url()
+        # Create DatabaseURLBuilder instance and test directly
+        builder = DatabaseURLBuilder(env_vars)
+        db_url = builder.get_url_for_environment(sync=False)
         
         # Should keep 'localhost' even in Docker for production
         self.assertIn('@localhost:', db_url)
@@ -208,17 +220,20 @@ class TestDockerHostnameResolution(unittest.TestCase):
         # Setup mocks - Docker environment
         mock_exists.return_value = True  # .dockerenv exists
         
-        # Set environment variables for test in STAGING
-        env.set('RUNNING_IN_DOCKER', 'true', 'test')
-        env.set('POSTGRES_HOST', 'localhost', 'test')
-        env.set('POSTGRES_PORT', '5432', 'test')
-        env.set('POSTGRES_DB', 'staging_db', 'test')
-        env.set('POSTGRES_USER', 'staging_user', 'test')
-        env.set('POSTGRES_PASSWORD', 'staging_pass', 'test')
-        env.set('ENVIRONMENT', 'staging', 'test')  # Staging environment
+        # Create environment variables dict for testing in STAGING
+        env_vars = {
+            'RUNNING_IN_DOCKER': 'true',
+            'POSTGRES_HOST': 'localhost',
+            'POSTGRES_PORT': '5432',
+            'POSTGRES_DB': 'staging_db',
+            'POSTGRES_USER': 'staging_user',
+            'POSTGRES_PASSWORD': 'staging_pass',
+            'ENVIRONMENT': 'staging'  # Staging environment
+        }
         
-        # Get database URL
-        db_url = AuthConfig.get_database_url()
+        # Create DatabaseURLBuilder instance and test directly
+        builder = DatabaseURLBuilder(env_vars)
+        db_url = builder.get_url_for_environment(sync=False)
         
         # Should keep 'localhost' even in Docker for staging
         self.assertIn('@localhost:', db_url)
