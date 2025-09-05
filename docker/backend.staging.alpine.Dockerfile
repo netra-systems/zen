@@ -92,7 +92,8 @@ ENV PATH=/home/netra/.local/bin:$PATH \
     PYTHONFAULTHANDLER=1 \
     PYTHONHASHSEED=random \
     # Staging-specific optimizations
-    WORKERS=4 \
+    # CRITICAL: Using 1 worker for debugging GCP deployment
+    WORKERS=1 \
     TIMEOUT=300 \
     LOG_LEVEL=info \
     # Memory optimization
@@ -117,10 +118,10 @@ EXPOSE 8000
 # This follows the pattern of the non-Alpine GCP deployment
 CMD ["sh", "-c", "\
     echo '[Staging] Starting Alpine-optimized backend service on Cloud Run...' && \
-    echo '[Staging] Memory limit: 512MB, Workers: ${WORKERS:-4}' && \
+    echo '[Staging] Memory limit: 512MB, Workers: ${WORKERS:-1} (DEBUG MODE)' && \
     echo '[Staging] Starting Gunicorn with uvicorn workers...' && \
     exec gunicorn netra_backend.app.main:app \
-        -w ${WORKERS:-4} \
+        -w ${WORKERS:-1} \
         -k uvicorn.workers.UvicornWorker \
         --bind 0.0.0.0:8000 \
         --timeout ${TIMEOUT:-300} \
