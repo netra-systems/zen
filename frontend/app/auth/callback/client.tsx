@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { logger } from '@/lib/logger';
+import { unifiedApiConfig } from '@/lib/unified-api-config';
 
 export default function AuthCallbackClient() {
   const router = useRouter();
@@ -79,7 +80,7 @@ export default function AuthCallbackClient() {
             state
           });
           
-          const response = await fetch(`http://localhost:8081/auth/oauth/callback?${params.toString()}`, {
+          const response = await fetch(`${unifiedApiConfig.urls.auth}/auth/oauth/callback?${params.toString()}`, {
             method: 'GET',
             redirect: 'manual'
           });
