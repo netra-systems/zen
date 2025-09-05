@@ -43,6 +43,8 @@ from netra_backend.app.redis_manager import RedisManager
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 from netra_backend.app.agents.config import agent_config
 from netra_backend.app.agents.utils import extract_thread_id
+from netra_backend.app.services.billing.token_counter import TokenCounter
+from netra_backend.app.services.token_optimization.context_manager import TokenOptimizationContextManager
 
 # Create logger instance
 logger = central_logger
@@ -148,6 +150,11 @@ class BaseAgent(ABC):
         
         # Initialize timing collector
         self.timing_collector = ExecutionTimingCollector(agent_name=name)
+        
+        # Initialize token counter for cost tracking and optimization
+        self.token_counter = TokenCounter()
+        # Initialize token optimization context manager (respects frozen dataclass)
+        self.token_context_manager = TokenOptimizationContextManager(self.token_counter)
         
         # Initialize core properties pattern
         # DEPRECATED WARNING: Direct tool_dispatcher assignment uses global state
@@ -357,6 +364,124 @@ class BaseAgent(ABC):
             The metadata value or default if not found
         """
         return context.metadata.get(key, default)
+    
+    # === Token Management and Cost Optimization Methods ===
+    
+    def track_llm_usage(self, context: 'UserExecutionContext', input_tokens: int, 
+                       output_tokens: int, model: str, operation_type: str = "execution") -> 'UserExecutionContext':
+        """Track LLM token usage and return enhanced context (respects frozen dataclass).
+        
+        CRITICAL: This method no longer mutates the context directly. Instead it returns
+        a new context with token data properly stored in metadata.
+        
+        Args:
+            context: Original UserExecutionContext (immutable)
+            input_tokens: Number of input tokens used
+            output_tokens: Number of output tokens generated  
+            model: LLM model used
+            operation_type: Type of operation (execution, thinking, tool_use, etc.)
+            
+        Returns:
+            Enhanced UserExecutionContext with token data in metadata
+        """
+        # Use context manager to track usage without mutating frozen dataclass
+        enhanced_context = self.token_context_manager.track_agent_usage(
+            context=context,
+            agent_name=self.name,
+            input_tokens=input_tokens,
+            output_tokens=output_tokens,
+            model=model,
+            operation_type=operation_type
+        )
+        
+        self.logger.debug(
+            f"✅ Tracked token usage for {self.name}: "
+            f"{input_tokens} input + {output_tokens} output tokens ({model})"
+        )
+        
+        return enhanced_context
+    
+    def optimize_prompt_for_context(self, context: 'UserExecutionContext', 
+                                  prompt: str, target_reduction: int = 20) -> tuple['UserExecutionContext', str]:
+        """Optimize a prompt and return enhanced context (respects frozen dataclass).
+        
+        CRITICAL: This method no longer mutates the context directly. Instead it returns
+        both the enhanced context and the optimized prompt.
+        
+        Args:
+            context: Original UserExecutionContext (immutable)
+            prompt: The prompt to optimize
+            target_reduction: Target percentage reduction in tokens
+            
+        Returns:
+            Tuple of (enhanced_context, optimized_prompt)
+        """
+        # Use context manager to optimize prompt without mutating frozen dataclass
+        enhanced_context, optimized_prompt = self.token_context_manager.optimize_prompt_for_context(
+            context=context,
+            agent_name=self.name,
+            prompt=prompt,
+            target_reduction=target_reduction
+        )
+        
+        # Get optimization metrics for logging
+        optimizations = enhanced_context.metadata.get("prompt_optimizations", [])
+        if optimizations:
+            latest_optimization = optimizations[-1]
+            self.logger.info(
+                f"✅ Prompt optimized for {self.name}: "
+                f"{latest_optimization['tokens_saved']} tokens saved "
+                f"({latest_optimization['reduction_percent']}% reduction)"
+            )
+        
+        return enhanced_context, optimized_prompt
+    
+    def get_cost_optimization_suggestions(self, context: 'UserExecutionContext') -> tuple['UserExecutionContext', List[Dict[str, Any]]]:
+        """Get cost optimization suggestions and return enhanced context (respects frozen dataclass).
+        
+        CRITICAL: This method no longer mutates the context directly. Instead it returns
+        both the enhanced context and the suggestions list.
+        
+        Args:
+            context: Original UserExecutionContext (immutable)
+            
+        Returns:
+            Tuple of (enhanced_context, suggestions_list)
+        """
+        # Use context manager to add suggestions without mutating frozen dataclass
+        enhanced_context = self.token_context_manager.add_cost_suggestions(
+            context=context,
+            agent_name=self.name
+        )
+        
+        # Get suggestions from enhanced context
+        suggestions_data = enhanced_context.metadata.get("cost_optimization_suggestions", {})
+        suggestions = suggestions_data.get("suggestions", [])
+        
+        return enhanced_context, suggestions
+    
+    def get_token_usage_summary(self, context: 'UserExecutionContext') -> Dict[str, Any]:
+        """Get token usage summary for this agent.
+        
+        Args:
+            context: User execution context
+            
+        Returns:
+            Token usage summary dictionary
+        """
+        # Get overall agent usage summary
+        summary = self.token_counter.get_agent_usage_summary()
+        
+        # Add current context token usage if available
+        if "token_usage" in context.metadata:
+            context_usage = context.metadata["token_usage"]
+            summary["current_session"] = {
+                "operations_count": len(context_usage.get("operations", [])),
+                "cumulative_cost": context_usage.get("cumulative_cost", 0.0),
+                "cumulative_tokens": context_usage.get("cumulative_tokens", 0)
+            }
+        
+        return summary
     
     # === Session Isolation Methods ===
     
@@ -798,9 +923,18 @@ class BaseAgent(ABC):
         """Emit agent started event via WebSocket bridge."""
         await self._websocket_adapter.emit_agent_started(message)
     
-    async def emit_thinking(self, thought: str, step_number: Optional[int] = None) -> None:
-        """Emit agent thinking event via WebSocket bridge."""
-        await self._websocket_adapter.emit_thinking(thought, step_number)
+    async def emit_thinking(self, thought: str, step_number: Optional[int] = None,
+                           context: Optional['UserExecutionContext'] = None) -> None:
+        """Emit agent thinking event via WebSocket bridge with optional token metrics."""
+        # Enhance thinking event with token usage if context available
+        enhanced_thought = thought
+        if context and "token_usage" in context.metadata:
+            token_data = context.metadata["token_usage"]
+            if token_data.get("operations"):
+                latest_op = token_data["operations"][-1]
+                enhanced_thought = f"{thought} [Tokens: {latest_op['input_tokens']+latest_op['output_tokens']}, Cost: ${latest_op['cost']:.4f}]"
+        
+        await self._websocket_adapter.emit_thinking(enhanced_thought, step_number)
     
     async def emit_tool_executing(self, tool_name: str, parameters: Optional[Dict] = None) -> None:
         """Emit tool executing event via WebSocket bridge."""
@@ -810,9 +944,45 @@ class BaseAgent(ABC):
         """Emit tool completed event via WebSocket bridge."""
         await self._websocket_adapter.emit_tool_completed(tool_name, result)
     
-    async def emit_agent_completed(self, result: Optional[Dict] = None) -> None:
-        """Emit agent completed event via WebSocket bridge."""
-        await self._websocket_adapter.emit_agent_completed(result)
+    async def emit_agent_completed(self, result: Optional[Dict] = None,
+                                  context: Optional['UserExecutionContext'] = None) -> None:
+        """Emit agent completed event via WebSocket bridge with cost analysis."""
+        # Enhance result with cost analysis if context available
+        enhanced_result = result or {}
+        
+        if context:
+            # Add token usage summary
+            if "token_usage" in context.metadata:
+                token_data = context.metadata["token_usage"]
+                enhanced_result["cost_analysis"] = {
+                    "total_operations": len(token_data.get("operations", [])),
+                    "cumulative_cost": token_data.get("cumulative_cost", 0.0),
+                    "cumulative_tokens": token_data.get("cumulative_tokens", 0),
+                    "average_cost_per_operation": (
+                        token_data.get("cumulative_cost", 0.0) / 
+                        max(len(token_data.get("operations", [])), 1)
+                    )
+                }
+            
+            # Add optimization suggestions if available
+            if "cost_optimization_suggestions" in context.metadata:
+                suggestions = context.metadata["cost_optimization_suggestions"]
+                high_priority_suggestions = [s for s in suggestions if s.get("priority") == "high"]
+                if high_priority_suggestions:
+                    enhanced_result["optimization_alerts"] = high_priority_suggestions
+            
+            # Add prompt optimization summary
+            if "prompt_optimizations" in context.metadata:
+                optimizations = context.metadata["prompt_optimizations"]
+                total_saved = sum(opt.get("tokens_saved", 0) for opt in optimizations)
+                total_cost_saved = sum(opt.get("cost_savings", 0) for opt in optimizations)
+                enhanced_result["optimization_summary"] = {
+                    "optimizations_applied": len(optimizations),
+                    "total_tokens_saved": total_saved,
+                    "total_cost_saved": total_cost_saved
+                }
+        
+        await self._websocket_adapter.emit_agent_completed(enhanced_result)
     
     async def emit_progress(self, content: str, is_complete: bool = False) -> None:
         """Emit progress update via WebSocket bridge."""

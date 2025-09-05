@@ -295,9 +295,385 @@ class TokenCounter:
             "most_used_model": model_analysis[0]["model"] if model_analysis else None
         }
     
+    def optimize_prompt(self, prompt: str, target_reduction_percent: int = 20, 
+                       model: str = LLMModel.GEMINI_2_5_FLASH.value) -> Dict[str, Any]:
+        """Optimize prompt to reduce token usage while preserving intent.
+        
+        Args:
+            prompt: The original prompt text
+            target_reduction_percent: Target percentage reduction (e.g., 20 for 20%)
+            model: Model to optimize for
+            
+        Returns:
+            Dictionary with optimization results including optimized prompt and metrics
+        """
+        if not prompt or not prompt.strip():
+            return {
+                "original_prompt": prompt,
+                "optimized_prompt": prompt,
+                "original_tokens": 0,
+                "optimized_tokens": 0,
+                "tokens_saved": 0,
+                "reduction_percent": 0.0,
+                "cost_savings": Decimal("0.00"),
+                "optimization_applied": []
+            }
+        
+        original_tokens = self.count_tokens(prompt, model)
+        original_cost = self.estimate_cost_for_text(prompt, model, include_response=False)
+        
+        optimized_prompt = prompt
+        optimizations_applied = []
+        
+        # 1. Remove redundant whitespace
+        if len(re.findall(r'\s{2,}', optimized_prompt)) > 0:
+            optimized_prompt = re.sub(r'\s{2,}', ' ', optimized_prompt)
+            optimizations_applied.append("whitespace_normalization")
+        
+        # 2. Remove redundant phrases
+        redundant_phrases = [
+            r'\bplease\s+',
+            r'\bkindly\s+', 
+            r'\bi would like you to\s+',
+            r'\bcan you please\s+',
+            r'\bcould you\s+',
+            r'\bit would be great if\s+'
+        ]
+        for pattern in redundant_phrases:
+            if re.search(pattern, optimized_prompt, re.IGNORECASE):
+                optimized_prompt = re.sub(pattern, '', optimized_prompt, flags=re.IGNORECASE)
+                optimizations_applied.append("redundant_phrases")
+                break
+        
+        # 3. Convert verbose expressions to concise equivalents
+        replacements = {
+            r'\bin order to\b': 'to',
+            r'\bdue to the fact that\b': 'because',
+            r'\bfor the purpose of\b': 'for',
+            r'\bin the event that\b': 'if',
+            r'\bas a result of\b': 'because',
+            r'\bgive consideration to\b': 'consider',
+            r'\bmake an assumption\b': 'assume'
+        }
+        for verbose, concise in replacements.items():
+            if re.search(verbose, optimized_prompt, re.IGNORECASE):
+                optimized_prompt = re.sub(verbose, concise, optimized_prompt, flags=re.IGNORECASE)
+                if "verbose_replacements" not in optimizations_applied:
+                    optimizations_applied.append("verbose_replacements")
+        
+        # 4. Remove excessive examples if present
+        example_patterns = [
+            r'\bfor example:.*?(?=\n|$)',
+            r'\be\.g\.:.*?(?=\n|$)',
+            r'\bsuch as:.*?(?=\n|$)'
+        ]
+        for pattern in example_patterns:
+            matches = re.findall(pattern, optimized_prompt, re.IGNORECASE | re.DOTALL)
+            if len(matches) > 2:  # Keep only first 2 examples
+                optimized_prompt = re.sub(pattern, '', optimized_prompt, count=len(matches)-2, flags=re.IGNORECASE | re.DOTALL)
+                optimizations_applied.append("example_reduction")
+        
+        # 5. Clean up any multiple spaces created by optimizations
+        optimized_prompt = re.sub(r'\s{2,}', ' ', optimized_prompt).strip()
+        
+        # Calculate final metrics
+        optimized_tokens = self.count_tokens(optimized_prompt, model)
+        tokens_saved = original_tokens - optimized_tokens
+        reduction_percent = (tokens_saved / max(original_tokens, 1)) * 100
+        
+        optimized_cost = self.estimate_cost_for_text(optimized_prompt, model, include_response=False)
+        cost_savings = original_cost - optimized_cost
+        
+        return {
+            "original_prompt": prompt,
+            "optimized_prompt": optimized_prompt,
+            "original_tokens": original_tokens,
+            "optimized_tokens": optimized_tokens,
+            "tokens_saved": tokens_saved,
+            "reduction_percent": round(reduction_percent, 2),
+            "cost_savings": cost_savings,
+            "optimization_applied": optimizations_applied,
+            "model": model,
+            "target_achieved": reduction_percent >= target_reduction_percent
+        }
+    
+    def track_agent_usage(self, agent_name: str, input_tokens: int, output_tokens: int,
+                          model: str = LLMModel.GEMINI_2_5_FLASH.value,
+                          operation_type: str = "execution") -> Dict[str, Any]:
+        """Track token usage for a specific agent.
+        
+        Args:
+            agent_name: Name of the agent
+            input_tokens: Number of input tokens used
+            output_tokens: Number of output tokens generated
+            model: Model used for the operation
+            operation_type: Type of operation (execution, thinking, tool_use, etc.)
+            
+        Returns:
+            Dictionary with tracking results and cumulative metrics
+        """
+        if not self.enabled:
+            return {"tracking_enabled": False}
+        
+        # Initialize agent tracking if needed
+        if not hasattr(self, 'agent_usage_stats'):
+            self.agent_usage_stats = {}
+        
+        if agent_name not in self.agent_usage_stats:
+            self.agent_usage_stats[agent_name] = {
+                "total_input_tokens": 0,
+                "total_output_tokens": 0,
+                "total_cost": Decimal("0.00"),
+                "operations_count": 0,
+                "models_used": set(),
+                "operation_types": {},
+                "first_seen": datetime.now(timezone.utc),
+                "last_seen": datetime.now(timezone.utc)
+            }
+        
+        agent_stats = self.agent_usage_stats[agent_name]
+        
+        # Calculate cost for this operation
+        operation_cost = self.calculate_cost(input_tokens, output_tokens, model)
+        
+        # Update agent statistics
+        agent_stats["total_input_tokens"] += input_tokens
+        agent_stats["total_output_tokens"] += output_tokens
+        agent_stats["total_cost"] += operation_cost
+        agent_stats["operations_count"] += 1
+        agent_stats["models_used"].add(model)
+        agent_stats["last_seen"] = datetime.now(timezone.utc)
+        
+        # Track operation types
+        if operation_type not in agent_stats["operation_types"]:
+            agent_stats["operation_types"][operation_type] = {
+                "count": 0,
+                "input_tokens": 0,
+                "output_tokens": 0,
+                "cost": Decimal("0.00")
+            }
+        
+        op_stats = agent_stats["operation_types"][operation_type]
+        op_stats["count"] += 1
+        op_stats["input_tokens"] += input_tokens
+        op_stats["output_tokens"] += output_tokens
+        op_stats["cost"] += operation_cost
+        
+        # Calculate efficiency metrics
+        total_tokens = input_tokens + output_tokens
+        avg_tokens_per_operation = (
+            (agent_stats["total_input_tokens"] + agent_stats["total_output_tokens"]) / 
+            agent_stats["operations_count"]
+        )
+        
+        # Return tracking result
+        return {
+            "tracking_enabled": True,
+            "agent_name": agent_name,
+            "operation_type": operation_type,
+            "current_operation": {
+                "input_tokens": input_tokens,
+                "output_tokens": output_tokens,
+                "total_tokens": total_tokens,
+                "cost": float(operation_cost),
+                "model": model
+            },
+            "cumulative_stats": {
+                "total_operations": agent_stats["operations_count"],
+                "total_input_tokens": agent_stats["total_input_tokens"],
+                "total_output_tokens": agent_stats["total_output_tokens"],
+                "total_tokens": agent_stats["total_input_tokens"] + agent_stats["total_output_tokens"],
+                "total_cost": float(agent_stats["total_cost"]),
+                "average_tokens_per_operation": round(avg_tokens_per_operation, 2),
+                "models_used": list(agent_stats["models_used"]),
+                "operation_types": {k: dict(v) for k, v in agent_stats["operation_types"].items()}
+            },
+            "timestamp": datetime.now(timezone.utc).isoformat()
+        }
+    
+    def get_optimization_suggestions(self, agent_usage_data: Optional[Dict[str, Any]] = None,
+                                   cost_threshold: Optional[Decimal] = None) -> List[Dict[str, Any]]:
+        """Get optimization suggestions based on usage patterns.
+        
+        Args:
+            agent_usage_data: Optional agent usage data (if None, uses all tracked agents)
+            cost_threshold: Optional cost threshold for flagging expensive operations
+            
+        Returns:
+            List of optimization suggestions with priorities and potential savings
+        """
+        suggestions = []
+        
+        if not hasattr(self, 'agent_usage_stats') or not self.agent_usage_stats:
+            return [{
+                "type": "no_data",
+                "priority": "low",
+                "title": "No Usage Data Available",
+                "description": "Start tracking agent usage to get optimization suggestions.",
+                "potential_savings": "N/A"
+            }]
+        
+        # Set default cost threshold
+        if cost_threshold is None:
+            cost_threshold = Decimal("1.00")  # $1.00 default threshold
+        
+        # Analyze all agents or specific agent
+        agents_to_analyze = (
+            {agent_usage_data["agent_name"]: self.agent_usage_stats[agent_usage_data["agent_name"]]}
+            if agent_usage_data and "agent_name" in agent_usage_data
+            else self.agent_usage_stats
+        )
+        
+        for agent_name, stats in agents_to_analyze.items():
+            agent_cost = stats["total_cost"]
+            avg_tokens = (
+                (stats["total_input_tokens"] + stats["total_output_tokens"]) / 
+                max(stats["operations_count"], 1)
+            )
+            
+            # High cost agent suggestion
+            if agent_cost > cost_threshold:
+                suggestions.append({
+                    "type": "high_cost_agent",
+                    "priority": "high",
+                    "title": f"High Cost Agent: {agent_name}",
+                    "description": f"Agent has incurred ${float(agent_cost):.4f} in costs across {stats['operations_count']} operations.",
+                    "recommendation": "Consider prompt optimization or switching to more cost-effective models.",
+                    "agent_name": agent_name,
+                    "current_cost": float(agent_cost),
+                    "potential_savings": f"${float(agent_cost * Decimal('0.2')):.4f} (20% reduction)"
+                })
+            
+            # High token usage suggestion
+            if avg_tokens > 2000:
+                suggestions.append({
+                    "type": "high_token_usage",
+                    "priority": "medium",
+                    "title": f"High Token Usage: {agent_name}",
+                    "description": f"Agent averages {avg_tokens:.0f} tokens per operation.",
+                    "recommendation": "Review prompts for verbosity and consider prompt optimization techniques.",
+                    "agent_name": agent_name,
+                    "average_tokens": round(avg_tokens, 2),
+                    "potential_savings": f"{avg_tokens * 0.15:.0f} tokens per operation (15% reduction)"
+                })
+            
+            # Model efficiency suggestions
+            models_used = list(stats["models_used"])
+            if len(models_used) > 1:
+                # Find cheapest model for comparison
+                cheapest_model, cheapest_cost = self.get_cheapest_model("sample text for comparison", models_used)
+                
+                suggestions.append({
+                    "type": "model_optimization",
+                    "priority": "medium",
+                    "title": f"Model Optimization: {agent_name}",
+                    "description": f"Agent uses {len(models_used)} different models. Consider standardizing on cost-effective options.",
+                    "recommendation": f"Consider using {cheapest_model} for cost savings.",
+                    "agent_name": agent_name,
+                    "models_used": models_used,
+                    "recommended_model": cheapest_model,
+                    "potential_savings": "10-30% cost reduction"
+                })
+            
+            # Operation type analysis
+            op_types = stats.get("operation_types", {})
+            for op_type, op_stats in op_types.items():
+                if op_stats["cost"] > cost_threshold * Decimal("0.5"):  # 50% of threshold per operation type
+                    suggestions.append({
+                        "type": "expensive_operation",
+                        "priority": "medium",
+                        "title": f"Expensive Operation Type: {agent_name}.{op_type}",
+                        "description": f"Operation type '{op_type}' has cost ${float(op_stats['cost']):.4f} across {op_stats['count']} calls.",
+                        "recommendation": "Optimize prompts for this operation type or cache frequent results.",
+                        "agent_name": agent_name,
+                        "operation_type": op_type,
+                        "operation_cost": float(op_stats["cost"]),
+                        "potential_savings": f"${float(op_stats['cost'] * Decimal('0.25')):.4f} (25% reduction)"
+                    })
+        
+        # Global suggestions
+        total_cost = sum(Decimal(str(stats["total_cost"])) for stats in self.agent_usage_stats.values())
+        if total_cost > cost_threshold * 5:  # 5x threshold for global suggestions
+            suggestions.append({
+                "type": "global_optimization",
+                "priority": "high",
+                "title": "Overall Cost Optimization",
+                "description": f"Total system cost is ${float(total_cost):.4f} across all agents.",
+                "recommendation": "Implement systematic prompt optimization and consider result caching.",
+                "total_cost": float(total_cost),
+                "potential_savings": f"${float(total_cost * Decimal('0.2')):.4f} (20% system-wide reduction)"
+            })
+        
+        # Sort suggestions by priority
+        priority_order = {"high": 3, "medium": 2, "low": 1}
+        suggestions.sort(key=lambda x: priority_order.get(x["priority"], 0), reverse=True)
+        
+        return suggestions
+    
+    def get_agent_usage_summary(self) -> Dict[str, Any]:
+        """Get summary of agent usage statistics.
+        
+        Returns:
+            Dictionary with comprehensive agent usage summary
+        """
+        if not hasattr(self, 'agent_usage_stats') or not self.agent_usage_stats:
+            return {
+                "agents_tracked": 0,
+                "total_operations": 0,
+                "total_cost": 0.0,
+                "total_tokens": 0,
+                "message": "No agent usage data available"
+            }
+        
+        total_operations = sum(stats["operations_count"] for stats in self.agent_usage_stats.values())
+        total_cost = sum(stats["total_cost"] for stats in self.agent_usage_stats.values())
+        total_tokens = sum(
+            stats["total_input_tokens"] + stats["total_output_tokens"]
+            for stats in self.agent_usage_stats.values()
+        )
+        
+        # Find most expensive agent
+        most_expensive = max(
+            self.agent_usage_stats.items(),
+            key=lambda x: x[1]["total_cost"]
+        ) if self.agent_usage_stats else (None, {"total_cost": 0})
+        
+        # Find most active agent
+        most_active = max(
+            self.agent_usage_stats.items(),
+            key=lambda x: x[1]["operations_count"]
+        ) if self.agent_usage_stats else (None, {"operations_count": 0})
+        
+        return {
+            "agents_tracked": len(self.agent_usage_stats),
+            "total_operations": total_operations,
+            "total_cost": float(total_cost),
+            "total_tokens": total_tokens,
+            "average_cost_per_operation": float(total_cost / max(total_operations, 1)),
+            "average_tokens_per_operation": total_tokens / max(total_operations, 1),
+            "most_expensive_agent": {
+                "name": most_expensive[0],
+                "cost": float(most_expensive[1]["total_cost"])
+            } if most_expensive[0] else None,
+            "most_active_agent": {
+                "name": most_active[0],
+                "operations": most_active[1]["operations_count"]
+            } if most_active[0] else None,
+            "agents": {
+                name: {
+                    "operations": stats["operations_count"],
+                    "total_cost": float(stats["total_cost"]),
+                    "total_tokens": stats["total_input_tokens"] + stats["total_output_tokens"],
+                    "models_used": list(stats["models_used"]),
+                    "operation_types": list(stats["operation_types"].keys())
+                }
+                for name, stats in self.agent_usage_stats.items()
+            }
+        }
+    
     def get_stats(self) -> Dict[str, Any]:
         """Get token counter statistics."""
-        return {
+        base_stats = {
             "enabled": self.enabled,
             "total_counts_performed": self.stats["total_counts_performed"],
             "total_tokens_counted": self.stats["total_tokens_counted"],
@@ -307,6 +683,12 @@ class TokenCounter:
             "supported_models": len(self.get_supported_models()),
             "estimators_available": len(self.token_estimators)
         }
+        
+        # Add agent usage stats if available
+        if hasattr(self, 'agent_usage_stats') and self.agent_usage_stats:
+            base_stats["agent_usage_summary"] = self.get_agent_usage_summary()
+        
+        return base_stats
     
     def reset_stats(self) -> None:
         """Reset statistics."""
