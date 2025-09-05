@@ -811,6 +811,126 @@ CMD ["npm", "start"]
         else:
             return self.build_image_cloud(service)
     
+    def retrieve_secret_value(self, secret_name: str) -> Optional[str]:
+        """Retrieve a secret value from Google Secret Manager.
+        
+        Args:
+            secret_name: Name of the secret to retrieve
+            
+        Returns:
+            The secret value or None if not found
+        """
+        try:
+            result = subprocess.run(
+                [self.gcloud_cmd, "secrets", "versions", "access", "latest",
+                 "--secret", secret_name, "--project", self.project_id],
+                capture_output=True,
+                text=True,
+                check=False,
+                shell=self.use_shell
+            )
+            
+            if result.returncode == 0:
+                return result.stdout.strip()
+            return None
+        except Exception as e:
+            print(f"   ⚠️ Failed to retrieve secret {secret_name}: {e}")
+            return None
+    
+    def get_critical_env_vars_from_gsm(self, service_name: str) -> Dict[str, str]:
+        """Retrieve critical environment variables from Google Secret Manager.
+        
+        This fixes the staging configuration issue by mapping GSM secrets to env vars.
+        
+        Args:
+            service_name: Name of the service (backend, auth, frontend)
+            
+        Returns:
+            Dictionary of environment variable mappings
+        """
+        print(f"   🔐 Retrieving critical secrets from GSM for {service_name}...")
+        
+        env_vars = {}
+        
+        # Critical database configuration needed by DatabaseURLBuilder
+        if service_name in ["backend", "auth"]:
+            # Map GSM secrets to environment variables that DatabaseURLBuilder expects
+            postgres_mappings = {
+                "POSTGRES_HOST": "postgres-host-staging",
+                "POSTGRES_PORT": "postgres-port-staging", 
+                "POSTGRES_DB": "postgres-db-staging",
+                "POSTGRES_USER": "postgres-user-staging",
+                "POSTGRES_PASSWORD": "postgres-password-staging"
+            }
+            
+            for env_name, gsm_name in postgres_mappings.items():
+                value = self.retrieve_secret_value(gsm_name)
+                if value:
+                    env_vars[env_name] = value
+                    print(f"      ✅ Retrieved {env_name}")
+                else:
+                    # Use reasonable defaults for non-critical values
+                    if env_name == "POSTGRES_PORT":
+                        env_vars[env_name] = "5432"
+                    elif env_name == "POSTGRES_HOST":
+                        # For Cloud SQL, use the instance connection name
+                        env_vars[env_name] = f"/cloudsql/{self.project_id}:us-central1:staging-shared-postgres"
+                    elif env_name == "POSTGRES_DB":
+                        env_vars[env_name] = "netra_staging"
+                    else:
+                        print(f"      ⚠️ Missing {env_name} - deployment may fail")
+            
+            # Critical authentication secrets
+            auth_mappings = {
+                "JWT_SECRET_KEY": "jwt-secret-staging",
+                "JWT_SECRET_STAGING": "jwt-secret-staging",  # Both names for compatibility
+                "SECRET_KEY": "secret-key-staging",
+                "SERVICE_SECRET": "service-secret-staging",
+                "SERVICE_ID": "service-id-staging"
+            }
+            
+            for env_name, gsm_name in auth_mappings.items():
+                value = self.retrieve_secret_value(gsm_name)
+                if value:
+                    env_vars[env_name] = value
+                    print(f"      ✅ Retrieved {env_name}")
+            
+            # Redis configuration
+            redis_mappings = {
+                "REDIS_HOST": "redis-host-staging",
+                "REDIS_PORT": "redis-port-staging",
+                "REDIS_PASSWORD": "redis-password-staging"
+            }
+            
+            for env_name, gsm_name in redis_mappings.items():
+                value = self.retrieve_secret_value(gsm_name)
+                if value:
+                    env_vars[env_name] = value
+                elif env_name == "REDIS_PORT":
+                    env_vars[env_name] = "6379"  # Default Redis port
+        
+        # Construct DATABASE_URL from components if we have them
+        if all(k in env_vars for k in ["POSTGRES_HOST", "POSTGRES_USER", "POSTGRES_PASSWORD", "POSTGRES_DB"]):
+            # Handle Cloud SQL Unix socket connection
+            if "/cloudsql/" in env_vars["POSTGRES_HOST"]:
+                database_url = (
+                    f"postgresql+asyncpg://{env_vars['POSTGRES_USER']}:"
+                    f"{env_vars['POSTGRES_PASSWORD']}@/{env_vars['POSTGRES_DB']}"
+                    f"?host={env_vars['POSTGRES_HOST']}"
+                )
+            else:
+                # Standard TCP connection
+                port = env_vars.get("POSTGRES_PORT", "5432")
+                database_url = (
+                    f"postgresql+asyncpg://{env_vars['POSTGRES_USER']}:"
+                    f"{env_vars['POSTGRES_PASSWORD']}@{env_vars['POSTGRES_HOST']}:"
+                    f"{port}/{env_vars['POSTGRES_DB']}"
+                )
+            env_vars["DATABASE_URL"] = database_url
+            print(f"      ✅ Constructed DATABASE_URL")
+        
+        return env_vars
+    
     def deploy_service(self, service: ServiceConfig, no_traffic: bool = False) -> Tuple[bool, Optional[str]]:
         """Deploy service to Cloud Run."""
         print(f"\n🚀 Deploying {service.name} to Cloud Run...")
@@ -845,6 +965,16 @@ CMD ["npm", "start"]
         env_vars = []
         for key, value in service.environment_vars.items():
             env_vars.append(f"{key}={value}")
+        
+        # CRITICAL FIX: Retrieve and add GSM secrets as environment variables
+        # This fixes the staging configuration failure where DATABASE_URL couldn't be constructed
+        if service.name in ["backend", "auth"]:
+            gsm_env_vars = self.get_critical_env_vars_from_gsm(service.name)
+            for key, value in gsm_env_vars.items():
+                # Add to env vars list, overriding any existing values
+                env_vars.append(f"{key}={value}")
+            
+            print(f"   ✅ Added {len(gsm_env_vars)} critical environment variables from GSM")
         
         # ⚠️ CRITICAL: Frontend environment variables - MANDATORY FOR DEPLOYMENT
         # These variables MUST be present for frontend to function
