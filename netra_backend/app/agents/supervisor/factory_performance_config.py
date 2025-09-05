@@ -79,43 +79,43 @@ class FactoryPerformanceConfig:
     
     # Performance Targets
     target_context_creation_ms: float = field(
-        default_factory=lambda: float(os.getenv('FACTORY_TARGET_CONTEXT_MS', '5.0'))
+        default_factory=lambda: float(get_env().get('FACTORY_TARGET_CONTEXT_MS', '5.0'))
     )
     target_agent_creation_ms: float = field(
-        default_factory=lambda: float(os.getenv('FACTORY_TARGET_AGENT_MS', '10.0'))
+        default_factory=lambda: float(get_env().get('FACTORY_TARGET_AGENT_MS', '10.0'))
     )
     target_cleanup_ms: float = field(
-        default_factory=lambda: float(os.getenv('FACTORY_TARGET_CLEANUP_MS', '2.0'))
+        default_factory=lambda: float(get_env().get('FACTORY_TARGET_CLEANUP_MS', '2.0'))
     )
     
     # Concurrency Configuration
     max_concurrent_per_user: int = field(
-        default_factory=lambda: int(os.getenv('FACTORY_MAX_CONCURRENT_PER_USER', '10'))
+        default_factory=lambda: int(get_env().get('FACTORY_MAX_CONCURRENT_PER_USER', '10'))
     )
     execution_timeout: float = field(
-        default_factory=lambda: float(os.getenv('FACTORY_EXECUTION_TIMEOUT', '30.0'))
+        default_factory=lambda: float(get_env().get('FACTORY_EXECUTION_TIMEOUT', '30.0'))
     )
     
     # Memory Management
     max_history_per_user: int = field(
-        default_factory=lambda: int(os.getenv('FACTORY_MAX_HISTORY_PER_USER', '50'))
+        default_factory=lambda: int(get_env().get('FACTORY_MAX_HISTORY_PER_USER', '50'))
     )
     enable_weak_references: bool = field(
-        default_factory=lambda: os.getenv('FACTORY_ENABLE_WEAK_REFS', 'true').lower() == 'true'
+        default_factory=lambda: get_env().get('FACTORY_ENABLE_WEAK_REFS', 'true').lower() == 'true'
     )
     
     # Feature Flags
     use_optimized_constructor: bool = field(
-        default_factory=lambda: os.getenv('FACTORY_USE_OPTIMIZED_CONSTRUCTOR', 'true').lower() == 'true'
+        default_factory=lambda: get_env().get('FACTORY_USE_OPTIMIZED_CONSTRUCTOR', 'true').lower() == 'true'
     )
     enable_event_batching: bool = field(
-        default_factory=lambda: os.getenv('FACTORY_ENABLE_EVENT_BATCHING', 'false').lower() == 'true'
+        default_factory=lambda: get_env().get('FACTORY_ENABLE_EVENT_BATCHING', 'false').lower() == 'true'
     )
     event_batch_size: int = field(
-        default_factory=lambda: int(os.getenv('FACTORY_EVENT_BATCH_SIZE', '10'))
+        default_factory=lambda: int(get_env().get('FACTORY_EVENT_BATCH_SIZE', '10'))
     )
     event_batch_timeout: float = field(
-        default_factory=lambda: float(os.getenv('FACTORY_EVENT_BATCH_TIMEOUT', '0.1'))
+        default_factory=lambda: float(get_env().get('FACTORY_EVENT_BATCH_TIMEOUT', '0.1'))
     )
     
     def to_dict(self) -> dict:
