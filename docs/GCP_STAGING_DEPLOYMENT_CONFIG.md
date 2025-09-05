@@ -116,13 +116,32 @@ The following secrets MUST exist in GCP Secret Manager for staging:
 - `clickhouse-password-staging`
 
 ### 4. Deployment Command Reference
+
+#### Default Deployment (with automatic validation) ✅
 ```bash
-# Successful deployment command pattern
-python scripts/deploy_to_gcp.py \
-  --project netra-staging \
-  --build-local \
-  --service backend \
-  --environment staging
+# RECOMMENDED - Validates configuration automatically before deployment
+python scripts/deploy_to_gcp.py --project netra-staging --build-local
+
+# The deployment script now automatically:
+# 1. Validates configuration against proven working setup (netra-backend-staging-00035-fnj)
+# 2. Checks all required environment variables match
+# 3. Verifies all secret mappings are correct
+# 4. Only proceeds if validation passes
+```
+
+#### Manual Validation Check
+```bash
+# To validate configuration without deploying:
+python scripts/validate_deployment_config.py --environment staging
+
+# To also check if secrets exist in GCP:
+python scripts/validate_deployment_config.py --environment staging --check-secrets
+```
+
+#### Emergency Deployment (skip validation) ⚠️
+```bash
+# NOT RECOMMENDED - Use only in emergencies when you need to bypass validation
+python scripts/deploy_to_gcp.py --project netra-staging --build-local --skip-validation
 ```
 
 ### 5. Health Check URLs

@@ -1436,9 +1436,63 @@ CMD ["npm", "start"]
                 
         return all_healthy
     
+    def validate_deployment_config(self, skip_validation: bool = False) -> bool:
+        """Validate deployment configuration against proven working setup.
+        
+        This ensures the deployment matches the configuration that successfully
+        deployed as netra-backend-staging-00035-fnj.
+        """
+        if skip_validation:
+            print("\n⚠️ SKIPPING deployment configuration validation (--skip-validation flag)")
+            return True
+            
+        print("\n✅ Phase 0: Validating Deployment Configuration...")
+        print("   Checking against proven working configuration from netra-backend-staging-00035-fnj")
+        
+        try:
+            # Determine environment based on project
+            environment = "staging" if "staging" in self.project_id else "production"
+            
+            # Check if validation script exists
+            validation_script = self.project_root / "scripts" / "validate_deployment_config.py"
+            if not validation_script.exists():
+                print("   ⚠️ Validation script not found, skipping config validation")
+                return True
+            
+            # Run validation
+            result = subprocess.run(
+                ["python", str(validation_script), "--environment", environment],
+                capture_output=True,
+                text=True,
+                check=False
+            )
+            
+            # Print validation output
+            if result.stdout:
+                for line in result.stdout.splitlines():
+                    print(f"   {line}")
+            
+            if result.returncode != 0:
+                print("\n❌ Deployment configuration validation FAILED!")
+                print("   Configuration does not match the proven working setup.")
+                print("   Review the errors above and fix configuration issues.")
+                print("   To bypass (NOT RECOMMENDED): use --skip-validation flag")
+                if result.stderr:
+                    print(f"\n   Error details: {result.stderr}")
+                return False
+                
+            print("   ✅ Configuration matches proven working setup")
+            return True
+            
+        except Exception as e:
+            print(f"   ⚠️ Could not run validation: {e}")
+            # Don't fail deployment if validation itself fails
+            return True
+    
     def deploy_all(self, skip_build: bool = False, use_local_build: bool = False, 
                    run_checks: bool = False, service_filter: Optional[str] = None,
-                   skip_post_tests: bool = False, no_traffic: bool = False) -> bool:
+                   skip_post_tests: bool = False, no_traffic: bool = False,
+                   skip_validation: bool = False) -> bool:
         """Deploy all services to GCP.
         
         Args:
@@ -1448,14 +1502,20 @@ CMD ["npm", "start"]
             service_filter: Deploy only specific service (e.g., 'frontend', 'backend', 'auth')
             skip_post_tests: Skip post-deployment authentication tests
             no_traffic: Deploy without routing traffic to new revisions
+            skip_validation: Skip deployment configuration validation
         """
         print(f"🚀 Deploying Netra Apex Platform to GCP")
         print(f"   Project: {self.project_id}")
         print(f"   Region: {self.region}")
         print(f"   Build Mode: {'Local (Fast)' if use_local_build else 'Cloud Build'}")
         print(f"   Pre-checks: {'Enabled' if run_checks else 'Disabled'}")
+        print(f"   Config Validation: {'SKIPPED' if skip_validation else 'Enabled (default)'}")
         if no_traffic:
             print(f"   ⚠️ Traffic Mode: NO TRAFFIC (revisions won't receive traffic)")
+        
+        # CRITICAL: Validate deployment configuration FIRST
+        if not self.validate_deployment_config(skip_validation):
+            return False
         
         # CRITICAL: Validate ALL prerequisites BEFORE any build operations
         print("\n🔐 Phase 1: Validating Prerequisites...")
@@ -1757,6 +1817,8 @@ See SPEC/gcp_deployment.xml for detailed guidelines.
                        help="Deploy without routing traffic to the new revision (useful for testing)")
     parser.add_argument("--alpine", action="store_true",
                        help="Use Alpine-optimized Docker images (78% smaller, 3x faster, 68% cost reduction)")
+    parser.add_argument("--skip-validation", action="store_true",
+                       help="Skip deployment configuration validation (NOT RECOMMENDED - use only in emergencies)")
     
     args = parser.parse_args()
     
@@ -1786,7 +1848,8 @@ See SPEC/gcp_deployment.xml for detailed guidelines.
                 run_checks=args.run_checks,
                 service_filter=args.service,
                 skip_post_tests=args.skip_post_tests,
-                no_traffic=args.no_traffic
+                no_traffic=args.no_traffic,
+                skip_validation=args.skip_validation
             )
             
         sys.exit(0 if success else 1)
