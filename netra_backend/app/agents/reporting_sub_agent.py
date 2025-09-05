@@ -49,6 +49,27 @@ class ReportingSubAgent(BaseAgent):
         
         # Initialize template system for guaranteed value delivery
         self._templates = ReportTemplates()
+    
+    async def validate_preconditions(self, context) -> bool:
+        """Validate that we have sufficient data to generate a meaningful report.
+        
+        Returns False if critical analysis results are missing.
+        """
+        # Extract state from context metadata
+        if hasattr(context, 'metadata') and context.metadata:
+            state = context.metadata.get('state')
+            if state:
+                # Check for core analysis results (convert to boolean explicitly)
+                has_triage = bool(hasattr(state, 'triage_result') and state.triage_result)
+                has_optimizations = bool(hasattr(state, 'optimizations_result') and state.optimizations_result)  
+                has_data = bool(hasattr(state, 'data_result') and state.data_result)
+                has_action_plan = bool(hasattr(state, 'action_plan_result') and state.action_plan_result)
+                
+                # Need at least 2 types of analysis results to generate meaningful report
+                required_count = sum([has_triage, has_optimizations, has_data, has_action_plan])
+                return required_count >= 2
+        
+        return False  # No state means no data to work with
 
     def _assess_available_data(self, context: UserExecutionContext) -> Dict[str, Any]:
         """Safely assess what data is available without throwing errors.

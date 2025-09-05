@@ -224,6 +224,14 @@ class LLMManager:
             return self._config.llm_configs.get(config_name)
         return None
     
+    async def get_llm_config(self, config_name: str = "default") -> Optional[LLMConfig]:
+        """Get LLM configuration by name (alias for get_config).
+        
+        This method exists for backward compatibility with health checks
+        and other components that expect this method name.
+        """
+        return await self.get_config(config_name)
+    
     async def health_check(self) -> Dict[str, Any]:
         """Perform health check on LLM services."""
         await self._ensure_initialized()

@@ -544,7 +544,7 @@ class TestModernExecutionPatterns:
             result = await reporting_agent.execute_modern(complete_state, "test-run-123", True)
             
             assert isinstance(result, ExecutionResult)
-            if result.success:
+            if result.is_success:
                 assert result.status == ExecutionStatus.COMPLETED
                 assert result.result is not None
                 assert result.execution_time_ms >= 0
@@ -556,7 +556,7 @@ class TestModernExecutionPatterns:
             
             assert isinstance(result, ExecutionResult)
             # Should fail due to preconditions
-            assert result.success is False
+            assert result.is_success is False
             assert result.status == ExecutionStatus.FAILED
 
     def test_execution_context_creation(self, reporting_agent, complete_state):
@@ -577,7 +577,7 @@ class TestModernExecutionPatterns:
         result = reporting_agent._create_success_execution_result(test_result, execution_time)
         
         assert isinstance(result, ExecutionResult)
-        assert result.success is True
+        assert result.is_success is True
         assert result.status == ExecutionStatus.COMPLETED
         assert result.result == test_result
         assert result.execution_time_ms == execution_time
@@ -590,7 +590,7 @@ class TestModernExecutionPatterns:
         result = reporting_agent._create_error_execution_result(error_msg, execution_time)
         
         assert isinstance(result, ExecutionResult)
-        assert result.success is False
+        assert result.is_success is False
         assert result.status == ExecutionStatus.FAILED
         assert result.error == error_msg
         assert result.execution_time_ms == execution_time
