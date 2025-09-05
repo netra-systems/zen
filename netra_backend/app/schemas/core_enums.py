@@ -293,6 +293,7 @@ class ExecutionStatus(str, Enum):
     INITIALIZING = "initializing"
     EXECUTING = "executing"
     COMPLETED = "completed"
+    SUCCESS = "completed"  # Alias for COMPLETED - both map to same value for backward compatibility
     FAILED = "failed"
     RETRYING = "retrying"
     FALLBACK = "fallback"

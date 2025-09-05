@@ -10,18 +10,10 @@ from dataclasses import dataclass
 from enum import Enum
 
 from netra_backend.app.logging_config import central_logger
+# SSOT: Import ExecutionStatus from core_enums instead of defining duplicate
+from netra_backend.app.schemas.core_enums import ExecutionStatus
 
 logger = central_logger.get_logger(__name__)
-
-
-class ExecutionStatus(Enum):
-    """Standard execution status codes."""
-    PENDING = "pending"
-    RUNNING = "running" 
-    COMPLETED = "completed"
-    FAILED = "failed"
-    CANCELLED = "cancelled"
-    TIMEOUT = "timeout"
 
 
 class ExecutionStrategy(Enum):

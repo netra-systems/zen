@@ -11,7 +11,8 @@ from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.agents.agent_error_types import AgentValidationError
 from netra_backend.app.agents.prompts import reporting_prompt_template
 from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
-from netra_backend.app.agents.base.interface import ExecutionContext, ExecutionResult, ExecutionStatus
+from netra_backend.app.agents.base.interface import ExecutionContext, ExecutionResult
+from netra_backend.app.schemas.core_enums import ExecutionStatus
 from netra_backend.app.agents.state import DeepAgentState, ReportResult
 from netra_backend.app.core.serialization.unified_json_handler import (
     LLMResponseParser,
@@ -859,7 +860,7 @@ class ReportingSubAgent(BaseAgent):
             ExecutionResult with success status
         """
         return ExecutionResult(
-            status=ExecutionStatus.SUCCESS,
+            status=ExecutionStatus.COMPLETED,
             request_id=getattr(self, '_current_request_id', 'unknown'),
             data=result,
             execution_time_ms=execution_time,
