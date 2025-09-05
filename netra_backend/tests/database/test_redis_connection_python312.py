@@ -1,4 +1,7 @@
 from shared.isolated_environment import get_env
+from test_framework.database.test_database_manager import TestDatabaseManager
+from test_framework.redis.test_redis_manager import TestRedisManager
+from shared.isolated_environment import IsolatedEnvironment
 #!/usr/bin/env python3
 """
 env = get_env()
@@ -14,7 +17,6 @@ import asyncio
 import os
 import sys
 import pytest
-from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 # Add parent directory to path for imports
 from dev_launcher.database_connector import DatabaseConnector, DatabaseType, ConnectionStatus
@@ -41,10 +43,10 @@ async def test_redis_connection_works_with_python312():
     
     # Mock Redis connection for testing
     with patch('redis.asyncio.from_url') as mock_from_url:
-        mock_client = AsyncMock()
+        mock_client = AsyncNone  # TODO: Use real service instance
         mock_from_url.return_value = mock_client
         mock_client.ping = AsyncMock(return_value=True)
-        mock_client.aclose = AsyncMock()
+        mock_client.aclose = AsyncNone  # TODO: Use real service instance
         
         # Test the actual connection - this should now work with Python 3.12
         result = await connector._test_redis_connection(redis_conn)

@@ -1,9 +1,9 @@
 """Test to reproduce and fix configuration loop issue."""
 import unittest
-from unittest.mock import patch, MagicMock
 import logging
 from netra_backend.app.core.configuration.base import UnifiedConfigManager
 from shared.isolated_environment import IsolatedEnvironment
+from test_framework.redis.test_redis_manager import TestRedisManager
 
 
 class TestConfigurationLoop(unittest.TestCase):

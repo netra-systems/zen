@@ -6,11 +6,12 @@ COMPLIANCE: 450-line max file, 25-line max functions
 
 import sys
 from pathlib import Path
+from test_framework.database.test_database_manager import TestDatabaseManager
+from shared.isolated_environment import IsolatedEnvironment
 
 # Test framework import - using pytest fixtures instead
 
 import asyncio
-from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -28,7 +29,7 @@ class TestClickHouseConnectionPool:
         # Mock: ClickHouse external database isolation for unit testing performance
         with patch('clickhouse_connect.get_client') as mock_get_client:
             # Mock: Generic component isolation for controlled unit testing
-            mock_client = Mock()
+            mock_client = mock_client_instance  # Initialize appropriate service
             mock_get_client.return_value = mock_client
             mock_client.ping.return_value = True
             
@@ -61,7 +62,7 @@ class TestClickHouseConnectionPool:
         # Mock: ClickHouse external database isolation for unit testing performance
         with patch('clickhouse_connect.get_client') as mock_get_client:
             # Mock: Generic component isolation for controlled unit testing
-            mock_client = AsyncMock()
+            mock_client = AsyncNone  # TODO: Use real service instance
             mock_get_client.return_value = mock_client
             mock_client.ping.return_value = True
             

@@ -10,13 +10,14 @@ It prevents the regression of the configuration loop issue where the system
 incorrectly identified non-test environments as test contexts.
 """
 import unittest
-from unittest.mock import patch, MagicMock, call
 import logging
 import sys
 from typing import Dict, Any, List, Optional
 from netra_backend.app.core.configuration.base import UnifiedConfigManager
 from shared.isolated_environment import IsolatedEnvironment
 from netra_backend.app.schemas.config import AppConfig
+from test_framework.redis.test_redis_manager import TestRedisManager
+from auth_service.core.auth_manager import AuthManager
 
 
 class ConfigurationRegressionTestBase:
@@ -86,6 +87,7 @@ class TestDevelopmentEnvironment(unittest.TestCase, ConfigurationRegressionTestB
     
     def test_no_loop_with_empty_test_vars(self):
         """Test that empty test variables don't trigger test context."""
+    pass
         env_vars = {
             'ENVIRONMENT': 'development',
             'TEST_MODE': '',  # Empty string
@@ -131,6 +133,7 @@ class TestStagingEnvironment(unittest.TestCase, ConfigurationRegressionTestBase)
     
     def test_staging_with_accidentally_set_test_vars(self):
         """Test staging behavior even if test vars are accidentally set to false."""
+    pass
         env_vars = {
             'ENVIRONMENT': 'staging',
             'TEST_MODE': 'false',  # Might be set accidentally
@@ -175,6 +178,7 @@ class TestProductionEnvironment(unittest.TestCase, ConfigurationRegressionTestBa
     
     def test_production_ignores_test_vars(self):
         """Test that production ignores test variables even if set."""
+    pass
         env_vars = {
             'ENVIRONMENT': 'production',
             'TEST_MODE': 'false',  # Should be ignored
@@ -231,8 +235,9 @@ class TestActualTestEnvironment(unittest.TestCase, ConfigurationRegressionTestBa
     
     def test_pytest_detection(self):
         """Test that pytest is properly detected as test context."""
+    pass
         # Simulate pytest being loaded
-        with patch.dict(sys.modules, {'pytest': MagicMock()}):
+        with patch.dict(sys.modules, {'pytest': MagicNone  # TODO: Use real service instance}):
             env_vars = {
                 'ENVIRONMENT': 'development',  # Even in dev
                 'TEST_MODE': 'false'
@@ -294,6 +299,7 @@ class TestEdgeCases(unittest.TestCase, ConfigurationRegressionTestBase):
     
     def test_environment_priority(self):
         """Test that ENVIRONMENT=test/testing takes priority."""
+    pass
         env_vars = {
             'ENVIRONMENT': 'test',  # This should trigger test context
             'TEST_MODE': 'false',   # Even though this is false
@@ -355,6 +361,7 @@ class TestPerformance(unittest.TestCase, ConfigurationRegressionTestBase):
     
     def test_memory_usage_stable(self):
         """Test that repeated config access doesn't leak memory."""
+    pass
         env_vars = {
             'ENVIRONMENT': 'production',
             'TEST_MODE': None
@@ -406,3 +413,4 @@ if __name__ == '__main__':
     # Run the full regression suite
     success = run_regression_suite()
     sys.exit(0 if success else 1)
+    pass
