@@ -174,9 +174,9 @@ function getEnvironmentConfig(env: Environment): UnifiedApiConfig {
           useWebSocketSecure: true,
           corsEnabled: true,
           dynamicDiscovery: false,
-          // v2 Migration Feature Flags - Conservative for production
-          enableV2AgentApi: process.env.NEXT_PUBLIC_ENABLE_V2_API === 'true',
-          v2MigrationMode: (process.env.NEXT_PUBLIC_V2_MIGRATION_MODE as any) || 'disabled',
+          // v2 Migration Feature Flags - CRITICAL: Enable v2 for multi-user safety
+          enableV2AgentApi: process.env.NEXT_PUBLIC_ENABLE_V2_API !== 'false', // Default true for safety
+          v2MigrationMode: (process.env.NEXT_PUBLIC_V2_MIGRATION_MODE as any) || 'full', // Full v2 for complete isolation
         },
       };
       

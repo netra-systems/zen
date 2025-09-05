@@ -966,15 +966,8 @@ CMD ["npm", "start"]
         for key, value in service.environment_vars.items():
             env_vars.append(f"{key}={value}")
         
-        # CRITICAL FIX: Retrieve and add GSM secrets as environment variables
-        # This fixes the staging configuration failure where DATABASE_URL couldn't be constructed
-        if service.name in ["backend", "auth"]:
-            gsm_env_vars = self.get_critical_env_vars_from_gsm(service.name)
-            for key, value in gsm_env_vars.items():
-                # Add to env vars list, overriding any existing values
-                env_vars.append(f"{key}={value}")
-            
-            print(f"   ✅ Added {len(gsm_env_vars)} critical environment variables from GSM")
+        # NOTE: Database credentials (POSTGRES_*, REDIS_*) and auth secrets (JWT_*, SECRET_KEY, etc.)
+        # are mounted via --set-secrets below, so we don't add them as regular env vars to avoid conflicts
         
         # ⚠️ CRITICAL: Frontend environment variables - MANDATORY FOR DEPLOYMENT
         # These variables MUST be present for frontend to function
@@ -1009,7 +1002,8 @@ CMD ["npm", "start"]
             env_vars.extend(critical_frontend_vars)
         
         if env_vars:
-            cmd.extend(["--set-env-vars", ",".join(env_vars)])
+            # Use --update-env-vars to avoid conflicts with existing secret-based env vars
+            cmd.extend(["--update-env-vars", ",".join(env_vars)])
         
         # Add VPC connector for services that need Redis/database access
         if service.name in ["backend", "auth"]:
