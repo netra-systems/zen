@@ -1,6 +1,6 @@
-from shared.isolated_environment import get_env
+from shared.isolated_environment import IsolatedEnvironment
 """
-env = get_env()
+env = IsolatedEnvironment()
 Critical Config Loader Core Tests
 
 Business Value Justification (BVJ):

@@ -1,4 +1,4 @@
-from shared.isolated_environment import get_env
+from shared.isolated_environment import IsolatedEnvironment
 """Test to reproduce and fix the database health checker sslmode issue.
 
 This test recreates the exact issue seen in GCP staging where the health checker
@@ -20,6 +20,7 @@ from netra_backend.app.services.database.health_checker import ConnectionHealthC
 from netra_backend.app.services.database.pool_metrics import ConnectionPoolMetrics
 from netra_backend.app.db import postgres_core
 from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.db.postgres_core import get_converted_async_db_url
 
 
 class TestDatabaseHealthCheckerSSLMode:
@@ -82,7 +83,7 @@ class TestDatabaseHealthCheckerSSLMode:
         
         with patch.dict(os.environ, {"DATABASE_URL": test_url}):
             # Get the converted async URL
-            async_url = DatabaseManager.get_application_url_async()
+            async_url = get_converted_async_db_url()
             
             # Verify conversion happened
             assert "postgresql+asyncpg://" in async_url
@@ -147,7 +148,7 @@ class TestDatabaseHealthCheckerSSLMode:
         
         with patch.dict(os.environ, {"DATABASE_URL": cloud_sql_url}):
             # Get the converted async URL
-            async_url = DatabaseManager.get_application_url_async()
+            async_url = get_converted_async_db_url()
             
             # Verify SSL params are completely removed for Cloud SQL
             assert "sslmode=" not in async_url
@@ -161,7 +162,7 @@ class TestDatabaseHealthCheckerSSLMode:
         bad_url = "postgresql+asyncpg://user:pass@host:5432/dbname?sslmode=require"
         
         with patch.dict(os.environ, {"DATABASE_URL": bad_url}):
-            with patch.object(DatabaseManager, 'get_application_url_async', return_value=bad_url):
+            with patch('netra_backend.app.db.postgres_core.get_converted_async_db_url', return_value=bad_url):
                 # The validation should catch this
                 with pytest.raises(RuntimeError) as exc_info:
                     # Mock the create_async_engine to not actually create engine

@@ -3,10 +3,10 @@
 import os
 import sys
 from unittest.mock import Mock, MagicMock
-from shared.isolated_environment import get_env
+from shared.isolated_environment import IsolatedEnvironment
 
 # Set environment variables BEFORE any imports
-env = get_env()
+env = IsolatedEnvironment()
 env.set("TESTING", "true", "test")
 env.set("DEV_MODE_DISABLE_CLICKHOUSE", "true", "test")
 env.set("CLICKHOUSE_ENABLED", "false", "test")

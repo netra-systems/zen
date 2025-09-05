@@ -1,4 +1,4 @@
-from shared.isolated_environment import get_env
+from shared.isolated_environment import IsolatedEnvironment
 """
 Test JWT secret consistency for backend service.
 Ensures backend service correctly loads and uses JWT secret for token validation.

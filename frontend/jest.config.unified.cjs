@@ -57,6 +57,8 @@ const getTestSuite = () => {
       return ['<rootDir>/__tests__/integration/**/*.test.[jt]s?(x)'];
     case 'critical':
       return ['<rootDir>/__tests__/critical/**/*.test.[jt]s?(x)'];
+    case 'regression':
+      return ['<rootDir>/__tests__/regression/**/*.test.[jt]s?(x)'];
     case 'chat':
       return ['<rootDir>/__tests__/chat/**/*.test.[jt]s?(x)'];
     case 'auth':

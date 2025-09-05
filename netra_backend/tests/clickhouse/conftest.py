@@ -8,10 +8,10 @@ import pytest
 from netra_backend.app.config import get_config
 from netra_backend.app.db.clickhouse_base import ClickHouseDatabase
 from netra_backend.app.db.clickhouse_query_fixer import ClickHouseQueryInterceptor
-from shared.isolated_environment import get_env
+from shared.isolated_environment import IsolatedEnvironment
 
 # CRITICAL: Set ClickHouse configuration BEFORE any imports that trigger config loading
-env = get_env()
+env = IsolatedEnvironment()
 # Override test framework's disabled ClickHouse for these specific tests using Docker credentials 
 env.set("CLICKHOUSE_HOST", env.get("TEST_CLICKHOUSE_HOST", "localhost"), source="clickhouse_conftest_setup")
 env.set("CLICKHOUSE_HTTP_PORT", env.get("TEST_CLICKHOUSE_HTTP_PORT", "8125"), source="clickhouse_conftest_setup") 

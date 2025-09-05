@@ -1,4 +1,4 @@
-from shared.isolated_environment import get_env
+from shared.isolated_environment import IsolatedEnvironment
 """L3 Integration Tests for Database Connectivity with Docker Compose Services.
 
 These tests validate database connectivity, transactions, and management using 
