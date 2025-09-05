@@ -478,10 +478,19 @@ class AuthEnvironment:
         """Get Google OAuth client ID with environment-specific behavior."""
         env = self.get_environment()
         
-        client_id = self.env.get("OAUTH_GOOGLE_CLIENT_ID")
-        if client_id:
-            return client_id
-            
+        # Try environment-specific OAuth variables first
+        env_specific_keys = [
+            f"GOOGLE_OAUTH_CLIENT_ID_{env.upper()}",
+            f"OAUTH_GOOGLE_CLIENT_ID_{env.upper()}",
+            "OAUTH_GOOGLE_CLIENT_ID",
+            "GOOGLE_OAUTH_CLIENT_ID"
+        ]
+        
+        for key in env_specific_keys:
+            client_id = self.env.get(key)
+            if client_id:
+                return client_id
+        
         # Environment-specific behavior (no fallback pattern)
         if env in ["production", "staging"]:
             # Production/staging require explicit OAuth configuration
@@ -501,10 +510,19 @@ class AuthEnvironment:
         """Get Google OAuth client secret with environment-specific behavior."""
         env = self.get_environment()
         
-        client_secret = self.env.get("OAUTH_GOOGLE_CLIENT_SECRET")
-        if client_secret:
-            return client_secret
-            
+        # Try environment-specific OAuth variables first
+        env_specific_keys = [
+            f"GOOGLE_OAUTH_CLIENT_SECRET_{env.upper()}",
+            f"OAUTH_GOOGLE_CLIENT_SECRET_{env.upper()}",
+            "OAUTH_GOOGLE_CLIENT_SECRET",
+            "GOOGLE_OAUTH_CLIENT_SECRET"
+        ]
+        
+        for key in env_specific_keys:
+            client_secret = self.env.get(key)
+            if client_secret:
+                return client_secret
+        
         # Environment-specific behavior (no fallback pattern)
         if env in ["production", "staging"]:
             # Production/staging require explicit OAuth configuration
