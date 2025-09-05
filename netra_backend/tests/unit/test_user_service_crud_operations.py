@@ -21,7 +21,7 @@ class TestCRUDUserBasicOperations:
     @pytest.fixture
     def crud_user(self):
         """CRUD user service instance."""
-        return CRUDUser()
+        return CRUDUser("test_user_service", User)
 
     @pytest.fixture
     def mock_db_session(self):
@@ -131,7 +131,7 @@ class TestCRUDUserUpdateOperations:
     @pytest.fixture
     def crud_user(self):
         """CRUD user service instance."""
-        return CRUDUser()
+        return CRUDUser("test_user_service", User)
 
     @pytest.fixture
     def mock_db_session(self):
@@ -356,7 +356,7 @@ class TestUserServiceSecurity:
     @pytest.fixture
     def crud_user(self):
         """CRUD user service instance."""
-        return CRUDUser()
+        return CRUDUser("test_user_service", User)
 
     @pytest.fixture
     def mock_db_session(self):
@@ -387,7 +387,7 @@ class TestUserServiceSecurity:
         # This is a conceptual test - SQLAlchemy ORM provides SQL injection protection
         # by using parameterized queries by default
         
-        crud_user = CRUDUser()
+        crud_user = CRUDUser("test_user_service", User)
         
         # The service should use SQLAlchemy ORM methods which are safe
         assert hasattr(crud_user, 'get_by_email')
@@ -401,7 +401,7 @@ class TestUserServiceSecurity:
     def test_password_storage_security(self):
         """Test that passwords are never stored in plain text."""
         # Test that the service doesn't have methods that could accidentally store plain passwords
-        crud_user = CRUDUser()
+        crud_user = CRUDUser("test_user_service", User)
         
         # Should not have any method that stores plain passwords
         assert not hasattr(crud_user, 'store_plain_password')
