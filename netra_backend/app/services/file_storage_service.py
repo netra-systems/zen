@@ -255,7 +255,7 @@ class FileStorageService(ServiceMixin):
         metadata: Optional[Dict[str, Any]] = None,
         user_id: Optional[str] = None
     ) -> Dict[str, Any]:
-        """Upload a large file with progress tracking and validation.
+        """Upload a large file with progress tracking and validation with user isolation.
         
         Args:
             file_stream: Binary file stream to upload
@@ -264,13 +264,14 @@ class FileStorageService(ServiceMixin):
             file_size: Expected file size in bytes
             chunk_size: Chunk size for reading (default 1MB)
             metadata: Optional metadata dictionary
+            user_id: Optional user ID for isolation
             
         Returns:
             Dictionary containing file_id, storage_path, file_size, and metadata
         """
         try:
             # Validate parameters
-            self._validate_file_upload_params(file_stream, filename, content_type)
+            self._validate_file_upload_params(file_stream, filename, content_type, user_id)
             
             if file_size <= 0:
                 raise ValueError("File size must be positive")
@@ -290,8 +291,8 @@ class FileStorageService(ServiceMixin):
             # Generate unique file ID
             file_id = self._generate_file_id()
             
-            # Get storage path
-            storage_path = self._get_file_path(file_id, filename)
+            # Get storage path with user isolation
+            storage_path = self._get_file_path(file_id, filename, user_id)
             
             # Write file with progress tracking
             written_bytes = 0
@@ -342,6 +343,7 @@ class FileStorageService(ServiceMixin):
                 "file_id": file_id,
                 "filename": filename,
                 "original_filename": filename,
+                "sanitized_filename": self._sanitize_filename(filename),
                 "content_type": content_type,
                 "file_size": written_bytes,
                 "storage_path": str(storage_path),
@@ -349,6 +351,7 @@ class FileStorageService(ServiceMixin):
                 "uploaded_at": datetime.now(timezone.utc).isoformat(),
                 "upload_type": "large_file",
                 "chunk_size": chunk_size,
+                "user_id": user_id,
                 "metadata": metadata or {}
             }
             
@@ -372,16 +375,31 @@ class FileStorageService(ServiceMixin):
                 context={"filename": filename, "content_type": content_type, "file_size": file_size}
             )
     
-    async def get_file_metadata(self, file_id: str) -> Optional[Dict[str, Any]]:
-        """Get metadata for a stored file.
+    def _validate_file_access(self, file_metadata: Dict[str, Any], requesting_user_id: Optional[str]) -> bool:
+        """Validate if user has access to the file."""
+        file_user_id = file_metadata.get("user_id")
+        
+        # System files (no user_id) can be accessed by anyone
+        if file_user_id is None:
+            return True
+            
+        # User can only access their own files
+        return file_user_id == requesting_user_id
+    
+    async def get_file_metadata(self, file_id: str, user_id: Optional[str] = None) -> Optional[Dict[str, Any]]:
+        """Get metadata for a stored file with access control.
         
         Args:
             file_id: Unique file identifier
+            user_id: User ID for access control
             
         Returns:
-            File metadata dictionary or None if not found
+            File metadata dictionary or None if not found/unauthorized
         """
-        return self._file_metadata.get(file_id)
+        metadata = self._file_metadata.get(file_id)
+        if metadata and self._validate_file_access(metadata, user_id):
+            return metadata
+        return None
     
     async def delete_file(self, file_id: str) -> Dict[str, Any]:
         """Delete a stored file.

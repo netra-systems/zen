@@ -637,6 +637,9 @@ class MessageHandlerService(IMessageHandlerService):
         self, user_context: UserExecutionContext, payload: Dict[str, Any], db_session: Optional[AsyncSession]
     ) -> None:
         """Handle get_agent_context message type."""
+        user_id = user_context.user_id
+        websocket_manager = create_websocket_manager(user_context)
+        
         try:
             session_token = payload.get("session_token", user_id)
             logger.info(f"Getting agent context for user {user_id}, session: {session_token}")
@@ -652,12 +655,12 @@ class MessageHandlerService(IMessageHandlerService):
                 }
             }
             
-            await manager.send_message(user_id, response)
+            await websocket_manager.send_to_user(response)
             logger.info(f"Sent agent context to user {user_id}")
             
         except Exception as e:
             logger.error(f"Error getting agent context for user {user_id}: {e}", exc_info=True)
-            await manager.send_error(user_id, f"Failed to get agent context: {str(e)}")
+            await websocket_manager.send_to_user({"type": "error", "message": f"Failed to get agent context: {str(e)}"})
 
     async def _get_user_conversation_history(
         self, user_id: str, db_session: Optional[AsyncSession]
@@ -726,11 +729,14 @@ class MessageHandlerService(IMessageHandlerService):
 
     async def handle_example_message(
         self,
-        user_id: str,
+        user_context: UserExecutionContext,
         payload: Dict[str, Any],
         db_session: Optional[AsyncSession]
     ) -> None:
         """Handle example_message message type."""
+        user_id = user_context.user_id
+        websocket_manager = create_websocket_manager(user_context)
+        
         try:
             logger.info(f"Processing example message for user {user_id}")
             
@@ -741,7 +747,7 @@ class MessageHandlerService(IMessageHandlerService):
                 )
             except ImportError as import_error:
                 logger.error(f"Failed to import example message handler: {import_error}")
-                await manager.send_error(user_id, "Example message handler not available")
+                await websocket_manager.send_to_user({"type": "error", "message": "Example message handler not available"})
                 return
             
             # Add user_id to payload if not present
@@ -763,12 +769,12 @@ class MessageHandlerService(IMessageHandlerService):
                 }
             }
             
-            await manager.send_message(user_id, success_message)
+            await websocket_manager.send_to_user(success_message)
             logger.info(f"Successfully processed example message for user {user_id}")
             
         except Exception as e:
             logger.error(f"Error processing example message for user {user_id}: {e}", exc_info=True)
-            await manager.send_error(user_id, f"Failed to process example message: {str(e)}")
+            await websocket_manager.send_to_user({"type": "error", "message": f"Failed to process example message: {str(e)}"})
     
     def _format_message_for_history(self, message) -> Dict[str, Any]:
         """Format a database message for conversation history."""
