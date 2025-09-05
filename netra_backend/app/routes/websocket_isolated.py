@@ -354,7 +354,9 @@ async def get_isolated_websocket_stats():
         raise HTTPException(status_code=404, detail="Stats endpoint not available in production")
     
     # Get global statistics
-    manager_stats = ConnectionScopedWebSocketManager.get_global_stats()
+    # NOTE: Using instance method get_stats() as get_global_stats() doesn't exist
+    manager = get_websocket_manager()
+    manager_stats = manager.get_stats()
     
     return {
         "isolation_mode": "connection_scoped",

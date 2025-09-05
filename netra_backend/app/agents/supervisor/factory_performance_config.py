@@ -13,7 +13,7 @@ enabling toggling of performance optimizations while maintaining backward compat
 
 from dataclasses import dataclass, field
 from typing import Optional
-import os
+from shared.isolated_environment import get_env
 
 
 @dataclass
@@ -27,54 +27,54 @@ class FactoryPerformanceConfig:
     
     # WebSocket Emitter Pooling Configuration
     enable_emitter_pooling: bool = field(
-        default_factory=lambda: os.getenv('FACTORY_ENABLE_POOLING', 'true').lower() == 'true'
+        default_factory=lambda: get_env().get('FACTORY_ENABLE_POOLING', 'true').lower() == 'true'
     )
     pool_initial_size: int = field(
-        default_factory=lambda: int(os.getenv('FACTORY_POOL_INITIAL_SIZE', '20'))
+        default_factory=lambda: int(get_env().get('FACTORY_POOL_INITIAL_SIZE', '20'))
     )
     pool_max_size: int = field(
-        default_factory=lambda: int(os.getenv('FACTORY_POOL_MAX_SIZE', '200'))
+        default_factory=lambda: int(get_env().get('FACTORY_POOL_MAX_SIZE', '200'))
     )
     pool_cleanup_interval: int = field(
-        default_factory=lambda: int(os.getenv('FACTORY_POOL_CLEANUP_INTERVAL', '300'))
+        default_factory=lambda: int(get_env().get('FACTORY_POOL_CLEANUP_INTERVAL', '300'))
     )
     pool_reuse_timeout: float = field(
-        default_factory=lambda: float(os.getenv('FACTORY_POOL_REUSE_TIMEOUT', '60.0'))
+        default_factory=lambda: float(get_env().get('FACTORY_POOL_REUSE_TIMEOUT', '60.0'))
     )
     
     # Agent Class Caching Configuration
     enable_class_caching: bool = field(
-        default_factory=lambda: os.getenv('FACTORY_ENABLE_CACHING', 'true').lower() == 'true'
+        default_factory=lambda: get_env().get('FACTORY_ENABLE_CACHING', 'true').lower() == 'true'
     )
     cache_size: int = field(
-        default_factory=lambda: int(os.getenv('FACTORY_CACHE_SIZE', '128'))
+        default_factory=lambda: int(get_env().get('FACTORY_CACHE_SIZE', '128'))
     )
     cache_ttl: int = field(
-        default_factory=lambda: int(os.getenv('FACTORY_CACHE_TTL', '3600'))
+        default_factory=lambda: int(get_env().get('FACTORY_CACHE_TTL', '3600'))
     )
     
     # Metrics Collection Configuration
     enable_metrics: bool = field(
-        default_factory=lambda: os.getenv('FACTORY_ENABLE_METRICS', 'true').lower() == 'true'
+        default_factory=lambda: get_env().get('FACTORY_ENABLE_METRICS', 'true').lower() == 'true'
     )
     metrics_sample_rate: float = field(
-        default_factory=lambda: float(os.getenv('FACTORY_METRICS_SAMPLE_RATE', '0.1'))
+        default_factory=lambda: float(get_env().get('FACTORY_METRICS_SAMPLE_RATE', '0.1'))
     )
     metrics_buffer_size: int = field(
-        default_factory=lambda: int(os.getenv('FACTORY_METRICS_BUFFER_SIZE', '100'))
+        default_factory=lambda: int(get_env().get('FACTORY_METRICS_BUFFER_SIZE', '100'))
     )
     
     # Object Reuse Configuration
     enable_object_reuse: bool = field(
-        default_factory=lambda: os.getenv('FACTORY_ENABLE_OBJECT_REUSE', 'true').lower() == 'true'
+        default_factory=lambda: get_env().get('FACTORY_ENABLE_OBJECT_REUSE', 'true').lower() == 'true'
     )
     reuse_pool_size: int = field(
-        default_factory=lambda: int(os.getenv('FACTORY_REUSE_POOL_SIZE', '50'))
+        default_factory=lambda: int(get_env().get('FACTORY_REUSE_POOL_SIZE', '50'))
     )
     
     # Lazy Initialization Configuration
     enable_lazy_init: bool = field(
-        default_factory=lambda: os.getenv('FACTORY_ENABLE_LAZY_INIT', 'true').lower() == 'true'
+        default_factory=lambda: get_env().get('FACTORY_ENABLE_LAZY_INIT', 'true').lower() == 'true'
     )
     
     # Performance Targets

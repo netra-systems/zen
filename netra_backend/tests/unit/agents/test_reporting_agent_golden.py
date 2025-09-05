@@ -408,6 +408,8 @@ class TestCacheScenarios:
 
     async def test_report_result_creation(self, reporting_agent):
         """Test ReportResult object creation."""
+        from netra_backend.app.agents.state import ReportSection, AgentMetadata
+        
         test_data = {
             "report": "Test report content",
             "sections": ["intro", "body", "conclusion"],
@@ -419,19 +421,25 @@ class TestCacheScenarios:
         assert isinstance(report_result, ReportResult)
         assert report_result.report_type == "analysis"
         assert report_result.content == "Test report content"
-        assert report_result.sections == ["intro", "body", "conclusion"]
-        assert report_result.metadata == {"version": "1.0"}
+        assert len(report_result.sections) == 3
+        assert all(isinstance(s, ReportSection) for s in report_result.sections)
+        assert report_result.sections[0].title == "Intro"
+        assert report_result.sections[1].title == "Body"  
+        assert report_result.sections[2].title == "Conclusion"
+        assert isinstance(report_result.metadata, AgentMetadata)
 
     async def test_report_result_missing_fields(self, reporting_agent):
         """Test ReportResult creation with missing fields."""
+        from netra_backend.app.agents.state import AgentMetadata
+        
         minimal_data = {}
         
         report_result = reporting_agent._create_report_result(minimal_data)
         
         assert isinstance(report_result, ReportResult)
         assert report_result.content == "No content available"
-        assert report_result.sections == []
-        assert report_result.metadata == {}
+        assert len(report_result.sections) == 0
+        assert isinstance(report_result.metadata, AgentMetadata)
 
 
 class TestErrorHandlingEdgeCases:

@@ -49,6 +49,8 @@ class SecretConfig:
                 "GOOGLE_CLIENT_SECRET"
             ],
             "redis": [
+                "REDIS_HOST",
+                "REDIS_PORT",
                 "REDIS_URL",
                 "REDIS_PASSWORD"
             ],
@@ -82,6 +84,8 @@ class SecretConfig:
                 "OAUTH_HMAC_SECRET"
             ],
             "redis": [
+                "REDIS_HOST",
+                "REDIS_PORT", 
                 "REDIS_URL",
                 "REDIS_PASSWORD"
             ]
@@ -120,6 +124,8 @@ class SecretConfig:
         "OAUTH_HMAC_SECRET": "oauth-hmac-secret-staging",
         
         # Redis
+        "REDIS_HOST": "redis-host-staging",
+        "REDIS_PORT": "redis-port-staging",
         "REDIS_URL": "redis-url-staging",
         "REDIS_PASSWORD": "redis-password-staging",
         

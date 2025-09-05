@@ -52,13 +52,13 @@ def determine_migration_plan_and_flags(role: str) -> Tuple[str, List[str]]:
     return config_func()
 
 
-def update_user_plan_in_db(
+async def update_user_plan_in_db(
     current_user: User, new_plan: str, feature_flags: List[str], db: AsyncSession
 ) -> None:
     """Update user plan and feature flags in database."""
     current_user.plan_tier = new_plan
     current_user.feature_flags = {flag: True for flag in feature_flags}
-    db.commit()
+    await db.commit()
 
 
 def build_migration_data_fields(current_user: User, new_plan: str, feature_flags: List[str]) -> Dict[str, Any]:
@@ -101,16 +101,16 @@ def build_no_migration_response(current_user: User) -> Dict[str, Any]:
     }
 
 
-def execute_user_migration(current_user: User, db: AsyncSession) -> Dict[str, Any]:
+async def execute_user_migration(current_user: User, db: AsyncSession) -> Dict[str, Any]:
     """Execute user migration workflow."""
     new_plan, feature_flags = determine_migration_plan_and_flags(current_user.role)
-    update_user_plan_in_db(current_user, new_plan, feature_flags, db)
+    await update_user_plan_in_db(current_user, new_plan, feature_flags, db)
     return build_migration_success_response(current_user, new_plan, feature_flags)
 
 
-def process_migration_request(current_user: User, db: AsyncSession) -> Dict[str, Any]:
+async def process_migration_request(current_user: User, db: AsyncSession) -> Dict[str, Any]:
     """Process migration request based on user status."""
     if check_user_needs_migration(current_user):
-        return execute_user_migration(current_user, db)
+        return await execute_user_migration(current_user, db)
     else:
         return build_no_migration_response(current_user)

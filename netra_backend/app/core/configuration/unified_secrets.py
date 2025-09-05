@@ -71,6 +71,51 @@ class UnifiedSecretsManager:
     def clear_cache(self) -> None:
         """Clear the secrets cache"""
         self._cache.clear()
+    
+    def get_jwt_secret(self) -> str:
+        """
+        Get JWT secret following proper fallback chain - instance method.
+        
+        Priority order:
+        1. Environment-specific JWT_SECRET_{ENVIRONMENT} 
+        2. Generic JWT_SECRET_KEY  
+        3. Legacy JWT_SECRET
+        4. Development fallback (only for development environment)
+        
+        Raises:
+            ValueError: If no JWT secret is configured for production environment
+            
+        Returns:
+            JWT secret string, properly stripped of whitespace
+        """
+        environment = self.get_secret('ENVIRONMENT', 'development').lower()
+        
+        # 1. Try environment-specific secret first
+        env_specific_key = f"JWT_SECRET_{environment.upper()}"
+        secret = self.get_secret(env_specific_key)
+        if secret:
+            return secret.strip()
+        
+        # 2. Try generic JWT_SECRET_KEY
+        secret = self.get_secret('JWT_SECRET_KEY')
+        if secret:
+            return secret.strip()
+        
+        # 3. Try legacy JWT_SECRET
+        secret = self.get_secret('JWT_SECRET')
+        if secret:
+            return secret.strip()
+        
+        # 4. Development fallback
+        if environment == 'development':
+            return "dev-secret-key-DO-NOT-USE-IN-PRODUCTION"
+        
+        # 5. Production validation - must have explicit secret
+        if environment == 'production':
+            raise ValueError("JWT secret not configured for production environment")
+        
+        # 6. Default fallback for other environments
+        return "dev-secret-key-DO-NOT-USE-IN-PRODUCTION"
 
 
 # Global instance
@@ -96,14 +141,8 @@ def set_secret(key: str, value: str) -> None:
 
 
 def get_jwt_secret() -> str:
-    """Get JWT secret from environment"""
-    secret = get_secret('JWT_SECRET')
-    if not secret:
-        # Generate a default secret for testing
-        import secrets
-        secret = secrets.token_hex(32)
-        set_secret('JWT_SECRET', secret)
-    return secret
+    """Get JWT secret using the global secrets manager"""
+    return get_secrets_manager().get_jwt_secret()
 
 
 # Alias for backwards compatibility

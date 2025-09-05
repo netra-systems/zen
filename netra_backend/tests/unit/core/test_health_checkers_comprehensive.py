@@ -130,18 +130,18 @@ class TestPostgreSQLHealthCheck:
         assert result.error_message == "Database unavailable"
         
     @pytest.mark.asyncio
-    @patch('netra_backend.app.db.database_manager.DatabaseManager.get_async_session')
-    async def test_execute_postgres_query_with_unified_manager(self, mock_get_async_session):
+    @patch('netra_backend.app.database.get_db')
+    async def test_execute_postgres_query_with_unified_manager(self, mock_get_db):
         """Test PostgreSQL query execution with unified DB manager."""
         from netra_backend.app.core.health_checkers import _execute_postgres_query
         
         # Mock successful session
         mock_session = AsyncMock()
-        mock_get_async_session.return_value.__aenter__.return_value = mock_session
+        mock_get_db.return_value.__aenter__.return_value = mock_session
         
         await _execute_postgres_query()
         
-        mock_get_async_session.assert_called_once_with("default")
+        mock_get_db.assert_called_once()
         mock_session.execute.assert_called_once()
         
     @pytest.mark.skip("Complex fallback initialization test - skipped for now")
