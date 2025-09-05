@@ -100,6 +100,7 @@ class AgentRegistry(UniversalAgentRegistry):
         try:
             from netra_backend.app.agents.optimizations_core_sub_agent import OptimizationsCoreSubAgent
             from netra_backend.app.agents.actions_to_meet_goals_sub_agent import ActionsToMeetGoalsSubAgent
+            from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
             
             def create_optimization_agent(context: UserExecutionContext):
                 return OptimizationsCoreSubAgent(
@@ -136,6 +137,7 @@ class AgentRegistry(UniversalAgentRegistry):
         """Register reporting agent."""
         try:
             from netra_backend.app.agents.reporting_sub_agent import ReportingSubAgent
+            from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
             
             def create_reporting_agent(context: UserExecutionContext):
                 return ReportingSubAgent(self.llm_manager, self.tool_dispatcher)
@@ -151,6 +153,7 @@ class AgentRegistry(UniversalAgentRegistry):
         """Register goals triage agent."""
         try:
             from netra_backend.app.agents.goals_triage_sub_agent import GoalsTriageSubAgent
+            from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
             
             def create_goals_agent(context: UserExecutionContext):
                 return GoalsTriageSubAgent(self.llm_manager, self.tool_dispatcher)
@@ -166,6 +169,7 @@ class AgentRegistry(UniversalAgentRegistry):
         """Register synthetic data agent."""
         try:
             from netra_backend.app.agents.synthetic_data_sub_agent import SyntheticDataSubAgent
+            from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
             
             def create_synthetic_agent(context: UserExecutionContext):
                 return SyntheticDataSubAgent(self.llm_manager, self.tool_dispatcher)
@@ -181,6 +185,7 @@ class AgentRegistry(UniversalAgentRegistry):
         """Register data helper agent."""
         try:
             from netra_backend.app.agents.data_helper_agent import DataHelperAgent
+            from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
             
             def create_helper_agent(context: UserExecutionContext):
                 return DataHelperAgent(self.llm_manager, self.tool_dispatcher)
@@ -196,6 +201,7 @@ class AgentRegistry(UniversalAgentRegistry):
         """Register corpus admin agent."""
         try:
             from netra_backend.app.admin.corpus import CorpusAdminSubAgent
+            from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
             
             def create_corpus_agent(context: UserExecutionContext):
                 return CorpusAdminSubAgent(self.llm_manager, self.tool_dispatcher)
