@@ -186,6 +186,33 @@ class DatabaseManager:
         
         return database_url
     
+    @classmethod
+    @asynccontextmanager
+    async def get_async_session(cls, name: str = 'primary'):
+        """
+        Class method for backward compatibility with code expecting DatabaseManager.get_async_session().
+        
+        This method provides the expected static/class method interface while using
+        the instance method internally for proper session management.
+        
+        Args:
+            name: Engine name (default: 'primary')
+            
+        Yields:
+            AsyncSession: Database session with automatic cleanup
+            
+        Note:
+            This is a compatibility shim. New code should use:
+            - netra_backend.app.database.get_db() for dependency injection
+            - instance.get_session() for direct usage
+        """
+        manager = get_database_manager()
+        if not manager._initialized:
+            await manager.initialize()
+        
+        async with manager.get_session(name) as session:
+            yield session
+    
     @staticmethod
     def create_application_engine() -> AsyncEngine:
         """Create a new application engine for health checks."""

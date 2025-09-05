@@ -249,10 +249,19 @@ Auth Service startup ABORTED.
         logger.info(f"Skipping OAuth validation in {env} environment")
     
     # Log Redis configuration status
-    from auth_service.auth_core.routes.auth_routes import auth_service
-    redis_enabled = auth_service.session_manager.redis_enabled
-    redis_status = "enabled" if redis_enabled else "disabled (staging environment)"
-    logger.info(f"Redis session management: {redis_status}")
+    try:
+        from auth_service.auth_core.routes.auth_routes import auth_service
+        # Check if redis_client is available (AuthService uses redis_client, not session_manager)
+        if hasattr(auth_service, 'redis_client'):
+            redis_enabled = auth_service.redis_client is not None
+            redis_status = "enabled" if redis_enabled else "disabled"
+        else:
+            # Redis client might not be initialized yet
+            redis_status = "will be configured during route initialization"
+        logger.info(f"Redis session management: {redis_status}")
+    except Exception as e:
+        logger.warning(f"Could not determine Redis status: {e}")
+        redis_status = "status unknown"
     
     # Check if we're in fast test mode
     # @marked: Test mode flag for test infrastructure
@@ -336,8 +345,10 @@ Auth Service startup ABORTED.
     # Close Redis connections if enabled
     async def close_redis():
         try:
-            if hasattr(auth_service.session_manager, 'close_redis'):
-                await auth_service.session_manager.close_redis()
+            # AuthService uses redis_client directly, not session_manager
+            if hasattr(auth_service, 'redis_client') and auth_service.redis_client:
+                if hasattr(auth_service.redis_client, 'close'):
+                    await auth_service.redis_client.close()
                 logger.info("Redis connections closed successfully")
         except Exception as e:
             logger.warning(f"Error closing Redis connections: {e}")

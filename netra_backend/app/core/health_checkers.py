@@ -104,10 +104,11 @@ async def _execute_postgres_query() -> None:
     from sqlalchemy import text
     from netra_backend.app.db.database_manager import DatabaseManager
     
-    # CRITICAL: Use unified database manager to ensure proper SSL parameter conversion
+    # CRITICAL: Use canonical database access pattern from database module SSOT
     try:
-        # Try to get connection from unified manager first
-        async with DatabaseManager.get_async_session("default") as session:
+        # Use get_db() for proper session lifecycle management
+        from netra_backend.app.database import get_db
+        async with get_db() as session:
             await session.execute(text("SELECT 1"))
     except (ValueError, Exception):
         # Fallback to direct engine access with validation
