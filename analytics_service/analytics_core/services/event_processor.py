@@ -14,6 +14,9 @@ from dataclasses import dataclass
 import os
 from contextlib import asynccontextmanager
 
+# SECURITY CRITICAL: Import UserExecutionContext for proper user isolation
+from netra_backend.app.services.user_execution_context import UserExecutionContext, InvalidContextError
+
 from analytics_service.analytics_core.models.events import (
     AnalyticsEvent,
     EventType,
@@ -37,10 +40,12 @@ class ProcessorConfig:
     max_events_per_user_per_minute: int = 1000
     enable_privacy_filtering: bool = True
     enable_analytics: bool = True
+    # SECURITY CRITICAL: Context validation is now mandatory
+    require_user_context: bool = True
 
 
 class EventProcessor:
-    """Main event processing service for analytics"""
+    """Main event processing service for analytics with mandatory user context isolation"""
     
     def __init__(self, 
                  clickhouse_manager: Optional[ClickHouseManager] = None,
@@ -150,12 +155,22 @@ class EventProcessor:
     
     # Event Processing Methods
     
-    async def process_event(self, event: AnalyticsEvent) -> bool:
-        """Process a single event"""
+    async def process_event(self, event: AnalyticsEvent, user_context: Optional[UserExecutionContext] = None) -> bool:
+        """Process a single event with mandatory user context isolation"""
         try:
+            # SECURITY CRITICAL: Validate user context is present
+            if self.config.require_user_context and user_context is None:
+                logger.error(f"SECURITY VIOLATION: Event processing attempted without UserExecutionContext for event {event.event_id}")
+                raise InvalidContextError("UserExecutionContext is mandatory for event processing")
+            
             # Validate event
             if not self._validate_event(event):
                 logger.warning(f"Invalid event rejected: {event.event_id}")
+                return False
+            
+            # SECURITY CRITICAL: Validate user context matches event user_id
+            if user_context and hasattr(event, 'user_id') and event.user_id != user_context.user_id:
+                logger.error(f"SECURITY VIOLATION: Event user_id {event.user_id} doesn't match context user_id {user_context.user_id}")
                 return False
             
             # Check rate limiting
@@ -169,8 +184,13 @@ class EventProcessor:
             if self.config.enable_privacy_filtering:
                 event = self._apply_privacy_filters(event)
             
-            # Add to processing queue
-            await self._processing_queue.put(event)
+            # SECURITY CRITICAL: Add event to processing queue with user context
+            event_with_context = {
+                'event': event,
+                'user_context': user_context.to_dict() if user_context else None,
+                'processing_timestamp': datetime.utcnow().isoformat()
+            }
+            await self._processing_queue.put(event_with_context)
             
             return True
             
@@ -178,16 +198,21 @@ class EventProcessor:
             logger.error(f"Failed to process event {event.event_id}: {e}")
             return False
     
-    async def process_batch(self, batch: EventBatch) -> ProcessingResult:
-        """Process a batch of events"""
+    async def process_batch(self, batch: EventBatch, user_context: Optional[UserExecutionContext] = None) -> ProcessingResult:
+        """Process a batch of events with mandatory user context isolation"""
         start_time = datetime.utcnow()
         processed_count = 0
         failed_count = 0
         errors = []
         
         try:
+            # SECURITY CRITICAL: Validate user context for batch processing
+            if self.config.require_user_context and user_context is None:
+                logger.error("SECURITY VIOLATION: Batch processing attempted without UserExecutionContext")
+                raise InvalidContextError("UserExecutionContext is mandatory for batch processing")
+            
             for event in batch.events:
-                success = await self.process_event(event)
+                success = await self.process_event(event, user_context)
                 if success:
                     processed_count += 1
                 else:
@@ -215,19 +240,51 @@ class EventProcessor:
     # Background Workers
     
     async def _process_events_worker(self, worker_name: str):
-        """Background worker for processing events"""
+        """Background worker for processing events with user context isolation"""
         logger.info(f"Started processing worker: {worker_name}")
         
         while self._running:
             try:
-                # Get event from queue with timeout
-                event = await asyncio.wait_for(
+                # Get event with context from queue with timeout
+                event_with_context = await asyncio.wait_for(
                     self._processing_queue.get(),
                     timeout=1.0
                 )
                 
-                # Add to batch buffer
-                self._batch_buffer.append(event)
+                # SECURITY CRITICAL: Extract event and user context
+                if isinstance(event_with_context, dict) and 'event' in event_with_context:
+                    event = event_with_context['event']
+                    context_data = event_with_context.get('user_context')
+                    
+                    # Reconstruct user context for processing
+                    user_context = None
+                    if context_data:
+                        try:
+                            user_context = UserExecutionContext.from_request(
+                                user_id=context_data['user_id'],
+                                thread_id=context_data['thread_id'],
+                                run_id=context_data['run_id'],
+                                request_id=context_data['request_id']
+                            )
+                        except Exception as e:
+                            logger.error(f"Failed to reconstruct user context: {e}")
+                            continue
+                    
+                    # Add to batch buffer with context
+                    batch_item = {
+                        'event': event,
+                        'user_context': user_context,
+                        'worker': worker_name
+                    }
+                    self._batch_buffer.append(batch_item)
+                else:
+                    # Legacy event without context - log security warning
+                    logger.warning(f"SECURITY WARNING: Processing event without user context in worker {worker_name}")
+                    if self.config.require_user_context:
+                        logger.error(f"SECURITY VIOLATION: Rejecting event without context in worker {worker_name}")
+                        continue
+                    # Add legacy event to buffer
+                    self._batch_buffer.append(event_with_context)
                 
                 # Check if batch is ready
                 if (len(self._batch_buffer) >= self.config.batch_size or 
@@ -393,7 +450,7 @@ class EventProcessor:
         return time_since_last_flush.total_seconds() >= self.config.flush_interval_seconds
     
     async def _flush_events(self):
-        """Flush events to storage"""
+        """Flush events to storage with user context validation"""
         if not self._batch_buffer:
             return
         
@@ -401,17 +458,54 @@ class EventProcessor:
         self._batch_buffer.clear()
         self._last_flush_time = datetime.utcnow()
         
-        success = await self._store_events_with_retry(batch)
+        # SECURITY CRITICAL: Process events by user context to maintain isolation
+        events_by_user = {}
+        legacy_events = []
+        
+        for item in batch:
+            if isinstance(item, dict) and 'event' in item:
+                # New format with user context
+                event = item['event']
+                user_context = item.get('user_context')
+                
+                if user_context and hasattr(user_context, 'user_id'):
+                    user_id = user_context.user_id
+                    if user_id not in events_by_user:
+                        events_by_user[user_id] = []
+                    events_by_user[user_id].append(item)
+                else:
+                    logger.warning("Event in batch missing user context")
+                    legacy_events.append(item)
+            else:
+                # Legacy event format
+                logger.warning("Processing legacy event without user context")
+                legacy_events.append(item)
+        
+        # Process events by user for proper isolation
+        success = True
+        for user_id, user_events in events_by_user.items():
+            user_success = await self._store_user_events_with_retry(user_events)
+            success = success and user_success
+        
+        # Handle legacy events if present
+        if legacy_events:
+            if self.config.require_user_context:
+                logger.error(f"SECURITY VIOLATION: Rejecting {len(legacy_events)} events without user context")
+                success = False
+            else:
+                legacy_success = await self._store_legacy_events_with_retry(legacy_events)
+                success = success and legacy_success
         
         if success:
             self._processed_count += len(batch)
             self._batch_count += 1
             
-            # Update hot prompts cache
+            # Update hot prompts cache by user for proper isolation
             if self.redis:
-                await self._update_hot_prompts(batch)
+                for user_id, user_events in events_by_user.items():
+                    await self._update_hot_prompts_for_user(user_events, user_id)
                 
-            logger.info(f"Flushed {len(batch)} events to storage")
+            logger.info(f"Flushed {len(batch)} events to storage across {len(events_by_user)} users")
         else:
             self._failed_count += len(batch)
             logger.error(f"Failed to flush {len(batch)} events")
@@ -466,8 +560,55 @@ class EventProcessor:
         
         return False
     
+    async def _store_user_events_with_retry(self, user_events: List[Dict[str, Any]]) -> bool:
+        """Store events for a specific user with context isolation"""
+        events = [item['event'] for item in user_events]
+        user_context = user_events[0].get('user_context') if user_events else None
+        
+        if user_context:
+            logger.debug(f"Storing {len(events)} events for user {user_context.user_id}")
+        
+        return await self._store_events_with_retry(events)
+    
+    async def _store_legacy_events_with_retry(self, legacy_events: List[Any]) -> bool:
+        """Store legacy events without context (security warning logged)"""
+        logger.warning(f"SECURITY WARNING: Storing {len(legacy_events)} events without user context isolation")
+        return await self._store_events_with_retry(legacy_events)
+    
+    async def _update_hot_prompts_for_user(self, user_events: List[Dict[str, Any]], user_id: str):
+        """Update hot prompts cache for a specific user with context isolation"""
+        if not self.redis:
+            return
+        
+        try:
+            events = [item['event'] for item in user_events]
+            for event in events:
+                if event.event_type == EventType.CHAT_INTERACTION:
+                    props = event.properties
+                    if props.get('prompt_text'):
+                        prompt_hash = hashlib.md5(
+                            props['prompt_text'].encode()
+                        ).hexdigest()
+                        
+                        prompt_data = {
+                            'user_id': user_id,  # Use verified user_id from context
+                            'timestamp': event.timestamp.isoformat(),
+                            'prompt_length': props.get('prompt_length', 0),
+                            'model_used': props.get('model_used'),
+                            'tokens_consumed': props.get('tokens_consumed', 0),
+                            'context_verified': True  # Mark as context-verified
+                        }
+                        
+                        # Use user-specific cache key for isolation
+                        cache_key = f"hot_prompt:{user_id}:{prompt_hash}"
+                        await self.redis.add_hot_prompt(cache_key, prompt_data)
+                        
+        except Exception as e:
+            logger.error(f"Failed to update hot prompts for user {user_id}: {e}")
+    
     async def _update_hot_prompts(self, events: List[AnalyticsEvent]):
-        """Update hot prompts cache with chat interactions"""
+        """Update hot prompts cache with chat interactions (DEPRECATED - use user-specific method)"""
+        logger.warning("DEPRECATED: Using legacy _update_hot_prompts without user context isolation")
         if not self.redis:
             return
             
@@ -485,7 +626,8 @@ class EventProcessor:
                             'timestamp': event.timestamp.isoformat(),
                             'prompt_length': props.get('prompt_length', 0),
                             'model_used': props.get('model_used'),
-                            'tokens_consumed': props.get('tokens_consumed', 0)
+                            'tokens_consumed': props.get('tokens_consumed', 0),
+                            'context_verified': False  # Mark as legacy/unverified
                         }
                         
                         await self.redis.add_hot_prompt(prompt_hash, prompt_data)
@@ -496,24 +638,29 @@ class EventProcessor:
     # Report Generation Methods
     
     async def generate_user_activity_report(self, 
-                                          user_id: Optional[str] = None,
+                                          user_context: UserExecutionContext,
                                           start_date: Optional[date] = None,
                                           end_date: Optional[date] = None,
                                           granularity: str = "day") -> List[Dict[str, Any]]:
-        """Generate user activity report"""
+        """Generate user activity report with mandatory user context isolation"""
         if not self.clickhouse:
             logger.error("ClickHouse not available for report generation")
             return []
         
         try:
-            # Check cache first
+            # SECURITY CRITICAL: Use user_id from validated context
+            user_id = user_context.user_id
+            logger.info(f"Generating user activity report for user {user_id} (context: {user_context.get_correlation_id()})")
+            
+            # Check cache first with context-specific key
             if self.redis:
-                cache_key = f"user_activity:{user_id}:{start_date}:{end_date}:{granularity}"
+                cache_key = f"user_activity:{user_id}:{start_date}:{end_date}:{granularity}:{user_context.request_id}"
                 cached_report = await self.redis.get_cached_report(cache_key)
                 if cached_report:
+                    logger.debug(f"Returning cached report for user {user_id}")
                     return cached_report
             
-            # Generate report from ClickHouse
+            # Generate report from ClickHouse with user context validation
             report = await self.clickhouse.get_user_activity_report(
                 user_id=user_id,
                 start_date=start_date,
@@ -521,15 +668,16 @@ class EventProcessor:
                 granularity=granularity
             )
             
-            # Cache the report
+            # Cache the report with context-specific key
             if self.redis and report:
-                cache_key = f"user_activity:{user_id}:{start_date}:{end_date}:{granularity}"
+                cache_key = f"user_activity:{user_id}:{start_date}:{end_date}:{granularity}:{user_context.request_id}"
                 await self.redis.cache_report(cache_key, report, ttl=300)  # 5 minute cache
+                logger.debug(f"Cached report for user {user_id} with key {cache_key}")
             
             return report
             
         except Exception as e:
-            logger.error(f"Failed to generate user activity report: {e}")
+            logger.error(f"Failed to generate user activity report for user {user_context.user_id}: {e}")
             return []
     
     async def generate_prompt_analytics(self,
