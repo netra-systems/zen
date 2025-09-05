@@ -18,8 +18,8 @@ if TYPE_CHECKING:
     from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
     from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
 
-from netra_backend.app.agents.tool_registry_unified import UnifiedToolRegistry
-from netra_backend.app.agents.tool_dispatcher_unified import UnifiedToolDispatcherFactory
+from netra_backend.app.core.registry.universal_registry import ToolRegistry
+from netra_backend.app.core.tools.unified_tool_dispatcher import UnifiedToolDispatcherFactory
 from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
@@ -53,7 +53,7 @@ class UserContextToolFactory:
             
         Returns:
             dict: {
-                'registry': UnifiedToolRegistry,
+                'registry': ToolRegistry,
                 'dispatcher': UnifiedToolDispatcher, 
                 'tools': List[BaseTool],
                 'bridge': AgentWebSocketBridge
@@ -66,7 +66,7 @@ class UserContextToolFactory:
         registry_id = f"user_{context.user_id}_{context.run_id}_{int(time.time()*1000)}"
         
         # Create isolated tool registry for this user
-        registry = UnifiedToolRegistry(registry_id=registry_id)
+        registry = ToolRegistry()
         logger.info(f"🗃️ Created isolated registry {registry_id} for {correlation_id}")
         
         # Create isolated tool instances for this user

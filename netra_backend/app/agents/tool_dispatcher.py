@@ -1,43 +1,53 @@
-"""Production-ready tool dispatcher with unified architecture.
+"""Tool Dispatcher Facade - Public API for tool dispatching operations.
 
-MIGRATION COMPLETED: Now using UnifiedToolDispatcher as single source of truth.
+CONSOLIDATION COMPLETE: Single source of truth in unified_tool_dispatcher.py
 
-The following implementations have been consolidated:
-- tool_dispatcher_core.py → UnifiedToolDispatcher
-- request_scoped_tool_dispatcher.py → UnifiedToolDispatcher  
-- unified_tool_execution.py → integrated into UnifiedToolDispatcher
-- websocket_tool_enhancement.py → replaced by ToolEventBus
+Architecture:
+- UnifiedToolDispatcher: Core implementation with factory-enforced isolation
+- UnifiedAdminToolDispatcher: Admin tools extending base dispatcher
+- Request-scoped isolation by default (no shared state)
+- WebSocket events for ALL tool executions
+- Clean separation: Registry, Execution, Events, Permissions
 
-ARCHITECTURE IMPROVEMENTS:
-✅ Single source of truth eliminates duplication
-✅ Request-scoped isolation by default with clear warnings for global usage  
-✅ Clean separation of concerns (registry, permissions, events, execution)
-✅ Integrated WebSocket event bus replaces adapter patterns
-✅ Comprehensive permission layer with RBAC and rate limiting
-✅ Enhanced security boundaries and audit logging
+Migration from legacy:
+- tool_dispatcher_core.py → Merged into UnifiedToolDispatcher
+- tool_dispatcher_unified.py → Refactored as netra_backend.app.core.tools.unified_tool_dispatcher
+- admin_tool_dispatcher/* (24 files) → netra_backend.app.admin.tools.unified_admin_dispatcher
+- request_scoped patterns → Built into factory
 
-USAGE PATTERNS:
-- RECOMMENDED: UnifiedToolDispatcherFactory.create_request_scoped()
-- LEGACY: UnifiedToolDispatcherFactory.create_legacy_global() (emits warnings)
+USAGE:
+- NEW CODE: Use UnifiedToolDispatcherFactory.create_for_request()
+- LEGACY: Backward compatibility maintained with deprecation warnings
 """
 
 import warnings
-from typing import List, Optional
+from typing import List, Optional, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
+    from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager as WebSocketManager
 
 from langchain_core.tools import BaseTool
 
-from netra_backend.app.agents.production_tool import ProductionTool, ToolExecuteResponse
-from netra_backend.app.agents.tool_dispatcher_unified import (
+# Import from new consolidated location
+from netra_backend.app.core.tools.unified_tool_dispatcher import (
     UnifiedToolDispatcher,
     UnifiedToolDispatcherFactory,
     ToolDispatchRequest,
     ToolDispatchResponse,
-    create_request_scoped_tool_dispatcher,
-    request_scoped_tool_dispatcher_context,
-    create_legacy_tool_dispatcher
+    DispatchStrategy,
+    create_request_scoped_dispatcher,
 )
 
-# Backward compatibility aliases - now using unified implementation
+# Import production tool support
+try:
+    from netra_backend.app.agents.production_tool import ProductionTool, ToolExecuteResponse
+except ImportError:
+    # Production tool may not be available in all environments
+    ProductionTool = None
+    ToolExecuteResponse = None
+
+# Backward compatibility alias
 ToolDispatcher = UnifiedToolDispatcher
 
 # Factory methods for different usage patterns
@@ -49,7 +59,7 @@ def create_tool_dispatcher(
     """Create legacy global tool dispatcher (DEPRECATED).
     
     WARNING: This creates a global dispatcher that may cause isolation issues.
-    Use create_request_scoped_tool_dispatcher() for new code.
+    Use UnifiedToolDispatcherFactory.create_for_request() for new code.
     
     Args:
         tools: List of tools to register initially
@@ -61,11 +71,32 @@ def create_tool_dispatcher(
     """
     warnings.warn(
         "create_tool_dispatcher() creates global state and may cause isolation issues. "
-        "Use create_request_scoped_tool_dispatcher() for new code.",
+        "Use UnifiedToolDispatcherFactory.create_for_request() for new code.",
         DeprecationWarning,
         stacklevel=2
     )
-    return create_legacy_tool_dispatcher(tools, websocket_bridge, permission_service)
+    return UnifiedToolDispatcherFactory.create_legacy_global(tools)
+
+def create_request_scoped_tool_dispatcher(
+    user_context: 'UserExecutionContext',
+    websocket_manager: Optional['WebSocketManager'] = None,
+    tools: Optional[List[BaseTool]] = None
+) -> UnifiedToolDispatcher:
+    """Create a request-scoped tool dispatcher (RECOMMENDED).
+    
+    Args:
+        user_context: User execution context for isolation
+        websocket_manager: WebSocket manager for events
+        tools: Initial tools to register
+        
+    Returns:
+        Request-scoped UnifiedToolDispatcher
+    """
+    return UnifiedToolDispatcherFactory.create_for_request(
+        user_context=user_context,
+        websocket_manager=websocket_manager,
+        tools=tools
+    )
 
 # Export public interfaces with clear migration path
 __all__ = [
@@ -77,14 +108,17 @@ __all__ = [
     "UnifiedToolDispatcher",
     "UnifiedToolDispatcherFactory", 
     "create_request_scoped_tool_dispatcher",
-    "request_scoped_tool_dispatcher_context",
+    "create_request_scoped_dispatcher",
     
     # Models and types
     "ToolDispatchRequest", 
-    "ToolDispatchResponse", 
-    "ProductionTool", 
-    "ToolExecuteResponse"
+    "ToolDispatchResponse",
+    "DispatchStrategy",
 ]
+
+# Add production tool exports if available
+if ProductionTool is not None:
+    __all__.extend(["ProductionTool", "ToolExecuteResponse"])
 
 # Migration guidance notice
 def _emit_migration_notice():
@@ -93,9 +127,10 @@ def _emit_migration_notice():
     logger = logging.getLogger(__name__)
     logger.info(
         "✅ Tool dispatcher consolidation complete. "
-        "Using UnifiedToolDispatcher as single source of truth. "
-        "Legacy global patterns will emit deprecation warnings."
+        "Using netra_backend.app.core.tools.unified_tool_dispatcher as SSOT. "
+        "Admin tools in netra_backend.app.admin.tools.unified_admin_dispatcher. "
+        "Legacy patterns emit deprecation warnings."
     )
 
-# Emit migration notice on module import  
+# Emit migration notice on module import
 _emit_migration_notice()

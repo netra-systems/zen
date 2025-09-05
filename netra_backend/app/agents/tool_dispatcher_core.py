@@ -10,7 +10,7 @@ if TYPE_CHECKING:
     from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
 
 from netra_backend.app.agents.state import DeepAgentState
-from netra_backend.app.agents.tool_dispatcher_registry import ToolRegistry
+from netra_backend.app.core.registry.universal_registry import ToolRegistry
 from netra_backend.app.agents.tool_dispatcher_validation import ToolValidator
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.schemas.tool import (

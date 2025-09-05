@@ -14,7 +14,7 @@ from netra_backend.app.agents.data_sub_agent.models import (
     DataAnalysisResponse,
 )
 from netra_backend.app.agents.state import DeepAgentState, OptimizationsResult
-from netra_backend.app.agents.triage_sub_agent.models import TriageResult
+from netra_backend.app.agents.triage.unified_triage_agent import TriageResult
 from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)

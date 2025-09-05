@@ -21,11 +21,7 @@ from typing import TYPE_CHECKING, Any, Dict, List, Optional
 
 from netra_backend.app.core.exceptions_base import NetraException
 from netra_backend.app.core.tool_models import ToolExecutionResult, UnifiedTool
-from netra_backend.app.core.websocket_exceptions import (
-    WebSocketBridgeUnavailableError,
-    WebSocketContextValidationError,
-    WebSocketSendFailureError
-)
+# WebSocket exceptions module was deleted - using standard exceptions
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.monitoring.websocket_notification_monitor import get_websocket_notification_monitor
 from shared.isolated_environment import IsolatedEnvironment
@@ -550,7 +546,7 @@ class UnifiedToolExecutionEngine:
             )
             
             # LOUD FAILURE: Raise exception instead of silent return
-            raise WebSocketContextValidationError(
+            raise ValueError(
                 validation_error="Missing execution context",
                 user_id="unknown"
             )
@@ -568,7 +564,7 @@ class UnifiedToolExecutionEngine:
             )
             
             # LOUD FAILURE: Raise exception instead of silent return
-            raise WebSocketBridgeUnavailableError(
+            raise ConnectionError(
                 operation=f"tool_executing({tool_name})",
                 user_id=context.user_id,
                 thread_id=context.thread_id
@@ -651,7 +647,7 @@ class UnifiedToolExecutionEngine:
             )
             
             # LOUD FAILURE: Raise exception
-            raise WebSocketContextValidationError(
+            raise ValueError(
                 validation_error="Missing execution context for tool completion",
                 user_id="unknown"
             )
@@ -669,7 +665,7 @@ class UnifiedToolExecutionEngine:
             )
             
             # LOUD FAILURE: Raise exception
-            raise WebSocketBridgeUnavailableError(
+            raise ConnectionError(
                 operation=f"tool_completed({tool_name})",
                 user_id=context.user_id,
                 thread_id=context.thread_id

@@ -169,7 +169,7 @@ class SupervisorAgent(BaseAgent):
                 # Import here to avoid circular dependency
                 from netra_backend.app.agents.tool_dispatcher_core import ToolDispatcher
                 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
-                from netra_backend.app.websocket_core.isolated_event_emitter import IsolatedWebSocketEventEmitter
+                from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmitter as IsolatedWebSocketEventEmitter
                 
                 # CRITICAL: Create WebSocket emitter BEFORE tool dispatcher
                 websocket_emitter = IsolatedWebSocketEventEmitter.create_for_user(

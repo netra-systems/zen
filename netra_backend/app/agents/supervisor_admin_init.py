@@ -21,11 +21,12 @@ from typing import List, Optional
 from langchain_core.tools import BaseTool
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from netra_backend.app.agents.admin_tool_dispatcher import AdminToolDispatcher
-from netra_backend.app.agents.admin_tool_dispatcher.migration_helper import (
-    AdminToolDispatcherMigrationHelper,
-    upgrade_admin_dispatcher_creation
-)
+# NOTE: AdminToolDispatcher modules were deleted - functions using them are disabled
+# from netra_backend.app.agents.admin_tool_dispatcher import AdminToolDispatcher
+# from netra_backend.app.agents.admin_tool_dispatcher.migration_helper import (
+#     AdminToolDispatcherMigrationHelper,
+#     upgrade_admin_dispatcher_creation
+# )
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
@@ -65,8 +66,8 @@ async def _create_admin_tool_dispatcher(
     db: AsyncSession, 
     user: User,
     user_context: Optional[UserExecutionContext] = None
-) -> AdminToolDispatcher:
-    """Create admin tool dispatcher with modern request-scoped pattern.
+):
+    """DISABLED: AdminToolDispatcher modules were deleted.
     
     Args:
         tools: List of tools to register
@@ -74,27 +75,14 @@ async def _create_admin_tool_dispatcher(
         user: Admin user
         user_context: Optional UserExecutionContext (recommended for proper isolation)
         
-    Returns:
-        AdminToolDispatcher: Modern request-scoped admin dispatcher
+    Raises:
+        NotImplementedError: AdminToolDispatcher was deleted
     """
-    logger.info(f"Creating supervisor with admin tools for user {user.email}")
-    
-    # Use migration helper to upgrade to modern pattern
-    tool_dispatcher = await upgrade_admin_dispatcher_creation(
-        admin_user=user,
-        db_session=db,
-        tools=tools,
-        llm_manager=None,
-        websocket_manager=None,
-        user_context=user_context  # Pass context if available
+    logger.error(f"AdminToolDispatcher functionality disabled for user {user.email} - modules were deleted")
+    raise NotImplementedError(
+        "AdminToolDispatcher modules were deleted. This functionality is temporarily disabled "
+        "until the modules are restored or replaced."
     )
-    
-    # Log migration status
-    AdminToolDispatcherMigrationHelper.log_migration_status(tool_dispatcher)
-    
-    admin_tools = tool_dispatcher.list_all_tools()
-    logger.info(f"Total tools available (including admin): {len(admin_tools)}")
-    return tool_dispatcher
 
 
 def _create_standard_tool_dispatcher(
