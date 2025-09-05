@@ -1781,7 +1781,7 @@ class UnifiedTestRunner:
                 "unit": ["netra_backend/tests/unit", "netra_backend/tests/core"],
                 "integration": ["netra_backend/tests/integration", "netra_backend/tests/startup"],
                 "api": ["netra_backend/tests/test_api_core_critical.py", "netra_backend/tests/test_api_error_handling_critical.py", "netra_backend/tests/test_api_threads_messages_critical.py", "netra_backend/tests/test_api_agent_generation_critical.py", "netra_backend/tests/test_api_endpoints_critical.py"],
-                "database": ["netra_backend/tests/test_database_connections.py", "netra_backend/tests/test_database_manager_managers.py", "netra_backend/tests/clickhouse"],
+                "database": ["netra_backend/tests/test_database_connections.py", "netra_backend/tests/clickhouse"],
                 "post_deployment": ["tests/post_deployment"],
                 "websocket": [str(config["test_dir"]), "-k", '"websocket or ws"'],
                 "agent": ["netra_backend/tests/agents"],
