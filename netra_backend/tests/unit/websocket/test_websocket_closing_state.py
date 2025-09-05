@@ -24,7 +24,7 @@ except ImportError:
     pytest.skip("Required modules have been removed or have missing dependencies", allow_module_level=True)
 
 from netra_backend.app.websocket_core.types import ConnectionInfo
-from netra_backend.app.websocket_core.manager import WebSocketManager as ConnectionManager
+from netra_backend.app.websocket_core import WebSocketManager as ConnectionManager
 
 class TestWebSocketClosingState:
     """Test WebSocket closing state handling."""

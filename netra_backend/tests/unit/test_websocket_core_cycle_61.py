@@ -16,7 +16,7 @@ from unittest.mock import patch, MagicMock, AsyncMock
 from fastapi import WebSocket
 
 try:
-    from netra_backend.app.websocket_core.manager import WebSocketManager
+    from netra_backend.app.websocket_core import WebSocketManager
 except ImportError:
     pytest.skip("Required modules have been removed or have missing dependencies", allow_module_level=True)
 

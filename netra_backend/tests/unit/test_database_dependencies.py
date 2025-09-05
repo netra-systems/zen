@@ -108,7 +108,7 @@ async def test_get_db_session_legacy_function():
     
     with patch('netra_backend.app.dependencies.get_db', mock_get_db):
         # Test that get_db_session is an async generator
-        gen = get_db_session()
+        gen = get_db()
         assert hasattr(gen, '__anext__'), "get_db_session should return an async generator"
         
         # Get the session from the generator

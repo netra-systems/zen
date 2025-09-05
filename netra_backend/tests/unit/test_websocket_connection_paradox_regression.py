@@ -11,7 +11,7 @@ import pytest
 from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 try:
-    from netra_backend.app.websocket_core.manager import WebSocketManager
+    from netra_backend.app.websocket_core import WebSocketManager
     from netra_backend.app.websocket_core.types import ConnectionInfo
     from fastapi import WebSocket
     from starlette.websockets import WebSocketState

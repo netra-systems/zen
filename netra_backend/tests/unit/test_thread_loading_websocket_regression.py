@@ -16,7 +16,7 @@ import pytest
 try:
     from netra_backend.app.services.message_handlers import MessageHandlerService
     from netra_backend.app.services.thread_service import ThreadService
-    from netra_backend.app.websocket_core.manager import get_websocket_manager as get_unified_manager
+    from netra_backend.app.websocket_core import get_websocket_manager as get_unified_manager
 except ImportError:
     pytest.skip("Required modules have been removed or have missing dependencies", allow_module_level=True)
 manager = get_unified_manager()

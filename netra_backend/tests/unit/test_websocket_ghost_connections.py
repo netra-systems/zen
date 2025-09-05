@@ -25,7 +25,7 @@ try:
 except ImportError:
     pytest.skip("Required modules have been removed or have missing dependencies", allow_module_level=True)
 
-from netra_backend.app.websocket_core.manager import WebSocketManager
+from netra_backend.app.websocket_core import WebSocketManager
 
 class TestGhostConnectionPrevention:
     """Test suite for ghost connection prevention and cleanup."""
