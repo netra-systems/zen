@@ -65,7 +65,6 @@ from netra_backend.app.startup_health_checks import validate_startup_health
 async def _ensure_database_tables_exist(logger: logging.Logger, graceful_startup: bool = True) -> None:
     """Ensure all required database tables exist, creating them if necessary."""
     try:
-        from netra_backend.app.db.database_manager import DatabaseManager
         from netra_backend.app.db.base import Base
         from sqlalchemy import text
         import asyncio
@@ -76,13 +75,12 @@ async def _ensure_database_tables_exist(logger: logging.Logger, graceful_startup
         
         logger.debug("Checking if database tables exist...")
         
-        # Create async engine for table creation
-        engine = DatabaseManager.create_application_engine()
+        # Get async engine from SSOT
+        from netra_backend.app.database import get_engine
+        engine = get_engine()
         
-        # Test connection with retry logic to avoid pool exhaustion
-        connection_ok = await DatabaseManager.test_connection_with_retry(engine)
-        if not connection_ok:
-            error_msg = "Failed to establish database connection for table verification"
+        if not engine:
+            error_msg = "Failed to get database engine for table verification"
             if graceful_startup:
                 logger.warning(f"{error_msg} - continuing without table verification")
                 return
@@ -163,8 +161,7 @@ async def _ensure_database_tables_exist(logger: logging.Logger, graceful_startup
                 logger.debug(f"All {len(expected_tables)} database tables are present")
         
         # Log final pool status before disposal
-        pool_status = DatabaseManager.get_pool_status(engine)
-        logger.debug(f"Database pool status before disposal: {pool_status}")
+        logger.debug(f"Database engine ready for disposal")
         
         await engine.dispose()
         
@@ -585,7 +582,7 @@ def setup_security_services(app: FastAPI, key_manager: KeyManager) -> None:
     """Setup security and LLM services."""
     app.state.key_manager = key_manager
     app.state.security_service = SecurityService(key_manager)
-    app.state.llm_manager = LLMManager(settings)
+    app.state.llm_manager = LLMManager()
     
     # CRITICAL FIX: Set ClickHouse availability flag based on configuration
     config = get_config()

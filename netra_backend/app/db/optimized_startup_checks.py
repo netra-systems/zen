@@ -312,21 +312,28 @@ class OptimizedStartupChecker:
     async def _quick_postgres_check(self, app, check_name: str) -> StartupCheckResult:
         """Quick PostgreSQL connectivity check."""
         try:
-            # Use unified DatabaseManager
-            from netra_backend.app.db.database_manager import DatabaseManager
-            database_manager = DatabaseManager()
+            # Use database module for connection test
+            from netra_backend.app.database import get_engine
             
-            engine = database_manager.create_application_engine()
-            connection_successful = await database_manager.test_connection_with_retry(engine)
+            try:
+                engine = get_engine()
+                if engine:
+                    from sqlalchemy import text
+                    from sqlalchemy.ext.asyncio import AsyncSession
+                    
+                    async with AsyncSession(engine) as session:
+                        result = await session.execute(text("SELECT 1"))
+                        await result.fetchone()
+                    
+                    return StartupCheckResult(
+                        name=check_name, success=True, critical=True,
+                        message="PostgreSQL connection successful"
+                    )
+            except Exception as e:
+                logger.warning(f"Database connection test failed: {e}")
             
-            if connection_successful:
-                return StartupCheckResult(
-                    name=check_name, success=True, critical=True,
-                    message="PostgreSQL unified connection successful"
-                )
-            else:
-                # Fallback to regular connection test
-                from netra_backend.app.db.postgres import async_session_factory
+            # Fallback to regular connection test
+            from netra_backend.app.db.postgres import async_session_factory
                 if async_session_factory:
                     async with async_session_factory() as session:
                         result = await session.execute("SELECT 1")
