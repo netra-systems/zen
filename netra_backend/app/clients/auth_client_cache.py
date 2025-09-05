@@ -484,6 +484,12 @@ class AuthServiceSettings:
         env = get_env()
         service_id = env.get("SERVICE_ID", "netra-backend")
         service_secret = env.get("SERVICE_SECRET", "")
+        
+        # Log for debugging
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.debug(f"AuthServiceSettings.get_service_credentials - ID: {service_id}, Secret configured: {bool(service_secret)}")
+        
         return service_id, service_secret
 
 
