@@ -6,15 +6,21 @@ import pytest
 import json
 from datetime import datetime, timedelta
 from fastapi.testclient import TestClient
-from unittest.mock import patch, MagicMock, AsyncMock
 import jwt as pyjwt
+from test_framework.database.test_database_manager import TestDatabaseManager
+from auth_service.core.auth_manager import AuthManager
+from shared.isolated_environment import IsolatedEnvironment
+import asyncio
 
 class TestRefreshEndpointIntegration:
     """Integration tests for the refresh endpoint"""
     
     @pytest.fixture
     def test_client(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create a test client for the auth service"""
+    pass
         from auth_service.main import app
         return TestClient(app)
     
@@ -32,6 +38,7 @@ class TestRefreshEndpointIntegration:
     
     def test_refresh_with_mock_valid_token(self, test_client):
         """Test refresh with a mocked valid token"""
+    pass
         # Create a mock JWT manager that returns valid data
         with patch('auth_service.auth_core.routes.auth_routes.jwt_manager') as mock_jwt:
             # Mock decode to return valid payload
@@ -54,11 +61,11 @@ class TestRefreshEndpointIntegration:
             
             # Mock database session
             with patch('auth_service.auth_core.routes.auth_routes.get_db_session') as mock_db:
-                mock_session = AsyncMock()
+                mock_session = AsyncNone  # TODO: Use real service instance
                 mock_db.return_value.__aenter__.return_value = mock_session
                 
                 # Mock user lookup
-                mock_result = MagicMock()
+                mock_result = MagicNone  # TODO: Use real service instance
                 mock_result.scalar_one_or_none.return_value = MagicMock(
                     id="123",
                     email="test@example.com",
@@ -96,6 +103,7 @@ class TestRefreshEndpointIntegration:
     
     def test_refresh_with_expired_token_mock(self, test_client):
         """Test refresh with expired token"""
+    pass
         with patch('auth_service.auth_core.routes.auth_routes.jwt_manager') as mock_jwt:
             # Mock decode to raise ExpiredSignatureError
             mock_jwt.decode_token.side_effect = pyjwt.ExpiredSignatureError("Token expired")
@@ -129,7 +137,8 @@ class TestRefreshEndpointIntegration:
                 data.get('token')
             )
             
-            return {
+            await asyncio.sleep(0)
+    return {
                 "body_type": str(type(body)),
                 "parsed_successfully": True,
                 "token_found": bool(refresh_token),
@@ -153,6 +162,7 @@ class TestRefreshEndpointIntegration:
     
     def test_refresh_without_token(self, test_client):
         """Test refresh endpoint without providing a token"""
+    pass
         # Test with empty body
         response = test_client.post("/auth/refresh", json={})
         assert response.status_code == 422

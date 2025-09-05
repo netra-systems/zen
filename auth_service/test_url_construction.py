@@ -7,6 +7,7 @@ since Unix socket connections cannot be tested on Windows.
 import sys
 import logging
 from pathlib import Path
+from shared.isolated_environment import IsolatedEnvironment
 
 # Add the project root to the Python path
 project_root = Path(__file__).parent.parent

@@ -13,6 +13,7 @@ from auth_service.main import app
 from auth_service.auth_core.core.jwt_handler import JWTHandler
 from auth_service.auth_core.services.auth_service import AuthService
 from auth_service.auth_core.database.repository import AuthRepository
+from shared.isolated_environment import IsolatedEnvironment
 
 
 class TestAuthAPIIntegration:

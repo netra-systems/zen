@@ -9,7 +9,9 @@ Reference: OAuth Regression Analysis 20250905
 
 import os
 import pytest
-from unittest.mock import patch, MagicMock
+from test_framework.redis.test_redis_manager import TestRedisManager
+from auth_service.core.auth_manager import AuthManager
+from shared.isolated_environment import IsolatedEnvironment
 
 from auth_service.auth_core.oauth.google_oauth import GoogleOAuthProvider
 from auth_service.auth_core.auth_environment import get_auth_env
@@ -22,7 +24,6 @@ class TestOAuthRedirectURIConfiguration:
     for each environment using the SSOT get_auth_service_url() method.
     """
     
-    @patch.dict(os.environ, {"ENVIRONMENT": "staging"}, clear=False)
     def test_staging_redirect_uri_uses_proper_domain(self):
         """Test staging OAuth redirect URI uses auth.staging.netrasystems.ai."""
         # Create provider and get redirect URI
@@ -37,7 +38,6 @@ class TestOAuthRedirectURIConfiguration:
         assert "run.app" not in redirect_uri, \
             "Redirect URI must NOT use Cloud Run app URL"
     
-    @patch.dict(os.environ, {"ENVIRONMENT": "production"}, clear=False)
     def test_production_redirect_uri_uses_proper_domain(self):
         """Test production OAuth redirect URI uses auth.netrasystems.ai."""
         provider = GoogleOAuthProvider()
@@ -51,7 +51,6 @@ class TestOAuthRedirectURIConfiguration:
         assert "run.app" not in redirect_uri, \
             "Redirect URI must NOT use Cloud Run app URL"
     
-    @patch.dict(os.environ, {"ENVIRONMENT": "development"}, clear=False)
     def test_development_redirect_uri_uses_localhost(self):
         """Test development OAuth redirect URI uses localhost."""
         provider = GoogleOAuthProvider()
@@ -93,7 +92,6 @@ class TestOAuthRedirectURIConfiguration:
         assert actual_uri == expected_uri, \
             f"Redirect URI must use AuthEnvironment SSOT. Expected: {expected_uri}, Got: {actual_uri}"
     
-    @patch.dict(os.environ, {"AUTH_SERVICE_URL": "https://custom.domain.com"}, clear=False)
     def test_redirect_uri_respects_explicit_override(self):
         """Test redirect URI respects AUTH_SERVICE_URL override."""
         provider = GoogleOAuthProvider()
@@ -121,7 +119,6 @@ class TestOAuthConfigurationValidation:
         redirect_uri = provider.get_redirect_uri()
         assert redirect_uri is not None, "Redirect URI must be configured"
     
-    @patch.dict(os.environ, {"ENVIRONMENT": "staging"}, clear=False)
     def test_staging_configuration_validation(self):
         """Test staging environment configuration validation."""
         provider = GoogleOAuthProvider()
@@ -160,7 +157,6 @@ class TestOAuthConfigurationValidation:
 class TestOAuthAuthorizationURL:
     """Test OAuth authorization URL generation with proper redirect URI."""
     
-    @patch.dict(os.environ, {"ENVIRONMENT": "staging"}, clear=False)
     def test_authorization_url_uses_correct_redirect_uri(self):
         """Test authorization URL includes correct redirect URI for staging."""
         provider = GoogleOAuthProvider()

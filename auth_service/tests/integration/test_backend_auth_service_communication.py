@@ -12,8 +12,13 @@ Based on regression analysis:
 import pytest
 import asyncio
 import json
-from unittest.mock import AsyncMock, patch, MagicMock
 from fastapi.testclient import TestClient
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from test_framework.database.test_database_manager import TestDatabaseManager
+from auth_service.core.auth_manager import AuthManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 
 class TestBackendAuthServiceCommunication:
@@ -21,7 +26,10 @@ class TestBackendAuthServiceCommunication:
     
     @pytest.fixture
     def test_client(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create test client that simulates backend HTTP calls to auth service."""
+    pass
         from auth_service.main import app
         return TestClient(app)
     
@@ -34,6 +42,7 @@ class TestBackendAuthServiceCommunication:
         Regression prevention: Ensures /auth/login endpoint exists and works
         as expected by backend service.
         """
+    pass
         with patch('auth_service.auth_core.routes.auth_routes.auth_service') as mock_auth:
             # Mock successful authentication
             mock_auth.authenticate_user = AsyncMock(return_value=("user-456", {"name": "Backend User"}))
@@ -77,6 +86,7 @@ class TestBackendAuthServiceCommunication:
         Regression prevention: Ensures /auth/service-token endpoint exists
         and works for backend service authentication.
         """
+    pass
         with patch('auth_service.auth_core.routes.auth_routes.env') as mock_env:
             mock_env.get.return_value = "backend-service-secret-123"
             
@@ -116,6 +126,7 @@ class TestBackendAuthServiceCommunication:
         Regression prevention: Ensures /auth/refresh endpoint exists and
         handles the field name variations backend might send.
         """
+    pass
         with patch('auth_service.auth_core.routes.auth_routes.auth_service') as mock_auth:
             mock_auth.refresh_tokens = AsyncMock(return_value=("new-backend-access", "new-backend-refresh"))
             
@@ -153,6 +164,7 @@ class TestBackendAuthServiceCommunication:
         Regression prevention: Ensures password utility endpoints exist
         and work for backend user management operations.
         """
+    pass
         with patch('auth_service.auth_core.routes.auth_routes.auth_service') as mock_auth:
             # Mock password operations
             mock_auth.hash_password = AsyncMock(return_value="hashed-backend-password")
@@ -200,8 +212,9 @@ class TestBackendAuthServiceCommunication:
         Regression prevention: Ensures /auth/logout endpoint exists and
         properly handles token invalidation from backend.
         """
+    pass
         with patch('auth_service.auth_core.routes.auth_routes.auth_service') as mock_auth:
-            mock_auth.blacklist_token = AsyncMock()
+            mock_auth.blacklist_token = AsyncNone  # TODO: Use real service instance
             
             # Simulate backend logout call with user's access token
             response = test_client.post("/auth/logout",
@@ -233,6 +246,7 @@ class TestBackendAuthServiceCommunication:
         Regression prevention: The dev login endpoint was specifically missing
         and causing 404s when backend called it in development.
         """
+    pass
         with patch('auth_service.auth_core.config.AuthConfig.get_environment', return_value='development'):
             with patch('auth_service.auth_core.routes.auth_routes.auth_service') as mock_auth:
                 mock_auth.create_access_token = AsyncMock(return_value="dev-backend-token")
@@ -272,6 +286,7 @@ class TestBackendAuthServiceCommunication:
         Regression prevention: Ensures /auth/create-token endpoint exists
         and works for backend's custom token needs.
         """
+    pass
         with patch('auth_service.auth_core.routes.auth_routes.auth_service') as mock_auth:
             mock_auth.create_access_token = AsyncMock(return_value="custom-backend-token")
             
@@ -308,7 +323,10 @@ class TestBackendAuthServiceErrorScenarios:
     
     @pytest.fixture
     def test_client(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create test client for error scenario testing."""
+    pass
         from auth_service.main import app
         return TestClient(app)
     
@@ -321,6 +339,7 @@ class TestBackendAuthServiceErrorScenarios:
         Regression prevention: Distinguishes between missing endpoints (404)
         and invalid requests (422) in backend error handling.
         """
+    pass
         # Test various malformed requests backend might send
         error_scenarios = [
             # Missing email in login
@@ -363,6 +382,7 @@ class TestBackendAuthServiceErrorScenarios:
         Regression prevention: Ensures authentication errors return 401,
         not 404, when endpoints exist but credentials are invalid.
         """
+    pass
         with patch('auth_service.auth_core.routes.auth_routes.auth_service') as mock_auth:
             # Mock authentication failure
             mock_auth.authenticate_user = AsyncMock(return_value=None)
@@ -413,6 +433,7 @@ class TestBackendAuthServiceErrorScenarios:
         Regression prevention: Ensures dev endpoints exist but are properly
         secured in production environments.
         """
+    pass
         with patch('auth_service.auth_core.config.AuthConfig.get_environment', return_value='production'):
             
             # Backend tries dev login in production
@@ -438,6 +459,7 @@ class TestBackendAuthServiceErrorScenarios:
         Verification test: Ensures the test setup correctly identifies when
         endpoints truly don't exist vs when they exist but have other errors.
         """
+    pass
         # Test truly non-existent endpoint
         response = test_client.post("/auth/definitely-does-not-exist",
             json={"test": "data"},

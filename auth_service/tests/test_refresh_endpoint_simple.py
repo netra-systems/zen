@@ -4,6 +4,7 @@ Simple test for refresh endpoint field naming without database dependencies.
 import json
 import sys
 import os
+from shared.isolated_environment import IsolatedEnvironment
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
 # Removed all mock imports - using real services per CLAUDE.md requirement

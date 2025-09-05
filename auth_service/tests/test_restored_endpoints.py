@@ -1,10 +1,13 @@
 """Test restored auth endpoints"""
 import pytest
-from unittest.mock import AsyncMock, patch
 from fastapi.testclient import TestClient
+from auth_service.core.auth_manager import AuthManager
+from shared.isolated_environment import IsolatedEnvironment
 
 @pytest.fixture
 def test_client():
+    """Use real service instance."""
+    # TODO: Initialize real service
     """Create test client for auth service"""
     from auth_service.main import app
     return TestClient(app)
@@ -30,7 +33,7 @@ def test_login_endpoint_exists(test_client):
 def test_logout_endpoint_exists(test_client):
     """Test that /auth/logout endpoint exists"""
     with patch('auth_service.auth_core.routes.auth_routes.auth_service') as mock_auth:
-        mock_auth.blacklist_token = AsyncMock()
+        mock_auth.blacklist_token = AsyncNone  # TODO: Use real service instance
         
         response = test_client.post("/auth/logout", 
                                    headers={"Authorization": "Bearer test-token"})

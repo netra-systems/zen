@@ -9,7 +9,9 @@ import uuid
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timedelta, timezone
 from typing import Dict, List, Optional, Tuple
-from unittest.mock import AsyncMock, MagicMock, patch
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from auth_service.core.auth_manager import AuthManager
+from shared.isolated_environment import IsolatedEnvironment
 
 import jwt
 import pytest
@@ -23,20 +25,30 @@ from auth_service.main import app
 
 class TestLevel1BasicAuthFlows:
     """Level 1: Basic authentication flows that must always work"""
+    pass
 
     @pytest.fixture
     def client(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create test client"""
+    pass
         return TestClient(app)
 
     @pytest.fixture
     def jwt_handler(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create JWT handler"""
+    pass
         return JWTHandler()
 
     @pytest.fixture
     def auth_service(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create auth service"""
+    pass
         return AuthService()
 
     def test_health_endpoint_accessible(self, client):
@@ -48,6 +60,7 @@ class TestLevel1BasicAuthFlows:
 
     def test_config_endpoint_returns_valid_structure(self, client):
         """Test that config endpoint returns expected structure"""
+    pass
         response = client.get("/auth/config")
         assert response.status_code == 200
         data = response.json()
@@ -83,6 +96,7 @@ class TestLevel1BasicAuthFlows:
     @pytest.mark.asyncio
     async def test_refresh_generates_unique_tokens(self, auth_service):
         """Test that refresh always generates unique tokens"""
+    pass
         user_id = "refresh-test-1"
         email = "refresh1@example.com"
         permissions = ["read"]
@@ -142,6 +156,7 @@ class TestLevel1BasicAuthFlows:
 
     def test_invalid_token_formats_rejected(self, jwt_handler):
         """Test that malformed tokens are properly rejected"""
+    pass
         invalid_tokens = [
             "",
             "invalid",
@@ -159,20 +174,31 @@ class TestLevel1BasicAuthFlows:
 
 class TestLevel2EdgeCases:
     """Level 2: Edge cases and boundary conditions"""
+    pass
 
     @pytest.fixture
     def jwt_handler(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create JWT handler"""
-        return JWTHandler()
+    pass
+        await asyncio.sleep(0)
+    return JWTHandler()
 
     @pytest.fixture
     def auth_service(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create auth service"""
+    pass
         return AuthService()
 
     @pytest.fixture
     def client(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create test client"""
+    pass
         return TestClient(app)
 
     @pytest.mark.asyncio
@@ -204,6 +230,7 @@ class TestLevel2EdgeCases:
     @pytest.mark.asyncio
     async def test_refresh_with_wrong_token_type(self, auth_service):
         """Test that access tokens cannot be used for refresh"""
+    pass
         user_id = "wrong-type-test"
         email = "wrongtype@example.com"
         
@@ -233,6 +260,7 @@ class TestLevel2EdgeCases:
 
     def test_token_with_tampered_signature(self, jwt_handler):
         """Test that tokens with tampered signatures are rejected"""
+    pass
         user_id = "tamper-test"
         email = "tamper@example.com"
         
@@ -271,6 +299,7 @@ class TestLevel2EdgeCases:
 
     def test_refresh_endpoint_with_malformed_json(self, client):
         """Test refresh endpoint with various malformed requests"""
+    pass
         malformed_requests = [
             b"not json",
             b"{'invalid': 'json'}",
@@ -299,15 +328,23 @@ class TestLevel2EdgeCases:
 
 class TestLevel3ConcurrencyAndStress:
     """Level 3: Concurrency, race conditions, and stress testing"""
+    pass
 
     @pytest.fixture
     def auth_service(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create auth service"""
-        return AuthService()
+    pass
+        await asyncio.sleep(0)
+    return AuthService()
 
     @pytest.fixture
     def client(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create test client"""
+    pass
         return TestClient(app)
 
     @pytest.mark.asyncio
@@ -321,7 +358,8 @@ class TestLevel3ConcurrencyAndStress:
         
         # Attempt concurrent refreshes
         async def attempt_refresh():
-            return await auth_service.refresh_tokens(initial_refresh)
+            await asyncio.sleep(0)
+    return await auth_service.refresh_tokens(initial_refresh)
         
         # Run multiple concurrent refresh attempts
         tasks = [attempt_refresh() for _ in range(10)]
@@ -334,6 +372,7 @@ class TestLevel3ConcurrencyAndStress:
     @pytest.mark.asyncio
     async def test_rapid_sequential_refreshes(self, auth_service):
         """Test rapid sequential token refreshes"""
+    pass
         user_id = "rapid-test"
         email = "rapid@example.com"
         
@@ -368,6 +407,7 @@ class TestLevel3ConcurrencyAndStress:
     @pytest.mark.asyncio
     async def test_token_generation_uniqueness_under_load(self, auth_service):
         """Test that tokens remain unique even under high load"""
+    pass
         user_id = "load-test"
         email = "load@example.com"
         
@@ -412,15 +452,23 @@ class TestLevel3ConcurrencyAndStress:
 
 class TestLevel4SecurityValidation:
     """Level 4: Security-focused tests"""
+    pass
 
     @pytest.fixture
     def jwt_handler(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create JWT handler"""
-        return JWTHandler()
+    pass
+        await asyncio.sleep(0)
+    return JWTHandler()
 
     @pytest.fixture
     def auth_service(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create auth service"""
+    pass
         return AuthService()
 
     def test_token_algorithm_confusion_attack(self, jwt_handler):
@@ -446,6 +494,7 @@ class TestLevel4SecurityValidation:
 
     def test_token_with_future_iat(self, jwt_handler):
         """Test that tokens with future issued-at times are rejected"""
+    pass
         user_id = "future-test"
         future_time = datetime.now(timezone.utc) + timedelta(hours=1)
         
@@ -493,6 +542,7 @@ class TestLevel4SecurityValidation:
 
     def test_token_jti_uniqueness(self, jwt_handler):
         """Test that JWT ID (jti) is unique for each token"""
+    pass
         jtis = set()
         
         for i in range(50):
@@ -507,11 +557,16 @@ class TestLevel4SecurityValidation:
 
 class TestLevel5IntegrationAndE2E:
     """Level 5: Full integration and end-to-end tests"""
+    pass
 
     @pytest.fixture
     def client(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create test client"""
-        return TestClient(app)
+    pass
+        await asyncio.sleep(0)
+    return TestClient(app)
 
     def test_full_auth_flow_with_refresh(self, client):
         """Test complete authentication flow including refresh"""
@@ -567,6 +622,7 @@ class TestLevel5IntegrationAndE2E:
 
     def test_websocket_auth_endpoint(self, client):
         """Test WebSocket authentication endpoint"""
+    pass
         # Create a mock token
         jwt_handler = JWTHandler()
         token = jwt_handler.create_access_token("ws-test", "ws@example.com")
@@ -600,6 +656,7 @@ class TestLevel5IntegrationAndE2E:
 
     def test_rate_limiting_behavior(self, client):
         """Test rate limiting behavior (if implemented)"""
+    pass
         # Make many rapid requests
         responses = []
         for _ in range(50):

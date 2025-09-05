@@ -30,6 +30,7 @@ from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, Optional
 # ZERO MOCKS: All mock imports eliminated - using real services per CLAUDE.md requirement
 from urllib.parse import parse_qs, urlparse
+from shared.isolated_environment import IsolatedEnvironment
 
 import httpx
 import pytest

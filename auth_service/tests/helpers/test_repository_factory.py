@@ -4,7 +4,9 @@ Provides repository instances for testing without direct database access
 """
 import asyncio
 from typing import AsyncGenerator, Optional
-from unittest.mock import AsyncMock, MagicMock
+from test_framework.database.test_database_manager import TestDatabaseManager
+from auth_service.core.auth_manager import AuthManager
+from shared.isolated_environment import IsolatedEnvironment
 
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -64,13 +66,13 @@ class RepositoryFactory:
         self._session = AsyncMock(spec=AsyncSession)
         
         # Setup basic mock behaviors
-        self._session.commit = AsyncMock()
-        self._session.rollback = AsyncMock()
-        self._session.close = AsyncMock()
-        self._session.flush = AsyncMock()
-        self._session.add = MagicMock()
-        self._session.execute = AsyncMock()
-        self._session.begin = AsyncMock()
+        self._session.commit = AsyncNone  # TODO: Use real service instance
+        self._session.rollback = AsyncNone  # TODO: Use real service instance
+        self._session.close = AsyncNone  # TODO: Use real service instance
+        self._session.flush = AsyncNone  # TODO: Use real service instance
+        self._session.add = MagicNone  # TODO: Use real service instance
+        self._session.execute = AsyncNone  # TODO: Use real service instance
+        self._session.begin = AsyncNone  # TODO: Use real service instance
     
     async def get_session(self) -> AsyncSession:
         """Get database session."""

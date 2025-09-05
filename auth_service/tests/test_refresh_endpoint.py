@@ -20,6 +20,7 @@ import time
 import uuid
 from datetime import datetime, timedelta, timezone
 from typing import Dict, Optional
+from shared.isolated_environment import IsolatedEnvironment
 
 # REAL SERVICES: No mock imports
 from fastapi import HTTPException

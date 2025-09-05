@@ -7,7 +7,10 @@ Focus: Service restart scenarios, database failover, and cross-service session c
 import pytest
 import asyncio
 import time
-from unittest.mock import patch, AsyncMock
+from test_framework.database.test_database_manager import TestDatabaseManager
+from test_framework.redis.test_redis_manager import TestRedisManager
+from auth_service.core.auth_manager import AuthManager
+from shared.isolated_environment import IsolatedEnvironment
 
 from auth_service.auth_core.routes.auth_routes import MockAuthService
 from auth_service.auth_core.models.auth_models import User

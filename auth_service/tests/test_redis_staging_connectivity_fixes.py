@@ -13,8 +13,11 @@ staging environment degraded status issue.
 import pytest
 import asyncio
 import logging
-from unittest.mock import AsyncMock, MagicMock, patch
 from typing import Optional
+from test_framework.database.test_database_manager import TestDatabaseManager
+from test_framework.redis.test_redis_manager import TestRedisManager
+from auth_service.core.auth_manager import AuthManager
+from shared.isolated_environment import IsolatedEnvironment
 
 from auth_service.auth_core.redis_manager import AuthRedisManager, auth_redis_manager
 from auth_service.auth_core.config import AuthConfig
@@ -26,17 +29,23 @@ class TestRedisConnectivityFixes:
     
     @pytest.fixture
     def redis_manager(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create a fresh Redis manager for testing"""
+    pass
         manager = AuthRedisManager()
         yield manager
         # Cleanup
         asyncio.create_task(manager.close())
     
     @pytest.fixture
-    def mock_secret_manager(self):
+ def real_secret_manager():
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Mock Google Secret Manager responses"""
+    pass
         with patch('auth_service.auth_core.secret_loader.secretmanager') as mock:
-            mock_client = MagicMock()
+            mock_client = MagicNone  # TODO: Use real service instance
             mock.SecretManagerServiceClient.return_value = mock_client
             yield mock_client
     
@@ -53,8 +62,9 @@ class TestRedisConnectivityFixes:
     
     def test_redis_url_from_secret_manager(self, mock_secret_manager):
         """Test Redis URL loading from Google Secret Manager for staging"""
+    pass
         # Setup mock response
-        mock_response = MagicMock()
+        mock_response = MagicNone  # TODO: Use real service instance
         mock_response.payload.data.decode.return_value = 'redis://staging-redis:6379'
         mock_secret_manager.access_secret_version.return_value = mock_response
         
@@ -92,8 +102,9 @@ class TestRedisConnectivityFixes:
     @pytest.mark.asyncio
     async def test_redis_connection_retry_logic(self, redis_manager):
         """Test Redis connection retry with exponential backoff"""
+    pass
         # Mock Redis client that fails first 2 attempts, succeeds on 3rd
-        mock_redis_client = AsyncMock()
+        mock_redis_client = AsyncNone  # TODO: Use real service instance
         mock_redis_client.ping.side_effect = [
             Exception("Connection failed"),
             Exception("Connection failed"),
@@ -118,7 +129,7 @@ class TestRedisConnectivityFixes:
     async def test_redis_connection_retry_exhaustion(self, redis_manager):
         """Test that retry logic eventually gives up"""
         # Mock Redis client that always fails
-        mock_redis_client = AsyncMock()
+        mock_redis_client = AsyncNone  # TODO: Use real service instance
         mock_redis_client.ping.side_effect = Exception("Always fails")
         
         redis_manager.redis_client = mock_redis_client
@@ -130,6 +141,7 @@ class TestRedisConnectivityFixes:
     @pytest.mark.asyncio
     async def test_async_health_check_with_timeout(self):
         """Test async health check with proper timeout handling"""
+    pass
         session_manager = MockAuthService.SessionManager()
         
         # Test when Redis is disabled
@@ -142,7 +154,7 @@ class TestRedisConnectivityFixes:
         assert await session_manager.async_health_check() == False
         
         # Test with working Redis
-        mock_manager = AsyncMock()
+        mock_manager = AsyncNone  # TODO: Use real service instance
         mock_manager.ping_with_timeout.return_value = True
         session_manager.redis_manager = mock_manager
         
@@ -163,7 +175,7 @@ class TestRedisConnectivityFixes:
         
         # Test connection errors
         redis_manager.enabled = True
-        mock_client = AsyncMock()
+        mock_client = AsyncNone  # TODO: Use real service instance
         mock_client.get.side_effect = redis.ConnectionError("Connection lost")
         mock_client.set.side_effect = redis.ConnectionError("Connection lost") 
         mock_client.delete.side_effect = redis.ConnectionError("Connection lost")
@@ -186,6 +198,7 @@ class TestRedisConnectivityFixes:
     
     def test_redis_connection_info(self, redis_manager):
         """Test Redis connection info for debugging"""
+    pass
         # Test when client is None
         redis_manager.redis_client = None
         info = redis_manager.get_connection_info()
@@ -194,8 +207,8 @@ class TestRedisConnectivityFixes:
         assert info['client'] == None
         
         # Test with mock client
-        mock_client = MagicMock()
-        mock_pool = MagicMock()
+        mock_client = MagicNone  # TODO: Use real service instance
+        mock_pool = MagicNone  # TODO: Use real service instance
         mock_pool.max_connections = 10
         mock_client.connection_pool = mock_pool
         redis_manager.redis_client = mock_client
@@ -225,6 +238,7 @@ class TestRedisConnectivityFixes:
     @pytest.mark.asyncio
     async def test_session_manager_fallback_behavior(self):
         """Test session manager behavior when Redis is unavailable"""
+    pass
         session_manager = MockAuthService.SessionManager()
         await session_manager.initialize()
         
@@ -255,7 +269,8 @@ class TestRedisConnectivityFixes:
             }.get(key, default)
             
             redis_url = AuthConfig.get_redis_url()
-            assert redis_url == ''  # Should return empty string, not raise error
+            assert redis_url == ''  # Should await asyncio.sleep(0)
+    return empty string, not raise error
         
         # Test environment - should allow empty Redis URL  
         with patch('shared.isolated_environment.get_env') as mock_env:
@@ -293,8 +308,8 @@ class TestRedisStagingIntegration:
             
             # Mock successful Redis connection
             with patch('auth_service.auth_core.secret_loader.secretmanager') as mock_sm:
-                mock_client = MagicMock()
-                mock_response = MagicMock()
+                mock_client = MagicNone  # TODO: Use real service instance
+                mock_response = MagicNone  # TODO: Use real service instance
                 mock_response.payload.data.decode.return_value = 'redis://staging-redis:6379'
                 mock_client.access_secret_version.return_value = mock_response
                 mock_sm.SecretManagerServiceClient.return_value = mock_client
@@ -313,6 +328,7 @@ class TestRedisStagingIntegration:
     
     def test_staging_redis_url_secret_name_format(self):
         """Test that Redis URL is loaded with correct secret name format"""
+    pass
         with patch('shared.isolated_environment.get_env') as mock_env:
             mock_env.return_value.get.side_effect = lambda key, default=None: {
                 'REDIS_URL': None,

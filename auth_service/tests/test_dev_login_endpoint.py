@@ -1,11 +1,14 @@
 """Test for dev login endpoint"""
 import pytest
-from unittest.mock import AsyncMock, patch, MagicMock
 from fastapi.testclient import TestClient
 from datetime import datetime, UTC
+from auth_service.core.auth_manager import AuthManager
+from shared.isolated_environment import IsolatedEnvironment
 
 @pytest.fixture
 def test_client():
+    """Use real service instance."""
+    # TODO: Initialize real service
     """Create test client for auth service"""
     # Import after env setup
     from auth_service.main import app

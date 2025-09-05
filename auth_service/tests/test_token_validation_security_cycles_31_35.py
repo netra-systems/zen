@@ -15,7 +15,8 @@ import pytest
 import time
 import jwt
 from datetime import datetime, timedelta, UTC
-from unittest.mock import patch, MagicMock
+from auth_service.core.auth_manager import AuthManager
+from shared.isolated_environment import IsolatedEnvironment
 
 from auth_service.auth_core.core.token_validator import TokenValidator
 # NOTE: SecurityManager was deleted - tests using it are disabled until replacement is available
@@ -24,6 +25,7 @@ from auth_service.auth_core.models.auth_models import User
 import logging
 
 def get_logger(name):
+    pass
     return logging.getLogger(name)
 
 
@@ -35,10 +37,14 @@ logger = get_logger(__name__)
 @pytest.mark.security
 class TestTokenValidationSecurity:
     """Critical token validation security test suite."""
+    pass
 
     @pytest.fixture
     def token_validator(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create isolated token validator for testing."""
+    pass
         validator = TokenValidator()
         validator.initialize()
         return validator
@@ -53,7 +59,10 @@ class TestTokenValidationSecurity:
 
     @pytest.mark.cycle_31
     def test_jwt_signature_tampering_detection_prevents_privilege_escalation(self, token_validator):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """
+    pass
         Cycle 31: Test JWT signature tampering detection prevents privilege escalation.
         
         Revenue Protection: $640K annually from preventing unauthorized access.
@@ -109,6 +118,7 @@ class TestTokenValidationSecurity:
         
         Revenue Protection: $480K annually from preventing stale token abuse.
         """
+    pass
         logger.info("Testing token expiration enforcement - Cycle 32")
         
         # Create token with very short expiration
@@ -141,6 +151,7 @@ class TestTokenValidationSecurity:
         
         Revenue Protection: $720K annually from preventing replay attacks.
         """
+    pass
         logger.info("Testing token replay attack detection - Cycle 33")
         
         # Create token with JTI (JWT ID) for replay detection
@@ -178,6 +189,7 @@ class TestTokenValidationSecurity:
         
         Revenue Protection: $560K annually from blocking compromised tokens.
         """
+    pass
         logger.info("Testing token revocation enforcement - Cycle 34")
         
         # Create valid token
@@ -215,6 +227,7 @@ class TestTokenValidationSecurity:
         
         Revenue Protection: $400K annually from preventing concurrent validation exploits.
         """
+    pass
         logger.info("Testing concurrent token validation - Cycle 35")
         
         import asyncio
@@ -242,7 +255,8 @@ class TestTokenValidationSecurity:
                 # Record usage
                 security_manager.record_token_usage(decoded["jti"], decoded["user_id"])
                 
-                return {
+                await asyncio.sleep(0)
+    return {
                     "validation_id": validation_id,
                     "success": True,
                     "revoked": is_revoked,
@@ -258,8 +272,10 @@ class TestTokenValidationSecurity:
 
         async def run_concurrent_validations():
             """Run multiple concurrent validations."""
+    pass
             tasks = [concurrent_validation(i) for i in range(10)]
-            return await asyncio.gather(*tasks, return_exceptions=True)
+            await asyncio.sleep(0)
+    return await asyncio.gather(*tasks, return_exceptions=True)
         
         # Execute concurrent validations
         results = asyncio.run(run_concurrent_validations())

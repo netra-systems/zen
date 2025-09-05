@@ -5,7 +5,8 @@ Ensures that the auth service NEVER causes refresh loops
 import asyncio
 import time
 import uuid
-from unittest.mock import AsyncMock, MagicMock, patch
+from auth_service.core.auth_manager import AuthManager
+from shared.isolated_environment import IsolatedEnvironment
 
 import jwt
 import pytest
@@ -18,20 +19,30 @@ from auth_service.main import app
 
 class TestRefreshLoopPrevention:
     """Test suite to verify refresh loop prevention measures"""
+    pass
 
     @pytest.fixture
     def jwt_handler(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create JWT handler"""
+    pass
         return JWTHandler()
 
     @pytest.fixture
     def auth_service(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create auth service"""
+    pass
         return AuthService()
 
     @pytest.fixture
     def client(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create test client"""
+    pass
         return TestClient(app)
 
     @pytest.mark.asyncio
@@ -76,6 +87,7 @@ class TestRefreshLoopPrevention:
     @pytest.mark.asyncio
     async def test_refresh_token_cannot_be_reused(self, auth_service):
         """Verify that refresh tokens cannot be reused (prevents loops)"""
+    pass
         user_id = "reuse-test"
         email = "reuse@test.com"
 
@@ -118,6 +130,7 @@ class TestRefreshLoopPrevention:
 
     def test_refresh_preserves_user_data(self, jwt_handler):
         """Verify user data is preserved across refresh (no placeholders)"""
+    pass
         user_id = "preserve-test"
         email = "preserve@staging.netrasystems.ai"
         permissions = ["admin", "write", "read"]
@@ -167,6 +180,7 @@ class TestRefreshLoopPrevention:
 
     def test_refresh_endpoint_handles_malformed_tokens(self, client):
         """Test refresh endpoint properly rejects malformed tokens"""
+    pass
         malformed_tokens = [
             "",
             "invalid",
@@ -192,7 +206,8 @@ class TestRefreshLoopPrevention:
 
         # Attempt concurrent refreshes
         async def attempt_refresh():
-            return await auth_service.refresh_tokens(initial_refresh)
+            await asyncio.sleep(0)
+    return await auth_service.refresh_tokens(initial_refresh)
 
         # Run 10 concurrent refresh attempts
         tasks = [attempt_refresh() for _ in range(10)]
@@ -208,6 +223,7 @@ class TestRefreshLoopPrevention:
 
     def test_jwt_components_are_unique(self, jwt_handler):
         """Test that JWT components (jti, iat) ensure uniqueness"""
+    pass
         tokens_data = []
 
         for i in range(20):
@@ -251,6 +267,7 @@ class TestRefreshLoopPrevention:
     @pytest.mark.asyncio
     async def test_user_data_consistency_across_refreshes(self, auth_service):
         """Verify user data remains consistent across multiple refreshes"""
+    pass
         user_id = "consistency-test-" + str(uuid.uuid4())[:8]
         email = "consistency@staging.netrasystems.ai"
         permissions = ["read", "write", "delete"]

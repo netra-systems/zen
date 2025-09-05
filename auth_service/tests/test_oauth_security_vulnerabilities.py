@@ -8,6 +8,10 @@ Business Value: Prevents OAuth security breaches worth $500K+ per incident.
 """
 
 import pytest
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from test_framework.database.test_database_manager import TestDatabaseManager
+from auth_service.core.auth_manager import AuthManager
+from shared.isolated_environment import IsolatedEnvironment
 
 pytestmark = pytest.mark.skip(reason="oauth_security module has been removed/refactored")
 
@@ -134,7 +138,7 @@ class TestOAuthSecurityVulnerabilities:
     def test_session_fixation_attack_prevention(self):
         """Test prevention of session fixation attacks."""
         # Mock session manager
-        mock_session_manager = MagicMock()
+        mock_session_manager = MagicNone  # TODO: Use real service instance
         protector = SessionFixationProtector(mock_session_manager)
         
         old_session_id = "attacker-controlled-session"

@@ -7,6 +7,7 @@ import pytest
 import pytest_asyncio
 from auth_service.auth_core.services.auth_service import AuthService
 from auth_service.auth_core.models.auth_models import LoginRequest, User
+from shared.isolated_environment import IsolatedEnvironment
 
 
 class TestAuthServiceCore:
