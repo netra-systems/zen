@@ -34,20 +34,20 @@ class TestThreadServiceCore:
         
         # Mock the WebSocket manager
         with patch('netra_backend.app.services.thread_service.manager') as mock_manager:
-            mock_manager.send_message = AsyncMock()
+            mock_manager.send_to_user = AsyncMock()
             
-            await thread_service._send_thread_created_event(user_id)
+            await thread_service._send_thread_created_event(user_id, "test-thread-123")
             
             # Verify WebSocket event was sent
-            mock_manager.send_message.assert_called_once()
-            call_args = mock_manager.send_message.call_args
+            mock_manager.send_to_user.assert_called_once()
+            call_args = mock_manager.send_to_user.call_args
             assert call_args[0][0] == user_id  # First arg should be user_id
             
             # Check the message structure
             message = call_args[0][1]
             assert message["type"] == "thread_created"
             assert "payload" in message
-            assert message["payload"]["thread_id"] == f"thread_{user_id}"
+            assert message["payload"]["thread_id"] == "test-thread-123"
             assert "timestamp" in message["payload"]
 
     @pytest.mark.asyncio
@@ -124,9 +124,11 @@ class TestDatabaseErrorHandling:
         
         error = _handle_database_error(operation, original_context, test_exception)
         
-        # Should preserve original context and add error info
-        assert "thread_id" in str(error) or hasattr(error, 'context')
-        assert "user_id" in str(error) or hasattr(error, 'context')
+        # Should preserve original context in error details
+        assert hasattr(error, 'error_details') and hasattr(error.error_details, 'context')
+        assert error.error_details.context is not None
+        assert "thread_id" in error.error_details.context
+        assert "user_id" in error.error_details.context
 
 
 class TestThreadServiceUnitOfWorkPattern:
@@ -206,8 +208,8 @@ class TestThreadServiceWebSocketIntegration:
         from netra_backend.app.services.thread_service import manager
         
         assert manager is not None
-        # Should have send_message method
-        assert hasattr(manager, 'send_message')
+        # Should have send_to_user method
+        assert hasattr(manager, 'send_to_user')
 
     @pytest.mark.asyncio
     async def test_thread_created_event_message_format(self, thread_service):
@@ -215,11 +217,11 @@ class TestThreadServiceWebSocketIntegration:
         user_id = "test_user_456"
         
         with patch('netra_backend.app.services.thread_service.manager') as mock_manager:
-            mock_manager.send_message = AsyncMock()
+            mock_manager.send_to_user = AsyncMock()
             
-            await thread_service._send_thread_created_event(user_id)
+            await thread_service._send_thread_created_event(user_id, "test-thread-123")
             
-            call_args = mock_manager.send_message.call_args[0][1]
+            call_args = mock_manager.send_to_user.call_args[0][1]
             
             # Verify message structure
             assert "type" in call_args
@@ -230,8 +232,8 @@ class TestThreadServiceWebSocketIntegration:
             assert "thread_id" in payload
             assert "timestamp" in payload
             
-            # Thread ID should include user ID
-            assert user_id in payload["thread_id"]
+            # Thread ID should be the one we passed
+            assert payload["thread_id"] == "test-thread-123"
             
             # Timestamp should be reasonable (recent)
             current_time = time.time()
@@ -244,11 +246,11 @@ class TestThreadServiceWebSocketIntegration:
         
         with patch('netra_backend.app.services.thread_service.manager') as mock_manager:
             # Simulate WebSocket error
-            mock_manager.send_message = AsyncMock(side_effect=ConnectionError("WebSocket connection lost"))
+            mock_manager.send_to_user = AsyncMock(side_effect=ConnectionError("WebSocket connection lost"))
             
             # Should not raise exception
             try:
-                await thread_service._send_thread_created_event(user_id)
+                await thread_service._send_thread_created_event(user_id, "test-thread-123")
                 websocket_error_handled = True
             except ConnectionError:
                 websocket_error_handled = False
