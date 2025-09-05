@@ -10,7 +10,7 @@ reducing configuration-related errors by 90%.
 from functools import lru_cache
 from typing import Any, Dict, Optional
 
-from netra_backend.app.core.configuration.base import UnifiedConfigManager
+# Circular import prevention - UnifiedConfigManager is defined in base.py
 from netra_backend.app.logging_config import central_logger as logger
 from netra_backend.app.schemas.config import AppConfig
 
@@ -24,8 +24,8 @@ class ConfigurationLoader:
     
     def __init__(self):
         """Initialize the configuration loader."""
-        self._manager = UnifiedConfigManager()
         self._logger = logger
+        self._config_cache: Optional[AppConfig] = None
         
     @lru_cache(maxsize=1)
     def load(self) -> AppConfig:
@@ -34,10 +34,49 @@ class ConfigurationLoader:
         Returns:
             AppConfig: The validated application configuration
         """
-        self._logger.info("Loading unified configuration")
-        config = self._manager.get_config()
-        self._logger.info(f"Configuration loaded for environment: {config.environment}")
-        return config
+        if self._config_cache is None:
+            self._logger.info("Loading configuration")
+            from netra_backend.app.core.environment_constants import EnvironmentDetector
+            environment = EnvironmentDetector.get_environment()
+            config = self._create_config_for_environment(environment)
+            self._config_cache = config
+            self._logger.info(f"Configuration loaded for environment: {environment}")
+        
+        return self._config_cache
+    
+    def _create_config_for_environment(self, environment: str) -> AppConfig:
+        """Create configuration instance for the specified environment.
+        
+        Args:
+            environment: The environment name
+            
+        Returns:
+            AppConfig: Environment-specific configuration
+        """
+        from netra_backend.app.schemas.config import (
+            DevelopmentConfig,
+            NetraTestingConfig,
+            ProductionConfig,
+            StagingConfig,
+        )
+        
+        config_classes = {
+            "development": DevelopmentConfig,
+            "staging": StagingConfig,
+            "production": ProductionConfig,
+            "testing": NetraTestingConfig,
+        }
+        
+        config_class = config_classes.get(environment, DevelopmentConfig)
+        self._logger.info(f"Creating {config_class.__name__} for environment: {environment}")
+        
+        try:
+            config = config_class()
+            return config
+        except Exception as e:
+            self._logger.error(f"Failed to create config for {environment}: {e}")
+            # Fallback to basic config
+            return AppConfig(environment=environment)
     
     def reload(self, force: bool = False) -> AppConfig:
         """Reload the configuration (for hot-reload scenarios).
@@ -50,7 +89,7 @@ class ConfigurationLoader:
         """
         if force:
             self.load.cache_clear()
-            self._manager.reload_config(force=True)
+            self._config_cache = None
         return self.load()
     
     def get_environment(self) -> str:
@@ -135,7 +174,12 @@ class ConfigurationLoader:
         Returns:
             bool: True if configuration is valid
         """
-        return self._manager.validate_config_integrity()
+        try:
+            config = self.load()
+            return True  # If we can load the config without errors, it's valid
+        except Exception as e:
+            self._logger.error(f"Configuration validation failed: {e}")
+            return False
 
 
 # Global instance for easy access

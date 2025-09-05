@@ -14,7 +14,7 @@ from typing import TYPE_CHECKING, Dict, List, Tuple
 
 if TYPE_CHECKING:
     # Import TriageResult only for type checking to prevent circular imports
-    from netra_backend.app.agents.triage_sub_agent.models import TriageResult
+    from netra_backend.app.agents.triage.unified_triage_agent import TriageResult
 
 from netra_backend.app.core.configuration.validator_auth import AuthValidator
 from netra_backend.app.core.configuration.validator_database import DatabaseValidator
