@@ -1,12 +1,5 @@
 """Supervisor Agent - UserExecutionContext Pattern Implementation
 
-Migrated supervisor agent using new UserExecutionContext pattern:
-- Uses UserExecutionContext for complete request isolation
-- DatabaseSessionManager for session management without global state
-- All legacy execute methods removed - no backward compatibility
-- Complete removal of DeepAgentState usage
-- All sub-agent calls use create_child_context() for proper isolation
-
 Business Value: Enables safe concurrent user operations with zero context leakage.
 BVJ: ALL segments | Platform Stability | Complete user isolation for production deployment
 """
@@ -50,16 +43,6 @@ logger = central_logger.get_logger(__name__)
 
 class SupervisorAgent(BaseAgent):
     """SupervisorAgent with UserExecutionContext pattern.
-    
-    CRITICAL: This supervisor uses the UserExecutionContext pattern to ensure:
-    - Complete user isolation (no shared state between requests)
-    - DatabaseSessionManager for session isolation
-    - ALL legacy execute methods removed - no backward compatibility
-    - UserExecutionContext passed through entire execution chain
-    - All sub-agents use create_child_context() for proper isolation
-    
-    The supervisor coordinates agent orchestration while maintaining strict
-    isolation boundaries to prevent user data leakage in concurrent scenarios.
     """
     
     def __init__(self, 
@@ -167,8 +150,6 @@ class SupervisorAgent(BaseAgent):
         async with self._execution_lock:
             try:
                 # Import here to avoid circular dependency
-                from netra_backend.app.agents.tool_dispatcher_core import ToolDispatcher
-                from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
                 from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmitter as IsolatedWebSocketEventEmitter
                 
                 # CRITICAL: Create WebSocket emitter BEFORE tool dispatcher
@@ -345,15 +326,24 @@ class SupervisorAgent(BaseAgent):
         return agent_instances
     
     def _get_required_agent_names(self) -> List[str]:
-        """Get list of required agent names for orchestration."""
-        # Core agents required for most workflows
-        core_agents = ["triage", "data", "optimization", "actions"]
+        """Get list of required agent names for orchestration.
         
-        # Optional agents that enhance functionality
-        optional_agents = ["reporting", "goals_triage", "data_helper", "synthetic_data"]
+        UVS SIMPLIFIED: Only 2 agents are truly required:
+        1. Triage - Determines what the user needs
+        2. Reporting (with UVS) - ALWAYS delivers value, handles all failures
         
-        # Return core agents first, then optionals
-        return core_agents + optional_agents
+        Default flow: Triage → Data Helper → Reporting (UVS)
+        All other agents are optional based on triage assessment.
+        """
+        # CRITICAL: Only these 2 agents are required for UVS
+        required_agents = ["triage", "reporting"]  # Reporting has UVS enhancements
+        
+        # Optional agents that may be invoked based on triage
+        # These are created but only used if triage determines they're needed
+        optional_agents = ["data_helper", "data", "optimization", "actions", "goals_triage", "synthetic_data"]
+        
+        # Return required first, then optionals
+        return required_agents + optional_agents
 
     def _validate_execution_preconditions(self, context: UserExecutionContext) -> bool:
         """Validate execution preconditions for supervisor orchestration.
@@ -440,31 +430,39 @@ class SupervisorAgent(BaseAgent):
         return lambda: self.websocket_bridge
 
     # Define agent dependencies with metadata keys (SSOT)
+    # UVS SIMPLIFIED: Only Triage and Reporting are required
+    # Reporting with UVS can handle ANY scenario, even with no data
     AGENT_DEPENDENCIES = {
         "triage": {
-            "required": [],
+            "required": [],  # Triage has no dependencies
             "optional": [],
             "produces": ["triage_result", "goal_triage_results"]
         },
+        "reporting": {
+            "required": [],  # UVS: Reporting can work with NOTHING
+            "optional": [("triage", "triage_result")],  # Better with triage but not required
+            "produces": ["report_result", "final_report"],
+            "uvs_enabled": True  # Flag indicating UVS enhancements
+        },
+        "data_helper": {
+            "required": [],  # Can work independently
+            "optional": [("triage", "triage_result")],
+            "produces": ["data_helper_result", "data_collection_guidance"]
+        },
         "data": {
-            "required": [("triage", "triage_result")],
-            "optional": [],
+            "required": [],  # Can attempt data collection independently
+            "optional": [("triage", "triage_result"), ("data_helper", "data_helper_result")],
             "produces": ["data_result", "data_analysis_result"]
         },
         "optimization": {
-            "required": [("triage", "triage_result"), ("data", "data_result")],
-            "optional": [],
+            "required": [("data", "data_result")],  # Needs data to optimize
+            "optional": [("triage", "triage_result")],
             "produces": ["optimizations_result", "optimization_strategies"]
         },
         "actions": {
-            "required": [("triage", "triage_result"), ("data", "data_result")],
-            "optional": [("optimization", "optimizations_result")],
+            "required": [],  # Can suggest generic actions
+            "optional": [("triage", "triage_result"), ("data", "data_result"), ("optimization", "optimizations_result")],
             "produces": ["action_plan_result", "actions_result"]
-        },
-        "reporting": {
-            "required": [("triage", "triage_result")],
-            "optional": [("data", "data_result"), ("optimization", "optimizations_result"), ("actions", "action_plan_result")],
-            "produces": ["report_result", "final_report"]
         }
     }
     
@@ -528,8 +526,29 @@ class SupervisorAgent(BaseAgent):
         results = {}
         completed_agents = set()
         failed_agents = set()
-        execution_order = ["triage", "data", "optimization", "actions", "reporting"]
         
+        # UVS SIMPLIFIED: Dynamic execution order based on triage
+        # Always: Triage → (optional agents based on triage) → Reporting (UVS)
+        # Default flow when no data: Triage → Data Helper → Reporting
+        
+        # Step 1: Always execute triage first
+        triage_result = None
+        if "triage" in agent_instances:
+            try:
+                triage_result = await self._execute_single_agent(
+                    agent_instances["triage"], context, "triage", completed_agents, failed_agents
+                )
+                results["triage"] = triage_result
+            except Exception as e:
+                logger.error(f"Triage failed: {e}. UVS Reporting will handle this.")
+                results["triage"] = {"error": str(e), "status": "failed"}
+                failed_agents.add("triage")
+        
+        # Step 2: Determine dynamic execution order based on triage
+        execution_order = self._determine_execution_order(triage_result, context)
+        logger.info(f"Dynamic execution order based on triage: {execution_order}")
+        
+        # Step 3: Execute determined agents
         for agent_name in execution_order:
             # Skip if agent not available
             if agent_name not in agent_instances:
@@ -601,10 +620,10 @@ class SupervisorAgent(BaseAgent):
                 results[agent_name] = {"error": str(e), "status": "failed"}
                 failed_agents.add(agent_name)
                 
-                # For critical agents (triage, data), stop the entire workflow
-                if agent_name in ["triage", "data"]:
-                    logger.error(f"Critical agent {agent_name} failed. Stopping workflow execution.")
-                    break
+                # UVS: Only triage failure might stop workflow, but reporting handles it
+                if agent_name == "triage":
+                    logger.warning(f"Triage failed. Reporting with UVS will handle this gracefully.")
+                    # Don't break - let reporting handle it
                     
                 # For non-critical agents, continue but log the impact
                 logger.warning(f"Non-critical agent {agent_name} failed. Continuing with degraded results.")
@@ -802,6 +821,94 @@ class SupervisorAgent(BaseAgent):
         if generic_key not in produces_keys:
             context.metadata[generic_key] = result
             logger.debug(f"Stored {agent_name} result under generic key: {generic_key}")
+    
+    def _determine_execution_order(self, triage_result: Optional[Dict], context: UserExecutionContext) -> List[str]:
+        """Determine dynamic execution order based on triage results.
+        
+        UVS SIMPLIFIED FLOW:
+        - If triage succeeded: Use its recommendations
+        - Default flow: Data Helper → Reporting (UVS)
+        - Reporting ALWAYS runs last as it has UVS fallbacks
+        
+        Args:
+            triage_result: Result from triage agent (may be None or failed)
+            context: User execution context
+            
+        Returns:
+            List of agent names to execute in order
+        """
+        execution_order = []
+        
+        # Check if triage provided guidance
+        if triage_result and isinstance(triage_result, dict):
+            # Extract data sufficiency assessment
+            data_sufficiency = triage_result.get("data_sufficiency", "unknown")
+            optimization_type = triage_result.get("optimization_type", "general")
+            
+            if data_sufficiency == "sufficient":
+                # Have data - can run full pipeline
+                execution_order = ["data", "optimization", "actions"]
+            elif data_sufficiency == "partial":
+                # Some data - start with data helper
+                execution_order = ["data_helper", "data", "optimization"]
+            else:
+                # No data or unknown - DEFAULT FLOW
+                execution_order = ["data_helper"]
+        else:
+            # Triage failed or no result - DEFAULT FLOW
+            logger.info("Triage unavailable. Using default flow: Data Helper → Reporting")
+            execution_order = ["data_helper"]
+        
+        # ALWAYS end with Reporting (has UVS enhancements)
+        execution_order.append("reporting")
+        
+        return execution_order
+    
+    async def _execute_single_agent(self, agent_instance: BaseAgent, 
+                                   context: UserExecutionContext,
+                                   agent_name: str,
+                                   completed_agents: set,
+                                   failed_agents: set) -> Dict[str, Any]:
+        """Execute a single agent and track its status.
+        
+        Args:
+            agent_instance: The agent to execute
+            context: User execution context
+            agent_name: Name of the agent
+            completed_agents: Set to track completed agents
+            failed_agents: Set to track failed agents
+            
+        Returns:
+            Agent execution result
+        """
+        try:
+            await self._emit_thinking(context, f"Running {agent_name}...")
+            
+            # Create child context for agent
+            child_context = context.create_child_context(
+                operation_name=f"{agent_name}_execution",
+                additional_metadata={"agent_name": agent_name}
+            )
+            
+            # Execute with retry
+            result = await self._execute_agent_with_retry(
+                agent_instance, child_context, agent_name
+            )
+            
+            # Mark as completed
+            completed_agents.add(agent_name)
+            
+            # Propagate metadata
+            self._merge_child_metadata_to_parent(context, child_context, agent_name)
+            self._store_agent_result(context, agent_name, result)
+            
+            logger.info(f"✅ Agent {agent_name} completed successfully")
+            return result
+            
+        except Exception as e:
+            logger.error(f"Agent {agent_name} failed: {e}")
+            failed_agents.add(agent_name)
+            raise
     
     def _is_recoverable_error(self, error: Exception) -> bool:
         """Determine if an error is recoverable and worth retrying.

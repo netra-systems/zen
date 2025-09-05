@@ -28,10 +28,10 @@ class WorkflowOrchestrator:
     def _define_workflow_based_on_triage(self, triage_result: Dict[str, Any]) -> List[PipelineStep]:
         """Define adaptive workflow based on triage results and data sufficiency.
         
-        The workflow adapts based on the TriageSubAgent's assessment:
-        a. If sufficient data is available: Full workflow
-        b. If some data but more needed: Partial workflow with data_helper
-        c. If no data available: Only data_helper
+        UVS SIMPLIFIED:
+        - Only 2 agents are REQUIRED: Triage and Reporting (with UVS)
+        - Default flow: Triage → Data Helper → Reporting
+        - Reporting with UVS handles ALL scenarios, even failures
         
         Args:
             triage_result: Results from the triage agent including data sufficiency assessment
@@ -42,43 +42,38 @@ class WorkflowOrchestrator:
         # Extract data sufficiency from triage result
         data_sufficiency = triage_result.get("data_sufficiency", "unknown")
         
+        # UVS: Reporting is ALWAYS the last step and can handle any scenario
         if data_sufficiency == "sufficient":
             # Full workflow when sufficient data is available
-            # FIXED: Data collection must happen BEFORE optimization can analyze it
             return [
                 self._create_pipeline_step("triage", "classification", 1, dependencies=[]),
-                self._create_pipeline_step("data", "insights", 2, dependencies=["triage"]),
+                self._create_pipeline_step("data", "insights", 2, dependencies=[]),
                 self._create_pipeline_step("optimization", "strategies", 3, dependencies=["data"]),
                 self._create_pipeline_step("actions", "implementation", 4, dependencies=["optimization"]),
-                self._create_pipeline_step("reporting", "summary", 5, dependencies=["actions"])
+                self._create_pipeline_step("reporting", "full_report", 5, dependencies=[])  # UVS: No hard deps
             ]
         elif data_sufficiency == "partial":
-            # Partial workflow with data_helper for additional data needs
-            # FIXED: Data helper comes early to identify gaps, then process what we have
+            # Partial data - use data helper first
             return [
                 self._create_pipeline_step("triage", "classification", 1, dependencies=[]),
-                self._create_pipeline_step("data_helper", "data_request", 2, dependencies=["triage"]),
-                self._create_pipeline_step("data", "insights", 3, dependencies=["data_helper"]),
-                self._create_pipeline_step("optimization", "strategies", 4, dependencies=["data"]),
-                self._create_pipeline_step("actions", "implementation", 5, dependencies=["optimization"]),
-                self._create_pipeline_step("reporting", "summary_with_data_request", 6, dependencies=["actions"])
+                self._create_pipeline_step("data_helper", "data_guidance", 2, dependencies=[]),
+                self._create_pipeline_step("data", "partial_insights", 3, dependencies=[]),
+                self._create_pipeline_step("reporting", "partial_report", 4, dependencies=[])  # UVS handles partial
             ]
         elif data_sufficiency == "insufficient":
-            # Minimal workflow - only request data
+            # DEFAULT UVS FLOW: Triage → Data Helper → Reporting
             return [
                 self._create_pipeline_step("triage", "classification", 1, dependencies=[]),
-                self._create_pipeline_step("data_helper", "data_request", 2, dependencies=["triage"])
+                self._create_pipeline_step("data_helper", "data_collection_guide", 2, dependencies=[]),
+                self._create_pipeline_step("reporting", "guidance_report", 3, dependencies=[])  # UVS provides guidance
             ]
         else:
-            # Default fallback to standard workflow with correct ordering
-            logger.warning(f"Unknown data sufficiency level: {data_sufficiency}, using default workflow")
-            # Default workflow uses logical order: triage -> data -> optimization -> actions -> reporting
+            # Unknown or triage failed - MINIMAL UVS FLOW
+            logger.warning(f"Unknown data sufficiency: {data_sufficiency}. Using minimal UVS flow.")
+            # Minimal flow: Just Data Helper and Reporting (UVS handles everything)
             return [
-                self._create_pipeline_step("triage", "classification", 1, dependencies=[]),
-                self._create_pipeline_step("data", "insights", 2, dependencies=["triage"]),
-                self._create_pipeline_step("optimization", "strategies", 3, dependencies=["data"]),
-                self._create_pipeline_step("actions", "implementation", 4, dependencies=["optimization"]),
-                self._create_pipeline_step("reporting", "summary", 5, dependencies=["actions"])
+                self._create_pipeline_step("data_helper", "initial_guidance", 1, dependencies=[]),
+                self._create_pipeline_step("reporting", "fallback_report", 2, dependencies=[])  # UVS fallback
             ]
     
     def _create_pipeline_step(self, agent_name: str, 
