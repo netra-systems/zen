@@ -13,12 +13,15 @@ Module ≤300 lines per CLAUDE.md requirements.
 
 import sys
 from pathlib import Path
+from auth_service.core.auth_manager import AuthManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 # Test framework import - using pytest fixtures instead
 
 import asyncio
 from typing import Any, Dict
-from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 from fastapi import HTTPException, Request, Response
@@ -31,7 +34,7 @@ from starlette.middleware.base import BaseHTTPMiddleware
 # Mock replacement for testing
 class AgentMetricsMiddleware:
     def __init__(self):
-        self.metrics_collector = Mock()
+        self.metrics_collector = metrics_collector_instance  # Initialize appropriate service
         self._operation_context = {}
         self._enabled = True
     
@@ -177,7 +180,7 @@ class TestMiddlewareOrdering:
         request.headers.get = Mock(return_value=str(content_length))
         request.method = "GET"
         # Mock: Generic component isolation for controlled unit testing
-        request.url = Mock()
+        request.url = url_instance  # Initialize appropriate service
         # Mock: Component isolation for controlled unit testing
         request.url.__str__ = Mock(return_value="http://test.com")
         request.url.path = "/test"
@@ -266,7 +269,7 @@ class TestHookExecutionSequence:
         request.headers = {}
         request.method = "GET"
         # Mock: Generic component isolation for controlled unit testing
-        request.url = Mock()
+        request.url = url_instance  # Initialize appropriate service
         # Mock: Component isolation for controlled unit testing
         request.url.__str__ = Mock(return_value="http://test.com")
         request.url.path = "/test"

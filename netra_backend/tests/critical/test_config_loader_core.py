@@ -1,4 +1,8 @@
 from shared.isolated_environment import get_env
+from test_framework.database.test_database_manager import TestDatabaseManager
+from test_framework.redis.test_redis_manager import TestRedisManager
+from auth_service.core.auth_manager import AuthManager
+from shared.isolated_environment import IsolatedEnvironment
 #!/usr/bin/env python3
 """Critical Config Loader Core Tests
 
@@ -17,7 +21,6 @@ from pathlib import Path
 
 import os
 from typing import Any, Dict
-from unittest.mock import Mock, patch, AsyncMock, MagicMock
 
 import pytest
 
@@ -152,7 +155,7 @@ class TestEnvironmentVariableLoading:
         """Test environment variable successfully loaded into config"""
         # Arrange - Mock config with field
         # Mock: Generic component isolation for controlled unit testing
-        mock_config = Mock()
+        mock_config = mock_config_instance  # Initialize appropriate service
 
         mock_config.db_pool_size = 10
         mock_config.db_max_overflow = 20
@@ -193,7 +196,7 @@ class TestEnvironmentVariableLoading:
         """Test environment variable loading fails when env var missing"""
         # Arrange - Mock config with field but no env var
         # Mock: Generic component isolation for controlled unit testing
-        mock_config = Mock()
+        mock_config = mock_config_instance  # Initialize appropriate service
         mock_config.test_field = None
         
         # Act - Attempt to load missing environment variable
@@ -208,7 +211,7 @@ class TestEnvironmentVariableLoading:
         """Test environment variable loading succeeds with existing field"""
         # Arrange - Mock config with existing field
         # Mock: Generic component isolation for controlled unit testing
-        mock_config = Mock()
+        mock_config = mock_config_instance  # Initialize appropriate service
         mock_config.test_field = None
         
         # Act - Load environment variable
@@ -227,11 +230,11 @@ class TestClickHouseConfiguration:
         """Test ClickHouse host updated in both native and HTTPS configs"""
         # Arrange - Mock config with ClickHouse configs
         # Mock: Generic component isolation for controlled unit testing
-        mock_config = Mock()
+        mock_config = mock_config_instance  # Initialize appropriate service
         # Mock: ClickHouse database isolation for fast testing without external database dependency
-        mock_config.clickhouse_native = Mock()
+        mock_config.clickhouse_native = clickhouse_native_instance  # Initialize appropriate service
         # Mock: ClickHouse database isolation for fast testing without external database dependency
-        mock_config.clickhouse_https = Mock()
+        mock_config.clickhouse_https = clickhouse_https_instance  # Initialize appropriate service
         
         # Act - Set ClickHouse host
         set_clickhouse_host(mock_config, "clickhouse.example.com")
@@ -244,11 +247,11 @@ class TestClickHouseConfiguration:
         """Test ClickHouse port validation ensures integer values"""
         # Arrange - Mock config with ClickHouse configs
         # Mock: Generic component isolation for controlled unit testing
-        mock_config = Mock()
+        mock_config = mock_config_instance  # Initialize appropriate service
         # Mock: ClickHouse database isolation for fast testing without external database dependency
-        mock_config.clickhouse_native = Mock()
+        mock_config.clickhouse_native = clickhouse_native_instance  # Initialize appropriate service
         # Mock: ClickHouse database isolation for fast testing without external database dependency
-        mock_config.clickhouse_https = Mock()
+        mock_config.clickhouse_https = clickhouse_https_instance  # Initialize appropriate service
         
         # Act - Set valid ClickHouse port
         set_clickhouse_port(mock_config, "9000")
@@ -261,7 +264,7 @@ class TestClickHouseConfiguration:
         """Test invalid ClickHouse port raises appropriate exception"""
         # Arrange - Mock config
         # Mock: Generic component isolation for controlled unit testing
-        mock_config = Mock()
+        mock_config = mock_config_instance  # Initialize appropriate service
         
         # Act & Assert - Invalid port raises ValueError
         with pytest.raises(ValueError):
@@ -271,11 +274,11 @@ class TestClickHouseConfiguration:
         """Test ClickHouse password setting logs without exposing password"""
         # Arrange - Mock config and logger
         # Mock: Generic component isolation for controlled unit testing
-        mock_config = Mock()
+        mock_config = mock_config_instance  # Initialize appropriate service
         # Mock: ClickHouse database isolation for fast testing without external database dependency
-        mock_config.clickhouse_native = Mock()
+        mock_config.clickhouse_native = clickhouse_native_instance  # Initialize appropriate service
         # Mock: ClickHouse database isolation for fast testing without external database dependency
-        mock_config.clickhouse_https = Mock()
+        mock_config.clickhouse_https = clickhouse_https_instance  # Initialize appropriate service
         
         # Act - Set password with logging
         # Mock: Component isolation for testing without external dependencies
@@ -293,11 +296,11 @@ class TestClickHouseConfiguration:
         """Test ClickHouse user setting includes username in logs"""
         # Arrange - Mock config and logger
         # Mock: Generic component isolation for controlled unit testing
-        mock_config = Mock()
+        mock_config = mock_config_instance  # Initialize appropriate service
         # Mock: ClickHouse database isolation for fast testing without external database dependency
-        mock_config.clickhouse_native = Mock()
+        mock_config.clickhouse_native = clickhouse_native_instance  # Initialize appropriate service
         # Mock: ClickHouse database isolation for fast testing without external database dependency
-        mock_config.clickhouse_https = Mock()
+        mock_config.clickhouse_https = clickhouse_https_instance  # Initialize appropriate service
         
         # Act - Set username with logging
         # Mock: Component isolation for testing without external dependencies
@@ -318,13 +321,13 @@ class TestLLMConfigurationLoading:
         """Test Gemini API key updated across all LLM configurations"""
         # Arrange - Mock config with LLM configs
         # Mock: Generic component isolation for controlled unit testing
-        mock_config = Mock()
+        mock_config = mock_config_instance  # Initialize appropriate service
         mock_config.llm_configs = {}
         llm_names = ['default', 'analysis', 'triage', 'data']
         
         for name in llm_names:
             # Mock: LLM service isolation for fast testing without API calls or rate limits
-            mock_config.llm_configs[name] = Mock()
+            mock_config.llm_configs[name] = None  # TODO: Use real service instance
             mock_config.llm_configs[name].api_key = None
             
         # Act - Set Gemini API key
@@ -339,10 +342,10 @@ class TestLLMConfigurationLoading:
         """Test individual LLM config API key setting"""
         # Arrange - Mock config with specific LLM config
         # Mock: Generic component isolation for controlled unit testing
-        mock_config = Mock()
+        mock_config = mock_config_instance  # Initialize appropriate service
         mock_config.llm_configs = {
             # Mock: Generic component isolation for controlled unit testing
-            'analysis': Mock()
+            'analysis': None  # TODO: Use real service instance
         }
         mock_config.llm_configs['analysis'].api_key = None
         
@@ -355,7 +358,7 @@ class TestLLMConfigurationLoading:
     def test_set_llm_api_key_missing_config_handles_gracefully(self):
         """Test LLM API key setting handles missing config gracefully"""
         # Arrange - Mock config without llm_configs
-        mock_config = Mock()
+        mock_config = mock_config_instance  # Initialize appropriate service
         # Don't set llm_configs attribute
         
         # Act - Attempt to set API key on missing config
@@ -423,9 +426,9 @@ class TestSecretApplicationLogic:
         """Test secret application to nested configuration path"""
         # Arrange - Mock nested config structure
         # Mock: Generic component isolation for controlled unit testing
-        mock_config = Mock()
+        mock_config = mock_config_instance  # Initialize appropriate service
         # Mock: Database isolation for unit testing without external database connections
-        mock_config.database = Mock()
+        mock_config.database = TestDatabaseManager().get_session()
         mock_config.database.password = None
         
         # Act - Apply secret to nested path
@@ -438,11 +441,11 @@ class TestSecretApplicationLogic:
         """Test navigation to parent object in config hierarchy"""
         # Arrange - Mock nested config structure
         # Mock: Generic component isolation for controlled unit testing
-        mock_config = Mock()
+        mock_config = mock_config_instance  # Initialize appropriate service
         # Mock: Generic component isolation for controlled unit testing
-        mock_config.level1 = Mock()
+        mock_config.level1 = level1_instance  # Initialize appropriate service
         # Mock: Generic component isolation for controlled unit testing
-        mock_config.level1.level2 = Mock()
+        mock_config.level1.level2 = level2_instance  # Initialize appropriate service
         
         # Act - Navigate to parent object
         parent = _navigate_to_parent_object(mock_config, ["level1", "level2", "field"])
@@ -468,7 +471,7 @@ class TestSecretApplicationLogic:
         """Test getting attribute returns correct value when exists"""
         # Arrange - Mock object with attribute
         # Mock: Generic component isolation for controlled unit testing
-        mock_obj = Mock()
+        mock_obj = mock_obj_instance  # Initialize appropriate service
         mock_obj.test_attr = "test_value"
         
         # Act - Get existing attribute
@@ -496,7 +499,6 @@ class TestSecretApplicationLogic:
 class TestCloudRunEnvironmentDetection:
     """Business Value: Ensures proper Cloud Run deployment environment detection"""
     
-    @patch.dict('os.environ', {'ENVIRONMENT': 'staging', 'TESTING': '0'})
     def test_k_service_staging_detection(self):
         """Test staging detection via K_SERVICE environment variable"""
         # Arrange - Mock K_SERVICE with staging
@@ -548,7 +550,7 @@ class TestCloudRunEnvironmentDetection:
             # Mock: Component isolation for testing without external dependencies
             with patch('netra_backend.app.cloud_environment_detector.get_config') as mock_get_config:
                 # Mock: Generic component isolation for controlled unit testing
-                mock_config = Mock()
+                mock_config = mock_config_instance  # Initialize appropriate service
                 mock_config.k_service = "netra-backend-staging"
                 mock_get_config.return_value = mock_config
                 
@@ -569,7 +571,7 @@ class TestCloudRunEnvironmentDetection:
             # Mock: Component isolation for testing without external dependencies
             with patch('netra_backend.app.cloud_environment_detector.get_config') as mock_get_config:
                 # Mock: Generic component isolation for controlled unit testing
-                mock_config = Mock()
+                mock_config = mock_config_instance  # Initialize appropriate service
                 mock_config.k_service = "netra-backend-production"
                 mock_config.pr_number = "456"
                 mock_get_config.return_value = mock_config

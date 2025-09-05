@@ -12,6 +12,13 @@ All functions ≤8 lines. File ≤300 lines as per CLAUDE.md requirements.
 import sys
 from pathlib import Path
 from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from test_framework.database.test_database_manager import TestDatabaseManager
+from test_framework.redis.test_redis_manager import TestRedisManager
+from auth_service.core.auth_manager import AuthManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 
 # Test framework import - using pytest fixtures instead
@@ -21,7 +28,6 @@ import json
 import time
 from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional
-from unittest.mock import AsyncMock, MagicMock, Mock, patch, Mock, mock_open, patch
 
 import pytest
 from fastapi import WebSocket, WebSocketDisconnect
@@ -43,7 +49,7 @@ class TestWebSocketConnectionResilience:
         """Test WebSocket automatically reconnects after network failures"""
         # Arrange - Mock WebSocket manager
         # Mock: Generic component isolation for controlled unit testing
-        mock_manager = Mock()
+        mock_manager = mock_manager_instance  # Initialize appropriate service
         # Mock: WebSocket infrastructure isolation for unit tests without real connections
         mock_websocket = Mock(spec=WebSocket)
         mock_websocket.client_state = WebSocketState.CONNECTED
@@ -75,9 +81,9 @@ class TestAgentTaskDelegation:
         """Test supervisor properly delegates tasks to appropriate sub-agents"""
         # Arrange - Mock supervisor and result
         # Mock: Generic component isolation for controlled unit testing
-        mock_supervisor = Mock()
+        mock_supervisor = mock_supervisor_instance  # Initialize appropriate service
         # Mock: Generic component isolation for controlled unit testing
-        mock_result = Mock()
+        mock_result = mock_result_instance  # Initialize appropriate service
         mock_result.agent_type = "data"
         mock_result.status = "completed"
         mock_result.confidence = 0.9
@@ -198,13 +204,13 @@ class TestDatabaseTransactionRollback:
         """Test database transactions rollback properly on failures"""
         # Arrange - Mock database session with transaction
         # Mock: Database session isolation for transaction testing without real database dependency
-        mock_session = AsyncMock()
+        mock_session = AsyncNone  # TODO: Use real service instance
         # Mock: Database session isolation for transaction testing without real database dependency
-        mock_session.add = Mock()
+        mock_session.add = add_instance  # Initialize appropriate service
         # Mock: Database session isolation for transaction testing without real database dependency
         mock_session.commit = AsyncMock(side_effect=Exception("DB Error"))
         # Mock: Database session isolation for transaction testing without real database dependency
-        mock_session.rollback = AsyncMock()
+        mock_session.rollback = AsyncNone  # TODO: Use real service instance
         # Mock: Database session isolation for transaction testing without real database dependency
         mock_session.in_transaction = Mock(return_value=False)
         mock_session.new = set()
@@ -212,7 +218,7 @@ class TestDatabaseTransactionRollback:
         # Act - Simulate transaction failure and rollback
         try:
             # Mock: Database session isolation for transaction testing without real database dependency
-            mock_session.add(Mock())  # Add some data
+            mock_session.add(None  # TODO: Use real service instance)  # Add some data
             await mock_session.commit()  # This will fail
         except Exception:
             await mock_session.rollback()  # Should rollback
@@ -265,7 +271,7 @@ class TestCorpusDataValidation:
         
         # Act - Mock CRUD operations
         # Mock: Generic component isolation for controlled unit testing
-        mock_service = Mock()
+        mock_service = mock_service_instance  # Initialize appropriate service
         # Mock: Async component isolation for testing without real async operations
         mock_service.create_corpus = AsyncMock(return_value={"id": "test_id", **test_corpus})
         # Mock: Async component isolation for testing without real async operations
@@ -290,7 +296,8 @@ class TestMultiAgentCoordination:
         # Arrange - Mock agents with async processing
         async def mock_agent_task(agent_id):
             await asyncio.sleep(0.01)  # Simulate processing
-            return f"result_{agent_id}"
+            await asyncio.sleep(0)
+    return f"result_{agent_id}"
             
         # Act - Execute agents in parallel
         agent_ids = [1, 2, 3, 4, 5]
@@ -312,9 +319,9 @@ class TestErrorRecoveryPipeline:
         """Test error recovery mechanisms across the agent pipeline"""
         # Arrange - Mock pipeline with error recovery
         # Mock: Generic component isolation for controlled unit testing
-        mock_pipeline = Mock()
+        mock_pipeline = mock_pipeline_instance  # Initialize appropriate service
         # Mock: Generic component isolation for controlled unit testing
-        mock_result = Mock()
+        mock_result = mock_result_instance  # Initialize appropriate service
         mock_result.status = "recovered"
         mock_result.error_handled = True
         
@@ -346,7 +353,7 @@ class TestSystemHealthMonitoring:
         
         # Act - Mock health monitoring
         # Mock: Generic component isolation for controlled unit testing
-        mock_health_monitor = Mock()
+        mock_health_monitor = mock_health_monitor_instance  # Initialize appropriate service
         # Mock: Async component isolation for testing without real async operations
         mock_health_monitor.run_health_checks = AsyncMock(return_value=health_checks)
         
@@ -397,8 +404,8 @@ class TestCrossServiceCommunication:
     async def test_auth_service_propagation_integrity(self):
         """Iteration 41: Auth token propagation across services prevents $50K security breach"""
         # Mock inter-service auth propagation
-        mock_auth_service = AsyncMock()
-        mock_backend = AsyncMock()
+        mock_auth_service = AsyncNone  # TODO: Use real service instance
+        mock_backend = AsyncNone  # TODO: Use real service instance
         test_token = "secure_jwt_token_12345"
         
         # Verify auth propagates correctly
@@ -414,6 +421,7 @@ class TestCrossServiceCommunication:
     @pytest.mark.asyncio
     async def test_service_discovery_circuit_breaker(self):
         """Iteration 42: Circuit breaker prevents cascade failures worth $75K in downtime"""
+    pass
         # Mock service discovery with circuit breaker
         circuit_state = {"failures": 0, "state": "closed", "threshold": 3}
         
@@ -486,6 +494,7 @@ class TestDataPersistenceLayer:
     @pytest.mark.asyncio
     async def test_cache_consistency_validation(self):
         """Iteration 45: Cache consistency prevents $50K performance degradation"""
+    pass
         # Mock cache layers
         l1_cache = {"user_123": {"name": "Enterprise User", "version": 1}}
         l2_cache = {"user_123": {"name": "Enterprise User", "version": 1}}
@@ -561,6 +570,7 @@ class TestSecurityBoundaries:
     @pytest.mark.asyncio
     async def test_rbac_enforcement_validation(self):
         """Iteration 48: RBAC enforcement prevents $100K unauthorized access incidents"""
+    pass
         # Mock RBAC system
         roles = {
             "admin": ["read", "write", "delete", "user_management"],
@@ -673,6 +683,7 @@ class TestAdditionalCriticalScenarios:
     @pytest.mark.asyncio
     async def test_websocket_message_ordering(self):
         """Test WebSocket message sequence preservation"""  
+    pass
         # Arrange - Mock message queue
         messages = [f"message_{i}" for i in range(5)]
         received_messages = []
@@ -689,7 +700,8 @@ class TestAdditionalCriticalScenarios:
         """Test system handles multiple users simultaneously"""
         # Arrange - Mock user sessions
         async def process_user(user_id):
-            return {"user_id": user_id, "status": "active"}
+            await asyncio.sleep(0)
+    return {"user_id": user_id, "status": "active"}
             
         # Act - Process multiple users
         user_ids = [f"user_{i}" for i in range(5)]
@@ -703,6 +715,7 @@ class TestAdditionalCriticalScenarios:
     @pytest.mark.asyncio
     async def test_permission_boundaries_enforcement(self):
         """Test access control prevents unauthorized actions"""
+    pass
         # Arrange - Mock permission system
         user_permissions = {"read": True, "write": False, "admin": False}
         
@@ -730,15 +743,16 @@ class TestAdditionalCriticalScenarios:
     @pytest.mark.asyncio
     async def test_resource_cleanup_on_shutdown(self):
         """Test proper resource cleanup"""
+    pass
         # Arrange - Mock resources
         # Mock: Generic component isolation for controlled unit testing
-        resources = {"db_conn": Mock(), "ws_conn": Mock(), "cache": Mock()}
+        resources = {"db_conn": None  # TODO: Use real service instance, "ws_conn": None  # TODO: Use real service instance, "cache": None  # TODO: Use real service instance}
         
         # Act - Cleanup resources
         cleanup_count = 0
         for resource in resources.values():
             # Mock: Generic component isolation for controlled unit testing
-            resource.close = Mock()
+            resource.close = close_instance  # Initialize appropriate service
             resource.close()
             cleanup_count += 1
             

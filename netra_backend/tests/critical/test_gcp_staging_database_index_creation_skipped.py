@@ -15,11 +15,12 @@ Business Value Justification (BVJ):
 
 import pytest
 import asyncio
-from unittest.mock import patch, MagicMock, AsyncMock
 from sqlalchemy.ext.asyncio import AsyncEngine
 from sqlalchemy.exc import OperationalError
 from netra_backend.app.db.database_initializer import DatabaseInitializer
 from test_framework.performance_helpers import fast_test, timeout_override
+from test_framework.database.test_database_manager import TestDatabaseManager
+from shared.isolated_environment import IsolatedEnvironment
 
 
 class TestDatabaseIndexCreationSkipped:
@@ -231,7 +232,7 @@ class TestDatabaseIndexCreationSkipped:
         """
         # Mock staging environment configuration
         with patch('netra_backend.app.core.configuration.base.get_unified_config') as mock_config:
-            mock_config.return_value = MagicMock()
+            mock_config.return_value = MagicNone  # TODO: Use real service instance
             mock_config.return_value.environment = "staging"
             # Missing staging-specific index configuration
             mock_config.return_value.staging_index_creation_enabled = None

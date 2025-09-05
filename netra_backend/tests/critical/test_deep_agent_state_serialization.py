@@ -12,7 +12,10 @@ Error location: netra_backend.app.websocket_core.manager:_send_to_connection:337
 import json
 from datetime import datetime, timezone
 from typing import Any, Dict
-from unittest.mock import AsyncMock, MagicMock, patch
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 import pytest
 from pydantic import BaseModel

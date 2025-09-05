@@ -10,12 +10,17 @@ All functions ≤8 lines. File ≤300 lines as per CLAUDE.md requirements.
 
 import sys
 from pathlib import Path
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from test_framework.database.test_database_manager import TestDatabaseManager
+from test_framework.redis.test_redis_manager import TestRedisManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 # Test framework import - using pytest fixtures instead
 
 import asyncio
 from typing import Any, Dict, Optional
-from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 

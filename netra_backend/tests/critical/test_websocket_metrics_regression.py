@@ -8,12 +8,15 @@ Business Value: Prevents metrics collection failures from impacting monitoring.
 
 import sys
 from pathlib import Path
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 # Test framework import - using pytest fixtures instead
 
 import asyncio
 from typing import Any, Dict
-from unittest.mock import AsyncMock, MagicMock, Mock, patch, patch
 
 import pytest
 from netra_backend.app.monitoring.metrics_collector import MetricsCollector, WebSocketMetrics
@@ -34,8 +37,8 @@ class TestWebSocketMetricsRegression:
         collector = MetricsCollector()
         
         # Mock connection manager that returns result without connection_stats
-        mock_manager = MagicMock()
-        mock_orchestrator = AsyncMock()
+        mock_manager = MagicNone  # TODO: Use real service instance
+        mock_orchestrator = AsyncNone  # TODO: Use real service instance
         
         # Simulate successful result but missing connection_stats key
         mock_result = ExecutionResult(
@@ -66,9 +69,9 @@ class TestWebSocketMetricsRegression:
         collector = MetricsCollector()
         
         # Mock: Generic component isolation for controlled unit testing
-        mock_manager = MagicMock()
+        mock_manager = MagicNone  # TODO: Use real service instance
         # Mock: Generic component isolation for controlled unit testing
-        mock_orchestrator = AsyncMock()
+        mock_orchestrator = AsyncNone  # TODO: Use real service instance
         
         # Simulate successful status but None result
         mock_result = ExecutionResult(
@@ -99,9 +102,9 @@ class TestWebSocketMetricsRegression:
         collector = MetricsCollector()
         
         # Mock: Generic component isolation for controlled unit testing
-        mock_manager = MagicMock()
+        mock_manager = MagicNone  # TODO: Use real service instance
         # Mock: Generic component isolation for controlled unit testing
-        mock_orchestrator = AsyncMock()
+        mock_orchestrator = AsyncNone  # TODO: Use real service instance
         
         # Simulate failed result
         mock_result = ExecutionResult(
@@ -132,9 +135,9 @@ class TestWebSocketMetricsRegression:
         collector = MetricsCollector()
         
         # Mock: Generic component isolation for controlled unit testing
-        mock_manager = MagicMock()
+        mock_manager = MagicNone  # TODO: Use real service instance
         # Mock: Generic component isolation for controlled unit testing
-        mock_orchestrator = AsyncMock()
+        mock_orchestrator = AsyncNone  # TODO: Use real service instance
         
         # Simulate successful result with proper connection_stats
         expected_stats = {
@@ -180,7 +183,7 @@ class TestWebSocketMetricsRegression:
         
         # Test with None result
         # Mock: Generic component isolation for controlled unit testing
-        mock_result = MagicMock()
+        mock_result = MagicNone  # TODO: Use real service instance
         mock_result.success = True
         mock_result.result = None
         stats = manager._extract_modern_stats(mock_result)

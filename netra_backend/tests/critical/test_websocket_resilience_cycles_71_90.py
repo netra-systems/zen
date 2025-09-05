@@ -13,7 +13,9 @@ Cycles Covered: 71-90
 
 import pytest
 import asyncio
-from unittest.mock import patch, MagicMock, AsyncMock
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from auth_service.core.auth_manager import AuthManager
+from shared.isolated_environment import IsolatedEnvironment
 
 from netra_backend.app.websocket_core.manager import WebSocketManager
 from netra_backend.app.core.unified_logging import get_logger

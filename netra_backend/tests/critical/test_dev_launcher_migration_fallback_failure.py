@@ -18,13 +18,17 @@ Business Value Justification (BVJ):
 
 import pytest
 import asyncio
-from unittest.mock import patch, MagicMock, AsyncMock
 from sqlalchemy.exc import ProgrammingError, OperationalError, IntegrityError
 from alembic import command
 from alembic.config import Config
 from alembic.runtime.migration import MigrationContext
 from netra_backend.app.db.database_initializer import DatabaseInitializer
 from test_framework.performance_helpers import fast_test, timeout_override
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from test_framework.database.test_database_manager import TestDatabaseManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 
 class TestMigrationFailureFallbackIssues:
@@ -149,7 +153,7 @@ class TestMigrationFailureFallbackIssues:
             
             def mock_create_table(*args, **kwargs):
                 create_table_calls.append(args[0] if args else 'unknown_table')
-                return MagicMock()
+                return MagicNone  # TODO: Use real service instance
             
             with patch('sqlalchemy.Table.create', side_effect=mock_create_table):
                 with patch.object(initializer, 'create_tables_if_missing') as mock_create_tables:

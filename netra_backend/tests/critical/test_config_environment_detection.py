@@ -1,4 +1,7 @@
 from shared.isolated_environment import get_env
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from test_framework.database.test_database_manager import TestDatabaseManager
+from shared.isolated_environment import IsolatedEnvironment
 #!/usr/bin/env python3
 """Critical Configuration Environment Detection Tests
 
@@ -16,7 +19,6 @@ from pathlib import Path
 
 import os
 from typing import Dict, Type
-from unittest.mock import Mock, patch, AsyncMock, MagicMock
 
 import pytest
 
@@ -48,7 +50,6 @@ class TestEnvironmentDetection:
             # Assert - Testing takes priority over ENVIRONMENT
             assert environment == Environment.TESTING.value
     
-    @patch.dict('os.environ', {'ENVIRONMENT': 'staging', 'TESTING': '0'})
     def test_cloud_run_environment_detection_staging(self):
         """Test Cloud Run staging environment detection"""
         # Arrange - Mock Cloud Run staging

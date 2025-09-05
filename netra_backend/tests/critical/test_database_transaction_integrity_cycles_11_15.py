@@ -14,9 +14,10 @@ Cycles Covered: 11, 12, 13, 14, 15
 import pytest
 import asyncio
 import time
-from unittest.mock import patch, MagicMock
 from sqlalchemy import text
 from sqlalchemy.exc import SQLAlchemyError, IntegrityError
+from test_framework.database.test_database_manager import TestDatabaseManager
+from shared.isolated_environment import IsolatedEnvironment
 
 from netra_backend.app.db.database_manager import DatabaseManager
 from netra_backend.app.core.unified_logging import get_logger

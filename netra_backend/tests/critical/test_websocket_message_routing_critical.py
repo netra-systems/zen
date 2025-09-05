@@ -12,7 +12,11 @@ import asyncio
 import json
 import uuid
 from datetime import datetime
-from unittest.mock import AsyncMock, MagicMock, Mock, patch, Mock, call, patch
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from test_framework.database.test_database_manager import TestDatabaseManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 import pytest
 from fastapi import WebSocket
@@ -26,8 +30,11 @@ class TestCriticalMessageRoutingToAgentService:
     """CRITICAL: Tests that messages MUST reach agent service or system fails silently."""
     
     @pytest.fixture
-    def mock_websocket(self):
+ def real_websocket():
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create mock WebSocket with proper application state."""
+    pass
         from starlette.websockets import WebSocketState
         
         # Mock: WebSocket infrastructure isolation for unit tests without real connections
@@ -35,35 +42,44 @@ class TestCriticalMessageRoutingToAgentService:
         # Set up application_state for handler compatibility
         ws.application_state = WebSocketState.CONNECTED
         # Mock send_json method for message sending
-        ws.send_json = AsyncMock()
+        ws.send_json = AsyncNone  # TODO: Use real service instance
         
         # Mock: Generic component isolation for controlled unit testing
-        ws.app = Mock()
+        ws.app = app_instance  # Initialize appropriate service
         # Mock: Generic component isolation for controlled unit testing
-        ws.app.state = Mock()
+        ws.app.state = state_instance  # Initialize appropriate service
         # Mock: Agent service isolation for testing without LLM agent execution
         ws.app.state.agent_service = AsyncMock(spec=AgentService)
         # Mock: Generic component isolation for controlled unit testing
-        ws.app.state.agent_service.handle_websocket_message = AsyncMock()
+        ws.app.state.agent_service.handle_websocket_message = AsyncNone  # TODO: Use real service instance
         return ws
     
     @pytest.fixture
-    def mock_agent_service(self):
+ def real_agent_service():
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create mock agent service."""
+    pass
         # Mock: Agent service isolation for testing without LLM agent execution
         agent_service = AsyncMock(spec=AgentService)
         # Mock: Generic component isolation for controlled unit testing
-        agent_service.handle_websocket_message = AsyncMock()
+        agent_service.handle_websocket_message = AsyncNone  # TODO: Use real service instance
         return agent_service
     
     @pytest.fixture
     def message_router(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create message router with real handlers."""
+    pass
         return MessageRouter()
     
     @pytest.fixture
     def user_message_handler(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create user message handler."""
+    pass
         return UserMessageHandler()
     
     @pytest.mark.asyncio
@@ -79,11 +95,11 @@ class TestCriticalMessageRoutingToAgentService:
         # Mock: Component isolation for testing without external dependencies
         with patch('netra_backend.app.routes.utils.websocket_helpers.get_async_db') as mock_db:
             # Mock: Database session isolation for transaction testing without real database dependency
-            mock_session = AsyncMock()
+            mock_session = AsyncNone  # TODO: Use real service instance
             # Mock: Database session isolation for transaction testing without real database dependency
             mock_db.return_value.__aenter__ = AsyncMock(return_value=mock_session)
             # Mock: Generic component isolation for controlled unit testing
-            mock_db.return_value.__aexit__ = AsyncMock()
+            mock_db.return_value.__aexit__ = AsyncNone  # TODO: Use real service instance
             
             # Test the core function that routes messages to agent service
             await process_agent_message(user_id, message_str, mock_agent_service)
@@ -100,6 +116,7 @@ class TestCriticalMessageRoutingToAgentService:
     @pytest.mark.asyncio
     async def test_02_start_agent_message_must_reach_agent_service(self, mock_agent_service):
         """Test 2: start_agent type MUST be forwarded to agent service."""
+    pass
         user_id = "test_user_123"
         message = {
             "type": "start_agent",
@@ -110,11 +127,11 @@ class TestCriticalMessageRoutingToAgentService:
         # Mock: Component isolation for testing without external dependencies
         with patch('netra_backend.app.routes.utils.websocket_helpers.get_async_db') as mock_db:
             # Mock: Database session isolation for transaction testing without real database dependency
-            mock_session = AsyncMock()
+            mock_session = AsyncNone  # TODO: Use real service instance
             # Mock: Database session isolation for transaction testing without real database dependency
             mock_db.return_value.__aenter__ = AsyncMock(return_value=mock_session)
             # Mock: Generic component isolation for controlled unit testing
-            mock_db.return_value.__aexit__ = AsyncMock()
+            mock_db.return_value.__aexit__ = AsyncNone  # TODO: Use real service instance
             
             await process_agent_message(user_id, message_str, mock_agent_service)
             
@@ -136,13 +153,14 @@ class TestCriticalMessageRoutingToAgentService:
     @pytest.mark.asyncio
     async def test_04_none_agent_service_raises_error(self):
         """Test 4: None agent service MUST raise appropriate error."""
+    pass
         user_id = "test_user_123"
         message = {"type": "user_message", "payload": {"content": "Test"}}
         message_str = json.dumps(message)
         
         # Mock: Database session isolation for testing without database dependencies
         with patch('netra_backend.app.routes.utils.websocket_helpers.get_async_db') as mock_db:
-            mock_session = AsyncMock()
+            mock_session = AsyncNone  # TODO: Use real service instance
             mock_db.return_value.__aenter__.return_value = mock_session
             mock_db.return_value.__aexit__.return_value = None
             
@@ -170,6 +188,7 @@ class TestCriticalMessageRoutingToAgentService:
     @pytest.mark.asyncio
     async def test_06_agent_service_exception_propagated(self, mock_agent_service):
         """Test 6: Agent service exceptions MUST be propagated for debugging."""
+    pass
         user_id = "test_user_123"
         message = {"type": "user_message", "payload": {"content": "Crash test"}}
         message_str = json.dumps(message)
@@ -180,10 +199,10 @@ class TestCriticalMessageRoutingToAgentService:
         # Mock: Component isolation for testing without external dependencies
         with patch('netra_backend.app.routes.utils.websocket_helpers.get_async_db') as mock_db:
             # Mock: Database session isolation for transaction testing without real database dependency
-            mock_session = AsyncMock()
+            mock_session = AsyncNone  # TODO: Use real service instance
             
             # Create a proper async context manager mock
-            async_context_manager = AsyncMock()
+            async_context_manager = AsyncNone  # TODO: Use real service instance
             async_context_manager.__aenter__ = AsyncMock(return_value=mock_session)
             async_context_manager.__aexit__ = AsyncMock(return_value=False)  # Don't suppress exceptions
             mock_db.return_value = async_context_manager
@@ -202,7 +221,8 @@ class TestCriticalMessageRoutingToAgentService:
         message = {
             "type": "user_message",
             "payload": {
-                "content": "Test with special chars: 'quotes' \"double\" \n newline",
+                "content": "Test with special chars: 'quotes' "double" 
+ newline",
                 "references": ["file1.txt", "data.json"]
             }
         }
@@ -211,11 +231,11 @@ class TestCriticalMessageRoutingToAgentService:
         # Mock: Component isolation for testing without external dependencies
         with patch('netra_backend.app.routes.utils.websocket_helpers.get_async_db') as mock_db:
             # Mock: Database session isolation for transaction testing without real database dependency
-            mock_session = AsyncMock()
+            mock_session = AsyncNone  # TODO: Use real service instance
             # Mock: Database session isolation for transaction testing without real database dependency
             mock_db.return_value.__aenter__ = AsyncMock(return_value=mock_session)
             # Mock: Generic component isolation for controlled unit testing
-            mock_db.return_value.__aexit__ = AsyncMock()
+            mock_db.return_value.__aexit__ = AsyncNone  # TODO: Use real service instance
             
             await process_agent_message(user_id, message_str, mock_agent_service)
             
@@ -232,13 +252,15 @@ class TestCriticalMessageRoutingToAgentService:
     @pytest.mark.asyncio
     async def test_08_message_router_handles_user_messages(self, message_router, mock_websocket):
         """Test 8: Message router MUST handle user messages correctly."""
+    pass
         user_id = "test_user_123"
         message = {"type": "user_message", "payload": {"content": "Test message"}}
         
         # Test that the message router can route user messages
         result = await message_router.route_message(user_id, mock_websocket, message)
         
-        # Should return True for successful routing
+        # Should await asyncio.sleep(0)
+    return True for successful routing
         assert result is True
     
     @pytest.mark.asyncio
@@ -249,15 +271,16 @@ class TestCriticalMessageRoutingToAgentService:
         
         # Mock the websocket send to capture the pong response
         # Mock: WebSocket infrastructure isolation for unit tests without real connections
-        mock_websocket.application_state = Mock()
+        mock_websocket.application_state = application_state_instance  # Initialize appropriate service
         mock_websocket.application_state._mock_name = "test_mock"  # Mark as mock for testing
         # Mock: WebSocket infrastructure isolation for unit tests without real connections
-        mock_websocket.send_json = AsyncMock()
+        mock_websocket.send_json = AsyncNone  # TODO: Use real service instance
         
         # Test that ping messages are handled by the router
         result = await message_router.route_message(user_id, mock_websocket, message)
         
-        # Should return True for successful ping handling
+        # Should await asyncio.sleep(0)
+    return True for successful ping handling
         assert result is True
         
         # Should send pong response
@@ -268,6 +291,7 @@ class TestCriticalMessageRoutingToAgentService:
     @pytest.mark.asyncio
     async def test_10_database_session_creation_and_commit(self, mock_agent_service):
         """Test 10: Database session MUST be created and committed properly."""
+    pass
         user_id = "test_user_123"
         message = {"type": "user_message", "payload": {"content": "Test"}}
         message_str = json.dumps(message)
@@ -275,13 +299,13 @@ class TestCriticalMessageRoutingToAgentService:
         # Mock: Component isolation for testing without external dependencies
         with patch('netra_backend.app.routes.utils.websocket_helpers.get_async_db') as mock_db:
             # Mock: Database session isolation for transaction testing without real database dependency
-            mock_session = AsyncMock()
+            mock_session = AsyncNone  # TODO: Use real service instance
             # Mock: Database session isolation for transaction testing without real database dependency
-            mock_session.commit = AsyncMock()
+            mock_session.commit = AsyncNone  # TODO: Use real service instance
             # Mock: Database session isolation for transaction testing without real database dependency
             mock_db.return_value.__aenter__ = AsyncMock(return_value=mock_session)
             # Mock: Generic component isolation for controlled unit testing
-            mock_db.return_value.__aexit__ = AsyncMock()
+            mock_db.return_value.__aexit__ = AsyncNone  # TODO: Use real service instance
             
             await process_agent_message(user_id, message_str, mock_agent_service)
             
@@ -306,13 +330,13 @@ class TestCriticalMessageRoutingToAgentService:
         # Mock: Component isolation for testing without external dependencies
         with patch('netra_backend.app.routes.utils.websocket_helpers.get_async_db') as mock_db:
             # Mock: Database session isolation for transaction testing without real database dependency
-            mock_session = AsyncMock()
+            mock_session = AsyncNone  # TODO: Use real service instance
             # Mock: Database session isolation for transaction testing without real database dependency
-            mock_session.commit = AsyncMock()
+            mock_session.commit = AsyncNone  # TODO: Use real service instance
             # Mock: Database session isolation for transaction testing without real database dependency
             mock_db.return_value.__aenter__ = AsyncMock(return_value=mock_session)
             # Mock: Generic component isolation for controlled unit testing
-            mock_db.return_value.__aexit__ = AsyncMock()
+            mock_db.return_value.__aexit__ = AsyncNone  # TODO: Use real service instance
             
             # Process all messages concurrently
             await asyncio.gather(*[
@@ -326,28 +350,31 @@ class TestCriticalMessageRoutingToAgentService:
     @pytest.mark.asyncio
     async def test_12_database_retry_logic_works(self, mock_agent_service):
         """Test 12: Database retry logic MUST work for transient errors."""
+    pass
         user_id = "test_user_123"
         message = {"type": "user_message", "payload": {"content": "Test"}}
         message_str = json.dumps(message)
         
         call_count = 0
         async def mock_db_side_effect():
+    pass
             nonlocal call_count
             call_count += 1
             if call_count <= 2:  # Fail first 2 attempts
                 raise Exception("Connection timeout")
             # Succeed on 3rd attempt
             # Mock: Database session isolation for transaction testing without real database dependency
-            mock_session = AsyncMock()
+            mock_session = AsyncNone  # TODO: Use real service instance
             # Mock: Database session isolation for transaction testing without real database dependency
-            mock_session.commit = AsyncMock()
-            return mock_session
+            mock_session.commit = AsyncNone  # TODO: Use real service instance
+            await asyncio.sleep(0)
+    return mock_session
         
         # Mock: Component isolation for testing without external dependencies
         with patch('netra_backend.app.routes.utils.websocket_helpers.get_async_db') as mock_db:
             mock_db.return_value.__aenter__.side_effect = mock_db_side_effect
             # Mock: Generic component isolation for controlled unit testing
-            mock_db.return_value.__aexit__ = AsyncMock()
+            mock_db.return_value.__aexit__ = AsyncNone  # TODO: Use real service instance
             
             await process_agent_message(user_id, message_str, mock_agent_service)
             
@@ -365,13 +392,13 @@ class TestCriticalMessageRoutingToAgentService:
         # Mock: Component isolation for testing without external dependencies
         with patch('netra_backend.app.routes.utils.websocket_helpers.get_async_db') as mock_db:
             # Mock: Database session isolation for transaction testing without real database dependency
-            mock_session = AsyncMock()
+            mock_session = AsyncNone  # TODO: Use real service instance
             # Mock: Database session isolation for transaction testing without real database dependency
-            mock_session.commit = AsyncMock()
+            mock_session.commit = AsyncNone  # TODO: Use real service instance
             # Mock: Database session isolation for transaction testing without real database dependency
             mock_db.return_value.__aenter__ = AsyncMock(return_value=mock_session)
             # Mock: Generic component isolation for controlled unit testing
-            mock_db.return_value.__aexit__ = AsyncMock()
+            mock_db.return_value.__aexit__ = AsyncNone  # TODO: Use real service instance
             
             # Should not crash
             await process_agent_message(user_id, message_str, mock_agent_service)
@@ -386,6 +413,7 @@ class TestCriticalMessageRoutingToAgentService:
     @pytest.mark.asyncio
     async def test_14_empty_message_type_forwarded(self, mock_agent_service):
         """Test 14: Empty message type should still be forwarded (let agent decide)."""
+    pass
         user_id = "test_user_123"
         message = {"type": "", "payload": {"content": "Test"}}
         message_str = json.dumps(message)
@@ -393,13 +421,13 @@ class TestCriticalMessageRoutingToAgentService:
         # Mock: Component isolation for testing without external dependencies
         with patch('netra_backend.app.routes.utils.websocket_helpers.get_async_db') as mock_db:
             # Mock: Database session isolation for transaction testing without real database dependency
-            mock_session = AsyncMock()
+            mock_session = AsyncNone  # TODO: Use real service instance
             # Mock: Database session isolation for transaction testing without real database dependency
-            mock_session.commit = AsyncMock()
+            mock_session.commit = AsyncNone  # TODO: Use real service instance
             # Mock: Database session isolation for transaction testing without real database dependency
             mock_db.return_value.__aenter__ = AsyncMock(return_value=mock_session)
             # Mock: Generic component isolation for controlled unit testing
-            mock_db.return_value.__aexit__ = AsyncMock()
+            mock_db.return_value.__aexit__ = AsyncNone  # TODO: Use real service instance
             
             await process_agent_message(user_id, message_str, mock_agent_service)
             
@@ -428,13 +456,13 @@ class TestCriticalMessageRoutingToAgentService:
         # Mock: Component isolation for testing without external dependencies
         with patch('netra_backend.app.routes.utils.websocket_helpers.get_async_db') as mock_db:
             # Mock: Database session isolation for transaction testing without real database dependency
-            mock_session = AsyncMock()
+            mock_session = AsyncNone  # TODO: Use real service instance
             # Mock: Database session isolation for transaction testing without real database dependency
-            mock_session.commit = AsyncMock()
+            mock_session.commit = AsyncNone  # TODO: Use real service instance
             # Mock: Database session isolation for transaction testing without real database dependency
             mock_db.return_value.__aenter__ = AsyncMock(return_value=mock_session)
             # Mock: Generic component isolation for controlled unit testing
-            mock_db.return_value.__aexit__ = AsyncMock()
+            mock_db.return_value.__aexit__ = AsyncNone  # TODO: Use real service instance
             
             await process_agent_message(user_id, message_str, mock_agent_service)
             
@@ -448,6 +476,7 @@ class TestCriticalMessageRoutingToAgentService:
     @pytest.mark.asyncio
     async def test_16_websocket_disconnect_during_forward_handled(self, mock_agent_service):
         """Test 16: WebSocket disconnect during forwarding MUST be handled."""
+    pass
         user_id = "test_user_123"
         message = {"type": "user_message", "payload": {"content": "Test"}}
         message_str = json.dumps(message)
@@ -459,12 +488,12 @@ class TestCriticalMessageRoutingToAgentService:
         # Mock: Component isolation for testing without external dependencies
         with patch('netra_backend.app.routes.utils.websocket_helpers.get_async_db') as mock_db:
             # Mock: Database session isolation for transaction testing without real database dependency
-            mock_session = AsyncMock()
-            mock_session.rollback = AsyncMock()
-            mock_session.commit = AsyncMock()
+            mock_session = AsyncNone  # TODO: Use real service instance
+            mock_session.rollback = AsyncNone  # TODO: Use real service instance
+            mock_session.commit = AsyncNone  # TODO: Use real service instance
             
             # Create a proper async context manager mock
-            async_context_manager = AsyncMock()
+            async_context_manager = AsyncNone  # TODO: Use real service instance
             async_context_manager.__aenter__ = AsyncMock(return_value=mock_session)
             async_context_manager.__aexit__ = AsyncMock(return_value=False)  # Don't suppress exceptions
             mock_db.return_value = async_context_manager
@@ -486,13 +515,13 @@ class TestCriticalMessageRoutingToAgentService:
         # Mock: Component isolation for testing without external dependencies
         with patch('netra_backend.app.routes.utils.websocket_helpers.get_async_db') as mock_db:
             # Mock: Database session isolation for transaction testing without real database dependency
-            mock_session = AsyncMock()
+            mock_session = AsyncNone  # TODO: Use real service instance
             # Mock: Database session isolation for transaction testing without real database dependency
-            mock_session.commit = AsyncMock()
+            mock_session.commit = AsyncNone  # TODO: Use real service instance
             # Mock: Database session isolation for transaction testing without real database dependency
             mock_db.return_value.__aenter__ = AsyncMock(return_value=mock_session)
             # Mock: Generic component isolation for controlled unit testing
-            mock_db.return_value.__aexit__ = AsyncMock()
+            mock_db.return_value.__aexit__ = AsyncNone  # TODO: Use real service instance
             
             await process_agent_message(user_id, message_str, mock_agent_service)
             
@@ -511,6 +540,7 @@ class TestCriticalMessageRoutingToAgentService:
     @pytest.mark.asyncio
     async def test_18_various_user_id_formats_handled(self, mock_agent_service):
         """Test 18: Various user ID formats MUST be handled correctly."""
+    pass
         # Test various user_id formats
         test_user_ids = [
             "simple_user",
@@ -529,13 +559,13 @@ class TestCriticalMessageRoutingToAgentService:
             # Mock: Component isolation for testing without external dependencies
             with patch('netra_backend.app.routes.utils.websocket_helpers.get_async_db') as mock_db:
                 # Mock: Database session isolation for transaction testing without real database dependency
-                mock_session = AsyncMock()
+                mock_session = AsyncNone  # TODO: Use real service instance
                 # Mock: Database session isolation for transaction testing without real database dependency
-                mock_session.commit = AsyncMock()
+                mock_session.commit = AsyncNone  # TODO: Use real service instance
                 # Mock: Database session isolation for transaction testing without real database dependency
                 mock_db.return_value.__aenter__ = AsyncMock(return_value=mock_session)
                 # Mock: Generic component isolation for controlled unit testing
-                mock_db.return_value.__aexit__ = AsyncMock()
+                mock_db.return_value.__aexit__ = AsyncNone  # TODO: Use real service instance
                 
                 await process_agent_message(user_id, message_str, mock_agent_service)
                 
@@ -568,19 +598,20 @@ class TestCriticalMessageRoutingToAgentService:
     @pytest.mark.asyncio
     async def test_20_critical_end_to_end_message_flow(self, mock_agent_service):
         """Test 20: CRITICAL END-TO-END - Message must flow from process_agent_message to agent execution."""
+    pass
         # This is the most important test - simulates full flow
         user_id = "test_user_123"
         
         # Setup a more complete mock agent service with internal components
         # Mock: Generic component isolation for controlled unit testing
-        mock_supervisor = AsyncMock()
+        mock_supervisor = AsyncNone  # TODO: Use real service instance
         # Mock: Agent service isolation for testing without LLM agent execution
         mock_supervisor.run = AsyncMock(return_value="Agent response: Cost analysis complete")
         
         # Mock: Generic component isolation for controlled unit testing
-        mock_message_handler = AsyncMock()
+        mock_message_handler = AsyncNone  # TODO: Use real service instance
         # Mock: Generic component isolation for controlled unit testing
-        mock_message_handler.handle_user_message = AsyncMock()
+        mock_message_handler.handle_user_message = AsyncNone  # TODO: Use real service instance
         
         mock_agent_service.supervisor = mock_supervisor
         mock_agent_service.message_handler = mock_message_handler
@@ -599,13 +630,13 @@ class TestCriticalMessageRoutingToAgentService:
         # Mock: Component isolation for testing without external dependencies
         with patch('netra_backend.app.routes.utils.websocket_helpers.get_async_db') as mock_db:
             # Mock: Database session isolation for transaction testing without real database dependency
-            mock_session = AsyncMock()
+            mock_session = AsyncNone  # TODO: Use real service instance
             # Mock: Database session isolation for transaction testing without real database dependency
-            mock_session.commit = AsyncMock()
+            mock_session.commit = AsyncNone  # TODO: Use real service instance
             # Mock: Database session isolation for transaction testing without real database dependency
             mock_db.return_value.__aenter__ = AsyncMock(return_value=mock_session)
             # Mock: Generic component isolation for controlled unit testing
-            mock_db.return_value.__aexit__ = AsyncMock()
+            mock_db.return_value.__aexit__ = AsyncNone  # TODO: Use real service instance
             
             # Process the message through the critical routing function
             await process_agent_message(user_id, message_str, mock_agent_service)

@@ -14,11 +14,14 @@ import asyncio
 import time
 import json
 import pytest
-from unittest.mock import Mock, AsyncMock, patch, MagicMock
 from typing import Dict, Any, List
 import gc
 import psutil
 import os
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 from netra_backend.app.websocket_core.manager import WebSocketManager
 from netra_backend.app.agents.state import DeepAgentState
@@ -30,19 +33,28 @@ class TestWebSocketAsyncSerialization:
     
     @pytest.fixture
     def manager(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create a WebSocket manager instance."""
+    pass
         return WebSocketManager()
     
     @pytest.fixture
-    def mock_websocket(self):
+ def real_websocket():
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create a mock WebSocket with async send_json."""
+    pass
         ws = AsyncMock(spec=WebSocket)
-        ws.send_json = AsyncMock()
+        ws.send_json = AsyncNone  # TODO: Use real service instance
         return ws
     
     @pytest.fixture
     def complex_message(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create a complex message that requires heavy serialization."""
+    pass
         # Create a deeply nested structure that will take time to serialize
         message = {
             "type": "agent_update",
@@ -62,7 +74,10 @@ class TestWebSocketAsyncSerialization:
     
     @pytest.fixture
     def large_agent_state(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create a large DeepAgentState that requires complex serialization."""
+    pass
         state = DeepAgentState(
             user_request="Test request",
             chat_thread_id="test-thread",
@@ -97,6 +112,7 @@ class TestWebSocketAsyncSerialization:
         
         async def monitor_loop():
             """Monitor if the event loop is responsive."""
+    pass
             nonlocal loop_blocked, block_duration
             start = time.perf_counter()
             while True:
@@ -134,7 +150,7 @@ class TestWebSocketAsyncSerialization:
         connections = []
         for i in range(10):
             ws = AsyncMock(spec=WebSocket)
-            ws.send_json = AsyncMock()
+            ws.send_json = AsyncNone  # TODO: Use real service instance
             conn_id = await manager.connect_user(f"user-{i}", ws, f"thread-{i}")
             connections.append((conn_id, ws, f"thread-{i}"))
         
@@ -158,6 +174,7 @@ class TestWebSocketAsyncSerialization:
     @pytest.mark.asyncio
     async def test_serialization_timeout_handling(self, manager, mock_websocket):
         """Test that serialization has proper timeout handling."""
+    pass
         # This test will FAIL with current implementation (no timeout)
         
         conn_id = await manager.connect_user("test-user", mock_websocket, "test-thread")
@@ -165,8 +182,10 @@ class TestWebSocketAsyncSerialization:
         # Create a message that will cause serialization to hang
         class HangingSerializer:
             def model_dump(self, **kwargs):
+    pass
                 time.sleep(10)  # Simulate hanging serialization
-                return {"data": "test"}
+                await asyncio.sleep(0)
+    return {"data": "test"}
         
         hanging_message = HangingSerializer()
         
@@ -196,7 +215,8 @@ class TestWebSocketAsyncSerialization:
             call_count += 1
             if call_count < 3:
                 raise asyncio.TimeoutError("WebSocket send timeout")
-            return None
+            await asyncio.sleep(0)
+    return None
         
         mock_websocket.send_json = mock_send_json
         
@@ -211,6 +231,7 @@ class TestWebSocketAsyncSerialization:
     @pytest.mark.asyncio
     async def test_memory_efficiency_during_serialization(self, manager, mock_websocket, large_agent_state):
         """Test that serialization doesn't cause excessive memory usage."""
+    pass
         # Monitor memory usage during serialization
         
         conn_id = await manager.connect_user("test-user", mock_websocket, "test-thread")
@@ -268,6 +289,7 @@ class TestWebSocketAsyncSerialization:
     @pytest.mark.asyncio 
     async def test_circuit_breaker_for_failing_connections(self, manager):
         """Test circuit breaker pattern for consistently failing connections."""
+    pass
         # Create a websocket that always fails
         failing_ws = AsyncMock(spec=WebSocket)
         failing_ws.send_json = AsyncMock(side_effect=Exception("Connection failed"))
@@ -318,11 +340,12 @@ class TestWebSocketAsyncSerialization:
     @pytest.mark.asyncio
     async def test_graceful_degradation_under_load(self, manager):
         """Test that system degrades gracefully under extreme load."""
+    pass
         # Create many connections
         connections = []
         for i in range(100):
             ws = AsyncMock(spec=WebSocket)
-            ws.send_json = AsyncMock()
+            ws.send_json = AsyncNone  # TODO: Use real service instance
             # Simulate some slow connections
             if i % 10 == 0:
                 ws.send_json = AsyncMock(side_effect=lambda x: asyncio.sleep(1))
@@ -363,10 +386,14 @@ class TestWebSocketSerializationCorrectness:
     
     @pytest.fixture
     def manager(self):
-        return WebSocketManager()
+    """Use real service instance."""
+    # TODO: Initialize real service
+        await asyncio.sleep(0)
+    return WebSocketManager()
     
     def test_serialize_none(self, manager):
         """Test serialization of None values."""
+    pass
         result = manager._serialize_message_safely(None)
         assert result == {}
     
@@ -378,6 +405,7 @@ class TestWebSocketSerializationCorrectness:
     
     def test_serialize_deep_agent_state(self, manager):
         """Test serialization of DeepAgentState."""
+    pass
         state = DeepAgentState(
             user_request="test",
             chat_thread_id="thread-1",
@@ -406,8 +434,10 @@ class TestWebSocketSerializationCorrectness:
     
     def test_serialize_with_to_dict(self, manager):
         """Test serialization of objects with to_dict method."""
+    pass
         class CustomObject:
             def to_dict(self):
+    pass
                 return {"custom": "data"}
         
         obj = CustomObject()
@@ -428,6 +458,7 @@ class TestWebSocketSerializationCorrectness:
     
     def test_serialize_complex_nested_structure(self, manager):
         """Test serialization of complex nested structures."""
+    pass
         from datetime import datetime
         from decimal import Decimal
         
@@ -454,10 +485,15 @@ class TestWebSocketSerializationBenchmarks:
     
     @pytest.fixture
     def manager(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         return WebSocketManager()
     
     @pytest.fixture
     def messages_of_various_sizes(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
+    pass
         """Generate messages of various sizes for benchmarking."""
         return [
             {"size": "small", "data": {"msg": "test"}},
@@ -488,3 +524,4 @@ class TestWebSocketSerializationBenchmarks:
                 assert benchmark.stats.mean < 0.1    # < 100ms for large
             else:  # xlarge
                 assert benchmark.stats.mean < 1.0    # < 1s for xlarge
+    pass

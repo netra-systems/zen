@@ -1,4 +1,9 @@
 from shared.isolated_environment import get_env
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from test_framework.database.test_database_manager import TestDatabaseManager
+from test_framework.redis.test_redis_manager import TestRedisManager
+from auth_service.core.auth_manager import AuthManager
+from shared.isolated_environment import IsolatedEnvironment
 #!/usr/bin/env python3
 """
 env = get_env()
@@ -22,7 +27,6 @@ These tests will FAIL initially to confirm the issues exist, then PASS after fix
 
 import os
 import pytest
-from unittest.mock import patch, MagicMock
 from typing import Dict, Any
 
 from netra_backend.app.core.secret_manager import SecretManager, SecretManagerError
@@ -89,7 +93,7 @@ class TestSecretKeyConfigurationRegression:
         # Arrange - Mock JWT token generation without proper SECRET_KEY
         with patch('netra_backend.app.core.auth.jwt_manager.JWTManager') as mock_jwt:
             # Simulate missing or invalid SECRET_KEY
-            mock_jwt_instance = MagicMock()
+            mock_jwt_instance = MagicNone  # TODO: Use real service instance
             mock_jwt_instance.generate_token.side_effect = ValueError("Invalid secret key")
             mock_jwt.return_value = mock_jwt_instance
             

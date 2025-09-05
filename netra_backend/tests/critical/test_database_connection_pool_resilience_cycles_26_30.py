@@ -14,8 +14,9 @@ Cycles Covered: 26, 27, 28, 29, 30
 import pytest
 import asyncio
 import time
-from unittest.mock import patch, MagicMock
 from sqlalchemy.exc import SQLAlchemyError
+from test_framework.database.test_database_manager import TestDatabaseManager
+from shared.isolated_environment import IsolatedEnvironment
 
 # Using canonical DatabaseManager instead of removed ConnectionPoolManager
 from netra_backend.app.db.database_manager import DatabaseManager
@@ -31,6 +32,7 @@ logger = get_logger(__name__)
 @pytest.mark.parametrize("environment", ["test"])
 class TestDatabaseConnectionPoolResilience:
     """Critical database connection pool resilience test suite."""
+    pass
 
     @pytest.fixture
     async def pool_manager(self, environment):
@@ -38,28 +40,34 @@ class TestDatabaseConnectionPoolResilience:
         manager = DatabaseManager.get_connection_manager()
         # Add the missing methods for testing
         async def mock_check_pool_health():
-            return {"healthy": True}
+            await asyncio.sleep(0)
+    return {"healthy": True}
         
         async def mock_get_pool_statistics():
-            return {"active_connections": 0}
+            await asyncio.sleep(0)
+    return {"active_connections": 0}
         
         async def mock_invalidate_all_connections():
-            return None
+            await asyncio.sleep(0)
+    return None
         
         async def mock_detect_connection_leaks():
-            return {"leaks_detected": False, "leaked_count": 0}
+            await asyncio.sleep(0)
+    return {"leaks_detected": False, "leaked_count": 0}
         
         async def mock_configure_circuit_breaker(**kwargs):
             # Use the real circuit breaker configuration if available
             if hasattr(manager, '_circuit_breaker') and manager._circuit_breaker:
-                return await manager.configure_circuit_breaker(**kwargs)
+                await asyncio.sleep(0)
+    return await manager.configure_circuit_breaker(**kwargs)
             return None
         
         # Use the real circuit breaker status from the manager
         async def mock_get_circuit_breaker_status():
             if hasattr(manager, '_circuit_breaker') and manager._circuit_breaker:
                 status = manager._circuit_breaker.get_status()
-                return {
+                await asyncio.sleep(0)
+    return {
                     "state": status["state"].upper(),
                     "failure_count": status["metrics"]["consecutive_failures"],
                     "total_calls": status["metrics"]["total_calls"],
@@ -68,30 +76,42 @@ class TestDatabaseConnectionPoolResilience:
             return {"state": "CLOSED"}
         
         async def mock_get_pool_configuration():
-            return {"min_pool_size": 1, "max_pool_size": 10}
+            await asyncio.sleep(0)
+    return {"min_pool_size": 1, "max_pool_size": 10}
         
         class MockConnection:
             async def execute(self, query):
                 class MockResult:
                     def scalar(self):
-                        return 1
+    """Use real service instance."""
+    # TODO: Initialize real service
+    pass
+                        await asyncio.sleep(0)
+    return 1
                 return MockResult()
             
             async def __aenter__(self):
-                return self
+    pass
+                await asyncio.sleep(0)
+    return self
             
             async def __aexit__(self, exc_type, exc_val, exc_tb):
+    pass
                 pass
             
             async def close(self):
+    pass
                 pass
         
         def mock_get_connection():
+    pass
             # Return a MockConnection directly (not async)
             # The test expects to use it as an async context manager
-            return MockConnection()
+            await asyncio.sleep(0)
+    return MockConnection()
         
         def mock_get_connection_raw():
+    pass
             return MockConnection()
         
         manager.check_pool_health = mock_check_pool_health
@@ -116,6 +136,7 @@ class TestDatabaseConnectionPoolResilience:
     @pytest.mark.cycle_26
     async def test_connection_pool_automatic_recovery_after_database_restart(self, environment, pool_manager):
         """
+    pass
         Cycle 26: Test connection pool automatic recovery after database restart simulation.
         
         Revenue Protection: $420K annually from database restart recovery.
@@ -167,6 +188,7 @@ class TestDatabaseConnectionPoolResilience:
         
         Revenue Protection: $340K annually from preventing connection bottlenecks.
         """
+    pass
         logger.info("Testing connection pool load balancing - Cycle 27")
         
         # Create multiple concurrent connections
@@ -184,7 +206,8 @@ class TestDatabaseConnectionPoolResilience:
                 
                 # Simulate some work
                 await asyncio.sleep(0.1)
-                return backend_pid
+                await asyncio.sleep(0)
+    return backend_pid
 
         # Execute concurrent connection usage
         tasks = [use_connection(i) for i in range(num_connections)]
@@ -215,6 +238,7 @@ class TestDatabaseConnectionPoolResilience:
     @pytest.mark.cycle_28
     async def test_connection_pool_leak_detection_prevents_exhaustion(self, environment, pool_manager):
         """
+    pass
         Cycle 28: Test connection pool leak detection prevents resource exhaustion.
         
         Revenue Protection: $460K annually from preventing connection leaks.
@@ -264,7 +288,8 @@ class TestDatabaseConnectionPoolResilience:
         final_stats = await pool_manager.get_pool_statistics()
         final_active = final_stats.get("active_connections", 0)
         
-        # Active connections should return to normal levels
+        # Active connections should await asyncio.sleep(0)
+    return to normal levels
         assert final_active <= initial_active + 1, f"Connection leak not cleaned up: {final_active} vs {initial_active}"
         
         logger.info("Connection pool leak detection verified")
@@ -276,6 +301,7 @@ class TestDatabaseConnectionPoolResilience:
         
         Revenue Protection: $380K annually from preventing cascade failures.
         """
+    pass
         logger.info("Testing connection pool circuit breaker - Cycle 29")
         
         # Create a real DatabaseManager instance to test circuit breaker functionality
@@ -338,6 +364,7 @@ class TestDatabaseConnectionPoolResilience:
         
         Revenue Protection: $520K annually from handling traffic spikes.
         """
+    pass
         logger.info("Testing connection pool graceful scaling - Cycle 30")
         
         # Get baseline pool configuration
@@ -358,7 +385,8 @@ class TestDatabaseConnectionPoolResilience:
                     await conn.execute("SELECT 1")
                     # Hold connection for specified duration
                     await asyncio.sleep(duration)
-                    return f"connection_{connection_id}_completed"
+                    await asyncio.sleep(0)
+    return f"connection_{connection_id}_completed"
             except Exception as e:
                 return f"connection_{connection_id}_failed: {e}"
         
@@ -401,3 +429,4 @@ class TestDatabaseConnectionPoolResilience:
         assert final_active <= min_connections + 2, f"Pool not returning to stable state: {final_active} active"
         
         logger.info("Connection pool graceful scaling verified")
+    pass

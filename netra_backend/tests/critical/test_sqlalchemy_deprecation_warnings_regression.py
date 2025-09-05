@@ -1,4 +1,7 @@
 from shared.isolated_environment import get_env
+from test_framework.database.test_database_manager import TestDatabaseManager
+from auth_service.core.auth_manager import AuthManager
+from shared.isolated_environment import IsolatedEnvironment
 #!/usr/bin/env python3
 """
 SQLAlchemy Deprecation Warning Staging Regression Tests
@@ -22,7 +25,6 @@ These tests will FAIL initially to confirm the issues exist, then PASS after fix
 import os
 import pytest
 import warnings
-from unittest.mock import patch, MagicMock
 from typing import Dict, Any, List
 
 import sqlalchemy

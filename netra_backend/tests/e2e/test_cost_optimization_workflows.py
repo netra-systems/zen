@@ -8,6 +8,7 @@ import asyncio
 import uuid
 from decimal import Decimal
 from typing import Dict, List, Optional
+from shared.isolated_environment import IsolatedEnvironment
 
 import pytest
 import pytest_asyncio

@@ -1,4 +1,7 @@
 from shared.isolated_environment import get_env
+from test_framework.database.test_database_manager import TestDatabaseManager
+from test_framework.redis.test_redis_manager import TestRedisManager
+from shared.isolated_environment import IsolatedEnvironment
 """
 Test-Driven Correction (TDC) Tests for Comprehensive Edge Cases of GCP Staging Issues
 Critical staging issues: Additional edge cases and combinations
@@ -17,7 +20,6 @@ Business Value Justification (BVJ):
 import pytest
 import asyncio
 import os
-from unittest.mock import patch, MagicMock, AsyncMock
 from contextlib import asynccontextmanager
 from netra_backend.app.db.clickhouse_base import ClickHouseDatabase
 from netra_backend.app.redis_manager import RedisManager
@@ -64,7 +66,7 @@ class TestGCPStagingEdgeCases:
             # Test Redis corruption
             try:
                 with patch('redis.asyncio.Redis') as mock_redis:
-                    mock_redis.return_value = AsyncMock()
+                    mock_redis.return_value = AsyncNone  # TODO: Use real service instance
                     mock_redis.return_value.ping.side_effect = ConnectionError("Invalid host with control characters")
                     redis_manager = RedisManager()
                     await redis_manager.connect()

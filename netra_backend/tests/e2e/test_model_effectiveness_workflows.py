@@ -7,6 +7,8 @@ Maximum 300 lines, functions ≤8 lines.
 import asyncio
 import uuid
 from typing import Dict, List, Optional
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from shared.isolated_environment import IsolatedEnvironment
 
 import pytest
 import pytest_asyncio

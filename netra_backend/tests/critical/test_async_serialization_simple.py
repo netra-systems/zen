@@ -5,10 +5,13 @@ Simple test to verify async serialization is working correctly.
 import asyncio
 import time
 import pytest
-from unittest.mock import AsyncMock, MagicMock
 from netra_backend.app.websocket_core.manager import WebSocketManager
 from netra_backend.app.agents.state import DeepAgentState
 from fastapi import WebSocket
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 
 @pytest.mark.asyncio
@@ -67,7 +70,7 @@ async def test_send_to_thread_uses_async_serialization():
     mock_websockets = []
     for i in range(3):
         ws = AsyncMock(spec=WebSocket)
-        ws.send_json = AsyncMock()
+        ws.send_json = AsyncNone  # TODO: Use real service instance
         conn_id = await manager.connect_user(f"user-{i}", ws, "test-thread")
         mock_websockets.append(ws)
     

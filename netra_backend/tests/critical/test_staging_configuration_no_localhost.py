@@ -1,4 +1,6 @@
 from shared.isolated_environment import get_env
+from test_framework.database.test_database_manager import TestDatabaseManager
+from shared.isolated_environment import IsolatedEnvironment
 """
 Critical Test: Staging Configuration Must Not Use Localhost Defaults
 
@@ -14,7 +16,6 @@ accidentally use localhost as default values for database hosts.
 
 import os
 import pytest
-from unittest.mock import patch, MagicMock
 from typing import Dict, Any
 
 from netra_backend.app.core.exceptions_config import ConfigurationError
@@ -52,7 +53,6 @@ class TestNoLocalhostDefaults:
 class TestStagingConfigurationValidation:
     """Test that staging configuration properly validates database hosts."""
     
-    @patch.dict(os.environ, {"ENVIRONMENT": "staging"}, clear=False)
     def test_staging_requires_explicit_clickhouse_host(self):
         """Staging must require explicit CLICKHOUSE_HOST configuration."""
         from netra_backend.app.core.configuration.database import DatabaseConfigManager
@@ -81,7 +81,6 @@ class TestStagingConfigurationValidation:
             
             assert "CLICKHOUSE_HOST not configured for staging environment" in str(exc_info.value)
     
-    @patch.dict(os.environ, {"ENVIRONMENT": "staging"}, clear=False)
     def test_staging_accepts_explicit_clickhouse_host(self):
         """Staging should accept explicitly configured CLICKHOUSE_HOST."""
         from netra_backend.app.core.configuration.database import DatabaseConfigManager
@@ -109,7 +108,6 @@ class TestStagingConfigurationValidation:
             assert config["host"] == "clickhouse.staging.example.com"
             assert config["host"] != "localhost"
     
-    @patch.dict(os.environ, {"ENVIRONMENT": "production"}, clear=False)
     def test_production_requires_explicit_clickhouse_host(self):
         """Production must require explicit CLICKHOUSE_HOST configuration."""
         from netra_backend.app.core.configuration.database import DatabaseConfigManager
@@ -142,7 +140,6 @@ class TestStagingConfigurationValidation:
 class TestDevelopmentConfigurationDefaults:
     """Test that development configuration properly handles defaults."""
     
-    @patch.dict(os.environ, {"ENVIRONMENT": "development"}, clear=False)
     def test_development_uses_localhost_when_not_configured(self):
         """Development should use localhost when CLICKHOUSE_HOST is not set."""
         from netra_backend.app.core.configuration.database import DatabaseConfigManager
@@ -166,7 +163,6 @@ class TestDevelopmentConfigurationDefaults:
             config = db_manager._get_clickhouse_configuration()
             assert config["host"] == "localhost", "Development should default to localhost when CLICKHOUSE_HOST not set"
     
-    @patch.dict(os.environ, {"ENVIRONMENT": "testing"}, clear=False)
     def test_testing_uses_localhost_when_not_configured(self):
         """Testing environment should use localhost when CLICKHOUSE_HOST is not set."""
         from netra_backend.app.core.configuration.database import DatabaseConfigManager
@@ -194,7 +190,6 @@ class TestDevelopmentConfigurationDefaults:
 class TestPostgreSQLValidation:
     """Test PostgreSQL configuration validation for staging/production."""
     
-    @patch.dict(os.environ, {"ENVIRONMENT": "staging"}, clear=False)
     def test_staging_rejects_localhost_postgres(self):
         """Staging should reject localhost for PostgreSQL connections."""
         from netra_backend.app.core.configuration.database import DatabaseConfigManager
@@ -208,7 +203,6 @@ class TestPostgreSQLValidation:
         
         assert "Localhost not allowed in staging" in str(exc_info.value)
     
-    @patch.dict(os.environ, {"ENVIRONMENT": "staging"}, clear=False)
     def test_staging_accepts_cloudsql_postgres(self):
         """Staging should accept Cloud SQL Unix socket connections."""
         from netra_backend.app.core.configuration.database import DatabaseConfigManager
@@ -220,7 +214,6 @@ class TestPostgreSQLValidation:
         cloud_sql_url = "postgresql://user:pass@/db?host=/cloudsql/project:region:instance"
         db_manager._validate_postgres_url(cloud_sql_url)  # Should not raise
     
-    @patch.dict(os.environ, {"ENVIRONMENT": "production"}, clear=False)
     def test_production_rejects_localhost_postgres(self):
         """Production should reject localhost for PostgreSQL connections."""
         from netra_backend.app.core.configuration.database import DatabaseConfigManager
@@ -238,7 +231,6 @@ class TestPostgreSQLValidation:
 class TestConfigurationIntegration:
     """Integration tests for complete configuration loading."""
     
-    @patch.dict(os.environ, {"ENVIRONMENT": "staging"}, clear=False)
     def test_staging_config_creation_validates_hosts(self):
         """Creating StagingConfig should validate database hosts."""
         from netra_backend.app.core.configuration.base import UnifiedConfigManager

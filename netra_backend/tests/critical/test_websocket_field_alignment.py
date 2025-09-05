@@ -5,6 +5,7 @@ This test prevents the regression where frontend sends 'content' but backend exp
 
 import sys
 from pathlib import Path
+from shared.isolated_environment import IsolatedEnvironment
 
 # Test framework import - using pytest fixtures instead
 
