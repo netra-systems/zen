@@ -2863,7 +2863,7 @@ class UnifiedDockerManager:
             self._save_state(state)
 
     def get_statistics(self) -> Dict[str, Any]:
-        """Get Docker management statistics with orchestration data."""
+        """Get Docker management statistics with orchestration data and memory monitoring."""
         state = self._load_state()
         
         stats = {
@@ -2885,6 +2885,32 @@ class UnifiedDockerManager:
         # Restart statistics
         for service, history in self._restart_history.items():
             stats["restart_counts"][service] = len(history)
+        
+        # Add memory and resource monitoring statistics
+        try:
+            resource_snapshot = self.resource_monitor.check_system_resources()
+            monitoring_stats = self.resource_monitor.get_monitoring_stats()
+            
+            stats["memory_monitoring"] = {
+                "system_memory_percent": resource_snapshot.system_memory.percentage,
+                "system_cpu_percent": resource_snapshot.system_cpu.percentage,
+                "docker_containers_count": int(resource_snapshot.docker_containers.current_usage),
+                "docker_networks_count": int(resource_snapshot.docker_networks.current_usage),
+                "docker_volumes_count": int(resource_snapshot.docker_volumes.current_usage),
+                "overall_threshold_level": resource_snapshot.get_max_threshold_level().value,
+                "total_cleanups_performed": monitoring_stats["total_cleanups_performed"],
+                "monitor_uptime_seconds": monitoring_stats["monitor_uptime_seconds"]
+            }
+            
+            # Add container memory warnings
+            high_memory_containers = self._check_container_memory_thresholds()
+            if high_memory_containers:
+                stats["memory_monitoring"]["high_memory_containers"] = [
+                    {"container": container, "memory_percent": usage} 
+                    for container, usage in high_memory_containers
+                ]
+        except Exception as e:
+            stats["memory_monitoring"] = {"error": str(e)}
         
         return stats
 
