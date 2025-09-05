@@ -145,15 +145,20 @@ def ensure_session_lifecycle_logging(session: AsyncSession, operation: str) -> N
 
 def _validate_session_type(session) -> None:
     """Validate session is AsyncSession type and tag with request context."""
-    if not isinstance(session, AsyncSession):
-        logger.error(f"Invalid session type: {type(session)}")
-        raise RuntimeError(f"Expected AsyncSession, got {type(session)}")
+    from shared.database.session_validation import validate_db_session, is_real_session
     
-    # Tag session as request-scoped
-    if not hasattr(session, 'info'):
-        session.info = {}
-    session.info['is_request_scoped'] = True
-    session.info['validated_at'] = datetime.now().isoformat()
+    try:
+        validate_db_session(session, "dependencies_validation")
+    except TypeError as e:
+        logger.error(f"Invalid session type: {type(session)}")
+        raise RuntimeError(str(e))
+    
+    # Tag session as request-scoped (only for real sessions)
+    if is_real_session(session):
+        if not hasattr(session, 'info'):
+            session.info = {}
+        session.info['is_request_scoped'] = True
+        session.info['validated_at'] = datetime.now().isoformat()
     
     logger.debug(f"Dependency injected session type: {type(session).__name__}")
     if session:
