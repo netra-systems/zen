@@ -168,9 +168,122 @@ def get_unified_circuit_breaker_manager() -> UnifiedCircuitBreakerManager:
     return _unified_manager
 
 
-def unified_circuit_breaker(name: str) -> UnifiedCircuitBreaker:
-    """Get unified circuit breaker by name."""
-    return _unified_manager.get_breaker(name)
+def unified_circuit_breaker(name: str, config: Optional[UnifiedCircuitConfig] = None):
+    """Decorator for applying circuit breaker protection to functions.
+    
+    Args:
+        name: Name of the circuit breaker
+        config: Optional configuration for the circuit breaker
+    
+    Returns:
+        Decorator function that wraps the target function with circuit breaker protection
+    """
+    import functools
+    import asyncio
+    from typing import Callable
+    
+    def decorator(func: Callable):
+        # Create or get the circuit breaker for this function
+        if config:
+            breaker = _unified_manager.create_breaker(name, config)
+        else:
+            breaker = _unified_manager.get_breaker(name)
+        
+        @functools.wraps(func)
+        async def async_wrapper(*args, **kwargs):
+            """Wrapper for async functions."""
+            # Check if circuit is open before attempting
+            if breaker.state == UnifiedCircuitBreakerState.OPEN:
+                # Check if we should transition to half-open
+                if breaker.last_failure_time and (time.time() - breaker.last_failure_time) > breaker.config.recovery_timeout:
+                    breaker.state = UnifiedCircuitBreakerState.HALF_OPEN
+                else:
+                    from netra_backend.app.core.circuit_breaker_types import CircuitBreakerOpenError
+                    raise CircuitBreakerOpenError(f"Circuit breaker {name} is open")
+            
+            breaker.total_calls += 1
+            
+            try:
+                # Execute the wrapped function
+                result = await func(*args, **kwargs)
+                
+                # Success - update metrics
+                breaker.success_count += 1
+                breaker.failure_count = 0
+                breaker.last_success_time = time.time()
+                
+                # Close circuit if it was half-open
+                if breaker.state == UnifiedCircuitBreakerState.HALF_OPEN:
+                    breaker.state = UnifiedCircuitBreakerState.CLOSED
+                    breaker.opened_at = None
+                
+                return result
+                
+            except Exception as e:
+                # Failure - update metrics
+                breaker.failure_count += 1
+                breaker.last_failure_time = time.time()
+                
+                # Check if we should open the circuit
+                if breaker.failure_count >= breaker.config.failure_threshold:
+                    if breaker.state == UnifiedCircuitBreakerState.CLOSED:
+                        breaker.opened_at = time.time()
+                    breaker.state = UnifiedCircuitBreakerState.OPEN
+                
+                # Re-raise the original exception
+                raise
+        
+        @functools.wraps(func)
+        def sync_wrapper(*args, **kwargs):
+            """Wrapper for sync functions."""
+            # Check if circuit is open before attempting
+            if breaker.state == UnifiedCircuitBreakerState.OPEN:
+                # Check if we should transition to half-open
+                if breaker.last_failure_time and (time.time() - breaker.last_failure_time) > breaker.config.recovery_timeout:
+                    breaker.state = UnifiedCircuitBreakerState.HALF_OPEN
+                else:
+                    from netra_backend.app.core.circuit_breaker_types import CircuitBreakerOpenError
+                    raise CircuitBreakerOpenError(f"Circuit breaker {name} is open")
+            
+            breaker.total_calls += 1
+            
+            try:
+                # Execute the wrapped function
+                result = func(*args, **kwargs)
+                
+                # Success - update metrics
+                breaker.success_count += 1
+                breaker.failure_count = 0
+                breaker.last_success_time = time.time()
+                
+                # Close circuit if it was half-open
+                if breaker.state == UnifiedCircuitBreakerState.HALF_OPEN:
+                    breaker.state = UnifiedCircuitBreakerState.CLOSED
+                    breaker.opened_at = None
+                
+                return result
+                
+            except Exception as e:
+                # Failure - update metrics
+                breaker.failure_count += 1
+                breaker.last_failure_time = time.time()
+                
+                # Check if we should open the circuit
+                if breaker.failure_count >= breaker.config.failure_threshold:
+                    if breaker.state == UnifiedCircuitBreakerState.CLOSED:
+                        breaker.opened_at = time.time()
+                    breaker.state = UnifiedCircuitBreakerState.OPEN
+                
+                # Re-raise the original exception
+                raise
+        
+        # Return appropriate wrapper based on function type
+        if asyncio.iscoroutinefunction(func):
+            return async_wrapper
+        else:
+            return sync_wrapper
+    
+    return decorator
 
 
 def unified_circuit_breaker_context(name: str):
