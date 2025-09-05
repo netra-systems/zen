@@ -107,15 +107,25 @@ class DatabaseManager:
         
         engine = self.get_engine(engine_name)
         async with AsyncSession(engine) as session:
+            original_exception = None
             try:
                 yield session
                 await session.commit()
             except Exception as e:
-                await session.rollback()
+                original_exception = e
+                try:
+                    await session.rollback()
+                except Exception as rollback_error:
+                    logger.error(f"Rollback failed: {rollback_error}")
+                    # Continue with original exception
                 logger.error(f"Database session error: {e}")
-                raise
+                raise original_exception
             finally:
-                await session.close()
+                try:
+                    await session.close()
+                except Exception as close_error:
+                    logger.error(f"Session close failed: {close_error}")
+                    # Don't raise close errors - they shouldn't prevent completion
     
     async def health_check(self, engine_name: str = 'primary') -> Dict[str, Any]:
         """Perform health check on database connection."""
@@ -249,6 +259,7 @@ def get_database_manager() -> DatabaseManager:
     return _database_manager
 
 
+@asynccontextmanager
 async def get_db_session(engine_name: str = 'primary'):
     """Helper to get database session."""
     manager = get_database_manager()

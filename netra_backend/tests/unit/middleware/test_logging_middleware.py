@@ -39,8 +39,11 @@ class TestLoggingMiddleware:
         request.client = Mock()
         request.client.host = "127.0.0.1"
         request.path_params = {}
-        request.query_params = Mock()
-        request.query_params.items = Mock(return_value=[])
+        # Mock query_params as a dict-like object
+        request.query_params = {}  # Empty dict for tests
+        # Mock state for request_id storage
+        request.state = Mock()
+        request.state.request_id = "test-request-id"
         return request
     
     @pytest.mark.asyncio
@@ -49,7 +52,7 @@ class TestLoggingMiddleware:
         mock_response = Response(content="success", status_code=200)
         mock_call_next = AsyncMock(return_value=mock_response)
         
-        with patch('netra_backend.app.middleware.logging_middleware.logger') as mock_logger:
+        with patch.object(middleware, 'logger') as mock_logger:
             response = await middleware.dispatch(mock_request, mock_call_next)
             
             # Should log the request
@@ -68,7 +71,7 @@ class TestLoggingMiddleware:
         
         mock_call_next = AsyncMock(side_effect=delayed_response)
         
-        with patch('netra_backend.app.middleware.logging_middleware.logger') as mock_logger:
+        with patch.object(middleware, 'logger') as mock_logger:
             start_time = time.time()
             response = await middleware.dispatch(mock_request, mock_call_next)
             duration = time.time() - start_time
@@ -87,7 +90,7 @@ class TestLoggingMiddleware:
         )
         mock_call_next = AsyncMock(return_value=error_response)
         
-        with patch('netra_backend.app.middleware.logging_middleware.logger') as mock_logger:
+        with patch.object(middleware, 'logger') as mock_logger:
             response = await middleware.dispatch(mock_request, mock_call_next)
             
             # Error should be logged
@@ -100,7 +103,7 @@ class TestLoggingMiddleware:
         mock_response = Response(content="success", status_code=200)
         mock_call_next = AsyncMock(return_value=mock_response)
         
-        with patch('netra_backend.app.middleware.logging_middleware.logger') as mock_logger:
+        with patch.object(middleware, 'logger') as mock_logger:
             response = await middleware.dispatch(mock_request, mock_call_next)
             
             # Should include client IP in logs
@@ -113,7 +116,7 @@ class TestLoggingMiddleware:
         mock_response = Response(content="success", status_code=200)
         mock_call_next = AsyncMock(return_value=mock_response)
         
-        with patch('netra_backend.app.middleware.logging_middleware.logger') as mock_logger:
+        with patch.object(middleware, 'logger') as mock_logger:
             response = await middleware.dispatch(mock_request, mock_call_next)
             
             # Should include request ID in logs
@@ -134,7 +137,7 @@ class TestLoggingMiddleware:
         mock_response = Response(content="ok", status_code=200)
         mock_call_next = AsyncMock(return_value=mock_response)
         
-        with patch('netra_backend.app.middleware.logging_middleware.logger') as mock_logger:
+        with patch.object(middleware, 'logger') as mock_logger:
             response = await middleware.dispatch(request, mock_call_next)
             
             # Health checks might be excluded from verbose logging
@@ -158,7 +161,7 @@ class TestLoggingMiddleware:
             mock_response = Response(content="success", status_code=200)
             mock_call_next = AsyncMock(return_value=mock_response)
             
-            with patch('netra_backend.app.middleware.logging_middleware.logger') as mock_logger:
+            with patch.object(middleware, 'logger') as mock_logger:
                 response = await middleware.dispatch(request, mock_call_next)
                 
                 # Should log the method
@@ -172,7 +175,7 @@ class TestLoggingMiddleware:
         mock_response = Response(content="success", status_code=200)
         mock_call_next = AsyncMock(return_value=mock_response)
         
-        with patch('netra_backend.app.middleware.logging_middleware.logger') as mock_logger:
+        with patch.object(middleware, 'logger') as mock_logger:
             # Make logger raise exception
             mock_logger.info.side_effect = Exception("Logging failed")
             
@@ -189,7 +192,7 @@ class TestLoggingMiddleware:
         mock_response = Response(content=content, status_code=200)
         mock_call_next = AsyncMock(return_value=mock_response)
         
-        with patch('netra_backend.app.middleware.logging_middleware.logger') as mock_logger:
+        with patch.object(middleware, 'logger') as mock_logger:
             response = await middleware.dispatch(mock_request, mock_call_next)
             
             # Should log response size

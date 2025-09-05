@@ -6,7 +6,6 @@ Functionality has been consolidated into the unified data agent.
 """
 
 from typing import Any, Dict, Optional
-from unittest.mock import Mock
 from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher

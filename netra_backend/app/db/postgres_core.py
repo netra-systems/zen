@@ -589,39 +589,15 @@ def initialize_postgres():
                 
         except Exception as e:
             logger.error(f"Failed to initialize PostgreSQL: {e}")
-            # For tests, return a mock session factory to prevent hanging
-            if get_env().get('PYTEST_CURRENT_TEST'):
-                logger.warning("Creating mock session factory for test environment")
-                return _create_mock_session_factory()
+            # CRITICAL SECURITY FIX: Never return mock session factory in any environment
+            # Mock session factories cause silent data loss by accepting operations without persistence
+            # All database initialization failures MUST be raised to prevent data corruption
             raise RuntimeError(f"Failed to initialize PostgreSQL: {e}") from e
     
     logger.debug(f"initialize_postgres returning: {async_session_factory}")
     return async_session_factory
 
 
-def _create_mock_session_factory():
-    """Create a mock session factory for test environments."""
-    from unittest.mock import AsyncMock, MagicMock
-    
-    # Create a mock async session factory
-    mock_factory = MagicMock()
-    mock_session = AsyncMock()
-    
-    # Mock session methods
-    mock_session.execute = AsyncMock()
-    mock_session.commit = AsyncMock()
-    mock_session.rollback = AsyncMock()
-    mock_session.close = AsyncMock()
-    mock_session.begin = MagicMock()
-    
-    # Create async context manager for session
-    async def mock_context_manager():
-        return mock_session
-    
-    mock_factory.return_value.__aenter__ = AsyncMock(return_value=mock_session)
-    mock_factory.return_value.__aexit__ = AsyncMock(return_value=None)
-    
-    return mock_factory
 
 
 def create_async_database(db_url: str = None) -> AsyncDatabase:

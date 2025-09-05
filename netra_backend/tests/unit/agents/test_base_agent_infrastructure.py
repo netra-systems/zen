@@ -49,16 +49,49 @@ class MockBaseAgent(BaseAgent):
         self.validation_calls += 1
         return not self.should_fail_validation
     
-    async def execute_core_logic(self, context: ExecutionContext) -> Dict[str, Any]:
+    async def _execute_with_user_context(self, context: UserExecutionContext, stream_updates: bool = False) -> ExecutionResult:
+        """Modern execution pattern using UserExecutionContext."""
+        
+        # Create ExecutionContext for validation
+        exec_context = ExecutionContext(
+            request_id=context.run_id,
+            run_id=context.run_id,
+            agent_name=self.name,
+            stream_updates=stream_updates,
+            user_id=context.user_id
+        )
+        
+        # Call validate_preconditions
+        if not await self.validate_preconditions(exec_context):
+            return ExecutionResult(
+                status=ExecutionStatus.FAILED,
+                request_id=context.run_id,
+                data=None,
+                error_message="Validation failed"
+            )
+        
+        # Only increment core_logic_calls if validation passed
         self.core_logic_calls += 1
+        
         if self.should_fail_execution:
-            raise ValueError("Simulated execution failure")
-        return {
-            "status": "success",
-            "message": "Mock execution completed",
-            "context_run_id": context.run_id,
-            "agent_name": context.agent_name
-        }
+            return ExecutionResult(
+                status=ExecutionStatus.FAILED,
+                request_id=context.run_id,
+                data=None,
+                error_message="Simulated execution failure"
+            )
+            
+        return ExecutionResult(
+            status=ExecutionStatus.COMPLETED,
+            request_id=context.run_id,
+            data={
+                "status": "success",
+                "message": "Mock execution completed",
+                "context_run_id": context.run_id,
+                "agent_name": self.name
+            },
+            error_message=None
+        )
 
 
 class TestBaseAgentReliabilityInfrastructure:
@@ -508,49 +541,59 @@ class TestBaseAgentWebSocketInfrastructure:
         assert mock_bridge.notify_custom.call_count == 2
         
     @pytest.mark.asyncio
-    @patch('netra_backend.app.services.agent_websocket_bridge.get_agent_websocket_bridge')
-    async def test_send_update_integration(self, mock_get_bridge, mock_llm_manager):
-        """Test _send_update method integration with AgentWebSocketBridge."""
+    async def test_send_update_integration(self, mock_llm_manager):
+        """Test _send_update method integration with user emitter."""
         agent = MockBaseAgent(
             llm_manager=mock_llm_manager,
             name="SendUpdateAgent"
         )
         
-        # Mock the bridge
-        mock_bridge = Mock()
-        mock_bridge.notify_agent_thinking = AsyncMock()
-        mock_bridge.notify_agent_completed = AsyncMock()
-        mock_bridge.notify_custom = AsyncMock()
-        mock_get_bridge.return_value = mock_bridge
-        
-        # Test processing update
-        await agent._send_update("test_run", {
-            "status": "processing",
-            "message": "Processing request..."
-        })
-        mock_bridge.notify_agent_thinking.assert_called_once_with(
-            "test_run", "SendUpdateAgent", "Processing request..."
+        # Create a user context
+        user_context = UserExecutionContext(
+            user_id="test_user",
+            thread_id="test_thread",
+            run_id="test_run"
         )
+        agent.set_user_context(user_context)
         
-        # Test completion update
-        mock_bridge.reset_mock()
-        await agent._send_update("test_run", {
-            "status": "completed",
-            "message": "Task completed",
-            "result": {"data": "test"}
-        })
-        mock_bridge.notify_agent_completed.assert_called_once_with(
-            "test_run", "SendUpdateAgent", result={"data": "test"}, execution_time_ms=None
-        )
+        # Mock the emitter
+        mock_emitter = Mock()
+        mock_emitter.emit_agent_thinking = AsyncMock()
+        mock_emitter.emit_agent_completed = AsyncMock()
+        mock_emitter.emit_custom_event = AsyncMock()
         
-        # Test custom status update
-        mock_bridge.reset_mock()
-        await agent._send_update("test_run", {
-            "status": "custom_status",
-            "message": "Custom message",
-            "data": "custom_data"
-        })
-        mock_bridge.notify_custom.assert_called_once()
+        # Mock the _get_user_emitter method to return our mock
+        with patch.object(agent, '_get_user_emitter', return_value=mock_emitter):
+            # Test processing update
+            await agent._send_update("test_run", {
+                "status": "processing",
+                "message": "Processing request..."
+            })
+            mock_emitter.emit_agent_thinking.assert_called_once_with(
+                "SendUpdateAgent", 
+                {"agent_name": "SendUpdateAgent", "message": "Processing request..."}
+            )
+            
+            # Test completion update
+            mock_emitter.reset_mock()
+            await agent._send_update("test_run", {
+                "status": "completed",
+                "message": "Task completed",
+                "result": {"data": "test"}
+            })
+            mock_emitter.emit_agent_completed.assert_called_once_with(
+                "SendUpdateAgent",
+                {"result": {"data": "test"}, "execution_time_ms": None, "agent_name": "SendUpdateAgent"}
+            )
+            
+            # Test custom status update
+            mock_emitter.reset_mock()
+            await agent._send_update("test_run", {
+                "status": "custom_status",
+                "message": "Custom message",
+                "data": "custom_data"
+            })
+            mock_emitter.emit_custom_event.assert_called_once()
         
     @pytest.mark.asyncio
     async def test_send_helper_methods(self, mock_llm_manager):

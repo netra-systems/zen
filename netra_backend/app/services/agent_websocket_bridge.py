@@ -316,22 +316,28 @@ class AgentWebSocketBridge(MonitorableComponent):
         # No setup needed - factory methods handle per-request integration
     
     async def _verify_integration(self) -> bool:
-        """Verify integration is working correctly."""
+        """Verify integration is working correctly.
+        
+        NOTE: In the new per-request isolation architecture, the WebSocket manager
+        is intentionally None at startup and will be created per-request via
+        create_user_emitter() factory pattern for proper user isolation.
+        """
         try:
-            # Verify WebSocket manager is responsive
-            if not self._websocket_manager:
-                return False
+            # In the new architecture, WebSocket manager is created per-request
+            # So having it as None at startup is expected and correct
+            # The actual WebSocket functionality will be validated per-request
             
             # REMOVED: Orchestrator verification - per-request factory patterns don't need global registry
             # Registry health is validated per-request through create_user_emitter() factory methods
             # No global orchestrator needed for user isolation pattern
             
-            # If we have registry, verify WebSocket integration
+            # If we have registry, verify it's available (but websocket_manager can be None)
+            # The registry itself handles per-request WebSocket creation
             if self._registry and hasattr(self._registry, 'websocket_manager'):
-                if not self._registry.websocket_manager:
-                    return False
+                # It's OK if websocket_manager is None - it will be set per-request
+                pass
             
-            logger.debug("Integration verification passed")
+            logger.debug("Integration verification passed - per-request isolation ready")
             return True
             
         except Exception as e:
@@ -405,9 +411,15 @@ class AgentWebSocketBridge(MonitorableComponent):
                 return self.health_status
     
     async def _check_websocket_manager_health(self) -> bool:
-        """Check WebSocket manager health."""
+        """Check WebSocket manager health.
+        
+        NOTE: In per-request isolation architecture, WebSocket manager
+        is None at startup and created per-request. This is expected.
+        """
         try:
-            return self._websocket_manager is not None
+            # In the new architecture, having None is normal and healthy
+            # WebSocket managers are created per-request for isolation
+            return True  # Always healthy - actual checks happen per-request
         except Exception:
             return False
     

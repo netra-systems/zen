@@ -966,8 +966,17 @@ CMD ["npm", "start"]
         for key, value in service.environment_vars.items():
             env_vars.append(f"{key}={value}")
         
-        # NOTE: Database credentials (POSTGRES_*, REDIS_*) and auth secrets (JWT_*, SECRET_KEY, etc.)
-        # are mounted via --set-secrets below, so we don't add them as regular env vars to avoid conflicts
+        # CRITICAL: Retrieve and add DATABASE_URL for backend/auth
+        # Note: Individual POSTGRES_* variables are already mounted as secrets via --set-secrets
+        # We only need to add DATABASE_URL as an environment variable
+        if service.name in ["backend", "auth"]:
+            critical_secrets = self.get_critical_env_vars_from_gsm(service.name)
+            # Add DATABASE_URL as an environment variable (required for startup)
+            if "DATABASE_URL" in critical_secrets:
+                env_vars.append(f"DATABASE_URL={critical_secrets['DATABASE_URL']}")
+                print(f"      ✅ Added DATABASE_URL to environment variables")
+        
+        # NOTE: Other secrets (JWT_*, SECRET_KEY, etc.) are mounted via --set-secrets below
         
         # ⚠️ CRITICAL: Frontend environment variables - MANDATORY FOR DEPLOYMENT
         # These variables MUST be present for frontend to function

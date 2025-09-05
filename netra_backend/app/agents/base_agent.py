@@ -665,7 +665,7 @@ class BaseAgent(ABC):
             
             # Create temporary DeepAgentState bridge (DEPRECATED - will be removed)
             temp_state = DeepAgentState(
-                user_request=context.agent_context.get('user_request', 'default_request'),
+                user_request=context.metadata.get('user_request', context.metadata.get('agent_input', 'default_request')),
                 chat_thread_id=context.thread_id,
                 user_id=context.user_id,
                 run_id=context.run_id
