@@ -6,19 +6,30 @@ Performs periodic health checks on database connections.
 import asyncio
 import time
 from datetime import datetime, timezone
-from typing import Any, Dict
+from typing import Any, Dict, Optional
 
 from sqlalchemy import text
+from sqlalchemy.ext.asyncio import AsyncEngine
 
 from netra_backend.app.logging_config import central_logger
+
+# Import DatabaseManager at module level to ensure it's loaded
+try:
+    from netra_backend.app.db.database_manager import DatabaseManager
+except ImportError:
+    # Fallback import if the primary path fails
+    DatabaseManager = None
+    logger = central_logger.get_logger(__name__)
+    logger.warning("Could not import DatabaseManager from primary path")
 
 logger = central_logger.get_logger(__name__)
 
 class ConnectionHealthChecker:
     """Perform periodic health checks on database connections"""
     
-    def __init__(self, metrics) -> None:
+    def __init__(self, metrics, database_manager=None) -> None:
         self.metrics = metrics
+        self._database_manager = database_manager
         self._running = False
         self._check_interval = 60  # 1 minute
         self._monitoring_task = None
@@ -112,11 +123,9 @@ class ConnectionHealthChecker:
     
     async def _execute_test_query(self) -> None:
         """Execute a simple test query"""
-        # Use DatabaseManager to get properly configured engine
-        from netra_backend.app.db.database_manager import DatabaseManager
         try:
-            # Create a fresh engine with proper configuration
-            engine = DatabaseManager.create_application_engine()
+            # Get or create engine
+            engine = await self._get_or_create_engine()
             try:
                 # Add timeout to prevent hanging
                 async with engine.begin() as conn:
@@ -177,9 +186,8 @@ class ConnectionHealthChecker:
         response_times = []
         test_queries = self._get_test_queries()
         
-        # Use DatabaseManager to get properly configured engine
-        from netra_backend.app.db.database_manager import DatabaseManager
-        engine = DatabaseManager.create_application_engine()
+        # Get or create engine
+        engine = await self._get_or_create_engine()
         try:
             for query in test_queries:
                 response_time = await self._time_query_with_engine(query, engine)
@@ -198,11 +206,32 @@ class ConnectionHealthChecker:
             text("SELECT COUNT(*) FROM information_schema.tables")
         ]
     
+    async def _get_or_create_engine(self) -> AsyncEngine:
+        """Get or create database engine for health checks"""
+        # If database manager was injected, use it
+        if self._database_manager:
+            # Check if it's the class or an instance
+            if hasattr(self._database_manager, 'create_application_engine'):
+                return self._database_manager.create_application_engine()
+            elif hasattr(self._database_manager, 'get_engine'):
+                return self._database_manager.get_engine()
+        
+        # Use module-level imported DatabaseManager
+        if DatabaseManager:
+            return DatabaseManager.create_application_engine()
+        
+        # Last resort: try runtime import
+        try:
+            from netra_backend.app.db.database_manager import DatabaseManager as DM
+            return DM.create_application_engine()
+        except ImportError as e:
+            logger.error(f"Failed to import DatabaseManager: {e}")
+            raise RuntimeError("DatabaseManager not available for health checks")
+    
     async def _time_query(self, query) -> float:
         """Time a single query execution"""
-        # Use DatabaseManager to get properly configured engine
-        from netra_backend.app.db.database_manager import DatabaseManager
-        engine = DatabaseManager.create_application_engine()
+        # Get or create engine
+        engine = await self._get_or_create_engine()
         try:
             start_time = time.time()
             async with engine.begin() as conn:
