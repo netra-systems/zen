@@ -163,7 +163,7 @@ class TestWebSocketStateIntegration:
     @pytest.mark.asyncio
     async def test_websocket_accepts_and_stays_connected(self):
         """Test that WebSocket accepts connection and doesn't immediately disconnect."""
-        from netra_backend.app.websocket_core.manager import WebSocketManager
+        from netra_backend.app.websocket_core import WebSocketManager
         from netra_backend.app.websocket_core.utils import safe_websocket_send
         
         manager = WebSocketManager()

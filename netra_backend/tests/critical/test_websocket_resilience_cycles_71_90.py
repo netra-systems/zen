@@ -15,7 +15,7 @@ import pytest
 import asyncio
 from unittest.mock import patch, MagicMock, AsyncMock
 
-from netra_backend.app.websocket_core.manager import WebSocketManager
+from netra_backend.app.websocket_core import WebSocketManager
 from netra_backend.app.core.unified_logging import get_logger
 
 logger = get_logger(__name__)

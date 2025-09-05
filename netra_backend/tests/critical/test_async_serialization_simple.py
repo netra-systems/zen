@@ -6,7 +6,7 @@ import asyncio
 import time
 import pytest
 from unittest.mock import AsyncMock, MagicMock
-from netra_backend.app.websocket_core.manager import WebSocketManager
+from netra_backend.app.websocket_core import WebSocketManager
 from netra_backend.app.agents.state import DeepAgentState
 from fastapi import WebSocket
 

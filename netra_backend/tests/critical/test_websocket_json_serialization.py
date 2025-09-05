@@ -19,7 +19,7 @@ from netra_backend.app.schemas.agent import AgentCompleted
 from netra_backend.app.schemas.agent_models import AgentMetadata, AgentResult
 from netra_backend.app.schemas.websocket_models import WebSocketMessage
 from netra_backend.app.websocket_core.handlers import UserMessageHandler
-from netra_backend.app.websocket_core.manager import WebSocketManager
+from netra_backend.app.websocket_core import WebSocketManager
 from netra_backend.app.websocket_core.types import ServerMessage, create_server_message
 
 
