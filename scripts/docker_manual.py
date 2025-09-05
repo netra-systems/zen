@@ -71,16 +71,7 @@ class ContainerManualControl:
         Returns:
             Tuple of (runtime_command, compose_command)
         """
-        # Windows: Prefer Podman if available for better performance
-        if platform.system() == 'Windows' and not preferred:
-            if shutil.which("podman"):
-                logger.info("🐧 Windows detected - preferring Podman for better performance")
-                if shutil.which("podman-compose"):
-                    return "podman", "podman-compose"
-                elif shutil.which("docker-compose"):
-                    logger.info("Using docker-compose with Podman backend")
-                    return "podman", "docker-compose"
-        
+        # If preferred is specified, use it first
         if preferred:
             if preferred == "docker" and shutil.which("docker"):
                 if shutil.which("docker-compose"):
@@ -95,6 +86,16 @@ class ContainerManualControl:
                     if shutil.which("docker-compose"):
                         logger.info("Falling back to docker-compose with Podman backend")
                         return "podman", "docker-compose"
+        
+        # Windows: Prefer Podman if available for better performance (only if not preferred)
+        if platform.system() == 'Windows' and not preferred:
+            if shutil.which("podman"):
+                logger.info("🐧 Windows detected - preferring Podman for better performance")
+                if shutil.which("podman-compose"):
+                    return "podman", "podman-compose"
+                elif shutil.which("docker-compose"):
+                    logger.info("Using docker-compose with Podman backend")
+                    return "podman", "docker-compose"
         
         # Auto-detect (non-Windows or no Podman)
         if shutil.which("docker"):
