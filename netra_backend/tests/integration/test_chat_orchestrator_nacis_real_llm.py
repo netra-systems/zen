@@ -26,10 +26,10 @@ from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 from netra_backend.app.agents.base.interface import ExecutionContext
 from netra_backend.app.core.config import get_settings
 from shared.isolated_environment import IsolatedEnvironment
-from netra_backend.app.database import get_async_session
+from netra_backend.app.database import get_db
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.logging_config import central_logger as logger
-from netra_backend.app.websocket_core.manager import WebSocketManager
+from netra_backend.app.websocket_core import WebSocketManager
 # Removed non-existent models import - test focuses on ChatOrchestrator functionality
 
 # Real environment configuration
@@ -42,7 +42,7 @@ class TestChatOrchestratorNACISRealLLM:
     @pytest.fixture
     async def real_database_session(self):
         """Get real database session for testing."""
-        async for session in get_async_session():
+        async for session in get_db():
             yield session
             await session.rollback()
 
