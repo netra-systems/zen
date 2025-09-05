@@ -42,6 +42,7 @@ The system has a lot of async, websockets, and other patterns that require heavy
 2. Solve for the 95% of cases first. Always make sure the breadth and coverage of those expected cases is ironclad before the 5%.
 3. Limit volume of code and new features. Rather delete an ugly or overbearing test then add a ton of code just to satisfy it. Always think of the whole system.
 4. This is a multi-user system.
+5. Update tests to SSOT methods. Never re-create legacy code to pass old tests!
 
 ### Related Architecture Documents:
 - **[User Context Architecture](./USER_CONTEXT_ARCHITECTURE.md)** - Factory patterns and execution isolation (START HERE)
