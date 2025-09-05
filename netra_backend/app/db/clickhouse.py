@@ -762,10 +762,13 @@ class ClickHouseService:
         """
         self.force_mock = force_mock
         self._client = None
+        from netra_backend.app.core.resilience.unified_circuit_breaker import UnifiedCircuitConfig
         self._circuit_breaker = UnifiedCircuitBreaker(
-            name="clickhouse",
-            failure_threshold=5,
-            recovery_timeout=30
+            UnifiedCircuitConfig(
+                name="clickhouse",
+                failure_threshold=5,
+                recovery_timeout=30
+            )
         )
         self._metrics = {"queries": 0, "failures": 0, "timeouts": 0}
     

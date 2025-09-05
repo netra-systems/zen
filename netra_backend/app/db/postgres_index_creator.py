@@ -10,10 +10,32 @@ from netra_backend.app.db.index_optimizer_core import (
     IndexCreationResult,
     IndexExistenceChecker,
 )
-from netra_backend.app.db.postgres_index_connection import PostgreSQLConnectionManager
 from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
+
+
+class PostgreSQLConnectionManager:
+    """Minimal PostgreSQL connection manager stub for compatibility."""
+    
+    async def get_connection(self):
+        """Get database connection."""
+        from netra_backend.app.database import get_db
+        async with get_db() as session:
+            return session
+    
+    async def execute_on_raw_connection(self, conn, query):
+        """Execute query on connection."""
+        try:
+            await conn.execute(query)
+        except Exception as e:
+            logger.error(f"Failed to execute query: {e}")
+            raise
+    
+    async def close_connection_safely(self, conn):
+        """Close connection safely."""
+        # Connection is managed by context manager
+        pass
 
 
 class PostgreSQLIndexCreator:
