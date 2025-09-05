@@ -3,9 +3,9 @@ Test iteration 66: Multi-tenant billing accuracy validation.
 Ensures accurate usage tracking and billing attribution across tenants.
 """
 import pytest
-from unittest.mock import Mock, patch
 from datetime import datetime, timedelta, timezone
 from decimal import Decimal
+from shared.isolated_environment import IsolatedEnvironment
 
 
 class TestMultiTenantBillingAccuracy:
@@ -13,7 +13,10 @@ class TestMultiTenantBillingAccuracy:
     
     @pytest.fixture
     def billing_rates(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Define billing rates per resource type."""
+    pass
         return {
             "api_calls": Decimal("0.001"),  # $0.001 per call
             "storage_gb": Decimal("0.10"),  # $0.10 per GB/month
@@ -22,7 +25,7 @@ class TestMultiTenantBillingAccuracy:
     
     def test_usage_attribution_accuracy(self, billing_rates):
         """Ensures all usage is correctly attributed to the right tenant."""
-        usage_tracker = Mock()
+        usage_tracker = usage_tracker_instance  # Initialize appropriate service
         usage_data = []
         
         def record_usage(tenant_id: str, resource_type: str, amount: Decimal, timestamp: datetime):
@@ -51,7 +54,9 @@ class TestMultiTenantBillingAccuracy:
     
     def test_billing_calculation_precision(self, billing_rates):
         """Validates billing calculations maintain precision to prevent rounding errors."""
+    pass
         def calculate_bill(usage_records, rates):
+    pass
             total = Decimal("0.00")
             for record in usage_records:
                 cost = record["amount"] * rates[record["resource_type"]]
@@ -74,7 +79,7 @@ class TestMultiTenantBillingAccuracy:
     
     def test_cross_tenant_billing_isolation(self):
         """Prevents billing data from one tenant affecting another's bill."""
-        billing_service = Mock()
+        billing_service = billing_service_instance  # Initialize appropriate service
         
         def get_tenant_bill(tenant_id: str, start_date: datetime, end_date: datetime):
             # Simulate tenant-specific billing data
@@ -96,3 +101,4 @@ class TestMultiTenantBillingAccuracy:
         assert bill_123 != bill_456
         assert bill_123 == Decimal("45.67")
         assert bill_456 == Decimal("123.89")
+    pass

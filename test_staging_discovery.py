@@ -5,6 +5,7 @@ import aiohttp
 import asyncio
 import json
 import ssl
+from shared.isolated_environment import IsolatedEnvironment
 
 STAGING_BASE = "https://api.staging.netrasystems.ai"
 

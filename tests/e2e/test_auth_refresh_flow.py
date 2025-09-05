@@ -8,6 +8,7 @@ import time
 import httpx
 from datetime import datetime, timedelta
 import logging
+from shared.isolated_environment import IsolatedEnvironment
 
 logger = logging.getLogger(__name__)
 

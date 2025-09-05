@@ -20,6 +20,7 @@ import pytest
 import logging
 from typing import Dict, Any, Optional
 from pathlib import Path
+from shared.isolated_environment import IsolatedEnvironment
 
 # Add project root to path for imports
 import sys

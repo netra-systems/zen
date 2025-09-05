@@ -1,4 +1,5 @@
 from shared.isolated_environment import get_env
+from shared.isolated_environment import IsolatedEnvironment
 #!/usr/bin/env python
 """MISSION CRITICAL: WebSocket Sub-Agent Events Test with FORCED Real Services
 

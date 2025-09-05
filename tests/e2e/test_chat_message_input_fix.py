@@ -9,6 +9,7 @@ import json
 from typing import Dict, Any
 from test_framework.utils.websocket import create_test_message, create_websocket_mock
 from test_framework.mocks.websocket import WebSocketMock
+from shared.isolated_environment import IsolatedEnvironment
 
 class TestChatMessageInputFix:
     """Test that message input properly starts agents like example prompts do."""
@@ -23,6 +24,7 @@ class TestChatMessageInputFix:
     
     async def test_message_input_sends_start_agent_for_new_conversation(self, ws_client):
         """Test that typing a message in input field sends start_agent for new conversations."""
+    pass
         # Simulate user typing a message in a new conversation (no thread_id)
         test_message = "Help me optimize my AI costs"
         
@@ -86,6 +88,7 @@ class TestChatMessageInputFix:
     
     async def test_example_prompt_behavior_matches_input(self, ws_client):
         """Test that example prompts and message input have consistent behavior."""
+    pass
         # Example prompt behavior (from ExamplePrompts.tsx)
         example_prompt = "Analyze my cloud infrastructure for cost optimization opportunities"
         
@@ -129,7 +132,8 @@ class TestChatMessageInputFix:
     async def test_empty_message_not_sent(self, ws_client):
         """Test that empty or whitespace-only messages are not sent."""
         # These should not trigger any agent activity
-        invalid_messages = ["", " ", "   ", "\n", "\t"]
+        invalid_messages = ["", " ", "   ", "
+", "\t"]
         
         for invalid_msg in invalid_messages:
             # Attempt to send invalid message
@@ -155,6 +159,7 @@ class TestChatMessageInputFix:
     
     async def test_message_with_thread_switching(self, ws_client):
         """Test message sending when switching between threads."""
+    pass
         thread1 = "thread-001"
         thread2 = "thread-002"
         

@@ -6,6 +6,10 @@ Test classes: TestCorpusAdminDocumentManagement, TestSupplyResearcherDataCollect
 
 import sys
 from pathlib import Path
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 # Test framework import - using pytest fixtures instead
 
@@ -13,7 +17,6 @@ import asyncio
 import json
 import time
 from datetime import datetime, timezone
-from unittest.mock import AsyncMock, MagicMock, Mock, patch, call, patch
 
 import pytest
 from netra_backend.app.schemas import (
@@ -159,9 +162,9 @@ class TestCorpusAdminDocumentManagement:
     def _mock_similarity_search(self, corpus_admin):
         """Mock similarity search functionality"""
         # Mock: Generic component isolation for controlled unit testing
-        corpus_admin.vector_store = AsyncMock()
+        corpus_admin.vector_store = AsyncNone  # TODO: Use real service instance
         # Mock: Generic component isolation for controlled unit testing
-        corpus_admin.vector_store.similarity_search = AsyncMock()
+        corpus_admin.vector_store.similarity_search = AsyncNone  # TODO: Use real service instance
         corpus_admin.vector_store.similarity_search.return_value = [
             {"id": "doc1", "content": "AI optimization guide", "score": 0.95},
             {"id": "doc3", "content": "Best practices document", "score": 0.87}
@@ -193,9 +196,9 @@ class TestCorpusAdminDocumentManagement:
     def _mock_update_operations(self, corpus_admin):
         """Mock update operations"""
         # Mock: Generic component isolation for controlled unit testing
-        corpus_admin.vector_store = AsyncMock()
+        corpus_admin.vector_store = AsyncNone  # TODO: Use real service instance
         # Mock: Generic component isolation for controlled unit testing
-        corpus_admin.vector_store.update_document = AsyncMock()
+        corpus_admin.vector_store.update_document = AsyncNone  # TODO: Use real service instance
         corpus_admin.vector_store.update_document.return_value = {"success": True}
     
     def _create_update_data(self):
@@ -234,9 +237,9 @@ class TestSupplyResearcherDataCollection:
     def _mock_supply_data_sources(self, supply_researcher):
         """Mock external supply data sources"""
         # Mock: Generic component isolation for controlled unit testing
-        supply_researcher.data_sources = AsyncMock()
+        supply_researcher.data_sources = AsyncNone  # TODO: Use real service instance
         # Mock: Generic component isolation for controlled unit testing
-        supply_researcher.data_sources.fetch_supply_data = AsyncMock()
+        supply_researcher.data_sources.fetch_supply_data = AsyncNone  # TODO: Use real service instance
         supply_researcher.data_sources.fetch_supply_data.return_value = {
             "suppliers": [
                 {"id": "sup1", "name": "Supplier A", "reliability": 0.95},
@@ -277,9 +280,9 @@ class TestSupplyResearcherDataCollection:
     def _mock_enrichment_service(self, supply_researcher):
         """Mock enrichment service"""
         # Mock: Generic component isolation for controlled unit testing
-        supply_researcher.enrichment_service = AsyncMock()
+        supply_researcher.enrichment_service = AsyncNone  # TODO: Use real service instance
         # Mock: Generic component isolation for controlled unit testing
-        supply_researcher.enrichment_service.enrich = AsyncMock()
+        supply_researcher.enrichment_service.enrich = AsyncNone  # TODO: Use real service instance
         supply_researcher.enrichment_service.enrich.return_value = {
             "supplier": "Supplier A",
             "price": 1000.0,
@@ -316,7 +319,7 @@ class TestDemoServiceWorkflow:
     def _mock_demo_data_generation(self, demo_service):
         """Mock demo data generation"""
         # Mock: Generic component isolation for controlled unit testing
-        demo_service.generate_demo_data = AsyncMock()
+        demo_service.generate_demo_data = AsyncNone  # TODO: Use real service instance
         demo_service.generate_demo_data.return_value = {
             "metrics": {"accuracy": 0.95, "latency": 100},
             "recommendations": ["Increase batch size", "Use mixed precision"]

@@ -7,11 +7,15 @@ orchestration metrics, and test outcomes with ≤8 lines per function.
 
 import sys
 from pathlib import Path
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from test_framework.database.test_database_manager import TestDatabaseManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 # Test framework import - using pytest fixtures instead
 
 from typing import Any, Dict, List
-from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 def assert_agent_service_initialized(service, supervisor):
     """Assert agent service is properly initialized."""
@@ -121,7 +125,7 @@ def assert_agent_creation_tracked(metrics, expected_created, expected_destroyed)
 def setup_mock_request_model(user_request="Test request", model_id="default_id", user_id="default_user"):
     """Setup mock request model for testing."""
     # Mock: Generic component isolation for controlled unit testing
-    mock_model = MagicMock()
+    mock_model = MagicNone  # TODO: Use real service instance
     mock_model.user_request = user_request
     mock_model.id = model_id
     mock_model.user_id = user_id
@@ -130,7 +134,7 @@ def setup_mock_request_model(user_request="Test request", model_id="default_id",
 def setup_mock_request_model_with_dump(dump_data, model_id="default_id", user_id="default_user"):
     """Setup mock request model with model_dump."""
     # Mock: Generic component isolation for controlled unit testing
-    mock_model = MagicMock()
+    mock_model = MagicNone  # TODO: Use real service instance
     del mock_model.user_request
     mock_model.id = model_id
     mock_model.user_id = user_id

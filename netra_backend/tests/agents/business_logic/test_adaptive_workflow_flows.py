@@ -4,10 +4,14 @@ Validates complete agent flows (A, B, C) and flow transitions.
 """
 
 import pytest
-from unittest.mock import AsyncMock, MagicMock, patch, call
 from typing import Dict, Any, List
 import asyncio
 import json
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from test_framework.redis.test_redis_manager import TestRedisManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
 from netra_backend.app.agents.triage.unified_triage_agent import UnifiedTriageAgent
@@ -28,6 +32,7 @@ from netra_backend.tests.agents.fixtures.llm_agent_fixtures import create_mock_l
 
 class TestAdaptiveWorkflowFlows:
     """Test complete end-to-end agent workflow flows."""
+    pass
 
     @pytest.fixture
     async def supervisor_agent(self):
@@ -47,11 +52,13 @@ class TestAdaptiveWorkflowFlows:
         supervisor.actions_agent = AsyncMock(spec=ActionsToMeetGoalsSubAgent)
         supervisor.reporting_agent = AsyncMock(spec=ReportingSubAgent)
         
-        return supervisor
+        await asyncio.sleep(0)
+    return supervisor
 
     @pytest.fixture
     def flow_test_scenarios(self) -> Dict[str, Dict[str, Any]]:
         """Define complete flow test scenarios."""
+    pass
         return {
             "sufficient_data_flow": {
                 "user_request": {
@@ -192,6 +199,7 @@ class TestAdaptiveWorkflowFlows:
     @pytest.mark.asyncio
     async def test_partial_data_modified_flow(self, supervisor_agent, flow_test_scenarios):
         """Test Flow B: Modified pipeline with partial data."""
+    pass
         scenario = flow_test_scenarios["partial_data_flow"]
         
         # Setup mock responses
@@ -306,10 +314,13 @@ class TestAdaptiveWorkflowFlows:
     @pytest.mark.asyncio
     async def test_flow_transition_handling(self, supervisor_agent):
         """Test smooth transitions between agents in a flow."""
+    pass
         # Track context accumulation through flow
         context_history = []
         
         def track_context(agent_name, context):
+    """Use real service instance."""
+    # TODO: Initialize real service
             context_history.append({
                 "agent": agent_name,
                 "context": context.copy() if isinstance(context, dict) else str(context)
@@ -347,6 +358,7 @@ class TestAdaptiveWorkflowFlows:
     @pytest.mark.asyncio
     async def test_error_recovery_in_flow(self, supervisor_agent):
         """Test error handling and recovery within flows."""
+    pass
         # Simulate error in middle of flow
         supervisor_agent.triage_agent.triage.return_value = {
             "data_sufficiency": DataSufficiency.SUFFICIENT,
@@ -420,16 +432,19 @@ class TestAdaptiveWorkflowFlows:
     @pytest.mark.asyncio
     async def test_flow_performance_metrics(self, supervisor_agent):
         """Test that flow execution captures performance metrics."""
+    pass
         import time
         
         # Track timing for each agent
         timings = {}
         
         async def timed_response(agent_name, response, delay=0.1):
+    pass
             start = time.time()
             await asyncio.sleep(delay)
             timings[agent_name] = time.time() - start
-            return response
+            await asyncio.sleep(0)
+    return response
         
         supervisor_agent.triage_agent.triage.side_effect = lambda x: timed_response(
             "triage",
@@ -497,6 +512,7 @@ class TestAdaptiveWorkflowFlows:
     @pytest.mark.asyncio
     async def test_flow_state_persistence(self, supervisor_agent):
         """Test that flow state is properly persisted for resumption."""
+    pass
         # Simulate partial flow execution
         supervisor_agent.triage_agent.triage.return_value = {
             "data_sufficiency": DataSufficiency.SUFFICIENT,
@@ -556,3 +572,4 @@ class TestAdaptiveWorkflowFlows:
             assert value_prop["value"] is not None
             assert "savings" in value_prop["outcome"] or "optimization" in value_prop["outcome"]
             assert value_prop["confidence"] > 0.5
+    pass

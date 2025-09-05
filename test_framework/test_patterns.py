@@ -1,6 +1,7 @@
 """Test patterns and base classes for integration tests."""
 
 import pytest
+from shared.isolated_environment import IsolatedEnvironment
 
 
 class L3IntegrationTest:

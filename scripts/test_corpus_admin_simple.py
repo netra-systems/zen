@@ -4,7 +4,7 @@
 import asyncio
 import sys
 import os
-from unittest.mock import AsyncMock, MagicMock
+from shared.isolated_environment import IsolatedEnvironment
 
 # Add the root directory to Python path
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))

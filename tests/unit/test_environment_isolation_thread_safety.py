@@ -19,9 +19,11 @@ import time
 import pytest
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from typing import List, Dict, Any
-from unittest.mock import patch
 
 from shared.isolated_environment import get_env, IsolatedEnvironment
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
 
 
 class TestEnvironmentIsolationThreadSafety:

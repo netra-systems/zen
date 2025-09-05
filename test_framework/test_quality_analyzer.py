@@ -20,6 +20,7 @@ from dataclasses import dataclass, asdict
 from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Dict, List, Optional, Set, Tuple, Any
+from shared.isolated_environment import IsolatedEnvironment
 
 from netra_backend.app.logging_config import central_logger
 

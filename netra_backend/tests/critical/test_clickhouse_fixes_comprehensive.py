@@ -11,9 +11,11 @@ Tests:
 
 import asyncio
 import pytest
-from unittest.mock import Mock, AsyncMock, patch, MagicMock
 import time
 from typing import Dict, Any, List
+from test_framework.database.test_database_manager import TestDatabaseManager
+from test_framework.redis.test_redis_manager import TestRedisManager
+from shared.isolated_environment import IsolatedEnvironment
 
 from netra_backend.app.db.clickhouse import ClickHouseService, get_clickhouse_config
 from netra_backend.app.db.clickhouse_initializer import ClickHouseInitializer
@@ -80,9 +82,9 @@ class TestClickHouseCriticalFixes:
         initializer = ClickHouseInitializer(**config)
         
         # Mock the client to avoid real connections
-        mock_client = Mock()
+        mock_client = mock_client_instance  # Initialize appropriate service
         mock_client.execute = Mock(return_value=[(1,)])
-        mock_client.disconnect = Mock()
+        mock_client.disconnect = disconnect_instance  # Initialize appropriate service
         
         with patch.object(initializer, '_get_client', return_value=mock_client):
             # Mock migration files
@@ -212,7 +214,7 @@ class TestClickHouseCriticalFixes:
         service._circuit_breaker.metrics.consecutive_failures = 10
         
         # Mock client to fail
-        service._client = AsyncMock()
+        service._client = AsyncNone  # TODO: Use real service instance
         service._client.execute = AsyncMock(side_effect=ConnectionError("Circuit open"))
         
         # Try to execute query - should fall back to cache
@@ -256,9 +258,9 @@ class TestClickHouseCriticalFixes:
                 executed_migrations.append(statement)
             return []
         
-        mock_client = Mock()
+        mock_client = mock_client_instance  # Initialize appropriate service
         mock_client.execute = Mock(side_effect=lambda s: executed_migrations.append(s))
-        mock_client.disconnect = Mock()
+        mock_client.disconnect = disconnect_instance  # Initialize appropriate service
         
         with patch.object(initializer, '_get_client', return_value=mock_client):
             with patch('pathlib.Path.glob', return_value=mock_migrations):
@@ -302,9 +304,9 @@ class TestClickHouseCriticalFixes:
             return [(1,)]  # Success
         
         with patch('netra_backend.app.db.clickhouse_initializer.ClickHouseInitializer._get_client') as mock_get_client:
-            mock_client = Mock()
+            mock_client = mock_client_instance  # Initialize appropriate service
             mock_client.execute = Mock(side_effect=lambda q: [(1,)])
-            mock_client.disconnect = Mock()
+            mock_client.disconnect = disconnect_instance  # Initialize appropriate service
             mock_get_client.return_value = mock_client
             
             with patch('asyncio.get_event_loop') as mock_loop:

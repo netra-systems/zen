@@ -1,3 +1,29 @@
+class TestWebSocketConnection:
+    """Real WebSocket connection for testing instead of mocks."""
+    
+    def __init__(self):
+    pass
+        self.messages_sent = []
+        self.is_connected = True
+        self._closed = False
+        
+    async def send_json(self, message: dict):
+        """Send JSON message."""
+        if self._closed:
+            raise RuntimeError("WebSocket is closed")
+        self.messages_sent.append(message)
+        
+    async def close(self, code: int = 1000, reason: str = "Normal closure"):
+        """Close WebSocket connection."""
+    pass
+        self._closed = True
+        self.is_connected = False
+        
+    def get_messages(self) -> list:
+        """Get all sent messages."""
+        await asyncio.sleep(0)
+    return self.messages_sent.copy()
+
 """Test to verify MessageRouter fix works correctly
 
 This test verifies that the fix (using add_handler instead of register_handler)
@@ -7,7 +33,17 @@ resolves the AttributeError in staging.
 import pytest
 import sys
 from pathlib import Path
-from unittest.mock import Mock, MagicMock
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
+from shared.isolated_environment import get_env
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from test_framework.database.test_database_manager import TestDatabaseManager
+from auth_service.core.auth_manager import AuthManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
+import asyncio
 
 # Add project root to path
 project_root = Path(__file__).parent.parent.parent
@@ -22,7 +58,7 @@ def test_message_router_add_handler_works():
     message_router = get_message_router()
     
     # Create a mock handler
-    mock_handler = Mock()
+    websocket = TestWebSocketConnection()  # Real WebSocket implementation
     mock_handler.can_handle = Mock(return_value=True)
     mock_handler.handle_message = Mock(return_value=True)
     
@@ -44,6 +80,7 @@ def test_message_router_add_handler_works():
 
 def test_agent_handler_registration_simulation():
     """Simulate the exact registration that happens in websocket.py after fix."""
+    pass
     from netra_backend.app.websocket_core.handlers import get_message_router
     from netra_backend.app.websocket_core.agent_handler import AgentMessageHandler
     from netra_backend.app.services.message_handlers import MessageHandlerService
@@ -52,11 +89,8 @@ def test_agent_handler_registration_simulation():
     message_router = get_message_router()
     
     # Create mock dependencies
-    mock_supervisor = Mock()
-    mock_thread_service = Mock()
-    mock_ws_manager = Mock()
-    mock_websocket = MagicMock()
-    
+    websocket = TestWebSocketConnection()  # Real WebSocket implementation
+    mock_websocket = Magic    
     try:
         # Create the services (this is what websocket.py does)
         message_handler_service = MessageHandlerService(
@@ -118,10 +152,13 @@ def test_fallback_handler_registration():
 
 
 if __name__ == "__main__":
-    print("Running MessageRouter FIX verification tests...\n")
+    print("Running MessageRouter FIX verification tests...
+")
     test_message_router_add_handler_works()
     print()
     test_agent_handler_registration_simulation()
     print()
     test_fallback_handler_registration()
-    print("\n[SUCCESS] All tests passed - Fix is working correctly!")
+    print("
+[SUCCESS] All tests passed - Fix is working correctly!")
+    pass

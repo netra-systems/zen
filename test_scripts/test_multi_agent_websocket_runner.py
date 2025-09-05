@@ -8,6 +8,7 @@ import sys
 import asyncio
 import unittest
 from io import StringIO
+from shared.isolated_environment import IsolatedEnvironment
 
 def run_multi_agent_tests():
     """Run the multi-agent WebSocket integration tests."""

@@ -50,6 +50,7 @@ class AuthServiceVerificationTester:
     """Tests auth service verification logic to identify false failure scenarios."""
     
     def __init__(self):
+    pass
         self.test_results = []
         self.env = get_env()
         # Enable isolation for test environment access per CLAUDE.md
@@ -408,12 +409,14 @@ class AuthServiceVerificationTester:
     
     async def comprehensive_auth_verification_test(self) -> Dict[str, Any]:
         """Run comprehensive auth service verification test."""
-        print(f"\n=== COMPREHENSIVE AUTH SERVICE VERIFICATION ===")
+        print(f"
+=== COMPREHENSIVE AUTH SERVICE VERIFICATION ===")
         
         all_results = []
         
         # Test 1: Basic health checks for all services
-        print("\n1. Testing service health endpoints...")
+        print("
+1. Testing service health endpoints...")
         for service_name in self.service_urls.keys():
             result = await self.verify_service_health(service_name)
             all_results.append(result)
@@ -423,7 +426,8 @@ class AuthServiceVerificationTester:
                 print(f"    Error: {result.error}")
         
         # Test 2: Auth service specific endpoints
-        print("\n2. Testing auth service specific endpoints...")
+        print("
+2. Testing auth service specific endpoints...")
         auth_endpoint_results = await self.verify_auth_service_specific_endpoints()
         all_results.extend(auth_endpoint_results)
         
@@ -435,7 +439,8 @@ class AuthServiceVerificationTester:
                 print(f"    Error: {result.error}")
         
         # Test 3: JWT verification functionality
-        print("\n3. Testing JWT verification functionality...")
+        print("
+3. Testing JWT verification functionality...")
         jwt_result = await self.verify_jwt_token_functionality()
         all_results.append(jwt_result)
         
@@ -445,7 +450,8 @@ class AuthServiceVerificationTester:
             print(f"    Error: {jwt_result.error}")
         
         # Test 4: OAuth endpoints functionality
-        print("\n4. Testing OAuth endpoints functionality...")
+        print("
+4. Testing OAuth endpoints functionality...")
         oauth_results = await self.verify_oauth_flow_endpoints()
         all_results.extend(oauth_results)
         
@@ -457,7 +463,8 @@ class AuthServiceVerificationTester:
                 print(f"    Error: {result.error}")
         
         # Test 5: Port configuration verification
-        print("\n5. Testing service port configurations...")
+        print("
+5. Testing service port configurations...")
         port_results = await self.verify_service_port_configuration()
         all_results.extend(port_results)
         
@@ -481,7 +488,8 @@ class AuthServiceVerificationTester:
             'all_results': all_results
         }
         
-        print(f"\n=== VERIFICATION SUMMARY ===")
+        print(f"
+=== VERIFICATION SUMMARY ===")
         print(f"Total tests: {total_tests}")
         print(f"Passed: {passed_tests}")
         print(f"Failed: {failed_tests}")
@@ -676,7 +684,8 @@ class TestAuthServiceVerificationFixes:
                        ['nodename nor servname', 'connect call failed', 'connection refused']):
                     service_unavailable_count += 1
         
-        print(f"\n=== FALSE FAILURE ANALYSIS ===")
+        print(f"
+=== FALSE FAILURE ANALYSIS ===")
         print(f"Total tests run: {results['total_tests']}")
         print(f"Services unavailable: {service_unavailable_count}")
         print(f"Potential false failures: {len(false_failures)}")
@@ -728,7 +737,8 @@ class TestAuthServiceVerificationFixes:
             pytest.skip(f"Auth service not accessible at {auth_service_url}: {e}")
         
         # Test standard health check
-        print(f"\n=== STANDARD VS IMPROVED HEALTH CHECK COMPARISON ===")
+        print(f"
+=== STANDARD VS IMPROVED HEALTH CHECK COMPARISON ===")
         
         # Standard health check (simplified)
         standard_start = time.time()
@@ -761,14 +771,18 @@ class TestAuthServiceVerificationFixes:
         improvement_detected = improved_success and not standard_success
         
         if improvement_detected:
-            print(f"\n✅ IMPROVEMENT DETECTED: Improved health check succeeded where standard failed")
+            print(f"
+✅ IMPROVEMENT DETECTED: Improved health check succeeded where standard failed")
         elif improved_success and standard_success:
-            print(f"\n✅ BOTH METHODS SUCCESSFUL: No false failure in this case")
+            print(f"
+✅ BOTH METHODS SUCCESSFUL: No false failure in this case")
         elif not improved_success and not standard_success:
-            print(f"\n⚠️  BOTH METHODS FAILED: Service may actually be unavailable")
+            print(f"
+⚠️  BOTH METHODS FAILED: Service may actually be unavailable")
             print(f"  Details: {improved_result}")
         else:
-            print(f"\n⚠️  UNEXPECTED RESULT: Standard succeeded but improved failed")
+            print(f"
+⚠️  UNEXPECTED RESULT: Standard succeeded but improved failed")
         
         # Test passes to document comparison results
         assert True, "Health check comparison completed"
@@ -793,7 +807,8 @@ class TestAuthServiceVerificationFixes:
         except Exception as e:
             pytest.skip(f"Auth service not accessible at {auth_service_url}: {e}")
         
-        print(f"\n=== IMPROVED AUTH VERIFICATION TEST ===")
+        print(f"
+=== IMPROVED AUTH VERIFICATION TEST ===")
         
         improved_auth_verification = AuthServiceVerificationFixer.create_improved_auth_verification(auth_service_url)
         result = await improved_auth_verification()
@@ -801,7 +816,8 @@ class TestAuthServiceVerificationFixes:
         print(f"Auth verification result: {'✅ VERIFIED' if result['auth_verified'] else '❌ NOT VERIFIED'}")
         print(f"Successful methods: {result['successful_methods']}/{result['total_methods']}")
         
-        print(f"\nVerification method details:")
+        print(f"
+Verification method details:")
         for method in result['verification_methods']:
             status = "✅ PASS" if method['success'] else "❌ FAIL"
             print(f"  {method['method']}: {status}")
@@ -814,9 +830,11 @@ class TestAuthServiceVerificationFixes:
         # Even if individual methods fail, overall verification should succeed if service is functional
         
         if result['auth_verified']:
-            print(f"\n✅ AUTH SERVICE VERIFIED: Service appears functional")
+            print(f"
+✅ AUTH SERVICE VERIFIED: Service appears functional")
         else:
-            print(f"\n⚠️  AUTH SERVICE NOT VERIFIED: Service may have issues")
+            print(f"
+⚠️  AUTH SERVICE NOT VERIFIED: Service may have issues")
             print("This could indicate:")
             print("  - Service is actually down")
             print("  - Network connectivity issues")
@@ -825,12 +843,14 @@ class TestAuthServiceVerificationFixes:
         
         # Test passes to document improved verification behavior
         assert result['total_methods'] >= 3, "Should test multiple verification methods"
-        assert isinstance(result['auth_verified'], bool), "Should return boolean verification result"
+        assert isinstance(result['auth_verified'], bool), "Should await asyncio.sleep(0)
+    return boolean verification result"
     
     def test_port_configuration_mismatch_detection(self):
         """Test detection of port configuration mismatches causing verification failures."""
         
-        print(f"\n=== PORT CONFIGURATION MISMATCH DETECTION ===")
+        print(f"
+=== PORT CONFIGURATION MISMATCH DETECTION ===")
         
         # Test various port configuration scenarios
         test_configurations = [
@@ -859,7 +879,8 @@ class TestAuthServiceVerificationFixes:
         mismatches_detected = []
         
         for config in test_configurations:
-            print(f"\nTesting configuration: {config['name']}")
+            print(f"
+Testing configuration: {config['name']}")
             print(f"  URL: {config['AUTH_SERVICE_URL']}")
             print(f"  Expected working: {config['expected_working']}")
             
@@ -892,7 +913,8 @@ class TestAuthServiceVerificationFixes:
             else:
                 print(f"  ✅ Configuration appears valid")
         
-        print(f"\n=== CONFIGURATION ANALYSIS SUMMARY ===")
+        print(f"
+=== CONFIGURATION ANALYSIS SUMMARY ===")
         if mismatches_detected:
             print(f"Detected {len(mismatches_detected)} potential configuration issues:")
             for mismatch in mismatches_detected:
@@ -907,3 +929,4 @@ class TestAuthServiceVerificationFixes:
 if __name__ == "__main__":
     # Run auth service verification tests
     pytest.main([__file__, "-v", "-s", "--tb=short"])
+    pass

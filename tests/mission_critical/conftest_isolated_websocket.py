@@ -7,7 +7,9 @@ This allows us to test the bridge functionality without Docker dependencies.
 import pytest
 import os
 import asyncio
-from unittest.mock import MagicMock, AsyncMock
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
 
 # Ensure isolated environment
 os.environ['WEBSOCKET_TEST_ISOLATED'] = 'true'

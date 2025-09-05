@@ -7,6 +7,7 @@ CRITICAL: ZERO MOCKS - Uses only real Redis services and isolated environment
 import pytest
 import os
 import asyncio
+from shared.isolated_environment import IsolatedEnvironment
 
 # REAL SERVICES ONLY - No mock imports
 from test_framework.real_services import get_real_services

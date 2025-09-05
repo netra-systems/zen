@@ -21,6 +21,7 @@ import pytest
 import uuid
 from datetime import datetime, timezone, timedelta
 from typing import Dict, Any
+from shared.isolated_environment import IsolatedEnvironment
 
 from tests.e2e.oauth_test_providers import (
     GoogleOAuthProvider, GitHubOAuthProvider, OAuthUserFactory, OAuthErrorProvider, get_enterprise_config,

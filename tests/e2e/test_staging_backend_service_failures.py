@@ -87,6 +87,7 @@ class ConfigurationValidationResult:
 @pytest.mark.e2e
 class TestStagingBackendServiceFailures:
     """Comprehensive test suite for staging backend service failures using TDC methodology."""
+    pass
 
     def setup_method(self):
         """Setup isolated test environment for each test."""
@@ -96,6 +97,7 @@ class TestStagingBackendServiceFailures:
         
     def teardown_method(self):
         """Clean up test environment."""
+    pass
         if hasattr(self, 'env'):
             self.env.reset_to_original()
 
@@ -116,6 +118,7 @@ class TestStagingBackendServiceFailures:
         
         Business Impact: 100% authentication failure = 100% revenue loss
         """
+    pass
         # Test that DATABASE_URL is configured for auth service
         database_url = self.env.get("DATABASE_URL")
         
@@ -170,6 +173,7 @@ class TestStagingBackendServiceFailures:
         
         Root Cause: Database credentials invalid, database doesn't exist, or network blocked
         """
+    pass
         database_url = self.env.get("DATABASE_URL")
         
         if not database_url:
@@ -239,6 +243,7 @@ class TestStagingBackendServiceFailures:
         
         Cascade Effect: Missing env vars -> Wrong config -> Connection failures -> Service down
         """
+    pass
         # Critical environment variables for auth service
         critical_auth_vars = {
             'DATABASE_URL': {
@@ -289,9 +294,13 @@ class TestStagingBackendServiceFailures:
         
         # Report all configuration failures
         if failures:
-            failure_report = "\n".join(f"  - {failure}" for failure in failures)
+            failure_report = "
+".join(f"  - {failure}" for failure in failures)
             assert False, (
-                f"CRITICAL AUTH SERVICE CONFIGURATION FAILURES:\n{failure_report}\n\n"
+                f"CRITICAL AUTH SERVICE CONFIGURATION FAILURES:
+{failure_report}
+
+"
                 f"These missing/invalid environment variables will cause auth service startup failure, "
                 f"resulting in 100% authentication breakdown and complete platform unavailability."
             )
@@ -313,6 +322,7 @@ class TestStagingBackendServiceFailures:
         
         Business Impact: Analytics broken, deployment validation fails, monitoring gaps
         """
+    pass
         # Test ClickHouse configuration loading
         clickhouse_url = self.env.get("CLICKHOUSE_URL")
         clickhouse_host = self.env.get("CLICKHOUSE_HOST", "clickhouse.staging.netrasystems.ai")
@@ -379,6 +389,7 @@ class TestStagingBackendServiceFailures:
         
         This specifically tests the application-level ClickHouse client, not just raw connectivity
         """
+    pass
         # Test that ClickHouse client can be imported and instantiated
         try:
             from netra_backend.app.db.clickhouse import ClickHouseService as ClickHouseClient
@@ -401,7 +412,8 @@ class TestStagingBackendServiceFailures:
                 connection_time = time.time() - start_time
                 
                 # Connection succeeded
-                assert connection_result is True, "ClickHouse client connection should return True on success"
+                assert connection_result is True, "ClickHouse client connection should await asyncio.sleep(0)
+    return True on success"
                 assert connection_time < 5.0, f"ClickHouse client connection too slow: {connection_time:.2f}s"
                 print(f"SUCCESS: ClickHouse client connected in {connection_time:.2f}s")
                 
@@ -442,6 +454,7 @@ class TestStagingBackendServiceFailures:
         
         Business Impact: Performance degradation, session persistence broken, cache misses
         """
+    pass
         # Test Redis configuration loading
         redis_url = self.env.get("REDIS_URL")
         redis_host = self.env.get("REDIS_HOST")
@@ -537,6 +550,7 @@ class TestStagingBackendServiceFailures:
         
         Anti-Pattern: Silent fallbacks in staging hide production readiness issues
         """
+    pass
         # Check if Redis fallback is inappropriately enabled in staging
         redis_fallback_enabled = self.env.get("REDIS_FALLBACK_ENABLED", "true").lower() == "true"
         redis_required = self.env.get("REDIS_REQUIRED", "false").lower() == "true"
@@ -598,6 +612,7 @@ class TestStagingBackendServiceFailures:
         
         Environment Divergence: Dev (permissive) != Staging (strict) != Prod (ultra-strict)
         """
+    pass
         # Check environment detection
         netra_env = self.env.get("NETRA_ENVIRONMENT", "unknown")
         k_service = self.env.get("K_SERVICE")
@@ -633,9 +648,13 @@ class TestStagingBackendServiceFailures:
                     )
             
             if failures:
-                failure_report = "\n".join(f"  - {failure}" for failure in failures)
+                failure_report = "
+".join(f"  - {failure}" for failure in failures)
                 assert False, (
-                    f"CRITICAL STAGING CONFIGURATION DRIFT:\n{failure_report}\n\n"
+                    f"CRITICAL STAGING CONFIGURATION DRIFT:
+{failure_report}
+
+"
                     f"Staging environment is configured like development with permissive fallbacks. "
                     f"This masks infrastructure issues and creates staging/production divergence, "
                     f"leading to production failures that weren't caught in staging."
@@ -652,12 +671,14 @@ class TestStagingBackendServiceFailures:
         """
         EXPECTED TO FAIL - CRITICAL HEALTH CHECK ISSUE
         
-        Issue: /health/ready endpoints return 503 due to external service connectivity failures
+        Issue: /health/ready endpoints await asyncio.sleep(0)
+    return 503 due to external service connectivity failures
         Expected: Health endpoints return 200 when all required services accessible
         Actual: Health checks fail due to ClickHouse/Redis connectivity issues
         
         Business Impact: Deployment validation fails, monitoring alerts, service marked unhealthy
         """
+    pass
         # Test backend health endpoint
         backend_url = self.env.get("BACKEND_URL", "http://localhost:8000")
         health_url = f"{backend_url}/health/ready"
@@ -698,8 +719,10 @@ class TestStagingBackendServiceFailures:
                         
                     assert False, (
                         f"CRITICAL HEALTH CHECK FAILURE: /health/ready returned 503 after {response_time:.2f}s. "
-                        f"This indicates external service connectivity issues preventing deployment validation.\n"
-                        f"Error details:\n{error_details}"
+                        f"This indicates external service connectivity issues preventing deployment validation.
+"
+                        f"Error details:
+{error_details}"
                     )
                 else:
                     # Unexpected status code
@@ -738,6 +761,7 @@ class TestStagingBackendServiceFailures:
         
         Technical Debt: Inconsistent import patterns reduce maintainability
         """
+    pass
         # Search for deprecated import patterns in loaded modules
         deprecated_patterns = [
             "from starlette.websockets import",
@@ -760,7 +784,8 @@ class TestStagingBackendServiceFailures:
                         for pattern in deprecated_patterns:
                             if pattern in source_code:
                                 # Find line number for better reporting
-                                lines = source_code.split('\n')
+                                lines = source_code.split('
+')
                                 for i, line in enumerate(lines, 1):
                                     if pattern in line:
                                         deprecated_usage_found.append({
@@ -778,15 +803,23 @@ class TestStagingBackendServiceFailures:
         
         # Should not find any deprecated imports
         if deprecated_usage_found:
-            usage_report = "\n".join(
+            usage_report = "
+".join(
                 f"  {usage['module']}:{usage['line']}: {usage['code']}"
                 for usage in deprecated_usage_found
             )
             assert False, (
-                f"DEPRECATED WEBSOCKET IMPORTS FOUND:\n{usage_report}\n\n"
-                f"These should be updated to use FastAPI imports:\n"
-                f"  OLD: from starlette.websockets import WebSocket\n"
-                f"  NEW: from fastapi import WebSocket\n\n"
+                f"DEPRECATED WEBSOCKET IMPORTS FOUND:
+{usage_report}
+
+"
+                f"These should be updated to use FastAPI imports:
+"
+                f"  OLD: from starlette.websockets import WebSocket
+"
+                f"  NEW: from fastapi import WebSocket
+
+"
                 f"Legacy imports may cause compatibility issues and maintenance burden."
             )
 
@@ -803,6 +836,7 @@ class TestStagingBackendServiceFailures:
         
         Maintenance Impact: Inconsistent patterns increase cognitive load and error risk
         """
+    pass
         # Test that modern imports are available and preferred
         modern_imports_available = True
         try:
@@ -855,6 +889,7 @@ class TestStagingBackendServiceFailures:
         
         Business Impact: Staging/production drift leads to production failures not caught in staging
         """
+    pass
         # Test multiple environment detection methods
         detection_methods = {
             'NETRA_ENVIRONMENT': self.env.get("NETRA_ENVIRONMENT"),
@@ -895,9 +930,13 @@ class TestStagingBackendServiceFailures:
                     config_failures.append(f"{var_name}: Expected '{expected_value}', got '{actual_value}'")
             
             if config_failures:
-                failure_report = "\n".join(f"  - {failure}" for failure in config_failures)
+                failure_report = "
+".join(f"  - {failure}" for failure in config_failures)
                 assert False, (
-                    f"CRITICAL STAGING VALIDATION ENFORCEMENT FAILURE:\n{failure_report}\n\n"
+                    f"CRITICAL STAGING VALIDATION ENFORCEMENT FAILURE:
+{failure_report}
+
+"
                     f"Staging environment detected but strict validation not enforced. "
                     f"This allows inappropriate fallbacks that mask production readiness issues."
                 )
@@ -915,6 +954,7 @@ class TestStagingBackendServiceFailures:
         
         Readiness Gap: Service health != actual operational capability
         """
+    pass
         # Test comprehensive service readiness
         services_to_test = [
             {
@@ -966,13 +1006,17 @@ class TestStagingBackendServiceFailures:
         
         # Report all service readiness failures
         if service_failures:
-            failure_report = "\n".join(
+            failure_report = "
+".join(
                 f"  - {failure['service']}{failure['endpoint']}: "
                 f"Status {failure['status_code']}, Error: {failure['error']}"
                 for failure in service_failures
             )
             assert False, (
-                f"CRITICAL SERVICE READINESS FAILURES:\n{failure_report}\n\n"
+                f"CRITICAL SERVICE READINESS FAILURES:
+{failure_report}
+
+"
                 f"Critical service endpoints are failing, indicating backend service "
                 f"infrastructure issues that will cause production deployment failures."
             )
@@ -991,7 +1035,8 @@ class TestStagingBackendServiceFailures:
     ) -> ServiceConnectivityResult:
         """Create standardized connectivity test result."""
         if error:
-            return ServiceConnectivityResult(
+            await asyncio.sleep(0)
+    return ServiceConnectivityResult(
                 service_name=service_name,
                 host=host,
                 port=port,
@@ -1046,6 +1091,7 @@ async def test_auth_service_database_url_undefined_critical_failure():
     EXPECTED TO FAIL: Auth service DATABASE_URL not configured
     Root Cause: Environment variable not loaded or missing from staging configuration
     """
+    pass
     env = IsolatedEnvironment()
     env.enable_isolation_mode()
     
@@ -1076,6 +1122,7 @@ async def test_clickhouse_connectivity_timeout_critical_failure():
     EXPECTED TO FAIL: ClickHouse connections timeout to staging host
     Root Cause: Service not provisioned or network connectivity blocked  
     """
+    pass
     env = IsolatedEnvironment()
     
     try:
@@ -1106,6 +1153,7 @@ async def test_redis_connectivity_failure_fallback_masking():
     EXPECTED TO FAIL: Redis connection fails but service inappropriately continues
     Root Cause: Redis fallback enabled in staging masking infrastructure issues
     """
+    pass
     env = IsolatedEnvironment()
     
     try:

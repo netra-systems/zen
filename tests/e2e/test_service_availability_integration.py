@@ -1,6 +1,7 @@
 """Integration test for the new service availability detection system.
 
 from shared.isolated_environment import get_env
+from shared.isolated_environment import IsolatedEnvironment
 This test demonstrates how to use the service availability detection
 in E2E tests to properly handle real vs. mock services.
 """
@@ -218,7 +219,8 @@ class TestExampleUsagePatterns:
 @pytest.mark.e2e
 async def test_full_integration():
     """Full integration test of the service detection system."""
-    print("\\n=== Service Detection Integration Test ===")
+    print("\
+=== Service Detection Integration Test ===")
     
     # Get service availability
     availability = await get_service_availability()
@@ -240,7 +242,8 @@ async def test_full_integration():
     print(f"Would skip without services: {bool(skip_services)}")
     print(f"Would skip without LLM: {bool(skip_llm)}")
     
-    print("=== Integration test complete ===\\n")
+    print("=== Integration test complete ===\
+")
 
 
 if __name__ == "__main__":

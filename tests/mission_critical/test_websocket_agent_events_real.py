@@ -28,6 +28,7 @@ import time
 import uuid
 from datetime import datetime, timedelta
 from typing import Dict, List, Set, Any, Optional
+from netra_backend.app.core.agent_registry import AgentRegistry
 
 # CRITICAL: Add project root to Python path for imports
 project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
@@ -65,6 +66,7 @@ class RealWebSocketEventValidator:
     }
     
     def __init__(self, strict_mode: bool = True):
+    pass
         self.strict_mode = strict_mode
         self.events: List[Dict] = []
         self.event_timeline: List[tuple] = []  # (timestamp, event_type, data)
@@ -175,6 +177,7 @@ class RealServiceTestCore:
     """Core test infrastructure using real services."""
     
     def __init__(self):
+    pass
         self.auth_client = None
         self.backend_client = None 
         self.ws_client = None
@@ -273,6 +276,7 @@ class TestWebSocketAgentEventsReal:
     
     async def test_real_websocket_agent_event_flow(self, real_service_core):
         """
+    pass
         MISSION CRITICAL: Test complete agent event flow with REAL services.
         
         This test validates the core chat functionality that generates $500K+ ARR.
@@ -309,7 +313,9 @@ class TestWebSocketAgentEventsReal:
         success, failures = validator.validate_critical_requirements()
         
         if not success:
-            pytest.fail(f"CRITICAL WEBSOCKET EVENT FAILURES:\n" + "\n".join(failures))
+            pytest.fail(f"CRITICAL WEBSOCKET EVENT FAILURES:
+" + "
+".join(failures))
         
         # Additional real-service validations
         assert len(validator.events) >= 3, f"Insufficient events captured: {len(validator.events)}"
@@ -319,6 +325,7 @@ class TestWebSocketAgentEventsReal:
     
     async def test_real_websocket_connection_reliability(self, real_service_core):
         """
+    pass
         MISSION CRITICAL: Test WebSocket connection reliability with real services.
         
         Validates that real WebSocket connections remain stable during agent execution.
@@ -351,6 +358,7 @@ class TestWebSocketAgentEventsReal:
         
         Events must arrive in correct order: started → thinking → executing → completed
         """
+    pass
         ws_client = real_service_core["ws_client"]
         validator = RealWebSocketEventValidator()
         
@@ -380,7 +388,9 @@ class TestWebSocketAgentEventsReal:
             for i, (timestamp, event_type, event_data) in enumerate(validator.event_timeline):
                 logger.error(f"  {i+1}. {timestamp:.2f}s: {event_type}")
             
-            pytest.fail(f"CRITICAL EVENT ORDERING FAILURES:\n" + "\n".join(failures))
+            pytest.fail(f"CRITICAL EVENT ORDERING FAILURES:
+" + "
+".join(failures))
         
         logger.info(f"✅ Real agent event ordering validated - {len(collected_events)} events")
     
@@ -390,6 +400,7 @@ class TestWebSocketAgentEventsReal:
         
         Agent responses must meet performance requirements with real infrastructure.
         """
+    pass
         ws_client = real_service_core["ws_client"]
         
         start_time = time.time()
@@ -419,6 +430,7 @@ class TestWebSocketAgentEventsReal:
         
         System must handle errors gracefully and maintain WebSocket connection.
         """
+    pass
         ws_client = real_service_core["ws_client"]
         
         # Send request that might cause errors (intentionally complex)
@@ -459,6 +471,7 @@ class TestWebSocketAgentEventsReal:
         
         System must handle multiple concurrent messages without losing events.
         """
+    pass
         ws_client = real_service_core["ws_client"]
         
         # Send multiple concurrent messages
@@ -522,6 +535,7 @@ class TestWebSocketStressReal:
     
     async def test_real_websocket_sustained_load(self, real_service_core):
         """
+    pass
         STRESS TEST: Sustained WebSocket load with real services.
         
         Validates system stability under continuous real load.

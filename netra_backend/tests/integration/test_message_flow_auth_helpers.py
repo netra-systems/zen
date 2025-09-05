@@ -2,6 +2,9 @@
 
 import sys
 from pathlib import Path
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from auth_service.core.auth_manager import AuthManager
+from shared.isolated_environment import IsolatedEnvironment
 
 # Test framework import - using pytest fixtures instead
 
@@ -10,7 +13,6 @@ import json
 import time
 from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional
-from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import jwt
 import pytest

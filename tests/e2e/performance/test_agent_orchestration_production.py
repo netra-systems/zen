@@ -1,6 +1,7 @@
 """E2E Test: Agent Orchestration Production Integration
 
 from shared.isolated_environment import get_env
+from shared.isolated_environment import IsolatedEnvironment
 CRITICAL: Real agent orchestration with actual BaseAgent and DeepAgentState.
 Tests production agent workflows with real LLM integration.
 

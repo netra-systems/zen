@@ -2,6 +2,12 @@
 
 import sys
 from pathlib import Path
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from test_framework.database.test_database_manager import TestDatabaseManager
+from auth_service.core.auth_manager import AuthManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 # Test framework import - using pytest fixtures instead
 
@@ -12,7 +18,6 @@ import tracemalloc
 import uuid
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional, Tuple
-from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 from netra_backend.app.logging_config import central_logger
@@ -42,19 +47,19 @@ def mock_websocket():
 def mock_db_session():
     """Create mock database session."""
     # Mock: Database session isolation for transaction testing without real database dependency
-    mock_session = AsyncMock()
+    mock_session = AsyncNone  # TODO: Use real service instance
     # Mock: Database session isolation for transaction testing without real database dependency
-    mock_session.execute = AsyncMock()
+    mock_session.execute = AsyncNone  # TODO: Use real service instance
     # Mock: Database session isolation for transaction testing without real database dependency
-    mock_session.commit = AsyncMock()
+    mock_session.commit = AsyncNone  # TODO: Use real service instance
     # Mock: Database session isolation for transaction testing without real database dependency
-    mock_session.rollback = AsyncMock()
+    mock_session.rollback = AsyncNone  # TODO: Use real service instance
     return mock_session
 
 def mock_security_service():
     """Create mock security service."""
     # Mock: Generic component isolation for controlled unit testing
-    service = AsyncMock()
+    service = AsyncNone  # TODO: Use real service instance
     # Mock: Async component isolation for testing without real async operations
     service.decode_access_token = AsyncMock(return_value={"user_id": "test_user_123"})
     # Mock: Async component isolation for testing without real async operations
@@ -64,7 +69,7 @@ def mock_security_service():
 def mock_agent_service():
     """Create mock agent service."""
     # Mock: Generic component isolation for controlled unit testing
-    service = AsyncMock() 
+    service = AsyncNone  # TODO: Use real service instance 
     # Mock: Generic component isolation for controlled unit testing
-    service.handle_websocket_message = AsyncMock()
+    service.handle_websocket_message = AsyncNone  # TODO: Use real service instance
     return service

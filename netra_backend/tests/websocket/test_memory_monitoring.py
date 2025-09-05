@@ -5,6 +5,8 @@ Tests memory leaks, long-running connections, and resource management.
 
 import sys
 from pathlib import Path
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from shared.isolated_environment import IsolatedEnvironment
 
 import asyncio
 import gc
@@ -12,7 +14,6 @@ import random
 import time
 import uuid
 from typing import Any, Dict, List
-from unittest.mock import AsyncMock, MagicMock
 
 import psutil
 import pytest

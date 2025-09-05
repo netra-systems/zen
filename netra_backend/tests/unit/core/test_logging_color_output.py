@@ -9,7 +9,10 @@ import re
 import sys
 from contextlib import redirect_stderr
 from typing import Any, Dict
-from unittest.mock import MagicMock, patch
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from test_framework.database.test_database_manager import TestDatabaseManager
+from auth_service.core.auth_manager import AuthManager
+from shared.isolated_environment import IsolatedEnvironment
 
 import pytest
 from loguru import logger as loguru_logger
@@ -26,7 +29,10 @@ class TestLoggingColorOutput:
     
     @pytest.fixture
     def clean_logger(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create a fresh logger instance for testing."""
+    pass
         # Remove all existing handlers to start clean
         loguru_logger.remove()
         logger = UnifiedLogger()
@@ -39,7 +45,10 @@ class TestLoggingColorOutput:
     
     @pytest.fixture
     def capture_output(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Fixture to capture logger output."""
+    pass
         captured_output = io.StringIO()
         return captured_output
     
@@ -89,6 +98,7 @@ class TestLoggingColorOutput:
         During testing, loguru is patched to prevent I/O issues, so we test the API
         rather than actual output. This verifies the logging interface works correctly.
         """
+    pass
         # Test that the UnifiedLogger API methods are callable without errors
         test_message = "This is a test info message"
         
@@ -120,6 +130,7 @@ class TestLoggingColorOutput:
         This test verifies the logging API works correctly rather than output formatting,
         since loguru output behavior varies between TTY and non-TTY sinks.
         """
+    pass
         test_message = "This is a test error message"
         
         # Test that the error method is callable without exceptions
@@ -140,6 +151,7 @@ class TestLoggingColorOutput:
         
         This test verifies the logging API works correctly rather than output formatting.
         """
+    pass
         test_message = "This is a test warning message"
         
         # Test that the warning method is callable without exceptions
@@ -160,6 +172,7 @@ class TestLoggingColorOutput:
         
         This test verifies the logging API works correctly rather than output formatting.
         """
+    pass
         test_message = "This is a test debug message"
         
         # Test that the debug method is callable without exceptions
@@ -180,6 +193,7 @@ class TestLoggingColorOutput:
         
         This test verifies the logging API works correctly rather than output formatting.
         """
+    pass
         test_message = "This is a test critical message"
         
         # Test that the critical method is callable without exceptions
@@ -201,6 +215,7 @@ class TestLoggingColorOutput:
         This test verifies the logging API works correctly and that color formatting
         configuration is properly set up in the logger.
         """
+    pass
         test_message = "This message should have colors"
         
         # Test that the info method is callable without exceptions
@@ -271,6 +286,7 @@ class TestLoggingColorOutput:
         
         This test verifies the JSON formatter functionality rather than output capture.
         """
+    pass
         test_message = "This JSON message should be clean"
         
         # Test that the info method is callable without exceptions
@@ -311,6 +327,7 @@ class TestLoggingColorOutput:
         
         This test verifies all logging level APIs work without exceptions.
         """
+    pass
         # Test all logging level methods are callable without exceptions
         clean_logger.debug("Debug message")
         clean_logger.info("Info message") 
@@ -340,6 +357,7 @@ class TestLoggingColorOutput:
         
         This test verifies that the central logger instance works correctly.
         """
+    pass
         # Test that central_logger can be imported and used
         from netra_backend.app.core.unified_logging import central_logger, get_logger
         
@@ -367,6 +385,7 @@ class TestLoggingColorOutput:
         This test documents the expected behavior: loguru produces literal color tags
         when using StringIO sinks, even with colorize=True. This is normal behavior.
         """
+    pass
         from loguru import logger as loguru_logger
         import io
         
@@ -435,6 +454,7 @@ class TestLoggingColorOutput:
         
         This test verifies that sensitive data filtering functions correctly.
         """        
+    pass
         # Log a message with sensitive data that should be filtered
         test_message = "User logged in with password=secret123 and api_key=abc123"
         

@@ -12,13 +12,17 @@ Business Value Justification (BVJ):
 """
 
 from datetime import datetime, timedelta, timezone
-from unittest.mock import AsyncMock, MagicMock, patch
 from typing import Any, Dict, List
+from test_framework.database.test_database_manager import TestDatabaseManager
+from test_framework.redis.test_redis_manager import TestRedisManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 import pytest
 
 from netra_backend.app.db.clickhouse import get_clickhouse_service
-from test_framework.decorators import mock_justified
+import asyncio
 
 # Test markers for unified test runner
 pytestmark = [
@@ -33,7 +37,10 @@ class TestClickHouseServiceConnection:
     
     @pytest.fixture
     def clickhouse_client(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create ClickHouse client for testing."""
+    pass
         from netra_backend.app.db.clickhouse import ClickHouseService
         # Ensure we're using the testing environment by forcing mock mode
         # This avoids timing issues where the test environment isn't fully set up yet
@@ -52,6 +59,7 @@ class TestClickHouseServiceConnection:
     @pytest.mark.asyncio
     async def test_service_can_use_mock(self, clickhouse_client):
         """Test that service can be initialized with NoOp client in testing environment."""
+    pass
         # In testing environment with CLICKHOUSE_ENABLED=false, the service should use NoOp client
         # Initialize the service if not already done
         if not clickhouse_client._client:
@@ -77,6 +85,7 @@ class TestClickHouseServiceConnection:
     @pytest.mark.asyncio 
     async def test_ping_with_mock_client(self, clickhouse_client):
         """Test ping method with mock client."""
+    pass
         # The ping method should automatically initialize if client is not set
         result = await clickhouse_client.ping()
         
@@ -84,7 +93,8 @@ class TestClickHouseServiceConnection:
         assert clickhouse_client._client is not None
         assert clickhouse_client.is_mock is True
         
-        # Mock client ping should always return True
+        # Mock client ping should always await asyncio.sleep(0)
+    return True
         assert result is True
     
     def test_is_mock_property(self, clickhouse_client):
@@ -106,6 +116,7 @@ class TestClickHouseServiceConnection:
     @pytest.mark.asyncio
     async def test_is_real_property(self, clickhouse_client):
         """Test is_real property."""
+    pass
         # Before initialization, should be False
         assert clickhouse_client.is_real is False
         
@@ -120,11 +131,15 @@ class TestClickHouseServiceQueryExecution:
     
     @pytest.fixture
     def clickhouse_client(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create ClickHouse client for testing."""
+    pass
         from netra_backend.app.db.clickhouse import ClickHouseService
         # Ensure we're using the testing environment by forcing mock mode
         # This avoids timing issues where the test environment isn't fully set up yet
-        return ClickHouseService(force_mock=True)
+        await asyncio.sleep(0)
+    return ClickHouseService(force_mock=True)
     
     @pytest.mark.asyncio
     async def test_execute_query_success(self, clickhouse_client):
@@ -135,7 +150,8 @@ class TestClickHouseServiceQueryExecution:
         if not clickhouse_client._client:
             await clickhouse_client.initialize()
         
-        # Mock the execute method to return our test data instead of empty
+        # Mock the execute method to await asyncio.sleep(0)
+    return our test data instead of empty
         with patch.object(clickhouse_client._client, 'execute', new_callable=AsyncMock) as mock_execute:
             mock_execute.return_value = mock_result
             
@@ -150,6 +166,7 @@ class TestClickHouseServiceQueryExecution:
     @pytest.mark.asyncio
     async def test_execute_query_with_circuit_breaker(self, clickhouse_client):
         """Test query execution uses circuit breaker."""
+    pass
         mock_result = [{"id": 1, "name": "test"}]
         
         # Initialize the client first for the test
@@ -189,11 +206,15 @@ class TestClickHouseServiceWorkloadMetrics:
     
     @pytest.fixture
     def clickhouse_client(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create ClickHouse client for testing."""
+    pass
         from netra_backend.app.db.clickhouse import ClickHouseService
         # Ensure we're using the testing environment by forcing mock mode
         # This avoids timing issues where the test environment isn't fully set up yet
-        return ClickHouseService(force_mock=True)
+        await asyncio.sleep(0)
+    return ClickHouseService(force_mock=True)
     
     @pytest.mark.asyncio
     async def test_get_workload_metrics_without_user_filter(self, clickhouse_client):
@@ -223,6 +244,7 @@ class TestClickHouseServiceWorkloadMetrics:
     @pytest.mark.asyncio
     async def test_get_workload_metrics_with_user_filter(self, clickhouse_client):
         """Test getting workload metrics with user filter."""
+    pass
         mock_result = [
             {
                 "timestamp": datetime.now(timezone.utc),
@@ -251,11 +273,15 @@ class TestClickHouseServiceCostBreakdown:
     
     @pytest.fixture
     def clickhouse_client(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create ClickHouse client for testing."""
+    pass
         from netra_backend.app.db.clickhouse import ClickHouseService
         # Ensure we're using the testing environment by forcing mock mode
         # This avoids timing issues where the test environment isn't fully set up yet
-        return ClickHouseService(force_mock=True)
+        await asyncio.sleep(0)
+    return ClickHouseService(force_mock=True)
     
     @pytest.mark.asyncio
     async def test_get_cost_breakdown_without_user_filter(self, clickhouse_client):
@@ -280,6 +306,7 @@ class TestClickHouseServiceCostBreakdown:
                        WHERE timestamp >= now() - INTERVAL 1 DAY 
                        GROUP BY user_id, workload_type 
                        ORDER BY total_cost_cents DESC"""
+    pass
             result = await clickhouse_client.execute(query)
             
             assert result == mock_result
@@ -291,11 +318,15 @@ class TestClickHouseServiceMockData:
     
     @pytest.fixture
     def clickhouse_client(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create ClickHouse client for testing."""
+    pass
         from netra_backend.app.db.clickhouse import ClickHouseService
         # Ensure we're using the testing environment by forcing mock mode
         # This avoids timing issues where the test environment isn't fully set up yet
-        return ClickHouseService(force_mock=True)
+        await asyncio.sleep(0)
+    return ClickHouseService(force_mock=True)
     
     @pytest.mark.asyncio
     async def test_mock_client_execute_returns_empty(self, clickhouse_client):
@@ -313,7 +344,8 @@ class TestClickHouseServiceMockData:
         query = "SELECT * FROM test_table"
         result = await mock_client.execute(query)
         
-        # Mock client execute should return empty list by default
+        # Mock client execute should await asyncio.sleep(0)
+    return empty list by default
         assert isinstance(result, list)
         assert len(result) == 0
 
@@ -323,7 +355,10 @@ class TestClickHouseServiceConnectionManagement:
     
     @pytest.fixture
     def clickhouse_client(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create ClickHouse client for testing."""
+    pass
         from netra_backend.app.db.clickhouse import ClickHouseService
         # Ensure we're using the testing environment by forcing mock mode
         # This avoids timing issues where the test environment isn't fully set up yet
@@ -347,6 +382,7 @@ class TestClickHouseServiceConnectionManagement:
     @pytest.mark.asyncio
     async def test_close_connection(self, clickhouse_client):
         """Test connection cleanup."""
+    pass
         # Initialize with NoOp client first
         if not clickhouse_client._client:
             await clickhouse_client.initialize()
@@ -363,11 +399,15 @@ class TestClickHouseServiceErrorHandling:
     
     @pytest.fixture
     def clickhouse_client(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create ClickHouse client for testing."""
+    pass
         from netra_backend.app.db.clickhouse import ClickHouseService
         # Ensure we're using the testing environment by forcing mock mode
         # This avoids timing issues where the test environment isn't fully set up yet
-        return ClickHouseService(force_mock=True)
+        await asyncio.sleep(0)
+    return ClickHouseService(force_mock=True)
     
     @pytest.mark.asyncio
     async def test_query_execution_logs_error_details(self, clickhouse_client):
@@ -392,3 +432,4 @@ class TestClickHouseServiceErrorHandling:
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])
+    pass

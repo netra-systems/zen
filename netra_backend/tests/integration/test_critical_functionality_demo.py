@@ -7,6 +7,7 @@ This test will initially fail, showing that our testing infrastructure can catch
 import pytest
 import asyncio
 from datetime import datetime
+from shared.isolated_environment import IsolatedEnvironment
 
 from netra_backend.app.services.thread_service import ThreadService
 from netra_backend.app.db.postgres_session import get_async_db

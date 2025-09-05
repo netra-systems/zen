@@ -11,12 +11,17 @@ for full analysis and optimization recommendations.
 """
 
 import pytest
-from unittest.mock import AsyncMock, MagicMock, patch
 from typing import Dict, Any
 import json
+from test_framework.redis.test_redis_manager import TestRedisManager
+from auth_service.core.auth_manager import AuthManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 from netra_backend.app.agents.base.interface import ExecutionContext, ExecutionResult
 from netra_backend.app.agents.state import DeepAgentState
+import asyncio
 
 
 class TestSufficientDataFlow:
@@ -24,7 +29,10 @@ class TestSufficientDataFlow:
     
     @pytest.fixture
     def complete_user_request(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create a user request with complete data."""
+    pass
         return {
             "user_request": "My GPT-4 API costs are $5,000/month with 2M tokens daily usage",
             "metrics": {
@@ -43,7 +51,10 @@ class TestSufficientDataFlow:
     
     @pytest.fixture
     def expected_triage_output(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Expected output from triage agent for sufficient data."""
+    pass
         return {
             "data_sufficiency": "sufficient",
             "category": "cost_optimization",
@@ -55,7 +66,10 @@ class TestSufficientDataFlow:
     
     @pytest.fixture
     def expected_optimization_output(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Expected optimization recommendations."""
+    pass
         return {
             "recommendations": [
                 {
@@ -87,7 +101,10 @@ class TestSufficientDataFlow:
     
     @pytest.fixture
     def expected_data_analysis_output(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Expected data analysis insights."""
+    pass
         return {
             "usage_insights": {
                 "peak_usage_concentration": 0.65,
@@ -115,7 +132,10 @@ class TestSufficientDataFlow:
     
     @pytest.fixture
     def expected_actions_output(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Expected actionable steps."""
+    pass
         return {
             "implementation_plan": [
                 {
@@ -155,7 +175,10 @@ class TestSufficientDataFlow:
     
     @pytest.fixture
     def expected_report_output(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Expected final report structure."""
+    pass
         return {
             "executive_summary": {
                 "current_state": "Spending $5,000/month on GPT-4",
@@ -189,7 +212,8 @@ class TestSufficientDataFlow:
             
             async def track_execution(agent_name, *args, **kwargs):
                 execution_order.append(agent_name)
-                return ExecutionResult(
+                await asyncio.sleep(0)
+    return ExecutionResult(
                     success=True,
                     status="completed",
                     result={"agent": agent_name}
@@ -210,6 +234,7 @@ class TestSufficientDataFlow:
     @pytest.mark.critical
     async def test_triage_correctly_identifies_sufficient_data(self, complete_user_request, expected_triage_output):
         """Validate triage agent correctly identifies data sufficiency."""
+    pass
         from netra_backend.app.agents.triage.unified_triage_agent import UnifiedTriageAgent
         
         with patch.object(TriageSubAgent, 'llm_manager') as mock_llm_manager:
@@ -273,6 +298,7 @@ class TestSufficientDataFlow:
     @pytest.mark.asyncio
     async def test_data_analysis_provides_actionable_insights(self, expected_data_analysis_output):
         """Validate data analysis provides deep insights."""
+    pass
         from netra_backend.app.agents.data_sub_agent.data_sub_agent import DataSubAgent
         
         with patch.object(DataSubAgent, 'llm_manager') as mock_llm_manager:
@@ -351,6 +377,7 @@ class TestSufficientDataFlow:
     @pytest.mark.asyncio
     async def test_report_demonstrates_clear_value(self, expected_report_output):
         """Validate final report clearly demonstrates ROI."""
+    pass
         from netra_backend.app.agents.reporting_sub_agent import ReportingSubAgent
         
         with patch.object(ReportingSubAgent, 'llm_manager') as mock_llm_manager:
@@ -434,6 +461,7 @@ class TestSufficientDataFlow:
     @pytest.mark.asyncio
     async def test_flow_handles_real_world_complexity(self):
         """Test flow with realistic complex data and edge cases."""
+    pass
         complex_request = {
             "user_request": "Multi-model setup with GPT-4, Claude, and Gemini",
             "metrics": {
@@ -529,3 +557,4 @@ class TestSufficientDataFlow:
             report_result = results[4].result
             assert report_result["executive_summary"]["quality_maintenance"] >= expected_value_metrics["quality_maintenance"]
             assert report_result["executive_summary"]["risk_assessment"] == expected_value_metrics["risk_tolerance"]
+    pass

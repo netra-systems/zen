@@ -19,8 +19,12 @@ import pytest
 import psutil
 import threading
 import aiohttp
-from unittest.mock import AsyncMock, MagicMock, patch
 from typing import Dict, Any, Optional
+from test_framework.docker.unified_docker_manager import UnifiedDockerManager
+from test_framework.database.test_database_manager import TestDatabaseManager
+from test_framework.redis.test_redis_manager import TestRedisManager
+from auth_service.core.auth_manager import AuthManager
+from shared.isolated_environment import IsolatedEnvironment
 
 from netra_backend.app.core.configuration import unified_config_manager
 from test_framework.base import BaseTestCase
@@ -268,7 +272,7 @@ class TestHealthEndpointPerformance(BaseTestCase):
     @pytest.mark.asyncio
     async def test_health_endpoint_response_time(self):
         """Test that health endpoint responds within 100ms."""
-        app = MagicMock()  # Mock test app for now
+        app = MagicNone  # TODO: Use real service instance  # Mock test app for now
         
         response_times = []
         

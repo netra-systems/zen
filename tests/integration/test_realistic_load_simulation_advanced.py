@@ -32,6 +32,7 @@ import random
 import statistics
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import psutil
+from shared.isolated_environment import IsolatedEnvironment
 
 # Add project root to Python path
 project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
@@ -50,6 +51,7 @@ class LoadTestMetrics:
     """Comprehensive metrics collection for load testing"""
     
     def __init__(self):
+    pass
         self.start_time = time.time()
         self.users: Dict[str, Dict[str, Any]] = {}
         self.messages: List[Dict[str, Any]] = []
@@ -73,6 +75,7 @@ class LoadTestMetrics:
             
     def record_websocket_connection(self, user_id: str, connection_time: float, success: bool):
         """Record WebSocket connection metrics"""
+    pass
         with self._lock:
             self.websocket_connections[user_id] = {
                 'connected_at': connection_time,
@@ -118,6 +121,7 @@ class LoadTestMetrics:
                     
     def record_error(self, user_id: str, error_type: str, error_message: str, timestamp: float):
         """Record error occurrence"""
+    pass
         with self._lock:
             error_record = {
                 'user_id': user_id,
@@ -147,6 +151,7 @@ class LoadTestMetrics:
             
     def get_performance_analysis(self) -> Dict[str, Any]:
         """Generate comprehensive performance analysis"""
+    pass
         with self._lock:
             test_duration = time.time() - self.start_time
             
@@ -203,6 +208,7 @@ class SimulatedUser:
     """Simulated user for load testing"""
     
     def __init__(self, user_id: str, metrics: LoadTestMetrics, backend_url: str, auth_url: str):
+    pass
         self.user_id = user_id
         self.metrics = metrics
         self.backend_url = backend_url
@@ -308,7 +314,8 @@ class SimulatedUser:
     async def listen_websocket_events(self):
         """Listen for WebSocket events in background"""
         if not self.websocket:
-            return
+            await asyncio.sleep(0)
+    return
             
         try:
             async for message in self.websocket:
@@ -331,6 +338,7 @@ class SimulatedUser:
             
     async def send_message(self, message_index: int) -> bool:
         """Send a message and wait for response"""
+    pass
         try:
             message_id = f"msg_{self.user_id}_{message_index}_{int(time.time() * 1000)}"
             query = f"{self.message_queries[message_index % len(self.message_queries)]} (User: {self.user_id[-8:]}, Message: {message_index + 1})"
@@ -488,6 +496,7 @@ class TestRealisticLoadSimulation(DockerTestBase):
         
     def _create_simulated_users(self) -> List[SimulatedUser]:
         """Create simulated users for load testing"""
+    pass
         users = []
         for i in range(self.num_users):
             user_id = f"load_test_user_{i:02d}_{uuid.uuid4().hex[:8]}"
@@ -505,6 +514,7 @@ class TestRealisticLoadSimulation(DockerTestBase):
             
     async def _run_concurrent_user_simulations(self, users: List[SimulatedUser]) -> List[Dict[str, Any]]:
         """Run user simulations concurrently"""
+    pass
         logger.info(f"Starting concurrent simulation for {len(users)} users...")
         
         # Start system monitoring
@@ -530,7 +540,8 @@ class TestRealisticLoadSimulation(DockerTestBase):
                 else:
                     processed_results.append(result)
             
-            return processed_results
+            await asyncio.sleep(0)
+    return processed_results
             
         finally:
             # Stop monitoring
@@ -572,6 +583,7 @@ class TestRealisticLoadSimulation(DockerTestBase):
             
     def _log_performance_analysis(self, analysis: Dict[str, Any]):
         """Log comprehensive performance analysis"""
+    pass
         logger.info("=" * 60)
         logger.info("LOAD TEST PERFORMANCE ANALYSIS")
         logger.info("=" * 60)
@@ -584,14 +596,17 @@ class TestRealisticLoadSimulation(DockerTestBase):
         logger.info(f"Success Rate: {analysis['success_rate_percent']:.1f}%")
         logger.info(f"Total Errors: {analysis['total_errors']}")
         
-        logger.info("\nWebSocket Performance:")
+        logger.info("
+WebSocket Performance:")
         logger.info(f"  Connections: {analysis['websocket_connections']}")
         logger.info(f"  Success Rate: {analysis['websocket_success_rate_percent']:.1f}%")
         
-        logger.info("\nThroughput:")
+        logger.info("
+Throughput:")
         logger.info(f"  Messages per Second: {analysis['throughput_messages_per_second']:.2f}")
         
-        logger.info("\nResponse Time Statistics:")
+        logger.info("
+Response Time Statistics:")
         stats = analysis['response_time_stats']
         logger.info(f"  Average: {stats['average_seconds']:.2f}s")
         logger.info(f"  Median: {stats['median_seconds']:.2f}s")
@@ -600,7 +615,8 @@ class TestRealisticLoadSimulation(DockerTestBase):
         logger.info(f"  Min: {stats['min_seconds']:.2f}s")
         logger.info(f"  Max: {stats['max_seconds']:.2f}s")
         
-        logger.info("\nSystem Resource Usage:")
+        logger.info("
+System Resource Usage:")
         sys_metrics = analysis['system_metrics']
         logger.info(f"  Peak CPU: {sys_metrics['max_cpu_percent']:.1f}%")
         logger.info(f"  Peak Memory: {sys_metrics['max_memory_percent']:.1f}%")
@@ -622,6 +638,7 @@ class TestRealisticLoadSimulation(DockerTestBase):
         6. Memory usage stays within reasonable bounds
         7. Error rates remain below acceptable thresholds
         """
+    pass
         logger.info("=== INTEGRATION TEST 10: Realistic Load Simulation (10 Users × 5 Messages) ===")
         
         # Create simulated users
@@ -659,6 +676,7 @@ class TestRealisticLoadSimulation(DockerTestBase):
         
         Validates system behavior as load gradually increases from 1 to 10 users.
         """
+    pass
         logger.info("=== INTEGRATION TEST 10b: Gradual Load Ramp-Up ===")
         
         all_users = self._create_simulated_users()
@@ -717,6 +735,7 @@ class TestRealisticLoadSimulation(DockerTestBase):
         
         Tests system behavior with sudden traffic bursts.
         """
+    pass
         logger.info("=== INTEGRATION TEST 10c: Burst Load Resilience ===")
         
         # Create users for burst test

@@ -16,6 +16,7 @@ import asyncio
 import logging
 import time
 from typing import List
+from shared.isolated_environment import IsolatedEnvironment
 
 from tests.e2e.fixtures.resource_monitoring import (
     resource_monitor, isolation_test_config, resource_limits

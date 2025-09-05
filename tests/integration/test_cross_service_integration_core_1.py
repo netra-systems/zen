@@ -6,7 +6,7 @@ import os
 import tempfile
 from datetime import datetime
 from pathlib import Path
-from unittest.mock import AsyncMock, Mock, patch
+from shared.isolated_environment import IsolatedEnvironment
 
 import pytest
 from fastapi import FastAPI, Request
@@ -21,6 +21,9 @@ from netra_backend.app.core.middleware_setup import setup_cors_middleware
 from fastapi.middleware.cors import CORSMiddleware
 from shared.cors_config_builder import get_fastapi_cors_config
 from shared.isolated_environment import get_env
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
 
 
 env = get_env()

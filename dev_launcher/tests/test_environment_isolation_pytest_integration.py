@@ -12,7 +12,7 @@ Prevents test framework integration failures that could block CI/CD pipeline.
 import os
 import threading
 import pytest
-from unittest.mock import patch
+from shared.isolated_environment import IsolatedEnvironment
 
 from shared.isolated_environment import get_env, get_environment_manager
 

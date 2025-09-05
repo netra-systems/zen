@@ -23,6 +23,7 @@ import asyncio
 import uuid
 from typing import Dict, Optional
 from tests.e2e.transaction_test_fixtures import (
+from shared.isolated_environment import IsolatedEnvironment
     TransactionConsistencyTester, TransactionTestDataFactory, DatabaseType, TransactionState,
     TransactionConsistencyTester,
     TransactionTestDataFactory,
@@ -40,6 +41,7 @@ def transaction_tester():
 @pytest.fixture
 def sample_user_data():
     """Create sample user data for testing."""
+    pass
     return {
         "user_id": f"user_{uuid.uuid4().hex[:8]}",
         "email": f"test_{uuid.uuid4().hex[:6]}@example.com", 
@@ -224,3 +226,5 @@ class TestEventualConsistency:
             clickhouse_conn.operations
         )
         assert all(op.completed for op in all_operations)
+
+    pass

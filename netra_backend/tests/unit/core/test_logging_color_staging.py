@@ -1,11 +1,11 @@
 from shared.isolated_environment import get_env
+from shared.isolated_environment import IsolatedEnvironment
 """Test that ANSI color codes are properly disabled in staging/production environments."""
 
 import os
 import sys
 import re
 from io import StringIO
-from unittest.mock import patch, MagicMock
 import pytest
 
 # Must set environment before any imports

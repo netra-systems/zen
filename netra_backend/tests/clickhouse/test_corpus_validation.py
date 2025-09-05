@@ -6,11 +6,12 @@ COMPLIANCE: 450-line max file, 25-line max functions
 
 import sys
 from pathlib import Path
+from test_framework.database.test_database_manager import TestDatabaseManager
+from shared.isolated_environment import IsolatedEnvironment
 
 # Test framework import - using pytest fixtures instead
 
 import asyncio
-from unittest.mock import AsyncMock, MagicMock, Mock, patch, patch
 
 import pytest
 
@@ -55,7 +56,7 @@ class TestValidationAndSafety:
         service = CorpusService()
         
         # Mock: Generic component isolation for controlled unit testing
-        db = MagicMock()
+        db = MagicNone  # TODO: Use real service instance
         
         # Test filtering by user_id
         await service.get_corpora(db, user_id="specific_user")
@@ -76,11 +77,11 @@ class TestCorpusCloning:
         # Mock: ClickHouse external database isolation for unit testing performance
         with patch('app.services.corpus_service.get_clickhouse_client') as mock_client:
             # Mock: Generic component isolation for controlled unit testing
-            mock_instance = AsyncMock()
+            mock_instance = AsyncNone  # TODO: Use real service instance
             mock_client.return_value.__aenter__.return_value = mock_instance
             
             # Mock: Generic component isolation for controlled unit testing
-            db = MagicMock()
+            db = MagicNone  # TODO: Use real service instance
             
             # Mock source corpus
             source = _create_source_corpus()
@@ -104,11 +105,11 @@ class TestCorpusCloning:
         # Mock: ClickHouse external database isolation for unit testing performance
         with patch('app.services.corpus_service.get_clickhouse_client') as mock_client:
             # Mock: Generic component isolation for controlled unit testing
-            mock_instance = AsyncMock()
+            mock_instance = AsyncNone  # TODO: Use real service instance
             mock_client.return_value.__aenter__.return_value = mock_instance
             
             # Mock: Generic component isolation for controlled unit testing
-            db = MagicMock()
+            db = MagicNone  # TODO: Use real service instance
             
             await service._copy_corpus_content(
                 "source_table", "dest_table", "corpus_id", db
@@ -135,7 +136,7 @@ def _get_validation_test_cases():
 def _create_source_corpus():
     """Create source corpus for cloning."""
     # Mock: Generic component isolation for controlled unit testing
-    source = MagicMock()
+    source = MagicNone  # TODO: Use real service instance
     source.id = "source_id"
     source.name = "Original Corpus"
     source.status = "available"

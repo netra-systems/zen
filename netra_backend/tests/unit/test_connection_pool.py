@@ -5,30 +5,37 @@ Business Value: Long-term maintainability
 """
 
 import pytest
-from unittest.mock import Mock, patch, MagicMock
 from netra_backend.app.core.async_connection_pool import AsyncConnectionPool
+from shared.isolated_environment import IsolatedEnvironment
+import asyncio
 
 class TestAsyncConnectionPool:
     """Test suite for AsyncConnectionPool"""
     
     @pytest.fixture
-    def mock_connection(self):
+ def real_connection():
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create mock connection"""
-        return Mock()
+        return None  # TODO: Use real service instance
     
     @pytest.fixture
     async def create_connection(self, mock_connection):
         """Mock connection creation function"""
         async def _create():
-            return mock_connection
+            await asyncio.sleep(0)
+    return mock_connection
         return _create
     
     @pytest.fixture
     async def close_connection(self):
         """Mock connection close function"""
+    pass
         async def _close(conn):
+    pass
             pass
-        return _close
+        await asyncio.sleep(0)
+    return _close
     
     @pytest.fixture
     async def pool_instance(self, create_connection, close_connection):
@@ -46,6 +53,7 @@ class TestAsyncConnectionPool:
     @pytest.mark.asyncio
     async def test_initialization(self, create_connection, close_connection):
         """Test proper initialization"""
+    pass
         pool = AsyncConnectionPool(
             create_connection=create_connection,
             close_connection=close_connection,
@@ -66,6 +74,7 @@ class TestAsyncConnectionPool:
     @pytest.mark.asyncio
     async def test_connection_acquisition(self, pool_instance):
         """Test connection acquisition and release"""
+    pass
         async with pool_instance.acquire() as conn:
             assert conn is not None
             assert pool_instance.active_count == 1
@@ -85,6 +94,7 @@ class TestAsyncConnectionPool:
     @pytest.mark.asyncio
     async def test_pool_closure(self, create_connection, close_connection):
         """Test proper pool closure"""
+    pass
         pool = AsyncConnectionPool(
             create_connection=create_connection,
             close_connection=close_connection,

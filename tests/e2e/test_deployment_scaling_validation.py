@@ -1,4 +1,5 @@
 from shared.isolated_environment import get_env
+from shared.isolated_environment import IsolatedEnvironment
 """
 Test deployment scaling and configuration resilience patterns.
 

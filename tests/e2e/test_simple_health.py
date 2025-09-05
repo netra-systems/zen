@@ -3,6 +3,7 @@
 import asyncio
 import pytest
 import aiohttp
+from shared.isolated_environment import IsolatedEnvironment
 
 
 class TestSimpleHealthCheck:
@@ -20,6 +21,7 @@ class TestSimpleHealthCheck:
     @pytest.mark.asyncio
     async def test_service_attempt(self):
         """Attempt to connect to services (passes regardless of result)."""
+    pass
         services = [
             ("backend", "http://localhost:8000/health"),
             ("auth", "http://localhost:8080/health")
@@ -45,7 +47,8 @@ class TestSimpleHealthCheck:
                 }
         
         # Print results
-        print(f"\n[INFO] Service connectivity check:")
+        print(f"
+[INFO] Service connectivity check:")
         for service_name, result in results.items():
             if result["accessible"]:
                 print(f"  [SUCCESS] {service_name}: accessible (status: {result['status']})")

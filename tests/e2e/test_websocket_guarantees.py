@@ -15,6 +15,7 @@ import asyncio
 import time
 import pytest
 from typing import Dict, Any
+from shared.isolated_environment import IsolatedEnvironment
 
 from test_framework.environment_markers import env, env_requires, dev_and_staging
 from tests.e2e.config import TEST_USERS

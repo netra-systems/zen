@@ -39,6 +39,7 @@ from typing import Dict, List, Set, Any, Optional, Tuple, Union
 from dataclasses import dataclass, field
 from contextlib import asynccontextmanager
 import statistics
+from shared.isolated_environment import IsolatedEnvironment
 
 import pytest
 import websockets
@@ -71,6 +72,7 @@ async def get_test_jwt_token(user_id: str = "chaos_test_user") -> str:
 
 async def test_user_context(user_id: str = "chaos_test_user"):
     """Create test user context."""
+    await asyncio.sleep(0)
     return {
         "user_id": user_id,
         "email": f"{user_id}@chaos.test",
@@ -85,6 +87,7 @@ async def test_user_context(user_id: str = "chaos_test_user"):
 @dataclass
 class ChaosEvent:
     """Represents a chaos event during testing."""
+    pass
     timestamp: float
     event_type: str
     connection_id: str
@@ -118,6 +121,7 @@ class ChaosWebSocketClient:
     """WebSocket client with chaos engineering capabilities."""
     
     def __init__(self, user_id: str, conditions: NetworkConditions):
+    pass
         self.user_id = user_id
         self.connection_id = f"chaos_{user_id}_{uuid.uuid4().hex[:8]}"
         self.conditions = conditions
@@ -313,6 +317,7 @@ class ChaosWebSocketClient:
         
     async def force_disconnect(self):
         """Force disconnect to simulate network failure."""
+    pass
         self._record_chaos_event("forced_disconnect", severity="high")
         if self.websocket and not self.websocket.closed:
             try:
@@ -350,7 +355,8 @@ class ChaosWebSocketClient:
             if "type" in corrupted:
                 corrupted["type"] = "unknown_type"
                 
-        return corrupted
+        await asyncio.sleep(0)
+    return corrupted
     
     def _record_chaos_event(self, event_type: str, details: Dict[str, Any] = None, severity: str = "medium"):
         """Record a chaos event for analysis."""
@@ -367,6 +373,7 @@ class ChaosWebSocketClient:
     
     def get_metrics(self) -> Dict[str, Any]:
         """Get connection metrics and chaos statistics."""
+    pass
         now = time.time()
         total_reconnections = len(self.reconnection_attempts)
         successful_reconnections = sum(1 for r in self.reconnection_attempts if r.success)
@@ -406,6 +413,7 @@ class ChaosTestOrchestrator:
     """Orchestrates chaos engineering tests across multiple connections."""
     
     def __init__(self):
+    pass
         self.clients: List[ChaosWebSocketClient] = []
         self.test_results: Dict[str, Any] = {}
         self.start_time = time.time()
@@ -604,6 +612,7 @@ class TestWebSocketBridgeChaos:
     @pytest.mark.asyncio
     async def test_random_connection_drops_medium_chaos(self, chaos_orchestrator):
         """Test resilience with 20-30% random connection drops."""
+    pass
         logger.info("Starting medium chaos test: 20-30% connection drops")
         
         # Medium chaos conditions
@@ -709,6 +718,7 @@ class TestWebSocketBridgeChaos:
     @pytest.mark.asyncio
     async def test_network_latency_injection(self, chaos_orchestrator):
         """Test system behavior under high network latency (100-500ms)."""
+    pass
         logger.info("Starting network latency injection test")
         
         # High latency conditions
@@ -836,6 +846,7 @@ class TestWebSocketBridgeChaos:
     @pytest.mark.asyncio
     async def test_rapid_connect_disconnect_cycles(self, chaos_orchestrator):
         """Test system resilience under rapid connect/disconnect cycles."""
+    pass
         logger.info("Starting rapid connect/disconnect cycle test")
         
         # Low chaos for focused connection testing
@@ -947,6 +958,7 @@ class TestWebSocketBridgeChaos:
     @pytest.mark.asyncio
     async def test_system_recovery_eventual_consistency(self, chaos_orchestrator):
         """Test system recovery and eventual consistency under chaos."""
+    pass
         logger.info("Starting system recovery and eventual consistency test")
         
         # Moderate chaos for consistency testing
@@ -1100,6 +1112,7 @@ class TestWebSocketBridgeChaos:
 
 async def run_chaos_test_suite():
     """Run the complete chaos engineering test suite."""
+    pass
     logger.info("Starting WebSocket Bridge Chaos Engineering Test Suite")
     
     test_class = TestWebSocketBridgeChaos()
@@ -1132,11 +1145,13 @@ async def run_chaos_test_suite():
         passed_tests = sum(1 for r in results if "PASSED" in r)
         total_tests = len(results)
         
-        logger.info(f"\nChaos Engineering Test Suite Results: {passed_tests}/{total_tests} passed")
+        logger.info(f"
+Chaos Engineering Test Suite Results: {passed_tests}/{total_tests} passed")
         for result in results:
             logger.info(result)
             
-        return passed_tests == total_tests
+        await asyncio.sleep(0)
+    return passed_tests == total_tests
         
     finally:
         await orchestrator.cleanup()

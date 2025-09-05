@@ -19,6 +19,7 @@ REQUIREMENTS:
 """
 import pytest
 import time
+from shared.isolated_environment import IsolatedEnvironment
 
 from tests.e2e.auth_flow_manager import AuthCompleteFlowManager
 from tests.e2e.api_key_lifecycle_helpers import (

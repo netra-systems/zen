@@ -6,9 +6,9 @@ COMPLIANCE: 450-line max file, 25-line max functions
 
 import sys
 from pathlib import Path
+from shared.isolated_environment import IsolatedEnvironment
 
 from datetime import datetime
-from unittest.mock import Mock, AsyncMock, MagicMock
 
 import pytest
 

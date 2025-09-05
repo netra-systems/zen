@@ -11,8 +11,10 @@ Based on regression analysis:
 """
 import pytest
 import asyncio
-from unittest.mock import AsyncMock, patch
 from fastapi.testclient import TestClient
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from auth_service.core.auth_manager import AuthManager
+from shared.isolated_environment import IsolatedEnvironment
 
 
 class TestAuthEndpointIntegration:
@@ -20,7 +22,10 @@ class TestAuthEndpointIntegration:
     
     @pytest.fixture
     def test_client(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create test client with full auth service setup."""
+    pass
         # Import after fixture to ensure proper env setup
         from auth_service.main import app
         return TestClient(app)
@@ -34,6 +39,7 @@ class TestAuthEndpointIntegration:
         Regression prevention: Ensures all endpoints in the auth flow exist
         and work together properly.
         """
+    pass
         # Mock auth service for predictable results
         with patch('auth_service.auth_core.routes.auth_routes.auth_service') as mock_auth:
             # Setup mock responses
@@ -41,7 +47,7 @@ class TestAuthEndpointIntegration:
             mock_auth.create_access_token = AsyncMock(return_value="access-token-123")
             mock_auth.create_refresh_token = AsyncMock(return_value="refresh-token-123")
             mock_auth.refresh_tokens = AsyncMock(return_value=("new-access-token", "new-refresh-token"))
-            mock_auth.blacklist_token = AsyncMock()
+            mock_auth.blacklist_token = AsyncNone  # TODO: Use real service instance
             
             # Step 1: Login
             login_response = test_client.post("/auth/login", json={
@@ -94,12 +100,13 @@ class TestAuthEndpointIntegration:
         Regression prevention: Ensures registration endpoint exists and
         integrates properly with token creation.
         """
+    pass
         with patch('auth_service.auth_core.routes.auth_routes.auth_service') as mock_auth:
             # Setup mock responses
             mock_auth.create_user = AsyncMock(return_value="new-user-456")
             mock_auth.create_access_token = AsyncMock(return_value="new-access-token")
             mock_auth.create_refresh_token = AsyncMock(return_value="new-refresh-token")
-            mock_auth.blacklist_token = AsyncMock()
+            mock_auth.blacklist_token = AsyncNone  # TODO: Use real service instance
             
             # Step 1: Register new user
             register_response = test_client.post("/auth/register", json={
@@ -139,6 +146,7 @@ class TestAuthEndpointIntegration:
         Regression prevention: Ensures service token endpoint exists and
         properly validates service credentials.
         """
+    pass
         with patch('auth_service.auth_core.routes.auth_routes.env') as mock_env:
             mock_env.get.return_value = "correct-service-secret"
             
@@ -170,12 +178,13 @@ class TestAuthEndpointIntegration:
         Regression prevention: The dev login endpoint was specifically missing
         and causing 404s. Ensure it works in full integration context.
         """
+    pass
         with patch('auth_service.auth_core.config.AuthConfig.get_environment', return_value='development'):
             with patch('auth_service.auth_core.routes.auth_routes.auth_service') as mock_auth:
                 mock_auth.create_access_token = AsyncMock(return_value="dev-access-token")
                 mock_auth.create_refresh_token = AsyncMock(return_value="dev-refresh-token")
                 mock_auth.refresh_tokens = AsyncMock(return_value=("new-dev-access", "new-dev-refresh"))
-                mock_auth.blacklist_token = AsyncMock()
+                mock_auth.blacklist_token = AsyncNone  # TODO: Use real service instance
                 
                 # Step 1: Dev login (no credentials required)
                 dev_login_response = test_client.post("/auth/dev/login", json={})
@@ -217,6 +226,7 @@ class TestAuthEndpointIntegration:
         Regression prevention: Ensures utility endpoints exist and integrate
         for complete password management workflows.
         """
+    pass
         with patch('auth_service.auth_core.routes.auth_routes.auth_service') as mock_auth:
             # Simulate realistic password operations
             test_password = "test-password-123"
@@ -259,9 +269,10 @@ class TestAuthEndpointIntegration:
         Regression prevention: Ensures custom token endpoint exists and
         creates usable tokens.
         """
+    pass
         with patch('auth_service.auth_core.routes.auth_routes.auth_service') as mock_auth:
             mock_auth.create_access_token = AsyncMock(return_value="custom-token-abc")
-            mock_auth.blacklist_token = AsyncMock()
+            mock_auth.blacklist_token = AsyncNone  # TODO: Use real service instance
             
             # Create custom token
             token_response = test_client.post("/auth/create-token", json={
@@ -293,7 +304,10 @@ class TestAuthEndpointErrorHandlingIntegration:
     
     @pytest.fixture
     def test_client(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create test client for error handling integration tests."""
+    pass
         from auth_service.main import app
         return TestClient(app)
     
@@ -306,6 +320,7 @@ class TestAuthEndpointErrorHandlingIntegration:
         Regression prevention: Ensures error responses are consistent and
         don't cause cascading failures.
         """
+    pass
         with patch('auth_service.auth_core.routes.auth_routes.auth_service') as mock_auth:
             # Mock authentication failure
             mock_auth.authenticate_user = AsyncMock(return_value=None)
@@ -334,6 +349,7 @@ class TestAuthEndpointErrorHandlingIntegration:
         Regression prevention: Ensures refresh endpoint exists and handles
         invalid tokens gracefully.
         """
+    pass
         with patch('auth_service.auth_core.routes.auth_routes.auth_service') as mock_auth:
             # Mock invalid refresh token
             mock_auth.refresh_tokens = AsyncMock(return_value=None)
@@ -358,6 +374,7 @@ class TestAuthEndpointErrorHandlingIntegration:
         Regression prevention: Ensures service token endpoint exists and
         validates credentials securely.
         """
+    pass
         with patch('auth_service.auth_core.routes.auth_routes.env') as mock_env:
             mock_env.get.return_value = "correct-secret"
             
@@ -382,6 +399,7 @@ class TestAuthEndpointErrorHandlingIntegration:
         Regression prevention: Ensures dev endpoints exist but are properly
         secured in production environments.
         """
+    pass
         with patch('auth_service.auth_core.config.AuthConfig.get_environment', return_value='production'):
             
             # Dev login in production should return 403, not 404

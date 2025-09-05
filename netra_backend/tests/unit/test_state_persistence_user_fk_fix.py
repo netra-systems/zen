@@ -2,7 +2,10 @@
 
 import uuid
 from datetime import datetime, timezone
-from unittest.mock import AsyncMock, MagicMock, patch
+from test_framework.database.test_database_manager import TestDatabaseManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 import pytest
 from sqlalchemy.exc import IntegrityError
@@ -12,25 +15,32 @@ from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.db.models_user import User
 from netra_backend.app.schemas.agent_state import CheckpointType, StatePersistenceRequest
 from netra_backend.app.services.state_persistence import state_persistence_service
+import asyncio
 
 
 @pytest.fixture
-def mock_db_session():
+ def real_db_session():
+    """Use real service instance."""
+    # TODO: Initialize real service
     """Create a mock database session."""
+    pass
     session = MagicMock(spec=AsyncSession)
-    session.add = MagicMock()
-    session.commit = AsyncMock()
-    session.flush = AsyncMock()
-    session.rollback = AsyncMock()
-    session.begin = MagicMock()
-    session.begin.return_value.__aenter__ = AsyncMock()
-    session.begin.return_value.__aexit__ = AsyncMock()
+    session.add = MagicNone  # TODO: Use real service instance
+    session.commit = AsyncNone  # TODO: Use real service instance
+    session.flush = AsyncNone  # TODO: Use real service instance
+    session.rollback = AsyncNone  # TODO: Use real service instance
+    session.begin = MagicNone  # TODO: Use real service instance
+    session.begin.return_value.__aenter__ = AsyncNone  # TODO: Use real service instance
+    session.begin.return_value.__aexit__ = AsyncNone  # TODO: Use real service instance
     return session
 
 
 @pytest.fixture  
 def sample_state():
+    """Use real service instance."""
+    # TODO: Initialize real service
     """Create sample agent state for testing."""
+    pass
     return DeepAgentState(
         user_request="Test request",
         chat_thread_id="thread_dev-temp-test123",
@@ -42,7 +52,10 @@ def sample_state():
 
 @pytest.fixture
 def persistence_request(sample_state):
+    """Use real service instance."""
+    # TODO: Initialize real service
     """Create sample persistence request."""
+    pass
     return StatePersistenceRequest(
         run_id=f"run_{uuid.uuid4()}",
         thread_id="thread_dev-temp-test123", 
@@ -105,7 +118,7 @@ async def test_state_persistence_handles_existing_user(mock_db_session, persiste
             is_active=True
         )
         mock_user_service.get = AsyncMock(return_value=existing_user)
-        mock_user_service.create = AsyncMock()
+        mock_user_service.create = AsyncNone  # TODO: Use real service instance
         
         # Execute save operation  
         await state_persistence_service.save_agent_state(
@@ -165,7 +178,7 @@ async def test_state_persistence_skips_creation_for_regular_users(mock_db_sessio
     
     with patch('netra_backend.app.services.user_service.user_service') as mock_user_service:
         mock_user_service.get = AsyncMock(return_value=None)
-        mock_user_service.create = AsyncMock()
+        mock_user_service.create = AsyncNone  # TODO: Use real service instance
         
         # Should still try to save, but without creating user
         # This will likely fail with FK violation, but that's expected for regular users
@@ -191,11 +204,12 @@ async def test_state_persistence_handles_empty_user_id(mock_db_session, sample_s
     )
     
     with patch('netra_backend.app.services.user_service.user_service') as mock_user_service:
-        mock_user_service.get = AsyncMock()
-        mock_user_service.create = AsyncMock()
+        mock_user_service.get = AsyncNone  # TODO: Use real service instance
+        mock_user_service.create = AsyncNone  # TODO: Use real service instance
         
         await state_persistence_service.save_agent_state(no_user_request, mock_db_session)
         
         # Should not attempt to look up or create user when user_id is None
         mock_user_service.get.assert_not_called()
         mock_user_service.create.assert_not_called()
+    pass

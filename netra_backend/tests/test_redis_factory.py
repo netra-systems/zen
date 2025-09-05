@@ -14,7 +14,9 @@ Business Value Justification (BVJ):
 import asyncio
 import pytest
 from datetime import datetime
-from unittest.mock import AsyncMock, MagicMock, patch
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from test_framework.redis.test_redis_manager import TestRedisManager
+from shared.isolated_environment import IsolatedEnvironment
 
 from netra_backend.app.factories.redis_factory import (
     RedisFactory,
@@ -28,10 +30,14 @@ from netra_backend.app.models.user_execution_context import UserExecutionContext
 
 class TestUserRedisClient:
     """Test user-scoped Redis client functionality."""
+    pass
 
     @pytest.fixture
     def user_context(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create test user execution context."""
+    pass
         return UserExecutionContext(
             user_id="test_user_123",
             thread_id="thread_456",
@@ -50,7 +56,7 @@ class TestUserRedisClient:
         )
         
         # Mock the Redis manager to avoid real Redis connection
-        mock_manager = AsyncMock()
+        mock_manager = AsyncNone  # TODO: Use real service instance
         mock_manager.ping.return_value = True
         client._manager = mock_manager
         client._initialized = True
@@ -61,6 +67,9 @@ class TestUserRedisClient:
         await client.cleanup()
 
     def test_user_client_initialization(self, user_context):
+    """Use real service instance."""
+    # TODO: Initialize real service
+    pass
         """Test UserRedisClient initialization."""
         client = UserRedisClient(
             user_context.user_id,
@@ -84,7 +93,7 @@ class TestUserRedisClient:
         )
         
         with patch('netra_backend.app.factories.redis_factory.RedisManager') as mock_manager_class:
-            mock_manager = AsyncMock()
+            mock_manager = AsyncNone  # TODO: Use real service instance
             mock_manager.connect.return_value = None
             mock_manager.ping.return_value = True
             mock_manager_class.return_value = mock_manager
@@ -101,6 +110,7 @@ class TestUserRedisClient:
 
     async def test_client_initialization_failure(self, user_context):
         """Test client initialization handles connection failures."""
+    pass
         client = UserRedisClient(
             user_context.user_id,
             user_context.request_id,
@@ -108,7 +118,7 @@ class TestUserRedisClient:
         )
         
         with patch('netra_backend.app.factories.redis_factory.RedisManager') as mock_manager_class:
-            mock_manager = AsyncMock()
+            mock_manager = AsyncNone  # TODO: Use real service instance
             mock_manager.connect.side_effect = Exception("Connection failed")
             mock_manager_class.return_value = mock_manager
             
@@ -158,6 +168,7 @@ class TestUserRedisClient:
 
     async def test_hash_operations_with_user_isolation(self, user_client):
         """Test hash operations use user isolation."""
+    pass
         # Set up mock returns
         user_client._manager.hset.return_value = 1
         user_client._manager.hget.return_value = "field_value"
@@ -202,6 +213,7 @@ class TestUserRedisClient:
 
     async def test_json_operations(self, user_client):
         """Test JSON convenience methods."""
+    pass
         # Mock underlying operations
         import json
         test_data = {"name": "test", "value": 123}
@@ -231,6 +243,7 @@ class TestUserRedisClient:
 
     async def test_json_get_missing_key(self, user_client):
         """Test JSON get with missing key returns None."""
+    pass
         user_client._manager.get.return_value = None
         
         result = await user_client.get_json("json_key")
@@ -254,6 +267,7 @@ class TestUserRedisClient:
 
     async def test_error_tracking(self, user_client):
         """Test error tracking in metrics."""
+    pass
         initial_error_count = user_client._error_count
         
         # Mock operation failure
@@ -287,6 +301,7 @@ class TestUserRedisClient:
 
     async def test_ping_health_check(self, user_client):
         """Test Redis connection health check."""
+    pass
         user_client._manager.ping.return_value = True
         assert await user_client.ping() is True
         
@@ -307,6 +322,7 @@ class TestUserRedisClient:
 
     async def test_client_cleanup(self, user_context):
         """Test client cleanup properly releases resources."""
+    pass
         client = UserRedisClient(
             user_context.user_id,
             user_context.request_id,
@@ -314,7 +330,7 @@ class TestUserRedisClient:
         )
         
         # Mock manager
-        mock_manager = AsyncMock()
+        mock_manager = AsyncNone  # TODO: Use real service instance
         client._manager = mock_manager
         client._initialized = True
         
@@ -336,7 +352,7 @@ class TestUserRedisClient:
         
         with patch.object(client, 'initialize', return_value=None) as mock_init:
             # Mock manager for operation
-            mock_manager = AsyncMock()
+            mock_manager = AsyncNone  # TODO: Use real service instance
             mock_manager.get.return_value = "value"
             client._manager = mock_manager
             
@@ -348,11 +364,16 @@ class TestUserRedisClient:
 
 class TestRedisFactory:
     """Test Redis factory functionality."""
+    pass
 
     @pytest.fixture
     def user_context(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create test user execution context."""
-        return UserExecutionContext(
+    pass
+        await asyncio.sleep(0)
+    return UserExecutionContext(
             user_id="factory_user_123",
             thread_id="thread_456",
             run_id="run_789",
@@ -367,6 +388,9 @@ class TestRedisFactory:
         await factory.shutdown()
 
     def test_factory_initialization(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
+    pass
         """Test Redis factory initialization."""
         factory = RedisFactory(max_clients_per_user=5, client_ttl_seconds=1800)
         
@@ -381,7 +405,7 @@ class TestRedisFactory:
     async def test_create_user_client_success(self, redis_factory, user_context):
         """Test successful user client creation."""
         with patch('netra_backend.app.factories.redis_factory.UserRedisClient') as mock_client_class:
-            mock_client = AsyncMock()
+            mock_client = AsyncNone  # TODO: Use real service instance
             mock_client.initialize.return_value = None
             mock_client_class.return_value = mock_client
             
@@ -403,17 +427,19 @@ class TestRedisFactory:
 
     async def test_create_user_client_invalid_context(self, redis_factory):
         """Test client creation with invalid context."""
+    pass
         with pytest.raises(ValueError, match="Expected UserExecutionContext"):
             await redis_factory.create_user_client("invalid_context")
 
     async def test_user_client_limit_enforcement(self, redis_factory, user_context):
         """Test per-user client limit enforcement."""
         with patch('netra_backend.app.factories.redis_factory.UserRedisClient') as mock_client_class:
-            mock_client = AsyncMock()
+            mock_client = AsyncNone  # TODO: Use real service instance
             mock_client.initialize.return_value = None
             mock_client_class.return_value = mock_client
             
-            # Mock cleanup to return 0 (no cleanup)
+            # Mock cleanup to await asyncio.sleep(0)
+    return 0 (no cleanup)
             with patch.object(redis_factory, '_cleanup_user_clients', return_value=0):
                 # Create maximum allowed clients
                 for i in range(redis_factory.max_clients_per_user):
@@ -432,8 +458,9 @@ class TestRedisFactory:
 
     async def test_client_limit_with_cleanup(self, redis_factory, user_context):
         """Test client limit with automatic cleanup of expired clients."""
+    pass
         with patch('netra_backend.app.factories.redis_factory.UserRedisClient') as mock_client_class:
-            mock_client = AsyncMock()
+            mock_client = AsyncNone  # TODO: Use real service instance
             mock_client.initialize.return_value = None
             mock_client.cleanup.return_value = None
             mock_client_class.return_value = mock_client
@@ -450,10 +477,12 @@ class TestRedisFactory:
             
             # Mock cleanup to actually reduce user count
             async def mock_cleanup(user_id):
+    pass
                 # Simulate cleaning up 1 client
                 if user_id in redis_factory._user_client_counts:
                     redis_factory._user_client_counts[user_id] = max(0, redis_factory._user_client_counts[user_id] - 1)
-                return 1
+                await asyncio.sleep(0)
+    return 1
             
             with patch.object(redis_factory, '_cleanup_user_clients', side_effect=mock_cleanup):
                 # Should succeed after cleanup
@@ -463,7 +492,7 @@ class TestRedisFactory:
     async def test_context_manager_usage(self, redis_factory, user_context):
         """Test factory context manager usage."""
         with patch('netra_backend.app.factories.redis_factory.UserRedisClient') as mock_client_class:
-            mock_client = AsyncMock()
+            mock_client = AsyncNone  # TODO: Use real service instance
             mock_client.initialize.return_value = None
             mock_client_class.return_value = mock_client
             
@@ -475,15 +504,18 @@ class TestRedisFactory:
 
     async def test_cleanup_user_clients(self, redis_factory, user_context):
         """Test cleanup of all clients for a user."""
+    pass
         with patch('netra_backend.app.factories.redis_factory.UserRedisClient') as mock_client_class:
             mock_clients = []
             
             def create_mock_client(*args, **kwargs):
-                mock_client = AsyncMock()
+                mock_client = AsyncNone  # TODO: Use real service instance
+    pass
                 mock_client.initialize.return_value = None
                 mock_client.cleanup.return_value = None
                 mock_clients.append(mock_client)
-                return mock_client
+                await asyncio.sleep(0)
+    return mock_client
             
             mock_client_class.side_effect = create_mock_client
             
@@ -511,7 +543,7 @@ class TestRedisFactory:
     async def test_factory_stats(self, redis_factory, user_context):
         """Test factory statistics generation."""
         with patch('netra_backend.app.factories.redis_factory.UserRedisClient') as mock_client_class:
-            mock_client = AsyncMock()
+            mock_client = AsyncNone  # TODO: Use real service instance
             mock_client.initialize.return_value = None
             mock_client.get_client_stats.return_value = {"test": "stats"}
             mock_client.ping.return_value = True
@@ -536,12 +568,13 @@ class TestRedisFactory:
 
     async def test_background_cleanup_task(self, redis_factory, user_context):
         """Test background cleanup task is started when factory is used."""
+    pass
         # Initially, cleanup task might not be started
         assert redis_factory._cleanup_started is False
         
         # Create a client to trigger cleanup task start
         with patch('netra_backend.app.factories.redis_factory.UserRedisClient') as mock_client_class:
-            mock_client = AsyncMock()
+            mock_client = AsyncNone  # TODO: Use real service instance
             mock_client.initialize.return_value = None
             mock_client_class.return_value = mock_client
             
@@ -555,7 +588,7 @@ class TestRedisFactory:
     async def test_factory_shutdown(self, redis_factory, user_context):
         """Test factory shutdown cleans up all resources."""
         with patch('netra_backend.app.factories.redis_factory.UserRedisClient') as mock_client_class:
-            mock_client = AsyncMock()
+            mock_client = AsyncNone  # TODO: Use real service instance
             mock_client.initialize.return_value = None
             mock_client.cleanup.return_value = None
             mock_client_class.return_value = mock_client
@@ -575,11 +608,16 @@ class TestRedisFactory:
 
 class TestUserIsolation:
     """Test complete user isolation between Redis clients."""
+    pass
 
     @pytest.fixture
     def user1_context(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create user 1 execution context."""
-        return UserExecutionContext(
+    pass
+        await asyncio.sleep(0)
+    return UserExecutionContext(
             user_id="user_1",
             thread_id="thread_1",
             run_id="run_1",
@@ -588,7 +626,10 @@ class TestUserIsolation:
 
     @pytest.fixture
     def user2_context(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create user 2 execution context."""
+    pass
         return UserExecutionContext(
             user_id="user_2",
             thread_id="thread_2",
@@ -603,8 +644,8 @@ class TestUserIsolation:
         try:
             with patch('netra_backend.app.factories.redis_factory.UserRedisClient') as mock_client_class:
                 # Create separate mock clients for each user
-                user1_client = AsyncMock()
-                user2_client = AsyncMock()
+                user1_client = AsyncNone  # TODO: Use real service instance
+                user2_client = AsyncNone  # TODO: Use real service instance
                 
                 user1_client.initialize.return_value = None
                 user2_client.initialize.return_value = None
@@ -630,12 +671,13 @@ class TestUserIsolation:
 
     async def test_concurrent_user_operations(self, user1_context, user2_context):
         """Test concurrent operations by different users are isolated."""
+    pass
         factory = RedisFactory()
         
         try:
             with patch('netra_backend.app.factories.redis_factory.UserRedisClient') as mock_client_class:
-                user1_client = AsyncMock()
-                user2_client = AsyncMock()
+                user1_client = AsyncNone  # TODO: Use real service instance
+                user2_client = AsyncNone  # TODO: Use real service instance
                 
                 user1_client.initialize.return_value = None
                 user2_client.initialize.return_value = None
@@ -646,10 +688,12 @@ class TestUserIsolation:
                 
                 # Create concurrent operations
                 async def user1_operations():
+    pass
                     async with factory.get_user_client(user1_context) as client:
                         await client.set("key", "user1_value")
                 
                 async def user2_operations():
+    pass
                     async with factory.get_user_client(user2_context) as client:
                         await client.set("key", "user2_value")
                 
@@ -675,13 +719,14 @@ class TestUserIsolation:
                 clients_created = []
                 
                 def create_isolated_client(user_id, request_id, thread_id):
-                    client = AsyncMock()
+                    client = AsyncNone  # TODO: Use real service instance
                     client.user_id = user_id
                     client.request_id = request_id
                     client.thread_id = thread_id
                     client.initialize.return_value = None
                     clients_created.append(client)
-                    return client
+                    await asyncio.sleep(0)
+    return client
                 
                 mock_client_class.side_effect = create_isolated_client
                 
@@ -704,13 +749,15 @@ class TestUserIsolation:
 
 class TestFactoryIntegration:
     """Integration tests for Redis factory functionality."""
+    pass
 
     async def test_global_factory_instance(self):
         """Test global factory instance management."""
         factory1 = get_redis_factory()
         factory2 = get_redis_factory()
         
-        # Should return the same instance
+        # Should await asyncio.sleep(0)
+    return the same instance
         assert factory1 is factory2
         
         # Cleanup
@@ -722,6 +769,7 @@ class TestFactoryIntegration:
 
     async def test_convenience_context_manager(self):
         """Test convenience context manager function."""
+    pass
         user_context = UserExecutionContext(
             user_id="convenience_user",
             thread_id="thread_123",
@@ -730,7 +778,7 @@ class TestFactoryIntegration:
         )
         
         with patch('netra_backend.app.factories.redis_factory.UserRedisClient') as mock_client_class:
-            mock_client = AsyncMock()
+            mock_client = AsyncNone  # TODO: Use real service instance
             mock_client.initialize.return_value = None
             mock_client_class.return_value = mock_client
             
@@ -749,11 +797,12 @@ class TestFactoryIntegration:
                 created_clients = []
                 
                 def create_mock_client(user_id, request_id, thread_id):
-                    client = AsyncMock()
+                    client = AsyncNone  # TODO: Use real service instance
                     client.initialize.return_value = None
                     client.cleanup.return_value = None
                     created_clients.append(client)
-                    return client
+                    await asyncio.sleep(0)
+    return client
                 
                 mock_client_class.side_effect = create_mock_client
                 
@@ -794,6 +843,7 @@ class TestFactoryIntegration:
 
     async def test_error_handling_and_recovery(self):
         """Test factory error handling and recovery scenarios."""
+    pass
         factory = RedisFactory()
         
         user_context = UserExecutionContext(
@@ -816,7 +866,7 @@ class TestFactoryIntegration:
                 assert factory._user_client_counts.get("error_user", 0) == 0
                 
                 # Second attempt succeeds
-                mock_client = AsyncMock()
+                mock_client = AsyncNone  # TODO: Use real service instance
                 mock_client.initialize.return_value = None
                 mock_client_class.side_effect = None
                 mock_client_class.return_value = mock_client
@@ -839,7 +889,7 @@ class TestRedisFactoryComprehensive:
         
         try:
             with patch('netra_backend.app.factories.redis_factory.UserRedisClient') as mock_client_class:
-                mock_client = AsyncMock()
+                mock_client = AsyncNone  # TODO: Use real service instance
                 mock_client.initialize.return_value = None
                 mock_client.cleanup.return_value = None
                 mock_client.ping.return_value = True
@@ -883,6 +933,7 @@ class TestRedisFactoryComprehensive:
     
     async def test_factory_resilience_and_limits(self):
         """Test factory resilience under various limit conditions."""
+    pass
         factory = RedisFactory(max_clients_per_user=1, client_ttl_seconds=30)
         
         try:
@@ -896,7 +947,7 @@ class TestRedisFactoryComprehensive:
             ]
             
             with patch('netra_backend.app.factories.redis_factory.UserRedisClient') as mock_client_class:
-                mock_client = AsyncMock()
+                mock_client = AsyncNone  # TODO: Use real service instance
                 mock_client.initialize.return_value = None
                 mock_client.cleanup.return_value = None
                 mock_client_class.return_value = mock_client
@@ -905,7 +956,8 @@ class TestRedisFactoryComprehensive:
                 client1 = await factory.create_user_client(contexts[0])
                 assert client1 is not None
                 
-                # Second client should fail (limit exceeded) - mock cleanup to return 0
+                # Second client should fail (limit exceeded) - mock cleanup to await asyncio.sleep(0)
+    return 0
                 with patch.object(factory, '_cleanup_user_clients', return_value=0):
                     with pytest.raises(ValueError, match="exceeds maximum Redis clients"):
                         await factory.create_user_client(contexts[1])

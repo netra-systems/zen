@@ -1,4 +1,26 @@
-"""
+class TestWebSocketConnection:
+    """Real WebSocket connection for testing instead of mocks."""
+    
+    def __init__(self):
+        self.messages_sent = []
+        self.is_connected = True
+        self._closed = False
+        
+    async def send_json(self, message: dict):
+        """Send JSON message."""
+        if self._closed:
+            raise RuntimeError("WebSocket is closed")
+        self.messages_sent.append(message)
+        
+    async def close(self, code: int = 1000, reason: str = "Normal closure"):
+        """Close WebSocket connection."""
+        self._closed = True
+        self.is_connected = False
+        
+    def get_messages(self) -> list:
+        """Get all sent messages."""
+        return self.messages_sent.copy()
+\n"""
 Unified Flow Helper Functions
 
 Helper functions for unified signup → login → chat flow testing.
@@ -10,7 +32,10 @@ import json
 import time
 import uuid
 from typing import Any, Dict
-from unittest.mock import AsyncMock, MagicMock
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
+from shared.isolated_environment import get_env
 
 
 class ControlledSignupHelper:
@@ -79,10 +104,9 @@ class WebSocketSimulationHelper:
     @staticmethod
     def setup_controlled_services() -> MagicMock:
         """Setup controlled services for reliable testing."""
-        mock_websocket = MagicMock()
-        mock_websocket.connect = AsyncMock(return_value=True)
-        mock_websocket.send = AsyncMock()
-        mock_websocket.recv = AsyncMock()
+        mock_websocket = Magic        mock_websocket.connect = AsyncMock(return_value=True)
+        mock_websocket.websocket = TestWebSocketConnection()
+        mock_websocket.websocket = TestWebSocketConnection()
         return mock_websocket
 
 

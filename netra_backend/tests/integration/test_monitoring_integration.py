@@ -13,7 +13,10 @@ import asyncio
 import pytest
 import time
 from typing import Dict, Any
-from unittest.mock import Mock, AsyncMock, patch
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 from netra_backend.app.websocket_core.event_monitor import ChatEventMonitor
 from netra_backend.app.services.agent_websocket_bridge import (
@@ -50,7 +53,7 @@ class TestMonitoringIntegrationStartup:
             "registered_observers": 0,
             "health_broadcast_interval": 30
         })
-        bridge.register_monitor_observer = Mock()
+        bridge.register_monitor_observer = register_monitor_observer_instance  # Initialize appropriate service
         return bridge
     
     @pytest.fixture
@@ -139,9 +142,9 @@ class TestCrossSystemValidation:
         
         # Create mock bridge with realistic behavior
         bridge = Mock(spec=AgentWebSocketBridge)
-        bridge.get_health_status = AsyncMock()
-        bridge.get_metrics = AsyncMock()
-        bridge.register_monitor_observer = Mock()
+        bridge.get_health_status = AsyncNone  # TODO: Use real service instance
+        bridge.get_metrics = AsyncNone  # TODO: Use real service instance
+        bridge.register_monitor_observer = register_monitor_observer_instance  # Initialize appropriate service
         
         # Register bridge with monitor
         await monitor.register_component_for_monitoring("test_bridge", bridge)
@@ -373,7 +376,7 @@ class TestPerformanceImpact:
         # Setup quick responses
         bridge.get_health_status = AsyncMock(return_value={"healthy": True, "state": "active"})
         bridge.get_metrics = AsyncMock(return_value={"total": 1})
-        bridge.register_monitor_observer = Mock()
+        bridge.register_monitor_observer = register_monitor_observer_instance  # Initialize appropriate service
         
         try:
             await monitor.start_monitoring()
@@ -402,7 +405,7 @@ class TestPerformanceImpact:
         bridge = Mock(spec=AgentWebSocketBridge)
         bridge.get_health_status = AsyncMock(return_value={"healthy": True})
         bridge.get_metrics = AsyncMock(return_value={"total": 1})
-        bridge.register_monitor_observer = Mock()
+        bridge.register_monitor_observer = register_monitor_observer_instance  # Initialize appropriate service
         
         try:
             await monitor.start_monitoring()
@@ -451,7 +454,7 @@ class TestSilentFailureCoverage:
             "total_initializations": 10,
             "successful_initializations": 2
         })
-        bridge.register_monitor_observer = Mock()
+        bridge.register_monitor_observer = register_monitor_observer_instance  # Initialize appropriate service
         
         try:
             await monitor.start_monitoring()
@@ -480,7 +483,7 @@ class TestSilentFailureCoverage:
             "state": "active"
         })
         bridge.get_metrics = AsyncMock(return_value={"success_rate": 1.0})
-        bridge.register_monitor_observer = Mock()
+        bridge.register_monitor_observer = register_monitor_observer_instance  # Initialize appropriate service
         
         try:
             await monitor.start_monitoring()
@@ -517,7 +520,7 @@ class TestSilentFailureCoverage:
         bridge = Mock(spec=AgentWebSocketBridge)
         bridge.get_health_status = AsyncMock(return_value={"healthy": True})
         bridge.get_metrics = AsyncMock(return_value={"total": 1})
-        bridge.register_monitor_observer = Mock()
+        bridge.register_monitor_observer = register_monitor_observer_instance  # Initialize appropriate service
         
         try:
             await monitor.start_monitoring()

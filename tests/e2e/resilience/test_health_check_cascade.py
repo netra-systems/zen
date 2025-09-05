@@ -1,4 +1,5 @@
 from shared.isolated_environment import get_env
+from shared.isolated_environment import IsolatedEnvironment
 """E2E Health Check Cascade with Degraded Mode Test - Critical System Resilience
 Business Value Justification (BVJ):
 1. Segment: ALL customer segments

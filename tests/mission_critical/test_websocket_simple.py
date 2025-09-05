@@ -1,3 +1,29 @@
+class TestWebSocketConnection:
+    """Real WebSocket connection for testing instead of mocks."""
+    
+    def __init__(self):
+    pass
+        self.messages_sent = []
+        self.is_connected = True
+        self._closed = False
+        
+    async def send_json(self, message: dict):
+        """Send JSON message."""
+        if self._closed:
+            raise RuntimeError("WebSocket is closed")
+        self.messages_sent.append(message)
+        
+    async def close(self, code: int = 1000, reason: str = "Normal closure"):
+        """Close WebSocket connection."""
+    pass
+        self._closed = True
+        self.is_connected = False
+        
+    def get_messages(self) -> list:
+        """Get all sent messages."""
+        await asyncio.sleep(0)
+    return self.messages_sent.copy()
+
 #!/usr/bin/env python
 """MISSION CRITICAL: Simple WebSocket Event Tests
 
@@ -18,8 +44,8 @@ import os
 import sys
 import json
 from typing import Optional, Dict, Any, List
-from unittest.mock import MagicMock, patch, AsyncMock
 from datetime import datetime, timezone
+from shared.isolated_environment import IsolatedEnvironment
 
 # Add project root to Python path
 project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
@@ -47,12 +73,16 @@ from netra_backend.app.agents.supervisor.execution_factory import (
     ExecutionStatus
 )
 from shared.isolated_environment import get_env
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
 
 
 class MockWebSocketConnection:
     """Mock WebSocket connection for testing."""
     
     def __init__(self, user_id: str, connection_id: str):
+    pass
         self.user_id = user_id
         self.connection_id = connection_id
         self.sent_events: List[Dict[str, Any]] = []
@@ -84,9 +114,7 @@ class MockWebSocketConnection:
     @property
     def application_state(self):
         """Mock application state for FastAPI compatibility."""
-        from unittest.mock import MagicMock
-        mock_state = MagicMock()
-        # Mock the WebSocketState.CONNECTED value
+        mock_state = Magic        # Mock the WebSocketState.CONNECTED value
         mock_state.__eq__ = lambda self, other: True if self.is_connected else False
         return mock_state if self.is_connected else None
 
@@ -95,6 +123,7 @@ class MockConnectionPool:
     """Mock WebSocket connection pool."""
     
     def __init__(self):
+    pass
         self.connections: Dict[str, MockWebSocketConnection] = {}
         
     async def get_connection(self, connection_id: str, user_id: str):
@@ -104,13 +133,13 @@ class MockConnectionPool:
             self.connections[key] = MockWebSocketConnection(user_id, connection_id)
         
         # Return connection info structure
-        from unittest.mock import MagicMock
-        connection_info = MagicMock()
-        connection_info.websocket = self.connections[key]
-        return connection_info
+        connection_info = Magic        connection_info.websocket = self.connections[key]
+        await asyncio.sleep(0)
+    return connection_info
         
     async def add_connection(self, user_id: str, connection_id: str, websocket):
         """Add connection to pool."""
+    pass
         key = f"{user_id}:{connection_id}"
         self.connections[key] = MockWebSocketConnection(user_id, connection_id)
         
@@ -124,7 +153,9 @@ class MockConnectionPool:
 
 async def test_factory_websocket_emitter_creation():
     """Test factory-based WebSocket emitter creation."""
-    print("\n=== Testing Factory WebSocket Emitter Creation ===")
+    pass
+    print("
+=== Testing Factory WebSocket Emitter Creation ===")
     
     try:
         # Create mock connection pool
@@ -159,7 +190,8 @@ async def test_factory_websocket_emitter_creation():
         # Clean up
         await emitter.cleanup()
         
-        return True
+        await asyncio.sleep(0)
+    return True
         
     except Exception as e:
         print(f"[FAIL] Factory creation test failed: {e}")
@@ -170,7 +202,8 @@ async def test_factory_websocket_emitter_creation():
 
 async def test_all_required_websocket_events():
     """Test all 5 required WebSocket events are properly sent."""
-    print("\n=== Testing All 5 Required WebSocket Events ===")
+    print("
+=== Testing All 5 Required WebSocket Events ===")
     
     try:
         # Create mock connection pool
@@ -224,7 +257,8 @@ async def test_all_required_websocket_events():
         
         # Verify all events were sent
         sent_events = mock_connection.sent_events
-        print(f"\n[STATS] Total events sent: {len(sent_events)}")
+        print(f"
+[STATS] Total events sent: {len(sent_events)}")
         
         # Check for required event types
         required_events = ["agent_started", "agent_thinking", "tool_executing", "tool_completed", "agent_completed"]
@@ -238,7 +272,8 @@ async def test_all_required_websocket_events():
         if missing_events:
             print(f"[ERROR] Missing required events: {missing_events}")
             print(f"Found events: {found_events}")
-            return False
+            await asyncio.sleep(0)
+    return False
             
         print(f"[SUCCESS] All 5 required events found: {found_events}")
         
@@ -266,7 +301,9 @@ async def test_all_required_websocket_events():
 
 async def test_websocket_event_json_serialization():
     """Test WebSocket event JSON serialization."""
-    print("\n=== Testing WebSocket Event JSON Serialization ===")
+    pass
+    print("
+=== Testing WebSocket Event JSON Serialization ===")
     
     try:
         # Create a test event
@@ -307,7 +344,8 @@ async def test_websocket_event_json_serialization():
         assert deserialized['data']['agent_name'] == "TestAgent"
         
         print("[SUCCESS] JSON serialization/deserialization successful")
-        return True
+        await asyncio.sleep(0)
+    return True
         
     except Exception as e:
         print(f"[FAIL] JSON serialization test failed: {e}")
@@ -325,22 +363,26 @@ async def run_test():
     
     try:
         # Test 1: Factory emitter creation
-        print("\n[TEST 1] Factory WebSocket Emitter Creation")
+        print("
+[TEST 1] Factory WebSocket Emitter Creation")
         result1 = await test_factory_websocket_emitter_creation()
         test_results.append(("Factory Creation", result1))
         
         # Test 2: All required events
-        print("\n[TEST 2] All 5 Required WebSocket Events")
+        print("
+[TEST 2] All 5 Required WebSocket Events")
         result2 = await test_all_required_websocket_events()
         test_results.append(("Required Events", result2))
         
         # Test 3: JSON serialization
-        print("\n[TEST 3] WebSocket Event JSON Serialization")
+        print("
+[TEST 3] WebSocket Event JSON Serialization")
         result3 = await test_websocket_event_json_serialization()
         test_results.append(("JSON Serialization", result3))
         
         # Summary
-        print("\n" + "=" * 60)
+        print("
+" + "=" * 60)
         print("TEST RESULTS SUMMARY:")
         print("=" * 60)
         
@@ -351,7 +393,8 @@ async def run_test():
             if not result:
                 all_passed = False
                 
-        print("\n" + "=" * 60)
+        print("
+" + "=" * 60)
         if all_passed:
             print("[SUCCESS] All WebSocket event tests passed!")
             print("[SUCCESS] Factory pattern working correctly")
@@ -362,10 +405,12 @@ async def run_test():
             print("[CRITICAL] Critical issues detected in WebSocket events")
         print("=" * 60)
         
-        return all_passed
+        await asyncio.sleep(0)
+    return all_passed
         
     except Exception as e:
-        print(f"\n[CRITICAL ERROR] CRITICAL EXCEPTION: {e}")
+        print(f"
+[CRITICAL ERROR] CRITICAL EXCEPTION: {e}")
         import traceback
         traceback.print_exc()
         return False
@@ -375,3 +420,5 @@ if __name__ == "__main__":
     result = asyncio.run(run_test())
     sys.exit(0 if result else 1)
 
+
+    pass

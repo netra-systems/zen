@@ -18,9 +18,10 @@ Updated to test the SSOT method using DatabaseURLBuilder and IsolatedEnvironment
 """
 
 import pytest
-from unittest.mock import patch, MagicMock, AsyncMock
 from typing import Optional
 import os
+from test_framework.database.test_database_manager import TestDatabaseManager
+from shared.isolated_environment import IsolatedEnvironment
 
 from netra_backend.app.schemas.config import (
     AppConfig,
@@ -47,11 +48,11 @@ class TestDatabaseURLValidation:
             'DATABASE_URL': 'postgresql://user:pass@localhost/devdb'
         }
         
-        mock_env = MagicMock()
+        mock_env = MagicNone  # TODO: Use real service instance
         mock_env.as_dict.return_value = mock_env_dict
         
-        mock_builder = MagicMock()
-        mock_development = MagicMock()
+        mock_builder = MagicNone  # TODO: Use real service instance
+        mock_development = MagicNone  # TODO: Use real service instance
         mock_development.auto_url = 'postgresql://user:pass@localhost/devdb'
         mock_builder.development = mock_development
         
@@ -73,11 +74,11 @@ class TestDatabaseURLValidation:
             'POSTGRES_DB': 'staging_db'
         }
         
-        mock_env = MagicMock()
+        mock_env = MagicNone  # TODO: Use real service instance
         mock_env.as_dict.return_value = mock_env_dict
         
-        mock_builder = MagicMock()
-        mock_staging = MagicMock()
+        mock_builder = MagicNone  # TODO: Use real service instance
+        mock_staging = MagicNone  # TODO: Use real service instance
         mock_staging.auto_url = 'postgresql://staging_user:staging_pass@staging-db.example.com:5432/staging_db'
         mock_builder.staging = mock_staging
         
@@ -97,11 +98,11 @@ class TestDatabaseURLValidation:
             # Missing all database configuration
         }
         
-        mock_env = MagicMock()
+        mock_env = MagicNone  # TODO: Use real service instance
         mock_env.as_dict.return_value = mock_env_dict
         
-        mock_builder = MagicMock()
-        mock_staging = MagicMock()
+        mock_builder = MagicNone  # TODO: Use real service instance
+        mock_staging = MagicNone  # TODO: Use real service instance
         mock_staging.auto_url = None  # DatabaseURLBuilder fails to construct URL
         mock_builder.staging = mock_staging
         
@@ -122,11 +123,11 @@ class TestDatabaseURLValidation:
             'POSTGRES_DB': 'prod_db'
         }
         
-        mock_env = MagicMock()
+        mock_env = MagicNone  # TODO: Use real service instance
         mock_env.as_dict.return_value = mock_env_dict
         
-        mock_builder = MagicMock()
-        mock_production = MagicMock()
+        mock_builder = MagicNone  # TODO: Use real service instance
+        mock_production = MagicNone  # TODO: Use real service instance
         mock_production.auto_url = 'postgresql://prod_user:prod_pass@prod-db.example.com:5432/prod_db'
         mock_builder.production = mock_production
         
@@ -147,7 +148,7 @@ class TestHealthCheckDatabaseValidation:
         
         from sqlalchemy.ext.asyncio import AsyncSession
         mock_db = AsyncMock(spec=AsyncSession)
-        mock_config = MagicMock()
+        mock_config = MagicNone  # TODO: Use real service instance
         mock_config.database_url = None
         
         with patch('netra_backend.app.routes.health.unified_config_manager.get_config', return_value=mock_config):
@@ -166,7 +167,7 @@ class TestHealthCheckDatabaseValidation:
         
         from sqlalchemy.ext.asyncio import AsyncSession
         mock_db = AsyncMock(spec=AsyncSession)
-        mock_config = MagicMock()
+        mock_config = MagicNone  # TODO: Use real service instance
         mock_config.database_url = None
         
         with patch('netra_backend.app.routes.health.unified_config_manager.get_config', return_value=mock_config):
@@ -185,11 +186,11 @@ class TestHealthCheckDatabaseValidation:
         
         from sqlalchemy.ext.asyncio import AsyncSession
         mock_db = AsyncMock(spec=AsyncSession)
-        mock_result = MagicMock()
+        mock_result = MagicNone  # TODO: Use real service instance
         mock_result.scalar_one_or_none.return_value = 1
         mock_db.execute.return_value = mock_result
         
-        mock_config = MagicMock()
+        mock_config = MagicNone  # TODO: Use real service instance
         mock_config.database_url = 'postgresql://user:pass@localhost/testdb'
         
         with patch('netra_backend.app.routes.health.unified_config_manager.get_config', return_value=mock_config):
@@ -207,7 +208,7 @@ class TestHealthCheckDatabaseValidation:
         
         from sqlalchemy.ext.asyncio import AsyncSession
         mock_db = AsyncMock(spec=AsyncSession)
-        mock_config = MagicMock()
+        mock_config = MagicNone  # TODO: Use real service instance
         mock_config.database_url = 'postgresql+mock://mockuser:mockpass@mockhost/mockdb'
         
         with patch('netra_backend.app.routes.health.unified_config_manager.get_config', return_value=mock_config):
@@ -226,7 +227,7 @@ class TestHealthCheckDatabaseValidation:
         mock_db = AsyncMock(spec=AsyncSession)
         mock_db.execute.side_effect = Exception("Connection failed")
         
-        mock_config = MagicMock()
+        mock_config = MagicNone  # TODO: Use real service instance
         mock_config.database_url = 'postgresql://user:pass@localhost/testdb'
         mock_config.environment = 'staging'
         

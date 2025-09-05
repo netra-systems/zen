@@ -7,6 +7,7 @@ import json
 import sys
 from datetime import datetime
 from typing import Dict, List, Any
+from shared.isolated_environment import IsolatedEnvironment
 
 # Staging URLs
 BACKEND_URL = "https://netra-backend-staging-pnovr5vsba-uc.a.run.app"

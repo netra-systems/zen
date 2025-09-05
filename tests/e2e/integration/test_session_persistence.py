@@ -25,6 +25,7 @@ import asyncio
 import pytest
 import time
 from typing import Dict, Any, Optional
+from shared.isolated_environment import IsolatedEnvironment
 
 from tests.e2e.session_persistence_manager import (
     SessionPersistenceManager, SessionPersistenceTestValidator, ServiceRestartSimulator, ChatContinuityValidator, PerformanceTracker,

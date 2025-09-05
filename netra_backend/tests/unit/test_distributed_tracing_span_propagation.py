@@ -3,8 +3,8 @@ Test iteration 61: Distributed tracing span propagation validation.
 Tests span context preservation across service boundaries and async operations.
 """
 import pytest
-from unittest.mock import Mock, patch
 import asyncio
+from shared.isolated_environment import IsolatedEnvironment
 
 # Handle optional OpenTelemetry dependency
 try:
@@ -15,7 +15,7 @@ try:
 except ImportError:
     # Mock OpenTelemetry components if not available
     OPENTELEMETRY_AVAILABLE = False
-    trace = Mock()
+    trace = trace_instance  # Initialize appropriate service
     TracerProvider = Mock
     TraceContextTextMapPropagator = Mock
 
@@ -25,7 +25,10 @@ class TestDistributedTracingSpanPropagation:
     
     @pytest.fixture
     def tracer_setup(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Setup OpenTelemetry tracer for testing."""
+    pass
         if not OPENTELEMETRY_AVAILABLE:
             pytest.skip("OpenTelemetry not available - skipping tracing tests")
         tracer_provider = TracerProvider()
@@ -59,15 +62,18 @@ class TestDistributedTracingSpanPropagation:
     @pytest.mark.skipif(not OPENTELEMETRY_AVAILABLE, reason="OpenTelemetry not available")
     async def test_async_span_context_preservation(self, tracer_setup):
         """Validates span context preservation in async operations."""
+    pass
         tracer = tracer_setup
         
         async def async_operation():
+    pass
             # Verify context is preserved across await boundaries
             current_span = trace.get_current_span()
             await asyncio.sleep(0.001)
             post_await_span = trace.get_current_span()
             assert current_span.get_span_context().span_id == post_await_span.get_span_context().span_id
-            return "success"
+            await asyncio.sleep(0)
+    return "success"
         
         with tracer.start_as_current_span("async_parent") as span:
             result = await async_operation()

@@ -10,6 +10,12 @@ error messages, including recovery mechanisms and notification channels.
 
 import sys
 from pathlib import Path
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from test_framework.database.test_database_manager import TestDatabaseManager
+from auth_service.core.auth_manager import AuthManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 import asyncio
 import json
@@ -17,7 +23,6 @@ import time
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
-from unittest.mock import AsyncMock, MagicMock, Mock, patch, patch
 
 import pytest
 import websockets
@@ -217,12 +222,12 @@ async def test_user():
 async def websocket_connection():
     """Mock WebSocket connection for testing."""
     # Mock: WebSocket infrastructure isolation for unit tests without real connections
-    mock_websocket = AsyncMock()
+    mock_websocket = AsyncNone  # TODO: Use real service instance
     mock_websocket.client_state = "OPEN"
     # Mock: WebSocket infrastructure isolation for unit tests without real connections
-    mock_websocket.send = AsyncMock()
+    mock_websocket.send = AsyncNone  # TODO: Use real service instance
     # Mock: WebSocket infrastructure isolation for unit tests without real connections
-    mock_websocket.receive = AsyncMock()
+    mock_websocket.receive = AsyncNone  # TODO: Use real service instance
     yield mock_websocket
 
 @pytest.mark.asyncio

@@ -18,10 +18,14 @@ Business Value Justification (BVJ):
 
 import pytest
 import asyncio
-from unittest.mock import patch, MagicMock, AsyncMock
 from aiohttp import ClientError, ClientResponse
 from dev_launcher.database_connector import DatabaseConnector, DatabaseConnection, DatabaseType, ConnectionStatus
 from test_framework.performance_helpers import fast_test, timeout_override
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from test_framework.docker.unified_docker_manager import UnifiedDockerManager
+from test_framework.database.test_database_manager import TestDatabaseManager
+from auth_service.core.auth_manager import AuthManager
+from shared.isolated_environment import IsolatedEnvironment
 
 
 class TestClickHouseValidationFailures:
@@ -52,9 +56,9 @@ class TestClickHouseValidationFailures:
         )
         
         # Mock aiohttp response to simulate healthy container with auth failure
-        mock_response = MagicMock()
+        mock_response = MagicNone  # TODO: Use real service instance
         mock_response.status = 401  # Auth failure but container is responding
-        mock_session = MagicMock()
+        mock_session = MagicNone  # TODO: Use real service instance
         mock_session.__aenter__ = AsyncMock(return_value=mock_session)
         mock_session.__aexit__ = AsyncMock(return_value=None)
         mock_session.get.return_value.__aenter__ = AsyncMock(return_value=mock_response)
@@ -96,7 +100,7 @@ class TestClickHouseValidationFailures:
         auth_error = ClientError("Authentication failed - code 194")
         
         with patch('aiohttp.ClientSession') as mock_session_class:
-            mock_session = MagicMock()
+            mock_session = MagicNone  # TODO: Use real service instance
             mock_session_class.return_value.__aenter__ = AsyncMock(return_value=mock_session)
             mock_session_class.return_value.__aexit__ = AsyncMock(return_value=None)
             mock_session.get.side_effect = auth_error
@@ -139,7 +143,7 @@ class TestClickHouseValidationFailures:
         connection_error = ClientError("Connection refused on port 9000")
         
         with patch('aiohttp.ClientSession') as mock_session_class:
-            mock_session = MagicMock()
+            mock_session = MagicNone  # TODO: Use real service instance
             mock_session_class.return_value.__aenter__ = AsyncMock(return_value=mock_session)
             mock_session_class.return_value.__aexit__ = AsyncMock(return_value=None)
             mock_session.get.side_effect = connection_error
@@ -208,7 +212,7 @@ class TestClickHouseValidationFailures:
         
         # Mock auth failure that should trigger fallback
         with patch('aiohttp.ClientSession') as mock_session_class:
-            mock_session = MagicMock()
+            mock_session = MagicNone  # TODO: Use real service instance
             mock_session_class.return_value.__aenter__ = AsyncMock(return_value=mock_session)
             mock_session_class.return_value.__aexit__ = AsyncMock(return_value=None)
             mock_session.get.side_effect = ClientError("Authentication failed - code 194")

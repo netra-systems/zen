@@ -1,4 +1,5 @@
 from shared.isolated_environment import get_env
+from shared.isolated_environment import IsolatedEnvironment
 """
 env = get_env()
 Debug script to test SecretManagerBuilder implementation and identify issues.

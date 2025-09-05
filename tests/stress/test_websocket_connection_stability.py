@@ -26,6 +26,7 @@ from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timedelta, timezone
 from typing import Dict, List, Set, Any, Optional, Tuple
 import tracemalloc
+from shared.isolated_environment import IsolatedEnvironment
 
 # Add project root to Python path
 project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))

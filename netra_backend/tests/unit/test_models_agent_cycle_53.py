@@ -13,6 +13,7 @@ import pytest
 from datetime import datetime, UTC
 from sqlalchemy import Column, Integer, String
 from sqlalchemy.ext.declarative import declarative_base
+from shared.isolated_environment import IsolatedEnvironment
 
 from netra_backend.app.db.models_agent import (
     Assistant,

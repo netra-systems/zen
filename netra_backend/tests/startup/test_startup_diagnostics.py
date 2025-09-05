@@ -1,4 +1,6 @@
 from shared.isolated_environment import get_env
+from test_framework.database.test_database_manager import TestDatabaseManager
+from shared.isolated_environment import IsolatedEnvironment
 """
 env = get_env()
 L3 Real Service Tests for Startup Diagnostics
@@ -19,7 +21,6 @@ import tempfile
 from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Optional
-from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
 
@@ -31,8 +32,7 @@ from netra_backend.app.schemas.diagnostic_types import (
     DiagnosticSeverity,
     FixResult,
     ServiceType,
-    StartupPhase,
-)
+    StartupPhase)
 from scripts.startup_diagnostics import (
     StartupDiagnostics,
     apply_fixes,
@@ -47,13 +47,10 @@ from scripts.startup_diagnostics import (
     fix_dependencies,
     fix_migrations,
     fix_port_conflict,
-    generate_recommendations,
-)
-from test_framework.decorators import mock_justified
+    generate_recommendations)
 from test_framework.real_services_test_fixtures import (
     real_postgres_connection,
-    with_test_database,
-)
+    with_test_database)
 
 @pytest.fixture
 def sample_diagnostic_error() -> DiagnosticError:
@@ -314,33 +311,30 @@ class TestRealEnvironmentVariableChecking:
 class TestMigrationChecking:
     """Test migration status checking."""
     # Mock: Component isolation for testing without external dependencies
-    @patch('scripts.startup_diagnostics.run_command_async')
-    @pytest.mark.asyncio
+        @pytest.mark.asyncio
     async def test_check_migrations_up_to_date(self, mock_run_cmd: AsyncMock) -> None:
         """Test migration check when up to date."""
-        mock_run_cmd.return_value = "current head\n"
+        mock_run_cmd.return_value = "current head
+"
         
         errors = await check_migrations()
         assert len(errors) == 0
     # Mock: Component isolation for testing without external dependencies
-    @patch('scripts.startup_diagnostics.run_command_async')
-    # Mock: Component isolation for testing without external dependencies
-    @patch('scripts.startup_diagnostics.create_migration_error')
-    @pytest.mark.asyncio
+        # Mock: Component isolation for testing without external dependencies
+        @pytest.mark.asyncio
     async def test_check_migrations_pending(self, mock_create_error: Mock,
                                            mock_run_cmd: AsyncMock,
                                            mock_diagnostic_error: DiagnosticError) -> None:
         """Test migration check with pending migrations."""
-        mock_run_cmd.return_value = "current abc123\n"  # No "head" means pending
+        mock_run_cmd.return_value = "current abc123
+"  # No "head" means pending
         mock_create_error.return_value = mock_diagnostic_error
         
         errors = await check_migrations()
         assert len(errors) == 1
     # Mock: Component isolation for testing without external dependencies
-    @patch('scripts.startup_diagnostics.run_command_async')
-    # Mock: Component isolation for testing without external dependencies
-    @patch('scripts.startup_diagnostics.create_migration_error')
-    @pytest.mark.asyncio
+        # Mock: Component isolation for testing without external dependencies
+        @pytest.mark.asyncio
     async def test_check_migrations_exception(self, mock_create_error: Mock,
                                              mock_run_cmd: AsyncMock,
                                              mock_diagnostic_error: DiagnosticError) -> None:
@@ -366,8 +360,7 @@ class TestFixApplication:
         fixes = await apply_fixes([mock_diagnostic_error])
         assert len(fixes) == 0
     # Mock: Component isolation for testing without external dependencies
-    @patch('scripts.startup_diagnostics.apply_single_fix')
-    @pytest.mark.asyncio
+        @pytest.mark.asyncio
     async def test_apply_fixes_with_auto_fixable(self, mock_apply_single: AsyncMock,
                                                 mock_diagnostic_error: DiagnosticError) -> None:
         """Test applying fixes with auto-fixable errors."""
@@ -382,8 +375,7 @@ class TestFixApplication:
 class TestSingleFixApplication:
     """Test individual fix application."""
     # Mock: Component isolation for testing without external dependencies
-    @patch('scripts.startup_diagnostics.fix_port_conflict')
-    @pytest.mark.asyncio
+        @pytest.mark.asyncio
     async def test_apply_single_fix_port_error(self, mock_fix_port: AsyncMock,
                                               mock_diagnostic_error: DiagnosticError) -> None:
         """Test applying fix for port error."""
@@ -395,8 +387,7 @@ class TestSingleFixApplication:
         result = await apply_single_fix(mock_diagnostic_error)
         assert result.successful is True
     # Mock: Component isolation for testing without external dependencies
-    @patch('scripts.startup_diagnostics.fix_dependencies')
-    @pytest.mark.asyncio
+        @pytest.mark.asyncio
     async def test_apply_single_fix_dependency_error(self, mock_fix_deps: AsyncMock,
                                                     mock_diagnostic_error: DiagnosticError) -> None:
         """Test applying fix for dependency error."""
@@ -437,8 +428,7 @@ class TestSpecificFixes:
         assert result.successful is True
         assert "port conflict resolved" in result.message.lower()
     # Mock: Component isolation for testing without external dependencies
-    @patch('scripts.startup_diagnostics.run_command_async')
-    @pytest.mark.asyncio
+        @pytest.mark.asyncio
     async def test_fix_dependencies_python_success(self, mock_run_cmd: AsyncMock,
                                                    mock_diagnostic_error: DiagnosticError) -> None:
         """Test successful Python dependency fix."""
@@ -448,8 +438,7 @@ class TestSpecificFixes:
         result = await fix_dependencies(mock_diagnostic_error)
         assert result.successful is True
     # Mock: Component isolation for testing without external dependencies
-    @patch('scripts.startup_diagnostics.run_command_async')
-    @pytest.mark.asyncio
+        @pytest.mark.asyncio
     async def test_fix_dependencies_failure(self, mock_run_cmd: AsyncMock,
                                            mock_diagnostic_error: DiagnosticError) -> None:
         """Test dependency fix failure."""
@@ -459,8 +448,7 @@ class TestSpecificFixes:
         result = await fix_dependencies(mock_diagnostic_error)
         assert result.successful is False
     # Mock: Component isolation for testing without external dependencies
-    @patch('scripts.startup_diagnostics.run_command_async')
-    @pytest.mark.asyncio
+        @pytest.mark.asyncio
     async def test_fix_migrations_success(self, mock_run_cmd: AsyncMock,
                                          mock_diagnostic_error: DiagnosticError) -> None:
         """Test successful migration fix."""
@@ -470,8 +458,7 @@ class TestSpecificFixes:
         result = await fix_migrations(mock_diagnostic_error)
         assert result.successful is True
     # Mock: Component isolation for testing without external dependencies
-    @patch('scripts.startup_diagnostics.run_command_async')
-    @pytest.mark.asyncio
+        @pytest.mark.asyncio
     async def test_fix_migrations_failure(self, mock_run_cmd: AsyncMock,
                                          mock_diagnostic_error: DiagnosticError) -> None:
         """Test migration fix failure."""

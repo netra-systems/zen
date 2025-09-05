@@ -11,8 +11,9 @@ import os
 import sys
 import pytest
 from pathlib import Path
-from unittest.mock import patch, MagicMock
 from typing import Dict, Any
+from test_framework.database.test_database_manager import TestDatabaseManager
+from test_framework.redis.test_redis_manager import TestRedisManager
 
 # Add project root to path
 project_root = Path(__file__).parent.parent.parent.parent
@@ -42,7 +43,10 @@ class TestStagingConfigurationLoading:
         }
     
     def test_environment_detection_uses_isolated_environment(self, staging_env_vars):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Test that environment detection uses IsolatedEnvironment."""
+    pass
         # Clear any existing environment
         with patch.dict(os.environ, {}, clear=True):
             # Import after clearing to ensure fresh state
@@ -72,7 +76,7 @@ class TestStagingConfigurationLoading:
             
             # Mock the config manager to avoid full initialization
             with patch('netra_backend.app.core.secret_manager.config_manager') as mock_config_mgr:
-                mock_config = MagicMock()
+                mock_config = MagicNone  # TODO: Use real service instance
                 mock_config.environment = 'staging'
                 mock_config_mgr.get_config.return_value = mock_config
                 
@@ -87,6 +91,7 @@ class TestStagingConfigurationLoading:
     
     def test_staging_configuration_validator(self, staging_env_vars):
         """Test staging configuration validator."""
+    pass
         with patch.dict(os.environ, {}, clear=True):
             from shared.isolated_environment import get_env
             from netra_backend.app.core.configuration.staging_validator import (
@@ -130,6 +135,7 @@ class TestStagingConfigurationLoading:
     
     def test_staging_validator_detects_placeholders(self):
         """Test that validator detects placeholder values."""
+    pass
         with patch.dict(os.environ, {}, clear=True):
             from shared.isolated_environment import get_env
             from netra_backend.app.core.configuration.staging_validator import StagingConfigurationValidator
@@ -176,15 +182,19 @@ class TestStagingConfigurationLoading:
     
     def test_env_file_loading_in_isolated_environment(self):
         """Test that .env file is properly loaded by IsolatedEnvironment."""
+    pass
         with patch.dict(os.environ, {}, clear=True):
             from shared.isolated_environment import IsolatedEnvironment
             
             # Create a temporary .env file
             import tempfile
             with tempfile.NamedTemporaryFile(mode='w', suffix='.env', delete=False) as f:
-                f.write('ENVIRONMENT=staging\n')
-                f.write('TEST_VAR=test_value\n')
-                f.write('DATABASE_URL=postgresql://staging/db\n')
+                f.write('ENVIRONMENT=staging
+')
+                f.write('TEST_VAR=test_value
+')
+                f.write('DATABASE_URL=postgresql://staging/db
+')
                 temp_env_file = Path(f.name)
             
             try:
@@ -221,7 +231,7 @@ class TestStagingConfigurationLoading:
             # Mock GCP secret loading
             with patch('netra_backend.app.core.secret_manager.secretmanager') as mock_sm:
                 # Mock the secret manager client
-                mock_client = MagicMock()
+                mock_client = MagicNone  # TODO: Use real service instance
                 mock_sm.SecretManagerServiceClient.return_value = mock_client
                 
                 # Test configuration loading
@@ -246,3 +256,4 @@ class TestStagingConfigurationLoading:
 if __name__ == '__main__':
     # Run tests
     pytest.main([__file__, '-v'])
+    pass

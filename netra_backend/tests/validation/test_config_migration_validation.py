@@ -1,4 +1,11 @@
 from shared.isolated_environment import get_env
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from test_framework.database.test_database_manager import TestDatabaseManager
+from test_framework.redis.test_redis_manager import TestRedisManager
+from auth_service.core.auth_manager import AuthManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 """Configuration Migration Validation Test
 
 CRITICAL: Validates that 371 os.environ violations were properly fixed.
@@ -14,7 +21,6 @@ import os
 import sys
 from pathlib import Path
 from typing import Any, Dict
-from unittest.mock import patch, AsyncMock, MagicMock
 
 import pytest
 

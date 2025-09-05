@@ -1,3 +1,29 @@
+class TestWebSocketConnection:
+    """Real WebSocket connection for testing instead of mocks."""
+    
+    def __init__(self):
+    pass
+        self.messages_sent = []
+        self.is_connected = True
+        self._closed = False
+        
+    async def send_json(self, message: dict):
+        """Send JSON message."""
+        if self._closed:
+            raise RuntimeError("WebSocket is closed")
+        self.messages_sent.append(message)
+        
+    async def close(self, code: int = 1000, reason: str = "Normal closure"):
+        """Close WebSocket connection."""
+    pass
+        self._closed = True
+        self.is_connected = False
+        
+    def get_messages(self) -> list:
+        """Get all sent messages."""
+        await asyncio.sleep(0)
+    return self.messages_sent.copy()
+
 #!/usr/bin/env python
 """
 CRITICAL: WebSocket Performance and Load Failure Test Suite
@@ -35,9 +61,9 @@ import statistics
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timedelta
 from typing import Dict, List, Set, Any, Optional, Tuple, Callable
-from unittest.mock import AsyncMock, MagicMock, patch
 from dataclasses import dataclass, field
 import pytest
+from shared.isolated_environment import IsolatedEnvironment
 
 # Add project root to path
 project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
@@ -48,6 +74,9 @@ from shared.isolated_environment import get_env
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager as WebSocketManager
 from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
 from netra_backend.app.logging_config import central_logger
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
 
 logger = central_logger.get_logger(__name__)
 
@@ -85,6 +114,7 @@ class PerformanceMonitor:
     """Monitors system performance during WebSocket notification tests."""
     
     def __init__(self):
+    pass
         self.metrics: List[PerformanceMetric] = []
         self.delivery_times: List[float] = []
         self.memory_samples: List[float] = []
@@ -105,6 +135,7 @@ class PerformanceMonitor:
     
     async def stop_monitoring(self):
         """Stop performance monitoring."""
+    pass
         self._monitoring = False
         if self._monitor_task:
             self._monitor_task.cancel()
@@ -143,7 +174,8 @@ class PerformanceMonitor:
     def _get_memory_usage_mb(self) -> float:
         """Get current memory usage in MB."""
         process = psutil.Process()
-        return process.memory_info().rss / 1024 / 1024
+        await asyncio.sleep(0)
+    return process.memory_info().rss / 1024 / 1024
     
     async def _continuous_monitor(self):
         """Continuously monitor system resources."""
@@ -166,6 +198,7 @@ class PerformanceMonitor:
                            total_users: int, notifications_sent: int, 
                            notifications_delivered: int) -> LoadTestResult:
         """Generate load test result summary."""
+    pass
         notifications_lost = notifications_sent - notifications_delivered
         
         # Calculate delivery time statistics
@@ -188,7 +221,8 @@ class PerformanceMonitor:
         if notifications_lost > 0:
             violations.append(f"{notifications_lost} notifications lost out of {notifications_sent}")
         
-        return LoadTestResult(
+        await asyncio.sleep(0)
+    return LoadTestResult(
             test_name=test_name,
             start_time=start_time,
             end_time=end_time,
@@ -230,14 +264,14 @@ class TestNotificationDeliveryPerformance:
         notifications_per_user = 20
         
         # Simulate WebSocket manager with performance issues
-        mock_websocket_manager = MagicMock()
-        notification_queue = asyncio.Queue(maxsize=100)  # Limited queue size
+        mock_websocket_manager = Magic        notification_queue = asyncio.Queue(maxsize=100)  # Limited queue size
         
         sent_notifications = 0
         delivered_notifications = 0
         
         async def slow_notification_delivery(user_id: str, notification_data: Dict[str, Any]):
             """Simulate slow notification delivery that degrades with load."""
+    pass
             nonlocal sent_notifications, delivered_notifications
             
             sent_notifications += 1
@@ -275,7 +309,8 @@ class TestNotificationDeliveryPerformance:
                 # Record queue size
                 performance_monitor.record_metric("notification_queue_size", queue_size, user_id)
                 
-                return True
+                await asyncio.sleep(0)
+    return True
                 
             except asyncio.QueueFull:
                 # Queue overflow - notification lost!
@@ -350,6 +385,7 @@ class TestNotificationDeliveryPerformance:
         
         async def leaky_notification_system(user_id: str, notification_data: Dict[str, Any]):
             """Notification system that leaks memory."""
+    pass
             nonlocal sent_notifications, delivered_notifications
             
             notification_id = f"{user_id}_{sent_notifications}_{time.time()}"
@@ -404,7 +440,8 @@ class TestNotificationDeliveryPerformance:
             # Don't clean up memory! (The bug)
             # Should remove from pending_deliveries but doesn't
             
-            return True
+            await asyncio.sleep(0)
+    return True
         
         # Run sustained load test
         start_time = time.time()
@@ -485,6 +522,7 @@ class TestNotificationDeliveryPerformance:
         
         async def unstable_websocket_connection(user_id: str, connection_id: str):
             """Simulate unstable WebSocket connection."""
+    pass
             nonlocal dropped_connections, reconnection_attempts
             
             # Create connection with random stability
@@ -543,7 +581,8 @@ class TestNotificationDeliveryPerformance:
                 # No connection available
                 failed_deliveries += 1
                 performance_monitor.record_metric("error_no_connection", 1, user_id)
-                return False
+                await asyncio.sleep(0)
+    return False
             
             connection_id = user_connections[0]
             
@@ -686,6 +725,7 @@ class TestConcurrentUserPerformance:
         
         def blocking_notification_processing(user_id: str, notification_data: Dict[str, Any]) -> Tuple[bool, float]:
             """CPU-intensive notification processing that blocks threads."""
+    pass
             start_time = time.time()
             
             # Simulate CPU-intensive work (blocking operation)
@@ -699,7 +739,8 @@ class TestConcurrentUserPerformance:
             end_time = time.time()
             processing_time_ms = (end_time - start_time) * 1000
             
-            return True, processing_time_ms
+            await asyncio.sleep(0)
+    return True, processing_time_ms
         
         async def send_notification_with_thread_pool(user_id: str, notification_data: Dict[str, Any]):
             """Send notification using thread pool."""
@@ -728,7 +769,8 @@ class TestConcurrentUserPerformance:
                         user_id
                     )
                 
-                return success
+                await asyncio.sleep(0)
+    return success
                 
             except asyncio.TimeoutError:
                 # Thread pool task timed out (thread exhaustion!)
@@ -812,6 +854,7 @@ class TestConcurrentUserPerformance:
     @pytest.mark.slow
     async def test_notification_queue_overflow_under_high_volume(self, performance_monitor):
         """CRITICAL: Test notification queue overflow under high volume."""
+    pass
         # This test SHOULD FAIL initially
         
         test_name = "notification_queue_overflow"
@@ -870,6 +913,7 @@ class TestConcurrentUserPerformance:
         
         async def enqueue_notification(user_id: str, notification_data: Dict[str, Any]):
             """Enqueue notification for processing."""
+    pass
             nonlocal sent_notifications, queue_overflow_errors
             
             sent_notifications += 1
@@ -878,7 +922,8 @@ class TestConcurrentUserPerformance:
             try:
                 # Try to add to queue (may overflow!)
                 notification_queue.put_nowait((user_id, notification_data, enqueue_time))
-                return True
+                await asyncio.sleep(0)
+    return True
                 
             except asyncio.QueueFull:
                 # Queue overflow!

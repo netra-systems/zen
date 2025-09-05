@@ -5,6 +5,7 @@ Maximum 300 lines, functions ≤8 lines.
 """
 
 import pytest
+from shared.isolated_environment import IsolatedEnvironment
 
 from netra_backend.app.agents.data_sub_agent import DataSubAgent
 

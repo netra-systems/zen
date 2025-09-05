@@ -2,6 +2,7 @@
 """Minimal inheritance test focusing on structure only"""
 
 import sys
+from shared.isolated_environment import IsolatedEnvironment
 sys.path.insert(0, r'C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1')
 
 def test_inheritance_structure_minimal():

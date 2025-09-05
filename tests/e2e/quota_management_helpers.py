@@ -13,9 +13,12 @@ across all subscription tiers in the Netra Apex platform.
 import asyncio
 from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional
-from unittest.mock import AsyncMock, Mock
 
 from netra_backend.app.db.models_user import ToolUsageLog, User
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
+from shared.isolated_environment import get_env
 
 
 class MockRateLimiter:

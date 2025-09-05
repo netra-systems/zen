@@ -91,6 +91,13 @@ class UnifiedWebSocketManager:
         self._task_failures: Dict[str, int] = {}  # task_name -> failure_count
         self._task_last_failure: Dict[str, datetime] = {}  # task_name -> last_failure_time
         self._monitoring_enabled = True
+        self._monitoring_lock = asyncio.Lock()  # Synchronization for monitoring state changes
+        
+        # Task registry for recovery and restart capabilities
+        self._task_registry: Dict[str, Dict[str, Any]] = {}  # task_name -> {func, args, kwargs, meta}
+        self._shutdown_requested = False  # Track intentional shutdown vs error-based disable
+        self._last_health_check = datetime.utcnow()
+        self._health_check_failures = 0
         
         logger.info("UnifiedWebSocketManager initialized with connection-level thread safety and enhanced error handling")
     
@@ -838,22 +845,32 @@ class UnifiedWebSocketManager:
     
     async def start_monitored_background_task(self, task_name: str, coro_func, *args, **kwargs) -> str:
         """Start a background task with monitoring and automatic restart."""
-        if not self._monitoring_enabled:
-            logger.warning("Background task monitoring is disabled")
-            return ""
-        
-        # Stop existing task if it exists
-        if task_name in self._background_tasks:
-            await self.stop_background_task(task_name)
-        
-        # Create monitored task
-        task = asyncio.create_task(
-            self._run_monitored_task(task_name, coro_func, *args, **kwargs)
-        )
-        
-        self._background_tasks[task_name] = task
-        logger.info(f"Started monitored background task: {task_name}")
-        return task_name
+        async with self._monitoring_lock:
+            if not self._monitoring_enabled:
+                logger.warning("Background task monitoring is disabled")
+                return ""
+            
+            # Store task definition in registry for potential recovery
+            self._task_registry[task_name] = {
+                'func': coro_func,
+                'args': args,
+                'kwargs': kwargs,
+                'created_at': datetime.utcnow(),
+                'restart_count': 0
+            }
+            
+            # Stop existing task if it exists
+            if task_name in self._background_tasks:
+                await self.stop_background_task(task_name)
+            
+            # Create monitored task
+            task = asyncio.create_task(
+                self._run_monitored_task(task_name, coro_func, *args, **kwargs)
+            )
+            
+            self._background_tasks[task_name] = task
+            logger.info(f"Started monitored background task: {task_name}")
+            return task_name
     
     async def _run_monitored_task(self, task_name: str, coro_func, *args, **kwargs):
         """Run a task with monitoring and error handling."""
@@ -1066,13 +1083,102 @@ class UnifiedWebSocketManager:
     
     async def shutdown_background_monitoring(self):
         """Shutdown all background tasks."""
-        self._monitoring_enabled = False
+        async with self._monitoring_lock:
+            self._shutdown_requested = True
+            self._monitoring_enabled = False
+            
+            # Cancel all tasks
+            for task_name in list(self._background_tasks.keys()):
+                await self.stop_background_task(task_name)
+            
+            logger.info("Background task monitoring shutdown complete")
+    
+    async def enable_background_monitoring(self, restart_previous_tasks: bool = True) -> Dict[str, Any]:
+        """
+        Re-enable background task monitoring with optional task recovery.
         
-        # Cancel all tasks
-        for task_name in list(self._background_tasks.keys()):
-            await self.stop_background_task(task_name)
+        CRITICAL FIX: Prevents permanent disable of monitoring system by providing
+        a safe way to restart monitoring after shutdown or errors.
         
-        logger.info("Background task monitoring shutdown complete")
+        Args:
+            restart_previous_tasks: Whether to restart tasks that were registered before shutdown
+            
+        Returns:
+            Dictionary with recovery status and counts
+        """
+        recovery_status = {
+            'monitoring_enabled': False,
+            'tasks_restarted': 0,
+            'tasks_failed_restart': 0,
+            'failed_tasks': [],
+            'health_check_reset': False,
+            'previous_state': {
+                'was_shutdown': self._shutdown_requested,
+                'had_failures': len(self._task_failures) > 0
+            }
+        }
+        
+        async with self._monitoring_lock:
+            if self._monitoring_enabled:
+                logger.info("Background monitoring is already enabled")
+                recovery_status['monitoring_enabled'] = True
+                return recovery_status
+            
+            # Reset monitoring state
+            self._monitoring_enabled = True
+            self._shutdown_requested = False
+            self._health_check_failures = 0
+            self._last_health_check = datetime.utcnow()
+            recovery_status['health_check_reset'] = True
+            
+            logger.info("Background task monitoring re-enabled")
+            recovery_status['monitoring_enabled'] = True
+            
+            # Optionally restart registered tasks
+            if restart_previous_tasks and self._task_registry:
+                logger.info(f"Attempting to restart {len(self._task_registry)} registered tasks")
+                
+                for task_name, task_config in list(self._task_registry.items()):
+                    try:
+                        # Increment restart count
+                        task_config['restart_count'] = task_config.get('restart_count', 0) + 1
+                        
+                        # Don't restart tasks that have failed too many times
+                        if task_config['restart_count'] > 5:
+                            logger.warning(f"Skipping restart of {task_name} - too many restart attempts ({task_config['restart_count']})")
+                            continue
+                        
+                        # Restart the task
+                        restart_result = await self.start_monitored_background_task(
+                            task_name,
+                            task_config['func'],
+                            *task_config['args'],
+                            **task_config['kwargs']
+                        )
+                        
+                        if restart_result:
+                            recovery_status['tasks_restarted'] += 1
+                            logger.info(f"Successfully restarted task: {task_name}")
+                        else:
+                            recovery_status['tasks_failed_restart'] += 1
+                            recovery_status['failed_tasks'].append(task_name)
+                            logger.error(f"Failed to restart task: {task_name}")
+                        
+                    except Exception as e:
+                        recovery_status['tasks_failed_restart'] += 1
+                        recovery_status['failed_tasks'].append(task_name)
+                        logger.error(f"Exception while restarting task {task_name}: {e}")
+            
+            # Clear old failure data for a fresh start
+            self._task_failures.clear()
+            self._task_last_failure.clear()
+            
+            logger.info(
+                f"Monitoring recovery complete: {recovery_status['tasks_restarted']} tasks restarted, "
+                f"{recovery_status['tasks_failed_restart']} failed"
+            )
+            
+        return recovery_status
 
 
 # SECURITY FIX: Replace singleton with factory pattern
@@ -1081,33 +1187,43 @@ class UnifiedWebSocketManager:
 
 def get_websocket_manager() -> UnifiedWebSocketManager:
     """
-    DEPRECATED: Get the global WebSocket manager instance.
+    🚨 SECURITY DEPRECATED: This function is DEPRECATED and UNSAFE.
     
-    WARNING: This function creates a non-isolated manager instance that can cause
-    CRITICAL SECURITY VULNERABILITIES in multi-user environments. It should only
-    be used for backward compatibility in legacy code that cannot be immediately
-    migrated to the factory pattern.
+    This function has been DISABLED because it creates critical security vulnerabilities
+    in multi-user environments, causing user data leakage and authentication bypass.
     
-    For new code, use:
-    - create_websocket_manager(user_context) for isolated managers
-    - WebSocketManagerFactory for advanced factory operations
+    REQUIRED MIGRATION:
+    - For authenticated WebSocket connections: Use create_websocket_manager(user_context)
+    - For factory patterns: Use WebSocketManagerFactory
+    - For testing: Create dedicated test instances with proper user context
     
-    Returns:
-        UnifiedWebSocketManager: A NEW instance (not singleton) for basic compatibility
+    SECURITY ISSUE: This function was creating shared state between users,
+    allowing User A to see User B's messages and data.
     """
     from netra_backend.app.logging_config import central_logger
-    import warnings
+    import inspect
     
     logger = central_logger.get_logger(__name__)
     
-    warnings.warn(
-        "SECURITY WARNING: Using deprecated get_websocket_manager() function. "
-        "This creates a non-isolated manager that can leak data between users. "
-        "Migrate to create_websocket_manager(user_context) for proper isolation.",
-        UserWarning,
-        stacklevel=2
+    # Get caller information for debugging
+    frame = inspect.currentframe()
+    caller_info = "unknown"
+    if frame and frame.f_back:
+        caller_info = f"{frame.f_back.f_code.co_filename}:{frame.f_back.f_lineno}"
+    
+    # FAIL LOUDLY to prevent silent security vulnerabilities
+    error_message = (
+        f"🚨 CRITICAL SECURITY ERROR: get_websocket_manager() has been DISABLED due to "
+        f"critical multi-user security vulnerabilities. Called from: {caller_info}\n\n"
+        f"REQUIRED FIX:\n"
+        f"1. For authenticated connections: Use create_websocket_manager(user_context)\n"
+        f"2. For factory patterns: Use WebSocketManagerFactory\n"
+        f"3. For testing: Create test instances with proper context\n\n"
+        f"SECURITY RISK: This function caused USER DATA LEAKAGE between different users.\n"
+        f"Migration guide: /docs/websocket_migration.md"
     )
     
-    # Return a NEW instance each time to prevent shared state
-    # This is still not ideal but safer than a true singleton
-    return UnifiedWebSocketManager()
+    logger.critical(error_message)
+    
+    # Fail loudly instead of creating security vulnerabilities
+    raise RuntimeError(error_message)

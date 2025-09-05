@@ -12,12 +12,16 @@ import asyncio
 import json
 import time
 from typing import Dict, List, Optional, Any
-from unittest.mock import patch, MagicMock, AsyncMock
+from shared.isolated_environment import IsolatedEnvironment
 
 import pytest
 from playwright.async_api import Page, WebSocket, ConsoleMessage
 
 from test_framework.base_e2e_test import BaseE2ETest as E2ETestBase
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
+from shared.isolated_environment import get_env
 
 
 class TestWebSocketStartupRaceCondition(E2ETestBase):

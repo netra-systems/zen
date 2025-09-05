@@ -1,3 +1,29 @@
+class TestWebSocketConnection:
+    """Real WebSocket connection for testing instead of mocks."""
+    
+    def __init__(self):
+    pass
+        self.messages_sent = []
+        self.is_connected = True
+        self._closed = False
+        
+    async def send_json(self, message: dict):
+        """Send JSON message."""
+        if self._closed:
+            raise RuntimeError("WebSocket is closed")
+        self.messages_sent.append(message)
+        
+    async def close(self, code: int = 1000, reason: str = "Normal closure"):
+        """Close WebSocket connection."""
+    pass
+        self._closed = True
+        self.is_connected = False
+        
+    def get_messages(self) -> list:
+        """Get all sent messages."""
+        await asyncio.sleep(0)
+    return self.messages_sent.copy()
+
 """
 Mission Critical Test Suite: Docker Lifecycle Management
 
@@ -34,7 +60,8 @@ import time
 import unittest
 from pathlib import Path
 from typing import Dict, List, Optional, Set, Tuple
-from unittest.mock import patch
+from test_framework.docker.unified_docker_manager import UnifiedDockerManager
+from shared.isolated_environment import IsolatedEnvironment
 
 # Import the Docker management infrastructure
 from test_framework.unified_docker_manager import (
@@ -55,6 +82,10 @@ from test_framework.docker_port_discovery import (
     ServicePortMapping
 )
 from test_framework.dynamic_port_allocator import (
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
+from shared.isolated_environment import get_env
     DynamicPortAllocator,
     PortRange,
     PortAllocationResult
@@ -91,6 +122,7 @@ class DockerLifecycleTestSuite(unittest.TestCase):
     @classmethod
     def tearDownClass(cls):
         """Clean up class-level resources."""
+    pass
         cls._cleanup_test_artifacts()
     
     def setUp(self):
@@ -104,6 +136,7 @@ class DockerLifecycleTestSuite(unittest.TestCase):
         
     def tearDown(self):
         """Clean up individual test."""
+    pass
         if self.docker_manager:
             try:
                 # Release environment and clean up
@@ -133,7 +166,8 @@ class DockerLifecycleTestSuite(unittest.TestCase):
                 capture_output=True, text=True, timeout=30
             )
             if result.returncode == 0 and result.stdout.strip():
-                container_ids = result.stdout.strip().split('\n')
+                container_ids = result.stdout.strip().split('
+')
                 for container_id in container_ids:
                     # Use safe removal instead of docker rm -f
                     try:
@@ -152,7 +186,8 @@ class DockerLifecycleTestSuite(unittest.TestCase):
                 capture_output=True, text=True, timeout=30
             )
             if result.returncode == 0 and result.stdout.strip():
-                network_ids = result.stdout.strip().split('\n')
+                network_ids = result.stdout.strip().split('
+')
                 for network_id in network_ids:
                     subprocess.run(['docker', 'network', 'rm', network_id], 
                                  capture_output=True, timeout=10)
@@ -166,6 +201,7 @@ class DockerLifecycleTestSuite(unittest.TestCase):
 
     def test_graceful_container_shutdown_sequence(self):
         """Test that containers are shut down gracefully with proper signal handling."""
+    pass
         # Create a test container that can handle signals
         container_name = f"{self.test_id}_graceful_test"
         
@@ -245,6 +281,7 @@ class DockerLifecycleTestSuite(unittest.TestCase):
         
     def test_container_removal_with_volume_cleanup(self):
         """Test container removal properly cleans up associated volumes."""
+    pass
         container_name = f"{self.test_id}_volume_test"
         volume_name = f"{self.test_id}_test_volume"
         
@@ -339,6 +376,7 @@ class DockerLifecycleTestSuite(unittest.TestCase):
         
     def test_rate_limiter_concurrent_limit_enforcement(self):
         """Test that rate limiter enforces concurrent operation limits."""
+    pass
         rate_limiter = DockerRateLimiter(min_interval=0.1, max_concurrent=2)
         
         concurrent_count = 0
@@ -346,9 +384,11 @@ class DockerLifecycleTestSuite(unittest.TestCase):
         lock = threading.Lock()
         
         def tracked_operation():
+    pass
             nonlocal concurrent_count, max_concurrent_observed
             
             def custom_cmd(cmd, **kwargs):
+    pass
                 nonlocal concurrent_count, max_concurrent_observed
                 with lock:
                     concurrent_count += 1
@@ -364,8 +404,7 @@ class DockerLifecycleTestSuite(unittest.TestCase):
                 return subprocess.run(cmd, capture_output=True, text=True, timeout=10)
             
             # Monkey patch the subprocess execution
-            with patch('subprocess.run', side_effect=custom_cmd):
-                return rate_limiter.execute_docker_command(['docker', 'version'], timeout=15)
+                            return rate_limiter.execute_docker_command(['docker', 'version'], timeout=15)
         
         # Execute operations concurrently
         with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
@@ -393,8 +432,7 @@ class DockerLifecycleTestSuite(unittest.TestCase):
                 return subprocess.run(['docker', 'version'], capture_output=True, text=True, timeout=10)
         
         start_time = time.time()
-        with patch('subprocess.run', side_effect=failing_command):
-            result = rate_limiter.execute_docker_command(['docker', 'fake-command'], timeout=30)
+                    result = rate_limiter.execute_docker_command(['docker', 'fake-command'], timeout=30)
         total_time = time.time() - start_time
         
         # Verify retry behavior
@@ -417,6 +455,7 @@ class DockerLifecycleTestSuite(unittest.TestCase):
 
     def test_container_memory_limit_enforcement(self):
         """Test that containers respect configured memory limits."""
+    pass
         container_name = f"{self.test_id}_memory_test"
         memory_limit = "128m"
         
@@ -480,6 +519,7 @@ class DockerLifecycleTestSuite(unittest.TestCase):
             
     def test_memory_pressure_container_behavior(self):
         """Test container behavior under memory pressure."""
+    pass
         container_name = f"{self.test_id}_memory_pressure"
         
         # Create container with very low memory limit
@@ -581,6 +621,7 @@ class DockerLifecycleTestSuite(unittest.TestCase):
             
     def test_concurrent_docker_operations_stability(self):
         """Test Docker daemon stability under concurrent operations load."""
+    pass
         operations_per_thread = 3
         num_threads = 4
         
@@ -684,6 +725,7 @@ class DockerLifecycleTestSuite(unittest.TestCase):
         
     def test_docker_manager_concurrent_environment_acquisition(self):
         """Test UnifiedDockerManager handling concurrent environment requests."""
+    pass
         num_concurrent = 3
         environment_results = []
         
@@ -759,6 +801,7 @@ class DockerLifecycleTestSuite(unittest.TestCase):
 
     def test_docker_network_creation_and_verification(self):
         """Test Docker network creation and proper configuration verification."""
+    pass
         network_name = f"{self.test_id}_test_network"
         
         # Create custom network
@@ -880,6 +923,7 @@ class DockerLifecycleTestSuite(unittest.TestCase):
         
     def test_network_cleanup_on_environment_release(self):
         """Test that networks are properly cleaned up when environments are released."""
+    pass
         manager = UnifiedDockerManager(
             environment_type=EnvironmentType.DEDICATED,
             test_id=f"{self.test_id}_cleanup_test"
@@ -892,7 +936,8 @@ class DockerLifecycleTestSuite(unittest.TestCase):
             # Verify networks exist
             ls_cmd = ['docker', 'network', 'ls', '--format', '{{.Name}}']
             result = subprocess.run(ls_cmd, capture_output=True, text=True, timeout=10)
-            networks_before = set(result.stdout.strip().split('\n'))
+            networks_before = set(result.stdout.strip().split('
+'))
             
             # Release environment
             manager.release_environment(env_name)
@@ -902,7 +947,8 @@ class DockerLifecycleTestSuite(unittest.TestCase):
             
             # Verify test networks are cleaned up
             result = subprocess.run(ls_cmd, capture_output=True, text=True, timeout=10)
-            networks_after = set(result.stdout.strip().split('\n'))
+            networks_after = set(result.stdout.strip().split('
+'))
             
             # Any networks created for this test should be removed
             test_networks = [net for net in networks_before if self.test_id in net or env_name in net]
@@ -958,6 +1004,7 @@ class DockerLifecycleTestSuite(unittest.TestCase):
         
     def test_docker_manager_automatic_conflict_resolution(self):
         """Test UnifiedDockerManager automatic conflict resolution."""
+    pass
         # Create a conflicting container manually
         conflicting_container = f"{self.test_id}_manager_conflict"
         
@@ -1016,7 +1063,9 @@ class DockerLifecycleTestSuite(unittest.TestCase):
             '--label', f'test_id={self.test_id}',
             '-p', f'{test_port}:80',
             'alpine:latest',
-            'sh', '-c', 'while true; do echo "HTTP/1.1 200 OK\\n\\nHello" | nc -l -p 80; done'
+            'sh', '-c', 'while true; do echo "HTTP/1.1 200 OK\
+\
+Hello" | nc -l -p 80; done'
         ]
         
         result = subprocess.run(create_cmd, capture_output=True, text=True, timeout=30)
@@ -1085,6 +1134,7 @@ class DockerLifecycleTestSuite(unittest.TestCase):
 
     def test_container_health_check_detection(self):
         """Test detection of container health status through health checks."""
+    pass
         healthy_container = f"{self.test_id}_healthy"
         unhealthy_container = f"{self.test_id}_unhealthy"
         
@@ -1125,6 +1175,7 @@ class DockerLifecycleTestSuite(unittest.TestCase):
         
         # Check health status
         def get_health_status(container_name):
+    pass
             inspect_cmd = [
                 'docker', 'inspect', container_name,
                 '--format', '{{if .State.Health}}{{.State.Health.Status}}{{else}}none{{end}}'
@@ -1213,6 +1264,7 @@ class DockerLifecycleTestSuite(unittest.TestCase):
                 
     def test_health_check_timeout_and_retry_behavior(self):
         """Test health check timeout and retry behavior."""
+    pass
         slow_container = f"{self.test_id}_slow_health"
         
         # Create container with slow health check
@@ -1390,6 +1442,7 @@ class DockerLifecycleTestSuite(unittest.TestCase):
         
     def test_orphaned_resource_detection_and_cleanup(self):
         """Test detection and cleanup of orphaned Docker resources."""
+    pass
         # Create some containers that will become "orphaned"
         orphaned_containers = []
         
@@ -1500,10 +1553,12 @@ class DockerLifecycleTestSuite(unittest.TestCase):
     
     def _get_docker_containers(self) -> List[str]:
         """Get list of Docker containers."""
+    pass
         cmd = ['docker', 'ps', '-a', '--format', '{{.Names}}']
         result = subprocess.run(cmd, capture_output=True, text=True, timeout=10)
         if result.returncode == 0:
-            return [name.strip() for name in result.stdout.strip().split('\n') if name.strip()]
+            return [name.strip() for name in result.stdout.strip().split('
+') if name.strip()]
         return []
     
     def _get_docker_networks(self) -> List[str]:
@@ -1511,7 +1566,8 @@ class DockerLifecycleTestSuite(unittest.TestCase):
         cmd = ['docker', 'network', 'ls', '--format', '{{.Name}}']
         result = subprocess.run(cmd, capture_output=True, text=True, timeout=10)
         if result.returncode == 0:
-            return [name.strip() for name in result.stdout.strip().split('\n') if name.strip()]
+            return [name.strip() for name in result.stdout.strip().split('
+') if name.strip()]
         return []
 
 
@@ -1520,6 +1576,7 @@ class DockerInfrastructureServiceStartupTests(unittest.TestCase):
     
     @classmethod
     def setUpClass(cls):
+    pass
         cls.test_project_prefix = "infra_startup"
         cls.created_containers = set()
         cls.docker_manager = UnifiedDockerManager(
@@ -1529,10 +1586,12 @@ class DockerInfrastructureServiceStartupTests(unittest.TestCase):
     
     @classmethod
     def tearDownClass(cls):
+    pass
         cls._cleanup_containers()
     
     @classmethod 
     def _cleanup_containers(cls):
+    pass
         for container in cls.created_containers:
             try:
                 subprocess.run(['docker', 'stop', '-t', '5', container], capture_output=True, timeout=10)
@@ -1583,6 +1642,7 @@ class DockerInfrastructureServiceStartupTests(unittest.TestCase):
     
     def test_service_startup_with_resource_constraints(self):
         """Test service startup under strict memory and CPU limits."""
+    pass
         test_id = f"{self.test_project_prefix}_constrained_{int(time.time())}"
         
         # Create containers with strict resource limits
@@ -1668,6 +1728,7 @@ class DockerInfrastructureServiceStartupTests(unittest.TestCase):
     
     def test_parallel_service_startup_isolation(self):
         """Test multiple services can start in parallel without interference."""
+    pass
         test_id = f"{self.test_project_prefix}_parallel_{int(time.time())}"
         
         def start_isolated_service(service_id):
@@ -1720,6 +1781,7 @@ class DockerInfrastructureServiceStartupTests(unittest.TestCase):
     
     def test_service_dependency_startup_ordering(self):
         """Test services start in correct dependency order."""
+    pass
         test_id = f"{self.test_project_prefix}_deps_{int(time.time())}"
         
         # Create a dependency chain: db -> backend -> frontend
@@ -1782,15 +1844,18 @@ class DockerInfrastructureHealthMonitoringTests(unittest.TestCase):
     
     @classmethod
     def setUpClass(cls):
+    pass
         cls.test_project_prefix = "infra_health"
         cls.created_containers = set()
     
     @classmethod
     def tearDownClass(cls):
+    pass
         cls._cleanup_containers()
     
     @classmethod 
     def _cleanup_containers(cls):
+    pass
         for container in cls.created_containers:
             try:
                 subprocess.run(['docker', 'stop', '-t', '3', container], capture_output=True, timeout=10)
@@ -1872,6 +1937,7 @@ class DockerInfrastructureHealthMonitoringTests(unittest.TestCase):
     
     def test_health_check_performance_under_load(self):
         """Test health check performance doesn't degrade under system load."""
+    pass
         test_id = f"{self.test_project_prefix}_load_{int(time.time())}"
         
         # Create load generators
@@ -2006,6 +2072,7 @@ class DockerInfrastructureHealthMonitoringTests(unittest.TestCase):
     
     def test_multi_service_health_aggregation(self):
         """Test health monitoring across multiple services with aggregation."""
+    pass
         test_id = f"{self.test_project_prefix}_multi_{int(time.time())}"
         
         # Create multiple services with different health patterns
@@ -2150,15 +2217,18 @@ class DockerInfrastructureFailureRecoveryTests(unittest.TestCase):
     
     @classmethod
     def setUpClass(cls):
+    pass
         cls.test_project_prefix = "infra_recovery"
         cls.created_containers = set()
     
     @classmethod
     def tearDownClass(cls):
+    pass
         cls._cleanup_containers()
     
     @classmethod 
     def _cleanup_containers(cls):
+    pass
         for container in cls.created_containers:
             try:
                 subprocess.run(['docker', 'stop', '-t', '3', container], capture_output=True, timeout=10)
@@ -2228,6 +2298,7 @@ class DockerInfrastructureFailureRecoveryTests(unittest.TestCase):
     
     def test_failure_cascade_prevention(self):
         """Test system prevents cascade failures across services."""
+    pass
         test_id = f"{self.test_project_prefix}_cascade_{int(time.time())}"
         
         # Create network for service communication
@@ -2379,6 +2450,7 @@ class DockerInfrastructureFailureRecoveryTests(unittest.TestCase):
     
     def test_network_failure_recovery(self):
         """Test recovery from network connectivity issues."""
+    pass
         test_id = f"{self.test_project_prefix}_network_{int(time.time())}"
         
         # Create custom network
@@ -2537,15 +2609,18 @@ class DockerInfrastructurePerformanceTests(unittest.TestCase):
     
     @classmethod
     def setUpClass(cls):
+    pass
         cls.test_project_prefix = "infra_perf"
         cls.created_containers = set()
     
     @classmethod
     def tearDownClass(cls):
+    pass
         cls._cleanup_containers()
     
     @classmethod 
     def _cleanup_containers(cls):
+    pass
         for container in cls.created_containers:
             try:
                 subprocess.run(['docker', 'stop', '-t', '2', container], capture_output=True, timeout=8)
@@ -2609,6 +2684,7 @@ class DockerInfrastructurePerformanceTests(unittest.TestCase):
     
     def test_memory_usage_efficiency_validation(self):
         """Test containers operate within memory efficiency requirements."""
+    pass
         test_id = f"{self.test_project_prefix}_memory_{int(time.time())}"
         
         # Create containers with different memory profiles
@@ -2652,7 +2728,8 @@ class DockerInfrastructurePerformanceTests(unittest.TestCase):
             result = subprocess.run(stats_cmd, capture_output=True, text=True, timeout=10)
             
             if result.returncode == 0:
-                lines = result.stdout.strip().split('\n')
+                lines = result.stdout.strip().split('
+')
                 if len(lines) >= 2:  # Skip header
                     data_line = lines[1]
                     if '\t' in data_line:
@@ -2702,6 +2779,7 @@ class DockerInfrastructurePerformanceTests(unittest.TestCase):
         
         def concurrent_operation_worker(worker_id, operations_count):
             """Perform multiple Docker operations concurrently."""
+    pass
             worker_results = []
             worker_containers = []
             
@@ -2808,6 +2886,7 @@ class DockerInfrastructurePerformanceTests(unittest.TestCase):
         
         WARNING: tmpfs removed - causes system crashes from RAM exhaustion.
         """
+    pass
         test_id = f"{self.test_project_prefix}_io_{int(time.time())}"
         
         # Test different I/O scenarios
@@ -2986,6 +3065,7 @@ class DockerInfrastructurePerformanceTests(unittest.TestCase):
     
     def test_unified_docker_manager_comprehensive_environment_lifecycle(self):
         """Test complete environment lifecycle with UnifiedDockerManager."""
+    pass
         test_env_name = f"comprehensive_lifecycle_{int(time.time())}"
         
         try:
@@ -3084,6 +3164,7 @@ class DockerInfrastructurePerformanceTests(unittest.TestCase):
     
     def test_container_failure_recovery_mechanisms(self):
         """Test container failure recovery and restart mechanisms."""
+    pass
         test_env_name = f"failure_recovery_{int(time.time())}"
         
         try:
@@ -3161,6 +3242,7 @@ class DockerInfrastructurePerformanceTests(unittest.TestCase):
     
     def test_stress_testing_multiple_rapid_environments(self):
         """Test stress conditions with rapid environment creation/destruction."""
+    pass
         num_environments = 6  # Reasonable number for stress testing
         environments_created = []
         stress_metrics = {

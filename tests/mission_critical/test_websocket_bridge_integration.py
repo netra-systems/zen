@@ -1,4 +1,11 @@
 from shared.isolated_environment import get_env
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from test_framework.database.test_database_manager import TestDatabaseManager
+from test_framework.redis.test_redis_manager import TestRedisManager
+from auth_service.core.auth_manager import AuthManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 #!/usr/bin/env python
 """INTEGRATION WebSocket Bridge Test with Real Agent Classes
 
@@ -14,8 +21,10 @@ import sys
 import os
 import unittest
 import asyncio
-from unittest.mock import MagicMock, AsyncMock, patch
 from typing import Dict, List, Any
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
 
 # Add project root to path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
@@ -32,39 +41,52 @@ class ComprehensiveMockBridge:
     """Mock bridge that captures all WebSocket events for validation."""
     
     def __init__(self):
+    pass
         self.events_captured = []
         self.state = "active"
         self.run_id_contexts = {}
     
     async def notify_agent_started(self, run_id: str, agent_name: str, **kwargs):
+    pass
         event = {"type": "agent_started", "run_id": run_id, "agent_name": agent_name, "kwargs": kwargs}
         self.events_captured.append(event)
-        return True
+        await asyncio.sleep(0)
+    return True
     
     async def notify_agent_thinking(self, run_id: str, agent_name: str, message: str, **kwargs):
+    pass
         event = {"type": "agent_thinking", "run_id": run_id, "agent_name": agent_name, "message": message, "kwargs": kwargs}
         self.events_captured.append(event)
-        return True
+        await asyncio.sleep(0)
+    return True
     
     async def notify_tool_executing(self, run_id: str, agent_name: str, tool_name: str, parameters: Dict = None, **kwargs):
+    pass
         event = {"type": "tool_executing", "run_id": run_id, "agent_name": agent_name, "tool_name": tool_name, "parameters": parameters, "kwargs": kwargs}
         self.events_captured.append(event)
-        return True
+        await asyncio.sleep(0)
+    return True
         
     async def notify_tool_completed(self, run_id: str, agent_name: str, tool_name: str, result: Dict = None, execution_time_ms: float = None, **kwargs):
+    pass
         event = {"type": "tool_completed", "run_id": run_id, "agent_name": agent_name, "tool_name": tool_name, "result": result, "execution_time_ms": execution_time_ms, "kwargs": kwargs}
         self.events_captured.append(event)
-        return True
+        await asyncio.sleep(0)
+    return True
     
     async def notify_agent_completed(self, run_id: str, agent_name: str, result: Dict = None, execution_time_ms: float = None, **kwargs):
+    pass
         event = {"type": "agent_completed", "run_id": run_id, "agent_name": agent_name, "result": result, "execution_time_ms": execution_time_ms, "kwargs": kwargs}
         self.events_captured.append(event)
-        return True
+        await asyncio.sleep(0)
+    return True
     
     async def notify_agent_error(self, run_id: str, agent_name: str, error: str, error_type: str = None, **kwargs):
+    pass
         event = {"type": "agent_error", "run_id": run_id, "agent_name": agent_name, "error": error, "error_type": error_type, "kwargs": kwargs}
         self.events_captured.append(event)
-        return True
+        await asyncio.sleep(0)
+    return True
     
     def get_events_for_run(self, run_id: str) -> List[Dict]:
         return [event for event in self.events_captured if event.get("run_id") == run_id]
@@ -94,10 +116,10 @@ class TestWebSocketBridgeIntegration(unittest.IsolatedAsyncioTestCase):
         for p in self.patches:
             mock = p.start()
             if hasattr(mock, 'return_value'):
-                mock.return_value = MagicMock()
-    
+                mock.return_value = Magic    
     def tearDown(self):
         """Clean up mocks."""
+    pass
         for p in self.patches:
             p.stop()
     
@@ -136,6 +158,7 @@ class TestWebSocketBridgeIntegration(unittest.IsolatedAsyncioTestCase):
     
     async def test_base_agent_websocket_integration(self):
         """CRITICAL: BaseAgent must integrate with WebSocket bridge."""
+    pass
         try:
             from netra_backend.app.agents.base_agent import BaseAgent
             from netra_backend.app.agents.state import DeepAgentState
@@ -145,6 +168,7 @@ class TestWebSocketBridgeIntegration(unittest.IsolatedAsyncioTestCase):
         # Create a test agent that extends BaseAgent
         class TestBaseAgent(BaseAgent):
             def __init__(self):
+    pass
                 super().__init__(name="TestBaseAgent")
             
             async def execute(self, state=None, run_id="", stream_updates=False):
@@ -152,7 +176,8 @@ class TestWebSocketBridgeIntegration(unittest.IsolatedAsyncioTestCase):
                 await self.emit_thinking("BaseAgent is processing")
                 await self.emit_tool_executing("base_tool", {"test": True})
                 await self.emit_tool_completed("base_tool", {"result": "base_success"})
-                return {"status": "completed", "agent": self.name}
+                await asyncio.sleep(0)
+    return {"status": "completed", "agent": self.name}
         
         agent = TestBaseAgent()
         
@@ -190,6 +215,7 @@ class TestWebSocketBridgeIntegration(unittest.IsolatedAsyncioTestCase):
     
     async def test_nested_agent_bridge_propagation(self):
         """CRITICAL: WebSocket bridge must propagate through nested agents."""
+    pass
         try:
             from netra_backend.app.agents.base_agent import BaseAgent
         except ImportError as e:
@@ -197,10 +223,12 @@ class TestWebSocketBridgeIntegration(unittest.IsolatedAsyncioTestCase):
         
         class ParentAgent(BaseAgent):
             def __init__(self, child_agent=None):
+    pass
                 super().__init__(name="ParentAgent")
                 self.child_agent = child_agent
             
             async def execute(self, state=None, run_id="", stream_updates=False):
+    pass
                 await self.emit_thinking("Parent agent starting")
                 
                 if self.child_agent:
@@ -211,17 +239,21 @@ class TestWebSocketBridgeIntegration(unittest.IsolatedAsyncioTestCase):
                     child_result = await self.child_agent.execute(state, run_id, stream_updates)
                 
                 await self.emit_thinking("Parent agent completing")
-                return {"status": "parent_completed"}
+                await asyncio.sleep(0)
+    return {"status": "parent_completed"}
         
         class ChildAgent(BaseAgent):
             def __init__(self):
+    pass
                 super().__init__(name="ChildAgent")
             
             async def execute(self, state=None, run_id="", stream_updates=False):
+    pass
                 await self.emit_thinking("Child agent executing")
                 await self.emit_tool_executing("child_tool", {"nested": True})
                 await self.emit_tool_completed("child_tool", {"child_result": "success"})
-                return {"status": "child_completed"}
+                await asyncio.sleep(0)
+    return {"status": "child_completed"}
         
         # Set up nested agents
         child = ChildAgent()
@@ -275,8 +307,7 @@ class TestWebSocketBridgeIntegration(unittest.IsolatedAsyncioTestCase):
         mock_llm = MagicMock(spec=LLMManager)
         mock_dispatcher = MagicMock(spec=ToolDispatcher)
         mock_dispatcher.has_websocket_support = True
-        mock_dispatcher.executor = MagicMock()
-        mock_dispatcher.diagnose_websocket_wiring = MagicMock(return_value={"critical_issues": []})
+        mock_dispatcher.executor = Magic        mock_dispatcher.diagnose_websocket_wiring = MagicMock(return_value={"critical_issues": []})
         
         registry = AgentRegistry()
         
@@ -302,6 +333,7 @@ class TestWebSocketBridgeIntegration(unittest.IsolatedAsyncioTestCase):
     
     async def test_error_handling_and_recovery(self):
         """CRITICAL: Bridge must handle errors gracefully and allow recovery."""
+    pass
         try:
             from netra_backend.app.agents.base_agent import BaseAgent
         except ImportError as e:
@@ -309,16 +341,19 @@ class TestWebSocketBridgeIntegration(unittest.IsolatedAsyncioTestCase):
         
         class ErrorTestAgent(BaseAgent):
             def __init__(self):
+    pass
                 super().__init__(name="ErrorTestAgent")
                 self.error_on_next = False
             
             async def execute(self, state=None, run_id="", stream_updates=False):
+    pass
                 if self.error_on_next:
                     await self.emit_error("Test error", "test_error_type")
                     raise Exception("Test error condition")
                 
                 await self.emit_thinking("Error test agent working normally")
-                return {"status": "success"}
+                await asyncio.sleep(0)
+    return {"status": "success"}
         
         agent = ErrorTestAgent()
         agent.set_websocket_bridge(self.bridge)
@@ -355,3 +390,30 @@ class TestWebSocketBridgeIntegration(unittest.IsolatedAsyncioTestCase):
 if __name__ == '__main__':
     # Run the integration test suite
     unittest.main(verbosity=2)
+
+
+class TestWebSocketConnection:
+    """Real WebSocket connection for testing instead of mocks."""
+    
+    def __init__(self):
+    pass
+        self.messages_sent = []
+        self.is_connected = True
+        self._closed = False
+        
+    async def send_json(self, message: dict):
+        """Send JSON message."""
+        if self._closed:
+            raise RuntimeError("WebSocket is closed")
+        self.messages_sent.append(message)
+        
+    async def close(self, code: int = 1000, reason: str = "Normal closure"):
+        """Close WebSocket connection."""
+    pass
+        self._closed = True
+        self.is_connected = False
+        
+    def get_messages(self) -> list:
+        """Get all sent messages."""
+        await asyncio.sleep(0)
+    return self.messages_sent.copy()

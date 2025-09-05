@@ -30,5 +30,6 @@ Coverage verified: All 22 functions from pr_router.py are tested.
 
 import sys
 from pathlib import Path
+from shared.isolated_environment import IsolatedEnvironment
 
 pass

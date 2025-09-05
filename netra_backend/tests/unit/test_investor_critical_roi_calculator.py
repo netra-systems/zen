@@ -8,6 +8,7 @@ Maximum 300 lines, functions ≤8 lines.
 import sys
 from pathlib import Path
 from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
+from shared.isolated_environment import IsolatedEnvironment
 
 
 import time

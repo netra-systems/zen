@@ -7,6 +7,7 @@ Business Value: Customer-facing functionality
 import pytest
 from fastapi.testclient import TestClient
 from netra_backend.app.main import app
+from shared.isolated_environment import IsolatedEnvironment
 
 @pytest.mark.api
 class TestDebugAPI:

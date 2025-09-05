@@ -4,11 +4,13 @@ from netra_backend.app.websocket_core import WebSocketManager
 # Test framework import - using pytest fixtures instead
 from pathlib import Path
 import sys
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from auth_service.core.auth_manager import AuthManager
+from shared.isolated_environment import IsolatedEnvironment
 
 import asyncio
 import json
 from typing import Any, Dict, List, Optional
-from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import httpx
 import pytest

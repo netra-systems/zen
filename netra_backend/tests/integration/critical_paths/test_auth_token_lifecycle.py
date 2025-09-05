@@ -10,6 +10,7 @@ import pytest
 import time
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
+from shared.isolated_environment import IsolatedEnvironment
 
 # Absolute imports from package root
 from netra_backend.app.config import get_config

@@ -1,4 +1,5 @@
 from shared.isolated_environment import get_env
+from shared.isolated_environment import IsolatedEnvironment
 """
 CRITICAL Dev Launcher Startup Validation Test
 

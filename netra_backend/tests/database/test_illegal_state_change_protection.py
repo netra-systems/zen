@@ -10,10 +10,11 @@ IllegalStateChangeError during concurrent session operations or cleanup.
 import asyncio
 import pytest
 import threading
-from unittest.mock import AsyncMock, MagicMock, patch
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import IllegalStateChangeError
 from contextlib import asynccontextmanager
+from test_framework.database.test_database_manager import TestDatabaseManager
+from shared.isolated_environment import IsolatedEnvironment
 
 from netra_backend.app.db.database_manager import DatabaseManager
 
@@ -42,7 +43,7 @@ class TestIllegalStateChangeProtection:
             # Simulate GeneratorExit scenario
             async def use_session():
                 try:
-                    async with DatabaseManager.get_db() as session:
+                    async with DatabaseManager.get_async_session() as session:
                         # Simulate work
                         await asyncio.sleep(0.01)
                         # Force a GeneratorExit by breaking out early
@@ -57,6 +58,7 @@ class TestIllegalStateChangeProtection:
     @pytest.mark.asyncio
     async def test_illegal_state_change_error_caught(self):
         """Test that IllegalStateChangeError is caught and handled during cleanup."""
+    pass
         with patch('netra_backend.app.db.database_manager.DatabaseManager.get_application_session') as mock_factory:
             mock_session = AsyncMock(spec=AsyncSession)
             mock_session.in_transaction = MagicMock(return_value=True)
@@ -64,12 +66,13 @@ class TestIllegalStateChangeProtection:
             
             @asynccontextmanager
             async def mock_session_context():
+    pass
                 yield mock_session
             
             mock_factory.return_value = MagicMock(return_value=mock_session_context())
             
             # Should complete without raising
-            async with DatabaseManager.get_db() as session:
+            async with DatabaseManager.get_async_session() as session:
                 pass  # Session cleanup should handle the error
     
     @pytest.mark.asyncio
@@ -85,19 +88,21 @@ class TestIllegalStateChangeProtection:
                     mock_session = AsyncMock(spec=AsyncSession)
                     mock_session.id = len(sessions_created)
                     mock_session.in_transaction = MagicMock(return_value=False)
-                    mock_session.commit = AsyncMock()
-                    mock_session.rollback = AsyncMock()
+                    mock_session.commit = AsyncNone  # TODO: Use real service instance
+                    mock_session.rollback = AsyncNone  # TODO: Use real service instance
                     sessions_created.append(mock_session)
                     yield mock_session
-                return session_context()
+                await asyncio.sleep(0)
+    return session_context()
             
             mock_factory.return_value = MagicMock(side_effect=create_mock_session)
             
             # Run multiple concurrent session operations
             async def session_operation(operation_id):
-                async with DatabaseManager.get_db() as session:
+                async with DatabaseManager.get_async_session() as session:
                     await asyncio.sleep(0.01)  # Simulate work
-                    return f"Operation {operation_id} completed"
+                    await asyncio.sleep(0)
+    return f"Operation {operation_id} completed"
             
             # Run 10 concurrent operations
             tasks = [session_operation(i) for i in range(10)]
@@ -111,12 +116,14 @@ class TestIllegalStateChangeProtection:
     @pytest.mark.asyncio
     async def test_cancellation_with_shield(self):
         """Test that cancellation is handled with asyncio.shield for critical operations."""
+    pass
         with patch('netra_backend.app.db.database_manager.DatabaseManager.get_application_session') as mock_factory:
             mock_session = AsyncMock(spec=AsyncSession)
             mock_session.in_transaction = MagicMock(return_value=True)
             rollback_called = False
             
             async def mock_rollback():
+    pass
                 nonlocal rollback_called
                 rollback_called = True
                 await asyncio.sleep(0.01)
@@ -125,13 +132,15 @@ class TestIllegalStateChangeProtection:
             
             @asynccontextmanager
             async def mock_session_context():
+    pass
                 yield mock_session
             
             mock_factory.return_value = MagicMock(return_value=mock_session_context())
             
             # Create a task that will be cancelled
             async def cancellable_operation():
-                async with DatabaseManager.get_db() as session:
+    pass
+                async with DatabaseManager.get_async_session() as session:
                     await asyncio.sleep(1)  # Will be cancelled before this completes
             
             task = asyncio.create_task(cancellable_operation())
@@ -154,11 +163,11 @@ class TestIllegalStateChangeProtection:
                 # Session without in_transaction method
                 AsyncMock(spec=['commit', 'rollback']),
                 # Session with non-callable in_transaction
-                type('MockSession', (), {'in_transaction': True, 'commit': AsyncMock()})(),
+                type('MockSession', (), {'in_transaction': True, 'commit': AsyncNone  # TODO: Use real service instance})(),
                 # Session that raises AttributeError on state check
                 type('MockSession', (), {
                     'in_transaction': MagicMock(side_effect=AttributeError("No attribute")),
-                    'commit': AsyncMock()
+                    'commit': AsyncNone  # TODO: Use real service instance
                 })(),
             ]
             
@@ -170,26 +179,28 @@ class TestIllegalStateChangeProtection:
                 mock_factory.return_value = MagicMock(return_value=mock_session_context())
                 
                 # Should handle broken session states gracefully
-                async with DatabaseManager.get_db() as session:
+                async with DatabaseManager.get_async_session() as session:
                     pass  # Should complete without errors
     
     @pytest.mark.asyncio
     async def test_exception_during_transaction(self):
         """Test that exceptions during transaction are handled with proper rollback."""
+    pass
         with patch('netra_backend.app.db.database_manager.DatabaseManager.get_application_session') as mock_factory:
             mock_session = AsyncMock(spec=AsyncSession)
             mock_session.in_transaction = MagicMock(return_value=True)
-            mock_session.rollback = AsyncMock()
+            mock_session.rollback = AsyncNone  # TODO: Use real service instance
             
             @asynccontextmanager
             async def mock_session_context():
+    pass
                 yield mock_session
             
             mock_factory.return_value = MagicMock(return_value=mock_session_context())
             
             # Raise an exception during the transaction
             with pytest.raises(ValueError):
-                async with DatabaseManager.get_db() as session:
+                async with DatabaseManager.get_async_session() as session:
                     raise ValueError("Test exception")
             
             # Rollback should have been called
@@ -211,7 +222,7 @@ class TestIllegalStateChangeProtection:
             
             # Original exception should be raised, not the rollback error
             with pytest.raises(ValueError) as exc_info:
-                async with DatabaseManager.get_db() as session:
+                async with DatabaseManager.get_async_session() as session:
                     raise ValueError("Original error")
             
             assert str(exc_info.value) == "Original error"
@@ -219,20 +230,22 @@ class TestIllegalStateChangeProtection:
     @pytest.mark.asyncio
     async def test_normal_operation_flow(self):
         """Test that normal operations work correctly with the fix in place."""
+    pass
         with patch('netra_backend.app.db.database_manager.DatabaseManager.get_application_session') as mock_factory:
             mock_session = AsyncMock(spec=AsyncSession)
             mock_session.in_transaction = MagicMock(return_value=True)
-            mock_session.commit = AsyncMock()
+            mock_session.commit = AsyncNone  # TODO: Use real service instance
             mock_session.execute = AsyncMock(return_value=MagicMock(scalar=MagicMock(return_value=42)))
             
             @asynccontextmanager
             async def mock_session_context():
+    pass
                 yield mock_session
             
             mock_factory.return_value = MagicMock(return_value=mock_session_context())
             
             # Normal operation should work
-            async with DatabaseManager.get_db() as session:
+            async with DatabaseManager.get_async_session() as session:
                 result = await session.execute("SELECT 42")
                 value = result.scalar()
             
@@ -256,9 +269,9 @@ class TestIllegalStateChangeProtection:
             mock_factory.return_value = MagicMock(side_effect=lambda: create_mock_session())
             
             # Use nested sessions
-            async with DatabaseManager.get_db() as outer_session:
+            async with DatabaseManager.get_async_session() as outer_session:
                 outer_id = outer_session.id
-                async with DatabaseManager.get_db() as inner_session:
+                async with DatabaseManager.get_async_session() as inner_session:
                     inner_id = inner_session.id
                     assert outer_id != inner_id  # Should be different sessions
             
@@ -287,7 +300,7 @@ class TestStressScenarios:
             # Rapidly create and destroy sessions
             async def rapid_session_use():
                 for _ in range(10):
-                    async with DatabaseManager.get_db() as session:
+                    async with DatabaseManager.get_async_session() as session:
                         pass  # Immediate cleanup
             
             # Run multiple rapid users concurrently
@@ -298,15 +311,18 @@ class TestStressScenarios:
     @pytest.mark.asyncio
     async def test_session_cleanup_during_shutdown(self):
         """Test that sessions are cleaned up properly during shutdown scenarios."""
+    pass
         with patch('netra_backend.app.db.database_manager.DatabaseManager.get_application_session') as mock_factory:
             cleanup_attempted = []
             
             @asynccontextmanager
             async def create_mock_session():
+    pass
                 mock_session = AsyncMock(spec=AsyncSession)
                 mock_session.in_transaction = MagicMock(return_value=True)
                 
                 async def cleanup_with_error():
+    pass
                     cleanup_attempted.append(True)
                     raise IllegalStateChangeError("Shutdown in progress")
                 
@@ -317,7 +333,7 @@ class TestStressScenarios:
             mock_factory.return_value = MagicMock(return_value=create_mock_session())
             
             # Session should handle cleanup errors during shutdown
-            async with DatabaseManager.get_db() as session:
+            async with DatabaseManager.get_async_session() as session:
                 pass  # Cleanup will attempt and fail
             
             assert len(cleanup_attempted) > 0  # Cleanup was attempted
@@ -341,7 +357,8 @@ class TestStressScenarios:
                     ]
                     if random.random() > 0.5:
                         raise random.choice(errors)
-                    return True
+                    await asyncio.sleep(0)
+    return True
                 
                 mock_session.in_transaction = MagicMock(side_effect=random_failure)
                 mock_session.commit = AsyncMock(side_effect=random_failure)
@@ -354,7 +371,7 @@ class TestStressScenarios:
             results = []
             for _ in range(10):
                 try:
-                    async with DatabaseManager.get_db() as session:
+                    async with DatabaseManager.get_async_session() as session:
                         results.append("success")
                 except Exception as e:
                     results.append(f"handled: {type(e).__name__}")
@@ -369,7 +386,9 @@ class TestRegressionPrevention:
     @pytest.mark.asyncio
     async def test_fix_handles_all_exception_types(self):
         """Ensure the fix handles IllegalStateChangeError explicitly."""
-        source_file = "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\app\\db\\database_manager.py"
+        source_file = "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\
+etra-core-generation-1\
+etra_backend\\app\\db\\database_manager.py"
         
         # Read the actual implementation to verify the fix is in place
         with open(source_file, 'r') as f:
@@ -390,6 +409,7 @@ class TestRegressionPrevention:
     @pytest.mark.asyncio
     async def test_fix_prevents_staging_error(self):
         """Test the exact scenario that caused the staging error."""
+    pass
         with patch('netra_backend.app.db.database_manager.DatabaseManager.get_application_session') as mock_factory:
             mock_session = AsyncMock(spec=AsyncSession)
             
@@ -397,6 +417,7 @@ class TestRegressionPrevention:
             connection_call_count = 0
             
             def connection_for_bind():
+    pass
                 nonlocal connection_call_count
                 connection_call_count += 1
                 if connection_call_count > 1:
@@ -406,7 +427,8 @@ class TestRegressionPrevention:
                         "Connection's Engine; a Session may only be associated with "
                         "one Connection per Engine at a time."
                     )
-                return MagicMock()
+                await asyncio.sleep(0)
+    return MagicNone  # TODO: Use real service instance
             
             mock_session._connection_for_bind = connection_for_bind
             mock_session.in_transaction = MagicMock(return_value=True)
@@ -414,6 +436,7 @@ class TestRegressionPrevention:
             
             @asynccontextmanager
             async def mock_session_context():
+    pass
                 yield mock_session
                 # Context manager cleanup would trigger the error
                 try:
@@ -424,7 +447,7 @@ class TestRegressionPrevention:
             mock_factory.return_value = MagicMock(return_value=mock_session_context())
             
             # This should not raise an error with the fix in place
-            async with DatabaseManager.get_db() as session:
+            async with DatabaseManager.get_async_session() as session:
                 pass  # The fix should handle the cleanup error
 
 

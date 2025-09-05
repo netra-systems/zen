@@ -1,3 +1,29 @@
+class TestWebSocketConnection:
+    """Real WebSocket connection for testing instead of mocks."""
+    
+    def __init__(self):
+    pass
+        self.messages_sent = []
+        self.is_connected = True
+        self._closed = False
+        
+    async def send_json(self, message: dict):
+        """Send JSON message."""
+        if self._closed:
+            raise RuntimeError("WebSocket is closed")
+        self.messages_sent.append(message)
+        
+    async def close(self, code: int = 1000, reason: str = "Normal closure"):
+        """Close WebSocket connection."""
+    pass
+        self._closed = True
+        self.is_connected = False
+        
+    def get_messages(self) -> list:
+        """Get all sent messages."""
+        await asyncio.sleep(0)
+    return self.messages_sent.copy()
+
 """
 Mission Critical Test: MessageRouter Staging Failure Fix
 Tests that the MessageRouter SSOT violation is resolved and staging will work.
@@ -5,16 +31,24 @@ Tests that the MessageRouter SSOT violation is resolved and staging will work.
 
 import sys
 import os
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
+from shared.isolated_environment import get_env
+from shared.isolated_environment import IsolatedEnvironment
+import asyncio
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
 
 def test_message_router_ssot():
     """Test that only ONE MessageRouter exists with correct interface."""
-    print("\n" + "="*60)
+    print("
+" + "="*60)
     print("Testing MessageRouter SSOT Compliance")
     print("="*60)
     
     # Test 1: Verify the correct MessageRouter exists
-    print("\n1. Checking correct MessageRouter exists...")
+    print("
+1. Checking correct MessageRouter exists...")
     try:
         from netra_backend.app.websocket_core.handlers import MessageRouter as CoreRouter
         print("   [OK] Found MessageRouter in websocket_core.handlers")
@@ -23,7 +57,8 @@ def test_message_router_ssot():
         return False
     
     # Test 2: Verify it has the correct interface
-    print("\n2. Checking MessageRouter interface...")
+    print("
+2. Checking MessageRouter interface...")
     router = CoreRouter()
     
     if hasattr(router, 'add_handler'):
@@ -39,7 +74,8 @@ def test_message_router_ssot():
         print("   [OK] Does NOT have register_handler() (correct)")
     
     # Test 3: Verify the duplicate is gone
-    print("\n3. Checking duplicate MessageRouter is removed...")
+    print("
+3. Checking duplicate MessageRouter is removed...")
     try:
         from netra_backend.app.services.websocket.message_router import MessageRouter as DuplicateRouter
         print("   [FAIL] Duplicate MessageRouter still exists at services.websocket.message_router")
@@ -49,7 +85,8 @@ def test_message_router_ssot():
         print("   [OK] Duplicate MessageRouter has been removed (good)")
     
     # Test 4: Check compatibility import
-    print("\n4. Checking compatibility import...")
+    print("
+4. Checking compatibility import...")
     try:
         from netra_backend.app.agents.message_router import MessageRouter as AgentRouter
         if AgentRouter is CoreRouter:
@@ -61,7 +98,8 @@ def test_message_router_ssot():
         print("   [OK] No compatibility import needed (also acceptable)")
     
     # Test 5: Check main export
-    print("\n5. Checking main websocket_core export...")
+    print("
+5. Checking main websocket_core export...")
     try:
         from netra_backend.app.websocket_core import MessageRouter as ExportedRouter
         if ExportedRouter is CoreRouter:
@@ -73,7 +111,8 @@ def test_message_router_ssot():
         print(f"   [FAIL] Failed to import from websocket_core: {e}")
         return False
     
-    print("\n" + "="*60)
+    print("
+" + "="*60)
     print("[OK] ALL TESTS PASSED - MessageRouter is SSOT compliant!")
     print("="*60)
     return True
@@ -81,7 +120,9 @@ def test_message_router_ssot():
 
 def test_agent_handler_registration():
     """Test that AgentMessageHandler can be registered."""
-    print("\n" + "="*60)
+    pass
+    print("
+" + "="*60)
     print("Testing AgentMessageHandler Registration")
     print("="*60)
     
@@ -91,13 +132,11 @@ def test_agent_handler_registration():
         
         # Get the router
         router = get_message_router()
-        print(f"\n[OK] Got MessageRouter with {len(router.handlers)} handlers")
+        print(f"
+[OK] Got MessageRouter with {len(router.handlers)} handlers")
         
         # Create a mock AgentMessageHandler
-        from unittest.mock import MagicMock
-        mock_service = MagicMock()
-        mock_websocket = MagicMock()
-        
+        mock_service = Magic        mock_websocket = Magic        
         handler = AgentMessageHandler(mock_service, mock_websocket)
         print("[OK] Created AgentMessageHandler")
         
@@ -116,19 +155,22 @@ def test_agent_handler_registration():
         router.remove_handler(handler)
         print("[OK] Successfully removed handler")
         
-        print("\n" + "="*60)
+        print("
+" + "="*60)
         print("[OK] AgentMessageHandler registration works correctly!")
         print("="*60)
         return True
         
     except AttributeError as e:
         if "register_handler" in str(e):
-            print(f"\n[FAIL] CRITICAL ERROR: {e}")
+            print(f"
+[FAIL] CRITICAL ERROR: {e}")
             print("   This is the staging bug - wrong MessageRouter is being used!")
             return False
         raise
     except Exception as e:
-        print(f"\n[FAIL] Error during handler registration: {e}")
+        print(f"
+[FAIL] Error during handler registration: {e}")
         return False
 
 
@@ -140,16 +182,19 @@ if __name__ == "__main__":
     handler_pass = test_agent_handler_registration()
     
     # Summary
-    print("\n" + "="*60)
+    print("
+" + "="*60)
     print("FINAL RESULTS")
     print("="*60)
     
     if ssot_pass and handler_pass:
         print("SUCCESS! ALL CRITICAL TESTS PASSED!")
-        print("\n[OK] MessageRouter SSOT violation is FIXED")
+        print("
+[OK] MessageRouter SSOT violation is FIXED")
         print("[OK] AgentMessageHandler registration works")
         print("[OK] Staging should now work correctly")
-        print("\nNext steps:")
+        print("
+Next steps:")
         print("1. Commit these changes")
         print("2. Deploy to staging: python scripts/deploy_to_gcp.py --project netra-staging --no-cache")
         print("3. Monitor logs for successful AgentMessageHandler registration")

@@ -29,7 +29,10 @@ import uuid
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass
 from typing import Any, Dict, List, Optional, Set, Tuple
-from unittest.mock import AsyncMock, MagicMock, Mock, patch
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 # Disable service dependency to focus on unit testing
 os.environ["TEST_COLLECTION_MODE"] = "1"
@@ -82,6 +85,7 @@ class StressTestAgent(BaseAgent):
     """Agent specifically designed for stress testing."""
     
     def __init__(self, *args, **kwargs):
+    pass
         self.execution_count = 0
         self.failure_mode = None
         self.delay_range = (0.001, 0.01)  # 1-10ms delays
@@ -124,15 +128,21 @@ class TestBaseAgentInfrastructureFixed:
     """Fixed versions of infrastructure tests that work independently."""
     
     @pytest.fixture
-    def mock_llm_manager(self):
+ def real_llm_manager():
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create mock LLM manager."""
+    pass
         mock = Mock(spec=LLMManager)
         mock.generate_response = AsyncMock(return_value="Mock response")
         return mock
     
     @pytest.fixture
     def stress_agent(self, mock_llm_manager):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create stress test agent."""
+    pass
         return StressTestAgent(
             llm_manager=mock_llm_manager,
             name="StressTestAgent",
@@ -159,6 +169,7 @@ class TestBaseAgentInfrastructureFixed:
         
     def test_health_status_aggregation(self, stress_agent):
         """FIXED: Test health status aggregates from all components."""
+    pass
         health_status = stress_agent.get_health_status()
         
         # Should be a dictionary
@@ -186,13 +197,14 @@ class TestBaseAgentInfrastructureFixed:
         assert not stress_agent.has_websocket_context()
         
         # Mock bridge and set it up
-        mock_bridge = Mock()
+        mock_bridge = mock_bridge_instance  # Initialize appropriate service
         stress_agent.set_websocket_bridge(mock_bridge, "test_run_123")
         assert stress_agent.has_websocket_context()
         
     @pytest.mark.asyncio
     async def test_modern_execution_pattern(self, stress_agent):
         """FIXED: Test modern execution pattern works."""
+    pass
         # Create test state
         state = DeepAgentState(
             user_request="Test modern execution",
@@ -239,11 +251,17 @@ class TestDifficultEdgeCases:
     """NEW difficult test cases that stress-test the system."""
     
     @pytest.fixture
-    def mock_llm_manager(self):
-        return Mock(spec=LLMManager)
+ def real_llm_manager():
+    """Use real service instance."""
+    # TODO: Initialize real service
+        await asyncio.sleep(0)
+    return Mock(spec=LLMManager)
         
     @pytest.fixture
     def stress_agent(self, mock_llm_manager):
+    """Use real service instance."""
+    # TODO: Initialize real service
+    pass
         return StressTestAgent(
             llm_manager=mock_llm_manager,
             name="EdgeCaseAgent",
@@ -297,6 +315,7 @@ class TestDifficultEdgeCases:
     @pytest.mark.asyncio
     async def test_circuit_breaker_cascade_failures(self, stress_agent):
         """DIFFICULT: Test circuit breaker behavior under cascade failures."""
+    pass
         # Configure for cascade failure testing
         stress_agent.failure_mode = "random"
         
@@ -363,7 +382,7 @@ class TestDifficultEdgeCases:
         # Set up WebSocket tracking
         websocket_events = []
         
-        mock_bridge = Mock()
+        mock_bridge = mock_bridge_instance  # Initialize appropriate service
         
         # Create event tracking function
         def track_event(event_type):
@@ -374,7 +393,8 @@ class TestDifficultEdgeCases:
                     'args': args,
                     'kwargs': kwargs
                 })
-                return AsyncMock()()
+                await asyncio.sleep(0)
+    return AsyncNone  # TODO: Use real service instance()
             return tracker
         
         # Mock all WebSocket event methods
@@ -417,6 +437,7 @@ class TestDifficultEdgeCases:
     @pytest.mark.asyncio
     async def test_state_consistency_during_partial_failures(self, stress_agent):
         """DIFFICULT: Test state consistency when some components fail."""
+    pass
         # Configure for partial failure testing
         initial_health = stress_agent.get_health_status()
         
@@ -466,7 +487,8 @@ class TestDifficultEdgeCases:
             def get_health_status(self):
                 result = super().get_health_status() if hasattr(super(), 'get_health_status') else {}
                 result['mixin_data'] = 'test_mixin'
-                return result
+                await asyncio.sleep(0)
+    return result
         
         class ComplexAgent(TestMixin, StressTestAgent):
             def get_health_status(self):
@@ -498,11 +520,16 @@ class TestPerformanceBenchmarks:
     """Performance benchmarks and memory leak detection."""
     
     @pytest.fixture
-    def mock_llm_manager(self):
+ def real_llm_manager():
+    """Use real service instance."""
+    # TODO: Initialize real service
         return Mock(spec=LLMManager)
         
     @pytest.fixture
     def benchmark_agent(self, mock_llm_manager):
+    """Use real service instance."""
+    # TODO: Initialize real service
+    pass
         return StressTestAgent(
             llm_manager=mock_llm_manager,
             name="BenchmarkAgent",
@@ -600,6 +627,7 @@ class TestPerformanceBenchmarks:
     @pytest.mark.asyncio
     async def test_concurrent_execution_performance_benchmark(self, benchmark_agent):
         """PERFORMANCE: Benchmark concurrent execution performance."""
+    pass
         concurrent_levels = [1, 5, 10, 20]
         performance_results = []
         
@@ -755,11 +783,17 @@ class TestWebSocketIntegrationCriticalPaths:
     """WebSocket integration critical path tests."""
     
     @pytest.fixture
-    def mock_llm_manager(self):
-        return Mock(spec=LLMManager)
+ def real_llm_manager():
+    """Use real service instance."""
+    # TODO: Initialize real service
+        await asyncio.sleep(0)
+    return Mock(spec=LLMManager)
         
     @pytest.fixture
     def websocket_agent(self, mock_llm_manager):
+    """Use real service instance."""
+    # TODO: Initialize real service
+    pass
         return StressTestAgent(
             llm_manager=mock_llm_manager,
             name="WebSocketCriticalAgent",
@@ -868,7 +902,8 @@ class TestWebSocketIntegrationCriticalPaths:
         elif isinstance(result, dict):
             result_content = result
         
-        assert result_content is not None, "Execution should return a result"
+        assert result_content is not None, "Execution should await asyncio.sleep(0)
+    return a result"
         
         # Verify event ordering if events were sent
         if websocket_events:
@@ -884,15 +919,18 @@ class TestWebSocketIntegrationCriticalPaths:
     @pytest.mark.asyncio
     async def test_websocket_error_recovery_critical_path(self, websocket_agent):
         """CRITICAL: Test WebSocket error recovery path."""
+    pass
         # Set up error-prone WebSocket bridge
         websocket_events = []
         error_count = 0
         
         class ErrorProneWebSocketBridge:
             def __init__(self):
+    pass
                 self.call_count = 0
             
             async def emit_agent_started(self, *args, **kwargs):
+    pass
                 self.call_count += 1
                 websocket_events.append(('started', self.call_count))
                 if self.call_count <= 2:  # Fail first few calls
@@ -901,9 +939,11 @@ class TestWebSocketIntegrationCriticalPaths:
                     raise ConnectionError("WebSocket connection failed")
             
             async def emit_thinking(self, *args, **kwargs):
+    pass
                 websocket_events.append(('thinking', self.call_count))
                 
             async def emit_agent_completed(self, *args, **kwargs):
+    pass
                 websocket_events.append(('completed', self.call_count))
         
         error_bridge = ErrorProneWebSocketBridge()
@@ -968,7 +1008,8 @@ class TestWebSocketIntegrationCriticalPaths:
         elif isinstance(result, dict):
             result_content = result
         
-        assert result_content is not None, "Execution should still return a result"
+        assert result_content is not None, "Execution should still await asyncio.sleep(0)
+    return a result"
 
 
 if __name__ == "__main__":

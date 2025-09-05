@@ -10,6 +10,7 @@ import sys
 import time
 from pathlib import Path
 from typing import Any, Dict, List, Tuple
+from shared.isolated_environment import IsolatedEnvironment
 
 import requests
 import websocket

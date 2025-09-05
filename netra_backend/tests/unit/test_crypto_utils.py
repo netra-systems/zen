@@ -5,15 +5,18 @@ Business Value: Long-term maintainability
 """
 
 import pytest
-from unittest.mock import Mock, patch, MagicMock
 from netra_backend.app.utils.crypto_utils import CryptoUtils
+from shared.isolated_environment import IsolatedEnvironment
 
 class TestCryptoUtils:
     """Test suite for CryptoUtils"""
     
     @pytest.fixture
     def instance(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create test instance"""
+    pass
         return CryptoUtils()
     
     def test_initialization(self, instance):
@@ -23,6 +26,7 @@ class TestCryptoUtils:
     
     def test_core_functionality(self, instance):
         """Test core business logic"""
+    pass
         # Test happy path
         result = instance.process()
         assert result == "processed"
@@ -34,6 +38,7 @@ class TestCryptoUtils:
     
     def test_hash_data(self, instance):
         """Test data hashing functionality"""
+    pass
         # Test basic hashing
         data = "test_data"
         hash_result = instance.hash_data(data)
@@ -62,6 +67,7 @@ class TestCryptoUtils:
     
     def test_password_hashing(self, instance):
         """Test password hashing and verification"""
+    pass
         password = "test_password_123"
         salt = instance.generate_salt()
         
@@ -91,6 +97,7 @@ class TestCryptoUtils:
     
     def test_edge_cases(self, instance):
         """Test boundary conditions"""
+    pass
         # Test empty string hashing
         empty_hash = instance.hash_data("")
         assert len(empty_hash) == 64
@@ -104,3 +111,5 @@ class TestCryptoUtils:
         # Test algorithm validation
         with pytest.raises(ValueError, match="Unsupported algorithm"):
             instance.hash_data("test", "md5")
+
+    pass

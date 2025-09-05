@@ -18,6 +18,7 @@ REQUIREMENTS:
 """
 import time
 from typing import Any, Dict
+from shared.isolated_environment import IsolatedEnvironment
 
 import pytest
 

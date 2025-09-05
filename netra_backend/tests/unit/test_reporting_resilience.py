@@ -6,8 +6,12 @@ Test Coverage: All failure scenarios, partial data, and emergency fallbacks.
 
 import pytest
 import uuid
-from unittest.mock import Mock, patch, AsyncMock, MagicMock
 from typing import Dict, Any
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from test_framework.redis.test_redis_manager import TestRedisManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 from netra_backend.app.agents.reporting_sub_agent import ReportingSubAgent
 from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
@@ -46,7 +50,7 @@ class TestReportingResilience:
         agent = ReportingSubAgent()
         
         # Create a mock context with broken metadata
-        mock_context = Mock()
+        mock_context = mock_context_instance  # Initialize appropriate service
         mock_context.metadata = "NOT_A_DICT"  # Intentionally broken
         mock_context.user_id = "test_user"
         mock_context.thread_id = "test_thread"
@@ -309,7 +313,7 @@ class TestReportingResilience:
         assert 'summary' in result
         
         # Test with Pydantic model mock
-        mock_model = Mock()
+        mock_model = mock_model_instance  # Initialize appropriate service
         mock_model.model_dump = Mock(return_value={'test': 'data'})
         result = agent._format_optimization_insights(mock_model)
         assert 'summary' in result

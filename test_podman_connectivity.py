@@ -7,6 +7,7 @@ This script tests direct connectivity to the database services running in Podman
 import os
 import sys
 from pathlib import Path
+from shared.isolated_environment import IsolatedEnvironment
 
 # Add the project root to Python path
 project_root = Path(__file__).parent

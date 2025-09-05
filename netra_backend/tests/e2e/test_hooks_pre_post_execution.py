@@ -12,13 +12,15 @@ Module ≤300 lines per CLAUDE.md requirements.
 
 import sys
 from pathlib import Path
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 # Test framework import - using pytest fixtures instead
 
 import asyncio
 from datetime import UTC, datetime
 from typing import Any, Dict, Optional
-from unittest.mock import AsyncMock, MagicMock, Mock
 
 import pytest
 from netra_backend.app.logging_config import central_logger
@@ -107,11 +109,11 @@ class TestPreExecutionHooks:
     def _create_mock_hook_manager(self):
         """Create mock hook manager for testing."""
         # Mock: Generic component isolation for controlled unit testing
-        quality_gate = Mock()
+        quality_gate = quality_gate_instance  # Initialize appropriate service
         # Mock: Async component isolation for testing without real async operations
         quality_gate.validate_content = AsyncMock(return_value=self._create_validation_result())
         # Mock: Generic component isolation for controlled unit testing
-        monitoring = Mock()
+        monitoring = monitoring_instance  # Initialize appropriate service
         return QualityHooksManager(quality_gate, monitoring)
     
     def _create_test_context(self) -> AgentExecutionContext:
@@ -178,11 +180,11 @@ class TestPostExecutionHooks:
     def _create_mock_hook_manager(self):
         """Create mock hook manager for testing."""
         # Mock: Generic component isolation for controlled unit testing
-        quality_gate = Mock()
+        quality_gate = quality_gate_instance  # Initialize appropriate service
         # Mock: Generic component isolation for controlled unit testing
-        monitoring = Mock()
+        monitoring = monitoring_instance  # Initialize appropriate service
         # Mock: Generic component isolation for controlled unit testing
-        monitoring.record_quality_event = AsyncMock()
+        monitoring.record_quality_event = AsyncNone  # TODO: Use real service instance
         return QualityHooksManager(quality_gate, monitoring)
     
     def _create_test_context(self) -> AgentExecutionContext:
@@ -259,7 +261,7 @@ class TestHookExecutionSequence:
     def _create_hook_manager(self) -> QualityHooksManager:
         """Create quality hook manager for testing."""
         # Mock: Generic component isolation for controlled unit testing
-        quality_gate = Mock()
+        quality_gate = quality_gate_instance  # Initialize appropriate service
         # Mock: Async component isolation for testing without real async operations
         quality_gate.validate_content = AsyncMock(
             return_value=ValidationResult(
@@ -269,9 +271,9 @@ class TestHookExecutionSequence:
             )
         )
         # Mock: Generic component isolation for controlled unit testing
-        monitoring = Mock()
+        monitoring = monitoring_instance  # Initialize appropriate service
         # Mock: Generic component isolation for controlled unit testing
-        monitoring.record_quality_event = AsyncMock()
+        monitoring.record_quality_event = AsyncNone  # TODO: Use real service instance
         return QualityHooksManager(quality_gate, monitoring)
     
     def _create_test_context(self) -> AgentExecutionContext:

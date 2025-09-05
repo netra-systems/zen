@@ -135,7 +135,8 @@ def demo_typical_test_usage():
 
 if __name__ == "__main__":
     print("Unified Test Configuration Demo")
-    print("===============================\n")
+    print("===============================
+")
     
     demo_basic_config()
     demo_tier_users()
@@ -146,5 +147,6 @@ if __name__ == "__main__":
     demo_typical_test_usage()
     
     print("Demo completed successfully!")
-    print("\nTo use in your tests:")
+    print("
+To use in your tests:")
     print("from tests.e2e.config import TEST_USERS, get_test_user, TestDataFactory")

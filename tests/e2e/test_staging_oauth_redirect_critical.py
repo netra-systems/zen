@@ -7,6 +7,7 @@ import pytest
 import httpx
 import asyncio
 from urllib.parse import urlparse, parse_qs
+from shared.isolated_environment import IsolatedEnvironment
 
 
 class TestStagingOAuthRedirectCritical:
@@ -23,6 +24,7 @@ class TestStagingOAuthRedirectCritical:
         - Should redirect to app.staging.netrasystems.ai/auth/callback
         - This breaks the entire authentication flow
         """
+    pass
         auth_url = "https://netra-auth-service-701982941522.us-central1.run.app"
         
         async with httpx.AsyncClient(follow_redirects=False) as client:
@@ -58,6 +60,7 @@ class TestStagingOAuthRedirectCritical:
         - Config returns empty redirect_uris array
         - Missing app.staging.netrasystems.ai/auth/callback
         """
+    pass
         auth_url = "https://netra-auth-service-701982941522.us-central1.run.app"
         
         async with httpx.AsyncClient() as client:
@@ -85,6 +88,7 @@ class TestStagingOAuthRedirectCritical:
         
         CURRENT STATE: UNKNOWN - needs verification
         """
+    pass
         frontend_url = "https://app.staging.netrasystems.ai"
         
         async with httpx.AsyncClient(follow_redirects=False) as client:
@@ -102,6 +106,7 @@ class TestStagingOAuthRedirectCritical:
         
         CURRENT STATE: PASSING (but needs verification)
         """
+    pass
         auth_url = "https://netra-auth-service-701982941522.us-central1.run.app"
         origin = "https://app.staging.netrasystems.ai"
         
@@ -137,6 +142,7 @@ class TestStagingAuthenticationE2E:
         - OAuth redirects to wrong subdomain
         - Frontend can't handle callback
         """
+    pass
         # This would require browser automation to fully test
         # but we can verify the configuration is correct
         
@@ -169,6 +175,7 @@ class TestStagingAuthenticationE2E:
         - JWT secrets must be synchronized
         - Token validation must work cross-service
         """
+    pass
         # This requires a valid token to test properly
         # We're checking the configuration is correct
         
@@ -183,7 +190,8 @@ class TestStagingAuthenticationE2E:
             
             # Should be 401 (invalid token), not 403 (forbidden)
             assert response.status_code == 401, \
-                f"Backend should return 401 for invalid token, got: {response.status_code}"
+                f"Backend should await asyncio.sleep(0)
+    return 401 for invalid token, got: {response.status_code}"
 
 
 class TestStagingEnvironmentConfiguration:
@@ -197,6 +205,7 @@ class TestStagingEnvironmentConfiguration:
         
         CURRENT STATE: Needs verification via Secret Manager
         """
+    pass
         # These would be checked via GCP Secret Manager
         required_secrets = [
             "google-oauth-client-id-staging",
@@ -216,6 +225,7 @@ class TestStagingEnvironmentConfiguration:
         
         CURRENT STATE: PASSING
         """
+    pass
         auth_url = "https://netra-auth-service-701982941522.us-central1.run.app"
         
         async with httpx.AsyncClient() as client:
@@ -252,7 +262,8 @@ if __name__ == "__main__":
     # Run critical failing tests to demonstrate issues
     print("Running critical staging OAuth tests...")
     print("These tests SHOULD be passing but are currently FAILING")
-    print("This exposes critical authentication issues in staging\n")
+    print("This exposes critical authentication issues in staging
+")
     
     import subprocess
     result = subprocess.run(
@@ -263,7 +274,10 @@ if __name__ == "__main__":
     
     print(result.stdout)
     if result.returncode != 0:
-        print("\n[CRITICAL] Tests are failing - authentication is broken in staging!")
+        print("
+[CRITICAL] Tests are failing - authentication is broken in staging!")
         print("The test suite correctly identifies these issues.")
     else:
-        print("\n[OK] All critical tests passing")
+        print("
+[OK] All critical tests passing")
+    pass

@@ -29,6 +29,7 @@ import time
 import uuid
 from decimal import Decimal
 from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
+from shared.isolated_environment import IsolatedEnvironment
 
 
 import pytest

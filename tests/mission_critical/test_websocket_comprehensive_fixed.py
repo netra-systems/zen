@@ -28,7 +28,8 @@ import time
 import uuid
 from datetime import datetime, timezone
 from typing import Dict, List, Any, Optional
-from unittest.mock import MagicMock, AsyncMock
+from netra_backend.app.core.agent_registry import AgentRegistry
+from shared.isolated_environment import IsolatedEnvironment
 
 # CRITICAL: Add project root to Python path
 project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
@@ -50,12 +51,16 @@ from netra_backend.app.agents.supervisor.execution_context import AgentExecution
 from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 from netra_backend.app.agents.unified_tool_execution import UnifiedToolExecutionEngine
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
 
 
 class WebSocketEventCapture:
     """Captures WebSocket events for validation."""
     
     def __init__(self):
+    pass
         self.events: List[Dict] = []
         self.event_counts: Dict[str, int] = {}
         
@@ -126,7 +131,8 @@ class WebSocketEventCapture:
             report.extend(["", "Errors:"] + [f"  - {error}" for error in errors])
             
         report.append("=" * 60)
-        return "\n".join(report)
+        return "
+".join(report)
 
 
 class TestWebSocketInfrastructure:
@@ -159,6 +165,7 @@ class TestWebSocketInfrastructure:
     @pytest.mark.critical
     async def test_websocket_notifier_has_all_required_methods(self):
         """Test WebSocketNotifier has ALL 5 required methods."""
+    pass
         notifier = WebSocketNotifier(self.ws_manager)
         
         # Check all required methods exist
@@ -199,8 +206,10 @@ class TestWebSocketInfrastructure:
     @pytest.mark.critical
     async def test_agent_registry_websocket_enhancement(self):
         """Test AgentRegistry enhances tool dispatcher with WebSocket support."""
+    pass
         class MockLLM:
             def __init__(self):
+    pass
                 self.name = "test_llm"
         
         # Create components
@@ -244,6 +253,7 @@ class TestWebSocketInfrastructure:
     @pytest.mark.critical
     async def test_complete_websocket_event_flow(self):
         """Test complete WebSocket event flow with all 5 required events."""
+    pass
         # Create WebSocket notifier
         notifier = WebSocketNotifier(self.ws_manager)
         
@@ -282,7 +292,8 @@ class TestWebSocketInfrastructure:
         
         # Generate comprehensive report
         report = self.event_capture.get_validation_report()
-        logger.info(f"\\n{report}")
+        logger.info(f"\
+{report}")
         
         # Critical assertions
         assert len(events) >= 5, f"Expected at least 5 events, got {len(events)}"
@@ -307,6 +318,7 @@ class TestWebSocketInfrastructure:
         
         async def send_user_events(user_index: int):
             """Send complete event sequence for one user."""
+    pass
             thread_id = f"concurrent-thread-{user_index}"
             context = AgentExecutionContext(
                 run_id=f"concurrent-run-{user_index}",
@@ -386,6 +398,7 @@ class TestWebSocketInfrastructure:
     @pytest.mark.critical
     async def test_tool_dispatcher_websocket_integration(self):
         """Test tool dispatcher integrates properly with WebSocket."""
+    pass
         # Test current SSOT implementation
         from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
         
@@ -410,7 +423,8 @@ class TestWebSocketInfrastructure:
 # ============================================================================
 
 if __name__ == "__main__":
-    logger.info("\\n" + "=" * 80)
+    logger.info("\
+" + "=" * 80)
     logger.info("MISSION CRITICAL: WebSocket Infrastructure Test Suite")
     logger.info("=" * 80)
     logger.info("Testing ALL 5 required WebSocket events with comprehensive validation")

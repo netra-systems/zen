@@ -21,6 +21,7 @@ import asyncio
 import time
 import pytest
 from typing import Dict, Any
+from shared.isolated_environment import IsolatedEnvironment
 
 from test_framework.service_dependencies import requires_services
 from test_framework.auth_helpers import (

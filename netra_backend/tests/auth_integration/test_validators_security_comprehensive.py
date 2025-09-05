@@ -30,7 +30,12 @@ COMPLIANCE:
 import re
 from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List
-from unittest.mock import Mock, patch
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from test_framework.database.test_database_manager import TestDatabaseManager
+from auth_service.core.auth_manager import AuthManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 import pytest
 from email_validator import EmailNotValidError

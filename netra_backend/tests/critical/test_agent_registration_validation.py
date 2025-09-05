@@ -9,6 +9,7 @@ agent registration failures were not detected during testing.
 import pytest
 import logging
 from typing import List, Set
+from shared.isolated_environment import IsolatedEnvironment
 
 from netra_backend.app.agents.supervisor.agent_class_registry import get_agent_class_registry
 from netra_backend.app.agents.supervisor.agent_class_initialization import (

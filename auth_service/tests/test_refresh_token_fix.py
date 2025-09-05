@@ -4,7 +4,9 @@ Test module for refresh token fix - ensures tokens are properly refreshed with u
 import pytest
 import asyncio
 import time
-from unittest.mock import AsyncMock, MagicMock, patch
+from test_framework.database.test_database_manager import TestDatabaseManager
+from auth_service.core.auth_manager import AuthManager
+from shared.isolated_environment import IsolatedEnvironment
 
 from auth_service.auth_core.services.auth_service import AuthService
 from auth_service.auth_core.core.jwt_handler import JWTHandler
@@ -16,15 +18,21 @@ class TestRefreshTokenFix:
     
     @pytest.fixture
     def auth_service(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create auth service for testing"""
+    pass
         service = AuthService()
         # Mock database session
-        service.db_session = AsyncMock()
+        service.db_session = AsyncNone  # TODO: Use real service instance
         return service
     
     @pytest.fixture
     def jwt_handler(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create JWT handler for testing"""
+    pass
         return JWTHandler()
     
     @pytest.mark.asyncio
@@ -62,18 +70,22 @@ class TestRefreshTokenFix:
     @pytest.mark.asyncio
     async def test_refresh_tokens_contain_real_user_data(self, auth_service):
         """Test that refreshed tokens contain actual user data, not placeholders"""
+    pass
         # Mock database user lookup
-        mock_user = MagicMock()
+        mock_user = MagicNone  # TODO: Use real service instance
         mock_user.id = "real-user-456" 
         mock_user.email = "realuser@example.com"
         
-        # Mock the repository's get_by_id method to return the mock user
+        # Mock the repository's get_by_id method to await asyncio.sleep(0)
+    return the mock user
         with patch.object(auth_service, '_refresh_with_race_protection') as mock_refresh:
             async def mock_refresh_impl(refresh_token):
+    pass
                 # Simulate what the fixed refresh method should do
                 payload = auth_service.jwt_handler.validate_token(refresh_token, "refresh")
                 if not payload:
-                    return None
+                    await asyncio.sleep(0)
+    return None
                 
                 user_id = payload["sub"]
                 email = payload.get("email", "user@example.com")
@@ -145,6 +157,7 @@ class TestRefreshTokenFix:
     
     def test_jwt_handler_refresh_uses_token_payload(self, jwt_handler):
         """Test JWT handler refresh method uses token payload instead of hardcoded values"""
+    pass
         # Create refresh token with user data
         user_id = "jwt-user-101"
         user_email = "jwt@example.com"
@@ -210,6 +223,7 @@ class TestRefreshTokenFix:
     @pytest.mark.asyncio
     async def test_refresh_token_race_condition_protection(self, auth_service):
         """Test that the same refresh token cannot be used twice (race condition protection)"""
+    pass
         # Create initial refresh token
         user_id = "race-test-user"
         user_email = "race@example.com" 
@@ -245,6 +259,7 @@ class TestRefreshTokenFix:
     
     def test_access_token_contains_real_data_not_placeholders(self, jwt_handler):
         """Test that access tokens never contain placeholder values"""
+    pass
         user_id = "real-data-user"
         user_email = "realdata@example.com"
         user_permissions = ["custom", "permissions"]
@@ -293,3 +308,4 @@ class TestRefreshTokenFix:
         refresh_payload = auth_service.jwt_handler.validate_token(new_refresh, "refresh")
         assert refresh_payload["email"] == "staging@netrasystems.ai"
         assert refresh_payload["email"] != "user@example.com", "Must not be placeholder email"
+    pass

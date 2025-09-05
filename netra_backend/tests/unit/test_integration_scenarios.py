@@ -5,9 +5,12 @@ to ensure components work together correctly.
 """
 
 import pytest
-from unittest.mock import Mock, AsyncMock, patch
 from netra_backend.app.services.cost_calculator import CostCalculatorService
 from netra_backend.app.schemas.llm_base_types import TokenUsage, LLMProvider
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from test_framework.database.test_database_manager import TestDatabaseManager
+from auth_service.core.auth_manager import AuthManager
+from shared.isolated_environment import IsolatedEnvironment
 
 
 class TestCrossServiceIntegration:
@@ -63,7 +66,7 @@ class TestCrossServiceIntegration:
             return {"cost": str(cost), "status": "completed"}
         
         with patch('netra_backend.app.services.thread_service.get_unit_of_work') as mock_get_uow:
-            mock_uow = AsyncMock()
+            mock_uow = AsyncNone  # TODO: Use real service instance
             mock_uow.__aenter__ = AsyncMock(return_value=mock_uow)
             mock_uow.__aexit__ = AsyncMock(return_value=None)
             mock_get_uow.return_value = mock_uow
@@ -169,7 +172,7 @@ class TestEndToEndWorkflows:
             }
         
         with patch('netra_backend.app.services.thread_service.get_unit_of_work') as mock_get_uow:
-            mock_uow = AsyncMock()
+            mock_uow = AsyncNone  # TODO: Use real service instance
             mock_uow.__aenter__ = AsyncMock(return_value=mock_uow)
             mock_uow.__aexit__ = AsyncMock(return_value=None)
             mock_get_uow.return_value = mock_uow
@@ -228,7 +231,7 @@ class TestEndToEndWorkflows:
                 return {"recovered": True, "error_handled": True}
         
         with patch('netra_backend.app.services.thread_service.get_unit_of_work') as mock_get_uow:
-            mock_uow = AsyncMock()
+            mock_uow = AsyncNone  # TODO: Use real service instance
             mock_uow.__aenter__ = AsyncMock(return_value=mock_uow)
             mock_uow.__aexit__ = AsyncMock(return_value=None)
             mock_get_uow.return_value = mock_uow
@@ -302,7 +305,7 @@ class TestServiceBoundaryIntegration:
             return {"boundary_cost": str(cost), "operation": "mixed"}
         
         with patch('netra_backend.app.services.thread_service.get_unit_of_work') as mock_get_uow:
-            mock_uow = AsyncMock()
+            mock_uow = AsyncNone  # TODO: Use real service instance
             mock_uow.__aenter__ = AsyncMock(return_value=mock_uow)
             mock_uow.__aexit__ = AsyncMock(return_value=None)
             mock_get_uow.return_value = mock_uow
@@ -353,7 +356,7 @@ class TestIntegrationPerformance:
             return {"id": operation_id, "cost": str(cost)}
         
         with patch('netra_backend.app.services.thread_service.get_unit_of_work') as mock_get_uow:
-            mock_uow = AsyncMock()
+            mock_uow = AsyncNone  # TODO: Use real service instance
             mock_uow.__aenter__ = AsyncMock(return_value=mock_uow)
             mock_uow.__aexit__ = AsyncMock(return_value=None)
             mock_get_uow.return_value = mock_uow

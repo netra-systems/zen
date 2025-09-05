@@ -64,9 +64,12 @@ class ThreadOperationManagerImpl {
   private readonly MAX_HISTORY_SIZE = 50;
   private readonly DEFAULT_TIMEOUT_MS = 10000;
   private readonly operationLocks = new Map<string, Promise<ThreadOperationResult>>();
+  private readonly operationMutex = new Map<string, boolean>();
+  private readonly pendingOperations = new Map<string, AbortController[]>();
+  private readonly debounceTimers = new Map<string, NodeJS.Timeout>();
 
   /**
-   * Starts a new thread operation
+   * Starts a new thread operation with proper mutex and debouncing
    */
   public async startOperation(
     type: ThreadOperationType,
@@ -75,42 +78,40 @@ class ThreadOperationManagerImpl {
     options: ThreadOperationOptions = {}
   ): Promise<ThreadOperationResult> {
     const operationId = this.generateOperationId(type, threadId);
+    const mutexKey = `${type}:${threadId || 'new'}`;
+    
+    // Handle debouncing for rapid operations
+    if (type === 'create' && !options.force) {
+      const debounced = await this.handleDebounce(mutexKey, 300); // 300ms debounce
+      if (!debounced) {
+        return { success: false, error: new Error('Operation debounced') };
+      }
+    }
+    
+    // Check mutex - prevent concurrent operations on same resource
+    if (this.operationMutex.get(mutexKey) && !options.force) {
+      logger.warn(`Operation ${type} on ${threadId} blocked by mutex`);
+      return { success: false, error: new Error('Operation already in progress') };
+    }
+    
+    // Acquire mutex
+    this.operationMutex.set(mutexKey, true);
+    
+    // Cancel any pending operations on this resource if forced
+    if (options.force) {
+      await this.cancelPendingOperations(mutexKey);
+    }
     
     // Check for duplicate operations unless skipped
     if (!options.skipDuplicateCheck && this.isDuplicateOperation(type, threadId)) {
+      this.operationMutex.delete(mutexKey);
       logger.warn(`Duplicate ${type} operation for thread ${threadId} - skipping`);
       return { success: false, error: new Error('Operation already in progress') };
     }
     
-    // Force cancel current operation if requested
-    if (options.force && this.currentOperation) {
-      await this.cancelCurrentOperation();
-    }
-    
-    // Wait for current operation if not forced
-    if (this.currentOperation && !options.force) {
-      return await this.queueOperation(type, threadId, executor, options);
-    }
-    
-    // Check for existing lock on this thread
-    const lockKey = `${type}:${threadId || 'new'}`;
-    const existingLock = this.operationLocks.get(lockKey);
-    if (existingLock) {
-      logger.info(`Waiting for existing ${type} operation on thread ${threadId}`);
-      return await existingLock;
-    }
-    
     // Create and execute operation
     const operation = this.createOperation(operationId, type, threadId);
-    const promise = this.executeOperation(operation, executor, options);
-    
-    // Store lock
-    this.operationLocks.set(lockKey, promise);
-    
-    // Clean up lock when done
-    promise.finally(() => {
-      this.operationLocks.delete(lockKey);
-    });
+    const promise = this.executeOperationWithMutex(operation, executor, options, mutexKey);
     
     return await promise;
   }
@@ -202,16 +203,22 @@ class ThreadOperationManagerImpl {
   }
 
   /**
-   * Executes an operation
+   * Executes an operation with mutex protection
    */
-  private async executeOperation(
+  private async executeOperationWithMutex(
     operation: ThreadOperation,
     executor: (signal: AbortSignal) => Promise<ThreadOperationResult>,
-    options: ThreadOperationOptions
+    options: ThreadOperationOptions,
+    mutexKey: string
   ): Promise<ThreadOperationResult> {
     // Set as current operation
     this.currentOperation = operation;
     this.updateOperation(operation.id, { status: 'running' });
+    
+    // Track pending operation for cancellation
+    const pendingList = this.pendingOperations.get(mutexKey) || [];
+    pendingList.push(operation.abortController!);
+    this.pendingOperations.set(mutexKey, pendingList);
     
     const timeoutMs = options.timeoutMs || this.DEFAULT_TIMEOUT_MS;
     const retryAttempts = options.retryAttempts || 0;
@@ -227,10 +234,11 @@ class ThreadOperationManagerImpl {
       // Handle retry if failed
       if (!result.success && retryAttempts > 0) {
         logger.info(`Retrying ${operation.type} operation (${retryAttempts} attempts left)`);
-        return await this.executeOperation(
+        return await this.executeOperationWithMutex(
           operation,
           executor,
-          { ...options, retryAttempts: retryAttempts - 1 }
+          { ...options, retryAttempts: retryAttempts - 1 },
+          mutexKey
         );
       }
       
@@ -259,6 +267,21 @@ class ThreadOperationManagerImpl {
         error: error as Error
       };
     } finally {
+      // Clean up pending operation
+      const pendingList = this.pendingOperations.get(mutexKey) || [];
+      const index = pendingList.indexOf(operation.abortController!);
+      if (index > -1) {
+        pendingList.splice(index, 1);
+      }
+      if (pendingList.length === 0) {
+        this.pendingOperations.delete(mutexKey);
+      } else {
+        this.pendingOperations.set(mutexKey, pendingList);
+      }
+      
+      // Release mutex
+      this.operationMutex.delete(mutexKey);
+      
       // Clear current operation
       if (this.currentOperation?.id === operation.id) {
         this.currentOperation = null;
@@ -386,6 +409,41 @@ class ThreadOperationManagerImpl {
     );
   }
 
+  /**
+   * Handles debouncing for rapid operations
+   */
+  private async handleDebounce(mutexKey: string, delayMs: number): Promise<boolean> {
+    const existingTimer = this.debounceTimers.get(mutexKey);
+    if (existingTimer) {
+      clearTimeout(existingTimer);
+    }
+    
+    return new Promise((resolve) => {
+      const timer = setTimeout(() => {
+        this.debounceTimers.delete(mutexKey);
+        resolve(true);
+      }, delayMs);
+      
+      this.debounceTimers.set(mutexKey, timer);
+    });
+  }
+  
+  /**
+   * Cancels all pending operations for a given mutex key
+   */
+  private async cancelPendingOperations(mutexKey: string): Promise<void> {
+    const pendingList = this.pendingOperations.get(mutexKey);
+    if (pendingList) {
+      logger.info(`Cancelling ${pendingList.length} pending operations for ${mutexKey}`);
+      pendingList.forEach(controller => {
+        if (!controller.signal.aborted) {
+          controller.abort();
+        }
+      });
+      this.pendingOperations.delete(mutexKey);
+    }
+  }
+  
   /**
    * Generates operation ID
    */

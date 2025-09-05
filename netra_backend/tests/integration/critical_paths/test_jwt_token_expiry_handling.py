@@ -24,6 +24,11 @@ Mock-Real Spectrum: L3 (Real JWT with time manipulation)
 """
 
 import pytest
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from test_framework.database.test_database_manager import TestDatabaseManager
+from test_framework.redis.test_redis_manager import TestRedisManager
+from auth_service.core.auth_manager import AuthManager
+from shared.isolated_environment import IsolatedEnvironment
 pytest.skip("TokenManager consolidated - rewrite needed for auth service", allow_module_level=True)
 
 import sys
@@ -36,7 +41,6 @@ import time
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional, Tuple
-from unittest.mock import MagicMock, patch
 
 from test_framework.freezegun_mock import freeze_time
 import jwt

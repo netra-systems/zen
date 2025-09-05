@@ -10,7 +10,7 @@ import threading
 import time
 import unittest
 from pathlib import Path
-from unittest.mock import MagicMock, Mock, patch
+from shared.isolated_environment import IsolatedEnvironment
 
 
 from dev_launcher.config import LauncherConfig
@@ -225,7 +225,6 @@ class TestErrorRecovery(unittest.TestCase):
     """Test error recovery mechanisms."""
     
     # Mock: Component isolation for testing without external dependencies
-    @patch('dev_launcher.service_config.load_or_create_config')
     def test_port_conflict_recovery(self, mock_config):
         """Test recovery from port conflicts."""
         config = self._create_dynamic_config()
@@ -275,7 +274,6 @@ class TestErrorRecovery(unittest.TestCase):
         return attempt_count
     
     # Mock: Component isolation for testing without external dependencies
-    @patch('dev_launcher.service_config.load_or_create_config')
     def test_resource_cleanup_on_error(self, mock_config):
         """Test proper resource cleanup on errors."""
         config = self._create_test_config()

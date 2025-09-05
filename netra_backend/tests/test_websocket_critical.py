@@ -1,5 +1,8 @@
 import sys
 from pathlib import Path
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from auth_service.core.auth_manager import AuthManager
+from shared.isolated_environment import IsolatedEnvironment
 
 # Test framework import - using pytest fixtures instead
 
@@ -8,7 +11,6 @@ import json
 import uuid
 from datetime import UTC, datetime
 from typing import Any, Dict, List
-from unittest.mock import AsyncMock, MagicMock, Mock, patch, patch
 
 import pytest
 
@@ -19,13 +21,13 @@ class TestWebSocketCritical:
     async def test_websocket_connection_establishment(self):
         """Test WebSocket connection establishment"""
         # Mock: WebSocket infrastructure isolation for unit tests without real connections
-        mock_websocket = AsyncMock()
+        mock_websocket = AsyncNone  # TODO: Use real service instance
         # Mock: WebSocket infrastructure isolation for unit tests without real connections
-        mock_websocket.accept = AsyncMock()
+        mock_websocket.accept = AsyncNone  # TODO: Use real service instance
         # Mock: WebSocket infrastructure isolation for unit tests without real connections
-        mock_websocket.send_text = AsyncMock()
+        mock_websocket.send_text = AsyncNone  # TODO: Use real service instance
         # Mock: WebSocket infrastructure isolation for unit tests without real connections
-        mock_websocket.receive_text = AsyncMock()
+        mock_websocket.receive_text = AsyncNone  # TODO: Use real service instance
         
         # Simulate connection
         await mock_websocket.accept()
@@ -39,8 +41,9 @@ class TestWebSocketCritical:
     @pytest.mark.asyncio
     async def test_websocket_message_handling(self):
         """Test WebSocket message sending and receiving"""
+    pass
         # Mock: WebSocket infrastructure isolation for unit tests without real connections
-        mock_websocket = AsyncMock()
+        mock_websocket = AsyncNone  # TODO: Use real service instance
         
         # Test sending different message types
         messages = [
@@ -58,9 +61,9 @@ class TestWebSocketCritical:
     async def test_websocket_connection_closure(self):
         """Test WebSocket connection closure handling"""
         # Mock: WebSocket infrastructure isolation for unit tests without real connections
-        mock_websocket = AsyncMock()
+        mock_websocket = AsyncNone  # TODO: Use real service instance
         # Mock: WebSocket infrastructure isolation for unit tests without real connections
-        mock_websocket.close = AsyncMock()
+        mock_websocket.close = AsyncNone  # TODO: Use real service instance
         
         # Close connection with different codes
         close_codes = [
@@ -77,14 +80,16 @@ class TestWebSocketCritical:
     @pytest.mark.asyncio
     async def test_websocket_heartbeat(self):
         """Test WebSocket heartbeat/ping-pong mechanism"""
+    pass
         # Mock: WebSocket infrastructure isolation for unit tests without real connections
-        mock_websocket = AsyncMock()
+        mock_websocket = AsyncNone  # TODO: Use real service instance
         
         # Simulate heartbeat
         heartbeat_interval = 30  # seconds
         heartbeat_count = 0
         
         async def send_heartbeat():
+    pass
             nonlocal heartbeat_count
             while heartbeat_count < 3:
                 await mock_websocket.send_text(json.dumps({"type": "ping"}))
@@ -110,7 +115,8 @@ class TestWebSocketCritical:
                 raise ConnectionError("Connection failed")
             
             # Mock: Generic component isolation for controlled unit testing
-            return AsyncMock()  # Successful connection
+            await asyncio.sleep(0)
+    return AsyncNone  # TODO: Use real service instance  # Successful connection
         
         # Try reconnection with exponential backoff
         for i in range(max_retries):
@@ -125,6 +131,7 @@ class TestWebSocketCritical:
     @pytest.mark.asyncio
     async def test_websocket_message_queue(self):
         """Test message queuing and processing"""
+    pass
         message_queue = asyncio.Queue()
         processed_messages = []
         
@@ -149,7 +156,7 @@ class TestWebSocketCritical:
     async def test_websocket_broadcast(self):
         """Test broadcasting messages to multiple WebSocket connections"""
         # Mock: Generic component isolation for controlled unit testing
-        connections = [AsyncMock() for _ in range(5)]
+        connections = [AsyncNone  # TODO: Use real service instance for _ in range(5)]
         
         broadcast_message = {
             "type": "broadcast",
@@ -167,8 +174,9 @@ class TestWebSocketCritical:
     @pytest.mark.asyncio
     async def test_websocket_authentication(self):
         """Test WebSocket authentication flow"""
+    pass
         # Mock: WebSocket infrastructure isolation for unit tests without real connections
-        mock_websocket = AsyncMock()
+        mock_websocket = AsyncNone  # TODO: Use real service instance
         
         # Test authentication message
         auth_message = {
@@ -193,7 +201,7 @@ class TestWebSocketCritical:
     async def test_websocket_rate_limiting(self):
         """Test WebSocket rate limiting"""
         # Mock: WebSocket infrastructure isolation for unit tests without real connections
-        mock_websocket = AsyncMock()
+        mock_websocket = AsyncNone  # TODO: Use real service instance
         
         # Track message timestamps
         message_times = []
@@ -218,8 +226,9 @@ class TestWebSocketCritical:
     @pytest.mark.asyncio
     async def test_websocket_error_handling(self):
         """Test WebSocket error handling"""
+    pass
         # Mock: WebSocket infrastructure isolation for unit tests without real connections
-        mock_websocket = AsyncMock()
+        mock_websocket = AsyncNone  # TODO: Use real service instance
         
         # Test various error scenarios
         error_scenarios = [

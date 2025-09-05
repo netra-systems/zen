@@ -6,6 +6,10 @@ Critical: Seamless thread creation for new users without friction
 
 import sys
 from pathlib import Path
+from test_framework.database.test_database_manager import TestDatabaseManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 # Test framework import - using pytest fixtures instead
 
@@ -13,7 +17,6 @@ import asyncio
 import uuid
 from datetime import datetime, timezone
 from typing import Any, Dict, Optional
-from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 from netra_backend.app.schemas import Thread, User

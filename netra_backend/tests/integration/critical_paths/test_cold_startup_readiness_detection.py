@@ -12,6 +12,9 @@ Business Value Justification (BVJ):
 
 import sys
 from pathlib import Path
+from test_framework.database.test_database_manager import TestDatabaseManager
+from test_framework.redis.test_redis_manager import TestRedisManager
+from shared.isolated_environment import IsolatedEnvironment
 
 # Test framework import - using pytest fixtures instead
 
@@ -19,7 +22,6 @@ import asyncio
 import os
 import time
 from typing import Any, Dict
-from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 from fastapi.testclient import TestClient
@@ -149,8 +151,8 @@ class TestColdStartupReadinessDetection:
             
             # Mock health dependencies as healthy for this test
             with patch('netra_backend.app.services.health_registry.health_registry.get_default_service') as mock_health:
-                mock_service = AsyncMock()
-                mock_response = MagicMock()
+                mock_service = AsyncNone  # TODO: Use real service instance
+                mock_response = MagicNone  # TODO: Use real service instance
                 mock_response.to_dict.return_value = {"status": "healthy", "components": {}}
                 mock_service.get_health.return_value = mock_response
                 mock_health.return_value = mock_service

@@ -10,6 +10,7 @@ import sys
 import importlib.util
 import subprocess
 from pathlib import Path
+from shared.isolated_environment import IsolatedEnvironment
 
 
 def test_clickhouse_driver_is_installed():
@@ -27,6 +28,7 @@ def test_clickhouse_driver_is_installed():
 
 def test_requirements_match_imports():
     """Test that requirements.txt matches actual imports in code."""
+    pass
     backend_req_path = Path(__file__).parent.parent.parent / "netra_backend" / "backend_requirements.txt"
     
     # Check what's in requirements
@@ -36,7 +38,8 @@ def test_requirements_match_imports():
     has_clickhouse_driver = 'clickhouse-driver' in requirements_content
     has_clickhouse_connect = 'clickhouse-connect' in requirements_content
     
-    print(f"\nRequirements.txt analysis:")
+    print(f"
+Requirements.txt analysis:")
     print(f"  - Has clickhouse-driver: {has_clickhouse_driver}")
     print(f"  - Has clickhouse-connect: {has_clickhouse_connect}")
     
@@ -52,13 +55,15 @@ def test_requirements_match_imports():
         if 'clickhouse_driver' in str(e):
             code_uses_driver = True  # Code tries to import it but it's missing
     
-    print(f"\nCode import analysis:")
+    print(f"
+Code import analysis:")
     print(f"  - Code imports clickhouse_driver: {code_uses_driver}")
     print(f"  - Code imports clickhouse_connect: {code_uses_connect}")
     
     # Check for mismatch
     if code_uses_driver and not has_clickhouse_driver:
-        print("\n[X] MISMATCH DETECTED:")
+        print("
+[X] MISMATCH DETECTED:")
         print("  Code uses 'clickhouse_driver' but requirements.txt doesn't include it!")
         print("  Requirements has 'clickhouse-connect' instead (different library)")
         return False
@@ -68,7 +73,8 @@ def test_requirements_match_imports():
 
 def test_both_libraries_not_same():
     """Verify that clickhouse-driver and clickhouse-connect are different packages."""
-    print("\n" + "="*60)
+    print("
+" + "="*60)
     print("Testing if both ClickHouse libraries are different...")
     
     # Check installed packages
@@ -98,7 +104,8 @@ def test_both_libraries_not_same():
             print(f"  [X] clickhouse-connect NOT installed")
         
         if has_connect and not has_driver:
-            print("\n[X] BUG CONFIRMED: Wrong ClickHouse library installed!")
+            print("
+[X] BUG CONFIRMED: Wrong ClickHouse library installed!")
             print("  Solution: Add 'clickhouse-driver' to requirements.txt")
             return False
     
@@ -107,6 +114,7 @@ def test_both_libraries_not_same():
 
 def main():
     """Run all tests to reproduce the bug."""
+    pass
     print("="*60)
     print("ClickHouse Driver Dependency Bug Reproduction Test")
     print("="*60)
@@ -114,11 +122,13 @@ def main():
     results = []
     
     # Test 1: Check if clickhouse_driver is installed
-    print("\nTest 1: Checking if clickhouse_driver module is available...")
+    print("
+Test 1: Checking if clickhouse_driver module is available...")
     results.append(test_clickhouse_driver_is_installed())
     
     # Test 2: Check requirements vs imports mismatch
-    print("\n" + "-"*60)
+    print("
+" + "-"*60)
     print("Test 2: Checking requirements.txt vs actual code imports...")
     results.append(test_requirements_match_imports())
     
@@ -126,7 +136,8 @@ def main():
     results.append(test_both_libraries_not_same())
     
     # Summary
-    print("\n" + "="*60)
+    print("
+" + "="*60)
     print("TEST SUMMARY")
     print("="*60)
     
@@ -134,11 +145,13 @@ def main():
         print("[OK] All tests passed - no dependency issues detected")
     else:
         print("[X] DEPENDENCY BUG CONFIRMED")
-        print("\nRoot Cause:")
+        print("
+Root Cause:")
         print("  1. Code imports 'clickhouse_driver' (native driver)")
         print("  2. Requirements specifies 'clickhouse-connect' (different library)")
         print("  3. These are two completely different ClickHouse Python clients")
-        print("\nFix Required:")
+        print("
+Fix Required:")
         print("  Add 'clickhouse-driver>=0.2.9' to backend_requirements.txt")
         print("  OR migrate all code to use 'clickhouse-connect' instead")
         return 1

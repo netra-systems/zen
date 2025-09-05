@@ -24,6 +24,7 @@ import time
 import uuid
 import redis.asyncio as redis
 from typing import Dict, Any, Optional
+from shared.isolated_environment import IsolatedEnvironment
 
 from tests.e2e.service_manager import ServiceManager
 from tests.e2e.harness_utils import UnifiedTestHarnessComplete

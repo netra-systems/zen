@@ -34,7 +34,8 @@ def simulate_page_refresh_reconnect():
     print("WEBSOCKET RECONNECTION SPEED COMPARISON")
     print("=" * 60)
     
-    print("\nScenario: Page Refresh Reconnection")
+    print("
+Scenario: Page Refresh Reconnection")
     print("-" * 40)
     
     attempts = 5
@@ -43,7 +44,8 @@ def simulate_page_refresh_reconnect():
     old_cumulative = 0
     new_cumulative = 0
     
-    print("\nAttempt | Old Delay (ms) | New Delay (ms) | Improvement")
+    print("
+Attempt | Old Delay (ms) | New Delay (ms) | Improvement")
     print("-" * 60)
     
     for i in range(attempts):
@@ -63,7 +65,8 @@ def simulate_page_refresh_reconnect():
     print("-" * 60)
     print(f"Total   | {old_cumulative:14.0f} | {new_cumulative:14.0f} | {old_cumulative / max(new_cumulative, 1):.1f}x faster")
     
-    print("\n" + "=" * 60)
+    print("
+" + "=" * 60)
     print("KEY IMPROVEMENTS:")
     print("=" * 60)
     
@@ -78,21 +81,25 @@ def simulate_page_refresh_reconnect():
     for improvement in improvements:
         print(f"  {improvement}")
     
-    print("\n" + "=" * 60)
+    print("
+" + "=" * 60)
     print("REAL-WORLD IMPACT:")
     print("=" * 60)
     
-    print("\nPage Refresh Recovery Time:")
+    print("
+Page Refresh Recovery Time:")
     print(f"  Old System: {old_cumulative/1000:.1f} seconds (worst case)")
     print(f"  New System: {new_cumulative/1000:.1f} seconds (worst case)")
     print(f"  Improvement: {(old_cumulative - new_cumulative)/1000:.1f} seconds saved")
     
-    print("\nTypical Page Refresh (successful on first attempt):")
+    print("
+Typical Page Refresh (successful on first attempt):")
     print(f"  Old System: 1.0 seconds")
     print(f"  New System: 0.0 seconds (immediate)")
     print(f"  User Experience: INSTANT reconnection")
     
-    print("\n" + "=" * 60)
+    print("
+" + "=" * 60)
     print("STRESS TEST RESULTS:")
     print("=" * 60)
     
@@ -101,13 +108,15 @@ def simulate_page_refresh_reconnect():
     old_total = sum(calculate_reconnect_delay(0, True) for _ in range(rapid_refreshes))
     new_total = sum(calculate_reconnect_delay(0, False) for _ in range(rapid_refreshes))
     
-    print(f"\n{rapid_refreshes} Rapid Page Refreshes:")
+    print(f"
+{rapid_refreshes} Rapid Page Refreshes:")
     print(f"  Old System: {old_total/1000:.1f} seconds total delay")
     print(f"  New System: {new_total/1000:.1f} seconds total delay")
     print(f"  Time Saved: {old_total/1000:.1f} seconds")
     print(f"  Performance: {old_total / max(new_total, 1):.0f}x faster")
     
-    print("\n" + "=" * 60)
+    print("
+" + "=" * 60)
     print("CONCLUSION: WebSocket connection is now 10x+ faster!")
     print("=" * 60)
 

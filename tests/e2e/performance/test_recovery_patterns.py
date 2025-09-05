@@ -15,6 +15,7 @@ import gc
 import logging
 import random
 import time
+from shared.isolated_environment import IsolatedEnvironment
 
 import psutil
 import pytest

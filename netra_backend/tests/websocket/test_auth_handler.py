@@ -7,6 +7,7 @@ Business Value: Customer-facing functionality
 import pytest
 import asyncio
 from netra_backend.app.websocket_core.auth import WebSocketAuthenticator
+from shared.isolated_environment import IsolatedEnvironment
 
 @pytest.mark.asyncio
 class TestAuthHandlerAsync:

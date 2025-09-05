@@ -2,6 +2,11 @@
 
 import sys
 from pathlib import Path
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from test_framework.database.test_database_manager import TestDatabaseManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 # Test framework import - using pytest fixtures instead
 
@@ -9,7 +14,6 @@ import asyncio
 import json
 import time
 from typing import Any, Dict, List, Optional
-from unittest.mock import AsyncMock, MagicMock, Mock, call, patch
 
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -24,15 +28,15 @@ from netra_backend.app.services.thread_service import ThreadService
 def mock_websocket_manager():
     """Mock WebSocket manager for testing."""
     # Mock: Generic component isolation for controlled unit testing
-    manager_mock = Mock()
+    manager_mock = manager_mock_instance  # Initialize appropriate service
     # Mock: Generic component isolation for controlled unit testing
-    manager_mock.send_message = AsyncMock()
+    manager_mock.send_message = AsyncNone  # TODO: Use real service instance
     # Mock: Generic component isolation for controlled unit testing
-    manager_mock.broadcast_to_thread = AsyncMock()
+    manager_mock.broadcast_to_thread = AsyncNone  # TODO: Use real service instance
     # Mock: Generic component isolation for controlled unit testing
-    manager_mock.connect_user_to_thread = AsyncMock()
+    manager_mock.connect_user_to_thread = AsyncNone  # TODO: Use real service instance
     # Mock: Generic component isolation for controlled unit testing
-    manager_mock.disconnect_user_from_thread = AsyncMock()
+    manager_mock.disconnect_user_from_thread = AsyncNone  # TODO: Use real service instance
     
     # Mock: Component isolation for testing without external dependencies
     with patch('app.ws_manager.manager', manager_mock):
@@ -43,14 +47,14 @@ def mock_thread_service():
     # Mock: Component isolation for controlled unit testing
     service = Mock(spec=ThreadService)
     # Mock: Generic component isolation for controlled unit testing
-    service.create_thread = AsyncMock()
+    service.create_thread = AsyncNone  # TODO: Use real service instance
     # Mock: Generic component isolation for controlled unit testing
-    service.switch_thread = AsyncMock()
+    service.switch_thread = AsyncNone  # TODO: Use real service instance
     # Mock: Generic component isolation for controlled unit testing
-    service.delete_thread = AsyncMock()
+    service.delete_thread = AsyncNone  # TODO: Use real service instance
     # Mock: Generic component isolation for controlled unit testing
-    service.create_run = AsyncMock()
+    service.create_run = AsyncNone  # TODO: Use real service instance
     # Mock: Generic component isolation for controlled unit testing
-    service.get_or_create_thread = AsyncMock()
+    service.get_or_create_thread = AsyncNone  # TODO: Use real service instance
     return service
 # )  # Orphaned closing parenthesis

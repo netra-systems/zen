@@ -1,6 +1,7 @@
 """Test to verify DatabaseConfig migration is complete and staging deployment issues.
 
 from shared.isolated_environment import get_env
+from shared.isolated_environment import IsolatedEnvironment
 This test reproduces the staging error:
 RuntimeError: Database engine creation failed: name 'DatabaseConfig' is not defined
 
@@ -31,6 +32,7 @@ class TestDatabaseConfigMigration:
         This test catches the staging error where DatabaseConfig was not properly imported
         or referenced, causing deployment failures.
         """
+    pass
         # Read the postgres_core.py file to check for DatabaseConfig references
         import netra_backend.app.db.postgres_core as postgres_core
         
@@ -80,6 +82,7 @@ class TestDatabaseConfigMigration:
         
         This simulates the staging environment initialization that was failing.
         """
+    pass
         from netra_backend.app.db.postgres_core import initialize_postgres
         from netra_backend.app.core.configuration.base import get_unified_config
         
@@ -122,7 +125,8 @@ class TestDatabaseConfigMigration:
                 # Check for problematic patterns
                 if 'DatabaseConfig.' in content:
                     # Extract lines with DatabaseConfig references
-                    lines = content.split('\n')
+                    lines = content.split('
+')
                     problematic_lines = [
                         (i+1, line.strip()) 
                         for i, line in enumerate(lines) 
@@ -130,8 +134,10 @@ class TestDatabaseConfigMigration:
                     ]
                     
                     if problematic_lines:
-                        issues = '\n'.join([f"  Line {num}: {line}" for num, line in problematic_lines])
-                        pytest.fail(f"Found DatabaseConfig attribute references in {file_path}:\n{issues}")
+                        issues = '
+'.join([f"  Line {num}: {line}" for num, line in problematic_lines])
+                        pytest.fail(f"Found DatabaseConfig attribute references in {file_path}:
+{issues}")
                         
             except FileNotFoundError:
                 # File might not exist in test environment
@@ -140,6 +146,7 @@ class TestDatabaseConfigMigration:
     @pytest.mark.e2e
     def test_unified_config_provides_all_required_attributes(self):
         """Verify get_unified_config() provides all attributes previously in DatabaseConfig."""
+    pass
         config = get_unified_config()
         
         # Map old DatabaseConfig attributes to new unified config attributes
@@ -172,6 +179,7 @@ class TestStagingDeploymentValidation:
         
         This test ensures staging deployment has proper configuration.
         """
+    pass
         with patch.dict(os.environ, {'ENVIRONMENT': 'staging'}):
             config = get_unified_config()
             
@@ -196,7 +204,8 @@ class TestStagingDeploymentValidation:
             try:
                 exec(import_stmt)
             except ImportError as e:
-                pytest.fail(f"Critical import failed (would break staging): {import_stmt}\n  Error: {e}")
+                pytest.fail(f"Critical import failed (would break staging): {import_stmt}
+  Error: {e}")
     
     @pytest.mark.asyncio
     @pytest.mark.e2e
@@ -205,6 +214,7 @@ class TestStagingDeploymentValidation:
         
         This reproduces the exact sequence that was failing in staging deployment.
         """
+    pass
         from netra_backend.app.db import postgres_core
         
         # Mock dependencies to isolate the test

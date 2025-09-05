@@ -5,6 +5,7 @@ import asyncio
 import json
 import websockets
 import requests
+from shared.isolated_environment import IsolatedEnvironment
 
 
 def get_google_auth_token():

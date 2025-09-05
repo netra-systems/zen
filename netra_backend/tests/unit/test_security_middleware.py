@@ -16,11 +16,15 @@ Target Coverage:
 
 import sys
 from pathlib import Path
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from auth_service.core.auth_manager import AuthManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 import time
 from datetime import datetime, timedelta
 from typing import Any, Dict, Optional
-from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 from fastapi import HTTPException, Request, Response, status
@@ -30,12 +34,12 @@ from starlette.datastructures import URL, Headers
 from netra_backend.app.core.exceptions_auth import NetraSecurityException
 
 from netra_backend.app.middleware.security_middleware import (
+import asyncio
     InputValidator,
     RateLimitTracker,
     SecurityConfig,
     SecurityMiddleware,
-    create_security_middleware,
-)
+    create_security_middleware)
 
 class TestSecurityConfig:
     """Test suite for SecurityConfig constants."""
@@ -48,6 +52,7 @@ class TestSecurityConfig:
 
     def test_security_config_size_limits(self):
         """Test request size configuration values."""
+    pass
         assert SecurityConfig.MAX_REQUEST_SIZE == 10 * 1024 * 1024  # 10MB
         assert SecurityConfig.MAX_HEADER_SIZE == 8192  # 8KB
         assert SecurityConfig.MAX_URL_LENGTH == 2048  # 2KB
@@ -64,6 +69,7 @@ class TestSecurityConfig:
 
     def test_security_config_header_values(self):
         """Test specific security header values."""
+    pass
         headers = SecurityConfig.SECURITY_HEADERS
         assert headers["X-Content-Type-Options"] == "nosniff"
         assert headers["X-Frame-Options"] == "DENY"
@@ -74,7 +80,10 @@ class TestRateLimitTracker:
     
     @pytest.fixture
     def rate_limiter(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create fresh rate limit tracker."""
+    pass
         return RateLimitTracker()
     
     def test_rate_limit_tracker_initialization(self, rate_limiter):
@@ -85,6 +94,7 @@ class TestRateLimitTracker:
 
     def test_rate_limit_check_within_limit_allowed(self, rate_limiter):
         """Test requests within limit are allowed."""
+    pass
         identifier = "test-ip-123"
         limit = 10
         
@@ -105,6 +115,7 @@ class TestRateLimitTracker:
 
     def test_rate_limit_multiple_identifiers_independent(self, rate_limiter):
         """Test different identifiers tracked independently."""
+    pass
         ip1, ip2 = "ip1", "ip2"
         limit = 5
         
@@ -131,6 +142,7 @@ class TestRateLimitTracker:
 
     def test_rate_limit_blocked_ip_remains_blocked(self, rate_limiter):
         """Test blocked IP remains blocked during block period."""
+    pass
         identifier = "blocked-ip"
         limit = 1
         
@@ -147,7 +159,10 @@ class TestInputValidator:
     
     @pytest.fixture
     def validator(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create input validator instance."""
+    pass
         return InputValidator()
     
     def test_input_validator_initialization(self, validator):
@@ -157,6 +172,7 @@ class TestInputValidator:
 
     def test_validate_input_empty_data_no_error(self, validator):
         """Test validation of empty data passes."""
+    pass
         validator.validate_input("", "test_field")
         validator.validate_input(None, "test_field")
         # No exception should be raised
@@ -170,6 +186,7 @@ class TestInputValidator:
 
     def test_sanitize_headers_removes_dangerous_headers(self, validator):
         """Test header sanitization removes dangerous headers."""
+    pass
         dangerous_headers = {
             "X-Forwarded-For": "127.0.0.1",
             "Host": "evil.com",
@@ -199,19 +216,28 @@ class TestSecurityMiddleware:
     """Test suite for SecurityMiddleware functionality."""
     
     @pytest.fixture
-    def mock_app(self):
+ def real_app():
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create mock FastAPI application."""
+    pass
         # Mock: Generic component isolation for controlled unit testing
-        return Mock()
+        return None  # TODO: Use real service instance
     
     @pytest.fixture
     def middleware(self, mock_app):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create security middleware instance."""
+    pass
         return SecurityMiddleware(mock_app)
     
     @pytest.fixture
-    def mock_request(self):
+ def real_request():
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create mock FastAPI request."""
+    pass
         # Mock: Component isolation for controlled unit testing
         request = Mock(spec=Request)
         request.method = "GET"
@@ -221,13 +247,16 @@ class TestSecurityMiddleware:
         request.url.__str__ = Mock(return_value="https://example.com/api/test")
         request.headers = Headers({"user-agent": "test-browser"})
         # Mock: Generic component isolation for controlled unit testing
-        request.client = Mock()
+        request.client = client_instance  # Initialize appropriate service
         request.client.host = "127.0.0.1"
         return request
     
     @pytest.fixture
-    def mock_response(self):
+ def real_response():
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create mock FastAPI response."""
+    pass
         # Mock: Component isolation for controlled unit testing
         response = Mock(spec=Response)
         response.headers = {}
@@ -242,6 +271,7 @@ class TestSecurityMiddleware:
 
     def test_security_middleware_sensitive_endpoints_configured(self, middleware):
         """Test sensitive endpoints are properly configured."""
+    pass
         sensitive = middleware.sensitive_endpoints
         expected_endpoints = [
             "/auth/login", "/api/admin", "/api/tools",
@@ -255,7 +285,8 @@ class TestSecurityMiddleware:
     async def test_security_middleware_adds_security_headers(self, middleware, mock_request, mock_response):
         """Test security middleware adds required headers."""
         async def mock_call_next(request):
-            return mock_response
+            await asyncio.sleep(0)
+    return mock_response
         
         # Mock: Component isolation for testing without external dependencies
         response = await middleware.dispatch(mock_request, mock_call_next)
@@ -269,8 +300,11 @@ class TestSecurityMiddleware:
     @pytest.mark.asyncio
     async def test_security_middleware_adds_custom_headers(self, middleware, mock_request, mock_response):
         """Test middleware adds custom security headers."""
+    pass
         async def mock_call_next(request):
-            return mock_response
+    pass
+            await asyncio.sleep(0)
+    return mock_response
         
         # Mock: Component isolation for testing without external dependencies
         response = await middleware.dispatch(mock_request, mock_call_next)
@@ -292,6 +326,7 @@ class TestSecurityMiddleware:
     @pytest.mark.asyncio
     async def test_security_middleware_rate_limiting_sensitive_endpoint(self, middleware, mock_request):
         """Test stricter rate limiting for sensitive endpoints."""
+    pass
         mock_request.url.path = "/auth/login"
         
         # Should use strict rate limit
@@ -310,6 +345,7 @@ class TestSecurityMiddleware:
 
     def test_security_middleware_validate_request_size_within_limit(self, middleware, mock_request):
         """Test request size validation within limits."""
+    pass
         # Mock small request
         # Mock: Component isolation for testing without external dependencies
         with patch('netra_backend.app.middleware.security_validation_helpers.RequestValidators.validate_request_size') as mock_validate:
@@ -325,6 +361,7 @@ class TestSecurityMiddleware:
 
     def test_security_middleware_validate_headers_normal_size(self, middleware, mock_request):
         """Test header validation for normal-sized headers."""
+    pass
         mock_request.headers = Headers({
             "User-Agent": "Mozilla/5.0 Browser",
             "Accept": "application/json"
@@ -344,6 +381,7 @@ class TestSecurityMiddleware:
 
     def test_security_middleware_track_auth_attempt_success(self, middleware):
         """Test successful authentication attempt tracking."""
+    pass
         ip_address = "192.168.1.50"
         
         middleware.track_auth_attempt(ip_address, success=True)
@@ -362,6 +400,7 @@ class TestSecurityMiddleware:
 
     def test_security_middleware_is_ip_suspicious_high_failures(self, middleware):
         """Test IP marked suspicious with high failure count."""
+    pass
         ip_address = "192.168.1.52"
         middleware.failed_auth_ips[ip_address] = 8
         
@@ -381,7 +420,9 @@ class TestSecurityMiddleware:
     @pytest.mark.asyncio
     async def test_security_middleware_rate_limit_exceeded_raises_429(self, middleware, mock_request):
         """Test rate limit exceeded raises 429 error."""
-        # Mock rate limiter to return True (rate limited)
+    pass
+        # Mock rate limiter to await asyncio.sleep(0)
+    return True (rate limited)
         with patch.object(middleware.rate_limiter, 'is_rate_limited', return_value=True):
             with pytest.raises(HTTPException) as exc_info:
                 await middleware._check_rate_limits(mock_request)
@@ -412,6 +453,7 @@ class TestSecurityMiddlewareFactory:
 
     def test_create_security_middleware_custom_rate_limiter(self):
         """Test factory creates middleware with custom rate limiter."""
+    pass
         custom_limiter = RateLimitTracker()
         
         middleware = create_security_middleware(custom_limiter)

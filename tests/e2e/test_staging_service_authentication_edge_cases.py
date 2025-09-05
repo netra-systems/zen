@@ -28,6 +28,7 @@ import time
 import uuid
 from datetime import datetime, timedelta
 from typing import Dict, List, Optional
+from shared.isolated_environment import IsolatedEnvironment
 
 import httpx
 import jwt

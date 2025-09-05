@@ -1,6 +1,7 @@
 """Test Environment Configuration
 
 from shared.isolated_environment import get_env
+from shared.isolated_environment import IsolatedEnvironment
 Provides configuration for E2E test environments.
 Now integrates with service availability detection to provide intelligent
 configuration based on actual service availability.

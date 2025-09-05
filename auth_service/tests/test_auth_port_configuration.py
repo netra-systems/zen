@@ -17,9 +17,12 @@ These tests MUST fail initially to demonstrate the issue before fixes are applie
 import pytest
 import os
 import asyncio
-from unittest.mock import patch, MagicMock
 from auth_service.auth_core.auth_environment import get_auth_env
 from shared.isolated_environment import get_env
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from test_framework.docker.unified_docker_manager import UnifiedDockerManager
+from auth_service.core.auth_manager import AuthManager
+from shared.isolated_environment import IsolatedEnvironment
 
 
 class TestAuthPortConfigurationConsistency:
@@ -216,7 +219,6 @@ class TestAuthPortConfigurationConsistency:
         This test FAILS initially because of the mismatch.
         """
         import socket
-        from unittest.mock import patch
         
         # Test port
         test_port = 8081

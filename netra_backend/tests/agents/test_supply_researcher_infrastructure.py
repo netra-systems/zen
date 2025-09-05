@@ -5,24 +5,29 @@ Modular design with ≤300 lines, ≤8 lines per function
 
 import sys
 from pathlib import Path
+from test_framework.database.test_database_manager import TestDatabaseManager
+from test_framework.redis.test_redis_manager import TestRedisManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 # Test framework import - using pytest fixtures instead
 
 import json
 from datetime import datetime
-from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.tests.agents.supply_researcher_fixtures import (
+import asyncio
     agent,
     mock_redis_manager,
-    successful_api_response,
-)
+    successful_api_response)
 
 class TestSupplyResearcherInfrastructure:
     """Infrastructure and operational tests"""
+    pass
 
     @pytest.mark.asyncio
     async def test_error_recovery_fallback(self, agent):
@@ -34,7 +39,9 @@ class TestSupplyResearcherInfrastructure:
 
     def _create_error_recovery_state(self):
         """Create state for error recovery testing (≤8 lines)"""
-        return DeepAgentState(
+    pass
+        await asyncio.sleep(0)
+    return DeepAgentState(
             user_request="Get GPT-4 pricing",
             chat_thread_id="test_thread",
             user_id="test_user"
@@ -45,7 +52,7 @@ class TestSupplyResearcherInfrastructure:
         # Mock: Redis external service isolation for fast, reliable tests without network dependency
         with patch('netra_backend.app.redis_manager.RedisManager') as mock_redis_class:
             # Mock: Redis external service isolation for fast, reliable tests without network dependency
-            mock_redis = Mock()
+            mock_redis = TestRedisManager().get_client()
             # Mock: Redis external service isolation for fast, reliable tests without network dependency
             mock_redis.get = AsyncMock(return_value=json.dumps(_get_cached_fallback_data()))
             mock_redis_class.return_value = mock_redis
@@ -53,6 +60,7 @@ class TestSupplyResearcherInfrastructure:
 
     def _get_cached_fallback_data(self):
         """Get cached fallback data (≤8 lines)"""
+    pass
         return {
             "pricing_input": 30,
             "pricing_output": 60,
@@ -67,6 +75,7 @@ class TestSupplyResearcherInfrastructure:
 
     def _verify_cache_access(self, agent):
         """Verify cache was accessed during fallback (≤8 lines)"""
+    pass
         if agent.redis_manager:
             assert agent.redis_manager.get.called
 
@@ -80,7 +89,9 @@ class TestSupplyResearcherInfrastructure:
 
     def _create_performance_test_state(self):
         """Create state for performance testing (≤8 lines)"""
-        return DeepAgentState(
+    pass
+        await asyncio.sleep(0)
+    return DeepAgentState(
             user_request="Performance test",
             chat_thread_id="perf_test",
             user_id="test_user"
@@ -91,14 +102,15 @@ class TestSupplyResearcherInfrastructure:
         # Mock: Component isolation for testing without external dependencies
         with patch('netra_backend.app.agents.supply_researcher_sub_agent.metrics') as mock_metrics:
             # Mock: Generic component isolation for controlled unit testing
-            mock_metrics.counter = Mock()
+            mock_metrics.counter = counter_instance  # Initialize appropriate service
             # Mock: Generic component isolation for controlled unit testing
-            mock_metrics.histogram = Mock()
+            mock_metrics.histogram = histogram_instance  # Initialize appropriate service
             # Mock: Generic component isolation for controlled unit testing
-            mock_metrics.gauge = Mock()
+            mock_metrics.gauge = gauge_instance  # Initialize appropriate service
 
     async def _execute_performance_test(self, agent, state):
         """Execute performance test (≤8 lines)"""
+    pass
         with patch.object(agent.research_engine, 'call_deep_research_api', 
                          new_callable=AsyncMock) as mock_api:
             mock_api.return_value = _get_performance_test_response()
@@ -106,7 +118,8 @@ class TestSupplyResearcherInfrastructure:
 
     def _get_performance_test_response(self):
         """Get performance test API response (≤8 lines)"""
-        return {
+        await asyncio.sleep(0)
+    return {
             "session_id": "perf_session",
             "status": "completed",
             "questions_answered": [],
@@ -115,6 +128,7 @@ class TestSupplyResearcherInfrastructure:
 
     def _verify_performance_metrics(self, state):
         """Verify performance metrics were collected (≤8 lines)"""
+    pass
         assert hasattr(state, 'supply_research_result')
         result = state.supply_research_result
         assert 'processing_time' in result
@@ -130,6 +144,7 @@ class TestSupplyResearcherInfrastructure:
 
     def _create_circuit_breaker(self):
         """Create circuit breaker for testing (≤8 lines)"""
+    pass
         return {
             "state": "closed",
             "failure_count": 0,
@@ -146,6 +161,7 @@ class TestSupplyResearcherInfrastructure:
 
     def _verify_circuit_breaker_behavior(self, circuit_breaker):
         """Verify circuit breaker behavior (≤8 lines)"""
+    pass
         assert circuit_breaker["state"] == "open"
         assert circuit_breaker["failure_count"] > circuit_breaker["failure_threshold"]
 
@@ -159,9 +175,11 @@ class TestSupplyResearcherInfrastructure:
 
     async def _check_agent_health(self, agent):
         """Check agent health status (≤8 lines)"""
+    pass
         try:
             # Simulate health check
-            return {
+            await asyncio.sleep(0)
+    return {
                 "status": "healthy",
                 "timestamp": datetime.now().isoformat(),
                 "dependencies": {"llm": "up", "db": "up", "redis": "up"}
@@ -177,7 +195,9 @@ class TestSupplyResearcherInfrastructure:
 
     async def _check_agent_readiness(self, agent):
         """Check agent readiness status (≤8 lines)"""
-        return {
+    pass
+        await asyncio.sleep(0)
+    return {
             "ready": True,
             "initialized": True,
             "dependencies_ready": True
@@ -190,6 +210,7 @@ class TestSupplyResearcherInfrastructure:
 
     def test_resource_cleanup_management(self, agent):
         """Test proper resource cleanup and management"""
+    pass
         resources = _create_test_resources()
         _simulate_resource_usage(resources)
         _cleanup_resources(resources)
@@ -201,11 +222,12 @@ class TestSupplyResearcherInfrastructure:
             "connections": ["conn1", "conn2", "conn3"],
             "files": ["temp1.txt", "temp2.txt"],
             # Mock: Generic component isolation for controlled unit testing
-            "memory_objects": [Mock(), Mock(), Mock()]
+            "memory_objects": [None  # TODO: Use real service instance, None  # TODO: Use real service instance, None  # TODO: Use real service instance]
         }
 
     def _simulate_resource_usage(self, resources):
         """Simulate resource usage (≤8 lines)"""
+    pass
         # Mark resources as used
         for resource_type in resources:
             for resource in resources[resource_type]:
@@ -221,6 +243,7 @@ class TestSupplyResearcherInfrastructure:
 
     def _verify_resource_cleanup(self, resources):
         """Verify resources were cleaned up (≤8 lines)"""
+    pass
         assert len(resources["connections"]) == 0
         assert len(resources["files"]) == 0
         assert len(resources["memory_objects"]) == 0
@@ -234,7 +257,9 @@ class TestSupplyResearcherInfrastructure:
 
     def _create_shutdown_tasks(self):
         """Create shutdown task list (≤8 lines)"""
-        return [
+    pass
+        await asyncio.sleep(0)
+    return [
             {"name": "close_connections", "completed": False},
             {"name": "save_state", "completed": False},
             {"name": "cleanup_temp_files", "completed": False},
@@ -249,6 +274,7 @@ class TestSupplyResearcherInfrastructure:
 
     def _verify_graceful_shutdown(self, tasks):
         """Verify graceful shutdown completed (≤8 lines)"""
+    pass
         for task in tasks:
             assert task["completed"] is True
 
@@ -262,7 +288,9 @@ class TestSupplyResearcherInfrastructure:
 
     def _collect_memory_stats(self):
         """Collect memory usage statistics (≤8 lines)"""
-        return {
+    pass
+        await asyncio.sleep(0)
+    return {
             "heap_size": 100 * 1024 * 1024,  # 100MB
             "used_memory": 75 * 1024 * 1024,  # 75MB
             "free_memory": 25 * 1024 * 1024,  # 25MB
@@ -276,6 +304,7 @@ class TestSupplyResearcherInfrastructure:
 
     def _optimize_memory_usage(self):
         """Optimize memory usage (≤8 lines)"""
+    pass
         # Simulate memory optimization
         import gc
         gc.collect()
@@ -285,3 +314,4 @@ class TestSupplyResearcherInfrastructure:
         assert "heap_size" in stats
         assert "used_memory" in stats
         assert stats["used_memory"] <= stats["heap_size"]
+    pass

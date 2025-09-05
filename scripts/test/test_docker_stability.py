@@ -7,6 +7,7 @@ import psycopg2
 import redis
 import sys
 from datetime import datetime
+from shared.isolated_environment import IsolatedEnvironment
 
 def test_postgres():
     """Test PostgreSQL connectivity."""

@@ -1,3 +1,26 @@
+class TestWebSocketConnection:
+    """Real WebSocket connection for testing instead of mocks."""
+    
+    def __init__(self):
+        self.messages_sent = []
+        self.is_connected = True
+        self._closed = False
+        
+    async def send_json(self, message: dict):
+        """Send JSON message."""
+        if self._closed:
+            raise RuntimeError("WebSocket is closed")
+        self.messages_sent.append(message)
+        
+    async def close(self, code: int = 1000, reason: str = "Normal closure"):
+        """Close WebSocket connection."""
+        self._closed = True
+        self.is_connected = False
+        
+    def get_messages(self) -> list:
+        """Get all sent messages."""
+        return self.messages_sent.copy()
+
 """LLM Initialization Test Helpers - Supporting classes and utilities
 
 Separated from main test file to comply with 450-line limit
@@ -9,13 +32,15 @@ import time
 from shared.isolated_environment import get_env
 from decimal import Decimal
 from typing import Any, Dict, List, Optional
-from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 from pydantic import BaseModel, Field
 
 from netra_backend.app.schemas.config import AppConfig
 from netra_backend.app.schemas.config import LLMConfig
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
 
 
 class LLMTestResponse(BaseModel):
@@ -94,9 +119,7 @@ class LLMTestHelpers:
     @staticmethod
     def create_mock_llm_manager() -> MagicMock:
         """Create mock LLM manager for testing"""
-        mock_manager = MagicMock()
-        mock_manager.get_llm.return_value = MagicMock()
-        mock_manager.ask_llm = AsyncMock(return_value="LLM_INIT_SUCCESS")
+        mock_manager = Magic        mock_manager.get_llm.return_value = Magic        mock_manager.ask_llm = AsyncMock(return_value="LLM_INIT_SUCCESS")
         LLMTestHelpers._setup_mock_responses(mock_manager)
         return mock_manager
     
@@ -111,9 +134,7 @@ class LLMTestHelpers:
     @staticmethod
     def _create_mock_usage_response():
         """Create mock response with usage tracking"""
-        mock_response = MagicMock()
-        mock_response.usage = MagicMock()
-        mock_response.usage.prompt_tokens = 100
+        mock_response = Magic        mock_response.usage = Magic        mock_response.usage.prompt_tokens = 100
         mock_response.usage.completion_tokens = 50
         mock_response.usage.total_tokens = 150
         return mock_response
@@ -185,8 +206,7 @@ class LLMTestHelpers:
     @staticmethod
     def create_failing_mock_manager():
         """Create mock manager that fails immediately"""
-        mock_manager = MagicMock()
-        mock_manager.ask_llm = AsyncMock(
+        mock_manager = Magic        mock_manager.ask_llm = AsyncMock(
             side_effect=RuntimeError("LLM provider unavailable - no fallback")
         )
         return mock_manager
@@ -214,8 +234,7 @@ class ReliabilityTestHelpers:
     @staticmethod
     def create_failing_manager():
         """Create manager that always fails"""
-        mock_manager = MagicMock()
-        mock_manager.ask_llm = AsyncMock(side_effect=Exception("Service unavailable"))
+        mock_manager = Magic        mock_manager.ask_llm = AsyncMock(side_effect=Exception("Service unavailable"))
         return mock_manager
     
     @staticmethod
@@ -232,8 +251,7 @@ class ReliabilityTestHelpers:
     @staticmethod
     def create_slow_manager():
         """Create manager with slow responses"""
-        mock_manager = MagicMock()
-        mock_manager.ask_llm = AsyncMock(side_effect=ReliabilityTestHelpers._slow_response)
+        mock_manager = Magic        mock_manager.ask_llm = AsyncMock(side_effect=ReliabilityTestHelpers._slow_response)
         return mock_manager
     
     @staticmethod

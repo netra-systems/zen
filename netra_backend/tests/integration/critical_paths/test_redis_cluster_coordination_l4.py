@@ -19,6 +19,7 @@ import asyncio
 import hashlib
 import json
 import random
+from shared.isolated_environment import IsolatedEnvironment
 
 import sys
 import time

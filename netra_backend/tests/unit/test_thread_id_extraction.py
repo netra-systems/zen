@@ -2,6 +2,7 @@
 
 import pytest
 from netra_backend.app.agents.utils import extract_thread_id
+from shared.isolated_environment import IsolatedEnvironment
 
 
 class MockState:

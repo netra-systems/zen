@@ -55,6 +55,7 @@ from pathlib import Path
 from datetime import datetime, timezone, timedelta
 from typing import Dict, Optional, List, Any, Tuple
 from dataclasses import dataclass
+from shared.isolated_environment import IsolatedEnvironment
 
 import pytest
 import jwt
@@ -87,6 +88,7 @@ class DeploymentMetrics:
     errors: List[str] = None
     
     def __post_init__(self):
+    pass
         if self.errors is None:
             self.errors = []
     
@@ -100,6 +102,7 @@ class DeploymentAuthTestSuite:
     """Comprehensive deployment authentication testing framework."""
     
     def __init__(self):
+    pass
         self.metrics: List[DeploymentMetrics] = []
         self.session = self._create_resilient_session()
         self.environments = {
@@ -136,6 +139,7 @@ class DeploymentAuthTestSuite:
     
     def _restore_environment(self):
         """Restore original environment variables."""
+    pass
         for key in list(os.environ.keys()):
             if 'JWT' in key or key == 'ENVIRONMENT':
                 del os.environ[key]
@@ -156,7 +160,8 @@ class DeploymentAuthTestSuite:
         self.metrics.append(metrics)
         
         try:
-            print(f"\n=== PRE-DEPLOYMENT COMPREHENSIVE VALIDATION ({environment}) ===")
+            print(f"
+=== PRE-DEPLOYMENT COMPREHENSIVE VALIDATION ({environment}) ===")
             
             # Backup environment
             self._backup_environment()
@@ -217,7 +222,8 @@ class DeploymentAuthTestSuite:
             metrics.completion_time = time.time()
             
             # Report results
-            print(f"\n=== PRE-DEPLOYMENT VALIDATION RESULTS ===")
+            print(f"
+=== PRE-DEPLOYMENT VALIDATION RESULTS ===")
             print(f"Environment: {environment}")
             print(f"Validations passed: {passed_validations}/{total_validations}")
             print(f"Success rate: {success_rate:.1%}")
@@ -227,10 +233,12 @@ class DeploymentAuthTestSuite:
                 print(f"  {status} {validation_name}")
             
             if metrics.success:
-                print(f"\n✓ PRE-DEPLOYMENT VALIDATION PASSED - Ready for {environment} deployment")
+                print(f"
+✓ PRE-DEPLOYMENT VALIDATION PASSED - Ready for {environment} deployment")
                 self._calculate_deployment_revenue_impact(metrics, "positive")
             else:
-                print(f"\n✗ PRE-DEPLOYMENT VALIDATION FAILED - Fix issues before {environment} deployment")
+                print(f"
+✗ PRE-DEPLOYMENT VALIDATION FAILED - Fix issues before {environment} deployment")
                 self._calculate_deployment_revenue_impact(metrics, "negative")
             
             return metrics.success
@@ -254,7 +262,8 @@ class DeploymentAuthTestSuite:
         self.metrics.append(metrics)
         
         try:
-            print(f"\n=== ZERO-DOWNTIME DEPLOYMENT VALIDATION ({environment}) ===")
+            print(f"
+=== ZERO-DOWNTIME DEPLOYMENT VALIDATION ({environment}) ===")
             
             # Start continuous user journey monitoring
             user_journey_results = []
@@ -273,7 +282,8 @@ class DeploymentAuthTestSuite:
             
             for phase in deployment_phases:
                 phase_start = time.time()
-                print(f"\n[DEPLOYING] Phase: {phase}")
+                print(f"
+[DEPLOYING] Phase: {phase}")
                 
                 # Run user journeys during deployment
                 journey_success = self._run_continuous_user_journeys(environment, duration=10)
@@ -321,7 +331,8 @@ class DeploymentAuthTestSuite:
             metrics.completion_time = time.time()
             
             # Report results
-            print(f"\n=== ZERO-DOWNTIME DEPLOYMENT RESULTS ===")
+            print(f"
+=== ZERO-DOWNTIME DEPLOYMENT RESULTS ===")
             print(f"Environment: {environment}")
             print(f"Total service downtime: {metrics.service_downtime:.2f}s")
             print(f"User journey success rate: {journey_success_rate:.1%}")
@@ -357,7 +368,8 @@ class DeploymentAuthTestSuite:
         self.metrics.append(metrics)
         
         try:
-            print(f"\n=== POST-DEPLOYMENT COMPREHENSIVE VERIFICATION ({environment}) ===")
+            print(f"
+=== POST-DEPLOYMENT COMPREHENSIVE VERIFICATION ({environment}) ===")
             
             verification_results = []
             
@@ -411,7 +423,8 @@ class DeploymentAuthTestSuite:
             metrics.completion_time = time.time()
             
             # Report results
-            print(f"\n=== POST-DEPLOYMENT VERIFICATION RESULTS ===")
+            print(f"
+=== POST-DEPLOYMENT VERIFICATION RESULTS ===")
             print(f"Environment: {environment}")
             print(f"Verifications passed: {passed_verifications}/{total_verifications}")
             print(f"Success rate: {success_rate:.1%}")
@@ -421,10 +434,12 @@ class DeploymentAuthTestSuite:
                 print(f"  {status} {verification_name}")
             
             if metrics.success:
-                print(f"\n✓ POST-DEPLOYMENT VERIFICATION PASSED - {environment} deployment successful")
+                print(f"
+✓ POST-DEPLOYMENT VERIFICATION PASSED - {environment} deployment successful")
                 self._calculate_deployment_revenue_impact(metrics, "positive")
             else:
-                print(f"\n✗ POST-DEPLOYMENT VERIFICATION FAILED - Issues detected in {environment}")
+                print(f"
+✗ POST-DEPLOYMENT VERIFICATION FAILED - Issues detected in {environment}")
                 self._calculate_deployment_revenue_impact(metrics, "negative")
             
             return metrics.success
@@ -446,7 +461,8 @@ class DeploymentAuthTestSuite:
         self.metrics.append(metrics)
         
         try:
-            print(f"\n=== DEPLOYMENT ROLLBACK AUTHENTICATION TEST ({environment}) ===")
+            print(f"
+=== DEPLOYMENT ROLLBACK AUTHENTICATION TEST ({environment}) ===")
             
             # Simulate initial successful deployment
             print("[PHASE 1] Simulating successful deployment...")
@@ -471,7 +487,8 @@ class DeploymentAuthTestSuite:
             rollback_results = []
             
             for scenario in rollback_scenarios:
-                print(f"\n[ROLLBACK SCENARIO] Testing {scenario}")
+                print(f"
+[ROLLBACK SCENARIO] Testing {scenario}")
                 
                 # Simulate rollback process
                 rollback_start = time.time()
@@ -500,7 +517,8 @@ class DeploymentAuthTestSuite:
             metrics.completion_time = time.time()
             
             # Report results
-            print(f"\n=== DEPLOYMENT ROLLBACK TEST RESULTS ===")
+            print(f"
+=== DEPLOYMENT ROLLBACK TEST RESULTS ===")
             print(f"Environment: {environment}")
             print(f"Successful rollback scenarios: {successful_rollbacks}/{total_rollbacks}")
             print(f"Rollback success rate: {rollback_success_rate:.1%}")
@@ -511,10 +529,12 @@ class DeploymentAuthTestSuite:
                 print(f"  {status} {scenario}")
             
             if metrics.success:
-                print(f"\n✓ DEPLOYMENT ROLLBACK AUTHENTICATION PASSED")
+                print(f"
+✓ DEPLOYMENT ROLLBACK AUTHENTICATION PASSED")
                 self._calculate_deployment_revenue_impact(metrics, "neutral")
             else:
-                print(f"\n✗ DEPLOYMENT ROLLBACK AUTHENTICATION FAILED")
+                print(f"
+✗ DEPLOYMENT ROLLBACK AUTHENTICATION FAILED")
                 self._calculate_deployment_revenue_impact(metrics, "negative")
             
             return metrics.success
@@ -529,6 +549,7 @@ class TestPrePostDeploymentJWTVerification:
     """Enhanced pre and post deployment JWT verification tests with comprehensive coverage."""
     
     def __init__(self):
+    pass
         self.deployment_suite = DeploymentAuthTestSuite()
     
     @pytest.fixture(autouse=True)
@@ -543,6 +564,7 @@ class TestPrePostDeploymentJWTVerification:
     
     def _validate_deployment_configuration(self, environment: str) -> bool:
         """Validate deployment configuration files."""
+    pass
         try:
             # Check for required configuration files
             config_files = [
@@ -737,6 +759,7 @@ class TestPrePostDeploymentJWTVerification:
     
     def _run_continuous_user_journeys(self, environment: str, duration: int) -> bool:
         """Run continuous user journeys during deployment."""
+    pass
         try:
             end_time = time.time() + duration
             success_count = 0
@@ -901,7 +924,8 @@ class TestPrePostDeploymentJWTVerification:
         
         overall_success = all(jwt_consistency_results.values())
         
-        print(f"\n=== MULTI-ENVIRONMENT JWT CONSISTENCY RESULTS ===")
+        print(f"
+=== MULTI-ENVIRONMENT JWT CONSISTENCY RESULTS ===")
         for env, success in jwt_consistency_results.items():
             status = "[PASS]" if success else "[FAIL]"
             print(f"  {status} {env.upper()}: JWT isolation and validation")
@@ -1185,34 +1209,40 @@ def run_comprehensive_deployment_tests():
     overall_results = []
     
     for environment in environments_to_test:
-        print(f"\n{'='*20} TESTING ENVIRONMENT: {environment.upper()} {'='*20}")
+        print(f"
+{'='*20} TESTING ENVIRONMENT: {environment.upper()} {'='*20}")
         
         env_results = {}
         
         # Pre-deployment validation
-        print(f"\n[PHASE 1] PRE-DEPLOYMENT VALIDATION - {environment}")
+        print(f"
+[PHASE 1] PRE-DEPLOYMENT VALIDATION - {environment}")
         pre_deploy_success = suite.test_pre_deployment_comprehensive_validation(environment)
         env_results["pre_deployment"] = pre_deploy_success
         
         # Zero-downtime deployment validation  
-        print(f"\n[PHASE 2] ZERO-DOWNTIME DEPLOYMENT - {environment}")
+        print(f"
+[PHASE 2] ZERO-DOWNTIME DEPLOYMENT - {environment}")
         deployment_success = suite.test_deployment_zero_downtime_validation(environment)
         env_results["deployment"] = deployment_success
         
         # Post-deployment verification
-        print(f"\n[PHASE 3] POST-DEPLOYMENT VERIFICATION - {environment}")
+        print(f"
+[PHASE 3] POST-DEPLOYMENT VERIFICATION - {environment}")
         post_deploy_success = suite.test_post_deployment_comprehensive_verification(environment)
         env_results["post_deployment"] = post_deploy_success
         
         # Rollback testing
-        print(f"\n[PHASE 4] ROLLBACK AUTHENTICATION TESTING - {environment}")
+        print(f"
+[PHASE 4] ROLLBACK AUTHENTICATION TESTING - {environment}")
         rollback_success = suite.test_deployment_rollback_authentication(environment)
         env_results["rollback"] = rollback_success
         
         overall_results.append((environment, env_results))
     
     # Generate comprehensive report
-    print("\n" + "=" * 90)
+    print("
+" + "=" * 90)
     print("COMPREHENSIVE DEPLOYMENT TEST RESULTS SUMMARY")
     print("=" * 90)
     
@@ -1220,7 +1250,8 @@ def run_comprehensive_deployment_tests():
     passed_tests = 0
     
     for environment, results in overall_results:
-        print(f"\nEnvironment: {environment.upper()}")
+        print(f"
+Environment: {environment.upper()}")
         env_passed = 0
         env_total = 0
         
@@ -1239,7 +1270,8 @@ def run_comprehensive_deployment_tests():
     
     # Overall metrics
     overall_success_rate = passed_tests / total_tests if total_tests > 0 else 0
-    print(f"\nOVERALL RESULTS:")
+    print(f"
+OVERALL RESULTS:")
     print(f"  Tests Passed: {passed_tests}/{total_tests}")
     print(f"  Success Rate: {overall_success_rate:.1%}")
     
@@ -1249,18 +1281,21 @@ def run_comprehensive_deployment_tests():
         avg_deployment_duration = statistics.mean([m.duration for m in suite.metrics])
         total_user_journeys = sum(m.user_journeys_completed for m in suite.metrics)
         
-        print(f"\nBUSINESS IMPACT METRICS:")
+        print(f"
+BUSINESS IMPACT METRICS:")
         print(f"  Total Revenue Impact: ${total_revenue_impact:.2f}")
         print(f"  Average Deployment Duration: {avg_deployment_duration:.2f}s")
         print(f"  User Journeys Completed: {total_user_journeys}")
     
     if overall_success_rate >= 0.8:
-        print(f"\n✓ COMPREHENSIVE DEPLOYMENT TEST SUITE: SUCCESS")
+        print(f"
+✓ COMPREHENSIVE DEPLOYMENT TEST SUITE: SUCCESS")
         print("  All critical deployment phases validated successfully")
         print("  Ready for production deployment")
         return True
     else:
-        print(f"\n✗ COMPREHENSIVE DEPLOYMENT TEST SUITE: ISSUES DETECTED") 
+        print(f"
+✗ COMPREHENSIVE DEPLOYMENT TEST SUITE: ISSUES DETECTED") 
         print("  Critical deployment issues found - address before proceeding")
         print("  Review failed tests and fix issues")
         return False
@@ -1268,3 +1303,5 @@ def run_comprehensive_deployment_tests():
 if __name__ == "__main__":
     success = run_comprehensive_deployment_tests()
     sys.exit(0 if success else 1)
+
+    pass

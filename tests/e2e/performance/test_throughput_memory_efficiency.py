@@ -15,6 +15,7 @@ import gc
 import logging
 import time
 from typing import Any, Dict
+from shared.isolated_environment import IsolatedEnvironment
 
 import pytest
 

@@ -1,4 +1,11 @@
 from shared.isolated_environment import get_env
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from test_framework.database.test_database_manager import TestDatabaseManager
+from test_framework.redis.test_redis_manager import TestRedisManager
+from auth_service.core.auth_manager import AuthManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 """
 env = get_env()
 Critical Staging Root Cause Validation Tests
@@ -17,7 +24,6 @@ import pytest
 import os
 import re
 import sys
-from unittest.mock import Mock, patch, AsyncMock, MagicMock
 from pathlib import Path
 import asyncpg
 
@@ -225,7 +231,6 @@ class TestClickHouseLocalhostConnection:
 class TestRedisConfigurationDefault:
     """Test suite reproducing Redis configuration errors."""
     
-    @patch.dict('os.environ', {'ENVIRONMENT': 'staging', 'TESTING': '0'})
     def test_hardcoded_localhost_overrides_staging_environment(self):
         """
         FAILING TEST: Reproduces Redis connecting to localhost in staging.

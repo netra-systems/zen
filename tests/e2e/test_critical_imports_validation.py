@@ -31,6 +31,7 @@ import time
 import traceback
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
+from shared.isolated_environment import IsolatedEnvironment
 
 import pytest
 
@@ -39,6 +40,7 @@ class CriticalImportsValidator:
     """Validates that all critical service imports work correctly"""
     
     def __init__(self):
+    pass
         self.project_root = Path(__file__).parent.parent.parent
         self.failed_imports: Dict[str, Dict[str, Any]] = {}
         self.start_time = 0.0
@@ -159,14 +161,19 @@ class CriticalImportsValidator:
             return True, None, None
             
         except ImportError as e:
-            return False, "ImportError", f"{str(e)}\nTraceback:\n{traceback.format_exc()}"
+            return False, "ImportError", f"{str(e)}
+Traceback:
+{traceback.format_exc()}"
         except SyntaxError as e:
-            return False, "SyntaxError", f"Line {e.lineno}: {e.msg}\nFile: {e.filename}"
+            return False, "SyntaxError", f"Line {e.lineno}: {e.msg}
+File: {e.filename}"
         except ModuleNotFoundError as e:
             return False, "ModuleNotFoundError", str(e)
         except Exception as e:
             error_type = type(e).__name__
-            return False, error_type, f"{str(e)}\nTraceback:\n{traceback.format_exc()}"
+            return False, error_type, f"{str(e)}
+Traceback:
+{traceback.format_exc()}"
 
     def validate_critical_imports(self) -> Dict[str, Any]:
         """Validate all critical imports work correctly"""
@@ -243,6 +250,7 @@ class TestCriticalImportsValidation:
     @pytest.fixture(scope="class")
     def validation_results(self, validator):
         """Run critical imports validation"""
+    pass
         return validator.validate_critical_imports()
 
     @pytest.mark.e2e
@@ -254,35 +262,51 @@ class TestCriticalImportsValidation:
             missing_deps = dependency_validation["missing_dependencies"]
             error_details = dependency_validation["dependency_errors"]
             
-            failure_msg = f"Missing required dependencies: {missing_deps}\n"
-            failure_msg += "Install missing packages:\n"
+            failure_msg = f"Missing required dependencies: {missing_deps}
+"
+            failure_msg += "Install missing packages:
+"
             
             for dep in missing_deps:
                 error_info = error_details.get(dep, {})
-                failure_msg += f"  pip install {dep}  # Error: {error_info.get('error', 'Unknown')}\n"
+                failure_msg += f"  pip install {dep}  # Error: {error_info.get('error', 'Unknown')}
+"
             
             pytest.fail(failure_msg)
 
     @pytest.mark.e2e
     def test_all_critical_modules_importable(self, validation_results):
         """Test that ALL critical modules can be imported without errors"""
+    pass
         failed_imports = validation_results["failed_imports"]
         success_rate = validation_results["success_rate"]
         
         if failed_imports > 0:
-            failure_report = f"\nCRITICAL IMPORT FAILURES: {failed_imports} modules failed to import\n"
-            failure_report += f"Success Rate: {success_rate:.1f}%\n"
-            failure_report += "=" * 80 + "\n"
+            failure_report = f"
+CRITICAL IMPORT FAILURES: {failed_imports} modules failed to import
+"
+            failure_report += f"Success Rate: {success_rate:.1f}%
+"
+            failure_report += "=" * 80 + "
+"
             
             # Report each failure with detailed information
             for module_name, error_info in validation_results["failed_import_details"].items():
-                failure_report += f"\n❌ {module_name}\n"
-                failure_report += f"   Error Type: {error_info['error_type']}\n"
-                failure_report += f"   Error: {error_info['error_message']}\n"
-                failure_report += "-" * 60 + "\n"
+                failure_report += f"
+❌ {module_name}
+"
+                failure_report += f"   Error Type: {error_info['error_type']}
+"
+                failure_report += f"   Error: {error_info['error_message']}
+"
+                failure_report += "-" * 60 + "
+"
             
-            failure_report += "\n🔥 CRITICAL: These import failures will cause cascading test failures!\n"
-            failure_report += "Fix these imports before running any other tests.\n"
+            failure_report += "
+🔥 CRITICAL: These import failures will cause cascading test failures!
+"
+            failure_report += "Fix these imports before running any other tests.
+"
             
             pytest.fail(failure_report)
 
@@ -292,16 +316,20 @@ class TestCriticalImportsValidation:
         circular_issues = validator.detect_circular_imports()
         
         if circular_issues:
-            failure_msg = "Circular import dependencies detected in critical modules:\n"
+            failure_msg = "Circular import dependencies detected in critical modules:
+"
             for issue in circular_issues:
-                failure_msg += f"  - {issue}\n"
-            failure_msg += "\nCircular imports must be resolved to prevent runtime failures."
+                failure_msg += f"  - {issue}
+"
+            failure_msg += "
+Circular imports must be resolved to prevent runtime failures."
             
             pytest.fail(failure_msg)
 
     @pytest.mark.e2e
     def test_performance_requirement(self, validation_results):
         """Test that critical imports validation completes within 10 seconds"""
+    pass
         elapsed_time = validation_results["elapsed_time_seconds"]
         max_time = 10.0
         
@@ -329,6 +357,7 @@ class TestCriticalImportsValidation:
     @pytest.mark.e2e
     def test_critical_services_coverage(self, validation_results, validator):
         """Test that all essential service categories are covered"""
+    pass
         successful_modules = validation_results["successful_modules"]
         
         # Verify we have successful imports from each critical category
@@ -347,14 +376,17 @@ class TestCriticalImportsValidation:
         
         if missing_categories:
             pytest.fail(
-                f"Missing critical service categories:\n" + 
-                "\n".join(f"  - {cat}" for cat in missing_categories)
+                f"Missing critical service categories:
+" + 
+                "
+".join(f"  - {cat}" for cat in missing_categories)
             )
 
     @pytest.mark.e2e
     def test_validation_summary_report(self, validation_results):
         """Generate comprehensive validation summary report"""
-        print("\n" + "=" * 26 + " CRITICAL IMPORTS VALIDATION " + "=" * 26)
+        print("
+" + "=" * 26 + " CRITICAL IMPORTS VALIDATION " + "=" * 26)
         print(f"Total Critical Modules: {validation_results['total_critical_modules']}")
         print(f"Successful Imports: {validation_results['successful_imports']}")
         print(f"Failed Imports: {validation_results['failed_imports']}")
@@ -369,9 +401,11 @@ class TestCriticalImportsValidation:
             print(f"Missing {missing_count} required dependencies")
         
         if validation_results["failed_imports"] == 0:
-            print("\nALL CRITICAL IMPORTS SUCCESSFUL - Test infrastructure ready!")
+            print("
+ALL CRITICAL IMPORTS SUCCESSFUL - Test infrastructure ready!")
         else:
-            print(f"\n{validation_results['failed_imports']} CRITICAL IMPORT FAILURES - Fix before running tests!")
+            print(f"
+{validation_results['failed_imports']} CRITICAL IMPORT FAILURES - Fix before running tests!")
         
         print("=" * 80)
         
@@ -382,10 +416,12 @@ class TestCriticalImportsValidation:
 # Standalone function for direct execution
 def run_critical_imports_validation():
     """Run critical imports validation directly"""
+    pass
     validator = CriticalImportsValidator()
     results = validator.validate_critical_imports()
     
-    print("\n" + "="*80)
+    print("
+" + "="*80)
     print("CRITICAL IMPORTS VALIDATION RESULTS")
     print("="*80)
     
@@ -395,7 +431,8 @@ def run_critical_imports_validation():
         return True
     else:
         print(f"FAILURE: {results['failed_imports']}/{results['total_critical_modules']} critical imports failed")
-        print("\nFailed modules:")
+        print("
+Failed modules:")
         for module, error in results["failed_import_details"].items():
             print(f"  - {module}: {error['error_type']}")
         return False

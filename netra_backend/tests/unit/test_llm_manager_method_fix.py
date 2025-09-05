@@ -6,7 +6,7 @@ as an alias for get_config, fixing the health check warning.
 
 import pytest
 import asyncio
-from unittest.mock import AsyncMock, MagicMock, patch
+from shared.isolated_environment import IsolatedEnvironment
 
 from netra_backend.app.llm.llm_manager import LLMManager
 
@@ -35,7 +35,7 @@ class TestLLMManagerMethodFix:
         manager = LLMManager()
         
         # Mock the config
-        mock_config = MagicMock()
+        mock_config = MagicNone  # TODO: Use real service instance
         mock_config.llm_configs = {
             "default": {"model": "test-model", "provider": "test"},
             "custom": {"model": "custom-model", "provider": "custom"}
@@ -67,7 +67,7 @@ class TestLLMManagerMethodFix:
         manager = LLMManager()
         
         # Mock the config
-        mock_config = MagicMock()
+        mock_config = MagicNone  # TODO: Use real service instance
         mock_config.llm_configs = {
             "default": {"model": "default-model", "provider": "default"}
         }
@@ -84,7 +84,7 @@ class TestLLMManagerMethodFix:
         from netra_backend.app.startup_health_checks import StartupHealthChecker, ServiceStatus
         
         # Create a mock app with LLM manager
-        mock_app = MagicMock()
+        mock_app = MagicNone  # TODO: Use real service instance
         mock_app.state.llm_manager = LLMManager()
         mock_app.state.llm_manager._initialized = True
         mock_app.state.llm_manager.llm_configs = {"default": {}}

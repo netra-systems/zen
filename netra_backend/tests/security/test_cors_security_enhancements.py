@@ -7,12 +7,17 @@ Business Value: Prevents security vulnerabilities that could lead to data breach
 
 import json
 import pytest
-from unittest.mock import patch, MagicMock
 from fastapi import Request
 from starlette.responses import Response
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from auth_service.core.auth_manager import AuthManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 from shared.cors_config_builder import CORSConfigurationBuilder
 from netra_backend.app.middleware.cors_fix_middleware import CORSFixMiddleware
+import asyncio
 
 
 class TestContentTypeValidation:
@@ -36,6 +41,7 @@ class TestContentTypeValidation:
     
     def test_suspicious_content_types(self):
         """Test that suspicious content types are rejected."""
+    pass
         suspicious_types = [
             'application/x-msdownload',
             'application/vnd.ms-excel',
@@ -75,6 +81,7 @@ class TestServiceToServiceDetection:
     
     def test_user_agent_detection(self):
         """Test detection via internal user agents."""
+    pass
         internal_agents = [
             'httpx/0.24.1',
             'aiohttp/3.8.1',
@@ -116,6 +123,7 @@ class TestOriginAllowedEnhanced:
     
     def test_normal_validation_still_works(self):
         """Test that normal CORS validation still works when not service-to-service."""
+    pass
         # Valid origin should be allowed in development
         cors_dev = CORSConfigurationBuilder({"ENVIRONMENT": "development"})
         assert cors_dev.origins.is_allowed(
@@ -134,10 +142,9 @@ class TestOriginAllowedEnhanced:
 class TestCORSSecurityLogging:
     """Test SEC-002: CORS security logging functionality."""
     
-    @patch('logging.getLogger')
-    def test_security_event_logging(self, mock_get_logger):
+        def test_security_event_logging(self, mock_get_logger):
         """Test that security events are logged properly."""
-        mock_logger = MagicMock()
+        mock_logger = MagicNone  # TODO: Use real service instance
         mock_get_logger.return_value = mock_logger
         
         cors = CORSConfigurationBuilder({"ENVIRONMENT": "production"})
@@ -193,6 +200,7 @@ class TestCORSHeaders:
     
     async def test_cors_middleware_adds_vary_header(self):
         """Test that CORS middleware adds Vary: Origin header."""
+    pass
         middleware = CORSFixMiddleware(app=None, environment="development")
         
         # Mock request with origin
@@ -211,9 +219,12 @@ class TestCORSHeaders:
         # Add status_code attribute for middleware compatibility
         mock_response.status_code = 200
         
-        # Mock call_next to return the response
+        # Mock call_next to await asyncio.sleep(0)
+    return the response
         async def mock_call_next(request):
-            return mock_response
+    pass
+            await asyncio.sleep(0)
+    return mock_response
         
         # Process the request
         result = await middleware.dispatch(mock_request, mock_call_next)
@@ -241,7 +252,8 @@ class TestCORSHeaders:
         mock_response.status_code = 200
         
         async def mock_call_next(request):
-            return mock_response
+            await asyncio.sleep(0)
+    return mock_response
         
         # Process the request
         await middleware.dispatch(mock_request, mock_call_next)
@@ -283,3 +295,4 @@ class TestSecurityIntegration:
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])
+    pass

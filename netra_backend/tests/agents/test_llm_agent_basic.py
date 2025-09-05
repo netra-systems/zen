@@ -5,13 +5,16 @@ Core functionality tests with ≤8 line functions for architectural compliance
 
 import sys
 from pathlib import Path
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 # Test framework import - using pytest fixtures instead
 
 import asyncio
 import json
 import uuid
-from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 

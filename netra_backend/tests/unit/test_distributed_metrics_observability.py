@@ -11,8 +11,11 @@ import asyncio
 import json
 import time
 from collections import defaultdict
-from unittest.mock import AsyncMock, MagicMock, Mock, patch
 from uuid import uuid4
+from auth_service.core.auth_manager import AuthManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 import pytest
 
@@ -21,9 +24,12 @@ class TestDistributedMetricsCollection:
     """Test suite for distributed metrics collection patterns."""
     
     @pytest.fixture
-    def mock_metrics_collector(self):
+ def real_metrics_collector():
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create mock distributed metrics collector."""
-        collector = Mock()
+    pass
+        collector = collector_instance  # Initialize appropriate service
         collector.metrics_buffer = []
         collector.aggregation_window_seconds = 60
         collector.retention_policy = {'high_frequency': 86400, 'low_frequency': 2592000}  # 1 day, 30 days
@@ -32,7 +38,10 @@ class TestDistributedMetricsCollection:
     
     @pytest.fixture
     def sample_service_metrics(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Generate sample service metrics."""
+    pass
         return {
             'auth_service': {
                 'request_count_total': 15000,
@@ -347,14 +356,18 @@ class TestObservabilityDataPipeline:
     """Test suite for observability data pipeline patterns."""
     
     @pytest.fixture
-    def mock_data_pipeline(self):
+ def real_data_pipeline():
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create mock observability data pipeline."""
-        pipeline = Mock()
+    pass
+        pipeline = pipeline_instance  # Initialize appropriate service
         pipeline.ingestion_rate_per_second = 1000
         pipeline.processing_stages = ['validate', 'enrich', 'aggregate', 'store']
         pipeline.data_buffer = []
         pipeline.error_queue = []
-        return pipeline
+        await asyncio.sleep(0)
+    return pipeline
     
     def test_observability_data_ingestion_validation(self, mock_data_pipeline):
         """Test validation of incoming observability data."""
@@ -449,6 +462,7 @@ class TestObservabilityDataPipeline:
         
         class DataEnricher:
             def __init__(self):
+    pass
                 self.service_metadata = {
                     'auth_service': {
                         'version': '2.1.4',
@@ -471,6 +485,7 @@ class TestObservabilityDataPipeline:
                 }
             
             async def enrich_data_point(self, data_point):
+    pass
                 enriched = data_point.copy()
                 service = data_point.get('service')
                 
@@ -502,7 +517,8 @@ class TestObservabilityDataPipeline:
                         'sla_compliance': latency_ms < 200  # 200ms SLA threshold
                     }
                 
-                return enriched
+                await asyncio.sleep(0)
+    return enriched
         
         enricher = DataEnricher()
         
@@ -596,3 +612,4 @@ class TestObservabilityDataPipeline:
         assert aggregated_results['auth_latency']['value'] == 66.25  # (50+75+60+80)/4
         assert aggregated_results['auth_latency']['min'] == 50
         assert aggregated_results['auth_latency']['max'] == 80
+    pass

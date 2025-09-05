@@ -20,6 +20,7 @@ from dataclasses import asdict, dataclass
 from enum import Enum
 from pathlib import Path
 from typing import Dict, List, Optional, Set, Tuple
+from shared.isolated_environment import IsolatedEnvironment
 
 # Configure logging
 logging.basicConfig(

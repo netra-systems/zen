@@ -3,7 +3,7 @@ Simple test script to verify AgentWebSocketBridge updates
 """
 import asyncio
 import sys
-from unittest.mock import AsyncMock, Mock, patch
+from shared.isolated_environment import IsolatedEnvironment
 
 # Add path for imports
 sys.path.insert(0, 'netra_backend')

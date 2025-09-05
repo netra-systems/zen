@@ -8,11 +8,12 @@ import asyncio
 import pytest
 import random
 import time
-from unittest.mock import AsyncMock, MagicMock, patch, call
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import IllegalStateChangeError, OperationalError
 from contextlib import asynccontextmanager
 from typing import List, Dict, Any
+from test_framework.database.test_database_manager import TestDatabaseManager
+from shared.isolated_environment import IsolatedEnvironment
 
 from netra_backend.app.db.database_manager import DatabaseManager
 
@@ -71,7 +72,7 @@ class TestConcurrentEdgeCases:
                 mock_session = AsyncMock(spec=AsyncSession)
                 mock_session.id = len(active_sessions)
                 mock_session.in_transaction = MagicMock(return_value=True)
-                mock_session.rollback = AsyncMock()
+                mock_session.rollback = AsyncNone  # TODO: Use real service instance
                 active_sessions.append(mock_session)
                 try:
                     yield mock_session
@@ -166,7 +167,7 @@ class TestConcurrentEdgeCases:
                 async def log_execute(query):
                     operation_log.append(("execute", session_id, query))
                     await asyncio.sleep(random.uniform(0.001, 0.005))  # Variable delay
-                    return MagicMock()
+                    return MagicNone  # TODO: Use real service instance
                 
                 async def log_commit():
                     operation_log.append(("commit", session_id))
@@ -226,11 +227,11 @@ class TestConcurrentEdgeCases:
                     if "long" in query:
                         # Simulate timeout
                         raise asyncio.TimeoutError("Query timeout")
-                    return MagicMock()
+                    return MagicNone  # TODO: Use real service instance
                 
                 mock_session.execute = execute_with_timeout
                 mock_session.in_transaction = MagicMock(return_value=True)
-                mock_session.rollback = AsyncMock()
+                mock_session.rollback = AsyncNone  # TODO: Use real service instance
                 
                 yield mock_session
             
@@ -264,7 +265,7 @@ class TestConcurrentEdgeCases:
                 
                 async def begin_nested():
                     transaction_stack.append((session_id, "active"))
-                    return AsyncMock()
+                    return AsyncNone  # TODO: Use real service instance
                 
                 async def commit():
                     if transaction_stack:
@@ -348,7 +349,7 @@ class TestConcurrentEdgeCases:
                         # First few operations fail
                         raise OperationalError("Database unavailable", None, None)
                     # Then recover
-                    return MagicMock()
+                    return MagicNone  # TODO: Use real service instance
                 
                 mock_session.execute = cascade_failure
                 mock_session.commit = cascade_failure
@@ -387,7 +388,7 @@ class TestMemoryAndResourceManagement:
                 mock_session = AsyncMock(spec=AsyncSession)
                 mock_session.id = len(session_refs)
                 mock_session.in_transaction = MagicMock(return_value=True)
-                mock_session.rollback = AsyncMock()
+                mock_session.rollback = AsyncNone  # TODO: Use real service instance
                 
                 # Track session creation
                 session_refs.append(mock_session)

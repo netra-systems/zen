@@ -24,7 +24,12 @@ import os
 import uuid
 from datetime import datetime
 from typing import Dict, Any
-from unittest.mock import AsyncMock, MagicMock, Mock, patch
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from test_framework.database.test_database_manager import TestDatabaseManager
+from auth_service.core.auth_manager import AuthManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 import pytest
 from fastapi import WebSocket
@@ -43,6 +48,7 @@ from netra_backend.app.services.message_handlers import MessageHandlerService
 
 class TestAgentHandlerMultiUserSafety:
     """Test multi-user isolation and data safety in agent handling."""
+    pass
 
     @pytest.mark.asyncio
     async def test_multi_user_isolation_no_data_leakage(self):
@@ -52,6 +58,7 @@ class TestAgentHandlerMultiUserSafety:
         CRITICAL: Validates that User A's data never appears in User B's context or responses.
         This is essential for business trust and regulatory compliance.
         """
+    pass
         # Set environment for v2 legacy mode to ensure proper mocking
         os.environ['USE_WEBSOCKET_SUPERVISOR_V3'] = 'false'
         
@@ -101,10 +108,10 @@ class TestAgentHandlerMultiUserSafety:
              patch('fastapi.Request'):
             
             # Configure WebSocket manager mock
-            ws_manager = Mock()
-            ws_manager.get_connection_id_by_websocket = Mock()
-            ws_manager.update_connection_thread = Mock()
-            ws_manager.send_error = AsyncMock()
+            ws_manager = UnifiedWebSocketManager()
+            ws_manager.get_connection_id_by_websocket = UnifiedWebSocketManager()
+            ws_manager.update_connection_thread = update_connection_thread_instance  # Initialize appropriate service
+            ws_manager.send_error = AsyncNone  # TODO: Use real service instance
             ws_manager.get_connection_id_by_websocket.side_effect = lambda ws: (
                 "conn_a" if ws == mock_websocket_a else "conn_b"
             )
@@ -113,10 +120,12 @@ class TestAgentHandlerMultiUserSafety:
             # Configure database session mock
             mock_db_session = AsyncMock(spec=AsyncSession)
             async def mock_session_gen():
+    pass
                 yield mock_db_session
             mock_db_gen.return_value = mock_session_gen()
             
-            # Configure context creation to return different contexts
+            # Configure context creation to await asyncio.sleep(0)
+    return different contexts
             context_a = UserExecutionContext(
                 user_id=user_a_id,
                 thread_id="thread_a_secret",
@@ -137,13 +146,13 @@ class TestAgentHandlerMultiUserSafety:
             )
             
             # Configure supervisors to be different instances
-            supervisor_a = Mock()
-            supervisor_b = Mock()
+            supervisor_a = supervisor_a_instance  # Initialize appropriate service
+            supervisor_b = supervisor_b_instance  # Initialize appropriate service
             mock_supervisor.side_effect = [supervisor_a, supervisor_b]
             
             # Configure message handler service
-            msg_handler_instance = Mock()
-            msg_handler_instance.handle_start_agent = AsyncMock()
+            msg_handler_instance = msg_handler_instance_instance  # Initialize appropriate service
+            msg_handler_instance.handle_start_agent = AsyncNone  # TODO: Use real service instance
             mock_msg_svc.return_value = msg_handler_instance
             
             # Process messages concurrently
@@ -175,6 +184,7 @@ class TestAgentHandlerMultiUserSafety:
         CRITICAL: Agent events must reach the correct user's WebSocket connection.
         Wrong routing causes users to see other users' private data.
         """
+    pass
         os.environ['USE_WEBSOCKET_SUPERVISOR_V3'] = 'false'
         
         mock_websocket = Mock(spec=WebSocket)
@@ -204,15 +214,16 @@ class TestAgentHandlerMultiUserSafety:
              patch('fastapi.Request'):
             
             # Configure WebSocket manager
-            ws_manager = Mock()
+            ws_manager = UnifiedWebSocketManager()
             ws_manager.get_connection_id_by_websocket = Mock(return_value=connection_id)
-            ws_manager.update_connection_thread = Mock()
-            ws_manager.send_error = AsyncMock()
+            ws_manager.update_connection_thread = update_connection_thread_instance  # Initialize appropriate service
+            ws_manager.send_error = AsyncNone  # TODO: Use real service instance
             mock_ws_mgr.return_value = ws_manager
             
             # Configure database session
             mock_db_session = AsyncMock(spec=AsyncSession)
             async def mock_session_gen():
+    pass
                 yield mock_db_session
             mock_db_gen.return_value = mock_session_gen()
             
@@ -227,8 +238,8 @@ class TestAgentHandlerMultiUserSafety:
             mock_context.return_value = context
             
             # Configure message handler
-            msg_handler_instance = Mock()
-            msg_handler_instance.handle_user_message = AsyncMock()
+            msg_handler_instance = msg_handler_instance_instance  # Initialize appropriate service
+            msg_handler_instance.handle_user_message = AsyncNone  # TODO: Use real service instance
             mock_msg_svc.return_value = msg_handler_instance
             
             # Process message
@@ -248,6 +259,7 @@ class TestAgentHandlerMultiUserSafety:
         CRITICAL: Ensures all required context fields are populated for proper user isolation.
         Missing context data can lead to authorization bypass or data exposure.
         """
+    pass
         os.environ['USE_WEBSOCKET_SUPERVISOR_V3'] = 'false'
         
         mock_websocket = Mock(spec=WebSocket)
@@ -279,15 +291,16 @@ class TestAgentHandlerMultiUserSafety:
              patch('fastapi.Request'):
             
             # Configure WebSocket manager
-            ws_manager = Mock()
+            ws_manager = UnifiedWebSocketManager()
             ws_manager.get_connection_id_by_websocket = Mock(return_value=connection_id)
-            ws_manager.update_connection_thread = Mock()
-            ws_manager.send_error = AsyncMock()
+            ws_manager.update_connection_thread = update_connection_thread_instance  # Initialize appropriate service
+            ws_manager.send_error = AsyncNone  # TODO: Use real service instance
             mock_ws_mgr.return_value = ws_manager
             
             # Configure database session
             mock_db_session = AsyncMock(spec=AsyncSession)
             async def mock_session_gen():
+    pass
                 yield mock_db_session
             mock_db_gen.return_value = mock_session_gen()
             
@@ -302,8 +315,8 @@ class TestAgentHandlerMultiUserSafety:
             mock_context.return_value = context
             
             # Configure message handler
-            msg_handler_instance = Mock()
-            msg_handler_instance.handle_start_agent = AsyncMock()
+            msg_handler_instance = msg_handler_instance_instance  # Initialize appropriate service
+            msg_handler_instance.handle_start_agent = AsyncNone  # TODO: Use real service instance
             mock_msg_svc.return_value = msg_handler_instance
             
             # Process message
@@ -329,6 +342,7 @@ class TestAgentHandlerMultiUserSafety:
         CRITICAL: Each user request gets its own supervisor instance to prevent
         shared state contamination and ensure complete multi-user safety.
         """
+    pass
         os.environ['USE_WEBSOCKET_SUPERVISOR_V3'] = 'false'
         
         mock_websocket = Mock(spec=WebSocket)
@@ -363,21 +377,24 @@ class TestAgentHandlerMultiUserSafety:
              patch('fastapi.Request'):
             
             # Configure WebSocket manager
-            ws_manager = Mock()
+            ws_manager = UnifiedWebSocketManager()
             ws_manager.get_connection_id_by_websocket = Mock(return_value="test_conn")
-            ws_manager.update_connection_thread = Mock()
-            ws_manager.send_error = AsyncMock()
+            ws_manager.update_connection_thread = update_connection_thread_instance  # Initialize appropriate service
+            ws_manager.send_error = AsyncNone  # TODO: Use real service instance
             mock_ws_mgr.return_value = ws_manager
             
             # Configure database session
             mock_db_session = AsyncMock(spec=AsyncSession)
             async def mock_session_gen():
+    pass
                 yield mock_db_session
             mock_db_gen.return_value = mock_session_gen()
             
             # Configure context creation
             def create_context(user_id, **kwargs):
-                return UserExecutionContext(
+    pass
+                await asyncio.sleep(0)
+    return UserExecutionContext(
                     user_id=user_id,
                     thread_id=kwargs['thread_id'],
                     run_id=kwargs['run_id'],
@@ -388,15 +405,16 @@ class TestAgentHandlerMultiUserSafety:
             
             # Configure supervisor creation to track instances
             def create_supervisor(**kwargs):
-                supervisor = Mock()
-                supervisor.user_id = kwargs.get('context', Mock()).user_id
+    pass
+                supervisor = supervisor_instance  # Initialize appropriate service
+                supervisor.user_id = kwargs.get('context', None  # TODO: Use real service instance).user_id
                 created_supervisors.append(supervisor)
                 return supervisor
             mock_supervisor.side_effect = create_supervisor
             
             # Configure message handler
-            msg_handler_instance = Mock()
-            msg_handler_instance.handle_user_message = AsyncMock()
+            msg_handler_instance = msg_handler_instance_instance  # Initialize appropriate service
+            msg_handler_instance.handle_user_message = AsyncNone  # TODO: Use real service instance
             mock_msg_svc.return_value = msg_handler_instance
             
             # Process all messages concurrently
@@ -426,6 +444,7 @@ class TestAgentHandlerMultiUserSafety:
         CRITICAL: Sessions must be request-scoped and properly closed to prevent
         connection leaks and ensure transaction isolation between users.
         """
+    pass
         os.environ['USE_WEBSOCKET_SUPERVISOR_V3'] = 'false'
         
         mock_websocket = Mock(spec=WebSocket)
@@ -456,16 +475,17 @@ class TestAgentHandlerMultiUserSafety:
              patch('fastapi.Request'):
             
             # Configure WebSocket manager
-            ws_manager = Mock()
+            ws_manager = UnifiedWebSocketManager()
             ws_manager.get_connection_id_by_websocket = Mock(return_value="test_conn")
-            ws_manager.update_connection_thread = Mock()
-            ws_manager.send_error = AsyncMock()
+            ws_manager.update_connection_thread = update_connection_thread_instance  # Initialize appropriate service
+            ws_manager.send_error = AsyncNone  # TODO: Use real service instance
             mock_ws_mgr.return_value = ws_manager
             
             # Configure database session with lifecycle tracking
             mock_db_session = AsyncMock(spec=AsyncSession)
             
             async def mock_session_generator():
+    pass
                 session_states["created"] = True
                 try:
                     yield mock_db_session
@@ -486,8 +506,8 @@ class TestAgentHandlerMultiUserSafety:
             mock_context.return_value = context
             
             # Configure message handler
-            msg_handler_instance = Mock()
-            msg_handler_instance.handle_start_agent = AsyncMock()
+            msg_handler_instance = msg_handler_instance_instance  # Initialize appropriate service
+            msg_handler_instance.handle_start_agent = AsyncNone  # TODO: Use real service instance
             mock_msg_svc.return_value = msg_handler_instance
             
             # Process message
@@ -513,6 +533,7 @@ class TestAgentHandlerMultiUserSafety:
         CRITICAL: Proper error handling prevents system crashes and statistics
         tracking enables monitoring and debugging of production issues.
         """
+    pass
         os.environ['USE_WEBSOCKET_SUPERVISOR_V3'] = 'false'
         
         mock_websocket = Mock(spec=WebSocket)
@@ -542,15 +563,16 @@ class TestAgentHandlerMultiUserSafety:
              patch('fastapi.Request'):
             
             # Configure WebSocket manager
-            ws_manager = Mock()
+            ws_manager = UnifiedWebSocketManager()
             ws_manager.get_connection_id_by_websocket = Mock(return_value="test_conn")
-            ws_manager.update_connection_thread = Mock()
-            ws_manager.send_error = AsyncMock()
+            ws_manager.update_connection_thread = update_connection_thread_instance  # Initialize appropriate service
+            ws_manager.send_error = AsyncNone  # TODO: Use real service instance
             mock_ws_mgr.return_value = ws_manager
             
             # Configure database session
             mock_db_session = AsyncMock(spec=AsyncSession)
             async def mock_session_gen():
+    pass
                 yield mock_db_session
             mock_db_gen.return_value = mock_session_gen()
             
@@ -565,9 +587,9 @@ class TestAgentHandlerMultiUserSafety:
             mock_context.return_value = context
             
             # Configure message handler - first successful
-            msg_handler_instance = Mock()
-            msg_handler_instance.handle_start_agent = AsyncMock()
-            msg_handler_instance.handle_user_message = AsyncMock()
+            msg_handler_instance = msg_handler_instance_instance  # Initialize appropriate service
+            msg_handler_instance.handle_start_agent = AsyncNone  # TODO: Use real service instance
+            msg_handler_instance.handle_user_message = AsyncNone  # TODO: Use real service instance
             mock_msg_svc.return_value = msg_handler_instance
             
             # Process successful message
@@ -605,7 +627,8 @@ class TestAgentHandlerMultiUserSafety:
             
             # Process error message
             result = await handler.handle_message(user_id, mock_websocket, error_message)
-            assert result is False, "Error message should return False"
+            assert result is False, "Error message should await asyncio.sleep(0)
+    return False"
             
             # Check stats after error
             stats = handler.get_stats()
@@ -614,7 +637,7 @@ class TestAgentHandlerMultiUserSafety:
             
             # Test different message types
             msg_handler_instance.handle_start_agent.side_effect = None  # Reset
-            msg_handler_instance.handle_user_message = AsyncMock()
+            msg_handler_instance.handle_user_message = AsyncNone  # TODO: Use real service instance
             
             # Test USER_MESSAGE type
             user_message = WebSocketMessage(

@@ -8,6 +8,7 @@ Business Value: Validates complete TCO calculation flows.
 
 import pytest
 from typing import Dict, Any
+from shared.isolated_environment import IsolatedEnvironment
 
 
 class TestTCOAnalysis:

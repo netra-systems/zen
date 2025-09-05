@@ -16,6 +16,7 @@ import logging
 import random
 import time
 from typing import Any, Dict, List, Set
+from shared.isolated_environment import IsolatedEnvironment
 
 import pytest
 

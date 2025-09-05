@@ -5,13 +5,14 @@ Tests Redis data persistence and caching
 
 import sys
 from pathlib import Path
+from test_framework.redis.test_redis_manager import TestRedisManager
+from shared.isolated_environment import IsolatedEnvironment
 
 # Test framework import - using pytest fixtures instead
 
 import asyncio
 import json
 import time
-from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 import redis.asyncio as redis

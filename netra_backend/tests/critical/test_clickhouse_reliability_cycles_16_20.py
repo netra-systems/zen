@@ -1,4 +1,7 @@
 from shared.isolated_environment import get_env
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from test_framework.database.test_database_manager import TestDatabaseManager
+from shared.isolated_environment import IsolatedEnvironment
 """
 Critical ClickHouse Reliability Tests - Cycles 16-20
 Tests revenue-critical ClickHouse operations and failure scenarios.
@@ -15,7 +18,6 @@ Cycles Covered: 16, 17, 18, 19, 20
 import pytest
 import asyncio
 import os
-from unittest.mock import patch, MagicMock
 import time
 
 from netra_backend.app.db.clickhouse import ClickHouseManager

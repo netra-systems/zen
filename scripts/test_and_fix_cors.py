@@ -6,6 +6,7 @@ import asyncio
 import httpx
 import json
 from typing import Dict, Any
+from shared.isolated_environment import IsolatedEnvironment
 
 
 async def test_cors_preflight(

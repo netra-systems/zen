@@ -1,3 +1,26 @@
+class TestWebSocketConnection:
+    """Real WebSocket connection for testing instead of mocks."""
+    
+    def __init__(self):
+        self.messages_sent = []
+        self.is_connected = True
+        self._closed = False
+        
+    async def send_json(self, message: dict):
+        """Send JSON message."""
+        if self._closed:
+            raise RuntimeError("WebSocket is closed")
+        self.messages_sent.append(message)
+        
+    async def close(self, code: int = 1000, reason: str = "Normal closure"):
+        """Close WebSocket connection."""
+        self._closed = True
+        self.is_connected = False
+        
+    def get_messages(self) -> list:
+        """Get all sent messages."""
+        return self.messages_sent.copy()
+
 """
 CRITICAL TEST SUITE: Request Isolation and User Context Separation
 ==================================================================
@@ -16,11 +39,16 @@ import asyncio
 import pytest
 import uuid
 from typing import List, Dict, Any, Optional
-from unittest.mock import Mock, AsyncMock, patch, MagicMock
 from datetime import datetime, timezone
 import threading
 import random
 import time
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from test_framework.database.test_database_manager import TestDatabaseManager
+from auth_service.core.auth_manager import AuthManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 # Import core components to test
 from netra_backend.app.core.registry.universal_registry import AgentRegistry
@@ -34,6 +62,10 @@ from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBrid
 from netra_backend.app.agents.tool_dispatcher_core import ToolDispatcher
 from netra_backend.app.llm.llm_manager import LLMManager
 from sqlalchemy.ext.asyncio import AsyncSession
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
+from shared.isolated_environment import get_env
 
 
 class UserContext:
@@ -189,7 +221,7 @@ class TestWebSocketEventIsolation:
         
         def create_user_websocket(user_id: str):
             """Create a mock WebSocket connection for a user."""
-            ws = Mock()
+            websocket = TestWebSocketConnection()  # Real WebSocket implementation
             ws.events_received = []
             ws.user_id = user_id
             
@@ -608,8 +640,7 @@ class TestPlaceholderValueIssues:
         registry = AgentRegistry()
         
         # Create a mock agent
-        mock_agent = Mock()
-        mock_agent.set_websocket_bridge = Mock()
+        websocket = TestWebSocketConnection()  # Real WebSocket implementation
         
         # Create websocket bridge
         websocket_bridge = Mock(spec=AgentWebSocketBridge)

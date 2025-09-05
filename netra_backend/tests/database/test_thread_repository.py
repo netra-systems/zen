@@ -6,11 +6,12 @@ COMPLIANCE: 450-line max file, 25-line max functions
 
 import sys
 from pathlib import Path
+from test_framework.database.test_database_manager import TestDatabaseManager
+from shared.isolated_environment import IsolatedEnvironment
 
 # Test framework import - using pytest fixtures instead
 
 from datetime import datetime, timezone
-from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 from sqlalchemy import JSON, Column, DateTime, String
@@ -82,7 +83,7 @@ class TestThreadRepositoryOperations:
         
         # Set up mock result for queries
         # Mock: Generic component isolation for controlled unit testing
-        mock_result = AsyncMock()
+        mock_result = AsyncNone  # TODO: Use real service instance
         mock_session.execute.return_value = mock_result
         
         # Soft delete

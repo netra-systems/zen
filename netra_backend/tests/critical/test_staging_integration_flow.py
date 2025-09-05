@@ -1,4 +1,9 @@
 from shared.isolated_environment import get_env
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from test_framework.database.test_database_manager import TestDatabaseManager
+from test_framework.redis.test_redis_manager import TestRedisManager
+from auth_service.core.auth_manager import AuthManager
+from shared.isolated_environment import IsolatedEnvironment
 #!/usr/bin/env python3
 """Staging Integration Flow Tests
 
@@ -18,7 +23,6 @@ from pathlib import Path
 import asyncio
 import os
 from typing import Dict, Optional
-from unittest.mock import AsyncMock, MagicMock, Mock, patch, patch
 
 import aiohttp
 import pytest
@@ -34,6 +38,8 @@ from netra_backend.app.startup_checks.checker import StartupChecker
 
 @pytest.fixture
 def staging_environment():
+    """Use real service instance."""
+    # TODO: Initialize real service
     """Set up staging environment for tests."""
     env_vars = {
         "ENVIRONMENT": "staging",
@@ -60,11 +66,11 @@ async def mock_external_services():
             # Mock: ClickHouse external database isolation for unit testing performance
             with patch("clickhouse_connect.get_client") as mock_ch:
                 # Mock: Generic component isolation for controlled unit testing
-                mock_pg.return_value = MagicMock()
+                mock_pg.return_value = MagicNone  # TODO: Use real service instance
                 # Mock: Redis external service isolation for fast, reliable tests without network dependency
-                mock_redis.return_value = MagicMock()
+                mock_redis.return_value = MagicNone  # TODO: Use real service instance
                 # Mock: Generic component isolation for controlled unit testing
-                mock_ch.return_value = MagicMock()
+                mock_ch.return_value = MagicNone  # TODO: Use real service instance
                 yield {
                     "postgres": mock_pg,
                     "redis": mock_redis,

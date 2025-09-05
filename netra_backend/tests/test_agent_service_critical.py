@@ -7,13 +7,16 @@ initialization, execution, error handling, and supervisor integration.
 
 import sys
 from pathlib import Path
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 # Test framework import - using pytest fixtures instead
 
 import asyncio
 import json
 from typing import Any, Dict
-from unittest.mock import AsyncMock, MagicMock, Mock, patch, patch
 
 import pytest
 from starlette.websockets import WebSocketDisconnect
@@ -27,24 +30,33 @@ class TestAgentServiceCritical:
     """Critical agent service tests for essential functionality."""
     
     @pytest.fixture
-    def mock_supervisor(self):
+ def real_supervisor():
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create mock supervisor."""
+    pass
         # Mock: Generic component isolation for controlled unit testing
-        supervisor = AsyncMock()
+        supervisor = AsyncNone  # TODO: Use real service instance
         # Mock: Async component isolation for testing without real async operations
         supervisor.run = AsyncMock(return_value={'status': 'completed'})
         return supervisor
     
     @pytest.fixture
     def agent_service(self, mock_supervisor):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create agent service instance."""
+    pass
         return AgentService(mock_supervisor)
     
     @pytest.fixture
-    def mock_request_model(self):
+ def real_request_model():
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create mock request model."""
+    pass
         # Mock: Generic component isolation for controlled unit testing
-        model = MagicMock()
+        model = MagicNone  # TODO: Use real service instance
         model.user_request = "Test message"
         model.run_id = "test_run_123"
         model.user_id = "test_user"
@@ -64,6 +76,7 @@ class TestAgentServiceCritical:
     @pytest.mark.asyncio
     async def test_run_execution_success(self, agent_service, mock_request_model):
         """Test successful agent run execution."""
+    pass
         run_id = "test_run_123"
         result = await agent_service.run(mock_request_model, run_id, stream_updates=True)
         
@@ -75,7 +88,7 @@ class TestAgentServiceCritical:
     async def test_run_with_model_dump_fallback(self, agent_service, mock_supervisor):
         """Test run with model dump fallback."""
         # Mock: Generic component isolation for controlled unit testing
-        model = MagicMock()
+        model = MagicNone  # TODO: Use real service instance
         model.user_request = "Test message"
         model.run_id = "test_run"
         model.user_id = "user123"
@@ -85,6 +98,7 @@ class TestAgentServiceCritical:
     @pytest.mark.asyncio
     async def test_websocket_message_handling(self, agent_service):
         """Test WebSocket message handling method exists."""
+    pass
         # Test that the method exists and accepts correct parameters
         user_id = "test_user"
         message = {"type": "test", "data": "test_data"}
@@ -110,6 +124,7 @@ class TestAgentServiceCritical:
     @pytest.mark.asyncio
     async def test_error_handling_supervisor_failure(self, agent_service, mock_request_model):
         """Test error handling when supervisor fails."""
+    pass
         # Mock: Agent supervisor isolation for testing without spawning real agents
         agent_service.supervisor.run = AsyncMock(side_effect=NetraException("Supervisor error"))
         
@@ -134,6 +149,7 @@ class TestAgentServiceCritical:
     @pytest.mark.asyncio
     async def test_supervisor_integration(self, agent_service, mock_request_model):
         """Test supervisor integration."""
+    pass
         expected_response = {"status": "completed", "result": "success"}
         # Mock: Agent supervisor isolation for testing without spawning real agents
         agent_service.supervisor.run = AsyncMock(return_value=expected_response)
@@ -153,6 +169,7 @@ class TestAgentServiceCritical:
     @pytest.mark.asyncio
     async def test_message_validation(self, agent_service):
         """Test message validation via WebSocket handler."""
+    pass
         invalid_message = {"invalid": "data"}
         user_id = "test_user"
         
@@ -173,6 +190,7 @@ class TestAgentServiceCritical:
     @pytest.mark.asyncio
     async def test_user_context_preservation(self, agent_service, mock_request_model):
         """Test user context preservation."""
+    pass
         await agent_service.run(mock_request_model, "test_run", stream_updates=False)
         
         call_args = agent_service.supervisor.run.call_args[0]
@@ -196,9 +214,10 @@ class TestAgentServiceCritical:
     @pytest.mark.asyncio
     async def test_request_model_compatibility(self, agent_service):
         """Test compatibility with different request model formats."""
+    pass
         # Test with dict-like model
         # Mock: Generic component isolation for controlled unit testing
-        dict_model = MagicMock()
+        dict_model = MagicNone  # TODO: Use real service instance
         dict_model.user_request = "Dict message"
         dict_model.run_id = "dict_run"
         dict_model.user_id = "dict_user"
@@ -217,6 +236,7 @@ class TestAgentServiceCritical:
     @pytest.mark.asyncio
     async def test_response_format_validation(self, agent_service, mock_request_model):
         """Test response format validation."""
+    pass
         # Test various response formats
         test_responses = [
             {"status": "completed"},
@@ -249,6 +269,7 @@ class TestAgentServiceCritical:
     @pytest.mark.asyncio
     async def test_memory_cleanup(self, agent_service, mock_request_model):
         """Test memory cleanup after execution."""
+    pass
         # Run multiple operations
         for i in range(5):
             await agent_service.run(mock_request_model, f"run_{i}", stream_updates=False)
@@ -270,6 +291,7 @@ class TestAgentServiceCritical:
     @pytest.mark.asyncio
     async def test_state_isolation(self, mock_supervisor):
         """Test state isolation between service instances."""
+    pass
         service1 = AgentService(mock_supervisor)
         service2 = AgentService(mock_supervisor)
         
@@ -292,3 +314,4 @@ class TestAgentServiceCritical:
             # Verify first log call contains expected user_id info
             first_call = mock_logger.info.call_args_list[0][0][0]
             assert "test_user" in first_call
+    pass

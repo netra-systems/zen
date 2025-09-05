@@ -14,7 +14,7 @@ import threading
 import time
 from datetime import datetime, timedelta
 from pathlib import Path
-from unittest.mock import Mock, MagicMock, patch
+from shared.isolated_environment import IsolatedEnvironment
 
 # Test framework imports
 from test_framework.environment_isolation import get_test_env_manager

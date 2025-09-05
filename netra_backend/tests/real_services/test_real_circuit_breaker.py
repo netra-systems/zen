@@ -28,6 +28,7 @@ from contextlib import asynccontextmanager
 import psutil
 import aiohttp
 import socket
+from shared.isolated_environment import IsolatedEnvironment
 
 from test_framework.environment_isolation import get_test_env_manager
 from netra_backend.app.core.resilience.unified_circuit_breaker import UnifiedCircuitBreaker

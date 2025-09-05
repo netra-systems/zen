@@ -5,6 +5,8 @@ Tests database transaction atomicity, consistency, isolation, and durability
 
 import sys
 from pathlib import Path
+from test_framework.database.test_database_manager import TestDatabaseManager
+from shared.isolated_environment import IsolatedEnvironment
 
 # Test framework import - using pytest fixtures instead
 
@@ -14,7 +16,6 @@ import time
 from datetime import datetime, timedelta
 from decimal import Decimal
 from typing import Dict, List, Optional
-from unittest.mock import AsyncMock, MagicMock, Mock, patch, patch
 
 import pytest
 

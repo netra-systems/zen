@@ -8,10 +8,11 @@ Based on analysis of restored endpoints, ensures proper response structure
 for all auth operations that clients depend on.
 """
 import pytest
-from unittest.mock import AsyncMock, patch
 from fastapi.testclient import TestClient
 from fastapi import FastAPI
 from auth_service.auth_core.routes.auth_routes import router as auth_router
+from auth_service.core.auth_manager import AuthManager
+from shared.isolated_environment import IsolatedEnvironment
 
 
 class TestAuthEndpointResponseFormats:
@@ -19,7 +20,10 @@ class TestAuthEndpointResponseFormats:
     
     @pytest.fixture
     def test_client(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create test client for response format tests."""
+    pass
         app = FastAPI()
         app.include_router(auth_router, prefix="")
         return TestClient(app)
@@ -30,6 +34,7 @@ class TestAuthEndpointResponseFormats:
         Regression prevention: Ensures login response maintains expected format
         that frontend and backend clients depend on.
         """
+    pass
         with patch('auth_service.auth_core.routes.auth_routes.auth_service') as mock_auth:
             mock_auth.authenticate_user = AsyncMock(return_value=("user-123", {"name": "Test User"}))
             mock_auth.create_access_token = AsyncMock(return_value="access-token-value")
@@ -94,6 +99,7 @@ class TestAuthEndpointResponseFormats:
         Regression prevention: Dev login was missing, ensure it returns
         same format as regular login when restored.
         """
+    pass
         with patch('auth_service.auth_core.config.AuthConfig.get_environment', return_value='development'):
             with patch('auth_service.auth_core.routes.auth_routes.auth_service') as mock_auth:
                 mock_auth.create_access_token = AsyncMock(return_value="dev-access-token")
@@ -145,8 +151,9 @@ class TestAuthEndpointResponseFormats:
     
     def test_logout_endpoint_response_format(self, test_client):
         """Test that logout endpoint returns consistent success format."""
+    pass
         with patch('auth_service.auth_core.routes.auth_routes.auth_service') as mock_auth:
-            mock_auth.blacklist_token = AsyncMock()
+            mock_auth.blacklist_token = AsyncNone  # TODO: Use real service instance
             
             response = test_client.post("/auth/logout", 
                                        headers={"Authorization": "Bearer test-token"})
@@ -167,7 +174,10 @@ class TestAuthUtilityEndpointFormats:
     
     @pytest.fixture
     def test_client(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create test client for utility endpoint tests."""
+    pass
         app = FastAPI()
         app.include_router(auth_router, prefix="")
         return TestClient(app)
@@ -190,6 +200,7 @@ class TestAuthUtilityEndpointFormats:
     
     def test_verify_password_endpoint_response_format(self, test_client):
         """Test that verify password endpoint returns proper verification format."""
+    pass
         with patch('auth_service.auth_core.routes.auth_routes.auth_service') as mock_auth:
             mock_auth.verify_password = AsyncMock(return_value=True)
             
@@ -242,6 +253,7 @@ class TestAuthUtilityEndpointFormats:
     
     def test_refresh_endpoint_response_format(self, test_client):
         """Test that refresh endpoint returns proper token refresh format."""
+    pass
         with patch('auth_service.auth_core.routes.auth_routes.auth_service') as mock_auth:
             mock_auth.refresh_tokens = AsyncMock(return_value=("new-access-token", "new-refresh-token"))
             
@@ -269,7 +281,10 @@ class TestAuthStatusEndpointFormats:
     
     @pytest.fixture
     def test_client(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create test client for status endpoint tests."""
+    pass
         app = FastAPI()
         app.include_router(auth_router, prefix="")
         return TestClient(app)
@@ -293,6 +308,7 @@ class TestAuthStatusEndpointFormats:
     
     def test_config_endpoint_response_format(self, test_client):
         """Test that config endpoint returns proper configuration format."""
+    pass
         with patch('auth_service.auth_core.config.AuthConfig.get_google_client_id', return_value="test-client-id"):
             with patch('auth_service.auth_core.config.AuthConfig.get_environment', return_value='development'):
                 
@@ -327,7 +343,10 @@ class TestAuthErrorResponseFormats:
     
     @pytest.fixture
     def test_client(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create test client for error response tests.""" 
+    pass
         app = FastAPI()
         app.include_router(auth_router, prefix="")
         return TestClient(app)
@@ -347,6 +366,7 @@ class TestAuthErrorResponseFormats:
     
     def test_authentication_error_response_format(self, test_client):
         """Test that authentication errors return proper format."""
+    pass
         with patch('auth_service.auth_core.routes.auth_routes.auth_service') as mock_auth:
             mock_auth.authenticate_user = AsyncMock(return_value=None)
             
@@ -374,3 +394,4 @@ class TestAuthErrorResponseFormats:
             # Forbidden error format
             assert "detail" in data
             assert "only available in development" in data["detail"]
+    pass

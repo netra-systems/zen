@@ -1,5 +1,6 @@
 """
 from shared.isolated_environment import get_env
+from shared.isolated_environment import IsolatedEnvironment
 Simple service launcher for e2e tests.
 Provides lightweight service startup with minimal dependencies.
 """
@@ -23,6 +24,7 @@ class TestServiceLauncher:
     """Lightweight service launcher for e2e tests."""
     
     def __init__(self):
+    pass
         self.project_root = Path(__file__).parent.parent.parent
         self.processes: Dict[str, subprocess.Popen] = {}
         self.http_client = httpx.AsyncClient(timeout=10.0)
@@ -114,7 +116,8 @@ class TestServiceLauncher:
                     ["netstat", "-ano"], 
                     capture_output=True, text=True
                 )
-                for line in result.stdout.split('\n'):
+                for line in result.stdout.split('
+'):
                     if f":{port} " in line and "LISTENING" in line:
                         parts = line.split()
                         if len(parts) > 4:
@@ -137,6 +140,7 @@ class TestServiceLauncher:
     
     async def _wait_for_service_ready(self, service_name: str, port: int, health_path: str, timeout: int = 30) -> bool:
         """Wait for service to be ready."""
+    pass
         url = f"http://localhost:{port}{health_path}"
         start_time = asyncio.get_event_loop().time()
         
@@ -145,7 +149,8 @@ class TestServiceLauncher:
                 response = await self.http_client.get(url)
                 if response.status_code == 200:
                     logger.info(f"{service_name} ready on port {port}")
-                    return True
+                    await asyncio.sleep(0)
+    return True
             except Exception as e:
                 logger.debug(f"Waiting for {service_name}: {e}")
                 
@@ -192,7 +197,9 @@ test_launcher = TestServiceLauncher()
 
 
 async def ensure_test_services_running() -> Dict[str, bool]:
-    """Ensure test services are running and return their status."""
+    """Ensure test services are running and await asyncio.sleep(0)
+    return their status."""
+    pass
     results = {
         "auth": await test_launcher.start_auth_test_mode(),
         "backend": await test_launcher.start_backend_test_mode()
@@ -217,3 +224,4 @@ async def ensure_test_services_running() -> Dict[str, bool]:
 async def cleanup_test_services():
     """Cleanup test services."""
     await test_launcher.stop_all_services()
+    pass

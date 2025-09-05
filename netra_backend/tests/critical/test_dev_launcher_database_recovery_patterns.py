@@ -21,7 +21,6 @@ Business Value Justification (BVJ):
 
 import pytest
 import asyncio
-from unittest.mock import patch, MagicMock, AsyncMock, call
 from sqlalchemy.exc import ProgrammingError, OperationalError, IntegrityError
 from sqlalchemy import text, MetaData, Table, Index
 from alembic import command
@@ -31,6 +30,8 @@ from test_framework.performance_helpers import fast_test, timeout_override
 import concurrent.futures
 import time
 from pathlib import Path
+from test_framework.database.test_database_manager import TestDatabaseManager
+from shared.isolated_environment import IsolatedEnvironment
 
 
 class TestMigration66e0e5d9662dIdempotency:

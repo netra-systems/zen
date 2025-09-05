@@ -16,9 +16,12 @@ CRITICAL: These tests MUST pass before any deployment to staging.
 import pytest
 import os
 import sys
-from unittest.mock import patch, MagicMock, AsyncMock
 from typing import Dict, Any, List
 import logging
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
+from shared.isolated_environment import IsolatedEnvironment
 
 # Add parent directory to path for imports
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
@@ -59,6 +62,7 @@ class TestStagingAuthURLRegression:
     
     def test_staging_never_returns_localhost(self):
         """CRITICAL: Staging must NEVER return localhost URLs."""
+    pass
         with patch.dict(os.environ, {'ENVIRONMENT': 'staging'}, clear=True):
             # Force fresh import
             if 'auth_service.auth_core.auth_environment' in sys.modules:
@@ -88,7 +92,9 @@ class TestStagingAuthURLRegression:
                 if 'localhost' in url or '127.0.0.1' in url or '0.0.0.0' in url:
                     failures.append(f"{name}: {url} contains local address")
             
-            assert not failures, f"Staging URLs contain localhost:\n" + "\n".join(failures)
+            assert not failures, f"Staging URLs contain localhost:
+" + "
+".join(failures)
     
     def test_staging_urls_use_staging_subdomain(self):
         """CRITICAL: All staging URLs must use staging subdomain."""
@@ -119,10 +125,13 @@ class TestStagingAuthURLRegression:
                 if actual[key] != expected[key]:
                     mismatches.append(f"{key}: expected '{expected[key]}', got '{actual[key]}'")
             
-            assert not mismatches, "Staging URL mismatches:\n" + "\n".join(mismatches)
+            assert not mismatches, "Staging URL mismatches:
+" + "
+".join(mismatches)
     
     def test_staging_auth_host_not_bind_address(self):
         """CRITICAL: Staging auth host must be proper domain, not bind address."""
+    pass
         with patch.dict(os.environ, {'ENVIRONMENT': 'staging'}, clear=True):
             from auth_service.auth_core.auth_environment import AuthEnvironment
             
@@ -156,6 +165,7 @@ class TestStagingAuthURLRegression:
     
     def test_staging_cors_origins_correct(self):
         """CRITICAL: Staging CORS origins must allow staging domains."""
+    pass
         with patch.dict(os.environ, {'ENVIRONMENT': 'staging'}, clear=True):
             from auth_service.auth_core.auth_environment import AuthEnvironment
             
@@ -235,6 +245,7 @@ class TestStagingDeploymentReadiness:
     
     def test_backend_client_staging_configuration(self):
         """Test that backend auth client is configured correctly for staging."""
+    pass
         with patch.dict(os.environ, {'ENVIRONMENT': 'staging'}, clear=True):
             # Clear module cache to force reimport
             modules_to_clear = [
@@ -313,6 +324,7 @@ class TestCriticalURLValidation:
     
     def test_no_cross_environment_contamination(self):
         """Test that environments don't contaminate each other."""
+    pass
         # Set production environment
         with patch.dict(os.environ, {'ENVIRONMENT': 'production'}, clear=True):
             if 'auth_service.auth_core.auth_environment' in sys.modules:
@@ -372,7 +384,8 @@ def test_smoke_staging_configuration():
         }
         
         # Log configuration
-        logger.info("\nStaging Configuration:")
+        logger.info("
+Staging Configuration:")
         for key, value in critical_config.items():
             logger.info(f"  {key}: {value}")
         
@@ -401,12 +414,14 @@ def test_smoke_staging_configuration():
         
         # Report results
         if validations:
-            logger.error("\nVALIDATION FAILURES:")
+            logger.error("
+VALIDATION FAILURES:")
             for validation in validations:
                 logger.error(f"  - {validation}")
             raise AssertionError(f"Staging configuration validation failed with {len(validations)} errors")
         else:
-            logger.info("\n✓ All staging configuration validations passed!")
+            logger.info("
+✓ All staging configuration validations passed!")
             logger.info("✓ Safe to deploy to staging environment")
     
     logger.info("="*60)
@@ -416,10 +431,14 @@ if __name__ == '__main__':
     # Run smoke test first
     try:
         test_smoke_staging_configuration()
-        print("\n✓ Smoke test passed - running full test suite...\n")
+        print("
+✓ Smoke test passed - running full test suite...
+")
     except AssertionError as e:
-        print(f"\n✗ Smoke test failed: {e}")
+        print(f"
+✗ Smoke test failed: {e}")
         sys.exit(1)
     
     # Run full test suite
     pytest.main([__file__, '-v', '--tb=short', '-x'])
+    pass

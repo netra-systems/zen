@@ -34,6 +34,7 @@ from typing import Dict, List, Optional, Tuple
 from urllib.parse import urlparse
 import sys
 from pathlib import Path
+from shared.isolated_environment import IsolatedEnvironment
 
 # Add project root to path for imports
 project_root = Path(__file__).parent.parent.parent

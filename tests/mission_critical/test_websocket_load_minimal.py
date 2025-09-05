@@ -25,6 +25,8 @@ from datetime import datetime
 from typing import Dict, List, Set, Any, Optional, Tuple
 import threading
 from dataclasses import dataclass, field
+from netra_backend.app.core.agent_registry import AgentRegistry
+from shared.isolated_environment import IsolatedEnvironment
 
 # Add project root to Python path for imports
 project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
@@ -83,6 +85,7 @@ class RealWebSocketConnection:
     """Real WebSocket connection wrapper for load testing with REAL services."""
     
     def __init__(self, user_id: str, services_manager: RealServicesManager):
+    pass
         self.user_id = user_id
         self.services_manager = services_manager
         self.websocket_client: Optional[WebSocketTestClient] = None
@@ -172,6 +175,7 @@ class RealWebSocketLoadTester:
     }
     
     def __init__(self):
+    pass
         self.services_manager: Optional[RealServicesManager] = None
         self.connections: List[RealWebSocketConnection] = []
         self.metrics = RealWebSocketLoadMetrics()
@@ -408,7 +412,8 @@ class RealWebSocketLoadTester:
     
     def _log_results(self) -> None:
         """Log comprehensive test results."""
-        logger.info(f"\n{'='*80}")
+        logger.info(f"
+{'='*80}")
         logger.info(f"REAL WEBSOCKET LOAD TEST RESULTS")
         logger.info(f"{'='*80}")
         logger.info(f"Concurrent Users: {self.metrics.concurrent_users}")
@@ -418,31 +423,38 @@ class RealWebSocketLoadTester:
         logger.info(f"Events Received: {self.metrics.events_received}")
         
         if self.metrics.response_times_ms:
-            logger.info(f"\nResponse Times:")
+            logger.info(f"
+Response Times:")
             logger.info(f"  Average: {self.metrics.avg_response_time_ms:.2f}ms")
             logger.info(f"  Max: {self.metrics.max_response_time_ms:.2f}ms")
             logger.info(f"  P95: {self.metrics.p95_response_time_ms:.2f}ms")
         
         if self.metrics.websocket_events:
-            logger.info(f"\nWebSocket Events Received:")
+            logger.info(f"
+WebSocket Events Received:")
             for event_type, count in self.metrics.websocket_events.items():
                 logger.info(f"  {event_type}: {count}")
         
         if self.metrics.missing_required_events:
-            logger.error(f"\nMISSING REQUIRED EVENTS: {self.metrics.missing_required_events}")
+            logger.error(f"
+MISSING REQUIRED EVENTS: {self.metrics.missing_required_events}")
         
         if self.metrics.connection_failures:
-            logger.error(f"\nConnection Failures:")
+            logger.error(f"
+Connection Failures:")
             for failure in self.metrics.connection_failures:
                 logger.error(f"  {failure}")
         
         if self.metrics.event_sequence_failures:
-            logger.error(f"\nEvent Sequence Failures:")
+            logger.error(f"
+Event Sequence Failures:")
             for failure in self.metrics.event_sequence_failures:
                 logger.error(f"  {failure}")
         
-        logger.info(f"\nTest Duration: {self.metrics.test_duration_ms:.2f}ms")
-        logger.info(f"{'='*80}\n")
+        logger.info(f"
+Test Duration: {self.metrics.test_duration_ms:.2f}ms")
+        logger.info(f"{'='*80}
+")
 
 
 async def test_real_websocket_load():
@@ -458,6 +470,7 @@ async def test_real_websocket_load():
     
     FAILS FAST if any critical requirement is not met.
     """
+    pass
     tester = RealWebSocketLoadTester()
     
     try:
@@ -489,7 +502,8 @@ async def test_real_websocket_load():
             
         logger.info("✅ REAL WebSocket load test PASSED")
         
-        return metrics
+        await asyncio.sleep(0)
+    return metrics
         
     except Exception as e:
         logger.error(f"❌ REAL WebSocket load test FAILED: {e}")
@@ -508,6 +522,7 @@ async def test_real_websocket_concurrent_stress():
     - No complete system failures occur
     - Critical events still flow under stress
     """
+    pass
     tester = RealWebSocketLoadTester()
     
     try:
@@ -534,7 +549,8 @@ async def test_real_websocket_concurrent_stress():
             
         logger.info("✅ REAL WebSocket concurrent stress test PASSED")
         
-        return metrics
+        await asyncio.sleep(0)
+    return metrics
         
     except Exception as e:
         logger.error(f"❌ REAL WebSocket concurrent stress test FAILED: {e}")
@@ -552,24 +568,30 @@ if __name__ == "__main__":
         
         try:
             # Test 1: Core REAL load test
-            logger.info("\n[1/2] Running REAL WebSocket load test...")
+            logger.info("
+[1/2] Running REAL WebSocket load test...")
             metrics1 = await test_real_websocket_load()
             
             # Test 2: REAL stress test
-            logger.info("\n[2/2] Running REAL WebSocket concurrent stress test...")
+            logger.info("
+[2/2] Running REAL WebSocket concurrent stress test...")
             metrics2 = await test_real_websocket_concurrent_stress()
             
-            logger.info("\n" + "="*80)
+            logger.info("
+" + "="*80)
             logger.info("✅ ALL REAL WEBSOCKET LOAD TESTS PASSED")
             logger.info("="*80)
             
-            return True
+            await asyncio.sleep(0)
+    return True
             
         except Exception as e:
-            logger.error(f"\n❌ REAL WEBSOCKET LOAD TESTS FAILED: {e}")
+            logger.error(f"
+❌ REAL WEBSOCKET LOAD TESTS FAILED: {e}")
             logger.info("="*80)
             return False
     
     # Run the tests
     success = asyncio.run(run_all_tests())
     exit(0 if success else 1)
+    pass

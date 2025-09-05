@@ -9,6 +9,7 @@ import os
 import sys
 import uuid
 from datetime import datetime
+from shared.isolated_environment import IsolatedEnvironment
 
 import httpx
 

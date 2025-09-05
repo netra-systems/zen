@@ -20,6 +20,7 @@ import os
 from datetime import datetime, timezone, timedelta
 from typing import Dict, Optional, List
 from pathlib import Path
+from shared.isolated_environment import IsolatedEnvironment
 
 # Add project root to path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
@@ -29,6 +30,7 @@ class TestOAuthCloudArmor:
     """Test OAuth flow and Cloud Armor integration."""
     
     def __init__(self, environment: str = "staging"):
+    pass
         self.environment = environment
         self.base_url = self._get_base_url(environment)
         self.auth_url = self._get_auth_url(environment)
@@ -65,7 +67,8 @@ class TestOAuthCloudArmor:
     @pytest.mark.e2e
     async def test_oauth_callback_not_blocked(self) -> Dict:
         """Test that OAuth callback with encoded parameters is not blocked."""
-        print("\n🔍 Testing OAuth callback endpoint...")
+        print("
+🔍 Testing OAuth callback endpoint...")
         
         # Simulate OAuth callback with encoded parameters that triggered the issue
         callback_url = f"{self.auth_url}/auth/callback"
@@ -144,7 +147,8 @@ class TestOAuthCloudArmor:
     
     def check_cloud_armor_logs(self, minutes_back: int = 10) -> Dict:
         """Check Cloud Armor logs for recent OAuth blocks."""
-        print(f"\n📊 Checking Cloud Armor logs (last {minutes_back} minutes)...")
+        print(f"
+📊 Checking Cloud Armor logs (last {minutes_back} minutes)...")
         
         # Build command based on OS
         if os.name == 'nt':
@@ -197,7 +201,8 @@ class TestOAuthCloudArmor:
     @pytest.mark.e2e
     async def test_sql_injection_still_blocked(self) -> Dict:
         """Ensure SQL injection attempts are still blocked on other paths."""
-        print("\n🛡️  Testing SQL injection protection...")
+        print("
+🛡️  Testing SQL injection protection...")
         
         # Test paths that should still be protected
         test_cases = [
@@ -261,7 +266,8 @@ class TestOAuthCloudArmor:
     
     def verify_security_policy(self) -> Dict:
         """Verify Cloud Armor security policy configuration."""
-        print("\n🔐 Verifying security policy configuration...")
+        print("
+🔐 Verifying security policy configuration...")
         
         cmd = [
             "gcloud", "compute", "security-policies", "rules", "describe", "50",
@@ -362,19 +368,22 @@ class TestOAuthCloudArmor:
         self.results["overall_status"] = "PASSED" if self.results["summary"]["failed"] == 0 else "FAILED"
         
         # Print summary
-        print("\n" + "=" * 60)
+        print("
+" + "=" * 60)
         print("📋 TEST SUMMARY")
         print("=" * 60)
         print(f"✅ Passed: {self.results['summary']['passed']}")
         print(f"❌ Failed: {self.results['summary']['failed']}")
         print(f"⚠️  Warnings: {self.results['summary']['warnings']}")
-        print(f"\n🎯 Overall Status: {self.results['overall_status']}")
+        print(f"
+🎯 Overall Status: {self.results['overall_status']}")
         
         # Save results
         results_file = f"oauth_cloud_armor_test_{self.environment}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
         with open(results_file, "w") as f:
             json.dump(self.results, f, indent=2)
-        print(f"\n💾 Results saved to: {results_file}")
+        print(f"
+💾 Results saved to: {results_file}")
         
         return self.results
 
@@ -397,3 +406,4 @@ async def main():
 
 if __name__ == "__main__":
     asyncio.run(main())
+    pass

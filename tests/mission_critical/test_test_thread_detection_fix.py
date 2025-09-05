@@ -18,11 +18,15 @@ Test Coverage:
 import asyncio
 import logging
 import pytest
-from unittest.mock import Mock, AsyncMock, patch
+from shared.isolated_environment import IsolatedEnvironment
 
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager as WebSocketManager
 from netra_backend.app.websocket_core.event_monitor import ChatEventMonitor
 from netra_backend.app.logging_config import central_logger
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
+from shared.isolated_environment import get_env
 
 # Set up logger for this test
 logger = central_logger.get_logger(__name__)

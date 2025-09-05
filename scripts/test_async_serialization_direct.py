@@ -7,6 +7,7 @@ import asyncio
 import time
 import sys
 import os
+from shared.isolated_environment import IsolatedEnvironment
 
 # Add the project root to Python path
 sys.path.insert(0, '/Users/anthony/Documents/GitHub/netra-apex')

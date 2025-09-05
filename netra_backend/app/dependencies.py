@@ -13,7 +13,7 @@ from netra_backend.app.database import get_db
 from netra_backend.app.llm.client_unified import ResilientLLMClient
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.services.security_service import SecurityService
-from netra_backend.app.websocket_core import get_websocket_manager
+from netra_backend.app.websocket_core.websocket_manager_factory import create_websocket_manager
 
 # CRITICAL: Import for proper session lifecycle management
 from contextlib import asynccontextmanager
@@ -29,8 +29,8 @@ if TYPE_CHECKING:
     )
 
 # NEW: Split architecture imports
+from netra_backend.app.models.user_execution_context import UserExecutionContext
 from netra_backend.app.agents.supervisor.user_execution_context import (
-    UserExecutionContext,
     validate_user_context
 )
 from netra_backend.app.agents.supervisor.agent_instance_factory import (
@@ -342,12 +342,22 @@ def get_agent_supervisor(request: Request) -> "Supervisor":
     
     # Verify supervisor has WebSocket capabilities
     if supervisor and hasattr(supervisor, 'agent_registry'):
-        # Get WebSocket manager and ensure it's set on the agent registry
-        websocket_manager = get_websocket_manager()
+        # Create user context for proper isolation
+        user_context = UserExecutionContext(
+            user_id="system",
+            request_id=f"supervisor_init_{time.time()}",
+            thread_id="supervisor_main",
+            run_id=f"run_{time.time()}"
+        )
+        websocket_manager = create_websocket_manager(user_context)
         if websocket_manager and hasattr(supervisor.agent_registry, 'set_websocket_manager'):
             # Ensure WebSocket manager is properly configured
-            supervisor.agent_registry.set_websocket_manager(websocket_manager)
-            logger.debug("Verified WebSocket manager is set on supervisor agent registry")
+            if asyncio.iscoroutinefunction(supervisor.agent_registry.set_websocket_manager):
+                # Handle async set_websocket_manager
+                logger.warning("Cannot await set_websocket_manager in sync context - WebSocket events may be limited")
+            else:
+                supervisor.agent_registry.set_websocket_manager(websocket_manager)
+                logger.debug("Verified WebSocket manager is set on supervisor agent registry")
         else:
             logger.warning("WebSocket manager not available or supervisor lacks agent_registry")
     else:
@@ -861,7 +871,14 @@ def get_message_handler_service(request: Request):
     # CRITICAL FIX: Include WebSocket manager to enable real-time agent events
     # This ensures WebSocket events work in all scenarios, not just direct WebSocket routes
     try:
-        websocket_manager = get_websocket_manager()
+        # Create user context for proper isolation
+        user_context = UserExecutionContext(
+            user_id="system",
+            request_id=f"message_handler_{time.time()}",
+            thread_id="message_handler_main",
+            run_id=f"run_{time.time()}"
+        )
+        websocket_manager = create_websocket_manager(user_context)
         logger.info("Successfully injected WebSocket manager into MessageHandlerService via dependency injection")
         return MessageHandlerService(supervisor, thread_service, websocket_manager)
     except Exception as e:
@@ -892,8 +909,15 @@ async def get_request_scoped_message_handler(
         # Get thread service (stateless)
         thread_service = get_thread_service(request)
         
-        # Get WebSocket manager (stateless)
-        websocket_manager = get_websocket_manager()
+        # Get WebSocket manager using factory pattern for proper isolation
+        # Create user context based on request context
+        user_context = UserExecutionContext(
+            user_id=context.user_id,
+            request_id=context.request_id,
+            thread_id=context.thread_id,
+            run_id=context.run_id
+        )
+        websocket_manager = create_websocket_manager(user_context)
         
         # Create MessageHandlerService with request-scoped components
         from netra_backend.app.services.message_handlers import MessageHandlerService

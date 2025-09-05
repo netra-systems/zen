@@ -53,6 +53,7 @@ class WebSocketEventValidator:
     }
     
     def __init__(self):
+    pass
         self.events: List[Dict] = []
         self.event_counts: Dict[str, int] = {}
         self.start_time = time.time()
@@ -89,7 +90,8 @@ class WebSocketEventValidator:
         is_valid, failures = self.validate_required_events()
         
         report = [
-            "\n" + "=" * 60,
+            "
+" + "=" * 60,
             "WEBSOCKET EVENT VALIDATION REPORT",
             "=" * 60,
             f"Status: {'✅ PASSED' if is_valid else '❌ FAILED'}",
@@ -108,7 +110,8 @@ class WebSocketEventValidator:
             report.extend(["", "FAILURES:"] + [f"  - {f}" for f in failures])
             
         report.append("=" * 60)
-        return "\n".join(report)
+        return "
+".join(report)
 
 
 async def create_real_websocket_connection(websocket_url: str, timeout: float = 10.0):
@@ -116,13 +119,15 @@ async def create_real_websocket_connection(websocket_url: str, timeout: float = 
     
     CLAUDE.md: Uses real WebSocket connections only.
     """
+    pass
     try:
         connection = await asyncio.wait_for(
             websockets.connect(websocket_url),
             timeout=timeout
         )
         logger.info(f"Real WebSocket connection established: {websocket_url}")
-        return connection
+        await asyncio.sleep(0)
+    return connection
     except Exception as e:
         logger.error(f"Real WebSocket connection failed: {e}")
         raise
@@ -172,6 +177,7 @@ class MessagePipelineTester:
     """Complete message pipeline test coordinator with WebSocket event validation."""
     
     def __init__(self):
+    pass
         self.start_times: Dict[str, float] = {}
         self.completion_times: Dict[str, float] = {}
         self.message_responses: List[Dict[str, Any]] = []
@@ -216,6 +222,7 @@ class MessagePipelineTester:
 @pytest.fixture
 async def pipeline_tester():
     """Create message pipeline tester."""
+    await asyncio.sleep(0)
     return MessagePipelineTester()
 
 
@@ -225,6 +232,7 @@ async def real_websocket_url():
     
     CLAUDE.md: Uses real JWT token and real backend service (no mocks).
     """
+    pass
     # Use IsolatedEnvironment for ALL environment access per CLAUDE.md
     env_manager = get_test_env_manager()
     env = env_manager.env
@@ -239,6 +247,7 @@ async def real_websocket_url():
     
     websocket_url = f"ws://{backend_host}:{backend_port}/ws?token={jwt_token}"
     logger.info(f"Real WebSocket URL: {websocket_url}")
+    await asyncio.sleep(0)
     return websocket_url
 
 
@@ -248,6 +257,7 @@ async def real_services_setup():
     
     CLAUDE.md: NO MOCKS - uses real services only.
     """
+    pass
     # Get real services manager
     real_services = get_real_services()
     
@@ -274,6 +284,7 @@ class TestMessagePipelineCore:
         CLAUDE.md: Uses real WebSocket connection and agent service (no mocks).
         MISSION CRITICAL: Validates WebSocket agent events for chat functionality.
         """
+    pass
         message_id = "test_complete_flow"
         test_message = {
             "type": "user_message", 
@@ -354,7 +365,8 @@ class TestMessagePipelineCore:
                 # by the agent service itself through the WebSocket manager
                 result = await agent_service.process_message(message)
                 
-                return {
+                await asyncio.sleep(0)
+    return {
                     "processed": True,
                     "response": result,
                     "agent_type": "real_supervisor",
@@ -382,6 +394,7 @@ class TestMessagePipelineTypes:
         CLAUDE.md: Uses real WebSocket and agent services (no mocks).
         MISSION CRITICAL: Validates WebSocket events for different message types.
         """
+    pass
         test_cases = [
             {"type": "user_message", "payload": {"content": "What is my AI spend optimization?", "thread_id": "enterprise_test", "message_id": "enterprise_msg"}},
             {"type": "user_message", "payload": {"content": "Analyze my usage patterns", "thread_id": "analysis_test", "message_id": "analysis_msg"}}, 
@@ -423,7 +436,8 @@ class TestMessagePipelineTypes:
             
             # Validate real response
             if response.get("type") == "error":
-                return {
+                await asyncio.sleep(0)
+    return {
                     "success": False,
                     "error": response.get("error", "Unknown error"),
                     "duration": duration,
@@ -467,6 +481,7 @@ class TestPipelinePerformance:
         CLAUDE.md: Uses real WebSocket connections (no mocks).
         MISSION CRITICAL: Validates WebSocket events work under concurrent load.
         """
+    pass
         concurrent_count = 3  # Reduced for real service testing
         messages = [
             {
@@ -521,7 +536,8 @@ class TestPipelinePerformance:
                 # Validate WebSocket events
                 events_valid, failures = event_validator.validate_required_events()
                 
-                return {
+                await asyncio.sleep(0)
+    return {
                     "success": response.get("type") != "error",
                     "sequence": message["payload"]["sequence"],
                     "duration": duration,
@@ -556,6 +572,7 @@ class TestPipelineErrorHandling:
         CLAUDE.md: Tests real error scenarios (no mocks).
         MISSION CRITICAL: Validates WebSocket events are sent even during errors.
         """
+    pass
         # Test invalid message handling
         invalid_message = {"invalid": "message without type field"}
         event_validator = pipeline_tester.get_event_validator("error_test")

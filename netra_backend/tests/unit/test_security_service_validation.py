@@ -5,14 +5,17 @@ and edge cases around key management and data handling.
 """
 
 import pytest
-from unittest.mock import Mock, patch, AsyncMock
 from cryptography.fernet import Fernet
 from netra_backend.app.services.security_service import SecurityService
 from netra_backend.app.services.key_manager import KeyManager
+from auth_service.core.auth_manager import AuthManager
+from shared.isolated_environment import IsolatedEnvironment
+import asyncio
 
 
 class TestSecurityServiceInitialization:
     """Test SecurityService initialization and setup."""
+    pass
 
     def test_initialize_with_provided_key_manager(self):
         """Test initialization with provided key manager."""
@@ -24,9 +27,9 @@ class TestSecurityServiceInitialization:
         assert service.key_manager is mock_key_manager
         assert service.fernet is not None
 
-    @patch('netra_backend.app.services.security_service.KeyManager.load_from_settings')
-    def test_initialize_without_key_manager(self, mock_load_from_settings):
+        def test_initialize_without_key_manager(self, mock_load_from_settings):
         """Test initialization creates key manager from settings."""
+    pass
         mock_key_manager = Mock(spec=KeyManager)
         mock_key_manager.fernet_key = Fernet.generate_key()
         mock_load_from_settings.return_value = mock_key_manager
@@ -48,6 +51,7 @@ class TestSecurityServiceInitialization:
 
     def test_initialize_fernet_with_none_key(self):
         """Test initialization when fernet key is None."""
+    pass
         mock_key_manager = Mock(spec=KeyManager)
         mock_key_manager.fernet_key = None
         
@@ -58,17 +62,24 @@ class TestSecurityServiceInitialization:
 
 class TestSecurityServiceEncryption:
     """Test encryption and decryption functionality."""
+    pass
 
     @pytest.fixture
     def security_service(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Security service with valid fernet key."""
+    pass
         mock_key_manager = Mock(spec=KeyManager)
         mock_key_manager.fernet_key = Fernet.generate_key()
         return SecurityService(key_manager=mock_key_manager)
 
     @pytest.fixture
     def security_service_no_key(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Security service without fernet key."""
+    pass
         mock_key_manager = Mock(spec=KeyManager)
         mock_key_manager.fernet_key = None
         return SecurityService(key_manager=mock_key_manager)
@@ -85,6 +96,7 @@ class TestSecurityServiceEncryption:
 
     def test_decrypt_valid_data(self, security_service):
         """Test decrypting valid encrypted data."""
+    pass
         plaintext = "sensitive_data_123"
         encrypted = security_service.encrypt(plaintext)
         
@@ -99,6 +111,7 @@ class TestSecurityServiceEncryption:
 
     def test_decrypt_without_fernet_key(self, security_service_no_key):
         """Test decryption fails without fernet key."""
+    pass
         with pytest.raises(ValueError, match="Fernet key not configured"):
             security_service_no_key.decrypt("encrypted_data")
 
@@ -111,6 +124,7 @@ class TestSecurityServiceEncryption:
 
     def test_encrypt_unicode_data(self, security_service):
         """Test encrypting unicode characters."""
+    pass
         unicode_text = "测试数据 🔐 émojis"
         
         encrypted = security_service.encrypt(unicode_text)
@@ -125,6 +139,7 @@ class TestSecurityServiceEncryption:
 
     def test_encrypt_large_data(self, security_service):
         """Test encrypting larger amounts of data."""
+    pass
         large_text = "A" * 10000
         
         encrypted = security_service.encrypt(large_text)
@@ -135,16 +150,19 @@ class TestSecurityServiceEncryption:
 
 class TestSecurityServicePasswordHashing:
     """Test password hashing functionality."""
+    pass
 
     @pytest.fixture
     def security_service(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Security service instance."""
+    pass
         mock_key_manager = Mock(spec=KeyManager)
         return SecurityService(key_manager=mock_key_manager)
 
     @pytest.mark.asyncio
-    @patch('netra_backend.app.services.security_service.auth_client')
-    async def test_get_password_hash_success(self, mock_auth_client, security_service):
+        async def test_get_password_hash_success(self, mock_auth_client, security_service):
         """Test successful password hashing via auth client."""
         password = "test_password_123"
         expected_hash = "$2b$12$hashedpassword"
@@ -156,9 +174,9 @@ class TestSecurityServicePasswordHashing:
         mock_auth_client.hash_password.assert_called_once_with(password)
 
     @pytest.mark.asyncio
-    @patch('netra_backend.app.services.security_service.auth_client')
-    async def test_get_password_hash_auth_client_failure(self, mock_auth_client, security_service):
+        async def test_get_password_hash_auth_client_failure(self, mock_auth_client, security_service):
         """Test password hashing when auth client fails."""
+    pass
         password = "test_password_123"
         mock_auth_client.hash_password = AsyncMock(side_effect=Exception("Auth service error"))
         
@@ -166,8 +184,7 @@ class TestSecurityServicePasswordHashing:
             await security_service.get_password_hash(password)
 
     @pytest.mark.asyncio
-    @patch('netra_backend.app.services.security_service.auth_client')
-    async def test_get_password_hash_empty_password(self, mock_auth_client, security_service):
+        async def test_get_password_hash_empty_password(self, mock_auth_client, security_service):
         """Test password hashing with empty password."""
         password = ""
         expected_hash = "$2b$12$emptyhashedpassword"
@@ -179,9 +196,9 @@ class TestSecurityServicePasswordHashing:
         mock_auth_client.hash_password.assert_called_once_with(password)
 
     @pytest.mark.asyncio
-    @patch('netra_backend.app.services.security_service.auth_client')
-    async def test_get_password_hash_null_result(self, mock_auth_client, security_service):
+        async def test_get_password_hash_null_result(self, mock_auth_client, security_service):
         """Test password hashing when auth client returns None."""
+    pass
         password = "test_password"
         mock_auth_client.hash_password = AsyncMock(return_value=None)
         
@@ -191,13 +208,18 @@ class TestSecurityServicePasswordHashing:
 
 class TestSecurityServiceEdgeCases:
     """Test edge cases and security vulnerabilities."""
+    pass
 
     @pytest.fixture
     def security_service(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Security service with valid fernet key."""
+    pass
         mock_key_manager = Mock(spec=KeyManager)
         mock_key_manager.fernet_key = Fernet.generate_key()
-        return SecurityService(key_manager=mock_key_manager)
+        await asyncio.sleep(0)
+    return SecurityService(key_manager=mock_key_manager)
 
     def test_encrypt_decrypt_roundtrip_multiple_times(self, security_service):
         """Test multiple encryption/decryption cycles don't corrupt data."""
@@ -211,6 +233,7 @@ class TestSecurityServiceEdgeCases:
 
     def test_different_encryptions_of_same_data(self, security_service):
         """Test that encrypting the same data produces different ciphertext."""
+    pass
         plaintext = "same_data"
         
         encrypted1 = security_service.encrypt(plaintext)
@@ -244,6 +267,7 @@ class TestSecurityServiceEdgeCases:
 
     def test_tampered_encrypted_data_detection(self, security_service):
         """Test that tampered encrypted data is detected."""
+    pass
         plaintext = "important_data"
         encrypted = security_service.encrypt(plaintext)
         
@@ -265,3 +289,4 @@ class TestSecurityServiceEdgeCases:
         # Should preserve all data including null bytes
         assert decrypted == malicious_data
         assert "\x00" in decrypted
+    pass

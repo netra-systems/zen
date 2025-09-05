@@ -7,13 +7,17 @@ Essential error response validation.
 
 import sys
 from pathlib import Path
+from test_framework.database.test_database_manager import TestDatabaseManager
+from auth_service.core.auth_manager import AuthManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 # Test framework import - using pytest fixtures instead
 
 import json
 import uuid
 from typing import Any, Dict
-from unittest.mock import AsyncMock, MagicMock, Mock, patch, patch
 
 import pytest
 
@@ -23,7 +27,7 @@ class TestAPIErrorHandlingCritical:
     async def test_bad_request_error(self):
         """Test 400 Bad Request error handling."""
         # Mock: Generic component isolation for controlled unit testing
-        mock_client = AsyncMock()
+        mock_client = AsyncNone  # TODO: Use real service instance
         
         # Test 400 Bad Request
         # Mock: Async component isolation for testing without real async operations
@@ -39,7 +43,7 @@ class TestAPIErrorHandlingCritical:
     async def test_unauthorized_error(self):
         """Test 401 Unauthorized error handling."""
         # Mock: Generic component isolation for controlled unit testing
-        mock_client = AsyncMock()
+        mock_client = AsyncNone  # TODO: Use real service instance
         
         # Test 401 Unauthorized
         # Mock: Async component isolation for testing without real async operations
@@ -54,7 +58,7 @@ class TestAPIErrorHandlingCritical:
     async def test_forbidden_error(self):
         """Test 403 Forbidden error handling."""
         # Mock: Generic component isolation for controlled unit testing
-        mock_client = AsyncMock()
+        mock_client = AsyncNone  # TODO: Use real service instance
         
         # Test 403 Forbidden
         # Mock: Async component isolation for testing without real async operations
@@ -69,7 +73,7 @@ class TestAPIErrorHandlingCritical:
     async def test_not_found_error(self):
         """Test 404 Not Found error handling."""
         # Mock: Generic component isolation for controlled unit testing
-        mock_client = AsyncMock()
+        mock_client = AsyncNone  # TODO: Use real service instance
         
         # Test 404 Not Found
         # Mock: Async component isolation for testing without real async operations
@@ -84,7 +88,7 @@ class TestAPIErrorHandlingCritical:
     async def test_internal_server_error(self):
         """Test 500 Internal Server Error handling."""
         # Mock: Generic component isolation for controlled unit testing
-        mock_client = AsyncMock()
+        mock_client = AsyncNone  # TODO: Use real service instance
         
         # Test 500 Internal Server Error
         # Mock: Async component isolation for testing without real async operations
@@ -99,7 +103,7 @@ class TestAPIErrorHandlingCritical:
     async def test_validation_error_detail(self):
         """Test validation error detail formatting."""
         # Mock: Generic component isolation for controlled unit testing
-        mock_client = AsyncMock()
+        mock_client = AsyncNone  # TODO: Use real service instance
         
         # Mock: Async component isolation for testing without real async operations
         mock_client.post = AsyncMock(return_value={
@@ -122,7 +126,7 @@ class TestAPIErrorHandlingCritical:
     async def test_authentication_invalid_credentials(self):
         """Test authentication with invalid credentials."""
         # Mock: Generic component isolation for controlled unit testing
-        mock_client = AsyncMock()
+        mock_client = AsyncNone  # TODO: Use real service instance
         
         # Mock: Async component isolation for testing without real async operations
         mock_client.post = AsyncMock(return_value={
@@ -140,7 +144,7 @@ class TestAPIErrorHandlingCritical:
     async def test_permission_insufficient_rights(self):
         """Test insufficient permission rights."""
         # Mock: Generic component isolation for controlled unit testing
-        mock_client = AsyncMock()
+        mock_client = AsyncNone  # TODO: Use real service instance
         auth_headers = {"Authorization": "Bearer user_token"}
         
         # Mock: Async component isolation for testing without real async operations
@@ -159,7 +163,7 @@ class TestAPIErrorHandlingCritical:
     async def test_resource_not_found_specific(self):
         """Test specific resource not found errors."""
         # Mock: Generic component isolation for controlled unit testing
-        mock_client = AsyncMock()
+        mock_client = AsyncNone  # TODO: Use real service instance
         auth_headers = {"Authorization": "Bearer token123"}
         
         endpoints = [
@@ -181,7 +185,7 @@ class TestAPIErrorHandlingCritical:
     async def test_malformed_json_error(self):
         """Test malformed JSON request error."""
         # Mock: Generic component isolation for controlled unit testing
-        mock_client = AsyncMock()
+        mock_client = AsyncNone  # TODO: Use real service instance
         
         # Mock: Async component isolation for testing without real async operations
         mock_client.post = AsyncMock(return_value={
@@ -196,7 +200,7 @@ class TestAPIErrorHandlingCritical:
     async def test_missing_required_headers(self):
         """Test missing required headers error."""
         # Mock: Generic component isolation for controlled unit testing
-        mock_client = AsyncMock()
+        mock_client = AsyncNone  # TODO: Use real service instance
         
         # Mock: Async component isolation for testing without real async operations
         mock_client.get = AsyncMock(return_value={
@@ -211,7 +215,7 @@ class TestAPIErrorHandlingCritical:
     async def test_invalid_token_format(self):
         """Test invalid token format error."""
         # Mock: Generic component isolation for controlled unit testing
-        mock_client = AsyncMock()
+        mock_client = AsyncNone  # TODO: Use real service instance
         auth_headers = {"Authorization": "Invalid token_format"}
         
         # Mock: Async component isolation for testing without real async operations
@@ -226,7 +230,7 @@ class TestAPIErrorHandlingCritical:
     async def test_expired_token_error(self):
         """Test expired token error."""
         # Mock: Generic component isolation for controlled unit testing
-        mock_client = AsyncMock()
+        mock_client = AsyncNone  # TODO: Use real service instance
         auth_headers = {"Authorization": "Bearer expired_token"}
         
         # Mock: Async component isolation for testing without real async operations
@@ -242,7 +246,7 @@ class TestAPIErrorHandlingCritical:
     async def test_method_not_allowed(self):
         """Test method not allowed error."""
         # Mock: Generic component isolation for controlled unit testing
-        mock_client = AsyncMock()
+        mock_client = AsyncNone  # TODO: Use real service instance
         
         # Mock: Async component isolation for testing without real async operations
         mock_client.patch = AsyncMock(return_value={
@@ -258,7 +262,7 @@ class TestAPIErrorHandlingCritical:
     async def test_content_type_validation(self):
         """Test content type validation error."""
         # Mock: Generic component isolation for controlled unit testing
-        mock_client = AsyncMock()
+        mock_client = AsyncNone  # TODO: Use real service instance
         auth_headers = {"Authorization": "Bearer token123"}
         
         # Mock: Async component isolation for testing without real async operations
@@ -278,7 +282,7 @@ class TestAPIErrorHandlingCritical:
     async def test_request_timeout_error(self):
         """Test request timeout error."""
         # Mock: Generic component isolation for controlled unit testing
-        mock_client = AsyncMock()
+        mock_client = AsyncNone  # TODO: Use real service instance
         auth_headers = {"Authorization": "Bearer token123"}
         
         # Mock: Async component isolation for testing without real async operations
@@ -297,7 +301,7 @@ class TestAPIErrorHandlingCritical:
     async def test_payload_too_large(self):
         """Test payload too large error."""
         # Mock: Generic component isolation for controlled unit testing
-        mock_client = AsyncMock()
+        mock_client = AsyncNone  # TODO: Use real service instance
         auth_headers = {"Authorization": "Bearer token123"}
         
         # Mock: Async component isolation for testing without real async operations
@@ -317,7 +321,7 @@ class TestAPIErrorHandlingCritical:
     async def test_service_unavailable(self):
         """Test service unavailable error."""
         # Mock: Generic component isolation for controlled unit testing
-        mock_client = AsyncMock()
+        mock_client = AsyncNone  # TODO: Use real service instance
         
         # Mock: Async component isolation for testing without real async operations
         mock_client.get = AsyncMock(return_value={
@@ -331,7 +335,7 @@ class TestAPIErrorHandlingCritical:
     async def test_database_connection_error(self):
         """Test database connection error handling."""
         # Mock: Generic component isolation for controlled unit testing
-        mock_client = AsyncMock()
+        mock_client = AsyncNone  # TODO: Use real service instance
         auth_headers = {"Authorization": "Bearer token123"}
         
         # Mock: Async component isolation for testing without real async operations
@@ -346,7 +350,7 @@ class TestAPIErrorHandlingCritical:
     async def test_error_response_consistency(self):
         """Test error response format consistency."""
         # Mock: Generic component isolation for controlled unit testing
-        mock_client = AsyncMock()
+        mock_client = AsyncNone  # TODO: Use real service instance
         
         error_codes = [400, 401, 403, 404, 422, 500]
         
@@ -364,7 +368,7 @@ class TestAPIErrorHandlingCritical:
     async def test_cascading_error_prevention(self):
         """Test cascading error prevention."""
         # Mock: Generic component isolation for controlled unit testing
-        mock_client = AsyncMock()
+        mock_client = AsyncNone  # TODO: Use real service instance
         auth_headers = {"Authorization": "Bearer token123"}
         
         # First error

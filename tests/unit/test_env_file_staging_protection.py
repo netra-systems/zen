@@ -7,8 +7,10 @@ protecting against accidental exposure of development secrets.
 import os
 import tempfile
 from pathlib import Path
-from unittest.mock import patch
 import pytest
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
 
 
 def test_env_file_not_loaded_in_staging():

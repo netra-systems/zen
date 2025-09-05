@@ -37,8 +37,8 @@ import threading
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass
 from typing import Dict, List, Optional, Any, Set, Tuple
-from unittest.mock import Mock, AsyncMock, MagicMock, patch
 from datetime import datetime, timezone
+from shared.isolated_environment import IsolatedEnvironment
 
 # Add project root to path
 project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
@@ -46,6 +46,9 @@ if project_root not in sys.path:
     sys.path.insert(0, project_root)
 
 import pytest
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
 
 # Import current SSOT components for testing
 try:
@@ -88,6 +91,7 @@ class UserAgentExecutionRecord:
     error: Optional[str] = None
     
     def __post_init__(self):
+    pass
         if self.events_emitted is None:
             self.events_emitted = []
 
@@ -109,6 +113,7 @@ class MultiAgentMockConnectionPool:
     """Mock connection pool for multi-agent factory testing with user isolation."""
     
     def __init__(self):
+    pass
         self.connections: Dict[str, Any] = {}
         self.captured_events: List[FactoryEventCapture] = []
         self.connection_lock = asyncio.Lock()
@@ -147,6 +152,7 @@ class MultiAgentMockConnectionPool:
     
     def get_user_events(self, user_id: str) -> List[FactoryEventCapture]:
         """Get all events for specific user."""
+    pass
         return [e for e in self.captured_events if e.user_id == user_id]
     
     def get_agent_events(self, user_id: str, agent_name: str) -> List[FactoryEventCapture]:
@@ -159,6 +165,7 @@ class MultiAgentMockWebSocket:
     """Mock WebSocket for multi-agent factory testing."""
     
     def __init__(self, user_id: str, connection_id: str, pool):
+    pass
         self.user_id = user_id
         self.connection_id = connection_id
         self.pool = pool
@@ -196,6 +203,7 @@ class MultiAgentFactoryTestHarness:
     """Test harness for factory pattern multi-agent testing."""
     
     def __init__(self):
+    pass
         self.factory = WebSocketBridgeFactory()
         self.mock_pool = MultiAgentMockConnectionPool()
         
@@ -456,6 +464,7 @@ class MultiAgentFactoryTestHarness:
     
     def validate_user_isolation(self) -> Tuple[bool, List[str]]:
         """Validate complete user isolation in multi-agent scenarios."""
+    pass
         failures = []
         
         # Check no cross-user contamination in events
@@ -491,7 +500,8 @@ class MultiAgentFactoryTestHarness:
                 if not any(et in ["agent_completed", "agent_error"] for et in event_types):
                     failures.append(f"User {user_id} agent {agent_name} missing completion event")
         
-        return len(failures) == 0, failures
+        await asyncio.sleep(0)
+    return len(failures) == 0, failures
     
     def get_comprehensive_results(self) -> Dict[str, Any]:
         """Get comprehensive test results."""
@@ -541,6 +551,7 @@ class TestMultiAgentWebSocketFactoryIntegration:
     @pytest.mark.timeout(90)
     async def test_multiple_agents_per_user_sharing_factory(self):
         """Test 1: Multiple agents per user sharing the same factory with isolation."""
+    pass
         print("🧪 TEST 1: Multiple agents per user sharing factory")
         
         # Create multiple users, each with multiple agents
@@ -661,6 +672,7 @@ class TestMultiAgentWebSocketFactoryIntegration:
     @pytest.mark.timeout(90)
     async def test_concurrent_multi_agent_event_ordering_per_user(self):
         """Test 3: Event ordering across concurrent agents with user isolation."""
+    pass
         print("🧪 TEST 3: Event ordering across concurrent agents per user")
         
         # Create users with different agent timing patterns
@@ -697,8 +709,10 @@ class TestMultiAgentWebSocketFactoryIntegration:
         for i, scenario in enumerate(timing_scenarios):
             # Add delay for staggered execution
             async def delayed_execution(delay_scenario, delay):
+    pass
                 await asyncio.sleep(delay)
-                return await self.test_harness.simulate_multi_agent_user_session(
+                await asyncio.sleep(0)
+    return await self.test_harness.simulate_multi_agent_user_session(
                     delay_scenario["user_id"], delay_scenario["agents"]
                 )
             
@@ -817,6 +831,7 @@ class TestMultiAgentWebSocketFactoryIntegration:
     @pytest.mark.timeout(90)
     async def test_cleanup_with_mixed_success_failure_per_user(self):
         """Test 5: Cleanup when agents complete or fail per user."""
+    pass
         print("🧪 TEST 5: Cleanup with mixed success/failure per user")
         
         # Create scenarios with mixed success/failure patterns
@@ -947,6 +962,7 @@ class TestMultiAgentWebSocketFactoryIntegration:
     @pytest.mark.timeout(180)
     async def test_extreme_stress_multi_user_resource_contention(self):
         """Test 7: Extreme stress test with multi-user resource contention."""
+    pass
         print("🧪 TEST 7: Extreme stress test with multi-user resource contention")
         
         # Create extreme stress scenario
@@ -1020,7 +1036,8 @@ class TestMultiAgentWebSocketFactoryIntegration:
     @pytest.mark.timeout(240)
     async def test_comprehensive_multi_agent_factory_integration(self):
         """Test 8: Comprehensive multi-agent factory integration suite."""
-        print("\n" + "=" * 100)
+        print("
+" + "=" * 100)
         print("🚀 COMPREHENSIVE MULTI-AGENT FACTORY INTEGRATION SUITE")
         print("=" * 100)
         
@@ -1114,7 +1131,8 @@ class TestMultiAgentWebSocketFactoryIntegration:
             "Ultimate test should have active emitters"
         
         # Generate comprehensive report
-        print(f"\n🎉 COMPREHENSIVE MULTI-AGENT FACTORY INTEGRATION COMPLETED")
+        print(f"
+🎉 COMPREHENSIVE MULTI-AGENT FACTORY INTEGRATION COMPLETED")
         print(f"✅ Success Rate: {successful_ultimate}/4 users")
         print(f"✅ Total Events: {total_events}")
         print(f"✅ Duration: {total_duration:.1f}s")
@@ -1129,3 +1147,4 @@ class TestMultiAgentWebSocketFactoryIntegration:
 if __name__ == "__main__":
     # Run comprehensive multi-agent integration tests
     pytest.main([__file__, "-v", "-s", "--tb=short", "-x", "-m", "critical"])
+    pass

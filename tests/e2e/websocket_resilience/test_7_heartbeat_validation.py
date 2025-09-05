@@ -16,6 +16,7 @@ from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
 from enum import Enum
 from typing import Any, Dict, List, Optional, Set, Tuple
+from shared.isolated_environment import IsolatedEnvironment
 
 import pytest
 import websockets

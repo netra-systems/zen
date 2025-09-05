@@ -5,6 +5,7 @@ import requests
 import json
 import sys
 from urllib.parse import urlencode, parse_qs, urlparse
+from shared.isolated_environment import IsolatedEnvironment
 
 # Staging URLs
 STAGING_URLS = {

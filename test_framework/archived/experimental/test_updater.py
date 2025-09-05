@@ -12,6 +12,7 @@ import sys
 from enum import Enum
 from pathlib import Path
 from typing import Any, Dict, List, Optional
+from shared.isolated_environment import IsolatedEnvironment
 
 # Add parent directory to path for imports
 

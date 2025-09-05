@@ -20,6 +20,7 @@ from pathlib import Path
 from typing import Dict, List, Set, Tuple
 import pytest
 from test_framework.base_integration_test import BaseIntegrationTest
+from shared.isolated_environment import IsolatedEnvironment
 
 
 @pytest.mark.e2e
@@ -37,6 +38,7 @@ class TestTypeExportConflicts(BaseIntegrationTest):
     @pytest.mark.e2e
     def test_detect_base_websocket_payload_duplicates_FAILING(self):
         """
+    pass
         FAILING TEST: Detects duplicate BaseWebSocketPayload definitions.
         
         This test SHOULD FAIL with current codebase because BaseWebSocketPayload
@@ -55,7 +57,8 @@ class TestTypeExportConflicts(BaseIntegrationTest):
         for ts_file in self.types_path.rglob("*.ts"):
             try:
                 content = ts_file.read_text(encoding='utf-8')
-                lines = content.split('\n')
+                lines = content.split('
+')
                 
                 for i, line in enumerate(lines, 1):
                     # Look for interface definitions
@@ -96,13 +99,18 @@ class TestTypeExportConflicts(BaseIntegrationTest):
         # This assertion SHOULD FAIL - we expect multiple definitions
         assert len(base_websocket_definitions) <= 1, (
             f"SSOT Violation: Found {len(base_websocket_definitions)} definitions/exports "
-            f"of BaseWebSocketPayload. Expected exactly 1 canonical definition.\n"
-            f"Conflicting definitions found in:\n" + 
-            '\n'.join([
+            f"of BaseWebSocketPayload. Expected exactly 1 canonical definition.
+"
+            f"Conflicting definitions found in:
+" + 
+            '
+'.join([
                 f"  - {defn['file']}:{defn['line']} ({defn['type']}): {defn['content']}"
                 for defn in base_websocket_definitions
             ]) +
-            f"\n\nThis violates the Single Source of Truth (SSOT) principle. "
+            f"
+
+This violates the Single Source of Truth (SSOT) principle. "
             f"BaseWebSocketPayload should be defined once in a canonical location."
         )
     
@@ -115,6 +123,7 @@ class TestTypeExportConflicts(BaseIntegrationTest):
         TypeScript compiler errors like "Duplicate identifier" or 
         "Type 'BaseWebSocketPayload' is not assignable to type 'BaseWebSocketPayload'".
         """
+    pass
         # Run TypeScript compiler with --noEmit to check for type errors
         try:
             result = subprocess.run(
@@ -135,9 +144,13 @@ class TestTypeExportConflicts(BaseIntegrationTest):
             
             # This assertion SHOULD FAIL due to type conflicts
             assert result.returncode == 0 and not has_duplicate_errors, (
-                f"TypeScript compilation failed with duplicate type errors.\n"
-                f"Exit code: {result.returncode}\n"
-                f"Errors:\n{compilation_errors}\n"
+                f"TypeScript compilation failed with duplicate type errors.
+"
+                f"Exit code: {result.returncode}
+"
+                f"Errors:
+{compilation_errors}
+"
                 f"This indicates duplicate type definitions are causing conflicts."
             )
             
@@ -154,16 +167,21 @@ class TestTypeExportConflicts(BaseIntegrationTest):
         This test SHOULD FAIL because the codebase contains ~104+ duplicate
         type definitions as documented in the critical remediation reports.
         """
+    pass
         duplicate_types = self._scan_for_duplicate_types()
         
         # This assertion SHOULD FAIL - we expect many duplicates
         assert len(duplicate_types) == 0, (
-            f"Found {len(duplicate_types)} duplicate type definitions violating SSOT:\n" +
-            '\n'.join([
+            f"Found {len(duplicate_types)} duplicate type definitions violating SSOT:
+" +
+            '
+'.join([
                 f"  {type_name}: {len(locations)} definitions in {locations}"
                 for type_name, locations in duplicate_types.items()
             ]) +
-            f"\n\nEach type should be defined exactly once in a canonical location."
+            f"
+
+Each type should be defined exactly once in a canonical location."
         )
     
     @pytest.mark.e2e
@@ -176,17 +194,24 @@ class TestTypeExportConflicts(BaseIntegrationTest):
         - Runtime exports: export { BaseWebSocketPayload }
         - Direct re-exports with different styles
         """
+    pass
         mixed_exports = self._detect_mixed_export_styles()
         
         # This assertion SHOULD FAIL due to inconsistent export patterns
         assert len(mixed_exports) == 0, (
-            f"Found {len(mixed_exports)} types with mixed export styles:\n" +
-            '\n'.join([
-                f"  {type_name}:\n    " + 
-                '\n    '.join([f"{style} in {file}" for style, file in styles])
+            f"Found {len(mixed_exports)} types with mixed export styles:
+" +
+            '
+'.join([
+                f"  {type_name}:
+    " + 
+                '
+    '.join([f"{style} in {file}" for style, file in styles])
                 for type_name, styles in mixed_exports.items()
             ]) +
-            f"\n\nAll exports for a type should use consistent style (prefer type-only exports)."
+            f"
+
+All exports for a type should use consistent style (prefer type-only exports)."
         )
 
     @pytest.mark.e2e
@@ -197,17 +222,22 @@ class TestTypeExportConflicts(BaseIntegrationTest):
         This tests a similar failure mode where interfaces with similar names
         (like WebSocketMessage vs WebSocketMessagePayload) create confusion.
         """
+    pass
         similar_interfaces = self._find_similar_interface_names()
         
         # This assertion SHOULD FAIL due to naming conflicts  
         assert len(similar_interfaces) == 0, (
             f"Found {len(similar_interfaces)} groups of similarly named interfaces "
-            f"that could cause confusion:\n" +
-            '\n'.join([
+            f"that could cause confusion:
+" +
+            '
+'.join([
                 f"  Similar group: {', '.join(group)}"
                 for group in similar_interfaces
             ]) +
-            f"\n\nInterface names should be distinct to avoid developer confusion."
+            f"
+
+Interface names should be distinct to avoid developer confusion."
         )
     
     def _scan_for_duplicate_types(self) -> Dict[str, List[str]]:
@@ -308,7 +338,8 @@ class TestTypeExportConflicts(BaseIntegrationTest):
         
         # Report findings for debugging
         if self.conflicting_types:
-            print(f"\n=== Type Conflict Analysis ===")
+            print(f"
+=== Type Conflict Analysis ===")
             print(f"Found {len(self.conflicting_types)} BaseWebSocketPayload references")
             for conflict in self.conflicting_types:
                 print(f"  {conflict['file']}:{conflict['line']} - {conflict['type']}")
@@ -316,3 +347,4 @@ class TestTypeExportConflicts(BaseIntegrationTest):
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])
+    pass

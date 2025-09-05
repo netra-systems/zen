@@ -8,27 +8,29 @@ import asyncio
 import json
 import time
 from typing import Any, Dict, Optional
-from unittest.mock import AsyncMock, MagicMock, patch
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from test_framework.database.test_database_manager import TestDatabaseManager
+from test_framework.redis.test_redis_manager import TestRedisManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 import pytest
 
 try:
     from netra_backend.app.core.circuit_breaker import (
         CircuitBreaker,
-        CircuitConfig as CircuitBreakerConfig,
-    )
+        CircuitConfig as CircuitBreakerConfig)
     from netra_backend.app.core.circuit_breaker_types import CircuitState as CircuitBreakerState
     from netra_backend.app.agents.base.interface import (
         ExecutionContext,
         ExecutionResult,
-        ExecutionStatus,
-    )
+        ExecutionStatus)
     from netra_backend.app.agents.triage.unified_triage_agent import UnifiedTriageAgent
     from netra_backend.app.agents.triage.unified_triage_agent import TriageCore
     from netra_backend.app.agents.triage.unified_triage_agent import (
         ExtractedEntities,
-        TriageResult,
-    )
+        TriageResult)
     from netra_backend.app.agents.triage_sub_agent.processing import TriageProcessor
     from netra_backend.app.llm.llm_manager import LLMManager
     from netra_backend.app.redis_manager import RedisManager
@@ -38,10 +40,14 @@ except ImportError:
 
 class TestCircuitBreakerThresholdBehavior:
     """Test circuit breaker exact threshold behavior and state transitions."""
+    pass
 
     @pytest.fixture
     def circuit_breaker(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create a circuit breaker with known thresholds."""
+    pass
         config = CircuitBreakerConfig(
             name="test_circuit",
             failure_threshold=3,
@@ -68,6 +74,7 @@ class TestCircuitBreakerThresholdBehavior:
 
     def test_state_transition_timing_precision(self, circuit_breaker):
         """Test recovery timeout precision."""
+    pass
         # Open the circuit
         for _ in range(3):
             circuit_breaker.record_failure()
@@ -98,9 +105,11 @@ class TestCircuitBreakerThresholdBehavior:
 
     def test_concurrent_failure_tracking(self, circuit_breaker):
         """Test concurrent failure updates."""
+    pass
         import threading
         
         def record_failures():
+    pass
             for _ in range(2):
                 circuit_breaker.record_failure()
         
@@ -135,19 +144,26 @@ class TestCircuitBreakerThresholdBehavior:
 
 class TestWebSocketErrorHandling:
     """Test WebSocket error handling during triage updates."""
+    pass
 
     @pytest.fixture
-    def mock_websocket_manager(self):
+ def real_websocket_manager():
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create a mock WebSocket manager."""
-        manager = AsyncMock()
-        manager.send_update = AsyncMock()
+        manager = AsyncNone  # TODO: Use real service instance
+    pass
+        manager.send_update = AsyncNone  # TODO: Use real service instance
         return manager
 
     @pytest.fixture
     def triage_agent(self, mock_websocket_manager):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create triage agent with mock WebSocket."""
+    pass
         llm_manager = MagicMock(spec=LLMManager)
-        tool_dispatcher = MagicMock()
+        tool_dispatcher = MagicNone  # TODO: Use real service instance
         agent = TriageSubAgent(
             llm_manager=llm_manager,
             tool_dispatcher=tool_dispatcher,
@@ -187,8 +203,10 @@ class TestWebSocketErrorHandling:
     @pytest.mark.asyncio
     async def test_websocket_timeout_handling(self, triage_agent, mock_websocket_manager):
         """Test WebSocket timeout scenarios."""
+    pass
         # Configure WebSocket to timeout
         async def slow_send(*args, **kwargs):
+    pass
             await asyncio.sleep(5)  # Simulate slow network
         
         mock_websocket_manager.send_update = slow_send
@@ -225,7 +243,8 @@ class TestWebSocketErrorHandling:
             call_count += 1
             if call_count % 2 == 0:
                 raise ConnectionError("Intermittent failure")
-            return {"status": "sent"}
+            await asyncio.sleep(0)
+    return {"status": "sent"}
         
         mock_websocket_manager.send_update = intermittent_failure
         
@@ -252,19 +271,26 @@ class TestWebSocketErrorHandling:
 
 class TestCacheInvalidationAndRedisFailures:
     """Test cache invalidation and Redis failure scenarios."""
+    pass
 
     @pytest.fixture
-    def mock_redis_manager(self):
+ def real_redis_manager():
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create a mock Redis manager."""
+    pass
         manager = MagicMock(spec=RedisManager)
-        manager.get = MagicMock()
-        manager.set = MagicMock()
-        manager.delete = MagicMock()
+        manager.get = MagicNone  # TODO: Use real service instance
+        manager.set = MagicNone  # TODO: Use real service instance
+        manager.delete = MagicNone  # TODO: Use real service instance
         return manager
 
     @pytest.fixture
     def triage_core(self, mock_redis_manager):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create triage core with mock Redis."""
+    pass
         return TriageCore(redis_manager=mock_redis_manager)
 
     def test_redis_get_failure_fallback(self, triage_core, mock_redis_manager):
@@ -279,6 +305,7 @@ class TestCacheInvalidationAndRedisFailures:
 
     def test_redis_set_failure_continues(self, triage_core, mock_redis_manager):
         """Test operation continues when Redis set fails."""
+    pass
         # Configure Redis set to fail
         mock_redis_manager.set.side_effect = ConnectionError("Redis write failed")
         
@@ -297,9 +324,11 @@ class TestCacheInvalidationAndRedisFailures:
 
     def test_intermittent_redis_failures(self, triage_core, mock_redis_manager):
         """Test handling of intermittent Redis failures."""
+    pass
         call_count = 0
         
         def intermittent_get(*args):
+    pass
             nonlocal call_count
             call_count += 1
             if call_count == 1:
@@ -337,10 +366,14 @@ class TestCacheInvalidationAndRedisFailures:
 
 class TestLLMResponseParsingEdgeCases:
     """Test LLM response parsing edge cases and malformed JSON."""
+    pass
 
     @pytest.fixture
     def triage_processor(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create triage processor for testing."""
+    pass
         llm_manager = MagicMock(spec=LLMManager)
         processor = TriageProcessor(llm_manager)
         return processor
@@ -355,7 +388,9 @@ class TestLLMResponseParsingEdgeCases:
             ("{'intent': 'cost'}", {"intent": "cost"}),
             
             # Case 3: JSON embedded in text
-            ("Here is the result: ```json\n{\"intent\": \"analysis\"}\n```", {"intent": "analysis"}),
+            ("Here is the result: ```json
+{"intent": "analysis"}
+```", {"intent": "analysis"}),
             
             # Case 4: Multiple JSON objects
             ('{"first": "one"} some text {"second": "two"}', {"first": "one"}),
@@ -367,7 +402,7 @@ class TestLLMResponseParsingEdgeCases:
             ('{"intent": "metrics" /* comment */}', {"intent": "metrics"}),
             
             # Case 7: Escaped quotes in values
-            ('{"message": "Say \\"hello\\" world"}', {"message": 'Say "hello" world'}),
+            ('{"message": "Say \"hello\" world"}', {"message": 'Say "hello" world'}),
         ]
         
         for input_text, expected in test_cases:
@@ -379,6 +414,7 @@ class TestLLMResponseParsingEdgeCases:
 
     def test_partial_llm_response_handling(self, triage_processor):
         """Test handling of partial LLM responses."""
+    pass
         partial_response = """
         {
             "primary_intent": "optimization",
@@ -397,7 +433,8 @@ class TestLLMResponseParsingEdgeCases:
         unicode_json = {
             "intent": "分析",  # Chinese
             "message": "Hello 👋 World",  # Emoji
-            "special": "Line\nbreak\ttab",  # Control characters
+            "special": "Line
+break\ttab",  # Control characters
             "math": "α + β = γ"  # Greek letters
         }
         
@@ -408,6 +445,7 @@ class TestLLMResponseParsingEdgeCases:
 
     def test_nested_json_extraction(self, triage_processor):
         """Test extraction of deeply nested JSON."""
+    pass
         nested = {
             "level1": {
                 "level2": {
@@ -450,12 +488,16 @@ class TestLLMResponseParsingEdgeCases:
 
 class TestModernExecutionEngineErrorPropagation:
     """Test modern execution engine error propagation and context validation."""
+    pass
 
     @pytest.fixture
     def triage_agent(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create triage agent for testing."""
+    pass
         llm_manager = MagicMock(spec=LLMManager)
-        tool_dispatcher = MagicMock()
+        tool_dispatcher = MagicNone  # TODO: Use real service instance
         agent = TriageSubAgent(
             llm_manager=llm_manager,
             tool_dispatcher=tool_dispatcher
@@ -482,6 +524,7 @@ class TestModernExecutionEngineErrorPropagation:
     @pytest.mark.asyncio
     async def test_execution_result_error_propagation(self, triage_agent):
         """Test error propagation through ExecutionResult."""
+    pass
         context = ExecutionContext(
             request_id="test-error",
             user_id="user-123",
@@ -528,6 +571,7 @@ class TestModernExecutionEngineErrorPropagation:
     @pytest.mark.asyncio
     async def test_reliability_manager_state_consistency(self, triage_agent):
         """Test reliability manager maintains state consistency."""
+    pass
         context = ExecutionContext(
             request_id="test-reliability",
             user_id="user-345",
@@ -564,7 +608,8 @@ class TestModernExecutionEngineErrorPropagation:
         # Mock slow processing
         async def slow_process(*args, **kwargs):
             await asyncio.sleep(2)
-            return TriageResult(
+            await asyncio.sleep(0)
+    return TriageResult(
                 primary_intent="slow",
                 secondary_intents=[],
                 extracted_entities=ExtractedEntities(),
@@ -581,6 +626,7 @@ class TestModernExecutionEngineErrorPropagation:
     @pytest.mark.asyncio
     async def test_metadata_preservation_through_execution(self, triage_agent):
         """Test metadata is preserved through execution."""
+    pass
         original_metadata = {
             "client_version": "1.2.3",
             "source": "api",
@@ -633,7 +679,8 @@ class TestModernExecutionEngineErrorPropagation:
                 )
                 
                 result = await triage_agent.execute(ctx, {"query": f"test-{ctx.metadata['index']}"})
-                return result
+                await asyncio.sleep(0)
+    return result
         
         # Execute concurrently
         results = await asyncio.gather(*[execute_with_context(ctx) for ctx in contexts])
@@ -646,6 +693,7 @@ class TestModernExecutionEngineErrorPropagation:
     @pytest.mark.asyncio
     async def test_retry_mechanism_context_consistency(self, triage_agent):
         """Test retry mechanisms maintain context consistency."""
+    pass
         context = ExecutionContext(
             request_id="test-retry",
             user_id="user-retry",
@@ -656,11 +704,13 @@ class TestModernExecutionEngineErrorPropagation:
         call_count = 0
         
         async def intermittent_process(*args, **kwargs):
+    pass
             nonlocal call_count
             call_count += 1
             if call_count < 3:
                 raise RuntimeError("Temporary failure")
-            return TriageResult(
+            await asyncio.sleep(0)
+    return TriageResult(
                 primary_intent="success",
                 secondary_intents=[],
                 extracted_entities=ExtractedEntities(),

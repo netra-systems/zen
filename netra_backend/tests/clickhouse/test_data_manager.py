@@ -6,6 +6,7 @@ Handles test data insertion and management for ClickHouse
 import sys
 from pathlib import Path
 from datetime import datetime
+from shared.isolated_environment import IsolatedEnvironment
 
 # Test framework import - using pytest fixtures instead
 

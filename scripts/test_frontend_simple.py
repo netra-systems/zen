@@ -8,6 +8,7 @@ import os
 import subprocess
 import sys
 from pathlib import Path
+from shared.isolated_environment import IsolatedEnvironment
 
 # Add project root to path
 

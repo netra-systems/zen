@@ -1,4 +1,5 @@
 from shared.isolated_environment import get_env
+from shared.isolated_environment import IsolatedEnvironment
 #!/usr/bin/env python3
 """Test NACIS core components without backend or complex dependencies.
 
@@ -14,7 +15,9 @@ import asyncio
 import os
 import sys
 from pathlib import Path
-from unittest.mock import Mock, AsyncMock
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
 
 # Add project root to path
 
@@ -27,13 +30,15 @@ async def test_nacis_core():
     """Test NACIS core components that don't need full agent initialization."""
     
     print("""
+    pass
 ╔══════════════════════════════════════════════════════════════╗
 ║         NACIS Core Components Test (No Backend)             ║
 ╚══════════════════════════════════════════════════════════════╝
     """)
     
     # Test 1: Model Cascade (CLQT Optimization)
-    print("\n" + "="*60)
+    print("
+" + "="*60)
     print("1. MODEL CASCADE (CLQT Optimization)")
     print("="*60)
     
@@ -43,13 +48,15 @@ async def test_nacis_core():
         cascade = ModelCascade()
         
         # Check tier configuration
-        print("\nTier Configuration:")
+        print("
+Tier Configuration:")
         print(f"  Tier 1 (Fast): {cascade.model_tiers[ModelTier.TIER1]}")
         print(f"  Tier 2 (Balanced): {cascade.model_tiers[ModelTier.TIER2]}")
         print(f"  Tier 3 (Powerful): {cascade.model_tiers[ModelTier.TIER3]}")
         
         # Test task routing
-        print("\nTask Routing:")
+        print("
+Task Routing:")
         test_tasks = [
             ("intent_classification", "Should use Tier 1"),
             ("research_extraction", "Should use Tier 2"),
@@ -61,13 +68,16 @@ async def test_nacis_core():
             model = cascade.get_model_for_task(task)
             print(f"  {task}: {model} ({expected})")
         
-        print("\n✅ Model Cascade working correctly")
+        print("
+✅ Model Cascade working correctly")
         
     except Exception as e:
-        print(f"\n❌ Model Cascade failed: {e}")
+        print(f"
+❌ Model Cascade failed: {e}")
     
     # Test 2: Confidence Manager
-    print("\n" + "="*60)
+    print("
+" + "="*60)
     print("2. CONFIDENCE MANAGER")
     print("="*60)
     
@@ -76,12 +86,14 @@ async def test_nacis_core():
         
         manager = ConfidenceManager()
         
-        print(f"\nConfidence Thresholds:")
+        print(f"
+Confidence Thresholds:")
         print(f"  High: {manager.confidence_thresholds['high']}")
         print(f"  Medium: {manager.confidence_thresholds['medium']}")
         print(f"  Low: {manager.confidence_thresholds['low']}")
         
-        print("\nCache Decisions:")
+        print("
+Cache Decisions:")
         test_scenarios = [
             ("tco_analysis", 0.95, "High confidence"),
             ("benchmarking", 0.85, "Medium confidence"),
@@ -93,13 +105,16 @@ async def test_nacis_core():
             decision = "Use cache" if should_cache else "Compute new"
             print(f"  {intent} ({confidence:.0%}): {decision} - {description}")
         
-        print("\n✅ Confidence Manager working correctly")
+        print("
+✅ Confidence Manager working correctly")
         
     except Exception as e:
-        print(f"\n❌ Confidence Manager failed: {e}")
+        print(f"
+❌ Confidence Manager failed: {e}")
     
     # Test 3: Execution Planner
-    print("\n" + "="*60)
+    print("
+" + "="*60)
     print("3. EXECUTION PLANNER")
     print("="*60)
     
@@ -109,7 +124,8 @@ async def test_nacis_core():
         
         planner = ExecutionPlanner()
         
-        print("\nExecution Plans by Intent:")
+        print("
+Execution Plans by Intent:")
         
         test_intents = [
             (IntentType.TCO_ANALYSIS, 0.85),
@@ -119,19 +135,23 @@ async def test_nacis_core():
         
         for intent, confidence in test_intents:
             plan = planner.create_plan(intent, confidence)
-            print(f"\n  {intent.value} (confidence: {confidence:.0%}):")
+            print(f"
+  {intent.value} (confidence: {confidence:.0%}):")
             print(f"    Priority: {plan.priority}")
             print(f"    Steps ({len(plan.steps)}):")
             for step in plan.steps:
                 print(f"      - {step.agent}: {step.action}")
         
-        print("\n✅ Execution Planner working correctly")
+        print("
+✅ Execution Planner working correctly")
         
     except Exception as e:
-        print(f"\n❌ Execution Planner failed: {e}")
+        print(f"
+❌ Execution Planner failed: {e}")
     
     # Test 4: Input Guardrails
-    print("\n" + "="*60)
+    print("
+" + "="*60)
     print("4. INPUT GUARDRAILS")
     print("="*60)
     
@@ -140,7 +160,8 @@ async def test_nacis_core():
         
         filters = InputFilters()
         
-        print(f"\nGuardrails Enabled: {filters.enabled}")
+        print(f"
+Guardrails Enabled: {filters.enabled}")
         
         test_inputs = [
             ("What is the TCO for GPT-4?", "Safe query"),
@@ -149,25 +170,30 @@ async def test_nacis_core():
             ("AAAAAAA!!!!!!!!", "Spam pattern"),
         ]
         
-        print("\nTesting Input Filtering:")
+        print("
+Testing Input Filtering:")
         for text, description in test_inputs:
             cleaned, warnings = await filters.filter_input(text)
             is_safe = filters.is_safe(warnings)
             
-            print(f"\n  Input: '{text[:40]}...' ({description})")
+            print(f"
+  Input: '{text[:40]}...' ({description})")
             print(f"    Safe: {'✅ Yes' if is_safe else '❌ No'}")
             if warnings:
                 print(f"    Warnings: {warnings[0][:50]}...")
             if text != cleaned:
                 print(f"    Cleaned: '{cleaned[:40]}...'")
         
-        print("\n✅ Input Guardrails working correctly")
+        print("
+✅ Input Guardrails working correctly")
         
     except Exception as e:
-        print(f"\n❌ Input Guardrails failed: {e}")
+        print(f"
+❌ Input Guardrails failed: {e}")
     
     # Test 5: Reliability Scorer
-    print("\n" + "="*60)
+    print("
+" + "="*60)
     print("5. RELIABILITY SCORER")
     print("="*60)
     
@@ -176,7 +202,8 @@ async def test_nacis_core():
         
         scorer = ReliabilityScorer()
         
-        print("\nSource Reliability Scoring:")
+        print("
+Source Reliability Scoring:")
         
         test_sources = [
             {
@@ -216,10 +243,12 @@ async def test_nacis_core():
         print("✅ Reliability Scorer working correctly")
         
     except Exception as e:
-        print(f"\n❌ Reliability Scorer failed: {e}")
+        print(f"
+❌ Reliability Scorer failed: {e}")
     
     # Test 6: Output Validators
-    print("\n" + "="*60)
+    print("
+" + "="*60)
     print("6. OUTPUT VALIDATORS")
     print("="*60)
     
@@ -228,7 +257,8 @@ async def test_nacis_core():
         
         validators = OutputValidators()
         
-        print("\nOutput Validation Tests:")
+        print("
+Output Validation Tests:")
         
         test_outputs = [
             {
@@ -249,7 +279,8 @@ async def test_nacis_core():
         ]
         
         for output in test_outputs:
-            print(f"\n  Testing: {output['description']}")
+            print(f"
+  Testing: {output['description']}")
             result = await validators.validate_output({
                 "data": output["data"],
                 "trace": output["trace"]
@@ -264,13 +295,16 @@ async def test_nacis_core():
             if result.get("disclaimers"):
                 print(f"    Disclaimers added: {len(result['disclaimers'])}")
         
-        print("\n✅ Output Validators working correctly")
+        print("
+✅ Output Validators working correctly")
         
     except Exception as e:
-        print(f"\n❌ Output Validators failed: {e}")
+        print(f"
+❌ Output Validators failed: {e}")
     
     # Summary
-    print("\n" + "="*60)
+    print("
+" + "="*60)
     print("SUMMARY")
     print("="*60)
     print("""

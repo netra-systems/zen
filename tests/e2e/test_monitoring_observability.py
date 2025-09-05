@@ -13,6 +13,7 @@ import asyncio
 import aiohttp
 from typing import Dict, List, Any
 from test_framework.http_client import TestClient
+from shared.isolated_environment import IsolatedEnvironment
 
 
 @pytest.mark.asyncio
@@ -64,7 +65,8 @@ async def test_service_health_metrics_collection():
                         if metric not in content:
                             missing_metrics.append(f"{service_name}: Missing essential metric '{metric}'")
                     
-                    print(f"✅ {service_name} metrics endpoint available with {len(content.split('\\n'))} lines of metrics")
+                    print(f"✅ {service_name} metrics endpoint available with {len(content.split('\
+'))} lines of metrics")
                     
             except Exception as e:
                 metric_failures.append(f"{service_name}: Failed to connect to metrics endpoint - {str(e)}")

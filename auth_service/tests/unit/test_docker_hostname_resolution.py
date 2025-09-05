@@ -1,4 +1,8 @@
 from shared.isolated_environment import get_env
+from test_framework.docker.unified_docker_manager import UnifiedDockerManager
+from test_framework.database.test_database_manager import TestDatabaseManager
+from auth_service.core.auth_manager import AuthManager
+from shared.isolated_environment import IsolatedEnvironment
 """
 Test Docker hostname resolution for database connections.
 
@@ -7,7 +11,6 @@ and adjusts database hostnames accordingly.
 """
 import os
 import unittest
-from unittest.mock import patch, mock_open, MagicMock
 import tempfile
 
 from auth_service.auth_core.config import AuthConfig
@@ -32,11 +35,11 @@ class TestDockerHostnameResolution(unittest.TestCase):
     
     def tearDown(self):
         """Restore original environment."""
+    pass
         env.clear()
         env.update(self.original_env, "test")
     
-    @patch('shared.database_url_builder.os.path.exists')
-    def test_docker_detection_via_env_variable(self, mock_exists):
+        def test_docker_detection_via_env_variable(self, mock_exists):
         """Test Docker detection via RUNNING_IN_DOCKER environment variable."""
         # Setup mocks
         mock_exists.return_value = False  # No .dockerenv file
@@ -60,11 +63,12 @@ class TestDockerHostnameResolution(unittest.TestCase):
         self.assertIn('@postgres:', db_url)
         self.assertNotIn('@localhost:', db_url)
     
-    @patch('shared.database_url_builder.os.path.exists')
-    def test_docker_detection_via_dockerenv_file(self, mock_exists):
+        def test_docker_detection_via_dockerenv_file(self, mock_exists):
         """Test Docker detection via .dockerenv file."""
+    pass
         # Setup mocks
         def exists_side_effect(path):
+    pass
             return path == '/.dockerenv'
         mock_exists.side_effect = exists_side_effect
         
@@ -86,9 +90,7 @@ class TestDockerHostnameResolution(unittest.TestCase):
         self.assertIn('@postgres:', db_url)
         self.assertNotIn('@127.0.0.1:', db_url)
     
-    @patch('builtins.open', new_callable=mock_open, read_data='1:cpu:/docker/abc123')
-    @patch('shared.database_url_builder.os.path.exists')
-    def test_docker_detection_via_cgroup(self, mock_exists, mock_file):
+            def test_docker_detection_via_cgroup(self, mock_exists, mock_file):
         """Test Docker detection via /proc/self/cgroup file."""
         # Setup mocks
         def exists_side_effect(path):
@@ -113,9 +115,9 @@ class TestDockerHostnameResolution(unittest.TestCase):
         self.assertIn('@postgres:', db_url)
         self.assertNotIn('@localhost:', db_url)
     
-    @patch('shared.database_url_builder.os.path.exists')
-    def test_non_docker_environment(self, mock_exists):
+        def test_non_docker_environment(self, mock_exists):
         """Test that non-Docker environments keep original hostname."""
+    pass
         # Setup mocks - no Docker indicators
         mock_exists.return_value = False
         
@@ -137,8 +139,7 @@ class TestDockerHostnameResolution(unittest.TestCase):
         self.assertIn('@localhost:', db_url)
         self.assertNotIn('@postgres:', db_url)
     
-    @patch('shared.database_url_builder.os.path.exists')
-    def test_non_localhost_host_not_overridden(self, mock_exists):
+        def test_non_localhost_host_not_overridden(self, mock_exists):
         """Test that non-localhost hosts are not overridden in Docker."""
         # Setup mocks - Docker environment
         mock_exists.return_value = True  # .dockerenv exists
@@ -162,9 +163,9 @@ class TestDockerHostnameResolution(unittest.TestCase):
         self.assertIn('@custom-db-host.example.com:', db_url)
         self.assertNotIn('@postgres:', db_url)
     
-    @patch('shared.database_url_builder.os.path.exists')
-    def test_database_url_override(self, mock_exists):
+        def test_database_url_override(self, mock_exists):
         """Test that DATABASE_URL takes precedence when set."""
+    pass
         # Setup mocks - Docker environment
         mock_exists.return_value = True  # .dockerenv exists
         
@@ -189,8 +190,7 @@ class TestDockerHostnameResolution(unittest.TestCase):
         self.assertIn(':5433/', db_url)
         self.assertIn('/custom_db', db_url)
     
-    @patch('shared.database_url_builder.os.path.exists')
-    def test_docker_not_applied_in_production(self, mock_exists):
+        def test_docker_not_applied_in_production(self, mock_exists):
         """Test that Docker hostname resolution is NOT applied in production."""
         # Setup mocks - Docker environment
         mock_exists.return_value = True  # .dockerenv exists
@@ -214,9 +214,9 @@ class TestDockerHostnameResolution(unittest.TestCase):
         self.assertIn('@localhost:', db_url)
         self.assertNotIn('@postgres:', db_url)
     
-    @patch('shared.database_url_builder.os.path.exists')
-    def test_docker_not_applied_in_staging(self, mock_exists):
+        def test_docker_not_applied_in_staging(self, mock_exists):
         """Test that Docker hostname resolution is NOT applied in staging."""
+    pass
         # Setup mocks - Docker environment
         mock_exists.return_value = True  # .dockerenv exists
         

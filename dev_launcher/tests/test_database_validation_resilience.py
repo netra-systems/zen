@@ -7,9 +7,9 @@ preventing regression of the issue where service names were passed as URLs.
 
 import asyncio
 import pytest
-from unittest.mock import AsyncMock, MagicMock, patch
 from pathlib import Path
 from typing import Dict, Optional, Tuple
+from shared.isolated_environment import IsolatedEnvironment
 
 from dev_launcher.launcher import DevLauncher
 from dev_launcher.config import LauncherConfig

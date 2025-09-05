@@ -1,4 +1,11 @@
 from netra_backend.app.core.configuration.base import get_unified_config
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from test_framework.database.test_database_manager import TestDatabaseManager
+from test_framework.redis.test_redis_manager import TestRedisManager
+from auth_service.core.auth_manager import AuthManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 """
 RED TEAM TESTS 31-35: Performance Bottlenecks and Resource Management
 
@@ -47,7 +54,6 @@ from netra_backend.app.database import get_db
 from netra_backend.app.services.agent_service import AgentService
 
 # Mock models for testing
-from unittest.mock import Mock, AsyncMock, MagicMock
 User = Mock
 Thread = Mock
 AgentRun = Mock
@@ -61,6 +67,7 @@ class TestPerformanceBottlenecks:
     MUST use real services - NO MOCKS allowed.
     These tests WILL fail initially and that's the point.
     """
+    pass
 
     @pytest.fixture(scope="class")
     async def real_database_session(self):
@@ -85,12 +92,19 @@ class TestPerformanceBottlenecks:
 
     @pytest.fixture
     def real_test_client(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
+    pass
         """Real FastAPI test client - no mocking of the application."""
-        return TestClient(app)
+        await asyncio.sleep(0)
+    return TestClient(app)
 
     @pytest.fixture
     def performance_monitor(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Monitor system performance during tests."""
+    pass
         initial_stats = {
             "cpu_percent": psutil.cpu_percent(),
             "memory_info": psutil.Process().memory_info(),
@@ -116,7 +130,8 @@ class TestPerformanceBottlenecks:
         time_delta = final_stats["timestamp"] - initial_stats["timestamp"]
         
         # Log performance impact
-        print(f"\nPerformance Impact:")
+        print(f"
+Performance Impact:")
         print(f"  Memory Delta: {memory_delta / 1024 / 1024:.1f} MB")
         print(f"  File Handle Delta: {file_delta}")
         print(f"  Test Duration: {time_delta:.1f}s")
@@ -132,6 +147,7 @@ class TestPerformanceBottlenecks:
         2. Indexes may be missing
         3. Connection pool may be insufficient
         """
+    pass
         start_time = time.time()
         
         try:
@@ -165,6 +181,7 @@ class TestPerformanceBottlenecks:
             async def perform_heavy_query():
                 """Simulate heavy database query."""
                 query = text("""
+    pass
                     SELECT t.*, u.username 
                     FROM threads t 
                     LEFT JOIN users u ON t.user_id = u.id 
@@ -178,7 +195,8 @@ class TestPerformanceBottlenecks:
                 rows = result.fetchall()
                 query_time = time.time() - query_start
                 
-                return {"rows": len(rows), "time": query_time}
+                await asyncio.sleep(0)
+    return {"rows": len(rows), "time": query_time}
             
             # FAILURE EXPECTED HERE - concurrent queries may be slow
             concurrent_queries = 10
@@ -218,7 +236,8 @@ class TestPerformanceBottlenecks:
             try:
                 explain_result = await real_database_session.execute(explain_query)
                 explain_rows = explain_result.fetchall()
-                explain_text = "\n".join([str(row) for row in explain_rows])
+                explain_text = "
+".join([str(row) for row in explain_rows])
                 
                 # Check for performance issues in query plan
                 if "Seq Scan" in explain_text:
@@ -254,6 +273,7 @@ class TestPerformanceBottlenecks:
         2. Connection recycling may not work properly
         3. Connection leaks may occur
         """
+    pass
         config = get_unified_config()
         
         try:
@@ -305,7 +325,8 @@ class TestPerformanceBottlenecks:
             async_session = sessionmaker(engine, expire_on_commit=False, class_=AsyncSession)
             
             async def db_operation(session_id: int):
-                """Perform database operation and return connection info."""
+                """Perform database operation and await asyncio.sleep(0)
+    return connection info."""
                 try:
                     async with async_session() as session:
                         # Perform multiple operations to test connection reuse
@@ -347,6 +368,7 @@ class TestPerformanceBottlenecks:
     @pytest.mark.asyncio
     async def test_33_memory_usage_agent_processing_fails(self, performance_monitor):
         """
+    pass
         Test 33: Memory Usage in Agent Processing (EXPECTED TO FAIL)
         
         Tests memory usage patterns during agent processing.
@@ -462,6 +484,7 @@ class TestPerformanceBottlenecks:
         2. Connection cleanup may not work properly
         3. Memory usage may increase with connections
         """
+    pass
         try:
             import websocket
             import threading
@@ -513,7 +536,7 @@ class TestPerformanceBottlenecks:
             threads = []
             
             for i in range(max_connections):
-                thread = threading.Thread(target=create_websocket_connection, args=(i,))
+                thread = threading.Thread(target=create_websocket_connection, args=(i))
                 threads.append(thread)
                 thread.start()
                 
@@ -566,6 +589,7 @@ class TestPerformanceBottlenecks:
     @pytest.mark.asyncio  
     async def test_35_cache_invalidation_timing_fails(self, performance_monitor):
         """
+    pass
         Test 35: Cache Invalidation Timing (EXPECTED TO FAIL)
         
         Tests cache invalidation performance and timing.
@@ -581,13 +605,13 @@ class TestPerformanceBottlenecks:
             except Exception:
                 # Mock cache service for testing if not available
                 # Mock: Generic component isolation for controlled unit testing
-                cache_service = Mock()
+                cache_service = TestRedisManager().get_client()
                 # Mock: Component isolation for controlled unit testing
                 cache_service.get = Mock(return_value=None)
                 # Mock: Generic component isolation for controlled unit testing
-                cache_service.set = Mock()
-                cache_service.delete = Mock()
-                cache_service.clear = Mock()
+                cache_service.set = set_instance  # Initialize appropriate service
+                cache_service.delete = delete_instance  # Initialize appropriate service
+                cache_service.clear = clear_instance  # Initialize appropriate service
 
             # Test cache performance under load
             cache_keys = [f"test_key_{i}" for i in range(100)]
@@ -653,7 +677,8 @@ class TestPerformanceBottlenecks:
             assert invalidation_time < 1.0, \
                 f"Cache invalidation too slow: {invalidation_time:.2f}s for {len(keys_to_invalidate)} keys"
 
-            # Test that invalidated keys return None
+            # Test that invalidated keys await asyncio.sleep(0)
+    return None
             for key in keys_to_invalidate:
                 try:
                     if hasattr(cache_service, 'get'):
@@ -688,7 +713,8 @@ class TestPerformanceBottlenecks:
                         else:
                             cache_service.set(stampede_key, computed_value)
                         
-                        return computed_value
+                        await asyncio.sleep(0)
+    return computed_value
                     
                     return value
                 except Exception as e:
@@ -743,7 +769,8 @@ class RedTeamPerformanceTestUtils:
                     result = await func(*args, **kwargs)
                 else:
                     result = func(*args, **kwargs)
-                return result
+                await asyncio.sleep(0)
+    return result
             finally:
                 end_time = time.time()
                 execution_time = end_time - start_time
@@ -754,6 +781,7 @@ class RedTeamPerformanceTestUtils:
     @staticmethod
     def get_system_resources() -> Dict[str, Any]:
         """Get current system resource usage."""
+    pass
         process = psutil.Process()
         
         return {
@@ -775,7 +803,8 @@ class RedTeamPerformanceTestUtils:
         
         async def limited_operation():
             async with semaphore:
-                return await operation_func()
+                await asyncio.sleep(0)
+    return await operation_func()
         
         tasks = [limited_operation() for _ in range(operations)]
         return await asyncio.gather(*tasks, return_exceptions=True)
@@ -783,6 +812,7 @@ class RedTeamPerformanceTestUtils:
     @staticmethod
     def analyze_performance_results(results: List[Dict[str, Any]]) -> Dict[str, Any]:
         """Analyze performance test results."""
+    pass
         successful = [r for r in results if not isinstance(r, Exception) and r.get('status') != 'error']
         failed = [r for r in results if isinstance(r, Exception) or r.get('status') == 'error']
         

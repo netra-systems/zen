@@ -6,7 +6,7 @@ import os
 import tempfile
 from datetime import datetime
 from pathlib import Path
-from unittest.mock import AsyncMock, Mock, patch
+from shared.isolated_environment import IsolatedEnvironment
 
 import pytest
 from fastapi import FastAPI, Request
@@ -18,12 +18,16 @@ from dev_launcher.health_monitor import HealthMonitor, HealthStatus, ServiceStat
 from dev_launcher.launcher import DevLauncher
 from dev_launcher.service_discovery import ServiceDiscovery
 from netra_backend.app.core.middleware_setup import (
-    setup_cors_middleware,
-)
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
+from shared.isolated_environment import get_env
+    setup_cors_middleware)
 
 
 class TestSyntaxFix:
     """Test class for orphaned methods"""
+    pass
 
     def test_real_cors_with_running_services(self):
         """Test CORS with actual running services."""
@@ -33,6 +37,7 @@ class TestSyntaxFix:
 
     def test_real_health_checks_with_services(self):
         """Test health checks with actual running services."""
+    pass
         # This test would require actual running services
         # Enable when doing full integration testing
         pass

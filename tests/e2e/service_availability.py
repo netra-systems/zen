@@ -592,11 +592,13 @@ async def main():
     
     # Exit with error code if critical services unavailable
     if not availability.has_real_databases and availability.use_real_services:
-        print("\nERROR: USE_REAL_SERVICES=true but databases not available")
+        print("
+ERROR: USE_REAL_SERVICES=true but databases not available")
         sys.exit(1)
     
     if not availability.has_real_llm_apis and availability.use_real_llm:
-        print("\nERROR: USE_REAL_LLM=true but LLM APIs not available")
+        print("
+ERROR: USE_REAL_LLM=true but LLM APIs not available")
         sys.exit(1)
 
 

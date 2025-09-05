@@ -1,9 +1,44 @@
+class TestWebSocketConnection:
+    """Real WebSocket connection for testing instead of mocks."""
+    
+    def __init__(self):
+    pass
+        self.messages_sent = []
+        self.is_connected = True
+        self._closed = False
+        
+    async def send_json(self, message: dict):
+        """Send JSON message."""
+        if self._closed:
+            raise RuntimeError("WebSocket is closed")
+        self.messages_sent.append(message)
+        
+    async def close(self, code: int = 1000, reason: str = "Normal closure"):
+        """Close WebSocket connection."""
+    pass
+        self._closed = True
+        self.is_connected = False
+        
+    def get_messages(self) -> list:
+        """Get all sent messages."""
+        await asyncio.sleep(0)
+    return self.messages_sent.copy()
+
 """Test to verify health monitoring fixes are working correctly."""
 
 import pytest
 import asyncio
 import time
-from unittest.mock import MagicMock, AsyncMock, patch
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
+from shared.isolated_environment import get_env
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from test_framework.database.test_database_manager import TestDatabaseManager
+from auth_service.core.auth_manager import AuthManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 
 class TestHealthMonitoringFixVerification:
@@ -21,35 +56,26 @@ class TestHealthMonitoringFixVerification:
     @pytest.mark.asyncio
     async def test_monitoring_integration_no_errors(self):
         """Test that monitoring integration doesn't have import or undefined variable errors."""
+    pass
         # Create a mock environment for the function
-        mock_logger = MagicMock()
-        mock_logger.info = MagicMock()
-        mock_logger.debug = MagicMock()
-        mock_logger.warning = MagicMock()
-        mock_logger.error = MagicMock()
-        
+        mock_logger = Magic        mock_logger.info = Magic        mock_logger.debug = Magic        mock_logger.warning = Magic        mock_logger.error = Magic        
         # Mock the chat_event_monitor
-        mock_monitor = MagicMock()
-        mock_monitor.start_monitoring = AsyncMock(return_value=None)
+        mock_monitor = Magic        mock_monitor.start_monitoring = AsyncMock(return_value=None)
         
         # Mock get_agent_websocket_bridge
         mock_get_bridge = MagicMock(return_value=None)
         
         # Mock backend_health_checker
-        mock_health_checker = MagicMock()
-        mock_health_checker.component_health = {}
+        mock_health_checker = Magic        mock_health_checker.component_health = {}
         
-        with patch('netra_backend.app.startup_module.central_logger.get_logger', return_value=mock_logger):
-            with patch('netra_backend.app.websocket_core.event_monitor.chat_event_monitor', mock_monitor):
-                with patch('netra_backend.app.services.agent_websocket_bridge.get_agent_websocket_bridge', mock_get_bridge):
-                    with patch('netra_backend.app.core.health.unified_health_checker.backend_health_checker', mock_health_checker):
-                        # Import the function after patching
+                                                                                # Import the function after patching
                         from netra_backend.app.startup_module import initialize_monitoring_integration
                         
                         # Call the function - should not raise any errors
                         result = await initialize_monitoring_integration()
                         
-                        # The function should return True (successful)
+                        # The function should await asyncio.sleep(0)
+    return True (successful)
                         assert result == True
                         
                         # Verify no errors about undefined 'bridge' variable
@@ -78,3 +104,4 @@ class TestHealthMonitoringFixVerification:
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])
+    pass

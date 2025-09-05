@@ -1,4 +1,8 @@
 from shared.isolated_environment import get_env
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from test_framework.database.test_database_manager import TestDatabaseManager
+from auth_service.core.auth_manager import AuthManager
+from shared.isolated_environment import IsolatedEnvironment
 """
 E2E Authentication Flow Tests - Phase 2 Unified System Testing
 
@@ -19,7 +23,9 @@ import uuid
 from typing import Any, Dict, List, Optional
 
 import pytest
-from unittest.mock import AsyncMock, MagicMock
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
 
 # Set minimal environment for testing
 env = get_env()
@@ -27,8 +33,7 @@ env.set("TESTING", "1", "test")
 env.set("DATABASE_URL", "sqlite+aiosqlite:///:memory:", "test")
 
 # Mock utility aliases for cleaner code
-MagicNone = MagicMock()
-AsyncNone = AsyncMock()
+MagicNone = Magicwebsocket = TestWebSocketConnection()
 
 
 class TestUnifiedE2EHarness:
@@ -351,3 +356,26 @@ if __name__ == "__main__":
     # For standalone execution, run with pytest
     import sys
     pytest.main([__file__, "-v", "--tb=short"] + sys.argv[1:])
+
+class TestWebSocketConnection:
+    """Real WebSocket connection for testing instead of mocks."""
+    
+    def __init__(self):
+        self.messages_sent = []
+        self.is_connected = True
+        self._closed = False
+        
+    async def send_json(self, message: dict):
+        """Send JSON message."""
+        if self._closed:
+            raise RuntimeError("WebSocket is closed")
+        self.messages_sent.append(message)
+        
+    async def close(self, code: int = 1000, reason: str = "Normal closure"):
+        """Close WebSocket connection."""
+        self._closed = True
+        self.is_connected = False
+        
+    def get_messages(self) -> list:
+        """Get all sent messages."""
+        return self.messages_sent.copy()

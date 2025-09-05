@@ -10,7 +10,7 @@ import sys
 import tempfile
 import unittest
 from pathlib import Path
-from unittest.mock import MagicMock, patch
+from shared.isolated_environment import IsolatedEnvironment
 
 # Add parent directory to path
 

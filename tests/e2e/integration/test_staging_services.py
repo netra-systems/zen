@@ -1,6 +1,7 @@
 """Staging Service Health and Connectivity Tests
 
 from shared.isolated_environment import get_env
+from shared.isolated_environment import IsolatedEnvironment
 Business Value Justification (BVJ):
 - Segment: Enterprise/Platform - All customer tiers
 - Business Goal: Service health validation and connectivity assurance

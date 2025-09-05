@@ -14,6 +14,7 @@ These tests validate Tests 3, 4, and 6 from the critical conversion paths.
 import sys
 from pathlib import Path
 from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
+from shared.isolated_environment import IsolatedEnvironment
 
 
 # Test framework import - using pytest fixtures instead

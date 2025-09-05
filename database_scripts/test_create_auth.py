@@ -1,4 +1,6 @@
 from shared.isolated_environment import get_env
+from auth_service.core.auth_manager import AuthManager
+from shared.isolated_environment import IsolatedEnvironment
 # Create test_staging_cross_service_auth_propagation.py
 content = """\"\"\"
 Staging Cross-Service Authentication Propagation Tests
@@ -21,7 +23,6 @@ import pytest
 import time
 from datetime import datetime, UTC, timedelta
 from typing import Dict, List, Optional, Any, Tuple
-from unittest.mock import patch, Mock, AsyncMock, MagicMock
 import aiohttp
 import jwt
 from fastapi import Request, HTTPException

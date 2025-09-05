@@ -7,6 +7,7 @@ Business Value: Long-term maintainability
 import pytest
 import time
 from netra_backend.app.db.models_agent import Run
+from shared.isolated_environment import IsolatedEnvironment
 
 class TestRun:
     """Test suite for Run database model"""

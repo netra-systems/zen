@@ -5,6 +5,7 @@ Test error handling and recovery for real ClickHouse connections
 
 import sys
 from pathlib import Path
+from shared.isolated_environment import IsolatedEnvironment
 
 # Test framework import - using pytest fixtures instead
 

@@ -6,11 +6,11 @@ Test JSON-RPC 2.0 request processing.
 
 import sys
 from pathlib import Path
+from shared.isolated_environment import IsolatedEnvironment
 
 # Test framework import - using pytest fixtures instead
 
 import json
-from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 
@@ -18,22 +18,29 @@ import pytest
 pytest.skip("MCP Request Handler not yet implemented", allow_module_level=True)
 
 from netra_backend.app.core.exceptions_base import NetraException
+import asyncio
 
 class TestRequestHandler:
     """Test request handler functionality"""
     
     @pytest.fixture
-    def mock_server(self):
+ def real_server():
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create mock server"""
+    pass
         # Mock: Generic component isolation for controlled unit testing
-        server = Mock()
+        server = server_instance  # Initialize appropriate service
         # Mock: Generic component isolation for controlled unit testing
-        server.handle_request = AsyncMock()
+        server.handle_request = AsyncNone  # TODO: Use real service instance
         return server
         
     @pytest.fixture
     def handler(self, mock_server):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create request handler"""
+    pass
         return RequestHandler(mock_server)
     @pytest.mark.asyncio
     async def test_process_request_string(self, handler, mock_server):
@@ -53,6 +60,7 @@ class TestRequestHandler:
     @pytest.mark.asyncio
     async def test_process_request_dict(self, handler, mock_server):
         """Test processing dict request"""
+    pass
         mock_server.handle_request.return_value = {
             "jsonrpc": "2.0",
             "result": {"success": True},
@@ -77,6 +85,7 @@ class TestRequestHandler:
     @pytest.mark.asyncio
     async def test_process_batch_request(self, handler, mock_server):
         """Test processing batch requests"""
+    pass
         mock_server.handle_request.side_effect = [
             {"jsonrpc": "2.0", "result": {"id": 1}, "id": 1},
             {"jsonrpc": "2.0", "result": {"id": 2}, "id": 2}
@@ -105,6 +114,7 @@ class TestRequestHandler:
     @pytest.mark.asyncio
     async def test_process_single_request_invalid_type(self, handler):
         """Test processing request with invalid type"""
+    pass
         response = await handler._process_single_request("not a dict")
         
         assert "error" in response
@@ -121,6 +131,7 @@ class TestRequestHandler:
     @pytest.mark.asyncio
     async def test_process_single_request_missing_method(self, handler):
         """Test processing request with missing method"""
+    pass
         response = await handler._process_single_request({"jsonrpc": "2.0"})
         
         assert "error" in response
@@ -141,6 +152,7 @@ class TestRequestHandler:
     @pytest.mark.asyncio
     async def test_process_business_error(self, handler, mock_server):
         """Test processing request that raises business error"""
+    pass
         mock_server.handle_request.side_effect = NetraException("Business error")
         
         response = await handler._process_single_request({
@@ -169,6 +181,7 @@ class TestRequestHandler:
         
     def test_validate_request_valid(self, handler):
         """Test validating valid request"""
+    pass
         request = {
             "jsonrpc": "2.0",
             "method": "test",
@@ -189,6 +202,7 @@ class TestRequestHandler:
         
     def test_validate_request_wrong_version(self, handler):
         """Test validating request with wrong version"""
+    pass
         request = {"jsonrpc": "1.0", "method": "test"}
         
         result = handler.validate_request(request)
@@ -205,6 +219,7 @@ class TestRequestHandler:
         
     def test_validate_request_invalid_params_type(self, handler):
         """Test validating request with invalid params type"""
+    pass
         request = {"jsonrpc": "2.0", "method": "test", "params": "string"}
         
         result = handler.validate_request(request)
@@ -221,6 +236,7 @@ class TestRequestHandler:
         
     def test_error_response_methods(self, handler):
         """Test error response helper methods"""
+    pass
         # Parse error
         response = handler._parse_error("Parse failed", 1)
         assert response["error"]["code"] == -32700
@@ -253,3 +269,4 @@ class TestRequestHandler:
         assert "id" not in response
         assert response["jsonrpc"] == "2.0"
         assert response["error"]["code"] == -32700
+    pass

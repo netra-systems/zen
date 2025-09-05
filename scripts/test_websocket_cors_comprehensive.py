@@ -22,6 +22,7 @@ from typing import Dict, List, Optional, Any
 import aiohttp
 import websockets
 from urllib.parse import urlparse
+from shared.isolated_environment import IsolatedEnvironment
 
 
 class WebSocketTester:

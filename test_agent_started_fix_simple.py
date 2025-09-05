@@ -1,3 +1,4 @@
+from shared.isolated_environment import IsolatedEnvironment
 """
 Simple test to verify the WebSocket handler fix for agent_started events.
 Tests that each connection gets its own handler and cleanup works properly.

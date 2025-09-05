@@ -1,4 +1,5 @@
 from shared.isolated_environment import get_env
+from shared.isolated_environment import IsolatedEnvironment
 """
 JWT Secret Synchronization Test
 
@@ -8,7 +9,9 @@ use the EXACT same JWT secret. This is REQUIRED for authentication to work.
 import os
 import sys
 import pytest
-from unittest.mock import patch
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
 
 # Add project root to path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
@@ -22,6 +25,7 @@ def test_jwt_secrets_are_synchronized():
     This test validates that the shared JWT secret manager is working
     correctly and both services get the same secret.
     """
+    pass
     # Import both service configurations
     from auth_service.auth_core.config import AuthConfig
     from netra_backend.app.core.configuration.unified_secrets import UnifiedSecretManager
@@ -51,6 +55,7 @@ def test_shared_jwt_manager_consistency():
     """
     Test that SharedJWTSecretManager returns consistent results.
     """
+    pass
     from shared.jwt_secret_manager import SharedJWTSecretManager
     
     # Get secret multiple times
@@ -72,6 +77,7 @@ def test_jwt_secret_environment_specific():
     """
     Test that environment-specific JWT secrets are loaded correctly.
     """
+    pass
     from shared.jwt_secret_manager import SharedJWTSecretManager
     
     # Clear cache before each test
@@ -111,6 +117,7 @@ def test_jwt_secret_validation():
     """
     Test that JWT secret validation works correctly.
     """
+    pass
     from shared.jwt_secret_manager import SharedJWTSecretManager
     
     # Test that short secrets fail in production
@@ -145,6 +152,7 @@ def test_jwt_synchronization_validation():
     """
     Test the deployment validation function.
     """
+    pass
     from shared.jwt_secret_manager import validate_jwt_configuration
     
     # Set up a valid configuration
@@ -193,11 +201,14 @@ if __name__ == "__main__":
         test_jwt_synchronization_validation()
         print("✅ Deployment validation test passed")
         
-        print("\n🎉 All JWT synchronization tests PASSED!")
+        print("
+🎉 All JWT synchronization tests PASSED!")
         
     except AssertionError as e:
-        print(f"\n❌ Test failed: {e}")
+        print(f"
+❌ Test failed: {e}")
         sys.exit(1)
     except Exception as e:
-        print(f"\n❌ Unexpected error: {e}")
+        print(f"
+❌ Unexpected error: {e}")
         sys.exit(1)

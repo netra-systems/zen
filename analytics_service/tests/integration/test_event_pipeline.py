@@ -31,6 +31,7 @@ import time
 from datetime import datetime, timezone, timedelta
 from typing import Any, Dict, List, Optional
 from uuid import uuid4
+from shared.isolated_environment import IsolatedEnvironment
 
 from test_framework import setup_test_path
 

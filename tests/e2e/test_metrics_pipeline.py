@@ -26,6 +26,7 @@ import asyncio
 import time
 import uuid
 from typing import Any, Dict, List
+from shared.isolated_environment import IsolatedEnvironment
 
 import pytest
 import pytest_asyncio

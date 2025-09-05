@@ -13,6 +13,7 @@ import json
 import time
 from dataclasses import dataclass
 from typing import Any, Dict, List, Optional
+from shared.isolated_environment import IsolatedEnvironment
 
 import aiohttp
 import pytest

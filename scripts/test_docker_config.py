@@ -5,6 +5,7 @@ import subprocess
 import yaml
 import sys
 import json
+from shared.isolated_environment import IsolatedEnvironment
 
 def run_docker_config(compose_files):
     """Run docker-compose config and return parsed YAML."""

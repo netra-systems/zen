@@ -1,11 +1,12 @@
 from shared.isolated_environment import IsolatedEnvironment
+from test_framework.database.test_database_manager import TestDatabaseManager
+from auth_service.core.auth_manager import AuthManager
 """
 Test JWT secret consistency for backend service.
 Ensures backend service correctly loads and uses JWT secret for token validation.
 """
 
 import os
-from unittest.mock import patch, AsyncMock
 
 import pytest
 
@@ -128,7 +129,6 @@ class TestJWTSecretConsistency:
             # The config might have a default or None value
             # We just verify it doesn't crash
     
-    @patch.dict('os.environ', {'ENVIRONMENT': 'staging', 'TESTING': '0'})
     def test_staging_production_require_secret(self):
         """Test that staging and production environments handle missing JWT secrets."""
         with patch.dict(os.environ, {

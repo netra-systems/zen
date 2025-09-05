@@ -18,8 +18,9 @@ import asyncio
 import logging
 import pytest
 from pathlib import Path
-from unittest.mock import AsyncMock, MagicMock, Mock, patch
 from typing import Dict, List, Set
+from test_framework.database.test_database_manager import TestDatabaseManager
+from shared.isolated_environment import IsolatedEnvironment
 
 # Mock imports to avoid database dependencies
 try:
@@ -31,7 +32,6 @@ try:
     )
 except ImportError:
     # Fallback mocks for testing
-    from unittest.mock import MagicMock
     from enum import Enum
     
     class DatabaseType(Enum):
@@ -64,7 +64,7 @@ class TestIdempotentMigrationHandling:
         initializer.add_database(config)
         
         # Mock connection that simulates Alembic-managed database
-        mock_conn = AsyncMock()
+        mock_conn = AsyncNone  # TODO: Use real service instance
         
         # Simulate Alembic version table exists
         mock_conn.fetchval.side_effect = [
@@ -116,7 +116,7 @@ class TestIdempotentMigrationHandling:
         )
         initializer.add_database(config)
         
-        mock_conn = AsyncMock()
+        mock_conn = AsyncNone  # TODO: Use real service instance
         
         # Simulate Alembic version exists with 25 tables
         mock_conn.fetchval.side_effect = [
@@ -168,7 +168,7 @@ class TestIdempotentMigrationHandling:
         )
         initializer.add_database(config)
         
-        mock_conn = AsyncMock()
+        mock_conn = AsyncNone  # TODO: Use real service instance
         
         # Simulate no Alembic version table (fresh database)
         mock_conn.fetchval.side_effect = [
@@ -254,7 +254,7 @@ class TestIdempotentMigrationHandling:
         )
         initializer.add_database(config)
         
-        mock_conn = AsyncMock()
+        mock_conn = AsyncNone  # TODO: Use real service instance
         
         # Track how many times each table creation is attempted
         creation_attempts = {}
@@ -298,7 +298,7 @@ class TestIdempotentMigrationHandling:
         )
         initializer.add_database(config)
         
-        mock_conn = AsyncMock()
+        mock_conn = AsyncNone  # TODO: Use real service instance
         
         # Simulate partial Alembic schema (some tables missing)
         mock_conn.fetchval.side_effect = [
@@ -348,7 +348,7 @@ class TestIdempotentMigrationHandling:
         )
         initializer.add_database(config)
         
-        mock_conn = AsyncMock()
+        mock_conn = AsyncNone  # TODO: Use real service instance
         
         # Simulate Alembic managed schema
         mock_conn.fetchval.side_effect = [
@@ -398,7 +398,7 @@ class TestIdempotentMigrationHandling:
         )
         initializer.add_database(config)
         
-        mock_conn = AsyncMock()
+        mock_conn = AsyncNone  # TODO: Use real service instance
         
         # Simulate database with users table but no sessions table initially
         # Sequence: alembic_version_exists, current_alembic_version, fk_sessions_exists, fk_api_keys_exists
@@ -466,7 +466,7 @@ class TestErrorRecoveryAndResilience:
         )
         initializer.add_database(config)
         
-        mock_conn = AsyncMock()
+        mock_conn = AsyncNone  # TODO: Use real service instance
         
         # Simulate direct initialization (no Alembic)
         mock_conn.fetchval.return_value = False
@@ -501,13 +501,13 @@ class TestErrorRecoveryAndResilience:
     async def test_circuit_breaker_prevents_cascading_failures(self):
         """Test that circuit breaker prevents cascading failures"""
         # Mock DatabaseInitializer
-        initializer = MagicMock()
+        initializer = MagicNone  # TODO: Use real service instance
         initializer.initialize_database = AsyncMock(return_value=False)
-        initializer.add_database = MagicMock()
+        initializer.add_database = MagicNone  # TODO: Use real service instance
         
         # Mock circuit breakers 
         mock_circuit_breaker = {"is_open": True, "failure_count": 3}
-        mock_circuit_breakers = MagicMock()
+        mock_circuit_breakers = MagicNone  # TODO: Use real service instance
         mock_circuit_breakers.get = MagicMock(return_value=mock_circuit_breaker)
         initializer.circuit_breakers = mock_circuit_breakers
         
@@ -547,7 +547,7 @@ class TestErrorRecoveryAndResilience:
         )
         initializer.add_database(config)
         
-        mock_conn = AsyncMock()
+        mock_conn = AsyncNone  # TODO: Use real service instance
         
         # Simulate migration failure requiring rollback
         rollback_called = False

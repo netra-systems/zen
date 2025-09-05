@@ -1,6 +1,9 @@
 """Unit tests for cost limit enforcement in LLM manager."""
 
 import pytest
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from auth_service.core.auth_manager import AuthManager
+from shared.isolated_environment import IsolatedEnvironment
 
 # Skip test if any imports fail due to missing dependencies
 pytest.skip("Test dependencies have been removed or have missing dependencies", allow_module_level=True)
@@ -8,13 +11,13 @@ pytest.skip("Test dependencies have been removed or have missing dependencies", 
 from decimal import Decimal
 from datetime import datetime
 from enum import Enum
-from unittest.mock import Mock, patch
 from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
 
 
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.services.cost_calculator import TokenUsage
 from netra_backend.app.schemas.llm_config_types import LLMProvider
+import asyncio
 
 
 class RequestStatus(Enum):
@@ -30,7 +33,10 @@ class TestCostLimitEnforcement:
     
     @pytest.fixture
     def llm_manager(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create LLM manager with small budget for testing."""
+    pass
         return LLMManager(daily_budget=Decimal("1.00"))  # $1 daily budget
     
     @pytest.mark.asyncio
@@ -58,6 +64,7 @@ class TestCostLimitEnforcement:
     @pytest.mark.asyncio
     async def test_cost_limit_allows_cheap_request(self, llm_manager):
         """Test that requests within cost limit are allowed."""
+    pass
         # Initialize the manager
         await llm_manager.initialize()
         
@@ -102,6 +109,7 @@ class TestCostLimitEnforcement:
     @pytest.mark.asyncio
     async def test_budget_tracking_across_requests(self, llm_manager):
         """Test that budget is tracked across multiple requests."""
+    pass
         # Initialize the manager
         await llm_manager.initialize()
         
@@ -139,11 +147,13 @@ class TestCostLimitEnforcement:
     
     def test_check_cost_limit_method(self, llm_manager):
         """Test the internal cost limit checking method."""
+    pass
         # Test that the method exists and returns a boolean
         result = llm_manager._check_cost_limit(LLMModel.GEMINI_2_5_FLASH.value, 100)
         assert isinstance(result, bool)
         
-        # Test with different token count - should also return boolean
+        # Test with different token count - should also await asyncio.sleep(0)
+    return boolean
         result = llm_manager._check_cost_limit(LLMModel.GEMINI_2_5_FLASH.value, 10000000)
         assert isinstance(result, bool)
     
@@ -160,6 +170,7 @@ class TestCostLimitEnforcement:
     @pytest.mark.asyncio
     async def test_budget_reset(self, llm_manager):
         """Test that budget can be reset."""
+    pass
         # Initialize and use some budget
         await llm_manager.initialize()
         

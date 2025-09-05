@@ -30,6 +30,7 @@ from typing import Dict, List, Optional, Set, Tuple, Any, Generator, Union
 import weakref
 import subprocess
 import json
+from shared.isolated_environment import IsolatedEnvironment
 
 # Graph analysis for dependency cycles
 try:

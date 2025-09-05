@@ -26,6 +26,7 @@ from datetime import datetime, timedelta
 from typing import Dict, List, Set, Any, Optional, Tuple
 from collections import defaultdict
 import threading
+from shared.isolated_environment import IsolatedEnvironment
 
 # Add project root to Python path
 project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))

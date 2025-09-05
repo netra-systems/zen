@@ -21,7 +21,7 @@ import asyncio
 import json
 import time
 from typing import Any, Dict, List
-from unittest.mock import patch
+from shared.isolated_environment import IsolatedEnvironment
 
 import pytest
 import pytest_asyncio
@@ -34,6 +34,10 @@ from tests.e2e.config import TEST_USERS, TestDataFactory
 from tests.e2e.agent_conversation_helpers import AgentConversationTestCore
 from tests.e2e.websocket_resilience_core import WebSocketResilienceTestCore
 from test_framework.http_client import UnifiedHTTPClient as RealWebSocketClient
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
+from shared.isolated_environment import get_env
 
 
 @pytest.mark.asyncio

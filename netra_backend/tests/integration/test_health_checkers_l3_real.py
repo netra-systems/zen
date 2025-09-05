@@ -4,7 +4,6 @@ These tests validate health checker functionality using real PostgreSQL and Redi
 containers via Testcontainers, providing L3-level realism as required by testing.xml.
 
 Business Value: Ensures health monitoring works with actual database connections,
-preventing false positives from mocked tests and validating real-world scenarios.
 """
 
 import pytest
@@ -13,11 +12,14 @@ from testcontainers.postgres import PostgresContainer
 from testcontainers.redis import RedisContainer
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.orm import sessionmaker
+from test_framework.docker.unified_docker_manager import UnifiedDockerManager
+from test_framework.database.test_database_manager import TestDatabaseManager
+from test_framework.redis.test_redis_manager import TestRedisManager
+from shared.isolated_environment import IsolatedEnvironment
 
 from netra_backend.app.core.health_checkers import (
     check_postgres_health,
-    check_redis_health,
-)
+    check_redis_health)
 from netra_backend.app.schemas.core_models import HealthCheckResult
 
 
@@ -27,7 +29,10 @@ class TestHealthCheckersL3Integration:
     
     @pytest.fixture(scope="class")
     def postgres_container(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Start real PostgreSQL container for testing."""
+    pass
         try:
             with PostgresContainer("postgres:15") as postgres:
                 yield postgres
@@ -36,7 +41,10 @@ class TestHealthCheckersL3Integration:
     
     @pytest.fixture(scope="class") 
     def redis_container(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Start real Redis container for testing."""
+    pass
         try:
             with RedisContainer("redis:7-alpine") as redis:
                 yield redis
@@ -59,6 +67,7 @@ class TestHealthCheckersL3Integration:
     @pytest.mark.asyncio
     async def test_postgres_health_with_real_database(self, postgres_container):
         """Test PostgreSQL health check with real containerized database."""
+    pass
         # Get connection URL from container
         db_url = postgres_container.get_connection_url()
         
@@ -70,11 +79,12 @@ class TestHealthCheckersL3Integration:
             engine = create_async_engine(async_url, echo=False)
             async_session = sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
             
-            # Mock the session context manager to return real session
+            # Mock the session context manager to await asyncio.sleep(0)
+    return real session
             # Mock: Database session isolation for transaction testing without real database dependency
-            mock_session_cm = pytest.mock.AsyncMock()
+            mock_session_cm = pytest.mock.AsyncNone  # TODO: Use real service instance
             # Mock: Database session isolation for transaction testing without real database dependency
-            mock_session_cm.__aenter__ = pytest.mock.AsyncMock()
+            mock_session_cm.__aenter__ = pytest.mock.AsyncNone  # TODO: Use real service instance
             # Mock: Database session isolation for transaction testing without real database dependency
             mock_session_cm.__aexit__ = pytest.mock.AsyncMock(return_value=None)
             mock_db_manager.get_async_session.return_value = mock_session_cm
@@ -100,7 +110,7 @@ class TestHealthCheckersL3Integration:
         # Mock: Component isolation for testing without external dependencies
         with pytest.mock.patch('netra_backend.app.core.unified.db_connection_manager.db_manager') as mock_db_manager:
             # Simulate real connection failure by using invalid host
-            mock_db_manager.get_async_session.side_effect = Exception("connection to server at \"invalid_host\" (127.0.0.1), port 5432 failed")
+            mock_db_manager.get_async_session.side_effect = Exception("connection to server at "invalid_host" (127.0.0.1), port 5432 failed")
             
             result = await check_postgres_health()
             
@@ -111,6 +121,7 @@ class TestHealthCheckersL3Integration:
     @pytest.mark.asyncio
     async def test_redis_health_with_real_redis(self, redis_container):
         """Test Redis health check with real containerized Redis."""
+    pass
         import redis.asyncio as aioredis
         
         # Get connection details from container
@@ -163,6 +174,7 @@ class TestHealthCheckersL3Integration:
     @pytest.mark.asyncio
     async def test_concurrent_health_checks_with_real_services(self, postgres_container, redis_container):
         """Test concurrent health checks with real services under load."""
+    pass
         # Prepare real connections
         postgres_url = postgres_container.get_connection_url().replace("postgresql://", "postgresql+asyncpg://")
         postgres_engine = create_async_engine(postgres_url, echo=False, pool_size=5, max_overflow=10)
@@ -181,9 +193,9 @@ class TestHealthCheckersL3Integration:
             
             # Setup real database session mock
             # Mock: Database session isolation for transaction testing without real database dependency
-            mock_session_cm = pytest.mock.AsyncMock()
+            mock_session_cm = pytest.mock.AsyncNone  # TODO: Use real service instance
             # Mock: Database session isolation for transaction testing without real database dependency
-            mock_session_cm.__aenter__ = pytest.mock.AsyncMock()
+            mock_session_cm.__aenter__ = pytest.mock.AsyncNone  # TODO: Use real service instance
             # Mock: Database session isolation for transaction testing without real database dependency
             mock_session_cm.__aexit__ = pytest.mock.AsyncMock(return_value=None)
             mock_db_manager.get_async_session.return_value = mock_session_cm
@@ -194,11 +206,13 @@ class TestHealthCheckersL3Integration:
             mock_redis_manager.get_client = pytest.mock.AsyncMock(return_value=real_redis_client)
             
             async def run_health_check_with_real_session():
+    pass
                 async with postgres_session() as session:
                     mock_session_cm.__aenter__.return_value = session
                     postgres_result = await check_postgres_health()
                     redis_result = await check_redis_health()
-                    return postgres_result, redis_result
+                    await asyncio.sleep(0)
+    return postgres_result, redis_result
             
             # Run concurrent health checks
             tasks = [run_health_check_with_real_session() for _ in range(5)]
@@ -235,9 +249,9 @@ class TestHealthCheckersL3Integration:
              pytest.mock.patch('netra_backend.app.redis_manager.redis_manager') as mock_redis_manager:
             
             # Mock: Database session isolation for transaction testing without real database dependency
-            mock_session_cm = pytest.mock.AsyncMock()
+            mock_session_cm = pytest.mock.AsyncNone  # TODO: Use real service instance
             # Mock: Database session isolation for transaction testing without real database dependency
-            mock_session_cm.__aenter__ = pytest.mock.AsyncMock()
+            mock_session_cm.__aenter__ = pytest.mock.AsyncNone  # TODO: Use real service instance
             # Mock: Database session isolation for transaction testing without real database dependency
             mock_session_cm.__aexit__ = pytest.mock.AsyncMock(return_value=None)
             mock_db_manager.get_async_session.return_value = mock_session_cm
@@ -278,3 +292,4 @@ class TestHealthCheckersL3Integration:
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])
+    pass

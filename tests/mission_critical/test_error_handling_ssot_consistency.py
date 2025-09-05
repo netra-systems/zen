@@ -22,6 +22,7 @@ import asyncio
 from pathlib import Path
 from typing import List, Dict, Set, Tuple, Any, Optional
 from dataclasses import dataclass
+from shared.isolated_environment import IsolatedEnvironment
 
 # Add root to path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
@@ -54,6 +55,7 @@ class ErrorHandlingSSOTValidator:
     """Validates that error handling follows SSOT principles"""
     
     def __init__(self):
+    pass
         self.project_root = Path(__file__).parent.parent.parent
         self.canonical_websocket_error_path = "netra_backend.app.core.exceptions_websocket"
         self.canonical_error_context_path = "netra_backend.app.schemas.shared_types"
@@ -328,6 +330,7 @@ class TestErrorHandlingSSOTConsistency:
     
     def test_no_duplicate_error_class_definitions(self, validator):
         """Test that there are no duplicate error class definitions"""
+    pass
         error_classes = validator.find_all_error_class_definitions()
         
         # Check WebSocketError
@@ -364,6 +367,7 @@ class TestErrorHandlingSSOTConsistency:
     
     def test_all_imports_use_canonical_sources(self, validator):
         """Test that all imports of error classes use canonical sources"""
+    pass
         imports = validator.find_all_error_imports()
         result = validator.validate_correct_imports(imports)
         assert result, f"Found incorrect imports: {validator.errors_found}"
@@ -375,6 +379,7 @@ class TestErrorHandlingSSOTConsistency:
     
     def test_websocket_error_inheritance_chain(self):
         """Test that WebSocketError properly inherits from NetraException"""
+    pass
         assert issubclass(CanonicalWebSocketError, Exception)
         
         # Check that it has expected attributes
@@ -395,16 +400,19 @@ class TestErrorHandlingSSOTConsistency:
     
     def test_full_ssot_validation(self, validator):
         """Comprehensive test running all validations"""
+    pass
         all_valid, errors, warnings = validator.run_full_validation()
         
         # Print detailed report
         if errors:
-            print("\n=== SSOT ERRORS FOUND ===")
+            print("
+=== SSOT ERRORS FOUND ===")
             for error in errors:
                 print(f"  [ERROR] {error}")
                 
         if warnings:
-            print("\n=== WARNINGS ===")
+            print("
+=== WARNINGS ===")
             for warning in warnings:
                 print(f"  [WARN] {warning}")
                 
@@ -432,6 +440,7 @@ class TestErrorHandlingSSOTConsistency:
     
     def test_error_context_serialization(self):
         """Test that ErrorContext can be properly serialized and deserialized"""
+    pass
         context = CanonicalErrorContext(
             trace_id="test-trace-123",
             operation="test_operation",
@@ -465,16 +474,19 @@ if __name__ == "__main__":
         print(f"[FAIL] VALIDATION FAILED: {len(errors)} errors found")
         
     if errors:
-        print("\n=== ERRORS ===")
+        print("
+=== ERRORS ===")
         for i, error in enumerate(errors, 1):
             print(f"{i}. {error}")
             
     if warnings:
-        print("\n=== WARNINGS ===")
+        print("
+=== WARNINGS ===")
         for i, warning in enumerate(warnings, 1):
             print(f"{i}. {warning}")
             
-    print("\n" + "=" * 80)
+    print("
+" + "=" * 80)
     
     # Run pytest if available
     try:

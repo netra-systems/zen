@@ -9,6 +9,7 @@ import sys
 from collections import defaultdict
 from pathlib import Path
 from typing import Dict, List, Tuple
+from shared.isolated_environment import IsolatedEnvironment
 
 # Add project root to path
 

@@ -7,6 +7,7 @@ import json
 import time
 import requests
 from typing import Dict, List, Tuple
+from shared.isolated_environment import IsolatedEnvironment
 
 # Staging URLs
 BACKEND_URL = "https://netra-backend-staging-701982941522.us-central1.run.app"

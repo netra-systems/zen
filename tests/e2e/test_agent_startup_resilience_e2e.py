@@ -23,6 +23,7 @@ import json
 import time
 from datetime import datetime, timezone
 from typing import Any, Dict, List
+from shared.isolated_environment import IsolatedEnvironment
 
 import pytest
 

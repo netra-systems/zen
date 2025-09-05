@@ -11,6 +11,7 @@ Coverage: Per-endpoint circuit breakers, failure thresholds, recovery mechanisms
 """
 
 import pytest
+from shared.isolated_environment import IsolatedEnvironment
 
 
 @pytest.mark.asyncio

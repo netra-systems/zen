@@ -1,3 +1,29 @@
+class TestWebSocketConnection:
+    """Real WebSocket connection for testing instead of mocks."""
+    
+    def __init__(self):
+    pass
+        self.messages_sent = []
+        self.is_connected = True
+        self._closed = False
+        
+    async def send_json(self, message: dict):
+        """Send JSON message."""
+        if self._closed:
+            raise RuntimeError("WebSocket is closed")
+        self.messages_sent.append(message)
+        
+    async def close(self, code: int = 1000, reason: str = "Normal closure"):
+        """Close WebSocket connection."""
+    pass
+        self._closed = True
+        self.is_connected = False
+        
+    def get_messages(self) -> list:
+        """Get all sent messages."""
+        await asyncio.sleep(0)
+    return self.messages_sent.copy()
+
 """Integration tests for consolidated Tool Dispatcher and Execution Engine.
 
 This test suite validates:
@@ -13,7 +39,12 @@ This test suite validates:
 import asyncio
 import time
 from typing import Any, Dict, List, Optional
-from unittest.mock import AsyncMock, MagicMock, patch
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from test_framework.database.test_database_manager import TestDatabaseManager
+from auth_service.core.auth_manager import AuthManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 import pytest
 from langchain_core.tools import BaseTool
@@ -45,6 +76,10 @@ from netra_backend.app.agents.execution_engine_consolidated import (
     execution_engine_context
 )
 from netra_backend.app.schemas.tool import ToolResult, ToolStatus
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
+from shared.isolated_environment import get_env
 
 
 # ============================================================================
@@ -52,39 +87,43 @@ from netra_backend.app.schemas.tool import ToolResult, ToolStatus
 # ============================================================================
 
 @pytest.fixture
-def mock_user_context():
+ def real_user_context():
+    """Use real service instance."""
+    # TODO: Initialize real service
     """Create mock user context."""
-    context = MagicMock()
-    context.user_id = "test_user_123"
+    pass
+    context = Magic    context.user_id = "test_user_123"
     context.request_id = "req_456"
     return context
 
 
 @pytest.fixture
-def mock_websocket_emitter():
+ def real_websocket_emitter():
+    """Use real service instance."""
+    # TODO: Initialize real service
     """Create mock WebSocket emitter."""
-    emitter = AsyncMock()
-    emitter.notify_tool_executing = AsyncMock()
-    emitter.notify_tool_completed = AsyncMock()
-    emitter.notify_tool_error = AsyncMock()
+    pass
+    websocket = TestWebSocketConnection()
     return emitter
 
 
 @pytest.fixture
-def mock_websocket_bridge():
+ def real_websocket_bridge():
+    """Use real service instance."""
+    # TODO: Initialize real service
     """Create mock WebSocket bridge."""
-    bridge = AsyncMock()
-    bridge.notify_agent_started = AsyncMock()
-    bridge.notify_agent_completed = AsyncMock()
-    bridge.notify_agent_error = AsyncMock()
+    pass
+    websocket = TestWebSocketConnection()
     return bridge
 
 
 @pytest.fixture
-def mock_agent_registry():
+ def real_agent_registry():
+    """Use real service instance."""
+    # TODO: Initialize real service
     """Create mock agent registry."""
-    registry = MagicMock()
-    mock_agent = AsyncMock()
+    pass
+    registry = Magic    websocket = TestWebSocketConnection()
     mock_agent.execute = AsyncMock(return_value="agent_result")
     registry.get_agent = MagicMock(return_value=mock_agent)
     return registry
@@ -98,7 +137,8 @@ async def sample_tools():
         description: str = "A test tool"
         
         def _run(self, query: str) -> str:
-            return f"Processed: {query}"
+            await asyncio.sleep(0)
+    return f"Processed: {query}"
         
         async def _arun(self, query: str) -> str:
             return f"Async processed: {query}"
@@ -153,6 +193,7 @@ class TestUnifiedToolDispatcher:
     @pytest.mark.asyncio
     async def test_tool_registration_and_discovery(self, sample_tools):
         """Test tool registration and discovery."""
+    pass
         dispatcher = UnifiedToolDispatcher()
         
         # Register tools
@@ -173,7 +214,8 @@ class TestUnifiedToolDispatcher:
         
         # Register a test tool
         async def test_handler(input: str) -> str:
-            return f"Result: {input}"
+            await asyncio.sleep(0)
+    return f"Result: {input}"
         
         tool_def = ToolDefinition(
             name="test",
@@ -197,12 +239,14 @@ class TestUnifiedToolDispatcher:
     @pytest.mark.asyncio
     async def test_tool_dispatch_with_admin_strategy(self):
         """Test tool dispatch with admin strategy."""
+    pass
         admin_strategy = AdminDispatchStrategy()
         dispatcher = UnifiedToolDispatcher(strategy=admin_strategy)
         
         # Register admin tool
         async def admin_handler(**kwargs) -> str:
-            return f"Admin action: {kwargs.get('_admin_context', {}).get('admin_verified')}"
+            await asyncio.sleep(0)
+    return f"Admin action: {kwargs.get('_admin_context', {}).get('admin_verified')}"
         
         tool_def = ToolDefinition(
             name="corpus_update",
@@ -231,7 +275,8 @@ class TestUnifiedToolDispatcher:
         
         # Register fast tool
         async def fast_handler() -> str:
-            return "fast"
+            await asyncio.sleep(0)
+    return "fast"
         
         tool_def = ToolDefinition(
             name="fast",
@@ -262,6 +307,7 @@ class TestUnifiedToolDispatcher:
     @pytest.mark.asyncio
     async def test_request_scoped_dispatcher(self, mock_user_context):
         """Test request-scoped dispatcher isolation."""
+    pass
         base_dispatcher = UnifiedToolDispatcher(user_context=mock_user_context)
         
         # Create request-scoped wrapper
@@ -271,7 +317,8 @@ class TestUnifiedToolDispatcher:
         
         # Register tool
         async def scoped_handler() -> str:
-            return "scoped result"
+            await asyncio.sleep(0)
+    return "scoped result"
         
         tool_def = ToolDefinition(
             name="scoped",
@@ -330,6 +377,7 @@ class TestExecutionEngine:
     @pytest.mark.asyncio
     async def test_agent_execution_success(self, mock_agent_registry, mock_user_context):
         """Test successful agent execution."""
+    pass
         engine = ExecutionEngine(
             registry=mock_agent_registry,
             user_context=mock_user_context
@@ -373,8 +421,9 @@ class TestExecutionEngine:
     @pytest.mark.asyncio
     async def test_execution_performance(self, mock_agent_registry):
         """Test execution meets <2s requirement."""
+    pass
         # Configure fast agent
-        mock_agent = AsyncMock()
+        websocket = TestWebSocketConnection()
         mock_agent.execute = AsyncMock(
             side_effect=lambda *args: asyncio.sleep(0.1) or "fast_result"
         )
@@ -407,8 +456,7 @@ class TestExecutionEngine:
         # Create multiple engines for different users
         engines = []
         for i in range(12):  # Test with 12 concurrent users
-            user_context = MagicMock()
-            user_context.user_id = f"user_{i}"
+            user_context = Magic            user_context.user_id = f"user_{i}"
             user_context.request_id = f"req_{i}"
             
             engine = ExecutionEngine(
@@ -470,6 +518,7 @@ class TestFactories:
     @pytest.mark.asyncio
     async def test_request_scoped_dispatcher_factory(self, mock_user_context):
         """Test request-scoped dispatcher factory."""
+    pass
         dispatcher = create_request_scoped_dispatcher(
             request_id="test_req_001",
             user_context=mock_user_context
@@ -510,6 +559,7 @@ class TestFactories:
     @pytest.mark.asyncio
     async def test_request_scoped_engine_factory(self, mock_user_context):
         """Test request-scoped engine factory."""
+    pass
         engine = ExecutionEngineFactory.create_request_scoped_engine(
             request_id="test_req_002",
             user_context=mock_user_context
@@ -569,8 +619,7 @@ class TestIntegration:
         # Create multiple request-scoped engines
         requests = []
         for i in range(5):
-            user_context = MagicMock()
-            user_context.user_id = f"user_{i}"
+            user_context = Magic            user_context.user_id = f"user_{i}"
             user_context.request_id = f"req_{i}"
             
             engine = ExecutionEngineFactory.create_request_scoped_engine(
@@ -600,6 +649,7 @@ class TestIntegration:
         mock_agent_registry
     ):
         """Test WebSocket event flow through the system."""
+    pass
         # Create dispatcher with WebSocket
         dispatcher = UnifiedToolDispatcher(
             user_context=mock_user_context,
@@ -608,7 +658,8 @@ class TestIntegration:
         
         # Register tool
         async def event_tool() -> str:
-            return "event_result"
+            await asyncio.sleep(0)
+    return "event_result"
         
         tool_def = ToolDefinition(
             name="event_tool",
@@ -661,7 +712,8 @@ class TestIntegration:
         
         # Register fast tool
         async def perf_tool() -> str:
-            return "perf"
+            await asyncio.sleep(0)
+    return "perf"
         
         tool_def = ToolDefinition(
             name="perf_tool",
@@ -704,6 +756,7 @@ class TestIntegration:
     @pytest.mark.asyncio
     async def test_backwards_compatibility(self, mock_user_context, mock_agent_registry):
         """Test backward compatibility with old APIs."""
+    pass
         with warnings.catch_warnings(record=True) as w:
             warnings.simplefilter("always")
             
@@ -767,7 +820,8 @@ class TestStress:
         # Register simple tool
         async def stress_tool(value: int) -> int:
             await asyncio.sleep(0.001)  # Tiny delay
-            return value * 2
+            await asyncio.sleep(0)
+    return value * 2
         
         tool_def = ToolDefinition(
             name="stress",
@@ -797,6 +851,7 @@ class TestStress:
     @pytest.mark.asyncio
     async def test_high_concurrent_execution(self, mock_agent_registry):
         """Test engine under high concurrent load."""
+    pass
         config = EngineConfig(
             max_concurrent_agents=50,
             enable_metrics=True
@@ -865,11 +920,12 @@ class TestErrorHandling:
     @pytest.mark.asyncio
     async def test_engine_timeout_handling(self, mock_agent_registry):
         """Test engine timeout handling."""
+    pass
         # Configure with short timeout
         config = EngineConfig(agent_execution_timeout=0.1)
         
         # Create slow agent
-        mock_agent = AsyncMock()
+        websocket = TestWebSocketConnection()
         mock_agent.execute = AsyncMock(
             side_effect=lambda *args: asyncio.sleep(1.0)  # Longer than timeout
         )

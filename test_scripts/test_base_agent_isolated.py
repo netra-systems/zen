@@ -1,4 +1,5 @@
 from shared.isolated_environment import get_env
+from shared.isolated_environment import IsolatedEnvironment
 #!/usr/bin/env python3
 """
 ISOLATED BASE AGENT TEST - Direct execution without pytest dependencies
@@ -11,7 +12,6 @@ import gc
 import os
 import sys
 import time
-from unittest.mock import Mock
 
 # Add project root to path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'netra_backend'))

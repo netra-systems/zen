@@ -16,6 +16,7 @@ import time
 import json
 from typing import Dict, Any, List
 import pytest_asyncio
+from shared.isolated_environment import IsolatedEnvironment
 
 from tests.e2e.config import TEST_USERS, TEST_ENDPOINTS
 from tests.e2e.jwt_token_helpers import JWTTestHelper

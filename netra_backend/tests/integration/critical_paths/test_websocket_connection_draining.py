@@ -15,6 +15,11 @@ from netra_backend.app.websocket_core import WebSocketManager
 # Test framework import - using pytest fixtures instead
 from pathlib import Path
 import sys
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from test_framework.docker.unified_docker_manager import UnifiedDockerManager
+from test_framework.database.test_database_manager import TestDatabaseManager
+from test_framework.redis.test_redis_manager import TestRedisManager
+from shared.isolated_environment import IsolatedEnvironment
 
 import pytest
 import asyncio
@@ -22,7 +27,6 @@ import json
 import time
 from typing import Dict, Any, List
 from datetime import datetime, timezone
-from unittest.mock import patch, AsyncMock, MagicMock
 from uuid import uuid4
 
 import redis.asyncio as redis

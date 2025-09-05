@@ -1,4 +1,5 @@
 from shared.isolated_environment import get_env
+from shared.isolated_environment import IsolatedEnvironment
 """
 env = get_env()
 Comprehensive Next.js Configuration Validation Tests
@@ -22,7 +23,6 @@ import subprocess
 import tempfile
 from pathlib import Path
 from typing import Dict, Any, List, Optional
-from unittest.mock import patch, Mock, MagicMock
 import sys
 
 

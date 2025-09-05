@@ -8,6 +8,7 @@ import platform
 import pytest
 import socket
 from typing import Dict, List
+from shared.isolated_environment import IsolatedEnvironment
 
 from dev_launcher.service_coordination import (
     ServiceCoordinator,

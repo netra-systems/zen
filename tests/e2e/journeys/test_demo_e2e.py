@@ -6,6 +6,7 @@ Shows service orchestration, user journeys, and WebSocket flows.
 import asyncio
 import logging
 from pathlib import Path
+from shared.isolated_environment import IsolatedEnvironment
 
 from tests.e2e.integration.unified_e2e_harness import create_e2e_harness
 

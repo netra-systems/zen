@@ -6,11 +6,13 @@ COMPLIANCE: 450-line max file, 25-line max functions
 
 import sys
 from pathlib import Path
+from test_framework.database.test_database_manager import TestDatabaseManager
+from auth_service.core.auth_manager import AuthManager
+from shared.isolated_environment import IsolatedEnvironment
 
 # Test framework import - using pytest fixtures instead
 
 from datetime import datetime, timedelta, timezone
-from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 from sqlalchemy import JSON, Column, DateTime, Float, Integer, String

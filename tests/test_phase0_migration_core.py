@@ -11,11 +11,15 @@ import time
 import uuid
 from datetime import datetime, timezone
 from typing import Any, Dict
-from unittest.mock import patch
+from shared.isolated_environment import IsolatedEnvironment
 
 # Core imports for Phase 0 migration - only essential ones
 from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
 from netra_backend.app.agents.base_agent import BaseAgent
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
+from shared.isolated_environment import get_env
 
 
 class TestUserExecutionContextCore:

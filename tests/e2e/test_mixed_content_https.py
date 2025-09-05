@@ -1,4 +1,5 @@
 from shared.isolated_environment import get_env
+from shared.isolated_environment import IsolatedEnvironment
 """
 E2E Test for Mixed Content and HTTPS Protocol Issues
 
@@ -19,10 +20,13 @@ import json
 import subprocess
 from pathlib import Path
 from typing import Dict, List, Tuple, Any
-from unittest.mock import patch
 import pytest
 from test_framework.base_integration_test import BaseIntegrationTest
 from test_framework.environment_markers import env, env_requires, dev_and_staging
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
+import asyncio
 
 
 @env("dev", "staging")
@@ -42,10 +46,10 @@ class TestMixedContentHTTPS(BaseIntegrationTest):
         self.mixed_content_violations = []
         self.protocol_inconsistencies = []
         
-    @patch.dict('os.environ', {'ENVIRONMENT': 'staging', 'TESTING': '0'})
     @pytest.mark.e2e
     def test_staging_environment_https_detection_FAILING(self):
         """
+    pass
         FAILING TEST: secure-api-config.ts should detect staging as secure environment.
         
         This test SHOULD FAIL because the environment detection logic in 
@@ -92,6 +96,7 @@ class TestMixedContentHTTPS(BaseIntegrationTest):
         This test SHOULD FAIL because API URLs may still use HTTP in staging,
         causing mixed content warnings when frontend is served over HTTPS.
         """
+    pass
         staging_env = {
             'NEXT_PUBLIC_ENVIRONMENT': 'staging',
             'NEXT_PUBLIC_API_URL': 'http://api.staging.netrasystems.ai',  # Wrong protocol
@@ -118,9 +123,40 @@ class TestMixedContentHTTPS(BaseIntegrationTest):
             
             # This assertion SHOULD FAIL due to HTTP URLs in staging
             assert len(http_violations) == 0, (
-                f"Found {len(http_violations)} mixed content violations in staging:\n" +
-                '\n'.join(f"  - {violation}" for violation in http_violations) +
-                f"\n\nAll URLs must use HTTPS/WSS in staging to prevent mixed content errors."
+                f"Found {len(http_violations)} mixed content violations in staging:
+
+class TestWebSocketConnection:
+    """Real WebSocket connection for testing instead of mocks."""
+    
+    def __init__(self):
+    pass
+        self.messages_sent = []
+        self.is_connected = True
+        self._closed = False
+        
+    async def send_json(self, message: dict):
+        """Send JSON message."""
+        if self._closed:
+            raise RuntimeError("WebSocket is closed")
+        self.messages_sent.append(message)
+        
+    async def close(self, code: int = 1000, reason: str = "Normal closure"):
+        """Close WebSocket connection."""
+    pass
+        self._closed = True
+        self.is_connected = False
+        
+    def get_messages(self) -> list:
+        """Get all sent messages."""
+        await asyncio.sleep(0)
+    return self.messages_sent.copy()
+
+" +
+                '
+'.join(f"  - {violation}" for violation in http_violations) +
+                f"
+
+All URLs must use HTTPS/WSS in staging to prevent mixed content errors."
             )
     
     @pytest.mark.e2e
@@ -131,6 +167,7 @@ class TestMixedContentHTTPS(BaseIntegrationTest):
         This test SHOULD FAIL because WebSocket URLs may use WS instead of WSS,
         causing connection failures from HTTPS pages due to mixed content restrictions.
         """
+    pass
         staging_scenarios = [
             {
                 'env': {'NEXT_PUBLIC_ENVIRONMENT': 'staging'},
@@ -159,8 +196,7 @@ class TestMixedContentHTTPS(BaseIntegrationTest):
                 mock_window.location.protocol = scenario['client_protocol']
                 
                 # Mock: Component isolation for testing without external dependencies
-                with patch('builtins.window', mock_window, create=True):
-                    api_config = self._get_secure_api_config()
+                                    api_config = self._get_secure_api_config()
                     
                     actual_ws_protocol = api_config['wsUrl'].split('://')[0] + ':'
                     expected_ws_protocol = scenario['expected_ws_protocol']
@@ -173,9 +209,13 @@ class TestMixedContentHTTPS(BaseIntegrationTest):
         
         # This assertion SHOULD FAIL due to WS instead of WSS
         assert len(websocket_violations) == 0, (
-            f"Found {len(websocket_violations)} WebSocket protocol violations:\n" +
-            '\n'.join(f"  - {violation}" for violation in websocket_violations) +
-            f"\n\nWebSocket URLs must use WSS in secure environments to prevent connection failures."
+            f"Found {len(websocket_violations)} WebSocket protocol violations:
+" +
+            '
+'.join(f"  - {violation}" for violation in websocket_violations) +
+            f"
+
+WebSocket URLs must use WSS in secure environments to prevent connection failures."
         )
     
     @pytest.mark.e2e
@@ -186,6 +226,7 @@ class TestMixedContentHTTPS(BaseIntegrationTest):
         This test SHOULD FAIL because server-side rendering (SSR) and client-side hydration
         may make different protocol decisions, causing hydration mismatches and errors.
         """
+    pass
         test_environments = [
             {'NEXT_PUBLIC_ENVIRONMENT': 'staging'},
             {'NEXT_PUBLIC_ENVIRONMENT': 'production'},
@@ -222,9 +263,13 @@ class TestMixedContentHTTPS(BaseIntegrationTest):
         
         # This assertion SHOULD FAIL due to SSR/client inconsistencies
         assert len(consistency_issues) == 0, (
-            f"Found {len(consistency_issues)} server/client protocol inconsistencies:\n" +
-            '\n'.join(f"  - {issue}" for issue in consistency_issues) +
-            f"\n\nServer and client must generate consistent protocols to prevent hydration errors."
+            f"Found {len(consistency_issues)} server/client protocol inconsistencies:
+" +
+            '
+'.join(f"  - {issue}" for issue in consistency_issues) +
+            f"
+
+Server and client must generate consistent protocols to prevent hydration errors."
         )
     
     @pytest.mark.e2e
@@ -235,6 +280,7 @@ class TestMixedContentHTTPS(BaseIntegrationTest):
         This test SHOULD FAIL because environment detection may not handle
         complex deployment scenarios like preview branches, custom domains, etc.
         """
+    pass
         edge_case_scenarios = [
             {
                 'name': 'Vercel Preview Branch',
@@ -272,8 +318,7 @@ class TestMixedContentHTTPS(BaseIntegrationTest):
                 mock_window.location.host = scenario['client_host']
                 
                 # Mock: Component isolation for testing without external dependencies
-                with patch('builtins.window', mock_window, create=True):
-                    is_secure = self._simulate_client_side_environment_detection(
+                                    is_secure = self._simulate_client_side_environment_detection(
                         protocol='https:',
                         host=scenario['client_host']
                     )
@@ -285,9 +330,13 @@ class TestMixedContentHTTPS(BaseIntegrationTest):
         
         # This assertion SHOULD FAIL due to edge case handling issues
         assert len(detection_failures) == 0, (
-            f"Environment detection failed for {len(detection_failures)} edge cases:\n" +
-            '\n'.join(f"  - {failure}" for failure in detection_failures) +
-            f"\n\nEnvironment detection must handle complex deployment scenarios correctly."
+            f"Environment detection failed for {len(detection_failures)} edge cases:
+" +
+            '
+'.join(f"  - {failure}" for failure in detection_failures) +
+            f"
+
+Environment detection must handle complex deployment scenarios correctly."
         )
 
     @pytest.mark.e2e
@@ -298,6 +347,7 @@ class TestMixedContentHTTPS(BaseIntegrationTest):
         This tests a similar failure mode where backend CORS origins are configured
         with HTTP while frontend uses HTTPS, causing CORS errors.
         """
+    pass
         # Mock staging environment with HTTPS frontend
         staging_env = {
             'NEXT_PUBLIC_ENVIRONMENT': 'staging',
@@ -328,9 +378,13 @@ class TestMixedContentHTTPS(BaseIntegrationTest):
             
             # This assertion SHOULD FAIL due to protocol mismatches
             assert len(protocol_mismatches) == 0, (
-                f"Found {len(protocol_mismatches)} CORS protocol mismatches:\n" +
-                '\n'.join(f"  - {mismatch}" for mismatch in protocol_mismatches) +
-                f"\n\nCORS origins must match frontend protocol to prevent connection errors."
+                f"Found {len(protocol_mismatches)} CORS protocol mismatches:
+" +
+                '
+'.join(f"  - {mismatch}" for mismatch in protocol_mismatches) +
+                f"
+
+CORS origins must match frontend protocol to prevent connection errors."
             )
 
     def _simulate_server_side_environment_detection(self) -> bool:
@@ -392,8 +446,7 @@ class TestMixedContentHTTPS(BaseIntegrationTest):
         mock_window.location.host = host
         
         # Mock: Component isolation for testing without external dependencies
-        with patch('builtins.window', mock_window, create=True):
-            return self._get_secure_api_config()
+                    return self._get_secure_api_config()
     
     def teardown_method(self):
         """Clean up after test and report violations."""
@@ -401,15 +454,18 @@ class TestMixedContentHTTPS(BaseIntegrationTest):
         
         # Report mixed content violations for debugging
         if self.mixed_content_violations:
-            print(f"\n=== Mixed Content Violations ===")
+            print(f"
+=== Mixed Content Violations ===")
             for violation in self.mixed_content_violations:
                 print(f"  - {violation}")
         
         if self.protocol_inconsistencies:
-            print(f"\n=== Protocol Inconsistencies ===")
+            print(f"
+=== Protocol Inconsistencies ===")
             for inconsistency in self.protocol_inconsistencies:
                 print(f"  - {inconsistency}")
 
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])
+    pass

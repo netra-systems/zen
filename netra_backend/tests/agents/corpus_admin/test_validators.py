@@ -7,29 +7,39 @@ operations and ensure proper approval workflows for enterprise clients.
 """
 
 import pytest
-from unittest.mock import Mock
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from auth_service.core.auth_manager import AuthManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 from netra_backend.app.agents.corpus_admin.validators import CorpusApprovalValidator
 from netra_backend.app.agents.corpus_admin.models import (
     CorpusOperation,
     CorpusType,
     CorpusMetadata,
-    CorpusOperationRequest,
-)
+    CorpusOperationRequest)
 from netra_backend.app.agents.state import DeepAgentState
 
 
 class TestCorpusApprovalValidator:
     """Test CorpusApprovalValidator class."""
+    pass
 
     @pytest.fixture
     def validator(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create validator instance for testing."""
+    pass
         return CorpusApprovalValidator()
 
     @pytest.fixture
     def sample_metadata(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create sample corpus metadata for testing."""
+    pass
         return CorpusMetadata(
             corpus_name="test_corpus",
             corpus_type=CorpusType.KNOWLEDGE_BASE,
@@ -39,7 +49,10 @@ class TestCorpusApprovalValidator:
 
     @pytest.fixture
     def sample_state(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create sample agent state for testing."""
+    pass
         state = DeepAgentState()
         state.user_request = "Delete the outdated documentation corpus"
         state.user_id = "test_user_123"
@@ -57,6 +70,7 @@ class TestCorpusApprovalValidator:
 
     def test_approval_thresholds_values(self, validator):
         """Test approval threshold values are reasonable."""
+    pass
         thresholds = validator.approval_thresholds
         
         assert thresholds["delete_documents"] == 100
@@ -71,13 +85,19 @@ class TestCorpusApprovalValidator:
 
 class TestApprovalRequirements:
     """Test approval requirement checking logic."""
+    pass
 
     @pytest.fixture
     def validator(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         return CorpusApprovalValidator()
 
     @pytest.fixture
     def sample_metadata(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
+    pass
         return CorpusMetadata(
             corpus_name="approval_test_corpus",
             corpus_type=CorpusType.DOCUMENTATION,
@@ -101,6 +121,7 @@ class TestApprovalRequirements:
     @pytest.mark.asyncio
     async def test_non_delete_operations_basic(self, validator, sample_metadata):
         """Test that non-DELETE operations don't automatically require approval."""
+    pass
         state = DeepAgentState()
         state.triage_result = {}
         
@@ -145,6 +166,7 @@ class TestApprovalRequirements:
     @pytest.mark.asyncio
     async def test_no_explicit_approval_request_in_triage(self, validator, sample_metadata):
         """Test no approval when not explicitly requested in triage result."""
+    pass
         request = CorpusOperationRequest(
             operation=CorpusOperation.CREATE,
             corpus_metadata=sample_metadata
@@ -174,6 +196,7 @@ class TestApprovalRequirements:
     @pytest.mark.asyncio
     async def test_small_update_operation_no_approval(self, validator, sample_metadata):
         """Test that small UPDATE operations don't require approval."""
+    pass
         update_request = CorpusOperationRequest(
             operation=CorpusOperation.UPDATE,
             corpus_metadata=sample_metadata
@@ -203,6 +226,7 @@ class TestApprovalRequirements:
     @pytest.mark.asyncio
     async def test_non_dict_triage_result(self, validator, sample_metadata):
         """Test approval checking with non-dict triage result."""
+    pass
         request = CorpusOperationRequest(
             operation=CorpusOperation.VALIDATE,
             corpus_metadata=sample_metadata
@@ -238,13 +262,20 @@ class TestApprovalRequirements:
 
 class TestApprovalMessageGeneration:
     """Test approval message generation."""
+    pass
 
     @pytest.fixture
     def validator(self):
-        return CorpusApprovalValidator()
+    """Use real service instance."""
+    # TODO: Initialize real service
+        await asyncio.sleep(0)
+    return CorpusApprovalValidator()
 
     @pytest.fixture
     def sample_metadata(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
+    pass
         return CorpusMetadata(
             corpus_name="message_test_corpus",
             corpus_type=CorpusType.KNOWLEDGE_BASE,
@@ -274,6 +305,7 @@ class TestApprovalMessageGeneration:
 
     def test_delete_operation_warning(self, validator, sample_metadata):
         """Test that DELETE operations include warning message."""
+    pass
         delete_request = CorpusOperationRequest(
             operation=CorpusOperation.DELETE,
             corpus_metadata=sample_metadata
@@ -299,6 +331,7 @@ class TestApprovalMessageGeneration:
 
     def test_operation_descriptions(self, validator, sample_metadata):
         """Test operation descriptions in messages."""
+    pass
         operation_tests = [
             (CorpusOperation.CREATE, "create a new corpus"),
             (CorpusOperation.UPDATE, "update existing corpus entries"),
@@ -331,6 +364,7 @@ class TestApprovalMessageGeneration:
 
     def test_approval_message_with_filters(self, validator, sample_metadata):
         """Test approval message includes filter information."""
+    pass
         filters = {
             "document_type": "technical",
             "status": "published",
@@ -364,6 +398,7 @@ class TestApprovalMessageGeneration:
 
     def test_approval_prompt_text(self, validator, sample_metadata):
         """Test approval prompt text is present."""
+    pass
         request = CorpusOperationRequest(
             operation=CorpusOperation.DELETE,
             corpus_metadata=sample_metadata
@@ -401,6 +436,7 @@ class TestApprovalMessageGeneration:
 
     def test_multiple_filters_formatting(self, validator, sample_metadata):
         """Test multiple filters are properly formatted."""
+    pass
         filters = {
             "category": "api_docs",
             "language": "english",
@@ -429,13 +465,19 @@ class TestApprovalMessageGeneration:
 
 class TestPrivateMethods:
     """Test private/helper methods."""
+    pass
 
     @pytest.fixture
     def validator(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         return CorpusApprovalValidator()
 
     @pytest.fixture
     def sample_metadata(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
+    pass
         return CorpusMetadata(
             corpus_name="private_test",
             corpus_type=CorpusType.EMBEDDINGS,
@@ -461,6 +503,7 @@ class TestPrivateMethods:
 
     def test_has_explicit_approval_request(self, validator):
         """Test explicit approval request detection."""
+    pass
         # Test with explicit approval
         state = DeepAgentState()
         state.triage_result = {"require_approval": True}
@@ -511,6 +554,7 @@ class TestPrivateMethods:
 
     def test_get_operation_descriptions(self, validator):
         """Test operation descriptions dictionary."""
+    pass
         descriptions = validator._get_operation_descriptions()
         
         assert isinstance(descriptions, dict)
@@ -545,6 +589,7 @@ class TestPrivateMethods:
 
     def test_get_approval_prompt(self, validator):
         """Test approval prompt text."""
+    pass
         prompt = validator._get_approval_prompt()
         
         assert "**Do you approve this operation?**" in prompt
@@ -554,13 +599,19 @@ class TestPrivateMethods:
 
 class TestValidateApprovalRequired:
     """Test the validate_approval_required method."""
+    pass
 
     @pytest.fixture
     def validator(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         return CorpusApprovalValidator()
 
     @pytest.fixture
     def sample_metadata(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
+    pass
         return CorpusMetadata(
             corpus_name="validate_test",
             corpus_type=CorpusType.TRAINING_DATA,
@@ -589,6 +640,7 @@ class TestValidateApprovalRequired:
     @pytest.mark.asyncio
     async def test_validate_approval_required_with_stream_updates(self, validator, sample_metadata):
         """Test validate_approval_required with streaming updates."""
+    pass
         request = CorpusOperationRequest(
             operation=CorpusOperation.CREATE,
             corpus_metadata=sample_metadata
@@ -633,14 +685,19 @@ class TestValidateApprovalRequired:
 
 class TestEdgeCases:
     """Test edge cases and error conditions."""
+    pass
 
     @pytest.fixture
     def validator(self):
-        return CorpusApprovalValidator()
+    """Use real service instance."""
+    # TODO: Initialize real service
+        await asyncio.sleep(0)
+    return CorpusApprovalValidator()
 
     @pytest.mark.asyncio
     async def test_malformed_state_objects(self, validator):
         """Test handling of malformed state objects."""
+    pass
         metadata = CorpusMetadata(
             corpus_name="malformed_test",
             corpus_type=CorpusType.DOCUMENTATION
@@ -687,6 +744,7 @@ class TestEdgeCases:
     @pytest.mark.asyncio
     async def test_concurrent_validation_calls(self, validator):
         """Test that validator handles concurrent calls properly."""
+    pass
         metadata = CorpusMetadata(
             corpus_name="concurrent_test",
             corpus_type=CorpusType.KNOWLEDGE_BASE

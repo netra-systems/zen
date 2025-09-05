@@ -28,6 +28,7 @@ import pytest
 import jwt
 import requests
 from test_framework.base_integration_test import BaseIntegrationTest
+from shared.isolated_environment import IsolatedEnvironment
 
 
 @pytest.mark.e2e
@@ -60,6 +61,7 @@ class TestAuthEdgeCases(BaseIntegrationTest):
     @pytest.mark.e2e
     def test_auth_token_expiration_during_active_session_EDGE_CASE(self):
         """
+    pass
         EDGE CASE: Token expires while user is actively using the application.
         
         This test simulates a token expiring mid-session and validates that the
@@ -110,6 +112,7 @@ class TestAuthEdgeCases(BaseIntegrationTest):
         
         Similar Pattern: User clicks login multiple times -> multiple auth flows -> token conflicts
         """
+    pass
         user_id = 'concurrent_user'
         auth_requests = []
         
@@ -127,7 +130,8 @@ class TestAuthEdgeCases(BaseIntegrationTest):
                     request_id=request_id
                 )
                 
-                return {
+                await asyncio.sleep(0)
+    return {
                     'request_id': request_id,
                     'status': 'success',
                     'token': token,
@@ -147,7 +151,8 @@ class TestAuthEdgeCases(BaseIntegrationTest):
                 simulate_concurrent_auth_request(i)
                 for i in range(5)  # 5 simultaneous requests
             ]
-            return await asyncio.gather(*tasks)
+            await asyncio.sleep(0)
+    return await asyncio.gather(*tasks)
         
         # Execute concurrent requests
         results = asyncio.run(run_concurrent_auth_test())
@@ -181,6 +186,7 @@ class TestAuthEdgeCases(BaseIntegrationTest):
     @pytest.mark.e2e
     def test_oauth_callback_invalid_token_handling_EDGE_CASE(self):
         """
+    pass
         EDGE CASE: OAuth callback handling with invalid/malformed tokens.
         
         This test validates proper handling of OAuth callbacks with various
@@ -249,12 +255,16 @@ class TestAuthEdgeCases(BaseIntegrationTest):
                 })
         
         assert len(oauth_callback_failures) == 0, (
-            f"OAuth callback failed to handle {len(oauth_callback_failures)} invalid token scenarios:\n" +
-            '\n'.join([
+            f"OAuth callback failed to handle {len(oauth_callback_failures)} invalid token scenarios:
+" +
+            '
+'.join([
                 f"  {fail['scenario']}: {fail['issue']}"
                 for fail in oauth_callback_failures
             ]) +
-            f"\n\nOAuth callbacks must gracefully handle all invalid token scenarios."
+            f"
+
+OAuth callbacks must gracefully handle all invalid token scenarios."
         )
     
     @pytest.mark.e2e
@@ -267,6 +277,7 @@ class TestAuthEdgeCases(BaseIntegrationTest):
         
         Similar Pattern: Auth service down -> all requests hang -> app becomes unusable
         """
+    pass
         timeout_scenarios = [
             {
                 'name': 'Connection Timeout',
@@ -327,12 +338,16 @@ class TestAuthEdgeCases(BaseIntegrationTest):
         self.timeout_failures.extend(service_failure_results)
         
         assert len(service_failure_results) == 0, (
-            f"Auth service failure scenarios not handled properly:\n" +
-            '\n'.join([
+            f"Auth service failure scenarios not handled properly:
+" +
+            '
+'.join([
                 f"  {result['scenario']}: expected '{result['expected']}', got '{result['actual']}'"
                 for result in service_failure_results
             ]) +
-            f"\n\nAuth service failures must have appropriate fallback behaviors."
+            f"
+
+Auth service failures must have appropriate fallback behaviors."
         )
     
     @pytest.mark.e2e
@@ -345,6 +360,7 @@ class TestAuthEdgeCases(BaseIntegrationTest):
         
         Similar Pattern: User logs in tab A -> tab B still shows logged out state
         """
+    pass
         # Simulate multiple browser tabs
         tab_sessions = {
             'tab_1': {'session_id': 'session_123', 'auth_state': 'logged_out'},
@@ -384,12 +400,16 @@ class TestAuthEdgeCases(BaseIntegrationTest):
         self.sync_issues.extend(sync_issues)
         
         assert len(sync_issues) == 0, (
-            f"Cross-tab authentication synchronization failed:\n" +
-            '\n'.join([
+            f"Cross-tab authentication synchronization failed:
+" +
+            '
+'.join([
                 f"  {issue['tab']}: {issue.get('issue', 'State mismatch - expected ' + str(issue.get('expected_state')) + ', got ' + str(issue.get('actual_state')))}"
                 for issue in sync_issues
             ]) +
-            f"\n\nAuth state must be synchronized across all browser tabs."
+            f"
+
+Auth state must be synchronized across all browser tabs."
         )
         
         # Test logout synchronization
@@ -412,12 +432,16 @@ class TestAuthEdgeCases(BaseIntegrationTest):
                 })
         
         assert len(logout_sync_issues) == 0, (
-            f"Cross-tab logout synchronization failed:\n" +
-            '\n'.join([
+            f"Cross-tab logout synchronization failed:
+" +
+            '
+'.join([
                 f"  {issue['tab']}: {issue['issue']}"
                 for issue in logout_sync_issues
             ]) +
-            f"\n\nLogout must be synchronized across all browser tabs."
+            f"
+
+Logout must be synchronized across all browser tabs."
         )
     
     @pytest.mark.e2e
@@ -430,6 +454,7 @@ class TestAuthEdgeCases(BaseIntegrationTest):
         
         Similar Pattern: User logs in on phone while already logged in on computer
         """
+    pass
         user_id = 'multi_device_user'
         
         # Simulate existing session
@@ -483,12 +508,16 @@ class TestAuthEdgeCases(BaseIntegrationTest):
                 })
         
         assert len(login_issues) == 0, (
-            f"Concurrent login handling failed:\n" +
-            '\n'.join([
+            f"Concurrent login handling failed:
+" +
+            '
+'.join([
                 f"  {issue['issue']}: {issue.get('error', 'No additional details')}"
                 for issue in login_issues
             ]) +
-            f"\n\nConcurrent logins must be handled according to session policy."
+            f"
+
+Concurrent logins must be handled according to session policy."
         )
     
     @pytest.mark.e2e
@@ -501,6 +530,7 @@ class TestAuthEdgeCases(BaseIntegrationTest):
         
         Similar Pattern: Attacker modifies JWT claims -> bypasses authorization
         """
+    pass
         # Create legitimate token
         legitimate_token = self._create_test_jwt_token(
             user_id='security_test_user',
@@ -569,12 +599,16 @@ class TestAuthEdgeCases(BaseIntegrationTest):
         self.token_vulnerabilities.extend(security_violations)
         
         assert len(security_violations) == 0, (
-            f"JWT security validation failed for {len(security_violations)} scenarios:\n" +
-            '\n'.join([
+            f"JWT security validation failed for {len(security_violations)} scenarios:
+" +
+            '
+'.join([
                 f"  {violation['scenario']}: {violation['issue']}"
                 for violation in security_violations
             ]) +
-            f"\n\nAll JWT manipulation attempts must be properly detected and rejected."
+            f"
+
+All JWT manipulation attempts must be properly detected and rejected."
         )
     
     @pytest.mark.e2e
@@ -587,6 +621,7 @@ class TestAuthEdgeCases(BaseIntegrationTest):
         
         Similar Pattern: Attacker steals session token -> gains unauthorized access
         """
+    pass
         # Create legitimate session
         legitimate_session = {
             'user_id': 'hijack_test_user',
@@ -658,12 +693,16 @@ class TestAuthEdgeCases(BaseIntegrationTest):
                 })
         
         assert len(security_bypasses) == 0, (
-            f"Session hijacking prevention failed for {len(security_bypasses)} scenarios:\n" +
-            '\n'.join([
+            f"Session hijacking prevention failed for {len(security_bypasses)} scenarios:
+" +
+            '
+'.join([
                 f"  {bypass['scenario']}: {bypass['issue']}"
                 for bypass in security_bypasses
             ]) +
-            f"\n\nSession security must prevent hijacking and unauthorized access."
+            f"
+
+Session security must prevent hijacking and unauthorized access."
         )
     
     # Helper methods for edge case testing
@@ -892,25 +931,30 @@ class TestAuthEdgeCases(BaseIntegrationTest):
         
         # Report findings for debugging
         if self.race_conditions:
-            print(f"\n=== Authentication Race Conditions ===")
+            print(f"
+=== Authentication Race Conditions ===")
             for condition in self.race_conditions:
                 print(f"  Request {condition.get('request_id', 'unknown')}: {condition.get('error', 'Unknown error')}")
         
         if self.timeout_failures:
-            print(f"\n=== Auth Service Timeout Failures ===")
+            print(f"
+=== Auth Service Timeout Failures ===")
             for failure in self.timeout_failures:
                 print(f"  {failure['scenario']}: {failure.get('actual', 'unknown behavior')}")
         
         if self.token_vulnerabilities:
-            print(f"\n=== Token Security Vulnerabilities ===")
+            print(f"
+=== Token Security Vulnerabilities ===")
             for vuln in self.token_vulnerabilities:
                 print(f"  {vuln['scenario']}: {vuln['issue']}")
         
         if self.sync_issues:
-            print(f"\n=== Cross-Tab Sync Issues ===")
+            print(f"
+=== Cross-Tab Sync Issues ===")
             for issue in self.sync_issues:
                 print(f"  {issue['tab']}: {issue.get('issue', 'State mismatch')}")
 
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])
+    pass

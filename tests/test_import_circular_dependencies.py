@@ -9,6 +9,7 @@ import sys
 import importlib
 from pathlib import Path
 from typing import List
+from shared.isolated_environment import IsolatedEnvironment
 
 # Set up Python path for imports
 def _setup_test_paths():
@@ -58,19 +59,24 @@ class TestCircularImports:
         # Assert no circular imports detected
         if circular_import_errors:
             pytest.fail(
-                f"Circular imports detected:\n" + 
-                "\n".join(f"  - {error}" for error in circular_import_errors)
+                f"Circular imports detected:
+" + 
+                "
+".join(f"  - {error}" for error in circular_import_errors)
             )
         
         # Assert no other import failures
         if failed_imports:
             pytest.fail(
-                f"Module import failures:\n" + 
-                "\n".join(f"  - {error}" for error in failed_imports)
+                f"Module import failures:
+" + 
+                "
+".join(f"  - {error}" for error in failed_imports)
             )
     
     def test_startup_module_import_order(self):
         """Test that startup_module imports in correct order."""
+    pass
         # Clear startup module if already imported
         module_name = 'netra_backend.app.startup_module'
         if module_name in sys.modules:
@@ -119,6 +125,7 @@ class TestCircularImports:
     
     def test_session_manager_type_checking_imports(self):
         """Test that session_manager uses TYPE_CHECKING pattern correctly."""
+    pass
         # Clear session_manager module if already imported
         module_name = 'netra_backend.app.database.session_manager'
         if module_name in sys.modules:
@@ -172,6 +179,7 @@ class TestCircularImports:
     
     def test_pytest_collection_compatibility(self):
         """Test that modules work properly during pytest collection."""
+    pass
         # Simulate pytest collection scenario
         original_modules = dict(sys.modules)
         
@@ -216,6 +224,7 @@ class TestCircularImports:
     @pytest.mark.parametrize("module_name", CRITICAL_MODULES)
     def test_individual_module_import(self, module_name: str):
         """Test each critical module can be imported individually."""
+    pass
         # Clear the specific module
         if module_name in sys.modules:
             del sys.modules[module_name]
@@ -257,6 +266,7 @@ class TestImportHierarchy:
     
     def test_startup_module_path_setup(self):
         """Test that startup_module sets up paths correctly."""
+    pass
         import netra_backend.app.startup_module as startup
         
         # Verify the _setup_paths function exists
@@ -282,6 +292,7 @@ class TestImportHierarchy:
     
     def test_type_checking_imports_isolation(self):
         """Test that TYPE_CHECKING imports don't cause runtime issues."""
+    pass
         # Import modules that use TYPE_CHECKING
         import netra_backend.app.database.session_manager
         import netra_backend.app.dependencies
@@ -315,7 +326,8 @@ if __name__ == "__main__":
     except Exception as e:
         print(f"FAIL: Import guards test failed: {e}")
     
-    print("\\nTesting import hierarchy...")
+    print("\
+Testing import hierarchy...")
     
     hierarchy_test = TestImportHierarchy()
     
@@ -331,4 +343,5 @@ if __name__ == "__main__":
     except Exception as e:
         print(f"FAIL: Path setup test failed: {e}")
         
-    print("\\nCircular import testing complete!")
+    print("\
+Circular import testing complete!")

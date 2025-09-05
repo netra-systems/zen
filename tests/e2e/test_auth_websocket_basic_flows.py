@@ -15,6 +15,7 @@ import json
 import time
 from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional
+from shared.isolated_environment import IsolatedEnvironment
 
 import pytest
 import jwt

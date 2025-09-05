@@ -24,7 +24,9 @@ import sys
 import time
 import uuid
 from typing import List, Dict, Any, Optional
-from unittest.mock import AsyncMock, Mock, patch
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from shared.isolated_environment import IsolatedEnvironment
 
 # Add project root to path
 project_root = os.path.abspath(os.path.join(os.path.dirname(__file__)))

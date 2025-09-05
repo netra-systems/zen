@@ -4,6 +4,12 @@ from netra_backend.app.websocket_core import WebSocketManager
 # Test framework import - using pytest fixtures instead
 from pathlib import Path
 import sys
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from test_framework.database.test_database_manager import TestDatabaseManager
+from auth_service.core.auth_manager import AuthManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 import asyncio
 import json
@@ -13,7 +19,6 @@ import time
 import uuid
 from datetime import datetime, timedelta
 from typing import Any, Dict
-from unittest.mock import AsyncMock, MagicMock
 
 import jwt
 import pytest
@@ -27,9 +32,7 @@ from netra_backend.app.agents.state import DeepAgentState
 
 from netra_backend.app.agents.supervisor_consolidated import (
 
-    SupervisorAgent as Supervisor,
-
-)
+    SupervisorAgent as Supervisor)
 from netra_backend.app.db.base import Base
 from netra_backend.app.db.models_postgres import Run
 from netra_backend.app.schemas.agent import AgentStarted
@@ -45,13 +48,14 @@ from netra_backend.app.websocket_core import WebSocketManager
 class TestSyntaxFix:
 
     """Test class for orphaned methods"""
+    pass
 
     def _setup_supervisor_with_database(self, db_setup, infra, test_entities):
 
         """Setup supervisor agent with database and infrastructure"""
 
         # Mock: Session state isolation for predictable testing
-        supervisor = Supervisor(db_setup["session"], infra["llm_manager"], infra["websocket_manager"], Mock())
+        supervisor = Supervisor(db_setup["session"], infra["llm_manager"], infra["websocket_manager"], None  # TODO: Use real service instance)
 
         supervisor.thread_id = test_entities["thread"].id
 

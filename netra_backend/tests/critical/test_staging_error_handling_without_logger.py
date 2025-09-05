@@ -13,9 +13,12 @@ These tests verify error handling resilience when logging is not functional.
 import pytest
 import sys
 import os
-from unittest.mock import Mock, patch, MagicMock
 from typing import List, Dict, Any
 import logging
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from test_framework.docker.unified_docker_manager import UnifiedDockerManager
+from test_framework.database.test_database_manager import TestDatabaseManager
+from shared.isolated_environment import IsolatedEnvironment
 
 
 class TestErrorHandlingWithoutLogger:

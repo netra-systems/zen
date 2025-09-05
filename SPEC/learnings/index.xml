@@ -38,6 +38,25 @@
         </prevention>
     </learning>
     
+    <learning id="fake-staging-tests-critical-failure-2025-09-05">
+        <title>🚨 CRITICAL: Fake Staging Tests Creating False Confidence</title>
+        <category>Testing/Staging/FakeTests/CriticalFailure/Abomination</category>
+        <keywords>fake-tests, staging-tests, false-confidence, zero-duration, simulation, mock-tests, test-fraud, critical-failure</keywords>
+        <path>fake_staging_tests_critical_failure_20250905.xml</path>
+        <critical-takeaway>
+            ENTIRE STAGING TEST SUITE IS FAKE! 158 tests complete in 0.000s because they test NOTHING.
+            Tests validate local dictionaries, use hardcoded simulations, print "[PASS]" without testing.
+            97.5% pass rate is MEANINGLESS. $120K+ MRR at risk from untested staging deployments.
+            NEVER accept tests completing in 0 seconds. ALWAYS verify real network calls.
+        </critical-takeaway>
+        <severity>CRITICAL-ABOMINATION</severity>
+        <business-impact>Entire staging validation is fake - production deployments based on lies</business-impact>
+        <prevention>
+            FORBID tests with 0.000s duration. REQUIRE real API/WebSocket calls. MANDATE packet capture proof.
+            Minimum E2E test duration >0.1s. Every test MUST make real network calls to staging.
+        </prevention>
+    </learning>
+    
     <learning id="permanent-failure-state-pattern-2025-09-05">
         <title>Systemic Permanent Failure State Pattern - Critical Discovery</title>
         <category>Resilience/CircuitBreaker/AntiPattern/SystemicIssue</category>

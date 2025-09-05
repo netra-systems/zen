@@ -24,6 +24,7 @@ from pathlib import Path
 from typing import Dict, List, Set, Tuple, Any, Optional
 import pytest
 from test_framework.base_integration_test import BaseIntegrationTest
+from shared.isolated_environment import IsolatedEnvironment
 
 
 @pytest.mark.e2e
@@ -48,6 +49,7 @@ class TestTypeSystemEdgeCases(BaseIntegrationTest):
     @pytest.mark.e2e
     def test_detect_circular_type_dependencies_EDGE_CASE(self):
         """
+    pass
         EDGE CASE: Detect circular dependencies in type imports.
         
         This test identifies circular import chains that could cause TypeScript
@@ -64,12 +66,16 @@ class TestTypeSystemEdgeCases(BaseIntegrationTest):
         complex_cycles = [chain for chain in circular_chains if len(chain) > 2]
         
         assert len(complex_cycles) == 0, (
-            f"Found {len(complex_cycles)} complex circular type dependency chains:\n" +
-            '\n'.join([
+            f"Found {len(complex_cycles)} complex circular type dependency chains:
+" +
+            '
+'.join([
                 f"  Chain {i+1}: {' -> '.join(chain)} -> {chain[0]}"
                 for i, chain in enumerate(complex_cycles)
             ]) +
-            f"\n\nCircular type dependencies can cause compilation failures and runtime errors."
+            f"
+
+Circular type dependencies can cause compilation failures and runtime errors."
         )
     
     @pytest.mark.e2e
@@ -82,6 +88,7 @@ class TestTypeSystemEdgeCases(BaseIntegrationTest):
         
         Similar Pattern: Schema generator creates UserType, manual code also defines UserType
         """
+    pass
         type_origin_conflicts = self._analyze_type_origin_conflicts()
         
         # Store for reporting
@@ -94,12 +101,16 @@ class TestTypeSystemEdgeCases(BaseIntegrationTest):
         }
         
         assert len(multi_source_types) == 0, (
-            f"Found {len(multi_source_types)} types defined in multiple sources:\n" +
-            '\n'.join([
+            f"Found {len(multi_source_types)} types defined in multiple sources:
+" +
+            '
+'.join([
                 f"  {type_name}: {', '.join(sources)}"
                 for type_name, sources in multi_source_types.items()
             ]) +
-            f"\n\nTypes should have single source of truth to prevent conflicts."
+            f"
+
+Types should have single source of truth to prevent conflicts."
         )
     
     @pytest.mark.e2e
@@ -112,6 +123,7 @@ class TestTypeSystemEdgeCases(BaseIntegrationTest):
         
         Similar Pattern: MessageType enum defined in both websocket.ts and api.ts
         """
+    pass
         enum_duplicates = self._scan_for_duplicate_enums()
         
         # Store for analysis
@@ -125,12 +137,16 @@ class TestTypeSystemEdgeCases(BaseIntegrationTest):
         ]
         
         assert len(critical_duplicates) == 0, (
-            f"Found {len(critical_duplicates)} critical enum duplicates:\n" +
-            '\n'.join([
+            f"Found {len(critical_duplicates)} critical enum duplicates:
+" +
+            '
+'.join([
                 f"  {dup['enum_name']}: {dup['locations']}"
                 for dup in critical_duplicates
             ]) +
-            f"\n\nCritical enums must be defined only once to prevent system-wide conflicts."
+            f"
+
+Critical enums must be defined only once to prevent system-wide conflicts."
         )
     
     @pytest.mark.e2e
@@ -143,6 +159,7 @@ class TestTypeSystemEdgeCases(BaseIntegrationTest):
         
         Similar Pattern: index.ts exports Type A, but Type A is not imported correctly
         """
+    pass
         registry_inconsistencies = self._validate_type_registry_consistency()
         
         # Store for reporting
@@ -155,12 +172,16 @@ class TestTypeSystemEdgeCases(BaseIntegrationTest):
         ]
         
         assert len(missing_type_exports) == 0, (
-            f"Found {len(missing_type_exports)} registry exports with missing targets:\n" +
-            '\n'.join([
+            f"Found {len(missing_type_exports)} registry exports with missing targets:
+" +
+            '
+'.join([
                 f"  {exp['registry']}: exports '{exp['type_name']}' but target not found"
                 for exp in missing_type_exports
             ]) +
-            f"\n\nType registries must only export types that actually exist."
+            f"
+
+Type registries must only export types that actually exist."
         )
     
     @pytest.mark.e2e
@@ -173,6 +194,7 @@ class TestTypeSystemEdgeCases(BaseIntegrationTest):
         
         Similar Pattern: 'export default User' and 'export { User }' in same file
         """
+    pass
         mixed_export_conflicts = self._scan_for_mixed_export_conflicts()
         
         # Edge case: Same name used for default and named export
@@ -182,12 +204,16 @@ class TestTypeSystemEdgeCases(BaseIntegrationTest):
         ]
         
         assert len(name_conflicts) == 0, (
-            f"Found {len(name_conflicts)} default/named export name conflicts:\n" +
-            '\n'.join([
+            f"Found {len(name_conflicts)} default/named export name conflicts:
+" +
+            '
+'.join([
                 f"  {conf['file']}: '{conf['default_name']}' exported as both default and named"
                 for conf in name_conflicts
             ]) +
-            f"\n\nDefault and named exports should not share the same identifier."
+            f"
+
+Default and named exports should not share the same identifier."
         )
     
     @pytest.mark.e2e
@@ -200,6 +226,7 @@ class TestTypeSystemEdgeCases(BaseIntegrationTest):
         
         Similar Pattern: Interface A extends B, B extends C, C extends A (circular)
         """
+    pass
         inheritance_issues = self._analyze_inheritance_chains()
         
         # Edge case: Inheritance chains longer than 5 levels (performance concern)
@@ -215,21 +242,29 @@ class TestTypeSystemEdgeCases(BaseIntegrationTest):
         ]
         
         assert len(deep_chains) == 0, (
-            f"Found {len(deep_chains)} inheritance chains deeper than 5 levels:\n" +
-            '\n'.join([
+            f"Found {len(deep_chains)} inheritance chains deeper than 5 levels:
+" +
+            '
+'.join([
                 f"  {chain['root_type']}: depth {chain['depth']}"
                 for chain in deep_chains
             ]) +
-            f"\n\nDeep inheritance chains can cause performance and maintainability issues."
+            f"
+
+Deep inheritance chains can cause performance and maintainability issues."
         )
         
         assert len(cyclic_inheritance) == 0, (
-            f"Found {len(cyclic_inheritance)} cyclic inheritance patterns:\n" +
-            '\n'.join([
+            f"Found {len(cyclic_inheritance)} cyclic inheritance patterns:
+" +
+            '
+'.join([
                 f"  Cycle: {' -> '.join(chain['cycle'])}"
                 for chain in cyclic_inheritance
             ]) +
-            f"\n\nCyclic inheritance prevents proper type resolution."
+            f"
+
+Cyclic inheritance prevents proper type resolution."
         )
     
     @pytest.mark.e2e
@@ -242,6 +277,7 @@ class TestTypeSystemEdgeCases(BaseIntegrationTest):
         
         Similar Pattern: TypeScript interface allows null, but runtime validation rejects it
         """
+    pass
         type_guard_mismatches = self._compare_runtime_compile_time_types()
         
         # Edge case: Type guards more restrictive than TS types
@@ -257,21 +293,29 @@ class TestTypeSystemEdgeCases(BaseIntegrationTest):
         ]
         
         assert len(overly_restrictive) == 0, (
-            f"Found {len(overly_restrictive)} overly restrictive type guards:\n" +
-            '\n'.join([
+            f"Found {len(overly_restrictive)} overly restrictive type guards:
+" +
+            '
+'.join([
                 f"  {mis['type_name']}: {mis['issue']}"
                 for mis in overly_restrictive
             ]) +
-            f"\n\nType guards should not be more restrictive than TypeScript types."
+            f"
+
+Type guards should not be more restrictive than TypeScript types."
         )
         
         assert len(overly_permissive) == 0, (
-            f"Found {len(overly_permissive)} overly permissive type guards:\n" +
-            '\n'.join([
+            f"Found {len(overly_permissive)} overly permissive type guards:
+" +
+            '
+'.join([
                 f"  {mis['type_name']}: {mis['issue']}"
                 for mis in overly_permissive
             ]) +
-            f"\n\nType guards should be at least as restrictive as TypeScript types."
+            f"
+
+Type guards should be at least as restrictive as TypeScript types."
         )
     
     @pytest.mark.asyncio
@@ -285,6 +329,7 @@ class TestTypeSystemEdgeCases(BaseIntegrationTest):
         
         Similar Pattern: Promise<UserType> where UserType is imported from another module
         """
+    pass
         async_type_issues = await self._analyze_async_type_resolution()
         
         # Edge case: Deeply nested Promise types
@@ -300,21 +345,29 @@ class TestTypeSystemEdgeCases(BaseIntegrationTest):
         ]
         
         assert len(nested_promise_issues) == 0, (
-            f"Found {len(nested_promise_issues)} deeply nested Promise types:\n" +
-            '\n'.join([
+            f"Found {len(nested_promise_issues)} deeply nested Promise types:
+" +
+            '
+'.join([
                 f"  {issue['type_name']}: nesting level {issue['nesting_level']}"
                 for issue in nested_promise_issues
             ]) +
-            f"\n\nDeeply nested Promise types can cause type inference issues."
+            f"
+
+Deeply nested Promise types can cause type inference issues."
         )
         
         assert len(circular_async_types) == 0, (
-            f"Found {len(circular_async_types)} Promise types with circular references:\n" +
-            '\n'.join([
+            f"Found {len(circular_async_types)} Promise types with circular references:
+" +
+            '
+'.join([
                 f"  {issue['type_name']}: {issue['circular_path']}"
                 for issue in circular_async_types
             ]) +
-            f"\n\nCircular references in async types prevent proper resolution."
+            f"
+
+Circular references in async types prevent proper resolution."
         )
     
     def _scan_for_circular_type_dependencies(self) -> List[List[str]]:
@@ -329,7 +382,7 @@ class TestTypeSystemEdgeCases(BaseIntegrationTest):
                 
                 # Extract import statements
                 import re
-                imports = re.findall(r"import.*?from\s+['\"]([^'\"]+)['\"]", content)
+                imports = re.findall(r"import.*?from\s+['"]([^'"]+)['"]", content)
                 
                 # Filter for local type imports
                 local_imports = [
@@ -344,6 +397,7 @@ class TestTypeSystemEdgeCases(BaseIntegrationTest):
         
         # Find circular dependencies using DFS
         def find_cycles(node, path, visited, rec_stack):
+    pass
             visited.add(node)
             rec_stack.add(node) 
             path.append(node)
@@ -352,7 +406,8 @@ class TestTypeSystemEdgeCases(BaseIntegrationTest):
                 if neighbor not in visited:
                     cycle = find_cycles(neighbor, path, visited, rec_stack)
                     if cycle:
-                        return cycle
+                        await asyncio.sleep(0)
+    return cycle
                 elif neighbor in rec_stack:
                     # Found cycle
                     cycle_start = path.index(neighbor)
@@ -456,7 +511,7 @@ class TestTypeSystemEdgeCases(BaseIntegrationTest):
                 # Extract exports
                 import re
                 exports = re.findall(r"export\s+(?:type\s+)?\{\s*([^}]+)\s*\}", content)
-                export_from = re.findall(r"export.*?from\s+['\"]([^'\"]+)['\"]", content)
+                export_from = re.findall(r"export.*?from\s+['"]([^'"]+)['"]", content)
                 
                 for export_match in exports:
                     export_names = [name.strip() for name in export_match.split(',')]
@@ -548,6 +603,7 @@ class TestTypeSystemEdgeCases(BaseIntegrationTest):
         
         # Analyze each inheritance chain
         def analyze_chain(interface_name, visited=None, path=None):
+    pass
             if visited is None:
                 visited = set()
             if path is None:
@@ -681,20 +737,24 @@ class TestTypeSystemEdgeCases(BaseIntegrationTest):
         
         # Report findings for debugging
         if self.circular_dependencies:
-            print(f"\n=== Circular Type Dependencies ===")
+            print(f"
+=== Circular Type Dependencies ===")
             for i, cycle in enumerate(self.circular_dependencies):
                 print(f"  Cycle {i+1}: {' -> '.join(cycle)}")
         
         if self.type_conflicts:
-            print(f"\n=== Type Origin Conflicts ===")
+            print(f"
+=== Type Origin Conflicts ===")
             for type_name, sources in self.type_conflicts.items():
                 print(f"  {type_name}: {sources}")
         
         if self.enum_duplicates:
-            print(f"\n=== Enum Duplicates ===")
+            print(f"
+=== Enum Duplicates ===")
             for dup in self.enum_duplicates:
                 print(f"  {dup['enum_name']}: {dup['locations']}")
 
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])
+    pass

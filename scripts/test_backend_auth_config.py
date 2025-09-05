@@ -6,6 +6,7 @@ import asyncio
 import httpx
 import json
 from datetime import datetime
+from shared.isolated_environment import IsolatedEnvironment
 
 async def test_backend_auth_config():
     """Test backend's auth configuration and debug token validation"""

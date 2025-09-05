@@ -22,7 +22,7 @@ from contextlib import asynccontextmanager
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional, Set, Union, AsyncGenerator, Callable
-from unittest.mock import AsyncMock, MagicMock
+from shared.isolated_environment import IsolatedEnvironment
 
 import pytest
 

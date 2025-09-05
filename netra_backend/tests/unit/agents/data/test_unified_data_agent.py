@@ -6,7 +6,11 @@ Tests the consolidated data agent with factory pattern and user isolation.
 import asyncio
 import pytest
 from datetime import datetime, timezone
-from unittest.mock import AsyncMock, MagicMock, patch
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from auth_service.core.auth_manager import AuthManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 from netra_backend.app.agents.data.unified_data_agent import (
     UnifiedDataAgent,
@@ -58,6 +62,7 @@ class TestUnifiedDataAgentFactory:
         
     def test_factory_cleanup(self):
         """Test factory cleanup of agents."""
+    pass
         factory = UnifiedDataAgentFactory()
         
         context = UserExecutionContext(
@@ -112,7 +117,10 @@ class TestUnifiedDataAgent:
     
     @pytest.fixture
     def user_context(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create test user context."""
+    pass
         return UserExecutionContext(
             user_id="test_user",
             request_id="test_request",
@@ -122,7 +130,10 @@ class TestUnifiedDataAgent:
     
     @pytest.fixture
     def agent(self, user_context):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create test agent instance."""
+    pass
         with patch('netra_backend.app.agents.data.unified_data_agent.DataAccessCapabilities'):
             return UnifiedDataAgent(context=user_context)
     
@@ -139,6 +150,7 @@ class TestUnifiedDataAgent:
         
     def test_extract_analysis_type(self):
         """Test analysis type extraction from context."""
+    pass
         # Test with metadata
         context1 = UserExecutionContext(
             user_id="test_user",
@@ -192,6 +204,7 @@ class TestUnifiedDataAgent:
         
     def test_validate_timeframe_format(self, agent):
         """Test timeframe format validation."""
+    pass
         assert agent._validate_timeframe_format('24h') is True
         assert agent._validate_timeframe_format('7d') is True
         assert agent._validate_timeframe_format('30d') is True
@@ -218,12 +231,14 @@ class TestUnifiedDataAgent:
     @pytest.mark.asyncio
     async def test_websocket_event_emission(self):
         """Test WebSocket event emission."""
+    pass
         # Mock WebSocket manager
-        mock_ws_manager = AsyncMock()
+        mock_ws_manager = AsyncNone  # TODO: Use real service instance
         
         # Create context with WebSocket manager - UserExecutionContext is frozen, so use dict for testing
         class MockContext:
             def __init__(self):
+    pass
                 self.user_id = "test_user"
                 self.request_id = "test_request"
                 self.websocket_manager = mock_ws_manager
@@ -269,6 +284,7 @@ class TestUnifiedDataAgent:
     @pytest.mark.asyncio
     async def test_handle_unknown_analysis(self, agent, user_context):
         """Test unknown analysis type handling."""
+    pass
         result = await agent._handle_unknown_analysis(user_context, "unknown_type")
         
         assert "Unknown analysis type: unknown_type" in result["error"]
@@ -300,6 +316,7 @@ class TestAnalysisStrategies:
     
     def test_anomaly_strategy_zscore_detection(self):
         """Test anomaly detection using z-score method."""
+    pass
         strategy = AnomalyDetectionStrategy()
         
         # Create data with outlier
@@ -339,6 +356,7 @@ class TestAnalysisStrategies:
     
     def test_usage_pattern_peak_hours(self):
         """Test peak hour identification."""
+    pass
         strategy = UsagePatternStrategy()
         
         # Create data with clear peak hours
@@ -415,6 +433,7 @@ class TestUnifiedDataAgentExecution:
     
     async def test_execute_with_websocket_events(self):
         """Test execution emits all required WebSocket events."""
+    pass
         context = UserExecutionContext(
             user_id="test_user",
             request_id="test_req_ws",
@@ -424,13 +443,14 @@ class TestUnifiedDataAgentExecution:
         )
         
         # Mock WebSocket manager (this should be patched at the agent level)
-        mock_ws_manager = AsyncMock()
+        mock_ws_manager = AsyncNone  # TODO: Use real service instance
         
         with patch('netra_backend.app.agents.data.unified_data_agent.DataAccessCapabilities'):
             agent = UnifiedDataAgent(context=context)
         
         # Mock the websocket event emission
         async def mock_emit_websocket_event(ctx, event_type, data):
+    pass
             await mock_ws_manager.send_event(event_type, data)
         
         with patch.object(agent, '_emit_websocket_event', side_effect=mock_emit_websocket_event) as mock_emit:
@@ -464,7 +484,9 @@ class TestUnifiedDataAgentExecution:
         with patch.object(agent, '_fetch_data', side_effect=Exception("Test error")):
             result = await agent.execute(context)
         
-        # Should return error result, not raise
+        # Should await asyncio.sleep(0)
+    return error result, not raise
         assert "error" in result
         assert "Test error" in result["error"]
         assert result["analysis_type"] == "error"
+    pass

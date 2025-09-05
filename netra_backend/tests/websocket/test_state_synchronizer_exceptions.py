@@ -5,9 +5,10 @@ Tests for critical exception handling requirements from websocket_reliability.xm
 
 import sys
 from pathlib import Path
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from shared.isolated_environment import IsolatedEnvironment
 
 import asyncio
-from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 
@@ -24,7 +25,7 @@ class TestStateSynchronizerExceptionHandling:
     async def test_critical_callback_failure_propagation(self):
         """Test that critical callback failures are properly propagated."""
         # Mock: Generic component isolation for controlled unit testing
-        connection_manager = MagicMock()
+        connection_manager = MagicNone  # TODO: Use real service instance
         synchronizer = ConnectionStateSynchronizer(connection_manager)
         
         # Create a critical callback that raises ConnectionError
@@ -45,7 +46,7 @@ class TestStateSynchronizerExceptionHandling:
     async def test_non_critical_callback_failure_handling(self):
         """Test that non-critical callback failures are handled gracefully."""
         # Mock: Generic component isolation for controlled unit testing
-        connection_manager = MagicMock()
+        connection_manager = MagicNone  # TODO: Use real service instance
         synchronizer = ConnectionStateSynchronizer(connection_manager)
         
         # Create a non-critical callback that raises ValueError
@@ -65,7 +66,7 @@ class TestStateSynchronizerExceptionHandling:
     async def test_mixed_callback_failures(self):
         """Test mixed critical and non-critical callback failures."""
         # Mock: Generic component isolation for controlled unit testing
-        connection_manager = MagicMock()
+        connection_manager = MagicNone  # TODO: Use real service instance
         synchronizer = ConnectionStateSynchronizer(connection_manager)
         
         # Create mixed callbacks
@@ -91,7 +92,7 @@ class TestStateSynchronizerExceptionHandling:
     async def test_callback_timeout_handling(self):
         """Test callback timeout handling."""
         # Mock: Generic component isolation for controlled unit testing
-        connection_manager = MagicMock()
+        connection_manager = MagicNone  # TODO: Use real service instance
         synchronizer = ConnectionStateSynchronizer(connection_manager)
         
         # Create a callback that hangs
@@ -110,7 +111,7 @@ class TestStateSynchronizerExceptionHandling:
     async def test_callback_exception_classification(self):
         """Test that exception types are correctly classified."""
         # Mock: Generic component isolation for controlled unit testing
-        connection_manager = MagicMock()
+        connection_manager = MagicNone  # TODO: Use real service instance
         synchronizer = ConnectionStateSynchronizer(connection_manager)
         
         # Test critical exceptions
@@ -127,7 +128,7 @@ class TestStateSynchronizerExceptionHandling:
     async def test_successful_callback_execution(self):
         """Test that successful callbacks execute without issues."""
         # Mock: Generic component isolation for controlled unit testing
-        connection_manager = MagicMock()
+        connection_manager = MagicNone  # TODO: Use real service instance
         synchronizer = ConnectionStateSynchronizer(connection_manager)
         
         results = []
@@ -146,7 +147,7 @@ class TestStateSynchronizerExceptionHandling:
     async def test_no_callbacks_registered(self):
         """Test behavior when no callbacks are registered."""
         # Mock: Generic component isolation for controlled unit testing
-        connection_manager = MagicMock()
+        connection_manager = MagicNone  # TODO: Use real service instance
         synchronizer = ConnectionStateSynchronizer(connection_manager)
         
         # Should complete successfully with no callbacks
@@ -156,7 +157,7 @@ class TestStateSynchronizerExceptionHandling:
     async def test_sync_callback_task_creation_failure(self):
         """Test handling of task creation failures."""
         # Mock: Generic component isolation for controlled unit testing
-        connection_manager = MagicMock()
+        connection_manager = MagicNone  # TODO: Use real service instance
         synchronizer = ConnectionStateSynchronizer(connection_manager)
         
         # Create a callback that's neither async nor sync callable
@@ -178,7 +179,7 @@ class TestStateSynchronizerExceptionClassification:
     async def test_explicit_exception_classification(self):
         """Test explicit exception classification per specification."""
         # Mock: Generic component isolation for controlled unit testing
-        connection_manager = MagicMock()
+        connection_manager = MagicNone  # TODO: Use real service instance
         synchronizer = ConnectionStateSynchronizer(connection_manager)
         
         # Create callbacks that raise different types of exceptions
@@ -212,7 +213,7 @@ class TestStateSynchronizerExceptionClassification:
     async def test_no_exceptions_in_callbacks(self):
         """Test behavior when no exceptions occur in callbacks."""
         # Mock: Generic component isolation for controlled unit testing
-        connection_manager = MagicMock()
+        connection_manager = MagicNone  # TODO: Use real service instance
         synchronizer = ConnectionStateSynchronizer(connection_manager)
         
         results = []
@@ -242,7 +243,7 @@ class TestStateSynchronizerExceptionClassification:
     async def test_only_non_critical_exceptions(self):
         """Test behavior with only non-critical exceptions."""
         # Mock: Generic component isolation for controlled unit testing
-        connection_manager = MagicMock()
+        connection_manager = MagicNone  # TODO: Use real service instance
         synchronizer = ConnectionStateSynchronizer(connection_manager)
         
         async def non_critical_callback_1(conn_id, event_type):

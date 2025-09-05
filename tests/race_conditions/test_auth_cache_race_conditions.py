@@ -8,6 +8,7 @@ import asyncio
 import pytest
 import time
 from netra_backend.app.clients.auth_client_cache import AuthClientCache
+from shared.isolated_environment import IsolatedEnvironment
 
 
 class TestAuthClientCacheRaceConditions:

@@ -5,6 +5,7 @@ Tests security configuration and environment handling
 
 import sys
 from pathlib import Path
+from shared.isolated_environment import IsolatedEnvironment
 
 import pytest
 

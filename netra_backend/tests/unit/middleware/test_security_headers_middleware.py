@@ -4,31 +4,41 @@ Tests to ensure security headers are properly added to responses.
 """
 
 import pytest
-from unittest.mock import AsyncMock, Mock, patch
 from fastapi import Request, Response
 from fastapi.responses import JSONResponse
+from test_framework.redis.test_redis_manager import TestRedisManager
+from shared.isolated_environment import IsolatedEnvironment
 
 from netra_backend.app.middleware.security_headers_middleware import SecurityHeadersMiddleware
+import asyncio
 
 
 class TestSecurityHeadersMiddleware:
     """Test suite for Security Headers Middleware."""
     
     @pytest.fixture
-    def mock_app(self):
+ def real_app():
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create a mock application."""
-        return Mock()
+        return None  # TODO: Use real service instance
     
     @pytest.fixture
     def middleware(self, mock_app):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create middleware instance."""
+    pass
         return SecurityHeadersMiddleware(mock_app)
     
     @pytest.fixture
-    def mock_request(self):
+ def real_request():
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create a mock request."""
+    pass
         request = Mock(spec=Request)
-        request.url = Mock()
+        request.url = url_instance  # Initialize appropriate service
         request.url.path = "/api/test"
         request.headers = {}
         return request
@@ -54,8 +64,9 @@ class TestSecurityHeadersMiddleware:
     @pytest.mark.asyncio
     async def test_adds_strict_transport_security_for_https(self, middleware):
         """Test HSTS header is added for HTTPS requests."""
+    pass
         request = Mock(spec=Request)
-        request.url = Mock()
+        request.url = url_instance  # Initialize appropriate service
         request.url.scheme = "https"
         request.url.path = "/api/test"
         request.headers = {}
@@ -72,7 +83,7 @@ class TestSecurityHeadersMiddleware:
     async def test_no_hsts_for_http(self, middleware):
         """Test HSTS header is NOT added for HTTP requests."""
         request = Mock(spec=Request)
-        request.url = Mock()
+        request.url = url_instance  # Initialize appropriate service
         request.url.scheme = "http"
         request.url.path = "/api/test"
         request.headers = {}
@@ -88,6 +99,7 @@ class TestSecurityHeadersMiddleware:
     @pytest.mark.asyncio
     async def test_adds_content_security_policy(self, middleware, mock_request):
         """Test CSP header is added."""
+    pass
         mock_response = Response(content="test", status_code=200)
         mock_call_next = AsyncMock(return_value=mock_response)
         
@@ -120,6 +132,7 @@ class TestSecurityHeadersMiddleware:
     @pytest.mark.asyncio
     async def test_handles_error_responses(self, middleware, mock_request):
         """Test security headers are added even to error responses."""
+    pass
         error_response = JSONResponse(
             status_code=500,
             content={"error": "Internal server error"}
@@ -154,6 +167,7 @@ class TestSecurityHeadersMiddleware:
     @pytest.mark.asyncio
     async def test_permissions_policy(self, middleware, mock_request):
         """Test permissions policy header."""
+    pass
         mock_response = Response(content="test", status_code=200)
         mock_call_next = AsyncMock(return_value=mock_response)
         
@@ -173,3 +187,4 @@ class TestSecurityHeadersMiddleware:
         await middleware.dispatch(mock_request, mock_call_next)
         
         mock_call_next.assert_called_once_with(mock_request)
+    pass

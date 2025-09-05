@@ -1,3 +1,26 @@
+class TestWebSocketConnection:
+    """Real WebSocket connection for testing instead of mocks."""
+    
+    def __init__(self):
+        self.messages_sent = []
+        self.is_connected = True
+        self._closed = False
+        
+    async def send_json(self, message: dict):
+        """Send JSON message."""
+        if self._closed:
+            raise RuntimeError("WebSocket is closed")
+        self.messages_sent.append(message)
+        
+    async def close(self, code: int = 1000, reason: str = "Normal closure"):
+        """Close WebSocket connection."""
+        self._closed = True
+        self.is_connected = False
+        
+    def get_messages(self) -> list:
+        """Get all sent messages."""
+        return self.messages_sent.copy()
+
 """
 Comprehensive Error Handling Tests
 
@@ -13,7 +36,6 @@ SSOT Compliance: Enhances existing error handling patterns, creates no new error
 import asyncio
 import pytest
 from datetime import datetime, timedelta
-from unittest.mock import AsyncMock, MagicMock, patch
 from typing import Dict, Any
 
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
@@ -22,6 +44,9 @@ from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
 from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.clients.auth_client_core import AuthServiceClient
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from shared.isolated_environment import get_env
 
 
 class TestEnhancedWebSocketErrorHandling:
@@ -31,7 +56,7 @@ class TestEnhancedWebSocketErrorHandling:
         """Set up test fixtures."""
         self.manager = UnifiedWebSocketManager()
         self.user_id = "test_user_123"
-        self.mock_websocket = AsyncMock()
+        self.websocket = TestWebSocketConnection()
     
     @pytest.mark.asyncio
     async def test_send_to_user_no_connections_loud_error(self):
@@ -52,7 +77,7 @@ class TestEnhancedWebSocketErrorHandling:
         from netra_backend.app.websocket_core.unified_manager import WebSocketConnection
         
         # Mock websocket that will fail
-        failing_websocket = AsyncMock()
+        websocket = TestWebSocketConnection()
         failing_websocket.send_json.side_effect = Exception("WebSocket connection broken")
         
         connection = WebSocketConnection(
@@ -149,8 +174,7 @@ class TestEnhancedAgentExecutionErrorHandling:
     
     def setup_method(self):
         """Set up test fixtures."""
-        self.mock_registry = MagicMock()
-        self.mock_websocket_bridge = AsyncMock()
+        self.mock_registry = Magic        self.websocket = TestWebSocketConnection()
         
         # Create execution context
         self.context = AgentExecutionContext(
@@ -360,11 +384,11 @@ class TestBackgroundTaskMonitoring:
     def test_background_task_status_reporting(self):
         """Test background task status reporting."""
         # Add some mock tasks
-        mock_task_1 = AsyncMock()
+        websocket = TestWebSocketConnection()
         mock_task_1.done.return_value = False
         mock_task_1.cancelled.return_value = False
         
-        mock_task_2 = AsyncMock()
+        websocket = TestWebSocketConnection()
         mock_task_2.done.return_value = True
         mock_task_2.cancelled.return_value = False
         mock_task_2.exception.return_value = RuntimeError("Test error")

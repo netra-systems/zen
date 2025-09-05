@@ -7,6 +7,7 @@ Generates detailed reports with splitting suggestions for test limit violations.
 import sys
 from pathlib import Path
 from typing import Dict, List
+from shared.isolated_environment import IsolatedEnvironment
 
 # Add the compliance directory to the path
 

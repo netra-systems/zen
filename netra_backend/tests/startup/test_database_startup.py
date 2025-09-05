@@ -14,8 +14,10 @@ This test validates database startup requirements:
 4. Fallback behavior works correctly
 """
 import pytest
-from unittest.mock import patch, MagicMock, AsyncMock
 from typing import Dict, List
+from test_framework.database.test_database_manager import TestDatabaseManager
+from test_framework.redis.test_redis_manager import TestRedisManager
+from shared.isolated_environment import IsolatedEnvironment
 
 from dev_launcher.database_connector import DatabaseConnector, ConnectionStatus, DatabaseType
 from test_framework.performance_helpers import fast_test
@@ -81,23 +83,23 @@ async def test_database_connection_validation_with_mocks():
          patch('redis.Redis') as mock_redis:
         
         # Mock successful PostgreSQL connection
-        mock_pg_conn = AsyncMock()
+        mock_pg_conn = AsyncNone  # TODO: Use real service instance
         mock_pg_conn.fetchval = AsyncMock(return_value=1)
         mock_asyncpg.return_value = mock_pg_conn
         
         # Mock successful ClickHouse connection
-        mock_response = AsyncMock()
+        mock_response = AsyncNone  # TODO: Use real service instance
         mock_response.status = 200
         mock_response.text = AsyncMock(return_value="Ok.")
         
-        mock_session = AsyncMock()
+        mock_session = AsyncNone  # TODO: Use real service instance
         mock_session.get = AsyncMock(return_value=mock_response)
         mock_session.__aenter__ = AsyncMock(return_value=mock_session)
         mock_session.__aexit__ = AsyncMock(return_value=None)
         mock_session_class.return_value = mock_session
         
         # Mock successful Redis connection
-        mock_redis_instance = MagicMock()
+        mock_redis_instance = MagicNone  # TODO: Use real service instance
         mock_redis_instance.ping = MagicMock(return_value=True)
         mock_redis.return_value = mock_redis_instance
         

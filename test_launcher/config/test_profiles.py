@@ -8,6 +8,7 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import Dict, List, Optional, Set
 from pathlib import Path
+from shared.isolated_environment import IsolatedEnvironment
 
 
 class TestProfile(Enum):

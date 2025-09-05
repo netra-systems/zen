@@ -1,3 +1,26 @@
+class TestWebSocketConnection:
+    """Real WebSocket connection for testing instead of mocks."""
+    
+    def __init__(self):
+        self.messages_sent = []
+        self.is_connected = True
+        self._closed = False
+        
+    async def send_json(self, message: dict):
+        """Send JSON message."""
+        if self._closed:
+            raise RuntimeError("WebSocket is closed")
+        self.messages_sent.append(message)
+        
+    async def close(self, code: int = 1000, reason: str = "Normal closure"):
+        """Close WebSocket connection."""
+        self._closed = True
+        self.is_connected = False
+        
+    def get_messages(self) -> list:
+        """Get all sent messages."""
+        return self.messages_sent.copy()
+
 """
 Docker Stability Validation Suite - Comprehensive Real-World Testing
 
@@ -29,7 +52,6 @@ from contextlib import contextmanager
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Dict, List, Optional, Set, Tuple, Any
-from unittest.mock import patch
 
 # Import Docker management infrastructure
 from test_framework.unified_docker_manager import (
@@ -47,6 +69,10 @@ from test_framework.docker_rate_limiter import (
 )
 from test_framework.docker_port_discovery import DockerPortDiscovery
 from test_framework.dynamic_port_allocator import DynamicPortAllocator
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
+from shared.isolated_environment import get_env
 
 logger = logging.getLogger(__name__)
 
@@ -594,8 +620,7 @@ class DockerStabilityValidator:
                     
                     return subprocess.run(['docker', 'version'], capture_output=True, text=True, timeout=10)
                 
-                with patch('subprocess.run', side_effect=mock_run):
-                    return rate_limiter.execute_docker_command(['docker', 'version'], timeout=15)
+                                    return rate_limiter.execute_docker_command(['docker', 'version'], timeout=15)
             
             # Run concurrent operations
             with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
@@ -1478,7 +1503,8 @@ class DockerStabilityValidator:
             result = subprocess.run(['docker', 'ps', '-a', '--format', '{{.Names}}'],
                                   capture_output=True, text=True, timeout=10)
             if result.returncode == 0:
-                return set(name.strip() for name in result.stdout.strip().split('\n') if name.strip())
+                return set(name.strip() for name in result.stdout.strip().split('
+') if name.strip())
         except:
             pass
         return set()
@@ -1489,7 +1515,8 @@ class DockerStabilityValidator:
             result = subprocess.run(['docker', 'network', 'ls', '--format', '{{.Name}}'],
                                   capture_output=True, text=True, timeout=10)
             if result.returncode == 0:
-                return set(name.strip() for name in result.stdout.strip().split('\n') if name.strip())
+                return set(name.strip() for name in result.stdout.strip().split('
+') if name.strip())
         except:
             pass
         return set()
@@ -1500,7 +1527,8 @@ class DockerStabilityValidator:
             result = subprocess.run(['docker', 'volume', 'ls', '--format', '{{.Name}}'],
                                   capture_output=True, text=True, timeout=10)
             if result.returncode == 0:
-                return set(name.strip() for name in result.stdout.strip().split('\n') if name.strip())
+                return set(name.strip() for name in result.stdout.strip().split('
+') if name.strip())
         except:
             pass
         return set()
@@ -1560,28 +1588,33 @@ class DockerStabilityValidationTestSuite(unittest.TestCase):
         logger.info(f"Success Rate: {report['test_results']['success_rate']}%")
         
         # Log validation areas
-        logger.info("\n=== VALIDATION AREAS STATUS ===")
+        logger.info("
+=== VALIDATION AREAS STATUS ===")
         for area, status in report['validation_areas'].items():
             logger.info(f"{area.replace('_', ' ').title()}: {status}")
         
         # Log issues
         if report['issues_summary']['total_errors'] > 0:
-            logger.error(f"\n=== ERRORS ({report['issues_summary']['total_errors']}) ===")
+            logger.error(f"
+=== ERRORS ({report['issues_summary']['total_errors']}) ===")
             for error in report['issues_summary']['top_errors']:
                 logger.error(f"- {error}")
         
         if report['issues_summary']['total_warnings'] > 0:
-            logger.warning(f"\n=== WARNINGS ({report['issues_summary']['total_warnings']}) ===")
+            logger.warning(f"
+=== WARNINGS ({report['issues_summary']['total_warnings']}) ===")
             for warning in report['issues_summary']['top_warnings']:
                 logger.warning(f"- {warning}")
         
         # Log recommendations
-        logger.info("\n=== RECOMMENDATIONS ===")
+        logger.info("
+=== RECOMMENDATIONS ===")
         for recommendation in report['recommendations']:
             logger.info(f"- {recommendation}")
         
         # Log performance metrics
-        logger.info("\n=== PERFORMANCE METRICS ===")
+        logger.info("
+=== PERFORMANCE METRICS ===")
         perf = report['performance_metrics']
         logger.info(f"Docker Operations: {perf['docker_operations_count']}")
         logger.info(f"Peak Memory Usage: {perf['peak_memory_usage_mb']} MB")
@@ -1592,7 +1625,8 @@ class DockerStabilityValidationTestSuite(unittest.TestCase):
         report_path = Path(__file__).parent / f"docker_stability_validation_report_{int(time.time())}.json"
         with open(report_path, 'w') as f:
             json.dump(report, f, indent=2)
-        logger.info(f"\nDetailed report saved to: {report_path}")
+        logger.info(f"
+Detailed report saved to: {report_path}")
         
         # Assert overall success
         self.assertTrue(report['validation_summary']['overall_success'], 
@@ -1622,7 +1656,8 @@ def run_validation_cli():
     report = validator.run_comprehensive_validation()
     
     # Print summary
-    print("\n" + "="*60)
+    print("
+" + "="*60)
     print("DOCKER STABILITY VALIDATION RESULTS")
     print("="*60)
     print(f"Overall Success: {'PASS' if report['validation_summary']['overall_success'] else 'FAIL'}")
@@ -1635,7 +1670,8 @@ def run_validation_cli():
     with open(output_file, 'w') as f:
         json.dump(report, f, indent=2)
     
-    print(f"\nDetailed report saved to: {output_file}")
+    print(f"
+Detailed report saved to: {output_file}")
     
     return 0 if report['validation_summary']['overall_success'] else 1
 

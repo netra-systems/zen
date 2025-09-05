@@ -1,4 +1,5 @@
 from shared.isolated_environment import get_env
+from shared.isolated_environment import IsolatedEnvironment
 """
 MISSION CRITICAL: WebSocket Reconnection Integration Tests
 
@@ -17,11 +18,13 @@ import time
 import websockets
 from typing import Dict, List, Optional, Any
 from datetime import datetime, timedelta, timezone
-from unittest.mock import Mock, patch, AsyncMock
 import pytest
 import aiohttp
 import os
 import sys
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
 
 # Add project root to path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
@@ -32,9 +35,11 @@ except ImportError:
     # Fallback for test environment
     class Settings:
         def __init__(self):
+    pass
             pass
     
     def get_settings():
+    pass
         return Settings()
 
 
@@ -42,6 +47,7 @@ class WebSocketReconnectionTests:
     """Integration tests for WebSocket reconnection scenarios."""
     
     def __init__(self):
+    pass
         self.settings = get_settings()
         self.ws_url = f"ws://localhost:8000/ws"
         self.jwt_secret = get_env().get('JWT_SECRET', 'test-secret-key')
@@ -67,7 +73,8 @@ class WebSocketReconnectionTests:
         Verifies delay increases appropriately with each failed attempt.
         """
         test_name = "exponential_backoff_reconnection"
-        print(f"\n🔍 Testing: {test_name}")
+        print(f"
+🔍 Testing: {test_name}")
         
         try:
             reconnect_delays = []
@@ -75,6 +82,7 @@ class WebSocketReconnectionTests:
             max_attempts = 5
             
             async def simulate_connection_with_failures():
+    pass
                 nonlocal attempt_count
                 for i in range(max_attempts):
                     attempt_count += 1
@@ -99,7 +107,8 @@ class WebSocketReconnectionTests:
                                 'timestamp': time.time()
                             }))
                             response = await asyncio.wait_for(ws.recv(), timeout=5.0)
-                            return True
+                            await asyncio.sleep(0)
+    return True
                             
                     except Exception as e:
                         delay = time.time() - start_time
@@ -145,7 +154,8 @@ class WebSocketReconnectionTests:
         Verifies thread context and message history preservation.
         """
         test_name = "session_state_restoration"
-        print(f"\n🔍 Testing: {test_name}")
+        print(f"
+🔍 Testing: {test_name}")
         
         try:
             token = self.generate_test_token()
@@ -237,7 +247,8 @@ class WebSocketReconnectionTests:
         Ensures resources are freed and state is saved.
         """
         test_name = "graceful_disconnect_handling"
-        print(f"\n🔍 Testing: {test_name}")
+        print(f"
+🔍 Testing: {test_name}")
         
         try:
             token = self.generate_test_token()
@@ -311,7 +322,8 @@ class WebSocketReconnectionTests:
         Ensures authentication updates don't break the connection.
         """
         test_name = "token_refresh_during_connection"
-        print(f"\n🔍 Testing: {test_name}")
+        print(f"
+🔍 Testing: {test_name}")
         
         try:
             # Start with short-lived token
@@ -374,7 +386,8 @@ class WebSocketReconnectionTests:
         Prevents infinite reconnection loops.
         """
         test_name = "max_reconnection_attempts"
-        print(f"\n🔍 Testing: {test_name}")
+        print(f"
+🔍 Testing: {test_name}")
         
         try:
             max_attempts = 10
@@ -382,6 +395,7 @@ class WebSocketReconnectionTests:
             
             # Simulate a persistently failing connection
             async def attempt_reconnection():
+    pass
                 nonlocal attempts
                 while attempts < max_attempts + 5:  # Try more than max
                     attempts += 1
@@ -398,7 +412,8 @@ class WebSocketReconnectionTests:
                             break
                         await asyncio.sleep(0.1)  # Short delay for testing
                 
-                return attempts
+                await asyncio.sleep(0)
+    return attempts
             
             try:
                 final_attempts = await asyncio.wait_for(
@@ -429,7 +444,8 @@ class WebSocketReconnectionTests:
         Ensures no message loss during temporary disconnections.
         """
         test_name = "reconnection_with_queued_messages"
-        print(f"\n🔍 Testing: {test_name}")
+        print(f"
+🔍 Testing: {test_name}")
         
         try:
             token = self.generate_test_token()
@@ -495,7 +511,8 @@ class WebSocketReconnectionTests:
         Ensures reconnection happens within acceptable time limits.
         """
         test_name = "reconnection_performance"
-        print(f"\n🔍 Testing: {test_name}")
+        print(f"
+🔍 Testing: {test_name}")
         
         try:
             token = self.generate_test_token()
@@ -560,7 +577,8 @@ class WebSocketReconnectionTests:
     
     async def run_all_tests(self) -> Dict[str, Any]:
         """Run all WebSocket reconnection tests."""
-        print("\n" + "=" * 60)
+        print("
+" + "=" * 60)
         print("🔌 WebSocket Reconnection Integration Tests")
         print("=" * 60)
         
@@ -583,7 +601,8 @@ class WebSocketReconnectionTests:
                 self.test_results['total'] += 1
         
         # Print summary
-        print("\n" + "=" * 60)
+        print("
+" + "=" * 60)
         print("📊 TEST RESULTS SUMMARY")
         print("=" * 60)
         print(f"Total Tests: {self.test_results['total']}")
@@ -591,7 +610,8 @@ class WebSocketReconnectionTests:
         print(f"Failed: {self.test_results['failed']} ❌")
         
         if self.test_results.get('reconnection_times'):
-            print("\n📈 RECONNECTION METRICS:")
+            print("
+📈 RECONNECTION METRICS:")
             metrics = self.test_results['reconnection_times']
             print(f"  Average: {metrics['average']:.2f}s")
             print(f"  Max: {metrics['max']:.2f}s")
@@ -599,9 +619,11 @@ class WebSocketReconnectionTests:
         
         # Determine overall status
         if self.test_results['failed'] == 0:
-            print("\n✅ ALL TESTS PASSED - WebSocket reconnection is robust!")
+            print("
+✅ ALL TESTS PASSED - WebSocket reconnection is robust!")
         else:
-            print(f"\n❌ {self.test_results['failed']} TESTS FAILED - Review reconnection logic")
+            print(f"
+❌ {self.test_results['failed']} TESTS FAILED - Review reconnection logic")
         
         return self.test_results
 
@@ -635,3 +657,5 @@ if __name__ == "__main__":
         sys.exit(0 if results['failed'] == 0 else 1)
     
     asyncio.run(main())
+
+    pass

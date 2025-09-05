@@ -4,6 +4,9 @@ import pytest
 from datetime import datetime, timezone
 import time
 from netra_backend.app.agents.base.execution_context import (
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
     ExecutionContext,
     ExecutionMetadata,
     AgentExecutionContext
@@ -33,6 +36,7 @@ class TestExecutionContextTimestamp:
         
     def test_agent_execution_context_has_timestamp(self):
         """Test that AgentExecutionContext has a timestamp attribute."""
+    pass
         context = AgentExecutionContext(
             context_id="agent-context-123",
             agent_id="test-agent",
@@ -46,10 +50,9 @@ class TestExecutionContextTimestamp:
     def test_execution_context_timestamp_in_unified_error_handler_scenario(self):
         """Simulate the scenario from unified_error_handler.py line 678."""
         # Create a mock agent error with context
-        from unittest.mock import Mock
         
         # Mock AgentError
-        error = Mock()
+        error = error_instance  # Initialize appropriate service
         error.message = "Data analysis failed"
         error.recoverable = False
         
@@ -70,6 +73,7 @@ class TestExecutionContextTimestamp:
             
     def test_execution_metadata_has_timestamp_compatibility(self):
         """Test ExecutionMetadata provides timestamp through start_time."""
+    pass
         metadata = ExecutionMetadata(
             agent_id="test",
             operation="test-op"

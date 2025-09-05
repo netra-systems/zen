@@ -12,6 +12,7 @@ import logging
 import pytest
 from io import StringIO
 from pathlib import Path
+from shared.isolated_environment import IsolatedEnvironment
 
 # Import isolated environment for proper environment management
 from shared.isolated_environment import get_env
@@ -29,6 +30,7 @@ class TestDatabaseAuthLogging:
     @pytest.fixture(autouse=True, scope="function")
     def require_real_services(self, isolated_test_env):
         """Ensure real services are available for integration tests."""
+    pass
         from test_framework.service_availability import require_real_services
         
         # Configure test environment with proper service URLs
@@ -123,12 +125,15 @@ class TestDatabaseAuthLogging:
             for pattern in unwanted_patterns:
                 if pattern.lower() in log_output.lower():
                     # Find the actual line for better reporting
-                    for line in log_output.split('\n'):
+                    for line in log_output.split('
+'):
                         if pattern.lower() in line.lower():
                             found_issues.append(f"Found unwanted pattern '{pattern}' in: {line.strip()}")
             
             # Assert no unwanted auth error messages
-            assert not found_issues, f"Found authentication/connection error logs that shouldn't appear:\n" + "\n".join(found_issues)
+            assert not found_issues, f"Found authentication/connection error logs that shouldn't appear:
+" + "
+".join(found_issues)
             
             # Verify database connectivity with a simple query
             # This validates that authentication and connection are working
@@ -175,6 +180,7 @@ class TestDatabaseAuthLogging:
     @pytest.mark.asyncio
     async def test_database_manager_url_building_no_auth_logs(self):
         """Test that DatabaseManager URL building doesn't log auth credentials."""
+    pass
         # Capture all log output
         log_capture = StringIO()
         handler = logging.StreamHandler(log_capture)
@@ -248,12 +254,15 @@ class TestDatabaseAuthLogging:
             for credential in credentials:
                 if credential in log_output:
                     # Find the actual line for better reporting
-                    for line in log_output.split('\n'):
+                    for line in log_output.split('
+'):
                         if credential in line:
                             found_credentials.append(f"Found credential '{credential}' in: {line.strip()}")
             
             # Assert no credentials in logs
-            assert not found_credentials, f"Found credentials in logs (security issue):\n" + "\n".join(found_credentials)
+            assert not found_credentials, f"Found credentials in logs (security issue):
+" + "
+".join(found_credentials)
             
         finally:
             # Restore original handlers
@@ -308,9 +317,13 @@ class TestDatabaseAuthLogging:
             
             if found_errors:
                 # Provide detailed error information for debugging
-                error_details = "\n".join([f"  - {error}" for error in found_errors])
+                error_details = "
+".join([f"  - {error}" for error in found_errors])
                 pytest.fail(
-                    f"Found authentication errors during MigrationRunner initialization:\n{error_details}\n\n"
+                    f"Found authentication errors during MigrationRunner initialization:
+{error_details}
+
+"
                     f"This indicates database authentication issues that could affect system stability."
                 )
             
@@ -320,3 +333,4 @@ class TestDatabaseAuthLogging:
 
 if __name__ == "__main__":
     pytest.main([__file__, "-xvs"])
+    pass

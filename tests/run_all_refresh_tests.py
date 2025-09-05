@@ -36,7 +36,8 @@ class TestSimulator:
     
     async def run_e2e_tests(self) -> Dict[str, Any]:
         """Simulate E2E test execution."""
-        print("\n[E2E TESTS] Page Refresh Comprehensive")
+        print("
+[E2E TESTS] Page Refresh Comprehensive")
         print("-" * 50)
         
         tests = [
@@ -63,7 +64,8 @@ class TestSimulator:
     
     async def run_integration_tests(self) -> Dict[str, Any]:
         """Simulate integration test execution."""
-        print("\n[INTEGRATION TESTS] WebSocket Reconnection")
+        print("
+[INTEGRATION TESTS] WebSocket Reconnection")
         print("-" * 50)
         
         tests = [
@@ -90,7 +92,8 @@ class TestSimulator:
     
     async def run_stress_tests(self) -> Dict[str, Any]:
         """Simulate stress test execution."""
-        print("\n[STRESS TESTS] Rapid Refresh")
+        print("
+[STRESS TESTS] Rapid Refresh")
         print("-" * 50)
         
         tests = [
@@ -115,7 +118,8 @@ class TestSimulator:
     
     async def run_validation_tests(self) -> Dict[str, Any]:
         """Simulate validation test execution."""
-        print("\n[VALIDATION TESTS] WebSocket Events")
+        print("
+[VALIDATION TESTS] WebSocket Events")
         print("-" * 50)
         
         tests = [
@@ -159,7 +163,8 @@ async def run_actual_tests():
     """Run actual tests using pytest."""
     import subprocess
     
-    print("\n[INFO] Running actual tests with pytest...")
+    print("
+[INFO] Running actual tests with pytest...")
     
     test_files = [
         'e2e/test_page_refresh_comprehensive.py',
@@ -171,7 +176,8 @@ async def run_actual_tests():
     results = {'total': 0, 'passed': 0, 'failed': 0}
     
     for test_file in test_files:
-        print(f"\n[RUNNING] {test_file}")
+        print(f"
+[RUNNING] {test_file}")
         try:
             result = subprocess.run(
                 ['python', '-m', 'pytest', test_file, '-v', '--tb=short'],
@@ -204,7 +210,8 @@ async def run_actual_tests():
 
 async def check_websocket_performance():
     """Check WebSocket connection performance improvements."""
-    print("\n[PERFORMANCE CHECK] WebSocket Connection Speed")
+    print("
+[PERFORMANCE CHECK] WebSocket Connection Speed")
     print("-" * 50)
     
     improvements = [
@@ -217,7 +224,8 @@ async def check_websocket_performance():
     for feature, current, previous in improvements:
         print(f"  {feature}: {current} ({previous})")
     
-    print("\n[OPTIMIZATION RESULTS]")
+    print("
+[OPTIMIZATION RESULTS]")
     print("  - First reconnect is now immediate (0ms delay)")
     print("  - Subsequent reconnects start at 100ms instead of 1s")
     print("  - Maximum delay reduced from 30s to 10s")
@@ -235,10 +243,12 @@ async def main():
     services_available = await check_services()
     
     if services_available:
-        print("\n[INFO] Services detected - running actual tests")
+        print("
+[INFO] Services detected - running actual tests")
         results = await run_actual_tests()
     else:
-        print("\n[INFO] Services not available - running simulation")
+        print("
+[INFO] Services not available - running simulation")
         simulator = TestSimulator()
         
         # Run all test suites
@@ -268,7 +278,8 @@ async def main():
     await check_websocket_performance()
     
     # Final summary
-    print("\n" + "=" * 70)
+    print("
+" + "=" * 70)
     print("[FINAL TEST SUMMARY]")
     print("=" * 70)
     print(f"Total Tests: {results['total']}")
@@ -281,27 +292,32 @@ async def main():
     pass_rate = (results['passed'] / results['total'] * 100) if results['total'] > 0 else 0
     print(f"Pass Rate: {pass_rate:.1f}%")
     
-    print("\n[KEY IMPROVEMENTS VERIFIED]")
+    print("
+[KEY IMPROVEMENTS VERIFIED]")
     print("  1. WebSocket reconnection 10x faster")
     print("  2. Immediate reconnect on page refresh")
     print("  3. Chat state fully persistent")
     print("  4. No message loss during refresh")
     print("  5. Graceful degradation under stress")
     
-    print("\n[COVERAGE AREAS]")
+    print("
+[COVERAGE AREAS]")
     print("  - E2E: Page refresh scenarios")
     print("  - Integration: WebSocket reconnection")
     print("  - Stress: Rapid refresh handling")
     print("  - Validation: Event consistency")
     
     if pass_rate >= 80:
-        print("\n[SUCCESS] Page refresh robustness achieved!")
+        print("
+[SUCCESS] Page refresh robustness achieved!")
         return 0
     elif pass_rate >= 60:
-        print("\n[ACCEPTABLE] Most tests passing")
+        print("
+[ACCEPTABLE] Most tests passing")
         return 1
     else:
-        print("\n[NEEDS IMPROVEMENT] Several tests failing")
+        print("
+[NEEDS IMPROVEMENT] Several tests failing")
         return 2
 
 

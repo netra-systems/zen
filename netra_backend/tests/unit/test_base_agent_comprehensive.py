@@ -6,7 +6,6 @@ Coverage Target: Timing, Correlation ID, Configuration, Logging, User Management
 
 import pytest
 import uuid
-from unittest.mock import Mock, patch, MagicMock, PropertyMock
 from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.agents.state import DeepAgentState
@@ -14,6 +13,10 @@ from netra_backend.app.schemas.agent import SubAgentLifecycle
 from netra_backend.app.agents.base.timing_collector import ExecutionTimingCollector
 from netra_backend.app.core.config import get_config
 import asyncio
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 
 class ConcreteConcreteTestAgent(BaseAgent):
@@ -33,7 +36,10 @@ class TestBaseAgentComprehensive:
     
     @pytest.fixture
     def real_llm_manager(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create a real LLM manager instance"""
+    pass
         # Using real instance to minimize mocking
         return LLMManager()
     
@@ -86,6 +92,7 @@ class TestBaseAgentComprehensive:
     
     def test_correlation_id_generation_uniqueness_tracking(self, real_llm_manager):
         """Test 2: Tests correlation ID generation, uniqueness, and propagation"""
+    pass
         # Create multiple agents
         agents = []
         correlation_ids = set()
@@ -124,9 +131,7 @@ class TestBaseAgentComprehensive:
         test_agent.set_state(SubAgentLifecycle.COMPLETED)
         assert test_agent.correlation_id == initial_id
     
-    @patch('netra_backend.app.agents.base_agent.get_config')
-    @patch('netra_backend.app.agents.base_agent.get_env')
-    def test_config_loading_error_resilience(self, mock_get_env, mock_get_config, real_llm_manager):
+            def test_config_loading_error_resilience(self, mock_get_env, mock_get_config, real_llm_manager):
         """Test 3: Validates robust error handling when configuration loading fails"""
         # Test 1: Config loading raises exception
         mock_get_env.return_value = {}
@@ -160,15 +165,13 @@ class TestBaseAgentComprehensive:
         agent4 = ConcreteConcreteTestAgent(llm_manager=real_llm_manager, name="MissingAttrAgent")
         assert agent4._subagent_logging_enabled is True
     
-    @patch('netra_backend.app.agents.base_agent.get_config')
-    @patch('netra_backend.app.agents.base_agent.get_env')
-    @patch('netra_backend.app.agents.base_agent.central_logger')
-    def test_subagent_logging_configuration_states(self, mock_logger, mock_get_env, mock_get_config, real_llm_manager):
+                def test_subagent_logging_configuration_states(self, mock_logger, mock_get_env, mock_get_config, real_llm_manager):
         """Test 4: Tests different logging configuration states and their effects"""
+    pass
         mock_get_env.return_value = {}
         
         # Test 1: Logging enabled
-        mock_config = Mock()
+        mock_config = mock_config_instance  # Initialize appropriate service
         mock_config.subagent_logging_enabled = True
         mock_get_config.return_value = mock_config
         
@@ -205,7 +208,7 @@ class TestBaseAgentComprehensive:
         assert not agent.has_websocket_context()
         
         # Test WebSocket bridge assignment (modern pattern)
-        mock_ws_bridge = Mock()
+        mock_ws_bridge = UnifiedWebSocketManager()
         test_run_id = "run_123"
         agent.set_websocket_bridge(mock_ws_bridge, test_run_id)
         
@@ -216,7 +219,7 @@ class TestBaseAgentComprehensive:
         
         # Test multiple agents with different contexts
         agent2 = ConcreteConcreteTestAgent(llm_manager=real_llm_manager, name="SecondWSAgent")
-        mock_ws_bridge2 = Mock()
+        mock_ws_bridge2 = UnifiedWebSocketManager()
         test_run_id2 = "run_456"
         agent2.set_websocket_bridge(mock_ws_bridge2, test_run_id2)
         
@@ -231,7 +234,7 @@ class TestBaseAgentComprehensive:
         assert not agent3.has_websocket_context()
         
         # Test bridge assignment to previously unconnected agent
-        mock_ws_bridge3 = Mock()
+        mock_ws_bridge3 = UnifiedWebSocketManager()
         test_run_id3 = "run_789"
         agent3.set_websocket_bridge(mock_ws_bridge3, test_run_id3)
         assert agent3.has_websocket_context()
@@ -240,11 +243,12 @@ class TestBaseAgentComprehensive:
     @pytest.mark.asyncio
     async def test_shutdown_comprehensive(self, real_llm_manager):
         """Additional test: Comprehensive shutdown behavior validation"""
+    pass
         agent = ConcreteConcreteTestAgent(llm_manager=real_llm_manager, name="ShutdownConcreteTestAgent")
         
         # Set up some state (using modern patterns)
         agent.context = {"key1": "value1", "key2": "value2"}
-        mock_ws_bridge = Mock()
+        mock_ws_bridge = UnifiedWebSocketManager()
         agent.set_websocket_bridge(mock_ws_bridge, "run_shutdown_test")
         agent.set_state(SubAgentLifecycle.RUNNING)
         

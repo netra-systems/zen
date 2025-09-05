@@ -7,6 +7,7 @@ import time
 import threading
 from pathlib import Path
 from test_framework.environment_lock import (
+from shared.isolated_environment import IsolatedEnvironment
     EnvironmentLock, 
     EnvironmentType, 
     LockStatus,
@@ -43,6 +44,7 @@ class TestEnvironmentLock:
     
     def test_context_manager(self, tmp_path):
         """Test context manager functionality."""
+    pass
         with EnvironmentLock(lock_dir=tmp_path) as lock:
             success = lock.acquire_test(timeout=5, purpose="Context manager test")
             assert success
@@ -79,6 +81,7 @@ class TestEnvironmentLock:
     
     def test_all_environment_types(self, tmp_path):
         """Test all environment type acquisitions."""
+    pass
         lock = EnvironmentLock(lock_dir=tmp_path)
         
         # Test each environment type
@@ -123,6 +126,7 @@ class TestEnvironmentLock:
     
     def test_not_held_error(self, tmp_path):
         """Test error when releasing lock not held."""
+    pass
         lock = EnvironmentLock(lock_dir=tmp_path)
         
         with pytest.raises(LockNotHeldError):
@@ -151,6 +155,7 @@ class TestEnvironmentLock:
     
     def test_generic_acquire(self, tmp_path):
         """Test generic acquire method."""
+    pass
         lock = EnvironmentLock(lock_dir=tmp_path)
         
         # Test generic acquire
@@ -179,6 +184,7 @@ def test_concurrent_access_simulation(tmp_path):
     
     def worker(worker_id):
         """Worker thread function."""
+    pass
         try:
             lock = EnvironmentLock(lock_dir=lock_dir)
             success = lock.acquire_dev(timeout=1, purpose=f"Worker {worker_id}")
@@ -192,7 +198,7 @@ def test_concurrent_access_simulation(tmp_path):
     # Start multiple threads trying to acquire the same lock
     threads = []
     for i in range(5):
-        t = threading.Thread(target=worker, args=(i,))
+        t = threading.Thread(target=worker, args=(i))
         threads.append(t)
         t.start()
     
@@ -242,4 +248,5 @@ if __name__ == "__main__":
         test_concurrent_access_simulation(tmp_path)
         print("✓ Passed")
         
-        print("\nAll manual tests passed!")
+        print("
+All manual tests passed!")

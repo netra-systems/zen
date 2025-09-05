@@ -15,7 +15,6 @@ Business Value Justification (BVJ):
 
 import pytest
 import asyncio
-from unittest.mock import patch, MagicMock, AsyncMock
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import OperationalError, DisconnectionError, TimeoutError as SQLTimeoutError
 from sqlalchemy import text
@@ -27,6 +26,9 @@ from netra_backend.app.routes.health import (
     _check_database_connection
 )
 from netra_backend.app.db.database_manager import DatabaseManager
+from test_framework.database.test_database_manager import TestDatabaseManager
+from auth_service.core.auth_manager import AuthManager
+from shared.isolated_environment import IsolatedEnvironment
 
 
 class TestPostgreSQLHealthCheckFailures:
@@ -114,7 +116,7 @@ class TestPostgreSQLHealthCheckFailures:
             mock_get_db.side_effect = Exception("Database dependency injection failed")
             
             # Mock request object
-            mock_request = MagicMock()
+            mock_request = MagicNone  # TODO: Use real service instance
             mock_request.app.state.startup_complete = True
             
             # This should fail due to dependency injection issues but might not be handled properly
@@ -227,12 +229,12 @@ class TestPostgreSQLHealthCheckFailures:
         
         async def slow_execute(*args, **kwargs):
             await asyncio.sleep(10)  # Simulate slow query
-            return MagicMock()
+            return MagicNone  # TODO: Use real service instance
         
         mock_db.execute = slow_execute
         
         # Mock request object
-        mock_request = MagicMock()
+        mock_request = MagicNone  # TODO: Use real service instance
         mock_request.app.state.startup_complete = True
         
         with patch('netra_backend.app.routes.health.get_db_dependency') as mock_get_db:

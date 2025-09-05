@@ -5,12 +5,13 @@ Tests PostgreSQL data persistence and integrity
 
 import sys
 from pathlib import Path
+from test_framework.database.test_database_manager import TestDatabaseManager
+from shared.isolated_environment import IsolatedEnvironment
 
 # Test framework import - using pytest fixtures instead
 
 import asyncio
 import uuid
-from unittest.mock import AsyncMock, MagicMock, patch
 
 import asyncpg
 import pytest

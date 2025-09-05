@@ -5,6 +5,7 @@ Business Value: Ensures consistent agent behavior through system prompts.
 """
 
 import pytest
+from shared.isolated_environment import IsolatedEnvironment
 
 from netra_backend.app.agents.prompts import (
     actions_system_prompt,

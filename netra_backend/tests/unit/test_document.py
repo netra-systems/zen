@@ -7,6 +7,7 @@ Business Value: Long-term maintainability
 import pytest
 from datetime import datetime
 from netra_backend.app.schemas.corpus import Document, DocumentCreate, DocumentUpdate
+from shared.isolated_environment import IsolatedEnvironment
 
 class TestDocument:
     """Test suite for Document Pydantic model"""

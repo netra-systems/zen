@@ -11,6 +11,7 @@ Business Value Justification (BVJ):
 """
 
 import asyncio
+from shared.isolated_environment import IsolatedEnvironment
 
 import pytest
 

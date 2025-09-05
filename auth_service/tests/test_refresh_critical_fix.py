@@ -5,6 +5,7 @@ import pytest
 import time
 from auth_service.auth_core.services.auth_service import AuthService
 from auth_service.auth_core.core.jwt_handler import JWTHandler
+from shared.isolated_environment import IsolatedEnvironment
 
 
 class TestRefreshCriticalFix:

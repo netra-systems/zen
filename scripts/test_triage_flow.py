@@ -4,7 +4,7 @@ import asyncio
 import json
 import time
 from typing import Any, Dict
-from unittest.mock import AsyncMock, MagicMock, Mock
+from shared.isolated_environment import IsolatedEnvironment
 
 # Add path for imports
 import sys

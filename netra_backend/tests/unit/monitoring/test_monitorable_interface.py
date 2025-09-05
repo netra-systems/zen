@@ -15,7 +15,8 @@ import pytest
 import asyncio
 import time
 from typing import Dict, Any, List
-from unittest.mock import AsyncMock, MagicMock, patch
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from shared.isolated_environment import IsolatedEnvironment
 
 from shared.monitoring.interfaces import (
     MonitorableComponent, 
@@ -177,7 +178,7 @@ class TestMockComponent:
         assert metrics["metrics_request_count"] == 1
         
         # Test observer registration
-        mock_observer = MagicMock()
+        mock_observer = MagicNone  # TODO: Use real service instance
         component.register_monitor_observer(mock_observer)
         assert mock_observer in component.observers
         
@@ -191,7 +192,7 @@ class TestMockComponent:
         component = MockMonitorableComponent("test_comp")
         
         # Mock observer to capture notifications
-        observer = AsyncMock()
+        observer = AsyncNone  # TODO: Use real service instance
         component.register_monitor_observer(observer)
         
         # Simulate health change
@@ -460,7 +461,7 @@ class TestComponentIndependence:
         assert len(component.observers) == 0
         
         # Removing non-existent observer should not crash
-        mock_observer = MagicMock()
+        mock_observer = MagicNone  # TODO: Use real service instance
         component.remove_monitor_observer(mock_observer)
         assert len(component.observers) == 0
 
@@ -523,7 +524,7 @@ class TestIntegrationScenarios:
         
         # Create component that fails during health/metrics calls
         failing_component = MagicMock(spec=MonitorableComponent)
-        failing_component.register_monitor_observer = MagicMock()  # Registration succeeds
+        failing_component.register_monitor_observer = MagicNone  # TODO: Use real service instance  # Registration succeeds
         failing_component.get_health_status = AsyncMock(side_effect=Exception("Health check failed"))
         failing_component.get_metrics = AsyncMock(side_effect=Exception("Metrics failed"))
         

@@ -11,10 +11,15 @@ and transitions between different workflow types are handled seamlessly.
 """
 
 import pytest
-from unittest.mock import AsyncMock, MagicMock, patch, call
 from typing import Dict, Any, List
 import json
 import copy
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from test_framework.database.test_database_manager import TestDatabaseManager
+from auth_service.core.auth_manager import AuthManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 from netra_backend.app.agents.base.interface import ExecutionContext, ExecutionResult
 from netra_backend.app.agents.state import DeepAgentState
@@ -25,7 +30,10 @@ class TestFlowTransitionsAndHandoffs:
     
     @pytest.fixture
     def initial_state(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create initial state for testing."""
+    pass
         state = DeepAgentState()
         state.user_request = json.dumps({
             "request": "Optimize my AI",
@@ -34,8 +42,11 @@ class TestFlowTransitionsAndHandoffs:
         return state
     
     @pytest.fixture
-    def mock_agent_outputs(self):
+ def real_agent_outputs():
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Mock outputs from different agents."""
+    pass
         return {
             "triage": {
                 "data_sufficiency": "partial",
@@ -121,6 +132,7 @@ class TestFlowTransitionsAndHandoffs:
     @pytest.mark.asyncio
     async def test_state_accumulation_through_pipeline(self, initial_state, mock_agent_outputs):
         """Test that state correctly accumulates through entire pipeline."""
+    pass
         agents_executed = []
         state_snapshots = []
         
@@ -153,7 +165,8 @@ class TestFlowTransitionsAndHandoffs:
                 "outputs_available": outputs_available,
                 "output_count": len(outputs_available)
             })
-            return ExecutionResult(success=True, status="completed", result=output)
+            await asyncio.sleep(0)
+    return ExecutionResult(success=True, status="completed", result=output)
         
         # Simulate pipeline execution
         flow_sequence = ["triage", "optimization", "actions", "data_helper", "reporting"]
@@ -184,6 +197,7 @@ class TestFlowTransitionsAndHandoffs:
     @pytest.mark.asyncio
     async def test_workflow_transition_sufficient_to_partial(self):
         """Test transition from sufficient to partial data workflow."""
+    pass
         from netra_backend.app.agents.supervisor.workflow_orchestrator import WorkflowOrchestrator
         
         with patch.object(WorkflowOrchestrator, '_define_workflow_based_on_triage') as mock_define:
@@ -258,6 +272,7 @@ class TestFlowTransitionsAndHandoffs:
     @pytest.mark.asyncio
     async def test_parallel_agent_handoffs(self):
         """Test parallel execution and result merging."""
+    pass
         from netra_backend.app.agents.supervisor.workflow_orchestrator import WorkflowOrchestrator
         
         parallel_results = {
@@ -317,7 +332,8 @@ class TestFlowTransitionsAndHandoffs:
         def determine_next_agent(state):
             if state.triage_result and state.triage_result.data_request_priority == "critical":
                 if state.triage_result.category == "cost_explosion":
-                    return "emergency_cost_optimization"
+                    await asyncio.sleep(0)
+    return "emergency_cost_optimization"
                 elif state.triage_result.category == "performance_degradation":
                     return "emergency_performance_optimization"
             return "standard_optimization"
@@ -344,6 +360,7 @@ class TestFlowTransitionsAndHandoffs:
     @pytest.mark.asyncio
     async def test_state_rollback_on_failure(self):
         """Test state rollback when critical agent fails."""
+    pass
         initial_state = DeepAgentState()
         from netra_backend.app.agents.triage.unified_triage_agent import TriageResult
         initial_state.triage_result = TriageResult(
@@ -402,7 +419,8 @@ class TestFlowTransitionsAndHandoffs:
                     workflow.remove("data")
                     opt_index = workflow.index("optimization")
                     workflow.insert(opt_index, "data")
-            return workflow
+            await asyncio.sleep(0)
+    return workflow
         
         adjusted_workflow = reorder_workflow(initial_workflow.copy(), triage_result)
         
@@ -412,6 +430,7 @@ class TestFlowTransitionsAndHandoffs:
     @pytest.mark.asyncio
     async def test_context_preservation_across_retries(self):
         """Test that context is preserved when retrying failed agents."""
+    pass
         state = DeepAgentState()
         state.user_request = json.dumps({"request": "Optimize", "retry_count": 0})
         
@@ -488,6 +507,7 @@ class TestFlowTransitionsAndHandoffs:
     @pytest.mark.asyncio
     async def test_state_merge_from_parallel_flows(self):
         """Test merging state from parallel workflow branches."""
+    pass
         state = DeepAgentState()
         
         # Parallel branch 1: Cost optimization

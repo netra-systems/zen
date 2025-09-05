@@ -15,7 +15,8 @@ import gc
 import logging
 import warnings
 from typing import List
-from unittest.mock import patch
+from test_framework.database.test_database_manager import TestDatabaseManager
+from shared.isolated_environment import IsolatedEnvironment
 
 import pytest
 from sqlalchemy import text

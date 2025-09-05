@@ -29,7 +29,7 @@ import time
 from typing import Dict, Any
 import pytest
 import pytest_asyncio
-# CLAUDE.md: NO MOCKS - removed unittest.mock import
+from shared.isolated_environment import IsolatedEnvironment
 
 from tests.e2e.agent_billing_test_helpers import (
     AgentBillingTestCore, 

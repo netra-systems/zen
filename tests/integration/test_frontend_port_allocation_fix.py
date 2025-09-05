@@ -15,6 +15,7 @@ import threading
 import time
 from pathlib import Path
 from typing import Optional
+from shared.isolated_environment import IsolatedEnvironment
 
 # Add project root to path
 PROJECT_ROOT = Path(__file__).parent.parent.parent

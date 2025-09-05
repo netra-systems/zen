@@ -5,8 +5,8 @@ Tests for supply chain endpoints - app/routes/supply.py
 
 import sys
 from pathlib import Path
+from shared.isolated_environment import IsolatedEnvironment
 
-from unittest.mock import patch, AsyncMock, MagicMock
 
 import pytest
 

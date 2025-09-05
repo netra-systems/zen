@@ -13,9 +13,12 @@ Tests validate:
 import pytest
 import asyncio
 from typing import Dict, Any, Optional, List
-from unittest.mock import Mock, AsyncMock, patch, MagicMock
 from datetime import datetime
 import json
+from test_framework.database.test_database_manager import TestDatabaseManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 
 class TestAgentInteractions:
@@ -42,6 +45,8 @@ class TestAgentInteractions:
         }
     
     def test_triage_to_optimization_handoff_context(self, base_context):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Validate context structure passed from Triage to Optimization agent.
         
         Business Logic Validation:
@@ -50,6 +55,7 @@ class TestAgentInteractions:
         - User intent must be maintained
         - Workflow path must be determined
         """
+    pass
         # Simulate triage response
         triage_response = {
             "data_sufficiency": "sufficient",
@@ -101,6 +107,7 @@ class TestAgentInteractions:
         - Dependencies must be tracked
         - Timeline must be included
         """
+    pass
         # Create context with optimization results
         optimization_context = {
             **base_context,
@@ -161,6 +168,7 @@ class TestAgentInteractions:
         - Final context contains complete journey
         - Each agent adds value to the accumulated state
         """
+    pass
         # Initialize context accumulator
         accumulated_context = base_context.copy()
         accumulated_context["agent_chain"] = []
@@ -312,6 +320,7 @@ class TestAgentInteractions:
         - Recovery strategies should be attempted
         - Graceful degradation when possible
         """
+    pass
         # Simulate triage success
         triage_result = {
             "data_sufficiency": "sufficient",
@@ -374,6 +383,7 @@ class TestAgentInteractions:
         - Report must indicate data request
         - Optimization must work with partial data
         """
+    pass
         # Update base context for partial data scenario
         partial_context = {
             **base_context,
@@ -495,6 +505,7 @@ class TestAgentInteractions:
         - Session/thread IDs must remain consistent
         - Business context must not be lost
         """
+    pass
         # Define immutable context elements
         immutable_elements = {
             "session_id": base_context["session_id"],

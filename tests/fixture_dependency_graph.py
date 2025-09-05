@@ -181,11 +181,13 @@ class FixtureDependencyGraph:
     
     def _infer_memory_impact(self, node: ast.FunctionDef, content: str) -> str:
         """Infer memory impact from fixture code."""
-        lines = content.split('\n')
+        lines = content.split('
+')
         func_start = node.lineno - 1
         func_end = node.end_lineno if hasattr(node, 'end_lineno') else func_start + 20
         
-        func_content = '\n'.join(lines[func_start:func_end]).lower()
+        func_content = '
+'.join(lines[func_start:func_end]).lower()
         
         # High impact indicators
         high_impact_indicators = [
@@ -420,7 +422,8 @@ class FixtureDependencyGraph:
         if heavy_imports > 10:
             report.append("5. Consider implementing lazy loading for heavy imports in E2E fixtures")
         
-        return '\n'.join(report)
+        return '
+'.join(report)
     
     def export_json(self) -> str:
         """Export fixture data as JSON for programmatic analysis."""

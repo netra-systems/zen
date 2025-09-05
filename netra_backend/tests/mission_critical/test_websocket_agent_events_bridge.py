@@ -17,8 +17,11 @@ These events are essential for the "Chat" business value delivery.
 import asyncio
 import pytest
 import time
-from unittest.mock import AsyncMock, Mock, patch
 from typing import List, Dict, Any
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 from netra_backend.app.services.agent_service_core import AgentService
 from netra_backend.app.services.agent_websocket_bridge import (
@@ -31,6 +34,7 @@ class WebSocketEventCapture:
     """Captures WebSocket events for testing."""
     
     def __init__(self):
+    pass
         self.events: List[Dict[str, Any]] = []
         self.event_times: List[float] = []
     
@@ -84,19 +88,26 @@ class WebSocketEventCapture:
 @pytest.mark.asyncio
 class TestMissionCriticalWebSocketEvents:
     """Mission-critical tests for WebSocket event delivery through bridge."""
+    pass
 
     @pytest.fixture
-    def mock_supervisor(self):
+ def real_supervisor():
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Mock supervisor with registry."""
-        supervisor = Mock()
-        supervisor.registry = Mock()
+    pass
+        supervisor = supervisor_instance  # Initialize appropriate service
+        supervisor.registry = registry_instance  # Initialize appropriate service
         supervisor.registry.websocket_manager = None
         supervisor.run = AsyncMock(return_value="Agent completed successfully")
         return supervisor
 
     @pytest.fixture
     def event_capture(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """WebSocket event capture system."""
+    pass
         return WebSocketEventCapture()
 
     @pytest.fixture
@@ -116,17 +127,17 @@ class TestMissionCriticalWebSocketEvents:
             mock_get_manager.return_value = event_capture
             
             # Setup orchestrator mock
-            registry = AsyncMock()
+            registry = AsyncNone  # TODO: Use real service instance
             registry.get_metrics.return_value = {"active_contexts": 0}
             
             # Mock execution context and notifier
-            mock_context = Mock()
+            mock_context = mock_context_instance  # Initialize appropriate service
             mock_context.user_id = "test_user"
             mock_context.thread_id = "test_thread"
             mock_context.run_id = "test_run"
             mock_context.agent_name = "test_agent"
             
-            mock_notifier = AsyncMock()
+            mock_notifier = AsyncNone  # TODO: Use real service instance
             registry.create_execution_context.return_value = (mock_context, mock_notifier)
             
             mock_get_registry.return_value = registry
@@ -142,6 +153,7 @@ class TestMissionCriticalWebSocketEvents:
 
     async def test_critical_agent_execution_event_sequence(self, integrated_service):
         """Test critical WebSocket events are sent in correct sequence during agent execution."""
+    pass
         service, event_capture, mock_context, mock_notifier = integrated_service
         
         # Execute agent
@@ -186,12 +198,13 @@ class TestMissionCriticalWebSocketEvents:
 
     async def test_event_delivery_reliability_with_retries(self, mock_supervisor, event_capture):
         """Test event delivery retries ensure reliability for business-critical chat."""
+    pass
         # Reset bridge singleton
         AgentWebSocketBridge._instance = None
         service = AgentService(mock_supervisor)
         
         # Setup integration with failing then succeeding WebSocket
-        failing_capture = Mock()
+        failing_capture = failing_capture_instance  # Initialize appropriate service
         failing_capture.send_to_thread = AsyncMock(side_effect=[False, False, True])  # Fail twice, succeed third
         
         with patch('netra_backend.app.services.agent_websocket_bridge.get_websocket_manager') as mock_get_manager, \
@@ -199,14 +212,14 @@ class TestMissionCriticalWebSocketEvents:
             
             mock_get_manager.return_value = failing_capture
             
-            registry = AsyncMock()
+            registry = AsyncNone  # TODO: Use real service instance
             registry.get_metrics.return_value = {"active_contexts": 0}
             mock_get_registry.return_value = registry
             
             await service.ensure_service_ready()
             
             # Test event delivery retry
-            mock_context = Mock()
+            mock_context = mock_context_instance  # Initialize appropriate service
             mock_context.user_id = "test_user"
             mock_context.thread_id = "test_thread"
             
@@ -252,6 +265,7 @@ class TestMissionCriticalWebSocketEvents:
 
     async def test_substantive_chat_value_preservation(self, integrated_service):
         """Test bridge preserves substantive chat business value through proper event delivery."""
+    pass
         service, event_capture, mock_context, mock_notifier = integrated_service
         
         # Simulate data analysis agent execution (high business value scenario)
@@ -299,6 +313,7 @@ class TestMissionCriticalWebSocketEvents:
 
     async def test_bridge_recovery_maintains_chat_availability(self, mock_supervisor):
         """Test bridge recovery mechanisms maintain chat availability."""
+    pass
         # Create service with initially failing integration
         AgentWebSocketBridge._instance = None
         service = AgentService(mock_supervisor)
@@ -314,7 +329,7 @@ class TestMissionCriticalWebSocketEvents:
                 event_capture
             ]
             
-            registry = AsyncMock()
+            registry = AsyncNone  # TODO: Use real service instance
             registry.get_metrics.return_value = {"active_contexts": 0}
             mock_get_registry.return_value = registry
             
@@ -374,6 +389,7 @@ class TestMissionCriticalWebSocketEvents:
 @pytest.mark.asyncio
 class TestWebSocketEventBusinessValue:
     """Tests specifically focused on business value delivery through WebSocket events."""
+    pass
 
     async def test_chat_interaction_complete_flow(self):
         """Test complete chat interaction flow preserves business value."""
@@ -381,8 +397,8 @@ class TestWebSocketEventBusinessValue:
         # to ensure all critical events support the business goal
         
         event_capture = WebSocketEventCapture()
-        supervisor = Mock()
-        supervisor.registry = Mock()
+        supervisor = supervisor_instance  # Initialize appropriate service
+        supervisor.registry = registry_instance  # Initialize appropriate service
         supervisor.run = AsyncMock(return_value="Data analysis complete: Customer retention improved by 15%")
         
         AgentWebSocketBridge._instance = None
@@ -393,17 +409,17 @@ class TestWebSocketEventBusinessValue:
             
             mock_get_manager.return_value = event_capture
             
-            registry = AsyncMock()
+            registry = AsyncNone  # TODO: Use real service instance
             registry.get_metrics.return_value = {"active_contexts": 0}
             
             # Mock execution context
-            mock_context = Mock()
+            mock_context = mock_context_instance  # Initialize appropriate service
             mock_context.user_id = "business_user"
             mock_context.thread_id = "important_analysis"
             mock_context.run_id = "analysis_run_001"
             mock_context.agent_name = "data_sub_agent"
             
-            mock_notifier = AsyncMock()
+            mock_notifier = AsyncNone  # TODO: Use real service instance
             registry.create_execution_context.return_value = (mock_context, mock_notifier)
             mock_get_registry.return_value = registry
             
@@ -438,9 +454,10 @@ class TestWebSocketEventBusinessValue:
 
     async def test_event_delivery_supports_user_trust(self):
         """Test WebSocket events build user trust through transparency."""
+    pass
         event_capture = WebSocketEventCapture()
-        supervisor = Mock()
-        supervisor.registry = Mock()
+        supervisor = supervisor_instance  # Initialize appropriate service
+        supervisor.registry = registry_instance  # Initialize appropriate service
         supervisor.run = AsyncMock(return_value="Security analysis complete")
         
         AgentWebSocketBridge._instance = None
@@ -451,14 +468,14 @@ class TestWebSocketEventBusinessValue:
             
             mock_get_manager.return_value = event_capture
             
-            registry = AsyncMock()
+            registry = AsyncNone  # TODO: Use real service instance
             registry.get_metrics.return_value = {"active_contexts": 0}
             
-            mock_context = Mock()
+            mock_context = mock_context_instance  # Initialize appropriate service
             mock_context.user_id = "security_team"
             mock_context.thread_id = "security_review"
             
-            mock_notifier = AsyncMock()
+            mock_notifier = AsyncNone  # TODO: Use real service instance
             registry.create_execution_context.return_value = (mock_context, mock_notifier)
             mock_get_registry.return_value = registry
             

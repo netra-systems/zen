@@ -6,7 +6,9 @@ import pytest
 # Using repository pattern per SSOT requirements
 from argon2 import PasswordHasher
 from argon2.exceptions import VerifyMismatchError
-from unittest.mock import AsyncMock, MagicMock, patch
+from test_framework.database.test_database_manager import TestDatabaseManager
+from auth_service.core.auth_manager import AuthManager
+from shared.isolated_environment import IsolatedEnvironment
 
 from auth_service.auth_core.services.auth_service import AuthService
 from auth_service.auth_core.database.models import AuthUser
@@ -23,6 +25,8 @@ from auth_service.tests.helpers.test_repository_factory import (
 
 @pytest.fixture
 def auth_service():
+    """Use real service instance."""
+    # TODO: Initialize real service
     """Create auth service instance"""
     service = AuthService()
     return service
@@ -48,6 +52,8 @@ async def mock_repository_factory():
 
 @pytest.fixture
 def password_hasher():
+    """Use real service instance."""
+    # TODO: Initialize real service
     """Create password hasher instance"""
     return PasswordHasher()
 

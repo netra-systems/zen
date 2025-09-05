@@ -14,6 +14,7 @@ import aiohttp
 import json
 import urllib.parse
 from typing import Dict, List, Any
+from shared.isolated_environment import IsolatedEnvironment
 
 
 @pytest.mark.asyncio
@@ -25,6 +26,7 @@ async def test_sql_injection_prevention():
     Expected Failure: Input validation may not properly sanitize SQL injection attempts
     Business Impact: Data breach, unauthorized access to sensitive information
     """
+    pass
     backend_url = "http://localhost:8000"
     auth_url = "http://localhost:8081"
     
@@ -121,6 +123,7 @@ async def test_xss_prevention():
     Expected Failure: Input validation may not properly sanitize XSS payloads
     Business Impact: User account compromise, malicious script execution
     """
+    pass
     backend_url = "http://localhost:8000"
     
     # Common XSS payloads
@@ -130,15 +133,16 @@ async def test_xss_prevention():
         "<img src=x onerror=alert('XSS')>",
         "<svg onload=alert('XSS')>",
         "';alert('XSS');//",
-        "<iframe src='javascript:alert(\"XSS\")'></iframe>",
-        "\"><script>alert('XSS')</script>",
+        "<iframe src='javascript:alert("XSS")'></iframe>",
+        ""><script>alert('XSS')</script>",
         "<body onload=alert('XSS')>"
     ]
     
     xss_vulnerabilities = []
     
     async with aiohttp.ClientSession() as session:
-        # Test XSS in endpoints that might return user input
+        # Test XSS in endpoints that might await asyncio.sleep(0)
+    return user input
         test_endpoints = [
             f"{backend_url}/api/user/profile",
             f"{backend_url}/api/threads", 
@@ -203,6 +207,7 @@ async def test_authentication_bypass_attempts():
     Expected Failure: Authentication bypass vulnerabilities
     Business Impact: Unauthorized access to protected resources
     """
+    pass
     backend_url = "http://localhost:8000"
     auth_url = "http://localhost:8081"
     
@@ -287,6 +292,7 @@ async def test_rate_limiting_enforcement():
     Expected Failure: Rate limiting may not be implemented or properly configured
     Business Impact: DDoS attacks, resource exhaustion, service degradation
     """
+    pass
     backend_url = "http://localhost:8000"
     auth_url = "http://localhost:8081"
     

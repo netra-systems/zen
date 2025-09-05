@@ -12,7 +12,7 @@ import os
 import sys
 from pathlib import Path
 import pytest
-from unittest.mock import patch
+from shared.isolated_environment import IsolatedEnvironment
 
 # Add project root to path for imports
 project_root = Path(__file__).parent.parent
@@ -20,6 +20,9 @@ sys.path.insert(0, str(project_root))
 
 from shared.jwt_secret_manager import SharedJWTSecretManager
 from shared.isolated_environment import get_env
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
 
 
 class TestJWTSecretSynchronization:

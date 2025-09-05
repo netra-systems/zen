@@ -12,7 +12,10 @@ This test suite validates:
 import asyncio
 import sys
 from typing import Any, Dict, List, Optional
-from unittest.mock import AsyncMock, MagicMock, patch
+from auth_service.core.auth_manager import AuthManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 import pytest
 
@@ -26,10 +29,14 @@ from netra_backend.app.schemas.agent import SubAgentLifecycle
 
 class TestContextWindowIsolation:
     """Test context window isolation between agents."""
+    pass
 
     @pytest.fixture
-    def mock_llm_manager(self):
+ def real_llm_manager():
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create mock LLM manager."""
+    pass
         manager = MagicMock(spec=LLMManager)
         manager.generate = AsyncMock(return_value="test response")
         manager.model_config = {"max_tokens": 4096, "context_window": 128000}
@@ -37,7 +44,10 @@ class TestContextWindowIsolation:
 
     @pytest.fixture
     def base_agent(self, mock_llm_manager):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create base agent instance."""
+    pass
         return BaseAgent(
             llm_manager=mock_llm_manager,
             name="TestAgent",
@@ -67,6 +77,7 @@ class TestContextWindowIsolation:
     @pytest.mark.asyncio
     async def test_context_window_size_limit(self, mock_llm_manager):
         """Test that prompts exceeding context window are handled."""
+    pass
         agent = BaseAgent(mock_llm_manager, name="TestAgent")
         
         # Create a prompt that exceeds typical context window
@@ -97,6 +108,7 @@ class TestContextWindowIsolation:
     @pytest.mark.asyncio
     async def test_token_counting_accuracy(self, mock_llm_manager):
         """Test accurate token counting for prompts."""
+    pass
         agent = BaseAgent(mock_llm_manager, name="TestAgent")
         
         test_cases = [
@@ -131,6 +143,7 @@ class TestContextWindowIsolation:
     @pytest.mark.asyncio
     async def test_supervisor_agent_context_distribution(self, mock_llm_manager):
         """Test that supervisor properly isolates context for sub-agents."""
+    pass
         supervisor = SupervisorAgent(mock_llm_manager)
         
         # Create mock sub-agents
@@ -180,6 +193,7 @@ class TestContextWindowIsolation:
     @pytest.mark.asyncio  
     async def test_parallel_agent_context_isolation(self, mock_llm_manager):
         """Test context isolation when agents run in parallel."""
+    pass
         agents = [
             BaseAgent(mock_llm_manager, name=f"Agent{i}")
             for i in range(10)
@@ -189,7 +203,8 @@ class TestContextWindowIsolation:
             """Set context for an agent."""
             agent.context = {"id": value, "data": f"data_{value}"}
             await asyncio.sleep(0.01)  # Simulate processing
-            return agent.context
+            await asyncio.sleep(0)
+    return agent.context
         
         # Run all agents in parallel
         tasks = [set_context(agent, i) for i, agent in enumerate(agents)]
@@ -203,6 +218,7 @@ class TestContextWindowIsolation:
     @pytest.mark.asyncio
     async def test_context_window_with_history(self, mock_llm_manager):
         """Test context window management with conversation history."""
+    pass
         agent = TriageSubAgent(mock_llm_manager)
         
         # Build up conversation history
@@ -243,6 +259,7 @@ class TestContextWindowIsolation:
 
 class TestTokenCountingAndLimits:
     """Test token counting and limit enforcement."""
+    pass
 
     @pytest.mark.asyncio
     async def test_max_tokens_enforcement(self):
@@ -264,6 +281,7 @@ class TestTokenCountingAndLimits:
     @pytest.mark.asyncio
     async def test_dynamic_token_allocation(self):
         """Test dynamic token allocation based on context size."""
+    pass
         mock_llm = MagicMock(spec=LLMManager)
         agent = DataSubAgent(mock_llm)
         
@@ -302,6 +320,7 @@ class TestTokenCountingAndLimits:
 
 class TestContextObservability:
     """Test context observability and metrics."""
+    pass
 
     @pytest.mark.asyncio
     async def test_context_size_metrics_collection(self):
@@ -327,6 +346,7 @@ class TestContextObservability:
     @pytest.mark.asyncio
     async def test_context_metrics_reporting(self):
         """Test reporting of context metrics to monitoring system."""
+    pass
         mock_llm = MagicMock(spec=LLMManager)
         agent = BaseAgent(mock_llm, name="TestAgent")
         
@@ -363,6 +383,7 @@ class TestContextObservability:
 
 class TestAgentContextIsolationFailures:
     """Test cases designed to fail and expose context isolation issues."""
+    pass
 
     @pytest.mark.xfail(reason="Context window validation not implemented")
     @pytest.mark.asyncio
@@ -379,6 +400,7 @@ class TestAgentContextIsolationFailures:
     @pytest.mark.asyncio
     async def test_missing_token_counting(self):
         """Test that token counting is not implemented."""
+    pass
         mock_llm = MagicMock(spec=LLMManager)
         agent = BaseAgent(mock_llm, name="TestAgent")
         
@@ -401,6 +423,7 @@ class TestAgentContextIsolationFailures:
     @pytest.mark.asyncio
     async def test_missing_context_truncation(self):
         """Test that context truncation is not implemented."""
+    pass
         mock_llm = MagicMock(spec=LLMManager)
         agent = DataSubAgent(mock_llm)
         
@@ -432,3 +455,4 @@ class TestAgentContextIsolationFailures:
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v", "--tb=short"])
+    pass

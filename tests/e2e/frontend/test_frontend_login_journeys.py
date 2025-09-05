@@ -17,6 +17,7 @@ import time
 import uuid
 from typing import Any, Dict, List
 from datetime import datetime
+from shared.isolated_environment import IsolatedEnvironment
 
 import pytest
 import httpx

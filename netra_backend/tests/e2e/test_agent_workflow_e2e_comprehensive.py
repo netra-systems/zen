@@ -7,10 +7,16 @@ task completion, including multi-agent collaboration and WebSocket communication
 
 import asyncio
 import pytest
-from unittest.mock import AsyncMock, Mock, patch
 from typing import Dict, Any, List
 import json
 import time
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from test_framework.database.test_database_manager import TestDatabaseManager
+from test_framework.redis.test_redis_manager import TestRedisManager
+from auth_service.core.auth_manager import AuthManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
@@ -26,12 +32,12 @@ class TestCompleteAgentWorkflow:
         """Test complete data analysis workflow from request to response."""
         # Mock WebSocket manager for real-time updates
         mock_websocket_manager = Mock(spec=WebSocketManager)
-        mock_websocket_manager.broadcast_to_thread = AsyncMock()
+        mock_websocket_manager.broadcast_to_thread = AsyncNone  # TODO: Use real service instance
         mock_websocket_manager.get_active_connections.return_value = ["conn_1", "conn_2"]
         
         # Mock database operations
-        mock_db_manager = Mock()
-        mock_session = AsyncMock()
+        mock_db_manager = TestDatabaseManager().get_session()
+        mock_session = AsyncNone  # TODO: Use real service instance
         mock_db_manager.get_async_session.return_value.__aenter__.return_value = mock_session
         
         # Mock ClickHouse for analytics
@@ -45,7 +51,7 @@ class TestCompleteAgentWorkflow:
             with patch('netra_backend.app.core.unified.db_connection_manager.db_manager', mock_db_manager):
                 with patch('netra_backend.app.db.clickhouse.ClickHouseService') as mock_clickhouse:
                     
-                    mock_clickhouse_instance = Mock()
+                    mock_clickhouse_instance = mock_clickhouse_instance_instance  # Initialize appropriate service
                     mock_clickhouse_instance.execute_query = AsyncMock(return_value=mock_clickhouse_result)
                     mock_clickhouse.return_value = mock_clickhouse_instance
                     
@@ -113,13 +119,13 @@ class TestCompleteAgentWorkflow:
     async def test_multi_agent_collaboration_workflow(self):
         """Test workflow involving multiple specialized agents."""
         # Mock different agent types
-        mock_data_agent = Mock()
+        mock_data_agent = AgentRegistry().get_agent("supervisor")
         mock_data_agent.execute_task = AsyncMock(return_value={
             "status": "completed",
             "data": {"processed_records": 1000, "analysis_results": {"avg_latency": 150}}
         })
         
-        mock_llm_agent = Mock()
+        mock_llm_agent = AgentRegistry().get_agent("supervisor")
         mock_llm_agent.execute_task = AsyncMock(return_value={
             "status": "completed", 
             "insights": ["Latency increased by 15% compared to yesterday", "Peak usage at 2-3 PM"],
@@ -127,7 +133,7 @@ class TestCompleteAgentWorkflow:
         })
         
         mock_websocket_manager = Mock(spec=WebSocketManager)
-        mock_websocket_manager.broadcast_to_thread = AsyncMock()
+        mock_websocket_manager.broadcast_to_thread = AsyncNone  # TODO: Use real service instance
         
         with patch('netra_backend.app.websocket_core.utils.get_connection_monitor', return_value=mock_websocket_manager):
             with patch('netra_backend.app.agents.data_sub_agent.data_agent.DataAgent', return_value=mock_data_agent):
@@ -187,7 +193,7 @@ class TestCompleteAgentWorkflow:
     async def test_error_recovery_in_workflow(self):
         """Test workflow error recovery and graceful degradation."""
         mock_websocket_manager = Mock(spec=WebSocketManager)
-        mock_websocket_manager.broadcast_to_thread = AsyncMock()
+        mock_websocket_manager.broadcast_to_thread = AsyncNone  # TODO: Use real service instance
         
         # Simulate partial failures in workflow steps
         step_results = [
@@ -259,7 +265,7 @@ class TestAgentWebSocketIntegration:
     async def test_real_time_progress_updates(self):
         """Test agent sends real-time progress updates via WebSocket."""
         mock_websocket_manager = Mock(spec=WebSocketManager)
-        mock_websocket_manager.broadcast_to_thread = AsyncMock()
+        mock_websocket_manager.broadcast_to_thread = AsyncNone  # TODO: Use real service instance
         mock_websocket_manager.get_thread_connections.return_value = ["conn1", "conn2"]
         
         with patch('netra_backend.app.websocket_core.utils.get_connection_monitor', return_value=mock_websocket_manager):
@@ -312,8 +318,8 @@ class TestAgentWebSocketIntegration:
     async def test_websocket_error_notifications(self):
         """Test agent sends error notifications via WebSocket."""
         mock_websocket_manager = Mock(spec=WebSocketManager)
-        mock_websocket_manager.broadcast_to_thread = AsyncMock()
-        mock_websocket_manager.send_error_notification = AsyncMock()
+        mock_websocket_manager.broadcast_to_thread = AsyncNone  # TODO: Use real service instance
+        mock_websocket_manager.send_error_notification = AsyncNone  # TODO: Use real service instance
         
         with patch('netra_backend.app.websocket_core.utils.get_connection_monitor', return_value=mock_websocket_manager):
             
@@ -364,8 +370,8 @@ class TestAgentWebSocketIntegration:
     async def test_websocket_bidirectional_communication(self):
         """Test bidirectional communication between client and agent via WebSocket."""
         mock_websocket_manager = Mock(spec=WebSocketManager)
-        mock_websocket_manager.broadcast_to_thread = AsyncMock()
-        mock_websocket_manager.send_to_connection = AsyncMock()
+        mock_websocket_manager.broadcast_to_thread = AsyncNone  # TODO: Use real service instance
+        mock_websocket_manager.send_to_connection = AsyncNone  # TODO: Use real service instance
         
         # Simulate incoming messages from client
         incoming_messages = [
@@ -427,7 +433,7 @@ class TestAgentSystemIntegration:
     async def test_agent_authentication_authorization_workflow(self):
         """Test agent respects authentication and authorization throughout workflow."""
         # Mock auth service responses
-        mock_auth_service = Mock()
+        mock_auth_service = AuthManager()
         mock_auth_service.validate_token = AsyncMock(return_value={
             "valid": True,
             "user_id": "authenticated_user",
@@ -437,8 +443,8 @@ class TestAgentSystemIntegration:
         mock_auth_service.check_permission = AsyncMock(return_value=True)
         
         # Mock database with user context
-        mock_db_manager = Mock()
-        mock_session = AsyncMock()
+        mock_db_manager = TestDatabaseManager().get_session()
+        mock_session = AsyncNone  # TODO: Use real service instance
         mock_db_manager.get_async_session.return_value.__aenter__.return_value = mock_session
         
         with patch('netra_backend.app.auth.auth_service_client.auth_service', mock_auth_service):
@@ -499,7 +505,7 @@ class TestAgentSystemIntegration:
     async def test_agent_configuration_management_integration(self):
         """Test agent integrates with configuration management system."""
         # Mock configuration manager
-        mock_config_manager = Mock()
+        mock_config_manager = mock_config_manager_instance  # Initialize appropriate service
         mock_config_manager.get_agent_config.return_value = {
             "max_execution_time": 300,
             "retry_attempts": 3,
@@ -552,7 +558,7 @@ class TestAgentSystemIntegration:
     async def test_end_to_end_system_health_integration(self):
         """Test agent workflow integrates with system health monitoring."""
         # Mock health checker
-        mock_health_checker = Mock()
+        mock_health_checker = mock_health_checker_instance  # Initialize appropriate service
         mock_health_checker.check_all = AsyncMock(return_value={
             "postgres": Mock(status="healthy", response_time_ms=50),
             "redis": Mock(status="degraded", response_time_ms=200),

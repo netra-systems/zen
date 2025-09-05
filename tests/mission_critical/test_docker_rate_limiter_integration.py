@@ -22,7 +22,6 @@ import pytest
 import subprocess
 import threading
 import time
-import unittest.mock as mock
 import asyncio
 import statistics
 import psutil
@@ -36,6 +35,8 @@ from dataclasses import dataclass
 from datetime import datetime, timedelta
 import sys
 from pathlib import Path
+from test_framework.docker.unified_docker_manager import UnifiedDockerManager
+from shared.isolated_environment import IsolatedEnvironment
 
 # Add project root to path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
@@ -56,6 +57,10 @@ from test_framework.docker_circuit_breaker import (
 from test_framework.docker_introspection import DockerIntrospector
 from test_framework.port_conflict_fix import DockerPortManager, PortConflictResolver
 from test_framework.unified_docker_manager import UnifiedDockerManager
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
+from shared.isolated_environment import get_env
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')

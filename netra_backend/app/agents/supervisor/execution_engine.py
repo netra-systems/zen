@@ -892,22 +892,24 @@ class ExecutionEngine:
             if success:
                 return
         
-        # Fallback to bridge
+        # Fallback to bridge - fix parameter mapping for AgentWebSocketBridge
         await self.websocket_bridge.notify_agent_thinking(
             context.run_id,
             context.agent_name,
-            thought,
-            step_number
+            reasoning=thought,
+            step_number=step_number
         )
     
     async def send_partial_result(self, context: AgentExecutionContext,
                                  content: str, is_complete: bool = False) -> None:
         """Send partial result notification with UserExecutionContext support."""
-        # NEW: Use bridge directly for progress updates (UserWebSocketEmitter may not have this method)
-        await self.websocket_bridge.notify_progress_update(
+        # FIXED: AgentWebSocketBridge doesn't have notify_progress_update - use agent_thinking instead
+        await self.websocket_bridge.notify_agent_thinking(
             context.run_id,
             context.agent_name,
-            {"content": content, "is_complete": is_complete, "isolated": self.user_context is not None}
+            reasoning=f"Progress Update: {content}" + (" (Complete)" if is_complete else " (In Progress)"),
+            step_number=None,
+            progress_percentage=100.0 if is_complete else None
         )
     
     async def send_tool_executing(self, context: AgentExecutionContext,
@@ -923,11 +925,12 @@ class ExecutionEngine:
             if success:
                 return
         
-        # Fallback to bridge
+        # Fallback to bridge - fix parameter mapping for AgentWebSocketBridge
         await self.websocket_bridge.notify_tool_executing(
             context.run_id,
             context.agent_name,
-            tool_name
+            tool_name,
+            parameters={}  # Add empty parameters dict as expected by AgentWebSocketBridge
         )
     
     async def send_final_report(self, context: AgentExecutionContext,
@@ -953,12 +956,12 @@ class ExecutionEngine:
             if success:
                 return
         
-        # Fallback to bridge
+        # Fallback to bridge - fix parameter mapping for AgentWebSocketBridge  
         await self.websocket_bridge.notify_agent_completed(
             context.run_id,
             context.agent_name,
-            report,
-            duration_ms
+            result=report,
+            execution_time_ms=duration_ms
         )
     
     async def _send_final_execution_report(self, context: AgentExecutionContext,
@@ -984,12 +987,12 @@ class ExecutionEngine:
                 result.duration * 1000 if result.duration else 0
             )
             
-            # Send completion notification via bridge
+            # Send completion notification via bridge - fix parameter mapping
             await self.websocket_bridge.notify_agent_completed(
                 context.run_id,
                 context.agent_name,
-                report,
-                result.duration * 1000 if result.duration else 0
+                result=report,
+                execution_time_ms=result.duration * 1000 if result.duration else 0
             )
         except Exception as e:
             logger.warning(f"Failed to send final execution report: {e}")
@@ -1009,13 +1012,13 @@ class ExecutionEngine:
                 "status": "failed_with_fallback" if (result.metadata and result.metadata.get('fallback_used')) else "failed"
             }
             
-            # Send completion notification for failed execution via bridge
+            # Send completion notification for failed execution via bridge - fix parameter mapping
             # This is CRITICAL for WebSocket clients to know execution finished
             await self.websocket_bridge.notify_agent_completed(
                 context.run_id,
                 context.agent_name,
-                report,
-                result.duration * 1000 if result.duration else 0
+                result=report,
+                execution_time_ms=result.duration * 1000 if result.duration else 0
             )
             
             logger.info(f"Sent completion event for failed {context.agent_name} execution")
@@ -1187,11 +1190,12 @@ class ExecutionEngine:
                 "critical": True
             }
             
-            # Try to send via WebSocket bridge
+            # Try to send via WebSocket bridge - fix parameter mapping
             await self.websocket_bridge.notify_agent_error(
                 context.run_id,
                 context.agent_name,
-                error_message["data"]
+                error=error_message["data"]["user_friendly_message"],
+                error_context=error_message["data"]
             )
             
             logger.info(f"Notified user {context.user_id} of agent execution error")
@@ -1222,11 +1226,12 @@ class ExecutionEngine:
                 "critical": True
             }
             
-            # Try to send via WebSocket bridge
+            # Try to send via WebSocket bridge - fix parameter mapping
             await self.websocket_bridge.notify_agent_error(
                 context.run_id,
                 context.agent_name,
-                timeout_message["data"]
+                error=timeout_message["data"]["user_friendly_message"],
+                error_context=timeout_message["data"]
             )
             
             logger.info(f"Notified user {context.user_id} of agent timeout")
@@ -1257,11 +1262,12 @@ class ExecutionEngine:
                 "critical": True
             }
             
-            # Try to send via WebSocket bridge
+            # Try to send via WebSocket bridge - fix parameter mapping
             await self.websocket_bridge.notify_agent_error(
                 context.run_id,
                 context.agent_name,
-                system_error_message["data"]
+                error=system_error_message["data"]["user_friendly_message"],
+                error_context=system_error_message["data"]
             )
             
             logger.info(f"Notified user {context.user_id} of system error")

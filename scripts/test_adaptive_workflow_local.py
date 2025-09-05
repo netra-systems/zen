@@ -9,6 +9,7 @@ import json
 from typing import Dict, Any
 import aiohttp
 from datetime import datetime
+from shared.isolated_environment import IsolatedEnvironment
 
 
 class AdaptiveWorkflowTester:

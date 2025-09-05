@@ -7,6 +7,7 @@ cannot be imported from netra_backend.app.db.database_manager.
 import pytest
 import sys
 import importlib
+from shared.isolated_environment import IsolatedEnvironment
 
 
 def test_supply_database_manager_import_error():
@@ -81,4 +82,6 @@ if __name__ == "__main__":
     except AssertionError:
         print("✗ Supply researcher agent import didn't fail as expected")
     
-    print("\nConclusion: SupplyDatabaseManager class is missing and needs to be implemented.")
+    print("
+Conclusion: SupplyDatabaseManager class is missing and needs to be implemented.")
+    pass

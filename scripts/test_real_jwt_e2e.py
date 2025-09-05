@@ -1,4 +1,5 @@
 from shared.isolated_environment import get_env
+from shared.isolated_environment import IsolatedEnvironment
 #!/usr/bin/env python3
 """
 Test Script: Real JWT Token E2E Test Validation

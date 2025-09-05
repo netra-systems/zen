@@ -18,6 +18,7 @@ import uuid
 from typing import Any, Dict, List, Optional
 from datetime import datetime
 import statistics
+from shared.isolated_environment import IsolatedEnvironment
 
 import pytest
 import httpx

@@ -20,6 +20,7 @@ import asyncio
 import json
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
+from shared.isolated_environment import IsolatedEnvironment
 
 import pytest
 
@@ -30,7 +31,10 @@ from tests.e2e.config import TestTokenManager, TEST_SECRETS
 from test_framework.websocket_helpers import MockWebSocket
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.websocket_core.unified_manager import get_websocket_manager
-from unittest.mock import patch, AsyncMock
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
+from shared.isolated_environment import get_env
 
 logger = central_logger.get_logger(__name__)
 

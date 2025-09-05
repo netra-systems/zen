@@ -5,15 +5,18 @@ Business Value: Platform stability and performance
 """
 
 import pytest
-from unittest.mock import Mock, patch, MagicMock
 from netra_backend.app.core.circuit_breaker import CircuitBreaker
+from shared.isolated_environment import IsolatedEnvironment
 
 class TestCircuitBreaker:
     """Test suite for CircuitBreaker"""
     
     @pytest.fixture
     def instance(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create test instance"""
+    pass
         return CircuitBreaker()
     
     def test_initialization(self, instance):
@@ -23,6 +26,7 @@ class TestCircuitBreaker:
     
     def test_core_functionality(self, instance):
         """Test core business logic"""
+    pass
         # Test happy path
         result = instance.process()
         assert result is not None
@@ -34,6 +38,7 @@ class TestCircuitBreaker:
     
     def test_edge_cases(self, instance):
         """Test boundary conditions"""
+    pass
         # Test with None, empty, extreme values
         pass
     
@@ -41,3 +46,5 @@ class TestCircuitBreaker:
         """Test input validation"""
         # Test validation logic
         pass
+
+    pass

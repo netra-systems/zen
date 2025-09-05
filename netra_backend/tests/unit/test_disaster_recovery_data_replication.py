@@ -3,10 +3,10 @@ Test iteration 68: Disaster recovery data replication integrity.
 Validates data consistency across replicated systems and backup integrity.
 """
 import pytest
-from unittest.mock import Mock, patch
 from datetime import datetime, timedelta, timezone
 import hashlib
 from typing import Dict, List, Any
+from shared.isolated_environment import IsolatedEnvironment
 
 
 class TestDisasterRecoveryDataReplication:
@@ -14,7 +14,10 @@ class TestDisasterRecoveryDataReplication:
     
     @pytest.fixture
     def replication_config(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Configuration for data replication testing."""
+    pass
         return {
             "replication_lag_threshold": 30,  # seconds
             "consistency_check_interval": 300,  # 5 minutes
@@ -55,7 +58,8 @@ class TestDisasterRecoveryDataReplication:
     
     def test_backup_data_integrity_validation(self, replication_config):
         """Validates backup data integrity and restoration capabilities."""
-        backup_service = Mock()
+    pass
+        backup_service = backup_service_instance  # Initialize appropriate service
         
         # Simulate backup data with checksums
         backup_metadata = {
@@ -98,7 +102,7 @@ class TestDisasterRecoveryDataReplication:
     
     def test_cross_region_replication_monitoring(self):
         """Monitors cross-region replication health and detects failures."""
-        replication_monitor = Mock()
+        replication_monitor = replication_monitor_instance  # Initialize appropriate service
         region_status = {
             "us-east-1": {"lag_seconds": 5, "last_sync": datetime.now(timezone.utc), "healthy": True},
             "us-west-2": {"lag_seconds": 15, "last_sync": datetime.now(timezone.utc) - timedelta(seconds=15), "healthy": True},
@@ -123,3 +127,4 @@ class TestDisasterRecoveryDataReplication:
         assert len(alerts) == 1
         assert alerts[0]["region"] == "eu-west-1"
         assert alerts[0]["severity"] == "warning"  # 120s > 60s but < 300s = warning
+    pass

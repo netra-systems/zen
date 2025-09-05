@@ -5,10 +5,13 @@ Shared fixtures and mocks for route testing.
 
 import sys
 from pathlib import Path
+from test_framework.database.test_database_manager import TestDatabaseManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 from contextlib import asynccontextmanager
 from typing import Any, Dict
-from unittest.mock import AsyncMock, MagicMock, Mock, patch, Mock
 
 import pytest
 from fastapi.testclient import TestClient
@@ -19,12 +22,16 @@ from netra_backend.app.services.security_service import KeyManager, SecurityServ
 
 @pytest.fixture
 def base_client():
+    """Use real service instance."""
+    # TODO: Initialize real service
     """Base FastAPI test client with minimal setup."""
     from netra_backend.app.main import app
     return TestClient(app)
 
 @pytest.fixture  
 def secured_client():
+    """Use real service instance."""
+    # TODO: Initialize real service
     """Test client with security service configured."""
     from netra_backend.app.main import app
     
@@ -32,7 +39,7 @@ def secured_client():
     @asynccontextmanager
     async def mock_db_session():
         # Mock: Database session isolation for transaction testing without real database dependency
-        mock_session = MagicMock()
+        mock_session = MagicNone  # TODO: Use real service instance
         yield mock_session
     
     if not hasattr(app.state, 'db_session_factory'):
@@ -62,15 +69,15 @@ def setup_agent_mocks(app):
     
     def mock_get_async_db():
         # Mock: Generic component isolation for controlled unit testing
-        return Mock()
+        return None  # TODO: Use real service instance
         
     def mock_get_llm_manager():
         # Mock: Generic component isolation for controlled unit testing
-        return Mock()
+        return None  # TODO: Use real service instance
         
     def mock_get_agent_service():
         # Mock: Generic component isolation for controlled unit testing
-        return Mock()
+        return None  # TODO: Use real service instance
     
     # Override dependencies
     app.dependency_overrides[get_async_db] = mock_get_async_db

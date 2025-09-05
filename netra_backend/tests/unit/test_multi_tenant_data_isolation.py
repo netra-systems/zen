@@ -3,8 +3,10 @@ Test iteration 64: Multi-tenant data isolation validation.
 Ensures complete data segregation between tenants to prevent data leakage.
 """
 import pytest
-from unittest.mock import Mock, patch
 from typing import Dict, Any
+from test_framework.database.test_database_manager import TestDatabaseManager
+from test_framework.redis.test_redis_manager import TestRedisManager
+from shared.isolated_environment import IsolatedEnvironment
 
 
 class TestMultiTenantDataIsolation:
@@ -12,7 +14,10 @@ class TestMultiTenantDataIsolation:
     
     @pytest.fixture
     def tenant_contexts(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Setup isolated tenant contexts for testing."""
+    pass
         return {
             "tenant_a": {"id": "tenant-123", "name": "Enterprise Corp"},
             "tenant_b": {"id": "tenant-456", "name": "Startup Inc"}
@@ -20,7 +25,7 @@ class TestMultiTenantDataIsolation:
     
     def test_database_query_tenant_filtering(self, tenant_contexts):
         """Ensures database queries are automatically filtered by tenant ID."""
-        mock_db = Mock()
+        mock_db = TestDatabaseManager().get_session()
         
         def execute_query(query: str, params: Dict[str, Any]):
             # Verify tenant filter is always present
@@ -38,9 +43,11 @@ class TestMultiTenantDataIsolation:
     
     def test_cross_tenant_access_prevention(self, tenant_contexts):
         """Validates that tenant A cannot access tenant B's data."""
-        mock_service = Mock()
+    pass
+        mock_service = mock_service_instance  # Initialize appropriate service
         
         def get_resource(resource_id: str, tenant_id: str):
+    pass
             # Simulate resource belonging to different tenant
             if resource_id == "resource-from-tenant-b":
                 actual_tenant = "tenant-456"
@@ -76,3 +83,4 @@ class TestMultiTenantDataIsolation:
         assert key_a != key_b
         assert "tenant:tenant-123" in key_a
         assert "tenant:tenant-456" in key_b
+    pass

@@ -22,6 +22,7 @@ import uuid
 import hashlib
 import secrets
 from typing import Dict, Optional, Any, List
+from shared.isolated_environment import IsolatedEnvironment
 
 # ABSOLUTE IMPORTS ONLY per Claude.md
 from shared.isolated_environment import get_env

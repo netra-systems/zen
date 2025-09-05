@@ -11,12 +11,18 @@ when critical information is missing for any meaningful optimization.
 """
 
 import pytest
-from unittest.mock import AsyncMock, MagicMock, patch
 from typing import Dict, Any
 import json
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from test_framework.database.test_database_manager import TestDatabaseManager
+from auth_service.core.auth_manager import AuthManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 from netra_backend.app.agents.base.interface import ExecutionContext, ExecutionResult
 from netra_backend.app.agents.state import DeepAgentState
+import asyncio
 
 
 class TestInsufficientDataFlow:
@@ -24,7 +30,10 @@ class TestInsufficientDataFlow:
     
     @pytest.fixture
     def insufficient_user_request(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create a vague user request with insufficient data."""
+    pass
         return {
             "user_request": "Help me optimize my AI costs",
             # No metrics provided
@@ -34,7 +43,10 @@ class TestInsufficientDataFlow:
     
     @pytest.fixture
     def expected_triage_insufficient(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Expected triage output for insufficient data."""
+    pass
         return {
             "data_sufficiency": "insufficient",
             "category": "unknown_optimization",
@@ -54,7 +66,10 @@ class TestInsufficientDataFlow:
     
     @pytest.fixture
     def expected_comprehensive_data_request(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Expected comprehensive data collection request."""
+    pass
         return {
             "data_collection_strategy": {
                 "approach": "guided_questionnaire",
@@ -136,7 +151,10 @@ class TestInsufficientDataFlow:
     
     @pytest.fixture
     def expected_educational_response(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Expected educational content to help user understand data needs."""
+    pass
         return {
             "educational_content": {
                 "why_data_matters": {
@@ -183,7 +201,8 @@ class TestInsufficientDataFlow:
             
             async def track_execution(agent_name, *args, **kwargs):
                 execution_order.append(agent_name)
-                return ExecutionResult(
+                await asyncio.sleep(0)
+    return ExecutionResult(
                     success=True,
                     status="completed",
                     result={"agent": agent_name}
@@ -202,6 +221,7 @@ class TestInsufficientDataFlow:
     @pytest.mark.asyncio
     async def test_triage_correctly_identifies_insufficient_data(self, insufficient_user_request, expected_triage_insufficient):
         """Validate triage identifies insufficient data scenario."""
+    pass
         from netra_backend.app.agents.triage.unified_triage_agent import UnifiedTriageAgent
         
         with patch.object(TriageSubAgent, 'llm_manager') as mock_llm_manager:
@@ -271,6 +291,7 @@ class TestInsufficientDataFlow:
     @pytest.mark.asyncio
     async def test_data_helper_includes_education(self, expected_educational_response):
         """Validate data helper educates users on why data is needed."""
+    pass
         from netra_backend.app.agents.data_helper_agent import DataHelperAgent
         
         with patch.object(DataHelperAgent, 'llm_manager') as mock_llm_manager:
@@ -350,6 +371,7 @@ class TestInsufficientDataFlow:
     @pytest.mark.asyncio
     async def test_flow_provides_clear_next_steps(self):
         """Test that flow provides clear, actionable next steps."""
+    pass
         from netra_backend.app.agents.supervisor.workflow_orchestrator import WorkflowOrchestrator
         
         with patch.object(WorkflowOrchestrator, 'execute_standard_workflow') as mock_workflow:
@@ -429,6 +451,7 @@ class TestInsufficientDataFlow:
     @pytest.mark.asyncio
     async def test_flow_conversion_optimization(self):
         """Test that insufficient data flow is optimized for user conversion."""
+    pass
         conversion_metrics = {
             "friction_minimized": True,
             "value_demonstrated": True,
@@ -520,3 +543,4 @@ class TestInsufficientDataFlow:
             assert results[0].result.get("fallback_mode") is True
             assert "general_guidance" in results[1].result
             assert "starter_questions" in results[1].result["general_guidance"]
+    pass

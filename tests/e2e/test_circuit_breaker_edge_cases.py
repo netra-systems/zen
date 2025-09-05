@@ -7,6 +7,7 @@ that might not be covered by unit tests.
 import pytest
 import asyncio
 import time
+from shared.isolated_environment import IsolatedEnvironment
 
 from netra_backend.app.core.resilience.unified_circuit_breaker import (
     UnifiedCircuitBreaker,

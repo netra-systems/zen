@@ -26,13 +26,17 @@ import pytest
 import time
 from datetime import datetime, timezone
 from typing import Any, Dict, List
-from unittest.mock import AsyncMock, MagicMock, patch
+from shared.isolated_environment import IsolatedEnvironment
 
 from netra_backend.app.agents.state import DeepAgentState, OptimizationsResult, ActionPlanResult
 from netra_backend.app.schemas.registry import WebSocketMessage, ServerMessage
 from netra_backend.app.schemas.websocket_models import BaseWebSocketPayload
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager as WebSocketManager
 from netra_backend.app.websocket_core.types import get_frontend_message_type
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
+from shared.isolated_environment import get_env
 
 
 class TestWebSocketJSONRequirements:

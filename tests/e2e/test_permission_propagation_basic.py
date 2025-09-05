@@ -7,6 +7,7 @@ Performance target: < 500ms propagation. File < 300 lines, functions < 25 lines.
 import asyncio
 import time
 from typing import Any, Dict, List
+from shared.isolated_environment import IsolatedEnvironment
 
 import pytest
 

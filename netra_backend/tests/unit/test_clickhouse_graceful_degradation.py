@@ -25,9 +25,12 @@ Expected Test Behavior:
 
 import asyncio
 import pytest
-from unittest.mock import patch, Mock, AsyncMock, MagicMock
 from typing import Optional, Dict, Any
 import logging
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from test_framework.database.test_database_manager import TestDatabaseManager
+from auth_service.core.auth_manager import AuthManager
+from shared.isolated_environment import IsolatedEnvironment
 
 from shared.isolated_environment import get_env
 
@@ -418,7 +421,7 @@ class TestClickHouseTimeoutScenarios:
             for is_connected in connectivity_sequence:
                 with patch('clickhouse_connect.get_client') as mock_client:
                     if is_connected:
-                        mock_client.return_value = Mock()  # Successful connection
+                        mock_client.return_value = return_value_instance  # Initialize appropriate service  # Successful connection
                     else:
                         mock_client.side_effect = ConnectionRefusedError("Connection refused")
                     

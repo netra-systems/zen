@@ -7,11 +7,14 @@ This test validates that the system correctly implements the UVS simplified arch
 """
 
 import pytest
-from unittest.mock import MagicMock, AsyncMock, patch
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
 from netra_backend.app.agents.supervisor.workflow_orchestrator import WorkflowOrchestrator
 from netra_backend.app.agents.base.interface import ExecutionContext
-from netra_backend.app.agents.supervisor.agent_class_registry import AgentClassRegistry
+from netra_backend.app.agents.registry.agent_class_registry import AgentClassRegistry
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 
 def create_supervisor():
@@ -20,8 +23,8 @@ def create_supervisor():
     registry = AgentClassRegistry()
     registry._ensure_initialized()
     
-    mock_llm = MagicMock()
-    mock_websocket = MagicMock()
+    mock_llm = MagicNone  # TODO: Use real service instance
+    mock_websocket = MagicNone  # TODO: Use real service instance
     
     # Mock the agent instance factory configuration
     with patch.object(SupervisorAgent, '_initialize_agent_instances'):
@@ -136,9 +139,9 @@ class TestUVSRequirements:
     async def test_workflow_orchestrator_adaptive_flow(self):
         """Test that WorkflowOrchestrator implements adaptive workflow."""
         # Create mocks
-        mock_registry = MagicMock()
-        mock_engine = AsyncMock()
-        mock_websocket = AsyncMock()
+        mock_registry = MagicNone  # TODO: Use real service instance
+        mock_engine = AsyncNone  # TODO: Use real service instance
+        mock_websocket = AsyncNone  # TODO: Use real service instance
         
         orchestrator = WorkflowOrchestrator(
             agent_registry=mock_registry,

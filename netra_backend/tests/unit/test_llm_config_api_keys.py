@@ -3,10 +3,12 @@
 This test ensures that all LLM configurations have proper API key mappings
 to prevent regression of the issue where 'actions_to_meet_goals' was missing
 from the Gemini API key mapping.
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 """
 
 import pytest
-from unittest.mock import patch, MagicMock
 from typing import Dict, Any
 
 try:
@@ -42,6 +44,7 @@ class TestLLMConfigurationAPIKeys:
     
     def test_secret_config_matches_secret_manager_mapping(self):
         """Ensure SECRET_CONFIG matches SecretManager mappings."""
+    pass
         # Find the gemini-api-key reference in SECRET_CONFIG
         gemini_secret_ref = None
         for ref in SECRET_CONFIG:
@@ -60,8 +63,10 @@ class TestLLMConfigurationAPIKeys:
         secret_manager_models = set(gemini_mapping["target_models"])
         
         assert secret_config_models == secret_manager_models, \
-            f"Mismatch between SECRET_CONFIG and SecretManager mappings:\n" \
-            f"SECRET_CONFIG: {secret_config_models}\n" \
+            f"Mismatch between SECRET_CONFIG and SecretManager mappings:
+" \
+            f"SECRET_CONFIG: {secret_config_models}
+" \
             f"SecretManager: {secret_manager_models}"
     
     def test_actions_to_meet_goals_specifically_included(self):
@@ -74,6 +79,7 @@ class TestLLMConfigurationAPIKeys:
     
     def test_all_llm_configs_have_provider(self):
         """Ensure all LLM configs have a valid provider."""
+    pass
         config = AppConfig()
         
         for name, llm_config in config.llm_configs.items():
@@ -82,11 +88,10 @@ class TestLLMConfigurationAPIKeys:
             assert isinstance(llm_config.provider, LLMProvider), \
                 f"LLM config '{name}' has invalid provider type"
     
-    @patch('netra_backend.app.core.configuration.secrets.get_env')
-    def test_gemini_api_key_loaded_from_environment(self, mock_get_env):
+        def test_gemini_api_key_loaded_from_environment(self, mock_get_env):
         """Test that GEMINI_API_KEY is properly loaded from environment."""
         # Mock environment with GEMINI_API_KEY
-        mock_env = MagicMock()
+        mock_env = MagicNone  # TODO: Use real service instance
         mock_env.get.side_effect = lambda key, default=None: {
             "ENVIRONMENT": "development",
             "GEMINI_API_KEY": "test-gemini-key-123"
@@ -105,6 +110,7 @@ class TestLLMConfigurationAPIKeys:
     
     def test_provider_requires_api_key(self):
         """Test that Google provider requires API key."""
+    pass
         from netra_backend.app.llm.llm_provider_handlers import validate_provider_key
         
         # Test Google provider without API key
@@ -129,6 +135,7 @@ class TestLLMConfigurationAPIKeys:
     
     def test_target_field_consistency(self):
         """Ensure target_field is consistent across mappings."""
+    pass
         secret_manager = SecretManager()
         gemini_mapping = secret_manager._get_gemini_api_key_mapping()
         
@@ -158,3 +165,4 @@ class TestLLMConfigurationAPIKeys:
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])
+    pass

@@ -16,6 +16,7 @@ import asyncio
 import pytest
 import time
 from typing import Any, Dict, List, Optional
+from shared.isolated_environment import IsolatedEnvironment
 
 from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.agents.state import DeepAgentState

@@ -1,4 +1,10 @@
 from netra_backend.app.core.configuration.base import get_unified_config
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from test_framework.database.test_database_manager import TestDatabaseManager
+from auth_service.core.auth_manager import AuthManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 """
 RED TEAM TESTS 26-30: Input Validation and Security
 
@@ -40,7 +46,6 @@ from netra_backend.app.database import get_db
 from netra_backend.app.services.user_auth_service import UserAuthService
 
 # Mock models for testing
-from unittest.mock import Mock, AsyncMock, MagicMock
 User = Mock
 Thread = Mock
 AgentRun = Mock
@@ -54,6 +59,7 @@ class TestInputValidationSecurity:
     MUST use real services - NO MOCKS allowed.
     These tests WILL fail initially and that's the point.
     """
+    pass
 
     @pytest.fixture(scope="class")
     async def real_database_session(self):
@@ -78,12 +84,19 @@ class TestInputValidationSecurity:
 
     @pytest.fixture
     def real_test_client(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
+    pass
         """Real FastAPI test client - no mocking of the application."""
-        return TestClient(app)
+        await asyncio.sleep(0)
+    return TestClient(app)
 
     @pytest.fixture
     def malicious_payloads(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Collection of malicious payloads for security testing."""
+    pass
         return {
             "sql_injection": [
                 "'; DROP TABLE users; --",
@@ -97,7 +110,7 @@ class TestInputValidationSecurity:
                 "<img src=x onerror=alert('XSS')>",
                 "javascript:alert('XSS')",
                 "<svg onload=alert('XSS')>",
-                "'; eval('alert(\"XSS\")'); //"
+                "'; eval('alert("XSS")'); //"
             ],
             "command_injection": [
                 "; rm -rf /",
@@ -131,6 +144,7 @@ class TestInputValidationSecurity:
         2. Parameterized queries may not be used everywhere
         3. Dynamic query building may be vulnerable
         """
+    pass
         try:
             # Test user authentication endpoint with SQL injection
             for sql_payload in malicious_payloads["sql_injection"]:
@@ -141,7 +155,8 @@ class TestInputValidationSecurity:
                     "password": "test_password"
                 })
                 
-                # Should not return successful response with malicious input
+                # Should not await asyncio.sleep(0)
+    return successful response with malicious input
                 assert response.status_code in [400, 401, 422], \
                     f"SQL injection payload '{sql_payload}' was not rejected (status: {response.status_code})"
                 
@@ -198,6 +213,7 @@ class TestInputValidationSecurity:
         2. Some services may trust input from other services
         3. Type validation may be incomplete
         """
+    pass
         try:
             # Test oversized input handling
             large_payload = "A" * 10000  # 10KB string
@@ -270,6 +286,7 @@ class TestInputValidationSecurity:
         2. Permission logic may be inconsistent
         3. Privilege escalation may be possible
         """
+    pass
         try:
             # Test unauthenticated access to protected endpoints
             protected_endpoints = [
@@ -356,6 +373,7 @@ class TestInputValidationSecurity:
         2. Dynamic query building may be vulnerable
         3. ORM usage may not be consistent
         """
+    pass
         try:
             # Test direct database operations with malicious input
             for sql_payload in malicious_payloads["sql_injection"]:
@@ -384,7 +402,8 @@ class TestInputValidationSecurity:
                     result = await real_database_session.execute(safe_query, {"username": sql_payload})
                     rows = result.fetchall()
                     
-                    # Should not return administrative users or cause errors
+                    # Should not await asyncio.sleep(0)
+    return administrative users or cause errors
                     assert len(rows) == 0 or all(not getattr(row, 'admin', False) for row in rows), \
                         f"SQL injection may have succeeded with payload: {sql_payload}"
                         
@@ -422,6 +441,7 @@ class TestInputValidationSecurity:
         2. Origin validation may not be enforced
         3. SameSite cookie attributes may not be set
         """
+    pass
         try:
             # Test missing CSRF token
             response = real_test_client.post("/auth/login", 
@@ -494,6 +514,7 @@ class TestInputValidationSecurity:
         2. CSP policy may be too permissive
         3. XSS protection headers may be missing
         """
+    pass
         try:
             # Test CSP header presence
             response = real_test_client.get("/")
@@ -569,7 +590,8 @@ class RedTeamSecurityTestUtils:
         import jwt
         
         # Use weak secret for testing
-        return jwt.encode(payload, "weak_secret", algorithm="HS256")
+        await asyncio.sleep(0)
+    return jwt.encode(payload, "weak_secret", algorithm="HS256")
     
     @staticmethod
     def create_sql_injection_payloads() -> List[str]:

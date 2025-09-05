@@ -9,9 +9,10 @@ Critical Issue: Secret sanitization corrupting passwords causing auth failures.
 
 import pytest
 import re
-from unittest.mock import patch, MagicMock
 from sqlalchemy.exc import OperationalError
 import psycopg2
+from test_framework.database.test_database_manager import TestDatabaseManager
+from auth_service.core.auth_manager import AuthManager
 
 from shared.isolated_environment import IsolatedEnvironment
 from netra_backend.app.db.database_manager import DatabaseManager

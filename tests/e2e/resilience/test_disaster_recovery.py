@@ -1,6 +1,7 @@
 """Critical Test #10: Disaster Recovery and System Restoration
 
 from shared.isolated_environment import get_env
+from shared.isolated_environment import IsolatedEnvironment
 CRITICAL CONTEXT: Disaster Recovery Validation
 Tests complete system backup, catastrophic failure simulation, and restoration
 without mocking. Critical for protecting $500K+ MRR from catastrophic failures.

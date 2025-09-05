@@ -54,6 +54,7 @@ from pathlib import Path
 from datetime import datetime, timezone, timedelta
 from typing import Dict, List, Optional, Tuple, Any
 from dataclasses import dataclass
+from shared.isolated_environment import IsolatedEnvironment
 
 # Add project root to path for imports
 project_root = Path(__file__).parent.parent.parent
@@ -89,6 +90,7 @@ class UserJourneyMetrics:
     errors: List[str] = None
     
     def __post_init__(self):
+    pass
         if self.steps_completed is None:
             self.steps_completed = []
         if self.errors is None:
@@ -110,6 +112,7 @@ class AuthenticationTestSuite:
     """Comprehensive authentication testing framework."""
     
     def __init__(self):
+    pass
         self.metrics: List[UserJourneyMetrics] = []
         self.session = self._create_resilient_session()
         self.base_urls = {
@@ -924,6 +927,7 @@ class AuthenticationTestSuite:
             results = []
             
             def simulate_user_journey(user_index):
+    pass
                 user_id = f"load_test_user_{user_index}"
                 user_start = time.time()
                 
@@ -1035,6 +1039,7 @@ class AuthenticationTestSuite:
                 
                 # Simulate concurrent operations
                 def perform_operation():
+    pass
                     login_data = {"email": f"{user_id}@example.com", "password": "ResourceTest123!"}
                     try:
                         response = self.session.post(f"{self.base_urls['auth']}/login", json=login_data)
@@ -1084,6 +1089,7 @@ class AuthenticationTestSuite:
                 results = []
                 
                 def simulate_load(user_index):
+    pass
                     user_start = time.time()
                     try:
                         login_data = {"email": f"scale_test_{user_index}@example.com", 
@@ -1161,7 +1167,8 @@ class AuthenticationTestSuite:
 
 def run_authentication_flow_tests(suite: AuthenticationTestSuite) -> Dict[str, bool]:
     """Run all authentication flow validation tests."""
-    print("\n" + "=" * 60)
+    print("
+" + "=" * 60)
     print("RUNNING AUTHENTICATION FLOW VALIDATION TESTS")
     print("=" * 60)
     
@@ -1181,7 +1188,8 @@ def run_authentication_flow_tests(suite: AuthenticationTestSuite) -> Dict[str, b
     results = {}
     for test_name, test_func in auth_tests.items():
         try:
-            print(f"\n[RUNNING] {test_name}")
+            print(f"
+[RUNNING] {test_name}")
             result = test_func()
             results[test_name] = result
             status = "✓ PASSED" if result else "✗ FAILED"
@@ -1194,7 +1202,8 @@ def run_authentication_flow_tests(suite: AuthenticationTestSuite) -> Dict[str, b
 
 def run_user_journey_tests(suite: AuthenticationTestSuite) -> Dict[str, bool]:
     """Run all user journey tests."""
-    print("\n" + "=" * 60) 
+    print("
+" + "=" * 60) 
     print("RUNNING USER JOURNEY TESTS")
     print("=" * 60)
     
@@ -1214,7 +1223,8 @@ def run_user_journey_tests(suite: AuthenticationTestSuite) -> Dict[str, bool]:
     results = {}
     for test_name, test_func in journey_tests.items():
         try:
-            print(f"\n[RUNNING] {test_name}")
+            print(f"
+[RUNNING] {test_name}")
             result = test_func()
             results[test_name] = result
             status = "✓ PASSED" if result else "✗ FAILED"
@@ -1227,7 +1237,8 @@ def run_user_journey_tests(suite: AuthenticationTestSuite) -> Dict[str, bool]:
 
 def run_performance_tests(suite: AuthenticationTestSuite) -> Dict[str, bool]:
     """Run performance under load tests."""
-    print("\n" + "=" * 60)
+    print("
+" + "=" * 60)
     print("RUNNING PERFORMANCE UNDER LOAD TESTS") 
     print("=" * 60)
     
@@ -1241,7 +1252,8 @@ def run_performance_tests(suite: AuthenticationTestSuite) -> Dict[str, bool]:
     results = {}
     for test_name, test_func in performance_tests.items():
         try:
-            print(f"\n[RUNNING] {test_name}")
+            print(f"
+[RUNNING] {test_name}")
             start_time = time.time()
             result = test_func()
             duration = time.time() - start_time
@@ -1282,7 +1294,8 @@ def main():
         
         total_duration = time.time() - start_time
         
-        print("\n" + "=" * 80)
+        print("
+" + "=" * 80)
         print("COMPREHENSIVE TEST RESULTS SUMMARY")
         print("=" * 80)
         
@@ -1292,13 +1305,15 @@ def main():
         print(f"Overall Success Rate: {overall_success_rate:.1%}")
         print(f"Total Execution Time: {total_duration:.2f} seconds")
         
-        print(f"\nAUTHENTICATION FLOW TESTS: {sum(auth_results.values())}/{len(auth_results)} passed")
+        print(f"
+AUTHENTICATION FLOW TESTS: {sum(auth_results.values())}/{len(auth_results)} passed")
         print(f"USER JOURNEY TESTS: {sum(journey_results.values())}/{len(journey_results)} passed")  
         print(f"PERFORMANCE TESTS: {sum(performance_results.values())}/{len(performance_results)} passed")
         
         if report.get("summary"):
             summary = report["summary"]
-            print(f"\nBUSINESS VALUE METRICS:")
+            print(f"
+BUSINESS VALUE METRICS:")
             print(f"  - User Journeys Completed: {summary['total_user_journeys']}")
             print(f"  - Average Journey Duration: {summary['average_journey_duration']:.2f}s")
             print(f"  - Total Revenue Impact: ${summary['total_revenue_impact']:.2f}")
@@ -1313,19 +1328,22 @@ def main():
         )
         
         if overall_success_rate >= 0.8 and critical_tests_passed:
-            print("\n🎉 COMPREHENSIVE TEST SUITE: SUCCESS")
+            print("
+🎉 COMPREHENSIVE TEST SUITE: SUCCESS")
             print("   JWT synchronization and authentication flows are robust")
             print("   User journeys deliver business value effectively")
             print("   System performs well under load")
             return True
         else:
-            print("\n⚠️  COMPREHENSIVE TEST SUITE: ISSUES DETECTED")
+            print("
+⚠️  COMPREHENSIVE TEST SUITE: ISSUES DETECTED")
             print("   Some critical authentication or user journey issues found")
             print("   Review failed tests and fix before production deployment")
             return False
             
     except Exception as e:
-        print(f"\n💥 CRITICAL ERROR IN TEST SUITE: {e}")
+        print(f"
+💥 CRITICAL ERROR IN TEST SUITE: {e}")
         import traceback
         traceback.print_exc()
         return False
@@ -1333,3 +1351,4 @@ def main():
 if __name__ == "__main__":
     success = main()
     sys.exit(0 if success else 1)
+    pass

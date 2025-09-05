@@ -25,14 +25,17 @@ from contextlib import asynccontextmanager
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional, Set, Callable, Union
 from enum import Enum
-from unittest.mock import AsyncMock, MagicMock, patch
 import pytest
 import httpx
 import json
 import jwt
 from urllib.parse import urlparse
+from shared.isolated_environment import IsolatedEnvironment
 
 from shared.isolated_environment import get_env
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
 
 logger = logging.getLogger(__name__)
 
@@ -73,6 +76,7 @@ class ImprovedAuthVerifier:
     """Improved auth verification with multiple strategies and fallbacks."""
     
     def __init__(self, auth_service_url: Optional[str] = None):
+    pass
         self.auth_service_url = auth_service_url or get_env().get('AUTH_SERVICE_URL', 'http://localhost:8081')
         self.verification_history = []
         self.current_state = AuthServiceState(
@@ -644,7 +648,8 @@ class TestAuthVerificationLogicImprovements:
     async def test_comprehensive_auth_verification_improvements(self):
         """Test comprehensive improved auth verification logic."""
         
-        print(f"\n=== COMPREHENSIVE AUTH VERIFICATION IMPROVEMENTS TEST ===")
+        print(f"
+=== COMPREHENSIVE AUTH VERIFICATION IMPROVEMENTS TEST ===")
         
         auth_service_url = get_env().get('AUTH_SERVICE_URL', 'http://localhost:8001')
         verifier = ImprovedAuthVerifier(auth_service_url)
@@ -658,7 +663,8 @@ class TestAuthVerificationLogicImprovements:
         print(f"Consecutive failures: {state.consecutive_failures}")
         
         # Show strategy results
-        print(f"\nVerification strategy results:")
+        print(f"
+Verification strategy results:")
         for result in state.verification_results:
             status = "✅ PASS" if result.success else "❌ FAIL"
             print(f"  {result.strategy.value}: {status} (confidence: {result.confidence_score:.2f})")
@@ -673,18 +679,21 @@ class TestAuthVerificationLogicImprovements:
         # Get comprehensive summary
         summary = verifier.get_verification_summary()
         
-        print(f"\n=== VERIFICATION SUMMARY ===")
+        print(f"
+=== VERIFICATION SUMMARY ===")
         print(f"Recent success rate: {summary['recent_success_rate']:.1f}%")
         print(f"Verification history length: {summary['verification_history_length']}")
         
         # Generate recommendations
         recommendations = AuthVerificationImprover._generate_recommendations(state)
         if recommendations:
-            print(f"\nRecommendations:")
+            print(f"
+Recommendations:")
             for rec in recommendations:
                 print(f"  - {rec}")
         else:
-            print(f"\n✅ No specific recommendations - auth verification looks good")
+            print(f"
+✅ No specific recommendations - auth verification looks good")
         
         # Test should pass to document improved verification
         assert len(state.verification_results) >= 5, "Should test multiple verification strategies"
@@ -730,7 +739,8 @@ class TestAuthVerificationLogicImprovements:
     async def test_resilient_auth_verifier_vs_standard(self):
         """Test resilient auth verifier compared to standard verification."""
         
-        print(f"\n=== RESILIENT VS STANDARD AUTH VERIFICATION COMPARISON ===")
+        print(f"
+=== RESILIENT VS STANDARD AUTH VERIFICATION COMPARISON ===")
         
         auth_service_url = get_env().get('AUTH_SERVICE_URL', 'http://localhost:8001')
         
@@ -746,7 +756,8 @@ class TestAuthVerificationLogicImprovements:
             print(f"   Error: {standard_result['error']}")
         
         # Resilient verification
-        print("\n2. Resilient auth verification:")
+        print("
+2. Resilient auth verification:")
         resilient_verifier = AuthVerificationImprover.create_resilient_auth_verifier(auth_service_url)
         resilient_start = time.time()
         resilient_result = await resilient_verifier()
@@ -757,7 +768,8 @@ class TestAuthVerificationLogicImprovements:
         print(f"   Time: {resilient_time:.3f}s")
         
         # Compare results
-        print(f"\n=== COMPARISON RESULTS ===")
+        print(f"
+=== COMPARISON RESULTS ===")
         
         improvement_detected = resilient_result['auth_verified'] and not standard_result['verified']
         both_successful = resilient_result['auth_verified'] and standard_result['verified']
@@ -777,7 +789,8 @@ class TestAuthVerificationLogicImprovements:
         # Show recommendations if available
         recommendations = resilient_result.get('recommendations', [])
         if recommendations:
-            print(f"\nRecommendations from resilient verifier:")
+            print(f"
+Recommendations from resilient verifier:")
             for rec in recommendations:
                 print(f"  - {rec}")
         
@@ -785,7 +798,8 @@ class TestAuthVerificationLogicImprovements:
         assert resilient_time >= 0, "Resilient verification should complete"
         assert standard_time >= 0, "Standard verification should complete"
         
-        return {
+        await asyncio.sleep(0)
+    return {
             'standard_result': standard_result,
             'resilient_result': resilient_result,
             'improvement_detected': improvement_detected
@@ -819,7 +833,8 @@ class TestAuthVerificationLogicImprovements:
     async def test_auth_verification_trending_analysis(self):
         """Test auth verification trending and historical analysis."""
         
-        print(f"\n=== AUTH VERIFICATION TRENDING ANALYSIS ===")
+        print(f"
+=== AUTH VERIFICATION TRENDING ANALYSIS ===")
         
         auth_service_url = get_env().get('AUTH_SERVICE_URL', 'http://localhost:8001')
         verifier = ImprovedAuthVerifier(auth_service_url)
@@ -828,7 +843,8 @@ class TestAuthVerificationLogicImprovements:
         verification_results = []
         
         for round_num in range(3):
-            print(f"\nVerification round {round_num + 1}:")
+            print(f"
+Verification round {round_num + 1}:")
             
             state = await verifier.comprehensive_auth_verification()
             verification_results.append(state)
@@ -840,7 +856,8 @@ class TestAuthVerificationLogicImprovements:
             await asyncio.sleep(0.5)
         
         # Analyze trends
-        print(f"\n=== VERIFICATION TRENDS ===")
+        print(f"
+=== VERIFICATION TRENDS ===")
         summary = verifier.get_verification_summary()
         
         print(f"Total verification rounds: {len(verification_results)}")
@@ -915,7 +932,8 @@ class TestAuthVerificationLogicImprovements:
         elif confidence_trend == "decreasing":
             recommendations.append("Verification confidence decreasing - review service health")
         
-        return {
+        await asyncio.sleep(0)
+    return {
             'pattern': pattern,
             'confidence_trend': confidence_trend,
             'stability': stability,

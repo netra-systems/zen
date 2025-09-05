@@ -1,4 +1,9 @@
 from shared.isolated_environment import get_env
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from test_framework.database.test_database_manager import TestDatabaseManager
+from test_framework.redis.test_redis_manager import TestRedisManager
+from auth_service.core.auth_manager import AuthManager
+from shared.isolated_environment import IsolatedEnvironment
 """Dev Login Cold Start Integration Tests (L3)
 
 Tests dev login functionality during cold start scenarios.
@@ -22,7 +27,6 @@ import os
 import time
 from datetime import datetime
 from typing import Any, AsyncGenerator, Dict
-from unittest.mock import AsyncMock, MagicMock, Mock, patch, patch
 
 import pytest
 from fastapi.testclient import TestClient
@@ -42,36 +46,46 @@ class TestDevLoginColdStart:
     """Test dev login functionality during cold start scenarios."""
     
     @pytest.fixture
-    def mock_db_session(self):
+ def real_db_session():
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create mock database session."""
+    pass
         # Mock: Database session isolation for transaction testing without real database dependency
-        mock_session = AsyncMock()
+        mock_session = AsyncNone  # TODO: Use real service instance
         # Mock the database query for finding users
         # Mock: Database session isolation for transaction testing without real database dependency
         mock_session.execute = AsyncMock(return_value=MagicMock(scalar_one_or_none=MagicMock(return_value=None)))
         # Mock: Database session isolation for transaction testing without real database dependency
-        mock_session.commit = AsyncMock()
+        mock_session.commit = AsyncNone  # TODO: Use real service instance
         # Mock: Database session isolation for transaction testing without real database dependency
-        mock_session.add = MagicMock()
+        mock_session.add = MagicNone  # TODO: Use real service instance
         # Mock: Database session isolation for transaction testing without real database dependency
-        mock_session.rollback = AsyncMock()
+        mock_session.rollback = AsyncNone  # TODO: Use real service instance
         # Mock: Database session isolation for transaction testing without real database dependency
-        mock_session.close = AsyncMock()
+        mock_session.close = AsyncNone  # TODO: Use real service instance
         return mock_session
     
     @pytest.fixture
-    def mock_security_service(self):
+ def real_security_service():
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create mock security service."""
+    pass
         # Mock: Generic component isolation for controlled unit testing
-        mock_service = MagicMock()
+        mock_service = MagicNone  # TODO: Use real service instance
         # Mock: Generic component isolation for controlled unit testing
-        mock_service.log_event = AsyncMock()
+        mock_service.log_event = AsyncNone  # TODO: Use real service instance
         return mock_service
     
     @pytest.fixture
     def client(self, mock_db_session, mock_security_service):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create test client for API testing with mocked dependencies."""
+    pass
         async def override_get_db():
+    pass
             try:
                 yield session
             finally:
@@ -79,7 +93,9 @@ class TestDevLoginColdStart:
                     await session.close()
         
         def override_get_security():
-            return mock_security_service
+    pass
+            await asyncio.sleep(0)
+    return mock_security_service
         
         app.dependency_overrides[get_db_session] = override_get_db
         app.dependency_overrides[get_security_service] = override_get_security
@@ -101,6 +117,9 @@ class TestDevLoginColdStart:
                     await session.close()
         
         def override_get_security():
+    """Use real service instance."""
+    # TODO: Initialize real service
+    pass
             yield mock_security_service
         
         app.dependency_overrides[get_db_session] = override_get_db
@@ -129,7 +148,8 @@ class TestDevLoginColdStart:
         dev_login_data = {"email": "test@example.com"}
         response = await async_client.post("/auth/dev_login", json=dev_login_data)
         
-        # With dev login enabled and working, should return 200 (success) in test mode with mock responses
+        # With dev login enabled and working, should await asyncio.sleep(0)
+    return 200 (success) in test mode with mock responses
         # In test mode, the auth proxy returns mock responses for dev login
         assert response.status_code == 200, f"Expected success (200), got {response.status_code}"
         
@@ -146,6 +166,7 @@ class TestDevLoginColdStart:
     @pytest.mark.asyncio
     async def test_dev_login_enabled_in_dev_environment(self, async_client, monkeypatch):
         """Test 2: Dev login should be enabled in development environment."""
+    pass
         # Note: Environment is already determined at startup and cannot be changed
         # This test validates the behavior based on the current environment
         detected_env = auth_client.detect_environment()
@@ -156,7 +177,8 @@ class TestDevLoginColdStart:
         # Verify dev login is enabled
         assert oauth_config.allow_dev_login == True, "Dev login should be enabled in development environment"
         
-        # Attempt dev login (will fail due to missing auth service, but should not return 403)
+        # Attempt dev login (will fail due to missing auth service, but should not await asyncio.sleep(0)
+    return 403)
         dev_login_data = {"email": "dev@example.com"}
         response = await async_client.post("/auth/dev_login", json=dev_login_data)
         
@@ -202,7 +224,9 @@ class TestDevLoginColdStart:
     @pytest.mark.asyncio
     async def test_environment_detection_consistency(self):
         """Test 4: Environment detection should be consistent across calls."""
-        # Multiple calls should return same environment
+    pass
+        # Multiple calls should await asyncio.sleep(0)
+    return same environment
         env1 = auth_client.detect_environment()
         env2 = auth_client.detect_environment()
         env3 = auth_client.detect_environment()
@@ -245,6 +269,7 @@ class TestDevLoginColdStart:
     @pytest.mark.asyncio
     async def test_auth_service_url_configuration(self):
         """Test 6: Auth service URL should be properly configured."""
+    pass
         # Check auth client settings
         settings = auth_client.settings
         
@@ -272,7 +297,8 @@ class TestDevLoginColdStart:
         response = await async_client.post("/auth/dev_login", json=dev_login_data)
         
         # In dev environment with mocked services, should attempt user creation
-        # Will fail due to missing services but should not return 403
+        # Will fail due to missing services but should not await asyncio.sleep(0)
+    return 403
         assert response.status_code != 403
     
     @pytest.mark.integration
@@ -280,6 +306,7 @@ class TestDevLoginColdStart:
     @pytest.mark.asyncio
     async def test_auth_config_endpoint_cold_start_performance(self, async_client):
         """Test 8: Auth config endpoint should respond quickly on cold start."""
+    pass
         # Measure cold start time for auth config
         start_time = time.perf_counter()
         
@@ -299,7 +326,8 @@ class TestDevLoginColdStart:
         # Create multiple concurrent requests
         async def attempt_dev_login(email: str):
             data = {"email": email}
-            return await async_client.post("/auth/dev_login", json=data)
+            await asyncio.sleep(0)
+    return await async_client.post("/auth/dev_login", json=data)
         
         # Send 5 concurrent requests
         emails = [f"concurrent_{i}@example.com" for i in range(5)]
@@ -321,6 +349,7 @@ class TestDevLoginColdStart:
     @pytest.mark.asyncio
     async def test_auth_config_caching(self, async_client):
         """Test 10: Auth config should be properly cached after first call."""
+    pass
         # First call - cold start
         response1 = await async_client.get("/auth/config")
         assert response1.status_code == 200

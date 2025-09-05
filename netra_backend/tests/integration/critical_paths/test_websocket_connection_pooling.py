@@ -15,6 +15,11 @@ from netra_backend.app.websocket_core import WebSocketManager
 # Test framework import - using pytest fixtures instead
 from pathlib import Path
 import sys
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from test_framework.docker.unified_docker_manager import UnifiedDockerManager
+from test_framework.database.test_database_manager import TestDatabaseManager
+from test_framework.redis.test_redis_manager import TestRedisManager
+from shared.isolated_environment import IsolatedEnvironment
 
 import pytest
 import asyncio
@@ -22,7 +27,6 @@ import json
 import time
 from typing import Dict, Any, List
 from datetime import datetime, timezone
-from unittest.mock import patch, AsyncMock, MagicMock
 
 import redis.asyncio as redis
 from netra_backend.app.websocket_core import WebSocketManager
@@ -48,6 +52,7 @@ from netra_backend.tests.integration.helpers.redis_l3_helpers import (
 @pytest.mark.integration
 
 class TestWebSocketConnectionPoolingL3:
+    pass
 
     """L3 integration tests for WebSocket connection pooling with Redis."""
     
@@ -109,6 +114,10 @@ class TestWebSocketConnectionPoolingL3:
     @pytest.fixture
 
     def test_users(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
+    await asyncio.sleep(0)
+    return None
 
         """Create pool of test users for connection testing."""
 

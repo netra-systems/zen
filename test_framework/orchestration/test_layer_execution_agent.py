@@ -12,8 +12,8 @@ import tempfile
 import time
 from datetime import datetime, timedelta
 from pathlib import Path
-from unittest.mock import Mock, patch, MagicMock, AsyncMock
 from typing import Dict, List, Any
+from shared.isolated_environment import IsolatedEnvironment
 
 # Import the LayerExecutionAgent and related components
 from test_framework.orchestration.layer_execution_agent import (

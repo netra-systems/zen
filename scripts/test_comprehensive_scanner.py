@@ -10,6 +10,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Optional, Set
 import re
+from shared.isolated_environment import IsolatedEnvironment
 
 
 class ComprehensiveTestScanner:

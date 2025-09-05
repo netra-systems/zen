@@ -7,6 +7,7 @@ Business Value: Ensures security boundaries are enforced.
 """
 
 import pytest
+from shared.isolated_environment import IsolatedEnvironment
 
 from netra_backend.app.guardrails.input_filters import InputFilters
 from netra_backend.app.guardrails.output_validators import OutputValidators

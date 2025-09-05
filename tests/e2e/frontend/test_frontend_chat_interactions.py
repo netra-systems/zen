@@ -1,4 +1,5 @@
 from shared.isolated_environment import get_env
+from shared.isolated_environment import IsolatedEnvironment
 
 """Frontend Chat Interface Interaction E2E Tests
 
@@ -22,11 +23,13 @@ from datetime import datetime
 import pytest
 import httpx
 import websockets
-from unittest.mock import MagicMock, AsyncMock
 
 from test_framework.http_client import UnifiedHTTPClient
 from test_framework.fixtures.auth import create_test_user_token, create_real_jwt_token
 from tests.e2e.helpers.auth.auth_service_helpers import AuthServiceHelper
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
 
 
 class ChatInteractionTestHarness:

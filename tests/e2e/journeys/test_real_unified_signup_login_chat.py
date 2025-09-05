@@ -31,7 +31,7 @@ import os
 import time
 from contextlib import asynccontextmanager
 from typing import Any, Dict, Optional
-from unittest.mock import MagicMock
+from shared.isolated_environment import IsolatedEnvironment
 
 import httpx
 import pytest
@@ -57,6 +57,9 @@ from tests.e2e.helpers.core.unified_flow_helpers import (
 from tests.e2e.database_test_connections import DatabaseConnectionManager
 from tests.e2e.harness_utils import UnifiedTestHarnessComplete
 from tests.e2e.integration.unified_e2e_harness import UnifiedE2ETestHarness
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
 
 
 class TestRealUnifiedFlower:

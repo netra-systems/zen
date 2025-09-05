@@ -22,6 +22,7 @@ import pytest
 from datetime import datetime, timezone
 from typing import Any, Dict
 from uuid import UUID
+from shared.isolated_environment import IsolatedEnvironment
 
 # Pydantic imports for model validation
 from pydantic import ValidationError, BaseModel

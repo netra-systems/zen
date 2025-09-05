@@ -1,4 +1,5 @@
 from shared.isolated_environment import get_env
+from shared.isolated_environment import IsolatedEnvironment
 """Test OAuth configuration issues found in staging.
 
 These tests reproduce the missing Google OAuth credentials issues that

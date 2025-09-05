@@ -16,7 +16,7 @@ import sys
 import tempfile
 import time
 from pathlib import Path
-from unittest.mock import patch, Mock
+from shared.isolated_environment import IsolatedEnvironment
 
 from test_framework.orchestration.layer_execution_agent import (
     LayerExecutionAgent, LayerExecutionConfig, ExecutionStrategy

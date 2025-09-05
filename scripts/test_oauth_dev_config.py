@@ -7,6 +7,7 @@ Verifies that the auth service correctly loads development-specific OAuth creden
 import os
 import sys
 from pathlib import Path
+from shared.isolated_environment import IsolatedEnvironment
 
 # Add project root to path
 project_root = Path(__file__).parent.parent

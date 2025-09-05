@@ -24,6 +24,7 @@ import uuid
 from datetime import datetime, timedelta
 from typing import Dict, List, Set, Any, Optional
 import logging
+from shared.isolated_environment import IsolatedEnvironment
 
 # CRITICAL: Add project root to Python path for imports
 project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
@@ -62,6 +63,7 @@ class StagingWebSocketEventValidator:
     }
     
     def __init__(self, strict_mode: bool = True):
+    pass
         self.strict_mode = strict_mode
         self.events: List[WebSocketEventRecord] = []
         self.event_counts: Dict[str, int] = {}
@@ -160,7 +162,8 @@ class StagingWebSocketEventValidator:
         is_valid, failures = self.validate_staging_requirements()
         
         report = [
-            "\n" + "=" * 80,
+            "
+" + "=" * 80,
             "STAGING WEBSOCKET VALIDATION REPORT",
             "=" * 80,
             f"Status: {'✅ STAGING READY' if is_valid else '❌ STAGING FAILED'}",
@@ -186,7 +189,8 @@ class StagingWebSocketEventValidator:
             report.extend(["", "WARNINGS:"] + [f"  - {w}" for w in self.warnings])
         
         report.append("=" * 80)
-        return "\n".join(report)
+        return "
+".join(report)
 
 
 # ============================================================================
@@ -218,6 +222,7 @@ class TestStagingWebSocketFlow:
     @pytest.mark.timeout(120)  # Longer timeout for staging cold starts
     async def test_staging_websocket_connection_with_auth(self):
         """Test that we can connect to staging WebSocket with proper authentication."""
+    pass
         logger.info("Testing staging WebSocket connection with authentication")
         
         # Test connection
@@ -301,6 +306,7 @@ class TestStagingWebSocketFlow:
     @pytest.mark.timeout(90)
     async def test_staging_websocket_ssl_tls_security(self):
         """Test that staging WebSocket uses proper SSL/TLS security."""
+    pass
         logger.info("Testing staging WebSocket SSL/TLS security")
         
         # Verify we're using wss:// protocol
@@ -362,6 +368,7 @@ class TestStagingWebSocketFlow:
     @pytest.mark.timeout(120)
     async def test_staging_websocket_performance(self):
         """Test WebSocket performance in staging environment."""
+    pass
         logger.info("Testing staging WebSocket performance")
         
         # Connect to staging
@@ -421,6 +428,7 @@ class TestStagingRegressionPrevention:
     @pytest.mark.critical
     async def test_staging_websocket_auth_headers_correct(self):
         """REGRESSION TEST: Ensure staging WebSocket uses correct auth headers."""
+    pass
         logger.info("Testing staging WebSocket authentication headers")
         
         # Get auth token
@@ -489,7 +497,8 @@ class TestStagingMissionCriticalSuite:
     @pytest.mark.asyncio
     async def test_run_staging_websocket_suite(self):
         """Run staging WebSocket validation suite."""
-        logger.info("\n" + "=" * 80)
+        logger.info("
+" + "=" * 80)
         logger.info("RUNNING STAGING WEBSOCKET VALIDATION SUITE")
         logger.info("=" * 80)
         
@@ -512,3 +521,4 @@ if __name__ == "__main__":
     # Run with: python tests/mission_critical/test_staging_websocket_agent_events.py
     # Or: pytest tests/mission_critical/test_staging_websocket_agent_events.py -v -m staging
     pytest.main([__file__, "-v", "--tb=short", "-m", "staging"])
+    pass

@@ -6,6 +6,7 @@ Tests JWT token refresh mechanisms including edge cases and error scenarios.
 """
 
 import pytest
+from shared.isolated_environment import IsolatedEnvironment
 pytest.skip("TokenManager consolidated - rewrite needed for auth service", allow_module_level=True)
 
 import sys

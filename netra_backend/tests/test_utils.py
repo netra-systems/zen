@@ -7,6 +7,7 @@ import sys
 from pathlib import Path
 from typing import Optional
 from sqlalchemy.ext.asyncio import AsyncSession
+from shared.isolated_environment import IsolatedEnvironment
 
 from netra_backend.app.db.models_postgres import User
 

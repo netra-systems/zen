@@ -23,6 +23,7 @@ from contextlib import asynccontextmanager
 import tempfile
 import os
 from pathlib import Path
+from shared.isolated_environment import IsolatedEnvironment
 
 # Fix import paths
 try:

@@ -11,6 +11,7 @@ import time
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
+from shared.isolated_environment import IsolatedEnvironment
 
 # Add project root to path
 project_root = Path(__file__).parent

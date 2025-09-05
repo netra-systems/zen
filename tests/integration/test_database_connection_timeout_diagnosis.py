@@ -24,7 +24,7 @@ from typing import Dict, Any, Optional, Tuple, List
 from contextlib import asynccontextmanager
 import asyncpg
 import psycopg2
-from unittest.mock import patch, AsyncMock
+from shared.isolated_environment import IsolatedEnvironment
 
 # Add project root to path for imports
 project_root = Path(__file__).parent.parent.parent
@@ -37,6 +37,9 @@ from test_framework.environment_markers import env
 from auth_service.auth_core.config import AuthConfig
 from auth_service.auth_core.database.connection import AuthDatabaseConnection
 from auth_service.auth_core.database.database_manager import AuthDatabaseManager
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
 
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
@@ -46,6 +49,7 @@ class DatabaseConnectionTimeoutDiagnostic:
     """Comprehensive diagnostic tool for database connection timeout issues."""
     
     def __init__(self):
+    pass
         self.env = get_env()
         self.results = {}
         self.timeout_results = []
@@ -214,12 +218,14 @@ class DatabaseConnectionTimeoutDiagnostic:
             
             # Create concurrent connection tasks
             async def connect_and_query(conn_id: int):
+    pass
                 conn_start = time.time()
                 try:
                     conn = await asyncio.wait_for(asyncpg.connect(clean_url), timeout=10.0)
                     await asyncio.wait_for(conn.fetchval("SELECT 1"), timeout=5.0)
                     await conn.close()
-                    return {
+                    await asyncio.sleep(0)
+    return {
                         'id': conn_id,
                         'success': True,
                         'time': time.time() - conn_start,
@@ -337,6 +343,7 @@ class TestDatabaseConnectionTimeoutFix:
     
     @pytest.fixture(scope="class")
     def diagnostic(self):
+    pass
         return DatabaseConnectionTimeoutDiagnostic()
     
     @pytest.mark.asyncio
@@ -347,25 +354,29 @@ class TestDatabaseConnectionTimeoutFix:
         This test identifies the root cause of 503 Service Unavailable errors
         by analyzing connection timeouts, initialization failures, and blocking issues.
         """
+    pass
         logger.info("=== COMPREHENSIVE DATABASE TIMEOUT DIAGNOSIS ===")
         
         # Run comprehensive diagnosis
         diagnosis = await diagnostic.diagnose_timeout_patterns()
         
         # Print detailed results
-        print(f"\n{'='*80}")
+        print(f"
+{'='*80}")
         print("DATABASE CONNECTION TIMEOUT DIAGNOSIS RESULTS")
         print(f"{'='*80}")
         
         # Configuration
         config = diagnosis.get('config', {})
-        print(f"\nConfiguration:")
+        print(f"
+Configuration:")
         print(f"  Environment: {config.get('auth_config', {}).get('environment', 'unknown')}")
         print(f"  Database URL: {config.get('auth_config', {}).get('masked_url', 'unknown')}")
         
         # Timeout test results
         timeout_tests = diagnosis.get('timeout_tests', [])
-        print(f"\nTimeout Test Results:")
+        print(f"
+Timeout Test Results:")
         for result in timeout_tests:
             status = "✅ SUCCESS" if result['success'] else "❌ FAILED"
             time_str = f"{result['connection_time']:.2f}s" if result['connection_time'] else "N/A"
@@ -375,7 +386,8 @@ class TestDatabaseConnectionTimeoutFix:
         
         # Initialization test
         init_result = diagnosis.get('initialization_test', {})
-        print(f"\nInitialization Test:")
+        print(f"
+Initialization Test:")
         print(f"  Overall: {'✅ SUCCESS' if init_result['success'] else '❌ FAILED'}")
         print(f"  Total Time: {init_result['total_time']:.2f}s")
         
@@ -388,19 +400,22 @@ class TestDatabaseConnectionTimeoutFix:
             
         # Concurrent test
         concurrent_result = diagnosis.get('concurrent_test', {})
-        print(f"\nConcurrent Connection Test:")
+        print(f"
+Concurrent Connection Test:")
         print(f"  Overall: {'✅ SUCCESS' if concurrent_result['success'] else '❌ FAILED'}")
         print(f"  Total Time: {concurrent_result['total_time']:.2f}s")
         
         # Analysis
         analysis = diagnosis.get('analysis', {})
-        print(f"\nRoot Cause Analysis:")
+        print(f"
+Root Cause Analysis:")
         print(f"  Severity: {analysis.get('severity', 'unknown').upper()}")
         
         for cause in analysis.get('root_causes', []):
             print(f"  ⚠️  {cause}")
             
-        print(f"\nRecommendations:")
+        print(f"
+Recommendations:")
         for rec in analysis.get('recommendations', []):
             print(f"  💡 {rec}")
         
@@ -413,7 +428,8 @@ class TestDatabaseConnectionTimeoutFix:
         
         if has_critical_issues:
             # This test should document the issue but not fail - we need to implement fixes
-            print(f"\n{'='*80}")
+            print(f"
+{'='*80}")
             print("❌ CRITICAL BLOCKING ISSUE IDENTIFIED")
             print("This test documents the database connection timeout issue.")
             print("Fixes are being implemented in subsequent tests.")
@@ -438,6 +454,7 @@ class TestDatabaseConnectionTimeoutFix:
         This test verifies that database connections work with appropriate timeout settings
         and implements fixes for timeout-related issues.
         """
+    pass
         logger.info("=== DATABASE CONNECTION TIMEOUT CONFIGURATION TEST ===")
         
         # Get environment configuration
@@ -497,13 +514,15 @@ class TestDatabaseConnectionTimeoutFix:
         # Find optimal timeout configuration
         optimal_config = min(successful_configs, key=lambda x: x['connection_time'])
         
-        print(f"\nOptimal timeout configuration:")
+        print(f"
+Optimal timeout configuration:")
         print(f"  Connect timeout: {optimal_config['config']['connect']}s")
         print(f"  Query timeout: {optimal_config['config']['query']}s") 
         print(f"  Connection time: {optimal_config['connection_time']:.2f}s")
         
         # Recommend configuration updates
-        print(f"\nRecommended fixes:")
+        print(f"
+Recommended fixes:")
         print(f"  1. Update AsyncPG connection timeout to {optimal_config['config']['connect']}s")
         print(f"  2. Update query timeout to {optimal_config['config']['query']}s")
         print(f"  3. Implement retry logic with exponential backoff")
@@ -515,6 +534,7 @@ class TestDatabaseConnectionTimeoutFix:
         This test identifies issues with database URL construction that could
         cause connection timeouts or failures.
         """
+    pass
         logger.info("=== DATABASE URL FORMATION DIAGNOSIS ===")
         
         # Get all URL variations
@@ -532,7 +552,8 @@ class TestDatabaseConnectionTimeoutFix:
             'auth_config': AuthConfig.get_database_url()
         }
         
-        print(f"\nDatabase URL Analysis:")
+        print(f"
+Database URL Analysis:")
         
         url_issues = []
         
@@ -558,7 +579,8 @@ class TestDatabaseConnectionTimeoutFix:
                 print(f"  {name}: ❌ NO URL GENERATED")
                 url_issues.append(f"{name}: URL generation failed")
         
-        print(f"\nURL Issues Found:")
+        print(f"
+URL Issues Found:")
         if url_issues:
             for issue in url_issues:
                 print(f"  ⚠️  {issue}")
@@ -569,7 +591,8 @@ class TestDatabaseConnectionTimeoutFix:
         critical_issues = [issue for issue in url_issues if "sslmode=" in issue or "generation failed" in issue]
         
         if critical_issues:
-            print(f"\nCritical URL issues that need fixing:")
+            print(f"
+Critical URL issues that need fixing:")
             for issue in critical_issues:
                 print(f"  🚨 {issue}")
         
@@ -620,13 +643,15 @@ class DatabaseConnectionTimeoutFixes:
     @classmethod
     async def test_database_readiness_with_timeout(cls, database_url: str, timeout: float = 10.0) -> bool:
         """Test database readiness with configurable timeout."""
+    pass
         try:
             async with cls.enhanced_database_connection(database_url, timeout, timeout) as conn:
                 result = await asyncio.wait_for(
                     conn.fetchval("SELECT 1"),
                     timeout=timeout
                 )
-                return result == 1
+                await asyncio.sleep(0)
+    return result == 1
         except Exception as e:
             logger.error(f"Database readiness check failed: {e}")
             return False
@@ -639,7 +664,8 @@ class DatabaseConnectionTimeoutFixes:
         
         for attempt in range(max_retries):
             try:
-                return await operation_func()
+                await asyncio.sleep(0)
+    return await operation_func()
             except Exception as e:
                 last_exception = e
                 if attempt < max_retries - 1:
@@ -672,6 +698,7 @@ class TestDatabaseConnectionTimeoutImplementedFixes:
     @pytest.mark.asyncio
     async def test_database_readiness_with_timeout_fix(self):
         """Test database readiness check with timeout fix."""
+    pass
         database_url = AuthConfig.get_database_url()
         
         # Test readiness with timeout
@@ -690,7 +717,8 @@ class TestDatabaseConnectionTimeoutImplementedFixes:
         # Define operation to retry
         async def test_operation():
             async with DatabaseConnectionTimeoutFixes.enhanced_database_connection(database_url) as conn:
-                return await conn.fetchval("SELECT 1")
+                await asyncio.sleep(0)
+    return await conn.fetchval("SELECT 1")
         
         # Test with retry logic
         result = await DatabaseConnectionTimeoutFixes.retry_database_operation(
@@ -709,7 +737,8 @@ if __name__ == "__main__":
         results = await diagnostic.diagnose_timeout_patterns()
         
         # Print summary
-        print(f"\nDiagnosis Summary:")
+        print(f"
+Diagnosis Summary:")
         analysis = results.get('analysis', {})
         print(f"Severity: {analysis.get('severity', 'unknown')}")
         
@@ -720,3 +749,4 @@ if __name__ == "__main__":
             print(f"Recommendation: {rec}")
     
     asyncio.run(main())
+    pass

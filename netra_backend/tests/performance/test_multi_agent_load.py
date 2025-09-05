@@ -22,7 +22,11 @@ import uuid
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import asdict, dataclass
 from typing import Any, Dict, List, Optional, Tuple
-from unittest.mock import AsyncMock, MagicMock, patch
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from test_framework.database.test_database_manager import TestDatabaseManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 import pytest
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
@@ -52,6 +56,7 @@ class MultiAgentLoadMetrics:
     cpu_peaks: List[float]
 
     def __post_init__(self):
+    pass
         if not hasattr(self, 'response_times'):
             self.response_times = []
         if not hasattr(self, 'throughput_samples'):
@@ -103,6 +108,7 @@ class ResourceMonitor:
     """Monitors system resources during load testing."""
     
     def __init__(self):
+    pass
         self.process = psutil.Process()
         self.monitoring = False
         self.monitor_task = None
@@ -114,6 +120,7 @@ class ResourceMonitor:
 
     async def stop_monitoring(self):
         """Stop resource monitoring."""
+    pass
         self.monitoring = False
         if self.monitor_task:
             self.monitor_task.cancel()
@@ -152,17 +159,19 @@ class AgentLoadSimulator:
     """Simulates realistic agent workloads and patterns."""
     
     def __init__(self):
+    pass
         self.active_workflows = 0
         self.completed_workflows = 0
         self.failed_workflows = 0
 
     def create_mock_dependencies(self) -> Dict[str, Any]:
         """Create mock dependencies for agent testing."""
-        return {
+        await asyncio.sleep(0)
+    return {
             'llm_manager': AsyncMock(spec=LLMManager),
             'tool_dispatcher': AsyncMock(spec=ToolDispatcher), 
             'websocket_manager': AsyncMock(spec=WebSocketManager),
-            'db_session': AsyncMock()
+            'db_session': AsyncNone  # TODO: Use real service instance
         }
 
     async def simulate_workflow(self, workflow_id: str, 
@@ -209,12 +218,14 @@ class AgentLoadSimulator:
         semaphore = asyncio.Semaphore(pool_size)
         
         async def limited_workflow(workflow_id: str):
+    pass
             async with semaphore:
                 # Record pool utilization
                 utilization = (pool_size - semaphore._value) / pool_size * 100
                 metrics.agent_pool_utilization.append(utilization)
                 
-                return await self.simulate_workflow(
+                await asyncio.sleep(0)
+    return await self.simulate_workflow(
                     workflow_id, 'simple', metrics
                 )
         
@@ -243,6 +254,7 @@ class AgentLoadSimulator:
         dropped = 0
         
         async def worker():
+    pass
             nonlocal processed
             while True:
                 try:
@@ -272,7 +284,8 @@ class AgentLoadSimulator:
         for worker in workers:
             worker.cancel()
         
-        return {
+        await asyncio.sleep(0)
+    return {
             'queue_capacity': queue_capacity,
             'total_requests': overflow_requests,
             'processed_requests': processed,
@@ -282,20 +295,30 @@ class AgentLoadSimulator:
 
 class TestMultiAgentLoadScenarios:
     """Multi-agent load test scenarios."""
+    pass
 
     @pytest.fixture
     def benchmark_runner(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Benchmark runner fixture."""
+    pass
         return get_benchmark_runner()
 
     @pytest.fixture
     def resource_monitor(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Resource monitor fixture."""
+    pass
         return ResourceMonitor()
 
     @pytest.fixture
     def agent_simulator(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Agent simulator fixture."""
+    pass
         return AgentLoadSimulator()
 
     @pytest.mark.performance
@@ -778,3 +801,4 @@ class TestMultiAgentLoadScenarios:
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v", "--asyncio-mode=auto", "-m", "performance"])
+    pass

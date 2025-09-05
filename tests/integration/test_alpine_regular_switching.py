@@ -35,7 +35,8 @@ from contextlib import asynccontextmanager
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple, Any
-from unittest.mock import patch
+from test_framework.docker.unified_docker_manager import UnifiedDockerManager
+from shared.isolated_environment import IsolatedEnvironment
 
 # Add project root to path for absolute imports (CLAUDE.md compliance)
 project_root = Path(__file__).parent.parent.parent
@@ -49,6 +50,9 @@ from test_framework.unified_docker_manager import (
 )
 from test_framework.docker_port_discovery import DockerPortDiscovery
 from shared.isolated_environment import get_env
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -59,6 +63,7 @@ class ContainerMetrics:
     """Container performance metrics collection."""
     
     def __init__(self):
+    pass
         self.startup_time = 0.0
         self.memory_usage_mb = 0.0
         self.cpu_usage_percent = 0.0
@@ -94,6 +99,7 @@ class AlpineRegularSwitchingTestSuite:
     @pytest.fixture(scope="class")
     def compose_available(self):
         """Check if docker-compose is available."""
+    pass
         try:
             result = subprocess.run(["docker-compose", "version"], capture_output=True, timeout=10)
             if result.returncode != 0:
@@ -117,13 +123,15 @@ class AlpineRegularSwitchingTestSuite:
     
     def _cleanup_test_containers(self, test_id: str):
         """Clean up containers created during testing."""
+    pass
         try:
             # Find and stop containers with test_id prefix
             cmd = ["docker", "ps", "-a", "--filter", f"name={test_id}", "--format", "{{.Names}}"]
             result = subprocess.run(cmd, capture_output=True, text=True, timeout=10)
             
             if result.returncode == 0 and result.stdout.strip():
-                container_names = result.stdout.strip().split('\n')
+                container_names = result.stdout.strip().split('
+')
                 for name in container_names:
                     if name.strip():
                         subprocess.run(["docker", "rm", "-f", name.strip()], 
@@ -301,6 +309,7 @@ class TestSequentialSwitching(AlpineRegularSwitchingTestSuite):
     
     def _verify_alpine_containers(self, manager: UnifiedDockerManager, services: List[str]):
         """Verify containers are actually Alpine-based."""
+    pass
         container_info = manager.get_enhanced_container_status(services)
         for service, info in container_info.items():
             # Check if image name contains 'alpine' or if it's an Alpine-based image
@@ -408,6 +417,7 @@ class TestSequentialSwitching(AlpineRegularSwitchingTestSuite):
     
     def _verify_test_data(self, manager: UnifiedDockerManager, test_data: Dict[str, str]):
         """Verify test data exists in services."""
+    pass
         try:
             project_name = manager._get_project_name()
             
@@ -470,6 +480,7 @@ class TestParallelExecution(AlpineRegularSwitchingTestSuite):
         
         # Start both environments simultaneously
         async def start_both():
+    pass
             regular_task = asyncio.create_task(
                 manager_regular.start_services_smart(services, wait_healthy=True)
             )
@@ -478,7 +489,8 @@ class TestParallelExecution(AlpineRegularSwitchingTestSuite):
             )
             
             regular_success, alpine_success = await asyncio.gather(regular_task, alpine_task)
-            return regular_success, alpine_success
+            await asyncio.sleep(0)
+    return regular_success, alpine_success
         
         regular_success, alpine_success = asyncio.run(start_both())
         
@@ -504,6 +516,7 @@ class TestParallelExecution(AlpineRegularSwitchingTestSuite):
         
         # Cleanup both environments
         async def cleanup_both():
+    pass
             regular_task = asyncio.create_task(manager_regular.graceful_shutdown())
             alpine_task = asyncio.create_task(manager_alpine.graceful_shutdown())
             await asyncio.gather(regular_task, alpine_task)
@@ -530,6 +543,7 @@ class TestParallelExecution(AlpineRegularSwitchingTestSuite):
         
         # Start all managers
         async def start_all():
+    pass
             tasks = []
             for manager, container_type, i in managers:
                 task = asyncio.create_task(
@@ -538,7 +552,8 @@ class TestParallelExecution(AlpineRegularSwitchingTestSuite):
                 tasks.append(task)
             
             results = await asyncio.gather(*tasks, return_exceptions=True)
-            return results
+            await asyncio.sleep(0)
+    return results
         
         logger.info("Starting multiple container instances to test resource contention")
         results = asyncio.run(start_all())
@@ -550,6 +565,7 @@ class TestParallelExecution(AlpineRegularSwitchingTestSuite):
         
         # Cleanup all managers
         async def cleanup_all():
+    pass
             tasks = []
             for manager, _, _ in managers:
                 task = asyncio.create_task(manager.graceful_shutdown())
@@ -574,7 +590,8 @@ class TestParallelExecution(AlpineRegularSwitchingTestSuite):
         except Exception as e:
             logger.warning(f"Failed to get container ports: {e}")
         
-        return ports
+        await asyncio.sleep(0)
+    return ports
     
     def _test_independent_operations(self, manager_regular: UnifiedDockerManager,
                                    manager_alpine: UnifiedDockerManager, services: List[str]):
@@ -857,7 +874,8 @@ services:
         cmd = ["docker", "ps", "-a", "--filter", f"name={project_name}", "--format", "{{.Names}}"]
         result = subprocess.run(cmd, capture_output=True, text=True, timeout=10)
         
-        remaining_containers = result.stdout.strip().split('\n') if result.stdout.strip() else []
+        remaining_containers = result.stdout.strip().split('
+') if result.stdout.strip() else []
         remaining_containers = [c for c in remaining_containers if c.strip()]
         
         assert not remaining_containers, f"Containers not cleaned up properly: {remaining_containers}"

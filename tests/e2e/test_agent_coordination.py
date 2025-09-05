@@ -17,6 +17,7 @@ COMPLIANCE: Updated per CLAUDE.md requirements
 
 import asyncio
 from datetime import datetime
+from shared.isolated_environment import IsolatedEnvironment
 
 import pytest
 

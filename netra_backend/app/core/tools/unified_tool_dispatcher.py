@@ -157,10 +157,15 @@ class UnifiedToolDispatcher:
             # If it's already a WebSocketManager, use it directly
             if hasattr(websocket_bridge, 'send_event'):
                 websocket_manager = websocket_bridge
+            # If it's an AgentWebSocketBridge, create proper adapter
+            elif hasattr(websocket_bridge, 'notify_tool_executing'):
+                websocket_manager = cls._create_websocket_bridge_adapter(websocket_bridge, user_context)
+                logger.info(f"Created WebSocket bridge adapter for AgentWebSocketBridge (user: {user_context.user_id})")
             # Otherwise wrap it
             else:
                 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
                 websocket_manager = UnifiedWebSocketManager()
+                logger.warning(f"Created fallback WebSocketManager - no bridge connection for user {user_context.user_id}")
         
         # Create instance using internal factory
         instance = cls._create_from_factory(
@@ -303,12 +308,83 @@ class UnifiedToolDispatcher:
             'dispatcher_id': self.dispatcher_id if hasattr(self, 'dispatcher_id') else None
         }
     
+    @staticmethod
+    def _create_websocket_bridge_adapter(websocket_bridge, user_context):
+        """Create adapter to connect AgentWebSocketBridge to UnifiedToolDispatcher.
+        
+        This adapter implements the WebSocketManager interface (send_event) 
+        using AgentWebSocketBridge's notification methods.
+        """
+        
+        class AgentWebSocketBridgeAdapter:
+            """Adapter that implements WebSocketManager interface using AgentWebSocketBridge."""
+            def __init__(self, bridge, context):
+                self.bridge = bridge
+                self.context = context
+                logger.debug(f"✅ Created WebSocket bridge adapter for user {context.user_id}")
+            
+            async def send_event(self, event_type: str, data: Dict[str, Any]):
+                """Send event via AgentWebSocketBridge using proper notification methods."""
+                try:
+                    if event_type == "tool_executing":
+                        # Use AgentWebSocketBridge's notify_tool_executing method
+                        success = await self.bridge.notify_tool_executing(
+                            run_id=data.get("run_id", self.context.run_id),
+                            agent_name=data.get("agent_name", "ToolDispatcher"),
+                            tool_name=data["tool_name"],
+                            parameters=data.get("parameters", {})
+                        )
+                        if success:
+                            logger.debug(f"🔧 TOOL EXECUTING: {data['tool_name']} → user {self.context.user_id}")
+                        return success
+                        
+                    elif event_type == "tool_completed":
+                        # Use AgentWebSocketBridge's notify_tool_completed method
+                        result_dict = None
+                        if data.get("result"):
+                            result_dict = {"output": str(data["result"])}
+                        elif data.get("error"):
+                            result_dict = {"error": str(data["error"])}
+                            
+                        success = await self.bridge.notify_tool_completed(
+                            run_id=data.get("run_id", self.context.run_id), 
+                            agent_name=data.get("agent_name", "ToolDispatcher"),
+                            tool_name=data["tool_name"],
+                            result=result_dict,
+                            execution_time_ms=data.get("execution_time_ms")
+                        )
+                        if success:
+                            logger.debug(f"✅ TOOL COMPLETED: {data['tool_name']} → user {self.context.user_id}")
+                        return success
+                        
+                    else:
+                        logger.warning(f"⚠️  Unknown event type for WebSocket bridge adapter: {event_type}")
+                        return False
+                        
+                except Exception as e:
+                    logger.error(f"🚨 WebSocket bridge adapter failed to send {event_type} event: {e}")
+                    return False
+            
+            def has_websocket_support(self):
+                """Check if WebSocket support is available."""
+                return self.bridge is not None
+        
+        return AgentWebSocketBridgeAdapter(websocket_bridge, user_context)
+    
     def _create_websocket_bridge(self):
         """Create WebSocket bridge adapter for legacy compatibility."""
+        # For instances created with an AgentWebSocketBridge, use the stored bridge
+        if hasattr(self, '_websocket_bridge') and self._websocket_bridge:
+            return self._create_websocket_bridge_adapter(self._websocket_bridge, self.user_context)
+        # Otherwise fall back to the manager-based adapter
+        return self._create_legacy_websocket_bridge()
+    
+    def _create_legacy_websocket_bridge(self):
+        """Create legacy WebSocket bridge adapter for backward compatibility."""
         from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmitter as WebSocketEventEmitter
         
         class WebSocketBridgeAdapter:
-            """Adapter to bridge WebSocketManager to legacy AgentWebSocketBridge interface."""
+            """Legacy adapter to bridge WebSocketManager to AgentWebSocketBridge interface."""
             def __init__(self, manager, context):
                 self.manager = manager
                 self.context = context

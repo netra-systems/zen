@@ -18,7 +18,6 @@ import threading
 import time
 import unittest
 from pathlib import Path
-from unittest.mock import AsyncMock, MagicMock, Mock, patch
 from typing import Dict, List, Optional
 
 # Add project root to path for imports

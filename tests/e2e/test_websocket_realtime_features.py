@@ -21,6 +21,7 @@ import uuid
 from typing import Dict, Any, List, Optional
 from concurrent.futures import ThreadPoolExecutor
 from tests.e2e.harness_utils import get_auth_service_url, get_backend_service_url
+from shared.isolated_environment import IsolatedEnvironment
 
 
 async def check_service_availability(service_url: str, service_name: str) -> bool:
@@ -140,7 +141,9 @@ async def test_websocket_connection_establishment():
         for failure in connection_failures:
             failure_report.append(f"  - {failure}")
         
-        pytest.skip(f"WebSocket connection test failed (services may not be running):\n" + "\n".join(failure_report))
+        pytest.skip(f"WebSocket connection test failed (services may not be running):
+" + "
+".join(failure_report))
     
     print("[Success] WebSocket connection test passed")
 
@@ -259,7 +262,9 @@ async def test_agent_communication_websocket():
         for failure in agent_communication_failures:
             failure_report.append(f"  - {failure}")
         
-        pytest.skip(f"Agent communication test failed (WebSocket infrastructure not implemented):\n" + "\n".join(failure_report))
+        pytest.skip(f"Agent communication test failed (WebSocket infrastructure not implemented):
+" + "
+".join(failure_report))
     
     print("[Success] Agent communication test passed")
 
@@ -409,7 +414,9 @@ async def test_multi_client_websocket_broadcasting():
         for failure in broadcasting_failures:
             failure_report.append(f"  - {failure}")
         
-        pytest.skip(f"Multi-client broadcasting test failed (broadcasting not implemented):\n" + "\n".join(failure_report))
+        pytest.skip(f"Multi-client broadcasting test failed (broadcasting not implemented):
+" + "
+".join(failure_report))
     
     print("[Success] Multi-client broadcasting test passed")
 
@@ -496,7 +503,9 @@ async def test_websocket_connection_resilience():
         for failure in resilience_failures:
             failure_report.append(f"  - {failure}")
         
-        pytest.skip(f"WebSocket resilience test failed (resilience features not implemented):\\n" + "\\n".join(failure_report))
+        pytest.skip(f"WebSocket resilience test failed (resilience features not implemented):\
+" + "\
+".join(failure_report))
     
     print("[Success] WebSocket resilience test passed")
 

@@ -45,6 +45,7 @@ class ComprehensiveDatabaseConnectivityValidator:
     """Comprehensive validator for all database connectivity fixes."""
     
     def __init__(self):
+    pass
         # CRITICAL: Use IsolatedEnvironment for ALL environment access per claude.md
         self.env = get_env()
         self.env.enable_isolation()  # Enable isolation for testing
@@ -306,13 +307,15 @@ class ComprehensiveDatabaseConnectivityValidator:
         
         try:
             async def single_readiness_check(check_id: int):
+    pass
                 start_time = time.time()
                 try:
                     auth_conn = AuthDatabaseConnection()
                     is_ready = await auth_conn.is_ready(timeout=15.0)
                     await auth_conn.close(timeout=3.0)
                     
-                    return {
+                    await asyncio.sleep(0)
+    return {
                         'check_id': check_id,
                         'success': is_ready,
                         'duration': time.time() - start_time,
@@ -697,6 +700,7 @@ class TestComprehensiveDatabaseConnectivityValidation:
     
     @pytest.fixture(scope="class")
     def validator(self):
+    pass
         return ComprehensiveDatabaseConnectivityValidator()
     
     @pytest.mark.asyncio
@@ -707,13 +711,15 @@ class TestComprehensiveDatabaseConnectivityValidation:
         This test validates that all fixes for the PRIMARY BLOCKER (503 Service
         Unavailable errors due to database connection timeouts) are working correctly.
         """
+    pass
         logger.info("=== COMPREHENSIVE DATABASE CONNECTIVITY VALIDATION ===")
         
         # Run comprehensive validation
         results = await validator.run_comprehensive_validation()
         
         # Display results
-        print(f"\n{'='*80}")
+        print(f"
+{'='*80}")
         print("COMPREHENSIVE DATABASE CONNECTIVITY VALIDATION RESULTS")
         print(f"{'='*80}")
         
@@ -724,11 +730,13 @@ class TestComprehensiveDatabaseConnectivityValidation:
             'failure': '❌'
         }.get(overall_status, '❓')
         
-        print(f"\nOverall Status: {status_emoji} {overall_status.upper()}")
+        print(f"
+Overall Status: {status_emoji} {overall_status.upper()}")
         
         # Auth service 503 fix results
         auth_results = results['auth_service_fixes']
-        print(f"\n1. Auth Service 503 Error Fix: {'✅ SUCCESS' if auth_results['success'] else '❌ FAILED'}")
+        print(f"
+1. Auth Service 503 Error Fix: {'✅ SUCCESS' if auth_results['success'] else '❌ FAILED'}")
         
         if 'stages' in auth_results:
             for stage_name, stage_data in auth_results['stages'].items():
@@ -741,14 +749,16 @@ class TestComprehensiveDatabaseConnectivityValidation:
             would_503 = health_check['would_return_503']
             
             print(f"   Simulated health check HTTP status: {http_status}")
-            print(f"   Would return 503 error: {'❌ YES' if would_503 else '✅ NO'}")
+            print(f"   Would await asyncio.sleep(0)
+    return 503 error: {'❌ YES' if would_503 else '✅ NO'}")
         
         if auth_results.get('error'):
             print(f"   Error: {auth_results['error']}")
         
         # Timeout handling fix results
         timeout_results = results['timeout_handling_fixes']
-        print(f"\n2. Timeout Handling Fixes: {'✅ SUCCESS' if timeout_results['success'] else '❌ FAILED'}")
+        print(f"
+2. Timeout Handling Fixes: {'✅ SUCCESS' if timeout_results['success'] else '❌ FAILED'}")
         
         if 'timeout_tests' in timeout_results:
             for test in timeout_results['timeout_tests']:
@@ -765,7 +775,8 @@ class TestComprehensiveDatabaseConnectivityValidation:
         
         # URL formation fix results
         url_results = results['url_formation_fixes']
-        print(f"\n3. URL Formation Fixes: {'✅ SUCCESS' if url_results['success'] else '❌ FAILED'}")
+        print(f"
+3. URL Formation Fixes: {'✅ SUCCESS' if url_results['success'] else '❌ FAILED'}")
         
         if 'url_checks' in url_results:
             for check in url_results['url_checks']:
@@ -785,7 +796,8 @@ class TestComprehensiveDatabaseConnectivityValidation:
         
         # Concurrent readiness check results
         concurrent_results = results['readiness_check_fixes']
-        print(f"\n4. Concurrent Readiness Check Fixes: {'✅ SUCCESS' if concurrent_results['success'] else '❌ FAILED'}")
+        print(f"
+4. Concurrent Readiness Check Fixes: {'✅ SUCCESS' if concurrent_results['success'] else '❌ FAILED'}")
         
         if 'results' in concurrent_results:
             successful = sum(1 for r in concurrent_results['results'] if r['success'])
@@ -799,7 +811,8 @@ class TestComprehensiveDatabaseConnectivityValidation:
                 print(f"     Check {result['check_id']}: {status} ({result['duration']:.2f}s)")
         
         # Summary and assertions
-        print(f"\n{'='*80}")
+        print(f"
+{'='*80}")
         print("VALIDATION SUMMARY")
         print(f"{'='*80}")
         
@@ -822,7 +835,8 @@ class TestComprehensiveDatabaseConnectivityValidation:
             for issue in critical_issues:
                 print(f"  - {issue}")
             
-            print(f"\nThese are PRIMARY BLOCKERS that prevent full system operation.")
+            print(f"
+These are PRIMARY BLOCKERS that prevent full system operation.")
         else:
             print("✅ ALL CRITICAL FIXES WORKING:")
             print("  - Auth service 503 errors fixed")
@@ -850,11 +864,13 @@ class TestComprehensiveDatabaseConnectivityValidation:
         )
         
         if results['overall_status'] == 'success':
-            print(f"\n🎉 COMPREHENSIVE VALIDATION SUCCESSFUL!")
+            print(f"
+🎉 COMPREHENSIVE VALIDATION SUCCESSFUL!")
             print(f"The PRIMARY BLOCKER (503 Service Unavailable errors) has been resolved.")
             print(f"All services should now start successfully and respond to health checks.")
         else:
-            print(f"\n⚠️  PARTIAL SUCCESS - Some non-critical issues remain")
+            print(f"
+⚠️  PARTIAL SUCCESS - Some non-critical issues remain")
             print(f"The PRIMARY BLOCKER is resolved but some optimizations could be made.")
     
     @pytest.mark.asyncio
@@ -865,6 +881,7 @@ class TestComprehensiveDatabaseConnectivityValidation:
         This test specifically simulates the auth service health endpoint
         logic to ensure it no longer returns 503 Service Unavailable.
         """
+    pass
         logger.info("=== AUTH SERVICE HEALTH ENDPOINT SIMULATION ===")
         
         # Simulate the exact logic from auth_service/main.py health endpoint
@@ -900,7 +917,8 @@ class TestComprehensiveDatabaseConnectivityValidation:
                     }
                     http_status = 503
                     
-                    print(f"❌ Would return 503 Service Unavailable")
+                    print(f"❌ Would await asyncio.sleep(0)
+    return 503 Service Unavailable")
                     print(f"Response: {health_response}")
                 else:
                     # This would return healthy status
@@ -941,7 +959,8 @@ class TestComprehensiveDatabaseConnectivityValidation:
                 f"This indicates the 503 error fix is not working."
             )
             
-            print(f"\n✅ Auth service health endpoint simulation successful - no 503 errors!")
+            print(f"
+✅ Auth service health endpoint simulation successful - no 503 errors!")
             
         except Exception as e:
             await auth_conn.close(timeout=5.0)  # Ensure cleanup
@@ -951,6 +970,7 @@ class TestComprehensiveDatabaseConnectivityValidation:
 if __name__ == "__main__":
     # Run comprehensive validation when executed directly
     async def main():
+    pass
         print("=== COMPREHENSIVE DATABASE CONNECTIVITY VALIDATION ===")
         
         validator = ComprehensiveDatabaseConnectivityValidator()
@@ -958,7 +978,8 @@ if __name__ == "__main__":
         
         # Print summary
         overall_status = results['overall_status']
-        print(f"\nOverall Status: {overall_status.upper()}")
+        print(f"
+Overall Status: {overall_status.upper()}")
         
         for test_name, test_result in results.items():
             if test_name != 'overall_status':
@@ -966,9 +987,11 @@ if __name__ == "__main__":
                 print(f"{test_name}: {status}")
         
         if overall_status == 'success':
-            print(f"\n🎉 All database connectivity fixes working!")
+            print(f"
+🎉 All database connectivity fixes working!")
             print(f"The PRIMARY BLOCKER (503 errors) has been resolved.")
         else:
-            print(f"\n⚠️  Some issues remain - check individual test results")
+            print(f"
+⚠️  Some issues remain - check individual test results")
     
     asyncio.run(main())

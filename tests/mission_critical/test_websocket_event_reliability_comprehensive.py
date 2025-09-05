@@ -27,6 +27,7 @@ from dataclasses import dataclass, field
 from enum import Enum
 import threading
 import statistics
+from shared.isolated_environment import IsolatedEnvironment
 
 # CRITICAL: Add project root to Python path for imports
 project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
@@ -124,6 +125,7 @@ class ReliabilityMockConnectionPool:
     """Mock connection pool for reliability testing with user isolation."""
     
     def __init__(self):
+    pass
         self.connections: Dict[str, Any] = {}
         self.connection_lock = asyncio.Lock()
         self.connection_stats: Dict[str, Dict] = {}
@@ -183,6 +185,7 @@ class ReliabilityMockWebSocket:
     """Mock WebSocket for reliability testing with failure simulation."""
     
     def __init__(self, user_id: str, connection_id: str):
+    pass
         self.user_id = user_id
         self.connection_id = connection_id
         self.messages_sent: List[Dict] = []
@@ -236,6 +239,7 @@ class FactoryPatternEventValidator:
     }
     
     def __init__(self):
+    pass
         self.user_events: Dict[str, List[Dict]] = {}  # user_id -> events
         self.user_content_scores: Dict[str, List[EventContentScore]] = {}  # user_id -> scores
         self.user_timing_analysis: Dict[str, UserTimingAnalysis] = {}
@@ -539,6 +543,7 @@ class FactoryPatternReliabilityTestHarness:
     """Test harness for factory pattern reliability testing."""
     
     def __init__(self):
+    pass
         self.factory = WebSocketBridgeFactory()
         self.mock_pool = ReliabilityMockConnectionPool()
         self.validator = FactoryPatternEventValidator()
@@ -643,11 +648,13 @@ class FactoryPatternReliabilityTestHarness:
     
     def get_reliability_results(self) -> Dict[str, Any]:
         """Get comprehensive reliability results."""
+    pass
         is_valid, results = self.validator.validate_comprehensive_reliability()
         factory_metrics = self.factory.get_factory_metrics()
         pool_stats = self.mock_pool.get_reliability_stats()
         
-        return {
+        await asyncio.sleep(0)
+    return {
             "validation_passed": is_valid,
             "validation_results": results,
             "factory_metrics": factory_metrics,
@@ -677,6 +684,7 @@ class TestComprehensiveWebSocketEventReliability:
     @pytest.mark.timeout(60)
     async def test_enhanced_event_content_quality_per_user(self):
         """Test event content quality with per-user validation."""
+    pass
         print("🎯 Testing enhanced event content quality per user")
         
         # Test multiple users with different quality scenarios
@@ -759,6 +767,7 @@ class TestComprehensiveWebSocketEventReliability:
     @pytest.mark.timeout(120)
     async def test_concurrent_user_reliability_isolation(self):
         """Test reliability under concurrent load with complete user isolation."""
+    pass
         print("🔄 Testing concurrent user reliability isolation")
         
         # Create many concurrent users
@@ -873,6 +882,7 @@ class TestComprehensiveWebSocketEventReliability:
     @pytest.mark.timeout(60)
     async def test_user_experience_reliability_validation(self):
         """Test user experience reliability with factory pattern."""
+    pass
         print("👥 Testing user experience reliability validation")
         
         # Create users with different UX scenarios
@@ -931,7 +941,8 @@ class TestComprehensiveWebSocketEventReliability:
     @pytest.mark.timeout(180)
     async def test_comprehensive_reliability_suite_factory_pattern(self):
         """Run the complete comprehensive reliability suite for factory pattern."""
-        print("\n" + "=" * 100)
+        print("
+" + "=" * 100)
         print("🚀 RUNNING COMPREHENSIVE WEBSOCKET RELIABILITY SUITE - FACTORY PATTERN")
         print("=" * 100)
         
@@ -997,7 +1008,8 @@ class TestComprehensiveWebSocketEventReliability:
         assert pool_stats["success_rate"] >= 0.7, f"Pool success rate too low: {pool_stats['success_rate']:.1%}"
         
         # Generate final report
-        print(f"\n🎉 COMPREHENSIVE RELIABILITY SUITE COMPLETED")
+        print(f"
+🎉 COMPREHENSIVE RELIABILITY SUITE COMPLETED")
         print(f"✅ Success Rate: {success_rate:.1%}")
         print(f"✅ Overall Content Quality: {overall_quality:.1f}/5.0")
         print(f"✅ Overall Timing Quality: {overall_timing:.2f}/1.0")
@@ -1013,6 +1025,7 @@ class TestComprehensiveWebSocketEventReliability:
 if __name__ == "__main__":
     # Generate reliability dashboard
     dashboard = """
+    pass
 WEBSOCKET EVENT RELIABILITY DASHBOARD - FACTORY PATTERN
 =====================================================
 

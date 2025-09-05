@@ -5,12 +5,13 @@ Tests authentication brute force protection mechanisms
 
 import sys
 from pathlib import Path
+from auth_service.core.auth_manager import AuthManager
+from shared.isolated_environment import IsolatedEnvironment
 
 # Test framework import - using pytest fixtures instead
 
 import asyncio
 import time
-from unittest.mock import AsyncMock, MagicMock, Mock, patch, patch
 
 import pytest
 

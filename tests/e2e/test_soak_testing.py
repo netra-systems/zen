@@ -39,6 +39,7 @@ import tracemalloc
 import uuid
 import websockets
 from websockets import ServerConnection
+from shared.isolated_environment import IsolatedEnvironment
 
 from shared.isolated_environment import get_env
 

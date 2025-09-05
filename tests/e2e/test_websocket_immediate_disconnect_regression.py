@@ -21,6 +21,7 @@ from websockets.exceptions import ConnectionClosed, WebSocketException
 import httpx
 from typing import Optional, Dict, Any
 import logging
+from shared.isolated_environment import IsolatedEnvironment
 
 # Setup logging to capture connection issues
 logging.basicConfig(level=logging.INFO)

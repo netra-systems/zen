@@ -1,5 +1,6 @@
 """Critical Auth Service Cascade Failures - E2E Failing Tests
 from shared.isolated_environment import get_env
+from shared.isolated_environment import IsolatedEnvironment
 End-to-end tests that replicate auth service failures cascading across multiple services.
 
 CRITICAL CASCADE FAILURE SCENARIOS TO REPLICATE:

@@ -12,8 +12,8 @@ Business Value Justification (BVJ):
 """
 
 import pytest
-from unittest.mock import Mock, patch
 import os
+from shared.isolated_environment import IsolatedEnvironment
 
 from test_framework.url_assertions import (
     assert_base_url_matches,

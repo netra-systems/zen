@@ -25,6 +25,7 @@ Mock-Real Spectrum: L4 (Production-like environment)
 
 import sys
 from pathlib import Path
+from shared.isolated_environment import IsolatedEnvironment
 
 import pytest
 import asyncio

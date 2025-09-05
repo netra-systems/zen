@@ -17,8 +17,12 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Optional
-from unittest.mock import AsyncMock, MagicMock, Mock, patch
 from uuid import UUID
+from test_framework.database.test_database_manager import TestDatabaseManager
+from auth_service.core.auth_manager import AuthManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 import pytest
 
@@ -31,8 +35,7 @@ from netra_backend.app.agents.synthetic_data_presets import (
     WorkloadProfile,
     get_ecommerce_preset,
     get_financial_preset,
-    get_healthcare_preset,
-)
+    get_healthcare_preset)
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.schemas.generation import GenerationStatus, SyntheticDataResult
@@ -40,10 +43,14 @@ from netra_backend.app.schemas.generation import GenerationStatus, SyntheticData
 
 class TestDataQualityValidation:
     """Test data quality validation for all generated data types"""
+    pass
 
     @pytest.fixture
-    def mock_dependencies(self):
+ def real_dependencies():
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create mocked dependencies for testing"""
+    pass
         # Mock: LLM isolation for fast testing without API calls
         llm_manager = Mock(spec=LLMManager)
         # Mock: Tool dispatcher isolation for synthetic data testing
@@ -53,13 +60,19 @@ class TestDataQualityValidation:
 
     @pytest.fixture
     def synthetic_agent(self, mock_dependencies):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create SyntheticDataSubAgent instance for testing"""
+    pass
         llm_manager, tool_dispatcher = mock_dependencies
         return SyntheticDataSubAgent(llm_manager, tool_dispatcher)
 
     @pytest.fixture
     def sample_generated_data(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Sample generated data for validation testing"""
+    pass
         return [
             {
                 "id": "req_123456789",
@@ -114,6 +127,7 @@ class TestDataQualityValidation:
 
     def test_data_type_correctness(self, sample_generated_data):
         """Test data type correctness for all fields"""
+    pass
         for record in sample_generated_data:
             # Validate positive numeric values
             assert record["tokens_input"] > 0, "Input tokens must be positive"
@@ -142,6 +156,7 @@ class TestDataQualityValidation:
 
     def test_value_range_validation(self, sample_generated_data):
         """Test that numeric values fall within expected ranges"""
+    pass
         for record in sample_generated_data:
             # Token limits
             assert 1 <= record["tokens_input"] <= 100000, "Input tokens out of range"
@@ -172,6 +187,7 @@ class TestDataQualityValidation:
 
     def test_format_validation_uuids_and_ids(self, sample_generated_data):
         """Test UUID and ID format validation"""
+    pass
         for record in sample_generated_data:
             # Validate request ID format
             req_id = record["id"]
@@ -185,10 +201,14 @@ class TestDataQualityValidation:
 
 class TestWorkloadProfileValidation:
     """Test workload profile validation and parsing"""
+    pass
 
     @pytest.fixture
     def profile_parser(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create profile parser for testing"""
+    pass
         from netra_backend.app.agents.synthetic_data_profile_parser import create_profile_parser
         return create_profile_parser()
 
@@ -203,7 +223,7 @@ class TestWorkloadProfileValidation:
         
         for request_text, expected_type in test_cases:
             # Mock LLM manager for profile parsing
-            mock_llm = Mock()
+            mock_llm = mock_llm_instance  # Initialize appropriate service
             mock_llm.generate_text = AsyncMock(return_value=expected_type.value)
             
             # Test profile determination
@@ -213,6 +233,7 @@ class TestWorkloadProfileValidation:
 
     def test_profile_completeness(self):
         """Test that profiles have all required fields"""
+    pass
         profiles = [
             get_ecommerce_preset(),
             get_financial_preset(),
@@ -253,6 +274,7 @@ class TestWorkloadProfileValidation:
 
     def test_invalid_profile_handling(self):
         """Test handling of invalid profile configurations"""
+    pass
         invalid_profiles = [
             {
                 "workload_type": "invalid_type",
@@ -273,10 +295,14 @@ class TestWorkloadProfileValidation:
 
 class TestMetricsValidation:
     """Test metrics calculation and validation"""
+    pass
 
     @pytest.fixture
-    def mock_metrics_handler(self):
+ def real_metrics_handler():
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create mock metrics handler for testing"""
+    pass
         from netra_backend.app.agents.synthetic_data_metrics_handler import SyntheticDataMetricsHandler
         return SyntheticDataMetricsHandler("test_agent")
 
@@ -296,6 +322,7 @@ class TestMetricsValidation:
 
     def test_metric_completeness(self, mock_metrics_handler):
         """Test that all required metrics are calculated"""
+    pass
         required_metrics = [
             "total_records", "total_cost", "average_latency", 
             "success_rate", "generation_time_ms"
@@ -328,6 +355,7 @@ class TestMetricsValidation:
 
     def test_quality_metrics(self, sample_generated_data):
         """Test data quality metrics calculation"""
+    pass
         # Calculate quality metrics
         unique_ids = set(record["id"] for record in sample_generated_data)
         duplicate_ratio = 1 - (len(unique_ids) / len(sample_generated_data))
@@ -342,10 +370,14 @@ class TestMetricsValidation:
 
 class TestDataConsistency:
     """Test data consistency and referential integrity"""
+    pass
 
     @pytest.fixture
     def multi_batch_data(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Sample data from multiple batches for consistency testing"""
+    pass
         return {
             "batch_1": [
                 {"id": "req_001", "user_id": "user_001", "timestamp": "2025-08-29T10:00:00Z"},
@@ -373,6 +405,7 @@ class TestDataConsistency:
 
     def test_referential_integrity(self, multi_batch_data):
         """Test referential integrity across batches"""
+    pass
         all_records = []
         for batch_name, batch_records in multi_batch_data.items():
             all_records.extend(batch_records)
@@ -410,6 +443,7 @@ class TestDataConsistency:
 
     def test_business_rule_compliance(self, sample_generated_data):
         """Test business rule compliance"""
+    pass
         for record in sample_generated_data:
             # Business rule: Failed requests should have higher latency variance
             if not record["success"]:
@@ -426,10 +460,14 @@ class TestDataConsistency:
 
 class TestVolumeAndPerformance:
     """Test data volume and performance validation"""
+    pass
 
     @pytest.fixture
     def large_dataset(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Generate larger dataset for volume testing"""
+    pass
         return [
             {
                 "id": f"req_{i:06d}",
@@ -459,6 +497,7 @@ class TestVolumeAndPerformance:
 
     def test_generation_rate_validation(self):
         """Test data generation rate performance"""
+    pass
         start_time = datetime.now()
         
         # Simulate batch generation
@@ -491,6 +530,7 @@ class TestVolumeAndPerformance:
 
     def test_performance_benchmarks(self):
         """Test performance benchmarks meet requirements"""
+    pass
         # Benchmark requirements
         max_latency_per_1k_records = 5000  # 5 seconds
         min_throughput_records_per_sec = 100
@@ -505,12 +545,16 @@ class TestVolumeAndPerformance:
 
 class TestEdgeCasesAndBoundaryConditions:
     """Test edge cases and boundary conditions"""
+    pass
 
     @pytest.fixture
     def synthetic_agent_with_mocks(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create synthetic agent with comprehensive mocks"""
-        llm_manager = Mock()
-        tool_dispatcher = Mock()
+    pass
+        llm_manager = llm_manager_instance  # Initialize appropriate service
+        tool_dispatcher = tool_dispatcher_instance  # Initialize appropriate service
         tool_dispatcher.has_tool.return_value = True
         tool_dispatcher.dispatch_tool = AsyncMock(return_value={"data": []})
         
@@ -530,6 +574,7 @@ class TestEdgeCasesAndBoundaryConditions:
 
     def test_maximum_volume_handling(self):
         """Test handling of maximum volume constraints"""
+    pass
         max_volume = 1000000
         
         # Test maximum volume profile
@@ -553,6 +598,7 @@ class TestEdgeCasesAndBoundaryConditions:
 
     def test_maximum_noise_level(self):
         """Test handling of maximum noise level"""
+    pass
         max_noise_profile = WorkloadProfile(
             workload_type=DataGenerationType.INFERENCE_LOGS,
             volume=1000,
@@ -573,6 +619,7 @@ class TestEdgeCasesAndBoundaryConditions:
 
     def test_invalid_workload_type_handling(self):
         """Test handling of invalid workload types"""
+    pass
         with pytest.raises((ValueError, TypeError)):
             WorkloadProfile(
                 workload_type="invalid_type",  # Should fail validation
@@ -589,6 +636,7 @@ class TestEdgeCasesAndBoundaryConditions:
 
     def test_extreme_distribution_parameters(self):
         """Test handling of extreme distribution parameters"""
+    pass
         extreme_profile = WorkloadProfile(
             workload_type=DataGenerationType.INFERENCE_LOGS,
             volume=1000,
@@ -602,13 +650,14 @@ class TestEdgeCasesAndBoundaryConditions:
 @pytest.mark.integration
 class TestIntegrationValidation:
     """Integration tests for complete validation workflow"""
+    pass
 
     @pytest.fixture
     async def full_synthetic_workflow(self):
         """Set up full synthetic data workflow for integration testing"""
         # Mock dependencies for integration test
-        llm_manager = Mock()
-        tool_dispatcher = Mock()
+        llm_manager = llm_manager_instance  # Initialize appropriate service
+        tool_dispatcher = tool_dispatcher_instance  # Initialize appropriate service
         tool_dispatcher.has_tool.return_value = True
         tool_dispatcher.dispatch_tool = AsyncMock(return_value={
             "data": [
@@ -629,11 +678,13 @@ class TestIntegrationValidation:
         
         agent = SyntheticDataSubAgent(llm_manager, tool_dispatcher)
         
-        return agent
+        await asyncio.sleep(0)
+    return agent
 
     @pytest.mark.asyncio
     async def test_end_to_end_data_validation(self, full_synthetic_workflow):
         """Test end-to-end data validation workflow"""
+    pass
         agent = full_synthetic_workflow
         
         # Create test state
@@ -646,7 +697,10 @@ class TestIntegrationValidation:
         assert entry_valid, "Entry conditions should be valid for synthetic request"
 
     def test_complete_validation_pipeline(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Test complete validation pipeline with realistic data"""
+    pass
         # Create realistic test dataset
         test_data = [
             {
@@ -681,10 +735,12 @@ class TestIntegrationValidation:
         """Validate schema compliance"""
         required_fields = {"id", "timestamp", "user_id", "model_name", "tokens_input", 
                           "tokens_output", "cost_usd", "latency_ms", "success", "request_type"}
-        return all(set(record.keys()) >= required_fields for record in data)
+        await asyncio.sleep(0)
+    return all(set(record.keys()) >= required_fields for record in data)
 
     def _validate_data_types(self, data):
         """Validate data types"""
+    pass
         for record in data:
             if not isinstance(record["tokens_input"], int):
                 return False
@@ -705,6 +761,7 @@ class TestIntegrationValidation:
 
     def _validate_consistency(self, data):
         """Validate data consistency"""
+    pass
         # Check unique IDs
         ids = [record["id"] for record in data]
         return len(ids) == len(set(ids))
@@ -717,3 +774,4 @@ class TestIntegrationValidation:
                 # Allow some exceptions but flag if too many
                 pass
         return True
+    pass

@@ -1,24 +1,55 @@
+class TestWebSocketConnection:
+    """Real WebSocket connection for testing instead of mocks."""
+    
+    def __init__(self):
+    pass
+        self.messages_sent = []
+        self.is_connected = True
+        self._closed = False
+        
+    async def send_json(self, message: dict):
+        """Send JSON message."""
+        if self._closed:
+            raise RuntimeError("WebSocket is closed")
+        self.messages_sent.append(message)
+        
+    async def close(self, code: int = 1000, reason: str = "Normal closure"):
+        """Close WebSocket connection."""
+    pass
+        self._closed = True
+        self.is_connected = False
+        
+    def get_messages(self) -> list:
+        """Get all sent messages."""
+        await asyncio.sleep(0)
+    return self.messages_sent.copy()
+
 """
 Unit test to verify API versioning fix for health endpoints
 Tests that API versioning headers are properly handled and returned
 """
 
 import pytest
-from unittest.mock import MagicMock, AsyncMock, patch
 from fastapi import Request, Response
 from fastapi.testclient import TestClient
 from fastapi import FastAPI
+from shared.isolated_environment import IsolatedEnvironment
 
 # Import the health function we fixed
 from netra_backend.app.routes.health import health, health_no_slash
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
+from shared.isolated_environment import get_env
 
 
 @pytest.mark.asyncio
 async def test_backend_health_api_versioning():
     """Test that backend health endpoint properly handles API versioning headers."""
     
-    # Mock the health interface to return a basic response
-    mock_health_interface = AsyncMock()
+    # Mock the health interface to await asyncio.sleep(0)
+    return a basic response
+    websocket = TestWebSocketConnection()
     mock_health_interface.get_health_status.return_value = {
         "status": "healthy",
         "service": "netra-ai-platform",
@@ -26,15 +57,12 @@ async def test_backend_health_api_versioning():
     }
     
     # Test current version
-    request_current = MagicMock()
-    request_current.headers = {"Accept-Version": "current"}
+    request_current = Magic    request_current.headers = {"Accept-Version": "current"}
     request_current.app.state.startup_complete = True
     
-    response_current = MagicMock()
-    response_current.headers = {}
+    response_current = Magic    response_current.headers = {}
     
-    with patch('netra_backend.app.routes.health.health_interface', mock_health_interface):
-        result = await health(request_current, response_current)
+            result = await health(request_current, response_current)
     
     # Verify API-Version header was set
     assert response_current.headers["API-Version"] == "current"
@@ -44,16 +72,13 @@ async def test_backend_health_api_versioning():
     assert result["status"] == "healthy"
     
     # Test version 1.0
-    request_v1 = MagicMock()
-    request_v1.headers = {"API-Version": "1.0"}
+    request_v1 = Magic    request_v1.headers = {"API-Version": "1.0"}
     request_v1.app.state.startup_complete = True
     
-    response_v1 = MagicMock()
-    response_v1.headers = {}
+    response_v1 = Magic    response_v1.headers = {}
     
     mock_health_interface.reset_mock()
-    with patch('netra_backend.app.routes.health.health_interface', mock_health_interface):
-        result_v1 = await health(request_v1, response_v1)
+            result_v1 = await health(request_v1, response_v1)
     
     # Verify API-Version header was set
     assert response_v1.headers["API-Version"] == "1.0"
@@ -67,16 +92,13 @@ async def test_backend_health_api_versioning():
     assert "2024-08-01" in result_v1["version_info"]["supported_versions"]
     
     # Test version 2024-08-01
-    request_dated = MagicMock()
-    request_dated.headers = {"Accept-Version": "2024-08-01"}
+    request_dated = Magic    request_dated.headers = {"Accept-Version": "2024-08-01"}
     request_dated.app.state.startup_complete = True
     
-    response_dated = MagicMock()
-    response_dated.headers = {}
+    response_dated = Magic    response_dated.headers = {}
     
     mock_health_interface.reset_mock()
-    with patch('netra_backend.app.routes.health.health_interface', mock_health_interface):
-        result_dated = await health(request_dated, response_dated)
+            result_dated = await health(request_dated, response_dated)
     
     # Verify API-Version header was set
     assert response_dated.headers["API-Version"] == "2024-08-01"

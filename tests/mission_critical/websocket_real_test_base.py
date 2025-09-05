@@ -31,7 +31,6 @@ from contextlib import asynccontextmanager
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional, Set, Union, AsyncGenerator, Callable
-from unittest.mock import AsyncMock
 import traceback
 
 import pytest
@@ -41,6 +40,9 @@ from shared.isolated_environment import get_env
 from test_framework.test_context import TestContext, TestUserContext
 from test_framework.unified_docker_manager import UnifiedDockerManager, EnvironmentType, ServiceHealth
 from test_framework.websocket_helpers import (
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
     WebSocketTestHelpers, 
     WebSocketPerformanceMonitor,
     ensure_websocket_service_ready

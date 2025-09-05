@@ -17,15 +17,19 @@ Business Value Justification (BVJ):
 """
 
 import pytest
-from unittest.mock import Mock, patch, MagicMock
 from typing import Dict, List, Optional
 import sys
 import os
+from shared.isolated_environment import IsolatedEnvironment
 
 # Add project root to path for imports
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
 
 from deployment.secrets_config import SecretConfig
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
+from shared.isolated_environment import get_env
 
 
 class TestStagingEnvironmentConfiguration:

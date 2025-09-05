@@ -9,6 +9,7 @@ import sys
 from collections import defaultdict
 from datetime import datetime
 from pathlib import Path
+from shared.isolated_environment import IsolatedEnvironment
 
 
 def scan_test_failures():

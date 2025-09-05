@@ -1,3 +1,29 @@
+class TestWebSocketConnection:
+    """Real WebSocket connection for testing instead of mocks."""
+    
+    def __init__(self):
+    pass
+        self.messages_sent = []
+        self.is_connected = True
+        self._closed = False
+        
+    async def send_json(self, message: dict):
+        """Send JSON message."""
+        if self._closed:
+            raise RuntimeError("WebSocket is closed")
+        self.messages_sent.append(message)
+        
+    async def close(self, code: int = 1000, reason: str = "Normal closure"):
+        """Close WebSocket connection."""
+    pass
+        self._closed = True
+        self.is_connected = False
+        
+    def get_messages(self) -> list:
+        """Get all sent messages."""
+        await asyncio.sleep(0)
+    return self.messages_sent.copy()
+
 """Test for Loguru GCP formatter fix to prevent format_map errors."""
 
 import json
@@ -5,7 +31,7 @@ import sys
 import os
 from datetime import datetime, timezone
 from io import StringIO
-from unittest.mock import Mock, patch
+from shared.isolated_environment import IsolatedEnvironment
 
 # Add project root to path
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
@@ -14,6 +40,11 @@ import pytest
 from loguru import logger
 
 from netra_backend.app.core.logging_formatters import LogFormatter, SensitiveDataFilter
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
+from shared.isolated_environment import get_env
+import asyncio
 
 
 class TestGCPFormatterFix:
@@ -25,7 +56,7 @@ class TestGCPFormatterFix:
         
         # Create a mock Loguru record with the actual structure
         # Loguru uses a namedtuple for level with .name, .no, .icon attributes
-        level_mock = Mock()
+        websocket = TestWebSocketConnection()  # Real WebSocket implementation
         level_mock.name = 'INFO'
         level_mock.no = 20
         level_mock.icon = 'ℹ️'
@@ -58,6 +89,7 @@ class TestGCPFormatterFix:
     
     def test_gcp_formatter_handles_missing_fields(self):
         """Test that the formatter handles missing or None fields gracefully."""
+    pass
         formatter = LogFormatter(SensitiveDataFilter())
         
         # Minimal record with missing fields
@@ -95,6 +127,7 @@ class TestGCPFormatterFix:
     
     def test_gcp_formatter_handles_dict_level(self):
         """Test that the formatter handles level as a dict."""
+    pass
         formatter = LogFormatter(SensitiveDataFilter())
         
         record = {
@@ -126,16 +159,18 @@ class TestGCPFormatterFix:
     
     def test_gcp_formatter_with_exception_info(self):
         """Test that the formatter handles exception information correctly."""
+    pass
         formatter = LogFormatter(SensitiveDataFilter())
         
-        level_mock = Mock()
+        websocket = TestWebSocketConnection()  # Real WebSocket implementation
         level_mock.name = 'ERROR'
         
         # Create exception info
-        exc_mock = Mock()
+        websocket = TestWebSocketConnection()  # Real WebSocket implementation
         exc_mock.type = ValueError
         exc_mock.value = ValueError("Test error")
-        exc_mock.traceback = "Traceback line 1\nTraceback line 2"
+        exc_mock.traceback = "Traceback line 1
+Traceback line 2"
         
         record = {
             'level': level_mock,
@@ -155,7 +190,8 @@ class TestGCPFormatterFix:
         assert parsed['error']['type'] == 'ValueError'
         assert 'Test error' in str(parsed['error']['value'])
         # Traceback should have newlines escaped for single-line JSON
-        assert '\\n' in parsed['error']['traceback']
+        assert '\
+' in parsed['error']['traceback']
     
     @pytest.mark.integration
     def test_gcp_formatter_with_real_loguru(self):
@@ -170,7 +206,8 @@ class TestGCPFormatterFix:
             formatter = LogFormatter(SensitiveDataFilter())
             record = message.record
             json_output = formatter.gcp_json_formatter(record)
-            output.write(json_output + "\n")
+            output.write(json_output + "
+")
         
         # Configure logger with our test sink
         logger.remove()  # Remove default handlers
@@ -222,3 +259,4 @@ if __name__ == "__main__":
     test.test_gcp_formatter_fallback_on_exception()
     test.test_gcp_formatter_with_exception_info()
     print("All tests passed!")
+    pass

@@ -17,6 +17,7 @@ import asyncio
 import json
 from datetime import datetime, timedelta
 from typing import Dict, List, Optional
+from shared.isolated_environment import IsolatedEnvironment
 
 import pytest
 import websockets

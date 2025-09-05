@@ -21,6 +21,7 @@ import pytest
 import requests
 import time
 from typing import Dict, Any, List
+from shared.isolated_environment import IsolatedEnvironment
 
 from tests.e2e.config import TEST_CONFIG, TEST_ENDPOINTS  
 from tests.e2e.real_services_manager import RealServicesManager

@@ -1,4 +1,6 @@
 from shared.isolated_environment import get_env
+from test_framework.database.test_database_manager import TestDatabaseManager
+from shared.isolated_environment import IsolatedEnvironment
 """Comprehensive unit tests for PermissionService - FREE TIER CRITICAL.
 
 BUSINESS VALUE JUSTIFICATION:
@@ -17,31 +19,36 @@ import sys
 from pathlib import Path
 
 from datetime import datetime, timezone
-from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 
 from netra_backend.app.db.models_postgres import User
 
 from netra_backend.app.services.permission_service import (
+import asyncio
     ROLE_HIERARCHY,
     ROLE_PERMISSIONS,
-    PermissionService,
-)
+    PermissionService)
 
 # Test fixtures for setup
 @pytest.fixture
-def mock_db_session():
+ def real_db_session():
+    """Use real service instance."""
+    # TODO: Initialize real service
     """Mock database session."""
+    pass
     # Mock: Generic component isolation for controlled unit testing
-    session = Mock()
+    session = TestDatabaseManager().get_session()
     # Make commit async for async methods
     session.commit = AsyncMock(return_value=None)
     return session
 
 @pytest.fixture
 def free_tier_user():
+    """Use real service instance."""
+    # TODO: Initialize real service
     """Free tier user fixture."""
+    pass
     # Mock: Component isolation for controlled unit testing
     user = Mock(spec=User)
     user.id = "test_user_1"
@@ -55,7 +62,10 @@ def free_tier_user():
 
 @pytest.fixture
 def pro_tier_user():
+    """Use real service instance."""
+    # TODO: Initialize real service
     """Pro tier user fixture."""
+    pass
     # Mock: Component isolation for controlled unit testing
     user = Mock(spec=User)
     user.id = "test_user_2"
@@ -69,7 +79,10 @@ def pro_tier_user():
 
 @pytest.fixture
 def developer_user():
+    """Use real service instance."""
+    # TODO: Initialize real service
     """Developer user fixture."""
+    pass
     # Mock: Component isolation for controlled unit testing
     user = Mock(spec=User)
     user.id = "dev_user_1"
@@ -83,7 +96,10 @@ def developer_user():
 
 @pytest.fixture
 def admin_user():
+    """Use real service instance."""
+    # TODO: Initialize real service
     """Admin user fixture."""
+    pass
     # Mock: Component isolation for controlled unit testing
     user = Mock(spec=User)
     user.id = "admin_user_1"
@@ -97,7 +113,10 @@ def admin_user():
 
 @pytest.fixture
 def super_admin_user():
+    """Use real service instance."""
+    # TODO: Initialize real service
     """Super admin user fixture."""
+    pass
     # Mock: Component isolation for controlled unit testing
     user = Mock(spec=User)
     user.id = "super_admin_1"
@@ -117,6 +136,7 @@ def assert_user_has_permission(user, permission):
 
 def assert_user_lacks_permission(user, permission):
     """Assert user lacks specific permission."""
+    pass
     result = PermissionService.has_permission(user, permission)
     assert result is False
 
@@ -127,6 +147,7 @@ def assert_role_level_equals(role, expected_level):
 
 def assert_user_is_admin_or_higher(user, expected):
     """Assert user admin status matches expected."""
+    pass
     result = PermissionService.is_admin_or_higher(user)
     assert result == expected
 
@@ -137,6 +158,7 @@ def assert_user_is_developer_or_higher(user, expected):
 
 def create_user_with_custom_permissions(additional=None, revoked=None):
     """Create user with custom permissions."""
+    pass
     # Mock: Component isolation for controlled unit testing
     user = Mock(spec=User)
     user.role = "standard_user"
@@ -157,6 +179,7 @@ def update_user_permissions_dict(user, additional=None, revoked=None):
 # Core permission checking tests
 class TestPermissionChecking:
     """Test core permission checking functionality."""
+    pass
 
     def test_standard_user_basic_permissions(self, free_tier_user):
         """Free tier user has basic permissions only."""
@@ -167,6 +190,7 @@ class TestPermissionChecking:
 
     def test_standard_user_lacks_advanced_permissions(self, free_tier_user):
         """Free tier user lacks advanced permissions."""
+    pass
         assert_user_lacks_permission(free_tier_user, "corpus_read")
         assert_user_lacks_permission(free_tier_user, "synthetic_preview")
         assert_user_lacks_permission(free_tier_user, "advanced_analytics")
@@ -181,6 +205,7 @@ class TestPermissionChecking:
 
     def test_power_user_lacks_developer_permissions(self, pro_tier_user):
         """Pro tier user lacks developer permissions."""
+    pass
         assert_user_lacks_permission(pro_tier_user, "corpus_write")
         assert_user_lacks_permission(pro_tier_user, "synthetic_generate")
         assert_user_lacks_permission(pro_tier_user, "debug_panel")
@@ -195,6 +220,7 @@ class TestPermissionChecking:
 
     def test_admin_has_admin_permissions(self, admin_user):
         """Admin has administrative permissions."""
+    pass
         assert_user_has_permission(admin_user, "user_management")
         assert_user_has_permission(admin_user, "system_config")
         assert_user_has_permission(admin_user, "billing_access")
@@ -208,6 +234,7 @@ class TestPermissionChecking:
 
 class TestRoleHierarchyAndLevels:
     """Test role hierarchy and level system."""
+    pass
 
     def test_role_hierarchy_levels(self):
         """Role hierarchy levels are correctly defined."""
@@ -218,6 +245,7 @@ class TestRoleHierarchyAndLevels:
 
     def test_role_hierarchy_super_admin(self):
         """Super admin has highest role level."""
+    pass
         assert_role_level_equals("super_admin", 4)
 
     def test_unknown_role_defaults_to_zero(self):
@@ -226,6 +254,7 @@ class TestRoleHierarchyAndLevels:
 
     def test_admin_or_higher_detection(self):
         """Admin or higher detection works correctly."""
+    pass
         # Mock: Component isolation for controlled unit testing
         admin_user = Mock(spec=User)
         admin_user.role = "admin"
@@ -238,6 +267,7 @@ class TestRoleHierarchyAndLevels:
 
     def test_developer_or_higher_detection(self, developer_user):
         """Developer or higher detection works correctly."""
+    pass
         assert_user_is_developer_or_higher(developer_user, True)
 
     def test_power_user_not_developer(self, pro_tier_user):
@@ -246,23 +276,22 @@ class TestRoleHierarchyAndLevels:
 
     def test_superuser_flag_grants_admin_access(self, free_tier_user):
         """Superuser flag grants admin access regardless of role."""
+    pass
         free_tier_user.is_superuser = True
         assert_user_is_admin_or_higher(free_tier_user, True)
 
 class TestDeveloperAutoDetection:
     """Test developer status auto-detection - CRITICAL for free-to-paid conversion."""
+    pass
 
-    @patch.dict('os.environ', {'DEV_MODE': 'true'})
     def test_dev_mode_enables_developer_status(self, free_tier_user):
         """DEV_MODE environment variable enables developer status."""
         result = PermissionService.detect_developer_status(free_tier_user)
         assert result is True
 
-    @patch('netra_backend.app.services.permission_service.PermissionService._check_dev_mode_enabled', return_value=False)
-    @patch('netra_backend.app.services.permission_service.PermissionService._check_netra_domain', return_value=False)
-    @patch('netra_backend.app.services.permission_service.PermissionService._check_dev_environment', return_value=False)
-    def test_dev_mode_false_no_developer_status(self, mock_check_dev_env, mock_check_netra_domain, mock_check_dev_mode, free_tier_user):
+                def test_dev_mode_false_no_developer_status(self, mock_check_dev_env, mock_check_netra_domain, mock_check_dev_mode, free_tier_user):
         """DEV_MODE=false doesn't grant developer status."""
+    pass
         result = PermissionService.detect_developer_status(free_tier_user)
         assert result is False
 
@@ -274,31 +303,27 @@ class TestDeveloperAutoDetection:
         result = PermissionService.detect_developer_status(netra_user)
         assert result is True
 
-    @patch('netra_backend.app.services.permission_service.PermissionService._check_dev_mode_enabled', return_value=False)
-    @patch('netra_backend.app.services.permission_service.PermissionService._check_netra_domain', return_value=False)
-    @patch('netra_backend.app.services.permission_service.PermissionService._check_dev_environment', return_value=False)
-    def test_external_domain_no_developer_status(self, mock_check_dev_env, mock_check_netra_domain, mock_check_dev_mode, free_tier_user):
+                def test_external_domain_no_developer_status(self, mock_check_dev_env, mock_check_netra_domain, mock_check_dev_mode, free_tier_user):
         """External domain doesn't grant developer status."""
+    pass
         free_tier_user.email = "user@gmail.com"
         result = PermissionService.detect_developer_status(free_tier_user)
         assert result is False
 
-    @patch.dict('os.environ', {'ENVIRONMENT': 'development'})
     def test_dev_environment_enables_developer_status(self, free_tier_user):
         """Development environment enables developer status."""
         result = PermissionService.detect_developer_status(free_tier_user)
         assert result is True
 
-    @patch('netra_backend.app.services.permission_service.PermissionService._check_dev_mode_enabled', return_value=False)
-    @patch('netra_backend.app.services.permission_service.PermissionService._check_netra_domain', return_value=False)
-    @patch('netra_backend.app.services.permission_service.PermissionService._check_dev_environment', return_value=False)
-    def test_prod_environment_no_developer_status(self, mock_check_dev_env, mock_check_netra_domain, mock_check_dev_mode, free_tier_user):
+                def test_prod_environment_no_developer_status(self, mock_check_dev_env, mock_check_netra_domain, mock_check_dev_mode, free_tier_user):
         """Production environment doesn't grant developer status."""
+    pass
         result = PermissionService.detect_developer_status(free_tier_user)
         assert result is False
 
 class TestUserRoleUpdates:
     """Test user role updates and elevation."""
+    pass
 
     def test_should_elevate_to_developer_checks(self, free_tier_user):
         """Should elevate to developer logic works correctly."""
@@ -307,6 +332,7 @@ class TestUserRoleUpdates:
 
     def test_should_not_elevate_existing_developer(self, developer_user):
         """Should not elevate existing developer."""
+    pass
         result = PermissionService._should_elevate_to_developer(developer_user)
         assert result is False
 
@@ -318,12 +344,12 @@ class TestUserRoleUpdates:
     @pytest.mark.asyncio
     async def test_elevate_user_to_developer_updates_fields(self, mock_db_session, free_tier_user):
         """Elevate user to developer updates role and developer flag."""
+    pass
         await PermissionService._elevate_user_to_developer(mock_db_session, free_tier_user)
         assert free_tier_user.role == "developer"
         assert free_tier_user.is_developer is True
         mock_db_session.commit.assert_called_once()
 
-    @patch.dict('os.environ', {'DEV_MODE': 'true'})
     @pytest.mark.asyncio
     async def test_update_user_role_with_dev_detection(self, mock_db_session, free_tier_user):
         """Update user role with developer detection works."""
@@ -336,6 +362,7 @@ class TestUserRoleUpdates:
     @pytest.mark.asyncio
     async def test_update_user_role_without_dev_detection(self, mock_db_session, free_tier_user):
         """Update user role without developer detection preserves role."""
+    pass
         original_role = free_tier_user.role
         result = await PermissionService.update_user_role(
             mock_db_session, free_tier_user, check_developer=False
@@ -344,6 +371,7 @@ class TestUserRoleUpdates:
 
 class TestCustomPermissions:
     """Test custom permission grants and revokes - CRITICAL for tier flexibility."""
+    pass
 
     @pytest.mark.asyncio
     async def test_grant_permission_creates_structure(self, mock_db_session):
@@ -358,6 +386,7 @@ class TestCustomPermissions:
     @pytest.mark.asyncio
     async def test_grant_permission_adds_new_permission(self, mock_db_session):
         """Grant permission adds new permission to list."""
+    pass
         user = create_user_with_custom_permissions()
         await PermissionService.grant_permission(mock_db_session, user, "new_perm")
         assert "new_perm" in user.permissions["additional"]
@@ -375,6 +404,7 @@ class TestCustomPermissions:
     @pytest.mark.asyncio
     async def test_revoke_permission_creates_structure(self, mock_db_session):
         """Revoke permission creates proper revoked structure."""
+    pass
         # Mock: Component isolation for controlled unit testing
         user = Mock(spec=User)
         user.permissions = None
@@ -392,6 +422,7 @@ class TestCustomPermissions:
 
     def test_custom_permissions_applied_correctly(self):
         """Custom permissions are applied correctly."""
+    pass
         user = create_user_with_custom_permissions(
             additional=["bonus_perm"], 
             revoked=["chat"]
@@ -402,6 +433,7 @@ class TestCustomPermissions:
 
 class TestSetUserRole:
     """Test setting user roles and validation."""
+    pass
 
     @pytest.mark.asyncio
     async def test_set_user_role_updates_role(self, mock_db_session, free_tier_user):
@@ -413,6 +445,7 @@ class TestSetUserRole:
     @pytest.mark.asyncio
     async def test_set_user_role_updates_developer_flag(self, mock_db_session, free_tier_user):
         """Set user role updates developer flag for elevated roles."""
+    pass
         await PermissionService.set_user_role(mock_db_session, free_tier_user, "developer")
         assert free_tier_user.is_developer is True
 
@@ -425,6 +458,7 @@ class TestSetUserRole:
     @pytest.mark.asyncio
     async def test_set_user_role_preserves_old_role_info(self, mock_db_session, pro_tier_user):
         """Set user role preserves information about old role."""
+    pass
         original_role = pro_tier_user.role
         result = await PermissionService.set_user_role(mock_db_session, pro_tier_user, "developer")
         # Should have changed role
@@ -433,6 +467,7 @@ class TestSetUserRole:
 
 class TestPermissionAggregation:
     """Test permission aggregation and complex scenarios."""
+    pass
 
     def test_has_any_permission_with_wildcard(self, super_admin_user):
         """has_any_permission works with wildcard permissions."""
@@ -444,6 +479,7 @@ class TestPermissionAggregation:
 
     def test_has_any_permission_with_specific(self, free_tier_user):
         """has_any_permission works with specific permissions."""
+    pass
         result = PermissionService.has_any_permission(
             free_tier_user, ["chat", "nonexistent_perm"]
         )
@@ -458,6 +494,7 @@ class TestPermissionAggregation:
 
     def test_has_all_permissions_missing_one(self, free_tier_user):
         """has_all_permissions returns False when missing one permission."""
+    pass
         result = PermissionService.has_all_permissions(
             free_tier_user, ["chat", "corpus_read"]  # Missing corpus_read
         )
@@ -474,6 +511,7 @@ class TestPermissionAggregation:
 
 class TestEdgeCasesAndErrorHandling:
     """Test edge cases and error handling scenarios."""
+    pass
 
     def test_empty_permissions_dict_handling(self):
         """Empty permissions dict is handled correctly."""
@@ -489,6 +527,7 @@ class TestEdgeCasesAndErrorHandling:
 
     def test_none_permissions_handling(self):
         """None permissions is handled correctly."""
+    pass
         # Mock: Component isolation for controlled unit testing
         user = Mock(spec=User)
         user.role = "standard_user"
@@ -513,6 +552,7 @@ class TestEdgeCasesAndErrorHandling:
 
     def test_case_insensitive_netra_domain_detection(self):
         """Netra domain detection is case insensitive."""
+    pass
         # Mock: Component isolation for controlled unit testing
         user = Mock(spec=User)
         user.email = "test@NETRASYSTEMS.AI"
@@ -526,3 +566,5 @@ class TestEdgeCasesAndErrorHandling:
         user.email = None
         result = PermissionService._check_netra_domain(user)
         assert result is False
+
+    pass

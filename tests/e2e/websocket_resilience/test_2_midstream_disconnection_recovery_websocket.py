@@ -17,6 +17,7 @@ import pytest
 import websockets
 from websockets.exceptions import ConnectionClosed, InvalidStatusCode
 from netra_backend.app.logging_config import central_logger
+from shared.isolated_environment import IsolatedEnvironment
 
 # Import required classes from core module
 from tests.e2e.websocket_resilience.midstream_disconnection_recovery import (

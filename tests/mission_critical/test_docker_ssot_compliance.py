@@ -33,10 +33,11 @@ import json
 import re
 from pathlib import Path
 from typing import Dict, List, Set, Any, Optional, Tuple
-from unittest.mock import AsyncMock, Mock, patch
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
 from datetime import datetime
+from test_framework.docker.unified_docker_manager import UnifiedDockerManager
+from shared.isolated_environment import IsolatedEnvironment
 
 # SSOT imports - the ONLY allowed Docker management interfaces
 from test_framework.unified_docker_manager import UnifiedDockerManager
@@ -44,6 +45,10 @@ from test_framework.ssot.docker import DockerTestUtility, create_docker_test_uti
 
 # Test deprecated classes properly redirect
 from test_framework.docker_test_manager import DockerTestManager, ServiceMode
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
+from shared.isolated_environment import get_env
 
 logger = logging.getLogger(__name__)
 

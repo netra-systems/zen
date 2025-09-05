@@ -2,10 +2,13 @@
 
 import sys
 from pathlib import Path
+from test_framework.database.test_database_manager import TestDatabaseManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 import asyncio
 from datetime import datetime, timedelta
-from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 
@@ -26,4 +29,4 @@ class ErrorRecoveryTestHelper:
             # Mock: Component isolation for controlled unit testing
             return Mock(name=f"api_breaker_{name}")
         # Mock: Generic component isolation for controlled unit testing
-        return Mock()
+        return None  # TODO: Use real service instance

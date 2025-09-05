@@ -1,3 +1,26 @@
+class TestWebSocketConnection:
+    """Real WebSocket connection for testing instead of mocks."""
+    
+    def __init__(self):
+        self.messages_sent = []
+        self.is_connected = True
+        self._closed = False
+        
+    async def send_json(self, message: dict):
+        """Send JSON message."""
+        if self._closed:
+            raise RuntimeError("WebSocket is closed")
+        self.messages_sent.append(message)
+        
+    async def close(self, code: int = 1000, reason: str = "Normal closure"):
+        """Close WebSocket connection."""
+        self._closed = True
+        self.is_connected = False
+        
+    def get_messages(self) -> list:
+        """Get all sent messages."""
+        return self.messages_sent.copy()
+
 """
 Mock fixtures for fast unit testing without external dependencies.
 
@@ -13,10 +36,13 @@ Use these for unit tests that need fast execution without real services.
 """
 import asyncio
 from typing import Optional, Dict, Any, List
-from unittest.mock import AsyncMock, MagicMock
 from contextlib import asynccontextmanager
 
 import pytest
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
+from shared.isolated_environment import get_env
 
 # Import availability checks with lazy loading
 def _fastapi_available():
@@ -188,8 +214,8 @@ def mock_llm_manager():
     Memory Impact: LOW - Simple service interface mock
     Use for: Unit tests requiring LLM interface without external API calls
     """
-    mock = MagicMock()
-    mock.get_llm = MagicMock(return_value=MagicMock())
+    mock = TestWebSocketConnection()  # Real implementation
+    mock.get_llm = MagicMock(return_value=TestWebSocketConnection())  # Real implementation
     return mock
 
 @pytest.fixture
@@ -224,8 +250,7 @@ def mock_security_service():
     Memory Impact: LOW - Auth interface mock
     Use for: Unit tests requiring security validation without real authentication
     """
-    return MagicMock()
-
+    return Magic
 @pytest.fixture
 @memory_profile("Tool dispatcher mock for agent testing without real tool execution", "LOW")
 def mock_tool_dispatcher():
@@ -234,8 +259,7 @@ def mock_tool_dispatcher():
     Memory Impact: LOW - Tool interface mock
     Use for: Unit tests requiring tool execution interface without real operations
     """
-    return MagicMock()
-
+    return Magic
 @pytest.fixture
 @memory_profile("Agent supervisor mock for testing without spawning real agents", "LOW")
 def mock_agent_supervisor():
@@ -256,8 +280,7 @@ def mock_agent_service():
     Memory Impact: LOW - Agent service interface mock
     Use for: Unit tests requiring agent service interface without LLM execution
     """
-    return MagicMock()
-
+    return Magic
 # =============================================================================
 # FASTAPI APPLICATION MOCK FIXTURES
 # Memory Impact: MEDIUM - Complete FastAPI app with all mocked dependencies

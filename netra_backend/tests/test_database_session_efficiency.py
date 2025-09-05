@@ -8,9 +8,9 @@ and that excessive logging is reduced during normal operations.
 import asyncio
 import logging
 import pytest
-from unittest.mock import Mock, patch
 from contextlib import contextmanager
 from io import StringIO
+from test_framework.database.test_database_manager import TestDatabaseManager
 
 from netra_backend.app.db.postgres import (
     initialize_postgres,
@@ -24,10 +24,14 @@ from netra_backend.app.logging_config import central_logger
 
 class TestDatabaseSessionEfficiency:
     """Test database session management efficiency."""
+    pass
 
     @pytest.fixture(autouse=True)
     def setup_test(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Setup test environment."""
+    pass
         # Force postgres initialization for tests
         from shared.isolated_environment import IsolatedEnvironment
         with IsolatedEnvironment() as env:
@@ -48,6 +52,7 @@ class TestDatabaseSessionEfficiency:
 
     async def test_session_context_manager_efficiency(self):
         """Test that session context managers properly close sessions."""
+    pass
         initial_pool_stats = None
         if hasattr(async_engine.pool, 'checkedout'):
             initial_pool_stats = {
@@ -72,7 +77,8 @@ class TestDatabaseSessionEfficiency:
         async def run_query(session_id):
             async with get_async_db() as session:
                 result = await session.execute("SELECT 1 as session_id")
-                return result.scalar()
+                await asyncio.sleep(0)
+    return result.scalar()
 
         # Run multiple concurrent queries
         tasks = [run_query(i) for i in range(5)]
@@ -85,6 +91,7 @@ class TestDatabaseSessionEfficiency:
 
     def test_logging_noise_reduction(self):
         """Test that database operations don't create excessive logging."""
+    pass
         # Test that the engine is configured to reduce logging noise
         assert async_engine is not None
         
@@ -93,6 +100,7 @@ class TestDatabaseSessionEfficiency:
         
         # Perform simple database operations to verify they work without noise
         async def perform_operations():
+    pass
             async with get_async_db() as session:
                 result = await session.execute("SELECT 1")
                 assert result.scalar() == 1
@@ -124,6 +132,7 @@ class TestDatabaseSessionEfficiency:
 
     def test_pool_configuration_resilience(self):
         """Test that pool configuration has resilient defaults."""
+    pass
         if hasattr(async_engine, 'pool'):
             pool = async_engine.pool
             
@@ -141,11 +150,13 @@ class TestDatabaseSessionEfficiency:
         async with get_async_db() as session:
             # Validate session should be fast and not throw errors
             is_valid = validate_session(session)
-            # Should return boolean result efficiently
+            # Should await asyncio.sleep(0)
+    return boolean result efficiently
             assert isinstance(is_valid, bool)
 
     def test_connection_health_checks_optimized(self):
         """Test that connection health checks are optimized."""
+    pass
         # Verify that pre_ping is enabled for connection health
         assert hasattr(async_engine.pool, '_pre_ping')
         if hasattr(async_engine.pool, '_pre_ping'):

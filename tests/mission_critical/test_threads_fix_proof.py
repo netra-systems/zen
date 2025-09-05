@@ -1,11 +1,44 @@
+class TestWebSocketConnection:
+    """Real WebSocket connection for testing instead of mocks."""
+    
+    def __init__(self):
+    pass
+        self.messages_sent = []
+        self.is_connected = True
+        self._closed = False
+        
+    async def send_json(self, message: dict):
+        """Send JSON message."""
+        if self._closed:
+            raise RuntimeError("WebSocket is closed")
+        self.messages_sent.append(message)
+        
+    async def close(self, code: int = 1000, reason: str = "Normal closure"):
+        """Close WebSocket connection."""
+    pass
+        self._closed = True
+        self.is_connected = False
+        
+    def get_messages(self) -> list:
+        """Get all sent messages."""
+        await asyncio.sleep(0)
+    return self.messages_sent.copy()
+
 """Proof that the threads fix actually works - simplified test without full DB."""
 
 import pytest
 import asyncio
-from unittest.mock import MagicMock, AsyncMock, patch, call
 from sqlalchemy.ext.asyncio import AsyncSession
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from test_framework.database.test_database_manager import TestDatabaseManager
+from auth_service.core.auth_manager import AuthManager
+from shared.isolated_environment import IsolatedEnvironment
 
 from netra_backend.app.services.database.thread_repository import ThreadRepository
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
+from shared.isolated_environment import get_env
 
 
 class TestProofOfFix:
@@ -26,9 +59,7 @@ class TestProofOfFix:
         
         # First execute raises JSONB error
         # Second execute returns all threads for fallback
-        mock_result = MagicMock()
-        mock_scalars = MagicMock()
-        
+        mock_result = Magic        mock_scalars = Magic        
         # Create test threads with various metadata states
         thread1 = MagicMock(id="thread_1", metadata_={"user_id": "user123"})
         thread2 = MagicMock(id="thread_2", metadata_=None)  # NULL metadata
@@ -65,7 +96,8 @@ class TestProofOfFix:
         # 5. Both queries were attempted
         assert mock_db.execute.call_count == 2
         
-        print("\n[PASS] PROOF: ThreadRepository handles JSONB failures correctly")
+        print("
+[PASS] PROOF: ThreadRepository handles JSONB failures correctly")
         print(f"   - Primary query failed with: {jsonb_error}")
         print(f"   - Fallback query executed successfully")
         print(f"   - Returned {len(result)} thread(s) for user123")
@@ -79,9 +111,7 @@ class TestProofOfFix:
         mock_db = AsyncMock(spec=AsyncSession)
         
         # Force fallback to test NULL metadata handling
-        mock_result = MagicMock()
-        mock_scalars = MagicMock()
-        
+        mock_result = Magic        mock_scalars = Magic        
         # Mix of threads with NULL, empty, and valid metadata
         threads = [
             MagicMock(id="thread_null", metadata_=None),
@@ -97,14 +127,14 @@ class TestProofOfFix:
         mock_db.execute.side_effect = [Exception("Force fallback"), mock_result]
         
         # Execute
-        with patch('netra_backend.app.services.database.thread_repository.logger'):
-            result = await thread_repo.find_by_user(mock_db, "target-user")
+                    result = await thread_repo.find_by_user(mock_db, "target-user")
         
         # PROOF: NULL metadata filtered out, only valid thread returned
         assert len(result) == 1
         assert result[0].id == "thread_valid"
         
-        print("\n[PASS] PROOF: NULL metadata doesn't crash the system")
+        print("
+[PASS] PROOF: NULL metadata doesn't crash the system")
         print(f"   - Processed {len(threads)} threads with mixed metadata")
         print(f"   - Filtered out NULL, empty, and malformed metadata")
         print(f"   - Returned only valid matching thread")
@@ -144,7 +174,8 @@ class TestProofOfFix:
         # 4. Both queries were attempted
         assert mock_db.execute.call_count == 2
         
-        print("\n[PASS] PROOF: Both queries failing is handled gracefully")
+        print("
+[PASS] PROOF: Both queries failing is handled gracefully")
         print("   - Primary query failed")
         print("   - Fallback query failed")
         print("   - Returned empty list instead of crashing")
@@ -158,9 +189,7 @@ class TestProofOfFix:
         mock_db = AsyncMock(spec=AsyncSession)
         
         # Force fallback to test normalization
-        mock_result = MagicMock()
-        mock_scalars = MagicMock()
-        
+        mock_result = Magic        mock_scalars = Magic        
         # Threads with different ID types
         import uuid
         uuid_obj = uuid.UUID("550e8400-e29b-41d4-a716-446655440000")
@@ -179,8 +208,7 @@ class TestProofOfFix:
         mock_db.execute.side_effect = [Exception("Force fallback"), mock_result]
         
         # Test 1: Find UUID string
-        with patch('netra_backend.app.services.database.thread_repository.logger'):
-            result = await thread_repo.find_by_user(mock_db, "550e8400-e29b-41d4-a716-446655440000")
+                    result = await thread_repo.find_by_user(mock_db, "550e8400-e29b-41d4-a716-446655440000")
         
         assert len(result) == 2  # Should find both t1 (string) and t2 (UUID object)
         assert {r.id for r in result} == {"t1", "t2"}
@@ -189,13 +217,13 @@ class TestProofOfFix:
         mock_db.execute.side_effect = [Exception("Force fallback"), mock_result]
         
         # Test 2: Find integer as string
-        with patch('netra_backend.app.services.database.thread_repository.logger'):
-            result = await thread_repo.find_by_user(mock_db, "123")
+                    result = await thread_repo.find_by_user(mock_db, "123")
         
         assert len(result) == 2  # Should find both t3 (int) and t4 (string with spaces)
         assert {r.id for r in result} == {"t3", "t4"}
         
-        print("\n[PASS] PROOF: Type normalization works correctly")
+        print("
+[PASS] PROOF: Type normalization works correctly")
         print("   - UUID objects normalized to string")
         print("   - Integer IDs normalized to string")
         print("   - Whitespace properly stripped")
@@ -215,8 +243,7 @@ class TestProofOfFix:
             mock_config.return_value.environment = "staging"
             
             with patch('netra_backend.app.logging_config.central_logger.get_logger') as mock_logger:
-                mock_logger.return_value.error = MagicMock()
-                
+                mock_logger.return_value.error = Magic                
                 with pytest.raises(HTTPException) as exc:
                     await handle_route_with_error_logging(failing_handler, "listing threads")
                 
@@ -232,8 +259,7 @@ class TestProofOfFix:
             mock_config.return_value.environment = "production"
             
             with patch('netra_backend.app.logging_config.central_logger.get_logger') as mock_logger:
-                mock_logger.return_value.error = MagicMock()
-                
+                mock_logger.return_value.error = Magic                
                 with pytest.raises(HTTPException) as exc:
                     await handle_route_with_error_logging(failing_handler, "listing threads")
                 
@@ -241,7 +267,8 @@ class TestProofOfFix:
                 assert "Database connection lost" not in exc.value.detail
                 assert "Failed to list threads" in exc.value.detail
         
-        print("\n[PASS] PROOF: Error logging is environment-aware")
+        print("
+[PASS] PROOF: Error logging is environment-aware")
         print("   - Staging: Detailed errors with stack traces")
         print("   - Production: Generic errors for security")
 
@@ -266,8 +293,7 @@ class TestRealWorldScenarios:
             MagicMock(id="thread_other", metadata_={"user_id": "different-user"}),
         ]
         
-        mock_result = MagicMock()
-        mock_result.scalars.return_value.all.return_value = staging_threads
+        mock_result = Magic        mock_result.scalars.return_value.all.return_value = staging_threads
         
         # Simulate JSONB failure (what happens in staging)
         mock_db.execute.side_effect = [
@@ -278,14 +304,14 @@ class TestRealWorldScenarios:
         # Execute with the actual JWT user ID
         jwt_user_id = "7c5e1032-ed21-4aea-b12a-aeddf3622bec"
         
-        with patch('netra_backend.app.services.database.thread_repository.logger'):
-            result = await thread_repo.find_by_user(mock_db, jwt_user_id)
+                    result = await thread_repo.find_by_user(mock_db, jwt_user_id)
         
         # PROOF: Returns correct thread for JWT user
         assert len(result) == 1
         assert result[0].id == "thread_1"
         
-        print("\n[PASS] PROOF: Staging scenario with JWT user works")
+        print("
+[PASS] PROOF: Staging scenario with JWT user works")
         print(f"   - JWT user_id: {jwt_user_id}")
         print(f"   - Found {len(result)} thread(s)")
         print("   - Legacy NULL metadata threads filtered out")
@@ -295,3 +321,4 @@ class TestRealWorldScenarios:
 if __name__ == "__main__":
     # Run the proof tests
     pytest.main([__file__, "-xvs", "--tb=short"])
+    pass

@@ -14,6 +14,7 @@ import pytest
 from pathlib import Path
 from typing import Dict, List, Set, Any, Optional
 from datetime import datetime
+from shared.isolated_environment import IsolatedEnvironment
 
 # Add project root to path
 project_root = Path(__file__).parent.parent.parent

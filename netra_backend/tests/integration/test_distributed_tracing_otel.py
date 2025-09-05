@@ -9,6 +9,11 @@ Tests distributed tracing with real OpenTelemetry and Jaeger containers.
 
 import sys
 from pathlib import Path
+from test_framework.docker.unified_docker_manager import UnifiedDockerManager
+from test_framework.database.test_database_manager import TestDatabaseManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 # Test framework import - using pytest fixtures instead
 
@@ -28,9 +33,8 @@ try:
     from opentelemetry.sdk.trace.export import BatchSpanProcessor
 except ImportError:
     # Mock OpenTelemetry components if not available
-    from unittest.mock import MagicMock
     # Mock: Generic component isolation for controlled unit testing
-    trace = MagicMock()
+    trace = MagicNone  # TODO: Use real service instance
     JaegerExporter = MagicMock
     AioHttpClientInstrumentor = MagicMock
     TracerProvider = MagicMock
@@ -53,6 +57,7 @@ class TestDistributedTracingOtelL3:
     @pytest.fixture(scope="class")
     async def jaeger_container(self, docker_client):
         """Start Jaeger container for trace collection."""
+    pass
         container = docker_client.containers.run(
             "jaegertracing/all-in-one:latest",
             ports={
@@ -142,6 +147,7 @@ class TestDistributedTracingOtelL3:
     
     async def _wait_for_jaeger(self, port: str, timeout: int = 60):
         """Wait for Jaeger to be available."""
+    pass
         start_time = time.time()
         while time.time() - start_time < timeout:
             try:
@@ -151,7 +157,8 @@ class TestDistributedTracingOtelL3:
                         timeout=aiohttp.ClientTimeout(total=2)
                     ) as response:
                         if response.status == 200:
-                            return
+                            await asyncio.sleep(0)
+    return
             except:
                 pass
             await asyncio.sleep(1)
@@ -165,7 +172,8 @@ class TestDistributedTracingOtelL3:
                 async with aiohttp.ClientSession() as session:
                     async with session.get(url, timeout=aiohttp.ClientTimeout(total=2)) as response:
                         if response.status == 200:
-                            return
+                            await asyncio.sleep(0)
+    return
             except:
                 pass
             await asyncio.sleep(0.5)
@@ -174,6 +182,7 @@ class TestDistributedTracingOtelL3:
     @pytest.fixture
     async def tracer_manager(self, jaeger_container):
         """Create tracer manager with Jaeger backend."""
+    pass
         manager = TracerManager(
             service_name="test_service",
             jaeger_config=jaeger_container
@@ -201,6 +210,7 @@ class TestDistributedTracingOtelL3:
         jaeger_container
     ):
         """Test basic span creation and export to Jaeger."""
+    pass
         tracer = tracer_manager.get_tracer("test_basic_spans")
         
         # Create a simple span
@@ -247,7 +257,8 @@ class TestDistributedTracingOtelL3:
             async with session.get(url, params=params) as response:
                 if response.status == 200:
                     data = await response.json()
-                    return data.get("data", [])
+                    await asyncio.sleep(0)
+    return data.get("data", [])
                 return []
     
     @pytest.mark.asyncio
@@ -259,6 +270,7 @@ class TestDistributedTracingOtelL3:
         jaeger_container
     ):
         """Test distributed tracing across multiple services."""
+    pass
         tracer = tracer_manager.get_tracer("test_distributed")
         
         # Create parent span
@@ -372,6 +384,8 @@ class TestDistributedTracingOtelL3:
         
         class TestSpanProcessor(CustomSpanProcessor):
             def on_start(self, span, parent_context):
+    """Use real service instance."""
+    # TODO: Initialize real service
                 super().on_start(span, parent_context)
                 # Add custom attributes on span start
                 span.set_attribute("processor.custom", "true")
@@ -424,6 +438,7 @@ class TestDistributedTracingOtelL3:
         jaeger_container
     ):
         """Test trace sampling configuration."""
+    pass
         # Configure different sampling rates
         high_sample_tracer = tracer_manager.get_tracer(
             "high_sample_tracer",

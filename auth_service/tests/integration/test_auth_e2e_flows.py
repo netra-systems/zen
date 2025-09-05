@@ -13,6 +13,7 @@ from auth_service.auth_core.core.jwt_handler import JWTHandler
 from auth_service.auth_core.database.repository import AuthRepository
 from auth_service.auth_core.database.connection import auth_db
 from auth_service.auth_core.redis_manager import auth_redis_manager
+from shared.isolated_environment import IsolatedEnvironment
 
 
 class TestCompleteUserLifecycle:

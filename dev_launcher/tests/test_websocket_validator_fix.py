@@ -1,4 +1,5 @@
 from shared.isolated_environment import get_env
+from shared.isolated_environment import IsolatedEnvironment
 """
 Test that verifies the WebSocket validator fix works correctly.
 
@@ -10,7 +11,6 @@ import asyncio
 import json
 import pytest
 import time
-from unittest.mock import AsyncMock, MagicMock, patch
 
 from dev_launcher.websocket_validator import WebSocketValidator, WebSocketEndpoint, WebSocketStatus
 

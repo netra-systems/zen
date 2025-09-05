@@ -5,11 +5,14 @@ Tests security middleware functionality
 
 import sys
 from pathlib import Path
+from auth_service.core.auth_manager import AuthManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 import asyncio
 import time
 from typing import Any, Dict
-from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 from fastapi import Request
@@ -18,21 +21,26 @@ from netra_backend.app.core.exceptions_auth import NetraSecurityException
 
 from netra_backend.app.middleware.security_middleware import (
     RateLimitTracker,
-    SecurityMiddleware,
-)
+    SecurityMiddleware)
 
 class TestSecurityMiddleware:
     """Test security middleware functionality."""
     
     @pytest.fixture
     def security_middleware(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create security middleware for testing."""
+    pass
         rate_limiter = RateLimitTracker()
         return SecurityMiddleware(None, rate_limiter)
     
     @pytest.fixture
-    def mock_request(self):
+ def real_request():
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create mock request for testing."""
+    pass
         # Mock: Component isolation for controlled unit testing
         request = Mock(spec=Request)
         request.method = "POST"
@@ -55,6 +63,7 @@ class TestSecurityMiddleware:
     @pytest.mark.asyncio
     async def test_rate_limiting(self, security_middleware, mock_request):
         """Test rate limiting functionality."""
+    pass
         # Simulate multiple requests from same IP
         for i in range(101):  # Exceed default limit of 100
             if i < 100:
@@ -82,6 +91,7 @@ class TestSecurityMiddleware:
     
     def test_url_validation(self, security_middleware, mock_request):
         """Test URL validation."""
+    pass
         # Test extremely long URL
         long_path = "a" * 3000
         mock_request.url.path = long_path
@@ -113,6 +123,7 @@ class TestSecurityMiddleware:
     @pytest.mark.asyncio
     async def test_malicious_payload_detection(self, security_middleware, mock_request):
         """Test detection of various malicious payloads."""
+    pass
         malicious_payloads = [
             b'{"cmd": "rm -rf /"}',
             b'{"shell": "bash -c malicious"}',
@@ -144,6 +155,7 @@ class TestSecurityMiddleware:
     
     def test_whitelist_bypass(self, security_middleware, mock_request):
         """Test IP whitelist bypass functionality."""
+    pass
         # Set up whitelist
         security_middleware.ip_whitelist = ["192.168.1.100"]
         
@@ -160,7 +172,8 @@ class TestSecurityMiddleware:
         # Mock slow request body read
         async def slow_body():
             await asyncio.sleep(10)  # Simulate very slow request
-            return b'{"data": "test"}'
+            await asyncio.sleep(0)
+    return b'{"data": "test"}'
         
         mock_request.body = slow_body
         
@@ -173,3 +186,4 @@ class TestSecurityMiddleware:
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])
+    pass

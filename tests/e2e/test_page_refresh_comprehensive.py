@@ -20,6 +20,7 @@ import pytest
 from playwright.async_api import Page, Browser, WebSocket, ConsoleMessage, Response
 import os
 import sys
+from shared.isolated_environment import IsolatedEnvironment
 
 # Add project root to path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
@@ -28,13 +29,16 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../.
 class WebSocketMonitor:
     """Simple WebSocket monitor for testing."""
     def __init__(self):
+    pass
         self.connections = []
         self.messages = []
     
     def track_connection(self, ws):
+    pass
         self.connections.append(ws)
     
     def track_message(self, msg):
+    pass
         self.messages.append(msg)
 
 
@@ -42,6 +46,7 @@ class PageRefreshTestSuite:
     """Comprehensive test suite for page refresh scenarios."""
     
     def __init__(self):
+    pass
         from shared.isolated_environment import get_env
         env = get_env()
         self.frontend_url = env.get('FRONTEND_URL', 'http://localhost:3000')
@@ -75,7 +80,8 @@ class PageRefreshTestSuite:
         Verifies that chat state is preserved across refresh.
         """
         test_name = "basic_refresh_with_active_chat"
-        print(f"\n🔍 Testing: {test_name}")
+        print(f"
+🔍 Testing: {test_name}")
         
         try:
             # Setup: Login and start a chat
@@ -145,13 +151,15 @@ class PageRefreshTestSuite:
         Ensures WebSocket properly reconnects with authentication.
         """
         test_name = "websocket_reconnection_on_refresh"
-        print(f"\n🔍 Testing: {test_name}")
+        print(f"
+🔍 Testing: {test_name}")
         
         try:
             # Setup monitoring
             ws_connections: List[Dict] = []
             
             def handle_websocket(ws: WebSocket):
+    pass
                 ws_connections.append({
                     'url': ws.url,
                     'time': time.time(),
@@ -220,7 +228,8 @@ class PageRefreshTestSuite:
         Ensures system handles rapid refreshes without crashes or connection flooding.
         """
         test_name = "rapid_refresh_resilience"
-        print(f"\n🔍 Testing: {test_name}")
+        print(f"
+🔍 Testing: {test_name}")
         
         try:
             # Setup authentication
@@ -235,6 +244,7 @@ class PageRefreshTestSuite:
             
             # Monitor console errors
             def handle_console(msg: ConsoleMessage):
+    pass
                 if msg.type == "error":
                     errors_caught.append(msg.text)
             
@@ -296,7 +306,8 @@ class PageRefreshTestSuite:
         Ensures unsent messages are preserved.
         """
         test_name = "draft_message_persistence"
-        print(f"\n🔍 Testing: {test_name}")
+        print(f"
+🔍 Testing: {test_name}")
         
         try:
             # Setup and navigate
@@ -351,7 +362,8 @@ class PageRefreshTestSuite:
         Ensures authentication remains stable when token expires during refresh.
         """
         test_name = "token_refresh_during_page_reload"
-        print(f"\n🔍 Testing: {test_name}")
+        print(f"
+🔍 Testing: {test_name}")
         
         try:
             # Create a token that expires soon
@@ -405,7 +417,8 @@ class PageRefreshTestSuite:
         Ensures user doesn't lose their place in the conversation.
         """
         test_name = "scroll_position_restoration"
-        print(f"\n🔍 Testing: {test_name}")
+        print(f"
+🔍 Testing: {test_name}")
         
         try:
             # Setup
@@ -473,7 +486,8 @@ class PageRefreshTestSuite:
         Ensures refresh doesn't degrade performance.
         """
         test_name = "performance_metrics_after_refresh"
-        print(f"\n🔍 Testing: {test_name}")
+        print(f"
+🔍 Testing: {test_name}")
         
         try:
             # Setup
@@ -540,7 +554,8 @@ class PageRefreshTestSuite:
     
     async def run_all_tests(self, browser: Browser) -> Dict[str, Any]:
         """Run all page refresh tests."""
-        print("\n" + "=" * 60)
+        print("
+" + "=" * 60)
         print("🚀 MISSION CRITICAL: Page Refresh Test Suite")
         print("=" * 60)
         
@@ -569,7 +584,8 @@ class PageRefreshTestSuite:
                 await context.close()
         
         # Print summary
-        print("\n" + "=" * 60)
+        print("
+" + "=" * 60)
         print("📊 TEST RESULTS SUMMARY")
         print("=" * 60)
         print(f"Total Tests: {self.test_results['total']}")
@@ -577,12 +593,14 @@ class PageRefreshTestSuite:
         print(f"Failed: {self.test_results['failed']} ❌")
         
         if self.test_results['critical_failures']:
-            print("\n⚠️ CRITICAL FAILURES:")
+            print("
+⚠️ CRITICAL FAILURES:")
             for failure in self.test_results['critical_failures']:
                 print(f"  - {failure['test']}: {failure['error']}")
         
         if self.test_results.get('performance_metrics'):
-            print("\n📈 PERFORMANCE METRICS:")
+            print("
+📈 PERFORMANCE METRICS:")
             metrics = self.test_results['performance_metrics']
             for key, value in metrics.items():
                 if isinstance(value, float):
@@ -592,11 +610,14 @@ class PageRefreshTestSuite:
         
         # Determine overall status
         if self.test_results['failed'] == 0:
-            print("\n✅ ALL TESTS PASSED - Page refresh handling is robust!")
+            print("
+✅ ALL TESTS PASSED - Page refresh handling is robust!")
         elif len(self.test_results['critical_failures']) > 0:
-            print("\n❌ CRITICAL FAILURES DETECTED - Immediate attention required!")
+            print("
+❌ CRITICAL FAILURES DETECTED - Immediate attention required!")
         else:
-            print("\n⚠️ SOME TESTS FAILED - Review and fix non-critical issues")
+            print("
+⚠️ SOME TESTS FAILED - Review and fix non-critical issues")
         
         return self.test_results
 
@@ -647,3 +668,4 @@ if __name__ == "__main__":
                 await browser.close()
     
     asyncio.run(main())
+    pass

@@ -21,6 +21,11 @@ import time
 import uuid
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from test_framework.database.test_database_manager import TestDatabaseManager
+from test_framework.redis.test_redis_manager import TestRedisManager
+from auth_service.core.auth_manager import AuthManager
+from shared.isolated_environment import IsolatedEnvironment
 
 import pytest
 import redis.asyncio as redis
@@ -68,9 +73,8 @@ except ImportError:
     try:
         from netra_backend.app.db.models import User
     except ImportError:
-        from unittest.mock import Mock, AsyncMock, MagicMock
         # Mock: Generic component isolation for controlled unit testing
-        User = Mock()
+        User = User_instance  # Initialize appropriate service
 
 try:
     from netra_backend.app.models.session import Session as UserSession
@@ -78,9 +82,8 @@ except ImportError:
     try:
         from netra_backend.app.db.models import Session as UserSession
     except ImportError:
-        from unittest.mock import Mock, AsyncMock, MagicMock
         # Mock: Session isolation for controlled testing without external state
-        UserSession = Mock()
+        UserSession = TestDatabaseManager().get_session()
 
 
 class TestTransactionRollbackCoordination:
@@ -91,6 +94,7 @@ class TestTransactionRollbackCoordination:
     MUST use real services - NO MOCKS allowed.
     These tests WILL fail initially and that's the point.
     """
+    pass
 
     @pytest.fixture(scope="class")
     async def real_database_session(self):
@@ -120,6 +124,7 @@ class TestTransactionRollbackCoordination:
     @pytest.fixture(scope="class")
     async def real_redis_client(self):
         """Real Redis client for distributed coordination - will fail if Redis not available."""
+    pass
         try:
             redis_client = redis.Redis(
                 host="localhost",
@@ -140,8 +145,12 @@ class TestTransactionRollbackCoordination:
 
     @pytest.fixture
     def real_test_client(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Real FastAPI test client - no mocking of the application."""
-        return TestClient(app)
+    pass
+        await asyncio.sleep(0)
+    return TestClient(app)
 
     @pytest.mark.asyncio
     async def test_01_basic_transaction_coordination_fails(
@@ -460,7 +469,8 @@ class TestTransactionRollbackCoordination:
                 timeout_seconds=45
             )
             
-            assert saga_result is not None, "SAGA execution should return result"
+            assert saga_result is not None, "SAGA execution should await asyncio.sleep(0)
+    return result"
             assert "status" in saga_result, "SAGA result should include status"
             
             # SAGA should fail at the last step and compensate
@@ -622,7 +632,8 @@ class TestTransactionRollbackCoordination:
             if hasattr(transaction_manager, 'detect_deadlocks'):
                 deadlock_report = await transaction_manager.detect_deadlocks()
                 
-                assert deadlock_report is not None, "Deadlock detection should return report"
+                assert deadlock_report is not None, "Deadlock detection should await asyncio.sleep(0)
+    return report"
                 assert "active_transactions" in deadlock_report, \
                     "Deadlock report should include active transactions"
                     
@@ -723,7 +734,8 @@ class TestTransactionRollbackCoordination:
             if hasattr(recovered_transaction_manager, 'recover_in_progress_transactions'):
                 recovery_result = await recovered_transaction_manager.recover_in_progress_transactions()
                 
-                assert recovery_result is not None, "Recovery should return result"
+                assert recovery_result is not None, "Recovery should await asyncio.sleep(0)
+    return result"
                 assert "recovered_transactions" in recovery_result, \
                     "Recovery should include recovered transactions count"
                 

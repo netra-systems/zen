@@ -2285,7 +2285,7 @@ class AgentWebSocketBridge(MonitorableComponent):
             raise ValueError("user_context is required for creating user emitter")
         
         try:
-            from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmitter as WebSocketEventEmitter
+            from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmitter as WebSocketEventEmitter, WebSocketEmitterFactory
             from netra_backend.app.agents.supervisor.user_execution_context import validate_user_context
             
             # Validate user context before creating emitter
@@ -2294,8 +2294,8 @@ class AgentWebSocketBridge(MonitorableComponent):
             # Create isolated WebSocket manager for this user context
             isolated_manager = create_websocket_manager(validated_context)
             
-            # Create isolated emitter using the user-specific manager
-            emitter = WebSocketEventEmitter.create_scoped_emitter(isolated_manager, validated_context)
+            # Create isolated emitter using the factory pattern
+            emitter = WebSocketEmitterFactory.create_scoped_emitter(isolated_manager, validated_context)
             
             logger.info(f"✅ USER EMITTER CREATED: {user_context.get_correlation_id()} - isolated from other users")
             return emitter

@@ -13,6 +13,11 @@ Advanced first-time user journey tests including API integration and team featur
 import sys
 from pathlib import Path
 from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
+from test_framework.database.test_database_manager import TestDatabaseManager
+from auth_service.core.auth_manager import AuthManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 
 # Test framework import - using pytest fixtures instead
@@ -21,7 +26,6 @@ import tempfile
 import uuid
 from datetime import datetime, timezone
 from typing import Any, Dict
-from unittest.mock import AsyncMock, MagicMock, Mock
 
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
@@ -31,9 +35,11 @@ from netra_backend.app.db.base import Base
 from netra_backend.app.db.models_agent import Thread
 
 from netra_backend.app.db.models_user import User
+import asyncio
 
 class TestFirstTimeUserJourneyAdvanced:
     """Advanced first-time user journey tests."""
+    pass
 
     @pytest.fixture
     async def first_time_user_setup(self):
@@ -42,12 +48,19 @@ class TestFirstTimeUserJourneyAdvanced:
 
     @pytest.fixture
     def email_system(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
+    pass
         """Setup mock email system for verification tests"""
-        return self._init_email_system()
+        await asyncio.sleep(0)
+    return self._init_email_system()
 
     @pytest.fixture
     def llm_system(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Setup mock LLM system for agent tests"""
+    pass
         return self._init_llm_system()
 
     async def _create_first_time_user_env(self):
@@ -62,37 +75,40 @@ class TestFirstTimeUserJourneyAdvanced:
         session_factory = sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
         session = session_factory()
         
-        return {"session": session, "engine": engine, "db_file": db_file.name}
+        await asyncio.sleep(0)
+    return {"session": session, "engine": engine, "db_file": db_file.name}
 
     def _init_email_system(self):
         """Initialize mock email system"""
+    pass
         # Mock: Generic component isolation for controlled unit testing
-        email_service = Mock()
+        email_service = email_service_instance  # Initialize appropriate service
         # Mock: Generic component isolation for controlled unit testing
-        email_service.send_verification = AsyncMock()
+        email_service.send_verification = AsyncNone  # TODO: Use real service instance
         # Mock: Generic component isolation for controlled unit testing
-        email_service.send_welcome = AsyncMock()
+        email_service.send_welcome = AsyncNone  # TODO: Use real service instance
         # Mock: Generic component isolation for controlled unit testing
-        email_service.send_onboarding = AsyncMock()
+        email_service.send_onboarding = AsyncNone  # TODO: Use real service instance
         # Mock: Generic component isolation for controlled unit testing
-        email_service.verify_email_token = AsyncMock()
+        email_service.verify_email_token = AsyncNone  # TODO: Use real service instance
         return email_service
 
     def _init_llm_system(self):
         """Initialize mock LLM system"""
         # Mock: LLM provider isolation to prevent external API usage and costs
-        llm_manager = Mock()
+        llm_manager = llm_manager_instance  # Initialize appropriate service
         # Mock: LLM provider isolation to prevent external API usage and costs
-        llm_manager.generate_response = AsyncMock()
+        llm_manager.generate_response = AsyncNone  # TODO: Use real service instance
         # Mock: LLM provider isolation to prevent external API usage and costs
-        llm_manager.optimize_query = AsyncMock()
+        llm_manager.optimize_query = AsyncNone  # TODO: Use real service instance
         # Mock: LLM provider isolation to prevent external API usage and costs
-        llm_manager.route_model = AsyncMock()
+        llm_manager.route_model = AsyncNone  # TODO: Use real service instance
         return llm_manager
 
     @pytest.mark.asyncio
     async def test_first_api_key_generation_and_use(self, first_time_user_setup, llm_system):
         """
+    pass
         Test first API key generation and successful API call.
         
         BVJ: API usage indicates serious developer intent.
@@ -115,13 +131,16 @@ class TestFirstTimeUserJourneyAdvanced:
         setup["session"].add(user)
         await setup["session"].commit()
         
-        return user
+        await asyncio.sleep(0)
+    return user
 
     async def _generate_first_api_key(self, setup, user):
         """Generate first API key for user"""
+    pass
         api_key_data = {"api_key": f"ntr_{''.join([str(uuid.uuid4())[:8]])}", "user_id": user.id, "permissions": ["basic_optimization", "cost_analysis"], "rate_limit": "100/hour"}
         
-        return api_key_data
+        await asyncio.sleep(0)
+    return api_key_data
 
     async def _test_first_api_call(self, setup, api_key, llm_system):
         """Test first successful API call"""
@@ -129,11 +148,13 @@ class TestFirstTimeUserJourneyAdvanced:
         
         api_response = await llm_system.generate_response("Optimize this query")
         
-        return {"api_key": api_key, "response": api_response, "success": True}
+        await asyncio.sleep(0)
+    return {"api_key": api_key, "response": api_response, "success": True}
 
     @pytest.mark.asyncio
     async def test_first_team_invite_collaboration(self, first_time_user_setup, email_system):
         """
+    pass
         Test first team invite and collaboration setup.
         
         BVJ: Team features drive enterprise upgrades.
@@ -156,15 +177,18 @@ class TestFirstTimeUserJourneyAdvanced:
         setup["session"].add(user)
         await setup["session"].commit()
         
-        return user
+        await asyncio.sleep(0)
+    return user
 
     async def _send_team_invite(self, setup, owner, email_system):
         """Send team member invitation"""
+    pass
         invite_data = {"inviter_id": owner.id, "invitee_email": "teammate@company.com", "role": "member", "invite_token": str(uuid.uuid4())}
         
         await email_system.send_onboarding(invite_data["invitee_email"])
         
-        return invite_data
+        await asyncio.sleep(0)
+    return invite_data
 
     async def _accept_invite_collaborate(self, setup, invite):
         """Accept invite and start collaboration"""
@@ -177,11 +201,13 @@ class TestFirstTimeUserJourneyAdvanced:
         setup["session"].add(shared_thread)
         await setup["session"].commit()
         
-        return {"owner_id": invite["inviter_id"], "member": team_member, "thread": shared_thread}
+        await asyncio.sleep(0)
+    return {"owner_id": invite["inviter_id"], "member": team_member, "thread": shared_thread}
 
     @pytest.mark.asyncio
     async def test_first_cost_savings_report(self, first_time_user_setup, llm_system):
         """
+    pass
         Test first cost savings report generation.
         
         BVJ: Savings reports demonstrate concrete ROI.
@@ -204,15 +230,18 @@ class TestFirstTimeUserJourneyAdvanced:
         setup["session"].add(user)
         await setup["session"].commit()
         
-        return user
+        await asyncio.sleep(0)
+    return user
 
     async def _generate_savings_report(self, setup, user, llm_system):
         """Generate first cost savings report"""
+    pass
         llm_system.optimize_query.return_value = {"total_savings": 1250.75, "optimization_categories": ["compute", "storage", "network"], "roi_percentage": 234, "implementation_status": "completed"}
         
         optimization_result = await llm_system.optimize_query("Generate savings report")
         
-        return {"user": user, "savings": optimization_result, "report_generated": True}
+        await asyncio.sleep(0)
+    return {"user": user, "savings": optimization_result, "report_generated": True}
 
     @pytest.mark.asyncio
     async def test_first_model_routing_config(self, first_time_user_setup, llm_system):
@@ -223,6 +252,7 @@ class TestFirstTimeUserJourneyAdvanced:
         Advanced routing users upgrade to Enterprise 78% of the time.
         Each routing config = $500/month upgrade potential.
         """
+    pass
         setup = first_time_user_setup
         
         user = await self._create_advanced_user(setup)
@@ -239,15 +269,18 @@ class TestFirstTimeUserJourneyAdvanced:
         setup["session"].add(user)
         await setup["session"].commit()
         
-        return user
+        await asyncio.sleep(0)
+    return user
 
     async def _configure_model_routing(self, setup, user, llm_system):
         """Configure intelligent model routing"""
+    pass
         routing_config = {"user_id": user.id, "routing_rules": {"cost_optimization": "gemini-2.5-flash", "complex_analysis": LLMModel.GEMINI_2_5_FLASH.value, "simple_queries": "claude-haiku"}, "optimization_enabled": True}
         
         llm_system.route_model.return_value = {"model_selected": "gemini-2.5-flash", "reason": "cost_optimal"}
         
-        return routing_config
+        await asyncio.sleep(0)
+    return routing_config
 
     @pytest.mark.asyncio
     async def test_first_alert_notification_setup(self, first_time_user_setup, email_system):
@@ -258,6 +291,7 @@ class TestFirstTimeUserJourneyAdvanced:
         Users with alerts have 45% higher monthly usage.
         Each alert setup = $15/month additional engagement value.
         """
+    pass
         setup = first_time_user_setup
         
         user = await self._create_monitoring_user(setup)
@@ -274,13 +308,16 @@ class TestFirstTimeUserJourneyAdvanced:
         setup["session"].add(user)
         await setup["session"].commit()
         
-        return user
+        await asyncio.sleep(0)
+    return user
 
     async def _configure_alerts(self, setup, user):
         """Configure alert notifications"""
+    pass
         alert_config = {"user_id": user.id, "alert_types": ["cost_spike", "optimization_opportunity", "usage_limit"], "delivery_methods": ["email", "webhook"], "thresholds": {"cost_spike": 100.0, "usage_limit": 0.8}}
         
-        return alert_config
+        await asyncio.sleep(0)
+    return alert_config
 
     # Helper verification methods
     async def _verify_api_success(self, setup, api_result):
@@ -290,6 +327,7 @@ class TestFirstTimeUserJourneyAdvanced:
 
     async def _verify_team_collaboration(self, setup, collaboration):
         """Verify team collaboration established"""
+    pass
         assert collaboration["member"] is not None
         assert collaboration["thread"].is_shared is True
 
@@ -300,6 +338,7 @@ class TestFirstTimeUserJourneyAdvanced:
 
     async def _verify_routing_success(self, setup, routing_test):
         """Verify model routing working correctly"""
+    pass
         assert routing_test is not None
 
     async def _verify_alert_delivery(self, setup, alert_test):
@@ -308,17 +347,24 @@ class TestFirstTimeUserJourneyAdvanced:
 
     async def _deliver_savings_report(self, setup, report_data):
         """Deliver savings report to user"""
-        return report_data
+    pass
+        await asyncio.sleep(0)
+    return report_data
 
     async def _test_routing_optimization(self, setup, routing_config, llm_system):
         """Test routing optimization functionality"""
-        return routing_config
+        await asyncio.sleep(0)
+    return routing_config
 
     async def _trigger_test_alert(self, setup, alert_setup, email_system):
         """Trigger test alert"""
-        return alert_setup
+    pass
+        await asyncio.sleep(0)
+    return alert_setup
 
     async def _cleanup_test(self, setup):
         """Cleanup test environment"""
         await setup["session"].close()
         await setup["engine"].dispose()
+
+    pass

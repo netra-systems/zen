@@ -34,7 +34,7 @@ import time
 import uuid
 from dataclasses import dataclass
 from typing import Any, Dict, List, Optional
-from unittest.mock import patch
+from shared.isolated_environment import IsolatedEnvironment
 
 import httpx
 import pytest
@@ -42,6 +42,10 @@ import pytest
 from test_framework.http_client import UnifiedHTTPClient as RealWebSocketClient
 from tests.e2e.integration.unified_e2e_harness import create_e2e_harness
 from tests.e2e.integration.user_journey_executor import TestUser
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
+from shared.isolated_environment import get_env
 
 
 @dataclass
@@ -61,6 +65,7 @@ class TestDesynchronizationResult:
     errors: List[str] = None
 
     def __post_init__(self):
+    pass
         if self.errors is None:
             self.errors = []
 
@@ -78,6 +83,7 @@ class TestAuthBackendDesynchronizationer:
         
     async def setup(self) -> None:
         """Setup desynchronization tester."""
+    pass
         self.http_client = httpx.AsyncClient(timeout=15.0, follow_redirects=True)
         self.test_user_email = f"desync_test_{uuid.uuid4().hex[:8]}@netra-test.com"
         
@@ -406,6 +412,7 @@ def create_e2e_harness():
 @pytest.mark.critical
 async def test_auth_backend_user_desynchronization_vulnerability():
     """
+    pass
     Test: Auth Backend User Desynchronization Vulnerability
     
     CRITICAL SECURITY TEST - Exposes vulnerability where user creation
@@ -459,6 +466,7 @@ async def test_partial_rollback_mechanism_validation():
     
     This test validates that proper rollback mechanisms exist.
     """
+    pass
     async with create_e2e_harness().test_environment() as harness:
         tester = AuthBackendDesynchronizationTester(harness)
         await tester.setup()
@@ -501,6 +509,7 @@ async def test_orphaned_record_detection_and_cleanup():
     
     Critical for maintaining data consistency and preventing account corruption.
     """
+    pass
     async with create_e2e_harness().test_environment() as harness:
         tester = AuthBackendDesynchronizationTester(harness)
         await tester.setup()
@@ -540,6 +549,7 @@ async def test_complete_desynchronization_scenario():
     This test serves as the definitive validation for auth-backend synchronization
     integrity and should guide the implementation of proper error handling.
     """
+    pass
     async with create_e2e_harness().test_environment() as harness:
         tester = AuthBackendDesynchronizationTester(harness)
         await tester.setup()
@@ -564,7 +574,8 @@ async def test_complete_desynchronization_scenario():
             assert result.execution_time < 60.0, f"Complete test too slow: {result.execution_time:.2f}s"
             
             # Generate comprehensive test report
-            print(f"\n[DESYNCHRONIZATION TEST REPORT]")
+            print(f"
+[DESYNCHRONIZATION TEST REPORT]")
             print(f"Execution Time: {result.execution_time:.2f}s")
             print(f"Auth User Created: {result.auth_user_created}")
             print(f"Backend Sync Failed: {result.backend_sync_failed}")
@@ -578,7 +589,8 @@ async def test_complete_desynchronization_scenario():
             print(f"Cleanup Successful: {result.cleanup_successful}")
             
             if result.vulnerability_exposed:
-                print(f"\n[CRITICAL FINDING] Auth-Backend desynchronization vulnerability confirmed")
+                print(f"
+[CRITICAL FINDING] Auth-Backend desynchronization vulnerability confirmed")
                 print(f"[RECOMMENDATION] Implement atomic user creation with proper rollback")
                 print(f"[RECOMMENDATION] Add consistency checking and cleanup mechanisms")
                 print(f"[RECOMMENDATION] Implement distributed transaction patterns")

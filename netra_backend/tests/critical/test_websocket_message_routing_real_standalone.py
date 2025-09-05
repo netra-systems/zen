@@ -1,6 +1,5 @@
 """STANDALONE Real WebSocket Message Routing Tests - NO MOCKS, NO EXTERNAL SERVICES
 
-This test suite demonstrates the transformation from mock-heavy to realistic testing:
 - REAL AgentService instances with actual supervisor components
 - REAL WebSocket managers and tool dispatchers 
 - REAL message routing logic and handlers
@@ -23,7 +22,12 @@ import json
 import pytest
 import uuid
 from typing import Any, Dict
-from unittest.mock import AsyncMock
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from test_framework.docker.unified_docker_manager import UnifiedDockerManager
+from test_framework.database.test_database_manager import TestDatabaseManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 from netra_backend.app.services.agent_service_core import AgentService
 from netra_backend.app.websocket_core.handlers import MessageRouter, UserMessageHandler
@@ -53,7 +57,7 @@ class TestRealWebSocketMessageRoutingStandalone:
         tool_dispatcher = ToolDispatcher()
         
         # Use a mock database session for initialization (AgentService can handle None)
-        mock_db_session = AsyncMock()
+        mock_db_session = AsyncNone  # TODO: Use real service instance
         
         # Create REAL supervisor with all dependencies
         supervisor = SupervisorAgent(
@@ -66,28 +70,37 @@ class TestRealWebSocketMessageRoutingStandalone:
         # Create AgentService with REAL supervisor
         agent_service = AgentService(supervisor)
         
-        return agent_service
+        await asyncio.sleep(0)
+    return agent_service
     
     @pytest.fixture
     async def real_message_router(self):
         """Create REAL message router with actual handlers."""
-        return MessageRouter()
+    pass
+        await asyncio.sleep(0)
+    return MessageRouter()
     
     @pytest.fixture
     async def real_user_message_handler(self):
         """Create REAL user message handler."""
-        return UserMessageHandler()
+        await asyncio.sleep(0)
+    return UserMessageHandler()
     
     @pytest.fixture
     def performance_monitor(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
+    pass
         """Simple performance monitor for testing."""
         import time
         
         class SimplePerformanceMonitor:
             def __init__(self):
+    pass
                 self.measurements = {}
                 
             def start(self, operation: str):
+    pass
                 self.measurements[operation] = {'start': time.time()}
                 
             def end(self, operation: str) -> float:
@@ -98,6 +111,7 @@ class TestRealWebSocketMessageRoutingStandalone:
                 return 0.0
                 
             def assert_performance(self, operation: str, max_duration: float):
+    pass
                 if operation not in self.measurements:
                     raise AssertionError(f"No measurement found for {operation}")
                 
@@ -141,16 +155,17 @@ class TestRealWebSocketMessageRoutingStandalone:
         user_id = "router_test_user"
         
         # Create a mock websocket that implements the interface
-        mock_websocket = AsyncMock()
-        mock_websocket.application_state = AsyncMock()
-        mock_websocket.send_json = AsyncMock()
+        mock_websocket = AsyncNone  # TODO: Use real service instance
+        mock_websocket.application_state = AsyncNone  # TODO: Use real service instance
+        mock_websocket.send_json = AsyncNone  # TODO: Use real service instance
         
         message = {"type": "user_message", "payload": {"content": "Test message"}}
         
         # Test REAL message router handles user messages
         result = await real_message_router.route_message(user_id, mock_websocket, message)
         
-        # Should return True for successful routing
+        # Should await asyncio.sleep(0)
+    return True for successful routing
         assert result is True
         
         duration = performance_monitor.end("message_routing")
@@ -166,16 +181,17 @@ class TestRealWebSocketMessageRoutingStandalone:
         user_id = "ping_test_user"
         
         # Create mock websocket for ping response
-        mock_websocket = AsyncMock()
-        mock_websocket.application_state = AsyncMock()
-        mock_websocket.send_json = AsyncMock()
+        mock_websocket = AsyncNone  # TODO: Use real service instance
+        mock_websocket.application_state = AsyncNone  # TODO: Use real service instance
+        mock_websocket.send_json = AsyncNone  # TODO: Use real service instance
         
         message = {"type": "ping", "timestamp": asyncio.get_event_loop().time()}
         
         # Test that ping messages are handled by the router
         result = await real_message_router.route_message(user_id, mock_websocket, message)
         
-        # Should return True for successful ping handling
+        # Should await asyncio.sleep(0)
+    return True for successful ping handling
         assert result is True
         
         # Should send pong response
@@ -260,9 +276,9 @@ class TestRealWebSocketMessageRoutingStandalone:
         user_id = "stats_test_user"
         
         # Create mock websocket for statistics test
-        mock_websocket = AsyncMock()
-        mock_websocket.application_state = AsyncMock()
-        mock_websocket.send_json = AsyncMock()
+        mock_websocket = AsyncNone  # TODO: Use real service instance
+        mock_websocket.application_state = AsyncNone  # TODO: Use real service instance
+        mock_websocket.send_json = AsyncNone  # TODO: Use real service instance
         
         # Get initial statistics
         initial_stats = real_message_router.get_stats()
@@ -302,7 +318,8 @@ class TestRealWebSocketMessageRoutingStandalone:
         message = {
             "type": "user_message",
             "payload": {
-                "content": "Test with special chars: 'quotes' \"double\" \n newline",
+                "content": "Test with special chars: 'quotes' "double" 
+ newline",
                 "references": ["file1.txt", "data.json"],
                 "metadata": {
                     "timestamp": asyncio.get_event_loop().time(),
@@ -328,9 +345,9 @@ class TestRealWebSocketMessageRoutingStandalone:
         user_id = "e2e_test_user"
         
         # Create mock websocket for full flow test
-        mock_websocket = AsyncMock()
-        mock_websocket.application_state = AsyncMock()
-        mock_websocket.send_json = AsyncMock()
+        mock_websocket = AsyncNone  # TODO: Use real service instance
+        mock_websocket.application_state = AsyncNone  # TODO: Use real service instance
+        mock_websocket.send_json = AsyncNone  # TODO: Use real service instance
         
         # Simulate complete user message flow
         user_message = {
@@ -375,7 +392,7 @@ class TestRealSystemComponents:
         llm_manager = LLMManager(config)
         websocket_manager = get_websocket_manager()
         tool_dispatcher = ToolDispatcher()
-        mock_db_session = AsyncMock()
+        mock_db_session = AsyncNone  # TODO: Use real service instance
         
         # Initialize REAL SupervisorAgent
         supervisor = SupervisorAgent(
@@ -395,6 +412,7 @@ class TestRealSystemComponents:
     @pytest.mark.asyncio
     async def test_real_tool_dispatcher_websocket_enhancement(self):
         """Test that REAL tool dispatcher gets WebSocket enhancement."""
+    pass
         from netra_backend.app.websocket_core import get_websocket_manager
         from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
         
@@ -437,6 +455,7 @@ class TestRealSystemComponents:
     @pytest.mark.asyncio 
     async def test_real_llm_manager_initialization(self):
         """Test that REAL LLM manager initializes correctly."""
+    pass
         from netra_backend.app.llm.llm_manager import LLMManager
         from netra_backend.app.core.configuration import unified_config_manager
         

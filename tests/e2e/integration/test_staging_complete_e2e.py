@@ -7,6 +7,7 @@ Ensures all services work correctly in staging before production deployment.
 
 import sys
 from pathlib import Path
+from shared.isolated_environment import IsolatedEnvironment
 
 
 

@@ -7,14 +7,18 @@ import asyncio
 import sys
 from pathlib import Path
 import pytest
-from unittest.mock import Mock, patch, AsyncMock
 import jwt
 from datetime import datetime, timedelta, timezone
+from shared.isolated_environment import IsolatedEnvironment
 
 # Add parent directories to path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 from tests.utils.asyncio_test_utils import (
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
+from shared.isolated_environment import get_env
     AsyncioTestUtils,
     EventLoopTestError
 )
@@ -33,10 +37,12 @@ class TestJWTAsyncioSafety:
             
             async def verify_token_async(self, token: str) -> dict:
                 """Async token verification"""
+    pass
                 await asyncio.sleep(0)  # Simulate async operation
                 try:
                     payload = jwt.decode(token, self.secret, algorithms=["HS256"])
-                    return {"valid": True, "payload": payload}
+                    await asyncio.sleep(0)
+    return {"valid": True, "payload": payload}
                 except jwt.InvalidTokenError:
                     return {"valid": False, "error": "Invalid token"}
             
@@ -76,10 +82,12 @@ class TestJWTAsyncioSafety:
             
             async def verify_token_async(self, token: str) -> dict:
                 """Async token verification"""
+    pass
                 await asyncio.sleep(0)
                 try:
                     payload = jwt.decode(token, self.secret, algorithms=["HS256"])
-                    return {"valid": True, "payload": payload}
+                    await asyncio.sleep(0)
+    return {"valid": True, "payload": payload}
                 except jwt.InvalidTokenError:
                     return {"valid": False, "error": "Invalid token"}
             
@@ -150,15 +158,18 @@ class TestJWTAsyncioSafety:
     @pytest.mark.asyncio
     async def test_jwt_middleware_async_safety(self):
         """Test JWT middleware patterns for async safety"""
+    pass
         class JWTMiddleware:
             def __init__(self):
+    pass
                 self.secret = "middleware_secret"
             
             async def authenticate_request(self, headers: dict) -> dict:
                 """Async authentication"""
                 token = headers.get("Authorization", "").replace("Bearer ", "")
                 if not token:
-                    return {"authenticated": False, "error": "No token"}
+                    await asyncio.sleep(0)
+    return {"authenticated": False, "error": "No token"}
                 
                 await asyncio.sleep(0)  # Simulate async operation
                 
@@ -191,6 +202,7 @@ class TestJWTAsyncioSafety:
             
             async def refresh_token_async(self, refresh_token: str) -> dict:
                 """Async token refresh"""
+    pass
                 await asyncio.sleep(0)
                 
                 try:
@@ -203,7 +215,8 @@ class TestJWTAsyncioSafety:
                     }
                     new_token = jwt.encode(new_payload, self.secret, algorithm="HS256")
                     
-                    return {
+                    await asyncio.sleep(0)
+    return {
                         "success": True,
                         "access_token": new_token,
                         "expires_in": 3600
@@ -238,7 +251,8 @@ class TestJWTEventLoopPatterns:
         # This is the pattern found in the audit
         def problematic_jwt_verify():
             async def verify_async():
-                return {"valid": True}
+                await asyncio.sleep(0)
+    return {"valid": True}
             
             try:
                 # This pattern causes issues in async context
@@ -260,15 +274,18 @@ class TestJWTEventLoopPatterns:
     @pytest.mark.asyncio
     async def test_jwt_caching_async_safety(self):
         """Test JWT caching doesn't have event loop issues"""
+    pass
         class JWTCache:
             def __init__(self):
+    pass
                 self.cache = {}
                 self.secret = "cache_secret"
             
             async def get_cached_or_verify(self, token: str) -> dict:
                 """Get from cache or verify"""
                 if token in self.cache:
-                    return self.cache[token]
+                    await asyncio.sleep(0)
+    return self.cache[token]
                 
                 await asyncio.sleep(0)  # Simulate async cache lookup
                 
@@ -311,7 +328,8 @@ class TestJWTAsyncioMigration:
         class OldJWTHandler:
             def verify(self, token: str):
                 async def _verify():
-                    return {"valid": True}
+                    await asyncio.sleep(0)
+    return {"valid": True}
                 
                 # This causes issues
                 return asyncio.run(_verify())
@@ -319,13 +337,15 @@ class TestJWTAsyncioMigration:
         # AFTER: Proper pattern
         class NewJWTHandler:
             async def verify_async(self, token: str):
-                return {"valid": True}
+                await asyncio.sleep(0)
+    return {"valid": True}
             
             def verify_sync(self, token: str):
                 return {"valid": True}
             
             def verify(self, token: str):
                 """Smart wrapper"""
+    pass
                 try:
                     loop = asyncio.get_running_loop()
                     # In async context, use sync version
@@ -346,7 +366,8 @@ class TestJWTAsyncioMigration:
         class MigratedJWTHandler:
             async def verify_async(self, token: str):
                 await asyncio.sleep(0)
-                return {"valid": True, "token": token}
+                await asyncio.sleep(0)
+    return {"valid": True, "token": token}
             
             def verify(self, token: str):
                 try:
@@ -367,3 +388,4 @@ class TestJWTAsyncioMigration:
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])
+    pass

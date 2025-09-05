@@ -10,7 +10,6 @@ import json
 import os
 import pytest
 import logging
-from unittest import mock
 from typing import Dict, Any
 
 from shared.isolated_environment import IsolatedEnvironment

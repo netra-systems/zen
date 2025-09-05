@@ -1,4 +1,5 @@
 from shared.isolated_environment import get_env
+from shared.isolated_environment import IsolatedEnvironment
 """L4 Compliance Audit Trail Critical Path Test
 
 Business Value Justification (BVJ):

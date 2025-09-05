@@ -10,6 +10,7 @@ import pytest
 from datetime import datetime, timezone
 from typing import Dict, Any, List
 from pydantic import ValidationError
+from shared.isolated_environment import IsolatedEnvironment
 
 from netra_backend.app.agents.corpus_admin.models import (
     CorpusOperation,

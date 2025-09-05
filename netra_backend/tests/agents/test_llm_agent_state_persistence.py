@@ -6,6 +6,11 @@ Split from oversized test_llm_agent_e2e_real.py
 
 import sys
 from pathlib import Path
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from test_framework.database.test_database_manager import TestDatabaseManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 # Test framework import - using pytest fixtures instead
 
@@ -14,7 +19,6 @@ import json
 import time
 import uuid
 from datetime import datetime
-from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 import pytest_asyncio
@@ -92,7 +96,7 @@ async def test_error_recovery(supervisor_agent):
 async def test_state_recovery_from_interruption():
     """Test state recovery from interrupted execution"""
     # Mock: Generic component isolation for controlled unit testing
-    mock_persistence = AsyncMock()
+    mock_persistence = AsyncNone  # TODO: Use real service instance
     
     # Mock interrupted state
     interrupted_state = DeepAgentState(
@@ -117,7 +121,7 @@ async def test_state_recovery_from_interruption():
 async def test_persistence_failure_handling():
     """Test handling of persistence failures"""
     # Mock: Generic component isolation for controlled unit testing
-    mock_persistence = AsyncMock()
+    mock_persistence = AsyncNone  # TODO: Use real service instance
     
     # Mock persistence failure
     # Mock: Agent service isolation for testing without LLM agent execution
@@ -160,7 +164,7 @@ async def test_state_serialization_consistency():
 async def test_concurrent_state_operations():
     """Test concurrent state save/load operations"""
     # Mock: Generic component isolation for controlled unit testing
-    mock_persistence = AsyncMock()
+    mock_persistence = AsyncNone  # TODO: Use real service instance
     
     # Mock concurrent operations
     async def mock_save_with_delay(*args, **kwargs):

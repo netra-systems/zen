@@ -13,6 +13,7 @@ import json
 import pytest
 import websockets
 from datetime import datetime, timezone
+from shared.isolated_environment import IsolatedEnvironment
 
 from test_framework.test_patterns import L3IntegrationTest
 

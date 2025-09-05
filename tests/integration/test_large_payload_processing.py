@@ -1,4 +1,5 @@
 import json
+from shared.isolated_environment import IsolatedEnvironment
 
 import httpx
 import pytest

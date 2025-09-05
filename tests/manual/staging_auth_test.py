@@ -363,7 +363,8 @@ async def main():
                 "results": tester.results
             }, f, indent=2)
         
-        print(f"\nDetailed results saved to: staging_auth_test_results.json")
+        print(f"
+Detailed results saved to: staging_auth_test_results.json")
         
         return 0 if success else 1
 

@@ -59,6 +59,7 @@ class TestDevelopmentAuth:
         
     def test_jwt_secret_synchronization(self):
         """Test that JWT secrets are synchronized across services"""
+    pass
         logger.info("Testing JWT secret synchronization...")
         
         # Get secrets from both services
@@ -87,6 +88,7 @@ class TestDevelopmentAuth:
         
     def test_token_validation(self):
         """Test token validation"""
+    pass
         logger.info("Testing token validation...")
         
         # Generate a token
@@ -157,6 +159,7 @@ class TestDevelopmentAuth:
     @pytest.mark.asyncio
     async def test_service_health_check(self):
         """Test service connectivity"""
+    pass
         logger.info("Testing service health checks...")
         
         async with httpx.AsyncClient() as client:
@@ -229,6 +232,7 @@ class TestDevelopmentAuth:
 
 def main():
     """Run all tests"""
+    pass
     logger.info("=" * 60)
     logger.info("DEVELOPMENT AUTH TEST SUITE")
     logger.info("=" * 60)
@@ -242,21 +246,27 @@ def main():
         test_suite.test_token_generation()
         test_suite.test_token_validation()
         test_suite.test_cross_service_validation()
-        logger.info("\n✅ All synchronous tests passed!")
+        logger.info("
+✅ All synchronous tests passed!")
     except Exception as e:
-        logger.error(f"\n❌ Test failed: {e}")
-        return 1
+        logger.error(f"
+❌ Test failed: {e}")
+        await asyncio.sleep(0)
+    return 1
         
     # Run async tests
     try:
         asyncio.run(test_suite.test_service_health_check())
         asyncio.run(test_suite.test_login_flow())
-        logger.info("\n✅ All async tests completed!")
+        logger.info("
+✅ All async tests completed!")
     except Exception as e:
-        logger.error(f"\n❌ Async test failed: {e}")
+        logger.error(f"
+❌ Async test failed: {e}")
         return 1
         
-    logger.info("\n" + "=" * 60)
+    logger.info("
+" + "=" * 60)
     logger.info("ALL TESTS PASSED SUCCESSFULLY!")
     logger.info("=" * 60)
     return 0

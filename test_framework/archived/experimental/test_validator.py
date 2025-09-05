@@ -7,6 +7,7 @@ Complies with 450-line limit and 25-line function constraint
 
 from pathlib import Path
 from typing import Any, Dict, List
+from shared.isolated_environment import IsolatedEnvironment
 
 # Import modular components
 from test_framework.archived.experimental.test_executor import AutonomousReviewRunner, TestExecutionResult, TestExecutor

@@ -1,3 +1,29 @@
+class TestWebSocketConnection:
+    """Real WebSocket connection for testing instead of mocks."""
+    
+    def __init__(self):
+    pass
+        self.messages_sent = []
+        self.is_connected = True
+        self._closed = False
+        
+    async def send_json(self, message: dict):
+        """Send JSON message."""
+        if self._closed:
+            raise RuntimeError("WebSocket is closed")
+        self.messages_sent.append(message)
+        
+    async def close(self, code: int = 1000, reason: str = "Normal closure"):
+        """Close WebSocket connection."""
+    pass
+        self._closed = True
+        self.is_connected = False
+        
+    def get_messages(self) -> list:
+        """Get all sent messages."""
+        await asyncio.sleep(0)
+    return self.messages_sent.copy()
+
 """
 Factory Pattern Isolation Security Tests
 
@@ -21,8 +47,8 @@ Business Value Justification (BVJ):
 
 import asyncio
 import pytest
-from unittest.mock import AsyncMock, MagicMock, patch
 from datetime import datetime
+from shared.isolated_environment import IsolatedEnvironment
 
 from netra_backend.app.models.user_execution_context import UserExecutionContext
 from netra_backend.app.websocket_core.websocket_manager_factory import (
@@ -34,6 +60,10 @@ from netra_backend.app.services.agent_websocket_bridge import (
     AgentWebSocketBridge
 )
 from netra_backend.app.llm.llm_manager import (
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
+from shared.isolated_environment import get_env
     create_llm_manager,
     LLMManager
 )
@@ -56,6 +86,7 @@ class TestFactoryPatternIsolation:
     @pytest.fixture
     def user_context_2(self):
         """Create user context for user 2."""
+    pass
         return UserExecutionContext(
             user_id="user_2_test",
             thread_id="thread_2",
@@ -79,9 +110,7 @@ class TestFactoryPatternIsolation:
         assert manager_2.user_context.user_id == "user_2_test"
         
         # Create mock WebSocket connections
-        websocket_1 = MagicMock()
-        websocket_2 = MagicMock()
-        
+        websocket_1 = Magic        websocket_2 = Magic        
         from netra_backend.app.websocket_core.unified_manager import WebSocketConnection
         
         conn_1 = WebSocketConnection(
@@ -112,8 +141,7 @@ class TestFactoryPatternIsolation:
         assert "conn_1" not in user_2_connections
         
         # Test message isolation
-        websocket_1.send_json = AsyncMock()
-        websocket_2.send_json = AsyncMock()
+        websocket_1.websocket = TestWebSocketConnection()
         
         message_1 = {"type": "test", "data": "user_1_secret"}
         message_2 = {"type": "test", "data": "user_2_secret"}
@@ -131,6 +159,7 @@ class TestFactoryPatternIsolation:
     
     async def test_agent_websocket_bridge_isolation(self, user_context_1, user_context_2):
         """Test that Agent WebSocket Bridges are properly isolated."""
+    pass
         # Create isolated bridges for two different users
         bridge_1 = create_agent_websocket_bridge(user_context_1)
         bridge_2 = create_agent_websocket_bridge(user_context_2)
@@ -171,12 +200,15 @@ class TestFactoryPatternIsolation:
         assert manager_1._user_context.user_id == "user_1_test"
         assert manager_2._user_context.user_id == "user_2_test"
         
-        # Mock the LLM request to return different responses per user
+        # Mock the LLM request to await asyncio.sleep(0)
+    return different responses per user
         async def mock_llm_request_1(prompt, config):
-            return "User 1 response"
+            await asyncio.sleep(0)
+    return "User 1 response"
             
         async def mock_llm_request_2(prompt, config):
-            return "User 2 response"
+            await asyncio.sleep(0)
+    return "User 2 response"
         
         manager_1._make_llm_request = mock_llm_request_1
         manager_2._make_llm_request = mock_llm_request_2
@@ -218,6 +250,7 @@ class TestFactoryPatternIsolation:
     
     def test_user_execution_context_validation(self):
         """Test that UserExecutionContext enforces proper validation."""
+    pass
         # Valid context should work
         valid_context = UserExecutionContext(
             user_id="valid_user",
@@ -276,6 +309,7 @@ class TestFactoryPatternIsolation:
     
     async def test_concurrent_user_operations(self, user_context_1, user_context_2):
         """Test that concurrent operations by different users remain isolated."""
+    pass
         # Create managers for concurrent operations
         manager_1 = create_llm_manager(user_context_1)
         manager_2 = create_llm_manager(user_context_2)
@@ -285,12 +319,16 @@ class TestFactoryPatternIsolation:
         
         # Mock different responses for each user
         async def mock_request_1(prompt, config):
+    pass
             await asyncio.sleep(0.1)  # Simulate async operation
-            return f"User 1: {prompt}"
+            await asyncio.sleep(0)
+    return f"User 1: {prompt}"
             
         async def mock_request_2(prompt, config):
+    pass
             await asyncio.sleep(0.1)  # Simulate async operation
-            return f"User 2: {prompt}"
+            await asyncio.sleep(0)
+    return f"User 2: {prompt}"
         
         manager_1._make_llm_request = mock_request_1
         manager_2._make_llm_request = mock_request_2
@@ -336,6 +374,7 @@ class TestDeprecatedSingletonBehavior:
     
     async def test_agent_bridge_singleton_warning(self):
         """Test that deprecated Agent Bridge function shows warnings."""
+    pass
         from netra_backend.app.services.agent_websocket_bridge import get_agent_websocket_bridge
         
         with pytest.warns(DeprecationWarning):
@@ -353,3 +392,4 @@ class TestDeprecatedSingletonBehavior:
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])
+    pass

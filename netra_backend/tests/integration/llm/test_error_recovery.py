@@ -16,15 +16,15 @@ REQUIREMENTS:
 
 import sys
 from pathlib import Path
+from auth_service.core.auth_manager import AuthManager
+from shared.isolated_environment import IsolatedEnvironment
 
 # Test framework import - using pytest fixtures instead
 
 import asyncio
-from unittest.mock import patch, AsyncMock, MagicMock
 
 import pytest
 
-from netra_backend.tests.integration.llm.shared_fixtures import mock_llm_manager, mock_llm_provider
 
 class TestLLMErrorRecovery:
     """BVJ: Validates error recovery mechanisms for LLM failures."""

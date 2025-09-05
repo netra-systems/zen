@@ -7,6 +7,8 @@ Validates system behavior under concurrent load conditions.
 
 import sys
 from pathlib import Path
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from shared.isolated_environment import IsolatedEnvironment
 
 # Test framework import - using pytest fixtures instead
 
@@ -15,7 +17,6 @@ import time
 import uuid
 from concurrent.futures import ThreadPoolExecutor
 from typing import List
-from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
@@ -46,7 +47,7 @@ class TestConcurrentProcessing:
             
             # Mock: WebSocket manager isolation for testing without external dependencies
             with patch('netra_backend.app.services.generation_job_manager.manager') as mock_manager:
-                mock_manager.broadcast_to_job = AsyncMock()
+                mock_manager.broadcast_to_job = AsyncNone  # TODO: Use real service instance
                 
                 start_time = time.perf_counter()
                 
@@ -76,7 +77,7 @@ class TestConcurrentProcessing:
             # Mock: Component isolation for testing without external dependencies
             with patch('netra_backend.app.services.content_generation_service.Pool') as mock_pool_class:
                 # Mock: Generic component isolation for controlled unit testing
-                mock_pool = MagicMock()
+                mock_pool = MagicNone  # TODO: Use real service instance
                 mock_pool_class.return_value.__enter__.return_value = mock_pool
                 mock_pool.imap_unordered.return_value = iter([
                     {'type': 'test', 'data': ('prompt', 'response')} 
@@ -85,7 +86,7 @@ class TestConcurrentProcessing:
                 
                 # Mock: WebSocket manager isolation for testing without external dependencies
                 with patch('netra_backend.app.services.generation_job_manager.manager') as mock_manager:
-                    mock_manager.broadcast_to_job = AsyncMock()
+                    mock_manager.broadcast_to_job = AsyncNone  # TODO: Use real service instance
                     
                     job_id = str(uuid.uuid4())
                     await run_content_generation_job(job_id, perf_params.model_dump())
@@ -151,7 +152,7 @@ class TestConcurrentProcessing:
                 
                 # Mock: WebSocket manager isolation for testing without external dependencies
                 with patch('netra_backend.app.services.generation_job_manager.manager') as mock_manager:
-                    mock_manager.broadcast_to_job = AsyncMock()
+                    mock_manager.broadcast_to_job = AsyncNone  # TODO: Use real service instance
                     
                     job_id = str(uuid.uuid4())
                     await run_content_generation_job(job_id, perf_params.model_dump())

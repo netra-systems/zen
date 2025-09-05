@@ -6,6 +6,7 @@ Test script to demonstrate Podman dynamic port allocation
 import sys
 import time
 from pathlib import Path
+from shared.isolated_environment import IsolatedEnvironment
 
 # Add project root to path
 PROJECT_ROOT = Path(__file__).parent.parent

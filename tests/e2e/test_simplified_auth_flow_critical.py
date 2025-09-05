@@ -22,6 +22,7 @@ import base64
 from typing import Any, Dict, Optional
 from datetime import datetime, timedelta
 from dataclasses import dataclass
+from shared.isolated_environment import IsolatedEnvironment
 
 import pytest
 

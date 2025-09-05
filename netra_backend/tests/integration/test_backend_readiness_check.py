@@ -7,6 +7,7 @@ import requests
 import asyncio
 import time
 from netra_backend.app.config import get_config
+from shared.isolated_environment import IsolatedEnvironment
 
 
 class TestBackendReadinessCheck:

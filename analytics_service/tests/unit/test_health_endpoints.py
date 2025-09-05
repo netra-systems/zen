@@ -22,6 +22,7 @@ import asyncio
 import json
 import time
 from datetime import datetime, timezone
+from shared.isolated_environment import IsolatedEnvironment
 # NO MOCKS - removed all mock imports per NO MOCKS POLICY
 
 import pytest

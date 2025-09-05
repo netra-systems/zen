@@ -5,20 +5,27 @@ Business Value: Revenue-critical component
 """
 
 import pytest
-from unittest.mock import Mock, patch, MagicMock
 from netra_backend.app.agents.corpus_admin.operations_crud import CorpusCRUDOperations
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 class TestOperationsCrud:
     """Test suite for CorpusCRUDOperations"""
     
     @pytest.fixture
-    def mock_tool_dispatcher(self):
+ def real_tool_dispatcher():
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create mock tool dispatcher"""
-        return Mock()
+        return None  # TODO: Use real service instance
     
     @pytest.fixture
     def instance(self, mock_tool_dispatcher):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create test instance"""
+    pass
         return CorpusCRUDOperations(mock_tool_dispatcher)
     
     def test_initialization(self, instance):
@@ -28,6 +35,7 @@ class TestOperationsCrud:
     
     def test_crud_operation_mapping(self, instance):
         """Test CRUD operation mapping"""
+    pass
         mapping = instance._get_crud_operation_mapping()
         assert "create" in mapping
         assert "search" in mapping
@@ -42,6 +50,7 @@ class TestOperationsCrud:
     
     def test_edge_cases(self, instance):
         """Test boundary conditions"""
+    pass
         # Test with None, empty, extreme values
         pass
     
@@ -49,3 +58,5 @@ class TestOperationsCrud:
         """Test input validation"""
         # Test validation logic
         pass
+
+    pass

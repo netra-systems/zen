@@ -12,6 +12,7 @@ import asyncio
 import json
 from datetime import datetime, timezone
 from typing import Any, Dict
+from shared.isolated_environment import IsolatedEnvironment
 
 import pytest
 from pydantic import ValidationError

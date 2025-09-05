@@ -11,6 +11,7 @@ Strategic Impact: Proper isolation ensures thread independence and data integrit
 import asyncio
 import time
 from typing import Any, Dict, List
+from shared.isolated_environment import IsolatedEnvironment
 
 import pytest
 

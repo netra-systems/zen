@@ -7,10 +7,12 @@ The actual comprehensive tests are in other test files in this directory.
 
 import sys
 from pathlib import Path
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 # Test framework import - using pytest fixtures instead
 
-from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 

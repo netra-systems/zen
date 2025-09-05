@@ -9,6 +9,7 @@ from sqlalchemy import text, select
 from netra_backend.app.services.database.thread_repository import ThreadRepository
 from netra_backend.app.db.models_postgres import Thread
 from netra_backend.app.db.base import Base
+from shared.isolated_environment import IsolatedEnvironment
 
 
 class TestThreadsFixIntegration:
@@ -34,6 +35,7 @@ class TestThreadsFixIntegration:
     @pytest.fixture
     async def db_session(self, db_engine):
         """Create a database session."""
+    pass
         async_session = async_sessionmaker(
             db_engine, 
             class_=AsyncSession,
@@ -46,10 +48,12 @@ class TestThreadsFixIntegration:
     @pytest.fixture
     async def thread_repo(self):
         """Create thread repository."""
-        return ThreadRepository()
+        await asyncio.sleep(0)
+    return ThreadRepository()
     
     async def create_test_thread(self, db: AsyncSession, thread_id: str, metadata: dict = None):
         """Helper to create a test thread."""
+    pass
         thread = Thread(
             id=thread_id,
             object="thread",
@@ -58,7 +62,8 @@ class TestThreadsFixIntegration:
         )
         db.add(thread)
         await db.commit()
-        return thread
+        await asyncio.sleep(0)
+    return thread
     
     @pytest.mark.asyncio
     async def test_normal_case_with_proper_metadata(self, db_session, thread_repo):
@@ -82,6 +87,7 @@ class TestThreadsFixIntegration:
     @pytest.mark.asyncio
     async def test_null_metadata_handled_gracefully(self, db_session, thread_repo):
         """Test NULL metadata doesn't crash."""
+    pass
         # Create thread with NULL metadata
         await self.create_test_thread(db_session, "thread_null", None)
         
@@ -93,7 +99,8 @@ class TestThreadsFixIntegration:
             {"user_id": user_id}
         )
         
-        # Query should not crash and return only valid thread
+        # Query should not crash and await asyncio.sleep(0)
+    return only valid thread
         threads = await thread_repo.find_by_user(db_session, user_id)
         
         assert len(threads) == 1
@@ -105,7 +112,8 @@ class TestThreadsFixIntegration:
         # Create thread with empty metadata
         await self.create_test_thread(db_session, "thread_empty", {})
         
-        # Query for any user should return empty
+        # Query for any user should await asyncio.sleep(0)
+    return empty
         threads = await thread_repo.find_by_user(db_session, "any-user")
         
         assert len(threads) == 0
@@ -113,6 +121,7 @@ class TestThreadsFixIntegration:
     @pytest.mark.asyncio
     async def test_mixed_metadata_scenarios(self, db_session, thread_repo):
         """Test multiple threads with various metadata states."""
+    pass
         user_id = "test-user-456"
         
         # Create various threads
@@ -156,6 +165,7 @@ class TestThreadsFixIntegration:
     @pytest.mark.asyncio
     async def test_whitespace_handling(self, db_session, thread_repo):
         """Test whitespace in user_id is handled."""
+    pass
         # Create thread with whitespace in user_id
         await self.create_test_thread(
             db_session,
@@ -204,7 +214,8 @@ class TestThreadsFixIntegration:
         # Should be reasonably fast (under 1 second even with fallback)
         assert duration < 1.0, f"Query took {duration:.3f} seconds"
         
-        print(f"\n✓ Performance test: Found {len(threads)} threads in {duration:.3f} seconds")
+        print(f"
+✓ Performance test: Found {len(threads)} threads in {duration:.3f} seconds")
 
 
 class TestActualPostgreSQLBehavior:
@@ -225,8 +236,10 @@ class TestActualPostgreSQLBehavior:
         
         def jsonb_extract(metadata, key):
             """Simulate PostgreSQL's ->> operator."""
+    pass
             if metadata is None:
-                return None
+                await asyncio.sleep(0)
+    return None
             if not isinstance(metadata, dict):
                 return None
             return str(metadata.get(key)) if key in metadata else None
@@ -244,7 +257,8 @@ class TestActualPostgreSQLBehavior:
         assert len(matched) == 1
         assert matched[0]["id"] == "t1"
         
-        print("\n✓ JSONB simulation: Correctly filtered threads")
+        print("
+✓ JSONB simulation: Correctly filtered threads")
         
         # Now test with integer user_id normalization
         target_user = "123"

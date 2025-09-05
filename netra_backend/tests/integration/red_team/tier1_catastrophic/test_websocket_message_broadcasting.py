@@ -24,6 +24,12 @@ from typing import Any, Dict, List, Optional, Set
 import websockets
 from websockets import ServerConnection
 from websockets.exceptions import ConnectionClosed, InvalidURI
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from test_framework.database.test_database_manager import TestDatabaseManager
+from auth_service.core.auth_manager import AuthManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 import pytest
 from fastapi.testclient import TestClient
@@ -39,7 +45,6 @@ from netra_backend.app.websocket_core import WebSocketManager as WebSocketConnec
 from netra_backend.app.services.agent_service import AgentService
 from netra_backend.app.db.models_user import User
 # AgentRun model - creating mock for tests
-from unittest.mock import Mock, AsyncMock, MagicMock
 AgentRun = Mock
 from netra_backend.app.database import get_db
 
@@ -52,6 +57,7 @@ class TestWebSocketMessageBroadcasting:
     MUST use real services - NO MOCKS allowed.
     These tests WILL fail initially and that's the point.
     """
+    pass
 
     @pytest.fixture(scope="class")
     async def real_database_session(self):
@@ -76,12 +82,19 @@ class TestWebSocketMessageBroadcasting:
 
     @pytest.fixture
     def real_test_client(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
+    pass
         """Real FastAPI test client - no mocking of the application."""
-        return TestClient(app)
+        await asyncio.sleep(0)
+    return TestClient(app)
 
     @pytest.fixture
     def websocket_config(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """WebSocket connection configuration."""
+    pass
         return {
             "host": "localhost",
             "port": 8000,
@@ -107,11 +120,13 @@ class TestWebSocketMessageBroadcasting:
         real_database_session.add(test_user)
         await real_database_session.commit()
         
-        return test_user
+        await asyncio.sleep(0)
+    return test_user
 
     @pytest.mark.asyncio
     async def test_01_basic_websocket_connection_fails(self, websocket_config, test_user):
         """
+    pass
         Test 15A: Basic WebSocket Connection (EXPECTED TO FAIL)
         
         Tests that WebSocket connections can be established successfully.
@@ -178,6 +193,7 @@ class TestWebSocketMessageBroadcasting:
         2. Message routing may not work
         3. Client identification may be broken
         """
+    pass
         # Generate auth token
         import jwt as pyjwt
         jwt_secret = "test-jwt-secret-key-for-testing-only-must-be-32-chars"
@@ -264,6 +280,7 @@ class TestWebSocketMessageBroadcasting:
         2. Connection tracking may not work
         3. Broadcast scalability may be poor
         """
+    pass
         # Create multiple test users
         test_users = []
         for i in range(3):
@@ -376,6 +393,7 @@ class TestWebSocketMessageBroadcasting:
         2. Message flow orchestration may be incomplete
         3. Event triggering may not work
         """
+    pass
         # Generate auth token
         import jwt as pyjwt
         jwt_secret = "test-jwt-secret-key-for-testing-only-must-be-32-chars"
@@ -418,6 +436,7 @@ class TestWebSocketMessageBroadcasting:
                     
                     # Start agent execution in background
                     async def execute_agent():
+    pass
                         try:
                             # FAILURE EXPECTED HERE - agent execution may not trigger WebSocket events
                             result = await agent_service.execute_agent_run(agent_run_id)
@@ -501,6 +520,7 @@ class TestWebSocketMessageBroadcasting:
         2. Message buffering may not exist
         3. Reconnection logic may not work
         """
+    pass
         # Generate auth token
         import jwt as pyjwt
         jwt_secret = "test-jwt-secret-key-for-testing-only-must-be-32-chars"
@@ -596,6 +616,7 @@ class TestWebSocketMessageBroadcasting:
         2. Sequence tracking may not be implemented
         3. Concurrent message handling may cause race conditions
         """
+    pass
         # Generate auth token
         import jwt as pyjwt
         jwt_secret = "test-jwt-secret-key-for-testing-only-must-be-32-chars"
@@ -690,6 +711,7 @@ class TestWebSocketMessageBroadcasting:
         2. Message throughput may be insufficient
         3. Memory usage may grow excessively
         """
+    pass
         # Create multiple test users for load testing
         num_clients = 10
         test_users = []
@@ -741,7 +763,8 @@ class TestWebSocketMessageBroadcasting:
                     )
                     connect_end = time.time()
                     connection_times.append(connect_end - connect_start)
-                    return ws
+                    await asyncio.sleep(0)
+    return ws
                     
                 except Exception as e:
                     return None
@@ -834,6 +857,7 @@ class TestWebSocketMessageBroadcasting:
         2. Error recovery may not work
         3. Client notification of errors may be missing
         """
+    pass
         # Generate auth token
         import jwt as pyjwt
         jwt_secret = "test-jwt-secret-key-for-testing-only-must-be-32-chars"
@@ -931,12 +955,14 @@ class RedTeamWebSocketTestUtils:
             "email": email,
             "exp": int(time.time()) + 3600
         }
-        return pyjwt.encode(token_payload, jwt_secret, algorithm="HS256")
+        await asyncio.sleep(0)
+    return pyjwt.encode(token_payload, jwt_secret, algorithm="HS256")
     
     @staticmethod
     async def connect_websocket(ws_url: str, auth_token: str, timeout: int = 10):
         """Connect to WebSocket with authentication."""
-        return await websockets.connect(
+        await asyncio.sleep(0)
+    return await websockets.connect(
             ws_url,
             extra_headers={"Authorization": f"Bearer {auth_token}"},
             timeout=timeout
@@ -945,6 +971,7 @@ class RedTeamWebSocketTestUtils:
     @staticmethod
     async def send_and_wait_response(websocket, message: Dict[str, Any], timeout: int = 5) -> Optional[Dict[str, Any]]:
         """Send message and wait for response."""
+    pass
         try:
             await websocket.send(json.dumps(message))
             response = await asyncio.wait_for(websocket.recv(), timeout=timeout)

@@ -12,6 +12,7 @@ from auth_service.auth_core.services.auth_service import AuthService
 from auth_service.auth_core.models.auth_models import User, LoginResponse
 from auth_service.auth_core.database.models import AuthUser, AuthSession
 from auth_service.auth_core.core.jwt_handler import JWTHandler
+from shared.isolated_environment import IsolatedEnvironment
 
 
 class TestAuthServiceBasics:

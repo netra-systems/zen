@@ -22,7 +22,12 @@ import json
 import pytest
 import uuid
 from typing import Any, Dict
-from unittest.mock import patch
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from test_framework.database.test_database_manager import TestDatabaseManager
+from auth_service.core.auth_manager import AuthManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 from netra_backend.app.services.agent_service_core import AgentService
 from netra_backend.app.routes.utils.websocket_helpers import process_agent_message
@@ -54,7 +59,6 @@ class TestRealWebSocketMessageRouting:
         from netra_backend.app.websocket_core import get_websocket_manager
         from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
         from netra_backend.app.core.configuration import unified_config_manager
-        from unittest.mock import AsyncMock
         
         # Create REAL LLM manager
         config = unified_config_manager.get_config()
@@ -67,7 +71,7 @@ class TestRealWebSocketMessageRouting:
         tool_dispatcher = ToolDispatcher()
         
         # Use a mock database session for initialization (AgentService can handle None)
-        mock_db_session = AsyncMock()
+        mock_db_session = AsyncNone  # TODO: Use real service instance
         
         # Create REAL supervisor with all dependencies
         supervisor = SupervisorAgent(

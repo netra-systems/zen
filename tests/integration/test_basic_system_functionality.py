@@ -30,6 +30,7 @@ import pytest
 import requests
 import websockets
 from websockets import connect, ConnectionClosedError
+from shared.isolated_environment import IsolatedEnvironment
 
 # Add project root to path for imports
 project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))

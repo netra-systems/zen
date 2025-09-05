@@ -9,6 +9,7 @@ import time
 import os
 import sys
 from pathlib import Path
+from shared.isolated_environment import IsolatedEnvironment
 
 def test_hot_reload():
     """Test hot reload by modifying a test file and checking container logs."""

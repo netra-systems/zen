@@ -4,6 +4,7 @@ Test for auth config endpoint - ensures frontend can get auth configuration
 import pytest
 from fastapi.testclient import TestClient
 from auth_service.main import app
+from shared.isolated_environment import IsolatedEnvironment
 
 
 class TestAuthConfigEndpoint:

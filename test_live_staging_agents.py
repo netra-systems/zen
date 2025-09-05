@@ -9,6 +9,7 @@ import sys
 from typing import Dict, List, Optional
 import websockets
 import ssl
+from shared.isolated_environment import IsolatedEnvironment
 
 # LIVE STAGING ENDPOINTS
 STAGING_BASE_URL = "https://api.staging.netrasystems.ai"

@@ -14,12 +14,13 @@ Module ≤300 lines per CLAUDE.md requirements.
 
 import sys
 from pathlib import Path
+from auth_service.core.auth_manager import AuthManager
+from shared.isolated_environment import IsolatedEnvironment
 
 # Test framework import - using pytest fixtures instead
 
 import asyncio
 from typing import Any, Dict, Optional
-from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 from fastapi import HTTPException, Request, Response
@@ -91,7 +92,7 @@ class TestRequestValidationMiddleware:
         # Mock: Component isolation for controlled unit testing
         request.headers.get = Mock(return_value=str(content_length))
         # Mock: Generic component isolation for controlled unit testing
-        request.url = Mock()
+        request.url = url_instance  # Initialize appropriate service
         # Mock: Component isolation for controlled unit testing
         request.url.__str__ = Mock(return_value=url)
         request.method = "GET"
@@ -211,7 +212,7 @@ class TestRateLimitingMiddleware:
         # Mock: Component isolation for controlled unit testing
         request = Mock(spec=Request)
         # Mock: Generic component isolation for controlled unit testing
-        request.url = Mock()
+        request.url = url_instance  # Initialize appropriate service
         request.url.path = path
         # Mock: Component isolation for controlled unit testing
         request.url.__str__ = Mock(return_value=f"http://test.com{path}")
@@ -335,7 +336,7 @@ class TestErrorHandlingMiddleware:
         request.headers = headers or {}
         request.method = "GET"
         # Mock: Generic component isolation for controlled unit testing
-        request.url = Mock()
+        request.url = url_instance  # Initialize appropriate service
         # Mock: Component isolation for controlled unit testing
         request.url.__str__ = Mock(return_value="http://test.com")
         request.url.path = "/test"

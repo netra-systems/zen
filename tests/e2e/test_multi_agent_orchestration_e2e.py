@@ -1,3 +1,26 @@
+class TestWebSocketConnection:
+    """Real WebSocket connection for testing instead of mocks."""
+    
+    def __init__(self):
+        self.messages_sent = []
+        self.is_connected = True
+        self._closed = False
+        
+    async def send_json(self, message: dict):
+        """Send JSON message."""
+        if self._closed:
+            raise RuntimeError("WebSocket is closed")
+        self.messages_sent.append(message)
+        
+    async def close(self, code: int = 1000, reason: str = "Normal closure"):
+        """Close WebSocket connection."""
+        self._closed = True
+        self.is_connected = False
+        
+    def get_messages(self) -> list:
+        """Get all sent messages."""
+        return self.messages_sent.copy()
+
 """
 Comprehensive Multi-Agent Orchestration E2E Test Suite
 
@@ -26,9 +49,13 @@ import time
 import uuid
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
+from test_framework.database.test_database_manager import TestDatabaseManager
+from auth_service.core.auth_manager import AuthManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 import pytest
-from unittest.mock import AsyncMock, Mock
 
 from netra_backend.app.agents.actions_to_meet_goals_sub_agent import ActionsToMeetGoalsSubAgent
 from netra_backend.app.agents.corpus_admin.agent import CorpusAdminSubAgent
@@ -42,6 +69,9 @@ from shared.isolated_environment import get_env
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.schemas.agent import SubAgentLifecycle
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager as WebSocketManager
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
 
 
 class MultiAgentOrchestrationSuite:
@@ -86,15 +116,11 @@ class MultiAgentOrchestrationSuite:
             self.websocket_manager = AsyncMock(spec=UnifiedWebSocketManager)
         
         # Configure WebSocket mock behavior
-        self.websocket_manager.send_message = AsyncMock()  # TODO: Use real service instead of Mock
-        self.websocket_manager.send_agent_update = AsyncMock()  # TODO: Use real service instead of Mock
-        self.websocket_manager.send_agent_log = AsyncMock()  # TODO: Use real service instead of Mock
-        self.websocket_manager.send_error = AsyncMock()  # TODO: Use real service instead of Mock
+        self.websocket_manager.websocket = TestWebSocketConnection()  # TODO: Use real service instead of Mock
     
     async def _initialize_agents(self) -> None:
         """Initialize all sub-agents with proper dependencies."""
-        mock_tool_dispatcher = AsyncMock()  # TODO: Use real service instead of Mock
-        mock_db_session = AsyncMock()  # TODO: Use real service instead of Mock
+        websocket = TestWebSocketConnection()  # TODO: Use real service instead of Mock
         
         # Configure mock_tool_dispatcher to avoid unawaited coroutine issues
         mock_tool_dispatcher.dispatch_tool = AsyncMock(return_value={"status": "success"})
@@ -139,8 +165,7 @@ class MultiAgentOrchestrationSuite:
     
     async def _initialize_supervisor(self) -> None:
         """Initialize supervisor agent with all sub-agents."""
-        mock_db_session = AsyncMock()  # TODO: Use real service instead of Mock
-        mock_tool_dispatcher = AsyncMock()  # TODO: Use real service instead of Mock
+        websocket = TestWebSocketConnection()  # TODO: Use real service instead of Mock
         
         self.supervisor = SupervisorAgent(
             db_session=mock_db_session,

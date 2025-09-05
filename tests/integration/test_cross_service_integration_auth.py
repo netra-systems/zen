@@ -1,4 +1,5 @@
 from shared.isolated_environment import get_env
+from shared.isolated_environment import IsolatedEnvironment
 """Auth Tests - Split from test_cross_service_integration.py"""
 
 import asyncio
@@ -7,7 +8,6 @@ import os
 import tempfile
 from datetime import datetime
 from pathlib import Path
-from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
 from fastapi import FastAPI, Request
@@ -22,6 +22,9 @@ from netra_backend.app.core.middleware_setup import (
     setup_cors_middleware,
 )
 from fastapi.middleware.cors import CORSMiddleware
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
 
 
 class TestSyntaxFix:

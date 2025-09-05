@@ -13,6 +13,7 @@ from typing import Dict, List, Any
 import aiohttp
 import ssl
 from pathlib import Path
+from shared.isolated_environment import IsolatedEnvironment
 
 # Add project root to path
 

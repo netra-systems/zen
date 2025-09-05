@@ -13,6 +13,7 @@ import jwt
 import hashlib
 from typing import Dict, Any
 from datetime import datetime, timedelta
+from shared.isolated_environment import IsolatedEnvironment
 
 from tests.e2e.staging_test_config import get_staging_config
 

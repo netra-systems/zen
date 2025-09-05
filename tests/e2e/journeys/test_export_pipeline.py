@@ -34,6 +34,7 @@ import os
 from typing import Dict, Any, List
 from pathlib import Path
 import pytest
+from shared.isolated_environment import IsolatedEnvironment
 
 from tests.e2e.export_pipeline_helpers import (
     LargeDatasetGenerator, ExportRequestManager, ExportFileValidator, PerformanceTracker,

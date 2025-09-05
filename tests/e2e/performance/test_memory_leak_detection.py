@@ -9,6 +9,7 @@ import asyncio
 import gc
 import logging
 from typing import Optional
+from shared.isolated_environment import IsolatedEnvironment
 
 from tests.e2e.integration.unified_e2e_harness import UnifiedE2ETestHarness
 from tests.e2e.integration.memory_leak_utilities import (

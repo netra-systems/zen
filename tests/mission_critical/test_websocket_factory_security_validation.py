@@ -37,8 +37,8 @@ import gc
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timedelta
 from typing import Dict, List, Set, Optional, Any
-from unittest.mock import Mock, AsyncMock
 import logging
+from shared.isolated_environment import IsolatedEnvironment
 
 from netra_backend.app.models.user_execution_context import UserExecutionContext
 from netra_backend.app.websocket_core.websocket_manager_factory import (
@@ -48,6 +48,10 @@ from netra_backend.app.websocket_core.websocket_manager_factory import (
     create_websocket_manager
 )
 from netra_backend.app.websocket_core.unified_manager import WebSocketConnection
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from shared.isolated_environment import get_env
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
 
 logger = logging.getLogger(__name__)
 
@@ -163,12 +167,27 @@ def user_contexts():
 
 
 @pytest.fixture
-def mock_websocket():
-    """Create mock WebSocket for testing."""
-    websocket = Mock()
-    websocket.send_json = AsyncMock()
-    websocket.close = AsyncMock()
-    return websocket
+def real_websocket():
+    """Create real WebSocket connection for testing."""
+    class TestWebSocketConnection:
+        def __init__(self):
+            self.messages_sent = []
+            self.is_connected = True
+            self._closed = False
+            
+        async def send_json(self, message: Dict):
+            if self._closed:
+                raise RuntimeError("WebSocket is closed")
+            self.messages_sent.append(message)
+            
+        async def close(self, code: int = 1000, reason: str = "Normal closure"):
+            self._closed = True
+            self.is_connected = False
+            
+        def get_messages(self) -> List[Dict]:
+            return self.messages_sent.copy()
+            
+    return TestWebSocketConnection()
 
 
 class TestFactoryIsolation:
@@ -264,8 +283,7 @@ class TestFactoryIsolation:
         
         for i, context in enumerate(user_contexts[:3]):
             manager = factory.create_manager(context)
-            websocket = Mock()
-            websocket.send_json = AsyncMock()
+            websocket = TestWebSocketConnection()  # Real WebSocket implementation
             
             connection = WebSocketConnection(
                 connection_id=context.websocket_connection_id,
@@ -369,8 +387,7 @@ class TestConcurrencySafety:
         
         for context in user_contexts[:5]:
             manager = factory.create_manager(context)
-            websocket = Mock()
-            websocket.send_json = AsyncMock()
+            websocket = TestWebSocketConnection()  # Real WebSocket implementation
             
             connection = WebSocketConnection(
                 connection_id=context.websocket_connection_id,
@@ -441,8 +458,7 @@ class TestConcurrencySafety:
         # Create multiple connections for rapid add/remove
         connections = []
         for i in range(10):
-            websocket = Mock()
-            websocket.send_json = AsyncMock()
+            websocket = TestWebSocketConnection()  # Real WebSocket implementation
             
             connection = WebSocketConnection(
                 connection_id=f"{context.websocket_connection_id}_{i}",
@@ -513,8 +529,7 @@ class TestResourceManagement:
         # Add multiple connections
         connections = []
         for i in range(5):
-            websocket = Mock()
-            websocket.send_json = AsyncMock()
+            websocket = TestWebSocketConnection()  # Real WebSocket implementation
             
             connection = WebSocketConnection(
                 connection_id=f"{context.websocket_connection_id}_{i}",
@@ -652,8 +667,7 @@ class TestResourceManagement:
                 manager = factory.create_manager(unique_context)
                 
                 # Add a connection to each manager
-                websocket = Mock()
-                websocket.send_json = AsyncMock()
+                websocket = TestWebSocketConnection()  # Real WebSocket implementation
                 
                 connection = WebSocketConnection(
                     connection_id=unique_context.websocket_connection_id,
@@ -726,8 +740,7 @@ class TestPerformanceScaling:
                 manager = factory.create_manager(context)
                 
                 # Add connection to each manager
-                websocket = Mock()
-                websocket.send_json = AsyncMock()
+                websocket = TestWebSocketConnection()  # Real WebSocket implementation
                 
                 connection = WebSocketConnection(
                     connection_id=context.websocket_connection_id,
@@ -804,8 +817,7 @@ class TestPerformanceScaling:
         
         for context in user_contexts[:10]:
             manager = factory.create_manager(context)
-            websocket = Mock()
-            websocket.send_json = AsyncMock()
+            websocket = TestWebSocketConnection()  # Real WebSocket implementation
             
             connection = WebSocketConnection(
                 connection_id=context.websocket_connection_id,
@@ -919,8 +931,7 @@ class TestSecurityBoundaries:
         manager = factory.create_manager(context)
         
         # Create legitimate connection
-        legitimate_websocket = Mock()
-        legitimate_websocket.send_json = AsyncMock()
+        websocket = TestWebSocketConnection()  # Real WebSocket implementation
         
         legitimate_connection = WebSocketConnection(
             connection_id=context.websocket_connection_id,
@@ -932,8 +943,7 @@ class TestSecurityBoundaries:
         await manager.add_connection(legitimate_connection)
         
         # Test connection with mismatched user_id (security violation)
-        malicious_websocket = Mock()
-        malicious_websocket.send_json = AsyncMock()
+        websocket = TestWebSocketConnection()  # Real WebSocket implementation
         
         malicious_connection = WebSocketConnection(
             connection_id="malicious_conn",
@@ -972,8 +982,7 @@ class TestSecurityBoundaries:
         manager = factory.create_manager(context)
         
         # Add connection
-        websocket = Mock()
-        websocket.send_json = AsyncMock()
+        websocket = TestWebSocketConnection()  # Real WebSocket implementation
         
         connection = WebSocketConnection(
             connection_id=context.websocket_connection_id,
@@ -1045,8 +1054,7 @@ class TestCompleteSecurityValidation:
         
         for i, context in enumerate(user_contexts[:5]):
             manager = factory.create_manager(context)
-            websocket = Mock()
-            websocket.send_json = AsyncMock()
+            websocket = TestWebSocketConnection()  # Real WebSocket implementation
             
             connection = WebSocketConnection(
                 connection_id=context.websocket_connection_id,
@@ -1179,8 +1187,7 @@ class TestSecurityPerformance:
         message_tasks = []
         
         for manager in secured_managers:
-            websocket = Mock()
-            websocket.send_json = AsyncMock()
+            websocket = TestWebSocketConnection()  # Real WebSocket implementation
             
             connection = WebSocketConnection(
                 connection_id=f"perf_{id(manager)}",

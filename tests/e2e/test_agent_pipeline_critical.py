@@ -23,6 +23,7 @@ from datetime import datetime, UTC
 from typing import Any, Dict, List, Optional
 import pytest
 import json
+from shared.isolated_environment import IsolatedEnvironment
 
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent

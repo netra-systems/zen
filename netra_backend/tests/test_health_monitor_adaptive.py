@@ -1,6 +1,7 @@
 # Shim module for health monitor tests
 import pytest
 from test_framework.fixtures.health import AdaptiveHealthMonitor
+from shared.isolated_environment import IsolatedEnvironment
 
 
 class TestAdaptiveRules:

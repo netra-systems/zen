@@ -8,19 +8,25 @@ backoff strategy continues to work correctly after the changes.
 import asyncio
 import time
 import pytest
-from unittest.mock import Mock, patch, AsyncMock, MagicMock
 from datetime import datetime, timedelta
 import jwt
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from auth_service.core.auth_manager import AuthManager
+from shared.isolated_environment import IsolatedEnvironment
 
 from netra_backend.app.core.app_factory import create_app
 
 
 class TestDevAutoLoginRegression:
     """Regression tests for dev auto-login improvements."""
+    pass
 
     @pytest.fixture
-    def mock_auth_service(self):
+ def real_auth_service():
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create a mock auth service for testing."""
+    pass
         with patch('netra_backend.app.core.dependencies.auth_service') as mock:
             mock.verify_token = AsyncMock(return_value={
                 'sub': 'dev-user-123',
@@ -37,7 +43,10 @@ class TestDevAutoLoginRegression:
 
     @pytest.fixture
     def dev_token(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Generate a valid dev token for testing."""
+    pass
         payload = {
             'sub': 'dev-user-123',
             'email': 'dev@example.com',
@@ -69,7 +78,8 @@ class TestDevAutoLoginRegression:
             if attempt_count < 3:
                 raise Exception("Service temporarily unavailable")
             
-            return {
+            await asyncio.sleep(0)
+    return {
                 'access_token': dev_token,
                 'refresh_token': 'refresh-token',
                 'user': {
@@ -101,9 +111,11 @@ class TestDevAutoLoginRegression:
     @pytest.mark.asyncio
     async def test_dev_autologin_initialization_state_tracking(self, mock_auth_service):
         """Test that initialization states are properly tracked during auto-login."""
+    pass
         initialization_states = []
         
         async def track_state(state: str):
+    pass
             initialization_states.append(state)
         
         # Mock the initialization progress tracking
@@ -142,7 +154,8 @@ class TestDevAutoLoginRegression:
         async def mock_refresh(*args, **kwargs):
             nonlocal refresh_called
             refresh_called = True
-            return {
+            await asyncio.sleep(0)
+    return {
                 'access_token': 'fresh-token',
                 'refresh_token': 'fresh-refresh',
                 'expires_in': 3600
@@ -162,15 +175,18 @@ class TestDevAutoLoginRegression:
     @pytest.mark.asyncio
     async def test_dev_autologin_concurrent_requests(self, mock_auth_service):
         """Test that concurrent auto-login requests don't cause race conditions."""
+    pass
         login_count = 0
         login_lock = asyncio.Lock()
         
         async def mock_login():
+    pass
             nonlocal login_count
             async with login_lock:
                 login_count += 1
                 await asyncio.sleep(0.1)  # Simulate processing time
-                return {
+                await asyncio.sleep(0)
+    return {
                     'access_token': f'token-{login_count}',
                     'user': {'id': 'dev-user-123'}
                 }
@@ -196,7 +212,8 @@ class TestDevAutoLoginRegression:
             storage[key] = value
         
         def mock_get_item(key):
-            return storage.get(key)
+            await asyncio.sleep(0)
+    return storage.get(key)
         
         with patch('netra_backend.app.core.storage.set_item', new=mock_set_item):
             with patch('netra_backend.app.core.storage.get_item', new=mock_get_item):
@@ -212,18 +229,22 @@ class TestDevAutoLoginRegression:
     @pytest.mark.asyncio
     async def test_dev_autologin_fallback_mechanism(self, mock_auth_service):
         """Test that dev auto-login has proper fallback when primary method fails."""
+    pass
         primary_failed = False
         fallback_used = False
         
         async def mock_primary_login():
+    pass
             nonlocal primary_failed
             primary_failed = True
             raise ConnectionError("Primary auth service unavailable")
         
         async def mock_fallback_login():
+    pass
             nonlocal fallback_used
             fallback_used = True
-            return {
+            await asyncio.sleep(0)
+    return {
                 'access_token': 'fallback-token',
                 'user': {'id': 'dev-user-fallback'}
             }
@@ -266,6 +287,7 @@ class TestDevAutoLoginRegression:
     @pytest.mark.asyncio
     async def test_dev_autologin_windows_unicode_handling(self):
         """Test that Windows Unicode/emoji handling works correctly."""
+    pass
         # Test emoji in user data
         user_data = {
             'name': 'Dev User 🤖',

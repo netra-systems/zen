@@ -6,6 +6,7 @@ import json
 import websockets
 import uuid
 from datetime import datetime
+from shared.isolated_environment import IsolatedEnvironment
 
 async def test_websocket_message():
     uri = "ws://localhost:8000/ws"

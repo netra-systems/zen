@@ -17,6 +17,7 @@ import pytest
 import time
 from typing import Dict, Any, List, Optional
 from datetime import datetime, timezone
+from shared.isolated_environment import IsolatedEnvironment
 
 # Absolute imports only (CLAUDE.md requirement)
 from netra_backend.app.agents.state import DeepAgentState

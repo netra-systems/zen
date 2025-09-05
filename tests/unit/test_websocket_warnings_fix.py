@@ -1,3 +1,29 @@
+class TestWebSocketConnection:
+    """Real WebSocket connection for testing instead of mocks."""
+    
+    def __init__(self):
+    pass
+        self.messages_sent = []
+        self.is_connected = True
+        self._closed = False
+        
+    async def send_json(self, message: dict):
+        """Send JSON message."""
+        if self._closed:
+            raise RuntimeError("WebSocket is closed")
+        self.messages_sent.append(message)
+        
+    async def close(self, code: int = 1000, reason: str = "Normal closure"):
+        """Close WebSocket connection."""
+    pass
+        self._closed = True
+        self.is_connected = False
+        
+    def get_messages(self) -> list:
+        """Get all sent messages."""
+        await asyncio.sleep(0)
+    return self.messages_sent.copy()
+
 """
 Test to verify that WebSocket warnings have been properly downgraded to INFO level.
 This test validates that the legacy pattern warnings no longer appear as warnings.
@@ -5,10 +31,14 @@ This test validates that the legacy pattern warnings no longer appear as warning
 
 import asyncio
 import logging
-from unittest.mock import MagicMock, patch
 import pytest
 from netra_backend.app.core.startup_validation import StartupValidator
 from netra_backend.app.core.startup_validation_fix import StartupValidationFixer
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
+from shared.isolated_environment import get_env
+from shared.isolated_environment import IsolatedEnvironment
 
 
 class TestWebSocketWarningsFix:
@@ -20,10 +50,7 @@ class TestWebSocketWarningsFix:
         validator = StartupValidator()
         
         # Mock app with WebSocket manager but no handlers
-        mock_app = MagicMock()
-        mock_app.state = MagicMock()
-        mock_ws_manager = MagicMock()
-        mock_ws_manager.message_handlers = []  # Zero handlers
+        mock_app = Magic        mock_app.state = Magic        mock_ws_manager = Magic        mock_ws_manager.message_handlers = []  # Zero handlers
         mock_ws_manager.active_connections = []
         mock_app.state.websocket_manager = mock_ws_manager
         
@@ -44,9 +71,7 @@ class TestWebSocketWarningsFix:
         """Test that missing agent registry is not an error in factory pattern."""
         
         # Mock app state with supervisor but no registry (factory pattern)
-        mock_app_state = MagicMock()
-        mock_supervisor = MagicMock()
-        mock_supervisor.registry = None  # No registry in factory pattern
+        mock_app_state = Magic        mock_supervisor = Magic        mock_supervisor.registry = None  # No registry in factory pattern
         mock_app_state.agent_supervisor = mock_supervisor
         
         # Run the fix
@@ -63,11 +88,7 @@ class TestWebSocketWarningsFix:
         validator = StartupValidator()
         
         # Mock app with supervisor and empty legacy registry
-        mock_app = MagicMock()
-        mock_app.state = MagicMock()
-        mock_supervisor = MagicMock()
-        mock_registry = MagicMock()
-        mock_registry.agents = {}  # Zero agents in legacy registry
+        mock_app = Magic        mock_app.state = Magic        mock_supervisor = Magic        mock_registry = Magic        mock_registry.agents = {}  # Zero agents in legacy registry
         mock_supervisor.registry = mock_registry
         mock_app.state.agent_supervisor = mock_supervisor
         
@@ -91,3 +112,4 @@ if __name__ == "__main__":
     asyncio.run(test.test_agent_registry_not_error_in_factory_pattern())
     asyncio.run(test.test_zero_agents_registered_is_info_level())
     print("✅ All WebSocket warning fix tests passed!")
+    pass

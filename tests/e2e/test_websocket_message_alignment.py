@@ -10,15 +10,20 @@ import json
 import pytest
 import websockets
 from typing import Any, Dict, List
-from unittest.mock import AsyncMock, MagicMock
+from shared.isolated_environment import IsolatedEnvironment
 
 from netra_backend.app.websocket_core.types import MessageType, create_server_message
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
+from shared.isolated_environment import get_env
 
 
 class WebSocketMessageAlignmentTest:
     """Test WebSocket message type alignment between backend and frontend."""
     
     def __init__(self):
+    pass
         self.received_messages: List[Dict[str, Any]] = []
         self.parse_errors: List[Dict[str, Any]] = []
         
@@ -153,10 +158,12 @@ async def test_all_backend_message_types():
     
     # Report results
     if failed_messages:
-        print("\n=== WebSocket Message Alignment Issues Found ===")
+        print("
+=== WebSocket Message Alignment Issues Found ===")
         print(f"Failed messages: {len(failed_messages)} out of {len(test_messages)}")
         for failure in failed_messages:
-            print(f"\nMessage Type: {failure['message_type']}")
+            print(f"
+Message Type: {failure['message_type']}")
             print(f"Error: {failure['errors']['error'] if failure['errors'] else 'Unknown'}")
             print(f"Message: {json.dumps(failure['message'], indent=2)}")
         
@@ -185,7 +192,8 @@ async def test_all_backend_message_types():
         assert set(actual_failures) == set(expected_failures), \
             f"Unexpected failures. Expected: {expected_failures}, Got: {actual_failures}"
     else:
-        print("\n=== All WebSocket Messages Validated Successfully ===")
+        print("
+=== All WebSocket Messages Validated Successfully ===")
         print(f"Tested {len(test_messages)} message types - all passed frontend validation")
 
 
@@ -211,7 +219,8 @@ async def test_welcome_message_format():
     )
     
     msg_dict = welcome_msg.model_dump()
-    print(f"\nTesting Welcome Message Format:")
+    print(f"
+Testing Welcome Message Format:")
     print(f"Message: {json.dumps(msg_dict, indent=2)}")
     
     success = await tester.simulate_frontend_validation(msg_dict)
@@ -261,3 +270,4 @@ if __name__ == "__main__":
     asyncio.run(test_all_backend_message_types())
     asyncio.run(test_welcome_message_format())
     asyncio.run(test_data_to_payload_conversion())
+    pass

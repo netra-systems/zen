@@ -1,4 +1,26 @@
-"""
+class TestWebSocketConnection:
+    """Real WebSocket connection for testing instead of mocks."""
+    
+    def __init__(self):
+        self.messages_sent = []
+        self.is_connected = True
+        self._closed = False
+        
+    async def send_json(self, message: dict):
+        """Send JSON message."""
+        if self._closed:
+            raise RuntimeError("WebSocket is closed")
+        self.messages_sent.append(message)
+        
+    async def close(self, code: int = 1000, reason: str = "Normal closure"):
+        """Close WebSocket connection."""
+        self._closed = True
+        self.is_connected = False
+        
+    def get_messages(self) -> list:
+        """Get all sent messages."""
+        return self.messages_sent.copy()
+\n"""
 Shared fixtures for WebSocket resilience tests.
 
 Common test fixtures, utilities, and mock classes used across all WebSocket resilience tests.
@@ -16,7 +38,6 @@ from dataclasses import dataclass, field
 from datetime import datetime, timedelta, timezone
 from enum import Enum
 from typing import Any, AsyncGenerator, Dict, List, Optional, Tuple
-from unittest.mock import AsyncMock, MagicMock, patch
 
 import jwt
 import pytest
@@ -24,6 +45,10 @@ import websockets
 from websockets.exceptions import ConnectionClosed, InvalidStatusCode
 
 from netra_backend.app.logging_config import central_logger
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
+from shared.isolated_environment import get_env
 
 logger = central_logger.get_logger(__name__)
 
@@ -279,7 +304,7 @@ class SecureWebSocketTestClient:
                 }
             
             # Mock successful connection for valid tokens
-            self.websocket = AsyncMock()
+            self.websocket = TestWebSocketConnection()
             self.is_connected = True
             connection_time = time.time() - connection_start
             

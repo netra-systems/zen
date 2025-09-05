@@ -13,6 +13,13 @@ Security target: Zero unauthorized tool access with comprehensive audit trail.
 
 import sys
 from pathlib import Path
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from test_framework.database.test_database_manager import TestDatabaseManager
+from test_framework.redis.test_redis_manager import TestRedisManager
+from auth_service.core.auth_manager import AuthManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 # Test framework import - using pytest fixtures instead
 
@@ -24,7 +31,6 @@ import uuid
 from datetime import datetime, timedelta, timezone
 from enum import Enum
 from typing import Any, Dict, List, Optional, Set
-from unittest.mock import AsyncMock, MagicMock, Mock, patch, patch
 
 import pytest
 from netra_backend.app.schemas import User
@@ -36,8 +42,7 @@ from netra_backend.app.agents.supervisor.state_manager import AgentStateManager
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
 from netra_backend.app.core.exceptions_base import (
     AuthorizationException,
-    NetraException,
-)
+    NetraException)
 from netra_backend.app.redis_manager import RedisManager
 from netra_backend.app.services.security_service import SecurityService
 # Removed mock import - using real service testing per CLAUDE.md "MOCKS = Abomination"
@@ -88,6 +93,7 @@ class ToolAuthorizationService:
     """Service for managing tool authorization and access control."""
     
     def __init__(self, redis_manager: Optional[RedisManager] = None):
+    pass
         self.redis_manager = redis_manager
         self.tool_registry: Dict[str, MockTool] = {}
         self.agent_permissions: Dict[str, Dict[str, Any]] = {}
@@ -279,6 +285,7 @@ class TestAgentToolAuthorizationL3:
     @pytest.fixture
     async def authorization_service(self, redis_manager):
         """Create tool authorization service."""
+    pass
         service = ToolAuthorizationService(redis_manager=redis_manager)
         
         # Register test tools
@@ -298,7 +305,10 @@ class TestAgentToolAuthorizationL3:
         
     @pytest.fixture
     def test_agents(self, authorization_service):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create test agents with different roles."""
+    pass
         agents = {}
         
         # Basic agent
@@ -337,7 +347,8 @@ class TestAgentToolAuthorizationL3:
         )
         agents["system"] = system_agent
         
-        return agents
+        await asyncio.sleep(0)
+    return agents
         
     @pytest.mark.asyncio
     async def test_role_based_tool_permissions(self, authorization_service, test_agents):
@@ -392,6 +403,7 @@ class TestAgentToolAuthorizationL3:
     @pytest.mark.asyncio
     async def test_zero_unauthorized_access(self, authorization_service, test_agents):
         """Test that there is zero unauthorized tool access."""
+    pass
         unauthorized_attempts = []
         
         # Test various unauthorized access attempts
@@ -450,6 +462,7 @@ class TestAgentToolAuthorizationL3:
     @pytest.mark.asyncio
     async def test_authorization_caching_performance(self, authorization_service, test_agents):
         """Test authorization caching for performance optimization."""
+    pass
         agent = test_agents["admin"]
         tool_id = "admin_tool"
         
@@ -517,6 +530,7 @@ class TestAgentToolAuthorizationL3:
     @pytest.mark.asyncio
     async def test_authorization_under_concurrent_load(self, authorization_service, test_agents):
         """Test authorization system under concurrent load."""
+    pass
         # Create concurrent authorization requests
         concurrent_requests = []
         

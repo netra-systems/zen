@@ -5,11 +5,12 @@ Tests error handling for database failures
 
 import sys
 from pathlib import Path
+from test_framework.database.test_database_manager import TestDatabaseManager
+from shared.isolated_environment import IsolatedEnvironment
 
 # Test framework import - using pytest fixtures instead
 
 import asyncio
-from unittest.mock import AsyncMock, MagicMock, patch
 
 import psycopg2
 import pytest

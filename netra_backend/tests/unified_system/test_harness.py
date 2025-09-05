@@ -1,4 +1,5 @@
 from shared.isolated_environment import get_env
+from shared.isolated_environment import IsolatedEnvironment
 """
 env = get_env()
 Unified System Test Harness for Netra Apex AI Optimization Platform.

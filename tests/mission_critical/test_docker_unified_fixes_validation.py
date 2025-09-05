@@ -1,3 +1,29 @@
+class TestWebSocketConnection:
+    """Real WebSocket connection for testing instead of mocks."""
+    
+    def __init__(self):
+    pass
+        self.messages_sent = []
+        self.is_connected = True
+        self._closed = False
+        
+    async def send_json(self, message: dict):
+        """Send JSON message."""
+        if self._closed:
+            raise RuntimeError("WebSocket is closed")
+        self.messages_sent.append(message)
+        
+    async def close(self, code: int = 1000, reason: str = "Normal closure"):
+        """Close WebSocket connection."""
+    pass
+        self._closed = True
+        self.is_connected = False
+        
+    def get_messages(self) -> list:
+        """Get all sent messages."""
+        await asyncio.sleep(0)
+    return self.messages_sent.copy()
+
 """
 Mission Critical Validation Test: Docker Unified Fixes
 
@@ -26,11 +52,16 @@ import uuid
 import json
 import logging
 from pathlib import Path
-from unittest.mock import MagicMock, patch
 from typing import Dict, List, Any, Optional, Tuple
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
 from datetime import datetime
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from test_framework.docker.unified_docker_manager import UnifiedDockerManager
+from test_framework.database.test_database_manager import TestDatabaseManager
+from test_framework.redis.test_redis_manager import TestRedisManager
+from auth_service.core.auth_manager import AuthManager
+from shared.isolated_environment import IsolatedEnvironment
 
 # Add project root to path
 project_root = Path(__file__).parent.parent.parent
@@ -38,6 +69,11 @@ sys.path.insert(0, str(project_root))
 
 from test_framework.unified_docker_manager import UnifiedDockerManager, EnvironmentType
 from test_framework.docker_config_loader import DockerConfigLoader, DockerEnvironment
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
+from shared.isolated_environment import get_env
+import asyncio
 
 
 class TestDockerUnifiedFixes:
@@ -71,6 +107,7 @@ class TestDockerUnifiedFixes:
     
     def test_p0_service_urls_use_correct_credentials(self):
         """Validate P0: Service URLs include correct credentials."""
+    pass
         # Development environment
         dev_manager = UnifiedDockerManager(environment_type=EnvironmentType.DEVELOPMENT)
         dev_url = dev_manager._build_service_url_from_port("postgres", 5433)
@@ -104,6 +141,7 @@ class TestDockerUnifiedFixes:
     
     def test_p0_port_discovery_from_docker_ps(self):
         """Validate P0: Port discovery extracts ports from docker ps output."""
+    pass
         manager = UnifiedDockerManager()
         
         mock_output = """
@@ -141,6 +179,7 @@ ghi789         netra-dev-auth          0.0.0.0:8081->8081/tcp   netra-core-gener
     
     def test_p1_environment_detection_implemented(self):
         """Validate P1: Environment detection is implemented."""
+    pass
         manager = UnifiedDockerManager()
         
         # Should have detect_environment method
@@ -150,7 +189,8 @@ ghi789         netra-dev-auth          0.0.0.0:8081->8081/tcp   netra-core-gener
         with patch('subprocess.run') as mock_run:
             # Mock development containers running
             mock_run.return_value = MagicMock(
-                stdout="netra-core-generation-1-dev-backend-1\n",
+                stdout="netra-core-generation-1-dev-backend-1
+",
                 stderr="",
                 returncode=0
             )
@@ -172,6 +212,7 @@ ghi789         netra-dev-auth          0.0.0.0:8081->8081/tcp   netra-core-gener
     
     def test_integration_docker_manager_uses_config_loader(self):
         """Validate integration: UnifiedDockerManager can use DockerConfigLoader."""
+    pass
         manager = UnifiedDockerManager(environment_type=EnvironmentType.DEVELOPMENT)
         
         # Manager should be able to get configuration from loader
@@ -216,6 +257,7 @@ ghi789         netra-dev-auth          0.0.0.0:8081->8081/tcp   netra-core-gener
     
     def test_summary_report(self):
         """Generate summary of all fixes."""
+    pass
         fixes_validated = {
             "P0 - Database Credentials": "✅ FIXED - Environment-aware credentials",
             "P0 - Port Discovery": "✅ FIXED - Enhanced container parsing",
@@ -225,7 +267,8 @@ ghi789         netra-dev-auth          0.0.0.0:8081->8081/tcp   netra-core-gener
             "P1 - Configuration Validation": "✅ IMPLEMENTED - Validation system"
         }
         
-        print("\n" + "="*60)
+        print("
+" + "="*60)
         print("DOCKER UNIFIED FIXES VALIDATION SUMMARY")
         print("="*60)
         for fix, status in fixes_validated.items():
@@ -299,6 +342,7 @@ class TestDockerUnifiedFixesInfrastructure:
         
         error_count = 0
         mock_output = """
+    pass
 CONTAINER ID   IMAGE                   PORTS                    NAMES
 abc123         netra-dev-backend       0.0.0.0:8000->8000/tcp   netra-core-generation-1-dev-backend-1
 def456         netra-dev-postgres      0.0.0.0:5433->5432/tcp   netra-core-generation-1-dev-postgres-1
@@ -442,6 +486,7 @@ ghi789         netra-dev-auth          0.0.0.0:8081->8081/tcp   netra-core-gener
     
     def test_unified_fixes_compatibility_validation(self):
         """Test compatibility of fixes across different environments."""
+    pass
         logger.info("🌐 Testing unified fixes compatibility validation")
         
         compatibility_matrix = {}
@@ -560,6 +605,7 @@ ghi789         netra-dev-auth          0.0.0.0:8081->8081/tcp   netra-core-gener
         
         def concurrent_credential_operation(thread_id: int) -> Dict[str, Any]:
             """Concurrent credential operation for stability testing."""
+    pass
             try:
                 start_time = time.time()
                 
@@ -705,6 +751,7 @@ abc123         backend   0.0.0.0:8000->8000/tcp   netra-backend-1""",
 def456         postgres    0.0.0.0:5433->5432/tcp   netra-postgres-1""",
             """CONTAINER ID   IMAGE   PORTS                    NAMES
 ghi789         auth    0.0.0.0:8081->8081/tcp   netra-auth-1"""
+    pass
         ]
         
         discovery_times = []

@@ -9,6 +9,7 @@ from datetime import datetime, timezone, timedelta
 import pytest
 from typing import Dict, Any
 import json
+from shared.isolated_environment import IsolatedEnvironment
 
 from netra_backend.app.db.clickhouse_schema import (
     ClickHouseTraceSchema,

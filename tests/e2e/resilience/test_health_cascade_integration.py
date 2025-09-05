@@ -1,4 +1,5 @@
 from shared.isolated_environment import get_env
+from shared.isolated_environment import IsolatedEnvironment
 """Health Check Cascade Integration Test - Real Health Endpoint Testing
 
 from shared.isolated_environment import get_env

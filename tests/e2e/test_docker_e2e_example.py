@@ -21,6 +21,7 @@ import json
 import pytest
 import httpx
 from typing import Dict, Any
+from shared.isolated_environment import IsolatedEnvironment
 
 # Import E2E test utilities
 from test_framework.websocket_helpers import WebSocketTestHelpers

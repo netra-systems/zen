@@ -15,12 +15,14 @@ import asyncio
 import httpx
 import pytest
 from typing import Dict, Any
+from shared.isolated_environment import IsolatedEnvironment
 
 
 class WorkingConfigValidator:
     """Validates the current working system configuration."""
     
     def __init__(self):
+    pass
         self.services = {
             "auth": {
                 "port": 8001,  # CORRECTED: Auth service is actually running on 8001
@@ -158,10 +160,12 @@ async def test_current_working_port_configuration():
     
     This is the actual port configuration observed during successful dev launcher startup.
     """
+    pass
     validator = WorkingConfigValidator()
     results = await validator.validate_all_services()
     
-    print(f"\n=== CURRENT WORKING CONFIGURATION VALIDATION ===")
+    print(f"
+=== CURRENT WORKING CONFIGURATION VALIDATION ===")
     print(f"Total services: {results['total_services']}")
     print(f"Healthy services: {results['healthy_services']}")
     print(f"Accessible services: {results['accessible_services']}")
@@ -173,7 +177,8 @@ async def test_current_working_port_configuration():
         port = service_result['port']
         response_time = service_result.get('response_time_ms', 0)
         
-        print(f"\n{status} {service_name.upper()} (port {port})")
+        print(f"
+{status} {service_name.upper()} (port {port})")
         print(f"   Response time: {response_time:.1f}ms" if response_time else "   No response time")
         
         if service_result.get('service_identity_confirmed'):
@@ -219,10 +224,12 @@ async def test_websocket_endpoint_accessibility():
     This validates the WebSocket endpoint exists and is reachable,
     even if authentication is required.
     """
+    pass
     validator = WorkingConfigValidator()
     result = await validator.validate_websocket_endpoint()
     
-    print(f"\n=== WEBSOCKET ENDPOINT VALIDATION ===")
+    print(f"
+=== WEBSOCKET ENDPOINT VALIDATION ===")
     print(f"WebSocket URL: {result['websocket_url']}")
     print(f"Endpoint accessible: {result['endpoint_accessible']}")
     
@@ -256,10 +263,12 @@ async def test_service_response_timing():
     
     This ensures the current configuration meets performance requirements.
     """
+    pass
     validator = WorkingConfigValidator()
     results = await validator.validate_all_services()
     
-    print(f"\n=== SERVICE RESPONSE TIMING VALIDATION ===")
+    print(f"
+=== SERVICE RESPONSE TIMING VALIDATION ===")
     
     timing_requirements = {
         "auth": 2000,    # Auth should respond within 2s for WebSocket handshakes
@@ -289,6 +298,7 @@ async def test_service_response_timing():
 
 if __name__ == "__main__":
     async def main():
+    pass
         validator = WorkingConfigValidator()
         
         print("=== VALIDATING CURRENT WORKING CONFIGURATION ===")

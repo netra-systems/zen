@@ -5,13 +5,14 @@ Tests Google OAuth and general OAuth manager
 import json
 import uuid
 from datetime import datetime, timedelta
-from unittest.mock import Mock, AsyncMock, patch
 import pytest
 import pytest_asyncio
 from auth_service.auth_core.oauth_manager import OAuthManager
 from auth_service.auth_core.oauth.google_oauth import GoogleOAuthProvider, GoogleOAuthError
 from auth_service.auth_core.config import AuthConfig
 from shared.isolated_environment import get_env
+from auth_service.core.auth_manager import AuthManager
+from shared.isolated_environment import IsolatedEnvironment
 
 
 class TestOAuthManagerBasics:
@@ -19,7 +20,10 @@ class TestOAuthManagerBasics:
     
     @pytest.fixture(autouse=True)
     def setup_method(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Setup for each test"""
+    pass
         self.manager = OAuthManager()
         self.state = str(uuid.uuid4())
         self.code = "test_authorization_code"
@@ -31,6 +35,7 @@ class TestOAuthManagerBasics:
     
     def test_get_available_providers(self):
         """Test getting available OAuth providers"""
+    pass
         providers = self.manager.get_available_providers()
         assert isinstance(providers, list)
         assert "google" in providers or len(providers) == 0  # May be empty if config missing
@@ -43,6 +48,7 @@ class TestOAuthManagerBasics:
     
     def test_get_provider_invalid(self):
         """Test getting invalid provider returns None"""
+    pass
         provider = self.manager.get_provider("invalid_provider")
         assert provider is None
     
@@ -53,6 +59,7 @@ class TestOAuthManagerBasics:
     
     def test_get_provider_status(self):
         """Test getting provider status"""
+    pass
         status = self.manager.get_provider_status("google")
         assert isinstance(status, dict)
         assert "provider" in status
@@ -72,7 +79,10 @@ class TestGoogleOAuthProvider:
     
     @pytest.fixture(autouse=True)
     def setup_method(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Setup for each test"""
+    pass
         self.provider = GoogleOAuthProvider()
         self.state = str(uuid.uuid4())
     
@@ -84,6 +94,7 @@ class TestGoogleOAuthProvider:
     
     def test_client_id_property(self):
         """Test client ID property"""
+    pass
         client_id = self.provider.client_id
         # Client ID might be None in test environment
         assert client_id is None or isinstance(client_id, str)
@@ -96,6 +107,7 @@ class TestGoogleOAuthProvider:
     
     def test_get_redirect_uri(self):
         """Test getting redirect URI"""
+    pass
         redirect_uri = self.provider.get_redirect_uri()
         # Redirect URI might be None in test environment
         assert redirect_uri is None or isinstance(redirect_uri, str)
@@ -107,6 +119,7 @@ class TestGoogleOAuthProvider:
     
     def test_validate_configuration(self):
         """Test validating configuration"""
+    pass
         is_valid, message = self.provider.validate_configuration()
         assert isinstance(is_valid, bool)
         assert isinstance(message, str)
@@ -121,6 +134,7 @@ class TestGoogleOAuthProvider:
     
     def test_get_configuration_status(self):
         """Test getting configuration status"""
+    pass
         status = self.provider.get_configuration_status()
         assert isinstance(status, dict)
         # Check for either 'configured' or 'is_configured' 
@@ -140,6 +154,7 @@ class TestGoogleOAuthProvider:
     
     def test_exchange_code_for_user_info_with_invalid_code(self):
         """Test exchanging authorization code gracefully handles invalid code"""
+    pass
         try:
             result = self.provider.exchange_code_for_user_info("invalid_test_code", self.state)
             # If it doesn't raise an exception, result should be None or a dict
@@ -154,7 +169,10 @@ class TestOAuthSecurity:
     
     @pytest.fixture(autouse=True) 
     def setup_method(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Setup for each test"""
+    pass
         self.manager = OAuthManager()
         self.provider = GoogleOAuthProvider()
         self.state = str(uuid.uuid4())
@@ -168,6 +186,7 @@ class TestOAuthSecurity:
     
     def test_provider_self_check_comprehensive(self):
         """Test provider self-check includes all required checks"""
+    pass
         check_result = self.provider.self_check()
         
         # Self-check should always return a dict with these fields
@@ -194,7 +213,10 @@ class TestOAuthIntegration:
     
     @pytest.fixture(autouse=True)
     def setup_method(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Setup for each test"""
+    pass
         self.manager = OAuthManager()
         self.provider = GoogleOAuthProvider()
     
@@ -214,6 +236,7 @@ class TestOAuthIntegration:
     
     def test_provider_status_consistency(self):
         """Test provider status is consistent"""
+    pass
         manager_status = self.manager.get_provider_status("google")
         direct_check = self.provider.self_check()
         

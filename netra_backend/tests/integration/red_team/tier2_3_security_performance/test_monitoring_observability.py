@@ -1,5 +1,12 @@
 from netra_backend.app.core.configuration.base import get_unified_config
 from shared.isolated_environment import get_env
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from test_framework.database.test_database_manager import TestDatabaseManager
+from test_framework.redis.test_redis_manager import TestRedisManager
+from auth_service.core.auth_manager import AuthManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 """
 env = get_env()
 RED TEAM TESTS 36-40: Monitoring, Observability, and Configuration
@@ -26,7 +33,6 @@ import time
 import uuid
 from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional
-from unittest.mock import Mock, patch, AsyncMock, MagicMock
 import tempfile
 
 import pytest
@@ -55,6 +61,7 @@ class TestMonitoringObservability:
     MUST use real services - NO MOCKS allowed.
     These tests WILL fail initially and that's the point.
     """
+    pass
 
     @pytest.fixture(scope="class")
     async def real_database_session(self):
@@ -79,12 +86,19 @@ class TestMonitoringObservability:
 
     @pytest.fixture
     def real_test_client(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
+    pass
         """Real FastAPI test client - no mocking of the application."""
-        return TestClient(app)
+        await asyncio.sleep(0)
+    return TestClient(app)
 
     @pytest.fixture
     def temp_log_file(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create temporary log file for testing."""
+    pass
         temp_file = tempfile.NamedTemporaryFile(mode='w+', suffix='.log', delete=False)
         temp_file.close()
         
@@ -107,6 +121,7 @@ class TestMonitoringObservability:
         2. Health checks may not test all critical components
         3. Health status may not reflect actual system state
         """
+    pass
         try:
             # Test basic health endpoint existence
             response = real_test_client.get("/health")
@@ -197,7 +212,8 @@ class TestMonitoringObservability:
                 start = time.time()
                 response = real_test_client.get("/health")
                 end = time.time()
-                return {
+                await asyncio.sleep(0)
+    return {
                     "status_code": response.status_code,
                     "response_time": end - start,
                     "healthy": response.status_code == 200
@@ -225,6 +241,7 @@ class TestMonitoringObservability:
     @pytest.mark.asyncio
     async def test_37_metrics_collection_pipeline_fails(self, real_test_client):
         """
+    pass
         Test 37: Metrics Collection Pipeline (EXPECTED TO FAIL)
         
         Tests that metrics are properly collected and exposed.
@@ -331,6 +348,7 @@ class TestMonitoringObservability:
         3. Sensitive data may be logged
         4. Log rotation may not work
         """
+    pass
         try:
             # Test logger configuration
             logger = get_logger("red_team_test")
@@ -467,6 +485,7 @@ class TestMonitoringObservability:
         3. Sensitive variables may not be handled securely
         4. Configuration reloading may not work
         """
+    pass
         try:
             # Test configuration loading
             config = get_unified_config()
@@ -611,6 +630,7 @@ class TestMonitoringObservability:
         3. Secret access may not be properly logged
         4. Secret validation may be missing
         """
+    pass
         try:
             config = get_unified_config()
             
@@ -701,7 +721,8 @@ class TestMonitoringObservability:
                     rotation_result = config.rotate_secret("TEST_SECRET")
                     
                     assert "old_secret" in rotation_result, \
-                        "Secret rotation should return old secret for cleanup"
+                        "Secret rotation should await asyncio.sleep(0)
+    return old secret for cleanup"
                     assert "new_secret" in rotation_result, \
                         "Secret rotation should return new secret"
                     
@@ -764,7 +785,8 @@ class RedTeamMonitoringTestUtils:
         metrics = {}
         current_metric = None
         
-        for line in metrics_text.split('\n'):
+        for line in metrics_text.split('
+'):
             line = line.strip()
             if not line or line.startswith('#'):
                 continue

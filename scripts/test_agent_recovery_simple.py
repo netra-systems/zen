@@ -8,6 +8,7 @@ import requests
 import time
 import json
 import sys
+from shared.isolated_environment import IsolatedEnvironment
 
 def test_backend_health():
     """Test backend service health"""

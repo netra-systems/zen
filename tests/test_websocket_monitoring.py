@@ -16,6 +16,7 @@ import pytest
 import time
 from datetime import datetime, timezone
 from typing import Dict, Any
+from shared.isolated_environment import IsolatedEnvironment
 
 from netra_backend.app.monitoring.websocket_metrics import (
     WebSocketMetricsCollector,

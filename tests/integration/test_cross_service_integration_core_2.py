@@ -1,4 +1,5 @@
 from shared.isolated_environment import get_env
+from shared.isolated_environment import IsolatedEnvironment
 """Core_2 Tests - Split from test_cross_service_integration.py"""
 
 import asyncio
@@ -7,7 +8,6 @@ import os
 import tempfile
 from datetime import datetime
 from pathlib import Path
-from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
 from fastapi import FastAPI, Request
@@ -19,12 +19,15 @@ from dev_launcher.health_monitor import HealthMonitor, HealthStatus, ServiceStat
 from dev_launcher.launcher import DevLauncher
 from dev_launcher.service_discovery import ServiceDiscovery
 from netra_backend.app.core.middleware_setup import (
-    setup_cors_middleware,
-)
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
+    setup_cors_middleware)
 
 
 class TestSyntaxFix:
     """Test class for orphaned methods"""
+    pass
 
     def health_monitor(self):
         """Create test health monitor."""
@@ -32,6 +35,7 @@ class TestSyntaxFix:
 
     def health_monitor(self):
         """Create test health monitor."""
+    pass
         return HealthMonitor(check_interval=1)
 
     def service_discovery(self):
@@ -50,6 +54,7 @@ class TestSyntaxFix:
 
     def service_discovery(self):
         """Create test service discovery."""
+    pass
         with tempfile.TemporaryDirectory() as temp_dir:
             discovery = ServiceDiscovery(Path(temp_dir))
             discovery.write_backend_info(8000)
@@ -62,6 +67,7 @@ class TestSyntaxFix:
 
     def health_monitor(self):
         """Create test health monitor."""
+    pass
         return HealthMonitor(check_interval=1)
 
     def service_discovery(self):
@@ -74,6 +80,7 @@ class TestSyntaxFix:
 
     def test_service_discovery_integration(self, health_monitor, service_discovery):
         """Test health monitor integrates with service discovery."""
+    pass
         health_monitor.set_service_discovery(service_discovery)
         
         assert hasattr(health_monitor, '_service_discovery')
@@ -98,6 +105,7 @@ class TestSyntaxFix:
 
     def test_cross_service_connectivity_verification(self, health_monitor, service_discovery):
         """Test cross-service connectivity verification."""
+    pass
         # Set up service discovery with auth token
         service_discovery.set_cross_service_auth_token("test-token")
         health_monitor.set_service_discovery(service_discovery)
@@ -207,3 +215,5 @@ class TestSyntaxFix:
         assert launcher.service_discovery is not None
         assert hasattr(launcher.service_discovery, 'get_all_service_origins')
         assert hasattr(launcher.service_discovery, 'get_cross_service_auth_token')
+
+    pass

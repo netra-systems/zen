@@ -13,8 +13,10 @@ Business Value Justification (BVJ):
 
 import pytest
 import os
-from unittest.mock import patch, MagicMock
 from typing import Dict, Any
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from auth_service.core.auth_manager import AuthManager
+from shared.isolated_environment import IsolatedEnvironment
 
 from auth_service.auth_core.auth_environment import AuthEnvironment
 
@@ -24,7 +26,10 @@ class TestAuthEnvironmentURLs:
     
     @pytest.fixture(autouse=True)
     def setup_method(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Clear environment before each test."""
+    pass
         # Store original env vars
         self.original_env = os.environ.copy()
         
@@ -55,6 +60,7 @@ class TestAuthEnvironmentURLs:
     
     def test_test_environment_urls(self):
         """Test that test environment returns correct URLs."""
+    pass
         with patch.dict(os.environ, {'ENVIRONMENT': 'test'}):
             auth_env = AuthEnvironment()
             
@@ -77,6 +83,7 @@ class TestAuthEnvironmentURLs:
     
     def test_production_urls(self):
         """Test that production environment returns correct URLs."""
+    pass
         with patch.dict(os.environ, {'ENVIRONMENT': 'production'}):
             auth_env = AuthEnvironment()
             
@@ -106,6 +113,7 @@ class TestAuthEnvironmentURLs:
     
     def test_partial_overrides(self):
         """Test that partial overrides work correctly."""
+    pass
         custom_env = {
             'ENVIRONMENT': 'staging',
             'FRONTEND_URL': 'https://override.staging.com'
@@ -142,6 +150,7 @@ class TestAuthEnvironmentURLs:
     
     def test_auth_service_port_for_environments(self):
         """Test auth service port returns correct values per environment."""
+    pass
         test_cases = [
             ('development', 8081),
             ('test', 8082),
@@ -173,6 +182,7 @@ class TestAuthEnvironmentURLs:
     
     def test_unknown_environment_defaults(self):
         """Test that unknown environments fall back to safe defaults."""
+    pass
         with patch.dict(os.environ, {'ENVIRONMENT': 'custom-env'}):
             auth_env = AuthEnvironment()
             
@@ -207,6 +217,7 @@ class TestAuthEnvironmentURLs:
     ])
     def test_url_protocol_consistency(self, env, expected_https):
         """Test that URL protocols are consistent per environment."""
+    pass
         with patch.dict(os.environ, {'ENVIRONMENT': env}):
             auth_env = AuthEnvironment()
             
@@ -244,6 +255,7 @@ class TestAuthEnvironmentURLRegression:
     
     def test_staging_urls_use_staging_subdomain(self):
         """Regression test: Ensure staging URLs use staging subdomain."""
+    pass
         with patch.dict(os.environ, {'ENVIRONMENT': 'staging'}):
             auth_env = AuthEnvironment()
             
@@ -272,6 +284,7 @@ class TestAuthEnvironmentURLRegression:
     
     def test_oauth_redirect_matches_frontend_domain(self):
         """Regression test: OAuth redirect must match frontend domain."""
+    pass
         environments = ['development', 'test', 'staging', 'production']
         
         for env in environments:

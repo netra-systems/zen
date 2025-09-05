@@ -7,10 +7,14 @@ preventing revenue loss from quota violations and system resource exhaustion.
 import pytest
 import asyncio
 import time
-from unittest.mock import AsyncMock, patch
+from shared.isolated_environment import IsolatedEnvironment
 
 from tests.e2e.helpers.performance import RateLimitingTester
 from tests.clients.backend_client import BackendClient
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
+from shared.isolated_environment import get_env
 
 
 @pytest.mark.critical

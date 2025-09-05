@@ -1,6 +1,7 @@
 """Standalone test to verify SSOT tool enhancement fix."""
 import asyncio
-from unittest.mock import MagicMock, AsyncMock
+from netra_backend.app.core.agent_registry import AgentRegistry
+from shared.isolated_environment import IsolatedEnvironment
 
 # Test imports
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher

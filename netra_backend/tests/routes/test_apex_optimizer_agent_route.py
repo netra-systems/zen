@@ -1,8 +1,10 @@
 import sys
 from pathlib import Path
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 import asyncio
-from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 from fastapi.testclient import TestClient
@@ -19,7 +21,7 @@ from netra_backend.app.main import app
 async def test_apex_optimizer_agent(prompt: str):
     # Create a mock supervisor
     # Mock: Generic component isolation for controlled unit testing
-    mock_supervisor = Mock()
+    mock_supervisor = mock_supervisor_instance  # Initialize appropriate service
     # Mock: Async component isolation for testing without real async operations
     mock_supervisor.run = AsyncMock(return_value={"status": "completed"})
     

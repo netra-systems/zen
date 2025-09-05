@@ -1,4 +1,5 @@
 from shared.isolated_environment import get_env
+from shared.isolated_environment import IsolatedEnvironment
 """
 RED TEAM TEST 1: Cross-Service Auth Token Validation
 

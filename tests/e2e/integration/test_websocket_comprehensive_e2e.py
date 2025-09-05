@@ -15,6 +15,7 @@ Module Architecture Compliance: Under 300 lines, functions under 8 lines
 
 import sys
 from pathlib import Path
+from shared.isolated_environment import IsolatedEnvironment
 
 
 

@@ -20,6 +20,7 @@ import tempfile
 import shutil
 import statistics
 from typing import Dict, Any, List
+from shared.isolated_environment import IsolatedEnvironment
 
 from tests.e2e.fixtures.resource_monitoring import isolation_test_config, resource_limits
 from tests.e2e.test_helpers.agent_isolation_base import AgentIsolationBase

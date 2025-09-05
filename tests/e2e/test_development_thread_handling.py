@@ -8,7 +8,7 @@ import asyncio
 import json
 import pytest
 from typing import Optional
-from unittest.mock import patch
+from shared.isolated_environment import IsolatedEnvironment
 
 import websockets
 from fastapi import FastAPI
@@ -18,6 +18,9 @@ from netra_backend.app.main import app
 from netra_backend.app.db.postgres import initialize_postgres, async_session_factory
 from netra_backend.app.db.models_postgres import Thread
 from shared.isolated_environment import get_env
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
 
 
 @pytest.mark.e2e

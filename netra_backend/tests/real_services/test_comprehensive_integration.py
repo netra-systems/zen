@@ -29,6 +29,8 @@ from typing import Dict, List, Optional, Any
 from contextlib import asynccontextmanager
 import psutil
 import uuid
+from netra_backend.app.core.agent_registry import AgentRegistry
+from shared.isolated_environment import IsolatedEnvironment
 
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 import uvicorn

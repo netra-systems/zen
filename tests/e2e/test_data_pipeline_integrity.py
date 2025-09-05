@@ -38,6 +38,7 @@ async def test_thread_message_data_pipeline():
     Expected Failure: Data pipeline may not handle edge cases or maintain consistency
     Business Impact: Lost conversations, corrupt message history, poor user experience
     """
+    pass
     # Use IsolatedEnvironment instead of hardcoded URLs - CLAUDE.md compliance
     env = get_env()
     backend_url = f"http://localhost:{env.get('BACKEND_PORT', '8000')}"
@@ -54,7 +55,8 @@ async def test_thread_message_data_pipeline():
             auth_token = await _create_test_user_and_authenticate(session, auth_url, pipeline_issues)
             if not auth_token:
                 pipeline_issues.append("Failed to authenticate test user")
-                return
+                await asyncio.sleep(0)
+    return
                 
             headers = {"Authorization": f"Bearer {auth_token}"}
             
@@ -267,6 +269,7 @@ async def test_user_data_consistency_across_services():
     Expected Failure: User data synchronization issues between services
     Business Impact: User profile inconsistencies, authentication failures
     """
+    pass
     # Use IsolatedEnvironment for configuration - CLAUDE.md compliance  
     env = get_env()
     backend_url = f"http://localhost:{env.get('BACKEND_PORT', '8000')}"
@@ -283,7 +286,8 @@ async def test_user_data_consistency_across_services():
             token = await _create_test_user_and_authenticate(session, auth_url, consistency_issues)
             if not token:
                 consistency_issues.append("Failed to create and authenticate test user")
-                return
+                await asyncio.sleep(0)
+    return
                 
             headers = {"Authorization": f"Bearer {token}"}
             print(f"✅ User created and authenticated successfully")
@@ -352,6 +356,7 @@ async def test_data_validation_and_sanitization():
     Expected Failure: Insufficient data validation allowing malformed data
     Business Impact: Data corruption, security vulnerabilities, system instability
     """
+    pass
     # Use IsolatedEnvironment for configuration - CLAUDE.md compliance
     env = get_env()
     backend_url = f"http://localhost:{env.get('BACKEND_PORT', '8000')}"
@@ -368,7 +373,8 @@ async def test_data_validation_and_sanitization():
             auth_token = await _create_test_user_and_authenticate(session, auth_url, validation_issues)
             if not auth_token:
                 validation_issues.append("Failed to authenticate for validation testing")
-                return
+                await asyncio.sleep(0)
+    return
                 
             headers = {"Authorization": f"Bearer {auth_token}"}
             
@@ -384,7 +390,8 @@ async def test_data_validation_and_sanitization():
                 # Special characters and encoding
                 {"title": "Test\x00\x01\x02", "metadata": {"test": "null_bytes"}},
                 {"title": "Test🚀🔥💯", "metadata": {"test": "unicode_emojis"}},
-                {"title": "Test\n\r\t", "metadata": {"test": "control_chars"}},
+                {"title": "Test
+\r\t", "metadata": {"test": "control_chars"}},
                 
                 # Potential injection attempts
                 {"title": "<script>alert('test')</script>", "metadata": {"test": "xss_attempt"}},

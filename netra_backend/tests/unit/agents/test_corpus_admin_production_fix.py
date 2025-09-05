@@ -30,6 +30,7 @@ import uuid
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass
 from typing import Any, Dict, List, Optional, Set, Tuple
+from shared.isolated_environment import IsolatedEnvironment
 
 # Disable service dependency to focus on unit testing
 os.environ["TEST_COLLECTION_MODE"] = "1"

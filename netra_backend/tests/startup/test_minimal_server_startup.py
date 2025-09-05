@@ -15,6 +15,7 @@ import socket
 import threading
 import time
 from typing import Optional
+from shared.isolated_environment import IsolatedEnvironment
 
 import pytest
 import uvicorn

@@ -7,8 +7,8 @@ instead of service names to resilient_database_check.
 
 import asyncio
 import pytest
-from unittest.mock import AsyncMock, MagicMock, patch, Mock
 from pathlib import Path
+from shared.isolated_environment import IsolatedEnvironment
 
 from dev_launcher.network_resilience import NetworkResilientClient, RetryPolicy
 

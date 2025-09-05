@@ -17,6 +17,7 @@ import sys
 import time
 from typing import Dict, Optional
 from urllib.parse import urlparse
+from shared.isolated_environment import IsolatedEnvironment
 
 import httpx
 import jwt

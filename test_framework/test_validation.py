@@ -7,6 +7,7 @@ Validates test files follow expected conventions
 from collections import defaultdict
 from pathlib import Path
 from typing import Dict, List, Optional
+from shared.isolated_environment import IsolatedEnvironment
 
 # Removed circular_import_detector - functionality integrated elsewhere
 

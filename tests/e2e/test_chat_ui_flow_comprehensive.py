@@ -37,6 +37,7 @@ from datetime import datetime, timedelta
 from typing import Dict, List, Optional, Any, Set
 from pathlib import Path
 import threading
+from netra_backend.app.core.agent_registry import AgentRegistry
 
 # CRITICAL: Add project root to Python path for imports
 project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
@@ -98,6 +99,7 @@ class MissionCriticalChatEventValidator:
     }
     
     def __init__(self, strict_mode: bool = True):
+    pass
         self.strict_mode = strict_mode
         self.events: List[Dict] = []
         self.event_timeline: List[tuple] = []  # (timestamp, event_type, data)
@@ -180,6 +182,7 @@ class MockWebSocketConnection:
     """
     
     def __init__(self, connection_id: str, validator: MissionCriticalChatEventValidator):
+    pass
         self.connection_id = connection_id
         self.validator = validator
         self.messages: List[Dict] = []
@@ -216,6 +219,7 @@ class ChatUIFlowTester:
     """
     
     def __init__(self):
+    pass
         # Use IsolatedEnvironment for all environment access (CLAUDE.md requirement)
         self.env = get_env()
         self.env.enable_isolation()
@@ -334,6 +338,7 @@ class TestChatUIFlowComprehensive:
         This test verifies the code structure itself is correct even when real services
         are not available. It validates imports, class structure, and basic functionality.
         """
+    pass
         # Test that we can import all required components
         assert WebSocketManager is not None
         assert AgentRegistry is not None
@@ -379,7 +384,8 @@ class TestChatUIFlowComprehensive:
         
         logger.info("✅ Structure compliance test PASSED - all CLAUDE.md requirements met")
         
-        print("\n📋 CLAUDE.md Compliance Verification:")
+        print("
+📋 CLAUDE.md Compliance Verification:")
         print("   ✅ Absolute imports only (no relative imports)")
         print("   ✅ IsolatedEnvironment for configuration access")
         print("   ✅ Mission-critical WebSocket event validation")
@@ -395,6 +401,7 @@ class TestChatUIFlowComprehensive:
         MISSION CRITICAL: This test validates that all 5 required WebSocket events
         are sent during agent execution, per CLAUDE.md Section 6.1.
         """
+    pass
         tester = ChatUIFlowTester()
         
         try:
@@ -416,7 +423,8 @@ class TestChatUIFlowComprehensive:
             # Generate validation report
             report = tester.event_validator.get_validation_report()
             
-            print(f"\n📊 WebSocket Event Validation Report:")
+            print(f"
+📊 WebSocket Event Validation Report:")
             print(f"   ✅ Success: {report['success']}")
             print(f"   📊 Total Events: {report['total_events']}")
             print(f"   🎯 Required Events Received: {report['required_events_received']}/5")
@@ -424,7 +432,8 @@ class TestChatUIFlowComprehensive:
             print(f"   ⏱️ Duration: {report['duration']:.2f}s")
             
             if not success:
-                print(f"\n❌ CRITICAL ERRORS:")
+                print(f"
+❌ CRITICAL ERRORS:")
                 for error in errors:
                     print(f"   • {error}")
             
@@ -473,6 +482,7 @@ class TestChatUIFlowComprehensive:
     @pytest.mark.asyncio  
     async def test_real_services_integration(self):
         """Test integration with real backend services."""
+    pass
         tester = ChatUIFlowTester()
         
         try:
@@ -533,3 +543,4 @@ if __name__ == "__main__":
     print("🧪 Run with: python unified_test_runner.py --category e2e --filter test_chat_ui_flow_comprehensive")
     print("📡 Tests mission-critical WebSocket events with real services")
     print("⚠️  Requires real services to be running (PostgreSQL, Redis, etc.)")
+    pass

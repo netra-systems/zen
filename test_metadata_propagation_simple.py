@@ -6,6 +6,7 @@ without initializing the full agent stack.
 
 import sys
 from pathlib import Path
+from shared.isolated_environment import IsolatedEnvironment
 
 # Add parent directory to path to import modules
 sys.path.append(str(Path(__file__).parent))

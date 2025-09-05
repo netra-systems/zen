@@ -6,6 +6,7 @@ Quick test to verify supervisor WebSocket integration.
 import asyncio
 import sys
 import os
+from shared.isolated_environment import IsolatedEnvironment
 sys.path.insert(0, os.path.join(os.path.dirname(__file__)))
 
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
@@ -13,7 +14,6 @@ from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 from netra_backend.app.websocket_core.manager import WebSocketManager
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.agents.state import DeepAgentState
-from unittest.mock import AsyncMock
 
 
 async def test_supervisor_websocket_integration():

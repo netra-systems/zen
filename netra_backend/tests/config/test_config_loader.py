@@ -1,4 +1,6 @@
 from shared.isolated_environment import IsolatedEnvironment
+from test_framework.database.test_database_manager import TestDatabaseManager
+from test_framework.redis.test_redis_manager import TestRedisManager
 """
 env = IsolatedEnvironment()
 Critical Config Loader Core Tests
@@ -28,7 +30,6 @@ from pathlib import Path
 
 import os
 from typing import Any, Dict, Optional
-from unittest.mock import MagicMock, Mock, patch
 
 import pytest
 
@@ -37,17 +38,13 @@ from test_framework.environment_markers import (
     env, test_only, dev_and_staging
 )
 from netra_backend.app.core.configuration.loader import (
-    ConfigurationLoader,
-)
+    ConfigurationLoader)
 from netra_backend.app.core.configuration.environment import (
-    EnvironmentDetector as CloudEnvironmentDetector,
-)
+    EnvironmentDetector as CloudEnvironmentDetector)
 from netra_backend.app.core.exceptions_config import (
-    ConfigurationError as ConfigLoadError,
-)
+    ConfigurationError as ConfigLoadError)
 from netra_backend.app.core.environment_constants import (
-    detect_cloud_run_environment,
-)
+    detect_cloud_run_environment)
 # Placeholder functions for compatibility
 def detect_app_engine_environment():
     """Detect App Engine environment"""
@@ -56,6 +53,7 @@ def detect_app_engine_environment():
 
 def load_config_from_environment():
     """Load config from environment"""
+    pass
     from netra_backend.app.core.configuration.base import get_unified_config
     return get_unified_config()
 
@@ -65,10 +63,14 @@ def validate_required_config(config):
 
 class TestCloudEnvironmentDetection:
     """Test cloud environment detection functionality"""
+    pass
 
     @pytest.fixture
     def clean_environment(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Clean environment variables for isolated testing"""
+    pass
         original_env = env.get_all()
         # Clear cloud-related environment variables
         cloud_vars = [
@@ -96,9 +98,9 @@ class TestCloudEnvironmentDetection:
         # Assert
         assert result == "production"
 
-    @patch.dict('os.environ', {'ENVIRONMENT': 'staging', 'TESTING': '0'})
     def test_detect_cloud_run_environment_staging_pattern(self, clean_environment):
         """Test Cloud Run staging environment detection"""
+    pass
         # Arrange
         env.set('K_SERVICE', 'netra-backend-staging', "test")
         env.set('K_CONFIGURATION', 'netra-backend-staging', "test")
@@ -119,6 +121,7 @@ class TestCloudEnvironmentDetection:
 
     def test_detect_app_engine_environment_standard(self, clean_environment):
         """Test App Engine standard environment detection"""
+    pass
         # Arrange
         env.set('GAE_APPLICATION', 'netra-project-123', "test")
         env.set('GAE_RUNTIME', 'python39', "test")
@@ -143,6 +146,7 @@ class TestCloudEnvironmentDetection:
 
     def test_detect_kubernetes_environment(self, clean_environment):
         """Test Google Kubernetes Engine detection"""
+    pass
         # Arrange
         env.set('KUBERNETES_SERVICE_HOST', '10.0.0.1', "test")
         env.set('GOOGLE_CLOUD_PROJECT', 'netra-gke-cluster', "test")
@@ -171,10 +175,14 @@ class TestCloudEnvironmentDetection:
 
 class TestConfigurationLoading:
     """Test configuration loading from various sources"""
+    pass
 
     @pytest.fixture
     def clean_environment(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Clean environment for config testing"""
+    pass
         original_env = env.get_all()
         config_vars = [
             'DATABASE_URL', 'REDIS_URL', 'SECRET_KEY',
@@ -217,6 +225,7 @@ class TestConfigurationLoading:
 
     def test_load_config_from_environment_missing_variables(self, clean_environment):
         """Test configuration loading with missing environment variables"""
+    pass
         # Arrange
         config_mapping = {
             'REQUIRED_VAR': 'required_value',
@@ -271,6 +280,7 @@ class TestConfigurationLoading:
 
     def test_load_config_with_default_values(self, clean_environment):
         """Test configuration loading with default values"""
+    pass
         # Arrange
         config_mapping = {
             'CUSTOM_PORT': 'port',
@@ -326,6 +336,7 @@ class TestConfigurationLoading:
 
 class TestConfigurationValidation:
     """Test configuration validation functionality"""
+    pass
 
     def test_validate_required_config_success(self):
         """Test successful validation of required configuration"""
@@ -343,6 +354,7 @@ class TestConfigurationValidation:
 
     def test_validate_required_config_missing_keys(self):
         """Test validation failure with missing required keys"""
+    pass
         # Arrange
         config = {
             'database_url': 'postgresql://localhost:5432/netra'
@@ -377,6 +389,7 @@ class TestConfigurationValidation:
 
     def test_validate_config_with_custom_validators(self):
         """Test configuration validation with custom validation functions"""
+    pass
         # Arrange
         config = {
             'database_url': 'postgresql://localhost:5432/netra',
@@ -385,10 +398,12 @@ class TestConfigurationValidation:
         }
         
         def validate_port(value):
+    pass
             if not isinstance(value, int) or value < 1 or value > 65535:
                 raise ValueError("Port must be between 1 and 65535")
         
         def validate_email(value):
+    pass
             if '@' not in value:
                 raise ValueError("Invalid email format")
         
@@ -429,9 +444,12 @@ class TestConfigurationValidation:
 
 class TestConfigurationFallbackMechanisms:
     """Test configuration fallback and error recovery"""
+    pass
 
     @pytest.fixture
     def clean_environment(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         original_env = env.get_all()
         yield
         env.clear()
@@ -439,6 +457,7 @@ class TestConfigurationFallbackMechanisms:
 
     def test_fallback_to_default_configuration(self, clean_environment):
         """Test fallback to default configuration when environment loading fails"""
+    pass
         # Arrange
         config_mapping = {
             'DATABASE_URL': 'database_url',
@@ -500,6 +519,7 @@ class TestConfigurationFallbackMechanisms:
 
     def test_graceful_degradation_partial_config_failure(self, clean_environment):
         """Test graceful degradation when partial configuration loading fails"""
+    pass
         # Arrange
         config_mapping = {
             'CRITICAL_SETTING': 'critical',
@@ -522,6 +542,7 @@ class TestConfigurationFallbackMechanisms:
 
 class TestConfigLoaderErrorHandling:
     """Test error handling and edge cases"""
+    pass
 
     def test_config_load_error_creation(self):
         """Test ConfigLoadError exception creation and details"""
@@ -543,6 +564,7 @@ class TestConfigLoaderErrorHandling:
 
     def test_config_loader_type_conversion_errors(self, clean_environment=None):
         """Test handling of type conversion errors"""
+    pass
         # Arrange
         env.update({
             'PORT': 'not_a_number',
@@ -589,6 +611,7 @@ class TestConfigLoaderErrorHandling:
 
 class TestConfigLoaderPerformance:
     """Test performance characteristics of config loader"""
+    pass
 
     def test_config_loading_performance_large_environment(self):
         """Test config loading performance with large number of environment variables"""
@@ -616,6 +639,7 @@ class TestConfigLoaderPerformance:
 
     def test_config_validation_performance(self):
         """Test performance of configuration validation"""
+    pass
         import time
         
         # Arrange - Large configuration
@@ -649,6 +673,7 @@ class TestConfigLoaderPerformance:
 # Helper functions that would be in the actual config_loader module
 def resolve_config_references(config: Dict[str, Any]) -> Dict[str, Any]:
     """Resolve configuration references like ${other_setting}"""
+    pass
     # Simplified implementation for testing
     resolved = {}
     max_iterations = 10

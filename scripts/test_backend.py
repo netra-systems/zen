@@ -13,6 +13,7 @@ This script now redirects to the unified test runner for backward compatibility.
 import sys
 import subprocess
 from pathlib import Path
+from shared.isolated_environment import IsolatedEnvironment
 
 def show_deprecation_warning():
     """Show deprecation warning."""

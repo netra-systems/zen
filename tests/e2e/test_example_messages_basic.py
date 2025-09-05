@@ -10,6 +10,7 @@ import asyncio
 from datetime import datetime, timezone
 from typing import Any, Dict
 from uuid import uuid4
+from shared.isolated_environment import IsolatedEnvironment
 
 import pytest
 

@@ -14,6 +14,11 @@ L4 Realism Level: Tests against actual staging configuration and real service en
 
 import sys
 from pathlib import Path
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from test_framework.docker.unified_docker_manager import UnifiedDockerManager
+from test_framework.redis.test_redis_manager import TestRedisManager
+from auth_service.core.auth_manager import AuthManager
+from shared.isolated_environment import IsolatedEnvironment
 
 # Test framework import - using pytest fixtures instead
 
@@ -27,7 +32,6 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Set
 
 from netra_backend.tests.integration.e2e.staging_test_helpers import StagingTestSuite, get_staging_suite
-from unittest.mock import AsyncMock, MagicMock
 
 import httpx
 import pytest

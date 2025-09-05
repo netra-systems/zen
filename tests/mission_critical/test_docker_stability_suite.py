@@ -47,7 +47,8 @@ from dataclasses import dataclass
 from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Dict, List, Optional, Set, Tuple, Any
-from unittest.mock import patch, MagicMock
+from test_framework.docker.unified_docker_manager import UnifiedDockerManager
+from shared.isolated_environment import IsolatedEnvironment
 
 import pytest
 import docker
@@ -59,6 +60,10 @@ from test_framework.unified_docker_manager import UnifiedDockerManager
 
 # Logging configuration
 import logging
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
+from shared.isolated_environment import get_env
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
@@ -104,6 +109,7 @@ class DockerInfrastructureValidator:
     """Comprehensive Docker infrastructure validation"""
     
     def __init__(self):
+    pass
         self.docker_client = docker.from_env()
         self.docker_manager = UnifiedDockerManager()
         self.metrics = InfrastructureMetrics(
@@ -179,6 +185,7 @@ class DockerInfrastructureValidator:
         errors = []
         
         def create_container(index):
+    pass
             try:
                 name = f"test_parallel_{index}_{int(time.time())}"
                 container = self.docker_client.containers.run(
@@ -269,6 +276,7 @@ class TestDockerInfrastructureServiceStartup:
     
     @pytest.fixture(autouse=True)
     def setup(self):
+    pass
         self.validator = DockerInfrastructureValidator()
         self.docker_manager = UnifiedDockerManager()
         yield
@@ -305,10 +313,12 @@ class TestDockerInfrastructureServiceStartup:
     
     def test_parallel_service_startup(self):
         """Test starting multiple environments in parallel"""
+    pass
         environments = []
         startup_times = []
         
         def start_environment(index):
+    pass
             env_name = f"parallel_env_{index}_{int(time.time())}"
             start = time.time()
             try:
@@ -367,10 +377,12 @@ class TestDockerInfrastructureServiceStartup:
     
     def test_startup_recovery_from_partial_failure(self):
         """Test recovery when some services fail to start"""
+    pass
         env_name = f"partial_failure_{int(time.time())}"
         
         # Simulate partial failure by killing a service mid-startup
         def interfere():
+    pass
             time.sleep(2)
             try:
                 containers = docker.from_env().containers.list()
@@ -444,6 +456,7 @@ class TestDockerInfrastructureHealthMonitoring:
     
     @pytest.fixture(autouse=True)
     def setup(self):
+    pass
         self.validator = DockerInfrastructureValidator()
         self.docker_manager = UnifiedDockerManager()
         yield
@@ -479,6 +492,7 @@ class TestDockerInfrastructureHealthMonitoring:
     
     def test_health_check_under_load(self):
         """Test health checks work under heavy load"""
+    pass
         env_name = f"health_load_{int(time.time())}"
         
         try:
@@ -487,6 +501,7 @@ class TestDockerInfrastructureHealthMonitoring:
             
             # Generate load
             def generate_load():
+    pass
                 containers = docker.from_env().containers.list()
                 for container in containers:
                     if env_name in container.name:
@@ -551,6 +566,7 @@ class TestDockerInfrastructureHealthMonitoring:
     
     def test_health_check_performance(self):
         """Test health check performance doesn't degrade"""
+    pass
         env_name = f"health_perf_{int(time.time())}"
         
         try:
@@ -608,6 +624,7 @@ class TestDockerInfrastructureFailureRecovery:
     
     @pytest.fixture(autouse=True)
     def setup(self):
+    pass
         self.validator = DockerInfrastructureValidator()
         self.docker_manager = UnifiedDockerManager()
         yield
@@ -655,6 +672,7 @@ class TestDockerInfrastructureFailureRecovery:
     
     def test_cascade_failure_prevention(self):
         """Test prevention of cascade failures"""
+    pass
         env_name = f"cascade_prevent_{int(time.time())}"
         
         try:
@@ -730,6 +748,7 @@ class TestDockerInfrastructureFailureRecovery:
     
     def test_disk_space_recovery(self):
         """Test recovery from disk space issues"""
+    pass
         env_name = f"disk_recovery_{int(time.time())}"
         
         try:
@@ -791,6 +810,7 @@ class TestDockerInfrastructurePerformanceBenchmarks:
     
     @pytest.fixture(autouse=True)
     def setup(self):
+    pass
         self.validator = DockerInfrastructureValidator()
         self.docker_manager = UnifiedDockerManager()
         yield
@@ -831,6 +851,7 @@ class TestDockerInfrastructurePerformanceBenchmarks:
     
     def test_alpine_vs_regular_performance(self):
         """Compare Alpine vs regular container performance"""
+    pass
         alpine_times = []
         regular_times = []
         
@@ -910,6 +931,7 @@ class TestDockerInfrastructurePerformanceBenchmarks:
     
     def test_cpu_efficiency(self):
         """Test CPU efficiency under load"""
+    pass
         env_name = f"cpu_eff_{int(time.time())}"
         
         try:
@@ -994,6 +1016,7 @@ class TestDockerInfrastructureLoadTesting:
     
     @pytest.fixture(autouse=True)
     def setup(self):
+    pass
         self.validator = DockerInfrastructureValidator()
         self.docker_manager = UnifiedDockerManager()
         yield
@@ -1073,6 +1096,7 @@ class TestDockerInfrastructureLoadTesting:
     @pytest.mark.slow
     def test_sustained_load_99_99_uptime(self):
         """Test 99.99% uptime under sustained load"""
+    pass
         env_name = f"uptime_test_{int(time.time())}"
         start_time = time.time()
         test_duration = 300  # 5 minutes for quick validation
@@ -1151,10 +1175,12 @@ class TestDockerInfrastructureLoadTesting:
     
     def test_concurrent_environment_management(self):
         """Test managing multiple environments concurrently"""
+    pass
         environments = []
         success_count = 0
         
         def manage_environment(index):
+    pass
             env_name = f"concurrent_{index}_{int(time.time())}"
             try:
                 # Acquire
@@ -1253,6 +1279,7 @@ class TestDockerInfrastructureAlpineOptimization:
     
     @pytest.fixture(autouse=True)
     def setup(self):
+    pass
         self.validator = DockerInfrastructureValidator()
         self.docker_manager = UnifiedDockerManager()
         yield
@@ -1303,6 +1330,7 @@ class TestDockerInfrastructureAlpineOptimization:
     
     def test_alpine_memory_footprint(self):
         """Test Alpine containers use less memory"""
+    pass
         env_name = f"alpine_memory_{int(time.time())}"
         
         try:
@@ -1378,6 +1406,7 @@ class TestDockerInfrastructureAlpineOptimization:
     
     def test_alpine_compatibility_verification(self):
         """Test Alpine containers maintain full service compatibility"""
+    pass
         env_name = f"alpine_compat_{int(time.time())}"
         
         try:
@@ -1462,6 +1491,7 @@ class TestDockerInfrastructureEdgeCases:
     
     @pytest.fixture(autouse=True)
     def setup(self):
+    pass
         self.validator = DockerInfrastructureValidator()
         self.docker_manager = UnifiedDockerManager()
         yield
@@ -1492,6 +1522,7 @@ class TestDockerInfrastructureEdgeCases:
     
     def test_port_exhaustion_handling(self):
         """Test handling when all ports are exhausted"""
+    pass
         environments = []
         
         try:
@@ -1552,6 +1583,7 @@ class TestDockerInfrastructureEdgeCases:
     
     def test_resource_limit_enforcement(self):
         """Test that resource limits are properly enforced"""
+    pass
         containers = []
         
         try:
@@ -1615,7 +1647,7 @@ class TestDockerInfrastructureEdgeCases:
                 if env_name in container.name:
                     try:
                         # Start processes that create zombies
-                        container.exec_run("sh -c 'sh -c \"sleep 1 &\" ; sleep 2'", detach=True)
+                        container.exec_run("sh -c 'sh -c "sleep 1 &" ; sleep 2'", detach=True)
                     except:
                         pass
             
@@ -1641,6 +1673,7 @@ class TestDockerInfrastructureSecurityValidation:
     
     @pytest.fixture(autouse=True)
     def setup(self):
+    pass
         self.validator = DockerInfrastructureValidator()
         self.docker_manager = UnifiedDockerManager()
         yield
@@ -1688,6 +1721,7 @@ class TestDockerInfrastructureSecurityValidation:
     
     def test_privilege_escalation_prevention(self):
         """Test prevention of privilege escalation"""
+    pass
         containers = []
         
         try:
@@ -1767,6 +1801,7 @@ class TestDockerInfrastructureSecurityValidation:
     
     def test_resource_exhaustion_protection(self):
         """Test protection against resource exhaustion attacks"""
+    pass
         containers = []
         
         try:
@@ -1836,7 +1871,8 @@ class TestDockerInfrastructureSecurityValidation:
                         sensitive_patterns = ['password', 'secret', 'key', 'token']
                         for pattern in sensitive_patterns:
                             # Allow some test patterns but not real secrets
-                            lines_with_pattern = [line for line in env_output.lower().split('\n') 
+                            lines_with_pattern = [line for line in env_output.lower().split('
+') 
                                                 if pattern in line and 'test' not in line]
                             assert len(lines_with_pattern) == 0, f"Potential secrets found: {pattern}"
                         
@@ -1864,3 +1900,4 @@ if __name__ == "__main__":
         "--durations=10",  # Show slowest tests
         "-m", "not slow"  # Skip slow tests by default
     ])
+    pass

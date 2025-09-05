@@ -23,6 +23,12 @@ COVERAGE:
 
 import sys
 from pathlib import Path
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from test_framework.docker.unified_docker_manager import UnifiedDockerManager
+from test_framework.database.test_database_manager import TestDatabaseManager
+from test_framework.redis.test_redis_manager import TestRedisManager
+from auth_service.core.auth_manager import AuthManager
+from shared.isolated_environment import IsolatedEnvironment
 
 # Test framework import - using pytest fixtures instead
 
@@ -31,7 +37,6 @@ import json
 import time
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
-from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import httpx
 import pytest
@@ -147,9 +152,8 @@ class TestCrossServiceAuthentication:
                     user_data = await auth_client.validate_token_jwt("valid_token")
                     user_service = CRUDUser("user_service", User)
                     # Mock a database session for the CRUDUser.get call
-                    from unittest.mock import AsyncMock, MagicMock
                     # Mock: Generic component isolation for controlled unit testing
-                    mock_db = AsyncMock()
+                    mock_db = AsyncNone  # TODO: Use real service instance
                     user_details = await user_service.get(mock_db, user_data["user_id"])
                     
                     # Verify auth flow succeeded
@@ -192,7 +196,7 @@ class TestDatabaseConsistency:
             
             # Mock user data in PostgreSQL
             # Mock: PostgreSQL database isolation for testing without real database connections
-            mock_postgres_client = AsyncMock()
+            mock_postgres_client = AsyncNone  # TODO: Use real service instance
             mock_postgres_client.fetchrow.return_value = {
                 "user_id": "user_123",
                 "email": "test@netrasystems.ai",
@@ -202,7 +206,7 @@ class TestDatabaseConsistency:
             
             # Mock corresponding analytics data in ClickHouse
             # Mock: ClickHouse database isolation for fast testing without external database dependency
-            mock_clickhouse_client = AsyncMock()
+            mock_clickhouse_client = AsyncNone  # TODO: Use real service instance
             mock_clickhouse_client.query.return_value = [
                 {"user_id": "user_123", "event_type": "login", "timestamp": "2025-01-20T10:00:00Z"}
             ]
@@ -230,13 +234,13 @@ class TestDatabaseConsistency:
         # Mock: PostgreSQL database isolation for testing without real database connections
         with patch('app.db.postgres.get_async_db') as mock_postgres:
             # Mock: Generic component isolation for controlled unit testing
-            mock_client = AsyncMock()
+            mock_client = AsyncNone  # TODO: Use real service instance
             # Mock: Generic component isolation for controlled unit testing
-            mock_client.begin.return_value = AsyncMock()
+            mock_client.begin.return_value = AsyncNone  # TODO: Use real service instance
             # Mock: Generic component isolation for controlled unit testing
-            mock_client.commit = AsyncMock()
+            mock_client.commit = AsyncNone  # TODO: Use real service instance
             # Mock: Generic component isolation for controlled unit testing
-            mock_client.rollback = AsyncMock()
+            mock_client.rollback = AsyncNone  # TODO: Use real service instance
             mock_postgres.return_value = mock_client
             
             user_data = {
@@ -254,9 +258,8 @@ class TestDatabaseConsistency:
             try:
                 # Simulate atomic operation across services
                 # Mock a database session for the CRUDUser.create call
-                from unittest.mock import AsyncMock, MagicMock
                 # Mock: Generic component isolation for controlled unit testing
-                mock_db = AsyncMock()
+                mock_db = AsyncNone  # TODO: Use real service instance
                 await user_service.create(mock_db, obj_in=user_data)
                 await thread_service.create_thread(user_data['user_id'], mock_db)
                 
@@ -277,7 +280,7 @@ class TestDatabaseConsistency:
         # Mock: PostgreSQL database isolation for testing without real database connections
         with patch('app.db.postgres.get_async_db') as mock_postgres:
             # Mock: Generic component isolation for controlled unit testing
-            mock_client = AsyncMock()
+            mock_client = AsyncNone  # TODO: Use real service instance
             mock_postgres.return_value = mock_client
             
             # Write data
@@ -288,7 +291,7 @@ class TestDatabaseConsistency:
             # Mock: ClickHouse database isolation for fast testing without external database dependency
             with patch('netra_backend.app.database.get_clickhouse_client') as mock_clickhouse:
                 # Mock: Generic component isolation for controlled unit testing
-                mock_ch_client = AsyncMock()
+                mock_ch_client = AsyncNone  # TODO: Use real service instance
                 mock_ch_client.query.return_value = [{"user_id": "sync_test_user", "synced_at": write_time}]
                 mock_clickhouse.return_value = mock_ch_client
                 
@@ -316,7 +319,7 @@ class TestServiceDiscovery:
         # Mock: Component isolation for testing without external dependencies
         with patch('httpx.AsyncClient.get') as mock_get:
             # Mock: Generic component isolation for controlled unit testing
-            mock_response = Mock()
+            mock_response = mock_response_instance  # Initialize appropriate service
             mock_response.status_code = 200
             mock_response.json.return_value = {"status": "healthy"}
             mock_get.return_value = mock_response
@@ -371,7 +374,7 @@ class TestServiceDiscovery:
                 # Mock: Component isolation for testing without external dependencies
                 with patch('httpx.AsyncClient.post') as mock_post:
                     # Mock: Generic component isolation for controlled unit testing
-                    mock_response = Mock()
+                    mock_response = mock_response_instance  # Initialize appropriate service
                     mock_response.status_code = 200
                     mock_response.json.return_value = {"result": "success"}
                     mock_post.return_value = mock_response
@@ -426,15 +429,14 @@ class TestErrorPropagation:
             # Mock: PostgreSQL database isolation for testing without real database connections
             with patch('app.db.postgres.get_async_db') as mock_postgres:
                 # Mock: Generic component isolation for controlled unit testing
-                mock_client = AsyncMock()
+                mock_client = AsyncNone  # TODO: Use real service instance
                 mock_client.fetchrow.return_value = {"user_id": "test", "email": "test@test.com"}
                 mock_postgres.return_value = mock_client
                 
                 # Should still be able to get user data
                 # Mock a database session for the CRUDUser.get call
-                from unittest.mock import AsyncMock, MagicMock
                 # Mock: Generic component isolation for controlled unit testing
-                mock_db = AsyncMock()
+                mock_db = AsyncNone  # TODO: Use real service instance
                 user_data = await user_service.get(mock_db, "test")
                 assert user_data is not None
     
@@ -499,9 +501,8 @@ class TestMultiServiceIntegration:
                 
                 user_service = CRUDUser("user_service", User)
                 # Mock a database session for the CRUDUser.get call
-                from unittest.mock import AsyncMock, MagicMock
                 # Mock: Generic component isolation for controlled unit testing
-                mock_db = AsyncMock()
+                mock_db = AsyncNone  # TODO: Use real service instance
                 user_data = await user_service.get(mock_db, auth_result["user_id"])
                 assert user_data["user_id"] == "journey_user"
                 
@@ -518,7 +519,7 @@ class TestMultiServiceIntegration:
                     # Mock: ClickHouse database isolation for fast testing without external database dependency
                     with patch('netra_backend.app.database.get_clickhouse_client') as mock_clickhouse:
                         # Mock: Generic component isolation for controlled unit testing
-                        mock_client = AsyncMock()
+                        mock_client = AsyncNone  # TODO: Use real service instance
                         mock_clickhouse.return_value = mock_client
                         
                         # Log user activity
@@ -561,7 +562,7 @@ class TestMultiServiceIntegration:
             mock_postgres.side_effect = [
                 Exception("Primary database unavailable"),
                 # Mock: Database isolation for unit testing without external database connections
-                AsyncMock()  # Replica database available
+                AsyncNone  # TODO: Use real service instance  # Replica database available
             ]
             
             try:

@@ -3,6 +3,10 @@
 import pytest
 from typing import Dict, Any
 from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
+from auth_service.core.auth_manager import AuthManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 
 
@@ -39,6 +43,8 @@ def advanced_test_config() -> Dict[str, Any]:
 
 
 def get_advanced_test_utils():
+    """Use real service instance."""
+    # TODO: Initialize real service
     """Get utilities for advanced testing."""
     return {
         "mock_llm_response": lambda prompt: {"status": "success", "response": "test"},
@@ -154,7 +160,6 @@ async def test_real_llm_interaction():
 @pytest.mark.asyncio
 async def test_tool_execution_with_llm():
     """Test tool execution triggered by LLM response."""
-    from unittest.mock import AsyncMock, MagicMock, Mock
     
     # Mock tool dispatcher
     tool_results = []
@@ -172,7 +177,7 @@ async def test_tool_execution_with_llm():
     
     # Create mock dispatcher
     # Mock: Generic component isolation for controlled unit testing
-    dispatcher = Mock()
+    dispatcher = dispatcher_instance  # Initialize appropriate service
     # Mock: Async component isolation for testing without real async operations
     dispatcher.dispatch_tool = AsyncMock(side_effect=mock_dispatch)
     

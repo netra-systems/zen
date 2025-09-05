@@ -1,4 +1,5 @@
 from shared.isolated_environment import get_env
+from shared.isolated_environment import IsolatedEnvironment
 """
 env = get_env()
 Comprehensive failing tests for dev_launcher mainline scenarios.
@@ -26,7 +27,6 @@ import tempfile
 import time
 import unittest
 from pathlib import Path
-from unittest.mock import MagicMock, Mock, call, patch, PropertyMock
 
 from dev_launcher.config import LauncherConfig
 from dev_launcher.launcher import DevLauncher
@@ -127,7 +127,6 @@ class TestDockerServiceDiscoveryReuse(unittest.TestCase):
         shutil.rmtree(self.temp_dir, ignore_errors=True)
         
     # Mock: Component isolation for testing without external dependencies
-    @patch('dev_launcher.container_discovery.ContainerDiscovery')
     def test_docker_discovery_report_generation(self, mock_discovery):
         """Test that Docker discovery generates proper report for reusable containers."""
         # Mock container discovery to return running services

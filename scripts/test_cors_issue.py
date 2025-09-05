@@ -3,6 +3,7 @@
 
 import httpx
 import asyncio
+from shared.isolated_environment import IsolatedEnvironment
 
 async def test_cors():
     """Test CORS with different origins."""

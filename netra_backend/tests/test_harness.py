@@ -2,7 +2,7 @@
 
 import asyncio
 from typing import Any, Dict, Optional
-from unittest.mock import MagicMock, AsyncMock
+from shared.isolated_environment import IsolatedEnvironment
 
 class UnifiedTestHarness:
     """Unified test harness for coordinating test execution."""
@@ -39,13 +39,13 @@ class UnifiedTestHarness:
     def create_mock_service(self, service_name: str) -> MagicMock:
         """Create a mock service."""
         # Mock: Generic component isolation for controlled unit testing
-        mock = MagicMock()
+        mock = MagicNone  # TODO: Use real service instance
         self.register_mock(service_name, mock)
         return mock
         
     def create_async_mock_service(self, service_name: str) -> AsyncMock:
         """Create an async mock service."""
         # Mock: Generic component isolation for controlled unit testing
-        mock = AsyncMock()
+        mock = AsyncNone  # TODO: Use real service instance
         self.register_mock(service_name, mock)
         return mock

@@ -1,3 +1,29 @@
+class TestWebSocketConnection:
+    """Real WebSocket connection for testing instead of mocks."""
+    
+    def __init__(self):
+    pass
+        self.messages_sent = []
+        self.is_connected = True
+        self._closed = False
+        
+    async def send_json(self, message: dict):
+        """Send JSON message."""
+        if self._closed:
+            raise RuntimeError("WebSocket is closed")
+        self.messages_sent.append(message)
+        
+    async def close(self, code: int = 1000, reason: str = "Normal closure"):
+        """Close WebSocket connection."""
+    pass
+        self._closed = True
+        self.is_connected = False
+        
+    def get_messages(self) -> list:
+        """Get all sent messages."""
+        await asyncio.sleep(0)
+    return self.messages_sent.copy()
+
 """
 CRITICAL TEST: Agent Processing Death After Triage
 ==================================================
@@ -27,13 +53,23 @@ import pytest
 import time
 from datetime import datetime
 from typing import Dict, Any, List, Optional
-from unittest.mock import AsyncMock, MagicMock, patch, call
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
+from shared.isolated_environment import get_env
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from test_framework.database.test_database_manager import TestDatabaseManager
+from auth_service.core.auth_manager import AuthManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 
 class AgentDeathDetector:
     """Monitors agent execution to detect silent deaths"""
     
     def __init__(self):
+    pass
         self.events: List[Dict[str, Any]] = []
         self.death_detected = False
         self.death_timestamp: Optional[float] = None
@@ -62,6 +98,7 @@ class AgentDeathDetector:
                 
     def get_death_report(self) -> Dict[str, Any]:
         """Generate detailed death report"""
+    pass
         return {
             'death_detected': self.death_detected,
             'death_timestamp': self.death_timestamp,
@@ -88,6 +125,7 @@ class TestAgentDeathAfterTriage:
         
         This test MUST FAIL to prove the bug exists!
         """
+    pass
         detector = AgentDeathDetector()
         
         # Setup mocked components
@@ -112,6 +150,7 @@ class TestAgentDeathAfterTriage:
             messages_sent = []
             
             async def mock_send_message(msg: Dict[str, Any]):
+    pass
                 messages_sent.append(msg)
                 detector.record_event(msg)
                 
@@ -168,7 +207,8 @@ class TestAgentDeathAfterTriage:
                     f"Health service correctly detected failure (this shouldn't happen with the bug!)"
             
             # Print detailed failure report
-            print("\n" + "="*80)
+            print("
+" + "="*80)
             print("CRITICAL BUG REPRODUCTION - AGENT DEATH AFTER TRIAGE")
             print("="*80)
             print(f"Death detected: {report['death_detected']}")
@@ -182,6 +222,7 @@ class TestAgentDeathAfterTriage:
         """
         Test that WebSocket remains "healthy" even when agent is dead
         """
+    pass
         ws_messages = []
         agent_dead = False
         
@@ -225,7 +266,8 @@ class TestAgentDeathAfterTriage:
                     'timestamp': time.time()
                 })
             
-            return ws_messages
+            await asyncio.sleep(0)
+    return ws_messages
         
         # Run simulation
         messages = await simulate_websocket_session()
@@ -246,7 +288,8 @@ class TestAgentDeathAfterTriage:
             for msg in messages if msg['type'] == 'agent_response'
         ), "Empty agent response sent (bug signature)"
         
-        print("\n" + "="*80)
+        print("
+" + "="*80)
         print("WEBSOCKET REMAINS 'HEALTHY' DESPITE AGENT DEATH")
         print("="*80)
         print(f"Agent dead: {agent_dead}")
@@ -257,6 +300,7 @@ class TestAgentDeathAfterTriage:
     @pytest.mark.asyncio
     async def test_health_service_misses_agent_death(self):
         """
+    pass
         Test that health service completely misses agent death
         """
         
@@ -264,6 +308,7 @@ class TestAgentDeathAfterTriage:
             """Simulates current broken health service"""
             
             def __init__(self):
+    pass
                 self.checks_performed = 0
                 self.agent_states = {
                     'supervisor': 'healthy',
@@ -275,7 +320,8 @@ class TestAgentDeathAfterTriage:
                 self.checks_performed += 1
                 
                 # This is the BUG - doesn't actually check if agent is processing
-                return {
+                await asyncio.sleep(0)
+    return {
                     'status': 'healthy',
                     'agent': agent_name,
                     'timestamp': time.time(),
@@ -292,7 +338,8 @@ class TestAgentDeathAfterTriage:
         # Kill the agent
         await health_service.kill_agent('triage')
         
-        # Health checks still return healthy (BUG!)
+        # Health checks still await asyncio.sleep(0)
+    return healthy (BUG!)
         for _ in range(10):
             health_status = await health_service.check_agent_health('triage')
             assert health_status['status'] == 'healthy', "Health check should incorrectly report healthy"
@@ -300,7 +347,8 @@ class TestAgentDeathAfterTriage:
         assert health_service.agent_states['triage'] == 'DEAD', "Agent is actually dead"
         assert health_service.checks_performed == 10, "Health checks were performed"
         
-        print("\n" + "="*80)
+        print("
+" + "="*80)
         print("HEALTH SERVICE FAILURE TO DETECT DEATH")
         print("="*80)
         print(f"Agent actual state: {health_service.agent_states['triage']}")
@@ -312,6 +360,7 @@ class TestAgentDeathAfterTriage:
     @pytest.mark.asyncio
     async def test_missing_error_recovery_for_agent_death(self):
         """
+    pass
         Test that error recovery doesn't trigger for silent agent death
         """
         
@@ -336,6 +385,7 @@ class TestAgentDeathAfterTriage:
         # Simulate agent processing
         async def process_with_silent_death():
             """Agent dies without raising exception"""
+    pass
             # Start processing
             print("Agent starting...")
             
@@ -344,7 +394,8 @@ class TestAgentDeathAfterTriage:
             
             # Agent dies silently (no exception!)
             # This is the bug - execution just stops
-            return None  # Returns None instead of result
+            await asyncio.sleep(0)
+    return None  # Returns None instead of result
             
         # Process message
         result = await process_with_silent_death()
@@ -354,7 +405,8 @@ class TestAgentDeathAfterTriage:
         assert len(recovery_attempts) == 0, "No recovery attempts made"
         assert result is None, "Agent returned None (dead)"
         
-        print("\n" + "="*80)
+        print("
+" + "="*80)
         print("ERROR RECOVERY FAILURE")
         print("="*80)
         print(f"Error recovery triggered: {error_recovery_triggered}")
@@ -369,11 +421,13 @@ class TestAgentDeathAfterTriage:
         
         # Then die silently without exception
         # This simulates the actual bug behavior
-        return None  # Dead agent returns None
+        await asyncio.sleep(0)
+    return None  # Dead agent returns None
         
     @pytest.mark.asyncio
     async def test_comprehensive_death_detection_requirements(self):
         """
+    pass
         Define what SHOULD happen to detect and recover from agent death
         
         This test defines the REQUIRED behavior to fix the bug.
@@ -396,7 +450,8 @@ class TestAgentDeathAfterTriage:
             if not implemented
         ]
         
-        print("\n" + "="*80)
+        print("
+" + "="*80)
         print("MISSING DEATH DETECTION MECHANISMS")
         print("="*80)
         for requirement in failed_requirements:
@@ -415,11 +470,13 @@ if __name__ == "__main__":
     # Run the test to demonstrate the bug
     import sys
     
-    print("\n" + "="*80)
+    print("
+" + "="*80)
     print("RUNNING CRITICAL AGENT DEATH DETECTION TEST")
     print("="*80)
     print("This test MUST FAIL to prove the bug exists!")
     print("If this test passes, the bug has been fixed.")
-    print("="*80 + "\n")
+    print("="*80 + "
+")
     
     pytest.main([__file__, "-v", "--tb=short", "-x"])

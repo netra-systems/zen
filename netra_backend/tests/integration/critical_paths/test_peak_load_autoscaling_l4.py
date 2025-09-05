@@ -19,6 +19,12 @@ L4 Requirements:
 
 import sys
 from pathlib import Path
+from test_framework.docker.unified_docker_manager import UnifiedDockerManager
+from test_framework.redis.test_redis_manager import TestRedisManager
+from auth_service.core.auth_manager import AuthManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 # Test framework import - using pytest fixtures instead
 
@@ -31,7 +37,6 @@ import uuid
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional, Tuple
-from unittest.mock import patch, AsyncMock, MagicMock
 
 import httpx
 import pytest

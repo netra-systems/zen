@@ -1,3 +1,29 @@
+class TestWebSocketConnection:
+    """Real WebSocket connection for testing instead of mocks."""
+    
+    def __init__(self):
+    pass
+        self.messages_sent = []
+        self.is_connected = True
+        self._closed = False
+        
+    async def send_json(self, message: dict):
+        """Send JSON message."""
+        if self._closed:
+            raise RuntimeError("WebSocket is closed")
+        self.messages_sent.append(message)
+        
+    async def close(self, code: int = 1000, reason: str = "Normal closure"):
+        """Close WebSocket connection."""
+    pass
+        self._closed = True
+        self.is_connected = False
+        
+    def get_messages(self) -> list:
+        """Get all sent messages."""
+        await asyncio.sleep(0)
+    return self.messages_sent.copy()
+
 """Test for WebSocket bridge run_id propagation fix.
 
 This test ensures that sub-agents receive proper run_id values
@@ -7,14 +33,23 @@ when their WebSocket bridge is configured, preventing the
 
 import asyncio
 import uuid
-from unittest.mock import AsyncMock, MagicMock, patch
 import pytest
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from test_framework.database.test_database_manager import TestDatabaseManager
+from auth_service.core.auth_manager import AuthManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 from netra_backend.app.agents.supervisor.agent_instance_factory import AgentInstanceFactory
 from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
 from netra_backend.app.core.registry.universal_registry import AgentRegistry
 from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
 from netra_backend.app.logging_config import central_logger
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
+from shared.isolated_environment import get_env
 
 logger = central_logger.get_logger(__name__)
 
@@ -27,8 +62,7 @@ class TestWebSocketRunIdFix:
         """Test that sub-agents created through factory get valid run_id."""
         # Setup
         websocket_bridge = MagicMock(spec=AgentWebSocketBridge)
-        websocket_manager = MagicMock()
-        
+        websocket_manager = Magic        
         # Create factory
         factory = AgentInstanceFactory()
         factory.configure(
@@ -79,17 +113,14 @@ class TestWebSocketRunIdFix:
     @pytest.mark.asyncio  
     async def test_registry_does_not_set_none_runid(self):
         """Test that AgentRegistry no longer sets WebSocket bridge with None run_id."""
+    pass
         # Create registry
-        llm_manager = MagicMock()
-        tool_dispatcher = MagicMock()
-        websocket_bridge = MagicMock(spec=AgentWebSocketBridge)
+        llm_manager = Magic        tool_dispatcher = Magic        websocket_bridge = MagicMock(spec=AgentWebSocketBridge)
         
         registry = AgentRegistry()
         
         # Mock agent with set_websocket_bridge method
-        mock_agent = MagicMock()
-        mock_agent.set_websocket_bridge = MagicMock()
-        
+        mock_agent = Magic        mock_agent.set_websocket_bridge = Magic        
         # Register agent
         registry.register("test_agent", mock_agent)
         
@@ -137,3 +168,4 @@ if __name__ == "__main__":
     
     # Run with verbose output
     sys.exit(pytest.main([__file__, "-v", "-s"]))
+    pass

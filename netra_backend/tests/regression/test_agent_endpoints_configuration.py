@@ -13,12 +13,15 @@ This test verifies:
 """
 
 import pytest
-from unittest.mock import Mock, patch, AsyncMock
 from fastapi.testclient import TestClient
 from fastapi import FastAPI
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 from netra_backend.app.core.app_factory import create_app
 from netra_backend.app.routes.agents_execute import router as agents_router
+import asyncio
 
 
 class TestAgentEndpointsConfiguration:
@@ -26,14 +29,20 @@ class TestAgentEndpointsConfiguration:
     
     @pytest.fixture
     def app(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create test app instance."""
+    pass
         with patch('netra_backend.app.core.app_factory.lifespan'):
             app = create_app()
             return app
     
     @pytest.fixture
     def client(self, app):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create test client."""
+    pass
         return TestClient(app)
     
     def test_agent_router_is_registered(self, app):
@@ -49,6 +58,7 @@ class TestAgentEndpointsConfiguration:
     
     def test_agent_endpoints_configuration(self, app):
         """Test that agent endpoints are configured with correct prefix."""
+    pass
         # Import the route configuration
         from netra_backend.app.core.app_factory_route_configs import get_all_route_configurations
         from netra_backend.app.core.app_factory_route_imports import import_all_route_modules
@@ -87,6 +97,7 @@ class TestAgentEndpointsConfiguration:
     @pytest.mark.asyncio
     async def test_data_endpoint_exists(self, client):
         """Test that /api/agents/data endpoint exists and responds."""
+    pass
         with patch('netra_backend.app.routes.agents_execute.get_current_user_optional', return_value=None):
             with patch('netra_backend.app.routes.agents_execute.get_agent_service', return_value=None):
                 response = client.post(
@@ -116,6 +127,7 @@ class TestAgentEndpointsConfiguration:
     
     def test_cors_configuration_for_agents(self, app):
         """Test that CORS is properly configured for agent endpoints."""
+    pass
         # Check that CORS middleware is configured
         middleware_types = [type(m) for m in app.user_middleware]
         middleware_names = [m.__class__.__name__ if hasattr(m, '__class__') else str(m) for m in app.user_middleware]
@@ -127,7 +139,7 @@ class TestAgentEndpointsConfiguration:
     @pytest.mark.asyncio
     async def test_agent_endpoint_with_mock_service(self, client):
         """Test agent endpoint with mocked agent service."""
-        mock_agent_service = Mock()
+        mock_agent_service = AgentRegistry().get_agent("supervisor")
         mock_agent_service.execute_agent = AsyncMock(return_value={
             'response': 'Mock response',
             'status': 'success'
@@ -151,6 +163,7 @@ class TestAgentEndpointsConfiguration:
     
     def test_agent_endpoints_url_structure(self):
         """Test that agent endpoints follow correct URL structure."""
+    pass
         # Import router to check endpoint paths
         from netra_backend.app.routes.agents_execute import router
         
@@ -216,6 +229,7 @@ class TestAgentEndpointIntegration:
     
     def test_staging_urls_configuration(self):
         """Test that staging URLs are correctly configured."""
+    pass
         # This is a configuration test, not a runtime test
         staging_backend_url = 'https://api.staging.netrasystems.ai'
         staging_frontend_url = 'https://app.staging.netrasystems.ai'

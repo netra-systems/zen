@@ -10,6 +10,7 @@ import sys
 import tempfile
 import unittest
 from pathlib import Path
+from shared.isolated_environment import IsolatedEnvironment
 
 # Add parent directory to path
 

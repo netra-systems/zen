@@ -13,6 +13,7 @@ These tests validate Tests 7 and 8 from the critical conversion paths.
 
 import sys
 from pathlib import Path
+from shared.isolated_environment import IsolatedEnvironment
 
 # Test framework import - using pytest fixtures instead
 

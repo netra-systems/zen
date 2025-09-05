@@ -8,6 +8,7 @@ import pytest
 from typing import Dict, Any, List
 import sys
 import os
+from shared.isolated_environment import IsolatedEnvironment
 
 # Add project root to path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
@@ -49,6 +50,7 @@ class TestAgentExecutionOrder:
     
     def test_partial_data_workflow_order(self):
         """Test that data_helper runs early in partial data workflow."""
+    pass
         orchestrator = WorkflowOrchestrator(None, None, None)
         
         # Simulate triage result with partial data
@@ -93,6 +95,7 @@ class TestAgentExecutionOrder:
     
     def test_default_fallback_workflow_order(self):
         """Test that default/unknown workflow uses correct order."""
+    pass
         orchestrator = WorkflowOrchestrator(None, None, None)
         
         # Simulate unknown data sufficiency
@@ -128,6 +131,7 @@ class TestAgentExecutionOrder:
     
     def test_dependency_chain_integrity(self):
         """Verify each agent depends on the previous one in the chain."""
+    pass
         orchestrator = WorkflowOrchestrator(None, None, None)
         
         # Test sufficient data workflow (most complete)
@@ -183,8 +187,10 @@ if __name__ == "__main__":
     print(f"Results: {passed} passed, {failed} failed")
     
     if failed == 0:
-        print("\n[SUCCESS] All agent execution order tests passed!")
+        print("
+[SUCCESS] All agent execution order tests passed!")
         print("Agents will execute in logical order: Triage -> Data -> Optimization -> Actions -> Reporting")
     else:
-        print("\n[FAILURE] Some tests failed - agent execution order may be incorrect!")
+        print("
+[FAILURE] Some tests failed - agent execution order may be incorrect!")
         sys.exit(1)

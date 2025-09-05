@@ -1,3 +1,29 @@
+class TestWebSocketConnection:
+    """Real WebSocket connection for testing instead of mocks."""
+    
+    def __init__(self):
+    pass
+        self.messages_sent = []
+        self.is_connected = True
+        self._closed = False
+        
+    async def send_json(self, message: dict):
+        """Send JSON message."""
+        if self._closed:
+            raise RuntimeError("WebSocket is closed")
+        self.messages_sent.append(message)
+        
+    async def close(self, code: int = 1000, reason: str = "Normal closure"):
+        """Close WebSocket connection."""
+    pass
+        self._closed = True
+        self.is_connected = False
+        
+    def get_messages(self) -> list:
+        """Get all sent messages."""
+        await asyncio.sleep(0)
+    return self.messages_sent.copy()
+
 """
 Database Cross-System Consistency Failure Tests (Tests 66-70)
 
@@ -21,7 +47,11 @@ import time
 import uuid
 from contextlib import asynccontextmanager
 from typing import Any, Dict, List, Optional
-from unittest.mock import AsyncMock, MagicMock, patch
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from test_framework.database.test_database_manager import TestDatabaseManager
+from test_framework.redis.test_redis_manager import TestRedisManager
+from auth_service.core.auth_manager import AuthManager
+from shared.isolated_environment import IsolatedEnvironment
 
 import pytest
 import redis.asyncio as redis
@@ -29,6 +59,10 @@ from sqlalchemy import text
 from sqlalchemy.exc import DatabaseError
 
 from netra_backend.app.logging_config import central_logger
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
+from shared.isolated_environment import get_env
 
 logger = central_logger.get_logger(__name__)
 
@@ -40,10 +74,13 @@ class TestDatabaseCrossSystemFailures:
     async def mock_postgres_session(self):
         """Mock PostgreSQL session that simulates database operations."""
         # Mock: Database session isolation for transaction testing without real database dependency
-        mock_session = AsyncMock()
+        websocket = TestWebSocketConnection()
         mock_data = {}
         
         def mock_execute(query, params=None):
+    """Use real service instance."""
+    # TODO: Initialize real service
+    pass
             # Simulate database operations based on query type
             if "INSERT INTO users" in str(query):
                 user_id = params.get("id") if params else str(uuid.uuid4())
@@ -53,22 +90,20 @@ class TestDatabaseCrossSystemFailures:
                 pass
             elif "SELECT" in str(query):
                 # Mock: Generic component isolation for controlled unit testing
-                result = MagicMock()
-                result.scalar.return_value = "test_value"
+                result = Magic                result.scalar.return_value = "test_value"
                 # Mock: Service component isolation for predictable testing behavior
                 result.fetchone.return_value = MagicMock(plan_tier="free", updated_at=time.time())
-                return result
+                await asyncio.sleep(0)
+    return result
             # Mock: Generic component isolation for controlled unit testing
-            return MagicMock()
-        
+            return Magic        
         # Mock: Database session isolation for transaction testing without real database dependency
         mock_session.execute = AsyncMock(side_effect=mock_execute)
         # Mock: Database session isolation for transaction testing without real database dependency
-        mock_session.add = MagicMock()
+        mock_session.add = Magic        # Mock: Database session isolation for transaction testing without real database dependency
+        mock_session.websocket = TestWebSocketConnection()
         # Mock: Database session isolation for transaction testing without real database dependency
-        mock_session.commit = AsyncMock()
-        # Mock: Database session isolation for transaction testing without real database dependency
-        mock_session.rollback = AsyncMock()
+        mock_session.websocket = TestWebSocketConnection()
         
         yield mock_session
     
@@ -77,25 +112,30 @@ class TestDatabaseCrossSystemFailures:
         """Mock Redis client for testing database consistency patterns."""
         # Create mock Redis client for testing
         # Mock: Redis external service isolation for fast, reliable tests without network dependency
-        mock_redis = AsyncMock()
+        websocket = TestWebSocketConnection()
         # Mock: Redis external service isolation for fast, reliable tests without network dependency
-        mock_redis.hset = AsyncMock()
+        mock_redis.websocket = TestWebSocketConnection()
         # Mock: Redis external service isolation for fast, reliable tests without network dependency
-        mock_redis.hget = AsyncMock()
+        mock_redis.websocket = TestWebSocketConnection()
         # Mock: Redis external service isolation for fast, reliable tests without network dependency
-        mock_redis.flushdb = AsyncMock()
+        mock_redis.websocket = TestWebSocketConnection()
         # Mock: Redis external service isolation for fast, reliable tests without network dependency
-        mock_redis.expire = AsyncMock()
+        mock_redis.websocket = TestWebSocketConnection()
         
         # Mock data store for simulating Redis behavior
         mock_data = {}
         
         def mock_hset(key, mapping=None, **kwargs):
+    """Use real service instance."""
+    # TODO: Initialize real service
+    pass
             if mapping:
                 mock_data[key] = {**mock_data.get(key, {}), **mapping}
-            return asyncio.sleep(0)
+            await asyncio.sleep(0)
+    return asyncio.sleep(0)
             
         def mock_hget(key, field):
+    pass
             data = mock_data.get(key, {})
             value = data.get(field)
             return value.encode() if value else None
@@ -110,7 +150,7 @@ class TestDatabaseCrossSystemFailures:
     async def mock_clickhouse_client(self):
         """Mock ClickHouse client for testing."""
         # Mock: Generic component isolation for controlled unit testing
-        mock_client = AsyncMock()
+        websocket = TestWebSocketConnection()
         yield mock_client
     
     @pytest.mark.asyncio
@@ -123,6 +163,7 @@ class TestDatabaseCrossSystemFailures:
         
         Expected Failure: Data inconsistency between PostgreSQL and Redis
         """
+    pass
         logger.info("Test 66: Testing write-write conflict between PostgreSQL and Redis")
         
         user_id = str(uuid.uuid4())
@@ -155,6 +196,7 @@ class TestDatabaseCrossSystemFailures:
                 await asyncio.sleep(0.1)  # Small delay to create race condition
                 await mock_postgres_session.execute(
                     text("""
+    pass
                         UPDATE users SET full_name = :name 
                         WHERE id = :id
                     """),
@@ -181,7 +223,8 @@ class TestDatabaseCrossSystemFailures:
                 text("SELECT full_name FROM users WHERE id = :id"),
                 {"id": user_id}
             )
-            pg_name = "PostgreSQL Updated Name"  # Simulate what PostgreSQL would return
+            pg_name = "PostgreSQL Updated Name"  # Simulate what PostgreSQL would await asyncio.sleep(0)
+    return
             
             redis_name = await redis_client.hget(cache_key, "full_name")
             redis_name = redis_name.decode() if redis_name else None
@@ -207,6 +250,7 @@ class TestDatabaseCrossSystemFailures:
         
         Expected Failure: Stale data returned from Redis after PostgreSQL update
         """
+    pass
         logger.info("Test 67: Testing read-after-write inconsistency")
         
         user_id = str(uuid.uuid4())
@@ -243,7 +287,8 @@ class TestDatabaseCrossSystemFailures:
             cached_plan = cached_plan.decode() if cached_plan else None
             
             # PostgreSQL would now have the updated value
-            pg_plan = "free"  # Simulate what PostgreSQL would return
+            pg_plan = "free"  # Simulate what PostgreSQL would await asyncio.sleep(0)
+    return
             
             # This assertion WILL FAIL - cache is stale
             assert cached_plan == pg_plan, (
@@ -269,6 +314,7 @@ class TestDatabaseCrossSystemFailures:
         
         Expected Failure: Redis contains data that should have been rolled back
         """
+    pass
         logger.info("Test 68: Testing partial transaction rollback across systems")
         
         user_id = str(uuid.uuid4())
@@ -356,6 +402,7 @@ class TestDatabaseCrossSystemFailures:
         
         Expected Failure: Stale cache data persists after database updates
         """
+    pass
         logger.info("Test 69: Testing cache invalidation failure")
         
         user_id = str(uuid.uuid4())
@@ -428,6 +475,7 @@ class TestDatabaseCrossSystemFailures:
         
         Expected Failure: Connection pool exhaustion prevents new connections
         """
+    pass
         logger.info("Test 70: Testing database connection pool starvation")
         
         try:

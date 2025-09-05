@@ -54,6 +54,7 @@ from pathlib import Path
 from datetime import datetime, timezone, timedelta
 from typing import Dict, List, Optional, Tuple, Any
 from dataclasses import dataclass
+from shared.isolated_environment import IsolatedEnvironment
 
 # Add project root to path for imports
 project_root = Path(__file__).parent.parent.parent
@@ -83,6 +84,7 @@ class UserJourneyMetrics:
     errors: List[str] = None
     
     def __post_init__(self):
+    pass
         if self.steps_completed is None:
             self.steps_completed = []
         if self.errors is None:
@@ -104,6 +106,7 @@ class ASCIIAuthenticationTestSuite:
     """Comprehensive authentication testing framework with ASCII-safe output."""
     
     def __init__(self):
+    pass
         self.metrics: List[UserJourneyMetrics] = []
         self.session = self._create_resilient_session()
         self.base_urls = {
@@ -734,6 +737,7 @@ class ASCIIAuthenticationTestSuite:
             results = []
             
             def simulate_user_journey(user_index):
+    pass
                 user_id = f"load_test_user_{user_index}"
                 user_start = time.time()
                 
@@ -904,7 +908,8 @@ def run_ascii_authentication_tests(suite: ASCIIAuthenticationTestSuite) -> Dict[
     results = {}
     for test_name, test_func in auth_tests.items():
         try:
-            suite._ascii_safe_print(f"\n[RUNNING] {test_name}")
+            suite._ascii_safe_print(f"
+[RUNNING] {test_name}")
             result = test_func()
             results[test_name] = result
             status = "[PASSED]" if result else "[FAILED]"
@@ -917,7 +922,8 @@ def run_ascii_authentication_tests(suite: ASCIIAuthenticationTestSuite) -> Dict[
 
 def run_ascii_user_journey_tests(suite: ASCIIAuthenticationTestSuite) -> Dict[str, bool]:
     """Run user journey tests with ASCII-safe output."""
-    suite._ascii_safe_print("\n" + "=" * 60) 
+    suite._ascii_safe_print("
+" + "=" * 60) 
     suite._ascii_safe_print("RUNNING USER JOURNEY TESTS")
     suite._ascii_safe_print("=" * 60)
     
@@ -928,7 +934,8 @@ def run_ascii_user_journey_tests(suite: ASCIIAuthenticationTestSuite) -> Dict[st
     results = {}
     for test_name, test_func in journey_tests.items():
         try:
-            suite._ascii_safe_print(f"\n[RUNNING] {test_name}")
+            suite._ascii_safe_print(f"
+[RUNNING] {test_name}")
             result = test_func()
             results[test_name] = result
             status = "[PASSED]" if result else "[FAILED]"
@@ -941,7 +948,8 @@ def run_ascii_user_journey_tests(suite: ASCIIAuthenticationTestSuite) -> Dict[st
 
 def run_ascii_performance_tests(suite: ASCIIAuthenticationTestSuite) -> Dict[str, bool]:
     """Run performance under load tests with ASCII-safe output."""
-    suite._ascii_safe_print("\n" + "=" * 60)
+    suite._ascii_safe_print("
+" + "=" * 60)
     suite._ascii_safe_print("RUNNING PERFORMANCE UNDER LOAD TESTS") 
     suite._ascii_safe_print("=" * 60)
     
@@ -953,7 +961,8 @@ def run_ascii_performance_tests(suite: ASCIIAuthenticationTestSuite) -> Dict[str
     results = {}
     for test_name, test_func in performance_tests.items():
         try:
-            suite._ascii_safe_print(f"\n[RUNNING] {test_name}")
+            suite._ascii_safe_print(f"
+[RUNNING] {test_name}")
             start_time = time.time()
             result = test_func()
             duration = time.time() - start_time
@@ -994,7 +1003,8 @@ def main():
         
         total_duration = time.time() - start_time
         
-        print("\n" + "=" * 80)
+        print("
+" + "=" * 80)
         print("COMPREHENSIVE TEST RESULTS SUMMARY")
         print("=" * 80)
         
@@ -1004,13 +1014,15 @@ def main():
         print(f"Overall Success Rate: {overall_success_rate:.1%}")
         print(f"Total Execution Time: {total_duration:.2f} seconds")
         
-        print(f"\nAUTHENTICATION FLOW TESTS: {sum(auth_results.values())}/{len(auth_results)} passed")
+        print(f"
+AUTHENTICATION FLOW TESTS: {sum(auth_results.values())}/{len(auth_results)} passed")
         print(f"USER JOURNEY TESTS: {sum(journey_results.values())}/{len(journey_results)} passed")  
         print(f"PERFORMANCE TESTS: {sum(performance_results.values())}/{len(performance_results)} passed")
         
         if report.get("summary"):
             summary = report["summary"]
-            print(f"\nBUSINESS VALUE METRICS:")
+            print(f"
+BUSINESS VALUE METRICS:")
             print(f"  - User Journeys Completed: {summary['total_user_journeys']}")
             print(f"  - Average Journey Duration: {summary['average_journey_duration']:.2f}s")
             print(f"  - Total Revenue Impact: ${summary['total_revenue_impact']:.2f}")
@@ -1024,19 +1036,22 @@ def main():
         )
         
         if overall_success_rate >= 0.8 and critical_tests_passed:
-            suite._ascii_safe_print("\n[SUCCESS] COMPREHENSIVE ASCII TEST SUITE: SUCCESS")
+            suite._ascii_safe_print("
+[SUCCESS] COMPREHENSIVE ASCII TEST SUITE: SUCCESS")
             suite._ascii_safe_print("   JWT synchronization and authentication flows are robust")
             suite._ascii_safe_print("   User journeys deliver business value effectively")
             suite._ascii_safe_print("   System performs well under load")
             return True
         else:
-            suite._ascii_safe_print("\n[WARNING] COMPREHENSIVE ASCII TEST SUITE: ISSUES DETECTED")
+            suite._ascii_safe_print("
+[WARNING] COMPREHENSIVE ASCII TEST SUITE: ISSUES DETECTED")
             suite._ascii_safe_print("   Some critical authentication or user journey issues found")
             suite._ascii_safe_print("   Review failed tests and fix before production deployment")
             return False
             
     except Exception as e:
-        print(f"\n[CRITICAL ERROR] CRITICAL ERROR IN TEST SUITE: {e}")
+        print(f"
+[CRITICAL ERROR] CRITICAL ERROR IN TEST SUITE: {e}")
         import traceback
         traceback.print_exc()
         return False
@@ -1044,3 +1059,4 @@ def main():
 if __name__ == "__main__":
     success = main()
     sys.exit(0 if success else 1)
+    pass

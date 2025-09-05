@@ -9,6 +9,7 @@ import subprocess
 import json
 import yaml
 from typing import Dict, List, Tuple
+from shared.isolated_environment import IsolatedEnvironment
 
 
 class CloudRunSecretValidator:
@@ -35,6 +36,7 @@ class CloudRunSecretValidator:
     }
     
     def __init__(self, project: str = "netra-staging", region: str = "us-central1"):
+    pass
         self.project = project
         self.region = region
         self.errors = []
@@ -106,7 +108,8 @@ class CloudRunSecretValidator:
         all_issues = {}
         
         for service_type, cloud_run_name in self.SERVICE_MAPPINGS.items():
-            print(f"\nValidating {service_type} service ({cloud_run_name})...")
+            print(f"
+Validating {service_type} service ({cloud_run_name})...")
             
             config = self.get_service_config(cloud_run_name)
             if not config:
@@ -161,23 +164,28 @@ def test_cloud_run_secret_configuration():
     is_valid, issues = validator.validate_all_services()
     
     if not is_valid:
-        print("\n[X] VALIDATION FAILED - Issues found:")
+        print("
+[X] VALIDATION FAILED - Issues found:")
         for service, service_issues in issues.items():
-            print(f"\n{service.upper()} SERVICE:")
+            print(f"
+{service.upper()} SERVICE:")
             for issue in service_issues:
                 print(f"  - {issue}")
         
         # Generate fix commands
         fix_commands = validator.generate_fix_commands(issues)
         if fix_commands:
-            print("\n[FIX] COMMANDS:")
+            print("
+[FIX] COMMANDS:")
             for cmd in fix_commands:
-                print(f"\n{cmd}")
+                print(f"
+{cmd}")
         
         # Fail the test
         assert False, f"Secret configuration issues found: {issues}"
     else:
-        print("\n[OK] All services have properly configured secrets")
+        print("
+[OK] All services have properly configured secrets")
         return True
 
 
@@ -185,10 +193,14 @@ if __name__ == "__main__":
     # Run the validation
     try:
         test_cloud_run_secret_configuration()
-        print("\n[OK] All validations passed!")
+        print("
+[OK] All validations passed!")
     except AssertionError as e:
-        print(f"\n[X] Validation failed: {e}")
+        print(f"
+[X] Validation failed: {e}")
         exit(1)
     except Exception as e:
-        print(f"\n[X] Unexpected error: {e}")
+        print(f"
+[X] Unexpected error: {e}")
         exit(1)
+    pass

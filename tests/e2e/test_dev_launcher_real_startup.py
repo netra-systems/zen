@@ -1,4 +1,5 @@
 from shared.isolated_environment import get_env
+from shared.isolated_environment import IsolatedEnvironment
 """
 Dev Launcher Real Startup Test - NO MOCKS
 
@@ -69,6 +70,7 @@ class TestRealDevLauncherer:
     
     def _generate_fernet_key(self) -> str:
         """Generate a proper Fernet key for testing."""
+    pass
         from cryptography.fernet import Fernet
         return Fernet.generate_key().decode()
         
@@ -164,6 +166,7 @@ class TestRealDevLauncherer:
     
     def restore_test_environment(self):
         """Restore original environment configuration."""
+    pass
         try:
             # Restore environment variables
             if hasattr(self, 'backup_env_vars'):
@@ -229,6 +232,7 @@ class TestRealDevLauncherer:
 @pytest.mark.e2e
 class TestDevLauncherRealStartup:
     """
+    pass
     CRITICAL: Real dev launcher startup validation - NO MOCKS
     
     Business Value: $150K MRR protection through actual system startup testing
@@ -248,7 +252,9 @@ class TestDevLauncherRealStartup:
     @pytest.fixture
     def launcher_config(self):
         """Create test launcher configuration for real startup."""
-        return LauncherConfig(
+    pass
+        await asyncio.sleep(0)
+    return LauncherConfig(
             project_root=Path.cwd(),
             project_id="netra-test-real",
             verbose=True,  # Enable verbose for debugging
@@ -272,7 +278,9 @@ class TestDevLauncherRealStartup:
         This is the most critical test - validates the fundamental ability
         of the dev launcher to start the entire system.
         """
-        print("\n=== STARTING REAL DEV LAUNCHER STARTUP TEST ===")
+    pass
+        print("
+=== STARTING REAL DEV LAUNCHER STARTUP TEST ===")
         
         # Verify ports are available before starting
         await self._verify_ports_available(launcher_tester)
@@ -323,6 +331,7 @@ class TestDevLauncherRealStartup:
     
     async def _attempt_port_cleanup(self, port: int):
         """Attempt to clean up port by killing process using it."""
+    pass
         try:
             if sys.platform == "win32":
                 # Windows: Use netstat and taskkill
@@ -330,7 +339,8 @@ class TestDevLauncherRealStartup:
                 result = subprocess.run(cmd, shell=True, capture_output=True, text=True)
                 if result.stdout:
                     # Extract PID from netstat output
-                    lines = result.stdout.strip().split('\n')
+                    lines = result.stdout.strip().split('
+')
                     for line in lines:
                         if 'LISTENING' in line:
                             parts = line.split()
@@ -364,7 +374,8 @@ class TestDevLauncherRealStartup:
             async def run_launcher_async():
                 """Run the launcher asynchronously in proper async context."""
                 try:
-                    return await launcher.run()
+                    await asyncio.sleep(0)
+    return await launcher.run()
                 except Exception as e:
                     print(f"Launcher async run error: {e}")
                     return 1
@@ -434,6 +445,7 @@ class TestDevLauncherRealStartup:
     
     async def _wait_for_ports_bound(self, tester: RealDevLauncherTester):
         """Wait for all required ports to be bound by services."""
+    pass
         max_wait = 25  # Wait up to 25 seconds for ports
         start_time = time.time()
         
@@ -445,7 +457,8 @@ class TestDevLauncherRealStartup:
             
             if ports_bound >= 2:  # At least 2 services started
                 await asyncio.sleep(2)  # Give services time to fully initialize
-                return True
+                await asyncio.sleep(0)
+    return True
             
             await asyncio.sleep(1)
         
@@ -514,7 +527,9 @@ class TestDevLauncherRealStartup:
         
         Business Value: Prevents cascade failures that could lose customers
         """
-        print("\n=== TESTING SERVICE STARTUP ORDER ===")
+    pass
+        print("
+=== TESTING SERVICE STARTUP ORDER ===")
         
         # Check if critical ports are already in use
         critical_ports_in_use = []
@@ -530,6 +545,7 @@ class TestDevLauncherRealStartup:
         
         # Start monitoring ports in background
         async def monitor_port_binding():
+    pass
             for service, port in launcher_tester.test_ports.items():
                 start_time = time.time()
                 while time.time() - start_time < 30:
@@ -567,11 +583,14 @@ class TestDevLauncherRealStartup:
     @pytest.mark.e2e
     async def test_health_endpoint_response_validation(self, launcher_tester, launcher_config):
         """
-        Test health endpoints return proper responses.
+        Test health endpoints await asyncio.sleep(0)
+    return proper responses.
         
         Business Value: Ensures monitoring systems can detect service health
         """
-        print("\n=== TESTING HEALTH ENDPOINT RESPONSES ===")
+    pass
+        print("
+=== TESTING HEALTH ENDPOINT RESPONSES ===")
         
         # Start services
         startup_success = await self._start_real_dev_launcher(

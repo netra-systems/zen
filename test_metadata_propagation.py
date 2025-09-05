@@ -2,6 +2,7 @@
 
 This test verifies that the supervisor correctly propagates metadata
 from child contexts back to parent context for the reporting agent.
+from shared.isolated_environment import IsolatedEnvironment
 """
 
 import asyncio

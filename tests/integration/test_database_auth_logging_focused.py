@@ -15,6 +15,7 @@ import logging
 import pytest
 from io import StringIO
 from pathlib import Path
+from shared.isolated_environment import IsolatedEnvironment
 
 # Import isolated environment for proper environment management
 from shared.isolated_environment import get_env
@@ -32,6 +33,7 @@ class TestDatabaseAuthLoggingFocused:
     @pytest.fixture(autouse=True, scope="function")
     def setup_test_db_config(self, isolated_test_env):
         """Set up test database configuration."""
+    pass
         # Configure test environment with proper service URLs
         postgres_url = 'postgresql://test_user:test_pass@localhost:5433/netra_test'
         redis_url = 'redis://localhost:6381'
@@ -125,16 +127,22 @@ class TestDatabaseAuthLoggingFocused:
             for pattern in unwanted_auth_patterns:
                 if pattern.lower() in log_output.lower():
                     # Find the actual line for better reporting
-                    for line in log_output.split('\n'):
+                    for line in log_output.split('
+'):
                         if pattern.lower() in line.lower():
                             found_auth_issues.append(f"Found unwanted auth pattern '{pattern}' in: {line.strip()}")
             
             # Assert no unwanted auth error messages
             if found_auth_issues:
                 pytest.fail(
-                    f"Found authentication error logs that indicate database auth issues:\\n" + 
-                    "\\n".join(found_auth_issues) +
-                    f"\\n\\nFull log output:\\n{log_output}"
+                    f"Found authentication error logs that indicate database auth issues:\
+" + 
+                    "\
+".join(found_auth_issues) +
+                    f"\
+\
+Full log output:\
+{log_output}"
                 )
             
             # Try to perform a basic database operation if possible
@@ -170,6 +178,7 @@ class TestDatabaseAuthLoggingFocused:
     
     def test_database_manager_no_credential_logging(self):
         """Test that DatabaseManager URL building doesn't log credentials."""
+    pass
         # Capture all log output
         log_capture = StringIO()
         handler = logging.StreamHandler(log_capture)
@@ -242,15 +251,21 @@ class TestDatabaseAuthLoggingFocused:
             for credential in credentials:
                 if credential in log_output:
                     # Find the actual line for better reporting
-                    for line in log_output.split('\n'):
+                    for line in log_output.split('
+'):
                         if credential in line:
                             found_credentials.append(f"Found credential '{credential}' in: {line.strip()}")
             
             # Assert no credentials in logs
             if found_credentials:
                 pytest.fail(
-                    f"Found credentials in logs (security issue):\\n" + "\\n".join(found_credentials) +
-                    f"\\n\\nFull log output:\\n{log_output}"
+                    f"Found credentials in logs (security issue):\
+" + "\
+".join(found_credentials) +
+                    f"\
+\
+Full log output:\
+{log_output}"
                 )
             
         finally:

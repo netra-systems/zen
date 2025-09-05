@@ -14,6 +14,7 @@ import sys
 import ast
 from pathlib import Path
 from typing import List, Tuple
+from shared.isolated_environment import IsolatedEnvironment
 
 import pytest
 
@@ -37,6 +38,7 @@ class TestNoEnvironmentFiles:
     @pytest.mark.critical
     def test_no_env_production_file(self):
         """Ensure .env.production does not exist."""
+    pass
         prod_env = project_root / ".env.production"
         assert not prod_env.exists(), (
             "CRITICAL: .env.production file exists! Production must only use "
@@ -54,6 +56,7 @@ class TestNoEnvironmentFiles:
     
     def test_gitignore_excludes_env_files(self):
         """Verify .gitignore properly excludes environment files."""
+    pass
         gitignore_path = project_root / ".gitignore"
         if gitignore_path.exists():
             with open(gitignore_path, 'r') as f:
@@ -94,6 +97,7 @@ class TestEnvironmentLoadingLogic:
     @pytest.mark.critical
     def test_auth_service_skips_env_loading_in_staging(self):
         """Verify auth service skips .env loading when ENVIRONMENT=staging."""
+    pass
         auth_main = project_root / "auth_service" / "main.py"
         
         with open(auth_main, 'r', encoding='utf-8') as f:
@@ -160,7 +164,9 @@ class TestNoHardcodedSecrets:
                     suspicious_files.extend(issues)
         
         assert not suspicious_files, (
-            f"Found hardcoded secrets in files:\n" + "\n".join(suspicious_files)
+            f"Found hardcoded secrets in files:
+" + "
+".join(suspicious_files)
         )
 
 
@@ -190,6 +196,7 @@ class TestDeploymentConfiguration:
     
     def test_deployment_script_uses_gsm_for_secrets(self):
         """Verify deployment script loads all secrets from GSM."""
+    pass
         deploy_script = project_root / "scripts" / "deploy_to_gcp.py"
         
         with open(deploy_script, 'r', encoding='utf-8') as f:
@@ -257,7 +264,9 @@ class TestNoReferencesToStagingEnvFile:
                     break
         
         assert not references, (
-            f"Found references to .env.staging in code:\n" + "\n".join(references)
+            f"Found references to .env.staging in code:
+" + "
+".join(references)
         )
 
 
@@ -309,15 +318,20 @@ class TestComplianceAudit:
         # Generate audit report
         passed = all(audit_results.values())
         
-        report = "Staging Configuration Audit Report\n"
-        report += "=" * 50 + "\n"
+        report = "Staging Configuration Audit Report
+"
+        report += "=" * 50 + "
+"
         for check, result in audit_results.items():
             status = "PASS" if result else "FAIL"
-            report += f"{check}: {status}\n"
+            report += f"{check}: {status}
+"
         
-        assert passed, f"Staging configuration audit failed:\n{report}"
+        assert passed, f"Staging configuration audit failed:
+{report}"
 
 
 if __name__ == "__main__":
     # Run tests with pytest
     pytest.main([__file__, "-v", "--tb=short"])
+    pass

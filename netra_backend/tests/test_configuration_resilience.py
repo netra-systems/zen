@@ -32,7 +32,9 @@ import pytest
 import asyncio
 import os
 from typing import Dict, Any, Optional
-from unittest.mock import patch, MagicMock
+from test_framework.database.test_database_manager import TestDatabaseManager
+from test_framework.redis.test_redis_manager import TestRedisManager
+from shared.isolated_environment import IsolatedEnvironment
 
 # ABSOLUTE IMPORTS - Following SPEC/import_management_architecture.xml
 from netra_backend.app.core.configuration.base import get_unified_config

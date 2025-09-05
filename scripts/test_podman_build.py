@@ -7,6 +7,7 @@ import subprocess
 import sys
 import shutil
 from pathlib import Path
+from shared.isolated_environment import IsolatedEnvironment
 
 def test_podman_availability():
     """Test if Podman is available."""

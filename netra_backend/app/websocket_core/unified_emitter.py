@@ -26,6 +26,7 @@ Critical Events (NEVER REMOVE):
 """
 
 import asyncio
+import time
 from typing import Optional, Dict, Any, TYPE_CHECKING, List
 from datetime import datetime
 from dataclasses import dataclass, field
@@ -312,78 +313,94 @@ class UnifiedWebSocketEmitter:
     
     # Backward compatibility methods for existing code
     
-    async def notify_agent_started(self, agent_name: str, **kwargs):
+    async def notify_agent_started(self, agent_name: str, metadata: Dict[str, Any] = None):
         """
-        Backward compatibility wrapper for agent_started.
+        Send agent_started event - CRITICAL for chat value delivery.
         
         Args:
             agent_name: Name of the agent starting
-            **kwargs: Additional event data
+            metadata: Additional event metadata
         """
+        if metadata is None:
+            metadata = {}
+        
         await self.emit_agent_started({
-            'agent': agent_name,
+            'agent_name': agent_name,
+            'metadata': metadata,
             'status': 'started',
-            **kwargs
+            'timestamp': time.time()
         })
     
-    async def notify_agent_thinking(self, thought: str, **kwargs):
+    async def notify_agent_thinking(self, thought: str, metadata: Dict[str, Any] = None):
         """
-        Backward compatibility wrapper for agent_thinking.
+        Send agent_thinking event - CRITICAL for chat value delivery.
         
         Args:
             thought: The agent's current thought
-            **kwargs: Additional event data
+            metadata: Additional event metadata
         """
+        if metadata is None:
+            metadata = {}
+        
         await self.emit_agent_thinking({
             'thought': thought,
+            'metadata': metadata,
             'type': 'reasoning',
-            **kwargs
+            'timestamp': time.time()
         })
     
-    async def notify_tool_executing(self, tool_name: str, parameters: Optional[Dict] = None, **kwargs):
+    async def notify_tool_executing(self, tool_name: str, metadata: Dict[str, Any] = None):
         """
-        Backward compatibility wrapper for tool_executing.
+        Send tool_executing event - CRITICAL for chat value delivery.
         
         Args:
             tool_name: Name of the tool being executed
-            parameters: Tool parameters
-            **kwargs: Additional event data
+            metadata: Additional event metadata
         """
+        if metadata is None:
+            metadata = {}
+        
         await self.emit_tool_executing({
             'tool': tool_name,
-            'parameters': parameters or {},
+            'metadata': metadata,
             'status': 'executing',
-            **kwargs  
+            'timestamp': time.time()
         })
     
-    async def notify_tool_completed(self, tool_name: str, result: Any, **kwargs):
+    async def notify_tool_completed(self, tool_name: str, metadata: Dict[str, Any] = None):
         """
-        Backward compatibility wrapper for tool_completed.
+        Send tool_completed event - CRITICAL for chat value delivery.
         
         Args:
             tool_name: Name of the tool that completed
-            result: Tool execution result
-            **kwargs: Additional event data
+            metadata: Additional event metadata (should include 'result')
         """
+        if metadata is None:
+            metadata = {}
+        
         await self.emit_tool_completed({
             'tool': tool_name,
-            'result': result,
+            'metadata': metadata,
             'status': 'completed',
-            **kwargs
+            'timestamp': time.time()
         })
     
-    async def notify_agent_completed(self, result: Any, **kwargs):
+    async def notify_agent_completed(self, agent_name: str, metadata: Dict[str, Any] = None):
         """
-        Backward compatibility wrapper for agent_completed.
+        Send agent_completed event - CRITICAL for chat value delivery.
         
         Args:
-            result: Final agent result
-            **kwargs: Additional event data
+            agent_name: Name of the agent that completed
+            metadata: Additional event metadata (should include 'result')
         """
+        if metadata is None:
+            metadata = {}
+        
         await self.emit_agent_completed({
-            'result': result,
+            'agent_name': agent_name,
+            'metadata': metadata,
             'status': 'completed',
-            **kwargs
+            'timestamp': time.time()
         })
     
     async def notify_agent_error(self, error: str, **kwargs):

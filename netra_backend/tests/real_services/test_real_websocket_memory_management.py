@@ -29,6 +29,7 @@ import json
 from datetime import datetime, timezone, timedelta
 from typing import Dict, List, Optional, Set
 from contextlib import asynccontextmanager
+from shared.isolated_environment import IsolatedEnvironment
 
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.websockets import WebSocketState

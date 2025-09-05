@@ -23,6 +23,7 @@ import time
 from pathlib import Path
 from typing import Dict, Any, List
 import logging
+from shared.isolated_environment import IsolatedEnvironment
 
 # Add project root to Python path
 project_root = Path(__file__).parent.parent

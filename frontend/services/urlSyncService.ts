@@ -33,13 +33,60 @@ export const useURLSync = (config: Partial<urlSyncTypes.UrlSyncConfig> = {}): ur
   const lastSyncedRef = useRef<string | null>(null);
   const isUpdatingRef = useRef(false);
   const isManualUpdateRef = useRef(false);
+  const urlUpdateQueue = useRef<Array<{threadId: string | null, timestamp: number}>>([]); 
+  const isProcessingQueue = useRef(false);
+  const updateDebounceTimer = useRef<NodeJS.Timeout | null>(null);
 
-  // Listen to store changes and update URL (skip during manual updates)
+  // Listen to store changes and update URL with proper queuing
   useEffect(() => {
     if (!isManualUpdateRef.current) {
-      urlSyncHandlers.handleStoreToUrlSync(activeThreadId, fullConfig, pathname, router, lastSyncedRef, isUpdatingRef);
+      queueUrlUpdate(activeThreadId);
     }
   }, [activeThreadId, pathname, router]);
+  
+  // Queue URL update to prevent race conditions
+  const queueUrlUpdate = useCallback((threadId: string | null) => {
+    const update = { threadId, timestamp: Date.now() };
+    urlUpdateQueue.current.push(update);
+    
+    // Debounce URL updates to prevent rapid-fire changes
+    if (updateDebounceTimer.current) {
+      clearTimeout(updateDebounceTimer.current);
+    }
+    
+    updateDebounceTimer.current = setTimeout(() => {
+      processUrlUpdateQueue();
+    }, 50); // 50ms debounce
+  }, []);
+  
+  // Process queued URL updates atomically
+  const processUrlUpdateQueue = useCallback(async () => {
+    if (isProcessingQueue.current || urlUpdateQueue.current.length === 0) {
+      return;
+    }
+    
+    isProcessingQueue.current = true;
+    
+    try {
+      // Get the most recent update (ignore intermediate ones)
+      const latestUpdate = urlUpdateQueue.current[urlUpdateQueue.current.length - 1];
+      urlUpdateQueue.current = []; // Clear queue
+      
+      // Only update if different from last synced
+      if (latestUpdate.threadId !== lastSyncedRef.current) {
+        urlSyncHandlers.handleStoreToUrlSync(
+          latestUpdate.threadId, 
+          fullConfig, 
+          pathname, 
+          router, 
+          lastSyncedRef, 
+          isUpdatingRef
+        );
+      }
+    } finally {
+      isProcessingQueue.current = false;
+    }
+  }, [fullConfig, pathname, router]);
 
   const syncUrlToStore = useCallback(async (url: string, switchToThread?: urlSyncTypes.ThreadSwitchFunction): Promise<boolean> => {
     if (!switchToThread) return false;
@@ -49,17 +96,36 @@ export const useURLSync = (config: Partial<urlSyncTypes.UrlSyncConfig> = {}): ur
   const syncStoreToUrl = useCallback((threadId: string | null): void => {
     // Set manual update flag to prevent auto-sync race condition
     isManualUpdateRef.current = true;
+    
+    // Clear any pending updates and timers
+    if (updateDebounceTimer.current) {
+      clearTimeout(updateDebounceTimer.current);
+      updateDebounceTimer.current = null;
+    }
+    urlUpdateQueue.current = [];
+    
+    // Perform immediate synchronous update
     urlSyncHandlers.performStoreToUrlSync(threadId, fullConfig, router, lastSyncedRef);
+    
     // Clear flag after a short delay to re-enable auto-sync
     setTimeout(() => {
       isManualUpdateRef.current = false;
-    }, 100);
+    }, 150); // Slightly longer delay to ensure operation completes
   }, [router]);
 
   const validateThreadId = useCallback(async (threadId: string): Promise<boolean> => {
     return await urlSyncUtils.performThreadValidation(threadId);
   }, []);
 
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (updateDebounceTimer.current) {
+        clearTimeout(updateDebounceTimer.current);
+      }
+    };
+  }, []);
+  
   return { 
     state, 
     syncUrlToStore, 

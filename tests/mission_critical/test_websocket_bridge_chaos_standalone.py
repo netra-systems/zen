@@ -29,6 +29,7 @@ from datetime import datetime, timezone
 from typing import Dict, List, Set, Any, Optional, Tuple, Union
 from dataclasses import dataclass, field
 import statistics
+from shared.isolated_environment import IsolatedEnvironment
 
 import pytest
 
@@ -37,6 +38,7 @@ class MockWebSocketClient:
     """Mock WebSocket client that simulates real network behavior."""
     
     def __init__(self, uri: str, **kwargs):
+    pass
         self.uri = uri
         self.kwargs = kwargs
         self.closed = False
@@ -45,10 +47,13 @@ class MockWebSocketClient:
         self.latency_simulation = 0.01  # 10ms base latency
         
     async def __aenter__(self):
+    pass
         await asyncio.sleep(self.latency_simulation)  # Connection latency
-        return self
+        await asyncio.sleep(0)
+    return self
         
     async def __aexit__(self, *args):
+    pass
         self.closed = True
         
     async def send(self, message: str):
@@ -64,6 +69,7 @@ class MockWebSocketClient:
         
     async def recv(self):
         """Receive message with simulated network conditions."""
+    pass
         if self.closed:
             raise ConnectionError("WebSocket is closed")
             
@@ -87,7 +93,8 @@ class MockWebSocketClient:
             "timestamp": time.time()
         })
         
-        return response
+        await asyncio.sleep(0)
+    return response
 
 
 @dataclass
@@ -115,6 +122,7 @@ class ChaosWebSocketClient:
     """WebSocket client with chaos engineering capabilities."""
     
     def __init__(self, user_id: str, conditions: NetworkConditions):
+    pass
         self.user_id = user_id
         self.connection_id = f"chaos_{user_id}_{uuid.uuid4().hex[:8]}"
         self.conditions = conditions
@@ -249,6 +257,7 @@ class ChaosWebSocketClient:
         
     async def force_disconnect(self):
         """Force disconnect to simulate network failure."""
+    pass
         self._record_chaos_event("forced_disconnect", severity="high")
         if self.websocket:
             self.websocket.closed = True
@@ -274,7 +283,8 @@ class ChaosWebSocketClient:
             if "type" in corrupted:
                 corrupted["type"] = "unknown_type"
                 
-        return corrupted
+        await asyncio.sleep(0)
+    return corrupted
     
     def _record_chaos_event(self, event_type: str, details: Dict[str, Any] = None, severity: str = "medium"):
         """Record a chaos event for analysis."""
@@ -289,6 +299,7 @@ class ChaosWebSocketClient:
     
     def get_metrics(self) -> Dict[str, Any]:
         """Get connection metrics and chaos statistics."""
+    pass
         chaos_events_by_type = defaultdict(int)
         for event in self.chaos_events:
             chaos_events_by_type[event.event_type] += 1
@@ -376,6 +387,7 @@ class TestWebSocketBridgeChaosStandalone:
     @pytest.mark.asyncio 
     async def test_high_chaos_extreme_conditions(self):
         """Test resilience under extreme chaos conditions (40-50% drops)."""
+    pass
         print("Starting high chaos test: 40-50% connection drops")
         
         # High chaos conditions
@@ -497,6 +509,7 @@ class TestWebSocketBridgeChaosStandalone:
     @pytest.mark.asyncio
     async def test_rapid_connect_disconnect_cycles(self):
         """Test system resilience under rapid connect/disconnect cycles."""
+    pass
         print("Starting rapid connect/disconnect cycle test")
         
         conditions = NetworkConditions(
@@ -627,6 +640,7 @@ class TestWebSocketBridgeChaosStandalone:
 
 async def run_standalone_chaos_tests():
     """Run the standalone chaos engineering tests."""
+    pass
     print("=" * 80)
     print("WEBSOCKET BRIDGE CHAOS ENGINEERING - STANDALONE DEMONSTRATION")
     print("=" * 80)
@@ -645,7 +659,8 @@ async def run_standalone_chaos_tests():
     results = []
     for test_method in test_methods:
         try:
-            print(f"\nRunning {test_method.__name__}")
+            print(f"
+Running {test_method.__name__}")
             await test_method()
             results.append(f"PASS: {test_method.__name__}")
         except Exception as e:
@@ -656,26 +671,31 @@ async def run_standalone_chaos_tests():
     passed_tests = sum(1 for r in results if "PASS:" in r)
     total_tests = len(results)
     
-    print(f"\n" + "=" * 80)
+    print(f"
+" + "=" * 80)
     print(f"CHAOS ENGINEERING TEST RESULTS: {passed_tests}/{total_tests} passed")
     print("=" * 80)
     for result in results:
         print(result)
         
     if passed_tests == total_tests:
-        print(f"\nWebSocket Bridge Chaos Engineering Tests SUCCESSFUL!")
+        print(f"
+WebSocket Bridge Chaos Engineering Tests SUCCESSFUL!")
         print("All chaos scenarios validated:")
         print("  - Random Connection Drops: PASS")
         print("  - High Chaos Conditions: PASS")
         print("  - Network Latency Injection: PASS")
         print("  - Rapid Reconnection Cycles: PASS") 
         print("  - Comprehensive Chaos Resilience: PASS")
-        print("\nChaos engineering methodology proven effective!")
+        print("
+Chaos engineering methodology proven effective!")
     else:
-        print(f"\nSome chaos tests failed - methodology needs refinement")
+        print(f"
+Some chaos tests failed - methodology needs refinement")
         
     print("=" * 80)
     
+    await asyncio.sleep(0)
     return passed_tests == total_tests
 
 

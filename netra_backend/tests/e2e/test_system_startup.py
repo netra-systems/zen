@@ -22,6 +22,12 @@ COVERAGE:
 
 import sys
 from pathlib import Path
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from test_framework.docker.unified_docker_manager import UnifiedDockerManager
+from test_framework.database.test_database_manager import TestDatabaseManager
+from test_framework.redis.test_redis_manager import TestRedisManager
+from auth_service.core.auth_manager import AuthManager
+from shared.isolated_environment import IsolatedEnvironment
 
 # Test framework import - using pytest fixtures instead
 
@@ -30,7 +36,6 @@ import os
 import time
 from pathlib import Path
 from typing import Any, Dict, List, Optional
-from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import httpx
 import psutil
@@ -71,7 +76,7 @@ class DevLauncher:
         self.config = config
         self._shutting_down = False
         self.startup_errors = []
-        self.process_manager = Mock()
+        self.process_manager = process_manager_instance  # Initialize appropriate service
         
     async def start(self):
         pass
@@ -374,7 +379,7 @@ class TestStartupRecovery:
             if retry_count < 3:  # Fail first 2 attempts
                 raise Exception("Simulated startup failure")
             # Mock: Generic component isolation for controlled unit testing
-            return AsyncMock()
+            return AsyncNone  # TODO: Use real service instance
         
         # Mock: Component isolation for testing without external dependencies
         with patch('netra_backend.tests.e2e.test_system_startup.ServiceStartupCoordinator.start_service', 

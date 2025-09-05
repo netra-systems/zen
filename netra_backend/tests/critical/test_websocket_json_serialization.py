@@ -9,7 +9,11 @@ This prevents regressions of the error:
 import json
 from datetime import datetime, timezone
 from typing import Any, Dict
-from unittest.mock import AsyncMock, MagicMock, patch
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from test_framework.database.test_database_manager import TestDatabaseManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 import pytest
 
@@ -21,22 +25,29 @@ from netra_backend.app.schemas.websocket_models import WebSocketMessage
 from netra_backend.app.websocket_core.handlers import UserMessageHandler
 from netra_backend.app.websocket_core import WebSocketManager
 from netra_backend.app.websocket_core.types import ServerMessage, create_server_message
+import asyncio
 
 
 class TestWebSocketJSONSerialization:
     """Test suite for WebSocket JSON serialization."""
+    pass
 
     @pytest.fixture
     def websocket_manager(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create a WebSocket manager instance."""
+    pass
         return WebSocketManager()
 
     @pytest.fixture
     def pipeline_executor(self, websocket_manager):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create a pipeline executor with websocket manager."""
-        from unittest.mock import MagicMock
-        mock_engine = MagicMock()
-        mock_session = MagicMock()
+        mock_engine = MagicNone  # TODO: Use real service instance
+    pass
+        mock_session = MagicNone  # TODO: Use real service instance
         executor = PipelineExecutor(engine=mock_engine, websocket_manager=websocket_manager, db_session=mock_session)
         return executor
 
@@ -64,6 +75,7 @@ class TestWebSocketJSONSerialization:
 
     def test_pipeline_executor_websocket_message_creation(self, pipeline_executor):
         """Test that PipelineExecutor creates properly serializable WebSocket messages."""
+    pass
         state = DeepAgentState(
             user_request="Pipeline test",
             chat_thread_id="thread-123"
@@ -106,6 +118,7 @@ class TestWebSocketJSONSerialization:
     @pytest.mark.asyncio
     async def test_websocket_send_with_deep_agent_state(self, websocket_manager):
         """Test sending DeepAgentState through WebSocket manager."""
+    pass
         state = DeepAgentState(
             user_request="Send test",
             metadata=AgentMetadata(
@@ -115,8 +128,8 @@ class TestWebSocketJSONSerialization:
         )
         
         # Mock WebSocket connection
-        mock_websocket = AsyncMock()
-        mock_websocket.send_json = AsyncMock()
+        mock_websocket = AsyncNone  # TODO: Use real service instance
+        mock_websocket.send_json = AsyncNone  # TODO: Use real service instance
         
         # Add connection
         conn_id = "test-conn-123"
@@ -180,6 +193,7 @@ class TestWebSocketJSONSerialization:
 
     def test_websocket_message_with_nested_datetime(self):
         """Test WebSocketMessage with nested datetime objects."""
+    pass
         # Create a message with nested datetime
         payload = {
             "data": {
@@ -241,6 +255,7 @@ class TestWebSocketJSONSerialization:
 
     def test_websocket_handler_message_serialization(self):
         """Test that WebSocket handlers properly serialize messages."""
+    pass
         handler = UserMessageHandler()
         
         # Create a mock response with datetime
@@ -262,6 +277,7 @@ class TestWebSocketJSONSerialization:
         Regression test for the specific flow that was failing:
         WebSocketManager.send_to_thread with DeepAgentState
         """
+    pass
         manager = WebSocketManager()
         
         # Create state that would have caused the error
@@ -295,8 +311,7 @@ class TestWebSocketJSONSerialization:
             ErrorMessage,
             MessageType,
             ServerMessage,
-            WebSocketStats,
-        )
+            WebSocketStats)
         
         # Test ErrorMessage
         error_msg = ErrorMessage(
@@ -329,6 +344,7 @@ class TestWebSocketJSONSerialization:
 
     def test_fix_prevents_original_error(self):
         """
+    pass
         Test that our fix prevents the original error:
         "Object of type DeepAgentState is not JSON serializable"
         

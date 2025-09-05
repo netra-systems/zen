@@ -32,7 +32,8 @@ try:
     print("✅ All imports successful!")
     
     # Test basic functionality
-    print("\n🔒 Testing Force Flag Guardian...")
+    print("
+🔒 Testing Force Flag Guardian...")
     guardian = DockerForceFlagGuardian()
     
     try:
@@ -42,7 +43,8 @@ try:
     except DockerForceFlagViolation:
         print("✅ Force flag guardian working correctly")
     
-    print("\n⏱️ Testing Rate Limiter...")
+    print("
+⏱️ Testing Rate Limiter...")
     rate_limiter = get_docker_rate_limiter()
     health = rate_limiter.health_check()
     
@@ -52,7 +54,8 @@ try:
         print("❌ Docker rate limiter unhealthy")
         sys.exit(1)
     
-    print("\n🐳 Testing Docker Daemon...")
+    print("
+🐳 Testing Docker Daemon...")
     daemon_health = check_docker_daemon_health()
     
     if daemon_health:
@@ -61,7 +64,8 @@ try:
         print("❌ Docker daemon is not healthy")
         sys.exit(1)
     
-    print("\n📊 Testing Metrics Collection...")
+    print("
+📊 Testing Metrics Collection...")
     metrics = DockerStabilityMetrics()
     metrics.record_operation("test_op", 1.5, True)
     metrics.record_force_flag_violation()
@@ -72,11 +76,13 @@ try:
     print(f"✅ Force flag violations: {report['force_flag_violations']}")
     print(f"✅ Rate limited operations: {report['rate_limited_operations']}")
     
-    print("\n" + "=" * 60)
+    print("
+" + "=" * 60)
     print("✅ DOCKER STABILITY TEST SUITE VALIDATION PASSED")
     print("=" * 60)
     print("The comprehensive test suite is ready for production use!")
-    print("\nTo run the full test suite:")
+    print("
+To run the full test suite:")
     print("python -m pytest tests/mission_critical/test_docker_stability_comprehensive.py -v")
     print("=" * 60)
     

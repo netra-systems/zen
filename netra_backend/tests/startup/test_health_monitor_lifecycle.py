@@ -6,8 +6,8 @@ COMPLIANCE: 450-line max file, 25-line max functions
 
 import sys
 from pathlib import Path
+from shared.isolated_environment import IsolatedEnvironment
 
-from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 
@@ -52,7 +52,7 @@ class TestServiceRegistration:
         
         # Create mock monitoring task
         # Mock: Generic component isolation for controlled unit testing
-        mock_task = Mock()
+        mock_task = mock_task_instance  # Initialize appropriate service
         health_monitor._monitoring_tasks["test_service"] = mock_task
         
         # Unregister
@@ -86,7 +86,7 @@ class TestMonitoringLifecycle:
         # Mock: Component isolation for testing without external dependencies
         with patch('asyncio.create_task') as mock_create_task:
             # Mock: Generic component isolation for controlled unit testing
-            mock_task = Mock()
+            mock_task = mock_task_instance  # Initialize appropriate service
             mock_create_task.return_value = mock_task
             
             await health_monitor.start_monitoring("test_service")
@@ -99,9 +99,9 @@ class TestMonitoringLifecycle:
     async def test_stop_monitoring(self, health_monitor: StagedHealthMonitor) -> None:
         """Test stopping all monitoring tasks."""
         # Mock: Generic component isolation for controlled unit testing
-        mock_task1 = Mock()
+        mock_task1 = mock_task1_instance  # Initialize appropriate service
         # Mock: Generic component isolation for controlled unit testing
-        mock_task2 = Mock()
+        mock_task2 = mock_task2_instance  # Initialize appropriate service
         health_monitor._monitoring_tasks = {"service1": mock_task1, "service2": mock_task2}
         health_monitor._running = True
         

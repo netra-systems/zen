@@ -6,7 +6,7 @@ for backend and frontend services.
 """
 
 import unittest
-from unittest.mock import MagicMock, Mock, patch
+from shared.isolated_environment import IsolatedEnvironment
 
 from dev_launcher.health_registration import HealthRegistrationHelper
 
@@ -51,7 +51,6 @@ class TestHealthRegistrationHelper(unittest.TestCase):
         self.mock_health_monitor.register_service.assert_not_called()
     
     # Mock: Component isolation for testing without external dependencies
-    @patch('dev_launcher.health_registration.print_with_emoji')
     def test_register_all_services(self, mock_print):
         """Test registering all services."""
         backend_info = {'port': 8000}

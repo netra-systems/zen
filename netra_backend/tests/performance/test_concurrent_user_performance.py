@@ -13,6 +13,9 @@ Business Value Justification (BVJ):
 
 import sys
 from pathlib import Path
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from test_framework.database.test_database_manager import TestDatabaseManager
+from shared.isolated_environment import IsolatedEnvironment
 
 # Test framework import - using pytest fixtures instead
 
@@ -24,7 +27,6 @@ import uuid
 from contextlib import asynccontextmanager
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional
-from unittest.mock import AsyncMock, MagicMock, Mock, patch, patch
 
 import pytest
 

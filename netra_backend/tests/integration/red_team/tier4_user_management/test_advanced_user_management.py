@@ -31,7 +31,12 @@ import uuid
 from contextlib import asynccontextmanager
 from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional, Set, Tuple
-from unittest.mock import AsyncMock, MagicMock, Mock, patch, patch
+from test_framework.database.test_database_manager import TestDatabaseManager
+from test_framework.redis.test_redis_manager import TestRedisManager
+from auth_service.core.auth_manager import AuthManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 import jwt
 import pytest

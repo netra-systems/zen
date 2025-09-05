@@ -9,6 +9,7 @@ import sys
 import time
 from typing import Dict, Any
 import requests
+from shared.isolated_environment import IsolatedEnvironment
 
 
 class StagingTester:

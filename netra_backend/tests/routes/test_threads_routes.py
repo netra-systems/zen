@@ -5,9 +5,9 @@ Tests for thread conversation management - app/routes/threads_route.py
 
 import sys
 from pathlib import Path
+from shared.isolated_environment import IsolatedEnvironment
 
 from datetime import datetime
-from unittest.mock import patch, AsyncMock, MagicMock
 
 import pytest
 

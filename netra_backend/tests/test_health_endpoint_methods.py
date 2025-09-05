@@ -31,8 +31,10 @@ Test Strategy:
 import pytest
 import asyncio
 from typing import Dict, Any
-from unittest.mock import AsyncMock, patch
 import json
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from test_framework.redis.test_redis_manager import TestRedisManager
+from shared.isolated_environment import IsolatedEnvironment
 
 # ABSOLUTE IMPORTS - Following SPEC/import_management_architecture.xml
 from fastapi.testclient import TestClient

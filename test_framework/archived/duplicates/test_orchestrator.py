@@ -8,6 +8,7 @@ import json
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Optional
+from shared.isolated_environment import IsolatedEnvironment
 
 from test_framework.archived.duplicates.failure_patterns import FailurePatternAnalyzer
 from test_framework.archived.duplicates.test_discovery import TestDiscovery

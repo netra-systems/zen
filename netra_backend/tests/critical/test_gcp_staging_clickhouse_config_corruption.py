@@ -14,8 +14,9 @@ Business Value Justification (BVJ):
 """
 
 import pytest
-from unittest.mock import patch, MagicMock
 from netra_backend.app.db.clickhouse_base import ClickHouseDatabase
+from test_framework.database.test_database_manager import TestDatabaseManager
+from shared.isolated_environment import IsolatedEnvironment
 
 
 class TestClickHouseConfigCorruption:
@@ -221,8 +222,8 @@ class TestClickHouseConfigCorruption:
         """
         # Simulate what might happen if environment variable parsing adds newlines
         with patch('netra_backend.app.core.configuration.base.get_unified_config') as mock_config:
-            mock_config.return_value = MagicMock()
-            mock_config.return_value.clickhouse = MagicMock()
+            mock_config.return_value = MagicNone  # TODO: Use real service instance
+            mock_config.return_value.clickhouse = MagicNone  # TODO: Use real service instance
             mock_config.return_value.clickhouse.host = "clickhouse.netra-staging.internal\n"
             mock_config.return_value.clickhouse.port = 8123
             mock_config.return_value.clickhouse.database = "netra_staging"

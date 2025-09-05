@@ -18,10 +18,13 @@ Risk Mitigation:
 
 import asyncio
 import pytest
-from unittest.mock import AsyncMock, MagicMock, patch, Mock
 from typing import Dict, Any
 import sys
 import os
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from test_framework.database.test_database_manager import TestDatabaseManager
+from test_framework.redis.test_redis_manager import TestRedisManager
+from shared.isolated_environment import IsolatedEnvironment
 
 # Test path setup removed - using absolute imports as per CLAUDE.md
 
@@ -52,23 +55,23 @@ async def test_clickhouse_migration_failure_fallback_state_inconsistency_fails()
          patch('redis.Redis') as mock_redis:
         
         # Mock ClickHouse HTTP health check (initially succeeds, then fails during migration)
-        mock_response = AsyncMock()
+        mock_response = AsyncNone  # TODO: Use real service instance
         mock_response.status = 200  # Health check succeeds
         mock_response.text = AsyncMock(return_value="Ok.")
         
-        mock_session = AsyncMock()
+        mock_session = AsyncNone  # TODO: Use real service instance
         mock_session.get = AsyncMock(return_value=mock_response)
         mock_session.__aenter__ = AsyncMock(return_value=mock_session)
         mock_session.__aexit__ = AsyncMock(return_value=None)
         mock_session_class.return_value = mock_session
         
         # Mock PostgreSQL (healthy)
-        mock_pg_conn = AsyncMock()
+        mock_pg_conn = AsyncNone  # TODO: Use real service instance
         mock_pg_conn.fetchval = AsyncMock(return_value=1)
         mock_asyncpg_connect.return_value = mock_pg_conn
         
         # Mock Redis (healthy)
-        mock_redis_instance = MagicMock()
+        mock_redis_instance = MagicNone  # TODO: Use real service instance
         mock_redis_instance.ping = MagicMock(return_value=True)
         mock_redis.return_value = mock_redis_instance
         
@@ -77,7 +80,7 @@ async def test_clickhouse_migration_failure_fallback_state_inconsistency_fails()
         
         # Mock migration runner to track state
         with patch('dev_launcher.database_connector.MigrationRunner') as mock_migration_runner:
-            mock_runner = MagicMock()
+            mock_runner = MagicNone  # TODO: Use real service instance
             mock_runner.check_and_run_migrations = AsyncMock(
                 side_effect=Exception("Migration failed")
             )
@@ -185,7 +188,7 @@ async def test_clickhouse_migration_retry_state_tracking_inconsistency_fails():
                 raise Exception(f"Temporary failure {call_count}")
             return None
             
-        mock_ch_instance = MagicMock()
+        mock_ch_instance = MagicNone  # TODO: Use real service instance
         mock_ch_instance.execute = mock_execute
         mock_ch_client.return_value = mock_ch_instance
         
@@ -238,7 +241,7 @@ async def test_clickhouse_fallback_recovery_state_synchronization_fails():
     """
     with patch('dev_launcher.database_connector.ClickHouseClient') as mock_ch_client:
         # Start with failed state
-        mock_ch_instance = MagicMock()
+        mock_ch_instance = MagicNone  # TODO: Use real service instance
         mock_ch_instance.execute = AsyncMock(side_effect=Exception("Initial failure"))
         mock_ch_client.return_value = mock_ch_instance
         

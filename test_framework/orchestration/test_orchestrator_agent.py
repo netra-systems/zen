@@ -37,6 +37,7 @@ from pathlib import Path
 from typing import Dict, List, Optional, Set, Union, Any, Callable, Tuple, NamedTuple
 from threading import Event, Lock
 import yaml
+from shared.isolated_environment import IsolatedEnvironment
 
 # Core test framework imports
 from test_framework.layer_system import (

@@ -15,7 +15,7 @@ import json
 import time
 from datetime import datetime, timedelta
 from typing import Any, Dict, List, Optional
-from unittest.mock import AsyncMock, Mock, patch
+from shared.isolated_environment import IsolatedEnvironment
 
 import httpx
 import jwt
@@ -31,6 +31,9 @@ from netra_backend.app.main import app
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager as WebSocketManager
 from test_framework.auth_jwt_test_manager import JWTGenerationTestManager as AuthJWTTestManager
 from test_framework.services import ServiceManager, get_service_manager
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from shared.isolated_environment import get_env
 
 
 class TokenRefreshTestScenarios:

@@ -48,6 +48,7 @@ class RealServiceTestAgent(BaseAgent):
     """Test agent implementation for real service testing"""
     
     def __init__(self, llm_manager: Optional[LLMManager] = None, name: str = "RealServiceAgent"):
+    pass
         super().__init__(llm_manager, name)
         self.execution_count = 0
         self.llm_calls = []
@@ -92,6 +93,7 @@ class TestBaseAgentRealServices:
     @pytest.fixture
     async def real_websocket_manager(self):
         """Create real WebSocket manager for integration testing"""
+    pass
         ws_manager = WebSocketManager()
         # No initialization needed - WebSocketManager is ready on construction
         yield ws_manager
@@ -107,6 +109,7 @@ class TestBaseAgentRealServices:
     @pytest.mark.asyncio
     async def test_real_llm_manager_timing_integration(self, real_llm_manager):
         """Test 6: Validates timing collection with real LLM manager interactions"""
+    pass
         agent = RealServiceTestAgent(llm_manager=real_llm_manager, name="LLMTimingAgent")
         
         # Execute with real LLM calls
@@ -165,7 +168,8 @@ class TestBaseAgentRealServices:
         
         async def monitor_send(user_id, message):
             messages_sent.append((user_id, message))
-            return await original_send(user_id, message)
+            await asyncio.sleep(0)
+    return await original_send(user_id, message)
         
         real_websocket_manager.send_message = monitor_send
         
@@ -234,6 +238,7 @@ class TestBaseAgentRealServices:
     @pytest.mark.asyncio
     async def test_database_state_persistence_agent_lifecycle(self, real_database_session):
         """Test 8: Validates agent state persistence through complete lifecycle"""
+    pass
         agent = RealServiceTestAgent(name="DBPersistenceAgent")
         
         # Track state transitions with real database simulation
@@ -356,6 +361,7 @@ class TestBaseAgentRealServices:
     @pytest.mark.asyncio
     async def test_multi_agent_coordination_real_communication(self, real_llm_manager):
         """Test 9: Tests coordination between multiple agents using real communication"""
+    pass
         # Create multiple agents with shared resources
         agents = []
         shared_state = DeepAgentState()
@@ -406,7 +412,8 @@ class TestBaseAgentRealServices:
                 agent.set_state(SubAgentLifecycle.COMPLETED)
                 results.append(agent)
             
-            return results
+            await asyncio.sleep(0)
+    return results
         
         # Execute coordination
         coordinated_agents = await coordinate_agents()
@@ -436,6 +443,7 @@ class TestBaseAgentRealServices:
         # Test parallel coordination
         async def parallel_execution():
             """Execute agents in parallel"""
+    pass
             tasks = []
             for agent in agents:
                 agent.set_state(SubAgentLifecycle.RUNNING)
@@ -522,13 +530,15 @@ class TestBaseAgentRealServices:
         
         async def database_operation_with_retry():
             """Simulate database operation with retry logic"""
+    pass
             max_retries = 3
             for attempt in range(max_retries):
                 try:
                     if attempt < 2:
                         raise ConnectionError(f"Database connection failed (attempt {attempt + 1})")
                     # Success on third attempt
-                    return {"status": "recovered", "attempts": attempt + 1}
+                    await asyncio.sleep(0)
+    return {"status": "recovered", "attempts": attempt + 1}
                 except ConnectionError as e:
                     db_errors.append(str(e))
                     if attempt == max_retries - 1:

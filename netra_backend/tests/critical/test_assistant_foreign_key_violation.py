@@ -1,4 +1,7 @@
 from shared.isolated_environment import get_env
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from test_framework.database.test_database_manager import TestDatabaseManager
+from shared.isolated_environment import IsolatedEnvironment
 
 env = get_env()
 
@@ -12,7 +15,6 @@ import os
 import pytest
 import asyncio
 from sqlalchemy import select
-from unittest.mock import AsyncMock, MagicMock, patch
 
 from netra_backend.app.db.models_postgres import Assistant, Run, Thread
 from netra_backend.app.services.thread_service import ThreadService
@@ -133,7 +135,7 @@ class TestAssistantForeignKeyViolation:
         
         # Mock WebSocket manager
         with patch('netra_backend.app.services.websocket.message_handler.manager') as mock_manager:
-            mock_manager.send_message = AsyncMock()
+            mock_manager.send_message = AsyncNone  # TODO: Use real service instance
             
             # Create message handler
             handler = MessageHandler()

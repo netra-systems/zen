@@ -8,6 +8,7 @@ Tests that the auth service can load OAuth credentials using the new SSOT system
 import os
 import sys
 from pathlib import Path
+from shared.isolated_environment import IsolatedEnvironment
 
 # Add project root to Python path
 project_root = Path(__file__).parent.parent

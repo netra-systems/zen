@@ -13,13 +13,16 @@ BVJ (Business Value Justification):
 
 import sys
 from pathlib import Path
+from test_framework.database.test_database_manager import TestDatabaseManager
+from test_framework.redis.test_redis_manager import TestRedisManager
+from auth_service.core.auth_manager import AuthManager
+from shared.isolated_environment import IsolatedEnvironment
 
 import asyncio
 import time
 import uuid
 from datetime import datetime, timedelta
 from typing import Dict, Any
-from unittest.mock import patch, AsyncMock, MagicMock
 
 import pytest
 import httpx
@@ -29,22 +32,19 @@ from redis.asyncio import Redis
 
 from netra_backend.app.models.user import User
 # ConversionEvent model - creating mock for tests
-from unittest.mock import Mock, AsyncMock, MagicMock
 ConversionEvent = Mock
 from netra_backend.app.services.user_service import UserService as UsageService
 
 # UserFlowTestBase - using unittest.TestCase
 import unittest
-from unittest.mock import Mock, AsyncMock, MagicMock
 UserFlowTestBase = unittest.TestCase
 assert_successful_registration = Mock
 assert_plan_compliance = Mock
 # User journey data - creating mocks
-from unittest.mock import Mock, AsyncMock, MagicMock
 # Mock: Generic component isolation for controlled unit testing
-UserTestData = Mock()
+UserTestData = UserTestData_instance  # Initialize appropriate service
 # Mock: Generic component isolation for controlled unit testing
-UserJourneyScenarios = Mock()
+UserJourneyScenarios = UserJourneyScenarios_instance  # Initialize appropriate service
 
 @pytest.mark.integration
 @pytest.mark.asyncio

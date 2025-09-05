@@ -28,9 +28,12 @@ import time
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Set, Tuple
-from unittest.mock import patch
 
 import pytest
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
+from shared.isolated_environment import get_env
 
 # Add project root to path
 project_root = Path(__file__).parent.parent.parent.parent.parent

@@ -6,12 +6,15 @@ Compliance: <300 lines, 25-line max functions, modular design.
 
 import sys
 from pathlib import Path
+from test_framework.docker.unified_docker_manager import UnifiedDockerManager
+from test_framework.database.test_database_manager import TestDatabaseManager
+from test_framework.redis.test_redis_manager import TestRedisManager
+from shared.isolated_environment import IsolatedEnvironment
 
 import asyncio
 from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Dict, List, Optional
-from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
@@ -79,14 +82,14 @@ def mock_services_config() -> ServicesConfiguration:
     
     # Create mock redis service
     # Mock: Redis external service isolation for fast, reliable tests without network dependency
-    mock_redis = Mock()
+    mock_redis = TestRedisManager().get_client()
     mock_redis.mode = ResourceMode.SHARED
     mock_redis.get_config.return_value = {"host": "redis.example.com", "port": 6379}
     config.redis = mock_redis
     
     # Create mock clickhouse service
     # Mock: ClickHouse database isolation for fast testing without external database dependency
-    mock_clickhouse = Mock()
+    mock_clickhouse = mock_clickhouse_instance  # Initialize appropriate service
     mock_clickhouse.mode = ResourceMode.LOCAL
     mock_clickhouse.get_config.return_value = {"host": "ch.example.com", "port": 8123, "secure": False}
     config.clickhouse = mock_clickhouse
@@ -146,7 +149,7 @@ class TestConfigFileChecking:
         # Mock: Component isolation for testing without external dependencies
         with patch('pathlib.Path.stat') as mock_stat:
             # Mock: Generic component isolation for controlled unit testing
-            mock_stat_result = Mock()
+            mock_stat_result = mock_stat_result_instance  # Initialize appropriate service
             mock_stat_result.st_mtime = old_time.timestamp()
             mock_stat.return_value = mock_stat_result
             
@@ -203,13 +206,13 @@ class TestEndpointValidation:
         
         # Create mock redis service
         # Mock: Redis external service isolation for fast, reliable tests without network dependency
-        mock_redis = Mock()
+        mock_redis = TestRedisManager().get_client()
         mock_redis.mode = ResourceMode.LOCAL
         config.redis = mock_redis
         
         # Create mock clickhouse service
         # Mock: ClickHouse database isolation for fast testing without external database dependency
-        mock_clickhouse = Mock()
+        mock_clickhouse = mock_clickhouse_instance  # Initialize appropriate service
         mock_clickhouse.mode = ResourceMode.LOCAL
         config.clickhouse = mock_clickhouse
         
@@ -224,13 +227,13 @@ class TestEndpointValidation:
         
         # Create mock redis service
         # Mock: Redis external service isolation for fast, reliable tests without network dependency
-        mock_redis = Mock()
+        mock_redis = TestRedisManager().get_client()
         mock_redis.mode = ResourceMode.LOCAL
         config.redis = mock_redis
         
         # Create mock clickhouse service
         # Mock: ClickHouse database isolation for fast testing without external database dependency
-        mock_clickhouse = Mock()
+        mock_clickhouse = mock_clickhouse_instance  # Initialize appropriate service
         mock_clickhouse.mode = ResourceMode.SHARED
         mock_clickhouse.get_config.return_value = {"host": "ch.example.com", "port": 8443, "secure": True}
         config.clickhouse = mock_clickhouse
@@ -266,17 +269,17 @@ class TestEndpointValidation:
         validator = ServiceConfigValidator(mock_validation_context)
         
         # Mock: Generic component isolation for controlled unit testing
-        mock_response = Mock()
+        mock_response = mock_response_instance  # Initialize appropriate service
         mock_response.status = 200
         
         # Create async context manager mock
         # Mock: Generic component isolation for controlled unit testing
-        mock_context = AsyncMock()
+        mock_context = AsyncNone  # TODO: Use real service instance
         mock_context.__aenter__.return_value = mock_response
         mock_context.__aexit__.return_value = None
         
         # Mock: Database session isolation for transaction testing without real database dependency
-        mock_session = Mock()
+        mock_session = TestDatabaseManager().get_session()
         mock_session.head.return_value = mock_context
         
         result = await validator._check_single_endpoint(mock_session, "http://api.example.com")
@@ -288,17 +291,17 @@ class TestEndpointValidation:
         validator = ServiceConfigValidator(mock_validation_context)
         
         # Mock: Generic component isolation for controlled unit testing
-        mock_response = Mock()
+        mock_response = mock_response_instance  # Initialize appropriate service
         mock_response.status = 500
         
         # Create async context manager mock
         # Mock: Generic component isolation for controlled unit testing
-        mock_context = AsyncMock()
+        mock_context = AsyncNone  # TODO: Use real service instance
         mock_context.__aenter__.return_value = mock_response
         mock_context.__aexit__.return_value = None
         
         # Mock: Database session isolation for transaction testing without real database dependency
-        mock_session = Mock()
+        mock_session = TestDatabaseManager().get_session()
         mock_session.head.return_value = mock_context
         
         result = await validator._check_single_endpoint(mock_session, "http://api.example.com")

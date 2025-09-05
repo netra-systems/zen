@@ -9,6 +9,7 @@ import sys
 import subprocess
 import os
 from pathlib import Path
+from shared.isolated_environment import IsolatedEnvironment
 
 def main():
     """Run the critical JWT authentication tests"""

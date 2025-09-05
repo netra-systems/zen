@@ -47,7 +47,6 @@ import time
 import httpx
 import json
 import socket
-from unittest.mock import Mock, patch, AsyncMock
 from datetime import datetime, timedelta, timezone
 import jwt
 import subprocess
@@ -55,6 +54,9 @@ import psutil
 
 from test_framework.base_e2e_test import BaseE2ETest
 from shared.isolated_environment import IsolatedEnvironment
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
 
 
 @pytest.mark.e2e
@@ -676,10 +678,12 @@ class TestComprehensiveAuthenticationSystemBreakdown(BaseE2ETest):
             }
         }
         
-        print(f"\n{'='*80}")
+        print(f"
+{'='*80}")
         print("COMPREHENSIVE AUTHENTICATION SYSTEM BREAKDOWN REPORT")  
         print(f"{'='*80}")
         print(json.dumps(breakdown_report, indent=2))
-        print(f"{'='*80}\n")
+        print(f"{'='*80}
+")
         
         super().teardown_method()

@@ -2,6 +2,7 @@
 from test_framework.fixtures import *
 from test_framework.fixtures.routes import CommonResponseValidators, MockServiceFactory
 import pytest
+from shared.isolated_environment import IsolatedEnvironment
 
 # Import additional fixtures from routes test fixtures  
 from netra_backend.tests.routes.test_route_fixtures import TEST_DOCUMENT_DATA, TEST_MCP_REQUEST, authenticated_test_client

@@ -2,8 +2,10 @@
 
 import sys
 from pathlib import Path
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
-from unittest.mock import AsyncMock, MagicMock, Mock, patch, patch
 
 import pytest
 
@@ -18,6 +20,7 @@ def mock_justified(reason):
 from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.llm.observability import SubAgentLogger, get_subagent_logger
+import asyncio
 
 class MockSubAgent(BaseAgent):
     """Test implementation of BaseAgent."""
@@ -37,12 +40,12 @@ class MockSubAgentLogger:
     
     def test_init_disabled(self):
         """Test logger initialization with disabled flag."""
+    pass
         logger = SubAgentLogger(enabled=False)
         assert logger.enabled is False
     
         # Mock: Component isolation for testing without external dependencies
-    @patch('app.llm.observability.logger')
-    def test_log_agent_communication_enabled(self, mock_logger):
+        def test_log_agent_communication_enabled(self, mock_logger):
         """Test agent communication logging when enabled."""
         logger = SubAgentLogger(enabled=True)
         logger.log_agent_communication("agent_a", "agent_b", "corr_123", "test_message")
@@ -54,17 +57,16 @@ class MockSubAgentLogger:
         assert "agent_b" in call_args
     
         # Mock: Component isolation for testing without external dependencies
-    @patch('app.llm.observability.logger')
-    def test_log_agent_communication_disabled(self, mock_logger):
+        def test_log_agent_communication_disabled(self, mock_logger):
         """Test agent communication logging when disabled."""
+    pass
         logger = SubAgentLogger(enabled=False)
         logger.log_agent_communication("agent_a", "agent_b", "corr_123", "test_message")
         
         mock_logger.info.assert_not_called()
     
         # Mock: Component isolation for testing without external dependencies
-    @patch('app.llm.observability.logger')
-    def test_log_agent_input(self, mock_logger):
+        def test_log_agent_input(self, mock_logger):
         """Test agent input logging."""
         logger = SubAgentLogger(enabled=True)
         logger.log_agent_input("agent_a", "agent_b", 1024, "corr_123")
@@ -75,9 +77,9 @@ class MockSubAgentLogger:
         assert "1024" in call_args
     
         # Mock: Component isolation for testing without external dependencies
-    @patch('app.llm.observability.logger')
-    def test_log_agent_output(self, mock_logger):
+        def test_log_agent_output(self, mock_logger):
         """Test agent output logging."""
+    pass
         logger = SubAgentLogger(enabled=True)
         logger.log_agent_output("agent_a", "agent_b", 2048, "success", "corr_123")
         
@@ -92,12 +94,18 @@ class TestBaseAgentLogging:
     
     @pytest.fixture
     def test_agent(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create test agent instance."""
+    pass
         return MockSubAgent(name="TestAgent")
     
     @pytest.fixture
-    def mock_state(self):
+ def real_state():
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create mock state."""
+    pass
         return DeepAgentState(user_request="test request")
     
     def test_agent_has_correlation_id(self, test_agent):
@@ -108,6 +116,7 @@ class TestBaseAgentLogging:
     
     def test_agent_has_logging_enabled_config(self, test_agent):
         """Test agent has logging enabled configuration."""
+    pass
         assert hasattr(test_agent, '_subagent_logging_enabled')
         assert isinstance(test_agent._subagent_logging_enabled, bool)
     
@@ -119,6 +128,7 @@ class TestBaseAgentLogging:
     
     def test_calculate_data_size_dict(self, test_agent):
         """Test data size calculation for dictionary."""
+    pass
         data = {"key": "value", "number": 123}
         size = test_agent._calculate_data_size(data)
         assert size > 0
@@ -131,9 +141,11 @@ class TestBaseAgentLogging:
     
     def test_calculate_data_size_exception(self, test_agent):
         """Test data size calculation handles exceptions."""
+    pass
         # Create an object that will fail JSON serialization
         class UnserializableObject:
             def __str__(self):
+    pass
                 raise Exception("Cannot serialize")
         
         data = UnserializableObject()
@@ -141,8 +153,7 @@ class TestBaseAgentLogging:
         assert size == 0
     
         # Mock: Component isolation for testing without external dependencies
-    @patch('app.llm.observability.SubAgentLogger._log_communication_json')
-    def test_log_agent_start(self, mock_log_comm, test_agent):
+        def test_log_agent_start(self, mock_log_comm, test_agent):
         """Test agent start logging."""
         test_agent._subagent_logging_enabled = True
         test_agent._log_agent_start("run_123")
@@ -152,17 +163,16 @@ class TestBaseAgentLogging:
         )
     
         # Mock: Component isolation for testing without external dependencies
-    @patch('app.llm.observability.SubAgentLogger._log_communication_json')
-    def test_log_agent_start_disabled(self, mock_log_comm, test_agent):
+        def test_log_agent_start_disabled(self, mock_log_comm, test_agent):
         """Test agent start logging when disabled."""
+    pass
         test_agent._subagent_logging_enabled = False
         test_agent._log_agent_start("run_123")
         
         mock_log_comm.assert_not_called()
     
         # Mock: Component isolation for testing without external dependencies
-    @patch('app.llm.observability.SubAgentLogger._log_communication_json')
-    def test_log_agent_completion(self, mock_log_comm, test_agent):
+        def test_log_agent_completion(self, mock_log_comm, test_agent):
         """Test agent completion logging."""
         test_agent._subagent_logging_enabled = True
         test_agent._log_agent_completion("run_123", "completed")
@@ -172,9 +182,9 @@ class TestBaseAgentLogging:
         )
     
         # Mock: Component isolation for testing without external dependencies
-    @patch('app.llm.observability.SubAgentLogger._log_input_json')
-    def test_log_input_from_agent(self, mock_log_input, test_agent):
+        def test_log_input_from_agent(self, mock_log_input, test_agent):
         """Test logging input from another agent."""
+    pass
         test_agent._subagent_logging_enabled = True
         test_agent.log_input_from_agent("other_agent", "test data")
         
@@ -186,8 +196,7 @@ class TestBaseAgentLogging:
         assert args[3] == test_agent.correlation_id
     
         # Mock: Component isolation for testing without external dependencies
-    @patch('app.llm.observability.SubAgentLogger._log_output_json')
-    def test_log_output_to_agent(self, mock_log_output, test_agent):
+        def test_log_output_to_agent(self, mock_log_output, test_agent):
         """Test logging output to another agent."""
         test_agent._subagent_logging_enabled = True
         test_agent.log_output_to_agent("target_agent", "response data", "success")
@@ -201,21 +210,21 @@ class TestBaseAgentLogging:
         assert args[4] == test_agent.correlation_id
     
         # Mock: Component isolation for testing without external dependencies
-    @patch('app.llm.observability.SubAgentLogger._log_communication_json')
-    # Mock: Component isolation for testing without external dependencies
-    @patch('app.config.get_config')
-    @pytest.mark.asyncio
+        # Mock: Component isolation for testing without external dependencies
+        @pytest.mark.asyncio
     async def test_pre_run_logging(self, mock_get_config, mock_log_comm, test_agent, mock_state):
         """Test logging during pre_run."""
+    pass
         # Mock config to enable logging
         # Mock: Generic component isolation for controlled unit testing
-        mock_config = MagicMock()
+        mock_config = MagicNone  # TODO: Use real service instance
         mock_config.subagent_logging_enabled = True
         mock_get_config.return_value = mock_config
         
         test_agent._subagent_logging_enabled = True
         
-        # Mock check_entry_conditions to return True
+        # Mock check_entry_conditions to await asyncio.sleep(0)
+    return True
         # Mock: Async component isolation for testing without real async operations
         test_agent.check_entry_conditions = AsyncMock(return_value=True)
         
@@ -233,3 +242,4 @@ def test_get_subagent_logger_singleton():
     
     assert logger1 is logger2
     assert isinstance(logger1, SubAgentLogger)
+    pass

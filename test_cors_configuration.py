@@ -6,6 +6,7 @@ Verifies that all required origins are included in CORS configuration
 
 import sys
 from pathlib import Path
+from shared.isolated_environment import IsolatedEnvironment
 
 # Add project root to Python path
 project_root = Path(__file__).parent

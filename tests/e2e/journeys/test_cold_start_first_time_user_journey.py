@@ -1,6 +1,7 @@
 from shared.isolated_environment import get_env
 """
 from shared.isolated_environment import get_env
+from shared.isolated_environment import IsolatedEnvironment
 CRITICAL E2E: Cold Start First-Time User Complete Journey Test
 
 BVJ (Business Value Justification):

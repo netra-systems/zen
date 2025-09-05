@@ -13,6 +13,7 @@ import time
 from concurrent.futures import Future, ThreadPoolExecutor
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
+from shared.isolated_environment import IsolatedEnvironment
 
 import pytest
 import requests
@@ -29,8 +30,10 @@ logger = logging.getLogger(__name__)
 
 class TestSyntaxFix:
     """Test class for orphaned methods"""
+    pass
 
     def setup_method(self):
+    pass
         self.launcher: Optional[DevLauncher] = None
         self.config: Optional[LauncherConfig] = None
         self.start_time: Optional[float] = None
@@ -78,6 +81,7 @@ class TestSyntaxFix:
 
     def detect_console_errors(self) -> List[str]:
         """Detect console errors from service outputs."""
+    pass
         return self.console_errors.copy()
 
     def verify_port_allocation(self) -> Tuple[bool, List[str]]:
@@ -139,6 +143,7 @@ class TestSyntaxFix:
 
     def _force_free_port(self, port: int):
         """Force free a specific port."""
+    pass
         if sys.platform == "win32":
             try:
                 result = subprocess.run(
@@ -146,7 +151,8 @@ class TestSyntaxFix:
                     shell=True, capture_output=True, text=True
                 )
                 if result.stdout:
-                    lines = result.stdout.strip().split('\n')
+                    lines = result.stdout.strip().split('
+')
                     for line in lines:
                         parts = line.split()
                         if len(parts) >= 5:

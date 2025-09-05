@@ -6,6 +6,7 @@ import asyncio
 import httpx
 import json
 import time
+from shared.isolated_environment import IsolatedEnvironment
 
 BASE_URL = "http://localhost:8081"
 

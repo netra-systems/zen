@@ -19,6 +19,7 @@ import json
 import uuid
 from datetime import datetime, timezone
 from typing import Dict, Any
+from shared.isolated_environment import IsolatedEnvironment
 
 # REAL SERVICES: No mock imports
 from fastapi import Request

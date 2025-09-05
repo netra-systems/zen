@@ -11,6 +11,7 @@ import sys
 import time
 import traceback
 import websockets
+from shared.isolated_environment import IsolatedEnvironment
 
 
 async def test_websocket_connection(url: str = "ws://localhost:8000/ws", origin: str = None):

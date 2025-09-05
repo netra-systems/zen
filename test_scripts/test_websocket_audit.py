@@ -3,6 +3,8 @@
 import asyncio
 import sys
 from pathlib import Path
+from netra_backend.app.core.agent_registry import AgentRegistry
+from shared.isolated_environment import IsolatedEnvironment
 sys.path.append(str(Path(__file__).parent))
 
 # Test 1: Verify run_id generation includes thread_id

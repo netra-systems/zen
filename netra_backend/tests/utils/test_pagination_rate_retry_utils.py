@@ -5,10 +5,10 @@ Each function ≤8 lines, using helper functions for setup and assertions.
 
 import sys
 from pathlib import Path
+from shared.isolated_environment import IsolatedEnvironment
 
 import asyncio
 import time
-from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 

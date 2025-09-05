@@ -12,6 +12,7 @@ User experience testing including mobile responsiveness and error recovery.
 
 import sys
 from pathlib import Path
+from shared.isolated_environment import IsolatedEnvironment
 
 # Test framework import - using pytest fixtures instead
 

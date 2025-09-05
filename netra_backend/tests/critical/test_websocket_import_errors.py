@@ -10,6 +10,7 @@ import importlib
 import sys
 from pathlib import Path
 from typing import List, Tuple
+from shared.isolated_environment import IsolatedEnvironment
 
 
 class TestWebSocketImportErrors:

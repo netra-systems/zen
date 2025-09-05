@@ -32,9 +32,9 @@ import traceback
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timedelta, timezone
 from typing import Dict, List, Set, Any, Optional, Callable
-from unittest.mock import Mock, AsyncMock, patch, MagicMock
 from contextlib import asynccontextmanager
 import weakref
+from shared.isolated_environment import IsolatedEnvironment
 
 # Add project root to path
 project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
@@ -45,6 +45,9 @@ import pytest
 
 # Import environment management
 from shared.isolated_environment import get_env
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
 
 # Import current SSOT components for testing
 try:

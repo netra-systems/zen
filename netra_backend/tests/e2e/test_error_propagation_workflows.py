@@ -13,12 +13,17 @@ Module ≤300 lines per CLAUDE.md requirements.
 
 import sys
 from pathlib import Path
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from test_framework.database.test_database_manager import TestDatabaseManager
+from auth_service.core.auth_manager import AuthManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 # Test framework import - using pytest fixtures instead
 
 import asyncio
 from typing import Any, Dict
-from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 from fastapi import Request, Response
@@ -168,7 +173,7 @@ class TestRecoveryCoordinationAcrossLayers:
     def _create_hook_manager(self) -> QualityHooksManager:
         """Create quality hook manager for testing."""
         # Mock: Generic component isolation for controlled unit testing
-        quality_gate = Mock()
+        quality_gate = quality_gate_instance  # Initialize appropriate service
         # Mock: Async component isolation for testing without real async operations
         quality_gate.validate_content = AsyncMock(
             return_value=ValidationResult(
@@ -178,7 +183,7 @@ class TestRecoveryCoordinationAcrossLayers:
             )
         )
         # Mock: Generic component isolation for controlled unit testing
-        monitoring = Mock()
+        monitoring = monitoring_instance  # Initialize appropriate service
         return QualityHooksManager(quality_gate, monitoring)
     
     def _create_security_middleware(self) -> SecurityMiddleware:
@@ -312,7 +317,7 @@ class TestRealWorkflowIntegration:
     def _create_hook_manager(self) -> QualityHooksManager:
         """Create quality hook manager for testing."""
         # Mock: Generic component isolation for controlled unit testing
-        quality_gate = Mock()
+        quality_gate = quality_gate_instance  # Initialize appropriate service
         # Mock: Async component isolation for testing without real async operations
         quality_gate.validate_content = AsyncMock(
             return_value=ValidationResult(
@@ -322,9 +327,9 @@ class TestRealWorkflowIntegration:
             )
         )
         # Mock: Generic component isolation for controlled unit testing
-        monitoring = Mock()
+        monitoring = monitoring_instance  # Initialize appropriate service
         # Mock: Generic component isolation for controlled unit testing
-        monitoring.record_quality_event = AsyncMock()
+        monitoring.record_quality_event = AsyncNone  # TODO: Use real service instance
         return QualityHooksManager(quality_gate, monitoring)
     
     def _create_security_middleware(self) -> SecurityMiddleware:
@@ -358,7 +363,7 @@ class TestRealWorkflowIntegration:
         request.headers = {}
         request.method = "GET"
         # Mock: Generic component isolation for controlled unit testing
-        request.url = Mock()
+        request.url = url_instance  # Initialize appropriate service
         # Mock: Component isolation for controlled unit testing
         request.url.__str__ = Mock(return_value="http://test.com")
         request.url.path = "/test"

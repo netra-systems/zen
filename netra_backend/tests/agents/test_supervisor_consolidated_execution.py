@@ -2,11 +2,15 @@
 
 import sys
 from pathlib import Path
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from test_framework.database.test_database_manager import TestDatabaseManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 # Test framework import - using pytest fixtures instead
 
 import asyncio
-from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -28,18 +32,18 @@ class TestSupervisorAgentExecution:
         # Mock: Database session isolation for transaction testing without real database dependency
         db_session = Mock(spec=AsyncSession)
         # Mock: WebSocket connection isolation for testing without network overhead
-        websocket_manager = Mock()
+        websocket_manager = UnifiedWebSocketManager()
         # Mock: Tool dispatcher isolation for agent testing without real tool execution
         tool_dispatcher = Mock(spec=ToolDispatcher)
         
         supervisor = SupervisorAgent(db_session, llm_manager, websocket_manager, tool_dispatcher)
         
         # Mock modern execution infrastructure
-        supervisor.reliability_manager.execute_with_reliability = AsyncMock()
-        supervisor.execution_engine.execute = AsyncMock()
+        supervisor.reliability_manager.execute_with_reliability = AsyncNone  # TODO: Use real service instance
+        supervisor.execution_engine.execute = AsyncNone  # TODO: Use real service instance
         
         # Mock the execution result
-        mock_result = Mock()
+        mock_result = mock_result_instance  # Initialize appropriate service
         mock_result.success = True
         supervisor.reliability_manager.execute_with_reliability.return_value = mock_result
         
@@ -69,18 +73,18 @@ class TestSupervisorAgentExecution:
         # Mock: Database session isolation for transaction testing without real database dependency
         db_session = Mock(spec=AsyncSession)
         # Mock: WebSocket connection isolation for testing without network overhead
-        websocket_manager = Mock()
+        websocket_manager = UnifiedWebSocketManager()
         # Mock: Tool dispatcher isolation for agent testing without real tool execution
         tool_dispatcher = Mock(spec=ToolDispatcher)
         
         supervisor = SupervisorAgent(db_session, llm_manager, websocket_manager, tool_dispatcher)
         
         # Mock modern execution infrastructure
-        supervisor.reliability_manager.execute_with_reliability = AsyncMock()
-        supervisor.execution_engine.execute = AsyncMock()
+        supervisor.reliability_manager.execute_with_reliability = AsyncNone  # TODO: Use real service instance
+        supervisor.execution_engine.execute = AsyncNone  # TODO: Use real service instance
         
         # Mock the execution result
-        mock_result = Mock()
+        mock_result = mock_result_instance  # Initialize appropriate service
         mock_result.success = True
         supervisor.reliability_manager.execute_with_reliability.return_value = mock_result
         
@@ -110,7 +114,7 @@ class TestSupervisorAgentExecution:
         # Mock: Database session isolation for transaction testing without real database dependency
         db_session = Mock(spec=AsyncSession)
         # Mock: WebSocket connection isolation for testing without network overhead
-        websocket_manager = Mock()
+        websocket_manager = UnifiedWebSocketManager()
         # Mock: Tool dispatcher isolation for agent testing without real tool execution
         tool_dispatcher = Mock(spec=ToolDispatcher)
         
@@ -141,7 +145,7 @@ class TestSupervisorAgentExecution:
         # Mock: Database session isolation for transaction testing without real database dependency
         db_session = Mock(spec=AsyncSession)
         # Mock: WebSocket connection isolation for testing without network overhead
-        websocket_manager = Mock()
+        websocket_manager = UnifiedWebSocketManager()
         # Mock: Tool dispatcher isolation for agent testing without real tool execution
         tool_dispatcher = Mock(spec=ToolDispatcher)
         
@@ -154,8 +158,8 @@ class TestSupervisorAgentExecution:
         
         # Mock flow logger
         supervisor.flow_logger.generate_flow_id = Mock(return_value="flow_test")
-        supervisor.flow_logger.start_flow = Mock()
-        supervisor.flow_logger.complete_flow = Mock()
+        supervisor.flow_logger.start_flow = start_flow_instance  # Initialize appropriate service
+        supervisor.flow_logger.complete_flow = complete_flow_instance  # Initialize appropriate service
         
         # Track lock usage
         lock_acquired = False
@@ -183,18 +187,18 @@ class TestSupervisorAgentExecution:
         # Mock: Database session isolation for transaction testing without real database dependency
         db_session = Mock(spec=AsyncSession)
         # Mock: WebSocket connection isolation for testing without network overhead
-        websocket_manager = Mock()
+        websocket_manager = UnifiedWebSocketManager()
         # Mock: Tool dispatcher isolation for agent testing without real tool execution
         tool_dispatcher = Mock(spec=ToolDispatcher)
         
         supervisor = SupervisorAgent(db_session, llm_manager, websocket_manager, tool_dispatcher)
         
         # Mock modern execution infrastructure
-        supervisor.reliability_manager.execute_with_reliability = AsyncMock()
-        supervisor.execution_engine.execute = AsyncMock()
+        supervisor.reliability_manager.execute_with_reliability = AsyncNone  # TODO: Use real service instance
+        supervisor.execution_engine.execute = AsyncNone  # TODO: Use real service instance
         
         # Mock successful result
-        mock_result = Mock()
+        mock_result = mock_result_instance  # Initialize appropriate service
         mock_result.success = True
         supervisor.reliability_manager.execute_with_reliability.return_value = mock_result
         
@@ -219,16 +223,16 @@ class TestSupervisorAgentExecution:
         # Mock: Database session isolation for transaction testing without real database dependency
         db_session = Mock(spec=AsyncSession)
         # Mock: WebSocket connection isolation for testing without network overhead
-        websocket_manager = Mock()
+        websocket_manager = UnifiedWebSocketManager()
         # Mock: Tool dispatcher isolation for agent testing without real tool execution
         tool_dispatcher = Mock(spec=ToolDispatcher)
         
         supervisor = SupervisorAgent(db_session, llm_manager, websocket_manager, tool_dispatcher)
         
         # Mock modern execution infrastructure
-        supervisor.reliability_manager.execute_with_reliability = AsyncMock()
-        supervisor.execution_engine.execute = AsyncMock()
-        supervisor.error_handler.handle_execution_error = AsyncMock()
+        supervisor.reliability_manager.execute_with_reliability = AsyncNone  # TODO: Use real service instance
+        supervisor.execution_engine.execute = AsyncNone  # TODO: Use real service instance
+        supervisor.error_handler.handle_execution_error = AsyncNone  # TODO: Use real service instance
         
         # Create updated state from execution result
         updated_state = DeepAgentState(
@@ -237,7 +241,7 @@ class TestSupervisorAgentExecution:
         )
         
         # Mock successful result
-        mock_result = Mock()
+        mock_result = mock_result_instance  # Initialize appropriate service
         mock_result.success = True
         mock_result.result = {"supervisor_result": "completed", "updated_state": updated_state}
         supervisor.reliability_manager.execute_with_reliability.return_value = mock_result
@@ -261,7 +265,7 @@ class TestSupervisorAgentExecution:
         # Mock: Database session isolation for transaction testing without real database dependency
         db_session = Mock(spec=AsyncSession)
         # Mock: WebSocket connection isolation for testing without network overhead
-        websocket_manager = Mock()
+        websocket_manager = UnifiedWebSocketManager()
         # Mock: Tool dispatcher isolation for agent testing without real tool execution
         tool_dispatcher = Mock(spec=ToolDispatcher)
         
@@ -273,8 +277,8 @@ class TestSupervisorAgentExecution:
         
         # Mock flow logger
         supervisor.flow_logger.generate_flow_id = Mock(return_value="flow_test")
-        supervisor.flow_logger.start_flow = Mock()
-        supervisor.flow_logger.complete_flow = Mock()
+        supervisor.flow_logger.start_flow = start_flow_instance  # Initialize appropriate service
+        supervisor.flow_logger.complete_flow = complete_flow_instance  # Initialize appropriate service
         
         # Execute
         result = await supervisor.run("test query", "thread-123", "user-456", "run-789")
@@ -301,7 +305,7 @@ class TestSupervisorAgentHooks:
         # Mock: Database session isolation for transaction testing without real database dependency
         db_session = Mock(spec=AsyncSession)
         # Mock: WebSocket connection isolation for testing without network overhead
-        websocket_manager = Mock()
+        websocket_manager = UnifiedWebSocketManager()
         # Mock: Tool dispatcher isolation for agent testing without real tool execution
         tool_dispatcher = Mock(spec=ToolDispatcher)
         
@@ -309,9 +313,9 @@ class TestSupervisorAgentHooks:
         
         # Create mock handlers
         # Mock: Generic component isolation for controlled unit testing
-        handler1 = AsyncMock()
+        handler1 = AsyncNone  # TODO: Use real service instance
         # Mock: Generic component isolation for controlled unit testing
-        handler2 = AsyncMock()
+        handler2 = AsyncNone  # TODO: Use real service instance
         
         # Register handlers
         supervisor.hooks["before_agent"] = [handler1, handler2]
@@ -334,7 +338,7 @@ class TestSupervisorAgentHooks:
         # Mock: Database session isolation for transaction testing without real database dependency
         db_session = Mock(spec=AsyncSession)
         # Mock: WebSocket connection isolation for testing without network overhead
-        websocket_manager = Mock()
+        websocket_manager = UnifiedWebSocketManager()
         # Mock: Tool dispatcher isolation for agent testing without real tool execution
         tool_dispatcher = Mock(spec=ToolDispatcher)
         
@@ -342,7 +346,7 @@ class TestSupervisorAgentHooks:
         
         # Create handlers - one fails
         # Mock: Generic component isolation for controlled unit testing
-        handler1 = AsyncMock()
+        handler1 = AsyncNone  # TODO: Use real service instance
         # Mock: Async component isolation for testing without real async operations
         handler2 = AsyncMock(side_effect=Exception("Handler failed"))
         
@@ -364,7 +368,7 @@ class TestSupervisorAgentHooks:
         # Mock: Database session isolation for transaction testing without real database dependency
         db_session = Mock(spec=AsyncSession)
         # Mock: WebSocket connection isolation for testing without network overhead
-        websocket_manager = Mock()
+        websocket_manager = UnifiedWebSocketManager()
         # Mock: Tool dispatcher isolation for agent testing without real tool execution
         tool_dispatcher = Mock(spec=ToolDispatcher)
         
@@ -389,7 +393,7 @@ class TestSupervisorAgentHooks:
         # Mock: Database session isolation for transaction testing without real database dependency
         db_session = Mock(spec=AsyncSession)
         # Mock: WebSocket connection isolation for testing without network overhead
-        websocket_manager = Mock()
+        websocket_manager = UnifiedWebSocketManager()
         # Mock: Tool dispatcher isolation for agent testing without real tool execution
         tool_dispatcher = Mock(spec=ToolDispatcher)
         

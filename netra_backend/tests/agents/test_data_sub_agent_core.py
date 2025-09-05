@@ -5,11 +5,14 @@ Focuses on initialization, data processing, and validation
 
 import sys
 from pathlib import Path
+from test_framework.redis.test_redis_manager import TestRedisManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 # Test framework import - using pytest fixtures instead
 
 from datetime import datetime
-from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 
@@ -30,11 +33,13 @@ from netra_backend.tests.agents.helpers.shared_test_types import (
 # Test fixtures for shared test classes
 @pytest.fixture
 def service():
+    """Use real service instance."""
+    # TODO: Initialize real service
     """Service fixture for shared integration tests."""
     # Mock: LLM service isolation for fast testing without API calls or rate limits
-    mock_llm_manager = Mock()
+    mock_llm_manager = mock_llm_manager_instance  # Initialize appropriate service
     # Mock: Tool dispatcher isolation for agent testing without real tool execution
-    mock_tool_dispatcher = Mock()
+    mock_tool_dispatcher = mock_tool_dispatcher_instance  # Initialize appropriate service
     agent = DataSubAgent(mock_llm_manager, mock_tool_dispatcher)
     return agent
 
@@ -42,9 +47,9 @@ def service():
 def create_test_agent():
     """Create a DataSubAgent instance with mocked dependencies"""
     # Mock: LLM service isolation for fast testing without API calls or rate limits
-    mock_llm_manager = Mock()
+    mock_llm_manager = mock_llm_manager_instance  # Initialize appropriate service
     # Mock: Tool dispatcher isolation for agent testing without real tool execution
-    mock_tool_dispatcher = Mock()
+    mock_tool_dispatcher = mock_tool_dispatcher_instance  # Initialize appropriate service
     return DataSubAgent(mock_llm_manager, mock_tool_dispatcher), mock_llm_manager, mock_tool_dispatcher
 
 class TestDataSubAgentInitialization:
@@ -53,9 +58,9 @@ class TestDataSubAgentInitialization:
     def test_initialization_with_defaults(self):
         """Test DataSubAgent initializes with default configuration"""
         # Mock: LLM service isolation for fast testing without API calls or rate limits
-        mock_llm_manager = Mock()
+        mock_llm_manager = mock_llm_manager_instance  # Initialize appropriate service
         # Mock: Tool dispatcher isolation for agent testing without real tool execution
-        mock_tool_dispatcher = Mock()
+        mock_tool_dispatcher = mock_tool_dispatcher_instance  # Initialize appropriate service
         
         agent = DataSubAgent(mock_llm_manager, mock_tool_dispatcher)
         assert agent != None
@@ -65,9 +70,9 @@ class TestDataSubAgentInitialization:
     def test_initialization_with_custom_config(self):
         """Test DataSubAgent initializes with custom configuration"""
         # Mock: LLM service isolation for fast testing without API calls or rate limits
-        mock_llm_manager = Mock()
+        mock_llm_manager = mock_llm_manager_instance  # Initialize appropriate service
         # Mock: Tool dispatcher isolation for agent testing without real tool execution
-        mock_tool_dispatcher = Mock()
+        mock_tool_dispatcher = mock_tool_dispatcher_instance  # Initialize appropriate service
         
         # DataSubAgent doesn't take config directly, it uses the standard initialization
         agent = DataSubAgent(mock_llm_manager, mock_tool_dispatcher)
@@ -109,9 +114,9 @@ class TestDataProcessing:
     async def test_process_data_success(self):
         """Test successful data processing"""
         # Mock: LLM service isolation for fast testing without API calls or rate limits
-        mock_llm_manager = Mock()
+        mock_llm_manager = mock_llm_manager_instance  # Initialize appropriate service
         # Mock: Tool dispatcher isolation for agent testing without real tool execution
-        mock_tool_dispatcher = Mock()
+        mock_tool_dispatcher = mock_tool_dispatcher_instance  # Initialize appropriate service
         agent = DataSubAgent(mock_llm_manager, mock_tool_dispatcher)
         
         test_data = {
@@ -134,9 +139,9 @@ class TestDataProcessing:
     async def test_process_data_validation_failure(self):
         """Test data processing with validation failure"""
         # Mock: LLM service isolation for fast testing without API calls or rate limits
-        mock_llm_manager = Mock()
+        mock_llm_manager = mock_llm_manager_instance  # Initialize appropriate service
         # Mock: Tool dispatcher isolation for agent testing without real tool execution
-        mock_tool_dispatcher = Mock()
+        mock_tool_dispatcher = mock_tool_dispatcher_instance  # Initialize appropriate service
         agent = DataSubAgent(mock_llm_manager, mock_tool_dispatcher)
         
         invalid_data = {
@@ -177,9 +182,9 @@ class TestDataValidation:
     def test_validate_required_fields(self):
         """Test validation of required fields"""
         # Mock: LLM service isolation for fast testing without API calls or rate limits
-        mock_llm_manager = Mock()
+        mock_llm_manager = mock_llm_manager_instance  # Initialize appropriate service
         # Mock: Tool dispatcher isolation for agent testing without real tool execution
-        mock_tool_dispatcher = Mock()
+        mock_tool_dispatcher = mock_tool_dispatcher_instance  # Initialize appropriate service
         agent = DataSubAgent(mock_llm_manager, mock_tool_dispatcher)
         
         valid_data = {
@@ -193,9 +198,9 @@ class TestDataValidation:
     def test_validate_missing_fields(self):
         """Test validation with missing required fields"""
         # Mock: LLM service isolation for fast testing without API calls or rate limits
-        mock_llm_manager = Mock()
+        mock_llm_manager = mock_llm_manager_instance  # Initialize appropriate service
         # Mock: Tool dispatcher isolation for agent testing without real tool execution
-        mock_tool_dispatcher = Mock()
+        mock_tool_dispatcher = mock_tool_dispatcher_instance  # Initialize appropriate service
         agent = DataSubAgent(mock_llm_manager, mock_tool_dispatcher)
         
         invalid_data = {
@@ -208,9 +213,9 @@ class TestDataValidation:
     def test_validate_data_types(self):
         """Test validation of data types"""
         # Mock: LLM service isolation for fast testing without API calls or rate limits
-        mock_llm_manager = Mock()
+        mock_llm_manager = mock_llm_manager_instance  # Initialize appropriate service
         # Mock: Tool dispatcher isolation for agent testing without real tool execution
-        mock_tool_dispatcher = Mock()
+        mock_tool_dispatcher = mock_tool_dispatcher_instance  # Initialize appropriate service
         agent = DataSubAgent(mock_llm_manager, mock_tool_dispatcher)
         
         # Test with correct types

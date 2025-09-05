@@ -8,7 +8,10 @@ import json
 import time
 import uuid
 from typing import Any, Dict, Optional
-from unittest.mock import AsyncMock, MagicMock, Mock, patch
+from test_framework.database.test_database_manager import TestDatabaseManager
+from test_framework.redis.test_redis_manager import TestRedisManager
+from auth_service.core.auth_manager import AuthManager
+from shared.isolated_environment import IsolatedEnvironment
 
 import pytest
 import redis.asyncio as redis
@@ -82,7 +85,6 @@ class MockAuthService:
                 else:
                     raise error
         
-        # Get from mock Redis
         session_data = self.redis_data.get(session_key)
         if session_data:
             return json.loads(session_data)
@@ -108,7 +110,6 @@ class MockAuthService:
         """Remove session on logout"""
         session_key = f"session:{session_id}"
         
-        # Remove from mock Redis
         if session_key in self.redis_data:
             del self.redis_data[session_key]
             if f"{session_key}:ttl" in self.redis_data:

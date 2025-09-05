@@ -15,6 +15,7 @@ import json
 import yaml
 from pathlib import Path
 from typing import Dict, List, Set
+from shared.isolated_environment import IsolatedEnvironment
 
 
 @pytest.mark.e2e

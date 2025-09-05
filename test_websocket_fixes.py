@@ -5,6 +5,8 @@ import asyncio
 import sys
 import io
 from pathlib import Path
+from netra_backend.app.core.agent_registry import AgentRegistry
+from shared.isolated_environment import IsolatedEnvironment
 
 # Fix Windows console encoding for emojis
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')

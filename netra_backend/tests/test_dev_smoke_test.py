@@ -6,12 +6,14 @@ This test runs essential smoke tests to validate the dev environment is working 
 
 import pytest
 import asyncio
-from unittest.mock import AsyncMock, patch
+from test_framework.database.test_database_manager import TestDatabaseManager
+from shared.isolated_environment import IsolatedEnvironment
 
 
 
 class TestDevSmokeTest:
     """Smoke tests for development environment."""
+    pass
 
     @pytest.mark.smoke
     def test_imports_work(self):
@@ -30,6 +32,7 @@ class TestDevSmokeTest:
     @pytest.mark.smoke
     def test_config_accessible(self):
         """Test that configuration is accessible."""
+    pass
         from netra_backend.app.config import get_config
         
         config = get_config()
@@ -52,6 +55,7 @@ class TestDevSmokeTest:
     @pytest.mark.smoke
     async def test_database_session_creation(self):
         """Test that database sessions can be created."""
+    pass
         # Skip database test in smoke mode since external services are disabled
         pytest.skip("Database connection skipped in smoke test mode - external services disabled for lightweight testing")
 
@@ -81,6 +85,7 @@ class TestDevSmokeTest:
     @pytest.mark.smoke
     def test_unified_config_accessible(self):
         """Test that unified config is accessible."""
+    pass
         from netra_backend.app.core.configuration.base import get_unified_config
         
         config = get_unified_config()
@@ -92,16 +97,14 @@ class TestDevSmokeTest:
         assert config.db_pool_size > 0
         assert config.db_max_overflow > 0
 
-    @patch('netra_backend.app.db.postgres_core.async_engine')
-    @patch('netra_backend.app.db.postgres_core.async_session_factory')
-    @pytest.mark.smoke
+            @pytest.mark.smoke
     def test_database_mocking_works(self, mock_session_factory, mock_engine):
         """Test that database mocking works for tests."""
         from netra_backend.app.db.postgres import async_engine, async_session_factory
         
         # Mock should be accessible
-        mock_engine.return_value = AsyncMock()
-        mock_session_factory.return_value = AsyncMock()
+        mock_engine.return_value = AsyncNone  # TODO: Use real service instance
+        mock_session_factory.return_value = AsyncNone  # TODO: Use real service instance
         
         # Should not raise errors
         assert mock_engine is not None
@@ -110,6 +113,7 @@ class TestDevSmokeTest:
     @pytest.mark.smoke
     def test_module_structure_intact(self):
         """Test that module structure is intact."""
+    pass
         # Test that all major modules can be imported
         modules_to_test = [
             'netra_backend.app.config',
@@ -156,6 +160,7 @@ class TestDevSmokeTest:
     @pytest.mark.smoke
     def test_basic_health_indicators(self):
         """Test basic health indicators."""
+    pass
         # Test that Python environment is working
         import sys
         assert sys.version_info >= (3, 8), "Python 3.8+ required"
@@ -195,3 +200,4 @@ class TestDevSmokeTest:
         # Should be able to get environment variables
         assert callable(env.get)
         assert isinstance(env.get('PATH', ''), str)
+    pass

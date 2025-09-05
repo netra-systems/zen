@@ -28,6 +28,7 @@ from typing import Dict, List, Optional, Any
 import psutil
 import redis.asyncio as aioredis
 from contextlib import asynccontextmanager
+from shared.isolated_environment import IsolatedEnvironment
 
 from test_framework.environment_isolation import get_test_env_manager
 

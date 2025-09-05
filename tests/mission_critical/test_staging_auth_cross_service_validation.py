@@ -34,12 +34,14 @@ import uuid
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
 from typing import Dict, Any, Optional, List, Tuple
-from unittest.mock import patch
 
 import httpx
 import jwt
 import pytest
 import requests
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
 
 # Add project root to path for imports
 project_root = Path(__file__).parent.parent.parent

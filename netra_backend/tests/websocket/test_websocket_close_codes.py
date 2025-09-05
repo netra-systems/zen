@@ -25,7 +25,8 @@ import json
 import time
 from datetime import datetime, timezone
 from typing import Dict, Any
-from unittest.mock import AsyncMock, MagicMock, patch
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from shared.isolated_environment import IsolatedEnvironment
 
 import pytest
 from starlette.websockets import WebSocketState
@@ -38,7 +39,7 @@ class TestWebSocketCloseCodes:
     async def test_normal_closure_clean_disconnect(self):
         """Test normal WebSocket closure with code 1000 (normal closure)."""
         # Mock websocket connection
-        mock_websocket = AsyncMock()
+        mock_websocket = AsyncNone  # TODO: Use real service instance
         mock_websocket.application_state = WebSocketState.CONNECTED
         
         # Mock welcome message
@@ -55,11 +56,11 @@ class TestWebSocketCloseCodes:
             welcome_message,
             ConnectionClosed(None, None)
         ])
-        mock_websocket.send_json = AsyncMock()
-        mock_websocket.close = AsyncMock()
+        mock_websocket.send_json = AsyncNone  # TODO: Use real service instance
+        mock_websocket.close = AsyncNone  # TODO: Use real service instance
         
         # Mock connection context manager
-        mock_connection = AsyncMock()
+        mock_connection = AsyncNone  # TODO: Use real service instance
         mock_connection.__aenter__ = AsyncMock(return_value=mock_websocket)
         mock_connection.__aexit__ = AsyncMock(return_value=None)
         
@@ -99,7 +100,7 @@ class TestWebSocketCloseCodes:
     async def test_protocol_error_close_code_1002(self):
         """Test WebSocket closure with code 1002 (protocol error)."""
         # Mock websocket connection
-        mock_websocket = AsyncMock()
+        mock_websocket = AsyncNone  # TODO: Use real service instance
         mock_websocket.application_state = WebSocketState.CONNECTED
         
         # Mock error response for protocol violation
@@ -117,11 +118,11 @@ class TestWebSocketCloseCodes:
             error_response,
             ConnectionClosedError(None, None)
         ])
-        mock_websocket.send = AsyncMock()
-        mock_websocket.close = AsyncMock()
+        mock_websocket.send = AsyncNone  # TODO: Use real service instance
+        mock_websocket.close = AsyncNone  # TODO: Use real service instance
         
         # Mock connection context manager
-        mock_connection = AsyncMock()
+        mock_connection = AsyncNone  # TODO: Use real service instance
         mock_connection.__aenter__ = AsyncMock(return_value=mock_websocket)
         mock_connection.__aexit__ = AsyncMock(return_value=None)
         
@@ -156,7 +157,7 @@ class TestWebSocketCloseCodes:
     async def test_invalid_data_close_code_1003(self):
         """Test WebSocket closure with code 1003 (unsupported data)."""
         # Mock websocket connection
-        mock_websocket = AsyncMock()
+        mock_websocket = AsyncNone  # TODO: Use real service instance
         mock_websocket.application_state = WebSocketState.CONNECTED
         
         # Mock error response for invalid data
@@ -174,10 +175,10 @@ class TestWebSocketCloseCodes:
             error_response,
             ConnectionClosedError(None, None)
         ])
-        mock_websocket.send = AsyncMock()
+        mock_websocket.send = AsyncNone  # TODO: Use real service instance
         
         # Mock connection context manager
-        mock_connection = AsyncMock()
+        mock_connection = AsyncNone  # TODO: Use real service instance
         mock_connection.__aenter__ = AsyncMock(return_value=mock_websocket)
         mock_connection.__aexit__ = AsyncMock(return_value=None)
         
@@ -212,7 +213,7 @@ class TestWebSocketCloseCodes:
     async def test_policy_violation_close_code_1008(self):
         """Test WebSocket closure with code 1008 (policy violation)."""
         # Mock websocket connection
-        mock_websocket = AsyncMock()
+        mock_websocket = AsyncNone  # TODO: Use real service instance
         mock_websocket.application_state = WebSocketState.CONNECTED
         
         # Mock error response for policy violation
@@ -234,10 +235,10 @@ class TestWebSocketCloseCodes:
             error_response,
             ConnectionClosedError(None, None)
         ])
-        mock_websocket.send_json = AsyncMock()
+        mock_websocket.send_json = AsyncNone  # TODO: Use real service instance
         
         # Mock connection context manager
-        mock_connection = AsyncMock()
+        mock_connection = AsyncNone  # TODO: Use real service instance
         mock_connection.__aenter__ = AsyncMock(return_value=mock_websocket)
         mock_connection.__aexit__ = AsyncMock(return_value=None)
         
@@ -277,7 +278,7 @@ class TestWebSocketCloseCodes:
     async def test_message_too_big_close_code_1009(self):
         """Test WebSocket closure with code 1009 (message too big)."""
         # Mock websocket connection
-        mock_websocket = AsyncMock()
+        mock_websocket = AsyncNone  # TODO: Use real service instance
         mock_websocket.application_state = WebSocketState.CONNECTED
         
         # Mock error response for message too big
@@ -299,10 +300,10 @@ class TestWebSocketCloseCodes:
             error_response,
             ConnectionClosedError(None, None)
         ])
-        mock_websocket.send_json = AsyncMock()
+        mock_websocket.send_json = AsyncNone  # TODO: Use real service instance
         
         # Mock connection context manager
-        mock_connection = AsyncMock()
+        mock_connection = AsyncNone  # TODO: Use real service instance
         mock_connection.__aenter__ = AsyncMock(return_value=mock_websocket)
         mock_connection.__aexit__ = AsyncMock(return_value=None)
         
@@ -342,7 +343,7 @@ class TestWebSocketCloseCodes:
     async def test_internal_error_close_code_1011(self):
         """Test WebSocket closure with code 1011 (internal server error)."""
         # Mock websocket connection
-        mock_websocket = AsyncMock()
+        mock_websocket = AsyncNone  # TODO: Use real service instance
         mock_websocket.application_state = WebSocketState.CONNECTED
         
         # Mock error response for internal error
@@ -364,10 +365,10 @@ class TestWebSocketCloseCodes:
             error_response,
             ConnectionClosedError(None, None)
         ])
-        mock_websocket.send_json = AsyncMock()
+        mock_websocket.send_json = AsyncNone  # TODO: Use real service instance
         
         # Mock connection context manager
-        mock_connection = AsyncMock()
+        mock_connection = AsyncNone  # TODO: Use real service instance
         mock_connection.__aenter__ = AsyncMock(return_value=mock_websocket)
         mock_connection.__aexit__ = AsyncMock(return_value=None)
         
@@ -406,7 +407,7 @@ class TestWebSocketCloseCodes:
     async def test_clean_disconnect_sequence(self):
         """Test complete clean disconnection sequence with proper resource cleanup."""
         # Mock websocket connection
-        mock_websocket = AsyncMock()
+        mock_websocket = AsyncNone  # TODO: Use real service instance
         mock_websocket.application_state = WebSocketState.CONNECTED
         
         # Mock message sequence: welcome -> messages -> disconnect confirmation -> close
@@ -436,11 +437,11 @@ class TestWebSocketCloseCodes:
             disconnect_confirmation,
             ConnectionClosed(None, None)
         ])
-        mock_websocket.send_json = AsyncMock()
-        mock_websocket.close = AsyncMock()
+        mock_websocket.send_json = AsyncNone  # TODO: Use real service instance
+        mock_websocket.close = AsyncNone  # TODO: Use real service instance
         
         # Mock connection context manager
-        mock_connection = AsyncMock()
+        mock_connection = AsyncNone  # TODO: Use real service instance
         mock_connection.__aenter__ = AsyncMock(return_value=mock_websocket)
         mock_connection.__aexit__ = AsyncMock(return_value=None)
         
@@ -504,7 +505,7 @@ class TestWebSocketCloseCodes:
     async def test_unexpected_disconnection_handling(self):
         """Test handling of unexpected disconnections (network issues, etc.)."""
         # Mock websocket connection
-        mock_websocket = AsyncMock()
+        mock_websocket = AsyncNone  # TODO: Use real service instance
         mock_websocket.application_state = WebSocketState.CONNECTED
         
         # Mock welcome message then unexpected disconnect
@@ -519,10 +520,10 @@ class TestWebSocketCloseCodes:
             welcome_message,
             ConnectionClosedError(None, None)  # Unexpected disconnect
         ])
-        mock_websocket.send_json = AsyncMock()
+        mock_websocket.send_json = AsyncNone  # TODO: Use real service instance
         
         # Mock connection context manager
-        mock_connection = AsyncMock()
+        mock_connection = AsyncNone  # TODO: Use real service instance
         mock_connection.__aenter__ = AsyncMock(return_value=mock_websocket)
         mock_connection.__aexit__ = AsyncMock(return_value=None)
         

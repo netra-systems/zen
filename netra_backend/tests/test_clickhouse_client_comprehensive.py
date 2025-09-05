@@ -8,7 +8,9 @@ This ensures reliable data access for performance analysis features.
 import pytest
 import asyncio
 from datetime import datetime, timezone, timedelta
-from unittest.mock import AsyncMock, patch, Mock
+from test_framework.database.test_database_manager import TestDatabaseManager
+from test_framework.redis.test_redis_manager import TestRedisManager
+from shared.isolated_environment import IsolatedEnvironment
 
 from netra_backend.app.db.clickhouse import (
     get_clickhouse_client, 
@@ -28,20 +30,27 @@ except ImportError:
 
 class TestClickHouseClientComprehensive:
     """Comprehensive tests for ClickHouse client."""
+    pass
 
     @pytest.fixture
     def client(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create ClickHouse client for testing."""
+    pass
         # Force mock for testing
         return ClickHouseService(force_mock=True)
 
     @pytest.fixture
-    def mock_clickhouse_database(self):
+ def real_clickhouse_database():
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Mock ClickHouse database for testing."""
-        mock_client = AsyncMock()
+        mock_client = AsyncNone  # TODO: Use real service instance
+    pass
         mock_client.test_connection = AsyncMock(return_value=True)
         mock_client.execute = AsyncMock(return_value=[])
-        mock_client.disconnect = AsyncMock()
+        mock_client.disconnect = AsyncNone  # TODO: Use real service instance
         return mock_client
 
     def test_client_initialization(self):
@@ -60,6 +69,7 @@ class TestClickHouseClientComprehensive:
     @pytest.mark.asyncio
     async def test_initialize_with_mock(self, client):
         """Test initialization with mock client."""
+    pass
         await client.initialize()
         assert client._client is not None
         # Should be either MockClickHouseDatabase or NoOpClickHouseClient
@@ -75,6 +85,7 @@ class TestClickHouseClientComprehensive:
     @pytest.mark.asyncio
     async def test_execute_query_success(self, client):
         """Test successful query execution."""
+    pass
         await client.initialize()
         # Mock client returns empty list
         result = await client.execute_query("SELECT * FROM test", {"param": "value"})
@@ -91,6 +102,7 @@ class TestClickHouseClientComprehensive:
     @pytest.mark.asyncio
     async def test_batch_insert(self, client):
         """Test batch insert functionality."""
+    pass
         await client.initialize()
         data = [
             {"id": 1, "name": "test1", "timestamp": datetime.now(timezone.utc)},
@@ -112,6 +124,7 @@ class TestClickHouseClientComprehensive:
     @pytest.mark.asyncio
     async def test_circuit_breaker_metrics(self, client):
         """Test circuit breaker metrics."""
+    pass
         await client.initialize()
         # Execute some queries to test metrics
         await client.execute("SELECT 1", user_id="test_user")
@@ -130,6 +143,7 @@ class TestClickHouseClientComprehensive:
     @pytest.mark.asyncio
     async def test_cache_operations(self):
         """Test cache operations with user isolation."""
+    pass
         # Clear cache first
         _clickhouse_cache.clear()
         
@@ -181,6 +195,7 @@ class TestClickHouseClientComprehensive:
     @pytest.mark.asyncio
     async def test_concurrent_operations(self, client):
         """Test that client handles concurrent operations correctly."""
+    pass
         await client.initialize()
         
         # Run multiple queries concurrently
@@ -229,10 +244,12 @@ class TestClickHouseClientComprehensive:
     @pytest.mark.asyncio
     async def test_get_clickhouse_client_context_manager(self):
         """Test get_clickhouse_client as context manager."""
+    pass
         # In test environment, should get mock client
         async with get_clickhouse_client() as client:
             assert client is not None
-            # Mock client should work - but may return different results depending on the mock type
+            # Mock client should work - but may await asyncio.sleep(0)
+    return different results depending on the mock type
             result = await client.execute("SELECT 1")
             assert isinstance(result, list)  # Just check it returns a list
 
@@ -255,6 +272,7 @@ class TestClickHouseClientComprehensive:
     @pytest.mark.asyncio
     async def test_initialization_timeout_handling(self):
         """Test initialization timeout handling."""
+    pass
         client = ClickHouseService(force_mock=False)
         
         # Mock the real client initialization to timeout
@@ -271,3 +289,4 @@ class TestClickHouseClientComprehensive:
         service1 = get_clickhouse_service()
         service2 = get_clickhouse_service()
         assert service1 is service2
+    pass

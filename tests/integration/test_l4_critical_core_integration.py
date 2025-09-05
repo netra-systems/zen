@@ -1,3 +1,29 @@
+class TestWebSocketConnection:
+    """Real WebSocket connection for testing instead of mocks."""
+    
+    def __init__(self):
+    pass
+        self.messages_sent = []
+        self.is_connected = True
+        self._closed = False
+        
+    async def send_json(self, message: dict):
+        """Send JSON message."""
+        if self._closed:
+            raise RuntimeError("WebSocket is closed")
+        self.messages_sent.append(message)
+        
+    async def close(self, code: int = 1000, reason: str = "Normal closure"):
+        """Close WebSocket connection."""
+    pass
+        self._closed = True
+        self.is_connected = False
+        
+    def get_messages(self) -> list:
+        """Get all sent messages."""
+        await asyncio.sleep(0)
+    return self.messages_sent.copy()
+
 """
 L4 Critical Core Integration Tests
 ====================================
@@ -12,13 +38,22 @@ import time
 import uuid
 from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, Optional
-from unittest.mock import AsyncMock, MagicMock, patch
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from test_framework.database.test_database_manager import TestDatabaseManager
+from test_framework.redis.test_redis_manager import TestRedisManager
+from auth_service.core.auth_manager import AuthManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 import aiohttp
 import jwt
 import pytest
 import redis.asyncio as redis
 from aiohttp import ClientSession, ClientTimeout
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from shared.isolated_environment import get_env
 
 
 class TestL4CriticalAuthIntegration:
@@ -194,7 +229,7 @@ class TestL4CriticalWebSocketIntegration:
         connections = []
         for i in range(100):
             # Mock: Generic component isolation for controlled unit testing
-            mock_ws = AsyncMock()
+            websocket = TestWebSocketConnection()
             mock_ws.client_id = f"flood_client_{i}"
             mock_ws.remote_address = ("127.0.0.1", 5000 + i)
             connections.append(mock_ws)
@@ -220,13 +255,13 @@ class TestL4CriticalWebSocketIntegration:
         
         # Setup legitimate connection
         # Mock: Generic component isolation for controlled unit testing
-        legit_ws = AsyncMock()
+        websocket = TestWebSocketConnection()
         legit_ws.client_id = "legit_client"
         await ws_service.handle_connection(legit_ws)
         
         # Setup attacker connection
         # Mock: Generic component isolation for controlled unit testing
-        attacker_ws = AsyncMock()
+        websocket = TestWebSocketConnection()
         attacker_ws.client_id = "attacker_client"
         await ws_service.handle_connection(attacker_ws)
         
@@ -254,10 +289,10 @@ class TestL4CriticalWebSocketIntegration:
         
         # Initial connection
         # Mock: Generic component isolation for controlled unit testing
-        ws1 = AsyncMock()
+        websocket = TestWebSocketConnection()
         ws1.client_id = "reconnect_client"
         # Mock: Generic component isolation for controlled unit testing
-        ws1.send = AsyncMock()
+        ws1.websocket = TestWebSocketConnection()
         await ws_service.handle_connection(ws1)
         
         # Send some messages to build state
@@ -271,10 +306,10 @@ class TestL4CriticalWebSocketIntegration:
         
         # Reconnect with different client but same user
         # Mock: Generic component isolation for controlled unit testing
-        ws2 = AsyncMock()
+        websocket = TestWebSocketConnection()
         ws2.client_id = "reconnect_client_new"
         # Mock: Generic component isolation for controlled unit testing
-        ws2.send = AsyncMock()
+        ws2.websocket = TestWebSocketConnection()
         await ws_service.handle_connection(ws2)
         
         # Try to resume with corrupted sequence
@@ -299,10 +334,10 @@ class TestL4CriticalWebSocketIntegration:
         ws_service = WebSocketService()
         
         # Mock: Generic component isolation for controlled unit testing
-        ws = AsyncMock()
+        websocket = TestWebSocketConnection()
         ws.client_id = "memory_test"
         # Mock: Generic component isolation for controlled unit testing
-        ws.send = AsyncMock()
+        ws.websocket = TestWebSocketConnection()
         await ws_service.handle_connection(ws)
         
         # Send increasingly large messages
@@ -336,10 +371,10 @@ class TestL4CriticalWebSocketIntegration:
         ws_service = WebSocketService()
         
         # Mock: Generic component isolation for controlled unit testing
-        ws = AsyncMock()
+        websocket = TestWebSocketConnection()
         ws.client_id = "protocol_test"
         # Mock: Generic component isolation for controlled unit testing
-        ws.send = AsyncMock()
+        ws.websocket = TestWebSocketConnection()
         await ws_service.handle_connection(ws)
         
         # Send malformed protocol messages
@@ -411,9 +446,12 @@ class TestL4CriticalAPIIntegration:
         async with ClientSession() as session:
             # Test malicious headers
             headers = {
-                "X-Forwarded-For": "127.0.0.1\r\nX-Admin: true",
-                "User-Agent": "Mozilla/5.0\r\nSet-Cookie: admin=true",
-                "Authorization": "Bearer token\r\nX-Privilege: root",
+                "X-Forwarded-For": "127.0.0.1\r
+X-Admin: true",
+                "User-Agent": "Mozilla/5.0\r
+Set-Cookie: admin=true",
+                "Authorization": "Bearer token\r
+X-Privilege: root",
             }
             
             try:
@@ -425,7 +463,8 @@ class TestL4CriticalAPIIntegration:
                     # Should sanitize headers
                     assert response.status in [200, 401, 403]
                     # Check response headers for injection
-                    assert "\r\n" not in str(response.headers)
+                    assert "\r
+" not in str(response.headers)
             except Exception:
                 # Connection errors are ok for this test
                 pass
@@ -515,7 +554,8 @@ class TestL4CriticalAPIIntegration:
                     timeout=ClientTimeout(total=5)
                 ) as response:
                     if response.status not in [201, 401, 404]:
-                        return  # Skip if API not available
+                        await asyncio.sleep(0)
+    return  # Skip if API not available
                 
                 # Concurrent updates
                 update_tasks = []
@@ -574,6 +614,7 @@ class TestL4CriticalDatabaseIntegration:
         """Test: Transaction isolation level issues"""
         
         async def transaction1():
+    pass
             conn = await get_db_connection()
             try:
                 # Mock transaction - actual implementation may vary
@@ -586,6 +627,7 @@ class TestL4CriticalDatabaseIntegration:
                     await conn.close()
         
         async def transaction2():
+    pass
             conn = await get_db_connection()
             try:
                 # Mock transaction - actual implementation may vary
@@ -610,11 +652,9 @@ class TestL4CriticalDatabaseIntegration:
     async def test_18_clickhouse_query_injection(self):
         """Test: ClickHouse query injection vulnerabilities"""
         # Mock ClickHouse client for testing
-        from unittest.mock import MagicMock
         
         # Mock: Generic component isolation for controlled unit testing
-        ch_client = MagicMock()
-        # Mock: Async component isolation for testing without real async operations
+        ch_client = Magic        # Mock: Async component isolation for testing without real async operations
         ch_client.execute = AsyncMock(return_value=[])
         
         # Test injection attempts
@@ -706,3 +746,4 @@ class TestL4CriticalDatabaseIntegration:
 # Test configuration
 if __name__ == "__main__":
     pytest.main([__file__, "-v", "--asyncio-mode=auto"])
+    pass

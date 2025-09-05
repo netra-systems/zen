@@ -1,4 +1,7 @@
 from shared.isolated_environment import get_env
+from test_framework.database.test_database_manager import TestDatabaseManager
+from test_framework.redis.test_redis_manager import TestRedisManager
+from shared.isolated_environment import IsolatedEnvironment
 #!/usr/bin/env python3
 """
 Redis Connection Warning Staging Regression Tests
@@ -22,7 +25,6 @@ These tests will FAIL initially to confirm the issues exist, then PASS after fix
 import os
 import pytest
 import redis
-from unittest.mock import patch, MagicMock
 from typing import Dict, Any, List
 
 from netra_backend.app.core.redis_connection_handler import RedisConnectionHandler
@@ -199,7 +201,7 @@ class TestRedisConnectionWarningsRegression:
             
             # Mock Redis client to capture connection attempts
             with patch('redis.Redis') as mock_redis:
-                mock_instance = MagicMock()
+                mock_instance = MagicNone  # TODO: Use real service instance
                 mock_redis.return_value = mock_instance
                 
                 # Act - Perform Redis health check

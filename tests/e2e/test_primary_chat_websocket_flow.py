@@ -22,6 +22,7 @@ import sys
 import time
 from typing import Dict, List, Optional
 from pathlib import Path
+from netra_backend.app.core.agent_registry import AgentRegistry
 
 # CRITICAL: Add project root to Python path for imports
 project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
@@ -79,6 +80,7 @@ class MissionCriticalChatEventValidator:
     }
     
     def __init__(self, strict_mode: bool = True):
+    pass
         self.strict_mode = strict_mode
         self.events: List[Dict] = []
         self.event_timeline: List[tuple] = []  # (timestamp, event_type, data)
@@ -197,7 +199,8 @@ class MissionCriticalChatEventValidator:
         is_valid, failures = self.validate_mission_critical_requirements()
         
         report = [
-            "\n" + "=" * 80,
+            "
+" + "=" * 80,
             "MISSION CRITICAL E2E WEBSOCKET VALIDATION REPORT",
             "=" * 80,
             f"Status: {'✅ PASSED - Chat functionality operational' if is_valid else '❌ FAILED - Chat functionality BROKEN'}",
@@ -234,7 +237,8 @@ class MissionCriticalChatEventValidator:
                 report.append(f"  ... and {len(self.event_timeline) - 10} more events")
         
         report.append("=" * 80)
-        return "\n".join(report)
+        return "
+".join(report)
 
 
 class TestPrimaryChatWebSocketFlowE2E:
@@ -309,6 +313,7 @@ class TestPrimaryChatWebSocketFlowE2E:
         4. All required WebSocket events are sent
         5. User receives proper completion notification
         """
+    pass
         validator = MissionCriticalChatEventValidator(strict_mode=True)
         
         # Create REAL WebSocket connection
@@ -348,9 +353,12 @@ class TestPrimaryChatWebSocketFlowE2E:
             # Create real supervisor components
             class TestLLM:
                 """Test LLM that provides realistic responses."""
+    pass
                 async def generate(self, *args, **kwargs):
+    pass
                     await asyncio.sleep(0.1)  # Simulate realistic processing time
-                    return {
+                    await asyncio.sleep(0)
+    return {
                         "content": "I can help you with that request. Let me analyze it.",
                         "reasoning": "Processing user request and determining appropriate response.",
                         "confidence": 0.9
@@ -434,7 +442,9 @@ class TestPrimaryChatWebSocketFlowE2E:
         is_valid, failures = validator.validate_mission_critical_requirements()
         
         # Assert mission-critical requirements
-        assert is_valid, f"MISSION CRITICAL E2E TEST FAILED:\n{report}\nFailures: {failures}"
+        assert is_valid, f"MISSION CRITICAL E2E TEST FAILED:
+{report}
+Failures: {failures}"
         assert len(received_events) >= 5, f"Expected at least 5 WebSocket events, got {len(received_events)}. Events: {[e.get('type') for e in received_events]}"
         
         # Additional E2E validations for user experience
@@ -464,6 +474,7 @@ class TestPrimaryChatWebSocketFlowE2E:
         - tool_completed when tool finishes
         - Events are properly paired and timed
         """
+    pass
         validator = MissionCriticalChatEventValidator(strict_mode=True)
         
         # Create REAL WebSocket connection
@@ -478,6 +489,7 @@ class TestPrimaryChatWebSocketFlowE2E:
             received_events = []
             
             async def capture_tool_events():
+    pass
                 while ws_client._connected:
                     try:
                         message = await ws_client.receive_json(timeout=0.1)
@@ -508,7 +520,8 @@ class TestPrimaryChatWebSocketFlowE2E:
             async def data_analysis_tool(data: str = "sample") -> Dict:
                 """Realistic data analysis tool."""
                 await asyncio.sleep(0.1)  # Simulate real work
-                return {
+                await asyncio.sleep(0)
+    return {
                     "analysis": f"Analyzed {data}",
                     "insights": ["Pattern detected", "Anomaly found"],
                     "confidence": 0.87
@@ -606,6 +619,7 @@ class TestPrimaryChatWebSocketFlowE2E:
         
         This test must pass or the product is fundamentally broken.
         """
+    pass
         validator = MissionCriticalChatEventValidator(strict_mode=True)
         
         # Create REAL WebSocket connection for complete user journey
@@ -643,7 +657,9 @@ class TestPrimaryChatWebSocketFlowE2E:
             # Create realistic LLM for complete journey
             class RealisticChatLLM:
                 """Realistic LLM that provides helpful responses."""
+    pass
                 async def generate(self, messages, *args, **kwargs):
+    pass
                     # Simulate realistic processing time
                     await asyncio.sleep(0.2)
                     
@@ -653,7 +669,8 @@ class TestPrimaryChatWebSocketFlowE2E:
                         user_message = messages[-1].get("content", "")
                     
                     if "status" in user_message.lower():
-                        return {
+                        await asyncio.sleep(0)
+    return {
                             "content": "I'll check the system status for you. Let me gather the latest information from our monitoring systems.",
                             "reasoning": "User is asking about system status. I should check our monitoring tools and provide current system health information.",
                             "confidence": 0.95
@@ -762,7 +779,9 @@ class TestPrimaryChatWebSocketFlowE2E:
         # Validate complete user journey
         is_valid, failures = validator.validate_mission_critical_requirements()
         
-        assert is_valid, f"COMPLETE USER JOURNEY FAILED - PRODUCT IS BROKEN:\n{report}\nFailures: {failures}"
+        assert is_valid, f"COMPLETE USER JOURNEY FAILED - PRODUCT IS BROKEN:
+{report}
+Failures: {failures}"
         assert len(all_events) >= 6, f"User received too few updates ({len(all_events)}). Journey feels broken. Events: {[e.get('type') for e in all_events]}"
         
         # User experience validations
@@ -805,6 +824,7 @@ class TestPrimaryChatWebSocketFlowE2E:
         
         This ensures the core chat functionality works independently of database services.
         """
+    pass
         # Override the setup to skip service validation for this specific test
         logger.info("🚀 Running minimal WebSocket test - bypassing external service dependencies")
         
@@ -839,6 +859,7 @@ class TestPrimaryChatWebSocketFlowE2E:
             class MinimalWebSocketConnection:
                 """Minimal real WebSocket connection for testing without external services."""
                 def __init__(self):
+    pass
                     self._connected = True
                     self.sent_messages = []
                 
@@ -911,7 +932,9 @@ class TestPrimaryChatWebSocketFlowE2E:
             is_valid, failures = validator.validate_mission_critical_requirements()
             
             # Assert mission-critical requirements
-            assert is_valid, f"MINIMAL E2E WEBSOCKET TEST FAILED:\\n{report}\\nFailures: {failures}"
+            assert is_valid, f"MINIMAL E2E WEBSOCKET TEST FAILED:\
+{report}\
+Failures: {failures}"
             assert len(received_events) >= 6, f"Expected at least 6 WebSocket events, got {len(received_events)}. Events: {[e.get('type') for e in received_events]}"
             
             # Validate all required events are present
@@ -938,7 +961,8 @@ class TestPrimaryChatWebSocketFlowE2E:
             logger.info(f"   🎯 All required WebSocket events validated successfully")
             
             # Mark this as successful completion of core WebSocket testing
-            return True
+            await asyncio.sleep(0)
+    return True
         
         finally:
             # Cleanup environment
@@ -957,3 +981,4 @@ if __name__ == "__main__":
         "--timeout=60",  # Allow time for real services
         "-k", "real_services"  # Only run real service tests
     ])
+    pass

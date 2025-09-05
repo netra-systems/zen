@@ -7,8 +7,8 @@ import asyncio
 import sys
 import threading
 import pytest
-from unittest.mock import Mock, patch, AsyncMock
 from pathlib import Path
+from shared.isolated_environment import IsolatedEnvironment
 
 # Add parent directories to path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
@@ -150,6 +150,10 @@ class TestEventLoopValidator:
         test_file = tmp_path / "test_module.py"
         test_file.write_text("""
 import asyncio
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
+from shared.isolated_environment import get_env
 
 async def good_async_function():
     result = await some_operation()

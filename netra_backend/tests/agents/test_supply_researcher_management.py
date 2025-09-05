@@ -6,12 +6,15 @@ Modular design with ≤300 lines, ≤8 lines per function
 import sys
 from pathlib import Path
 from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
+from auth_service.core.auth_manager import AuthManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 
 # Test framework import - using pytest fixtures instead
 
 from datetime import datetime, timedelta
-from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 

@@ -12,10 +12,14 @@ Business Value Justification (BVJ):
 import sys
 from pathlib import Path
 from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from auth_service.core.auth_manager import AuthManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 
 from typing import Optional
-from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 
@@ -252,7 +256,7 @@ class TestAgentRoute:
         from netra_backend.app.services.agent_service import get_agent_service
         
         # Mock agent service with performance metrics
-        mock_agent_service = Mock()
+        mock_agent_service = AgentRegistry().get_agent("supervisor")
         mock_agent_service.process_message = AsyncMock(return_value={
             "response": "Processed with metrics",
             "metrics": {
@@ -287,13 +291,13 @@ class TestAgentRoute:
         
         # Mock primary agent failure
         # Mock: Generic component isolation for controlled unit testing
-        primary_agent = Mock()
+        primary_agent = AgentRegistry().get_agent("supervisor")
         # Mock: Async component isolation for testing without real async operations
         primary_agent.process_message = AsyncMock(side_effect=Exception("Primary failed"))
         
         # Mock fallback agent success
         # Mock: Generic component isolation for controlled unit testing
-        fallback_agent = Mock()
+        fallback_agent = AgentRegistry().get_agent("supervisor")
         # Mock: Async component isolation for testing without real async operations
         fallback_agent.process_message = AsyncMock(return_value={
             "response": "Fallback response",

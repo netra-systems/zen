@@ -27,6 +27,7 @@ import time
 import traceback
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Set, Tuple
+from shared.isolated_environment import IsolatedEnvironment
 
 import pytest
 
@@ -35,6 +36,7 @@ class ImportIntegrityValidator:
     """Comprehensive import integrity validation system"""
     
     def __init__(self):
+    pass
         self.project_root = Path(__file__).parent.parent.parent
         self.errors: Dict[str, Dict[str, Any]] = {}
         self.warnings: Dict[str, List[str]] = {}
@@ -155,7 +157,8 @@ class ImportIntegrityValidator:
             
             # Look for import statements
             imports = []
-            for line in content.split("\n"):
+            for line in content.split("
+"):
                 line = line.strip()
                 if line.startswith("from ") and " import " in line:
                     # Extract module being imported
@@ -296,6 +299,7 @@ class TestImportIntegrity:
     @pytest.fixture(scope="class") 
     def validation_results(self, validator):
         """Run validation and return results"""
+    pass
         return validator.run_comprehensive_validation()
 
     @pytest.mark.e2e
@@ -305,22 +309,28 @@ class TestImportIntegrity:
         
         if missing_packages:
             error_details = validation_results["errors"].get("missing_packages", {})
-            failure_msg = f"Missing required packages: {missing_packages}\n"
+            failure_msg = f"Missing required packages: {missing_packages}
+"
             for package, details in error_details.items():
-                failure_msg += f"  - {package}: {details['error']}\n"
+                failure_msg += f"  - {package}: {details['error']}
+"
             pytest.fail(failure_msg)
 
     @pytest.mark.e2e
     def test_all_modules_importable(self, validation_results):
         """Test that all Python modules can be imported without errors"""
+    pass
         failed_imports = validation_results["failed_imports"]
         total_files = validation_results["total_files"]
         success_rate = validation_results["success_rate"]
         
         if failed_imports > 0:
             # Build detailed failure report
-            failure_report = f"\nImport Integrity Failures: {failed_imports}/{total_files} files failed (Success rate: {success_rate}%)\n"
-            failure_report += "=" * 80 + "\n"
+            failure_report = f"
+Import Integrity Failures: {failed_imports}/{total_files} files failed (Success rate: {success_rate}%)
+"
+            failure_report += "=" * 80 + "
+"
             
             import_failures = validation_results["errors"].get("import_failures", {})
             
@@ -334,11 +344,16 @@ class TestImportIntegrity:
             
             # Report by error type
             for error_type, errors in error_groups.items():
-                failure_report += f"\n{error_type} ({len(errors)} failures):\n"
-                failure_report += "\n".join(errors[:10])  # Limit to first 10 per type
+                failure_report += f"
+{error_type} ({len(errors)} failures):
+"
+                failure_report += "
+".join(errors[:10])  # Limit to first 10 per type
                 if len(errors) > 10:
-                    failure_report += f"\n  ... and {len(errors) - 10} more {error_type} failures"
-                failure_report += "\n"
+                    failure_report += f"
+  ... and {len(errors) - 10} more {error_type} failures"
+                failure_report += "
+"
             
             pytest.fail(failure_report)
 
@@ -348,13 +363,15 @@ class TestImportIntegrity:
         circular_deps = validation_results["circular_deps"]
         
         if circular_deps:
-            failure_msg = f"Circular import dependencies detected: {circular_deps}\n"
+            failure_msg = f"Circular import dependencies detected: {circular_deps}
+"
             failure_msg += "These modules have potential circular import issues that must be resolved."
             pytest.fail(failure_msg)
 
     @pytest.mark.e2e
     def test_performance_requirements(self, validation_results):
         """Test that import validation completes within performance requirements"""
+    pass
         elapsed_time = validation_results["elapsed_time_seconds"]
         max_allowed_time = 60.0  # 60 seconds maximum
         
@@ -379,6 +396,7 @@ class TestImportIntegrity:
     @pytest.mark.e2e
     def test_critical_directories_coverage(self, validation_results, validator):
         """Test that all critical directories are covered"""
+    pass
         # Ensure we tested files from all expected directories
         tested_dirs = set()
         
@@ -426,7 +444,9 @@ class TestImportIntegrity:
     @pytest.mark.e2e
     def test_import_integrity_summary(self, validation_results):
         """Generate and validate comprehensive test summary"""
-        print("\n" + "=" * 80)
+    pass
+        print("
+" + "=" * 80)
         print("IMPORT INTEGRITY VALIDATION SUMMARY")
         print("=" * 80)
         print(f"Total Python files scanned: {validation_results['total_files']}")
@@ -438,7 +458,8 @@ class TestImportIntegrity:
         print(f"Validation time: {validation_results['elapsed_time_seconds']}s")
         
         if validation_results["warnings"]:
-            print(f"\nWarnings: {len(validation_results['warnings'])}")
+            print(f"
+Warnings: {len(validation_results['warnings'])}")
             for warning_type, warnings in validation_results["warnings"].items():
                 print(f"  {warning_type}: {len(warnings)} warnings")
         

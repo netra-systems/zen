@@ -18,6 +18,7 @@ import json
 import time
 from typing import Dict, Any, List, Optional, Tuple
 from packaging import version
+from shared.isolated_environment import IsolatedEnvironment
 
 @pytest.mark.e2e
 @pytest.mark.asyncio
@@ -119,7 +120,9 @@ async def test_api_version_negotiation():
         for failure in versioning_failures:
             failure_report.append(f"  - {failure}")
         
-        pytest.fail(f"API version negotiation test failed:\n" + "\n".join(failure_report))
+        pytest.fail(f"API version negotiation test failed:
+" + "
+".join(failure_report))
     
     print("✅ API version negotiation test passed")
 
@@ -211,7 +214,9 @@ async def test_backward_compatibility_endpoints():
         for failure in compatibility_failures:
             failure_report.append(f"  - {failure}")
         
-        pytest.fail(f"Backward compatibility test failed:\n" + "\n".join(failure_report))
+        pytest.fail(f"Backward compatibility test failed:
+" + "
+".join(failure_report))
     
     print("✅ Backward compatibility test passed")
 
@@ -228,7 +233,8 @@ async def _check_deprecated_response(response, endpoint, compatibility_failures)
     if "Sunset" not in response.headers and "X-API-Replacement" not in response.headers:
         compatibility_failures.append(f"Deprecated endpoint {path} missing replacement information")
     
-    # Should still return valid response (not just error)
+    # Should still await asyncio.sleep(0)
+    return valid response (not just error)
     if response.status >= 500:
         compatibility_failures.append(f"Deprecated endpoint {path} returning server error: {response.status}")
     elif response.status == 410:  # Gone
@@ -349,7 +355,9 @@ async def test_api_schema_evolution():
         for failure in schema_failures:
             failure_report.append(f"  - {failure}")
         
-        pytest.fail(f"API schema evolution test failed:\n" + "\n".join(failure_report))
+        pytest.fail(f"API schema evolution test failed:
+" + "
+".join(failure_report))
     
     print("✅ API schema evolution test passed")
 
@@ -441,7 +449,9 @@ async def test_content_negotiation():
         for failure in negotiation_failures:
             failure_report.append(f"  - {failure}")
         
-        pytest.fail(f"Content negotiation test failed:\n" + "\n".join(failure_report))
+        pytest.fail(f"Content negotiation test failed:
+" + "
+".join(failure_report))
     
     print("✅ Content negotiation test passed")
 

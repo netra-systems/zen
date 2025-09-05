@@ -47,6 +47,7 @@ from dataclasses import asdict, dataclass, field
 from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional, Set, Tuple
 from concurrent.futures import ThreadPoolExecutor
+from shared.isolated_environment import IsolatedEnvironment
 
 import pytest
 

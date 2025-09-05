@@ -36,6 +36,7 @@ import time
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 from urllib.parse import urljoin, urlparse
+from shared.isolated_environment import IsolatedEnvironment
 
 import httpx
 import pytest

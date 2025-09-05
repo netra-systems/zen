@@ -31,6 +31,7 @@ import asyncio
 import json
 import time
 from typing import Any, Dict, List, Optional, Set, Union
+from shared.isolated_environment import IsolatedEnvironment
 
 import pytest
 
