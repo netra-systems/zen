@@ -208,6 +208,13 @@ class AuthConfig:
         """Get database URL for auth service using comprehensive URL builder."""
         env_manager = get_env()
         
+        # Check for fast test mode - use in-memory SQLite
+        fast_test_mode = env_manager.get("AUTH_FAST_TEST_MODE", "false").lower() == "true"
+        
+        if fast_test_mode:
+            logger.info("AUTH_FAST_TEST_MODE enabled - using in-memory SQLite database from config")
+            return "sqlite+aiosqlite:///:memory:"
+        
         # Get the base host configuration
         postgres_host = env_manager.get("POSTGRES_HOST")
         
