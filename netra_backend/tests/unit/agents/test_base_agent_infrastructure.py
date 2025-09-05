@@ -19,6 +19,7 @@ from typing import Dict, Any, Optional
 from unittest.mock import Mock, AsyncMock, patch, MagicMock
 
 from netra_backend.app.agents.base_agent import BaseAgent
+from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
 from netra_backend.app.agents.base.interface import ExecutionContext, ExecutionResult
 from netra_backend.app.agents.base.reliability_manager import ReliabilityManager
 from netra_backend.app.agents.base.executor import BaseExecutionEngine
@@ -306,12 +307,16 @@ class TestBaseAgentExecutionEngine:
         state.user_id = "test_user_456"
         
         # Execute using modern pattern
-        with pytest.warns(DeprecationWarning):
-            result = await agent.execute_modern(
-                state=state,
-                run_id="test_run_789",
-                stream_updates=True
-            )
+        context = UserExecutionContext(
+            user_id=state.user_id,
+            thread_id=state.chat_thread_id,
+            run_id="test_run_789",
+            metadata={'agent_input': state.user_request}
+        )
+        result = await agent.execute_with_context(
+            context=context,
+            stream_updates=True
+        )
         
         # Verify execution result
         assert isinstance(result, ExecutionResult)
@@ -340,11 +345,16 @@ class TestBaseAgentExecutionEngine:
         state = DeepAgentState()
         state.user_request = "Test request"
         
-        with pytest.warns(DeprecationWarning):
-            result = await agent.execute_modern(
-                state=state,
-                run_id="validation_fail_run"
-            )
+        context = UserExecutionContext(
+            user_id="test_user",
+            thread_id="test_thread",
+            run_id="validation_fail_run",
+            metadata={'agent_input': state.user_request}
+        )
+        result = await agent.execute_with_context(
+            context=context,
+            stream_updates=False
+        )
         
         # Execution should fail due to validation
         assert result.is_success is False
@@ -368,11 +378,16 @@ class TestBaseAgentExecutionEngine:
         state = DeepAgentState()
         state.user_request = "Test request"
         
-        with pytest.warns(DeprecationWarning):
-            result = await agent.execute_modern(
-                state=state,
-                run_id="execution_fail_run"
-            )
+        context = UserExecutionContext(
+            user_id="test_user",
+            thread_id="test_thread",
+            run_id="execution_fail_run",
+            metadata={'agent_input': state.user_request}
+        )
+        result = await agent.execute_with_context(
+            context=context,
+            stream_updates=False
+        )
         
         # Execution should fail in core logic
         assert result.is_success is False

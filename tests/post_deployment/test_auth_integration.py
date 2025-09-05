@@ -1,7 +1,5 @@
-from shared.isolated_environment import get_env
 #!/usr/bin/env python3
 """
-env = get_env()
 Post-deployment authentication integration test.
 Verifies that authentication is working correctly between auth service and backend.
 

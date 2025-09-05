@@ -1,0 +1,226 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learning>
+    <metadata>
+        <title>OAuth Redirect URI SSOT Implementation - Critical Fix</title>
+        <date>2025-09-05</date>
+        <severity>CRITICAL</severity>
+        <impact>100% OAuth authentication failure due to SSOT violations</impact>
+        <resolution_status>FIXED</resolution_status>
+        <affected_services>auth_service, all OAuth-dependent services</affected_services>
+        <keywords>SSOT, OAuth, redirect_uri, single source of truth, configuration management</keywords>
+        <cross_references>
+            <ref>/OAUTH_REDIRECT_URI_MISMATCH_AUDIT.md</ref>
+            <ref>/OAUTH_SSOT_COMPLIANCE_ANALYSIS.md</ref>
+            <ref>/OAUTH_REDIRECT_URI_SSOT_ARCHITECTURE.md</ref>
+            <ref>/SPEC/learnings/oauth_redirect_uri_misconfiguration.xml</ref>
+            <ref>/docs/GOOGLE_OAUTH_CONSOLE_CONFIGURATION.md</ref>
+        </cross_references>
+    </metadata>
+    
+    <problem>
+        <description>
+            OAuth authentication failed with "redirect_uri_mismatch" because the system had 
+            FOUR different sources of truth for OAuth redirect URIs, violating SSOT principles
+            and making it impossible to maintain consistent configuration.
+        </description>
+        
+        <ssot_violations>
+            <violation number="1">
+                <source>GoogleOAuthProvider.get_redirect_uri()</source>
+                <returns>https://auth.staging.netrasystems.ai/auth/oauth/callback</returns>
+                <status>Was partially correct (right domain, wrong path)</status>
+            </violation>
+            
+            <violation number="2">
+                <source>AuthEnvironment.get_oauth_redirect_uri()</source>
+                <returns>https://app.staging.netrasystems.ai/auth/callback</returns>
+                <status>WRONG - returned frontend URL instead of auth service</status>
+            </violation>
+            
+            <violation number="3">
+                <source>Environment Variables (OAUTH_REDIRECT_URI, OAUTH_CALLBACK_URL)</source>
+                <returns>https://auth.staging.netrasystems.ai/oauth/callback</returns>
+                <status>Wrong path - missing /auth prefix</status>
+            </violation>
+            
+            <violation number="4">
+                <source>Hardcoded in auth_routes.py</source>
+                <returns>Mixed auth and frontend URLs</returns>
+                <status>Inconsistent - different values in different places</status>
+            </violation>
+        </ssot_violations>
+        
+        <root_cause>
+            Multiple teams/developers added OAuth redirect URI configuration in different places
+            without establishing a single source of truth. This led to configuration drift where
+            different parts of the system used different methods to get the redirect URI.
+        </root_cause>
+    </problem>
+    
+    <solution>
+        <principle>
+            Establish GoogleOAuthProvider.get_redirect_uri() as the SINGLE SOURCE OF TRUTH
+            for all OAuth redirect URIs across the entire system.
+        </principle>
+        
+        <implementation>
+            <step number="1">
+                <action>Standardized OAuth redirect path</action>
+                <details>Changed from /auth/oauth/callback to /auth/callback for simplicity</details>
+                <file>/auth_service/auth_core/oauth/google_oauth.py:78-95</file>
+            </step>
+            
+            <step number="2">
+                <action>Deprecated AuthEnvironment.get_oauth_redirect_uri()</action>
+                <details>Added deprecation warning, temporarily fixed to return auth URL instead of frontend</details>
+                <file>/auth_service/auth_core/auth_environment.py:708-736</file>
+            </step>
+            
+            <step number="3">
+                <action>Deprecated environment variables</action>
+                <details>Marked OAUTH_REDIRECT_URI and OAUTH_CALLBACK_URL as deprecated in configs</details>
+                <file>/config/staging.env:82-88</file>
+            </step>
+            
+            <step number="4">
+                <action>Updated auth routes to use SSOT</action>
+                <details>Modified /auth/config endpoint to get redirect URI from GoogleOAuthProvider</details>
+                <file>/auth_service/auth_core/routes/auth_routes.py:71-96</file>
+            </step>
+            
+            <step number="5">
+                <action>Updated config dependency tracker</action>
+                <details>Added deprecation entries for OAuth environment variables</details>
+                <file>/netra_backend/app/core/config_dependencies.py:240-274</file>
+            </step>
+            
+            <step number="6">
+                <action>Created comprehensive documentation</action>
+                <details>Documented SSOT architecture with migration guide</details>
+                <file>/OAUTH_REDIRECT_URI_SSOT_ARCHITECTURE.md</file>
+            </step>
+        </implementation>
+        
+        <google_console_configuration>
+            <environment name="staging">
+                <add>https://auth.staging.netrasystems.ai/auth/callback</add>
+                <remove>https://auth.staging.netrasystems.ai/auth/oauth/callback</remove>
+                <remove>https://app.staging.netrasystems.ai/auth/callback</remove>
+            </environment>
+            
+            <environment name="production">
+                <add>https://auth.netrasystems.ai/auth/callback</add>
+                <remove>Any frontend URLs</remove>
+            </environment>
+            
+            <environment name="development">
+                <add>http://localhost:8081/auth/callback</add>
+                <remove>http://localhost:3000/auth/callback</remove>
+            </environment>
+        </google_console_configuration>
+    </solution>
+    
+    <ssot_principles_enforced>
+        <principle number="1">
+            <title>Single Method for Redirect URI</title>
+            <implementation>Only GoogleOAuthProvider.get_redirect_uri() returns OAuth redirect URIs</implementation>
+            <enforcement>Deprecation warnings on all other methods</enforcement>
+        </principle>
+        
+        <principle number="2">
+            <title>No Environment Variable Overrides</title>
+            <implementation>Environment variables marked as deprecated and validation returns false</implementation>
+            <enforcement>Config dependency tracker marks them as DEPRECATED</enforcement>
+        </principle>
+        
+        <principle number="3">
+            <title>Consistent Path Across Environments</title>
+            <implementation>All environments use /auth/callback path</implementation>
+            <enforcement>Single method ensures consistency</enforcement>
+        </principle>
+        
+        <principle number="4">
+            <title>Auth Service Handles OAuth</title>
+            <implementation>Redirect URIs always point to auth service, never frontend</implementation>
+            <enforcement>Method uses auth_service_url, not frontend_url</enforcement>
+        </principle>
+    </ssot_principles_enforced>
+    
+    <testing_requirements>
+        <test name="test_oauth_redirect_uri_uses_ssot">
+            Verify all code uses GoogleOAuthProvider.get_redirect_uri()
+        </test>
+        
+        <test name="test_deprecated_methods_show_warnings">
+            Ensure deprecated methods emit DeprecationWarning
+        </test>
+        
+        <test name="test_redirect_uri_path_consistency">
+            Verify all redirect URIs end with /auth/callback
+        </test>
+        
+        <test name="test_no_environment_variable_usage">
+            Ensure OAUTH_REDIRECT_URI and OAUTH_CALLBACK_URL are not used
+        </test>
+    </testing_requirements>
+    
+    <lessons_learned>
+        <lesson priority="1">
+            <title>SSOT Violations Cause Cascading Failures</title>
+            <description>
+                When configuration has multiple sources of truth, it becomes impossible to
+                maintain consistency, leading to runtime failures that are hard to debug.
+            </description>
+        </lesson>
+        
+        <lesson priority="2">
+            <title>Environment Variables Are Not Always SSOT-Compliant</title>
+            <description>
+                Environment variables can violate SSOT when the same value can be set in
+                multiple ways or when programmatic generation is more appropriate.
+            </description>
+        </lesson>
+        
+        <lesson priority="3">
+            <title>OAuth Requires Exact Matching</title>
+            <description>
+                OAuth providers like Google require EXACT redirect URI matching. Even a
+                trailing slash difference will cause authentication to fail.
+            </description>
+        </lesson>
+        
+        <lesson priority="4">
+            <title>Documentation Must Be Comprehensive</title>
+            <description>
+                SSOT implementation requires extensive documentation with cross-references,
+                migration guides, and clear deprecation notices to prevent regression.
+            </description>
+        </lesson>
+    </lessons_learned>
+    
+    <prevention_measures>
+        <measure>Code reviews must check for SSOT violations</measure>
+        <measure>New configuration must have single source documented</measure>
+        <measure>Deprecation process must be followed for removing old sources</measure>
+        <measure>Integration tests must verify configuration consistency</measure>
+        <measure>Documentation must be updated when configuration changes</measure>
+    </prevention_measures>
+    
+    <validation_commands>
+        <command purpose="Check SSOT implementation">
+            python -c "from auth_service.auth_core.oauth.google_oauth import GoogleOAuthProvider; print(GoogleOAuthProvider().get_redirect_uri())"
+        </command>
+        
+        <command purpose="Validate OAuth configuration">
+            python scripts/validate_oauth_configuration.py --env staging
+        </command>
+        
+        <command purpose="Test OAuth redirect URI">
+            pytest auth_service/tests/unit/test_oauth_redirect_uri_regression.py -v
+        </command>
+        
+        <command purpose="Check for deprecated usage">
+            grep -r "get_oauth_redirect_uri\|OAUTH_REDIRECT_URI\|OAUTH_CALLBACK_URL" --include="*.py" .
+        </command>
+    </validation_commands>
+</learning>

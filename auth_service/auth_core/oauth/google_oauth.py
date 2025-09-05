@@ -78,8 +78,10 @@ class GoogleOAuthProvider:
     def get_redirect_uri(self) -> Optional[str]:
         """Get OAuth redirect URI for current environment.
         
-        CRITICAL: Uses SSOT from AuthEnvironment.get_auth_service_url()
-        for proper domain configuration (e.g., auth.staging.netrasystems.ai)
+        CRITICAL: This is the SINGLE SOURCE OF TRUTH for OAuth redirect URIs.
+        All services, tests, and configurations MUST use this method.
+        
+        Standardized path: /auth/callback (not /auth/oauth/callback)
         """
         if self._redirect_uri:
             return self._redirect_uri
@@ -87,8 +89,8 @@ class GoogleOAuthProvider:
         # Get the proper auth service URL from configuration
         base_url = self.auth_env.get_auth_service_url()
         
-        # Construct redirect URI using configured auth service URL
-        self._redirect_uri = f"{base_url}/auth/oauth/callback"
+        # SSOT: Standardized path is /auth/callback
+        self._redirect_uri = f"{base_url}/auth/callback"
             
         return self._redirect_uri
     
@@ -155,7 +157,7 @@ class GoogleOAuthProvider:
             "code": code,
             "client_id": self._client_id,
             "client_secret": self._client_secret,
-            "redirect_uri": self._redirect_uri,
+            "redirect_uri": self.get_redirect_uri(),  # Use method to ensure URI is set
             "grant_type": "authorization_code"
         }
         

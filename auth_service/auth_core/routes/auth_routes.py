@@ -68,6 +68,13 @@ async def auth_config() -> Dict[str, Any]:
         auth_base_url = "http://localhost:8081"
         frontend_base_url = "http://localhost:3000"
     
+    # CRITICAL: Get OAuth redirect URI from SSOT
+    # See: /auth_service/auth_core/oauth/google_oauth.py:78 for implementation
+    # See: /OAUTH_SSOT_COMPLIANCE_ANALYSIS.md for why this is critical
+    from auth_service.auth_core.oauth.google_oauth import GoogleOAuthProvider
+    oauth_provider = GoogleOAuthProvider()
+    oauth_redirect_uri = oauth_provider.get_redirect_uri()
+    
     # Build auth configuration response matching frontend expectations
     config_response = {
         "google_client_id": google_client_id,
@@ -82,7 +89,11 @@ async def auth_config() -> Dict[str, Any]:
             "dev_login": f"{auth_base_url}/auth/dev/login" if is_development else None
         },
         "authorized_javascript_origins": [frontend_base_url],
-        "authorized_redirect_uris": [f"{frontend_base_url}/auth/callback"]
+        # CRITICAL: This is for frontend callback after auth service processes OAuth
+        # The OAuth provider redirects to auth service, then auth redirects to frontend
+        "authorized_redirect_uris": [f"{frontend_base_url}/auth/callback"],
+        # SSOT: The actual OAuth redirect URI used with Google
+        "oauth_redirect_uri": oauth_redirect_uri
     }
     
     # Remove None values from endpoints

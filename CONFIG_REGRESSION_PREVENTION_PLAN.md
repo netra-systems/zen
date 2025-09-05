@@ -38,6 +38,15 @@ class ConfigDependencyMap:
     """Maps configuration dependencies to prevent breaking deletions"""
     
     CRITICAL_DEPENDENCIES = {
+        "SERVICE_SECRET": {
+            "required_by": ["netra_backend", "inter_service_auth", "circuit_breaker"],
+            "shared_across": ["netra_backend", "auth_service"],
+            "fallback_allowed": False,
+            "deletion_impact": "ULTRA_CRITICAL - Complete authentication system failure, circuit breaker permanently open, 100% user lockout",
+            "incident_reference": "2025-09-05 GCP staging complete outage",
+            "validation_required": True,
+            "monitoring_required": True
+        },
         "DATABASE_URL": {
             "required_by": ["session_service", "state_persistence", "auth_service"],
             "fallback_allowed": False,
@@ -127,6 +136,7 @@ class TestConfigurationRegression:
         config = get_unified_config()
         
         # Critical configs that MUST exist
+        assert config.service_secret, "SERVICE_SECRET is missing - CRITICAL: Will cause complete auth failure"
         assert config.database_url, "DATABASE_URL is missing"
         assert config.jwt_secret_key, "JWT_SECRET_KEY is missing"
         assert config.environment in ["development", "testing", "staging", "production"]
@@ -134,6 +144,7 @@ class TestConfigurationRegression:
         # Validate format
         assert config.database_url.startswith(("postgresql://", "sqlite://"))
         assert len(config.jwt_secret_key) >= 32, "JWT key too short"
+        assert len(config.service_secret) >= 16, "SERVICE_SECRET too short - security risk"
     
     def test_backward_compatibility(self):
         """Ensure old config access patterns still work"""

@@ -44,27 +44,63 @@ class AuthEnvironment:
     
     # JWT & Security Configuration
     def get_jwt_secret_key(self) -> str:
-        """Get JWT secret key for token generation/validation."""
+        """Get JWT secret key for token generation/validation.
+        
+        UPDATED: Now supports environment-specific JWT secrets to align with backend service.
+        Fallback chain matches netra_backend/app/core/configuration/unified_secrets.py:94
+        
+        Priority order:
+        1. Environment-specific JWT_SECRET_{ENVIRONMENT} (e.g., JWT_SECRET_STAGING)
+        2. Generic JWT_SECRET_KEY  
+        3. Legacy JWT_SECRET
+        4. Development/test fallbacks
+        
+        This fixes the 401 authentication regression in staging where JWT_SECRET_STAGING
+        was configured but auth service only looked for JWT_SECRET_KEY.
+        """
         env = self.get_environment()
+        
+        # 1. Try environment-specific secret first (matches backend service logic)
+        env_specific_key = f"JWT_SECRET_{env.upper()}"
+        secret = self.env.get(env_specific_key, "")
+        if secret:
+            logger.debug(f"Using environment-specific JWT secret: {env_specific_key}")
+            return secret.strip()
+        
+        # 2. Try generic JWT_SECRET_KEY (original logic)
         secret = self.env.get("JWT_SECRET_KEY", "")
+        if secret:
+            logger.debug("Using generic JWT_SECRET_KEY")
+            return secret.strip()
+            
+        # 3. Try legacy JWT_SECRET
+        secret = self.env.get("JWT_SECRET", "")
+        if secret:
+            logger.warning("Using JWT_SECRET from environment (DEPRECATED - use JWT_SECRET_KEY or environment-specific)")
+            return secret.strip()
         
-        if not secret:
-            if env == "development":
-                # Development: Generate consistent dev secret
-                import hashlib
-                dev_secret = hashlib.sha256("netra_dev_jwt_key".encode()).hexdigest()[:32]
-                self.env.set("JWT_SECRET_KEY", dev_secret, "auth_env_development")
-                return dev_secret
-            elif env == "test":
-                # Test: Generate consistent test secret
-                import hashlib
-                test_secret = hashlib.sha256("netra_test_jwt_key".encode()).hexdigest()[:32]
-                self.env.set("JWT_SECRET_KEY", test_secret, "auth_env_test")
-                return test_secret
-            elif env in ["staging", "production"]:
-                raise ValueError(f"JWT_SECRET_KEY must be explicitly set in {env} environment")
+        # 4. Environment-specific fallbacks
+        if env == "development":
+            # Development: Generate consistent dev secret
+            import hashlib
+            dev_secret = hashlib.sha256("netra_dev_jwt_key".encode()).hexdigest()[:32]
+            self.env.set("JWT_SECRET_KEY", dev_secret, "auth_env_development")
+            logger.debug("Generated development JWT secret")
+            return dev_secret
+        elif env == "test":
+            # Test: Generate consistent test secret
+            import hashlib
+            test_secret = hashlib.sha256("netra_test_jwt_key".encode()).hexdigest()[:32]
+            self.env.set("JWT_SECRET_KEY", test_secret, "auth_env_test")
+            logger.debug("Generated test JWT secret")
+            return test_secret
+        elif env in ["staging", "production"]:
+            # Hard failure for staging/production - no fallbacks
+            expected_vars = [env_specific_key, "JWT_SECRET_KEY", "JWT_SECRET"]
+            raise ValueError(f"JWT secret not configured for {env} environment. Expected one of: {expected_vars}")
         
-        return secret
+        # Fallback for unknown environments
+        raise ValueError(f"JWT secret not configured for {env} environment")
     
     def get_jwt_algorithm(self) -> str:
         """Get JWT algorithm with environment-specific defaults."""
@@ -706,24 +742,36 @@ class AuthEnvironment:
             return f"http://{host}:{port}"
     
     def get_oauth_redirect_uri(self, provider: str = "google") -> str:
-        """Get OAuth redirect URI with environment-specific defaults.
+        """DEPRECATED: DO NOT USE - Violates SSOT principles.
+        
+        **CRITICAL**: This method is deprecated and will be removed.
+        Use GoogleOAuthProvider.get_redirect_uri() instead.
+        
+        This method incorrectly returns frontend URLs which cannot handle OAuth callbacks.
+        See: /OAUTH_SSOT_COMPLIANCE_ANALYSIS.md for details.
+        See: /auth_service/auth_core/oauth/google_oauth.py:78 for SSOT implementation.
         
         Args:
             provider: OAuth provider name (google, github, etc.)
             
         Returns:
             Full OAuth callback URL for the provider
+            
+        Raises:
+            DeprecationWarning: Always - this method should not be used
         """
-        env = self.get_environment()
+        import warnings
+        warnings.warn(
+            "get_oauth_redirect_uri() is deprecated and violates SSOT. "
+            "Use GoogleOAuthProvider.get_redirect_uri() instead.",
+            DeprecationWarning,
+            stacklevel=2
+        )
         
-        # Check for explicit override first
-        uri = self.env.get("OAUTH_REDIRECT_URI")
-        if uri:
-            return uri
-        
-        # Build from frontend URL
-        frontend_url = self.get_frontend_url()
-        return f"{frontend_url}/auth/callback"
+        # TEMPORARY: Return auth service URL to fix immediate issue
+        # This entire method will be removed once all callers are updated
+        auth_url = self.get_auth_service_url()
+        return f"{auth_url}/auth/callback"
     
     # Environment & Deployment
     def get_environment(self) -> str:

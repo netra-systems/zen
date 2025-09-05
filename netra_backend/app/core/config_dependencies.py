@@ -237,6 +237,42 @@ class ConfigDependencyMap:
             "validation": lambda x: x and x.startswith(("http://", "https://"))
         },
         
+        # OAuth Redirect URI Configuration - CRITICAL SSOT
+        # See: /OAUTH_REDIRECT_URI_SSOT_ARCHITECTURE.md for complete documentation
+        "OAUTH_REDIRECT_URI": {
+            "required_by": [],  # DEPRECATED - DO NOT USE
+            "fallback_allowed": False,
+            "impact_level": ConfigImpactLevel.CRITICAL,
+            "deletion_impact": "NONE - This is DEPRECATED and should NOT be used",
+            "alternatives": [],
+            "validation": lambda x: False,  # Always invalid - should not be used
+            # Legacy information
+            "legacy_status": "DEPRECATED",
+            "deprecation_date": "2025-09-05",
+            "removal_version": "2.0.0",
+            "replacement": "GoogleOAuthProvider.get_redirect_uri() method",
+            "migration_guide": "DO NOT SET THIS. Use GoogleOAuthProvider.get_redirect_uri() as SSOT. See /auth_service/auth_core/oauth/google_oauth.py:78",
+            "auto_construct": False,
+            "critical_note": "This caused redirect_uri_mismatch errors. NEVER use environment variables for OAuth redirect URIs."
+        },
+        
+        "OAUTH_CALLBACK_URL": {
+            "required_by": [],  # DEPRECATED - DO NOT USE
+            "fallback_allowed": False,
+            "impact_level": ConfigImpactLevel.CRITICAL,
+            "deletion_impact": "NONE - This is DEPRECATED and should NOT be used",
+            "alternatives": [],
+            "validation": lambda x: False,  # Always invalid - should not be used
+            # Legacy information
+            "legacy_status": "DEPRECATED",
+            "deprecation_date": "2025-09-05",
+            "removal_version": "2.0.0",
+            "replacement": "GoogleOAuthProvider.get_redirect_uri() method",
+            "migration_guide": "DO NOT SET THIS. Use GoogleOAuthProvider.get_redirect_uri() as SSOT. See /auth_service/auth_core/oauth/google_oauth.py:78",
+            "auto_construct": False,
+            "critical_note": "This violates SSOT principles. NEVER use environment variables for OAuth redirect URIs."
+        },
+        
         "GOOGLE_OAUTH_CLIENT_ID": {
             "required_by": [
                 "auth_service.oauth",

@@ -31,6 +31,7 @@ from typing import Dict, Any, List
 from unittest.mock import Mock, AsyncMock, patch
 
 from netra_backend.app.agents.base_agent import BaseAgent
+from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
 from netra_backend.app.agents.triage.unified_triage_agent import UnifiedTriageAgent
 from netra_backend.app.agents.base.interface import ExecutionContext, ExecutionResult
 from netra_backend.app.llm.llm_manager import LLMManager
@@ -612,6 +613,7 @@ class TestCircuitBreakerPerformance:
             
             start_time = time.time()
             # Direct execution without infrastructure
+            # Create ExecutionContext with correct parameters
             result = await agent_without_cb.execute_core_logic(ExecutionContext(
                 request_id=f"no_cb_test_{i}",
                 run_id=f"no_cb_test_{i}",

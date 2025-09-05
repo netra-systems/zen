@@ -2,9 +2,9 @@
   "metadata": {
     "version": "3.0.0",
     "category": "test_literals",
-    "generated_at": "2025-09-05T08:33:41.116866",
-    "root_directory": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1",
-    "total_literals": 13504
+    "generated_at": "2025-09-05T09:42:05.631756",
+    "root_directory": "/Users/anthony/Documents/GitHub/netra-apex",
+    "total_literals": 13488
   },
   "literals": {
     "\u001b[0m": {
@@ -1740,13 +1740,6 @@
         "auth_service/tests/test_refresh_loop_prevention_comprehensive.py:183"
       ]
     },
-    "' should be valid": {
-      "value": "' should be valid",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:155"
-      ]
-    },
     "' spans": {
       "value": "' spans",
       "category": "test_literals",
@@ -3403,6 +3396,7 @@
       "category": "test_literals",
       "locations": [
         "auth_service/tests/test_auth_port_configuration.py:455",
+        "auth_service/tests/unit/test_oauth_redirect_uri_regression.py:94",
         "scripts/test_websocket_cors_comprehensive.py:135"
       ]
     },
@@ -3491,12 +3485,12 @@
         "auth_service/test_auth_direct.py:72",
         "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:203",
         "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:225",
+        "auth_service/tests/test_oauth_redirect_regression.py:187",
         "auth_service/tests/unit/test_auth_environment_urls.py:141",
         "auth_service/tests/unit/test_auth_environment_urls.py:157",
         "auth_service/tests/unit/test_auth_environment_urls.py:172",
         "auth_service/tests/utils/assertion_helpers.py:166",
-        "auth_service/tests/utils/assertion_helpers.py:186",
-        "auth_service/tests/utils/assertion_helpers.py:202"
+        "auth_service/tests/utils/assertion_helpers.py:186"
       ]
     },
     ", interrupting gracefully...": {
@@ -3547,6 +3541,13 @@
       "category": "test_literals",
       "locations": [
         "scripts/auto_fix_test_violations.py:822"
+      ]
+    },
+    ", token=": {
+      "value": ", token=",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_oauth_redirect_regression.py:134"
       ]
     },
     ", type:": {
@@ -7380,10 +7381,10 @@
         "auth_service/tests/test_critical_bugs_real.py:289",
         "auth_service/tests/test_critical_bugs_simple.py:141",
         "auth_service/tests/test_environment_loading.py:370",
+        "auth_service/tests/test_oauth_redirect_regression.py:192",
         "auth_service/tests/test_oauth_state_validation.py:312",
         "auth_service/tests/test_redis_staging_connectivity_fixes.py:335",
-        "auth_service/tests/test_refresh_endpoint_integration.py:173",
-        "auth_service/tests/test_refresh_loop_prevention_comprehensive.py:285"
+        "auth_service/tests/test_refresh_endpoint_integration.py:173"
       ]
     },
     "-vv": {
@@ -7650,9 +7651,9 @@
       "value": "../MainChat",
       "category": "test_literals",
       "locations": [
+        "frontend/components/chat/__tests__/NewChatTransitions.test.tsx:7",
         "frontend/components/chat/__tests__/first-interaction-hide.test.tsx:3",
-        "frontend/components/chat/__tests__/main-chat-first-interaction.integration.test.tsx:4",
-        "frontend/components/chat/__tests__/NewChatTransitions.test.tsx:7"
+        "frontend/components/chat/__tests__/main-chat-first-interaction.integration.test.tsx:4"
       ]
     },
     "../MessageInput": {
@@ -8662,6 +8663,7 @@
         "auth_service/tests/test_auth_comprehensive.py:231",
         "auth_service/tests/test_auth_comprehensive.py:245",
         "auth_service/tests/test_auth_comprehensive.py:249",
+        "auth_service/tests/test_oauth_redirect_regression.py:146",
         "auth_service/tests/unit/test_auth_config_comprehensive.py:158",
         "auth_service/tests/unit/test_auth_endpoint_routing_regression_prevention.py:166",
         "auth_service/tests/unit/test_auth_environment_urls.py:289",
@@ -8873,7 +8875,9 @@
       "value": "/auth/oauth/callback",
       "category": "test_literals",
       "locations": [
-        "auth_service/tests/unit/test_auth_endpoint_routing_regression_prevention.py:167"
+        "auth_service/tests/test_oauth_redirect_regression.py:150",
+        "auth_service/tests/unit/test_auth_endpoint_routing_regression_prevention.py:167",
+        "auth_service/tests/unit/test_oauth_redirect_uri_regression.py:87"
       ]
     },
     "/auth/oauth/google/callback": {
@@ -9302,6 +9306,7 @@
       "value": "/oauth/callback",
       "category": "test_literals",
       "locations": [
+        "auth_service/tests/test_oauth_redirect_regression.py:152",
         "auth_service/tests/unit/test_auth_config_comprehensive.py:158"
       ]
     },
@@ -10258,6 +10263,8 @@
       "value": "12345",
       "category": "test_literals",
       "locations": [
+        "auth_service/tests/test_oauth_redirect_regression.py:62",
+        "auth_service/tests/test_oauth_redirect_regression.py:120",
         "auth_service/tests/test_oauth_state_validation.py:135"
       ]
     },
@@ -10312,9 +10319,9 @@
         "auth_service/tests/unit/test_database_repository_comprehensive.py:434",
         "auth_service/tests/unit/test_database_repository_comprehensive.py:439",
         "auth_service/tests/unit/test_docker_hostname_resolution.py:73",
+        "auth_service/tests/unit/test_oauth_redirect_uri_regression.py:61",
         "scripts/setup_test_environment.py:69",
-        "scripts/test_backend_port_binding.py:33",
-        "scripts/test_cors.py:313"
+        "scripts/test_backend_port_binding.py:33"
       ]
     },
     "127.0.0.1:3000": {
@@ -11109,17 +11116,6 @@
       "locations": [
         "scripts/test_seed_data.py:250",
         "scripts/test_seed_data.py:255"
-      ]
-    },
-    "24h": {
-      "value": "24h",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:71",
-        "scripts/test_data_validator_backup.py:83",
-        "scripts/test_data_validator_backup.py:106",
-        "scripts/test_data_validator_backup.py:135",
-        "scripts/test_data_validator_backup.py:151"
       ]
     },
     "25": {
@@ -12891,6 +12887,7 @@
       "value": ": expected",
       "category": "test_literals",
       "locations": [
+        "auth_service/tests/test_oauth_redirect_regression.py:187",
         "auth_service/tests/utils/assertion_helpers.py:186",
         "auth_service/tests/utils/assertion_helpers.py:202"
       ]
@@ -13838,11 +13835,11 @@
       "value": "@/hooks/useWebSocket",
       "category": "test_literals",
       "locations": [
+        "frontend/components/chat/__tests__/NewChatTransitions.test.tsx:9",
+        "frontend/components/chat/__tests__/NewChatTransitions.test.tsx:16",
         "frontend/components/chat/__tests__/first-interaction-hide.test.tsx:14",
         "frontend/components/chat/__tests__/main-chat-first-interaction.integration.test.tsx:10",
-        "frontend/components/chat/__tests__/main-chat-first-interaction.integration.test.tsx:35",
-        "frontend/components/chat/__tests__/NewChatTransitions.test.tsx:9",
-        "frontend/components/chat/__tests__/NewChatTransitions.test.tsx:16"
+        "frontend/components/chat/__tests__/main-chat-first-interaction.integration.test.tsx:35"
       ]
     },
     "@/lib/thread-operation-manager": {
@@ -13885,12 +13882,12 @@
       "value": "@/store/unified-chat",
       "category": "test_literals",
       "locations": [
+        "frontend/components/chat/__tests__/NewChatTransitions.test.tsx:8",
+        "frontend/components/chat/__tests__/NewChatTransitions.test.tsx:15",
         "frontend/components/chat/__tests__/first-interaction-hide.test.tsx:6",
         "frontend/components/chat/__tests__/first-interaction-hide.test.tsx:11",
         "frontend/components/chat/__tests__/main-chat-first-interaction.integration.test.tsx:7",
-        "frontend/components/chat/__tests__/main-chat-first-interaction.integration.test.tsx:32",
-        "frontend/components/chat/__tests__/NewChatTransitions.test.tsx:8",
-        "frontend/components/chat/__tests__/NewChatTransitions.test.tsx:15"
+        "frontend/components/chat/__tests__/main-chat-first-interaction.integration.test.tsx:32"
       ]
     },
     "@127.0.0.1:": {
@@ -14201,17 +14198,17 @@
       "value": "@testing-library/react",
       "category": "test_literals",
       "locations": [
+        "frontend/components/chat/__tests__/NewChatTransitions.test.tsx:4",
         "frontend/components/chat/__tests__/first-interaction-hide.test.tsx:2",
-        "frontend/components/chat/__tests__/main-chat-first-interaction.integration.test.tsx:2",
-        "frontend/components/chat/__tests__/NewChatTransitions.test.tsx:4"
+        "frontend/components/chat/__tests__/main-chat-first-interaction.integration.test.tsx:2"
       ]
     },
     "@testing-library/user-event": {
       "value": "@testing-library/user-event",
       "category": "test_literals",
       "locations": [
-        "frontend/components/chat/__tests__/main-chat-first-interaction.integration.test.tsx:3",
-        "frontend/components/chat/__tests__/NewChatTransitions.test.tsx:5"
+        "frontend/components/chat/__tests__/NewChatTransitions.test.tsx:5",
+        "frontend/components/chat/__tests__/main-chat-first-interaction.integration.test.tsx:3"
       ]
     },
     "@unit": {
@@ -15658,18 +15655,6 @@
         "scripts/test_failure_analyzer.py:50"
       ]
     },
-    "Analysis completed": {
-      "value": "Analysis completed",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:344",
-        "scripts/test_data_validator_backup.py:357",
-        "scripts/test_data_validator_backup.py:370",
-        "scripts/test_data_validator_backup.py:383",
-        "scripts/test_data_validator_backup.py:396",
-        "scripts/test_data_validator_backup.py:413"
-      ]
-    },
     "Analysis completed successfully": {
       "value": "Analysis completed successfully",
       "category": "test_literals",
@@ -15689,27 +15674,6 @@
       "category": "test_literals",
       "locations": [
         "scripts/compliance/test_refactor_helper.py:705"
-      ]
-    },
-    "Analysis should produce at least one finding": {
-      "value": "Analysis should produce at least one finding",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:378"
-      ]
-    },
-    "Analysis type '": {
-      "value": "Analysis type '",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:155"
-      ]
-    },
-    "Analysis type is required": {
-      "value": "Analysis type is required",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:89"
       ]
     },
     "Analytics Data Consistency": {
@@ -17166,6 +17130,20 @@
         "auth_service/tests/integration/test_auth_endpoint_regression_prevention_integration.py:74"
       ]
     },
+    "Authorization URL must include proper redirect URI:": {
+      "value": "Authorization URL must include proper redirect URI:",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/unit/test_oauth_redirect_uri_regression.py:175"
+      ]
+    },
+    "Authorization URL must not include Cloud Run app URL": {
+      "value": "Authorization URL must not include Cloud Run app URL",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/unit/test_oauth_redirect_uri_regression.py:179"
+      ]
+    },
     "Authorization URL should be valid Google OAuth URL": {
       "value": "Authorization URL should be valid Google OAuth URL",
       "category": "test_literals",
@@ -17389,13 +17367,6 @@
       "category": "test_literals",
       "locations": [
         "scripts/test_intensive_serialization.py:203"
-      ]
-    },
-    "Average latency increased by 15%": {
-      "value": "Average latency increased by 15%",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:321"
       ]
     },
     "Average per object:": {
@@ -20403,13 +20374,6 @@
         "scripts/comprehensive_test_fixer.py:2"
       ]
     },
-    "Comprehensive Unit Tests for DataValidator\n\nTests all data validation operations including request validation,\nraw data quality checks, analysis result validation, and quality scoring.\n\nBusiness Value Justification (BVJ):\n- Segment: Platform/Internal  \n- Business Goal: Data quality assurance and reliable analytics\n- Value Impact: Prevents incorrect insights that could impact revenue\n- Strategic Impact: Critical for data integrity and trustworthy analysis": {
-      "value": "Comprehensive Unit Tests for DataValidator\n\nTests all data validation operations including request validation,\nraw data quality checks, analysis result validation, and quality scoring.\n\nBusiness Value Justification (BVJ):\n- Segment: Platform/Internal  \n- Business Goal: Data quality assurance and reliable analytics\n- Value Impact: Prevents incorrect insights that could impact revenue\n- Strategic Impact: Critical for data integrity and trustworthy analysis",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:1"
-      ]
-    },
     "Comprehensive WebSocket CORS Test Script\n\nThis script tests WebSocket connectivity in various scenarios to ensure CORS is properly configured\nfor Docker development environment. It tests connections with different origins and validates\nthat the development OAUTH SIMULATION works properly.\n\nBusiness Value Justification (BVJ):\n- Segment: Platform/Internal\n- Business Goal: Ensure WebSocket reliability in development\n- Value Impact: Prevents connection issues that block development\n- Strategic Impact: Foundation for real-time features": {
       "value": "Comprehensive WebSocket CORS Test Script\n\nThis script tests WebSocket connectivity in various scenarios to ensure CORS is properly configured\nfor Docker development environment. It tests connections with different origins and validates\nthat the development OAUTH SIMULATION works properly.\n\nBusiness Value Justification (BVJ):\n- Segment: Platform/Internal\n- Business Goal: Ensure WebSocket reliability in development\n- Value Impact: Prevents connection issues that block development\n- Strategic Impact: Foundation for real-time features",
       "category": "test_literals",
@@ -21130,13 +21094,6 @@
         "scripts/test_cors.py:352"
       ]
     },
-    "Consider optimizing slow queries": {
-      "value": "Consider optimizing slow queries",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:325"
-      ]
-    },
     "Consistently Failing Tests:": {
       "value": "Consistently Failing Tests:",
       "category": "test_literals",
@@ -21313,13 +21270,6 @@
       "category": "test_literals",
       "locations": [
         "scripts/test_triage_flow.py:31"
-      ]
-    },
-    "Cost optimization opportunities identified": {
-      "value": "Cost optimization opportunities identified",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:322"
       ]
     },
     "Cost savings of $1,200/month achieved.": {
@@ -23149,11 +23099,25 @@
         "scripts/test_ansi_logging.py:91"
       ]
     },
+    "Development must not use production domains": {
+      "value": "Development must not use production domains",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/unit/test_oauth_redirect_uri_regression.py:66"
+      ]
+    },
     "Development password in staging (should fail)": {
       "value": "Development password in staging (should fail)",
       "category": "test_literals",
       "locations": [
         "scripts/test_database_url_builder_comprehensive.py:222"
+      ]
+    },
+    "Development redirect URI must use localhost, got:": {
+      "value": "Development redirect URI must use localhost, got:",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/unit/test_oauth_redirect_uri_regression.py:62"
       ]
     },
     "Development server failed to start": {
@@ -24676,8 +24640,8 @@
       "category": "test_literals",
       "locations": [
         "scripts/manage_test_services.py:105",
-        "scripts/test_backend_auth_config.py:33",
         "scripts/test_backend_ORIGINAL.py:372",
+        "scripts/test_backend_auth_config.py:33",
         "scripts/test_cors.py:459",
         "scripts/test_database_url_builder_comprehensive.py:272",
         "scripts/test_staging_auth.py:170",
@@ -24715,20 +24679,6 @@
         "scripts/add_pytest_markers.py:154",
         "scripts/apply_fast_test_decorators.py:178",
         "scripts/frontend_iterative_test_runner.py:527"
-      ]
-    },
-    "Error 1": {
-      "value": "Error 1",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:452"
-      ]
-    },
-    "Error 2": {
-      "value": "Error 2",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:452"
       ]
     },
     "Error Details:": {
@@ -27820,13 +27770,6 @@
         "scripts/test_execution_tracker.py:777"
       ]
     },
-    "Findings must be a list": {
-      "value": "Findings must be a list",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:365"
-      ]
-    },
     "First Interaction Hide Feature": {
       "value": "First Interaction Hide Feature",
       "category": "test_literals",
@@ -30541,13 +30484,6 @@
         "scripts/test_staging_auth_flow.py:181"
       ]
     },
-    "Implement caching for frequent requests": {
-      "value": "Implement caching for frequent requests",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:326"
-      ]
-    },
     "Implement memory monitoring and alerting": {
       "value": "Implement memory monitoring and alerting",
       "category": "test_literals",
@@ -30966,13 +30902,6 @@
         "scripts/test_adaptive_workflow_direct.py:174"
       ]
     },
-    "Insufficient timestamps": {
-      "value": "Insufficient timestamps",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:584"
-      ]
-    },
     "Integration Tests": {
       "value": "Integration Tests",
       "category": "test_literals",
@@ -31133,13 +31062,6 @@
         "auth_service/tests/utils/assertion_helpers.py:31"
       ]
     },
-    "Invalid analysis type": {
-      "value": "Invalid analysis type",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:112"
-      ]
-    },
     "Invalid auth provider:": {
       "value": "Invalid auth provider:",
       "category": "test_literals",
@@ -31202,13 +31124,6 @@
         "scripts/test_websocket_dev_mode.py:132"
       ]
     },
-    "Invalid latency_ms value": {
-      "value": "Invalid latency_ms value",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:286"
-      ]
-    },
     "Invalid login returned": {
       "value": "Invalid login returned",
       "category": "test_literals",
@@ -31221,13 +31136,6 @@
       "category": "test_literals",
       "locations": [
         "scripts/test_cors.py:243"
-      ]
-    },
-    "Invalid metrics: ['invalid_metric']": {
-      "value": "Invalid metrics: ['invalid_metric']",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:142"
       ]
     },
     "Invalid permission format:": {
@@ -32545,13 +32453,6 @@
         "scripts/test_failure_scanner.py:47"
       ]
     },
-    "Low data point count": {
-      "value": "Low data point count",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:218"
-      ]
-    },
     "M": {
       "value": "M",
       "category": "test_literals",
@@ -33559,20 +33460,6 @@
       "locations": [
         "auth_service/tests/utils/assertion_helpers.py:95",
         "auth_service/tests/utils/assertion_helpers.py:114"
-      ]
-    },
-    "Missing required field: findings": {
-      "value": "Missing required field: findings",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:351"
-      ]
-    },
-    "Missing required field: recommendations": {
-      "value": "Missing required field: recommendations",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:352"
       ]
     },
     "Missing required permission:": {
@@ -34720,13 +34607,6 @@
         "scripts/analyze_test_overlap.py:542"
       ]
     },
-    "No data provided for validation": {
-      "value": "No data provided for validation",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:200"
-      ]
-    },
     "No deprecation warnings detected": {
       "value": "No deprecation warnings detected",
       "category": "test_literals",
@@ -35230,14 +35110,6 @@
         "scripts/test_oauth_local.py:84"
       ]
     },
-    "Not a list": {
-      "value": "Not a list",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:358",
-        "scripts/test_data_validator_backup.py:385"
-      ]
-    },
     "Not found:": {
       "value": "Not found:",
       "category": "test_literals",
@@ -35461,6 +35333,13 @@
       "category": "test_literals",
       "locations": [
         "scripts/test_staging_deployment.py:127"
+      ]
+    },
+    "OAuth Redirect URI Configuration Regression Tests\n\nCRITICAL: These tests prevent OAuth redirect URI misconfiguration\nthat caused staging deployment failures.\n\nBusiness Impact: Prevents authentication failures affecting $75K+ MRR\nReference: OAuth Regression Analysis 20250905": {
+      "value": "OAuth Redirect URI Configuration Regression Tests\n\nCRITICAL: These tests prevent OAuth redirect URI misconfiguration\nthat caused staging deployment failures.\n\nBusiness Impact: Prevents authentication failures affecting $75K+ MRR\nReference: OAuth Regression Analysis 20250905",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/unit/test_oauth_redirect_uri_regression.py:1"
       ]
     },
     "OAuth callback should return user info": {
@@ -36989,13 +36868,6 @@
         "netra_backend/app/services/realistic_test_data/performance_simulator.py:1"
       ]
     },
-    "Performance analysis completed": {
-      "value": "Performance analysis completed",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:319"
-      ]
-    },
     "Performance and SLA validation tests": {
       "value": "Performance and SLA validation tests",
       "category": "test_literals",
@@ -37810,6 +37682,13 @@
       "category": "test_literals",
       "locations": [
         "scripts/test_ansi_logging.py:90"
+      ]
+    },
+    "Production redirect URI must use auth.netrasystems.ai, got:": {
+      "value": "Production redirect URI must use auth.netrasystems.ai, got:",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/unit/test_oauth_redirect_uri_regression.py:48"
       ]
     },
     "Progress file path (default: frontend_test_progress.json)": {
@@ -38768,13 +38647,6 @@
         "scripts/optimize_test_performance.py:406"
       ]
     },
-    "Recommendations must be a list": {
-      "value": "Recommendations must be a list",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:391"
-      ]
-    },
     "Recommendations:": {
       "value": "Recommendations:",
       "category": "test_literals",
@@ -38824,6 +38696,63 @@
       "category": "test_literals",
       "locations": [
         "scripts/websocket_performance_standalone_test.py:157"
+      ]
+    },
+    "Redirect URI configuration should be checked": {
+      "value": "Redirect URI configuration should be checked",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/unit/test_oauth_redirect_uri_regression.py:157"
+      ]
+    },
+    "Redirect URI mismatch: auth=": {
+      "value": "Redirect URI mismatch: auth=",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_oauth_redirect_regression.py:134"
+      ]
+    },
+    "Redirect URI must NOT use Cloud Run app URL": {
+      "value": "Redirect URI must NOT use Cloud Run app URL",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/unit/test_oauth_redirect_uri_regression.py:38",
+        "auth_service/tests/unit/test_oauth_redirect_uri_regression.py:52"
+      ]
+    },
+    "Redirect URI must be configured": {
+      "value": "Redirect URI must be configured",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/unit/test_oauth_redirect_uri_regression.py:122"
+      ]
+    },
+    "Redirect URI must use AuthEnvironment SSOT. Expected:": {
+      "value": "Redirect URI must use AuthEnvironment SSOT. Expected:",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/unit/test_oauth_redirect_uri_regression.py:94"
+      ]
+    },
+    "Redirect URI not using SSOT path:": {
+      "value": "Redirect URI not using SSOT path:",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_oauth_redirect_regression.py:147"
+      ]
+    },
+    "Redirect URI should be cached": {
+      "value": "Redirect URI should be cached",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/unit/test_oauth_redirect_uri_regression.py:77"
+      ]
+    },
+    "Redirect URI should be configured": {
+      "value": "Redirect URI should be configured",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/unit/test_oauth_redirect_uri_regression.py:152"
       ]
     },
     "Redirect to: [cyan]": {
@@ -39198,6 +39127,13 @@
       "category": "test_literals",
       "locations": [
         "scripts/test_supervisor_websocket_integration.py:129"
+      ]
+    },
+    "Regression test for OAuth redirect URI bug.\n\nThis test ensures that the redirect_uri is always properly set when exchanging\nauthorization codes with Google OAuth. This prevents the 400 Bad Request error\nthat was occurring in production.\n\nBug: self._redirect_uri was being used directly instead of calling get_redirect_uri(),\nwhich could result in sending None to Google's token endpoint.\n\nFix: Always use self.get_redirect_uri() to ensure the redirect URI is properly set.": {
+      "value": "Regression test for OAuth redirect URI bug.\n\nThis test ensures that the redirect_uri is always properly set when exchanging\nauthorization codes with Google OAuth. This prevents the 400 Bad Request error\nthat was occurring in production.\n\nBug: self._redirect_uri was being used directly instead of calling get_redirect_uri(),\nwhich could result in sending None to Google's token endpoint.\n\nFix: Always use self.get_redirect_uri() to ensure the redirect URI is properly set.",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_oauth_redirect_regression.py:1"
       ]
     },
     "Regular User": {
@@ -41777,13 +41713,6 @@
         "scripts/load_test_isolation.py:520"
       ]
     },
-    "Savings percentage must be between 0-50%": {
-      "value": "Savings percentage must be between 0-50%",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:408"
-      ]
-    },
     "Scale horizontally to reduce CPU load": {
       "value": "Scale horizontally to reduce CPU load",
       "category": "test_literals",
@@ -42212,6 +42141,13 @@
       "category": "test_literals",
       "locations": [
         "netra_backend/app/services/test_environment.py:46"
+      ]
+    },
+    "Self-check must include redirect_uri": {
+      "value": "Self-check must include redirect_uri",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/unit/test_oauth_redirect_uri_regression.py:151"
       ]
     },
     "Sending 5 critical WebSocket events...": {
@@ -42892,14 +42828,6 @@
         "scripts/load_test_isolation.py:388"
       ]
     },
-    "Short time span": {
-      "value": "Short time span",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:304",
-        "scripts/test_data_validator_backup.py:574"
-      ]
-    },
     "Should accept JSON output format": {
       "value": "Should accept JSON output format",
       "category": "test_literals",
@@ -43079,11 +43007,25 @@
         "auth_service/tests/test_refresh_token_fix.py:169"
       ]
     },
+    "Should respect AUTH_SERVICE_URL override, got:": {
+      "value": "Should respect AUTH_SERVICE_URL override, got:",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/unit/test_oauth_redirect_uri_regression.py:104"
+      ]
+    },
     "Should return 503 for SSL certificate issues, got": {
       "value": "Should return 503 for SSL certificate issues, got",
       "category": "test_literals",
       "locations": [
         "auth_service/tests/auth-service-down-critical-scenarios.py:381"
+      ]
+    },
+    "Should return same cached object": {
+      "value": "Should return same cached object",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/unit/test_oauth_redirect_uri_regression.py:78"
       ]
     },
     "Should use ASGI3 interface": {
@@ -43487,24 +43429,6 @@
         "scripts/test_adaptive_workflow.py:284"
       ]
     },
-    "Some finding": {
-      "value": "Some finding",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:384",
-        "scripts/test_data_validator_backup.py:397",
-        "scripts/test_data_validator_backup.py:414"
-      ]
-    },
-    "Some recommendation": {
-      "value": "Some recommendation",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:372",
-        "scripts/test_data_validator_backup.py:398",
-        "scripts/test_data_validator_backup.py:415"
-      ]
-    },
     "Some requests should succeed": {
       "value": "Some requests should succeed",
       "category": "test_literals",
@@ -43831,6 +43755,13 @@
         "auth_service/tests/unit/test_auth_environment_urls.py:255"
       ]
     },
+    "Staging redirect URI must use auth.staging.netrasystems.ai, got:": {
+      "value": "Staging redirect URI must use auth.staging.netrasystems.ai, got:",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/unit/test_oauth_redirect_uri_regression.py:34"
+      ]
+    },
     "Staging should not allow dev login": {
       "value": "Staging should not allow dev login",
       "category": "test_literals",
@@ -43843,6 +43774,13 @@
       "category": "test_literals",
       "locations": [
         "scripts/test_environment_detection.py:150"
+      ]
+    },
+    "Staging validation should not fail on redirect URI:": {
+      "value": "Staging validation should not fail on redirect URI:",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/unit/test_oauth_redirect_uri_regression.py:138"
       ]
     },
     "Staging:": {
@@ -52010,13 +51948,6 @@
         "scripts/test_ga4_connection.py:60"
       ]
     },
-    "Timeframe is required": {
-      "value": "Timeframe is required",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:100"
-      ]
-    },
     "Timeout": {
       "value": "Timeout",
       "category": "test_literals",
@@ -52929,13 +52860,6 @@
         "scripts/test_parallel_docker_manager.py:150"
       ]
     },
-    "Total savings must be non-negative": {
-      "value": "Total savings must be non-negative",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:425"
-      ]
-    },
     "Total send time:": {
       "value": "Total send time:",
       "category": "test_literals",
@@ -53348,6 +53272,13 @@
       "category": "test_literals",
       "locations": [
         "auth_service/tests/test_token_validation_security_cycles_31_35.py:274"
+      ]
+    },
+    "Unexpected redirect_uri:": {
+      "value": "Unexpected redirect_uri:",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_oauth_redirect_regression.py:84"
       ]
     },
     "Unexpected result": {
@@ -54013,7 +53944,8 @@
       "category": "test_literals",
       "locations": [
         "auth_service/tests/test_signup_flow_comprehensive.py:134",
-        "auth_service/tests/test_signup_flow_comprehensive.py:224"
+        "auth_service/tests/test_signup_flow_comprehensive.py:224",
+        "auth_service/tests/unit/test_auth_service_comprehensive.py:36"
       ]
     },
     "User registration failed:": {
@@ -54211,11 +54143,25 @@
         "auth_service/test_staging_db_connection.py:197"
       ]
     },
+    "Using deprecated path /auth/oauth/callback:": {
+      "value": "Using deprecated path /auth/oauth/callback:",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_oauth_redirect_regression.py:151"
+      ]
+    },
     "Using fallback optimization for test_run_id": {
       "value": "Using fallback optimization for test_run_id",
       "category": "test_literals",
       "locations": [
         "scripts/test_logging_fix.py:27"
+      ]
+    },
+    "Using incorrect path /oauth/callback:": {
+      "value": "Using incorrect path /oauth/callback:",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_oauth_redirect_regression.py:153"
       ]
     },
     "Using wildcard (*) origin - consider specific origins for security": {
@@ -55046,27 +54992,6 @@
         "scripts/test_seed_data.py:59"
       ]
     },
-    "Warning 1": {
-      "value": "Warning 1",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:466"
-      ]
-    },
-    "Warning 2": {
-      "value": "Warning 2",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:466"
-      ]
-    },
-    "Warning 3": {
-      "value": "Warning 3",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:466"
-      ]
-    },
     "Warning:": {
       "value": "Warning:",
       "category": "test_literals",
@@ -55559,6 +55484,13 @@
       "category": "test_literals",
       "locations": [
         "scripts/batch_test_generator.py:530"
+      ]
+    },
+    "Wrong redirect URI for": {
+      "value": "Wrong redirect URI for",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_oauth_redirect_regression.py:187"
       ]
     },
     "WrongOldPassword!": {
@@ -62173,13 +62105,6 @@
         "auth_service/tests/unit/test_refresh_endpoint.py:310"
       ]
     },
-    "also_not_a_number": {
-      "value": "also_not_a_number",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:276"
-      ]
-    },
     "alternation_score": {
       "value": "alternation_score",
       "category": "test_literals",
@@ -63465,7 +63390,8 @@
       "value": "auth.staging.netrasystems.ai",
       "category": "test_literals",
       "locations": [
-        "auth_service/tests/unit/test_auth_environment_urls.py:132"
+        "auth_service/tests/unit/test_auth_environment_urls.py:132",
+        "auth_service/tests/unit/test_oauth_redirect_uri_regression.py:174"
       ]
     },
     "auth@example.com": {
@@ -63658,6 +63584,14 @@
         "auth_service/tests/test_oauth_state_validation.py:162",
         "auth_service/tests/test_oauth_state_validation.py:181",
         "auth_service/tests/test_oauth_state_validation.py:243"
+      ]
+    },
+    "auth_service.auth_core.oauth.google_oauth.get_auth_env": {
+      "value": "auth_service.auth_core.oauth.google_oauth.get_auth_env",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_oauth_redirect_regression.py:35",
+        "auth_service/tests/test_oauth_redirect_regression.py:182"
       ]
     },
     "auth_service.auth_core.routes.auth_routes.AuthUserRepository": {
@@ -63967,6 +63901,13 @@
       "category": "test_literals",
       "locations": [
         "scripts/test_cors_issue.py:61"
+      ]
+    },
+    "authorization_code": {
+      "value": "authorization_code",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_oauth_redirect_regression.py:90"
       ]
     },
     "authorized_javascript_origins": {
@@ -65424,6 +65365,20 @@
         "scripts/test_real_jwt_e2e.py:192"
       ]
     },
+    "checks_failed": {
+      "value": "checks_failed",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/unit/test_oauth_redirect_uri_regression.py:156"
+      ]
+    },
+    "checks_passed": {
+      "value": "checks_passed",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/unit/test_oauth_redirect_uri_regression.py:155"
+      ]
+    },
     "children": {
       "value": "children",
       "category": "test_literals",
@@ -65873,6 +65828,7 @@
       "category": "test_literals",
       "locations": [
         "auth_service/tests/conftest.py:309",
+        "auth_service/tests/test_oauth_redirect_regression.py:88",
         "scripts/test_config_loading.py:104"
       ]
     },
@@ -65890,6 +65846,7 @@
       "category": "test_literals",
       "locations": [
         "auth_service/tests/conftest.py:310",
+        "auth_service/tests/test_oauth_redirect_regression.py:89",
         "scripts/test_config_loading.py:105"
       ]
     },
@@ -65964,13 +65921,13 @@
         "netra_backend/app/services/realistic_test_data/llm_response_generator.py:70",
         "auth_service/tests/integration/test_auth_api_integration.py:422",
         "auth_service/tests/test_auth_comprehensive.py:233",
+        "auth_service/tests/test_oauth_redirect_regression.py:87",
         "scripts/test_staging_login_automated.py:100",
         "scripts/test_staging_login_automated.py:103",
         "scripts/test_staging_login_automated.py:106",
         "scripts/test_staging_login_automated.py:164",
         "scripts/test_staging_login_automated.py:209",
-        "scripts/test_staging_login_automated.py:216",
-        "scripts/test_staging_login_automated.py:288"
+        "scripts/test_staging_login_automated.py:216"
       ]
     },
     "code_execution": {
@@ -66685,8 +66642,8 @@
       "locations": [
         "auth_service/tests/test_redis_staging_connectivity_fixes.py:193",
         "auth_service/tests/test_redis_staging_connectivity_fixes.py:205",
-        "frontend/components/chat/__tests__/main-chat-first-interaction.integration.test.tsx:81",
         "frontend/components/chat/__tests__/NewChatTransitions.test.tsx:49",
+        "frontend/components/chat/__tests__/main-chat-first-interaction.integration.test.tsx:81",
         "scripts/test_clickhouse_startup_fix.py:242",
         "scripts/test_websocket_cors_comprehensive.py:65",
         "scripts/test_websocket_cors_comprehensive.py:92"
@@ -67259,22 +67216,6 @@
         "scripts/test_triage_flow.py:62"
       ]
     },
-    "cost_cents": {
-      "value": "cost_cents",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:46",
-        "scripts/test_data_validator_backup.py:72",
-        "scripts/test_data_validator_backup.py:136",
-        "scripts/test_data_validator_backup.py:176",
-        "scripts/test_data_validator_backup.py:184",
-        "scripts/test_data_validator_backup.py:257",
-        "scripts/test_data_validator_backup.py:262",
-        "scripts/test_data_validator_backup.py:267",
-        "scripts/test_data_validator_backup.py:621",
-        "scripts/test_data_validator_backup.py:625"
-      ]
-    },
     "cost_data": {
       "value": "cost_data",
       "category": "test_literals",
@@ -67290,8 +67231,7 @@
         "scripts/business_value_test_index.py:99",
         "scripts/business_value_test_index.py:422",
         "scripts/business_value_test_index.py:471",
-        "scripts/business_value_test_index.py:493",
-        "scripts/test_data_validator_backup.py:146"
+        "scripts/business_value_test_index.py:493"
       ]
     },
     "cost_per_1k_input": {
@@ -67341,15 +67281,6 @@
       "category": "test_literals",
       "locations": [
         "scripts/test_triage_flow.py:48"
-      ]
-    },
-    "cost_savings": {
-      "value": "cost_savings",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:328",
-        "scripts/test_data_validator_backup.py:399",
-        "scripts/test_data_validator_backup.py:416"
       ]
     },
     "cost_usd": {
@@ -67985,14 +67916,14 @@
       "locations": [
         "auth_service/tests/integration/test_auth_e2e_flows.py:361",
         "auth_service/tests/integration/test_backend_auth_service_communication.py:443",
+        "auth_service/tests/test_oauth_redirect_regression.py:76",
+        "auth_service/tests/test_oauth_redirect_regression.py:129",
         "auth_service/tests/unit/test_oauth_comprehensive.py:294",
         "scripts/simple_serialization_test.py:13",
         "scripts/simple_serialization_test.py:16",
         "scripts/test_adaptive_workflow_direct.py:128",
         "scripts/test_adaptive_workflow_direct.py:136",
-        "scripts/test_agent_pipeline_simple.py:147",
-        "scripts/test_agent_pipeline_simple.py:248",
-        "scripts/test_agent_pipeline_simple.py:250"
+        "scripts/test_agent_pipeline_simple.py:147"
       ]
     },
     "data:text/html,<script>alert('xss')</script>": {
@@ -68056,18 +67987,6 @@
         "scripts/test_gtm_loading.py:20",
         "scripts/test_gtm_loading.py:51",
         "scripts/test_gtm_loading.py:123"
-      ]
-    },
-    "data_points": {
-      "value": "data_points",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:190",
-        "scripts/test_data_validator_backup.py:201",
-        "scripts/test_data_validator_backup.py:441",
-        "scripts/test_data_validator_backup.py:454",
-        "scripts/test_data_validator_backup.py:467",
-        "scripts/test_data_validator_backup.py:480"
       ]
     },
     "data_quality": {
@@ -72114,18 +72033,6 @@
         "netra_backend/app/services/factory_status/test_coverage_calculator.py:71"
       ]
     },
-    "findings": {
-      "value": "findings",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:320",
-        "scripts/test_data_validator_backup.py:358",
-        "scripts/test_data_validator_backup.py:371",
-        "scripts/test_data_validator_backup.py:384",
-        "scripts/test_data_validator_backup.py:397",
-        "scripts/test_data_validator_backup.py:414"
-      ]
-    },
     "fingerprint_mismatch": {
       "value": "fingerprint_mismatch",
       "category": "test_literals",
@@ -72386,14 +72293,6 @@
         "scripts/team_updates_test_analyzer.py:147",
         "scripts/team_updates_test_analyzer.py:157",
         "scripts/test_execution_tracker.py:699"
-      ]
-    },
-    "float": {
-      "value": "float",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:53",
-        "scripts/test_data_validator_backup.py:503"
       ]
     },
     "flow_duration": {
@@ -74204,6 +74103,13 @@
         "auth_service/tests/factories/audit_factory.py:214"
       ]
     },
+    "grant_type": {
+      "value": "grant_type",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_oauth_redirect_regression.py:90"
+      ]
+    },
     "granted_at": {
       "value": "granted_at",
       "category": "test_literals",
@@ -74773,14 +74679,6 @@
         "netra_backend/app/services/realistic_test_data/performance_simulator.py:163"
       ]
     },
-    "high_null_fields": {
-      "value": "high_null_fields",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:247",
-        "scripts/test_data_validator_backup.py:248"
-      ]
-    },
     "high_risk": {
       "value": "high_risk",
       "category": "test_literals",
@@ -75301,6 +75199,7 @@
       "value": "http://localhost:8081",
       "category": "test_literals",
       "locations": [
+        "auth_service/tests/test_oauth_redirect_regression.py:178",
         "auth_service/tests/unit/test_auth_environment_urls.py:53",
         "scripts/start_test_services.py:155",
         "scripts/test_adaptive_workflow.py:70",
@@ -75310,6 +75209,14 @@
         "scripts/test_data_pipeline_simple.py:17",
         "scripts/test_oauth_local.py:43",
         "scripts/test_signup_flow_manual.py:10"
+      ]
+    },
+    "http://localhost:8081/auth/callback": {
+      "value": "http://localhost:8081/auth/callback",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_oauth_redirect_regression.py:164",
+        "auth_service/tests/test_oauth_redirect_regression.py:165"
       ]
     },
     "http://localhost:8081/health": {
@@ -75417,6 +75324,13 @@
       "locations": [
         "scripts/test_cors.py:307",
         "scripts/test_cors.py:322"
+      ]
+    },
+    "https%3A%2F%2Fauth.staging.netrasystems.ai%2Fauth%2Foauth%2Fcallback": {
+      "value": "https%3A%2F%2Fauth.staging.netrasystems.ai%2Fauth%2Foauth%2Fcallback",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/unit/test_oauth_redirect_uri_regression.py:173"
       ]
     },
     "https://": {
@@ -75581,24 +75495,54 @@
       "value": "https://auth.netrasystems.ai",
       "category": "test_literals",
       "locations": [
+        "auth_service/tests/test_oauth_redirect_regression.py:174",
         "auth_service/tests/unit/test_auth_environment_urls.py:86",
         "scripts/test_cors_ssot_compliance.py:107"
+      ]
+    },
+    "https://auth.netrasystems.ai/auth/callback": {
+      "value": "https://auth.netrasystems.ai/auth/callback",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_oauth_redirect_regression.py:162"
+      ]
+    },
+    "https://auth.netrasystems.ai/auth/oauth/callback": {
+      "value": "https://auth.netrasystems.ai/auth/oauth/callback",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/unit/test_oauth_redirect_uri_regression.py:47"
       ]
     },
     "https://auth.staging.netrasystems.ai": {
       "value": "https://auth.staging.netrasystems.ai",
       "category": "test_literals",
       "locations": [
+        "auth_service/tests/test_oauth_redirect_regression.py:28",
+        "auth_service/tests/test_oauth_redirect_regression.py:176",
         "auth_service/tests/unit/test_auth_environment_urls.py:75",
         "auth_service/tests/unit/test_auth_environment_urls.py:123",
+        "scripts/staging_comprehensive_test.py:27",
         "scripts/test_auth_client_debug.py:14",
         "scripts/test_auth_client_debug.py:30",
         "scripts/test_auth_fix_simple.py:25",
         "scripts/test_auth_fix_simple.py:69",
-        "scripts/test_auth_service_integration_fix.py:28",
-        "scripts/test_auth_service_integration_fix.py:131",
-        "scripts/test_cors_ssot_compliance.py:60",
-        "scripts/test_staging.py:27"
+        "scripts/test_auth_service_integration_fix.py:28"
+      ]
+    },
+    "https://auth.staging.netrasystems.ai/auth/callback": {
+      "value": "https://auth.staging.netrasystems.ai/auth/callback",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_oauth_redirect_regression.py:83",
+        "auth_service/tests/test_oauth_redirect_regression.py:163"
+      ]
+    },
+    "https://auth.staging.netrasystems.ai/auth/oauth/callback": {
+      "value": "https://auth.staging.netrasystems.ai/auth/oauth/callback",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/unit/test_oauth_redirect_uri_regression.py:33"
       ]
     },
     "https://avatars.githubusercontent.com/": {
@@ -75653,6 +75597,13 @@
       "locations": [
         "auth_service/tests/unit/test_auth_environment_urls.py:96",
         "auth_service/tests/unit/test_auth_environment_urls.py:105"
+      ]
+    },
+    "https://custom.domain.com/auth/oauth/callback": {
+      "value": "https://custom.domain.com/auth/oauth/callback",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/unit/test_oauth_redirect_uri_regression.py:103"
       ]
     },
     "https://dev.netra.systems": {
@@ -75711,13 +75662,6 @@
       "locations": [
         "scripts/test_staging_jwt_validation.py:60",
         "scripts/test_staging_jwt_validation.py:113"
-      ]
-    },
-    "https://auth.staging.netrasystems.ai": {
-      "value": "https://auth.staging.netrasystems.ai",
-      "category": "test_literals",
-      "locations": [
-        "scripts/staging_comprehensive_test.py:27"
       ]
     },
     "https://netra-auth-service-staging.run.app/auth/oauth/callback": {
@@ -76529,13 +76473,6 @@
         "scripts/test_adaptive_workflow_local.py:106"
       ]
     },
-    "int": {
-      "value": "int",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:503"
-      ]
-    },
     "integration": {
       "value": "integration",
       "category": "test_literals",
@@ -76801,13 +76738,6 @@
         "auth_service/tests/unit/test_oauth_comprehensive.py:187"
       ]
     },
-    "invalid_metric": {
-      "value": "invalid_metric",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:136"
-      ]
-    },
     "invalid_provider": {
       "value": "invalid_provider",
       "category": "test_literals",
@@ -76843,13 +76773,6 @@
         "auth_service/tests/test_auth_comprehensive.py:227"
       ]
     },
-    "invalid_timestamp": {
-      "value": "invalid_timestamp",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:592"
-      ]
-    },
     "invalid_token": {
       "value": "invalid_token",
       "category": "test_literals",
@@ -76860,13 +76783,6 @@
         "scripts/test_verify_workflow_status.py:113",
         "scripts/test_verify_workflow_status_corrected.py:126",
         "scripts/test_verify_workflow_status_corrected.py:128"
-      ]
-    },
-    "invalid_type": {
-      "value": "invalid_type",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:105"
       ]
     },
     "invalid_url": {
@@ -77673,11 +77589,7 @@
         "netra_backend/app/services/realistic_test_data/performance_simulator.py:306",
         "netra_backend/app/services/realistic_test_data/performance_simulator.py:307",
         "netra_backend/app/services/realistic_test_data/performance_simulator.py:349",
-        "netra_backend/app/services/realistic_test_data/performance_simulator.py:403",
-        "scripts/test_data_validator_backup.py:45",
-        "scripts/test_data_validator_backup.py:50",
-        "scripts/test_data_validator_backup.py:72",
-        "scripts/test_data_validator_backup.py:136"
+        "netra_backend/app/services/realistic_test_data/performance_simulator.py:403"
       ]
     },
     "latency_p50_ms": {
@@ -78647,11 +78559,7 @@
       "category": "test_literals",
       "locations": [
         "scripts/real_service_test_metrics.py:95",
-        "scripts/real_service_test_metrics.py:187",
-        "scripts/test_data_validator_backup.py:52",
-        "scripts/test_data_validator_backup.py:501",
-        "scripts/test_data_validator_backup.py:505",
-        "scripts/test_data_validator_backup.py:506"
+        "scripts/real_service_test_metrics.py:187"
       ]
     },
     "max_age": {
@@ -78706,20 +78614,6 @@
         "scripts/load_test_isolation.py:304",
         "scripts/load_test_isolation.py:360",
         "scripts/load_test_isolation.py:443"
-      ]
-    },
-    "max_null_percentage": {
-      "value": "max_null_percentage",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:40"
-      ]
-    },
-    "max_outlier_percentage": {
-      "value": "max_outlier_percentage",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:42"
       ]
     },
     "may still exceed line limits": {
@@ -79100,10 +78994,6 @@
         "netra_backend/app/services/realistic_test_data/performance_simulator.py:125",
         "scripts/team_updates_test_analyzer.py:18",
         "scripts/test_clickhouse_startup_fix.py:66",
-        "scripts/test_data_validator_backup.py:72",
-        "scripts/test_data_validator_backup.py:136",
-        "scripts/test_data_validator_backup.py:264",
-        "scripts/test_data_validator_backup.py:284",
         "scripts/test_intensive_serialization.py:102"
       ]
     },
@@ -79209,18 +79099,7 @@
       "category": "test_literals",
       "locations": [
         "scripts/real_service_test_metrics.py:94",
-        "scripts/real_service_test_metrics.py:186",
-        "scripts/test_data_validator_backup.py:51",
-        "scripts/test_data_validator_backup.py:500",
-        "scripts/test_data_validator_backup.py:504",
-        "scripts/test_data_validator_backup.py:506"
-      ]
-    },
-    "min_data_points": {
-      "value": "min_data_points",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:39"
+        "scripts/real_service_test_metrics.py:186"
       ]
     },
     "min_ms": {
@@ -79229,13 +79108,6 @@
       "locations": [
         "scripts/load_test_isolation.py:115",
         "scripts/load_test_isolation.py:303"
-      ]
-    },
-    "min_time_span_hours": {
-      "value": "min_time_span_hours",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:41"
       ]
     },
     "minimal_validation": {
@@ -79403,14 +79275,6 @@
       "category": "test_literals",
       "locations": [
         "scripts/test_staging_websocket_comprehensive.py:162"
-      ]
-    },
-    "missing_fields": {
-      "value": "missing_fields",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:231",
-        "scripts/test_data_validator_backup.py:231"
       ]
     },
     "missing_imports": {
@@ -80932,6 +80796,7 @@
       "category": "test_literals",
       "locations": [
         "auth_service/tests/test_auth_config_endpoint.py:56",
+        "auth_service/tests/unit/test_oauth_redirect_uri_regression.py:65",
         "scripts/test_cors.py:317"
       ]
     },
@@ -81560,13 +81425,6 @@
       "category": "test_literals",
       "locations": [
         "scripts/test_ssl_certificates_staging.py:82"
-      ]
-    },
-    "not_a_number": {
-      "value": "not_a_number",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:275"
       ]
     },
     "not_configured": {
@@ -82300,17 +82158,6 @@
       "category": "test_literals",
       "locations": [
         "scripts/pytest_plugins.py:81"
-      ]
-    },
-    "outliers": {
-      "value": "outliers",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:265",
-        "scripts/test_data_validator_backup.py:266",
-        "scripts/test_data_validator_backup.py:267",
-        "scripts/test_data_validator_backup.py:532",
-        "scripts/test_data_validator_backup.py:537"
       ]
     },
     "output": {
@@ -84050,8 +83897,8 @@
         "auth_service/tests/test_auth_port_configuration.py:381",
         "auth_service/tests/test_auth_real_services_comprehensive.py:430",
         "auth_service/tests/test_dev_login_endpoint.py:37",
-        "auth_service/tests/unit/test_auth_config_comprehensive.py:19",
-        "auth_service/tests/unit/test_auth_config_comprehensive.py:104"
+        "auth_service/tests/test_oauth_redirect_regression.py:162",
+        "auth_service/tests/test_oauth_redirect_regression.py:173"
       ]
     },
     "profile": {
@@ -84770,19 +84617,7 @@
       "category": "test_literals",
       "locations": [
         "scripts/business_value_test_index.py:629",
-        "scripts/business_value_test_index.py:746",
-        "scripts/test_data_validator_backup.py:229",
-        "scripts/test_data_validator_backup.py:246",
-        "scripts/test_data_validator_backup.py:264",
-        "scripts/test_data_validator_backup.py:284",
-        "scripts/test_data_validator_backup.py:302"
-      ]
-    },
-    "quality_score": {
-      "value": "quality_score",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:191"
+        "scripts/business_value_test_index.py:746"
       ]
     },
     "quality_scores": {
@@ -85009,9 +84844,9 @@
       "value": "react",
       "category": "test_literals",
       "locations": [
+        "frontend/components/chat/__tests__/NewChatTransitions.test.tsx:3",
         "frontend/components/chat/__tests__/first-interaction-hide.test.tsx:1",
-        "frontend/components/chat/__tests__/main-chat-first-interaction.integration.test.tsx:1",
-        "frontend/components/chat/__tests__/NewChatTransitions.test.tsx:3"
+        "frontend/components/chat/__tests__/main-chat-first-interaction.integration.test.tsx:1"
       ]
     },
     "read": {
@@ -85344,6 +85179,13 @@
         "netra_backend/app/services/realistic_test_data/performance_simulator.py:88"
       ]
     },
+    "redirect URI": {
+      "value": "redirect URI",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/unit/test_oauth_redirect_uri_regression.py:137"
+      ]
+    },
     "redirectUri": {
       "value": "redirectUri",
       "category": "test_literals",
@@ -85355,9 +85197,23 @@
       "value": "redirect_uri",
       "category": "test_literals",
       "locations": [
+        "auth_service/tests/test_oauth_redirect_regression.py:79",
+        "auth_service/tests/test_oauth_redirect_regression.py:83",
+        "auth_service/tests/test_oauth_redirect_regression.py:84",
+        "auth_service/tests/test_oauth_redirect_regression.py:106",
+        "auth_service/tests/test_oauth_redirect_regression.py:130",
         "auth_service/tests/unit/test_oauth_comprehensive.py:57",
         "auth_service/tests/unit/test_oauth_comprehensive.py:69",
-        "auth_service/tests/unit/test_oauth_comprehensive.py:77"
+        "auth_service/tests/unit/test_oauth_comprehensive.py:77",
+        "auth_service/tests/unit/test_oauth_redirect_uri_regression.py:151",
+        "auth_service/tests/unit/test_oauth_redirect_uri_regression.py:152"
+      ]
+    },
+    "redirect_uri was None in token exchange - REGRESSION DETECTED!": {
+      "value": "redirect_uri was None in token exchange - REGRESSION DETECTED!",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_oauth_redirect_regression.py:80"
       ]
     },
     "redirect_uri=": {
@@ -85365,6 +85221,14 @@
       "category": "test_literals",
       "locations": [
         "auth_service/tests/unit/test_oauth_comprehensive.py:127"
+      ]
+    },
+    "redirect_uri_configured": {
+      "value": "redirect_uri_configured",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/unit/test_oauth_redirect_uri_regression.py:155",
+        "auth_service/tests/unit/test_oauth_redirect_uri_regression.py:156"
       ]
     },
     "redirect_url": {
@@ -86013,6 +85877,22 @@
         "scripts/analyze_test_mocks.py:56"
       ]
     },
+    "requests.get": {
+      "value": "requests.get",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_oauth_redirect_regression.py:57",
+        "auth_service/tests/test_oauth_redirect_regression.py:115"
+      ]
+    },
+    "requests.post": {
+      "value": "requests.post",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_oauth_redirect_regression.py:50",
+        "auth_service/tests/test_oauth_redirect_regression.py:109"
+      ]
+    },
     "requests\\.(?:get|post|put|delete)": {
       "value": "requests\\.(?:get|post|put|delete)",
       "category": "test_literals",
@@ -86635,6 +86515,9 @@
       "value": "run.app",
       "category": "test_literals",
       "locations": [
+        "auth_service/tests/unit/test_oauth_redirect_uri_regression.py:37",
+        "auth_service/tests/unit/test_oauth_redirect_uri_regression.py:51",
+        "auth_service/tests/unit/test_oauth_redirect_uri_regression.py:178",
         "scripts/test_cors.py:319",
         "scripts/test_gtm_loading.py:111"
       ]
@@ -86900,15 +86783,6 @@
       "category": "test_literals",
       "locations": [
         "scripts/test_agent_pipeline_simple.py:86"
-      ]
-    },
-    "savings_percentage": {
-      "value": "savings_percentage",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:329",
-        "scripts/test_data_validator_backup.py:400",
-        "scripts/test_data_validator_backup.py:417"
       ]
     },
     "scaling_service.py": {
@@ -88970,6 +88844,13 @@
         "scripts/test_service_startup_with_missing_optionals.py:135"
       ]
     },
+    "staging-client.apps.googleusercontent.com": {
+      "value": "staging-client.apps.googleusercontent.com",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/unit/test_oauth_redirect_uri_regression.py:130"
+      ]
+    },
     "staging-db": {
       "value": "staging-db",
       "category": "test_literals",
@@ -89034,6 +88915,13 @@
       "locations": [
         "scripts/test_oauth_dev_config.py:54",
         "scripts/test_oauth_dev_config.py:61"
+      ]
+    },
+    "staging-secret-key-long-enough": {
+      "value": "staging-secret-key-long-enough",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/unit/test_oauth_redirect_uri_regression.py:131"
       ]
     },
     "staging-service-secret-at-least-32-chars": {
@@ -89520,9 +89408,7 @@
       "value": "structure",
       "category": "test_literals",
       "locations": [
-        "auth_service/tests/test_auth_comprehensive.py:479",
-        "scripts/test_data_validator_backup.py:229",
-        "scripts/test_data_validator_backup.py:246"
+        "auth_service/tests/test_auth_comprehensive.py:479"
       ]
     },
     "stub": {
@@ -90407,6 +90293,15 @@
         "scripts/test_backend_ORIGINAL.py:95"
       ]
     },
+    "test-auth-code": {
+      "value": "test-auth-code",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_oauth_redirect_regression.py:69",
+        "auth_service/tests/test_oauth_redirect_regression.py:87",
+        "auth_service/tests/test_oauth_redirect_regression.py:126"
+      ]
+    },
     "test-auth-code-12345": {
       "value": "test-auth-code-12345",
       "category": "test_literals",
@@ -90439,13 +90334,16 @@
       "value": "test-client-id",
       "category": "test_literals",
       "locations": [
+        "auth_service/tests/test_oauth_redirect_regression.py:38",
+        "auth_service/tests/test_oauth_redirect_regression.py:88",
         "auth_service/tests/test_oauth_state_validation.py:94",
         "auth_service/tests/test_oauth_state_validation.py:117",
         "auth_service/tests/test_oauth_state_validation.py:161",
         "auth_service/tests/test_oauth_state_validation.py:180",
         "auth_service/tests/test_oauth_state_validation.py:242",
         "auth_service/tests/unit/test_auth_endpoint_response_consistency.py:296",
-        "auth_service/tests/unit/test_jwt_handler_comprehensive.py:333"
+        "auth_service/tests/unit/test_jwt_handler_comprehensive.py:333",
+        "auth_service/tests/unit/test_oauth_redirect_uri_regression.py:167"
       ]
     },
     "test-client-id-123456": {
@@ -90456,12 +90354,34 @@
         "scripts/test_auth_oauth_integration.py:41"
       ]
     },
+    "test-client-id.apps.googleusercontent.com": {
+      "value": "test-client-id.apps.googleusercontent.com",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/unit/test_oauth_redirect_uri_regression.py:115"
+      ]
+    },
+    "test-client-secret": {
+      "value": "test-client-secret",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_oauth_redirect_regression.py:39",
+        "auth_service/tests/test_oauth_redirect_regression.py:89"
+      ]
+    },
     "test-client-secret-abcdef": {
       "value": "test-client-secret-abcdef",
       "category": "test_literals",
       "locations": [
         "scripts/test_auth_oauth_integration.py:25",
         "scripts/test_auth_oauth_integration.py:42"
+      ]
+    },
+    "test-client.apps.googleusercontent.com": {
+      "value": "test-client.apps.googleusercontent.com",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/unit/test_oauth_redirect_uri_regression.py:145"
       ]
     },
     "test-code-verifier-1234567890abcdef": {
@@ -90750,6 +90670,20 @@
         "scripts/test_backend_ORIGINAL.py:86"
       ]
     },
+    "test-secret-key-long-enough": {
+      "value": "test-secret-key-long-enough",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/unit/test_oauth_redirect_uri_regression.py:116"
+      ]
+    },
+    "test-secret-long-enough": {
+      "value": "test-secret-long-enough",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/unit/test_oauth_redirect_uri_regression.py:146"
+      ]
+    },
     "test-service": {
       "value": "test-service",
       "category": "test_literals",
@@ -90842,7 +90776,11 @@
       "locations": [
         "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:228",
         "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:371",
-        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:415"
+        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:415",
+        "auth_service/tests/test_oauth_redirect_regression.py:69",
+        "auth_service/tests/test_oauth_redirect_regression.py:100",
+        "auth_service/tests/test_oauth_redirect_regression.py:126",
+        "auth_service/tests/unit/test_oauth_redirect_uri_regression.py:170"
       ]
     },
     "test-svc": {
@@ -90892,6 +90830,8 @@
       "value": "test-token",
       "category": "test_literals",
       "locations": [
+        "auth_service/tests/test_oauth_redirect_regression.py:52",
+        "auth_service/tests/test_oauth_redirect_regression.py:111",
         "auth_service/tests/test_oauth_state_validation.py:124"
       ]
     },
@@ -93558,16 +93498,7 @@
       "value": "throughput",
       "category": "test_literals",
       "locations": [
-        "scripts/test_data_validator_backup.py:47",
-        "scripts/test_data_validator_backup.py:177",
-        "scripts/test_data_validator_backup.py:184",
-        "scripts/test_data_validator_backup.py:622",
-        "scripts/test_data_validator_backup.py:625",
-        "scripts/test_data_validator_backup.py:641",
-        "scripts/test_data_validator_backup.py:645",
-        "scripts/test_data_validator_backup.py:663",
-        "scripts/test_data_validator_backup.py:664",
-        "scripts/test_data_validator_backup.py:674"
+        "scripts/test_staging_websocket_comprehensive.py:216"
       ]
     },
     "throughput_ops": {
@@ -93701,21 +93632,6 @@
         "scripts/test_triage_flow.py:39"
       ]
     },
-    "time_span": {
-      "value": "time_span",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:302"
-      ]
-    },
-    "time_span_hours": {
-      "value": "time_span_hours",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:559",
-        "scripts/test_data_validator_backup.py:599"
-      ]
-    },
     "time_utilities": {
       "value": "time_utilities",
       "category": "test_literals",
@@ -93729,17 +93645,6 @@
       "category": "test_literals",
       "locations": [
         "scripts/test_example_message_flow.py:121"
-      ]
-    },
-    "timeframe": {
-      "value": "timeframe",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:71",
-        "scripts/test_data_validator_backup.py:83",
-        "scripts/test_data_validator_backup.py:106",
-        "scripts/test_data_validator_backup.py:135",
-        "scripts/test_data_validator_backup.py:151"
       ]
     },
     "timeout": {
@@ -94043,16 +93948,6 @@
       "category": "test_literals",
       "locations": [
         "auth_service/test_auth_direct.py:83"
-      ]
-    },
-    "tokens_input": {
-      "value": "tokens_input",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:276",
-        "scripts/test_data_validator_backup.py:281",
-        "scripts/test_data_validator_backup.py:516",
-        "scripts/test_data_validator_backup.py:517"
       ]
     },
     "too": {
@@ -94475,15 +94370,6 @@
         "scripts/optimize_test_performance.py:99"
       ]
     },
-    "total_potential_savings_cents": {
-      "value": "total_potential_savings_cents",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:330",
-        "scripts/test_data_validator_backup.py:401",
-        "scripts/test_data_validator_backup.py:418"
-      ]
-    },
     "total_requests": {
       "value": "total_requests",
       "category": "test_literals",
@@ -94645,13 +94531,6 @@
       "category": "test_literals",
       "locations": [
         "auth_service/tests/integration/test_auth_e2e_flows.py:337"
-      ]
-    },
-    "trend_analysis": {
-      "value": "trend_analysis",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:146"
       ]
     },
     "triage": {
@@ -95362,21 +95241,7 @@
         "auth_service/test_framework/mock_auth_service.py:87",
         "auth_service/tests/integration/test_auth_api_integration.py:291",
         "auth_service/tests/unit/test_auth_service_comprehensive.py:266",
-        "scripts/load_testing/run_load_test.py:91",
-        "scripts/test_data_validator_backup.py:173",
-        "scripts/test_data_validator_backup.py:239",
-        "scripts/test_data_validator_backup.py:294",
-        "scripts/test_data_validator_backup.py:618",
-        "scripts/test_data_validator_backup.py:670"
-      ]
-    },
-    "user_1": {
-      "value": "user_1",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:208",
-        "scripts/test_data_validator_backup.py:255",
-        "scripts/test_data_validator_backup.py:274"
+        "scripts/load_testing/run_load_test.py:91"
       ]
     },
     "user_agent": {
@@ -96222,10 +96087,7 @@
         "scripts/setup_test_environment.py:133",
         "scripts/setup_test_environment.py:168",
         "scripts/setup_test_environment.py:186",
-        "scripts/setup_test_environment.py:285",
-        "scripts/test_data_validator_backup.py:303",
-        "scripts/test_data_validator_backup.py:304",
-        "scripts/test_data_validator_backup.py:560"
+        "scripts/setup_test_environment.py:285"
       ]
     },
     "warnings": {
@@ -96709,25 +96571,6 @@
         "scripts/test_cold_start_e2e.py:54"
       ]
     },
-    "workload_": {
-      "value": "workload_",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:174",
-        "scripts/test_data_validator_backup.py:619",
-        "scripts/test_data_validator_backup.py:671"
-      ]
-    },
-    "workload_id": {
-      "value": "workload_id",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:174",
-        "scripts/test_data_validator_backup.py:619",
-        "scripts/test_data_validator_backup.py:638",
-        "scripts/test_data_validator_backup.py:671"
-      ]
-    },
     "workload_type": {
       "value": "workload_type",
       "category": "test_literals",
@@ -96981,13 +96824,6 @@
       "category": "test_literals",
       "locations": [
         "scripts/test_staging_auth_live.py:159"
-      ]
-    },
-    "wörk-löad_ñoñé": {
-      "value": "wörk-löad_ñoñé",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:638"
       ]
     },
     "x": {
@@ -101899,13 +101735,6 @@
       "category": "test_literals",
       "locations": [
         "scripts/test_blocking_analysis.py:351"
-      ]
-    },
-    "用户_测试_123": {
-      "value": "用户_测试_123",
-      "category": "test_literals",
-      "locations": [
-        "scripts/test_data_validator_backup.py:637"
       ]
     },
     "用户名 🚀": {
