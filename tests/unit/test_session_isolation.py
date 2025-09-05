@@ -211,40 +211,45 @@ class TestSessionIsolation:
         """Test that sessions are properly cleaned up even when exceptions occur."""
         cleanup_called = False
         
+        # Create a mock session factory that tracks cleanup
+        mock_factory = Mock()
+        
+        @asynccontextmanager
+        async def mock_get_request_scoped_session(user_id, request_id):
+            nonlocal cleanup_called
+            mock_session = Mock(spec=AsyncSession)
+            mock_session.info = {}
+            
+            try:
+                yield mock_session
+            finally:
+                cleanup_called = True
+        
+        mock_factory.get_request_scoped_session = mock_get_request_scoped_session
+        
         async def mock_get_session_factory():
-            mock_factory = Mock()
-            
-            @asynccontextmanager
-            async def mock_get_request_scoped_session(user_id, request_id):
-                nonlocal cleanup_called
-                mock_session = Mock(spec=AsyncSession)
-                mock_session.info = {}  # Proper dict for info
-                
-                async def mock_exit(exc_type, exc_val, exc_tb):
-                    cleanup_called = True
-                    return False
-                
-                mock_session.__aenter__ = AsyncMock(return_value=mock_session)
-                mock_session.__aexit__ = mock_exit
-                
-                try:
-                    yield mock_session
-                finally:
-                    cleanup_called = True
-            
-            mock_factory.get_request_scoped_session = mock_get_request_scoped_session
             return mock_factory
         
         with patch('netra_backend.app.database.request_scoped_session_factory.get_session_factory', mock_get_session_factory):
-            try:
-                async for session in get_request_scoped_db_session():
-                    # Simulate an exception during request processing
+            with patch('netra_backend.app.dependencies._validate_session_type'):
+                # Create the async generator
+                session_generator = get_request_scoped_db_session()
+                
+                try:
+                    # Start the generator and get the session
+                    session = await session_generator.__anext__()
+                    # Simulate work that raises an exception
                     raise ValueError("test exception")
-            except ValueError:
-                # Expected exception
-                pass
+                except ValueError:
+                    pass
+                finally:
+                    # Properly close the generator to trigger cleanup
+                    try:
+                        await session_generator.__anext__()
+                    except StopAsyncIteration:
+                        pass
         
-        # Verify cleanup was called even with exception
+        # Verify cleanup was called
         assert cleanup_called, "Session cleanup should be called even when exceptions occur"
     
     @pytest.mark.asyncio

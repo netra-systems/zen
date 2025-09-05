@@ -113,8 +113,18 @@ async def test_enhanced_execution_engine_sends_notifications():
     mock_ws_manager = MagicMock()
     mock_ws_manager.send_to_thread = AsyncMock()
     
-    # Create execution engine
-    engine = ExecutionEngine(mock_registry, mock_ws_manager)
+    # Add required methods for AgentWebSocketBridge
+    mock_ws_manager.notify_agent_started = AsyncMock()
+    mock_ws_manager.notify_agent_thinking = AsyncMock()
+    mock_ws_manager.notify_progress_update = AsyncMock()
+    mock_ws_manager.notify_tool_executing = AsyncMock()
+    mock_ws_manager.notify_agent_completed = AsyncMock()
+    mock_ws_manager.notify_agent_error = AsyncMock()
+    mock_ws_manager.notify_agent_death = AsyncMock()
+    mock_ws_manager.get_metrics = AsyncMock(return_value={})
+    
+    # Create execution engine using the factory method
+    engine = ExecutionEngine._init_from_factory(mock_registry, mock_ws_manager)
     
     # Mock agent execution
     mock_agent = MagicMock()
@@ -130,36 +140,50 @@ async def test_enhanced_execution_engine_sends_notifications():
     )
     
     state = DeepAgentState()
-    state.user_prompt = "Test prompt"
-    state.final_answer = "Test answer"
+    state.user_request = "Test prompt"
+    state.final_report = "Test answer"
     
     # Mock the agent core to return success
     with patch.object(engine.agent_core, 'execute_agent') as mock_execute:
         from netra_backend.app.agents.supervisor.execution_context import AgentExecutionResult
-        mock_execute.return_value = AgentExecutionResult(
+        mock_result = AgentExecutionResult(
             success=True,
             state=state,
             duration=1.0
         )
+        # Add data attribute for compatibility with execution tracking
+        mock_result.data = {"agent_result": "success"}
+        mock_execute.return_value = mock_result
         
         # Execute agent
         result = await engine.execute_agent(context, state)
     
-    # Verify notifications were sent
-    assert mock_ws_manager.send_to_thread.called
+    # Verify notifications were sent through the WebSocket bridge
+    # ExecutionEngine now uses AgentWebSocketBridge methods instead of send_to_thread
+    assert mock_ws_manager.notify_agent_started.called, "notify_agent_started should have been called"
+    assert mock_ws_manager.notify_agent_thinking.called, "notify_agent_thinking should have been called"
+    assert mock_ws_manager.notify_agent_completed.called, "notify_agent_completed should have been called"
     
-    # Check for specific event types
-    sent_events = []
-    for call in mock_ws_manager.send_to_thread.call_args_list:
-        message = call[0][1]
-        if isinstance(message, dict) and 'type' in message:
-            sent_events.append(message['type'])
+    # Verify the calls were made with correct parameters
+    # Check agent_started call
+    started_call_args = mock_ws_manager.notify_agent_started.call_args
+    assert started_call_args is not None, "notify_agent_started was not called"
+    assert started_call_args[0][0] == context.run_id, "Wrong run_id in agent_started call"
+    assert started_call_args[0][1] == context.agent_name, "Wrong agent_name in agent_started call"
     
-    # Should have sent agent_started and agent_thinking
-    assert 'agent_started' in sent_events
-    assert 'agent_thinking' in sent_events
+    # Check agent_thinking call
+    thinking_call_args = mock_ws_manager.notify_agent_thinking.call_args
+    assert thinking_call_args is not None, "notify_agent_thinking was not called"
+    assert thinking_call_args[0][0] == context.run_id, "Wrong run_id in agent_thinking call"
+    assert thinking_call_args[0][1] == context.agent_name, "Wrong agent_name in agent_thinking call"
     
-    print(f"Sent events: {sent_events}")
+    # Check agent_completed call
+    completed_call_args = mock_ws_manager.notify_agent_completed.call_args
+    assert completed_call_args is not None, "notify_agent_completed was not called"
+    assert completed_call_args[0][0] == context.run_id, "Wrong run_id in agent_completed call"
+    assert completed_call_args[0][1] == context.agent_name, "Wrong agent_name in agent_completed call"
+    
+    print("WebSocket notifications verified successfully!")
 
 
 if __name__ == "__main__":

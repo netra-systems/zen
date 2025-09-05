@@ -31,11 +31,11 @@ class TestUnifiedIsolatedEnvironment:
     @pytest.fixture(autouse=True)
     def setup_and_cleanup(self):
         """Setup and cleanup for each test."""
-        # Store original environment
-        original_env = env.get_all()
-        
         # Get fresh environment instance for each test
         env = get_env()
+        
+        # Store original environment
+        original_env = env.get_all()
         
         # Ensure we start in a clean state
         if env.is_isolated():
@@ -45,7 +45,11 @@ class TestUnifiedIsolatedEnvironment:
         
         # Cleanup: restore original environment
         env.disable_isolation()
-        env.clear()
+        
+        # Only clear if isolation is enabled
+        if env.is_isolated():
+            env.clear()
+        
         env.update(original_env, "test")
     
     def test_singleton_behavior(self):
@@ -110,7 +114,7 @@ class TestUnifiedIsolatedEnvironment:
         
         # Check values
         assert env.get('TEST_ISOLATION') == 'isolated_value'
-        assert env.get('TEST_ISOLATION') == 'os_value'  # Should not be polluted
+        assert os.environ['TEST_ISOLATION'] == 'os_value'  # Should not be polluted
         
         # Test new variable in isolation
         env.set('TEST_NEW_VAR', 'new_value', 'test')
@@ -169,10 +173,11 @@ class TestUnifiedIsolatedEnvironment:
         normal_value = env._expand_shell_commands("normal_value")
         assert normal_value == "normal_value"
         
-        # Test with ${VARIABLE} expansion
+        # Test with ${VARIABLE} expansion (should be skipped during pytest)
         env.set('EXPAND_TEST', 'expanded_value', "test")
         test_value = env._expand_shell_commands("prefix_${EXPAND_TEST}_suffix")
-        assert test_value == "prefix_expanded_value_suffix"
+        # During pytest, shell expansion is skipped for safety
+        assert test_value == "prefix_${EXPAND_TEST}_suffix"
         
         # Test during pytest (should skip expansion)
         # This test itself is running in pytest context, so expansion should be skipped

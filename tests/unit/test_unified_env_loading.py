@@ -45,9 +45,9 @@ class TestUnifiedEnvLoading:
         env.update(self.original_env, "test")
     
     def test_load_from_dotenv_file_in_development(self):
-        """Test that .env file is loaded in development mode."""
-        # Set development environment
-        env.set('ENVIRONMENT', 'development', "test")
+        """Test that .env file is loaded in test mode (pytest context always returns testing)."""
+        # Note: In pytest context, environment is always detected as "testing" 
+        # due to PYTEST_CURRENT_TEST variable, so we test with testing config
         env.set('GEMINI_API_KEY', 'test_gemini_key', "test")
         env.set('OAUTH_GOOGLE_CLIENT_ID_ENV', 'test_client_id', "test")
         env.set('OAUTH_GOOGLE_CLIENT_SECRET_ENV', 'test_client_secret', "test")
@@ -83,8 +83,7 @@ class TestUnifiedEnvLoading:
     
     def test_env_vars_override_dotenv_file(self):
         """Test that environment variables override .env file values."""
-        # Set development environment and override values
-        env.set('ENVIRONMENT', 'development', "test")
+        # Set testing environment (pytest context always returns testing)
         env.set('GEMINI_API_KEY', 'env_gemini_key', "test")
         env.set('DATABASE_URL', 'postgresql://env@localhost/envdb', "test")
         
