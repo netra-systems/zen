@@ -206,16 +206,14 @@ const MainChat: React.FC = () => {
   }
 
   return (
-    <div className="flex h-full bg-gradient-to-br from-gray-50 via-white to-gray-50" data-testid="main-chat">
-      {/* Sidebar removed - handled by AppWithLayout */}
-      
-      <div className="flex flex-col flex-1 max-w-full">
-        {/* Chat Header */}
+    <div className="flex flex-col h-full bg-gradient-to-br from-gray-50 via-white to-gray-50 overflow-hidden" data-testid="main-chat">
+      {/* Chat Header - Fixed at top */}
+      <div className="flex-shrink-0">
         <ChatHeader />
-        
-        {/* Main Content Area */}
-        <div className="flex-grow overflow-hidden relative">
-          <div className="h-full overflow-y-auto" data-testid="main-content">
+      </div>
+      
+      {/* Scrollable Content Area - Only scrollable element */}
+      <div className="flex-1 overflow-y-auto overflow-x-hidden" data-testid="main-content">
             {/* Empty State with Example Prompts - shown when no thread is selected OR thread selected but no messages */}
             <AnimatePresence mode="wait">
               {(shouldShowEmptyState || shouldShowExamplePrompts) && (
@@ -357,24 +355,22 @@ const MainChat: React.FC = () => {
                 </motion.div>
               )}
             </AnimatePresence>
-          </div>
-        </div>
-        
-        {/* Chat Input */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-          className="border-t bg-white/95 backdrop-blur-sm shadow-lg"
-        >
-          <div className="px-6 py-4 max-w-3xl mx-auto w-full">
-            <MessageInput 
-              ref={messageInputRef} 
-              onFirstInteraction={handleFirstInteraction}
-            />
-          </div>
-        </motion.div>
       </div>
+      
+      {/* Chat Input - Fixed at bottom */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.2 }}
+        className="flex-shrink-0 border-t bg-white/95 backdrop-blur-sm shadow-lg"
+      >
+        <div className="px-6 py-4 max-w-3xl mx-auto w-full">
+          <MessageInput 
+            ref={messageInputRef} 
+            onFirstInteraction={handleFirstInteraction}
+          />
+        </div>
+      </motion.div>
       
       {/* Overflow Debug Panel */}
       <OverflowPanel isOpen={isOverflowOpen} onClose={() => setIsOverflowOpen(false)} />

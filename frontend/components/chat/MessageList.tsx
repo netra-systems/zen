@@ -3,14 +3,13 @@ import { useUnifiedChatStore } from '@/store/unified-chat';
 import { MessageItem } from './MessageItem';
 import { ThinkingIndicator } from './ThinkingIndicator';
 import { MessageSkeleton, SkeletonPresets } from '../loading/MessageSkeleton';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useProgressiveLoading } from '@/hooks/useProgressiveLoading';
 
 export const MessageList: React.FC = () => {
   const { messages, isProcessing, isThreadLoading, currentRunId } = useUnifiedChatStore();
-  const scrollAreaRef = useRef<HTMLDivElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   const isUserScrolling = useRef(false);
   const lastScrollTop = useRef(0);
   const pendingMessageRef = useRef<string | null>(null);
@@ -39,8 +38,10 @@ export const MessageList: React.FC = () => {
 
   useEffect(() => {
     const handleScroll = () => {
-      if (scrollAreaRef.current) {
-        const { scrollTop, scrollHeight, clientHeight } = scrollAreaRef.current;
+      // Find the parent scrollable container (main-content)
+      const scrollContainer = document.querySelector('[data-testid="main-content"]') as HTMLElement;
+      if (scrollContainer) {
+        const { scrollTop, scrollHeight, clientHeight } = scrollContainer;
         const isAtBottom = scrollHeight - scrollTop - clientHeight < 100;
         
         if (scrollTop < lastScrollTop.current && !isAtBottom) {
@@ -53,7 +54,7 @@ export const MessageList: React.FC = () => {
       }
     };
 
-    const scrollElement = scrollAreaRef.current;
+    const scrollElement = document.querySelector('[data-testid="main-content"]') as HTMLElement;
     if (scrollElement) {
       scrollElement.addEventListener('scroll', handleScroll);
     }
@@ -156,7 +157,7 @@ export const MessageList: React.FC = () => {
   }));
 
   return (
-    <ScrollArea ref={scrollAreaRef} className="h-[calc(100vh-180px)] px-4 py-2 overflow-y-auto">
+    <div ref={containerRef} className="px-4 py-2">
       <AnimatePresence initial={false}>
         {displayedMessages.length === 0 && (
           <motion.div
@@ -230,6 +231,6 @@ export const MessageList: React.FC = () => {
       </AnimatePresence>
       
       <div ref={messagesEndRef} className="h-4" />
-    </ScrollArea>
+    </div>
   );
 };
