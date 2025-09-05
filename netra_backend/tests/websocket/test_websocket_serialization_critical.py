@@ -17,7 +17,7 @@ from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 
-from netra_backend.app.schemas.registry import (
+from netra_backend.app.schemas import (
     DeepAgentState,
     Message,
     MessageType,

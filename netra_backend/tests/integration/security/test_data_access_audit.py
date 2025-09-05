@@ -24,7 +24,7 @@ from datetime import datetime, timezone
 
 import pytest
 
-from netra_backend.app.schemas.registry import CorpusAuditAction, CorpusAuditStatus
+from netra_backend.app.schemas import CorpusAuditAction, CorpusAuditStatus
 
 from netra_backend.tests.integration.security.shared_fixtures import (
     DataAccessAuditHelper,

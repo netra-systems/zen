@@ -9,7 +9,7 @@ from unittest.mock import patch, AsyncMock
 
 import pytest
 
-from netra_backend.app.core.configuration.base import ActualSecretManager as SecretManager
+from netra_backend.app.core.configuration.unified_secrets import UnifiedSecretsManager as SecretManager
 from netra_backend.app.schemas.config import AppConfig
 
 class TestJWTSecretConsistency:

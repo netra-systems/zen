@@ -37,7 +37,7 @@ from netra_backend.app.agents.base.interface import ExecutionContext, ExecutionR
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 from netra_backend.app.redis_manager import RedisManager
-from netra_backend.app.schemas.registry import DeepAgentState
+from netra_backend.app.schemas import DeepAgentState
 from netra_backend.app.models.user_execution_context import UserExecutionContext
 
 

@@ -31,7 +31,7 @@ from netra_backend.app.websocket_core import WebSocketManager, get_websocket_man
 
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
 from netra_backend.app.db.models_postgres import Message, Thread
-from netra_backend.app.schemas.registry import WebSocketMessage
+from netra_backend.app.schemas import WebSocketMessage
 
 from netra_backend.app.services.agent_service_core import AgentService
 from netra_backend.app.services.message_handlers import MessageHandlerService

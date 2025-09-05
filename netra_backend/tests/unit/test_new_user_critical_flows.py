@@ -29,7 +29,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 try:
     from netra_backend.app.clients.auth_client_core import auth_client
     from netra_backend.app.db.models_postgres import Secret, ToolUsageLog, User
-    from netra_backend.app.schemas.registry import UserCreate
+    from netra_backend.app.schemas import UserCreate
     from netra_backend.app.services.user_service import user_service
 except ImportError:
     pytest.skip("Required modules have been removed or have missing dependencies", allow_module_level=True)

@@ -24,7 +24,7 @@ class TestThreadRepositoryOperations:
     
     @pytest.mark.asyncio
     async def test_thread_crud_operations(self):
-        from netra_backend.app.schemas.registry import Thread
+        from netra_backend.app.schemas import Thread
         from netra_backend.app.services.database.thread_repository import (
             ThreadRepository,
         )
@@ -152,7 +152,7 @@ class TestMessageRepositoryQueries:
     
     @pytest.mark.asyncio
     async def test_message_pagination(self):
-        from netra_backend.app.schemas.registry import Message, MessageType
+        from netra_backend.app.schemas import Message, MessageType
         from netra_backend.app.services.database.message_repository import (
             MessageRepository,
         )
@@ -190,7 +190,7 @@ class TestMessageRepositoryQueries:
     
     @pytest.mark.asyncio
     async def test_complex_message_queries(self):
-        from netra_backend.app.schemas.registry import Message, MessageType
+        from netra_backend.app.schemas import Message, MessageType
         from netra_backend.app.services.database.message_repository import (
             MessageRepository,
         )

@@ -11,7 +11,7 @@ from unittest.mock import MagicMock, AsyncMock, patch
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
 from netra_backend.app.agents.supervisor.workflow_orchestrator import WorkflowOrchestrator
 from netra_backend.app.agents.base.interface import ExecutionContext
-from netra_backend.app.agents.registry.agent_class_registry import AgentClassRegistry
+from netra_backend.app.agents.supervisor.agent_class_registry import AgentClassRegistry
 
 
 def create_supervisor():

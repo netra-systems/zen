@@ -46,7 +46,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from netra_backend.app.core.auth_constants import AuthConstants, JWTConstants
 
 from netra_backend.app.database import get_db
-from netra_backend.app.schemas.registry import WebSocketMessage
+from netra_backend.app.schemas import WebSocketMessage
 from netra_backend.tests.integration.sso_saml_components import (
     EnterpriseSessionManager,
     EnterpriseTokenManager,
