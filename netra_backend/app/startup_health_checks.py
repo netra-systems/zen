@@ -256,20 +256,19 @@ class StartupHealthChecker:
         service_name = "clickhouse"
         
         try:
-            from netra_backend.app.db.clickhouse import ClickHouseDB
+            from netra_backend.app.db.clickhouse import ClickHouseService
             
             # Check if ClickHouse is configured
-            ch_db = ClickHouseDB()
-            if not ch_db.enabled:
-                return HealthCheckResult(
-                    service_name=service_name,
-                    status=ServiceStatus.NOT_CONFIGURED,
-                    message="ClickHouse is disabled in configuration",
-                    check_time=datetime.now(timezone.utc)
-                )
+            ch_service = ClickHouseService()
             
-            # Try to execute a simple query
-            result = await ch_db.execute("SELECT 1")
+            # Initialize the service first
+            await ch_service.initialize()
+            
+            # Try to execute a simple query to validate connection
+            result = await ch_service.execute("SELECT 1")
+            
+            # Clean up the service connection
+            await ch_service.close()
             
             latency_ms = (asyncio.get_event_loop().time() - start_time) * 1000
             return HealthCheckResult(
