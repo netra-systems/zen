@@ -6,7 +6,8 @@
       "Bash(find:*)",
       "Bash(docker logs:*)",
       "Bash(curl:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(git commit:*)"
     ],
     "deny": [],
     "ask": []

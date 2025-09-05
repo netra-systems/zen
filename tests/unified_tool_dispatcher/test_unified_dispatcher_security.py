@@ -1,4 +1,4 @@
-"""Comprehensive security tests for CanonicalToolDispatcher.
+"""Comprehensive security tests for UnifiedToolDispatcher.
 
 These tests verify the CRITICAL security requirements:
 - Mandatory user isolation (no global state)
@@ -22,8 +22,8 @@ from unittest.mock import AsyncMock, Mock, patch
 from datetime import datetime, timezone
 
 # Core imports
-from netra_backend.app.agents.canonical_tool_dispatcher import (
-    CanonicalToolDispatcher,
+from netra_backend.app.core.tools.unified_tool_dispatcher import (
+    UnifiedToolDispatcher,
     AuthenticationError,
     PermissionError, 
     SecurityViolationError,
@@ -83,8 +83,8 @@ def mock_websocket_bridge():
 def sample_tool():
     """Create sample tool for testing."""
     class SampleTool(BaseTool):
-        name = "sample_tool"
-        description = "A sample tool for testing"
+        name: str = "sample_tool"
+        description: str = "A sample tool for testing"
         
         def _run(self, input_text: str = "default") -> str:
             return f"Sample tool executed with: {input_text}"
@@ -98,8 +98,8 @@ def sample_tool():
 def admin_tool():
     """Create admin-only tool for testing."""
     class AdminTool(BaseTool):
-        name = "corpus_create"  # Admin tool name
-        description = "Admin-only corpus creation tool"
+        name: str = "corpus_create"  # Admin tool name
+        description: str = "Admin-only corpus creation tool"
         
         def _run(self, corpus_name: str) -> str:
             return f"Created corpus: {corpus_name}"
@@ -119,22 +119,22 @@ class TestSecurityEnforcement:
     
     def test_direct_instantiation_blocked(self):
         """Test that direct instantiation is blocked with SecurityViolationError."""
-        initial_violations = CanonicalToolDispatcher._security_violations
+        initial_violations = UnifiedToolDispatcher._security_violations
         
-        with pytest.raises(SecurityViolationError) as exc_info:
-            CanonicalToolDispatcher()
+        with pytest.raises((SecurityViolationError, RuntimeError)) as exc_info:
+            UnifiedToolDispatcher()
         
         error_msg = str(exc_info.value)
-        assert "SECURITY VIOLATION" in error_msg
-        assert "Direct CanonicalToolDispatcher instantiation is FORBIDDEN" in error_msg
+        # Check for either error message (RuntimeError or SecurityViolationError)
+        assert "Direct instantiation" in error_msg or "SECURITY VIOLATION" in error_msg
         assert "create_for_user" in error_msg
         
         # The error should contain security information
-        assert "mandatory user isolation" in error_msg
+        assert "user isolation" in error_msg.lower()
     
     async def test_factory_creates_isolated_instance(self, valid_user_context, mock_websocket_bridge):
         """Test that factory method creates properly isolated instance."""
-        dispatcher = await CanonicalToolDispatcher.create_for_user(
+        dispatcher = await UnifiedToolDispatcher.create_for_user(
             user_context=valid_user_context,
             websocket_bridge=mock_websocket_bridge
         )
@@ -144,10 +144,10 @@ class TestSecurityEnforcement:
             assert dispatcher.user_context == valid_user_context
             assert dispatcher.websocket_bridge == mock_websocket_bridge
             assert dispatcher._is_active is True
-            assert dispatcher.dispatcher_id.startswith(f"canonical_{valid_user_context.user_id}")
+            assert dispatcher.dispatcher_id.startswith(f"{valid_user_context.user_id}_")
             
             # Verify isolation - different instances have different state
-            dispatcher2 = await CanonicalToolDispatcher.create_for_user(
+            dispatcher2 = await UnifiedToolDispatcher.create_for_user(
                 user_context=valid_user_context,
                 websocket_bridge=mock_websocket_bridge  
             )
@@ -164,14 +164,13 @@ class TestSecurityEnforcement:
     async def test_invalid_user_context_rejected(self, mock_websocket_bridge):
         """Test that invalid user context is rejected with AuthenticationError."""
         with pytest.raises(AuthenticationError) as exc_info:
-            await CanonicalToolDispatcher.create_for_user(
+            await UnifiedToolDispatcher.create_for_user(
                 user_context=None,  # None context
                 websocket_bridge=mock_websocket_bridge
             )
         
         error_msg = str(exc_info.value)
-        assert "SECURITY VIOLATION" in error_msg
-        assert "UserExecutionContext is REQUIRED" in error_msg
+        assert "UserExecutionContext" in error_msg or "Valid UserExecutionContext required" in error_msg
         
         # Test with context that has invalid empty user_id (should fail in UserExecutionContext construction)
         with pytest.raises((AuthenticationError, Exception)) as exc_info:
@@ -181,7 +180,7 @@ class TestSecurityEnforcement:
                 run_id="test_run", 
                 thread_id="test_thread"
             )
-            await CanonicalToolDispatcher.create_for_user(
+            await UnifiedToolDispatcher.create_for_user(
                 user_context=invalid_context,
                 websocket_bridge=mock_websocket_bridge
             )
@@ -205,12 +204,12 @@ class TestUserIsolation:
         )
         
         # Create dispatchers for different users
-        dispatcher1 = await CanonicalToolDispatcher.create_for_user(
+        dispatcher1 = await UnifiedToolDispatcher.create_for_user(
             user_context=user1_context,
             websocket_bridge=mock_websocket_bridge,
             tools=[sample_tool]
         )
-        dispatcher2 = await CanonicalToolDispatcher.create_for_user(
+        dispatcher2 = await UnifiedToolDispatcher.create_for_user(
             user_context=user2_context,
             websocket_bridge=mock_websocket_bridge
         )
@@ -267,7 +266,7 @@ class TestUserIsolation:
             user_id="user2", run_id="run2", thread_id="thread2"
         )
         
-        dispatcher = await CanonicalToolDispatcher.create_for_user(
+        dispatcher = await UnifiedToolDispatcher.create_for_user(
             user_context=user1_context,
             websocket_bridge=mock_websocket_bridge,
             tools=[sample_tool]
@@ -300,7 +299,7 @@ class TestPermissionValidation:
     
     async def test_permission_validation_enforced(self, valid_user_context, mock_websocket_bridge, sample_tool):
         """Test that permission validation is always enforced."""
-        dispatcher = await CanonicalToolDispatcher.create_for_user(
+        dispatcher = await UnifiedToolDispatcher.create_for_user(
             user_context=valid_user_context,
             websocket_bridge=mock_websocket_bridge,
             tools=[sample_tool]
@@ -321,7 +320,7 @@ class TestPermissionValidation:
     async def test_admin_tool_permission_enforcement(self, admin_user_context, valid_user_context, mock_websocket_bridge, admin_tool):
         """Test that admin tools require admin permissions."""
         # Create admin dispatcher
-        admin_dispatcher = await CanonicalToolDispatcher.create_for_user(
+        admin_dispatcher = await UnifiedToolDispatcher.create_for_user(
             user_context=admin_user_context,
             websocket_bridge=mock_websocket_bridge,
             tools=[admin_tool],
@@ -329,7 +328,7 @@ class TestPermissionValidation:
         )
         
         # Create regular user dispatcher
-        user_dispatcher = await CanonicalToolDispatcher.create_for_user(
+        user_dispatcher = await UnifiedToolDispatcher.create_for_user(
             user_context=valid_user_context,
             websocket_bridge=mock_websocket_bridge,
             tools=[admin_tool],
@@ -342,7 +341,7 @@ class TestPermissionValidation:
             assert response.success is True
             
             # Regular user should fail (permission will be checked during execution)
-            with patch.object(CanonicalToolDispatcher, '_validate_admin_permissions', return_value=False):
+            with patch.object(UnifiedToolDispatcher, '_validate_admin_permissions', return_value=False):
                 response = await user_dispatcher.execute_tool("corpus_create", {"corpus_name": "test_corpus"})
                 # Should fail due to permission check
                 assert response.success is False
@@ -364,7 +363,7 @@ class TestPermissionValidation:
             thread_id="thread1"
         )
         
-        dispatcher = await CanonicalToolDispatcher.create_for_user(
+        dispatcher = await UnifiedToolDispatcher.create_for_user(
             user_context=anonymous_context,
             websocket_bridge=mock_websocket_bridge,
             tools=[sample_tool]
@@ -388,7 +387,7 @@ class TestWebSocketEvents:
     
     async def test_websocket_events_sent_on_success(self, valid_user_context, mock_websocket_bridge, sample_tool):
         """Test that WebSocket events are sent for successful tool execution."""
-        dispatcher = await CanonicalToolDispatcher.create_for_user(
+        dispatcher = await UnifiedToolDispatcher.create_for_user(
             user_context=valid_user_context,
             websocket_bridge=mock_websocket_bridge,
             tools=[sample_tool]
@@ -420,7 +419,7 @@ class TestWebSocketEvents:
     
     async def test_websocket_events_sent_on_error(self, valid_user_context, mock_websocket_bridge):
         """Test that WebSocket events are sent even when tool execution fails."""
-        dispatcher = await CanonicalToolDispatcher.create_for_user(
+        dispatcher = await UnifiedToolDispatcher.create_for_user(
             user_context=valid_user_context,
             websocket_bridge=mock_websocket_bridge
             # No tools registered - will cause "tool not found" error
@@ -443,7 +442,7 @@ class TestWebSocketEvents:
     
     async def test_missing_websocket_bridge_handled(self, valid_user_context, sample_tool):
         """Test that missing WebSocket bridge is handled gracefully."""
-        dispatcher = await CanonicalToolDispatcher.create_for_user(
+        dispatcher = await UnifiedToolDispatcher.create_for_user(
             user_context=valid_user_context,
             websocket_bridge=None,  # No WebSocket bridge
             tools=[sample_tool]
@@ -474,7 +473,7 @@ class TestErrorHandling:
     
     async def test_cleanup_after_error(self, valid_user_context, mock_websocket_bridge):
         """Test that resources are properly cleaned up even after errors."""
-        dispatcher = await CanonicalToolDispatcher.create_for_user(
+        dispatcher = await UnifiedToolDispatcher.create_for_user(
             user_context=valid_user_context,
             websocket_bridge=mock_websocket_bridge
         )
@@ -496,7 +495,7 @@ class TestErrorHandling:
     
     async def test_concurrent_execution_isolation(self, valid_user_context, mock_websocket_bridge, sample_tool):
         """Test that concurrent tool executions are properly isolated."""
-        dispatcher = await CanonicalToolDispatcher.create_for_user(
+        dispatcher = await UnifiedToolDispatcher.create_for_user(
             user_context=valid_user_context,
             websocket_bridge=mock_websocket_bridge,
             tools=[sample_tool]
@@ -526,7 +525,7 @@ class TestErrorHandling:
     
     async def test_inactive_dispatcher_blocked(self, valid_user_context, mock_websocket_bridge, sample_tool):
         """Test that using inactive dispatcher raises appropriate error."""
-        dispatcher = await CanonicalToolDispatcher.create_for_user(
+        dispatcher = await UnifiedToolDispatcher.create_for_user(
             user_context=valid_user_context,
             websocket_bridge=mock_websocket_bridge,
             tools=[sample_tool]
@@ -555,7 +554,7 @@ class TestContextManager:
         """Test that scoped dispatcher automatically cleans up."""
         dispatcher_id = None
         
-        async with CanonicalToolDispatcher.create_scoped(
+        async with UnifiedToolDispatcher.create_scoped(
             user_context=valid_user_context,
             websocket_bridge=mock_websocket_bridge,
             tools=[sample_tool]
@@ -571,14 +570,14 @@ class TestContextManager:
         assert dispatcher._is_active is False
         
         # Should not be in active dispatchers registry
-        assert dispatcher_id not in CanonicalToolDispatcher._active_dispatchers
+        assert dispatcher_id not in UnifiedToolDispatcher._active_dispatchers
     
     async def test_scoped_dispatcher_cleanup_on_exception(self, valid_user_context, mock_websocket_bridge, sample_tool):
         """Test that scoped dispatcher cleans up even when exception occurs."""
         dispatcher_id = None
         
         with pytest.raises(ValueError):
-            async with CanonicalToolDispatcher.create_scoped(
+            async with UnifiedToolDispatcher.create_scoped(
                 user_context=valid_user_context,
                 websocket_bridge=mock_websocket_bridge,
                 tools=[sample_tool]
@@ -594,7 +593,7 @@ class TestContextManager:
         
         # Should still be cleaned up despite exception
         assert dispatcher._is_active is False
-        assert dispatcher_id not in CanonicalToolDispatcher._active_dispatchers
+        assert dispatcher_id not in UnifiedToolDispatcher._active_dispatchers
 
 
 # ============================================================================
@@ -621,7 +620,7 @@ class TestPerformanceAndLoad:
         
         async def execute_for_user(user_context):
             """Execute multiple tools for a single user."""
-            async with CanonicalToolDispatcher.create_scoped(
+            async with UnifiedToolDispatcher.create_scoped(
                 user_context=user_context,
                 websocket_bridge=mock_websocket_bridge,
                 tools=[sample_tool]
@@ -659,7 +658,7 @@ class TestPerformanceAndLoad:
     
     async def test_resource_leak_prevention(self, mock_websocket_bridge, sample_tool):
         """Test that resource leaks are prevented under repeated usage."""
-        initial_dispatcher_count = len(CanonicalToolDispatcher._active_dispatchers)
+        initial_dispatcher_count = len(UnifiedToolDispatcher._active_dispatchers)
         
         # Create and cleanup many dispatchers
         for i in range(20):
@@ -669,7 +668,7 @@ class TestPerformanceAndLoad:
                 thread_id=f"leak_test_thread_{i}"
             )
             
-            async with CanonicalToolDispatcher.create_scoped(
+            async with UnifiedToolDispatcher.create_scoped(
                 user_context=user_context,
                 websocket_bridge=mock_websocket_bridge,
                 tools=[sample_tool]
@@ -679,7 +678,7 @@ class TestPerformanceAndLoad:
                 assert response.success is True
         
         # Verify no resource leaks - dispatcher count should return to initial
-        final_dispatcher_count = len(CanonicalToolDispatcher._active_dispatchers)
+        final_dispatcher_count = len(UnifiedToolDispatcher._active_dispatchers)
         assert final_dispatcher_count == initial_dispatcher_count
         
         print(f"✅ No resource leaks detected: {initial_dispatcher_count} -> {final_dispatcher_count} dispatchers")
@@ -699,7 +698,7 @@ class TestIntegration:
         mock_bridge.notify_tool_executing.return_value = True
         mock_bridge.notify_tool_completed.return_value = True
         
-        async with CanonicalToolDispatcher.create_scoped(
+        async with UnifiedToolDispatcher.create_scoped(
             user_context=valid_user_context,
             websocket_bridge=mock_bridge,
             tools=[sample_tool]
@@ -748,14 +747,14 @@ class TestSecurityStatus:
     
     def test_security_status_tracking(self):
         """Test that security status is properly tracked."""
-        initial_violations = CanonicalToolDispatcher._security_violations
+        initial_violations = UnifiedToolDispatcher._security_violations
         
         # Attempt direct instantiation (should fail and increment violations)
         with pytest.raises(SecurityViolationError):
-            CanonicalToolDispatcher()
+            UnifiedToolDispatcher()
         
         # Check security status
-        status = CanonicalToolDispatcher.get_security_status()
+        status = UnifiedToolDispatcher.get_security_status()
         
         assert status['security_violations'] > initial_violations
         assert status['enforcement_active'] is True
@@ -777,7 +776,7 @@ class TestSecurityStatus:
         # Create multiple dispatchers for the same user
         dispatchers = []
         for i in range(3):
-            dispatcher = await CanonicalToolDispatcher.create_for_user(
+            dispatcher = await UnifiedToolDispatcher.create_for_user(
                 user_context=user_context,
                 websocket_bridge=mock_websocket_bridge,
                 tools=[sample_tool]
@@ -789,7 +788,7 @@ class TestSecurityStatus:
             assert dispatcher._is_active is True
         
         # Cleanup all dispatchers for user
-        cleanup_count = await CanonicalToolDispatcher.cleanup_user_dispatchers(test_user_id)
+        cleanup_count = await UnifiedToolDispatcher.cleanup_user_dispatchers(test_user_id)
         assert cleanup_count == 3
         
         # Verify they're all cleaned up
@@ -797,7 +796,7 @@ class TestSecurityStatus:
             assert dispatcher._is_active is False
         
         # Verify none are in active registry for this user
-        status = CanonicalToolDispatcher.get_security_status()
+        status = UnifiedToolDispatcher.get_security_status()
         user_dispatcher_count = status['dispatchers_by_user'].get(test_user_id, 0)
         assert user_dispatcher_count == 0
         

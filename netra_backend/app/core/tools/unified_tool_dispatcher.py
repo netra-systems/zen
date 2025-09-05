@@ -45,6 +45,23 @@ logger = central_logger.get_logger(__name__)
 
 
 # ============================================================================
+# SECURITY EXCEPTIONS
+# ============================================================================
+
+class AuthenticationError(Exception):
+    """Raised when user authentication context is missing."""
+    pass
+
+class PermissionError(Exception):
+    """Raised when user lacks permission for tool execution."""
+    pass
+
+class SecurityViolationError(Exception):
+    """Raised when security constraints are violated."""
+    pass
+
+
+# ============================================================================
 # DATA MODELS
 # ============================================================================
 
@@ -87,16 +104,107 @@ class UnifiedToolDispatcher:
     # Class-level registry to track active dispatchers
     _active_dispatchers: Dict[str, 'UnifiedToolDispatcher'] = {}
     _max_dispatchers_per_user = 10
+    _security_violations = 0  # Track security violations globally
     
     def __init__(self):
         """Private initializer - raises error to enforce factory usage."""
         raise RuntimeError(
             "Direct instantiation of UnifiedToolDispatcher is forbidden.\n"
             "Use factory methods for proper isolation:\n"
+            "  - UnifiedToolDispatcher.create_for_user(context)\n"
+            "  - UnifiedToolDispatcher.create_scoped(context)\n"
             "  - UnifiedToolDispatcherFactory.create_for_request(context)\n"
             "  - UnifiedToolDispatcherFactory.create_for_admin(context, db)\n\n"
             "This ensures user isolation and prevents shared state issues."
         )
+    
+    @classmethod
+    async def create_for_user(
+        cls,
+        user_context: 'UserExecutionContext',
+        websocket_bridge: Optional[Any] = None,
+        tools: Optional[List['BaseTool']] = None,
+        enable_admin_tools: bool = False
+    ) -> 'UnifiedToolDispatcher':
+        """Create isolated dispatcher for specific user context.
+        
+        SECURITY CRITICAL: This is the recommended way to create dispatcher instances.
+        
+        Args:
+            user_context: UserExecutionContext for complete isolation (REQUIRED)
+            websocket_bridge: AgentWebSocketBridge for event notifications
+            tools: Optional list of tools to register initially
+            enable_admin_tools: Enable admin-level tools (requires admin permissions)
+            
+        Returns:
+            UnifiedToolDispatcher: Isolated dispatcher for this user only
+            
+        Raises:
+            AuthenticationError: If user_context is invalid
+            SecurityViolationError: If security constraints are violated
+            PermissionError: If admin tools requested without admin permission
+        """
+        # Validate user context
+        if not user_context or not user_context.user_id:
+            raise AuthenticationError("Valid UserExecutionContext required for dispatcher creation")
+        
+        # Determine strategy based on admin tools
+        strategy = DispatchStrategy.ADMIN if enable_admin_tools else DispatchStrategy.DEFAULT
+        
+        # Convert websocket_bridge to websocket_manager if needed
+        websocket_manager = None
+        if websocket_bridge:
+            # If it's already a WebSocketManager, use it directly
+            if hasattr(websocket_bridge, 'send_event'):
+                websocket_manager = websocket_bridge
+            # Otherwise wrap it
+            else:
+                from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+                websocket_manager = UnifiedWebSocketManager()
+        
+        # Create instance using internal factory
+        instance = cls._create_from_factory(
+            user_context=user_context,
+            websocket_manager=websocket_manager,
+            strategy=strategy,
+            tools=tools,
+            websocket_bridge=websocket_bridge  # Pass original bridge for compatibility
+        )
+        
+        # Store the original bridge for compatibility
+        instance._websocket_bridge = websocket_bridge
+        
+        return instance
+    
+    @classmethod
+    @asynccontextmanager
+    async def create_scoped(
+        cls,
+        user_context: 'UserExecutionContext',
+        websocket_bridge: Optional[Any] = None,
+        tools: Optional[List['BaseTool']] = None,
+        enable_admin_tools: bool = False
+    ):
+        """Create scoped dispatcher with automatic cleanup.
+        
+        RECOMMENDED USAGE PATTERN:
+            async with UnifiedToolDispatcher.create_scoped(user_context) as dispatcher:
+                result = await dispatcher.execute_tool("my_tool", params)
+                # Automatic cleanup happens here
+        """
+        dispatcher = await cls.create_for_user(
+            user_context=user_context,
+            websocket_bridge=websocket_bridge,
+            tools=tools,
+            enable_admin_tools=enable_admin_tools
+        )
+        
+        try:
+            yield dispatcher
+        finally:
+            # Ensure cleanup
+            if dispatcher._is_active:
+                dispatcher.cleanup()
     
     @classmethod
     def _create_from_factory(
@@ -110,7 +218,7 @@ class UnifiedToolDispatcher:
         """Internal factory method for creating properly isolated instances.
         
         This bypasses the __init__ RuntimeError and creates request-scoped instances.
-        Only called by UnifiedToolDispatcherFactory.
+        Only called by UnifiedToolDispatcherFactory or create_for_user.
         """
         # Create instance without calling __init__
         instance = cls.__new__(cls)
@@ -158,7 +266,7 @@ class UnifiedToolDispatcher:
         # Register initial tools
         if tools:
             for tool in tools:
-                self.registry.register_tool(tool)
+                self.register_tool(tool)
             logger.info(f"Registered {len(tools)} tools in dispatcher {self.dispatcher_id}")
         
         # Admin-specific setup
@@ -186,8 +294,13 @@ class UnifiedToolDispatcher:
             'failed_executions': 0,
             'total_execution_time_ms': 0,
             'websocket_events_sent': 0,
+            'permission_checks': 0,
+            'permission_denials': 0,
+            'security_violations': 0,
             'last_execution_time': None,
-            'created_at': self.created_at
+            'created_at': self.created_at,
+            'user_id': self.user_context.user_id if hasattr(self, 'user_context') else None,
+            'dispatcher_id': self.dispatcher_id if hasattr(self, 'dispatcher_id') else None
         }
     
     def _create_websocket_bridge(self):
@@ -239,43 +352,71 @@ class UnifiedToolDispatcher:
     @property
     def tools(self) -> Dict[str, Any]:
         """Get registered tools."""
-        return self.registry.tools if hasattr(self, 'registry') else {}
+        if hasattr(self, 'registry'):
+            # Return the registry's items as a dict
+            return {key: self.registry.get(key) for key in self.registry.list_keys()}
+        return {}
     
     @property
     def has_websocket_support(self) -> bool:
         """Check if WebSocket support is enabled."""
         return self.websocket_manager is not None
     
+    @property
+    def websocket_bridge(self):
+        """Compatibility property for tests expecting websocket_bridge."""
+        # Return the original bridge if it was passed, otherwise return the manager
+        return getattr(self, '_websocket_bridge', self.websocket_manager)
+    
     def has_tool(self, tool_name: str) -> bool:
         """Check if a tool is registered."""
         self._ensure_active()
-        return self.registry.has_tool(tool_name)
+        return self.registry.has(tool_name)
     
     def register_tool(self, tool: 'BaseTool') -> None:
         """Register a tool with the dispatcher."""
         self._ensure_active()
-        self.registry.register_tool(tool)
+        # Use the UniversalRegistry's register method
+        self.registry.register(tool.name, tool)
         logger.debug(f"Registered tool {tool.name} in dispatcher {self.dispatcher_id}")
     
     def get_available_tools(self) -> List[str]:
         """Get list of available tool names."""
         self._ensure_active()
-        return self.registry.list_tools()
+        return self.registry.list_keys()
     
     async def execute_tool(
         self,
         tool_name: str,
-        parameters: Dict[str, Any] = None
+        parameters: Dict[str, Any] = None,
+        require_permission_check: bool = True
     ) -> ToolDispatchResponse:
-        """Execute a tool with WebSocket notifications.
+        """Execute a tool with WebSocket notifications and security validation.
         
         CRITICAL: This method ensures WebSocket events are sent for ALL tool executions.
         Events sent: tool_executing, tool_completed
+        
+        Args:
+            tool_name: Name of tool to execute (REQUIRED)
+            parameters: Tool parameters dictionary
+            require_permission_check: Force permission check (ALWAYS True in production)
+            
+        Returns:
+            ToolDispatchResponse: Results with complete metadata
+            
+        Raises:
+            AuthenticationError: If user context is invalid
+            PermissionError: If user lacks tool permission
+            SecurityViolationError: If security constraints violated
         """
         self._ensure_active()
         
         parameters = parameters or {}
         start_time = time.time()
+        
+        # MANDATORY: Permission validation
+        if require_permission_check:
+            await self._validate_tool_permissions(tool_name)
         
         # Emit tool_executing event
         if self.has_websocket_support:
@@ -292,7 +433,7 @@ class UnifiedToolDispatcher:
                     raise PermissionError(f"Admin permission required for tool {tool_name}")
             
             # Get tool and execute
-            tool = self.registry.get_tool(tool_name)
+            tool = self.registry.get(tool_name)
             
             # Create tool input
             tool_input = ToolInput(
@@ -302,10 +443,13 @@ class UnifiedToolDispatcher:
             )
             
             # Execute through executor (includes WebSocket notifications)
+            # Only pass parameters the tool expects, context is for the executor
+            kwargs = {'context': self.user_context}
+            kwargs.update(parameters)
             result = await self.executor.execute_tool_with_input(
                 tool_input,
                 tool,
-                {'context': self.user_context, **parameters}
+                kwargs
             )
             
             # Update metrics
@@ -435,18 +579,70 @@ class UnifiedToolDispatcher:
     
     # ===================== ADMIN METHODS =====================
     
+    async def _validate_tool_permissions(self, tool_name: str):
+        """Validate user has permission to execute the specified tool.
+        
+        SECURITY CRITICAL: This method enforces permission boundaries.
+        
+        Args:
+            tool_name: Name of tool to validate permissions for
+            
+        Raises:
+            AuthenticationError: If user context is invalid
+            PermissionError: If user lacks required permissions
+            SecurityViolationError: If security check fails
+        """
+        # Track permission check
+        self._metrics['permission_checks'] += 1
+        
+        # Validate user context exists
+        if not self.user_context or not self.user_context.user_id:
+            self._metrics['security_violations'] += 1
+            self.__class__._security_violations += 1
+            raise AuthenticationError(
+                f"SECURITY: User context required for tool execution [tool={tool_name}]"
+            )
+        
+        # Check admin tool permissions
+        if hasattr(self, 'admin_tools') and tool_name in self.admin_tools:
+            if self.strategy != DispatchStrategy.ADMIN:
+                self._metrics['permission_denials'] += 1
+                raise PermissionError(
+                    f"Admin permission required for tool {tool_name} "
+                    f"[user={self.user_context.user_id}]"
+                )
+            
+            # Verify admin role in metadata
+            if not self._check_admin_permission():
+                self._metrics['permission_denials'] += 1
+                raise PermissionError(
+                    f"User {self.user_context.user_id} lacks admin role for tool {tool_name}"
+                )
+        
+        # Log successful permission check
+        logger.debug(
+            f"Permission validated for tool {tool_name} "
+            f"[user={self.user_context.user_id}, dispatcher={self.dispatcher_id}]"
+        )
+    
     def _check_admin_permission(self) -> bool:
         """Check if user has admin permissions."""
-        if not self.user:
-            return False
+        # Check metadata for admin role
+        if hasattr(self.user_context, 'metadata') and self.user_context.metadata:
+            roles = self.user_context.metadata.get('roles', [])
+            if 'admin' in roles:
+                return True
         
-        # Check user admin status
-        if hasattr(self.user, 'is_admin'):
-            return self.user.is_admin
+        # Check user object if available
+        if hasattr(self, 'user') and self.user:
+            # Check user admin status
+            if hasattr(self.user, 'is_admin'):
+                return self.user.is_admin
         
         # Check permission service
-        if self.permission_service:
-            return self.permission_service.has_admin_permission(self.user)
+        if hasattr(self, 'permission_service') and self.permission_service:
+            if hasattr(self, 'user') and self.user:
+                return self.permission_service.has_admin_permission(self.user)
         
         return False
     

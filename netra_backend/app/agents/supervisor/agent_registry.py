@@ -11,7 +11,7 @@ KEY SECURITY FEATURES:
 - WebSocket bridge isolation per user session
 
 SSOT COMPLIANCE: Extends UniversalRegistry as SSOT while adding hardening.
-Uses CanonicalToolDispatcher as SSOT with mandatory user scoping.
+Uses UnifiedToolDispatcher as SSOT with mandatory user scoping.
 All agents receive properly isolated tool dispatchers per user context.
 """
 
@@ -29,8 +29,8 @@ from netra_backend.app.core.registry.universal_registry import (
 )
 
 if TYPE_CHECKING:
-    # MIGRATED: Use CanonicalToolDispatcher instead of legacy dispatchers
-    from netra_backend.app.agents.canonical_tool_dispatcher import CanonicalToolDispatcher
+    # MIGRATED: Use UnifiedToolDispatcher as SSOT for tool dispatching
+    from netra_backend.app.core.tools.unified_tool_dispatcher import UnifiedToolDispatcher
     from netra_backend.app.llm.llm_manager import LLMManager
     from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
     from netra_backend.app.websocket_core.manager import WebSocketManager
@@ -530,11 +530,11 @@ class AgentRegistry(UniversalAgentRegistry):
             websocket_bridge: WebSocket bridge for event notifications
             
         Returns:
-            CanonicalToolDispatcher: Properly isolated dispatcher instance
+            UnifiedToolDispatcher: Properly isolated dispatcher instance
         """
-        from netra_backend.app.agents.canonical_tool_dispatcher import CanonicalToolDispatcher
+        from netra_backend.app.core.tools.unified_tool_dispatcher import UnifiedToolDispatcher
         
-        return await CanonicalToolDispatcher.create_for_user(
+        return await UnifiedToolDispatcher.create_for_user(
             user_context=user_context,
             websocket_bridge=websocket_bridge,
             enable_admin_tools=False  # Default to standard tools only
@@ -542,7 +542,7 @@ class AgentRegistry(UniversalAgentRegistry):
     
     async def create_tool_dispatcher_for_user(self, user_context: 'UserExecutionContext',
                                              websocket_bridge: Optional['AgentWebSocketBridge'] = None,
-                                             enable_admin_tools: bool = False) -> 'CanonicalToolDispatcher':
+                                             enable_admin_tools: bool = False) -> 'UnifiedToolDispatcher':
         """Create properly isolated tool dispatcher for a specific user.
         
         RECOMMENDED USAGE: Use this method to get tool dispatchers for agents.
@@ -553,11 +553,11 @@ class AgentRegistry(UniversalAgentRegistry):
             enable_admin_tools: Enable admin tools (requires admin permissions)
             
         Returns:
-            CanonicalToolDispatcher: Isolated dispatcher for this user
+            UnifiedToolDispatcher: Isolated dispatcher for this user
         """
-        from netra_backend.app.agents.canonical_tool_dispatcher import CanonicalToolDispatcher
+        from netra_backend.app.core.tools.unified_tool_dispatcher import UnifiedToolDispatcher
         
-        return await CanonicalToolDispatcher.create_for_user(
+        return await UnifiedToolDispatcher.create_for_user(
             user_context=user_context,
             websocket_bridge=websocket_bridge,
             enable_admin_tools=enable_admin_tools

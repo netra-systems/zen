@@ -329,12 +329,26 @@ class UnifiedToolExecutionEngine:
     
     async def _run_tool_by_interface(self, tool: Any, kwargs: Dict[str, Any]) -> Any:
         """Run tool based on its interface type."""
-        if hasattr(tool, 'arun'):
-            return await tool.arun(kwargs)
+        # Remove context from kwargs before passing to tool
+        tool_kwargs = {k: v for k, v in kwargs.items() if k != 'context'}
+        
+        # For BaseTool instances, they expect specific arguments
+        from langchain_core.tools import BaseTool
+        if isinstance(tool, BaseTool):
+            # BaseTool.arun expects the input as a single argument or dict
+            # Convert kwargs to the format expected by the tool
+            if tool_kwargs:
+                # If there are parameters, pass them as tool input
+                return await tool.arun(tool_kwargs)
+            else:
+                # If no parameters, pass empty dict
+                return await tool.arun({})
+        elif hasattr(tool, 'arun'):
+            return await tool.arun(**tool_kwargs)
         elif asyncio.iscoroutinefunction(tool):
-            return await tool(kwargs)
+            return await tool(**tool_kwargs)
         else:
-            return tool(kwargs)
+            return tool(**tool_kwargs)
     
     async def _execute_by_tool_type(
         self,
@@ -575,7 +589,7 @@ class UnifiedToolExecutionEngine:
             user_id=context.user_id,
             thread_id=context.thread_id, 
             run_id=context.run_id,
-            agent_name=context.agent_name,
+            agent_name=getattr(context, 'agent_name', 'ToolDispatcher'),
             tool_name=tool_name,
             connection_id=getattr(context, 'connection_id', None)
         )
@@ -597,7 +611,7 @@ class UnifiedToolExecutionEngine:
             start_time = time.time()
             result = await self.websocket_bridge.notify_tool_executing(
                 run_id=context.run_id,
-                agent_name=context.agent_name,
+                agent_name=getattr(context, 'agent_name', 'ToolDispatcher'),
                 tool_name=tool_name,
                 parameters={"summary": params_summary} if params_summary else None
             )
@@ -676,7 +690,7 @@ class UnifiedToolExecutionEngine:
             user_id=context.user_id,
             thread_id=context.thread_id,
             run_id=context.run_id,
-            agent_name=context.agent_name,
+            agent_name=getattr(context, 'agent_name', 'ToolDispatcher'),
             tool_name=tool_name,
             connection_id=getattr(context, 'connection_id', None)
         )
@@ -711,7 +725,7 @@ class UnifiedToolExecutionEngine:
             start_time = time.time()
             notification_result = await self.websocket_bridge.notify_tool_completed(
                 run_id=context.run_id,
-                agent_name=context.agent_name,
+                agent_name=getattr(context, 'agent_name', 'ToolDispatcher'),
                 tool_name=tool_name,
                 result=result_dict,
                 execution_time_ms=duration_ms
@@ -753,7 +767,7 @@ class UnifiedToolExecutionEngine:
         if hasattr(state, '_websocket_context') and state._websocket_context:
             original_context = state._websocket_context
             return AgentExecutionContext(
-                agent_name=f"{original_context.agent_name}[{tool_name}]",
+                agent_name=f"{original_getattr(context, 'agent_name', 'ToolDispatcher')}[{tool_name}]",
                 run_id=original_context.run_id,
                 thread_id=original_context.thread_id,
                 user_id=original_context.user_id,
@@ -943,7 +957,7 @@ class UnifiedToolExecutionEngine:
             
             await self.websocket_bridge.notify_progress_update(
                 run_id=context.run_id,
-                agent_name=context.agent_name,
+                agent_name=getattr(context, 'agent_name', 'ToolDispatcher'),
                 progress=progress_data
             )
         except Exception as e:
