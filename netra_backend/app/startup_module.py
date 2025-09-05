@@ -1189,7 +1189,6 @@ async def initialize_monitoring_integration(handlers: dict = None) -> bool:
         
         # Import monitoring components
         from netra_backend.app.websocket_core.event_monitor import chat_event_monitor
-        from netra_backend.app.services.agent_websocket_bridge import get_agent_websocket_bridge
         
         # Initialize ChatEventMonitor independently first
         await chat_event_monitor.start_monitoring()
