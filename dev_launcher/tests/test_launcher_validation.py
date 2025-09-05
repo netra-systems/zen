@@ -1,4 +1,5 @@
 from shared.isolated_environment import get_env
+from shared.isolated_environment import IsolatedEnvironment
 """
 env = get_env()
 Validation tests for the dev launcher.
@@ -68,7 +69,6 @@ def test_launcher_imports():
 
 def test_launcher_dry_run():
     """Test launcher initialization without actually starting services."""
-    from unittest.mock import patch
 
     from dev_launcher.launcher import DevLauncher
     from dev_launcher.config import LauncherConfig
@@ -141,7 +141,6 @@ def test_health_monitor_basic():
 def test_process_manager_basic():
     """Test basic process manager functionality."""
     import subprocess
-    from unittest.mock import Mock
 
     from dev_launcher.process_manager import ProcessManager
     
@@ -164,7 +163,6 @@ def test_process_manager_basic():
 def test_config_env_vars():
     """Test that configuration handles environment variables."""
     import os
-    from unittest.mock import patch
 
     from dev_launcher.config import LauncherConfig
     
@@ -182,7 +180,6 @@ def test_config_env_vars():
 
 def test_error_messages():
     """Test that error messages are user-friendly."""
-    from unittest.mock import Mock, patch
 
     from dev_launcher.config import LauncherConfig
     from dev_launcher.launcher import DevLauncher
@@ -216,7 +213,6 @@ def test_error_messages():
 
 def test_launcher_with_defaults():
     """Test that launcher can be created with default settings."""
-    from unittest.mock import patch
 
     from dev_launcher.launcher import DevLauncher
     from dev_launcher.config import LauncherConfig
@@ -283,5 +279,4 @@ def main():
 
 
 if __name__ == "__main__":
-    from unittest.mock import patch
     sys.exit(main())

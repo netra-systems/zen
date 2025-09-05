@@ -11,7 +11,7 @@ import pytest
 import time
 from pathlib import Path
 from typing import Dict, List, Optional
-from unittest.mock import AsyncMock, MagicMock, patch
+from shared.isolated_environment import IsolatedEnvironment
 
 from dev_launcher.dependency_manager import (
     DependencyManager, 

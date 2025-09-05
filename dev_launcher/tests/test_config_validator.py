@@ -1,4 +1,5 @@
 from shared.isolated_environment import get_env
+from shared.isolated_environment import IsolatedEnvironment
 """
 Tests for Service Config Validator.
 
@@ -8,7 +9,6 @@ Validates the intelligent configuration detection and validation functionality.
 import asyncio
 from datetime import datetime, timedelta
 from pathlib import Path
-from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
 
@@ -146,17 +146,14 @@ class TestConfigDecisionEngine:
 class TestHelperFunctions:
     """Test helper functions."""
     
-    @patch.dict('os.environ', {'CI': 'true'})
     def test_detect_ci_environment_with_ci(self):
         """Test CI environment detection with CI flag."""
         assert _detect_ci_environment() is True
     
-    @patch.dict('os.environ', {}, clear=True)
     def test_detect_ci_environment_without_ci(self):
         """Test CI environment detection without CI flag."""
         assert _detect_ci_environment() is False
     
-    @patch.dict('os.environ', {'REDIS_HOST': 'localhost', 'POSTGRES_PORT': '5432'})
     def test_extract_env_overrides(self):
         """Test extraction of environment overrides."""
         overrides = _extract_env_overrides()
@@ -170,9 +167,7 @@ class TestValidateServiceConfig:
     
     @pytest.mark.asyncio
     # Mock: Component isolation for testing without external dependencies
-    @patch('dev_launcher.config_validator.ServiceConfigValidator')
     # Mock: Component isolation for testing without external dependencies
-    @patch('dev_launcher.config_validator.ConfigDecisionEngine')
     async def test_main_validation_flow(self, mock_engine_class, mock_validator_class):
         """Test main validation flow."""
         # Setup mocks

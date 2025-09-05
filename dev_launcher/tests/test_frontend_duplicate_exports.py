@@ -23,7 +23,7 @@ import shutil
 import subprocess
 from pathlib import Path
 from typing import Dict, List, Set, Tuple, Optional
-from unittest.mock import patch, mock_open, MagicMock
+from shared.isolated_environment import IsolatedEnvironment
 
 # Test fixtures and utilities
 class TypeScriptModuleParser:
