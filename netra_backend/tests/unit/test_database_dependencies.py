@@ -10,12 +10,15 @@ Business Value Justification (BVJ):
 Tests the correct usage of async generators vs async context managers
 to prevent "TypeError: 'async_generator' object does not support the 
 asynchronous context manager protocol" errors.
+
+Updated to test the SSOT method where get_db() is an async context manager.
 """
 
 import pytest
 from typing import AsyncGenerator
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch, Mock
 from sqlalchemy.ext.asyncio import AsyncSession
+from contextlib import asynccontextmanager
 
 from netra_backend.app.dependencies import (
     get_db_dependency,
@@ -30,7 +33,8 @@ async def test_get_db_dependency_returns_async_generator():
     # Create a mock AsyncSession
     mock_session = MagicMock(spec=AsyncSession)
     
-    # Mock get_db to return an async generator
+    # Mock get_db as async context manager (SSOT method)
+    @asynccontextmanager
     async def mock_get_db():
         yield mock_session
     
@@ -57,7 +61,8 @@ async def test_get_db_dependency_validates_session_type():
     # Create a mock AsyncSession
     mock_session = MagicMock(spec=AsyncSession)
     
-    # Mock get_db to return an async generator
+    # Mock get_db as async context manager (SSOT method)
+    @asynccontextmanager
     async def mock_get_db():
         yield mock_session
     
@@ -72,22 +77,22 @@ async def test_get_db_dependency_validates_session_type():
 
 @pytest.mark.asyncio
 async def test_get_db_dependency_handles_multiple_sessions():
-    """Test that get_db_dependency correctly handles multiple sessions from get_db."""
-    # Create mock sessions
-    mock_sessions = [MagicMock(spec=AsyncSession) for _ in range(3)]
+    """Test that get_db_dependency correctly handles a single session from get_db context manager."""
+    # Create mock session
+    mock_session = MagicMock(spec=AsyncSession)
     
-    # Mock get_db to yield multiple sessions
+    # Mock get_db as async context manager (SSOT method - returns one session)
+    @asynccontextmanager
     async def mock_get_db():
-        for session in mock_sessions:
-            yield session
+        yield mock_session
     
     with patch('netra_backend.app.dependencies.get_db', mock_get_db):
         received_sessions = []
         async for session in get_db_dependency():
             received_sessions.append(session)
         
-        assert len(received_sessions) == 3, "Should receive all sessions"
-        assert received_sessions == mock_sessions, "Should receive sessions in order"
+        assert len(received_sessions) == 1, "Should receive one session from context manager"
+        assert received_sessions[0] == mock_session, "Should receive the mock session"
 
 
 @pytest.mark.asyncio
@@ -96,7 +101,8 @@ async def test_get_db_session_legacy_function():
     # Create a mock AsyncSession
     mock_session = MagicMock(spec=AsyncSession)
     
-    # Mock get_db to return an async generator
+    # Mock get_db as async context manager (SSOT method)
+    @asynccontextmanager
     async def mock_get_db():
         yield mock_session
     
@@ -116,7 +122,8 @@ async def test_async_for_iteration_pattern():
     # Create a mock AsyncSession
     mock_session = MagicMock(spec=AsyncSession)
     
-    # Mock get_db to return an async generator
+    # Mock get_db as async context manager (SSOT method)
+    @asynccontextmanager
     async def mock_get_db():
         yield mock_session
     
@@ -133,22 +140,21 @@ async def test_async_for_iteration_pattern():
 
 @pytest.mark.asyncio
 async def test_async_with_pattern_fails():
-    """Test that async with pattern would fail (demonstrating the original bug)."""
-    # Create a mock that simulates the original get_db behavior
-    async def mock_get_db():
-        # This is an async generator, not a context manager
+    """Test that async with pattern works with proper async context manager."""
+    # Create a mock that simulates a proper async context manager
+    @asynccontextmanager
+    async def mock_get_db_context_manager():
         yield MagicMock(spec=AsyncSession)
     
-    # Verify that trying to use async with would fail
-    with pytest.raises(TypeError) as exc_info:
-        async with mock_get_db() as session:  # This should fail
-            pass
-    
-    assert "does not support the asynchronous context manager protocol" in str(exc_info.value)
+    # Verify that async with works with proper context manager
+    try:
+        async with mock_get_db_context_manager() as session:
+            assert isinstance(session, MagicMock)
+    except TypeError:
+        pytest.fail("Async with should work with proper async context manager")
 
 
-@pytest.mark.asyncio
-async def test_validate_session_type():
+def test_validate_session_type():
     """Test the _validate_session_type function."""
     # Test with valid AsyncSession
     mock_session = MagicMock(spec=AsyncSession)
@@ -169,6 +175,7 @@ async def test_validate_session_type():
 async def test_get_db_dependency_propagates_exceptions():
     """Test that exceptions from get_db are properly propagated."""
     # Mock get_db to raise an exception
+    @asynccontextmanager
     async def mock_get_db():
         raise ConnectionError("Database connection failed")
         yield  # Never reached
@@ -183,9 +190,10 @@ async def test_get_db_dependency_propagates_exceptions():
 
 @pytest.mark.asyncio 
 async def test_generator_cleanup_on_exception():
-    """Test that generator cleanup happens correctly on exception."""
+    """Test that generator cleanup behavior is correct (resources don't leak)."""
     cleanup_called = False
     
+    @asynccontextmanager
     async def mock_get_db():
         nonlocal cleanup_called
         try:
@@ -200,8 +208,10 @@ async def test_generator_cleanup_on_exception():
         except ValueError:
             pass  # Expected
     
-    # Note: Cleanup might be delayed due to generator finalization
-    # but should eventually happen
+    # Note: With async generators, cleanup timing can vary due to garbage collection.
+    # The important thing is that the context manager ensures proper resource cleanup
+    # regardless of when the generator is finalized. This test verifies no errors occur.
+    # In production, proper resource cleanup is guaranteed by the async context manager.
 
 
 @pytest.mark.asyncio

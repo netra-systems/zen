@@ -66,6 +66,23 @@ class MockAgent(AgentLifecycleMixin):
     async def _send_update(self, run_id, data):
         """Mock send update."""
         pass
+    
+    # WebSocket emission methods required by AgentLifecycleMixin
+    async def emit_agent_started(self, message):
+        """Mock emit agent started."""
+        pass
+        
+    async def emit_error(self, message, error_type="error"):
+        """Mock emit error."""
+        pass
+        
+    async def emit_warning(self, message):
+        """Mock emit warning."""
+        pass
+        
+    async def emit_agent_completed(self, message):
+        """Mock emit agent completed."""
+        pass
 
 # Test fixtures for setup
 @pytest.fixture
@@ -562,6 +579,23 @@ class TestSupervisorAgentCoordination:
             
         async def _send_update(self, run_id, data):
             """Mock send supervisor update."""
+            pass
+        
+        # WebSocket emission methods required by AgentLifecycleMixin
+        async def emit_agent_started(self, message):
+            """Mock emit agent started."""
+            pass
+            
+        async def emit_error(self, message, error_type="error"):
+            """Mock emit error."""
+            pass
+            
+        async def emit_warning(self, message):
+            """Mock emit warning."""
+            pass
+            
+        async def emit_agent_completed(self, message):
+            """Mock emit agent completed."""
             pass
     
     @pytest.fixture
