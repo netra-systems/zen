@@ -46,7 +46,7 @@ import sys
 from pathlib import Path
 
 # Add auth service to path
-auth_service_path = Path("{Path(__file__).parent.parent}")
+auth_service_path = Path(r"{Path(__file__).parent.parent}")
 sys.path.insert(0, str(auth_service_path.parent))
 
 # Clear JWT_SECRET_KEY to simulate missing variable
@@ -93,7 +93,7 @@ import sys
 from pathlib import Path
 
 # Add auth service to path
-auth_service_path = Path("{Path(__file__).parent.parent}")
+auth_service_path = Path(r"{Path(__file__).parent.parent}")
 sys.path.insert(0, str(auth_service_path.parent))
 
 # Set test environment 
@@ -137,7 +137,7 @@ import sys
 from pathlib import Path
 
 # Add auth service to path
-auth_service_path = Path(__file__).parent.parent
+auth_service_path = Path(r"{Path(__file__).parent.parent}")
 sys.path.insert(0, str(auth_service_path.parent))
 
 # Clear any existing variables
@@ -147,7 +147,7 @@ env.delete("JWT_SECRET_KEY", "test_script")
 
 # Load the test .env file BEFORE importing auth modules
 from dotenv import load_dotenv
-load_dotenv("{temp_env_file}", override=True)
+load_dotenv(r"{temp_env_file}", override=True)
 
 # Now import auth environment - should work
 try:
@@ -187,7 +187,7 @@ import sys
 from pathlib import Path
 
 # Add auth service to path
-auth_service_path = Path("{Path(__file__).parent.parent}")
+auth_service_path = Path(r"{Path(__file__).parent.parent}")
 sys.path.insert(0, str(auth_service_path.parent))
 
 # Set test environment with OAuth test credentials
@@ -240,7 +240,7 @@ import sys
 from pathlib import Path
 
 # Add auth service to path
-auth_service_path = Path("{Path(__file__).parent.parent}")
+auth_service_path = Path(r"{Path(__file__).parent.parent}")
 sys.path.insert(0, str(auth_service_path.parent))
 
 # Test development environment defaults
@@ -287,7 +287,7 @@ import sys
 from pathlib import Path
 
 # Add auth service to path
-auth_service_path = Path("{Path(__file__).parent.parent}")
+auth_service_path = Path(r"{Path(__file__).parent.parent}")
 sys.path.insert(0, str(auth_service_path.parent))
 
 # Set variables using IsolatedEnvironment
