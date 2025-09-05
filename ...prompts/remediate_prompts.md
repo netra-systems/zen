@@ -326,3 +326,12 @@ LIFE OR DEATH CRITICAL: ACTION:
     2) Use multi-agent (3-7 best most relevant agents) to complete actual work.
     3) failing tests and test suite must be complete, comphrensive, and difficult
 """
+
+
+LIFE OR DEATH CRITICAL!!!!!!!: ACTION:
+WEBSOCKET_MOCK_REQUEST_REMEDIATION_PLAN.md
+FOR EACH sub task in item:
+    1) don't believe the report fully - check latest system and think about it yourself
+    2) Use multi-agent (3-7 best most relevant agents) to complete actual work.
+    3) failing tests and test suite must be complete, comphrensive, and difficult
+Repeat validation until 3 independent agents confirm it is correct in every possible way
