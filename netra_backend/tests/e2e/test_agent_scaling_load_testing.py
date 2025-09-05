@@ -343,7 +343,7 @@ class TestAgentResourceManagement:
                 
                 # Mock database operation
                 async def db_operation():
-                    async with mock_db_manager.get_async_session() as session:
+                    async with mock_db_manager.get_db() as session:
                         await asyncio.sleep(0.05)  # Simulate query time
                         return {"status": "completed"}
                 
