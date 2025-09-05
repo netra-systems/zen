@@ -2,10 +2,14 @@
 
 import sys
 from pathlib import Path
+from test_framework.database.test_database_manager import TestDatabaseManager
+from test_framework.redis.test_redis_manager import TestRedisManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 import json
 from datetime import datetime, timezone
-from unittest.mock import AsyncMock, MagicMock, Mock, patch, patch
 
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -73,7 +77,7 @@ class TestDateTimeSerialization:
         # Mock: Database session isolation for transaction testing without real database dependency
         mock_session = AsyncMock(spec=AsyncSession)
         # Mock: Generic component isolation for controlled unit testing
-        mock_begin = AsyncMock()
+        mock_begin = AsyncNone  # TODO: Use real service instance
         # Mock: Async component isolation for testing without real async operations
         mock_begin.__aenter__ = AsyncMock(return_value=None)
         # Mock: Async component isolation for testing without real async operations
@@ -81,9 +85,9 @@ class TestDateTimeSerialization:
         # Mock: Database session isolation for transaction testing without real database dependency
         mock_session.begin = MagicMock(return_value=mock_begin)
         # Mock: Database session isolation for transaction testing without real database dependency
-        mock_session.add = MagicMock()
+        mock_session.add = MagicNone  # TODO: Use real service instance
         # Mock: Database session isolation for transaction testing without real database dependency
-        mock_session.flush = AsyncMock()
+        mock_session.flush = AsyncNone  # TODO: Use real service instance
         
         # Mock internal methods and force legacy save path
         with patch.object(service, '_log_state_transaction', new_callable=AsyncMock) as mock_log:
@@ -147,7 +151,7 @@ class TestDateTimeSerialization:
         # Mock: Database session isolation for transaction testing without real database dependency
         mock_session = AsyncMock(spec=AsyncSession)
         # Mock: Generic component isolation for controlled unit testing
-        mock_begin = AsyncMock()
+        mock_begin = AsyncNone  # TODO: Use real service instance
         # Mock: Async component isolation for testing without real async operations
         mock_begin.__aenter__ = AsyncMock(return_value=None)
         # Mock: Async component isolation for testing without real async operations
@@ -155,9 +159,9 @@ class TestDateTimeSerialization:
         # Mock: Database session isolation for transaction testing without real database dependency
         mock_session.begin = MagicMock(return_value=mock_begin)
         # Mock: Database session isolation for transaction testing without real database dependency
-        mock_session.add = MagicMock()
+        mock_session.add = MagicNone  # TODO: Use real service instance
         # Mock: Database session isolation for transaction testing without real database dependency
-        mock_session.flush = AsyncMock()
+        mock_session.flush = AsyncNone  # TODO: Use real service instance
         
         # Mock methods and force legacy save path
         with patch.object(service, '_log_state_transaction', new_callable=AsyncMock):

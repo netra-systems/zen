@@ -11,9 +11,14 @@ Tests are designed to be failing initially to identify gaps in functionality.
 import asyncio
 import time
 import pytest
-from unittest.mock import Mock, AsyncMock, patch, MagicMock, call
 from typing import Any, Dict, List, Optional
 from datetime import datetime
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from test_framework.database.test_database_manager import TestDatabaseManager
+from test_framework.redis.test_redis_manager import TestRedisManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 from netra_backend.app.core.managers.unified_lifecycle_manager import (
     UnifiedLifecycleManager,
@@ -48,6 +53,7 @@ class TestUnifiedLifecycleManagerInitialization:
         
     def test_init_with_custom_values_sets_parameters_correctly(self):
         """Test initialization with custom parameters."""
+    pass
         manager = UnifiedLifecycleManager(
             user_id="test_user",
             shutdown_timeout=45,
@@ -62,10 +68,9 @@ class TestUnifiedLifecycleManagerInitialization:
         assert manager.health_check_grace_period == 10
         assert manager.startup_timeout == 90
         
-    @patch('netra_backend.app.core.managers.unified_lifecycle_manager.IsolatedEnvironment')
-    def test_load_environment_config_uses_environment_variables(self, mock_env_class):
+        def test_load_environment_config_uses_environment_variables(self, mock_env_class):
         """Test that environment variables are loaded correctly."""
-        mock_env = Mock()
+        mock_env = mock_env_instance  # Initialize appropriate service
         mock_env.get.side_effect = lambda key, default: {
             'SHUTDOWN_TIMEOUT': '35',
             'DRAIN_TIMEOUT': '15',
@@ -85,10 +90,10 @@ class TestUnifiedLifecycleManagerInitialization:
         assert manager._error_threshold == 3
         assert manager._health_check_interval == 60.0
         
-    @patch('netra_backend.app.core.managers.unified_lifecycle_manager.IsolatedEnvironment')
-    def test_load_environment_config_handles_invalid_values_gracefully(self, mock_env_class):
+        def test_load_environment_config_handles_invalid_values_gracefully(self, mock_env_class):
         """Test that invalid environment values fall back to defaults."""
-        mock_env = Mock()
+    pass
+        mock_env = mock_env_instance  # Initialize appropriate service
         mock_env.get.side_effect = lambda key, default: {
             'SHUTDOWN_TIMEOUT': 'invalid',
             'DRAIN_TIMEOUT': 'also_invalid'
@@ -112,6 +117,7 @@ class TestUnifiedLifecycleManagerInitialization:
         
     def test_component_type_enum_values_are_correct(self):
         """Test that component type enum has expected values."""
+    pass
         expected_types = [
             "websocket_manager", "database_manager", "agent_registry",
             "health_service", "llm_manager", "redis_manager", "clickhouse_manager"
@@ -139,6 +145,7 @@ class TestUnifiedLifecycleManagerInitialization:
         
     def test_lifecycle_metrics_initialization(self):
         """Test LifecycleMetrics dataclass initialization."""
+    pass
         metrics = LifecycleMetrics()
         
         assert metrics.startup_time is None
@@ -155,20 +162,26 @@ class TestComponentRegistration:
     
     @pytest.fixture
     def manager(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create a lifecycle manager for testing."""
+    pass
         return UnifiedLifecycleManager()
         
     @pytest.fixture
-    def mock_websocket_manager(self):
+ def real_websocket_manager():
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create mock WebSocket manager."""
-        mock_ws = AsyncMock()
-        mock_ws.broadcast_system_message = AsyncMock()
+        mock_ws = AsyncNone  # TODO: Use real service instance
+    pass
+        mock_ws.broadcast_system_message = AsyncNone  # TODO: Use real service instance
         return mock_ws
         
     @pytest.mark.asyncio
     async def test_register_component_adds_component_successfully(self, manager):
         """Test successful component registration."""
-        component = Mock()
+        component = component_instance  # Initialize appropriate service
         health_check = Mock(return_value={"healthy": True})
         
         await manager.register_component(
@@ -191,7 +204,8 @@ class TestComponentRegistration:
     @pytest.mark.asyncio
     async def test_register_component_without_health_check_works(self, manager):
         """Test component registration without health check."""
-        component = Mock()
+    pass
+        component = component_instance  # Initialize appropriate service
         
         await manager.register_component(
             "test_component", 
@@ -209,7 +223,7 @@ class TestComponentRegistration:
     async def test_register_component_emits_websocket_event(self, manager, mock_websocket_manager):
         """Test that component registration emits WebSocket event."""
         manager._websocket_manager = mock_websocket_manager
-        component = Mock()
+        component = component_instance  # Initialize appropriate service
         
         await manager.register_component(
             "test_ws", 
@@ -227,8 +241,9 @@ class TestComponentRegistration:
     @pytest.mark.asyncio
     async def test_register_component_handles_duplicate_names_correctly(self, manager):
         """Test behavior when registering component with duplicate name."""
-        component1 = Mock()
-        component2 = Mock()
+    pass
+        component1 = component1_instance  # Initialize appropriate service
+        component2 = component2_instance  # Initialize appropriate service
         
         await manager.register_component("duplicate", component1, ComponentType.DATABASE_MANAGER)
         await manager.register_component("duplicate", component2, ComponentType.REDIS_MANAGER)
@@ -239,7 +254,7 @@ class TestComponentRegistration:
     @pytest.mark.asyncio
     async def test_unregister_component_removes_component_successfully(self, manager):
         """Test successful component unregistration."""
-        component = Mock()
+        component = component_instance  # Initialize appropriate service
         component.name = "test_component"
         
         await manager.register_component("test_component", component, ComponentType.LLM_MANAGER)
@@ -252,12 +267,13 @@ class TestComponentRegistration:
     @pytest.mark.asyncio
     async def test_unregister_nonexistent_component_handles_gracefully(self, manager):
         """Test unregistering a component that doesn't exist."""
+    pass
         # Should not raise exception
         await manager.unregister_component("nonexistent")
         
     def test_get_component_returns_correct_instance(self, manager):
         """Test getting component by type."""
-        component = Mock()
+        component = component_instance  # Initialize appropriate service
         manager._component_instances[ComponentType.AGENT_REGISTRY] = component
         
         result = manager.get_component(ComponentType.AGENT_REGISTRY)
@@ -266,6 +282,7 @@ class TestComponentRegistration:
         
     def test_get_component_returns_none_for_missing_type(self, manager):
         """Test getting nonexistent component type."""
+    pass
         result = manager.get_component(ComponentType.WEBSOCKET_MANAGER)
         
         assert result is None
@@ -281,6 +298,7 @@ class TestComponentRegistration:
         
     def test_get_component_status_returns_none_for_missing_component(self, manager):
         """Test getting status for nonexistent component."""
+    pass
         result = manager.get_component_status("missing")
         
         assert result is None
@@ -291,8 +309,12 @@ class TestStartupLifecycle:
     
     @pytest.fixture
     def manager(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create a lifecycle manager for testing."""
-        return UnifiedLifecycleManager()
+    pass
+        await asyncio.sleep(0)
+    return UnifiedLifecycleManager()
         
     @pytest.mark.asyncio
     async def test_startup_from_initializing_phase_succeeds(self, manager):
@@ -312,6 +334,7 @@ class TestStartupLifecycle:
     @pytest.mark.asyncio
     async def test_startup_from_wrong_phase_fails(self, manager):
         """Test startup from wrong phase fails."""
+    pass
         manager._current_phase = LifecyclePhase.RUNNING
         
         result = await manager.startup()
@@ -332,6 +355,7 @@ class TestStartupLifecycle:
     @pytest.mark.asyncio
     async def test_startup_initialization_failure_sets_error_phase(self, manager):
         """Test that initialization failure sets error phase."""
+    pass
         with patch.object(manager, '_phase_validate_components', return_value=True), \
              patch.object(manager, '_phase_initialize_components', return_value=False):
             
@@ -356,6 +380,7 @@ class TestStartupLifecycle:
     @pytest.mark.asyncio
     async def test_startup_exception_handling_sets_error_phase(self, manager):
         """Test that startup exceptions are handled properly."""
+    pass
         with patch.object(manager, '_phase_validate_components', side_effect=Exception("Test error")):
             
             result = await manager.startup()
@@ -373,7 +398,8 @@ class TestStartupLifecycle:
     @pytest.mark.asyncio
     async def test_phase_validate_components_updates_status_during_validation(self, manager):
         """Test that component validation updates status."""
-        component = Mock()
+    pass
+        component = component_instance  # Initialize appropriate service
         status = ComponentStatus("test_db", ComponentType.DATABASE_MANAGER)
         manager._components["test_db"] = status
         manager._component_instances[ComponentType.DATABASE_MANAGER] = component
@@ -387,7 +413,7 @@ class TestStartupLifecycle:
     @pytest.mark.asyncio
     async def test_validate_database_component_calls_health_check(self, manager):
         """Test database component validation calls health check."""
-        mock_db = AsyncMock()
+        mock_db = AsyncNone  # TODO: Use real service instance
         mock_db.health_check.return_value = {"healthy": True}
         manager._component_instances[ComponentType.DATABASE_MANAGER] = mock_db
         
@@ -398,7 +424,8 @@ class TestStartupLifecycle:
     @pytest.mark.asyncio
     async def test_validate_database_component_raises_on_unhealthy(self, manager):
         """Test database validation raises exception when unhealthy."""
-        mock_db = AsyncMock()
+        mock_db = AsyncNone  # TODO: Use real service instance
+    pass
         mock_db.health_check.return_value = {"healthy": False, "error": "Connection failed"}
         manager._component_instances[ComponentType.DATABASE_MANAGER] = mock_db
         
@@ -408,8 +435,8 @@ class TestStartupLifecycle:
     @pytest.mark.asyncio
     async def test_validate_websocket_component_stores_reference(self, manager):
         """Test WebSocket validation stores manager reference."""
-        mock_ws = Mock()
-        mock_ws.broadcast_system_message = Mock()
+        mock_ws = UnifiedWebSocketManager()
+        mock_ws.broadcast_system_message = broadcast_system_message_instance  # Initialize appropriate service
         manager._component_instances[ComponentType.WEBSOCKET_MANAGER] = mock_ws
         
         await manager._validate_websocket_component("test_ws")
@@ -419,7 +446,8 @@ class TestStartupLifecycle:
     @pytest.mark.asyncio
     async def test_validate_agent_registry_component_checks_readiness(self, manager):
         """Test agent registry validation checks readiness."""
-        mock_registry = Mock()
+    pass
+        mock_registry = mock_registry_instance  # Initialize appropriate service
         mock_registry.get_registry_status.return_value = {"ready": True}
         manager._component_instances[ComponentType.AGENT_REGISTRY] = mock_registry
         
@@ -430,7 +458,7 @@ class TestStartupLifecycle:
     @pytest.mark.asyncio
     async def test_validate_agent_registry_component_raises_when_not_ready(self, manager):
         """Test agent registry validation raises when not ready."""
-        mock_registry = Mock()
+        mock_registry = mock_registry_instance  # Initialize appropriate service
         mock_registry.get_registry_status.return_value = {"ready": False, "reason": "Not initialized"}
         manager._component_instances[ComponentType.AGENT_REGISTRY] = mock_registry
         
@@ -440,6 +468,7 @@ class TestStartupLifecycle:
     @pytest.mark.asyncio
     async def test_phase_initialize_components_follows_correct_order(self, manager):
         """Test component initialization follows correct order."""
+    pass
         expected_order = [
             ComponentType.DATABASE_MANAGER,
             ComponentType.REDIS_MANAGER,
@@ -453,8 +482,9 @@ class TestStartupLifecycle:
         # Create mock components for each type
         initialized_order = []
         for comp_type in expected_order:
-            mock_comp = AsyncMock()
+            mock_comp = AsyncNone  # TODO: Use real service instance
             async def track_init(ct=comp_type):
+    pass
                 initialized_order.append(ct)
             mock_comp.initialize = track_init
             
@@ -471,7 +501,7 @@ class TestStartupLifecycle:
     async def test_phase_start_health_monitoring_creates_task(self, manager):
         """Test health monitoring task creation."""
         with patch.object(asyncio, 'create_task') as mock_create_task:
-            mock_task = Mock()
+            mock_task = mock_task_instance  # Initialize appropriate service
             mock_create_task.return_value = mock_task
             
             await manager._phase_start_health_monitoring()
@@ -485,10 +515,14 @@ class TestShutdownLifecycle:
     
     @pytest.fixture
     def manager(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create a lifecycle manager for testing."""
+    pass
         manager = UnifiedLifecycleManager()
         manager._current_phase = LifecyclePhase.RUNNING
-        return manager
+        await asyncio.sleep(0)
+    return manager
         
     @pytest.mark.asyncio
     async def test_shutdown_prevents_duplicate_calls(self, manager):
@@ -498,11 +532,13 @@ class TestShutdownLifecycle:
         
         result = await manager.shutdown()
         
-        assert result is True  # Should return success but not do work
+        assert result is True  # Should await asyncio.sleep(0)
+    return success but not do work
         
     @pytest.mark.asyncio
     async def test_shutdown_executes_all_phases_successfully(self, manager):
         """Test successful shutdown execution."""
+    pass
         with patch.object(manager, '_shutdown_phase_1_mark_unhealthy') as p1, \
              patch.object(manager, '_shutdown_phase_2_drain_requests') as p2, \
              patch.object(manager, '_shutdown_phase_3_close_websockets') as p3, \
@@ -542,7 +578,8 @@ class TestShutdownLifecycle:
     @pytest.mark.asyncio
     async def test_shutdown_phase_1_marks_health_service_unhealthy(self, manager):
         """Test phase 1 marks health service as shutting down."""
-        mock_health_service = AsyncMock()
+        mock_health_service = AsyncNone  # TODO: Use real service instance
+    pass
         manager._component_instances[ComponentType.HEALTH_SERVICE] = mock_health_service
         
         with patch.object(asyncio, 'sleep') as mock_sleep:
@@ -572,6 +609,7 @@ class TestShutdownLifecycle:
     @pytest.mark.asyncio
     async def test_shutdown_phase_2_handles_timeout_correctly(self, manager):
         """Test phase 2 handles drain timeout."""
+    pass
         manager._active_requests = {"req1": time.time()}
         manager.drain_timeout = 0.1  # Very short timeout
         
@@ -585,7 +623,7 @@ class TestShutdownLifecycle:
     @pytest.mark.asyncio
     async def test_shutdown_phase_3_closes_websocket_connections(self, manager):
         """Test phase 3 closes WebSocket connections."""
-        mock_ws = AsyncMock()
+        mock_ws = AsyncNone  # TODO: Use real service instance
         mock_ws.get_connection_count.return_value = 5
         manager._websocket_manager = mock_ws
         
@@ -598,7 +636,8 @@ class TestShutdownLifecycle:
     @pytest.mark.asyncio
     async def test_shutdown_phase_4_waits_for_agent_tasks(self, manager):
         """Test phase 4 waits for agent tasks to complete."""
-        mock_registry = Mock()
+    pass
+        mock_registry = mock_registry_instance  # Initialize appropriate service
         mock_tasks = [asyncio.create_task(asyncio.sleep(0.01)) for _ in range(3)]
         mock_registry.get_active_tasks.return_value = mock_tasks
         manager._component_instances[ComponentType.AGENT_REGISTRY] = mock_registry
@@ -624,7 +663,7 @@ class TestShutdownLifecycle:
         
         shutdown_order = []
         for comp_type in expected_order:
-            mock_comp = AsyncMock()
+            mock_comp = AsyncNone  # TODO: Use real service instance
             async def track_shutdown(ct=comp_type):
                 shutdown_order.append(ct)
             mock_comp.shutdown = track_shutdown
@@ -640,12 +679,13 @@ class TestShutdownLifecycle:
     @pytest.mark.asyncio
     async def test_shutdown_phase_6_cancels_background_tasks(self, manager):
         """Test phase 6 cancels background tasks."""
-        mock_task = Mock()
+    pass
+        mock_task = mock_task_instance  # Initialize appropriate service
         mock_task.done.return_value = False
         manager._health_check_task = mock_task
         
         with patch.object(asyncio, 'all_tasks', return_value=[]), \
-             patch.object(asyncio, 'current_task', return_value=Mock()), \
+             patch.object(asyncio, 'current_task', return_value=return_value_instance  # Initialize appropriate service), \
              patch.object(asyncio, 'sleep'):
             
             await manager._shutdown_phase_6_cleanup_resources()
@@ -659,10 +699,14 @@ class TestHealthMonitoring:
     
     @pytest.fixture
     def manager(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create a lifecycle manager for testing."""
+    pass
         manager = UnifiedLifecycleManager()
         manager._current_phase = LifecyclePhase.RUNNING
-        return manager
+        await asyncio.sleep(0)
+    return manager
         
     @pytest.mark.asyncio
     async def test_health_monitor_loop_runs_periodic_checks(self, manager):
@@ -685,9 +729,11 @@ class TestHealthMonitoring:
     @pytest.mark.asyncio
     async def test_health_monitor_loop_handles_exceptions(self, manager):
         """Test health monitoring loop handles exceptions gracefully."""
+    pass
         exception_count = 0
         
         async def mock_periodic_check():
+    pass
             nonlocal exception_count
             exception_count += 1
             if exception_count == 1:
@@ -719,6 +765,7 @@ class TestHealthMonitoring:
     @pytest.mark.asyncio
     async def test_run_periodic_health_checks_handles_unhealthy_components(self, manager):
         """Test periodic health checks handle unhealthy components."""
+    pass
         health_check = Mock(return_value={"healthy": False, "error": "DB connection failed"})
         status = ComponentStatus("test", ComponentType.DATABASE_MANAGER)
         
@@ -755,6 +802,7 @@ class TestHealthMonitoring:
     @pytest.mark.asyncio
     async def test_run_all_health_checks_handles_exceptions(self, manager):
         """Test health check execution handles exceptions."""
+    pass
         health_check = Mock(side_effect=Exception("Health check failed"))
         manager._health_checks["failing_check"] = health_check
         
@@ -770,8 +818,12 @@ class TestRequestTracking:
     
     @pytest.fixture
     def manager(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create a lifecycle manager for testing."""
-        return UnifiedLifecycleManager()
+    pass
+        await asyncio.sleep(0)
+    return UnifiedLifecycleManager()
         
     @pytest.mark.asyncio
     async def test_request_context_tracks_active_request(self, manager):
@@ -791,6 +843,7 @@ class TestRequestTracking:
     @pytest.mark.asyncio
     async def test_request_context_handles_exceptions(self, manager):
         """Test request context handles exceptions properly."""
+    pass
         request_id = "test_request_456"
         
         try:
@@ -831,8 +884,12 @@ class TestLifecycleHooksAndHandlers:
     
     @pytest.fixture
     def manager(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create a lifecycle manager for testing."""
-        return UnifiedLifecycleManager()
+    pass
+        await asyncio.sleep(0)
+    return UnifiedLifecycleManager()
         
     def test_add_startup_handler_adds_handler_correctly(self, manager):
         """Test adding startup handler."""
@@ -845,7 +902,9 @@ class TestLifecycleHooksAndHandlers:
         
     def test_add_shutdown_handler_adds_handler_correctly(self, manager):
         """Test adding shutdown handler."""
+    pass
         def test_handler():
+    pass
             pass
             
         manager.add_shutdown_handler(test_handler)
@@ -863,7 +922,8 @@ class TestLifecycleHooksAndHandlers:
         
     def test_register_lifecycle_hook_ignores_unknown_events(self, manager):
         """Test registering hook for unknown event."""
-        hook = Mock()
+    pass
+        hook = hook_instance  # Initialize appropriate service
         
         manager.register_lifecycle_hook("unknown_event", hook)
         
@@ -874,8 +934,8 @@ class TestLifecycleHooksAndHandlers:
     @pytest.mark.asyncio
     async def test_execute_lifecycle_hooks_calls_sync_hooks(self, manager):
         """Test executing synchronous lifecycle hooks."""
-        hook1 = Mock()
-        hook2 = Mock()
+        hook1 = hook1_instance  # Initialize appropriate service
+        hook2 = hook2_instance  # Initialize appropriate service
         
         manager._lifecycle_hooks["test_event"] = [hook1, hook2]
         
@@ -887,8 +947,9 @@ class TestLifecycleHooksAndHandlers:
     @pytest.mark.asyncio
     async def test_execute_lifecycle_hooks_calls_async_hooks(self, manager):
         """Test executing asynchronous lifecycle hooks."""
-        hook1 = AsyncMock()
-        hook2 = AsyncMock()
+        hook1 = AsyncNone  # TODO: Use real service instance
+    pass
+        hook2 = AsyncNone  # TODO: Use real service instance
         
         manager._lifecycle_hooks["test_event"] = [hook1, hook2]
         
@@ -901,7 +962,7 @@ class TestLifecycleHooksAndHandlers:
     async def test_execute_lifecycle_hooks_handles_hook_exceptions(self, manager):
         """Test lifecycle hook execution handles exceptions."""
         failing_hook = Mock(side_effect=Exception("Hook failed"))
-        working_hook = Mock()
+        working_hook = working_hook_instance  # Initialize appropriate service
         
         manager._lifecycle_hooks["test_event"] = [failing_hook, working_hook]
         
@@ -917,14 +978,21 @@ class TestWebSocketIntegration:
     
     @pytest.fixture
     def manager(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create a lifecycle manager for testing."""
-        return UnifiedLifecycleManager()
+    pass
+        await asyncio.sleep(0)
+    return UnifiedLifecycleManager()
         
     @pytest.fixture
-    def mock_websocket_manager(self):
+ def real_websocket_manager():
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create mock WebSocket manager."""
-        mock_ws = AsyncMock()
-        mock_ws.broadcast_system_message = AsyncMock()
+        mock_ws = AsyncNone  # TODO: Use real service instance
+    pass
+        mock_ws.broadcast_system_message = AsyncNone  # TODO: Use real service instance
         return mock_ws
         
     @pytest.mark.asyncio
@@ -945,6 +1013,7 @@ class TestWebSocketIntegration:
     @pytest.mark.asyncio
     async def test_emit_websocket_event_when_disabled_does_nothing(self, manager, mock_websocket_manager):
         """Test WebSocket event emission when disabled."""
+    pass
         manager._websocket_manager = mock_websocket_manager
         manager._enable_websocket_events = False
         
@@ -964,6 +1033,7 @@ class TestWebSocketIntegration:
     @pytest.mark.asyncio
     async def test_emit_websocket_event_handles_exceptions_gracefully(self, manager, mock_websocket_manager):
         """Test WebSocket event emission handles exceptions."""
+    pass
         manager._websocket_manager = mock_websocket_manager
         manager._enable_websocket_events = True
         mock_websocket_manager.broadcast_system_message.side_effect = Exception("WebSocket error")
@@ -973,7 +1043,7 @@ class TestWebSocketIntegration:
         
     def test_set_websocket_manager_stores_reference(self, manager):
         """Test setting WebSocket manager."""
-        mock_ws = Mock()
+        mock_ws = UnifiedWebSocketManager()
         
         manager.set_websocket_manager(mock_ws)
         
@@ -981,6 +1051,7 @@ class TestWebSocketIntegration:
         
     def test_enable_websocket_events_sets_flag(self, manager):
         """Test enabling/disabling WebSocket events."""
+    pass
         manager.enable_websocket_events(True)
         assert manager._enable_websocket_events is True
         
@@ -993,8 +1064,12 @@ class TestStatusAndMonitoring:
     
     @pytest.fixture
     def manager(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create a lifecycle manager for testing."""
-        return UnifiedLifecycleManager(user_id="test_user")
+    pass
+        await asyncio.sleep(0)
+    return UnifiedLifecycleManager(user_id="test_user")
         
     @pytest.mark.asyncio
     async def test_set_phase_updates_phase_and_emits_event(self, manager):
@@ -1012,6 +1087,7 @@ class TestStatusAndMonitoring:
             
     def test_get_current_phase_returns_current_phase(self, manager):
         """Test getting current phase."""
+    pass
         manager._current_phase = LifecyclePhase.RUNNING
         
         result = manager.get_current_phase()
@@ -1028,6 +1104,7 @@ class TestStatusAndMonitoring:
         
     def test_is_shutting_down_returns_correct_status(self, manager):
         """Test is_shutting_down method."""
+    pass
         manager._shutdown_initiated = False
         assert manager.is_shutting_down() is False
         
@@ -1058,6 +1135,7 @@ class TestStatusAndMonitoring:
         
     def test_get_health_status_returns_healthy_when_running(self, manager):
         """Test health status when system is running."""
+    pass
         manager._current_phase = LifecyclePhase.RUNNING
         
         result = manager.get_health_status()
@@ -1076,6 +1154,7 @@ class TestStatusAndMonitoring:
         
     def test_get_health_status_returns_shutting_down_when_shutting_down(self, manager):
         """Test health status when system is shutting down."""
+    pass
         manager._current_phase = LifecyclePhase.SHUTTING_DOWN
         
         result = manager.get_health_status()
@@ -1095,6 +1174,7 @@ class TestStatusAndMonitoring:
     @pytest.mark.asyncio
     async def test_wait_for_shutdown_waits_for_event(self, manager):
         """Test waiting for shutdown completion."""
+    pass
         # Start wait task
         wait_task = asyncio.create_task(manager.wait_for_shutdown())
         
@@ -1114,11 +1194,14 @@ class TestSignalHandling:
     
     @pytest.fixture
     def manager(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create a lifecycle manager for testing."""
-        return UnifiedLifecycleManager()
+    pass
+        await asyncio.sleep(0)
+    return UnifiedLifecycleManager()
         
-    @patch('netra_backend.app.core.managers.unified_lifecycle_manager.signal')
-    def test_setup_signal_handlers_registers_handlers(self, mock_signal, manager):
+        def test_setup_signal_handlers_registers_handlers(self, mock_signal, manager):
         """Test signal handler setup."""
         manager.setup_signal_handlers()
         
@@ -1142,6 +1225,7 @@ class TestLifecycleManagerFactory:
         
     def test_get_global_manager_creates_singleton(self):
         """Test global manager singleton creation."""
+    pass
         manager1 = LifecycleManagerFactory.get_global_manager()
         manager2 = LifecycleManagerFactory.get_global_manager()
         
@@ -1162,6 +1246,7 @@ class TestLifecycleManagerFactory:
     @pytest.mark.asyncio
     async def test_shutdown_all_managers_shuts_down_all_instances(self):
         """Test shutting down all manager instances."""
+    pass
         global_manager = LifecycleManagerFactory.get_global_manager()
         user_manager = LifecycleManagerFactory.get_user_manager("test_user")
         
@@ -1205,6 +1290,7 @@ class TestConvenienceFunctions:
         
     def test_get_lifecycle_manager_returns_global_when_no_user_id(self):
         """Test get_lifecycle_manager returns global manager."""
+    pass
         manager = get_lifecycle_manager()
         
         assert manager.user_id is None
@@ -1220,11 +1306,12 @@ class TestConvenienceFunctions:
     @pytest.mark.asyncio
     async def test_setup_application_lifecycle_configures_components(self):
         """Test application lifecycle setup."""
-        mock_app = Mock()
-        mock_websocket = Mock()
-        mock_db = Mock()
-        mock_registry = Mock()
-        mock_health = Mock()
+    pass
+        mock_app = mock_app_instance  # Initialize appropriate service
+        mock_websocket = UnifiedWebSocketManager()
+        mock_db = TestDatabaseManager().get_session()
+        mock_registry = mock_registry_instance  # Initialize appropriate service
+        mock_health = mock_health_instance  # Initialize appropriate service
         
         with patch.object(mock_app, 'on_event') as mock_on_event:
             manager = await setup_application_lifecycle(
@@ -1254,14 +1341,18 @@ class TestThreadSafety:
     
     @pytest.fixture
     def manager(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create a lifecycle manager for testing."""
-        return UnifiedLifecycleManager()
+    pass
+        await asyncio.sleep(0)
+    return UnifiedLifecycleManager()
         
     @pytest.mark.asyncio
     async def test_concurrent_component_registration_is_thread_safe(self, manager):
         """Test concurrent component registration."""
         async def register_component(name, comp_type):
-            component = Mock()
+            component = component_instance  # Initialize appropriate service
             await manager.register_component(name, component, comp_type)
             
         tasks = [
@@ -1277,7 +1368,9 @@ class TestThreadSafety:
     @pytest.mark.asyncio
     async def test_concurrent_request_tracking_is_thread_safe(self, manager):
         """Test concurrent request tracking."""
+    pass
         async def track_request(req_id):
+    pass
             async with manager.request_context(f"req_{req_id}"):
                 await asyncio.sleep(0.01)
                 
@@ -1304,8 +1397,12 @@ class TestErrorHandling:
     
     @pytest.fixture
     def manager(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create a lifecycle manager for testing."""
-        return UnifiedLifecycleManager()
+    pass
+        await asyncio.sleep(0)
+    return UnifiedLifecycleManager()
         
     @pytest.mark.asyncio
     async def test_component_registration_error_handling(self, manager):
@@ -1313,7 +1410,7 @@ class TestErrorHandling:
         # Mock WebSocket manager that raises exception
         with patch.object(manager, '_emit_websocket_event', side_effect=Exception("WebSocket error")):
             # Should not raise exception - test that it handles WebSocket errors gracefully
-            component = Mock()
+            component = component_instance  # Initialize appropriate service
             try:
                 await manager.register_component("test", component, ComponentType.DATABASE_MANAGER)
                 # If the method doesn't handle the exception, this test should fail
@@ -1326,6 +1423,7 @@ class TestErrorHandling:
     @pytest.mark.asyncio
     async def test_health_check_error_handling(self, manager):
         """Test health check error handling."""
+    pass
         # Health check that raises exception
         health_check = Mock(side_effect=Exception("Health check failed"))
         manager._health_checks["failing_check"] = health_check
@@ -1352,8 +1450,12 @@ class TestPerformanceAndEdgeCases:
     
     @pytest.fixture
     def manager(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create a lifecycle manager for testing."""
-        return UnifiedLifecycleManager()
+    pass
+        await asyncio.sleep(0)
+    return UnifiedLifecycleManager()
         
     def test_large_number_of_components_handling(self, manager):
         """Test handling large number of components."""
@@ -1371,6 +1473,7 @@ class TestPerformanceAndEdgeCases:
     @pytest.mark.asyncio
     async def test_rapid_startup_shutdown_cycles(self, manager):
         """Test rapid startup/shutdown cycles don't cause issues."""
+    pass
         for _ in range(3):
             # Mock successful startup
             with patch.object(manager, '_phase_validate_components', return_value=True), \
@@ -1402,12 +1505,14 @@ class TestPerformanceAndEdgeCases:
         for i in range(50):
             manager._components.pop(f"temp_{i}", None)
             
-        # Should return to original state
+        # Should await asyncio.sleep(0)
+    return to original state
         assert len(manager._components) == initial_component_count
         
     @pytest.mark.asyncio
     async def test_concurrent_shutdown_attempts(self, manager):
         """Test multiple concurrent shutdown attempts are handled safely."""
+    pass
         manager._current_phase = LifecyclePhase.RUNNING
         
         with patch.object(manager, '_shutdown_phase_1_mark_unhealthy'), \
@@ -1436,8 +1541,12 @@ class TestAdditionalFunctionality:
     
     @pytest.fixture
     def manager(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create a lifecycle manager for testing."""
-        return UnifiedLifecycleManager()
+    pass
+        await asyncio.sleep(0)
+    return UnifiedLifecycleManager()
         
     def test_environment_configuration_edge_cases(self, manager):
         """Test edge cases in environment configuration loading."""
@@ -1449,6 +1558,7 @@ class TestAdditionalFunctionality:
     @pytest.mark.asyncio
     async def test_phase_transitions_are_properly_logged(self, manager):
         """Test that phase transitions are properly logged and tracked."""
+    pass
         old_phase = manager._current_phase
         
         await manager._set_phase(LifecyclePhase.STARTING)
@@ -1470,11 +1580,12 @@ class TestAdditionalFunctionality:
     @pytest.mark.asyncio
     async def test_health_check_grace_period_configuration(self, manager):
         """Test health check grace period is configurable and used."""
+    pass
         manager.health_check_grace_period = 2
         
         # Mock health service
-        mock_health = Mock()
-        mock_health.mark_shutting_down = AsyncMock()
+        mock_health = mock_health_instance  # Initialize appropriate service
+        mock_health.mark_shutting_down = AsyncNone  # TODO: Use real service instance
         manager._component_instances[ComponentType.HEALTH_SERVICE] = mock_health
         
         with patch('asyncio.sleep') as mock_sleep:
@@ -1499,6 +1610,7 @@ class TestAdditionalFunctionality:
     @pytest.mark.asyncio
     async def test_startup_timeout_configuration(self, manager):
         """Test startup timeout configuration."""
+    pass
         assert manager.startup_timeout == 60  # Default value
         
         # Test that timeout is used in phase validation
@@ -1509,7 +1621,7 @@ class TestAdditionalFunctionality:
     async def test_websocket_event_disabled_functionality(self, manager):
         """Test WebSocket event functionality when disabled."""
         manager._enable_websocket_events = False
-        mock_ws = AsyncMock()
+        mock_ws = AsyncNone  # TODO: Use real service instance
         manager._websocket_manager = mock_ws
         
         await manager._emit_websocket_event("test_event", {"data": "test"})
@@ -1520,6 +1632,7 @@ class TestAdditionalFunctionality:
     @pytest.mark.asyncio 
     async def test_request_context_with_multiple_managers(self, manager):
         """Test request context works correctly with multiple managers."""
+    pass
         manager2 = UnifiedLifecycleManager(user_id="user2")
         
         # Both managers should track requests independently

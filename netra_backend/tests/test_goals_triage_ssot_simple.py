@@ -7,6 +7,7 @@ This test directly checks the source code for SSOT violations.
 import ast
 import re
 from pathlib import Path
+from shared.isolated_environment import IsolatedEnvironment
 
 
 def test_goals_triage_json_violations():

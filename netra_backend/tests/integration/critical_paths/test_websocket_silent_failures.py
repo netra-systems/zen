@@ -9,8 +9,11 @@ import asyncio
 import pytest
 import time
 import uuid
-from unittest.mock import Mock, AsyncMock, patch, MagicMock
 from typing import Dict, Any, Optional
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 from netra_backend.app.agents.unified_tool_execution import UnifiedToolExecutionEngine
 from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier
@@ -32,16 +35,19 @@ class TestWebSocketSilentFailures:
         manager.send_to_user = AsyncMock(return_value=True)
         manager._ping_connection = AsyncMock(return_value=True)
         manager.check_connection_health = AsyncMock(return_value=True)
-        return manager
+        await asyncio.sleep(0)
+    return manager
     
     @pytest.fixture
     async def mock_context(self):
         """Create a mock execution context."""
+    pass
         context = Mock(spec=AgentExecutionContext)
         context.thread_id = f"test_thread_{uuid.uuid4()}"
         context.agent_name = "test_agent"
         context.user_id = "test_user"
-        return context
+        await asyncio.sleep(0)
+    return context
     
     @pytest.fixture
     async def event_monitor(self):
@@ -54,16 +60,17 @@ class TestWebSocketSilentFailures:
     @pytest.mark.asyncio
     async def test_rank1_websocket_event_non_emission_fallback(self, mock_context):
         """
+    pass
         Test RANK 1: WebSocket Event Non-Emission
         Verify that fallback logging occurs when WebSocket is unavailable.
         """
         # Create execution engine without WebSocket notifier
         engine = UnifiedToolExecutionEngine(
-            tool_dispatcher=Mock(),
+            tool_dispatcher=tool_dispatcher_instance  # Initialize appropriate service,
             websocket_notifier=None  # No WebSocket notifier
         )
         
-        tool = Mock()
+        tool = tool_instance  # Initialize appropriate service
         tool.name = "test_tool"
         tool.execute = AsyncMock(return_value="test_result")
         
@@ -93,12 +100,13 @@ class TestWebSocketSilentFailures:
         Test RANK 1: WebSocket Event Non-Emission with missing context.
         Verify that missing context is detected and logged.
         """
+    pass
         engine = UnifiedToolExecutionEngine(
-            tool_dispatcher=Mock(),
+            tool_dispatcher=tool_dispatcher_instance  # Initialize appropriate service,
             websocket_notifier=Mock(spec=WebSocketNotifier)
         )
         
-        tool = Mock()
+        tool = tool_instance  # Initialize appropriate service
         tool.name = "test_tool"
         tool.execute = AsyncMock(return_value="test_result")
         
@@ -123,10 +131,11 @@ class TestWebSocketSilentFailures:
         Test RANK 2: Agent Registry WebSocket Enhancement Failure
         Verify that enhancement failure is detected at startup.
         """
+    pass
         registry = AgentRegistry()
         
         # Mock tool dispatcher without enhancement
-        mock_dispatcher = Mock()
+        mock_dispatcher = mock_dispatcher_instance  # Initialize appropriate service
         mock_dispatcher._websocket_enhanced = False
         registry.tool_dispatcher = mock_dispatcher
         
@@ -149,15 +158,16 @@ class TestWebSocketSilentFailures:
         """
         Test RANK 2: Startup validation detects WebSocket enhancement failure.
         """
-        app = Mock()
-        app.state = Mock()
+    pass
+        app = app_instance  # Initialize appropriate service
+        app.state = state_instance  # Initialize appropriate service
         
         orchestrator = StartupOrchestrator(app)
         
         # Create mock supervisor with unenhanced dispatcher
-        mock_supervisor = Mock()
-        mock_supervisor.registry = Mock()
-        mock_supervisor.registry.tool_dispatcher = Mock()
+        mock_supervisor = mock_supervisor_instance  # Initialize appropriate service
+        mock_supervisor.registry = registry_instance  # Initialize appropriate service
+        mock_supervisor.registry.tool_dispatcher = tool_dispatcher_instance  # Initialize appropriate service
         mock_supervisor.registry.tool_dispatcher._websocket_enhanced = False
         mock_supervisor.registry.tool_dispatcher.websocket_notifier = None
         
@@ -173,11 +183,12 @@ class TestWebSocketSilentFailures:
         Test RANK 3: WebSocket Connection Cleanup Race Conditions
         Verify active health checking prevents sending to dead connections.
         """
+    pass
         # Simulate unhealthy connection
         mock_websocket_manager._ping_connection = AsyncMock(return_value=False)
         mock_websocket_manager.connections = {
             "test_conn": {
-                "websocket": Mock(),
+                "websocket": None  # TODO: Use real service instance,
                 "is_healthy": False,
                 "user_id": "test_user"
             }
@@ -198,21 +209,22 @@ class TestWebSocketSilentFailures:
         Test RANK 4: Startup Validation with Event Verification
         Verify that startup actually tests WebSocket functionality.
         """
-        app = Mock()
-        app.state = Mock()
+    pass
+        app = app_instance  # Initialize appropriate service
+        app.state = state_instance  # Initialize appropriate service
         
         orchestrator = StartupOrchestrator(app)
         
         # Mock WebSocket manager
-        mock_manager = AsyncMock()
+        mock_manager = AsyncNone  # TODO: Use real service instance
         mock_manager.send_to_thread = AsyncMock(return_value=True)
         
         # Mock supervisor with enhanced dispatcher
-        mock_supervisor = Mock()
-        mock_supervisor.registry = Mock()
-        mock_supervisor.registry.tool_dispatcher = Mock()
+        mock_supervisor = mock_supervisor_instance  # Initialize appropriate service
+        mock_supervisor.registry = registry_instance  # Initialize appropriate service
+        mock_supervisor.registry.tool_dispatcher = tool_dispatcher_instance  # Initialize appropriate service
         mock_supervisor.registry.tool_dispatcher._websocket_enhanced = True
-        mock_supervisor.registry.tool_dispatcher.websocket_notifier = Mock()
+        mock_supervisor.registry.tool_dispatcher.websocket_notifier = UnifiedWebSocketManager()
         
         app.state.agent_supervisor = mock_supervisor
         
@@ -232,10 +244,11 @@ class TestWebSocketSilentFailures:
         Test RANK 5: Event Delivery Confirmation System
         Verify critical events require and track confirmation.
         """
+    pass
         notifier = WebSocketNotifier(mock_websocket_manager)
         
         # Send critical event
-        message = Mock()
+        message = message_instance  # Initialize appropriate service
         message.model_dump = Mock(return_value={"type": "agent_started"})
         
         with patch.object(notifier, '_attempt_delivery', return_value=True) as mock_attempt:
@@ -261,12 +274,13 @@ class TestWebSocketSilentFailures:
         """
         Test that emergency notifications are triggered for critical failures.
         """
+    pass
         notifier = WebSocketNotifier(mock_websocket_manager)
         
         # Simulate delivery failure
         mock_websocket_manager.send_to_thread = AsyncMock(return_value=False)
         
-        message = Mock()
+        message = message_instance  # Initialize appropriate service
         message.model_dump = Mock(return_value={"type": "agent_started"})
         
         with patch.object(notifier, '_trigger_emergency_notification') as mock_emergency:
@@ -290,6 +304,7 @@ class TestWebSocketSilentFailures:
         """
         Test that event monitor detects silent failures in event sequences.
         """
+    pass
         thread_id = "test_thread"
         
         # Record agent started
@@ -314,6 +329,7 @@ class TestWebSocketSilentFailures:
         """
         Test that event monitor detects stale threads.
         """
+    pass
         thread_id = "stale_thread"
         
         # Record an event
@@ -337,6 +353,7 @@ class TestWebSocketSilentFailures:
         """
         Test that event monitor tracks event latency.
         """
+    pass
         thread_id = "latency_test"
         
         # Record events with delay
@@ -356,6 +373,7 @@ class TestWebSocketSilentFailures:
         """
         Test a comprehensive scenario with multiple potential silent failures.
         """
+    pass
         # Set up monitoring
         monitor = ChatEventMonitor()
         
@@ -391,6 +409,7 @@ async def test_integration_full_websocket_flow_with_monitoring():
     """
     Integration test: Full WebSocket flow with all safety mechanisms.
     """
+    pass
     # Create real components
     manager = WebSocketManager()
     monitor = ChatEventMonitor()
@@ -400,7 +419,7 @@ async def test_integration_full_websocket_flow_with_monitoring():
     
     # Create context
     thread_id = f"integration_test_{uuid.uuid4()}"
-    context = Mock()
+    context = context_instance  # Initialize appropriate service
     context.thread_id = thread_id
     context.agent_name = "test_agent"
     

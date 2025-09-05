@@ -7,6 +7,11 @@ Core AI functionality validation.
 
 import sys
 from pathlib import Path
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from auth_service.core.auth_manager import AuthManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 # Test framework import - using pytest fixtures instead
 
@@ -14,7 +19,6 @@ import json
 import uuid
 from datetime import datetime, timezone
 from typing import Any, Dict
-from unittest.mock import AsyncMock, MagicMock, Mock, patch, patch
 
 import pytest
 
@@ -24,7 +28,7 @@ class TestAPIAgentGenerationCritical:
     async def test_agent_query_endpoint(self):
         """Test agent query endpoint."""
         # Mock: Generic component isolation for controlled unit testing
-        mock_client = AsyncMock()
+        mock_client = AsyncNone  # TODO: Use real service instance
         auth_headers = {"Authorization": "Bearer token123"}
         
         # Test agent query
@@ -57,7 +61,7 @@ class TestAPIAgentGenerationCritical:
     async def test_agent_metadata_validation(self):
         """Test agent response metadata validation."""
         # Mock: Generic component isolation for controlled unit testing
-        mock_client = AsyncMock()
+        mock_client = AsyncNone  # TODO: Use real service instance
         auth_headers = {"Authorization": "Bearer token123"}
         
         query_data = {
@@ -91,7 +95,7 @@ class TestAPIAgentGenerationCritical:
     async def test_synthetic_data_generation(self):
         """Test synthetic data generation endpoint."""
         # Mock: Generic component isolation for controlled unit testing
-        mock_client = AsyncMock()
+        mock_client = AsyncNone  # TODO: Use real service instance
         auth_headers = {"Authorization": "Bearer token123"}
         
         # Test generate synthetic data
@@ -122,7 +126,7 @@ class TestAPIAgentGenerationCritical:
     async def test_generation_job_tracking(self):
         """Test generation job tracking."""
         # Mock: Generic component isolation for controlled unit testing
-        mock_client = AsyncMock()
+        mock_client = AsyncNone  # TODO: Use real service instance
         auth_headers = {"Authorization": "Bearer token123"}
         
         generation_data = {
@@ -154,7 +158,7 @@ class TestAPIAgentGenerationCritical:
     async def test_configuration_get_endpoint(self):
         """Test configuration get endpoint."""
         # Mock: Generic component isolation for controlled unit testing
-        mock_client = AsyncMock()
+        mock_client = AsyncNone  # TODO: Use real service instance
         auth_headers = {"Authorization": "Bearer token123"}
         
         # Test get configuration
@@ -181,7 +185,7 @@ class TestAPIAgentGenerationCritical:
     async def test_configuration_features_validation(self):
         """Test configuration features validation."""
         # Mock: Generic component isolation for controlled unit testing
-        mock_client = AsyncMock()
+        mock_client = AsyncNone  # TODO: Use real service instance
         auth_headers = {"Authorization": "Bearer token123"}
         
         # Mock: Async component isolation for testing without real async operations
@@ -208,7 +212,7 @@ class TestAPIAgentGenerationCritical:
     async def test_configuration_update_endpoint(self):
         """Test configuration update endpoint."""
         # Mock: Generic component isolation for controlled unit testing
-        mock_client = AsyncMock()
+        mock_client = AsyncNone  # TODO: Use real service instance
         auth_headers = {"Authorization": "Bearer token123"}
         
         # Test update configuration (admin only)
@@ -235,7 +239,7 @@ class TestAPIAgentGenerationCritical:
     async def test_agent_context_handling(self):
         """Test agent context handling."""
         # Mock: Generic component isolation for controlled unit testing
-        mock_client = AsyncMock()
+        mock_client = AsyncNone  # TODO: Use real service instance
         auth_headers = {"Authorization": "Bearer token123"}
         
         contexts = [
@@ -270,7 +274,7 @@ class TestAPIAgentGenerationCritical:
     async def test_generation_type_validation(self):
         """Test generation type validation."""
         # Mock: Generic component isolation for controlled unit testing
-        mock_client = AsyncMock()
+        mock_client = AsyncNone  # TODO: Use real service instance
         auth_headers = {"Authorization": "Bearer token123"}
         
         generation_types = ["logs", "metrics", "events", "traces"]
@@ -302,7 +306,7 @@ class TestAPIAgentGenerationCritical:
     async def test_agent_processing_time_tracking(self):
         """Test agent processing time tracking."""
         # Mock: Generic component isolation for controlled unit testing
-        mock_client = AsyncMock()
+        mock_client = AsyncNone  # TODO: Use real service instance
         auth_headers = {"Authorization": "Bearer token123"}
         
         query_data = {
@@ -337,7 +341,7 @@ class TestAPIAgentGenerationCritical:
     async def test_configuration_limits_validation(self):
         """Test configuration limits validation."""
         # Mock: Generic component isolation for controlled unit testing
-        mock_client = AsyncMock()
+        mock_client = AsyncNone  # TODO: Use real service instance
         auth_headers = {"Authorization": "Bearer token123"}
         
         # Mock: Async component isolation for testing without real async operations
@@ -361,7 +365,7 @@ class TestAPIAgentGenerationCritical:
     async def test_generation_format_options(self):
         """Test generation format options."""
         # Mock: Generic component isolation for controlled unit testing
-        mock_client = AsyncMock()
+        mock_client = AsyncNone  # TODO: Use real service instance
         auth_headers = {"Authorization": "Bearer token123"}
         
         formats = ["json", "csv", "xml", "yaml"]
@@ -393,7 +397,7 @@ class TestAPIAgentGenerationCritical:
     async def test_agent_multi_agent_orchestration(self):
         """Test multi-agent orchestration."""
         # Mock: Generic component isolation for controlled unit testing
-        mock_client = AsyncMock()
+        mock_client = AsyncNone  # TODO: Use real service instance
         auth_headers = {"Authorization": "Bearer token123"}
         
         query_data = {
@@ -428,7 +432,7 @@ class TestAPIAgentGenerationCritical:
     async def test_configuration_environment_detection(self):
         """Test configuration environment detection."""
         # Mock: Generic component isolation for controlled unit testing
-        mock_client = AsyncMock()
+        mock_client = AsyncNone  # TODO: Use real service instance
         auth_headers = {"Authorization": "Bearer token123"}
         
         environments = ["development", "staging", "production"]
@@ -450,7 +454,7 @@ class TestAPIAgentGenerationCritical:
     async def test_generation_count_validation(self):
         """Test generation count validation."""
         # Mock: Generic component isolation for controlled unit testing
-        mock_client = AsyncMock()
+        mock_client = AsyncNone  # TODO: Use real service instance
         auth_headers = {"Authorization": "Bearer token123"}
         
         counts = [1, 10, 100, 1000]

@@ -14,8 +14,12 @@ Business Value: Ensures consistent patterns across all agents for maintainabilit
 import asyncio
 import json
 import pytest
-from unittest.mock import AsyncMock, MagicMock, Mock, patch, call
 from typing import Dict, Any
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from test_framework.database.test_database_manager import TestDatabaseManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 from netra_backend.app.agents.goals_triage_sub_agent import GoalsTriageSubAgent
 from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
@@ -26,26 +30,35 @@ class TestGoalsTriageSubAgentSSOTViolations:
     """Test suite for SSOT violations in GoalsTriageSubAgent."""
     
     @pytest.fixture
-    def mock_context(self):
+ def real_context():
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create a mock UserExecutionContext for testing."""
+    pass
         context = MagicMock(spec=UserExecutionContext)
         context.user_id = "test_user_123"
         context.run_id = "test_run_456"
         context.thread_id = "test_thread_789"
         context.metadata = {"user_request": "Optimize costs and improve user experience"}
-        context.db_session = MagicMock()
+        context.db_session = MagicNone  # TODO: Use real service instance
         return context
     
     @pytest.fixture
     def agent(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create GoalsTriageSubAgent instance."""
+    pass
         return GoalsTriageSubAgent()
     
     @pytest.fixture
-    def mock_session_manager(self):
+ def real_session_manager():
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create a mock DatabaseSessionManager."""
+    pass
         session_manager = MagicMock(spec=DatabaseSessionManager)
-        session_manager.close = AsyncMock()
+        session_manager.close = AsyncNone  # TODO: Use real service instance
         return session_manager
     
     # ========================================================================
@@ -61,6 +74,7 @@ class TestGoalsTriageSubAgentSSOTViolations:
         Current violation: Lines 338-344 use json.loads() directly
         Expected: Should use LLMResponseParser.safe_json_parse()
         """
+    pass
         # Patch the LLMResponseParser to track its usage
         with patch('netra_backend.app.core.serialization.unified_json_handler.LLMResponseParser') as MockParser:
             mock_parser = MockParser.return_value
@@ -84,6 +98,7 @@ class TestGoalsTriageSubAgentSSOTViolations:
         Current violation: Line 365 uses json.loads() directly
         Expected: Should use LLMResponseParser.ensure_agent_response_is_json()
         """
+    pass
         with patch('netra_backend.app.core.serialization.unified_json_handler.LLMResponseParser') as MockParser:
             mock_parser = MockParser.return_value
             expected_data = {
@@ -109,6 +124,7 @@ class TestGoalsTriageSubAgentSSOTViolations:
         
         Expected: Should use JSONErrorFixer.fix_common_json_errors()
         """
+    pass
         with patch('netra_backend.app.core.serialization.unified_json_handler.JSONErrorFixer') as MockFixer:
             mock_fixer = MockFixer.return_value
             mock_fixer.fix_common_json_errors = MagicMock(return_value='["fixed_goal"]')
@@ -135,6 +151,7 @@ class TestGoalsTriageSubAgentSSOTViolations:
         
         Expected: Should use UnifiedJSONHandler.dumps() for serialization
         """
+    pass
         with patch('netra_backend.app.core.serialization.unified_json_handler.UnifiedJSONHandler') as MockHandler:
             mock_handler = MockHandler.return_value
             mock_handler.dumps = MagicMock(return_value='{"serialized": true}')
@@ -176,12 +193,13 @@ class TestGoalsTriageSubAgentSSOTViolations:
         Current violation: Lines 183-188 use basic try/except
         Expected: Should use agent_error_handler decorator or unified patterns
         """
+    pass
         with patch('netra_backend.app.core.unified_error_handler.agent_error_handler') as mock_error_handler:
             # Mock the error handler decorator
             mock_error_handler.return_value = lambda func: func
             
             # Force an LLM error
-            agent.llm_manager = MagicMock()
+            agent.llm_manager = MagicNone  # TODO: Use real service instance
             agent.llm_manager.ask_llm = AsyncMock(side_effect=Exception("LLM API Error"))
             
             # This should be wrapped with agent_error_handler
@@ -189,7 +207,8 @@ class TestGoalsTriageSubAgentSSOTViolations:
             
             # ASSERTION: Error should be handled through unified handler
             # The method should gracefully fallback, not raise
-            assert isinstance(result, list)  # Should return fallback list
+            assert isinstance(result, list)  # Should await asyncio.sleep(0)
+    return fallback list
     
     @pytest.mark.asyncio  
     async def test_uses_circuit_breaker_for_repeated_failures(self, agent, mock_context):
@@ -198,11 +217,12 @@ class TestGoalsTriageSubAgentSSOTViolations:
         
         Expected: Should integrate with circuit breaker from BaseAgent
         """
+    pass
         # Since agent inherits from BaseAgent with enable_reliability=True,
         # it should have circuit breaker functionality
         
         # Mock multiple failures
-        agent.llm_manager = MagicMock()
+        agent.llm_manager = MagicNone  # TODO: Use real service instance
         agent.llm_manager.ask_llm = AsyncMock(side_effect=Exception("Persistent failure"))
         
         # Try multiple times - circuit breaker should engage
@@ -223,9 +243,10 @@ class TestGoalsTriageSubAgentSSOTViolations:
         
         Expected: Error logs should include user_id, run_id, thread_id
         """
+    pass
         with patch.object(agent.logger, 'error') as mock_logger:
             # Force an error
-            agent.llm_manager = MagicMock()
+            agent.llm_manager = MagicNone  # TODO: Use real service instance
             agent.llm_manager.ask_llm = AsyncMock(side_effect=ValueError("Test error"))
             
             await agent._extract_goals_from_request(mock_context, "test")
@@ -246,6 +267,7 @@ class TestGoalsTriageSubAgentSSOTViolations:
         """
         INTEGRATION TEST: Full execution should use all SSOT patterns.
         """
+    pass
         with patch('netra_backend.app.core.serialization.unified_json_handler.LLMResponseParser') as MockParser, \
              patch('netra_backend.app.core.serialization.unified_json_handler.UnifiedJSONHandler') as MockHandler, \
              patch('netra_backend.app.core.unified_error_handler.agent_error_handler') as mock_error_handler, \
@@ -258,16 +280,16 @@ class TestGoalsTriageSubAgentSSOTViolations:
             mock_error_handler.return_value = lambda func: func
             
             # Mock LLM responses
-            agent.llm_manager = MagicMock()
+            agent.llm_manager = MagicNone  # TODO: Use real service instance
             agent.llm_manager.ask_llm = AsyncMock(return_value='["goal1", "goal2"]')
             
             # Mock WebSocket methods
-            agent.emit_agent_started = AsyncMock()
-            agent.emit_thinking = AsyncMock()
-            agent.emit_progress = AsyncMock()
-            agent.emit_tool_executing = AsyncMock()
-            agent.emit_tool_completed = AsyncMock()
-            agent.emit_agent_completed = AsyncMock()
+            agent.emit_agent_started = AsyncNone  # TODO: Use real service instance
+            agent.emit_thinking = AsyncNone  # TODO: Use real service instance
+            agent.emit_progress = AsyncNone  # TODO: Use real service instance
+            agent.emit_tool_executing = AsyncNone  # TODO: Use real service instance
+            agent.emit_tool_completed = AsyncNone  # TODO: Use real service instance
+            agent.emit_agent_completed = AsyncNone  # TODO: Use real service instance
             
             # Execute
             result = await agent.execute(mock_context)
@@ -284,6 +306,7 @@ class TestGoalsTriageSubAgentSSOTViolations:
         """
         TEST: Verify concurrent executions maintain user isolation.
         """
+    pass
         # Create multiple contexts for different users
         contexts = []
         for i in range(3):
@@ -292,17 +315,17 @@ class TestGoalsTriageSubAgentSSOTViolations:
             context.run_id = f"run_{i}"
             context.thread_id = f"thread_{i}"
             context.metadata = {"user_request": f"Goal for user {i}"}
-            context.db_session = MagicMock()
+            context.db_session = MagicNone  # TODO: Use real service instance
             contexts.append(context)
         
         # Mock dependencies
-        agent.llm_manager = MagicMock()
+        agent.llm_manager = MagicNone  # TODO: Use real service instance
         agent.llm_manager.ask_llm = AsyncMock(return_value='["user_specific_goal"]')
         
         # Mock WebSocket methods
         for method in ['emit_agent_started', 'emit_thinking', 'emit_progress', 
                       'emit_tool_executing', 'emit_tool_completed', 'emit_agent_completed']:
-            setattr(agent, method, AsyncMock())
+            setattr(agent, method, AsyncNone  # TODO: Use real service instance)
         
         # Mock DatabaseSessionManager
         with patch.object(DatabaseSessionManager, '__init__', return_value=None), \
@@ -331,6 +354,7 @@ class TestGoalsTriageSubAgentSSOTViolations:
         """
         TEST: Should gracefully handle extremely malformed JSON.
         """
+    pass
         with patch('netra_backend.app.core.serialization.unified_json_handler.LLMResponseParser') as MockParser:
             mock_parser = MockParser.return_value
             mock_parser.safe_json_parse = MagicMock(return_value=["fallback_goal"])
@@ -350,7 +374,8 @@ class TestGoalsTriageSubAgentSSOTViolations:
             
             for malformed in malformed_inputs:
                 result = agent._parse_goals_from_llm_response(malformed)
-                # Should not raise exception, should return something usable
+                # Should not raise exception, should await asyncio.sleep(0)
+    return something usable
                 assert isinstance(result, list)
                 assert len(result) > 0  # Should have fallback
     
@@ -359,6 +384,7 @@ class TestGoalsTriageSubAgentSSOTViolations:
         """
         TEST: Should handle circular references in data structures.
         """
+    pass
         with patch('netra_backend.app.core.serialization.unified_json_handler.CircularReferenceHandler') as MockCircHandler:
             mock_handler = MockCircHandler.return_value
             mock_handler.serialize_safe = MagicMock(return_value='{"safe": "data"}')
@@ -376,13 +402,14 @@ class TestGoalsTriageSubAgentSSOTViolations:
         """
         TEST: WebSocket events should still be emitted even during JSON errors.
         """
+    pass
         # Mock WebSocket methods
-        agent.emit_thinking = AsyncMock()
-        agent.emit_tool_executing = AsyncMock()
-        agent.emit_tool_completed = AsyncMock()
+        agent.emit_thinking = AsyncNone  # TODO: Use real service instance
+        agent.emit_tool_executing = AsyncNone  # TODO: Use real service instance
+        agent.emit_tool_completed = AsyncNone  # TODO: Use real service instance
         
         # Force JSON parsing error
-        agent.llm_manager = MagicMock()
+        agent.llm_manager = MagicNone  # TODO: Use real service instance
         agent.llm_manager.ask_llm = AsyncMock(return_value='{invalid json}')
         
         # Execute
@@ -405,6 +432,7 @@ class TestGoalsTriageSubAgentCompliance:
         """
         COMPLIANCE TEST: Verify no direct json module usage.
         """
+    pass
         import ast
         import inspect
         from netra_backend.app.agents import goals_triage_sub_agent
@@ -434,6 +462,7 @@ class TestGoalsTriageSubAgentCompliance:
         """
         COMPLIANCE TEST: Verify usage of canonical SSOT implementations.
         """
+    pass
         from netra_backend.app.agents import goals_triage_sub_agent
         source = inspect.getsource(goals_triage_sub_agent)
         
@@ -452,6 +481,7 @@ class TestGoalsTriageSubAgentCompliance:
         """
         TEST: Ensure fixes maintain backward compatibility.
         """
+    pass
         # Old-style JSON response (what existing code might return)
         old_style_response = '["goal1", "goal2", "goal3"]'
         

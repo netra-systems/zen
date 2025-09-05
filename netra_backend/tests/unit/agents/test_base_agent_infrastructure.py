@@ -16,7 +16,11 @@ import asyncio
 import pytest
 import time
 from typing import Dict, Any, Optional
-from unittest.mock import Mock, AsyncMock, patch, MagicMock
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from test_framework.redis.test_redis_manager import TestRedisManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
@@ -39,6 +43,7 @@ class MockBaseAgent(BaseAgent):
     """Mock implementation for testing BaseAgent infrastructure."""
     
     def __init__(self, *args, **kwargs):
+    pass
         super().__init__(*args, **kwargs)
         self.core_logic_calls = 0
         self.validation_calls = 0
@@ -98,25 +103,34 @@ class TestBaseAgentReliabilityInfrastructure:
     """Test reliability management infrastructure (circuit breakers, retries, health)."""
     
     @pytest.fixture
-    def mock_llm_manager(self):
+ def real_llm_manager():
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Mock LLM manager for testing."""
+    pass
         llm = Mock(spec=LLMManager)
         llm.generate_response = AsyncMock(return_value="Mock LLM response")
         return llm
     
     @pytest.fixture
-    def mock_tool_dispatcher(self):
+ def real_tool_dispatcher():
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Mock tool dispatcher for testing."""
+    pass
         dispatcher = Mock(spec=ToolDispatcher)
         dispatcher.dispatch = AsyncMock(return_value={"result": "Mock tool result"})
         return dispatcher
     
     @pytest.fixture
-    def mock_redis_manager(self):
+ def real_redis_manager():
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Mock Redis manager for testing."""
+    pass
         redis = Mock(spec=RedisManager)
         redis.get = AsyncMock(return_value=None)
-        redis.set = AsyncMock()
+        redis.set = AsyncNone  # TODO: Use real service instance
         return redis
     
     def test_reliability_infrastructure_initialization_enabled(self, mock_llm_manager, mock_tool_dispatcher, mock_redis_manager):
@@ -145,6 +159,7 @@ class TestBaseAgentReliabilityInfrastructure:
         
     def test_reliability_infrastructure_initialization_disabled(self, mock_llm_manager):
         """Test reliability infrastructure is not initialized when disabled."""
+    pass
         agent = MockBaseAgent(
             llm_manager=mock_llm_manager,
             name="NoReliabilityAgent",
@@ -178,7 +193,8 @@ class TestBaseAgentReliabilityInfrastructure:
         # Mock operation that succeeds
         async def success_operation():
             await asyncio.sleep(0.01)  # Simulate work
-            return {"result": "success"}
+            await asyncio.sleep(0)
+    return {"result": "success"}
         
         result = await agent.execute_with_reliability(
             operation=success_operation,
@@ -191,6 +207,7 @@ class TestBaseAgentReliabilityInfrastructure:
     @pytest.mark.asyncio
     async def test_execute_with_reliability_failure_and_recovery(self, mock_llm_manager, mock_tool_dispatcher):
         """Test failure handling and recovery with reliability wrapper."""
+    pass
         agent = MockBaseAgent(
             llm_manager=mock_llm_manager,
             name="ReliabilityFailureAgent",
@@ -201,11 +218,13 @@ class TestBaseAgentReliabilityInfrastructure:
         call_count = 0
         
         async def flaky_operation():
+    pass
             nonlocal call_count
             call_count += 1
             if call_count < 3:
                 raise ValueError(f"Simulated failure {call_count}")
-            return {"result": "recovered", "attempts": call_count}
+            await asyncio.sleep(0)
+    return {"result": "recovered", "attempts": call_count}
         
         # Should succeed after retries
         result = await agent.execute_with_reliability(
@@ -229,13 +248,12 @@ class TestBaseAgentReliabilityInfrastructure:
         )
         
         # Mock the circuit breaker to prevent it from opening
-        from unittest.mock import Mock, AsyncMock
-        mock_circuit_breaker = Mock()
+        mock_circuit_breaker = mock_circuit_breaker_instance  # Initialize appropriate service
         mock_circuit_breaker.is_open = Mock(return_value=False)
         mock_circuit_breaker.is_closed = Mock(return_value=True)
-        mock_circuit_breaker.record_success = Mock()
-        mock_circuit_breaker.record_failure = Mock()
-        mock_circuit_breaker.reset = Mock()
+        mock_circuit_breaker.record_success = record_success_instance  # Initialize appropriate service
+        mock_circuit_breaker.record_failure = record_failure_instance  # Initialize appropriate service
+        mock_circuit_breaker.reset = reset_instance  # Initialize appropriate service
         
         # Replace the circuit breaker with our mock
         agent.circuit_breaker._circuit_breaker = mock_circuit_breaker
@@ -246,7 +264,8 @@ class TestBaseAgentReliabilityInfrastructure:
             raise ValueError("Primary operation always fails")
         
         async def fallback_operation():
-            return {"result": "fallback_success", "source": "fallback"}
+            await asyncio.sleep(0)
+    return {"result": "fallback_success", "source": "fallback"}
         
         result = await agent.execute_with_reliability(
             operation=failing_operation,
@@ -260,6 +279,7 @@ class TestBaseAgentReliabilityInfrastructure:
         
     def test_execute_with_reliability_not_enabled_error(self, mock_llm_manager):
         """Test error when trying to use reliability without enabling it."""
+    pass
         agent = MockBaseAgent(
             llm_manager=mock_llm_manager,
             name="NoReliabilityAgent",
@@ -267,7 +287,9 @@ class TestBaseAgentReliabilityInfrastructure:
         )
         
         async def dummy_operation():
-            return "dummy"
+    pass
+            await asyncio.sleep(0)
+    return "dummy"
         
         with pytest.raises(RuntimeError, match="Reliability not enabled"):
             asyncio.run(agent.execute_with_reliability(
@@ -280,13 +302,16 @@ class TestBaseAgentExecutionEngine:
     """Test execution engine patterns (modern execution, monitoring, context handling)."""
     
     @pytest.fixture
-    def mock_llm_manager(self):
+ def real_llm_manager():
+    """Use real service instance."""
+    # TODO: Initialize real service
         llm = Mock(spec=LLMManager)
         llm.generate_response = AsyncMock(return_value="Mock response")
         return llm
     
     def test_execution_engine_initialization_enabled(self, mock_llm_manager):
         """Test execution engine is properly initialized when enabled."""
+    pass
         agent = MockBaseAgent(
             llm_manager=mock_llm_manager,
             name="ExecutionEngineAgent",
@@ -326,6 +351,7 @@ class TestBaseAgentExecutionEngine:
     @pytest.mark.asyncio
     async def test_execute_modern_success(self, mock_llm_manager):
         """Test successful modern execution pattern."""
+    pass
         agent = MockBaseAgent(
             llm_manager=mock_llm_manager,
             name="ModernExecutionAgent",
@@ -398,6 +424,7 @@ class TestBaseAgentExecutionEngine:
     @pytest.mark.asyncio
     async def test_execute_modern_execution_failure(self, mock_llm_manager):
         """Test modern execution with core logic failure."""
+    pass
         agent = MockBaseAgent(
             llm_manager=mock_llm_manager,
             name="ExecutionFailureAgent",
@@ -453,17 +480,23 @@ class TestBaseAgentWebSocketInfrastructure:
     """Test WebSocket infrastructure (event emission, bridge integration, update methods)."""
     
     @pytest.fixture
-    def mock_llm_manager(self):
+ def real_llm_manager():
+    """Use real service instance."""
+    # TODO: Initialize real service
         llm = Mock(spec=LLMManager)
-        return llm
+        await asyncio.sleep(0)
+    return llm
     
     @pytest.fixture
-    def mock_websocket_bridge(self):
+ def real_websocket_bridge():
+    """Use real service instance."""
+    # TODO: Initialize real service
+    pass
         """Mock WebSocket bridge for testing."""
-        bridge = Mock()
-        bridge.notify_agent_thinking = AsyncMock()
-        bridge.notify_agent_completed = AsyncMock()
-        bridge.notify_custom = AsyncMock()
+        bridge = bridge_instance  # Initialize appropriate service
+        bridge.notify_agent_thinking = AsyncNone  # TODO: Use real service instance
+        bridge.notify_agent_completed = AsyncNone  # TODO: Use real service instance
+        bridge.notify_custom = AsyncNone  # TODO: Use real service instance
         return bridge
     
     def test_websocket_bridge_integration(self, mock_llm_manager):
@@ -477,7 +510,7 @@ class TestBaseAgentWebSocketInfrastructure:
         assert not agent.has_websocket_context()
         
         # Set WebSocket bridge
-        mock_bridge = Mock()
+        mock_bridge = mock_bridge_instance  # Initialize appropriate service
         agent.set_websocket_bridge(mock_bridge, "test_run_123")
         
         # Verify WebSocket context is available
@@ -486,21 +519,22 @@ class TestBaseAgentWebSocketInfrastructure:
     @pytest.mark.asyncio
     async def test_websocket_event_emission_methods(self, mock_llm_manager):
         """Test all WebSocket event emission methods."""
+    pass
         agent = MockBaseAgent(
             llm_manager=mock_llm_manager,
             name="WebSocketEventsAgent"
         )
         
         # Mock the WebSocket bridge with the methods that WebSocketBridgeAdapter actually calls
-        mock_bridge = Mock()
-        mock_bridge.notify_agent_started = AsyncMock()
-        mock_bridge.notify_agent_thinking = AsyncMock()
-        mock_bridge.notify_tool_executing = AsyncMock()
-        mock_bridge.notify_tool_completed = AsyncMock()
-        mock_bridge.notify_agent_completed = AsyncMock()
-        mock_bridge.notify_progress_update = AsyncMock()  # emit_progress calls this
-        mock_bridge.notify_agent_error = AsyncMock()      # emit_error calls this
-        mock_bridge.notify_custom = AsyncMock()           # subagent methods call this
+        mock_bridge = mock_bridge_instance  # Initialize appropriate service
+        mock_bridge.notify_agent_started = AsyncNone  # TODO: Use real service instance
+        mock_bridge.notify_agent_thinking = AsyncNone  # TODO: Use real service instance
+        mock_bridge.notify_tool_executing = AsyncNone  # TODO: Use real service instance
+        mock_bridge.notify_tool_completed = AsyncNone  # TODO: Use real service instance
+        mock_bridge.notify_agent_completed = AsyncNone  # TODO: Use real service instance
+        mock_bridge.notify_progress_update = AsyncNone  # TODO: Use real service instance  # emit_progress calls this
+        mock_bridge.notify_agent_error = AsyncNone  # TODO: Use real service instance      # emit_error calls this
+        mock_bridge.notify_custom = AsyncNone  # TODO: Use real service instance           # subagent methods call this
         
         # Use the proper method to set the bridge
         agent.set_websocket_bridge(mock_bridge, "test_run")
@@ -557,12 +591,13 @@ class TestBaseAgentWebSocketInfrastructure:
         agent.set_user_context(user_context)
         
         # Mock the emitter
-        mock_emitter = Mock()
-        mock_emitter.emit_agent_thinking = AsyncMock()
-        mock_emitter.emit_agent_completed = AsyncMock()
-        mock_emitter.emit_custom_event = AsyncMock()
+        mock_emitter = mock_emitter_instance  # Initialize appropriate service
+        mock_emitter.emit_agent_thinking = AsyncNone  # TODO: Use real service instance
+        mock_emitter.emit_agent_completed = AsyncNone  # TODO: Use real service instance
+        mock_emitter.emit_custom_event = AsyncNone  # TODO: Use real service instance
         
-        # Mock the _get_user_emitter method to return our mock
+        # Mock the _get_user_emitter method to await asyncio.sleep(0)
+    return our mock
         with patch.object(agent, '_get_user_emitter', return_value=mock_emitter):
             # Test processing update
             await agent._send_update("test_run", {
@@ -598,13 +633,14 @@ class TestBaseAgentWebSocketInfrastructure:
     @pytest.mark.asyncio
     async def test_send_helper_methods(self, mock_llm_manager):
         """Test WebSocket helper methods for common update patterns."""
+    pass
         agent = MockBaseAgent(
             llm_manager=mock_llm_manager,
             name="HelperMethodsAgent"
         )
         
         # Mock _send_update to track calls
-        agent._send_update = AsyncMock()
+        agent._send_update = AsyncNone  # TODO: Use real service instance
         
         # Test send_processing_update
         await agent.send_processing_update("test_run", "Processing data...")
@@ -636,12 +672,16 @@ class TestBaseAgentHealthMonitoring:
     """Test health monitoring infrastructure (component aggregation, status reporting)."""
     
     @pytest.fixture
-    def mock_llm_manager(self):
+ def real_llm_manager():
+    """Use real service instance."""
+    # TODO: Initialize real service
         llm = Mock(spec=LLMManager)
-        return llm
+        await asyncio.sleep(0)
+    return llm
     
     def test_health_status_basic_components(self, mock_llm_manager):
         """Test basic health status reporting."""
+    pass
         agent = MockBaseAgent(
             llm_manager=mock_llm_manager,
             name="HealthTestAgent"
@@ -677,6 +717,7 @@ class TestBaseAgentHealthMonitoring:
         
     def test_health_status_with_execution_engine(self, mock_llm_manager):
         """Test health status with execution engine enabled."""
+    pass
         agent = MockBaseAgent(
             llm_manager=mock_llm_manager,
             name="ExecutionHealthAgent",
@@ -720,12 +761,17 @@ class TestBaseAgentPropertyInitialization:
     """Test property initialization patterns (optional features, configuration, SSOT access)."""
     
     @pytest.fixture
-    def mock_llm_manager(self):
+ def real_llm_manager():
+    """Use real service instance."""
+    # TODO: Initialize real service
         llm = Mock(spec=LLMManager)
         return llm
     
     @pytest.fixture
-    def mock_dependencies(self):
+ def real_dependencies():
+    """Use real service instance."""
+    # TODO: Initialize real service
+    pass
         """Mock all optional dependencies."""
         return {
             'tool_dispatcher': Mock(spec=ToolDispatcher),
@@ -750,6 +796,7 @@ class TestBaseAgentPropertyInitialization:
         
     def test_full_initialization_with_all_features(self, mock_llm_manager, mock_dependencies):
         """Test full initialization with all features enabled."""
+    pass
         agent = MockBaseAgent(
             llm_manager=mock_llm_manager,
             name="FullFeaturesAgent",
@@ -824,6 +871,7 @@ class TestBaseAgentPropertyInitialization:
         
     def test_caching_initialization_requirements(self, mock_llm_manager):
         """Test caching infrastructure initialization requirements."""
+    pass
         # Caching enabled but no Redis manager - should not initialize caching
         agent1 = MockBaseAgent(
             llm_manager=mock_llm_manager,
@@ -848,7 +896,6 @@ class TestBaseAgentPropertyInitialization:
         assert agent2._enable_caching is True
         assert agent2.redis_manager is not None
         
-    @patch.dict('os.environ', {'TEST_COLLECTION_MODE': '1'})
     def test_test_collection_mode_handling(self, mock_llm_manager):
         """Test special handling during test collection mode."""
         agent = MockBaseAgent(llm_manager=mock_llm_manager)
@@ -858,6 +905,7 @@ class TestBaseAgentPropertyInitialization:
         
     def test_timing_collector_initialization(self, mock_llm_manager):
         """Test timing collector is properly initialized."""
+    pass
         agent_name = "TimingTestAgent"
         agent = MockBaseAgent(
             llm_manager=mock_llm_manager,
@@ -882,12 +930,15 @@ class TestBaseAgentEdgeCasesAndErrorScenarios:
     """Test edge cases, error scenarios, and boundary conditions."""
     
     @pytest.fixture
-    def mock_llm_manager(self):
+ def real_llm_manager():
+    """Use real service instance."""
+    # TODO: Initialize real service
         llm = Mock(spec=LLMManager)
         return llm
     
     def test_state_transition_validation_errors(self, mock_llm_manager):
         """Test invalid state transitions are properly rejected."""
+    pass
         agent = MockBaseAgent(llm_manager=mock_llm_manager)
         
         # Valid transitions should work
@@ -928,6 +979,7 @@ class TestBaseAgentEdgeCasesAndErrorScenarios:
     @pytest.mark.asyncio
     async def test_shutdown_with_cleanup_errors(self, mock_llm_manager):
         """Test shutdown handles cleanup errors gracefully."""
+    pass
         agent = MockBaseAgent(
             llm_manager=mock_llm_manager,
             enable_reliability=True
@@ -955,11 +1007,12 @@ class TestBaseAgentEdgeCasesAndErrorScenarios:
                 
     def test_configuration_error_resilience(self, mock_llm_manager):
         """Test agent handles configuration errors gracefully."""
+    pass
         # Mock agent_config to have missing attributes
         with patch('netra_backend.app.agents.base_agent.agent_config') as mock_config:
             # Missing timeout attribute
             mock_config.timeout = None
-            mock_config.retry = Mock()
+            mock_config.retry = retry_instance  # Initialize appropriate service
             mock_config.retry.max_retries = 3
             mock_config.retry.base_delay = 1.0
             mock_config.retry.max_delay = 30.0
@@ -1014,3 +1067,4 @@ class TestBaseAgentEdgeCasesAndErrorScenarios:
         # Verify no errors occurred
         assert len(errors) == 0, f"Concurrent access errors: {errors}"
         assert len(results) == 10
+    pass

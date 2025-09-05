@@ -16,9 +16,10 @@ Updated to test the SSOT method where get_db() is an async context manager.
 
 import pytest
 from typing import AsyncGenerator
-from unittest.mock import AsyncMock, MagicMock, patch, Mock
 from sqlalchemy.ext.asyncio import AsyncSession
 from contextlib import asynccontextmanager
+from test_framework.database.test_database_manager import TestDatabaseManager
+from shared.isolated_environment import IsolatedEnvironment
 
 from netra_backend.app.dependencies import (
     get_db_dependency,

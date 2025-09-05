@@ -12,6 +12,7 @@ Advanced features testing for first-time users including collaboration and secur
 
 import sys
 from pathlib import Path
+from shared.isolated_environment import IsolatedEnvironment
 
 # Test framework import - using pytest fixtures instead
 

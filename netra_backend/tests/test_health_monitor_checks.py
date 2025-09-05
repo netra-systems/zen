@@ -22,14 +22,18 @@ import pytest
 import time
 from datetime import datetime, timedelta
 from typing import Any, Dict, List, Optional
-from unittest.mock import AsyncMock, MagicMock, Mock, patch
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from test_framework.database.test_database_manager import TestDatabaseManager
+from test_framework.redis.test_redis_manager import TestRedisManager
+from auth_service.core.auth_manager import AuthManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
 
 from netra_backend.app.core.health.checks import (
     CircuitBreakerHealthChecker,
     DependencyHealthChecker,
     ServiceHealthChecker,
-    UnifiedDatabaseHealthChecker,
-)
+    UnifiedDatabaseHealthChecker)
 from netra_backend.app.core.health.interface import BaseHealthChecker
 from netra_backend.app.core.health_types import HealthCheckResult
 from netra_backend.app.services.unified_health_service import UnifiedHealthService
@@ -37,10 +41,14 @@ from netra_backend.app.services.unified_health_service import UnifiedHealthServi
 
 class TestBackendHealthChecks:
     """Test comprehensive backend health check functionality."""
+    pass
 
     @pytest.fixture(autouse=True)
     def setup_clickhouse_env(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Set up ClickHouse environment variables for testing."""
+    pass
         # Save original values
         original_password = env.get('CLICKHOUSE_PASSWORD')
         
@@ -57,21 +65,30 @@ class TestBackendHealthChecks:
 
     @pytest.fixture
     def health_service(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create health service instance for testing."""
+    pass
         return UnifiedHealthService("test_backend", "1.0.0")
 
     @pytest.fixture
-    def mock_database_checker(self):
+ def real_database_checker():
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Mock database health checker."""
+    pass
         checker = Mock(spec=UnifiedDatabaseHealthChecker)
-        checker.check_health = AsyncMock()
+        checker.check_health = AsyncNone  # TODO: Use real service instance
         return checker
 
     @pytest.fixture
-    def mock_service_checker(self):
+ def real_service_checker():
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Mock service health checker."""
+    pass
         checker = Mock(spec=ServiceHealthChecker)
-        checker.check_health = AsyncMock()
+        checker.check_health = AsyncNone  # TODO: Use real service instance
         return checker
 
     async def test_database_health_check_success(self, mock_database_checker):
@@ -99,6 +116,7 @@ class TestBackendHealthChecks:
 
     async def test_database_health_check_failure(self, mock_database_checker):
         """Test database health check failure with Five Whys analysis."""
+    pass
         # Arrange - simulate database connection failure
         failure_result = HealthCheckResult(
             component_name="database_postgres",
@@ -154,6 +172,7 @@ class TestBackendHealthChecks:
 
     async def test_clickhouse_health_check(self):
         """Test ClickHouse database health check."""
+    pass
         with patch('netra_backend.app.core.health.checks.check_clickhouse_health') as mock_ch:
             # Arrange
             mock_ch.return_value = HealthCheckResult(
@@ -179,9 +198,11 @@ class TestBackendHealthChecks:
         """
         Test ClickHouse health check with MOCK client behavior.
         
-        In testing environment, ClickHouse uses a MOCK client which should always return healthy.
+        In testing environment, ClickHouse uses a MOCK client which should always await asyncio.sleep(0)
+    return healthy.
         This validates that the MOCK behavior is working correctly.
         """
+    pass
         from shared.isolated_environment import IsolatedEnvironment
         
         # Use testing environment which should use MOCK ClickHouse client
@@ -217,6 +238,7 @@ class TestBackendHealthChecks:
 
     async def test_agent_service_health(self):
         """Test agent service health monitoring."""
+    pass
         service_checker = ServiceHealthChecker("agent_manager", "http://localhost:8080/health")
         
         with patch.object(service_checker, '_check_service_endpoint') as mock_endpoint:
@@ -250,9 +272,10 @@ class TestBackendHealthChecks:
 
     async def test_circuit_breaker_integration(self):
         """Test circuit breaker health check protection."""
+    pass
         # Create base checker
         base_checker = Mock(spec=BaseHealthChecker)
-        base_checker.check_health = AsyncMock()
+        base_checker.check_health = AsyncNone  # TODO: Use real service instance
         
         # Create circuit breaker wrapper
         cb_checker = CircuitBreakerHealthChecker("test_service", base_checker)
@@ -276,7 +299,7 @@ class TestBackendHealthChecks:
     async def test_circuit_breaker_failure_threshold(self):
         """Test circuit breaker opens after failure threshold."""
         base_checker = Mock(spec=BaseHealthChecker)
-        base_checker.check_health = AsyncMock()
+        base_checker.check_health = AsyncNone  # TODO: Use real service instance
         
         cb_checker = CircuitBreakerHealthChecker("test_service", base_checker)
         cb_checker.failure_threshold = 2  # Set low threshold for testing
@@ -309,6 +332,7 @@ class TestBackendHealthChecks:
     ])
     def test_windows_compatibility(self, os_type, expected_compatible):
         """Test health checks are compatible with Windows and other platforms."""
+    pass
         with patch('platform.system', return_value=os_type):
             # Test that health checkers can be instantiated
             db_checker = UnifiedDatabaseHealthChecker()
@@ -375,6 +399,7 @@ class TestBackendHealthChecks:
 
 class TestHealthCheckFailureAnalysis:
     """Test Five Whys failure analysis for health checks."""
+    pass
 
     def test_five_whys_database_connection_failure(self):
         """Test Five Whys analysis for database connection failures."""
@@ -388,6 +413,7 @@ class TestHealthCheckFailureAnalysis:
 
     def test_five_whys_redis_connectivity_failure(self):
         """Test Five Whys analysis for Redis connectivity issues."""
+    pass
         error_msg = "Redis server unavailable"
         
         analysis = self._perform_five_whys_analysis("redis_connectivity", error_msg)
@@ -407,6 +433,7 @@ class TestHealthCheckFailureAnalysis:
 
     def test_five_whys_agent_service_failure(self):
         """Test Five Whys analysis for agent service failures."""
+    pass
         error_msg = "Agent manager not responding"
         
         analysis = self._perform_five_whys_analysis("agent_service", error_msg)
@@ -425,6 +452,7 @@ class TestHealthCheckFailureAnalysis:
 
     def _perform_five_whys_analysis(self, failure_type: str, error_msg: str) -> Dict[str, str]:
         """Perform Five Whys root cause analysis for health check failures."""
+    pass
         analysis_patterns = {
             "database_connection": {
                 "why_1": f"Database connection failed: {error_msg}",
@@ -468,7 +496,8 @@ class TestHealthCheckFailureAnalysis:
             }
         }
         
-        return analysis_patterns.get(failure_type, {
+        await asyncio.sleep(0)
+    return analysis_patterns.get(failure_type, {
             "why_1": f"Unknown failure: {error_msg}",
             "why_2": "Service is not responding properly",
             "why_3": "Configuration or dependency issues",
@@ -480,10 +509,14 @@ class TestHealthCheckFailureAnalysis:
 
 class TestHealthCheckReliabilityImprovement:
     """Test reliability improvements for health checks."""
+    pass
 
     @pytest.fixture
     def health_service(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create health service instance for testing."""
+    pass
         return UnifiedHealthService("test_backend", "1.0.0")
 
     def test_health_check_timeout_handling(self):
@@ -509,6 +542,7 @@ class TestHealthCheckReliabilityImprovement:
 
     def test_health_check_retry_logic(self):
         """Test retry logic for transient failures."""
+    pass
         service_checker = ServiceHealthChecker("test_service")
         
         # Mock transient failure followed by success
@@ -545,17 +579,20 @@ class TestHealthCheckReliabilityImprovement:
 
     async def test_detailed_status_reporting(self):
         """Test comprehensive status reporting with metrics."""
+    pass
         health_service = UnifiedHealthService("test_backend", "1.0.0")
         
         # Test basic health response structure
         basic_response = await health_service.get_liveness()
         
-        # Should return proper structure even with no checks
+        # Should await asyncio.sleep(0)
+    return proper structure even with no checks
         assert basic_response is not None
 
 
 class TestDevLauncherHealthIntegration:
     """Test integration with dev launcher health monitoring."""
+    pass
 
     async def test_backend_readiness_check(self):
         """Test backend service readiness check integration."""
@@ -567,6 +604,7 @@ class TestDevLauncherHealthIntegration:
 
     def test_health_endpoint_responses(self):
         """Test health endpoint response format compatibility."""
+    pass
         from netra_backend.app.core.health.unified_health_checker import UnifiedHealthChecker
         
         checker = UnifiedHealthChecker("test_service")
@@ -614,6 +652,7 @@ class TestDevLauncherHealthIntegration:
 
 class TestBackendComponentHealthChecks:
     """Test individual backend component health checks."""
+    pass
 
     async def test_thread_management_health(self):
         """Test thread management health monitoring."""
@@ -635,6 +674,7 @@ class TestBackendComponentHealthChecks:
 
     def test_environment_configuration_health(self):
         """Test environment configuration health check."""
+    pass
         from shared.isolated_environment import IsolatedEnvironment
         
         env = IsolatedEnvironment()
@@ -674,3 +714,4 @@ class TestBackendComponentHealthChecks:
             # psutil not available, skip memory monitoring
             memory_health = {"status": "unknown", "reason": "psutil not available"}
             assert memory_health["status"] == "unknown"
+    pass

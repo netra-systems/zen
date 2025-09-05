@@ -1,15 +1,19 @@
 """Test that agents_execute endpoints work with the fixed circuit breaker decorator."""
 
 import pytest
-from unittest.mock import Mock, patch, AsyncMock
 from fastapi.testclient import TestClient
 from fastapi import FastAPI
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 from netra_backend.app.routes.agents_execute import router
 
 
 @pytest.fixture
 def test_app():
+    """Use real service instance."""
+    # TODO: Initialize real service
     """Create a test FastAPI app with the agents_execute router."""
     app = FastAPI()
     app.include_router(router, prefix="/api/agents")
@@ -18,6 +22,8 @@ def test_app():
 
 @pytest.fixture
 def test_client(test_app):
+    """Use real service instance."""
+    # TODO: Initialize real service
     """Create a test client."""
     return TestClient(test_app)
 

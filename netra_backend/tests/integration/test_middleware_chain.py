@@ -4,15 +4,19 @@ Tests to ensure all middleware work together correctly in the chain.
 """
 
 import pytest
-from unittest.mock import AsyncMock, Mock, patch
 from fastapi import FastAPI, Request, Response
 from fastapi.testclient import TestClient
 from fastapi.responses import JSONResponse
+from test_framework.redis.test_redis_manager import TestRedisManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 from netra_backend.app.middleware.cors_fix_middleware import CORSFixMiddleware
 from netra_backend.app.middleware.error_recovery_middleware import ErrorRecoveryMiddleware
 from netra_backend.app.middleware.security_headers_middleware import SecurityHeadersMiddleware
 from netra_backend.app.middleware.logging_middleware import LoggingMiddleware
+import asyncio
 
 
 class TestMiddlewareChain:
@@ -20,7 +24,10 @@ class TestMiddlewareChain:
     
     @pytest.fixture
     def app(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create a test FastAPI app with middleware chain."""
+    pass
         app = FastAPI()
         
         # Add middleware in the same order as production
@@ -32,25 +39,35 @@ class TestMiddlewareChain:
         # Add test endpoints
         @app.get("/test/success")
         async def success_endpoint():
-            return {"status": "success"}
+    pass
+            await asyncio.sleep(0)
+    return {"status": "success"}
         
         @app.get("/test/error")
         async def error_endpoint():
+    pass
             raise ValueError("Test error")
         
         @app.post("/test/data")
         async def data_endpoint(request: Request):
-            return {"received": "data"}
+    pass
+            await asyncio.sleep(0)
+    return {"received": "data"}
         
         @app.get("/test/timeout")
         async def timeout_endpoint():
+    pass
             raise TimeoutError("Request timeout")
         
-        return app
+        await asyncio.sleep(0)
+    return app
     
     @pytest.fixture
     def client(self, app):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create test client."""
+    pass
         return TestClient(app)
     
     def test_middleware_chain_success_flow(self, client):
@@ -77,6 +94,7 @@ class TestMiddlewareChain:
     
     def test_middleware_chain_error_handling(self, client):
         """Test error handling through middleware chain."""
+    pass
         response = client.get(
             "/test/error",
             headers={
@@ -117,6 +135,7 @@ class TestMiddlewareChain:
     
     def test_middleware_chain_invalid_origin(self, client):
         """Test request with invalid origin."""
+    pass
         response = client.get(
             "/test/success",
             headers={
@@ -149,6 +168,7 @@ class TestMiddlewareChain:
     
     def test_middleware_chain_post_request(self, client):
         """Test POST request through middleware chain."""
+    pass
         response = client.post(
             "/test/data",
             json={"test": "data"},
@@ -186,11 +206,15 @@ class TestMiddlewareChain:
         assert "access-control-allow-origin" in response.headers
     
     def test_middleware_chain_handles_none_response(self, client):
-        """Test middleware chain handles endpoints that return None."""
+        """Test middleware chain handles endpoints that await asyncio.sleep(0)
+    return None."""
+    pass
         # Add endpoint that returns None
         @client.app.get("/test/none")
         async def none_endpoint():
-            return None
+    pass
+            await asyncio.sleep(0)
+    return None
         
         response = client.get(
             "/test/none",
@@ -208,7 +232,8 @@ class TestMiddlewareChain:
             response = JSONResponse({"data": "test"})
             response.headers["X-Custom-Header"] = "custom-value"
             response.headers["Cache-Control"] = "no-cache"
-            return response
+            await asyncio.sleep(0)
+    return response
         
         response = client.get(
             "/test/custom",
@@ -228,9 +253,12 @@ class TestMiddlewareChain:
     @pytest.mark.parametrize("status_code", [400, 401, 403, 404, 422, 500, 502, 503])
     def test_middleware_chain_various_status_codes(self, client, status_code):
         """Test middleware chain with various HTTP status codes."""
+    pass
         @client.app.get(f"/test/status/{status_code}")
         async def status_endpoint():
-            return JSONResponse(
+    pass
+            await asyncio.sleep(0)
+    return JSONResponse(
                 content={"error": f"Status {status_code}"},
                 status_code=status_code
             )

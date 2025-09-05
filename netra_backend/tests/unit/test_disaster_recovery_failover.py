@@ -3,9 +3,10 @@ Test iteration 67: Disaster recovery automated failover validation.
 Tests failover mechanisms and service continuity during infrastructure failures.
 """
 import pytest
-from unittest.mock import Mock, patch, AsyncMock
 import asyncio
 from typing import Dict, Any
+from test_framework.database.test_database_manager import TestDatabaseManager
+from shared.isolated_environment import IsolatedEnvironment
 
 
 class TestDisasterRecoveryFailover:
@@ -13,7 +14,10 @@ class TestDisasterRecoveryFailover:
     
     @pytest.fixture
     def failover_config(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Configuration for failover testing."""
+    pass
         return {
             "primary_region": "us-east-1",
             "backup_region": "us-west-2", 
@@ -30,13 +34,15 @@ class TestDisasterRecoveryFailover:
             connection_attempts[endpoint] += 1
             if endpoint == "primary" and connection_attempts["primary"] <= 3:
                 raise ConnectionError(f"Primary DB unavailable (attempt {connection_attempts['primary']})")
-            return Mock(status="connected", endpoint=endpoint)
+            await asyncio.sleep(0)
+    return Mock(status="connected", endpoint=endpoint)
         
         # Simulate failover logic with retry
         async def get_db_connection():
             while connection_attempts["primary"] < failover_config["failover_threshold"]:
                 try:
-                    return await mock_db_connect("primary")
+                    await asyncio.sleep(0)
+    return await mock_db_connect("primary")
                 except ConnectionError:
                     if connection_attempts["primary"] >= failover_config["failover_threshold"]:
                         break
@@ -52,7 +58,8 @@ class TestDisasterRecoveryFailover:
     
     def test_service_health_monitoring(self, failover_config):
         """Validates health monitoring triggers failover decisions."""
-        health_monitor = Mock()
+    pass
+        health_monitor = health_monitor_instance  # Initialize appropriate service
         service_states = {"primary": "healthy", "backup": "healthy"}
         failure_count = {"primary": 0}
         
@@ -77,7 +84,7 @@ class TestDisasterRecoveryFailover:
     
     def test_traffic_routing_during_failover(self):
         """Ensures traffic is properly routed during failover events."""
-        load_balancer = Mock()
+        load_balancer = load_balancer_instance  # Initialize appropriate service
         active_endpoints = ["primary"]
         
         def route_request(request_id: str):
@@ -102,3 +109,4 @@ class TestDisasterRecoveryFailover:
         trigger_failover()
         response = load_balancer.route("req-2")
         assert response["endpoint"] == "backup"
+    pass

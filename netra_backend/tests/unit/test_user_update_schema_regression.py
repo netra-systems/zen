@@ -16,6 +16,7 @@ and that CRUDUser can be properly initialized in test scenarios.
 import pytest
 from pydantic import ValidationError
 from sqlalchemy.ext.asyncio import AsyncSession
+from shared.isolated_environment import IsolatedEnvironment
 
 from netra_backend.app.db.models_postgres import User
 from netra_backend.app.schemas.user import UserUpdate

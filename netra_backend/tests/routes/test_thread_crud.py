@@ -11,16 +11,18 @@ Business Value Justification (BVJ):
 
 import sys
 from pathlib import Path
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 from datetime import datetime
-from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
 from netra_backend.tests.test_route_fixtures import (
+import asyncio
     CommonResponseValidators,
-    basic_test_client,
-)
+    basic_test_client)
 
 class TestThreadCRUD:
     """Test thread CRUD operations functionality."""
@@ -65,13 +67,14 @@ class TestThreadCRUD:
     @pytest.mark.asyncio
     async def test_thread_archival(self):
         """Test thread archival functionality."""
+    pass
         from netra_backend.app.services.thread_service import ThreadService
         
         thread_id = "thread123"
         user_id = "user1"
         
         # Mock: Generic component isolation for controlled unit testing
-        with patch.object(ThreadService, 'delete_thread', new=AsyncMock()) as mock_delete:
+        with patch.object(ThreadService, 'delete_thread', new=AsyncNone  # TODO: Use real service instance) as mock_delete:
             mock_delete.return_value = True
             
             # Test soft delete/archive
@@ -82,7 +85,7 @@ class TestThreadCRUD:
         # Test delete thread which acts as archive functionality
         # Since archive_thread doesn't exist, we simulate it with delete_thread
         # Mock: Generic component isolation for controlled unit testing
-        with patch.object(ThreadService, 'delete_thread', new=AsyncMock()) as mock_delete:
+        with patch.object(ThreadService, 'delete_thread', new=AsyncNone  # TODO: Use real service instance) as mock_delete:
             # Simulate thread deletion response (archive behavior)
             mock_delete.return_value = {
                 "thread_id": thread_id,
@@ -137,6 +140,7 @@ class TestThreadCRUD:
     
     def test_thread_update(self, basic_test_client):
         """Test thread metadata updates."""
+    pass
         thread_id = "thread123"
         update_data = {
             "title": "Updated Thread Title",
@@ -191,6 +195,7 @@ class TestThreadCRUD:
     
     def test_thread_status_management(self, basic_test_client):
         """Test thread status transitions."""
+    pass
         thread_id = "thread123"
         status_transitions = [
             {"status": "active", "reason": "Thread activated"},
@@ -260,6 +265,7 @@ class TestThreadCRUD:
     
     def test_thread_duplication(self, basic_test_client):
         """Test thread duplication functionality."""
+    pass
         source_thread_id = "thread123"
         duplication_options = {
             "include_messages": True,

@@ -7,6 +7,7 @@ Tests to prevent:
 
 import sys
 from pathlib import Path
+from shared.isolated_environment import IsolatedEnvironment
 
 from datetime import datetime, timezone
 

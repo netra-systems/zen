@@ -7,6 +7,7 @@ Follows 450-line limit with 25-line function limit.
 import subprocess
 from pathlib import Path
 from typing import List
+from shared.isolated_environment import IsolatedEnvironment
 
 from netra_backend.app.services.factory_status.git_commit_parser import (
     CommitType,

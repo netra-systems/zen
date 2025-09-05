@@ -5,6 +5,10 @@ Tests session creation and initialization scenarios
 
 import sys
 from pathlib import Path
+from test_framework.database.test_database_manager import TestDatabaseManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 # Test framework import - using pytest fixtures instead
 
@@ -12,7 +16,6 @@ import asyncio
 import json
 import time
 import uuid
-from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 

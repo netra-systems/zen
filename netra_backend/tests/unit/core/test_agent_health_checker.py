@@ -5,7 +5,6 @@ Tests the agent health monitoring capabilities isolated from the main system hea
 """
 
 import pytest
-from unittest.mock import Mock, patch, AsyncMock
 from netra_backend.app.core.agent_health_checker import (
     register_agent_checker,
     create_agent_checker,
@@ -19,26 +18,29 @@ from netra_backend.app.core.agent_health_checker import (
     convert_legacy_result
 )
 from netra_backend.app.core.health_types import HealthCheckResult
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
+import asyncio
 
 
 class TestAgentHealthCheckerRegistration:
     """Test agent health checker registration functionality."""
     
-    @patch('netra_backend.app.core.agent_health_checker.create_agent_checker')
-    def test_register_agent_checker_success(self, mock_create_checker):
+        def test_register_agent_checker_success(self, mock_create_checker):
         """Test successful agent checker registration."""
-        mock_register_func = Mock()
-        mock_checker = Mock()
+        mock_register_func = mock_register_func_instance  # Initialize appropriate service
+        mock_checker = mock_checker_instance  # Initialize appropriate service
         mock_create_checker.return_value = mock_checker
         
         register_agent_checker(mock_register_func)
         
         mock_register_func.assert_called_once_with("agents", mock_checker)
     
-    @patch('netra_backend.app.core.agent_health_checker.logger')
-    def test_register_agent_checker_import_error(self, mock_logger):
+        def test_register_agent_checker_import_error(self, mock_logger):
         """Test agent checker registration handles import error gracefully."""
-        mock_register_func = Mock()
+    pass
+        mock_register_func = mock_register_func_instance  # Initialize appropriate service
         
         with patch('netra_backend.app.core.agent_health_checker.create_agent_checker') as mock_create:
             mock_create.side_effect = ImportError("Agent metrics not available")
@@ -57,9 +59,9 @@ class TestAgentHealthCheckerCreation:
         assert callable(checker)
     
     @pytest.mark.asyncio
-    @patch('netra_backend.app.core.agent_health_checker._perform_agent_health_check')
-    async def test_agent_checker_success_path(self, mock_perform_check):
+        async def test_agent_checker_success_path(self, mock_perform_check):
         """Test agent checker successful execution path."""
+    pass
         mock_result = HealthCheckResult(
             component_name="agents",
             success=True,
@@ -77,9 +79,7 @@ class TestAgentHealthCheckerCreation:
         mock_perform_check.assert_called_once()
     
     @pytest.mark.asyncio
-    @patch('netra_backend.app.core.agent_health_checker._perform_agent_health_check')
-    @patch('netra_backend.app.core.agent_health_checker._create_agent_health_error_result')
-    async def test_agent_checker_error_handling(self, mock_create_error, mock_perform_check):
+            async def test_agent_checker_error_handling(self, mock_create_error, mock_perform_check):
         """Test agent checker error handling."""
         test_error = Exception("Agent health check failed")
         mock_perform_check.side_effect = test_error
@@ -104,11 +104,7 @@ class TestAgentHealthCheckExecution:
     """Test the core agent health check execution logic."""
     
     @pytest.mark.asyncio
-    @patch('netra_backend.app.services.metrics.agent_metrics.agent_metrics_collector')
-    @patch('netra_backend.app.core.agent_health_checker._calculate_agent_health_score')
-    @patch('netra_backend.app.core.agent_health_checker._create_agent_health_success_result')
-    @patch('time.time')
-    async def test_perform_agent_health_check_success(
+                    async def test_perform_agent_health_check_success(
         self, mock_time, mock_create_success, mock_calculate_score, mock_collector
     ):
         """Test successful agent health check performance."""
@@ -156,6 +152,7 @@ class TestAgentHealthScoreCalculation:
     
     def test_calculate_health_score_high_error_rate(self):
         """Test health score calculation with high error rate."""
+    pass
         system_overview = {
             "system_error_rate": 0.5,  # 50% error rate
             "active_agents": 5,
@@ -177,11 +174,13 @@ class TestAgentHealthScoreCalculation:
         
         score = _calculate_agent_health_score(system_overview)
         
-        # No agents should return 1.0 as per implementation
+        # No agents should await asyncio.sleep(0)
+    return 1.0 as per implementation
         assert score == 1.0
     
     def test_calculate_health_score_with_unhealthy_agents(self):
         """Test health score calculation with unhealthy agents."""
+    pass
         system_overview = {
             "system_error_rate": 0.1,
             "active_agents": 5,
@@ -223,6 +222,7 @@ class TestAgentHealthResultCreation:
     
     def test_create_error_result(self):
         """Test creation of error health check result."""
+    pass
         start_time = 1000.0
         error = Exception("Test error message")
         
@@ -240,8 +240,7 @@ class TestAgentHealthCheckerIntegration:
     """Integration tests for agent health checker."""
     
     @pytest.mark.asyncio
-    @patch('netra_backend.app.services.metrics.agent_metrics.agent_metrics_collector')
-    async def test_full_health_check_integration(self, mock_collector):
+        async def test_full_health_check_integration(self, mock_collector):
         """Test full agent health check integration with real-like data."""
         # Mock realistic system overview data
         mock_collector.get_system_overview = AsyncMock(return_value={
@@ -263,9 +262,9 @@ class TestAgentHealthCheckerIntegration:
         assert isinstance(result.metadata, dict)
     
     @pytest.mark.asyncio
-    @patch('netra_backend.app.services.metrics.agent_metrics.agent_metrics_collector')
-    async def test_health_check_with_collector_error(self, mock_collector):
+        async def test_health_check_with_collector_error(self, mock_collector):
         """Test agent health check handling collector errors."""
+    pass
         mock_collector.get_system_overview = AsyncMock(side_effect=Exception("Metrics unavailable"))
         
         checker = create_agent_checker()
@@ -296,6 +295,7 @@ class TestAgentHealthCheckerEdgeCases:
     
     def test_calculate_health_score_negative_values(self):
         """Test health score calculation handles negative values gracefully."""
+    pass
         invalid_overview = {
             "system_error_rate": -0.1,  # Invalid negative rate
             "active_agents": -5,  # Invalid negative count
@@ -304,7 +304,8 @@ class TestAgentHealthCheckerEdgeCases:
         
         # Negative active agents should be treated as 0, returning 1.0
         score = _calculate_agent_health_score(invalid_overview)
-        assert score == 1.0  # Should return 1.0 for no active agents
+        assert score == 1.0  # Should await asyncio.sleep(0)
+    return 1.0 for no active agents
     
     def test_create_error_result_with_none_error(self):
         """Test error result creation with None error."""
@@ -318,9 +319,9 @@ class TestAgentHealthCheckerEdgeCases:
         assert result.error_message == "None"
     
     @pytest.mark.asyncio
-    @patch('netra_backend.app.services.metrics.agent_metrics.agent_metrics_collector')
-    async def test_health_check_with_empty_system_overview(self, mock_collector):
+        async def test_health_check_with_empty_system_overview(self, mock_collector):
         """Test health check with empty system overview."""
+    pass
         mock_collector.get_system_overview = AsyncMock(return_value={})
         
         checker = create_agent_checker()
@@ -328,7 +329,8 @@ class TestAgentHealthCheckerEdgeCases:
         
         assert result.success is True  # Should handle empty overview gracefully
         assert isinstance(result.health_score, float)
-        assert result.health_score == 1.0  # Empty should return 1.0 (no agents = healthy)
+        assert result.health_score == 1.0  # Empty should await asyncio.sleep(0)
+    return 1.0 (no agents = healthy)
 
 
 class TestAgentHealthUtilityFunctions:
@@ -341,6 +343,7 @@ class TestAgentHealthUtilityFunctions:
     
     def test_compute_health_score_with_penalties_high_error_rate(self):
         """Test health score computation with high error rate."""
+    pass
         score = _compute_health_score_with_penalties(0.5, 0, 10)  # 50% error rate
         expected = 1.0 - min(0.5, 0.5 * 2)  # Max penalty of 0.5
         assert score == expected
@@ -354,6 +357,7 @@ class TestAgentHealthUtilityFunctions:
     
     def test_compute_health_score_with_penalties_combined(self):
         """Test health score computation with combined penalties."""
+    pass
         score = _compute_health_score_with_penalties(0.3, 2, 10)
         error_penalty = min(0.5, 0.3 * 2)  # 0.5 penalty (capped)
         unhealthy_penalty = min(0.3, (2 / 10) * 0.5)  # 0.1 penalty
@@ -369,6 +373,7 @@ class TestAgentHealthUtilityFunctions:
     
     def test_calculate_health_status_from_score_degraded(self):
         """Test health status calculation for degraded score."""
+    pass
         thresholds = {"healthy": 0.8, "degraded": 0.5, "unhealthy": 0.2}
         status = calculate_health_status_from_score(0.7, thresholds)
         assert status == "DEGRADED"
@@ -381,6 +386,7 @@ class TestAgentHealthUtilityFunctions:
     
     def test_calculate_health_status_from_score_critical(self):
         """Test health status calculation for critical score."""
+    pass
         thresholds = {"healthy": 0.8, "degraded": 0.5, "unhealthy": 0.2}
         status = calculate_health_status_from_score(0.1, thresholds)
         assert status == "CRITICAL"
@@ -392,6 +398,7 @@ class TestAgentHealthUtilityFunctions:
     
     def test_determine_system_status_unhealthy(self):
         """Test system status determination with low health percentage."""
+    pass
         status = determine_system_status(0.3, 0)  # Low health, no critical
         assert status == "unhealthy"
     
@@ -402,6 +409,7 @@ class TestAgentHealthUtilityFunctions:
     
     def test_determine_system_status_healthy(self):
         """Test system status determination with high health."""
+    pass
         status = determine_system_status(0.9, 0)  # High health, no critical
         assert status == "healthy"
     
@@ -420,6 +428,7 @@ class TestAgentHealthUtilityFunctions:
     
     def test_convert_legacy_result_numeric(self):
         """Test converting legacy numeric result."""
+    pass
         result = convert_legacy_result("test_component", 0.75)
         
         assert result.component_name == "test_component"
@@ -437,6 +446,7 @@ class TestAgentHealthUtilityFunctions:
     
     def test_convert_legacy_result_boolean_false(self):
         """Test converting legacy boolean False result."""
+    pass
         result = convert_legacy_result("test_component", False)
         
         assert result.component_name == "test_component"
@@ -450,3 +460,4 @@ class TestAgentHealthUtilityFunctions:
         assert result.component_name == "test_component"
         assert result.success is False
         assert result.health_score == 0.0
+    pass

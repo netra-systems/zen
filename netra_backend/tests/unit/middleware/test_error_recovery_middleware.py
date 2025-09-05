@@ -4,31 +4,41 @@ Tests to ensure the middleware correctly handles errors and recovers gracefully.
 """
 
 import pytest
-from unittest.mock import AsyncMock, Mock, patch
 from fastapi import Request, Response
 from fastapi.responses import JSONResponse
+from test_framework.database.test_database_manager import TestDatabaseManager
+from shared.isolated_environment import IsolatedEnvironment
 
 from netra_backend.app.middleware.error_recovery_middleware import ErrorRecoveryMiddleware
+import asyncio
 
 
 class TestErrorRecoveryMiddleware:
     """Test suite for Error Recovery Middleware."""
     
     @pytest.fixture
-    def mock_app(self):
+ def real_app():
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create a mock application."""
-        return Mock()
+        return None  # TODO: Use real service instance
     
     @pytest.fixture
     def middleware(self, mock_app):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create middleware instance."""
+    pass
         return ErrorRecoveryMiddleware(mock_app)
     
     @pytest.fixture
-    def mock_request(self):
+ def real_request():
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create a mock request."""
+    pass
         request = Mock(spec=Request)
-        request.url = Mock()
+        request.url = url_instance  # Initialize appropriate service
         request.url.path = "/api/test"
         request.method = "GET"
         request.headers = {}
@@ -49,6 +59,7 @@ class TestErrorRecoveryMiddleware:
     @pytest.mark.asyncio
     async def test_handles_generic_exception(self, middleware, mock_request):
         """Test handling of generic exceptions in development environment."""
+    pass
         mock_call_next = AsyncMock(side_effect=Exception("Generic error"))
         
         response = await middleware.dispatch(mock_request, mock_call_next)
@@ -73,6 +84,7 @@ class TestErrorRecoveryMiddleware:
     @pytest.mark.asyncio
     async def test_handles_timeout_error(self, middleware, mock_request):
         """Test handling of timeout errors."""
+    pass
         mock_call_next = AsyncMock(side_effect=TimeoutError("Request timeout"))
         
         response = await middleware.dispatch(mock_request, mock_call_next)
@@ -97,6 +109,7 @@ class TestErrorRecoveryMiddleware:
     @pytest.mark.asyncio
     async def test_logs_errors(self, middleware, mock_request):
         """Test that errors are properly logged."""
+    pass
         with patch('netra_backend.app.middleware.error_recovery_middleware.logger') as mock_logger:
             mock_call_next = AsyncMock(side_effect=Exception("Test error"))
             
@@ -122,6 +135,7 @@ class TestErrorRecoveryMiddleware:
     @pytest.mark.asyncio
     async def test_no_error_details_in_production(self, middleware, mock_request):
         """Test that error details are not exposed in production."""
+    pass
         # Mock production environment
         with patch.dict('os.environ', {'ENVIRONMENT': 'production'}):
             mock_call_next = AsyncMock(side_effect=Exception("Sensitive error details"))

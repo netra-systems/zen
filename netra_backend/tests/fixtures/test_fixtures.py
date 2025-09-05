@@ -2,26 +2,34 @@
 
 import sys
 from pathlib import Path
-from unittest.mock import MagicMock
+from test_framework.database.test_database_manager import TestDatabaseManager
+from test_framework.redis.test_redis_manager import TestRedisManager
+from shared.isolated_environment import IsolatedEnvironment
 
 import pytest
 
 @pytest.fixture
-def mock_database():
+ def real_database():
+    """Use real service instance."""
+    # TODO: Initialize real service
     """Create a mock database."""
+    pass
     # Mock: Generic component isolation for controlled unit testing
-    db = MagicMock()
+    db = MagicNone  # TODO: Use real service instance
     # Mock: Service component isolation for predictable testing behavior
     db.query = MagicMock(return_value=[])
     return db
 
 @pytest.fixture
-def mock_cache():
+ def real_cache():
+    """Use real service instance."""
+    # TODO: Initialize real service
     """Create a mock cache."""
+    pass
     # Mock: Generic component isolation for controlled unit testing
-    cache = MagicMock()
+    cache = MagicNone  # TODO: Use real service instance
     # Mock: Service component isolation for predictable testing behavior
     cache.get = MagicMock(return_value=None)
     # Mock: Generic component isolation for controlled unit testing
-    cache.set = MagicMock()
+    cache.set = MagicNone  # TODO: Use real service instance
     return cache

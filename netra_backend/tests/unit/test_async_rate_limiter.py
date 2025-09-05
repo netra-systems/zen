@@ -9,10 +9,11 @@ and edge cases that could lead to cost overruns.
 
 import sys
 from pathlib import Path
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from shared.isolated_environment import IsolatedEnvironment
 
 import asyncio
 import time
-from unittest.mock import patch, AsyncMock, MagicMock
 
 import pytest
 
@@ -21,16 +22,22 @@ from netra_backend.app.core.async_rate_limiter import AsyncRateLimiter
 # Test fixtures for setup
 @pytest.fixture
 def rate_limiter():
+    """Use real service instance."""
+    # TODO: Initialize real service
     """Standard rate limiter with reasonable limits."""
     return AsyncRateLimiter(max_calls=3, time_window=1.0)
 
 @pytest.fixture
 def strict_limiter():
+    """Use real service instance."""
+    # TODO: Initialize real service
     """Strict rate limiter for testing edge cases."""
     return AsyncRateLimiter(max_calls=1, time_window=0.5)
 
 @pytest.fixture
 def fast_limiter():
+    """Use real service instance."""
+    # TODO: Initialize real service
     """Fast rate limiter for timing tests."""
     return AsyncRateLimiter(max_calls=10, time_window=0.1)
 

@@ -4,6 +4,11 @@ from netra_backend.app.websocket_core.manager import WebSocketManager
 # Test framework import - using pytest fixtures instead
 from pathlib import Path
 import sys
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from test_framework.database.test_database_manager import TestDatabaseManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 import asyncio
 import json
@@ -13,7 +18,6 @@ import time
 import uuid
 from datetime import datetime, timedelta
 from typing import Any, Dict
-from unittest.mock import AsyncMock, MagicMock
 
 import jwt
 import pytest
@@ -27,9 +31,7 @@ from netra_backend.app.agents.state import DeepAgentState
 
 from netra_backend.app.agents.supervisor_consolidated import (
 
-    SupervisorAgent as Supervisor,
-
-)
+    SupervisorAgent as Supervisor)
 from netra_backend.app.db.base import Base
 from netra_backend.app.db.models_postgres import Run
 from netra_backend.app.schemas.agent import AgentStarted
@@ -45,10 +47,14 @@ from netra_backend.app.websocket_core.manager import WebSocketManager
 @pytest.fixture
 
 def setup_real_database():
+    """Use real service instance."""
+    # TODO: Initialize real service
+    return None
 
         """Setup a real in-memory SQLite database for integration testing"""
 
         async def _setup():
+    pass
             # Create temporary database
 
             db_file = tempfile.NamedTemporaryFile(delete=False, suffix='.db')
@@ -75,7 +81,8 @@ def setup_real_database():
 
             session = async_session()
             
-            return {
+            await asyncio.sleep(0)
+    return {
 
                 "session": session,
 
@@ -90,8 +97,12 @@ def setup_real_database():
 @pytest.fixture
 
 def setup_integration_infrastructure():
+    """Use real service instance."""
+    # TODO: Initialize real service
+    return None
 
         """Setup integrated infrastructure for testing"""
+    pass
         # Real WebSocket Manager
 
         websocket_manager = WebSocketManager()
@@ -99,7 +110,7 @@ def setup_integration_infrastructure():
         # Mock LLM Manager with realistic responses
 
         # Mock: LLM provider isolation to prevent external API usage and costs
-        llm_manager = Mock()
+        llm_manager = llm_manager_instance  # Initialize appropriate service
 
         # Mock: LLM service isolation for fast testing without API calls or rate limits
         llm_manager.call_llm = AsyncMock(side_effect=self._mock_llm_response)

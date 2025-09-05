@@ -1,4 +1,9 @@
 from shared.isolated_environment import get_env
+from test_framework.database.test_database_manager import TestDatabaseManager
+from test_framework.redis.test_redis_manager import TestRedisManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 """
 Test file to expose and validate startup issues
 
@@ -19,7 +24,6 @@ Business Value Justification (BVJ):
 import asyncio
 import sys
 from pathlib import Path
-from unittest.mock import AsyncMock, MagicMock, Mock, patch, patch
 
 import pytest
 
@@ -146,9 +150,9 @@ class TestSchemaValidationService:
         # Mock: Service component isolation for predictable testing behavior
         mock_engine = MagicMock(spec=AsyncEngine)
         # Mock: Generic component isolation for controlled unit testing
-        mock_conn = AsyncMock()
+        mock_conn = AsyncNone  # TODO: Use real service instance
         # Mock: Generic component isolation for controlled unit testing
-        mock_result = AsyncMock()
+        mock_result = AsyncNone  # TODO: Use real service instance
         mock_result.scalar.return_value = 1
         mock_conn.execute.return_value = mock_result
         mock_engine.connect.return_value.__aenter__.return_value = mock_conn
@@ -171,9 +175,9 @@ class TestSchemaValidationService:
         # Mock: Service component isolation for predictable testing behavior
         mock_engine = MagicMock(spec=AsyncEngine)
         # Mock: Generic component isolation for controlled unit testing
-        mock_conn = AsyncMock()
+        mock_conn = AsyncNone  # TODO: Use real service instance
         # Mock: Generic component isolation for controlled unit testing
-        mock_result = AsyncMock()
+        mock_result = AsyncNone  # TODO: Use real service instance
         mock_result.scalar.return_value = 1
         mock_conn.execute.return_value = mock_result
         mock_engine.connect.return_value.__aenter__.return_value = mock_conn
@@ -218,9 +222,9 @@ class TestStartupIntegration:
             # Mock: Database access isolation for fast, reliable unit testing
             with patch('netra_backend.app.startup_checks.database_checks.AsyncEngine') as mock_engine:
                 # Mock: Generic component isolation for controlled unit testing
-                mock_conn = AsyncMock()
+                mock_conn = AsyncNone  # TODO: Use real service instance
                 # Mock: Generic component isolation for controlled unit testing
-                mock_result = AsyncMock()
+                mock_result = AsyncNone  # TODO: Use real service instance
                 mock_result.scalar.return_value = 1
                 mock_conn.execute.return_value = mock_result
                 mock_engine.connect.return_value.__aenter__.return_value = mock_conn

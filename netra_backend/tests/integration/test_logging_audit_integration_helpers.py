@@ -2,6 +2,7 @@
 
 import sys
 from pathlib import Path
+from shared.isolated_environment import IsolatedEnvironment
 
 # Test framework import - using pytest fixtures instead
 
@@ -11,7 +12,6 @@ import os
 import tempfile
 from datetime import UTC, datetime
 from typing import Any, Dict, List
-from unittest.mock import AsyncMock, MagicMock, Mock, patch, patch
 
 import pytest
 from netra_backend.app.logging_config import central_logger, get_central_logger

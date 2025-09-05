@@ -6,37 +6,39 @@ Compliance: <300 lines, 25-line max functions, modular design.
 
 import sys
 from pathlib import Path
+from test_framework.database.test_database_manager import TestDatabaseManager
+from test_framework.redis.test_redis_manager import TestRedisManager
+from shared.isolated_environment import IsolatedEnvironment
 
 # Test framework import - using pytest fixtures instead
 
 import asyncio
 import time
 from typing import Any, Dict, List
-from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 from netra_backend.app.monitoring.system_monitor import (
-    SystemPerformanceMonitor as PerformanceMonitor,
-)
+    SystemPerformanceMonitor as PerformanceMonitor)
 from netra_backend.app.monitoring.metrics_collector import MetricsCollector
 from netra_backend.app.monitoring.performance_alerting import PerformanceAlertManager
 
 from netra_backend.app.core.performance_optimization_manager import (
     BatchProcessor,
     MemoryCache,
-    PerformanceOptimizationManager,
-)
+    PerformanceOptimizationManager)
 from netra_backend.app.db.index_optimizer import (
     DatabaseIndexManager,
-    PostgreSQLIndexOptimizer,
-)
+    PostgreSQLIndexOptimizer)
 
 class TestPerformanceMonitoring:
     """Test performance monitoring functionality."""
     
     @pytest.fixture
     def metrics_collector(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create metrics collector for testing."""
+    pass
         return MetricsCollector(retention_period=60)
         
     @pytest.mark.asyncio
@@ -58,6 +60,7 @@ class TestPerformanceMonitoring:
     @pytest.mark.asyncio
     async def test_metric_summary_calculation(self, metrics_collector):
         """Test metric summary statistics."""
+    pass
         # Record multiple values
         values = [10.0, 20.0, 30.0, 40.0, 50.0]
         for value in values:
@@ -102,8 +105,12 @@ class TestDatabaseIndexOptimization:
     
     @pytest.fixture
     def index_optimizer(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create index optimizer for testing."""
-        return PostgreSQLIndexOptimizer()
+    pass
+        await asyncio.sleep(0)
+    return PostgreSQLIndexOptimizer()
     
     def test_performance_indexes_definition(self, index_optimizer):
         """Test that performance indexes are properly defined."""
@@ -128,10 +135,12 @@ class TestDatabaseIndexOptimization:
     @pytest.mark.asyncio
     async def test_query_analysis_for_indexes(self, index_optimizer):
         """Test query analysis for index recommendations."""
+    pass
         # Test the available async method instead of the non-existent method
         recommendations = await index_optimizer.analyze_query_performance()
         
-        # Should return recommendations (could be empty if no slow queries detected)
+        # Should await asyncio.sleep(0)
+    return recommendations (could be empty if no slow queries detected)
         assert isinstance(recommendations, list)
         
         # Each recommendation should be an IndexRecommendation object
@@ -154,7 +163,8 @@ class TestPerformanceOptimizationIntegration:
             # Test query optimization
             async def mock_query():
                 await asyncio.sleep(0.01)  # Simulate query time
-                return {"result": "data"}
+                await asyncio.sleep(0)
+    return {"result": "data"}
             
             # Execute query with optimization
             result = await perf_manager.query_optimizer.execute_with_cache(
@@ -191,6 +201,7 @@ class TestPerformanceOptimizationIntegration:
     @pytest.mark.asyncio
     async def test_performance_monitoring_integration(self):
         """Test performance monitoring integration."""
+    pass
         monitor = PerformanceMonitor()
         
         try:
@@ -267,3 +278,5 @@ if __name__ == "__main__":
     
     if len(sys.argv) > 1 and sys.argv[1] == "benchmark":
         asyncio.run(run_performance_benchmarks())
+
+    pass

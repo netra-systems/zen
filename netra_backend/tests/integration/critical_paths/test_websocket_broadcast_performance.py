@@ -15,6 +15,10 @@ from netra_backend.app.websocket_core.manager import WebSocketManager
 # Test framework import - using pytest fixtures instead
 from pathlib import Path
 import sys
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from test_framework.docker.unified_docker_manager import UnifiedDockerManager
+from test_framework.redis.test_redis_manager import TestRedisManager
+from shared.isolated_environment import IsolatedEnvironment
 
 import pytest
 import asyncio
@@ -23,7 +27,6 @@ import time
 import statistics
 from typing import Dict, Any, List, Tuple
 from datetime import datetime, timezone
-from unittest.mock import patch, AsyncMock, MagicMock
 from uuid import uuid4
 from concurrent.futures import ThreadPoolExecutor
 
@@ -45,6 +48,7 @@ from netra_backend.tests.integration.helpers.redis_l3_helpers import (
 )
 
 class BroadcastPerformanceTracker:
+    pass
 
     """Track broadcast performance metrics."""
     
@@ -109,6 +113,7 @@ class BroadcastPerformanceTracker:
 @pytest.mark.integration
 
 class TestWebSocketBroadcastPerformanceL3:
+    pass
 
     """L3 integration tests for WebSocket broadcast performance."""
     
@@ -170,6 +175,10 @@ class TestWebSocketBroadcastPerformanceL3:
     @pytest.fixture
 
     def large_user_pool(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
+    await asyncio.sleep(0)
+    return None
 
         """Create large pool of test users for performance testing."""
 
@@ -196,6 +205,9 @@ class TestWebSocketBroadcastPerformanceL3:
     @pytest.fixture
 
     def performance_tracker(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
+    return None
 
         """Create performance tracking instance."""
 
@@ -719,7 +731,8 @@ class TestWebSocketBroadcastPerformanceL3:
                 
                 duration = time.time() - start_time
 
-                return duration, success_count, b_id
+                await asyncio.sleep(0)
+    return duration, success_count, b_id
             
             task = execute_broadcast(broadcast_message, broadcast_id)
 

@@ -13,10 +13,12 @@ usage tracking, and upgrade prompts. Critical for conversion funnel and cost con
 
 import sys
 from pathlib import Path
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from test_framework.redis.test_redis_manager import TestRedisManager
+from shared.isolated_environment import IsolatedEnvironment
 
 import asyncio
 from datetime import UTC, datetime
-from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 import redis
@@ -24,30 +26,41 @@ import redis
 from netra_backend.app.schemas.tool_permission import ToolExecutionContext
 
 from netra_backend.app.services.tool_permissions.rate_limiter import (
-    ToolPermissionRateLimiter,
-)
+    ToolPermissionRateLimiter)
 
 # Test fixtures for setup
 @pytest.fixture
-def mock_redis():
+ def real_redis():
+    """Use real service instance."""
+    # TODO: Initialize real service
     """Mock Redis client."""
+    pass
     # Mock: Redis external service isolation for fast, reliable tests without network dependency
     redis_mock = AsyncMock(spec=redis.Redis)
     return redis_mock
 
 @pytest.fixture
 def rate_limiter(mock_redis):
+    """Use real service instance."""
+    # TODO: Initialize real service
     """Rate limiter with mock Redis."""
+    pass
     return ToolPermissionRateLimiter(redis_client=mock_redis)
 
 @pytest.fixture
 def rate_limiter_no_redis():
+    """Use real service instance."""
+    # TODO: Initialize real service
     """Rate limiter without Redis client."""
+    pass
     return ToolPermissionRateLimiter(redis_client=None)
 
 @pytest.fixture
 def free_tier_context():
+    """Use real service instance."""
+    # TODO: Initialize real service
     """Free tier execution context."""
+    pass
     # Mock: Component isolation for controlled unit testing
     context = Mock(spec=ToolExecutionContext)
     context.user_id = "free_user_123"
@@ -57,7 +70,10 @@ def free_tier_context():
 
 @pytest.fixture
 def pro_tier_context():
+    """Use real service instance."""
+    # TODO: Initialize real service
     """Pro tier execution context."""
+    pass
     # Mock: Component isolation for controlled unit testing
     context = Mock(spec=ToolExecutionContext)
     context.user_id = "pro_user_456"
@@ -67,15 +83,18 @@ def pro_tier_context():
 
 @pytest.fixture
 def free_tier_permission_definitions():
+    """Use real service instance."""
+    # TODO: Initialize real service
     """Free tier permission definitions with strict limits."""
+    pass
     # Mock: Generic component isolation for controlled unit testing
-    rate_limits = Mock()
+    rate_limits = rate_limits_instance  # Initialize appropriate service
     rate_limits.per_minute = 5
     rate_limits.per_hour = 50
     rate_limits.per_day = 100
     
     # Mock: Generic component isolation for controlled unit testing
-    permission_def = Mock()
+    permission_def = permission_def_instance  # Initialize appropriate service
     permission_def.rate_limits = rate_limits
     
     return {
@@ -84,15 +103,18 @@ def free_tier_permission_definitions():
 
 @pytest.fixture
 def pro_tier_permission_definitions():
+    """Use real service instance."""
+    # TODO: Initialize real service
     """Pro tier permission definitions with higher limits."""
+    pass
     # Mock: Generic component isolation for controlled unit testing
-    rate_limits = Mock()
+    rate_limits = rate_limits_instance  # Initialize appropriate service
     rate_limits.per_minute = 50
     rate_limits.per_hour = 500
     rate_limits.per_day = 2000
     
     # Mock: Generic component isolation for controlled unit testing
-    permission_def = Mock()
+    permission_def = permission_def_instance  # Initialize appropriate service
     permission_def.rate_limits = rate_limits
     
     return {
@@ -101,15 +123,18 @@ def pro_tier_permission_definitions():
 
 @pytest.fixture
 def unlimited_permission_definitions():
+    """Use real service instance."""
+    # TODO: Initialize real service
     """Unlimited permission definitions."""
+    pass
     # Mock: Generic component isolation for controlled unit testing
-    rate_limits = Mock()
+    rate_limits = rate_limits_instance  # Initialize appropriate service
     rate_limits.per_minute = None
     rate_limits.per_hour = None
     rate_limits.per_day = None
     
     # Mock: Generic component isolation for controlled unit testing
-    permission_def = Mock()
+    permission_def = permission_def_instance  # Initialize appropriate service
     permission_def.rate_limits = rate_limits
     
     return {
@@ -120,17 +145,18 @@ def unlimited_permission_definitions():
 def create_mock_permission_def(per_minute=None, per_hour=None, per_day=None):
     """Create mock permission definition with rate limits."""
     # Mock: Generic component isolation for controlled unit testing
-    rate_limits = Mock()
+    rate_limits = rate_limits_instance  # Initialize appropriate service
     rate_limits.per_minute = per_minute
     rate_limits.per_hour = per_hour
     rate_limits.per_day = per_day
     # Mock: Generic component isolation for controlled unit testing
-    permission_def = Mock()
+    permission_def = permission_def_instance  # Initialize appropriate service
     permission_def.rate_limits = rate_limits
     return permission_def
 
 def assert_rate_limit_allowed(result):
     """Assert rate limit check result is allowed."""
+    pass
     assert result["allowed"] is True
     assert "limits" in result
 
@@ -142,6 +168,7 @@ def assert_rate_limit_exceeded(result, expected_limit):
 
 def assert_usage_key_format(key, user_id, tool_name, pattern):
     """Assert usage key has correct format."""
+    pass
     assert user_id in key
     assert tool_name in key
     assert pattern in key
@@ -152,11 +179,13 @@ def setup_redis_usage_count(mock_redis, count):
 
 def setup_redis_error(mock_redis, error_message):
     """Setup Redis to raise error."""
+    pass
     mock_redis.get = AsyncMock(side_effect=Exception(error_message))
 
 # Core rate limiting functionality tests
 class TestRateLimitChecking:
     """Test core rate limit checking functionality."""
+    pass
 
     @pytest.mark.asyncio
     async def test_no_rate_limits_always_allowed(self, rate_limiter, free_tier_context):
@@ -170,6 +199,7 @@ class TestRateLimitChecking:
     async def test_under_minute_limit_allowed(self, rate_limiter, free_tier_context, 
                                               free_tier_permission_definitions):
         """Under minute limit allows request."""
+    pass
         setup_redis_usage_count(rate_limiter.redis, 3)  # Under limit of 5
         result = await rate_limiter.check_rate_limits(
             free_tier_context, ["free_tool_access"], free_tier_permission_definitions
@@ -190,10 +220,13 @@ class TestRateLimitChecking:
     async def test_exceed_hour_limit_blocked(self, rate_limiter, free_tier_context,
                                              free_tier_permission_definitions):
         """Exceeding hour limit blocks request."""
-        # Mock to return different values for different periods
+        # Mock to await asyncio.sleep(0)
+    return different values for different periods
         async def mock_get_usage(user_id, tool_name, period):
+    pass
             if period == "minute":
-                return 3  # Under minute limit
+                await asyncio.sleep(0)
+    return 3  # Under minute limit
             elif period == "hour":
                 return 50  # At hour limit
             elif period == "day":
@@ -210,10 +243,13 @@ class TestRateLimitChecking:
     async def test_exceed_day_limit_blocked(self, rate_limiter, free_tier_context,
                                             free_tier_permission_definitions):
         """Exceeding day limit blocks request."""
-        # Mock to return different values for different periods
+        # Mock to await asyncio.sleep(0)
+    return different values for different periods
         async def mock_get_usage(user_id, tool_name, period):
+    pass
             if period == "minute":
-                return 3  # Under minute limit
+                await asyncio.sleep(0)
+    return 3  # Under minute limit
             elif period == "hour":
                 return 30  # Under hour limit
             elif period == "day":
@@ -257,6 +293,7 @@ class TestRateLimitChecking:
 
 class TestUsageKeyGeneration:
     """Test usage key generation for different time periods."""
+    pass
 
     def test_minute_key_format(self, rate_limiter):
         """Minute usage key has correct format."""
@@ -266,6 +303,7 @@ class TestUsageKeyGeneration:
 
     def test_hour_key_format(self, rate_limiter):
         """Hour usage key has correct format."""
+    pass
         now = datetime(2025, 1, 15, 14, 30, 45, tzinfo=UTC)
         key = rate_limiter._build_usage_key("user123", "tool_name", "hour", now)
         assert_usage_key_format(key, "user123", "tool_name", "2025011514")
@@ -278,6 +316,7 @@ class TestUsageKeyGeneration:
 
     def test_invalid_period_returns_none(self, rate_limiter):
         """Invalid period returns None."""
+    pass
         now = datetime.now(UTC)
         key = rate_limiter._build_usage_key("user123", "tool_name", "invalid", now)
         assert key is None
@@ -290,6 +329,7 @@ class TestUsageKeyGeneration:
 
 class TestUsageTracking:
     """Test usage tracking and recording."""
+    pass
 
     @pytest.mark.asyncio
     async def test_get_usage_count_with_redis(self, rate_limiter):
@@ -301,6 +341,7 @@ class TestUsageTracking:
     @pytest.mark.asyncio
     async def test_get_usage_count_no_data(self, rate_limiter):
         """Get usage count returns 0 when no data."""
+    pass
         setup_redis_usage_count(rate_limiter.redis, None)
         count = await rate_limiter._get_usage_count("user123", "tool", "day")
         assert count == 0
@@ -314,6 +355,7 @@ class TestUsageTracking:
     @pytest.mark.asyncio
     async def test_get_usage_count_redis_error(self, rate_limiter):
         """Get usage count handles Redis errors gracefully."""
+    pass
         setup_redis_error(rate_limiter.redis, "Connection failed")
         count = await rate_limiter._get_usage_count("user123", "tool", "day")
         assert count == 0
@@ -337,6 +379,7 @@ class TestUsageTracking:
     @pytest.mark.asyncio
     async def test_record_tool_usage_sets_expiry(self, rate_limiter):
         """Record tool usage sets appropriate expiry times."""
+    pass
         # Reset mock call counts to ensure clean state
         rate_limiter.redis.expire.reset_mock()
         
@@ -360,12 +403,14 @@ class TestUsageTracking:
     @pytest.mark.asyncio
     async def test_record_tool_usage_redis_error(self, rate_limiter):
         """Record tool usage handles Redis errors gracefully."""
+    pass
         rate_limiter.redis.incr.side_effect = Exception("Redis error")
         # Should not raise exception
         await rate_limiter.record_tool_usage("user123", "tool", 500, "success")
 
 class TestPermissionDefinitionProcessing:
     """Test permission definition processing and rate limit extraction."""
+    pass
 
     def test_get_applicable_rate_limits_single_permission(self, rate_limiter):
         """Get applicable rate limits for single permission."""
@@ -381,6 +426,7 @@ class TestPermissionDefinitionProcessing:
 
     def test_get_applicable_rate_limits_multiple_permissions(self, rate_limiter):
         """Get applicable rate limits merges multiple permissions."""
+    pass
         perm1 = create_mock_permission_def(per_minute=5, per_hour=50, per_day=500)
         perm2 = create_mock_permission_def(per_minute=10, per_hour=100, per_day=1000)
         
@@ -397,7 +443,7 @@ class TestPermissionDefinitionProcessing:
     def test_get_applicable_rate_limits_no_rate_limits(self, rate_limiter):
         """Get applicable rate limits handles permissions without rate limits."""
         # Mock: Generic component isolation for controlled unit testing
-        permission_def = Mock()
+        permission_def = permission_def_instance  # Initialize appropriate service
         permission_def.rate_limits = None
         permission_defs = {"no_limits": permission_def}
         
@@ -406,6 +452,7 @@ class TestPermissionDefinitionProcessing:
 
     def test_get_applicable_rate_limits_missing_permission(self, rate_limiter):
         """Get applicable rate limits handles missing permissions."""
+    pass
         limits = rate_limiter._get_applicable_rate_limits(
             ["nonexistent"], {}
         )
@@ -413,6 +460,7 @@ class TestPermissionDefinitionProcessing:
 
 class TestResponseBuilding:
     """Test response building for allowed and exceeded scenarios."""
+    pass
 
     def test_build_limit_exceeded_response_structure(self, rate_limiter):
         """Build limit exceeded response has correct structure."""
@@ -430,6 +478,7 @@ class TestResponseBuilding:
     @pytest.mark.asyncio
     async def test_build_allowed_response_structure(self, rate_limiter, free_tier_context):
         """Build allowed response has correct structure."""
+    pass
         setup_redis_usage_count(rate_limiter.redis, 10)
         rate_limits = {"per_minute": 5, "per_hour": 50}
         
@@ -454,6 +503,7 @@ class TestResponseBuilding:
 
 class TestPeriodKeyAndTTL:
     """Test period key and TTL generation."""
+    pass
 
     def test_get_period_key_and_ttl_minute(self, rate_limiter):
         """Get period key and TTL for minute period."""
@@ -465,6 +515,7 @@ class TestPeriodKeyAndTTL:
 
     def test_get_period_key_and_ttl_hour(self, rate_limiter):
         """Get period key and TTL for hour period."""
+    pass
         now = datetime(2025, 1, 15, 14, 30, 45, tzinfo=UTC)
         key, ttl = rate_limiter._get_period_key_and_ttl("user123", "tool", "hour", now)
         
@@ -481,6 +532,7 @@ class TestPeriodKeyAndTTL:
 
     def test_get_period_key_and_ttl_invalid(self, rate_limiter):
         """Get period key and TTL for invalid period returns None."""
+    pass
         now = datetime.now(UTC)
         key, ttl = rate_limiter._get_period_key_and_ttl("user123", "tool", "invalid", now)
         
@@ -489,6 +541,7 @@ class TestPeriodKeyAndTTL:
 
 class TestEdgeCasesAndErrorHandling:
     """Test edge cases and error handling scenarios."""
+    pass
 
     @pytest.mark.asyncio
     async def test_none_rate_limits_in_definition(self, rate_limiter, free_tier_context):
@@ -508,6 +561,7 @@ class TestEdgeCasesAndErrorHandling:
     @pytest.mark.asyncio
     async def test_invalid_usage_key_returns_zero(self, rate_limiter):
         """Invalid usage key returns zero count."""
+    pass
         with patch.object(rate_limiter, '_build_usage_key', return_value=None):
             count = await rate_limiter._get_usage_count("user", "tool", "invalid")
             assert count == 0
@@ -535,6 +589,7 @@ class TestEdgeCasesAndErrorHandling:
     @pytest.mark.asyncio
     async def test_malformed_redis_data(self, rate_limiter):
         """Malformed Redis data is handled gracefully."""
+    pass
         rate_limiter.redis.get.return_value = "not_a_number"
         
         # Should handle ValueError when converting to int
@@ -555,6 +610,7 @@ class TestEdgeCasesAndErrorHandling:
 
 class TestIntegrationScenarios:
     """Test realistic integration scenarios for business cases."""
+    pass
 
     @pytest.mark.asyncio
     async def test_free_tier_user_conversion_scenario(self, rate_limiter, free_tier_context):
@@ -579,6 +635,7 @@ class TestIntegrationScenarios:
     async def test_pro_tier_user_higher_limits(self, rate_limiter, pro_tier_context,
                                                pro_tier_permission_definitions):
         """Pro tier user has much higher limits."""
+    pass
         # Usage that would block free tier but not pro tier
         setup_redis_usage_count(rate_limiter.redis, 150)  # Would block free tier
         

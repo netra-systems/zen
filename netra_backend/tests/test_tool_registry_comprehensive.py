@@ -7,6 +7,7 @@ Demonstrates that the registry works correctly with the new get_tool_categories 
 import asyncio
 import sys
 from pathlib import Path
+from shared.isolated_environment import IsolatedEnvironment
 
 # Fix Unicode encoding for Windows
 import io

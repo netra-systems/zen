@@ -5,9 +5,11 @@ Focus on retry strategies, circuit breaker recovery, and transaction rollback pa
 
 import pytest
 import asyncio
-from unittest.mock import AsyncMock, Mock, patch
 from contextlib import asynccontextmanager
 from typing import Dict, Any, List, Optional
+from test_framework.database.test_database_manager import TestDatabaseManager
+from test_framework.redis.test_redis_manager import TestRedisManager
+from shared.isolated_environment import IsolatedEnvironment
 
 from netra_backend.app.core.exceptions_service import ServiceError
 

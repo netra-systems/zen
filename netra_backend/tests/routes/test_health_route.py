@@ -2,6 +2,7 @@
 import sys
 from pathlib import Path
 from shared.isolated_environment import get_env
+from shared.isolated_environment import IsolatedEnvironment
 
 """Simple health test without complex imports"""
 

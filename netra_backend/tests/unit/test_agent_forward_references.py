@@ -6,6 +6,7 @@ instantiated with all their forward references resolved.
 
 import sys
 from pathlib import Path
+from shared.isolated_environment import IsolatedEnvironment
 
 import pytest
 

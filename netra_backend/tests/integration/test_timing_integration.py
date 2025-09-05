@@ -11,6 +11,7 @@ BVJ: Platform | Stability | Ensures timing infrastructure works correctly
 import asyncio
 import time
 from typing import Optional
+from shared.isolated_environment import IsolatedEnvironment
 
 import pytest
 

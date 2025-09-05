@@ -1,4 +1,7 @@
 from shared.isolated_environment import get_env
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from auth_service.core.auth_manager import AuthManager
+from shared.isolated_environment import IsolatedEnvironment
 """
 SSOT Compliance Test for JWT Secret Loading
 
@@ -8,7 +11,6 @@ preventing SSOT violations.
 """
 
 import os
-from unittest.mock import patch, MagicMock
 import pytest
 
 from netra_backend.app.core.configuration.unified_secrets import get_jwt_secret, UnifiedSecretManager
@@ -90,11 +92,11 @@ class TestJWTSecretSSOTCompliance:
             "JWT_SECRET_KEY": test_secret
         }, clear=False):
             # Mock settings without jwt_secret_key
-            mock_settings = MagicMock()
+            mock_settings = MagicNone  # TODO: Use real service instance
             mock_settings.jwt_secret_key = None
             
             # Create middleware without explicit JWT secret
-            app = MagicMock()
+            app = MagicNone  # TODO: Use real service instance
             middleware = FastAPIAuthMiddleware(app, jwt_secret=None)
             
             # Test internal method
@@ -110,8 +112,8 @@ class TestJWTSecretSSOTCompliance:
         test_explicit_secret = "explicit-middleware-secret-32-chars"
         test_ssot_secret = "ssot-fallback-secret-32-chars-long"
         
-        app = MagicMock()
-        mock_settings = MagicMock()
+        app = MagicNone  # TODO: Use real service instance
+        mock_settings = MagicNone  # TODO: Use real service instance
         mock_settings.jwt_secret_key = None
         
         # Test explicit secret validation
@@ -142,8 +144,8 @@ class TestJWTSecretSSOTCompliance:
             token_service = TokenService()
             token_service_secret = token_service._get_jwt_secret()
             
-            app = MagicMock()
-            mock_settings = MagicMock()
+            app = MagicNone  # TODO: Use real service instance
+            mock_settings = MagicNone  # TODO: Use real service instance
             mock_settings.jwt_secret_key = None
             middleware = FastAPIAuthMiddleware(app, jwt_secret=None)
             middleware_secret = middleware._get_jwt_secret_with_validation(None, mock_settings)
@@ -199,8 +201,8 @@ class TestJWTSecretSSOTCompliance:
                 token_service._get_jwt_secret()
             
             # Middleware should re-raise with context (test the method directly)
-            app = MagicMock()
-            mock_settings = MagicMock()
+            app = MagicNone  # TODO: Use real service instance
+            mock_settings = MagicNone  # TODO: Use real service instance
             mock_settings.jwt_secret_key = None
             
             # Test the method directly since constructor also validates
@@ -232,8 +234,8 @@ class TestJWTSecretSSOTIntegration:
             assert token_service._get_jwt_secret() == canonical_secret
             
             # Middleware delegates (when no explicit secret)
-            app = MagicMock()
-            mock_settings = MagicMock()
+            app = MagicNone  # TODO: Use real service instance
+            mock_settings = MagicNone  # TODO: Use real service instance
             mock_settings.jwt_secret_key = None
             middleware = FastAPIAuthMiddleware(app, jwt_secret=None)
             middleware_secret = middleware._get_jwt_secret_with_validation(None, mock_settings)

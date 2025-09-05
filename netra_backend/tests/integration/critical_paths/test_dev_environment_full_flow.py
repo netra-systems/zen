@@ -20,6 +20,7 @@ import time
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, Optional
+from shared.isolated_environment import IsolatedEnvironment
 
 import aiohttp
 import pytest

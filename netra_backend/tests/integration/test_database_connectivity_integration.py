@@ -17,10 +17,11 @@ import pytest
 import asyncio
 import os
 from typing import Optional
-from unittest.mock import patch, MagicMock
 from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.orm import sessionmaker
+from test_framework.database.test_database_manager import TestDatabaseManager
+from shared.isolated_environment import IsolatedEnvironment
 
 from netra_backend.app.main import app
 from netra_backend.app.database import get_db
@@ -36,8 +37,8 @@ class TestDatabaseConnectivityIntegration:
         """Test /health/ready endpoint with valid database configuration."""
         # Create a mock database session that simulates a working connection
         async def mock_get_db():
-            mock_session = AsyncMock()
-            mock_result = MagicMock()
+            mock_session = AsyncNone  # TODO: Use real service instance
+            mock_result = MagicNone  # TODO: Use real service instance
             mock_result.scalar_one_or_none.return_value = 1
             mock_session.execute.return_value = mock_result
             try:
@@ -49,7 +50,7 @@ class TestDatabaseConnectivityIntegration:
         
         try:
             with patch('netra_backend.app.routes.health.unified_config_manager.get_config') as mock_config:
-                mock_cfg = MagicMock()
+                mock_cfg = MagicNone  # TODO: Use real service instance
                 mock_cfg.database_url = 'postgresql://test:test@localhost/testdb'
                 mock_cfg.environment = 'testing'
                 mock_config.return_value = mock_cfg
@@ -71,7 +72,7 @@ class TestDatabaseConnectivityIntegration:
         """Test /health/ready endpoint with missing database in staging."""
         # Create a mock database session
         async def mock_get_db():
-            mock_session = AsyncMock()
+            mock_session = AsyncNone  # TODO: Use real service instance
             try:
                 yield mock_session
             finally:
@@ -81,7 +82,7 @@ class TestDatabaseConnectivityIntegration:
         
         try:
             with patch('netra_backend.app.routes.health.unified_config_manager.get_config') as mock_config:
-                mock_cfg = MagicMock()
+                mock_cfg = MagicNone  # TODO: Use real service instance
                 mock_cfg.database_url = None  # Missing database URL
                 mock_cfg.environment = 'staging'
                 mock_config.return_value = mock_cfg
@@ -180,7 +181,7 @@ class TestDatabaseConnectionPooling:
             # Simulate connection failure and recovery
             with patch.object(manager, '_engine') as mock_engine:
                 # First call fails
-                mock_engine.dispose = MagicMock()
+                mock_engine.dispose = MagicNone  # TODO: Use real service instance
                 
                 # Simulate recovery
                 manager.handle_connection_error(Exception("Connection lost"))
@@ -196,8 +197,8 @@ class TestDatabaseConnectionPooling:
         sessions_created = []
         
         async def mock_get_db():
-            mock_session = AsyncMock()
-            mock_result = MagicMock()
+            mock_session = AsyncNone  # TODO: Use real service instance
+            mock_result = MagicNone  # TODO: Use real service instance
             mock_result.scalar_one_or_none.return_value = 1
             mock_session.execute.return_value = mock_result
             sessions_created.append(mock_session)
@@ -210,7 +211,7 @@ class TestDatabaseConnectionPooling:
         
         try:
             with patch('netra_backend.app.routes.health.unified_config_manager.get_config') as mock_config:
-                mock_cfg = MagicMock()
+                mock_cfg = MagicNone  # TODO: Use real service instance
                 mock_cfg.database_url = 'postgresql://test:test@localhost/testdb'
                 mock_cfg.environment = 'testing'
                 mock_config.return_value = mock_cfg

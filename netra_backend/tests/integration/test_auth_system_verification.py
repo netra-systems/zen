@@ -6,6 +6,7 @@ import pytest
 import asyncio
 import requests
 from netra_backend.app.config import get_config
+from shared.isolated_environment import IsolatedEnvironment
 
 
 class TestAuthSystemVerification:

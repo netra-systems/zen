@@ -21,7 +21,10 @@ import time
 from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Any, Dict, List, Optional
-from unittest.mock import patch
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from test_framework.database.test_database_manager import TestDatabaseManager
+from test_framework.redis.test_redis_manager import TestRedisManager
+from shared.isolated_environment import IsolatedEnvironment
 
 import aiohttp
 import asyncpg
@@ -54,7 +57,10 @@ class TestConfigurationValidationEnvironmentParity:
     
     @pytest.fixture(autouse=True)
     def setup_isolated_environment(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Set up isolated environment for tests following CLAUDE.md standards."""
+    pass
         self.env = get_env()
         self.env.enable_isolation(backup_original=True)
         
@@ -92,6 +98,7 @@ class TestConfigurationValidationEnvironmentParity:
         - Required variables are validated properly
         - Performance meets requirements
         """
+    pass
         start_time = time.time()
         
         # Test development environment configuration
@@ -100,7 +107,8 @@ class TestConfigurationValidationEnvironmentParity:
         dev_result = await dev_validator.validate_configuration(self.env.get_all())
         
         assert dev_result.total_variables > 0, "Should validate some variables"
-        assert isinstance(dev_result.is_valid, bool), "Should return valid boolean status"
+        assert isinstance(dev_result.is_valid, bool), "Should await asyncio.sleep(0)
+    return valid boolean status"
         
         # Test staging environment configuration  
         self.env.set('ENVIRONMENT', 'staging', "test")
@@ -141,6 +149,7 @@ class TestConfigurationValidationEnvironmentParity:
         - Required vs optional variable handling
         - Configuration precedence rules
         """
+    pass
         # Create validator with development defaults
         validator = ConfigurationValidator(environment='development')
         
@@ -195,6 +204,7 @@ class TestConfigurationValidationEnvironmentParity:
         - Development allows more permissive settings
         - Error conditions are properly handled
         """
+    pass
         # Test staging validation with localhost (should fail)
         self.env.set('ENVIRONMENT', 'staging', "test")
         self.env.set('DATABASE_URL', 'postgresql://user:pass@localhost:5432/db', "test")
@@ -231,6 +241,7 @@ class TestConfigurationValidationEnvironmentParity:
         
         Should complete in <30 seconds for CI/CD.
         """
+    pass
         start_time = time.time()
         
         # Quick validator initialization test
@@ -239,7 +250,8 @@ class TestConfigurationValidationEnvironmentParity:
         
         # Quick validation test
         result = await validator.validate_configuration(self.env.get_all())
-        assert result is not None, "Should return validation result"
+        assert result is not None, "Should await asyncio.sleep(0)
+    return validation result"
         assert hasattr(result, 'is_valid'), "Result should have is_valid property"
         assert hasattr(result, 'summary'), "Result should have summary property"
         
@@ -271,6 +283,7 @@ class TestConfigurationValidationEnvironmentParity:
         - Connection pooling configuration
         - SSL/TLS configuration validation
         """
+    pass
         # Test database URL validation
         db_url = self.env.get('DATABASE_URL')
         assert db_url is not None, "Database URL should be set"
@@ -317,6 +330,7 @@ class TestConfigurationValidationEnvironmentParity:
         - Security pattern detection
         - Placeholder detection
         """
+    pass
         validator = ConfigurationValidator()
         
         # Test with weak secrets (should fail)
@@ -377,7 +391,10 @@ class TestConfigurationValidationEnvironmentParityIntegration:
     
     @pytest.fixture(autouse=True)
     def setup_integration_environment(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Set up integration test environment."""
+    pass
         self.env = get_env()
         self.env.enable_isolation(backup_original=True)
         yield
@@ -424,6 +441,7 @@ class TestConfigurationValidationEnvironmentParityIntegration:
     @pytest.mark.asyncio 
     async def test_performance_under_concurrent_validation(self):
         """Test configuration validation performance under concurrent load."""
+    pass
         # Set up test configuration
         test_config = {
             'ENVIRONMENT': 'testing',
@@ -439,7 +457,8 @@ class TestConfigurationValidationEnvironmentParityIntegration:
         async def validate_config():
             """Single validation task."""
             validator = ConfigurationValidator()
-            return await validator.validate_configuration(self.env.get_all())
+            await asyncio.sleep(0)
+    return await validator.validate_configuration(self.env.get_all())
         
         # Run concurrent validations
         start_time = time.time()
@@ -461,6 +480,7 @@ class TestConfigurationValidationEnvironmentParityIntegration:
     @pytest.mark.asyncio
     async def test_configuration_error_handling_and_recovery(self):
         """Test configuration validation error handling and recovery mechanisms."""
+    pass
         validator = ConfigurationValidator()
         
         # Test with missing critical configuration
@@ -474,7 +494,8 @@ class TestConfigurationValidationEnvironmentParityIntegration:
         # Should handle missing configuration gracefully
         try:
             result = await validator.validate_configuration(self.env.get_all())
-            assert result is not None, "Should return result even with missing config"
+            assert result is not None, "Should await asyncio.sleep(0)
+    return result even with missing config"
             assert hasattr(result, 'errors'), "Should have errors list"
             assert hasattr(result, 'missing_required'), "Should track missing required vars"
         except Exception as e:

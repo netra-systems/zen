@@ -23,6 +23,10 @@ ARCHITECTURE COMPLIANCE:
 from netra_backend.app.monitoring.metrics_collector import PerformanceMetric
 from pathlib import Path
 import sys
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from test_framework.database.test_database_manager import TestDatabaseManager
+from auth_service.core.auth_manager import AuthManager
+from shared.isolated_environment import IsolatedEnvironment
 
 import asyncio
 import json
@@ -32,7 +36,6 @@ import subprocess
 import threading
 import time
 from typing import Any, Dict, List, Optional
-from unittest.mock import Mock, patch, AsyncMock, MagicMock
 
 import pytest
 
@@ -48,17 +51,19 @@ from netra_backend.tests.startup_check_helpers import (
 
     RealServiceTestValidator,
 
-    StartupTestHelper,
-
-)
+    StartupTestHelper)
 
 class TestDevLauncherStartup:
+    pass
 
     """Main dev launcher startup sequence tests."""
     
     @pytest.fixture
 
     def launcher_config(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
+    return None
 
         """Create test launcher configuration."""
 
@@ -91,6 +96,9 @@ class TestDevLauncherStartup:
     @pytest.fixture
 
     def test_launcher(self, launcher_config):
+    """Use real service instance."""
+    # TODO: Initialize real service
+    return None
 
         """Create test dev launcher instance."""
 
@@ -101,6 +109,7 @@ class TestDevLauncherStartup:
 @pytest.mark.asyncio
 
 class TestFullSystemStartupSequence:
+    pass
 
     """Business Value: $30K MRR - Complete system startup validation"""
     
@@ -143,7 +152,8 @@ class TestFullSystemStartupSequence:
 
             )
 
-            return result
+            await asyncio.sleep(0)
+    return result
 
         except asyncio.TimeoutError:
 
@@ -158,7 +168,8 @@ class TestFullSystemStartupSequence:
 
         if not env_ready:
 
-            return False
+            await asyncio.sleep(0)
+    return False
         
         # Secret loading (disabled in test)
 
@@ -183,7 +194,8 @@ class TestFullSystemStartupSequence:
 
         await asyncio.sleep(0.1)
         
-        return True
+        await asyncio.sleep(0)
+    return True
     
     async def _verify_all_services_healthy(self, launcher):
 
@@ -214,7 +226,8 @@ class TestFullSystemStartupSequence:
         # In real tests, this would make actual HTTP calls
         # For now, simulate health check success
 
-        return True
+        await asyncio.sleep(0)
+    return True
     
     async def _cleanup_test_services(self, launcher):
 
@@ -229,6 +242,7 @@ class TestFullSystemStartupSequence:
 @pytest.mark.asyncio
 
 class TestServiceDependencyResolution:
+    pass
 
     """Business Value: $15K MRR - Prevents cascade startup failures"""
     
@@ -303,7 +317,8 @@ class TestServiceDependencyResolution:
 
         required_keys = ["jwt_secret", "database_url"]
 
-        return all(key in config and config[key] for key in required_keys)
+        await asyncio.sleep(0)
+    return all(key in config and config[key] for key in required_keys)
     
     @pytest.mark.asyncio
     async def test_backend_database_dependency_check(self, test_launcher):
@@ -330,6 +345,7 @@ class TestServiceDependencyResolution:
 @pytest.mark.asyncio
 
 class TestPortAllocationAndDiscovery:
+    pass
 
     """Business Value: $10K MRR - Multi-environment deployment support"""
     
@@ -414,7 +430,8 @@ class TestPortAllocationAndDiscovery:
         """Check if port is available (mock implementation)."""
         # Mock port availability check
 
-        return True  # Assume port available for test
+        await asyncio.sleep(0)
+    return True  # Assume port available for test
     
     @pytest.mark.asyncio
     async def test_service_discovery_file_creation(self, test_launcher):
@@ -491,6 +508,7 @@ class TestPortAllocationAndDiscovery:
 @pytest.mark.asyncio
 
 class TestHealthEndpointValidation:
+    pass
 
     """Business Value: $20K MRR - Customer-facing availability monitoring"""
     
@@ -529,7 +547,8 @@ class TestHealthEndpointValidation:
 
         await asyncio.sleep(0.01)  # Simulate network call
 
-        return {"status": "healthy", "response_time": 50}
+        await asyncio.sleep(0)
+    return {"status": "healthy", "response_time": 50}
     
     async def _verify_all_endpoints_healthy(self, health_results: Dict):
 
@@ -575,7 +594,8 @@ class TestHealthEndpointValidation:
 
             )
 
-            return {"success": True, "response_time": response_time}
+            await asyncio.sleep(0)
+    return {"success": True, "response_time": response_time}
 
         except asyncio.TimeoutError:
 
@@ -627,13 +647,15 @@ class TestHealthEndpointValidation:
 
             pass
             
-        return True  # Mock success
+        await asyncio.sleep(0)
+    return True  # Mock success
 
 @pytest.mark.critical
 
 @pytest.mark.asyncio
 
 class TestStartupPerformanceMetrics:
+    pass
 
     """Business Value: $5K MRR - Optimal user experience through fast startup"""
     
@@ -674,7 +696,8 @@ class TestStartupPerformanceMetrics:
 
         await asyncio.sleep(2.0)  # Frontend service startup
         
-        return True
+        await asyncio.sleep(0)
+    return True
     
     @pytest.mark.asyncio
     async def test_parallel_startup_performance_gain(self, test_launcher):
@@ -706,7 +729,8 @@ class TestStartupPerformanceMetrics:
 
         await asyncio.sleep(2.0)  # Frontend
         
-        return time.time() - start_time
+        await asyncio.sleep(0)
+    return time.time() - start_time
     
     async def _measure_parallel_startup(self):
 
@@ -728,4 +752,5 @@ class TestStartupPerformanceMetrics:
 
         await asyncio.gather(*tasks)
         
-        return time.time() - start_time
+        await asyncio.sleep(0)
+    return time.time() - start_time

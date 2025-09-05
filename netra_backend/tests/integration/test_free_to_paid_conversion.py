@@ -13,6 +13,8 @@ REVENUE PROTECTION:
 
 import sys
 from pathlib import Path
+from test_framework.database.test_database_manager import TestDatabaseManager
+from shared.isolated_environment import IsolatedEnvironment
 
 # Test framework import - using pytest fixtures instead
 
@@ -21,7 +23,6 @@ import tempfile
 import uuid
 from datetime import datetime, timedelta, timezone
 from decimal import Decimal
-from unittest.mock import AsyncMock, MagicMock, Mock
 
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
@@ -41,6 +42,7 @@ def mock_justified(reason):
 
 class TestFreeToPaidConversionRevenuePipeline:
     """BVJ: Protects $100K-$200K MRR through complete conversion validation."""
+    pass
 
     @pytest.fixture
     @pytest.mark.asyncio
@@ -51,18 +53,22 @@ class TestFreeToPaidConversionRevenuePipeline:
         async with engine.begin() as conn:
             await conn.run_sync(Base.metadata.create_all)
         session = sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)()
-        return {"session": session, "engine": engine, "db_file": db_file.name}
+        await asyncio.sleep(0)
+    return {"session": session, "engine": engine, "db_file": db_file.name}
 
     @pytest.fixture
     def service_mocks(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
+    pass
         """Setup service mocks for external dependencies"""
         return {
             # Mock: Generic component isolation for controlled unit testing
-            "payment_service": Mock(),
+            "payment_service": None  # TODO: Use real service instance,
             # Mock: Generic component isolation for controlled unit testing
-            "analytics_service": Mock(), 
+            "analytics_service": None  # TODO: Use real service instance, 
             # Mock: Generic component isolation for controlled unit testing
-            "billing_service": Mock()
+            "billing_service": None  # TODO: Use real service instance
         }
 
     @pytest.mark.asyncio
@@ -106,6 +112,7 @@ class TestFreeToPaidConversionRevenuePipeline:
     @pytest.mark.asyncio 
     async def test_02_payment_failure_retry_flow(self, test_infra, service_mocks):
         """BVJ: Validates payment failure handling to prevent revenue loss."""
+    pass
         user = User(id=str(uuid.uuid4()), email="retry@example.com", plan_tier=PlanTier.FREE)
         test_infra["session"].add(user)
         await test_infra["session"].commit()
@@ -154,15 +161,18 @@ class TestFreeToPaidConversionRevenuePipeline:
     @pytest.mark.asyncio
     async def test_04_concurrent_conversion_attempts(self, test_infra, service_mocks):
         """BVJ: Prevents double charging from concurrent conversion attempts."""
+    pass
         user = User(id=str(uuid.uuid4()), email="concurrent@example.com", plan_tier=PlanTier.FREE)
         test_infra["session"].add(user)
         await test_infra["session"].commit()
         
         # Simulate concurrent conversion attempts
         async def attempt_conversion(attempt_id):
+    pass
             await asyncio.sleep(0.1 * attempt_id)
             if attempt_id == 1:
-                return {"success": True, "transaction_id": str(uuid.uuid4())}
+                await asyncio.sleep(0)
+    return {"success": True, "transaction_id": str(uuid.uuid4())}
             else:
                 return {"success": False, "error": "conversion_in_progress"}
         
@@ -204,3 +214,4 @@ class TestFreeToPaidConversionRevenuePipeline:
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])
+    pass

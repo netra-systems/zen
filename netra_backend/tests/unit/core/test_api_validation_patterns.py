@@ -4,9 +4,9 @@ Focus on request validation, response serialization, and error handling patterns
 """
 
 import pytest
-from unittest.mock import Mock, patch
 from typing import Dict, Any, Optional, List
 from pydantic import BaseModel, ValidationError, Field
+from shared.isolated_environment import IsolatedEnvironment
 
 from netra_backend.app.core.exceptions_service import ServiceError
 from netra_backend.app.core.exceptions_config import ValidationError as ValidationServiceError

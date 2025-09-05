@@ -27,9 +27,13 @@ import json
 import jwt
 import pytest
 from datetime import datetime, timedelta, timezone
-from unittest.mock import AsyncMock, MagicMock, patch
 from fastapi import HTTPException
 from fastapi.security import HTTPAuthorizationCredentials
+from test_framework.database.test_database_manager import TestDatabaseManager
+from auth_service.core.auth_manager import AuthManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 from netra_backend.app.routes.admin import (
     verify_admin_role_from_jwt,
@@ -137,7 +141,7 @@ class TestPrivilegeEscalationPrevention:
         # This test ensures that even if a malicious client sends admin=true
         # in the request body, it's ignored and JWT validation is used
         
-        mock_request = MagicMock()
+        mock_request = MagicNone  # TODO: Use real service instance
         mock_request.headers = {"authorization": "Bearer fake_user_token"}
         mock_request.client.host = "127.0.0.1"
         mock_request.url = "http://test.com/admin/settings"
@@ -170,7 +174,7 @@ class TestPrivilegeEscalationPrevention:
         """Test that JWT admin status overrides database record."""
         # Test case where database says user is admin but JWT says otherwise
         
-        mock_request = MagicMock()
+        mock_request = MagicNone  # TODO: Use real service instance
         mock_request.headers = {"authorization": "Bearer admin_token"}
         mock_request.client.host = "127.0.0.1"
         mock_request.url = "http://test.com/admin/settings"
@@ -193,7 +197,7 @@ class TestPrivilegeEscalationPrevention:
             mock_auth_client.validate_token_jwt = AsyncMock(return_value=mock_jwt_validation)
             
             with patch('netra_backend.app.routes.admin.log_admin_operation') as mock_log:
-                mock_log.return_value = AsyncMock()
+                mock_log.return_value = AsyncNone  # TODO: Use real service instance
                 
                 # Should succeed because JWT is authoritative
                 result = await require_admin_with_jwt_validation(mock_request, mock_user)
@@ -205,7 +209,7 @@ class TestPrivilegeEscalationPrevention:
     @pytest.mark.asyncio
     async def test_jwt_token_tampering_detection(self):
         """Test detection of JWT token tampering attempts."""
-        mock_request = MagicMock()
+        mock_request = MagicNone  # TODO: Use real service instance
         mock_request.headers = {"authorization": "Bearer tampered_token"}
         mock_request.client.host = "192.168.1.100"
         mock_request.url = "http://test.com/admin/settings"
@@ -223,7 +227,7 @@ class TestPrivilegeEscalationPrevention:
             mock_auth_client.validate_token_jwt = AsyncMock(return_value=mock_jwt_validation)
             
             with patch('netra_backend.app.routes.admin.log_admin_operation') as mock_log:
-                mock_log.return_value = AsyncMock()
+                mock_log.return_value = AsyncNone  # TODO: Use real service instance
                 
                 with pytest.raises(HTTPException) as exc_info:
                     await require_admin_with_jwt_validation(mock_request, mock_user)
@@ -238,7 +242,7 @@ class TestPrivilegeEscalationPrevention:
     @pytest.mark.asyncio
     async def test_missing_bearer_token_detection(self):
         """Test detection of missing Bearer token."""
-        mock_request = MagicMock()
+        mock_request = MagicNone  # TODO: Use real service instance
         mock_request.headers = {}  # No authorization header
         mock_request.client.host = "10.0.0.1"
         
@@ -258,8 +262,8 @@ class TestAuditLoggingValidation:
     @pytest.mark.asyncio
     async def test_admin_operation_logged(self):
         """Test that admin operations are properly logged."""
-        mock_audit_service = MagicMock()
-        mock_audit_service.log_action = AsyncMock()
+        mock_audit_service = MagicNone  # TODO: Use real service instance
+        mock_audit_service.log_action = AsyncNone  # TODO: Use real service instance
         
         with patch('netra_backend.app.routes.admin.audit_service', mock_audit_service):
             await log_admin_operation(
@@ -282,7 +286,7 @@ class TestAuditLoggingValidation:
     @pytest.mark.asyncio
     async def test_unauthorized_access_attempt_logged(self):
         """Test that unauthorized admin access attempts are logged."""
-        mock_request = MagicMock()
+        mock_request = MagicNone  # TODO: Use real service instance
         mock_request.headers = {"authorization": "Bearer user_token"}
         mock_request.client.host = "suspicious.ip.address"
         mock_request.url = "http://test.com/admin/settings"
@@ -302,7 +306,7 @@ class TestAuditLoggingValidation:
             mock_auth_client.validate_token_jwt = AsyncMock(return_value=mock_jwt_validation)
             
             with patch('netra_backend.app.routes.admin.log_admin_operation') as mock_log:
-                mock_log.return_value = AsyncMock()
+                mock_log.return_value = AsyncNone  # TODO: Use real service instance
                 
                 with pytest.raises(HTTPException):
                     await require_admin_with_jwt_validation(mock_request, mock_user)
@@ -322,7 +326,7 @@ class TestAuditLoggingValidation:
     @pytest.mark.asyncio
     async def test_successful_admin_access_logged(self):
         """Test that successful admin access is logged."""
-        mock_request = MagicMock()
+        mock_request = MagicNone  # TODO: Use real service instance
         mock_request.headers = {"authorization": "Bearer admin_token"}
         mock_request.client.host = "192.168.1.5"
         mock_request.url = "http://test.com/admin/settings"
@@ -342,7 +346,7 @@ class TestAuditLoggingValidation:
             mock_auth_client.validate_token_jwt = AsyncMock(return_value=mock_jwt_validation)
             
             with patch('netra_backend.app.routes.admin.log_admin_operation') as mock_log:
-                mock_log.return_value = AsyncMock()
+                mock_log.return_value = AsyncNone  # TODO: Use real service instance
                 
                 result = await require_admin_with_jwt_validation(mock_request, mock_user)
                 assert result == mock_user
@@ -361,7 +365,7 @@ class TestAuditLoggingValidation:
     @pytest.mark.asyncio
     async def test_audit_logging_failure_handling(self):
         """Test that audit logging failures don't break admin operations."""
-        mock_audit_service = MagicMock()
+        mock_audit_service = MagicNone  # TODO: Use real service instance
         mock_audit_service.log_action = AsyncMock(side_effect=Exception("Audit service down"))
         
         with patch('netra_backend.app.routes.admin.audit_service', mock_audit_service):
@@ -394,7 +398,7 @@ class TestSecurityBoundaries:
             "user_id": "user_123"
         }
         
-        mock_db = AsyncMock()
+        mock_db = AsyncNone  # TODO: Use real service instance
         
         await _sync_jwt_claims_to_user_record(mock_user, jwt_validation, mock_db)
         
@@ -506,8 +510,8 @@ async def test_comprehensive_security_validation():
     that all security measures are working correctly.
     """
     # Simulate attacker with regular user account trying to escalate privileges
-    mock_request = MagicMock()
-    mock_request.headers = MagicMock()
+    mock_request = MagicNone  # TODO: Use real service instance
+    mock_request.headers = MagicNone  # TODO: Use real service instance
     
     # Mock headers properly
     def mock_headers_get(key, default=None):
@@ -539,7 +543,7 @@ async def test_comprehensive_security_validation():
     with patch('netra_backend.app.routes.admin.auth_client') as mock_auth_client:
         with patch('netra_backend.app.routes.admin.log_admin_operation') as mock_log:
             mock_auth_client.validate_token_jwt = AsyncMock(return_value=attacker_jwt_validation)
-            mock_log.return_value = AsyncMock()
+            mock_log.return_value = AsyncNone  # TODO: Use real service instance
             
             # Attempt should be blocked and logged
             with pytest.raises(HTTPException) as exc_info:

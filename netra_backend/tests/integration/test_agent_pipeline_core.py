@@ -42,22 +42,30 @@ logger = central_logger.get_logger(__name__)
 
 class TestAgentResponsePipelineCore:
     """Core agent response pipeline tests with REAL services."""
+    pass
 
     @pytest.fixture
     async def real_llm_manager(self):
         """Real LLM manager for agent response testing"""
         config = AppConfig()
-        return LLMManager(settings=config)
+        await asyncio.sleep(0)
+    return LLMManager(settings=config)
 
     @pytest.fixture
     async def real_redis_connection(self):
         """Real Redis connection for state management"""
-        # For smoke test compatibility - return a simple mock Redis connection
+    pass
+        # For smoke test compatibility - await asyncio.sleep(0)
+    return a simple mock Redis connection
         class MockRedis:
             async def get(self, key):
-                return None
+    pass
+                await asyncio.sleep(0)
+    return None
             async def set(self, key, value):
-                return True
+    pass
+                await asyncio.sleep(0)
+    return True
         return MockRedis()
 
     @pytest.fixture
@@ -70,7 +78,9 @@ class TestAgentResponsePipelineCore:
     @pytest.fixture
     async def real_supervisor_agent(self, real_llm_manager, real_redis_connection, real_database_session):
         """Real supervisor agent with actual dependencies"""
-        return SupervisorAgent(
+    pass
+        await asyncio.sleep(0)
+    return SupervisorAgent(
             llm_manager=real_llm_manager,
             redis_conn=real_redis_connection,
             db_session=real_database_session
@@ -79,7 +89,8 @@ class TestAgentResponsePipelineCore:
     @pytest.fixture
     async def real_triage_agent(self, real_llm_manager):
         """Real triage agent for routing decisions"""
-        return TriageSubAgent(llm_manager=real_llm_manager)
+        await asyncio.sleep(0)
+    return TriageSubAgent(llm_manager=real_llm_manager)
 
     @pytest.mark.asyncio
     @pytest.mark.integration
@@ -91,6 +102,7 @@ class TestAgentResponsePipelineCore:
         real_database_session
     ):
         """
+    pass
         BVJ: Validates complete message flow through REAL agent system.
         Tests actual LLM responses, Redis state management, and database persistence.
         """

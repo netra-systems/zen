@@ -14,6 +14,7 @@ Key regression scenarios tested:
 import pytest
 from datetime import datetime
 from typing import Dict, Any
+from shared.isolated_environment import IsolatedEnvironment
 
 from netra_backend.app.agents.base.interface import ExecutionResult, ExecutionContext
 from netra_backend.app.schemas.core_enums import ExecutionStatus

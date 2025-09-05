@@ -13,7 +13,8 @@ and startup checks from hanging the server startup indefinitely.
 from test_framework.performance_helpers import fast_test, timeout_override
 import asyncio
 import time
-from unittest.mock import AsyncMock, patch, MagicMock
+from test_framework.database.test_database_manager import TestDatabaseManager
+from shared.isolated_environment import IsolatedEnvironment
 
 import pytest
 from fastapi import FastAPI
@@ -78,7 +79,7 @@ class TestServerStartupTimeouts:
             mock_checks.side_effect = hanging_checks
             
             # Mock logger
-            mock_logger = MagicMock()
+            mock_logger = MagicNone  # TODO: Use real service instance
             
             # Test that startup_health_checks completes within reasonable time
             start_time = time.time()
@@ -98,11 +99,11 @@ class TestServerStartupTimeouts:
     @pytest.mark.unit
     async def test_async_postgres_initialization_wrapper(self):
         """Test the async postgres initialization wrapper."""
-        mock_logger = MagicMock()
+        mock_logger = MagicNone  # TODO: Use real service instance
         
         # Test successful initialization
         with patch('netra_backend.app.startup_module.initialize_postgres') as mock_init:
-            mock_session_factory = MagicMock()
+            mock_session_factory = MagicNone  # TODO: Use real service instance
             mock_init.return_value = mock_session_factory
             
             result = await _async_initialize_postgres(mock_logger)
@@ -132,7 +133,7 @@ class TestServerStartupTimeouts:
         
         # Mock config for graceful startup
         with patch('netra_backend.app.startup_module.get_config') as mock_config:
-            config_mock = MagicMock()
+            config_mock = MagicNone  # TODO: Use real service instance
             config_mock.database_url = "postgresql://test:test@localhost/test"
             config_mock.graceful_startup_mode = "true"
             mock_config.return_value = config_mock
@@ -165,7 +166,7 @@ class TestServerStartupTimeouts:
         
         # Mock successful, fast database setup
         with patch('netra_backend.app.startup_module.get_config') as mock_config:
-            config_mock = MagicMock()
+            config_mock = MagicNone  # TODO: Use real service instance
             config_mock.database_url = "postgresql://test:test@localhost/test"
             config_mock.graceful_startup_mode = "true"
             mock_config.return_value = config_mock
@@ -175,7 +176,7 @@ class TestServerStartupTimeouts:
                 with patch('netra_backend.app.startup_module._is_mock_database_url', return_value=False):
                     # Mock fast, successful database init
                     with patch('netra_backend.app.startup_module._async_initialize_postgres') as mock_init:
-                        mock_session_factory = MagicMock()
+                        mock_session_factory = MagicNone  # TODO: Use real service instance
                         mock_init.return_value = mock_session_factory
                         
                         # Mock table existence check
@@ -203,7 +204,7 @@ class TestServerStartupTimeouts:
         
         # Mock config for mock database
         with patch('netra_backend.app.startup_module.get_config') as mock_config:
-            config_mock = MagicMock()
+            config_mock = MagicNone  # TODO: Use real service instance
             config_mock.database_url = "sqlite+aiosqlite:///:memory:"  # Mock URL
             config_mock.graceful_startup_mode = "true"
             mock_config.return_value = config_mock
@@ -235,7 +236,7 @@ async def test_complete_startup_with_timeouts():
     
     # Mock all external dependencies to focus on timeout behavior
     with patch('netra_backend.app.startup_module.get_config') as mock_config:
-        config_mock = MagicMock()
+        config_mock = MagicNone  # TODO: Use real service instance
         config_mock.graceful_startup_mode = "true"
         config_mock.disable_startup_checks = "false"
         config_mock.fast_startup_mode = "false"

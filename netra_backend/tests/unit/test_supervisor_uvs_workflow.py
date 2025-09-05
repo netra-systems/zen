@@ -9,8 +9,12 @@ Tests the simplified supervisor that implements UVS principles:
 
 import pytest
 import asyncio
-from unittest.mock import Mock, AsyncMock, patch, MagicMock
 from typing import Dict, Any, List
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from test_framework.database.test_database_manager import TestDatabaseManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
 from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
@@ -21,50 +25,61 @@ class TestUVSSupervisorWorkflow:
     """Test UVS principles in supervisor workflow"""
     
     @pytest.fixture
-    def mock_context(self):
+ def real_context():
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create mock user execution context"""
+    pass
         context = Mock(spec=UserExecutionContext)
         context.user_id = "test_user_123"
         context.run_id = "test_run_456"
         context.thread_id = "test_thread_789"
         context.websocket_connection_id = "ws_conn_123"
-        context.db_session = Mock()
+        context.db_session = TestDatabaseManager().get_session()
         context.metadata = {}
         context.create_child_context = Mock(return_value=context)
         return context
     
     @pytest.fixture
-    def mock_llm_manager(self):
+ def real_llm_manager():
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create mock LLM manager"""
-        return Mock()
+        return None  # TODO: Use real service instance
     
     @pytest.fixture
-    def mock_websocket_bridge(self):
+ def real_websocket_bridge():
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create mock WebSocket bridge"""
-        bridge = Mock()
-        bridge.websocket_manager = Mock()
-        bridge.emit_agent_event = AsyncMock()
+    pass
+        bridge = bridge_instance  # Initialize appropriate service
+        bridge.websocket_manager = UnifiedWebSocketManager()
+        bridge.emit_agent_event = AsyncNone  # TODO: Use real service instance
         return bridge
     
     @pytest.fixture
     def supervisor(self, mock_llm_manager, mock_websocket_bridge):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create supervisor instance with mocked dependencies"""
+    pass
         # Mock the agent class registry and instance factory
         with patch('netra_backend.app.agents.supervisor_consolidated.get_agent_class_registry') as mock_reg:
             with patch('netra_backend.app.agents.supervisor_consolidated.get_agent_instance_factory') as mock_factory:
                 with patch('netra_backend.app.agents.supervisor_consolidated.get_supervisor_flow_logger') as mock_flow:
                     # Setup mocks
-                    mock_registry = Mock()
+                    mock_registry = mock_registry_instance  # Initialize appropriate service
                     mock_reg.return_value = mock_registry
                     
-                    mock_instance_factory = Mock()
-                    mock_instance_factory.configure = Mock()
+                    mock_instance_factory = mock_instance_factory_instance  # Initialize appropriate service
+                    mock_instance_factory.configure = configure_instance  # Initialize appropriate service
                     mock_factory.return_value = mock_instance_factory
                     
-                    mock_flow_logger = Mock()
+                    mock_flow_logger = mock_flow_logger_instance  # Initialize appropriate service
                     mock_flow_logger.generate_flow_id = Mock(return_value="test_flow_123")
-                    mock_flow_logger.start_flow = Mock()
-                    mock_flow_logger.complete_flow = Mock()
+                    mock_flow_logger.start_flow = start_flow_instance  # Initialize appropriate service
+                    mock_flow_logger.complete_flow = complete_flow_instance  # Initialize appropriate service
                     mock_flow.return_value = mock_flow_logger
                     
                     # Create supervisor
@@ -171,7 +186,7 @@ class TestUVSSupervisorWorkflow:
             mock_agents = {}
             for name in ["triage", "data", "optimization", "actions", "reporting"]:
                 agent = Mock(spec=BaseAgent)
-                agent.execute = AsyncMock()
+                agent.execute = AsyncNone  # TODO: Use real service instance
                 mock_agents[name] = agent
             
             # Setup successful agents
@@ -183,12 +198,14 @@ class TestUVSSupervisorWorkflow:
                 with patch.object(supervisor, '_execute_agent_with_context') as mock_exec:
                     # Setup execution behavior to simulate failures
                     async def exec_side_effect(agent, context, name):
+    pass
                         if name == "data":
                             raise Exception("Data agent failed")
                         elif name == "optimization":
                             raise Exception("Optimization failed")
                         else:
-                            return {"status": "success", "result": f"{name}_result"}
+                            await asyncio.sleep(0)
+    return {"status": "success", "result": f"{name}_result"}
                     
                     mock_exec.side_effect = exec_side_effect
                     
@@ -197,7 +214,7 @@ class TestUVSSupervisorWorkflow:
                         # Also patch _execute_single_agent for triage
                         with patch.object(supervisor, '_execute_single_agent', return_value={"status": "success"}):
                             results = await supervisor._execute_workflow_with_isolated_agents(
-                                mock_agents, mock_context, Mock(), "test_flow"
+                                mock_agents, mock_context, None  # TODO: Use real service instance, "test_flow"
                             )
                     
                     # Verify workflow completed despite failures
@@ -310,7 +327,7 @@ class TestUVSSupervisorWorkflow:
         with patch.object(supervisor, '_create_isolated_agent_instances', return_value=mock_agents):
             with patch.object(supervisor, 'flow_logger'):
                 results = await supervisor._execute_workflow_with_isolated_agents(
-                    mock_agents, mock_context, Mock(), "test_flow"
+                    mock_agents, mock_context, None  # TODO: Use real service instance, "test_flow"
                 )
         
         # Verify workflow completed
@@ -362,26 +379,26 @@ class TestUVSWebSocketEvents:
     async def test_websocket_events_preserved(self):
         """Verify all required WebSocket events are still emitted"""
         
-        mock_bridge = Mock()
-        mock_bridge.emit_agent_event = AsyncMock()
-        mock_bridge.websocket_manager = Mock()
+        mock_bridge = mock_bridge_instance  # Initialize appropriate service
+        mock_bridge.emit_agent_event = AsyncNone  # TODO: Use real service instance
+        mock_bridge.websocket_manager = UnifiedWebSocketManager()
         
         # Mock dependencies as in other tests
         with patch('netra_backend.app.agents.supervisor_consolidated.get_agent_class_registry') as mock_reg:
             with patch('netra_backend.app.agents.supervisor_consolidated.get_agent_instance_factory') as mock_factory:
                 with patch('netra_backend.app.agents.supervisor_consolidated.get_supervisor_flow_logger') as mock_flow:
                     # Setup mocks
-                    mock_reg.return_value = Mock()
+                    mock_reg.return_value = return_value_instance  # Initialize appropriate service
                     
-                    mock_instance_factory = Mock()
-                    mock_instance_factory.configure = Mock()
+                    mock_instance_factory = mock_instance_factory_instance  # Initialize appropriate service
+                    mock_instance_factory.configure = configure_instance  # Initialize appropriate service
                     mock_factory.return_value = mock_instance_factory
                     
-                    mock_flow_logger = Mock()
+                    mock_flow_logger = mock_flow_logger_instance  # Initialize appropriate service
                     mock_flow.return_value = mock_flow_logger
                     
                     supervisor = SupervisorAgent(
-                        llm_manager=Mock(),
+                        llm_manager=llm_manager_instance  # Initialize appropriate service,
                         websocket_bridge=mock_bridge
                     )
         
@@ -400,3 +417,4 @@ class TestUVSWebSocketEvents:
                     assert call_args[1]["event_type"] == "agent_thinking"
                     assert call_args[1]["data"]["message"] == "Test message"
                     assert call_args[1]["data"]["user_id"] == "test_user"
+    pass

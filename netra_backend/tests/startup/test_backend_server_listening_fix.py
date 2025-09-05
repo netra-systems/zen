@@ -1,4 +1,7 @@
 from shared.isolated_environment import get_env
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from test_framework.database.test_database_manager import TestDatabaseManager
+from shared.isolated_environment import IsolatedEnvironment
 """
 env = get_env()
 Backend Server Listening Fix Test
@@ -22,7 +25,6 @@ import sys
 import time
 from pathlib import Path
 from typing import Optional
-from unittest.mock import patch
 
 import pytest
 import requests

@@ -10,6 +10,7 @@ Maximum 300 lines enforced - focuses on core JWT flows only
 
 import sys
 from pathlib import Path
+from shared.isolated_environment import IsolatedEnvironment
 
 import asyncio
 import time

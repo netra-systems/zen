@@ -3,7 +3,9 @@ from test_framework.utils import *
 from test_framework.http_client import *
 from typing import Dict, Any, Optional
 import asyncio
-from unittest.mock import Mock, AsyncMock, MagicMock
+from test_framework.database.test_database_manager import TestDatabaseManager
+from auth_service.core.auth_manager import AuthManager
+from shared.isolated_environment import IsolatedEnvironment
 
 
 class MockHTTPClient:

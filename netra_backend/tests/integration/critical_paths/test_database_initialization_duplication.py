@@ -13,8 +13,13 @@ Business Value Justification (BVJ):
 
 import asyncio
 import pytest
-from unittest.mock import AsyncMock, Mock, patch, call
 from fastapi import FastAPI
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from test_framework.database.test_database_manager import TestDatabaseManager
+from test_framework.redis.test_redis_manager import TestRedisManager
+from auth_service.core.auth_manager import AuthManager
+from shared.isolated_environment import IsolatedEnvironment
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
 
 # from netra_backend.app.core.startup_manager import StartupManager, ComponentPriority  # Module removed
 from netra_backend.app.db.database_initializer import DatabaseInitializer
@@ -34,7 +39,7 @@ class TestDatabaseInitializationDuplication:
         """
         # Create a test app
         app = FastAPI()
-        app.state = Mock()
+        app.state = state_instance  # Initialize appropriate service
         
         # Create startup manager
         startup_manager = StartupManager()
@@ -50,11 +55,11 @@ class TestDatabaseInitializationDuplication:
             
             # Configure mocks
             mock_setup_connections.return_value = None
-            mock_init_postgres.return_value = Mock()  # Return a mock session factory
+            mock_init_postgres.return_value = return_value_instance  # Initialize appropriate service  # Return a mock session factory
             mock_ensure_tables.return_value = None
             
             # Create a mock DatabaseInitializer instance
-            mock_db_initializer = AsyncMock()
+            mock_db_initializer = AsyncNone  # TODO: Use real service instance
             mock_db_initializer.initialize_postgresql = AsyncMock(return_value=True)
             mock_db_initializer_class.return_value = mock_db_initializer
             
@@ -80,7 +85,7 @@ class TestDatabaseInitializationDuplication:
         from netra_backend.app.db.database_manager import DatabaseManager
         
         # Mock the database engine and connection test
-        mock_engine = Mock()
+        mock_engine = UserExecutionEngine()
         
         # Track the number of calls to test_connection_with_retry
         call_count = 0
@@ -116,7 +121,7 @@ class TestDatabaseInitializationDuplication:
         from netra_backend.app.startup_module import setup_database_connections
         
         app = FastAPI()
-        app.state = Mock()
+        app.state = state_instance  # Initialize appropriate service
         
         with patch('netra_backend.app.startup_module.get_config') as mock_config, \
              patch('netra_backend.app.startup_module.initialize_postgres') as mock_init_postgres, \
@@ -128,7 +133,7 @@ class TestDatabaseInitializationDuplication:
                 database_url="postgresql://test:test@localhost/test",
                 graceful_startup_mode="false"
             )
-            mock_init_postgres.return_value = Mock()  # Return a mock session factory
+            mock_init_postgres.return_value = return_value_instance  # Initialize appropriate service  # Return a mock session factory
             mock_ensure_tables.return_value = None
             
             # Call setup_database_connections

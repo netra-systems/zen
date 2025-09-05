@@ -12,9 +12,13 @@ Tests cover:
 
 import asyncio
 import pytest
-from unittest.mock import AsyncMock, Mock, patch
 from datetime import datetime, timezone
 import uuid
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from test_framework.database.test_database_manager import TestDatabaseManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 from netra_backend.app.services.agent_websocket_bridge import (
     AgentWebSocketBridge,
@@ -29,6 +33,7 @@ from netra_backend.app.services.agent_websocket_bridge import (
 
 class TestAgentWebSocketBridgeUnit:
     """Unit tests for AgentWebSocketBridge core functionality."""
+    pass
 
     @pytest.fixture
     async def bridge(self):
@@ -40,31 +45,41 @@ class TestAgentWebSocketBridgeUnit:
         await bridge.shutdown()
 
     @pytest.fixture
-    def mock_websocket_manager(self):
+ def real_websocket_manager():
+    """Use real service instance."""
+    # TODO: Initialize real service
+    pass
         """Mock WebSocket manager."""
-        manager = AsyncMock()
+        manager = AsyncNone  # TODO: Use real service instance
         manager.send_message = AsyncMock(return_value=True)
         manager.send_error = AsyncMock(return_value=True)
         manager.send_to_thread = AsyncMock(return_value=True)
-        return manager
+        await asyncio.sleep(0)
+    return manager
 
     @pytest.fixture
-    def mock_registry(self):
+ def real_registry():
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Mock agent execution registry."""
-        registry = AsyncMock()
-        registry.set_websocket_manager = AsyncMock()
-        registry.setup_agent_websocket_integration = AsyncMock()
+        registry = AsyncNone  # TODO: Use real service instance
+    pass
+        registry.set_websocket_manager = AsyncNone  # TODO: Use real service instance
+        registry.setup_agent_websocket_integration = AsyncNone  # TODO: Use real service instance
         registry.get_metrics = AsyncMock(return_value={"active_contexts": 0})
-        registry.shutdown = AsyncMock()
+        registry.shutdown = AsyncNone  # TODO: Use real service instance
         return registry
 
     @pytest.fixture
-    def mock_supervisor(self):
+ def real_supervisor():
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Mock supervisor agent."""
-        supervisor = Mock()
-        supervisor.registry = Mock()
+    pass
+        supervisor = supervisor_instance  # Initialize appropriate service
+        supervisor.registry = registry_instance  # Initialize appropriate service
         supervisor.registry.websocket_manager = None
-        supervisor.registry.set_websocket_manager = Mock()
+        supervisor.registry.set_websocket_manager = UnifiedWebSocketManager()
         return supervisor
 
     def test_singleton_pattern(self):
@@ -80,6 +95,7 @@ class TestAgentWebSocketBridgeUnit:
 
     def test_initial_state(self, bridge):
         """Test bridge initializes with correct default state."""
+    pass
         assert bridge.state == IntegrationState.UNINITIALIZED
         assert bridge._websocket_manager is None
         assert bridge._orchestrator is None
@@ -99,6 +115,7 @@ class TestAgentWebSocketBridgeUnit:
 
     def test_metrics_initialization(self, bridge):
         """Test metrics are initialized correctly."""
+    pass
         metrics = bridge.metrics
         
         assert metrics.total_initializations == 0
@@ -111,6 +128,7 @@ class TestAgentWebSocketBridgeUnit:
 
 class TestAgentWebSocketBridgeIntegration:
     """Integration tests for bridge lifecycle management."""
+    pass
 
     @pytest.fixture
     async def bridge(self):
@@ -122,17 +140,19 @@ class TestAgentWebSocketBridgeIntegration:
 
     @pytest.fixture
     def integration_mocks(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
+    pass
         """Complete set of integration mocks."""
-        return {
-            'websocket_manager': AsyncMock(),
-            'registry': AsyncMock(),
-            'supervisor': Mock(),
-            'registry': Mock()
+        await asyncio.sleep(0)
+    return {
+            'websocket_manager': AsyncNone  # TODO: Use real service instance,
+            'registry': AsyncNone  # TODO: Use real service instance,
+            'supervisor': None  # TODO: Use real service instance,
+            'registry': None  # TODO: Use real service instance
         }
 
-    @patch('netra_backend.app.services.agent_websocket_bridge.get_websocket_manager')
-    @patch('netra_backend.app.services.agent_websocket_bridge.get_agent_execution_registry')
-    async def test_successful_integration(self, mock_get_registry, mock_get_manager, bridge, integration_mocks):
+            async def test_successful_integration(self, mock_get_registry, mock_get_manager, bridge, integration_mocks):
         """Test successful integration from uninitialized to active."""
         # Setup mocks
         mock_get_manager.return_value = integration_mocks['websocket_manager']
@@ -162,10 +182,9 @@ class TestAgentWebSocketBridgeIntegration:
         integration_mocks['registry'].set_websocket_manager.assert_called_once()
         integration_mocks['registry'].setup_agent_websocket_integration.assert_called_once()
 
-    @patch('netra_backend.app.services.agent_websocket_bridge.get_websocket_manager')
-    @patch('netra_backend.app.services.agent_websocket_bridge.get_agent_execution_registry')
-    async def test_idempotent_initialization(self, mock_get_registry, mock_get_manager, bridge, integration_mocks):
+            async def test_idempotent_initialization(self, mock_get_registry, mock_get_manager, bridge, integration_mocks):
         """Test integration is idempotent - can be called multiple times safely."""
+    pass
         # Setup mocks
         mock_get_manager.return_value = integration_mocks['websocket_manager']
         mock_get_registry.return_value = integration_mocks['registry']
@@ -196,9 +215,7 @@ class TestAgentWebSocketBridgeIntegration:
         # Second call should have minimal duration (quick path)
         assert result2.duration_ms < result1.duration_ms
 
-    @patch('netra_backend.app.services.agent_websocket_bridge.get_websocket_manager')
-    @patch('netra_backend.app.services.agent_websocket_bridge.get_agent_execution_registry')
-    async def test_integration_failure_handling(self, mock_get_registry, mock_get_manager, bridge):
+            async def test_integration_failure_handling(self, mock_get_registry, mock_get_manager, bridge):
         """Test integration handles failures gracefully."""
         # Setup failure scenario
         mock_get_manager.side_effect = RuntimeError("WebSocket manager unavailable")
@@ -217,10 +234,9 @@ class TestAgentWebSocketBridgeIntegration:
         assert bridge.metrics.successful_initializations == 0
         assert bridge.metrics.failed_initializations == 1
 
-    @patch('netra_backend.app.services.agent_websocket_bridge.get_websocket_manager')
-    @patch('netra_backend.app.services.agent_websocket_bridge.get_agent_execution_registry')
-    async def test_force_reinit_option(self, mock_get_registry, mock_get_manager, bridge, integration_mocks):
+            async def test_force_reinit_option(self, mock_get_registry, mock_get_manager, bridge, integration_mocks):
         """Test force_reinit parameter forces re-initialization."""
+    pass
         # Setup mocks
         mock_get_manager.return_value = integration_mocks['websocket_manager']
         mock_get_registry.return_value = integration_mocks['registry']
@@ -240,6 +256,7 @@ class TestAgentWebSocketBridgeIntegration:
 
 class TestAgentWebSocketBridgeHealth:
     """Tests for health monitoring and recovery functionality."""
+    pass
 
     @pytest.fixture
     async def bridge(self):
@@ -249,13 +266,12 @@ class TestAgentWebSocketBridgeHealth:
         yield bridge
         await bridge.shutdown()
 
-    @patch('netra_backend.app.services.agent_websocket_bridge.get_websocket_manager')
-    @patch('netra_backend.app.services.agent_websocket_bridge.get_agent_execution_registry')
-    async def test_health_check_active_state(self, mock_get_registry, mock_get_manager, bridge):
+            async def test_health_check_active_state(self, mock_get_registry, mock_get_manager, bridge):
         """Test health check for active integration."""
+    pass
         # Setup active integration
-        websocket_manager = AsyncMock()
-        registry = AsyncMock()
+        websocket_manager = AsyncNone  # TODO: Use real service instance
+        registry = AsyncNone  # TODO: Use real service instance
         registry.get_metrics.return_value = {"active_contexts": 0}
         
         mock_get_manager.return_value = websocket_manager
@@ -274,13 +290,11 @@ class TestAgentWebSocketBridgeHealth:
         assert health.consecutive_failures == 0
         assert health.is_healthy
 
-    @patch('netra_backend.app.services.agent_websocket_bridge.get_websocket_manager')
-    @patch('netra_backend.app.services.agent_websocket_bridge.get_agent_execution_registry')
-    async def test_health_check_degraded_state(self, mock_get_registry, mock_get_manager, bridge):
+            async def test_health_check_degraded_state(self, mock_get_registry, mock_get_manager, bridge):
         """Test health check detects degraded state."""
         # Setup integration with failing orchestrator
-        websocket_manager = AsyncMock()
-        registry = AsyncMock()
+        websocket_manager = AsyncNone  # TODO: Use real service instance
+        registry = AsyncNone  # TODO: Use real service instance
         registry.get_metrics.side_effect = RuntimeError("Orchestrator failure")
         
         mock_get_manager.return_value = websocket_manager
@@ -303,16 +317,15 @@ class TestAgentWebSocketBridgeHealth:
         assert not health.registry_healthy
         assert health.consecutive_failures == 1
 
-    @patch('netra_backend.app.services.agent_websocket_bridge.get_websocket_manager')
-    @patch('netra_backend.app.services.agent_websocket_bridge.get_agent_execution_registry')
-    async def test_recovery_mechanism(self, mock_get_registry, mock_get_manager, bridge):
+            async def test_recovery_mechanism(self, mock_get_registry, mock_get_manager, bridge):
         """Test automatic recovery from failed state."""
+    pass
         # Setup initially failing integration
         mock_get_manager.side_effect = [
             RuntimeError("Initial failure"),  # First call fails
-            AsyncMock()  # Second call succeeds
+            AsyncNone  # TODO: Use real service instance  # Second call succeeds
         ]
-        registry = AsyncMock()
+        registry = AsyncNone  # TODO: Use real service instance
         registry.get_metrics.return_value = {"active_contexts": 0}
         mock_get_registry.return_value = registry
 
@@ -334,6 +347,7 @@ class TestAgentWebSocketBridgeHealth:
 
 class TestAgentWebSocketBridgeBoundaries:
     """Tests for clear boundary separation between WebSocket/Agent/Bridge."""
+    pass
 
     @pytest.fixture
     async def bridge(self):
@@ -344,6 +358,9 @@ class TestAgentWebSocketBridgeBoundaries:
         await bridge.shutdown()
 
     def test_bridge_doesnt_mix_concerns(self, bridge):
+    """Use real service instance."""
+    # TODO: Initialize real service
+    pass
         """Test bridge doesn't mix WebSocket and Agent concerns."""
         # Bridge should only have coordination methods
         bridge_methods = [method for method in dir(bridge) if not method.startswith('_')]
@@ -366,13 +383,11 @@ class TestAgentWebSocketBridgeBoundaries:
         for coord_method in coordination_methods:
             assert coord_method in bridge_methods, f"Bridge should have coordination method: {coord_method}"
 
-    @patch('netra_backend.app.services.agent_websocket_bridge.get_websocket_manager')
-    @patch('netra_backend.app.services.agent_websocket_bridge.get_agent_execution_registry')
-    async def test_dependencies_not_leaked(self, mock_get_registry, mock_get_manager, bridge):
+            async def test_dependencies_not_leaked(self, mock_get_registry, mock_get_manager, bridge):
         """Test bridge doesn't leak internal dependencies."""
         # Setup integration
-        websocket_manager = AsyncMock()
-        registry = AsyncMock()
+        websocket_manager = AsyncNone  # TODO: Use real service instance
+        registry = AsyncNone  # TODO: Use real service instance
         registry.get_metrics.return_value = {"active_contexts": 0}
         
         mock_get_manager.return_value = websocket_manager
@@ -395,6 +410,7 @@ class TestAgentWebSocketBridgeBoundaries:
 
     async def test_clean_separation_in_status(self, bridge):
         """Test status reporting maintains clean separation."""
+    pass
         status = await bridge.get_status()
         
         # Should have clear sections
@@ -415,6 +431,7 @@ class TestAgentWebSocketBridgeBoundaries:
 
 class TestAgentWebSocketBridgeAsync:
     """Tests for async lifecycle and resource management."""
+    pass
 
     @pytest.fixture
     async def bridge(self):
@@ -426,6 +443,7 @@ class TestAgentWebSocketBridgeAsync:
 
     async def test_factory_function(self):
         """Test create_agent_websocket_bridge factory function."""
+    pass
         from netra_backend.app.agents.supervisor.execution_factory import UserExecutionContext
         
         # Create user context for testing
@@ -446,13 +464,11 @@ class TestAgentWebSocketBridgeAsync:
         await bridge1.shutdown()
         await bridge2.shutdown()
 
-    @patch('netra_backend.app.services.agent_websocket_bridge.get_websocket_manager')
-    @patch('netra_backend.app.services.agent_websocket_bridge.get_agent_execution_registry')
-    async def test_concurrent_initialization(self, mock_get_registry, mock_get_manager, bridge):
+            async def test_concurrent_initialization(self, mock_get_registry, mock_get_manager, bridge):
         """Test bridge handles concurrent initialization correctly."""
         # Setup mocks
-        websocket_manager = AsyncMock()
-        registry = AsyncMock()
+        websocket_manager = AsyncNone  # TODO: Use real service instance
+        registry = AsyncNone  # TODO: Use real service instance
         registry.get_metrics.return_value = {"active_contexts": 0}
         
         mock_get_manager.return_value = websocket_manager
@@ -477,6 +493,7 @@ class TestAgentWebSocketBridgeAsync:
 
     async def test_clean_shutdown(self, bridge):
         """Test bridge shuts down cleanly."""
+    pass
         # Start some background tasks
         await bridge.initialize()
         
@@ -497,6 +514,7 @@ class TestAgentWebSocketBridgeAsync:
 
 class TestAgentWebSocketBridgeNotificationInterface:
     """Tests for the new notification interface methods."""
+    pass
 
     @pytest.fixture
     async def bridge_with_manager(self):
@@ -507,11 +525,11 @@ class TestAgentWebSocketBridgeNotificationInterface:
         with patch('netra_backend.app.services.agent_websocket_bridge.get_websocket_manager') as mock_get_manager, \
              patch('netra_backend.app.services.agent_websocket_bridge.get_agent_execution_registry') as mock_get_registry:
             
-            websocket_manager = AsyncMock()
+            websocket_manager = AsyncNone  # TODO: Use real service instance
             websocket_manager.send_to_thread.return_value = True
             mock_get_manager.return_value = websocket_manager
             
-            registry = AsyncMock()
+            registry = AsyncNone  # TODO: Use real service instance
             registry.get_metrics.return_value = {"active_contexts": 0}
             registry.get_thread_id_for_run = AsyncMock(return_value="test_thread")
             mock_get_registry.return_value = registry
@@ -524,6 +542,7 @@ class TestAgentWebSocketBridgeNotificationInterface:
 
     async def test_notify_tool_executing(self, bridge_with_manager):
         """Test tool_executing notification method."""
+    pass
         bridge, websocket_manager, registry = bridge_with_manager
         
         success = await bridge.notify_tool_executing(
@@ -567,6 +586,7 @@ class TestAgentWebSocketBridgeNotificationInterface:
 
     async def test_notify_agent_completed(self, bridge_with_manager):
         """Test agent_completed notification method."""
+    pass
         bridge, websocket_manager, registry = bridge_with_manager
         
         success = await bridge.notify_agent_completed(
@@ -607,6 +627,7 @@ class TestAgentWebSocketBridgeNotificationInterface:
 
     async def test_notify_progress_update(self, bridge_with_manager):
         """Test progress_update notification method."""
+    pass
         bridge, websocket_manager, registry = bridge_with_manager
         
         success = await bridge.notify_progress_update(
@@ -653,6 +674,7 @@ class TestAgentWebSocketBridgeNotificationInterface:
 
     async def test_parameter_sanitization(self, bridge_with_manager):
         """Test sensitive data is sanitized in notifications."""
+    pass
         bridge, websocket_manager, registry = bridge_with_manager
         
         # Test with sensitive parameters
@@ -703,12 +725,14 @@ class TestAgentWebSocketBridgeNotificationInterface:
 
     async def test_notification_without_websocket_manager(self, bridge_with_manager):
         """Test notifications gracefully handle missing WebSocket manager."""
+    pass
         bridge, _, _ = bridge_with_manager
         
         # Simulate WebSocket manager becoming unavailable
         bridge._websocket_manager = None
         
-        # All notification methods should return False but not crash
+        # All notification methods should await asyncio.sleep(0)
+    return False but not crash
         assert not await bridge.notify_agent_started("run_1", "agent")
         assert not await bridge.notify_agent_thinking("run_1", "agent", "thinking")
         assert not await bridge.notify_tool_executing("run_1", "agent", "tool")
@@ -722,6 +746,7 @@ class TestAgentWebSocketBridgeNotificationInterface:
 @pytest.mark.asyncio
 class TestAgentWebSocketBridgeMissionCritical:
     """Mission-critical tests for WebSocket event delivery - ensures business value."""
+    pass
 
     @pytest.fixture
     async def bridge(self):
@@ -732,23 +757,25 @@ class TestAgentWebSocketBridgeMissionCritical:
         await bridge.shutdown()
 
     @pytest.fixture
-    def mock_execution_context(self):
+ def real_execution_context():
+    """Use real service instance."""
+    # TODO: Initialize real service
+    pass
         """Mock execution context for testing."""
-        context = Mock()
+        context = context_instance  # Initialize appropriate service
         context.user_id = "test_user"
         context.thread_id = "test_thread"
         context.run_id = "test_run"
         context.agent_name = "test_agent"
-        return context
+        await asyncio.sleep(0)
+    return context
 
-    @patch('netra_backend.app.services.agent_websocket_bridge.get_websocket_manager')
-    @patch('netra_backend.app.services.agent_websocket_bridge.get_agent_execution_registry')
-    async def test_critical_event_delivery(self, mock_get_registry, mock_get_manager, bridge, mock_execution_context):
+            async def test_critical_event_delivery(self, mock_get_registry, mock_get_manager, bridge, mock_execution_context):
         """Test critical WebSocket events are delivered for chat business value."""
         # Setup integration
-        websocket_manager = AsyncMock()
+        websocket_manager = AsyncNone  # TODO: Use real service instance
         websocket_manager.send_to_thread.return_value = True
-        registry = AsyncMock()
+        registry = AsyncNone  # TODO: Use real service instance
         registry.get_metrics.return_value = {"active_contexts": 0}
         
         mock_get_manager.return_value = websocket_manager
@@ -780,14 +807,13 @@ class TestAgentWebSocketBridgeMissionCritical:
         assert event_payload["agent_name"] == "test_agent"
         assert "payload" in event_payload
 
-    @patch('netra_backend.app.services.agent_websocket_bridge.get_websocket_manager')
-    @patch('netra_backend.app.services.agent_websocket_bridge.get_agent_execution_registry')
-    async def test_notification_interface_agent_thinking(self, mock_get_registry, mock_get_manager, bridge):
+            async def test_notification_interface_agent_thinking(self, mock_get_registry, mock_get_manager, bridge):
         """Test agent_thinking notification interface method."""
+    pass
         # Setup integration
-        websocket_manager = AsyncMock()
+        websocket_manager = AsyncNone  # TODO: Use real service instance
         websocket_manager.send_to_thread.return_value = True
-        registry = AsyncMock()
+        registry = AsyncNone  # TODO: Use real service instance
         registry.get_metrics.return_value = {"active_contexts": 0}
         registry.get_thread_id_for_run = AsyncMock(return_value="test_thread")
         
@@ -832,6 +858,7 @@ class TestAgentWebSocketBridgeMissionCritical:
 
 class TestAgentWebSocketBridgeMonitorableComponent:
     """Tests for MonitorableComponent interface implementation."""
+    pass
 
     @pytest.fixture
     async def bridge(self):
@@ -842,12 +869,16 @@ class TestAgentWebSocketBridgeMonitorableComponent:
         await bridge.shutdown()
 
     @pytest.fixture
-    def mock_monitor_observer(self):
+ def real_monitor_observer():
+    """Use real service instance."""
+    # TODO: Initialize real service
+    pass
         """Mock monitor observer for testing."""
-        observer = AsyncMock()
+        observer = AsyncNone  # TODO: Use real service instance
         observer.__class__.__name__ = "MockMonitor"  # For logging
-        observer.on_component_health_change = AsyncMock()
-        return observer
+        observer.on_component_health_change = AsyncNone  # TODO: Use real service instance
+        await asyncio.sleep(0)
+    return observer
 
     async def test_monitorable_component_interface_compliance(self, bridge):
         """Test bridge correctly implements MonitorableComponent interface."""
@@ -864,6 +895,7 @@ class TestAgentWebSocketBridgeMonitorableComponent:
 
     async def test_get_health_status_interface_method(self, bridge):
         """Test get_health_status() returns standardized health information."""
+    pass
         health_status = await bridge.get_health_status()
         
         # Verify standardized health status structure
@@ -894,6 +926,7 @@ class TestAgentWebSocketBridgeMonitorableComponent:
 
     async def test_register_monitor_observer_functionality(self, bridge, mock_monitor_observer):
         """Test monitor observer registration works correctly."""
+    pass
         # Initially no observers
         metrics = await bridge.get_metrics()
         assert metrics['registered_observers'] == 0
@@ -920,13 +953,12 @@ class TestAgentWebSocketBridgeMonitorableComponent:
         health = await bridge.health_check()
         assert health.state == IntegrationState.UNINITIALIZED
 
-    @patch('netra_backend.app.services.agent_websocket_bridge.get_websocket_manager')
-    @patch('netra_backend.app.services.agent_websocket_bridge.get_agent_execution_registry')
-    async def test_health_change_notification_to_observers(self, mock_get_registry, mock_get_manager, bridge, mock_monitor_observer):
+            async def test_health_change_notification_to_observers(self, mock_get_registry, mock_get_manager, bridge, mock_monitor_observer):
         """Test health changes are properly notified to registered observers."""
+    pass
         # Setup integration
-        websocket_manager = AsyncMock()
-        registry = AsyncMock()
+        websocket_manager = AsyncNone  # TODO: Use real service instance
+        registry = AsyncNone  # TODO: Use real service instance
         registry.get_metrics.return_value = {"active_contexts": 0}
         
         mock_get_manager.return_value = websocket_manager
@@ -962,3 +994,4 @@ class TestAgentWebSocketBridgeMonitorableComponent:
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])
+    pass

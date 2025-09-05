@@ -7,6 +7,9 @@ concurrent access, and ClickHouse optimization patterns.
 
 import sys
 from pathlib import Path
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from test_framework.database.test_database_manager import TestDatabaseManager
+from shared.isolated_environment import IsolatedEnvironment
 
 # Test framework import - using pytest fixtures instead
 
@@ -14,7 +17,6 @@ import asyncio
 import time
 import uuid
 from typing import Dict, List
-from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
@@ -35,18 +37,18 @@ class TestDatabasePerformance:
         # Mock: ClickHouse external database isolation for unit testing performance
         with patch('netra_backend.app.db.clickhouse_base.ClickHouseDatabase') as mock_db_class:
             # Mock: Generic component isolation for controlled unit testing
-            mock_db = AsyncMock()
+            mock_db = AsyncNone  # TODO: Use real service instance
             mock_db_class.return_value = mock_db
             
             # Mock: ClickHouse external database isolation for unit testing performance
             with patch('netra_backend.app.db.clickhouse_query_fixer.ClickHouseQueryInterceptor') as mock_interceptor_class:
                 # Mock: Generic component isolation for controlled unit testing
-                mock_interceptor = AsyncMock()
+                mock_interceptor = AsyncNone  # TODO: Use real service instance
                 mock_interceptor_class.return_value = mock_interceptor
                 
                 # Mock: WebSocket manager isolation for testing without external dependencies
                 with patch('netra_backend.app.services.generation_job_manager.manager') as mock_manager:
-                    mock_manager.broadcast_to_job = AsyncMock()
+                    mock_manager.broadcast_to_job = AsyncNone  # TODO: Use real service instance
                     
                     start_time = time.perf_counter()
                     await save_corpus_to_clickhouse(large_corpus, table_name)
@@ -72,7 +74,7 @@ class TestDatabasePerformance:
         table_names = [f'perf_test_{i}' for i in range(5)]
         
         # Mock: ClickHouse connection creation for unit testing isolation
-        mock_db_connection = AsyncMock()
+        mock_db_connection = AsyncNone  # TODO: Use real service instance
         mock_db_connection.execute_query.return_value = [
             {'workload_type': 'test', 'prompt': 'p', 'response': 'r'}
             for _ in range(1000)
@@ -104,18 +106,18 @@ class TestDatabasePerformance:
             # Mock: ClickHouse external database isolation for unit testing performance
             with patch('netra_backend.app.db.clickhouse_base.ClickHouseDatabase') as mock_db_class:
                 # Mock: Generic component isolation for controlled unit testing
-                mock_db = AsyncMock()
+                mock_db = AsyncNone  # TODO: Use real service instance
                 mock_db_class.return_value = mock_db
                 
                 # Mock: ClickHouse external database isolation for unit testing performance
                 with patch('netra_backend.app.db.clickhouse_query_fixer.ClickHouseQueryInterceptor') as mock_interceptor_class:
                     # Mock: Generic component isolation for controlled unit testing
-                    mock_interceptor = AsyncMock()
+                    mock_interceptor = AsyncNone  # TODO: Use real service instance
                     mock_interceptor_class.return_value = mock_interceptor
                     
                     # Mock: WebSocket manager isolation for testing without external dependencies
                     with patch('netra_backend.app.services.generation_job_manager.manager') as mock_manager:
-                        mock_manager.broadcast_to_job = AsyncMock()
+                        mock_manager.broadcast_to_job = AsyncNone  # TODO: Use real service instance
                         
                         start_time = time.perf_counter()
                         await save_corpus_to_clickhouse(test_corpus, f'batch_test_{batch_size}')
@@ -139,7 +141,7 @@ class TestDatabasePerformance:
             nonlocal connection_count
             connection_count += 1
             # Mock: Generic component isolation for controlled unit testing
-            mock_conn = AsyncMock()
+            mock_conn = AsyncNone  # TODO: Use real service instance
             return mock_conn
         
         # Mock: Component isolation for testing without external dependencies
@@ -170,7 +172,7 @@ class TestDatabasePerformance:
         
         for scenario in query_scenarios:
             # Mock: ClickHouse connection creation for unit testing isolation
-            mock_db_connection = AsyncMock()
+            mock_db_connection = AsyncNone  # TODO: Use real service instance
             # Mock response based on table size
             mock_db_connection.execute_query.return_value = [
                 {'workload_type': 'test', 'prompt': f'p_{i}', 'response': f'r_{i}'}

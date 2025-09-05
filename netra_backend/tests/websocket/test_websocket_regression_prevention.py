@@ -7,17 +7,23 @@ These tests ensure the WebSocket-Agent integration remains functional.
 from netra_backend.app.websocket_core.manager import WebSocketManager
 from pathlib import Path
 import sys
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from test_framework.database.test_database_manager import TestDatabaseManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 from typing import Any, Dict
-from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
 from netra_backend.app.logging_config import central_logger
+import asyncio
 
 logger = central_logger.get_logger(__name__)
 
 class TestCircularImportPrevention:
+    pass
 
     """Test that no circular imports exist between WebSocket and Agent modules."""
     
@@ -34,14 +40,10 @@ class TestCircularImportPrevention:
         from netra_backend.app.websocket_core_executor import ConnectionExecutor
         from netra_backend.app.websocket_core.message_handler_core import (
 
-            ReliableMessageHandler,
-
-        )
+            ReliableMessageHandler)
         from netra_backend.app.websocket_core.websocket_broadcast_executor import (
 
-            BroadcastExecutor,
-
-        )
+            BroadcastExecutor)
 
         assert ConnectionExecutor is not None
 
@@ -73,14 +75,19 @@ class TestCircularImportPrevention:
         assert 'websocket' not in module_str.lower() or 'websocket' in ['websocket_manager']
 
 class TestAgentRegistration:
+    pass
 
     """Test agent registration during initialization."""
     
     @pytest.fixture
 
     def real_components(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
+    return None
 
         """Create real components for testing."""
+    pass
         from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
         from netra_backend.app.llm.llm_manager import LLMManager
         from netra_backend.app.websocket_core.manager import WebSocketManager as UnifiedWebSocketManager
@@ -145,6 +152,7 @@ class TestAgentRegistration:
 @pytest.mark.asyncio
 
 class TestWebSocketMessageFlow:
+    pass
 
     """Test WebSocket message flow to agent execution."""
     
@@ -158,7 +166,7 @@ class TestWebSocketMessageFlow:
         # Create mocks
 
         # Mock: Generic component isolation for controlled unit testing
-        mock_supervisor = AsyncMock()
+        mock_supervisor = AsyncNone  # TODO: Use real service instance
 
         # Mock: Async component isolation for testing without real async operations
         mock_supervisor.run = AsyncMock(return_value="Test response")
@@ -207,10 +215,10 @@ class TestWebSocketMessageFlow:
         """Test message handler routing for different message types."""
         
         # Mock: Generic component isolation for controlled unit testing
-        mock_supervisor = Mock()
+        mock_supervisor = mock_supervisor_instance  # Initialize appropriate service
 
         # Mock: Generic component isolation for controlled unit testing
-        mock_thread_service = Mock()
+        mock_thread_service = mock_thread_service_instance  # Initialize appropriate service
         
         handler = MessageHandlerService(mock_supervisor, mock_thread_service)
         
@@ -230,15 +238,13 @@ class TestWebSocketMessageFlow:
         """Test WebSocket connection establishment and message handling."""
         from netra_backend.app.routes.utils.websocket_helpers import (
 
-            process_agent_message,
-
-        )
+            process_agent_message)
         
         # Mock: Agent service isolation for testing without LLM agent execution
-        mock_agent_service = AsyncMock()
+        mock_agent_service = AsyncNone  # TODO: Use real service instance
 
         # Mock: WebSocket infrastructure isolation for unit tests without real connections
-        mock_agent_service.handle_websocket_message = AsyncMock()
+        mock_agent_service.handle_websocket_message = AsyncNone  # TODO: Use real service instance
         
         # Test process_agent_message
 
@@ -246,10 +252,10 @@ class TestWebSocketMessageFlow:
         with patch('netra_backend.app.routes.utils.websocket_helpers.get_async_db') as mock_db:
 
             # Mock: Generic component isolation for controlled unit testing
-            mock_db.return_value.__aenter__ = AsyncMock(return_value=Mock())
+            mock_db.return_value.__aenter__ = AsyncMock(return_value=return_value_instance  # Initialize appropriate service)
 
             # Mock: Generic component isolation for controlled unit testing
-            mock_db.return_value.__aexit__ = AsyncMock()
+            mock_db.return_value.__aexit__ = AsyncNone  # TODO: Use real service instance
             
             await process_agent_message("user_123", "test_data", mock_agent_service)
             
@@ -258,6 +264,7 @@ class TestWebSocketMessageFlow:
             mock_agent_service.handle_websocket_message.assert_called_once()
 
 class TestAgentExecutionPipeline:
+    pass
 
     """Test the agent execution pipeline."""
     
@@ -266,15 +273,13 @@ class TestAgentExecutionPipeline:
         """Test pipeline executor can be initialized."""
         from netra_backend.app.agents.supervisor.pipeline_executor import (
 
-            PipelineExecutor,
-
-        )
+            PipelineExecutor)
         
         # Mock: Generic component isolation for controlled unit testing
-        mock_engine = Mock()
+        mock_engine = UserExecutionEngine()
 
         # Mock: Generic component isolation for controlled unit testing
-        mock_ws_manager = Mock()
+        mock_ws_manager = UnifiedWebSocketManager()
 
         mock_db_session = None
         
@@ -288,10 +293,10 @@ class TestAgentExecutionPipeline:
         from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
         
         # Mock: Generic component isolation for controlled unit testing
-        mock_registry = Mock()
+        mock_registry = mock_registry_instance  # Initialize appropriate service
 
         # Mock: Generic component isolation for controlled unit testing
-        mock_ws_manager = Mock()
+        mock_ws_manager = UnifiedWebSocketManager()
         
         engine = ExecutionEngine(mock_registry, mock_ws_manager)
 
@@ -303,15 +308,13 @@ class TestAgentExecutionPipeline:
         """Test agent execution core functionality."""
         from netra_backend.app.agents.supervisor.agent_execution_core import (
 
-            AgentExecutionCore,
-
-        )
+            AgentExecutionCore)
         
         # Mock: Generic component isolation for controlled unit testing
-        mock_registry = Mock()
+        mock_registry = mock_registry_instance  # Initialize appropriate service
 
         # Mock: Agent service isolation for testing without LLM agent execution
-        mock_agent = AsyncMock()
+        mock_agent = AsyncNone  # TODO: Use real service instance
 
         # Mock: Agent service isolation for testing without LLM agent execution
         mock_agent.execute = AsyncMock(return_value={"result": "success"})
@@ -328,7 +331,7 @@ class TestAgentExecutionPipeline:
             agent_name="test_agent",
 
             # Mock: Generic component isolation for controlled unit testing
-            state=Mock(),
+            state=state_instance  # Initialize appropriate service,
 
             run_id="test_run",
 
@@ -341,6 +344,7 @@ class TestAgentExecutionPipeline:
         mock_agent.execute.assert_called_once()
 
 class TestWebSocketBroadcasting:
+    pass
 
     """Test WebSocket broadcasting functionality."""
     

@@ -2,8 +2,10 @@
 
 import pytest
 from decimal import Decimal
-from unittest.mock import AsyncMock, patch
 from netra_backend.app.services.analytics.cost_tracker import CostTracker
+from test_framework.redis.test_redis_manager import TestRedisManager
+from auth_service.core.auth_manager import AuthManager
+from shared.isolated_environment import IsolatedEnvironment
 
 
 class TestCostTracker:
@@ -22,7 +24,7 @@ class TestCostTracker:
         tracker = CostTracker()
         
         with patch.object(tracker, '_get_redis') as mock_redis:
-            mock_client = AsyncMock()
+            mock_client = AsyncNone  # TODO: Use real service instance
             mock_redis.return_value = mock_client
             
             await tracker.track_operation_cost(
@@ -44,7 +46,7 @@ class TestCostTracker:
         tracker = CostTracker()
         
         with patch.object(tracker, '_get_redis') as mock_redis:
-            mock_client = AsyncMock()
+            mock_client = AsyncNone  # TODO: Use real service instance
             mock_redis.return_value = mock_client
             
             # Track some operations

@@ -14,6 +14,7 @@ Coverage: Auth config hot reload, session maintenance, validation, rollback, con
 
 import sys
 from pathlib import Path
+from shared.isolated_environment import IsolatedEnvironment
 
 import pytest
 import asyncio

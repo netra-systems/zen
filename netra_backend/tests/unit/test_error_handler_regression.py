@@ -5,7 +5,8 @@ Tests to prevent IndexError when logging SQLAlchemy errors.
 
 import sys
 from pathlib import Path
-from unittest.mock import MagicMock, Mock, patch
+from test_framework.database.test_database_manager import TestDatabaseManager
+from shared.isolated_environment import IsolatedEnvironment
 
 import pytest
 from sqlalchemy.exc import DataError, IntegrityError

@@ -1,5 +1,9 @@
 """
 from test_framework.performance_helpers import fast_test, timeout_override
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from test_framework.database.test_database_manager import TestDatabaseManager
+from test_framework.redis.test_redis_manager import TestRedisManager
+from shared.isolated_environment import IsolatedEnvironment
 
 Deployment Edge Cases and Failure Scenarios Tests
 
@@ -18,7 +22,6 @@ import pytest
 import psutil
 import signal
 import os
-from unittest.mock import AsyncMock, MagicMock, patch
 from typing import Dict, Any, Optional
 
 from netra_backend.app.core.configuration import unified_config_manager
@@ -61,7 +64,7 @@ class TestStartupTimeoutEdgeCases(BaseTestCase):
         with patch('netra_backend.app.db.postgres.get_postgres_db') as mock_db:
             async def hanging_db_connection():
                 await asyncio.sleep(30)  # Long database connection time
-                return MagicMock()
+                return MagicNone  # TODO: Use real service instance
             
             mock_db.side_effect = hanging_db_connection
             

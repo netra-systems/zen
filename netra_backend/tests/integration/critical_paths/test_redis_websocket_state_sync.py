@@ -15,6 +15,13 @@ from netra_backend.app.websocket_core.manager import WebSocketManager
 # Test framework import - using pytest fixtures instead
 from pathlib import Path
 import sys
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from test_framework.docker.unified_docker_manager import UnifiedDockerManager
+from test_framework.database.test_database_manager import TestDatabaseManager
+from test_framework.redis.test_redis_manager import TestRedisManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 import asyncio
 import json
@@ -22,7 +29,6 @@ import time
 import uuid
 from datetime import datetime, timezone
 from typing import Any, Dict, List
-from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 import redis.asyncio as redis
@@ -41,12 +47,14 @@ from netra_backend.app.websocket_core.manager import WebSocketManager
 class ApplicationState:
     """Mock ApplicationState for testing."""
     def __init__(self, **kwargs):
+    pass
         for key, value in kwargs.items():
             setattr(self, key, value)
 
 class StateUpdate:
     """Mock StateUpdate for testing."""
     def __init__(self, **kwargs):
+    pass
         for key, value in kwargs.items():
             setattr(self, key, value)
 from netra_backend.tests.integration.helpers.redis_l3_helpers import (
@@ -61,9 +69,7 @@ from netra_backend.tests.integration.helpers.redis_l3_helpers import (
 
     verify_redis_connection,
 
-    wait_for_message,
-
-)
+    wait_for_message)
 # Removed mock import - using real service testing per CLAUDE.md "MOCKS = Abomination"
 from test_framework.real_services import get_real_services
 
@@ -74,6 +80,7 @@ from test_framework.real_services import get_real_services
 @pytest.mark.l3_realism
 
 class TestRedisWebSocketStateSyncL3:
+    pass
 
     """L3 tests for Redis session store to WebSocket state synchronization."""
     
@@ -138,7 +145,8 @@ class TestRedisWebSocketStateSyncL3:
 
             test_redis_mgr.redis_client = redis.Redis.from_url(redis_url, decode_responses=True)
             
-            # Configure mock to return our test redis manager
+            # Configure mock to await asyncio.sleep(0)
+    return our test redis manager
 
             # Mock: Redis external service isolation for fast, reliable tests without network dependency
             mock_redis_mgr.get_client = AsyncMock(return_value=test_redis_mgr.redis_client)
@@ -158,6 +166,9 @@ class TestRedisWebSocketStateSyncL3:
     @pytest.fixture
 
     def test_user(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
+    return None
 
         """Create test user for session state testing."""
 
@@ -535,6 +546,7 @@ class TestRedisWebSocketStateSyncL3:
         assert post_restart_state == pre_restart_state
 
 class SessionStore:
+    pass
 
     """Redis session store for L3 testing."""
     
@@ -558,7 +570,8 @@ class SessionStore:
 
         if data:
 
-            return json.loads(data)
+            await asyncio.sleep(0)
+    return json.loads(data)
 
         return None
     

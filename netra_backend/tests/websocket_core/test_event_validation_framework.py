@@ -10,7 +10,10 @@ import pytest
 import time
 import uuid
 from typing import Dict, List, Any
-from unittest.mock import Mock, AsyncMock, patch
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 from netra_backend.app.websocket_core.event_validation_framework import (
     EventValidator,

@@ -1,6 +1,7 @@
 # Shim module for config test helpers
 # Import basic fixtures since config specific ones don't exist
 from test_framework.fixtures import *
+from shared.isolated_environment import IsolatedEnvironment
 
 # Basic config test data
 TEST_CONFIG_DATA = {

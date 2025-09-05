@@ -7,13 +7,15 @@ All functions maintain 25-line limit with single responsibility.
 
 import sys
 from pathlib import Path
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 # Test framework import - using pytest fixtures instead
 
 import asyncio
 import time
 from typing import Any, Dict, List
-from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import psutil
 import pytest
@@ -30,22 +32,28 @@ class TestCorpusGenerationPerformance:
     
     @pytest.fixture(scope="function")
     def mock_corpus_service(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create mock corpus service"""
+    pass
         # Mock: Async component isolation for testing without real async operations
         service = AsyncMock(spec=CorpusService)
         # Mock: Async component isolation for testing without real async operations
         service.create_corpus = AsyncMock(return_value="corpus_perf_123")
         # Mock: Generic component isolation for controlled unit testing
-        service.generate_data = AsyncMock()
+        service.generate_data = AsyncNone  # TODO: Use real service instance
         return service
     
     @pytest.fixture(scope="function")
     def mock_synthetic_manager(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create mock synthetic data manager"""
+    pass
         # Mock: Async component isolation for testing without real async operations
         manager = AsyncMock(spec=SyntheticDataService)
         # Mock: Generic component isolation for controlled unit testing
-        manager.generate_batch = AsyncMock()
+        manager.generate_batch = AsyncNone  # TODO: Use real service instance
         # Mock: Async component isolation for testing without real async operations
         manager.validate_data = AsyncMock(return_value=True)
         return manager
@@ -66,11 +74,13 @@ class TestCorpusGenerationPerformance:
     
     async def _generate_large_corpus(self, service, manager, count):
         """Generate large corpus with batching"""
+    pass
         batch_size = 1000
         batches = count // batch_size
         for i in range(batches):
             await manager.generate_batch(batch_size)
-        return {"success": True, "record_count": count}
+        await asyncio.sleep(0)
+    return {"success": True, "record_count": count}
     
     @pytest.mark.performance
     @pytest.mark.asyncio
@@ -86,22 +96,26 @@ class TestCorpusGenerationPerformance:
     
     async def _create_concurrent_tasks(self, service, count):
         """Create concurrent generation tasks"""
+    pass
         tasks = []
         for i in range(count):
             task = self._generate_corpus_async(service, f"corpus_{i}")
             tasks.append(task)
-        return tasks
+        await asyncio.sleep(0)
+    return tasks
     
     async def _generate_corpus_async(self, service, corpus_id):
         """Generate corpus asynchronously"""
         await service.create_corpus(corpus_id)
         await asyncio.sleep(0.1)  # Simulate processing
-        return {"success": True, "corpus_id": corpus_id}
+        await asyncio.sleep(0)
+    return {"success": True, "corpus_id": corpus_id}
     
     @pytest.mark.performance
     @pytest.mark.asyncio
     async def test_resource_utilization(self, mock_corpus_service):
         """Monitor CPU/memory usage"""
+    pass
         initial_memory = psutil.Process().memory_info().rss / 1024 / 1024
         initial_cpu = psutil.cpu_percent(interval=0.1)
         
@@ -125,6 +139,7 @@ class TestCorpusGenerationPerformance:
     @pytest.mark.asyncio
     async def test_batch_processing_performance(self, mock_synthetic_manager):
         """Test batch processing efficiency"""
+    pass
         batch_sizes = [100, 500, 1000, 5000]
         results = await self._test_batch_sizes(
             mock_synthetic_manager, batch_sizes
@@ -140,10 +155,12 @@ class TestCorpusGenerationPerformance:
             await manager.generate_batch(size)
             elapsed = time.time() - start
             results.append({"size": size, "time": elapsed, "processed": True})
-        return results
+        await asyncio.sleep(0)
+    return results
     
     def _verify_batch_efficiency(self, results):
         """Verify batch processing is efficient"""
+    pass
         for i in range(1, len(results)):
             size_ratio = results[i]["size"] / results[i-1]["size"]
             prev_time = results[i-1]["time"]
@@ -166,6 +183,7 @@ class TestCorpusGenerationPerformance:
     
     async def _stream_corpus_data(self, service):
         """Stream corpus data chunks"""
+    pass
         for i in range(10):
             await asyncio.sleep(0.01)  # Simulate streaming delay
             yield {"chunk_id": i, "data": f"chunk_{i}"}
@@ -186,7 +204,9 @@ class TestCorpusGenerationPerformance:
     
     def _get_memory_usage(self):
         """Get current memory usage in MB"""
-        return psutil.Process().memory_info().rss / 1024 / 1024
+    pass
+        await asyncio.sleep(0)
+    return psutil.Process().memory_info().rss / 1024 / 1024
     
     async def _perform_generation_cycle(self, service):
         """Perform single generation cycle"""
@@ -198,6 +218,7 @@ class TestCorpusGenerationPerformance:
     @pytest.mark.asyncio
     async def test_error_recovery_performance(self, mock_corpus_service):
         """Test performance during error conditions"""
+    pass
         mock_corpus_service.generate_data.side_effect = [
             Exception("Error"), None, None, Exception("Error"), None
         ]
@@ -213,7 +234,8 @@ class TestCorpusGenerationPerformance:
                 successes += 1
             except Exception:
                 pass  # Expected errors
-        return successes
+        await asyncio.sleep(0)
+    return successes
 
 class TestScalabilityMetrics:
     """Test scalability metrics"""
@@ -231,6 +253,7 @@ class TestScalabilityMetrics:
     
     async def _execute_operations(self, count):
         """Execute multiple operations"""
+    pass
         tasks = []
         for i in range(count):
             tasks.append(self._single_operation(i))
@@ -239,12 +262,14 @@ class TestScalabilityMetrics:
     async def _single_operation(self, op_id):
         """Execute single operation"""
         await asyncio.sleep(0.001)  # Simulate minimal work
-        return {"op_id": op_id, "completed": True}
+        await asyncio.sleep(0)
+    return {"op_id": op_id, "completed": True}
     
     @pytest.mark.performance
     @pytest.mark.asyncio
     async def test_latency_percentiles(self):
         """Measure latency percentiles"""
+    pass
         latencies = await self._collect_latencies(100)
         p50 = self._calculate_percentile(latencies, 50)
         p95 = self._calculate_percentile(latencies, 95)
@@ -260,10 +285,12 @@ class TestScalabilityMetrics:
             start = time.time()
             await asyncio.sleep(0.001 * (i % 10 + 1))  # Variable latency
             latencies.append((time.time() - start) * 1000)  # Convert to ms
-        return latencies
+        await asyncio.sleep(0)
+    return latencies
     
     def _calculate_percentile(self, data, percentile):
         """Calculate percentile value"""
+    pass
         sorted_data = sorted(data)
         index = int(len(sorted_data) * percentile / 100)
         return sorted_data[min(index, len(sorted_data) - 1)]

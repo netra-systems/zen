@@ -12,6 +12,7 @@ Coverage: Invitation workflow, permission validation, edge cases
 
 import sys
 from pathlib import Path
+from shared.isolated_environment import IsolatedEnvironment
 
 # Test framework import - using pytest fixtures instead
 

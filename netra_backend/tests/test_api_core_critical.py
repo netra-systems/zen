@@ -7,6 +7,12 @@ Essential API infrastructure functionality.
 
 import sys
 from pathlib import Path
+from test_framework.database.test_database_manager import TestDatabaseManager
+from test_framework.redis.test_redis_manager import TestRedisManager
+from auth_service.core.auth_manager import AuthManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 # Test framework import - using pytest fixtures instead
 
@@ -14,7 +20,6 @@ import json
 import uuid
 from datetime import datetime, timezone
 from typing import Any, Dict
-from unittest.mock import AsyncMock, MagicMock, Mock, patch, patch
 
 import pytest
 
@@ -24,7 +29,7 @@ class TestAPICoreEndpointsCritical:
     async def test_health_endpoints(self):
         """Test health check endpoints."""
         # Mock: Generic component isolation for controlled unit testing
-        mock_client = AsyncMock()
+        mock_client = AsyncNone  # TODO: Use real service instance
         
         # Test /health/live endpoint
         # Mock: Async component isolation for testing without real async operations
@@ -40,7 +45,7 @@ class TestAPICoreEndpointsCritical:
     async def test_health_ready_endpoint(self):
         """Test health ready endpoint."""
         # Mock: Generic component isolation for controlled unit testing
-        mock_client = AsyncMock()
+        mock_client = AsyncNone  # TODO: Use real service instance
         
         # Test /health/ready endpoint
         # Mock: Async component isolation for testing without real async operations
@@ -56,7 +61,7 @@ class TestAPICoreEndpointsCritical:
     async def test_login_endpoint(self):
         """Test login authentication endpoint."""
         # Mock: Generic component isolation for controlled unit testing
-        mock_client = AsyncMock()
+        mock_client = AsyncNone  # TODO: Use real service instance
         
         # Test login endpoint
         login_data = {
@@ -81,7 +86,7 @@ class TestAPICoreEndpointsCritical:
     async def test_register_endpoint(self):
         """Test user registration endpoint."""
         # Mock: Generic component isolation for controlled unit testing
-        mock_client = AsyncMock()
+        mock_client = AsyncNone  # TODO: Use real service instance
         
         # Test register endpoint
         register_data = {
@@ -103,7 +108,7 @@ class TestAPICoreEndpointsCritical:
     async def test_pagination_basic(self):
         """Test basic API pagination."""
         # Mock: Generic component isolation for controlled unit testing
-        mock_client = AsyncMock()
+        mock_client = AsyncNone  # TODO: Use real service instance
         auth_headers = {"Authorization": "Bearer token123"}
         
         # Test paginated response
@@ -129,7 +134,7 @@ class TestAPICoreEndpointsCritical:
     async def test_pagination_metadata(self):
         """Test pagination metadata validation."""
         # Mock: Generic component isolation for controlled unit testing
-        mock_client = AsyncMock()
+        mock_client = AsyncNone  # TODO: Use real service instance
         auth_headers = {"Authorization": "Bearer token123"}
         
         # Mock: Async component isolation for testing without real async operations
@@ -154,7 +159,7 @@ class TestAPICoreEndpointsCritical:
     async def test_rate_limiting_exceeded(self):
         """Test rate limit exceeded response."""
         # Mock: Generic component isolation for controlled unit testing
-        mock_client = AsyncMock()
+        mock_client = AsyncNone  # TODO: Use real service instance
         auth_headers = {"Authorization": "Bearer token123"}
         
         # Test rate limit exceeded
@@ -179,7 +184,7 @@ class TestAPICoreEndpointsCritical:
     async def test_rate_limiting_headers(self):
         """Test rate limiting headers validation."""
         # Mock: Generic component isolation for controlled unit testing
-        mock_client = AsyncMock()
+        mock_client = AsyncNone  # TODO: Use real service instance
         auth_headers = {"Authorization": "Bearer token123"}
         
         # Mock: Async component isolation for testing without real async operations
@@ -203,7 +208,7 @@ class TestAPICoreEndpointsCritical:
     async def test_authentication_token_validation(self):
         """Test authentication token validation."""
         # Mock: Generic component isolation for controlled unit testing
-        mock_client = AsyncMock()
+        mock_client = AsyncNone  # TODO: Use real service instance
         
         login_data = {
             "email": "test@example.com",
@@ -227,7 +232,7 @@ class TestAPICoreEndpointsCritical:
     async def test_health_service_status(self):
         """Test health endpoint service status."""
         # Mock: Generic component isolation for controlled unit testing
-        mock_client = AsyncMock()
+        mock_client = AsyncNone  # TODO: Use real service instance
         
         # Mock: Async component isolation for testing without real async operations
         mock_client.get = AsyncMock(return_value={
@@ -250,7 +255,7 @@ class TestAPICoreEndpointsCritical:
     async def test_authentication_error_handling(self):
         """Test authentication error handling."""
         # Mock: Generic component isolation for controlled unit testing
-        mock_client = AsyncMock()
+        mock_client = AsyncNone  # TODO: Use real service instance
         
         # Test invalid credentials
         # Mock: Async component isolation for testing without real async operations
@@ -269,7 +274,7 @@ class TestAPICoreEndpointsCritical:
     async def test_registration_validation(self):
         """Test registration input validation."""
         # Mock: Generic component isolation for controlled unit testing
-        mock_client = AsyncMock()
+        mock_client = AsyncNone  # TODO: Use real service instance
         
         # Test missing required fields
         # Mock: Async component isolation for testing without real async operations
@@ -286,7 +291,7 @@ class TestAPICoreEndpointsCritical:
     async def test_pagination_edge_cases(self):
         """Test pagination edge cases."""
         # Mock: Generic component isolation for controlled unit testing
-        mock_client = AsyncMock()
+        mock_client = AsyncNone  # TODO: Use real service instance
         auth_headers = {"Authorization": "Bearer token123"}
         
         # Test empty results
@@ -312,7 +317,7 @@ class TestAPICoreEndpointsCritical:
     async def test_rate_limiting_recovery(self):
         """Test rate limiting recovery."""
         # Mock: Generic component isolation for controlled unit testing
-        mock_client = AsyncMock()
+        mock_client = AsyncNone  # TODO: Use real service instance
         auth_headers = {"Authorization": "Bearer token123"}
         
         # Test successful request after rate limit reset

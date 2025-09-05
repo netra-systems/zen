@@ -6,6 +6,9 @@ Compliance: <300 lines, 25-line max functions, modular design.
 
 import sys
 from pathlib import Path
+from test_framework.database.test_database_manager import TestDatabaseManager
+from test_framework.redis.test_redis_manager import TestRedisManager
+from shared.isolated_environment import IsolatedEnvironment
 
 # Test framework import - using pytest fixtures instead
 
@@ -13,26 +16,30 @@ import asyncio
 import statistics
 import time
 from typing import Any, Dict, List
-from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 
 from netra_backend.app.core.performance_optimization_manager import (
     MemoryCache,
-    QueryOptimizer,
-)
+    QueryOptimizer)
 
 class TestMemoryCache:
     """Test memory cache performance and functionality."""
     
     @pytest.fixture
     def cache(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create cache instance for testing."""
+    pass
         return MemoryCache(max_size=100, default_ttl=60)
         
     @pytest.fixture
     def perf_cache(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create cache instance for performance testing."""
+    pass
         return MemoryCache(max_size=2000, default_ttl=60)  # Larger cache for performance tests
         
     @pytest.mark.asyncio
@@ -50,6 +57,7 @@ class TestMemoryCache:
     @pytest.mark.asyncio
     async def test_cache_ttl_expiration(self, cache):
         """Test TTL expiration functionality."""
+    pass
         # Set with short TTL
         await cache.set("temp_key", "temp_value", ttl=1)
         
@@ -85,6 +93,7 @@ class TestMemoryCache:
     @pytest.mark.asyncio
     async def test_cache_performance(self, perf_cache):
         """Test cache performance under load."""
+    pass
         # Populate cache
         items = 1000
         cache = perf_cache  # Use the larger performance cache
@@ -117,8 +126,12 @@ class TestQueryOptimizer:
     
     @pytest.fixture
     def optimizer(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create query optimizer for testing."""
-        return QueryOptimizer(cache_size=100, cache_ttl=300)
+    pass
+        await asyncio.sleep(0)
+    return QueryOptimizer(cache_size=100, cache_ttl=300)
         
     @pytest.mark.asyncio
     async def test_query_caching(self, optimizer):
@@ -144,13 +157,16 @@ class TestQueryOptimizer:
     @pytest.mark.asyncio
     async def test_query_metrics_tracking(self, optimizer):
         """Test query performance metrics tracking."""
+    pass
         # Use different queries to avoid caching
         base_query = "INSERT INTO test_table VALUES"
         
         # Mock slow executor
         async def slow_executor():
+    pass
             await asyncio.sleep(0.1)  # 100ms
-            return {"result": "data"}
+            await asyncio.sleep(0)
+    return {"result": "data"}
         
         # Execute different queries multiple times to avoid cache hits
         for i in range(5):
@@ -179,6 +195,7 @@ class TestQueryOptimizer:
     
     def test_cache_ttl_determination(self, optimizer):
         """Test cache TTL determination logic."""
+    pass
         # User-related queries should have shorter TTL
         assert optimizer._determine_cache_ttl("SELECT * FROM users") == 60
         

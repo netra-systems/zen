@@ -6,20 +6,20 @@ COMPLIANCE: 450-line max file, 25-line max functions
 
 import sys
 from pathlib import Path
+from shared.isolated_environment import IsolatedEnvironment
 
 from datetime import datetime, timedelta
-from unittest.mock import Mock, patch, AsyncMock, MagicMock
 
 import pytest
 
 from netra_backend.tests.startup.mock_health_monitor import (
+import asyncio
     HealthCheckResult,
     HealthStage,
     ServiceConfig,
     StagedHealthMonitor,
     create_process_health_check,
-    create_url_health_check,
-)
+    create_url_health_check)
 
 @pytest.fixture
 def health_monitor() -> StagedHealthMonitor:
@@ -41,7 +41,7 @@ def mock_service_config() -> ServiceConfig:
 def mock_process() -> Mock:
     """Create mock process for testing."""
     # Mock: Generic component isolation for controlled unit testing
-    process = Mock()
+    process = process_instance  # Initialize appropriate service
     process.poll.return_value = None  # Running process
     return process
 
@@ -153,11 +153,10 @@ class TestHealthCheckFactories:
         assert check() is False
 
     # Mock: Component isolation for testing without external dependencies
-    @patch('requests.get')
-    def test_create_url_health_check_success(self, mock_get: Mock) -> None:
+        def test_create_url_health_check_success(self, mock_get: Mock) -> None:
         """Test URL health check for successful response."""
         # Mock: Generic component isolation for controlled unit testing
-        mock_response = Mock()
+        mock_response = mock_response_instance  # Initialize appropriate service
         mock_response.status_code = 200
         mock_get.return_value = mock_response
         
@@ -166,11 +165,10 @@ class TestHealthCheckFactories:
         mock_get.assert_called_once_with("http://api.example.com", timeout=5)
 
     # Mock: Component isolation for testing without external dependencies
-    @patch('requests.get')
-    def test_create_url_health_check_failure(self, mock_get: Mock) -> None:
+        def test_create_url_health_check_failure(self, mock_get: Mock) -> None:
         """Test URL health check for failed response."""
         # Mock: Generic component isolation for controlled unit testing
-        mock_response = Mock()
+        mock_response = mock_response_instance  # Initialize appropriate service
         mock_response.status_code = 500
         mock_get.return_value = mock_response
         
@@ -178,8 +176,7 @@ class TestHealthCheckFactories:
         assert check() is False
 
     # Mock: Component isolation for testing without external dependencies
-    @patch('requests.get')
-    def test_create_url_health_check_exception(self, mock_get: Mock) -> None:
+        def test_create_url_health_check_exception(self, mock_get: Mock) -> None:
         """Test URL health check with connection exception."""
         mock_get.side_effect = Exception("Connection failed")
         
@@ -187,11 +184,10 @@ class TestHealthCheckFactories:
         assert check() is False
 
     # Mock: Component isolation for testing without external dependencies
-    @patch('requests.get')
-    def test_create_url_health_check_custom_timeout(self, mock_get: Mock) -> None:
+        def test_create_url_health_check_custom_timeout(self, mock_get: Mock) -> None:
         """Test URL health check with custom timeout."""
         # Mock: Generic component isolation for controlled unit testing
-        mock_response = Mock()
+        mock_response = mock_response_instance  # Initialize appropriate service
         mock_response.status_code = 200
         mock_get.return_value = mock_response
         

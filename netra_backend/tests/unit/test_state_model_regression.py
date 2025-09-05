@@ -5,6 +5,7 @@ Ensures all state models can be instantiated with minimal required data.
 
 import sys
 from pathlib import Path
+from shared.isolated_environment import IsolatedEnvironment
 
 from typing import Any, Dict
 

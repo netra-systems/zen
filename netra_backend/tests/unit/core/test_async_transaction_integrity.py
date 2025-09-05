@@ -5,28 +5,33 @@ Focus on transaction boundaries, rollback scenarios, and concurrent access patte
 
 import pytest
 import asyncio
-from unittest.mock import AsyncMock, Mock, patch
 from contextlib import asynccontextmanager
+from test_framework.database.test_database_manager import TestDatabaseManager
+from shared.isolated_environment import IsolatedEnvironment
 
 from netra_backend.app.db.database_manager import DatabaseManager
 
 
 class TestAsyncTransactionIntegrity:
     """Test async database transaction integrity and isolation"""
+    pass
 
     @pytest.fixture
-    def mock_database_manager(self):
+ def real_database_manager():
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create mock database manager for testing"""
+    pass
         manager = Mock(spec=DatabaseManager)
-        manager.get_session = AsyncMock()
-        manager.close_session = AsyncMock()
+        manager.get_session = AsyncNone  # TODO: Use real service instance
+        manager.close_session = AsyncNone  # TODO: Use real service instance
         
         # Mock session with transaction methods
-        session = AsyncMock()
-        session.begin = AsyncMock()
-        session.commit = AsyncMock()
-        session.rollback = AsyncMock()
-        session.close = AsyncMock()
+        session = AsyncNone  # TODO: Use real service instance
+        session.begin = AsyncNone  # TODO: Use real service instance
+        session.commit = AsyncNone  # TODO: Use real service instance
+        session.rollback = AsyncNone  # TODO: Use real service instance
+        session.close = AsyncNone  # TODO: Use real service instance
         
         manager.get_session.return_value = session
         return manager, session
@@ -63,10 +68,12 @@ class TestAsyncTransactionIntegrity:
     @pytest.mark.asyncio
     async def test_transaction_rollback_on_error(self, mock_database_manager):
         """Test that transactions roll back properly on errors"""
+    pass
         manager, session = mock_database_manager
         
         @asynccontextmanager
         async def transaction_context():
+    pass
             try:
                 await session.begin()
                 yield session
@@ -95,24 +102,25 @@ class TestAsyncTransactionIntegrity:
         manager, session = mock_database_manager
         
         # Create separate sessions for concurrent transactions
-        session1 = AsyncMock()
-        session2 = AsyncMock()
+        session1 = AsyncNone  # TODO: Use real service instance
+        session2 = AsyncNone  # TODO: Use real service instance
         
-        session1.begin = AsyncMock()
-        session1.commit = AsyncMock()
-        session1.rollback = AsyncMock()
-        session1.close = AsyncMock()
+        session1.begin = AsyncNone  # TODO: Use real service instance
+        session1.commit = AsyncNone  # TODO: Use real service instance
+        session1.rollback = AsyncNone  # TODO: Use real service instance
+        session1.close = AsyncNone  # TODO: Use real service instance
         
-        session2.begin = AsyncMock()
-        session2.commit = AsyncMock()
-        session2.rollback = AsyncMock()
-        session2.close = AsyncMock()
+        session2.begin = AsyncNone  # TODO: Use real service instance
+        session2.commit = AsyncNone  # TODO: Use real service instance
+        session2.rollback = AsyncNone  # TODO: Use real service instance
+        session2.close = AsyncNone  # TODO: Use real service instance
         
         # Mock different sessions for concurrent access
         manager.get_session.side_effect = [session1, session2]
         
         async def transaction_task(session_mock):
             """Simulate transaction task"""
+    pass
             try:
                 await session_mock.begin()
                 await asyncio.sleep(0.01)  # Simulate work
@@ -173,12 +181,13 @@ class TestAsyncTransactionIntegrity:
     @pytest.mark.asyncio
     async def test_nested_transaction_savepoints(self, mock_database_manager):
         """Test nested transactions using savepoints"""
+    pass
         manager, session = mock_database_manager
         
         # Mock savepoint functionality
-        session.begin_nested = AsyncMock()
-        session.commit = AsyncMock()
-        session.rollback = AsyncMock()
+        session.begin_nested = AsyncNone  # TODO: Use real service instance
+        session.commit = AsyncNone  # TODO: Use real service instance
+        session.rollback = AsyncNone  # TODO: Use real service instance
         
         async def nested_transaction():
             """Simulate nested transaction with savepoint"""
@@ -210,19 +219,20 @@ class TestAsyncTransactionIntegrity:
 
 class TestAsyncDatabaseConnectionManagement:
     """Test async database connection management patterns"""
+    pass
 
     @pytest.mark.asyncio
     async def test_connection_pool_exhaustion_recovery(self):
         """Test recovery from connection pool exhaustion"""
         # Mock connection pool
-        pool = AsyncMock()
-        pool.acquire = AsyncMock()
-        pool.release = AsyncMock()
+        pool = AsyncNone  # TODO: Use real service instance
+        pool.acquire = AsyncNone  # TODO: Use real service instance
+        pool.release = AsyncNone  # TODO: Use real service instance
         
         # Simulate pool exhaustion then recovery
         pool.acquire.side_effect = [
             asyncio.TimeoutError("Pool exhausted"),
-            AsyncMock()  # Recovery
+            AsyncNone  # TODO: Use real service instance  # Recovery
         ]
         
         connection = None
@@ -245,8 +255,9 @@ class TestAsyncDatabaseConnectionManagement:
     @pytest.mark.asyncio
     async def test_connection_cleanup_on_cancellation(self):
         """Test proper cleanup when async operations are cancelled"""
-        connection = AsyncMock()
-        connection.close = AsyncMock()
+        connection = AsyncNone  # TODO: Use real service instance
+    pass
+        connection.close = AsyncNone  # TODO: Use real service instance
         
         async def database_operation():
             """Simulate long-running database operation"""
@@ -271,16 +282,20 @@ class TestAsyncDatabaseConnectionManagement:
     @pytest.mark.asyncio
     async def test_async_context_manager_resource_safety(self):
         """Test that async context managers properly handle resources"""
+    pass
         resource_acquired = False
         resource_released = False
         
         class AsyncResource:
             async def __aenter__(self):
+    pass
                 nonlocal resource_acquired
                 resource_acquired = True
-                return self
+                await asyncio.sleep(0)
+    return self
             
             async def __aexit__(self, exc_type, exc_val, exc_tb):
+    pass
                 nonlocal resource_released
                 resource_released = True
         

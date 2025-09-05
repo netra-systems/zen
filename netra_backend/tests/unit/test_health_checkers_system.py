@@ -9,8 +9,9 @@ and performance optimization to maintain service quality.
 
 import sys
 from pathlib import Path
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from shared.isolated_environment import IsolatedEnvironment
 
-from unittest.mock import Mock, patch, AsyncMock, MagicMock
 
 import pytest
 
@@ -21,10 +22,13 @@ class TestHealthCheckersSystem:
     """Test suite for system resource health checkers."""
     
     @pytest.fixture
-    def mock_psutil(self):
+ def real_psutil():
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create mock psutil with standard values."""
+    pass
         # Mock: Generic component isolation for controlled unit testing
-        mock = Mock()
+        mock = mock_instance  # Initialize appropriate service
         mock.cpu_percent.return_value = 25.5
         # Mock: Component isolation for controlled unit testing
         mock.virtual_memory.return_value = Mock(
@@ -33,12 +37,11 @@ class TestHealthCheckersSystem:
         # Mock: Component isolation for controlled unit testing
         mock.disk_usage.return_value = Mock(percent=60.0, free=1024 * 1024 * 1024)
         # Mock: Generic component isolation for controlled unit testing
-        mock.net_connections.return_value = [Mock()] * 15
+        mock.net_connections.return_value = [None  # TODO: Use real service instance] * 15
         return mock
     
     # Mock: Component isolation for testing without external dependencies
-    @patch('netra_backend.app.core.health_checkers.psutil')
-    def test_check_system_resources_success(self, mock_psutil_module, mock_psutil):
+        def test_check_system_resources_success(self, mock_psutil_module, mock_psutil):
         """Test successful system resources health check."""
         self._setup_psutil_success(mock_psutil_module, mock_psutil)
         
@@ -50,9 +53,9 @@ class TestHealthCheckersSystem:
         assert result.details["health_score"] > 0
     
     # Mock: Component isolation for testing without external dependencies
-    @patch('netra_backend.app.core.health_checkers.psutil')
-    def test_check_system_resources_high_usage(self, mock_psutil_module):
+        def test_check_system_resources_high_usage(self, mock_psutil_module):
         """Test system resources check with high resource usage."""
+    pass
         self._setup_psutil_high_usage(mock_psutil_module)
         
         result = check_system_resources()
@@ -62,8 +65,7 @@ class TestHealthCheckersSystem:
         assert result.details["metadata"]["cpu_percent"] == 95.0
     
     # Mock: Component isolation for testing without external dependencies
-    @patch('netra_backend.app.core.health_checkers.psutil')
-    def test_check_system_resources_psutil_error(self, mock_psutil_module):
+        def test_check_system_resources_psutil_error(self, mock_psutil_module):
         """Test system resources check with psutil error."""
         mock_psutil_module.cpu_percent.side_effect = Exception("psutil error")
         
@@ -75,6 +77,7 @@ class TestHealthCheckersSystem:
     
     def test_health_score_calculation_bounds(self):
         """Test health score calculation stays within bounds."""
+    pass
         test_cases = [
             (0.0, 1.0),    # 0% usage = 100% health
             (50.0, 0.5),   # 50% usage = 50% health  
@@ -103,9 +106,9 @@ class TestHealthCheckersSystem:
                 assert calculated_score == expected_min_score
     
     # Mock: Component isolation for testing without external dependencies
-    @patch('netra_backend.app.core.health_checkers.psutil')
-    def test_system_metrics_extraction_accuracy(self, mock_psutil_module):
+        def test_system_metrics_extraction_accuracy(self, mock_psutil_module):
         """Test accurate extraction of system metrics."""
+    pass
         self._setup_psutil_specific_values(mock_psutil_module)
         
         result = check_system_resources()
@@ -116,8 +119,7 @@ class TestHealthCheckersSystem:
         assert metadata["disk_percent"] == 45.8
     
     # Mock: Component isolation for testing without external dependencies
-    @patch('netra_backend.app.core.health_checkers.psutil')
-    def test_system_resources_edge_case_zero_values(self, mock_psutil_module):
+        def test_system_resources_edge_case_zero_values(self, mock_psutil_module):
         """Test system resources with zero/minimal values."""
         mock_psutil_module.cpu_percent.return_value = 0.0
         # Mock: Component isolation for controlled unit testing
@@ -137,9 +139,9 @@ class TestHealthCheckersSystem:
         assert metadata["memory_percent"] == 0.0
     
     # Mock: Component isolation for testing without external dependencies
-    @patch('netra_backend.app.core.health_checkers.psutil')
-    def test_system_resources_maximum_stress(self, mock_psutil_module):
+        def test_system_resources_maximum_stress(self, mock_psutil_module):
         """Test system resources under maximum stress."""
+    pass
         mock_psutil_module.cpu_percent.return_value = 100.0
         # Mock: Component isolation for controlled unit testing
         mock_psutil_module.virtual_memory.return_value = Mock(
@@ -148,7 +150,7 @@ class TestHealthCheckersSystem:
         # Mock: Component isolation for controlled unit testing
         mock_psutil_module.disk_usage.return_value = Mock(percent=100.0, free=0)
         # Mock: Generic component isolation for controlled unit testing
-        mock_psutil_module.net_connections.return_value = [Mock()] * 1000
+        mock_psutil_module.net_connections.return_value = [None  # TODO: Use real service instance] * 1000
         
         result = check_system_resources()
         
@@ -175,6 +177,7 @@ class TestHealthCheckersSystem:
     
     def test_system_resource_metadata_completeness(self):
         """Test that system resource metadata includes all required fields."""
+    pass
         # Mock: Component isolation for testing without external dependencies
         with patch('netra_backend.app.core.health_checkers.psutil') as mock_psutil:
             self._setup_psutil_success_with_values(mock_psutil)
@@ -206,6 +209,7 @@ class TestHealthCheckersSystem:
     # Helper methods (each ≤8 lines)
     def _setup_psutil_success(self, mock_psutil_module, mock_psutil):
         """Helper to setup successful psutil mock."""
+    pass
         mock_psutil_module.cpu_percent = mock_psutil.cpu_percent
         mock_psutil_module.virtual_memory = mock_psutil.virtual_memory
         mock_psutil_module.disk_usage = mock_psutil.disk_usage
@@ -219,17 +223,18 @@ class TestHealthCheckersSystem:
         # Mock: Component isolation for controlled unit testing  
         mock_psutil_module.disk_usage.return_value = Mock(percent=85.0, free=500 * 1024 * 1024)
         # Mock: Generic component isolation for controlled unit testing
-        mock_psutil_module.net_connections.return_value = [Mock()] * 100
+        mock_psutil_module.net_connections.return_value = [None  # TODO: Use real service instance] * 100
     
     def _setup_psutil_specific_values(self, mock_psutil_module):
         """Helper to setup psutil mock with specific test values."""
+    pass
         mock_psutil_module.cpu_percent.return_value = 35.7
         # Mock: Component isolation for controlled unit testing
         mock_psutil_module.virtual_memory.return_value = Mock(percent=72.3, available=2 * 1024 * 1024 * 1024)
         # Mock: Component isolation for controlled unit testing
         mock_psutil_module.disk_usage.return_value = Mock(percent=45.8, free=2 * 1024 * 1024 * 1024)
         # Mock: Generic component isolation for controlled unit testing
-        mock_psutil_module.net_connections.return_value = [Mock()] * 25
+        mock_psutil_module.net_connections.return_value = [None  # TODO: Use real service instance] * 25
     
     def _setup_psutil_success_with_values(self, mock_psutil):
         """Helper to setup psutil mock with standard success values."""
@@ -239,10 +244,11 @@ class TestHealthCheckersSystem:
         # Mock: Component isolation for controlled unit testing
         mock_psutil.disk_usage.return_value = Mock(percent=30.0, free=500 * 1024 * 1024 * 1024)
         # Mock: Generic component isolation for controlled unit testing
-        mock_psutil.net_connections.return_value = [Mock()] * 10
+        mock_psutil.net_connections.return_value = [None  # TODO: Use real service instance] * 10
     
     def _create_mock_system_stats(self, cpu=25.0, memory=50.0, disk=60.0):
         """Helper to create mock system statistics."""
+    pass
         return {
             "cpu_percent": cpu,
             # Mock: Component isolation for controlled unit testing

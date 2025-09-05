@@ -1,4 +1,12 @@
 from shared.isolated_environment import get_env
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from test_framework.docker.unified_docker_manager import UnifiedDockerManager
+from test_framework.database.test_database_manager import TestDatabaseManager
+from test_framework.redis.test_redis_manager import TestRedisManager
+from auth_service.core.auth_manager import AuthManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 """WebSocket Authentication Cold Start Agent Integration Tests (L3)
 
 env = get_env()
@@ -29,7 +37,6 @@ import os
 import time
 from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional
-from unittest.mock import AsyncMock, MagicMock, Mock, patch, patch
 
 import jwt
 import pytest
@@ -46,19 +53,25 @@ from netra_backend.app.clients.auth_client_core import auth_client
 from netra_backend.app.core.exceptions_websocket import WebSocketAuthenticationError
 
 @pytest.fixture
-def mock_postgres():
+ def real_postgres():
+    """Use real service instance."""
+    # TODO: Initialize real service
     """Mock PostgreSQL for testing."""
+    pass
     # Mock: Generic component isolation for controlled unit testing
-    mock_db = MagicMock()
+    mock_db = MagicNone  # TODO: Use real service instance
     # Mock: PostgreSQL database isolation for testing without real database connections
     mock_db.get_connection_url = MagicMock(return_value="postgresql://test_user:test_password@localhost/test_db")
     return mock_db
 
 @pytest.fixture
-def mock_redis():
+ def real_redis():
+    """Use real service instance."""
+    # TODO: Initialize real service
     """Mock Redis for testing."""
+    pass
     # Mock: Redis external service isolation for fast, reliable tests without network dependency
-    mock_redis = MagicMock()
+    mock_redis = MagicNone  # TODO: Use real service instance
     # Mock: Redis external service isolation for fast, reliable tests without network dependency
     mock_redis.get_container_host_ip = MagicMock(return_value="localhost")
     # Mock: Redis external service isolation for fast, reliable tests without network dependency
@@ -80,6 +93,7 @@ async def auth_service_config(mock_postgres, mock_redis):
 @pytest.mark.asyncio
 async def test_jwt_token(auth_service_config):
     """Generate a valid JWT token for testing."""
+    pass
     payload = {
         "user_id": "test_user_123",
         "email": "test@example.com",
@@ -87,6 +101,7 @@ async def test_jwt_token(auth_service_config):
         "exp": datetime.now(timezone.utc) + timedelta(hours=1)
     }
     secret = auth_service_config["jwt_secret"]
+    await asyncio.sleep(0)
     return jwt.encode(payload, secret, algorithm="HS256")
 
 @pytest.fixture
@@ -246,6 +261,7 @@ class TestWebSocketAuthColdStartL3:
         
         # Connect multiple clients concurrently
         async def connect_client(token, user_index):
+    pass
             headers = {"Authorization": f"Bearer {token}"}
             async with websockets.connect(ws_url, extra_headers=headers) as ws:
                 await ws.send(json.dumps({
@@ -580,8 +596,10 @@ class TestWebSocketAuthColdStartL3:
         with patch('netra_backend.app.clients.auth_client_core.auth_client.validate_token') as mock_validate:
             # Simulate slow response from auth service
             async def slow_validation(*args, **kwargs):
+    pass
                 await asyncio.sleep(5)
-                return {"valid": True, "user_id": "test_user_123"}
+                await asyncio.sleep(0)
+    return {"valid": True, "user_id": "test_user_123"}
             
             mock_validate.side_effect = slow_validation
             

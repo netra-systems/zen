@@ -6,8 +6,9 @@ before being sent to ClickHouse.
 
 import sys
 from pathlib import Path
+from test_framework.database.test_database_manager import TestDatabaseManager
+from shared.isolated_environment import IsolatedEnvironment
 
-from unittest.mock import AsyncMock, MagicMock, Mock, patch, patch
 
 import pytest
 
@@ -71,7 +72,7 @@ class TestMetricsValueTypeMismatch:
         """Test that the ClickHouseQueryInterceptor properly fixes queries"""
         # Mock client
         # Mock: Generic component isolation for controlled unit testing
-        mock_client = AsyncMock()
+        mock_client = AsyncNone  # TODO: Use real service instance
         # Mock: Async component isolation for testing without real async operations
         mock_client.execute_query = AsyncMock(return_value=[])
         
@@ -126,7 +127,7 @@ class TestMetricsValueTypeMismatch:
     async def test_interceptor_statistics(self):
         """Test that interceptor tracks statistics correctly"""
         # Mock: Generic component isolation for controlled unit testing
-        mock_client = AsyncMock()
+        mock_client = AsyncNone  # TODO: Use real service instance
         # Mock: Async component isolation for testing without real async operations
         mock_client.execute_query = AsyncMock(return_value=[])
         

@@ -3,6 +3,7 @@
 L3 Integration Test: Thread Management Basic Operations
 Tests fundamental thread creation, retrieval, updates, and deletion
 from multiple angles including edge cases and concurrent operations.
+from shared.isolated_environment import IsolatedEnvironment
 
 import sys
 from pathlib import Path

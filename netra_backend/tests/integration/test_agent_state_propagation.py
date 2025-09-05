@@ -22,7 +22,12 @@ import pytest
 import uuid
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
-from unittest.mock import AsyncMock, MagicMock, patch
+from test_framework.database.test_database_manager import TestDatabaseManager
+from test_framework.redis.test_redis_manager import TestRedisManager
+from auth_service.core.auth_manager import AuthManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 from netra_backend.app.agents.state import DeepAgentState, AgentMetadata
 from netra_backend.app.agents.supervisor.execution_context import (
@@ -91,6 +96,8 @@ async def agent_manager():
 
 @pytest.fixture
 def test_user():
+    """Use real service instance."""
+    # TODO: Initialize real service
     """Create test user data."""
     return {
         "id": "test_user_123",
@@ -106,6 +113,8 @@ def test_user():
 
 @pytest.fixture
 def test_thread():
+    """Use real service instance."""
+    # TODO: Initialize real service
     """Create test thread data."""
     return {
         "id": "test_thread_123", 
@@ -118,6 +127,8 @@ def test_thread():
 
 @pytest.fixture
 def base_execution_context(test_user, test_thread):
+    """Use real service instance."""
+    # TODO: Initialize real service
     """Create base execution context."""
     return AgentExecutionContext(
         run_id=str(uuid.uuid4()),
@@ -151,6 +162,8 @@ def base_execution_context(test_user, test_thread):
 
 @pytest.fixture
 def initial_state(test_user, test_thread):
+    """Use real service instance."""
+    # TODO: Initialize real service
     """Create initial agent state."""
     return DeepAgentState(
         user_request="Analyze performance optimization opportunities",

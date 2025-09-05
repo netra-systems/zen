@@ -27,6 +27,7 @@ from typing import Dict, List, Optional, Any
 from fastapi.testclient import TestClient
 from sqlalchemy import text
 from contextlib import asynccontextmanager
+from shared.isolated_environment import IsolatedEnvironment
 
 # Absolute imports following CLAUDE.md standards
 from netra_backend.app.main import app

@@ -6,7 +6,8 @@ the redirect loop issue that occurred in development mode.
 
 import time
 import uuid
-from unittest.mock import AsyncMock, MagicMock, patch
+from test_framework.database.test_database_manager import TestDatabaseManager
+from shared.isolated_environment import IsolatedEnvironment
 
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -20,12 +21,18 @@ class TestThreadIdUniqueness:
     
     @pytest.fixture
     def thread_repo(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create a ThreadRepository instance"""
+    pass
         return ThreadRepository()
     
     @pytest.fixture
-    def mock_db(self):
+ def real_db():
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create a mock database session"""
+    pass
         return AsyncMock(spec=AsyncSession)
     
     @pytest.mark.asyncio
@@ -35,15 +42,18 @@ class TestThreadIdUniqueness:
         This test should FAIL with the old implementation where thread_id = f"thread_{user_id}"
         and PASS with the new implementation using UUIDs
         """
+    pass
         user_id = "dev-temp-bace0170"
         
-        # Mock get_active_thread to always return None (no existing thread)
+        # Mock get_active_thread to always await asyncio.sleep(0)
+    return None (no existing thread)
         thread_repo.get_active_thread = AsyncMock(return_value=None)
         
         # Track created thread IDs
         created_thread_ids = []
         
         async def mock_create(db, **kwargs):
+    pass
             thread_id = kwargs.get('id')
             created_thread_ids.append(thread_id)
             thread = Thread(
@@ -52,7 +62,8 @@ class TestThreadIdUniqueness:
                 created_at=kwargs.get('created_at'),
                 metadata_=kwargs.get('metadata_')
             )
-            return thread
+            await asyncio.sleep(0)
+    return thread
         
         thread_repo.create = AsyncMock(side_effect=mock_create)
         
@@ -75,17 +86,21 @@ class TestThreadIdUniqueness:
         
         This test should FAIL with the old implementation and PASS with the new one
         """
+    pass
         user_id = "test-user-123"
         
-        # Mock get_active_thread to return None
+        # Mock get_active_thread to await asyncio.sleep(0)
+    return None
         thread_repo.get_active_thread = AsyncMock(return_value=None)
         
         created_thread_id = None
         
         async def mock_create(db, **kwargs):
+    pass
             nonlocal created_thread_id
             created_thread_id = kwargs.get('id')
-            return Thread(
+            await asyncio.sleep(0)
+    return Thread(
                 id=created_thread_id,
                 object=kwargs.get('object'),
                 created_at=kwargs.get('created_at'),
@@ -113,6 +128,7 @@ class TestThreadIdUniqueness:
         
         This ensures we don't create unnecessary threads
         """
+    pass
         user_id = "test-user-456"
         existing_thread_id = f"thread_{uuid.uuid4().hex[:16]}"
         
@@ -123,9 +139,10 @@ class TestThreadIdUniqueness:
             metadata_={"user_id": user_id}
         )
         
-        # Mock get_active_thread to return existing thread
+        # Mock get_active_thread to await asyncio.sleep(0)
+    return existing thread
         thread_repo.get_active_thread = AsyncMock(return_value=existing_thread)
-        thread_repo.create = AsyncMock()
+        thread_repo.create = AsyncNone  # TODO: Use real service instance
         
         # Get existing thread
         thread = await thread_repo.get_or_create_for_user(mock_db, user_id)
@@ -140,14 +157,17 @@ class TestThreadIdUniqueness:
         
         This simulates multiple concurrent requests creating threads
         """
+    pass
         user_id = "concurrent-user"
         
-        # Always return None to force creation
+        # Always await asyncio.sleep(0)
+    return None to force creation
         thread_repo.get_active_thread = AsyncMock(return_value=None)
         
         created_threads = []
         
         async def mock_create(db, **kwargs):
+    pass
             thread = Thread(
                 id=kwargs.get('id'),
                 object=kwargs.get('object'),
@@ -155,7 +175,8 @@ class TestThreadIdUniqueness:
                 metadata_=kwargs.get('metadata_')
             )
             created_threads.append(thread)
-            return thread
+            await asyncio.sleep(0)
+    return thread
         
         thread_repo.create = AsyncMock(side_effect=mock_create)
         
@@ -192,7 +213,8 @@ class TestThreadIdUniqueness:
         async def mock_create(db, **kwargs):
             nonlocal created_thread_id
             created_thread_id = kwargs.get('id')
-            return Thread(
+            await asyncio.sleep(0)
+    return Thread(
                 id=created_thread_id,
                 object=kwargs.get('object'),
                 created_at=kwargs.get('created_at'),
@@ -215,3 +237,4 @@ class TestThreadIdUniqueness:
         id_part = created_thread_id[7:]  # Remove 'thread_' prefix
         assert len(id_part) >= 8, \
             f"Thread ID suffix should be at least 8 characters for uniqueness, got: {id_part}"
+    pass

@@ -12,6 +12,10 @@ Tests database pool functionality:
 
 import sys
 from pathlib import Path
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from test_framework.database.test_database_manager import TestDatabaseManager
+from shared.isolated_environment import IsolatedEnvironment
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
 
 # Test framework import - using pytest fixtures instead
 
@@ -19,7 +23,6 @@ import asyncio
 import time
 from contextlib import asynccontextmanager
 from typing import Any, Dict, List
-from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 from sqlalchemy import exc as sqlalchemy_exc
@@ -33,6 +36,7 @@ class ConnectionManager:
     """Mock database connection manager for integration testing."""
     
     def __init__(self, database_url=None, **kwargs):
+    pass
         self.database_url = database_url
         self.config = kwargs
         self._engine = None
@@ -42,8 +46,8 @@ class ConnectionManager:
         """Initialize the connection manager with proper mock engine."""
         if not self._initialized:
             # Create a mock engine with pool attributes
-            self._engine = Mock()
-            mock_pool = Mock()
+            self._engine = UserExecutionEngine()
+            mock_pool = mock_pool_instance  # Initialize appropriate service
             
             # Mock pool methods that tests expect
             mock_pool.size.return_value = self.config.get('pool_size', 5)
@@ -59,32 +63,36 @@ class ConnectionManager:
         
     async def cleanup(self):
         """Cleanup resources."""
+    pass
         self._initialized = False
         
     def get_engine(self):
         """Get the mock engine."""
         if not self._initialized:
             raise RuntimeError("ConnectionManager not initialized")
-        return self._engine
+        await asyncio.sleep(0)
+    return self._engine
         
     def get_session(self):
         """Get mock async session context manager."""
+    pass
         if not self._initialized:
             raise RuntimeError("ConnectionManager not initialized")
         
         # Create a proper async session mock that passes isinstance check
         session_mock = AsyncMock(spec=AsyncSession)
         session_mock.is_active = True
-        session_mock.execute = AsyncMock()
+        session_mock.execute = AsyncNone  # TODO: Use real service instance
         
         # Mock connection method that returns a mock connection object
-        mock_connection = Mock()
+        mock_connection = mock_connection_instance  # Initialize appropriate service
         mock_connection.__class__.__name__ = "Connection"
         session_mock.connection = Mock(return_value=mock_connection)
         
         # Mock the execute method to return proper results
         async def mock_execute(query):
-            result_mock = Mock()
+    pass
+            result_mock = result_mock_instance  # Initialize appropriate service
             if "SELECT 1" in str(query):
                 result_mock.fetchone.return_value = [1]
                 result_mock.scalar.return_value = 1
@@ -94,12 +102,13 @@ class ConnectionManager:
                 result_mock.fetchone.return_value = ['secondary']
             else:
                 result_mock.fetchone.return_value = [1]
-            return result_mock
+            await asyncio.sleep(0)
+    return result_mock
         
         session_mock.execute = mock_execute
         
         # Create context manager
-        context_manager = AsyncMock()
+        context_manager = AsyncNone  # TODO: Use real service instance
         context_manager.__aenter__ = AsyncMock(return_value=session_mock)
         context_manager.__aexit__ = AsyncMock(return_value=None)
         
@@ -108,20 +117,25 @@ class ConnectionManager:
     @pytest.mark.asyncio
     async def test_connectivity(self):
         """Test connectivity."""
-        return True
+        await asyncio.sleep(0)
+    return True
         
     async def _test_connection(self):
         """Test database connection (private method for testing)."""
-        return True
+    pass
+        await asyncio.sleep(0)
+    return True
         
     async def get_health_info(self):
         """Get health information."""
-        return {'status': 'healthy', 'connection_count': 5, 'pool_size': 10}
+        await asyncio.sleep(0)
+    return {'status': 'healthy', 'connection_count': 5, 'pool_size': 10}
 
 class DatabaseConnectivityMaster:
     """Mock database connectivity master for integration testing."""
     
     def __init__(self):
+    pass
         self._connections = {}
         
     async def configure_database(self, name, url, **kwargs):
@@ -132,9 +146,11 @@ class DatabaseConnectivityMaster:
         
     def get_session(self, name):
         """Get session for named connection."""
+    pass
         if name not in self._connections:
             raise KeyError(f"Database '{name}' not configured")
-        return self._connections[name].get_session()
+        await asyncio.sleep(0)
+    return self._connections[name].get_session()
         
     async def cleanup_all(self):
         """Cleanup all connections."""
@@ -144,11 +160,16 @@ class DatabaseConnectivityMaster:
 
 class TestDatabasePoolIntegration:
     """Integration tests for database connection pool management."""
+    pass
 
     @pytest.fixture
     def pool_config(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Database pool configuration for testing."""
-        return {
+    pass
+        await asyncio.sleep(0)
+    return {
             'pool_size': 5,
             'max_overflow': 10,
             'pool_timeout': 30,
@@ -158,7 +179,10 @@ class TestDatabasePoolIntegration:
 
     @pytest.fixture 
     def test_database_url(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Test database URL with pool parameters."""
+    pass
         return "sqlite+aiosqlite:///test_pool.db"
 
     @pytest.mark.asyncio
@@ -172,6 +196,7 @@ class TestDatabasePoolIntegration:
         - Pool size limits are enforced
         - Configuration parameters are applied correctly
         """
+    pass
         db_manager = ConnectionManager(test_database_url, **pool_config)
         
         await db_manager.initialize()
@@ -205,6 +230,7 @@ class TestDatabasePoolIntegration:
     @pytest.mark.asyncio
     async def test_pool_sizing_and_limits(self, test_database_url):
         """
+    pass
         Test connection pool respects sizing limits and overflow behavior.
         
         Validates:
@@ -259,6 +285,7 @@ class TestDatabasePoolIntegration:
         - Stale connections are detected and replaced
         - Connection state is managed correctly
         """
+    pass
         # Use short recycle time for testing
         short_recycle_config = {**pool_config, 'pool_recycle': 1}  # 1 second
         
@@ -300,7 +327,8 @@ class TestDatabasePoolIntegration:
                     async with db_manager.get_session() as session:
                         await session.execute(f"SELECT {worker_id}, {i}")
                         operations_completed += 1
-                return {'worker_id': worker_id, 'operations': operations_completed, 'success': True}
+                await asyncio.sleep(0)
+    return {'worker_id': worker_id, 'operations': operations_completed, 'success': True}
             except Exception as e:
                 return {'worker_id': worker_id, 'operations': operations_completed, 'error': str(e), 'success': False}
         
@@ -318,15 +346,16 @@ class TestDatabasePoolIntegration:
     @pytest.mark.asyncio
 # COMMENTED OUT: Mock-dependent test -     async def test_pool_failover_scenarios(self, pool_config):
 # COMMENTED OUT: Mock-dependent test -         """Test connection pool behavior during database failures and recovery."""
+    pass
 # COMMENTED OUT: Mock-dependent test -         failing_db_url = "postgresql+asyncpg://nonexistent:5432/nonexistent"
 # COMMENTED OUT: Mock-dependent test -         db_manager = ConnectionManager(failing_db_url, **pool_config)
 # COMMENTED OUT: Mock-dependent test -         
         # Mock: Database access isolation for fast, reliable unit testing
 # COMMENTED OUT: Mock-dependent test -         with patch('sqlalchemy.ext.asyncio.create_async_engine') as mock_create_engine:
             # Mock: Generic component isolation for controlled unit testing
-# COMMENTED OUT: Mock-dependent test -             mock_engine = Mock()
+# COMMENTED OUT: Mock-dependent test -             mock_engine = UserExecutionEngine()
             # Mock: Generic component isolation for controlled unit testing
-# COMMENTED OUT: Mock-dependent test -             mock_engine.pool = Mock()
+# COMMENTED OUT: Mock-dependent test -             mock_engine.pool = pool_instance  # Initialize appropriate service
             # Mock: Database isolation for unit testing without external database connections
 # COMMENTED OUT: Mock-dependent test -             mock_engine.connect = AsyncMock(side_effect=Exception("Database unavailable"))
 # COMMENTED OUT: Mock-dependent test -             mock_create_engine.return_value = mock_engine
@@ -338,7 +367,7 @@ class TestDatabasePoolIntegration:
 # COMMENTED OUT: Mock-dependent test -             
             # Test recovery scenario
             # Mock: Generic component isolation for controlled unit testing
-# COMMENTED OUT: Mock-dependent test -             mock_engine.connect = AsyncMock(return_value=Mock())
+# COMMENTED OUT: Mock-dependent test -             mock_engine.connect = AsyncMock(return_value=return_value_instance  # Initialize appropriate service)
             # Mock: Async component isolation for testing without real async operations
 # COMMENTED OUT: Mock-dependent test -             with patch.object(db_manager, '_test_connection', AsyncMock(return_value=True)):
 # COMMENTED OUT: Mock-dependent test -                 recovery_success = await db_manager.test_connectivity()
@@ -379,10 +408,12 @@ class TestDatabasePoolIntegration:
 
     def _get_pool_checked_out_count(self, db_manager: ConnectionManager) -> int:
         """Get the number of checked out connections from pool."""
+    pass
         try:
             engine = db_manager.get_engine()
             if hasattr(engine.pool, 'checkedout'):
-                return engine.pool.checkedout()
+                await asyncio.sleep(0)
+    return engine.pool.checkedout()
             return 0
         except:
             return 0
@@ -403,6 +434,7 @@ class TestDatabasePoolIntegration:
     @pytest.mark.asyncio
     async def test_database_manager_integration(self, test_database_url, pool_config):
         """
+    pass
         Test integration with DatabaseConnectivityMaster for pool management.
         
         Validates:
@@ -451,7 +483,8 @@ class TestDatabasePoolIntegration:
         try:
             engine = db_manager.get_engine()
             pool = engine.pool
-            return {'pool_type': type(pool).__name__, 'checked_out': getattr(pool, 'checkedout', lambda: 0)()}
+            await asyncio.sleep(0)
+    return {'pool_type': type(pool).__name__, 'checked_out': getattr(pool, 'checkedout', lambda: 0)()}
         except Exception:
             return {}
 

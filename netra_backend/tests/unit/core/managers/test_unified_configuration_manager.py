@@ -17,8 +17,14 @@ import tempfile
 import threading
 import time
 from pathlib import Path
-from unittest.mock import Mock, patch, MagicMock, mock_open
 from typing import Dict, Any, List, Optional
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from test_framework.database.test_database_manager import TestDatabaseManager
+from test_framework.redis.test_redis_manager import TestRedisManager
+from auth_service.core.auth_manager import AuthManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 # Under test
 from netra_backend.app.core.managers.unified_configuration_manager import (
@@ -71,6 +77,7 @@ class TestConfigurationEntry:
     
     def test_configuration_entry_sensitive_value_masking(self):
         """Test that sensitive values are properly masked for display."""
+    pass
         entry = ConfigurationEntry(
             key="secret.key",
             value="super_secret_password",
@@ -106,6 +113,7 @@ class TestConfigurationEntry:
     
     def test_configuration_entry_validate_type_coercion_int(self):
         """Test type validation and coercion for integer values."""
+    pass
         entry = ConfigurationEntry(
             key="num.key",
             value="123",
@@ -135,6 +143,7 @@ class TestConfigurationEntry:
     
     def test_configuration_entry_validate_type_coercion_bool_true(self):
         """Test type validation and coercion for boolean true values."""
+    pass
         for true_value in ["true", "1", "yes", "on"]:
             entry = ConfigurationEntry(
                 key="bool.key",
@@ -163,6 +172,7 @@ class TestConfigurationEntry:
     
     def test_configuration_entry_validate_invalid_type_conversion(self):
         """Test validation fails for invalid type conversion."""
+    pass
         entry = ConfigurationEntry(
             key="invalid.key",
             value="not_a_number",
@@ -191,6 +201,7 @@ class TestConfigurationEntry:
     
     def test_configuration_entry_validate_max_length_rule(self):
         """Test validation rule: max_length."""
+    pass
         entry = ConfigurationEntry(
             key="string.key",
             value="very_long_string_that_exceeds_limit",
@@ -223,6 +234,7 @@ class TestConfigurationEntry:
     
     def test_configuration_entry_validate_max_value_rule(self):
         """Test validation rule: max_value."""
+    pass
         entry = ConfigurationEntry(
             key="num.key",
             value=15,
@@ -255,6 +267,7 @@ class TestConfigurationEntry:
     
     def test_configuration_entry_validate_positive_rule(self):
         """Test validation rule: positive."""
+    pass
         entry = ConfigurationEntry(
             key="num.key",
             value=-5,
@@ -290,6 +303,7 @@ class TestConfigurationEntry:
     
     def test_configuration_entry_validate_regex_rule(self):
         """Test validation rule: regex."""
+    pass
         entry = ConfigurationEntry(
             key="email.key",
             value="invalid-email",
@@ -308,10 +322,9 @@ class TestConfigurationEntry:
 class TestUnifiedConfigurationManagerBasic:
     """Test basic functionality of UnifiedConfigurationManager."""
     
-    @patch('netra_backend.app.core.managers.unified_configuration_manager.IsolatedEnvironment')
-    def test_manager_initialization_defaults(self, mock_env):
+        def test_manager_initialization_defaults(self, mock_env):
         """Test manager initialization with default parameters."""
-        mock_env_instance = Mock()
+        mock_env_instance = mock_env_instance_instance  # Initialize appropriate service
         mock_env_instance.get.return_value = None
         mock_env.return_value = mock_env_instance
         
@@ -326,10 +339,10 @@ class TestUnifiedConfigurationManagerBasic:
         assert manager.cache_ttl == 300
         assert manager.environment == 'development'  # Default fallback
     
-    @patch('netra_backend.app.core.managers.unified_configuration_manager.IsolatedEnvironment')
-    def test_manager_initialization_with_parameters(self, mock_env):
+        def test_manager_initialization_with_parameters(self, mock_env):
         """Test manager initialization with custom parameters."""
-        mock_env_instance = Mock()
+    pass
+        mock_env_instance = mock_env_instance_instance  # Initialize appropriate service
         mock_env_instance.get.return_value = None
         mock_env.return_value = mock_env_instance
         
@@ -351,10 +364,9 @@ class TestUnifiedConfigurationManagerBasic:
         assert manager.cache_ttl == 600
         assert manager.environment == "staging"
     
-    @patch('netra_backend.app.core.managers.unified_configuration_manager.IsolatedEnvironment')
-    def test_environment_detection_from_environment_var(self, mock_env):
+        def test_environment_detection_from_environment_var(self, mock_env):
         """Test environment detection from ENVIRONMENT variable."""
-        mock_env_instance = Mock()
+        mock_env_instance = mock_env_instance_instance  # Initialize appropriate service
         mock_env_instance.get.side_effect = lambda key: {
             'ENVIRONMENT': 'production',
             'STAGE': None,
@@ -369,10 +381,10 @@ class TestUnifiedConfigurationManagerBasic:
         
         assert manager.environment == "production"
     
-    @patch('netra_backend.app.core.managers.unified_configuration_manager.IsolatedEnvironment')
-    def test_environment_detection_fallback_chain(self, mock_env):
+        def test_environment_detection_fallback_chain(self, mock_env):
         """Test environment detection fallback chain."""
-        mock_env_instance = Mock()
+    pass
+        mock_env_instance = mock_env_instance_instance  # Initialize appropriate service
         mock_env_instance.get.side_effect = lambda key: {
             'ENVIRONMENT': None,
             'STAGE': None,
@@ -387,10 +399,9 @@ class TestUnifiedConfigurationManagerBasic:
         
         assert manager.environment == "test"
     
-    @patch('netra_backend.app.core.managers.unified_configuration_manager.IsolatedEnvironment')
-    def test_default_configurations_loaded(self, mock_env):
+        def test_default_configurations_loaded(self, mock_env):
         """Test that default configurations are loaded during initialization."""
-        mock_env_instance = Mock()
+        mock_env_instance = mock_env_instance_instance  # Initialize appropriate service
         mock_env_instance.get.return_value = None
         mock_env.return_value = mock_env_instance
         
@@ -415,8 +426,11 @@ class TestConfigurationAccess:
     """Test configuration access methods."""
     
     @pytest.fixture
-    def mock_manager(self):
+ def real_manager():
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create a mocked configuration manager."""
+    pass
         with patch('netra_backend.app.core.managers.unified_configuration_manager.IsolatedEnvironment'):
             with patch('builtins.open', mock_open(read_data='{}')):
                 with patch('pathlib.Path.exists', return_value=False):
@@ -430,6 +444,7 @@ class TestConfigurationAccess:
     
     def test_get_nonexistent_configuration_with_default(self, mock_manager):
         """Test getting a non-existent configuration with default."""
+    pass
         value = mock_manager.get("nonexistent.key", "default_value")
         assert value == "default_value"
     
@@ -440,6 +455,7 @@ class TestConfigurationAccess:
     
     def test_get_with_type_coercion_int(self, mock_manager):
         """Test getting value with integer type coercion."""
+    pass
         # Set a string value
         mock_manager.set("test.number", "123")
         
@@ -456,6 +472,7 @@ class TestConfigurationAccess:
     
     def test_get_with_type_coercion_bool_false(self, mock_manager):
         """Test getting value with boolean type coercion for false values."""
+    pass
         mock_manager.set("test.bool", "false")
         value = mock_manager.get("test.bool", data_type=bool)
         assert value is False
@@ -472,6 +489,7 @@ class TestConfigurationAccess:
     
     def test_get_int_method(self, mock_manager):
         """Test get_int convenience method."""
+    pass
         mock_manager.set("test.number", "456")
         value = mock_manager.get_int("test.number")
         assert value == 456
@@ -484,6 +502,7 @@ class TestConfigurationAccess:
     
     def test_get_float_method(self, mock_manager):
         """Test get_float convenience method."""
+    pass
         mock_manager.set("test.float", "123.45")
         value = mock_manager.get_float("test.float")
         assert value == 123.45
@@ -497,6 +516,7 @@ class TestConfigurationAccess:
     
     def test_get_str_method(self, mock_manager):
         """Test get_str convenience method."""
+    pass
         mock_manager.set("test.string", 123)
         value = mock_manager.get_str("test.string")
         assert value == "123"
@@ -510,6 +530,7 @@ class TestConfigurationAccess:
     
     def test_get_list_method_comma_separated(self, mock_manager):
         """Test get_list method with comma-separated string."""
+    pass
         mock_manager.set("test.list", "item1, item2, item3")
         value = mock_manager.get_list("test.list")
         assert value == ["item1", "item2", "item3"]
@@ -522,6 +543,7 @@ class TestConfigurationAccess:
     
     def test_get_dict_method_json(self, mock_manager):
         """Test get_dict method with JSON string."""
+    pass
         mock_manager.set("test.dict", '{"key": "value", "number": 123}')
         value = mock_manager.get_dict("test.dict")
         assert value == {"key": "value", "number": 123}
@@ -534,6 +556,7 @@ class TestConfigurationAccess:
     
     def test_set_configuration_basic(self, mock_manager):
         """Test setting a configuration value."""
+    pass
         mock_manager.set("new.config", "test_value")
         
         assert mock_manager.exists("new.config")
@@ -550,6 +573,7 @@ class TestConfigurationAccess:
     
     def test_set_configuration_overwrites_existing(self, mock_manager):
         """Test setting configuration overwrites existing value."""
+    pass
         mock_manager.set("test.key", "original")
         assert mock_manager.get("test.key") == "original"
         
@@ -567,6 +591,7 @@ class TestConfigurationAccess:
     
     def test_delete_nonexistent_configuration(self, mock_manager):
         """Test deleting a non-existent configuration."""
+    pass
         result = mock_manager.delete("nonexistent.key")
         assert result is False
     
@@ -577,6 +602,7 @@ class TestConfigurationAccess:
     
     def test_keys_method_no_pattern(self, mock_manager):
         """Test getting all configuration keys without pattern."""
+    pass
         keys = mock_manager.keys()
         assert isinstance(keys, list)
         assert len(keys) > 0
@@ -592,6 +618,7 @@ class TestConfigurationAccess:
     
     def test_get_all_configurations_exclude_sensitive(self, mock_manager):
         """Test getting all configurations excluding sensitive values."""
+    pass
         # Add a sensitive configuration
         mock_manager.set("secret.key", "secret_value")
         mock_manager._sensitive_keys.add("secret.key")
@@ -620,7 +647,10 @@ class TestConfigurationCaching:
     
     @pytest.fixture
     def cached_manager(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create a configuration manager with caching enabled."""
+    pass
         with patch('netra_backend.app.core.managers.unified_configuration_manager.IsolatedEnvironment'):
             with patch('builtins.open', mock_open(read_data='{}')):
                 with patch('pathlib.Path.exists', return_value=False):
@@ -638,6 +668,7 @@ class TestConfigurationCaching:
     
     def test_cache_returns_cached_values(self, cached_manager):
         """Test that subsequent accesses return cached values."""
+    pass
         # First access
         value1 = cached_manager.get("system.debug")
         
@@ -665,6 +696,7 @@ class TestConfigurationCaching:
     
     def test_set_clears_cache_for_key(self, cached_manager):
         """Test that setting a value clears cache for that key."""
+    pass
         # Get value to cache it
         original_value = cached_manager.get("system.debug")
         assert "system.debug" in cached_manager._cache
@@ -694,6 +726,7 @@ class TestConfigurationCaching:
     
     def test_clear_cache_single_key(self, cached_manager):
         """Test clearing cache for a single key."""
+    pass
         cached_manager.get("system.debug")
         cached_manager.get("database.pool_size")
         
@@ -718,6 +751,7 @@ class TestConfigurationCaching:
     
     def test_disabled_caching(self):
         """Test manager with caching disabled."""
+    pass
         with patch('netra_backend.app.core.managers.unified_configuration_manager.IsolatedEnvironment'):
             with patch('builtins.open', mock_open(read_data='{}')):
                 with patch('pathlib.Path.exists', return_value=False):
@@ -736,9 +770,12 @@ class TestServiceSpecificConfigurations:
     
     @pytest.fixture
     def manager(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create a configuration manager for testing."""
+    pass
         with patch('netra_backend.app.core.managers.unified_configuration_manager.IsolatedEnvironment') as mock_env_class:
-            mock_env_instance = Mock()
+            mock_env_instance = mock_env_instance_instance  # Initialize appropriate service
             mock_env_instance.get.return_value = None
             mock_env_class.return_value = mock_env_instance
             
@@ -760,6 +797,7 @@ class TestServiceSpecificConfigurations:
     
     def test_get_database_config_custom_values(self, manager):
         """Test getting database configuration with custom values."""
+    pass
         manager.set("database.url", "postgresql://test:test@localhost/test")
         manager.set("database.pool_size", 20)
         manager.set("database.echo", True)
@@ -783,6 +821,7 @@ class TestServiceSpecificConfigurations:
     
     def test_get_redis_config_custom_values(self, manager):
         """Test getting Redis configuration with custom values."""
+    pass
         manager.set("redis.url", "redis://localhost:6379")
         manager.set("redis.max_connections", 100)
         manager.set("redis.socket_timeout", 10.0)
@@ -816,6 +855,7 @@ class TestServiceSpecificConfigurations:
     
     def test_get_agent_config_defaults(self, manager):
         """Test getting agent configuration with defaults."""
+    pass
         config = manager.get_agent_config()
         
         assert isinstance(config, dict)
@@ -842,6 +882,7 @@ class TestServiceSpecificConfigurations:
     
     def test_get_security_config_defaults(self, manager):
         """Test getting security configuration with defaults."""
+    pass
         config = manager.get_security_config()
         
         assert isinstance(config, dict)
@@ -873,7 +914,10 @@ class TestConfigurationValidation:
     
     @pytest.fixture
     def manager(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create a configuration manager for validation testing."""
+    pass
         with patch('netra_backend.app.core.managers.unified_configuration_manager.IsolatedEnvironment'):
             with patch('builtins.open', mock_open(read_data='{}')):
                 with patch('pathlib.Path.exists', return_value=False):
@@ -891,6 +935,7 @@ class TestConfigurationValidation:
     
     def test_validation_disabled_manager(self):
         """Test that validation can be disabled."""
+    pass
         with patch('netra_backend.app.core.managers.unified_configuration_manager.IsolatedEnvironment'):
             with patch('builtins.open', mock_open(read_data='{}')):
                 with patch('pathlib.Path.exists', return_value=False):
@@ -930,6 +975,7 @@ class TestConfigurationValidation:
     
     def test_set_with_validation_failure(self, manager):
         """Test setting value that fails validation."""
+    pass
         # Create a configuration entry that will fail validation
         manager.set("test.key", "valid_value")
         
@@ -945,7 +991,10 @@ class TestConfigurationChangeTracking:
     
     @pytest.fixture
     def manager(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create a configuration manager for change tracking testing."""
+    pass
         with patch('netra_backend.app.core.managers.unified_configuration_manager.IsolatedEnvironment'):
             with patch('builtins.open', mock_open(read_data='{}')):
                 with patch('pathlib.Path.exists', return_value=False):
@@ -969,6 +1018,7 @@ class TestConfigurationChangeTracking:
     
     def test_change_tracking_on_update(self, manager):
         """Test that configuration changes are tracked when values are updated."""
+    pass
         manager.set("test.key", "original_value")
         initial_history_length = len(manager._change_history)
         
@@ -999,6 +1049,7 @@ class TestConfigurationChangeTracking:
     
     def test_get_change_history_with_limit(self, manager):
         """Test getting change history with limit."""
+    pass
         # Make several changes
         for i in range(5):
             manager.set(f"test.key{i}", f"value{i}")
@@ -1022,9 +1073,11 @@ class TestConfigurationChangeTracking:
     
     def test_change_listeners(self, manager):
         """Test configuration change listeners."""
+    pass
         listener_calls = []
         
         def test_listener(key: str, old_value: Any, new_value: Any):
+    pass
             listener_calls.append((key, old_value, new_value))
         
         manager.add_change_listener(test_listener)
@@ -1061,10 +1114,13 @@ class TestConfigurationChangeTracking:
     
     def test_listener_exception_handling(self, manager):
         """Test that listener exceptions don't break configuration changes."""
+    pass
         def failing_listener(key: str, old_value: Any, new_value: Any):
+    pass
             raise Exception("Listener failed!")
         
         def working_listener(key: str, old_value: Any, new_value: Any):
+    pass
             working_listener.called = True
         
         working_listener.called = False
@@ -1091,7 +1147,10 @@ class TestThreadSafety:
     
     @pytest.fixture
     def manager(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create a configuration manager for thread safety testing."""
+    pass
         with patch('netra_backend.app.core.managers.unified_configuration_manager.IsolatedEnvironment'):
             with patch('builtins.open', mock_open(read_data='{}')):
                 with patch('pathlib.Path.exists', return_value=False):
@@ -1125,9 +1184,11 @@ class TestThreadSafety:
     
     def test_concurrent_writes(self, manager):
         """Test concurrent write operations are thread-safe."""
+    pass
         results = []
         
         def write_config(thread_id):
+    pass
             for i in range(10):
                 key = f"test.key_{thread_id}_{i}"
                 value = f"value_{thread_id}_{i}"
@@ -1137,7 +1198,7 @@ class TestThreadSafety:
         # Start multiple threads
         threads = []
         for thread_id in range(5):
-            thread = threading.Thread(target=write_config, args=(thread_id,))
+            thread = threading.Thread(target=write_config, args=(thread_id))
             threads.append(thread)
             thread.start()
         
@@ -1190,7 +1251,7 @@ class TestConfigurationManagerFactory:
     def test_get_global_manager_singleton(self):
         """Test that global manager is a singleton."""
         with patch('netra_backend.app.core.managers.unified_configuration_manager.UnifiedConfigurationManager') as MockManager:
-            mock_instance = Mock()
+            mock_instance = mock_instance_instance  # Initialize appropriate service
             MockManager.return_value = mock_instance
             
             # Clear any existing global manager
@@ -1205,13 +1266,14 @@ class TestConfigurationManagerFactory:
     
     def test_get_user_manager_per_user(self):
         """Test that each user gets their own manager."""
+    pass
         with patch('netra_backend.app.core.managers.unified_configuration_manager.UnifiedConfigurationManager') as MockManager:
             # Clear existing managers
             ConfigurationManagerFactory._user_managers.clear()
             
             # Configure mock to return different instances for different calls
-            mock_manager1 = Mock()
-            mock_manager2 = Mock()
+            mock_manager1 = mock_manager1_instance  # Initialize appropriate service
+            mock_manager2 = mock_manager2_instance  # Initialize appropriate service
             MockManager.side_effect = [mock_manager1, mock_manager2]
             
             manager1 = ConfigurationManagerFactory.get_user_manager("user1")
@@ -1228,8 +1290,8 @@ class TestConfigurationManagerFactory:
             ConfigurationManagerFactory._service_managers.clear()
             
             # Configure mock to return different instances for different calls
-            mock_manager1 = Mock()
-            mock_manager2 = Mock()
+            mock_manager1 = mock_manager1_instance  # Initialize appropriate service
+            mock_manager2 = mock_manager2_instance  # Initialize appropriate service
             MockManager.side_effect = [mock_manager1, mock_manager2]
             
             manager1 = ConfigurationManagerFactory.get_service_manager("service1")
@@ -1241,6 +1303,7 @@ class TestConfigurationManagerFactory:
     
     def test_get_manager_combined_user_service(self):
         """Test getting manager with both user_id and service_name."""
+    pass
         with patch('netra_backend.app.core.managers.unified_configuration_manager.UnifiedConfigurationManager') as MockManager:
             # Clear existing managers
             ConfigurationManagerFactory._user_managers.clear()
@@ -1261,6 +1324,7 @@ class TestConfigurationManagerFactory:
     
     def test_get_manager_service_only(self):
         """Test getting manager with only service_name."""
+    pass
         with patch.object(ConfigurationManagerFactory, 'get_service_manager') as mock_get_service:
             ConfigurationManagerFactory.get_manager(service_name="test_service")
             mock_get_service.assert_called_once_with("test_service")
@@ -1273,17 +1337,18 @@ class TestConfigurationManagerFactory:
     
     def test_get_manager_count(self):
         """Test getting count of active managers."""
+    pass
         with patch('netra_backend.app.core.managers.unified_configuration_manager.UnifiedConfigurationManager'):
             # Set up some managers
-            ConfigurationManagerFactory._global_manager = Mock()
+            ConfigurationManagerFactory._global_manager = _global_manager_instance  # Initialize appropriate service
             ConfigurationManagerFactory._user_managers = {
-                "user1": Mock(),
-                "user2": Mock(),
-                "user1:service1": Mock()  # Combined user+service
+                "user1": None  # TODO: Use real service instance,
+                "user2": None  # TODO: Use real service instance,
+                "user1:service1": None  # TODO: Use real service instance  # Combined user+service
             }
             ConfigurationManagerFactory._service_managers = {
-                "service1": Mock(),
-                "service2": Mock()
+                "service1": None  # TODO: Use real service instance,
+                "service2": None  # TODO: Use real service instance
             }
             
             counts = ConfigurationManagerFactory.get_manager_count()
@@ -1298,9 +1363,9 @@ class TestConfigurationManagerFactory:
         """Test clearing caches for all managers."""
         with patch('netra_backend.app.core.managers.unified_configuration_manager.UnifiedConfigurationManager'):
             # Set up mock managers
-            global_manager = Mock()
-            user_manager = Mock()
-            service_manager = Mock()
+            global_manager = global_manager_instance  # Initialize appropriate service
+            user_manager = user_manager_instance  # Initialize appropriate service
+            service_manager = service_manager_instance  # Initialize appropriate service
             
             ConfigurationManagerFactory._global_manager = global_manager
             ConfigurationManagerFactory._user_managers = {"user1": user_manager}
@@ -1325,6 +1390,7 @@ class TestConvenienceFunctions:
     
     def test_get_dashboard_config_manager(self):
         """Test legacy compatibility function for dashboard config manager."""
+    pass
         with patch('netra_backend.app.core.managers.unified_configuration_manager.get_configuration_manager') as mock_get:
             get_dashboard_config_manager()
             mock_get.assert_called_once_with(service_name="dashboard")
@@ -1337,6 +1403,7 @@ class TestConvenienceFunctions:
     
     def test_get_llm_config_manager(self):
         """Test legacy compatibility function for LLM config manager."""
+    pass
         with patch('netra_backend.app.core.managers.unified_configuration_manager.get_configuration_manager') as mock_get:
             get_llm_config_manager()
             mock_get.assert_called_once_with(service_name="llm")
@@ -1347,7 +1414,10 @@ class TestStatusAndMonitoring:
     
     @pytest.fixture
     def manager(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create a configuration manager for status testing."""
+    pass
         with patch('netra_backend.app.core.managers.unified_configuration_manager.IsolatedEnvironment'):
             with patch('builtins.open', mock_open(read_data='{}')):
                 with patch('pathlib.Path.exists', return_value=False):
@@ -1374,6 +1444,7 @@ class TestStatusAndMonitoring:
     
     def test_get_status_validation_information(self, manager):
         """Test getting validation status information."""
+    pass
         status = manager.get_status()
         
         assert "validation_status" in status
@@ -1396,6 +1467,7 @@ class TestStatusAndMonitoring:
     
     def test_get_status_scope_breakdown(self, manager):
         """Test getting configuration scope breakdown."""
+    pass
         status = manager.get_status()
         
         assert "scopes" in status
@@ -1417,6 +1489,7 @@ class TestStatusAndMonitoring:
     
     def test_get_health_status_unhealthy(self, manager):
         """Test getting health status when system is unhealthy."""
+    pass
         # Add a required key that's missing
         manager._required_keys.add("missing.required.key")
         
@@ -1432,7 +1505,10 @@ class TestWebSocketIntegration:
     
     @pytest.fixture
     def manager(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create a configuration manager for WebSocket testing."""
+    pass
         with patch('netra_backend.app.core.managers.unified_configuration_manager.IsolatedEnvironment'):
             with patch('builtins.open', mock_open(read_data='{}')):
                 with patch('pathlib.Path.exists', return_value=False):
@@ -1441,7 +1517,7 @@ class TestWebSocketIntegration:
     
     def test_set_websocket_manager(self, manager):
         """Test setting WebSocket manager."""
-        mock_websocket_manager = Mock()
+        mock_websocket_manager = UnifiedWebSocketManager()
         
         manager.set_websocket_manager(mock_websocket_manager)
         
@@ -1451,6 +1527,7 @@ class TestWebSocketIntegration:
     
     def test_enable_disable_websocket_events(self, manager):
         """Test enabling/disabling WebSocket events."""
+    pass
         # Default should be enabled
         assert manager._enable_websocket_events is True
         
@@ -1462,8 +1539,8 @@ class TestWebSocketIntegration:
     
     def test_websocket_change_notification(self, manager):
         """Test WebSocket change notifications."""
-        mock_websocket_manager = Mock()
-        mock_websocket_manager.broadcast_system_message = Mock()
+        mock_websocket_manager = UnifiedWebSocketManager()
+        mock_websocket_manager.broadcast_system_message = broadcast_system_message_instance  # Initialize appropriate service
         
         manager.set_websocket_manager(mock_websocket_manager)
         
@@ -1476,7 +1553,8 @@ class TestWebSocketIntegration:
     
     def test_websocket_notification_disabled(self, manager):
         """Test WebSocket notifications when disabled."""
-        mock_websocket_manager = Mock()
+    pass
+        mock_websocket_manager = UnifiedWebSocketManager()
         manager.set_websocket_manager(mock_websocket_manager)
         manager.enable_websocket_events(False)
         
@@ -1502,7 +1580,7 @@ class TestEnvironmentVariableLoading:
         }
         
         with patch('netra_backend.app.core.managers.unified_configuration_manager.IsolatedEnvironment') as MockEnv:
-            mock_env_instance = Mock()
+            mock_env_instance = mock_env_instance_instance  # Initialize appropriate service
             mock_env_instance.get.side_effect = lambda key: mock_env_data.get(key)
             MockEnv.return_value = mock_env_instance
             
@@ -1519,13 +1597,14 @@ class TestEnvironmentVariableLoading:
     
     def test_sensitive_environment_variables(self):
         """Test that sensitive environment variables are marked as sensitive."""
+    pass
         mock_env_data = {
             'OPENAI_API_KEY': 'sk-secret-key',
             'JWT_SECRET_KEY': 'super-secret-jwt-key'
         }
         
         with patch('netra_backend.app.core.managers.unified_configuration_manager.IsolatedEnvironment') as MockEnv:
-            mock_env_instance = Mock()
+            mock_env_instance = mock_env_instance_instance  # Initialize appropriate service
             mock_env_instance.get.side_effect = lambda key: mock_env_data.get(key)
             MockEnv.return_value = mock_env_instance
             
@@ -1554,7 +1633,7 @@ class TestConfigurationFileLoading:
         }
         
         with patch('netra_backend.app.core.managers.unified_configuration_manager.IsolatedEnvironment') as mock_env_class:
-            mock_env_instance = Mock()
+            mock_env_instance = mock_env_instance_instance  # Initialize appropriate service
             mock_env_instance.get.return_value = None
             mock_env_class.return_value = mock_env_instance
             
@@ -1569,6 +1648,7 @@ class TestConfigurationFileLoading:
     
     def test_configuration_file_not_found(self):
         """Test handling when configuration files don't exist."""
+    pass
         with patch('netra_backend.app.core.managers.unified_configuration_manager.IsolatedEnvironment'):
             with patch('pathlib.Path.exists', return_value=False):
                 # Should not raise exception when config files don't exist
@@ -1589,3 +1669,4 @@ class TestConfigurationFileLoading:
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])
+    pass

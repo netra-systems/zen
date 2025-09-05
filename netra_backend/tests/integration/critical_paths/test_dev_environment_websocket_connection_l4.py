@@ -31,6 +31,7 @@ from collections import deque
 from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Set
+from shared.isolated_environment import IsolatedEnvironment
 
 import aiohttp
 import pytest

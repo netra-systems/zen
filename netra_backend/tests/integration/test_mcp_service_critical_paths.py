@@ -28,6 +28,7 @@ import pytest
 import uuid
 from datetime import UTC, datetime, timedelta
 from typing import Dict, Any
+from shared.isolated_environment import IsolatedEnvironment
 
 # Test framework imports
 from test_framework.fixtures.database_fixtures import test_db_session

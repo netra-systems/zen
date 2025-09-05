@@ -13,16 +13,25 @@ import sys
 from pathlib import Path
 from typing import Dict, List, Set, Tuple
 import pytest
+from test_framework.database.test_database_manager import TestDatabaseManager
+from auth_service.core.auth_manager import AuthManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 from test_framework.agent_test_helpers import create_test_execution_context, TestExecutionContext
 
 
 class TestExecutionContextRegression:
     """Regression tests for ExecutionContext parameter usage in integration tests."""
+    pass
 
     @pytest.fixture
     def execution_context(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create a proper ExecutionContext for testing."""
+    pass
         return create_test_execution_context(
             user_id="test-user-123",
             thread_id="test-thread-456",
@@ -53,6 +62,7 @@ class TestExecutionContextRegression:
 
     def test_execution_context_backward_compatibility(self, execution_context):
         """Test that ExecutionContext maintains backward compatibility."""
+    pass
         # Old code might access context properties directly
         assert execution_context.user_id is not None
         assert execution_context.thread_id is not None
@@ -93,6 +103,7 @@ class TestExecutionContextRegression:
 
     def test_no_false_positive_import_checks(self):
         """Test that import checks only trigger at line start (no false positives)."""
+    pass
         test_code = '''
 # This should not trigger: from netra_backend import something
 def test_function():
@@ -101,9 +112,11 @@ def test_function():
     x = "string with from netra_backend import should not trigger"
     
 from test_framework.agent_test_helpers import TestExecutionContext  # This SHOULD trigger
+import asyncio
         '''
         
-        lines = test_code.split('\n')
+        lines = test_code.split('
+')
         import_lines = []
         
         for i, line in enumerate(lines):
@@ -119,10 +132,9 @@ from test_framework.agent_test_helpers import TestExecutionContext  # This SHOUL
     @pytest.mark.asyncio
     async def test_execution_context_in_async_agent_calls(self, execution_context):
         """Test that ExecutionContext works correctly in async agent calls."""
-        from unittest.mock import AsyncMock
         
         # Mock an agent that uses ExecutionContext
-        mock_agent = AsyncMock()
+        mock_agent = AsyncNone  # TODO: Use real service instance
         mock_agent.execute = AsyncMock(return_value={"status": "success"})
         
         # Call agent with ExecutionContext
@@ -163,6 +175,7 @@ from test_framework.agent_test_helpers import TestExecutionContext  # This SHOUL
 
     def test_execution_context_creation_patterns(self):
         """Test different patterns for creating ExecutionContext."""
+    pass
         # Pattern 1: Using test helper
         context1 = create_test_execution_context()
         assert context1.user_id is not None
@@ -208,6 +221,7 @@ from test_framework.agent_test_helpers import TestExecutionContext  # This SHOUL
 
     def test_auth_service_test_result_format_markers(self):
         """Test that auth service test results use correct format markers."""
+    pass
         # Check if junit.xml exists and has correct format
         junit_path = Path("auth_service/junit.xml")
         if junit_path.exists():
@@ -232,7 +246,8 @@ from test_framework.agent_test_helpers import TestExecutionContext  # This SHOUL
         def dynamic_timeout():
             nonlocal call_count
             call_count += 1
-            return 5 + call_count  # Increasing timeout
+            await asyncio.sleep(0)
+    return 5 + call_count  # Increasing timeout
         
         breaker = UnifiedCircuitBreaker(
             failure_threshold=2,
@@ -248,3 +263,4 @@ from test_framework.agent_test_helpers import TestExecutionContext  # This SHOUL
         if callable(breaker._recovery_timeout):
             timeout_value = breaker._recovery_timeout()
             assert timeout_value > 5
+    pass

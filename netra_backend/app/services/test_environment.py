@@ -3,6 +3,7 @@
 import asyncio
 import os
 from typing import Any, Dict, List, Optional
+from shared.isolated_environment import IsolatedEnvironment
 
 import redis.asyncio as redis
 from loguru import logger

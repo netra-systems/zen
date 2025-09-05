@@ -20,6 +20,7 @@ from datetime import datetime, timezone
 from typing import Dict, List, Any, Optional
 from dataclasses import dataclass
 from enum import Enum
+from shared.isolated_environment import IsolatedEnvironment
 
 from test_framework.test_patterns import L3IntegrationTest
 

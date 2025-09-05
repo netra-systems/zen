@@ -19,7 +19,10 @@ import json
 import uuid
 from datetime import datetime
 from typing import List
-from unittest.mock import AsyncMock, patch
+from test_framework.database.test_database_manager import TestDatabaseManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 import pytest
 

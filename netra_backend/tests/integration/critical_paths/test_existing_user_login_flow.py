@@ -12,6 +12,10 @@ Business Value Justification (BVJ):
 
 import sys
 from pathlib import Path
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from test_framework.database.test_database_manager import TestDatabaseManager
+from auth_service.core.auth_manager import AuthManager
+from shared.isolated_environment import IsolatedEnvironment
 
 # Test framework import - using pytest fixtures instead
 
@@ -21,7 +25,6 @@ import time
 import uuid
 from datetime import datetime, timedelta, timezone
 from typing import Any, Dict
-from unittest.mock import AsyncMock, MagicMock, Mock, patch, patch
 
 import jwt
 import pytest
@@ -70,15 +73,15 @@ class TestExistingUserLoginFlow:
         # Mock: Authentication service isolation for testing without real auth flows
         service = AsyncMock(spec=AuthService)
         # Mock: Generic component isolation for controlled unit testing
-        service.authenticate = AsyncMock()
+        service.authenticate = AsyncNone  # TODO: Use real service instance
         # Mock: Generic component isolation for controlled unit testing
-        service.generate_tokens = AsyncMock()
+        service.generate_tokens = AsyncNone  # TODO: Use real service instance
         # Mock: Async component isolation for testing without real async operations
         service.validate_token = AsyncMock(return_value=True)
         # Mock: Generic component isolation for controlled unit testing
-        service.refresh_tokens = AsyncMock()
+        service.refresh_tokens = AsyncNone  # TODO: Use real service instance
         # Mock: Generic component isolation for controlled unit testing
-        service.revoke_token = AsyncMock()
+        service.revoke_token = AsyncNone  # TODO: Use real service instance
         yield service
     
     @pytest.fixture
@@ -87,13 +90,13 @@ class TestExistingUserLoginFlow:
         # Mock: Database session isolation for transaction testing without real database dependency
         service = AsyncMock(spec=SessionService)
         # Mock: Session isolation for controlled testing without external state
-        service.create_session = AsyncMock()
+        service.create_session = AsyncNone  # TODO: Use real service instance
         # Mock: Session isolation for controlled testing without external state
-        service.get_session = AsyncMock()
+        service.get_session = AsyncNone  # TODO: Use real service instance
         # Mock: Session isolation for controlled testing without external state
-        service.update_session_activity = AsyncMock()
+        service.update_session_activity = AsyncNone  # TODO: Use real service instance
         # Mock: Session isolation for controlled testing without external state
-        service.end_session = AsyncMock()
+        service.end_session = AsyncNone  # TODO: Use real service instance
         yield service
     
     @pytest.fixture
@@ -191,7 +194,7 @@ class TestExistingUserLoginFlow:
     async def test_session_creation_on_successful_login(self, async_client, mock_existing_user, mock_session_service):
         """Test 4: Successful login should create a new session."""
         # Mock: Database session isolation for transaction testing without real database dependency
-        mock_session = MagicMock()
+        mock_session = MagicNone  # TODO: Use real service instance
         mock_session.id = str(uuid.uuid4())
         mock_session.user_id = mock_existing_user.id
         mock_session.created_at = datetime.now(timezone.utc)

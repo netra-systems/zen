@@ -2,7 +2,7 @@
 
 import pytest
 import os
-from unittest.mock import patch
+from test_framework.database.test_database_manager import TestDatabaseManager
 
 from shared.database_url_builder import DatabaseURLBuilder
 from shared.isolated_environment import IsolatedEnvironment

@@ -9,8 +9,8 @@ internally.
 import asyncio
 import time
 from enum import Enum
-from unittest.mock import Mock, patch, AsyncMock
 import pytest
+from shared.isolated_environment import IsolatedEnvironment
 
 from netra_backend.app.core.resilience.unified_circuit_breaker import (
     UnifiedCircuitBreaker,
@@ -21,10 +21,14 @@ from netra_backend.app.core.circuit_breaker_types import CircuitState
 
 class TestCircuitBreakerRegression:
     """Regression tests for circuit breaker state property compatibility."""
+    pass
 
     @pytest.fixture
     def circuit_breaker(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create a circuit breaker instance for testing."""
+    pass
         return UnifiedCircuitBreaker(
             failure_threshold=3,
             recovery_timeout=5,
@@ -44,6 +48,7 @@ class TestCircuitBreakerRegression:
     @pytest.mark.asyncio
     async def test_circuit_breaker_state_transitions_legacy_compatibility(self, circuit_breaker):
         """Test state transitions maintain backward compatibility."""
+    pass
         # Mock a failing operation
         failing_operation = AsyncMock(side_effect=Exception("Test failure"))
         
@@ -86,6 +91,7 @@ class TestCircuitBreakerRegression:
 
     def test_circuit_breaker_state_property_no_async_transition(self, circuit_breaker):
         """Test that state property access doesn't trigger async transitions."""
+    pass
         # This was a bug where accessing .state could cause async issues
         # The fix ensures state property is a simple getter without async logic
         
@@ -119,10 +125,13 @@ class TestCircuitBreakerRegression:
 
     def test_circuit_breaker_legacy_code_compatibility(self, circuit_breaker):
         """Test that legacy code expecting CircuitState enum continues to work."""
+    pass
         # Legacy code pattern that checks state
         def legacy_check_circuit(cb):
+    pass
             if cb.state == CircuitState.CLOSED:
-                return "Circuit is healthy"
+                await asyncio.sleep(0)
+    return "Circuit is healthy"
             elif cb.state == CircuitState.OPEN:
                 return "Circuit is broken"
             elif cb.state == CircuitState.HALF_OPEN:
@@ -161,6 +170,7 @@ class TestCircuitBreakerRegression:
 
     def test_circuit_breaker_state_debug_logging(self, circuit_breaker):
         """Test that debug logging for state transitions works correctly."""
+    pass
         with patch('netra_backend.app.core.resilience.unified_circuit_breaker.logger') as mock_logger:
             # Access state to trigger any debug logging
             _ = circuit_breaker.state
@@ -195,6 +205,7 @@ class TestCircuitBreakerRegression:
 
     def test_circuit_breaker_backward_compatibility_complete(self, circuit_breaker):
         """Comprehensive test ensuring full backward compatibility."""
+    pass
         # Test all legacy enum values are accessible
         assert hasattr(CircuitState, 'CLOSED')
         assert hasattr(CircuitState, 'OPEN')

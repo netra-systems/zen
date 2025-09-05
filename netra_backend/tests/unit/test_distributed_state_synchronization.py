@@ -10,8 +10,10 @@ components and provides observability into state synchronization health.
 import asyncio
 import time
 from concurrent.futures import ThreadPoolExecutor
-from unittest.mock import AsyncMock, MagicMock, Mock, patch
 from uuid import uuid4
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 import pytest
 
@@ -20,9 +22,12 @@ class TestDistributedStateConsistency:
     """Test suite for distributed state consistency patterns."""
     
     @pytest.fixture
-    def mock_state_manager(self):
+ def real_state_manager():
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create mock distributed state manager."""
-        manager = Mock()
+    pass
+        manager = manager_instance  # Initialize appropriate service
         manager.state_versions = {}
         manager.consensus_threshold = 2
         manager.active_nodes = ['node1', 'node2', 'node3']
@@ -30,9 +35,12 @@ class TestDistributedStateConsistency:
         return manager
     
     @pytest.fixture
-    def mock_vector_clock(self):
+ def real_vector_clock():
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create mock vector clock for distributed ordering."""
-        clock = Mock()
+    pass
+        clock = clock_instance  # Initialize appropriate service
         clock.timestamps = {'node1': 0, 'node2': 0, 'node3': 0}
         clock.increment = Mock(side_effect=lambda node: setattr(clock, 'timestamps', 
             {**clock.timestamps, node: clock.timestamps[node] + 1}))
@@ -61,6 +69,7 @@ class TestDistributedStateConsistency:
     
     def test_vector_clock_ordering(self, mock_vector_clock):
         """Test vector clock for event ordering in distributed system."""
+    pass
         # Simulate events across nodes
         events = [
             {'node': 'node1', 'event': 'create_thread', 'data': {'id': 1}},
@@ -102,23 +111,28 @@ class TestDistributedStateConsistency:
         
         class DistributedLock:
             def __init__(self, resource_id: str):
+    pass
                 self.resource_id = resource_id
                 self.holder = None
                 self.waiters = []
                 self.lease_expiry = None
             
             async def acquire(self, node_id: str, timeout: float = 1.0):
+    pass
                 if self.holder is None:
                     self.holder = node_id
                     self.lease_expiry = time.time() + timeout
-                    return True
+                    await asyncio.sleep(0)
+    return True
                 return False
             
             async def release(self, node_id: str):
+    pass
                 if self.holder == node_id:
                     self.holder = None
                     self.lease_expiry = None
-                    return True
+                    await asyncio.sleep(0)
+    return True
                 return False
         
         lock = DistributedLock("thread_processing")
@@ -158,6 +172,7 @@ class TestDistributedStateConsistency:
     
     def test_state_synchronization_metrics(self, mock_state_manager):
         """Test collection of state synchronization metrics."""
+    pass
         sync_metrics = {
             'sync_operations_total': 0,
             'sync_conflicts_resolved': 0,
@@ -207,13 +222,17 @@ class TestAgentStateCoordination:
     """Test suite for agent state coordination patterns."""
     
     @pytest.fixture
-    def mock_agent_coordinator(self):
+ def real_agent_coordinator():
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create mock agent state coordinator."""
-        coordinator = Mock()
+    pass
+        coordinator = coordinator_instance  # Initialize appropriate service
         coordinator.agent_states = {}
         coordinator.state_listeners = []
         coordinator.coordination_log = []
-        return coordinator
+        await asyncio.sleep(0)
+    return coordinator
     
     def test_agent_state_broadcast_pattern(self, mock_agent_coordinator):
         """Test state broadcast pattern across agents."""
@@ -242,6 +261,7 @@ class TestAgentStateCoordination:
     
     def test_agent_state_aggregation(self, mock_agent_coordinator):
         """Test aggregation of agent states for system-wide view."""
+    pass
         agent_states = {
             'supervisor_001': {'status': 'active', 'load': 0.3, 'tasks': 2},
             'data_agent_001': {'status': 'active', 'load': 0.7, 'tasks': 5},
@@ -326,7 +346,8 @@ class TestEventualConsistencyPatterns:
                         self.counts.get(node, 0),
                         other.counts.get(node, 0)
                     )
-                return merged
+                await asyncio.sleep(0)
+    return merged
             
             def value(self):
                 return sum(self.counts.values())
@@ -407,3 +428,4 @@ class TestEventualConsistencyPatterns:
         assert replica1.state == replica2.state
         assert replica1.state['threads']['t1']['status'] == 'completed'
         assert replica1.state['sequence'] == 2
+    pass

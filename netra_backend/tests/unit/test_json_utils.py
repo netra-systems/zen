@@ -5,15 +5,18 @@ Business Value: Long-term maintainability
 """
 
 import pytest
-from unittest.mock import Mock, patch, MagicMock
 from netra_backend.app.core.serialization.unified_json_handler import CircularReferenceHandler
+from shared.isolated_environment import IsolatedEnvironment
 
 class TestJsonUtils:
     """Test suite for JsonUtils"""
     
     @pytest.fixture
     def instance(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create test instance"""
+    pass
         return CircularReferenceHandler()
     
     def test_initialization(self, instance):
@@ -23,6 +26,7 @@ class TestJsonUtils:
     
     def test_core_functionality(self, instance):
         """Test core business logic"""
+    pass
         # Test happy path
         result = instance.process()
         assert result is not None
@@ -34,6 +38,7 @@ class TestJsonUtils:
     
     def test_edge_cases(self, instance):
         """Test boundary conditions"""
+    pass
         # Test with None, empty, extreme values
         pass
     
@@ -41,3 +46,5 @@ class TestJsonUtils:
         """Test input validation"""
         # Test validation logic
         pass
+
+    pass

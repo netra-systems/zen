@@ -5,8 +5,10 @@ Tests for synthetic data creation - app/routes/synthetic_data.py
 
 import sys
 from pathlib import Path
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from test_framework.database.test_database_manager import TestDatabaseManager
+from shared.isolated_environment import IsolatedEnvironment
 
-from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
@@ -86,7 +88,7 @@ class TestSyntheticDataRoute:
         
         # Mock database dependency
         # Mock: Generic component isolation for controlled unit testing
-        mock_db = AsyncMock()
+        mock_db = AsyncNone  # TODO: Use real service instance
         
         # Create mock for SyntheticDataService class
         # Mock: Component isolation for testing without external dependencies

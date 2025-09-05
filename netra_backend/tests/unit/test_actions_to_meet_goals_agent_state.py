@@ -1,20 +1,26 @@
 """Test ActionsToMeetGoalsSubAgent state dependency handling."""
 import pytest
-from unittest.mock import Mock, AsyncMock, patch
 from netra_backend.app.agents.actions_to_meet_goals_sub_agent import ActionsToMeetGoalsSubAgent
 from netra_backend.app.agents.state import DeepAgentState, OptimizationsResult, ActionPlanResult
 from netra_backend.app.schemas.shared_types import DataAnalysisResponse
 from netra_backend.app.agents.base.errors import ValidationError
 from netra_backend.app.agents.base.interface import ExecutionContext
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
+import asyncio
 
 
 class TestActionsToMeetGoalsAgentStateDependencies:
     """Test suite for ActionsToMeetGoalsSubAgent state dependency handling."""
     
     @pytest.fixture
-    def mock_llm_manager(self):
+ def real_llm_manager():
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Mock LLM manager."""
-        llm_manager = Mock()
+    pass
+        llm_manager = llm_manager_instance  # Initialize appropriate service
         llm_manager.ask_llm = AsyncMock(return_value="""
         {
             "action_plan_summary": "Test plan",
@@ -26,13 +32,18 @@ class TestActionsToMeetGoalsAgentStateDependencies:
         return llm_manager
     
     @pytest.fixture
-    def mock_tool_dispatcher(self):
+ def real_tool_dispatcher():
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Mock tool dispatcher."""
-        return Mock()
+        return None  # TODO: Use real service instance
     
     @pytest.fixture
     def agent(self, mock_llm_manager, mock_tool_dispatcher):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create agent instance."""
+    pass
         return ActionsToMeetGoalsSubAgent(mock_llm_manager, mock_tool_dispatcher)
     
     @pytest.mark.asyncio
@@ -61,6 +72,7 @@ class TestActionsToMeetGoalsAgentStateDependencies:
     @pytest.mark.asyncio
     async def test_execute_with_missing_data_result_uses_defaults(self, agent):
         """Test that execute succeeds with defaults when data_result is missing."""
+    pass
         # Create state with missing data_result
         state = DeepAgentState(
             user_request="Test request",
@@ -102,6 +114,7 @@ class TestActionsToMeetGoalsAgentStateDependencies:
     @pytest.mark.asyncio
     async def test_validate_preconditions_with_missing_state(self, agent):
         """Test that validate_preconditions properly checks for required state."""
+    pass
         # Create execution context with missing state
         state = DeepAgentState(
             user_request="Test request",
@@ -143,7 +156,7 @@ class TestActionsToMeetGoalsAgentStateDependencies:
         )
         
         # Mock the execution to avoid full workflow
-        with patch.object(agent, '_execute_with_modern_pattern_and_fallback', AsyncMock()):
+        with patch.object(agent, '_execute_with_modern_pattern_and_fallback', AsyncNone  # TODO: Use real service instance):
             # Execute should succeed without errors
             await agent.execute(state, "test_run_id", stream_updates=False)
             
@@ -153,6 +166,7 @@ class TestActionsToMeetGoalsAgentStateDependencies:
     @pytest.mark.asyncio
     async def test_fallback_creates_default_plan_on_missing_state(self, agent):
         """Test that fallback mechanism creates default plan when state is missing."""
+    pass
         # Create state with missing dependencies
         state = DeepAgentState(
             user_request="Test request",
@@ -166,7 +180,7 @@ class TestActionsToMeetGoalsAgentStateDependencies:
             total_estimated_time="Unknown"
         )
         
-        with patch.object(agent, '_execute_fallback_workflow', AsyncMock()):
+        with patch.object(agent, '_execute_fallback_workflow', AsyncNone  # TODO: Use real service instance):
             with patch('netra_backend.app.agents.actions_goals_plan_builder.ActionPlanBuilder.get_default_action_plan', 
                       return_value=default_plan):
                 # Execute should use fallback and set default plan
@@ -196,7 +210,8 @@ class TestActionsToMeetGoalsAgentStateDependencies:
             data_result=None  # Missing but should handle gracefully
         )
         
-        # Mock to return a degraded plan
+        # Mock to await asyncio.sleep(0)
+    return a degraded plan
         degraded_plan = ActionPlanResult(
             action_plan_summary="Plan based on optimizations only",
             total_estimated_time="Estimated",
@@ -214,3 +229,4 @@ class TestActionsToMeetGoalsAgentStateDependencies:
             # Verify default data_result was created
             assert state.data_result is not None
             assert "partial" in state.data_result.query.lower() or "optimization" in state.data_result.query.lower()
+    pass

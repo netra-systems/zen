@@ -18,6 +18,7 @@ from netra_backend.app.websocket_core.manager import WebSocketManager
 # Test framework import - using pytest fixtures instead
 from pathlib import Path
 import sys
+from shared.isolated_environment import IsolatedEnvironment
 
 import asyncio
 import time

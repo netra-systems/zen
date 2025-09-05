@@ -5,6 +5,10 @@ Tests compression algorithms, authentication expiry handling, and security featu
 
 import sys
 from pathlib import Path
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from test_framework.database.test_database_manager import TestDatabaseManager
+from auth_service.core.auth_manager import AuthManager
+from shared.isolated_environment import IsolatedEnvironment
 
 import asyncio
 import json
@@ -13,7 +17,6 @@ import time
 import uuid
 import zlib
 from typing import Any, Dict, List
-from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 

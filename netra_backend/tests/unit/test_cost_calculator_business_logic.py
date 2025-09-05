@@ -10,6 +10,7 @@ from netra_backend.app.services.cost_calculator import (
     CostCalculatorService, CostTier, ModelCostInfo
 )
 from netra_backend.app.schemas.llm_base_types import LLMProvider, TokenUsage
+from shared.isolated_environment import IsolatedEnvironment
 
 
 class TestCostCalculatorCore:

@@ -16,6 +16,7 @@ The tests use real database sessions to ensure actual integration behavior.
 import pytest
 import uuid
 from sqlalchemy.ext.asyncio import AsyncSession
+from shared.isolated_environment import IsolatedEnvironment
 
 from netra_backend.app.db.models_postgres import User
 from netra_backend.app.schemas.user import UserUpdate, UserCreate

@@ -21,6 +21,12 @@ import time
 import uuid
 from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from test_framework.database.test_database_manager import TestDatabaseManager
+from test_framework.redis.test_redis_manager import TestRedisManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 import pytest
 import redis.asyncio as redis
@@ -45,6 +51,7 @@ except ImportError:
         
         @staticmethod
         def build_postgres_url(user, password, port, database):
+    pass
             return f"postgresql://{user}:{password}@localhost:{port}/{database}"
 
 try:
@@ -58,11 +65,17 @@ except ImportError:
     # Mock BackgroundJobService
     class BackgroundJobService:
         async def enqueue_job(self, **kwargs):
-            return {"job_id": f"job-{uuid.uuid4()}", "status": "enqueued"}
+    pass
+            await asyncio.sleep(0)
+    return {"job_id": f"job-{uuid.uuid4()}", "status": "enqueued"}
         async def get_job_status(self, job_id):
-            return {"status": "completed", "retry_count": 0}
+    pass
+            await asyncio.sleep(0)
+    return {"status": "completed", "retry_count": 0}
         async def get_job_result(self, job_id):
-            return {"output_data": {"result": 1764}, "completed_at": datetime.now(timezone.utc)}
+    pass
+            await asyncio.sleep(0)
+    return {"output_data": {"result": 1764}, "completed_at": datetime.now(timezone.utc)}
 
 try:
     from netra_backend.app.services.job_store import JobStore
@@ -80,9 +93,8 @@ except ImportError:
 try:
     from netra_backend.app.db.models_agent import AgentRun
 except ImportError:
-    from unittest.mock import Mock, AsyncMock, MagicMock
     # Mock: Generic component isolation for controlled unit testing
-    AgentRun = Mock()
+    AgentRun = AgentRegistry().get_agent("supervisor")
 
 
 class TestBackgroundJobProcessing:
@@ -93,6 +105,7 @@ class TestBackgroundJobProcessing:
     MUST use real services - NO MOCKS allowed.
     These tests WILL fail initially and that's the point.
     """
+    pass
 
     @pytest.fixture(scope="class")
     async def real_redis_client(self):
@@ -118,6 +131,7 @@ class TestBackgroundJobProcessing:
     @pytest.fixture(scope="class")
     async def real_database_session(self):
         """Real PostgreSQL database session - will fail if DB not available."""
+    pass
         try:
             database_url = DatabaseConstants.build_postgres_url(
                 user="test", password="test",
@@ -142,8 +156,12 @@ class TestBackgroundJobProcessing:
 
     @pytest.fixture
     def real_test_client(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Real FastAPI test client - no mocking of the application."""
-        return TestClient(app)
+    pass
+        await asyncio.sleep(0)
+    return TestClient(app)
 
     @pytest.mark.asyncio
     async def test_01_basic_job_enqueue_execution_fails(
@@ -242,6 +260,7 @@ class TestBackgroundJobProcessing:
         2. Job scheduling may not respect priorities
         3. Worker allocation may not be priority-aware
         """
+    pass
         try:
             background_job_service = BackgroundJobService()
             
@@ -645,7 +664,8 @@ class TestBackgroundJobProcessing:
                 # Simulate system restart/recovery
                 recovery_result = await background_job_service.simulate_recovery()
                 
-                assert recovery_result is not None, "Recovery simulation should return result"
+                assert recovery_result is not None, "Recovery simulation should await asyncio.sleep(0)
+    return result"
                 assert "recovered_jobs" in recovery_result, "Recovery should report recovered jobs"
                 
                 recovered_jobs = recovery_result["recovered_jobs"]

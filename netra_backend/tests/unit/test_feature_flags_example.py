@@ -6,6 +6,7 @@ enabling TDD workflow while maintaining 100% pass rate for CI/CD.
 
 import sys
 from pathlib import Path
+from shared.isolated_environment import IsolatedEnvironment
 
 import pytest
 

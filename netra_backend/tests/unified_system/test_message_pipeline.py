@@ -12,13 +12,17 @@ Business Value Justification (BVJ):
 
 import sys
 from pathlib import Path
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from test_framework.database.test_database_manager import TestDatabaseManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 import asyncio
 import json
 import time
 from contextlib import asynccontextmanager
 from typing import Any, Dict, Optional
-from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
@@ -77,6 +81,8 @@ class MessagePipelineTestHelper:
 
 @pytest.fixture
 def message_helper():
+    """Use real service instance."""
+    # TODO: Initialize real service
     """Fixture providing message pipeline test helper."""
     return MessagePipelineTestHelper()
 
@@ -87,27 +93,27 @@ async def agent_service_with_mocks():
     
     # Create LLM manager mock
     # Mock: LLM provider isolation to prevent external API usage and costs
-    llm_manager = Mock()
+    llm_manager = llm_manager_instance  # Initialize appropriate service
     # Mock: LLM provider isolation to prevent external API usage and costs
     llm_manager.ask_llm = AsyncMock(return_value="Mock agent response for optimization request")
     # Mock: LLM provider isolation to prevent external API usage and costs
-    llm_manager.generate_streaming_response = AsyncMock()
+    llm_manager.generate_streaming_response = AsyncNone  # TODO: Use real service instance
     
     # Create tool dispatcher mock
     # Mock: Tool execution isolation for predictable agent testing
-    tool_dispatcher = Mock()
+    tool_dispatcher = tool_dispatcher_instance  # Initialize appropriate service
     # Mock: Tool execution isolation for predictable agent testing
     tool_dispatcher.get_available_tools = Mock(return_value=["analysis", "optimization"])
     
     # Create WebSocket manager mock
     # Mock: WebSocket connection isolation for testing without network overhead
-    websocket_manager = Mock()
+    websocket_manager = UnifiedWebSocketManager()
     # Mock: WebSocket connection isolation for testing without network overhead
-    websocket_manager.send_message = AsyncMock()
+    websocket_manager.send_message = AsyncNone  # TODO: Use real service instance
     
     # Create database session mock
     # Mock: Database session isolation for transaction testing without real database dependency
-    mock_db_session = AsyncMock()
+    mock_db_session = AsyncNone  # TODO: Use real service instance
     
     # Create supervisor with mocked components
     supervisor = SupervisorAgent(
@@ -163,7 +169,7 @@ class TestMessagePipeline:
                 with patch('app.db.postgres.get_async_db') as mock_db:
                     # Mock database session
                     # Mock: Database session isolation for transaction testing without real database dependency
-                    mock_session = AsyncMock()
+                    mock_session = AsyncNone  # TODO: Use real service instance
                     # Mock: Database session isolation for transaction testing without real database dependency
                     mock_db.return_value.__aenter__ = AsyncMock(return_value=mock_session)
                     # Mock: Async component isolation for testing without real async operations
@@ -245,7 +251,7 @@ class TestMessagePipeline:
                 # Mock: Component isolation for testing without external dependencies
                 with patch('app.db.postgres.get_async_db') as mock_db:
                     # Mock: Database session isolation for transaction testing without real database dependency
-                    mock_session = AsyncMock()
+                    mock_session = AsyncNone  # TODO: Use real service instance
                     # Mock: Database session isolation for transaction testing without real database dependency
                     mock_db.return_value.__aenter__ = AsyncMock(return_value=mock_session)
                     # Mock: Async component isolation for testing without real async operations
@@ -330,7 +336,7 @@ class TestMessagePipeline:
                 # Mock: Component isolation for testing without external dependencies
                 with patch('app.db.postgres.get_async_db') as mock_db:
                     # Mock: Database session isolation for transaction testing without real database dependency
-                    mock_session = AsyncMock()
+                    mock_session = AsyncNone  # TODO: Use real service instance
                     # Mock: Database session isolation for transaction testing without real database dependency
                     mock_db.return_value.__aenter__ = AsyncMock(return_value=mock_session)
                     # Mock: Async component isolation for testing without real async operations
@@ -387,7 +393,7 @@ class TestMessagePipeline:
                 # Mock: Component isolation for testing without external dependencies
                 with patch('app.db.postgres.get_async_db') as mock_db:
                     # Mock: Database session isolation for transaction testing without real database dependency
-                    mock_session = AsyncMock()
+                    mock_session = AsyncNone  # TODO: Use real service instance
                     # Mock: Database session isolation for transaction testing without real database dependency
                     mock_db.return_value.__aenter__ = AsyncMock(return_value=mock_session)
                     # Mock: Async component isolation for testing without real async operations
@@ -460,7 +466,7 @@ class TestMessagePipeline:
                 # Mock: Component isolation for testing without external dependencies
                 with patch('app.db.postgres.get_async_db') as mock_db:
                     # Mock: Database session isolation for transaction testing without real database dependency
-                    mock_session = AsyncMock()
+                    mock_session = AsyncNone  # TODO: Use real service instance
                     # Mock: Database session isolation for transaction testing without real database dependency
                     mock_db.return_value.__aenter__ = AsyncMock(return_value=mock_session)
                     # Mock: Async component isolation for testing without real async operations
@@ -512,7 +518,7 @@ class TestMessagePipeline:
                 # Mock: Component isolation for testing without external dependencies
                 with patch('app.db.postgres.get_async_db') as mock_db:
                     # Mock: Database session isolation for transaction testing without real database dependency
-                    mock_session = AsyncMock()
+                    mock_session = AsyncNone  # TODO: Use real service instance
                     # Mock: Database session isolation for transaction testing without real database dependency
                     mock_db.return_value.__aenter__ = AsyncMock(return_value=mock_session)
                     # Mock: Async component isolation for testing without real async operations

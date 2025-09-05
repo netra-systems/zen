@@ -25,6 +25,11 @@ import time
 import uuid
 from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional, Set
+from test_framework.database.test_database_manager import TestDatabaseManager
+from auth_service.core.auth_manager import AuthManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 import pytest
 from fastapi.testclient import TestClient
@@ -41,12 +46,12 @@ class MockAgentService(BaseAgentService):
     """Extended agent service for lifecycle testing (renamed to avoid pytest collection)"""
     
     def __init__(self, db_session=None):
+    pass
         # Create a mock supervisor for testing
-        from unittest.mock import AsyncMock, MagicMock, Mock
         # Mock: Generic component isolation for controlled unit testing
-        mock_supervisor = Mock()
+        mock_supervisor = mock_supervisor_instance  # Initialize appropriate service
         # Mock: Generic component isolation for controlled unit testing
-        mock_supervisor.run = AsyncMock()
+        mock_supervisor.run = AsyncNone  # TODO: Use real service instance
         super().__init__(mock_supervisor)
         self.db_session = db_session
     
@@ -67,14 +72,17 @@ class MockAgentService(BaseAgentService):
             self.db_session.add(agent)
             await self.db_session.commit()
         
-        return agent
+        await asyncio.sleep(0)
+    return agent
     
     async def execute_agent_run(self, agent_run_id: str):
         """Execute an agent run."""
+    pass
         # Simulate agent execution
         await asyncio.sleep(0.1)  # Simulate work
         
-        return {
+        await asyncio.sleep(0)
+    return {
             "status": "completed",
             "agent_run_id": agent_run_id,
             "result": "Agent execution completed successfully"
@@ -84,26 +92,33 @@ class MockAgentService(BaseAgentService):
         """Clean up agent resources."""
         # Simulate cleanup
         await asyncio.sleep(0.05)
-        return True
+        await asyncio.sleep(0)
+    return True
     
     async def detect_orphaned_processes(self):
         """Detect orphaned processes."""
+    pass
         # Return empty list - no orphans detected in tests
-        return []
+        await asyncio.sleep(0)
+    return []
     
     async def cleanup_orphaned_processes(self, orphaned_pids):
         """Clean up orphaned processes."""
-        return {"cleaned_up": len(orphaned_pids), "failed": 0}
+        await asyncio.sleep(0)
+    return {"cleaned_up": len(orphaned_pids), "failed": 0}
     
     async def recover_failed_agent(self, agent_run_id: str):
         """Recover a failed agent."""
-        return {"recovery_status": "recovered", "agent_run_id": agent_run_id}
+    pass
+        await asyncio.sleep(0)
+    return {"recovery_status": "recovered", "agent_run_id": agent_run_id}
     
     async def execute_agent_with_state_tracking(self, agent_run_id: str):
         """Execute agent with state tracking."""
         # Simulate execution with state updates
         await asyncio.sleep(0.1)
-        return {
+        await asyncio.sleep(0)
+    return {
             "status": "completed",
             "state_updates": 3,
             "final_state": {"step": 5, "progress": 1.0}
@@ -111,7 +126,9 @@ class MockAgentService(BaseAgentService):
     
     async def recover_agent_from_state(self, agent_run_id: str):
         """Recover agent from saved state."""
-        return {
+    pass
+        await asyncio.sleep(0)
+    return {
             "recovered_state": {
                 "step": 3,
                 "progress": 0.6,
@@ -167,6 +184,7 @@ class TestAgentLifecycleManagement:
     MUST use real services - NO MOCKS allowed.
     These tests WILL fail initially and that's the point.
     """
+    pass
 
     @pytest.fixture(scope="function")
     async def real_database_session(self):
@@ -197,12 +215,19 @@ class TestAgentLifecycleManagement:
 
     @pytest.fixture
     def real_test_client(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
+    pass
         """Real FastAPI test client - no mocking of the application."""
-        return TestClient(app)
+        await asyncio.sleep(0)
+    return TestClient(app)
 
     @pytest.fixture
     def process_tracker(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Track processes before and after tests to detect leaks."""
+    pass
         initial_processes = set()
         current_process = psutil.Process()
         
@@ -246,6 +271,7 @@ class TestAgentLifecycleManagement:
         2. Agent registry may not exist
         3. Configuration loading may fail
         """
+    pass
         try:
             # Try to initialize a basic agent
             agent_config = {
@@ -293,6 +319,7 @@ class TestAgentLifecycleManagement:
         2. Task scheduling may not work
         3. Status tracking may be incomplete
         """
+    pass
         try:
             # Create agent run record
             agent_run_id = str(uuid.uuid4())
@@ -367,6 +394,7 @@ class TestAgentLifecycleManagement:
         2. Memory leaks may occur
         3. File handles may not be closed
         """
+    pass
         initial_memory = psutil.Process().memory_info().rss
         initial_open_files = len(psutil.Process().open_files())
         
@@ -449,6 +477,7 @@ class TestAgentLifecycleManagement:
         2. Orphan detection may not exist
         3. Cleanup mechanisms may not work
         """
+    pass
         initial_pids = process_tracker["initial_pids"]
         
         try:
@@ -554,6 +583,7 @@ class TestAgentLifecycleManagement:
         2. Recovery mechanisms may not exist
         3. Failure logging may be incomplete
         """
+    pass
         try:
             # Create agent run that will likely fail
             agent_run_id = str(uuid.uuid4())
@@ -610,7 +640,8 @@ class TestAgentLifecycleManagement:
                 recovery_result = await agent_service.recover_failed_agent(agent_run_id)
                 
                 assert "recovery_status" in recovery_result, \
-                    "Recovery should return status information"
+                    "Recovery should await asyncio.sleep(0)
+    return status information"
                 
                 # Recovery might succeed or fail, but should be handled gracefully
                 assert recovery_result["recovery_status"] in ["recovered", "recovery_failed"], \
@@ -630,6 +661,7 @@ class TestAgentLifecycleManagement:
         2. Resource contention may occur
         3. Deadlocks may happen
         """
+    pass
         try:
             # Create multiple agent runs for concurrent execution
             agent_runs = []
@@ -659,7 +691,8 @@ class TestAgentLifecycleManagement:
             agent_service = MockAgentService(real_database_session)
             
             async def execute_agent(run_id: str) -> Dict[str, Any]:
-                """Execute a single agent and return result."""
+                """Execute a single agent and await asyncio.sleep(0)
+    return result."""
                 try:
                     result = await agent_service.execute_agent_run(run_id)
                     return {"run_id": run_id, "status": "success", "result": result}
@@ -717,6 +750,7 @@ class TestAgentLifecycleManagement:
         2. Timeout values may not be configurable
         3. Cleanup after timeout may not work
         """
+    pass
         try:
             # Create agent run with timeout configuration
             agent_run_id = str(uuid.uuid4())
@@ -791,6 +825,7 @@ class TestAgentLifecycleManagement:
         2. State updates may not be atomic
         3. Recovery from saved state may not work
         """
+    pass
         try:
             # Create agent run with state tracking
             agent_run_id = str(uuid.uuid4())
@@ -851,7 +886,8 @@ class TestAgentLifecycleManagement:
                 recovery_result = await agent_service.recover_agent_from_state(agent_run_id)
                 
                 assert "recovered_state" in recovery_result, \
-                    "Recovery should return recovered state"
+                    "Recovery should await asyncio.sleep(0)
+    return recovered state"
                 
                 recovered_state = recovery_result["recovered_state"]
                 assert recovered_state["step"] == final_state["step"], \

@@ -6,8 +6,9 @@ Tests various scenarios for thread creation, loading, and user_id validation.
 import pytest
 import time
 import uuid
-from unittest.mock import Mock, AsyncMock, patch, MagicMock
 from fastapi import HTTPException
+from test_framework.database.test_database_manager import TestDatabaseManager
+from shared.isolated_environment import IsolatedEnvironment
 
 from netra_backend.app.routes.utils.thread_validators import (
     validate_thread_access,
@@ -31,7 +32,7 @@ class TestThreadValidation:
     
     def test_validate_thread_access_with_string_ids(self):
         """Test validation with string user IDs."""
-        thread = Mock()
+        thread = thread_instance  # Initialize appropriate service
         thread.id = "thread_123"
         thread.metadata_ = {"user_id": "user_456"}
         
@@ -45,7 +46,7 @@ class TestThreadValidation:
     
     def test_validate_thread_access_with_integer_ids(self):
         """Test validation with integer user IDs that get normalized."""
-        thread = Mock()
+        thread = thread_instance  # Initialize appropriate service
         thread.id = "thread_123"
         thread.metadata_ = {"user_id": 456}  # Integer in metadata
         
@@ -56,7 +57,7 @@ class TestThreadValidation:
     def test_validate_thread_access_with_uuid_ids(self):
         """Test validation with UUID user IDs."""
         user_uuid = uuid.uuid4()
-        thread = Mock()
+        thread = thread_instance  # Initialize appropriate service
         thread.id = "thread_123"
         thread.metadata_ = {"user_id": str(user_uuid)}
         
@@ -66,7 +67,7 @@ class TestThreadValidation:
     
     def test_validate_thread_access_with_whitespace(self):
         """Test validation handles whitespace in IDs."""
-        thread = Mock()
+        thread = thread_instance  # Initialize appropriate service
         thread.id = "thread_123"
         thread.metadata_ = {"user_id": "  user_456  "}
         
@@ -76,7 +77,7 @@ class TestThreadValidation:
     
     def test_validate_thread_access_missing_metadata(self):
         """Test validation with missing metadata."""
-        thread = Mock()
+        thread = thread_instance  # Initialize appropriate service
         thread.id = "thread_123"
         thread.metadata_ = None
         
@@ -87,7 +88,7 @@ class TestThreadValidation:
     
     def test_validate_thread_access_missing_user_id(self):
         """Test validation with missing user_id in metadata."""
-        thread = Mock()
+        thread = thread_instance  # Initialize appropriate service
         thread.id = "thread_123"
         thread.metadata_ = {"title": "Test Thread"}  # No user_id
         
@@ -102,7 +103,7 @@ class TestThreadCreation:
     
     def test_prepare_thread_metadata_string_user_id(self):
         """Test metadata preparation with string user ID."""
-        thread_data = Mock()
+        thread_data = thread_data_instance  # Initialize appropriate service
         thread_data.metadata = None
         thread_data.title = "Test Thread"
         
@@ -115,7 +116,7 @@ class TestThreadCreation:
     
     def test_prepare_thread_metadata_integer_user_id(self):
         """Test metadata preparation with integer user ID."""
-        thread_data = Mock()
+        thread_data = thread_data_instance  # Initialize appropriate service
         thread_data.metadata = None
         thread_data.title = None
         
@@ -126,7 +127,7 @@ class TestThreadCreation:
     
     def test_prepare_thread_metadata_uuid_user_id(self):
         """Test metadata preparation with UUID user ID."""
-        thread_data = Mock()
+        thread_data = thread_data_instance  # Initialize appropriate service
         thread_data.metadata = {"custom": "value"}
         thread_data.title = None
         
@@ -138,7 +139,7 @@ class TestThreadCreation:
     
     def test_prepare_thread_metadata_with_whitespace(self):
         """Test metadata preparation strips whitespace from user_id."""
-        thread_data = Mock()
+        thread_data = thread_data_instance  # Initialize appropriate service
         thread_data.metadata = None
         thread_data.title = None
         
@@ -153,11 +154,11 @@ class TestThreadUpdate:
     @pytest.mark.asyncio
     async def test_update_thread_metadata_preserves_user_id(self):
         """Test that thread updates cannot change user_id."""
-        thread = Mock()
+        thread = thread_instance  # Initialize appropriate service
         thread.id = "thread_123"
         thread.metadata_ = {"user_id": "original_user", "title": "Old Title"}
         
-        thread_update = Mock()
+        thread_update = thread_update_instance  # Initialize appropriate service
         thread_update.title = "New Title"
         thread_update.metadata = {"user_id": "hacker_user", "custom": "value"}
         
@@ -175,11 +176,11 @@ class TestThreadUpdate:
     @pytest.mark.asyncio
     async def test_update_thread_metadata_normalizes_user_id(self):
         """Test that existing user_id gets normalized during update."""
-        thread = Mock()
+        thread = thread_instance  # Initialize appropriate service
         thread.id = "thread_123"
         thread.metadata_ = {"user_id": 123}  # Integer user_id
         
-        thread_update = Mock()
+        thread_update = thread_update_instance  # Initialize appropriate service
         thread_update.title = None
         thread_update.metadata = {"custom": "value"}
         
@@ -197,16 +198,16 @@ class TestThreadHandlers:
         """Test thread creation handler."""
         with patch('netra_backend.app.routes.utils.thread_handlers.create_thread_record') as mock_create:
             with patch('netra_backend.app.routes.utils.thread_handlers.build_thread_response') as mock_build:
-                mock_thread = Mock()
+                mock_thread = mock_thread_instance  # Initialize appropriate service
                 mock_thread.id = "thread_123"
                 mock_create.return_value = mock_thread
                 mock_build.return_value = {"id": "thread_123", "object": "thread"}
                 
-                thread_data = Mock()
+                thread_data = thread_data_instance  # Initialize appropriate service
                 thread_data.metadata = None
                 thread_data.title = "Test Thread"
                 
-                db = AsyncMock()
+                db = AsyncNone  # TODO: Use real service instance
                 result = await handle_create_thread_request(db, thread_data, "user_456")
                 
                 assert result["id"] == "thread_123"
@@ -222,7 +223,7 @@ class TestThreadHandlers:
         with patch('netra_backend.app.routes.utils.thread_handlers.get_thread_with_validation') as mock_validate:
             with patch('netra_backend.app.routes.utils.thread_handlers.MessageRepository') as mock_repo:
                 with patch('netra_backend.app.routes.utils.thread_handlers.build_thread_response') as mock_build:
-                    mock_thread = Mock()
+                    mock_thread = mock_thread_instance  # Initialize appropriate service
                     mock_thread.id = "thread_123"
                     mock_thread.metadata_ = {"user_id": "user_456"}
                     mock_validate.return_value = mock_thread
@@ -230,7 +231,7 @@ class TestThreadHandlers:
                     mock_repo.return_value.count_by_thread = AsyncMock(return_value=5)
                     mock_build.return_value = {"id": "thread_123", "message_count": 5}
                     
-                    db = AsyncMock()
+                    db = AsyncNone  # TODO: Use real service instance
                     result = await handle_get_thread_request(db, "thread_123", "user_456")
                     
                     assert result["id"] == "thread_123"
@@ -242,7 +243,7 @@ class TestThreadHandlers:
         """Test message retrieval with thread validation."""
         with patch('netra_backend.app.routes.utils.thread_handlers.get_thread_with_validation') as mock_validate:
             with patch('netra_backend.app.routes.utils.thread_handlers.build_thread_messages_response') as mock_build:
-                mock_thread = Mock()
+                mock_thread = mock_thread_instance  # Initialize appropriate service
                 mock_thread.id = "thread_123"
                 mock_validate.return_value = mock_thread
                 
@@ -252,7 +253,7 @@ class TestThreadHandlers:
                     "total": 1
                 }
                 
-                db = AsyncMock()
+                db = AsyncNone  # TODO: Use real service instance
                 result = await handle_get_messages_request(db, "thread_123", "user_456", 50, 0)
                 
                 assert result["thread_id"] == "thread_123"
@@ -277,7 +278,7 @@ class TestEdgeCases:
     
     def test_validate_thread_access_with_special_characters(self):
         """Test validation with special characters in user_id."""
-        thread = Mock()
+        thread = thread_instance  # Initialize appropriate service
         thread.id = "thread_123"
         thread.metadata_ = {"user_id": "user@domain.com"}
         

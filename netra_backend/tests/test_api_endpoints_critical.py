@@ -7,6 +7,7 @@ Each module contains specific test categories with 25-line maximum functions.
 
 import sys
 from pathlib import Path
+from shared.isolated_environment import IsolatedEnvironment
 
 # Import all critical API tests from focused modules
 from netra_backend.tests.test_api_agent_generation_critical import (

@@ -10,6 +10,11 @@ from netra_backend.app.websocket_core.manager import WebSocketManager
 # Test framework import - using pytest fixtures instead
 from pathlib import Path
 import sys
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from test_framework.database.test_database_manager import TestDatabaseManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 import asyncio
 import gc
@@ -17,7 +22,6 @@ import statistics
 import time
 from concurrent.futures import ThreadPoolExecutor
 from typing import Any, Dict, List, Optional, Tuple
-from unittest.mock import AsyncMock, MagicMock, Mock, patch, patch
 
 import psutil
 import pytest
@@ -51,7 +55,7 @@ class AgentLoadTestFixtures:
             'websocket_manager': AsyncMock(spec=WebSocketManager),
 
             # Mock: Session isolation for controlled testing without external state
-            'db_session': AsyncMock()
+            'db_session': AsyncNone  # TODO: Use real service instance
 
         }
     
@@ -405,7 +409,7 @@ class TestAgentLoadScenarios:
             agent = SupervisorAgent(
 
                 # Mock: Generic component isolation for controlled unit testing
-                AsyncMock(), AsyncMock(), AsyncMock(), AsyncMock()
+                AsyncNone  # TODO: Use real service instance, AsyncNone  # TODO: Use real service instance, AsyncNone  # TODO: Use real service instance, AsyncNone  # TODO: Use real service instance
 
             )
 

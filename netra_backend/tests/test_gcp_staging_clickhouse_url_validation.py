@@ -14,8 +14,8 @@ Issues replicated:
 
 import pytest
 import re
-from unittest.mock import patch, MagicMock
 from urllib.parse import urlparse, ParseResult
+from test_framework.database.test_database_manager import TestDatabaseManager
 
 from netra_backend.app.db.clickhouse import ClickHouseDatabase
 from shared.isolated_environment import IsolatedEnvironment
@@ -297,7 +297,7 @@ class TestClickHouseConnectionValidation:
         # Mock ClickHouse client to avoid external dependency
         with patch('clickhouse_connect.get_client') as mock_get_client:
             # Should fail before reaching the client due to URL validation
-            mock_client = MagicMock()
+            mock_client = MagicNone  # TODO: Use real service instance
             mock_get_client.return_value = mock_client
             
             with pytest.raises(ValueError) as exc_info:

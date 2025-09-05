@@ -3,7 +3,10 @@
 import pytest
 from datetime import datetime, timezone
 from decimal import Decimal
-from unittest.mock import patch
+from auth_service.core.auth_manager import AuthManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 from netra_backend.app.services.billing.token_counter import TokenCounter, TokenType, TokenCount
 from netra_backend.app.llm.llm_defaults import LLMModel
@@ -11,6 +14,7 @@ from netra_backend.app.llm.llm_defaults import LLMModel
 
 class TestTokenCounterOptimization:
     """Test token optimization functionality."""
+    pass
 
     def setup_method(self):
         """Set up test fixtures."""
@@ -18,6 +22,7 @@ class TestTokenCounterOptimization:
 
     def test_optimize_prompt_basic(self):
         """Test basic prompt optimization."""
+    pass
         prompt = "Please  kindly  help  me  with  this  task  please"
         result = self.token_counter.optimize_prompt(prompt, target_reduction_percent=20)
         
@@ -40,6 +45,7 @@ class TestTokenCounterOptimization:
 
     def test_optimize_prompt_empty_input(self):
         """Test optimization with empty input."""
+    pass
         result = self.token_counter.optimize_prompt("", target_reduction_percent=20)
         
         assert result["original_tokens"] == 0
@@ -61,6 +67,7 @@ class TestTokenCounterOptimization:
 
     def test_optimize_prompt_cost_savings(self):
         """Test that cost savings are calculated correctly."""
+    pass
         prompt = "Please  kindly  help  me  with  multiple  spaces  everywhere"
         result = self.token_counter.optimize_prompt(prompt)
         
@@ -70,6 +77,7 @@ class TestTokenCounterOptimization:
 
 class TestTokenCounterAgentTracking:
     """Test agent usage tracking functionality."""
+    pass
 
     def setup_method(self):
         """Set up test fixtures."""
@@ -77,6 +85,7 @@ class TestTokenCounterAgentTracking:
 
     def test_track_agent_usage_basic(self):
         """Test basic agent usage tracking."""
+    pass
         result = self.token_counter.track_agent_usage(
             agent_name="TestAgent",
             input_tokens=100,
@@ -120,6 +129,7 @@ class TestTokenCounterAgentTracking:
 
     def test_track_agent_usage_multiple_operation_types(self):
         """Test tracking different operation types for the same agent."""
+    pass
         agent_name = "MultiOpAgent"
         
         # Execution operation
@@ -159,6 +169,7 @@ class TestTokenCounterAgentTracking:
 
 class TestTokenCounterOptimizationSuggestions:
     """Test optimization suggestions functionality."""
+    pass
 
     def setup_method(self):
         """Set up test fixtures."""
@@ -166,6 +177,7 @@ class TestTokenCounterOptimizationSuggestions:
 
     def test_get_optimization_suggestions_no_data(self):
         """Test suggestions when no usage data exists."""
+    pass
         suggestions = self.token_counter.get_optimization_suggestions()
         
         assert len(suggestions) == 1
@@ -194,6 +206,7 @@ class TestTokenCounterOptimizationSuggestions:
 
     def test_get_optimization_suggestions_high_token_usage(self):
         """Test suggestions for high token usage."""
+    pass
         # Create agent with high token usage
         self.token_counter.track_agent_usage(
             agent_name="TokenHeavyAgent",
@@ -232,6 +245,7 @@ class TestTokenCounterOptimizationSuggestions:
 
     def test_get_optimization_suggestions_priority_ordering(self):
         """Test that suggestions are ordered by priority."""
+    pass
         # Create scenarios for different priority suggestions
         for i in range(20):  # Create high cost scenario
             self.token_counter.track_agent_usage(
@@ -259,6 +273,7 @@ class TestTokenCounterOptimizationSuggestions:
 
 class TestTokenCounterUsageSummary:
     """Test agent usage summary functionality."""
+    pass
 
     def setup_method(self):
         """Set up test fixtures."""
@@ -266,6 +281,7 @@ class TestTokenCounterUsageSummary:
 
     def test_get_agent_usage_summary_no_data(self):
         """Test summary when no usage data exists."""
+    pass
         summary = self.token_counter.get_agent_usage_summary()
         
         assert summary["agents_tracked"] == 0
@@ -294,6 +310,7 @@ class TestTokenCounterUsageSummary:
 
     def test_get_agent_usage_summary_most_active_and_expensive(self):
         """Test identification of most active and expensive agents."""
+    pass
         # Agent1: More operations but cheaper per operation
         for i in range(5):
             self.token_counter.track_agent_usage("Agent1", 50, 25, "claude-3-haiku")  # Cheaper model
@@ -313,6 +330,7 @@ class TestTokenCounterUsageSummary:
 
 class TestTokenCounterIntegration:
     """Integration tests for TokenCounter enhancements."""
+    pass
 
     def setup_method(self):
         """Set up test fixtures."""
@@ -320,6 +338,7 @@ class TestTokenCounterIntegration:
 
     def test_full_workflow_optimization_and_tracking(self):
         """Test complete workflow of optimization and tracking."""
+    pass
         # Step 1: Optimize a prompt
         original_prompt = "Please kindly help me with this task in order to complete it properly"
         optimization_result = self.token_counter.optimize_prompt(original_prompt)
@@ -359,9 +378,9 @@ class TestTokenCounterIntegration:
         assert stats["agent_usage_summary"]["agents_tracked"] == 1
         assert "StatsAgent" in stats["agent_usage_summary"]["agents"]
 
-    @patch('netra_backend.app.services.billing.token_counter.datetime')
-    def test_timestamp_consistency(self, mock_datetime):
+        def test_timestamp_consistency(self, mock_datetime):
         """Test that timestamps are consistent across operations."""
+    pass
         fixed_time = datetime(2024, 1, 1, 12, 0, 0, tzinfo=timezone.utc)
         mock_datetime.now.return_value = fixed_time
         

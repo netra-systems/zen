@@ -7,6 +7,8 @@ Provides comprehensive performance metrics and benchmark data.
 
 import sys
 from pathlib import Path
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from shared.isolated_environment import IsolatedEnvironment
 
 # Test framework import - using pytest fixtures instead
 
@@ -14,7 +16,6 @@ import asyncio
 import time
 import uuid
 from typing import List
-from unittest.mock import patch, AsyncMock, MagicMock
 
 import psutil
 import pytest
@@ -43,7 +44,7 @@ class TestBenchmarkMetrics:
             
             # Mock: WebSocket manager isolation for testing without external dependencies
             with patch('netra_backend.app.services.generation_job_manager.manager') as mock_manager:
-                mock_manager.broadcast_to_job = AsyncMock()
+                mock_manager.broadcast_to_job = AsyncNone  # TODO: Use real service instance
                 
                 job_id = str(uuid.uuid4())
                 await run_content_generation_job(job_id, perf_params.model_dump())
@@ -151,7 +152,7 @@ class TestBenchmarkMetrics:
             
             # Mock: WebSocket manager isolation for testing without external dependencies
             with patch('netra_backend.app.services.generation_job_manager.manager') as mock_manager:
-                mock_manager.broadcast_to_job = AsyncMock()
+                mock_manager.broadcast_to_job = AsyncNone  # TODO: Use real service instance
                 
                 job_id = str(uuid.uuid4())
                 await run_content_generation_job(job_id, perf_params.model_dump())
@@ -193,7 +194,7 @@ class TestBenchmarkMetrics:
                 
                 # Mock: WebSocket manager isolation for testing without external dependencies
                 with patch('netra_backend.app.services.generation_job_manager.manager') as mock_manager:
-                    mock_manager.broadcast_to_job = AsyncMock()
+                    mock_manager.broadcast_to_job = AsyncNone  # TODO: Use real service instance
                     
                     start_time = time.perf_counter()
                     job_id = str(uuid.uuid4())

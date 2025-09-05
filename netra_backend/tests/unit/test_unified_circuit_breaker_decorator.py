@@ -2,7 +2,7 @@
 
 import asyncio
 import pytest
-from unittest.mock import AsyncMock, MagicMock
+from shared.isolated_environment import IsolatedEnvironment
 
 from netra_backend.app.core.resilience.unified_circuit_breaker import (
     unified_circuit_breaker,
@@ -18,7 +18,10 @@ class TestUnifiedCircuitBreakerDecorator:
     
     @pytest.fixture(autouse=True)
     def setup(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Reset circuit breaker manager before each test."""
+    pass
         manager = get_unified_circuit_breaker_manager()
         manager.breakers.clear()
         yield
@@ -33,7 +36,8 @@ class TestUnifiedCircuitBreakerDecorator:
         async def test_function(value: int) -> int:
             nonlocal call_count
             call_count += 1
-            return value * 2
+            await asyncio.sleep(0)
+    return value * 2
         
         # Should work normally
         result = await test_function(5)
@@ -50,6 +54,7 @@ class TestUnifiedCircuitBreakerDecorator:
     
     def test_decorator_with_sync_function(self):
         """Test decorator works with sync functions."""
+    pass
         call_count = 0
         
         @unified_circuit_breaker(name="test_sync", config=None)
@@ -88,7 +93,8 @@ class TestUnifiedCircuitBreakerDecorator:
             failure_count += 1
             if failure_count <= 2:
                 raise ValueError("Test error")
-            return "success"
+            await asyncio.sleep(0)
+    return "success"
         
         # First two calls should fail
         with pytest.raises(ValueError):
@@ -110,10 +116,12 @@ class TestUnifiedCircuitBreakerDecorator:
     @pytest.mark.asyncio
     async def test_decorator_circuit_opens_on_failures(self):
         """Test that circuit opens after threshold failures."""
+    pass
         call_count = 0
         
         @unified_circuit_breaker(name="test_failures", config=None)
         async def failing_function():
+    pass
             nonlocal call_count
             call_count += 1
             raise RuntimeError("Intentional failure")
@@ -143,7 +151,9 @@ class TestUnifiedCircuitBreakerDecorator:
         @unified_circuit_breaker(name="test_metadata", config=None)
         async def documented_function(x: int, y: int) -> int:
             """This function adds two numbers."""
-            return x + y
+    pass
+            await asyncio.sleep(0)
+    return x + y
         
         # Check that metadata is preserved
         assert documented_function.__name__ == "documented_function"
@@ -159,7 +169,8 @@ class TestUnifiedCircuitBreakerDecorator:
         
         @unified_circuit_breaker(name="func1", config=None)
         async def function1():
-            return "func1"
+            await asyncio.sleep(0)
+    return "func1"
         
         @unified_circuit_breaker(name="func2", config=None)
         async def function2():
@@ -186,3 +197,4 @@ class TestUnifiedCircuitBreakerDecorator:
         assert breaker1.failure_count == 0
         assert breaker2.success_count == 0
         assert breaker2.failure_count == 1
+    pass

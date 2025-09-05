@@ -9,6 +9,7 @@ Tests basic service discovery functionality without external dependencies.
 
 import pytest
 from netra_backend.app.services.discovery import ServiceRegistry, HealthMonitor, ServiceDiscovery
+from shared.isolated_environment import IsolatedEnvironment
 
 @pytest.mark.smoke
 class TestServiceDiscoveryBasic:

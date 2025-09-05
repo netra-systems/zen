@@ -1,4 +1,6 @@
 from shared.isolated_environment import get_env
+from test_framework.redis.test_redis_manager import TestRedisManager
+from shared.isolated_environment import IsolatedEnvironment
 """Redis Connection Staging Issues - Failing Tests
 
 Tests that expose Redis connection failures found during GCP staging logs audit.
@@ -29,7 +31,6 @@ Test Categories:
 import os
 import pytest
 import asyncio
-from unittest.mock import patch, MagicMock, AsyncMock
 from netra_backend.app.redis_manager import RedisManager
 from netra_backend.app.core.configuration.base import get_unified_config
 
@@ -238,7 +239,7 @@ class TestRedisConnectionStagingFailures:
         with patch.dict(os.environ, staging_env, clear=True):
             # Mock Redis connection to focus on environment detection issue
             with patch('redis.Redis') as mock_redis:
-                mock_redis_instance = MagicMock()
+                mock_redis_instance = MagicNone  # TODO: Use real service instance
                 mock_redis_instance.ping.return_value = True
                 mock_redis.return_value = mock_redis_instance
                 
@@ -381,7 +382,7 @@ class TestRedisConnectionScopingEdgeCases:
             
             # Mock Redis to fail initially, then succeed
             with patch('redis.Redis') as mock_redis:
-                mock_redis_instance = MagicMock()
+                mock_redis_instance = MagicNone  # TODO: Use real service instance
                 # First two calls fail, third succeeds
                 mock_redis_instance.ping.side_effect = [ConnectionError("Connection failed")] * 2 + [True]
                 mock_redis.return_value = mock_redis_instance

@@ -13,20 +13,21 @@ migration execution, and recovery mechanisms in staging environment.
 
 import sys
 from pathlib import Path
+from test_framework.database.test_database_manager import TestDatabaseManager
+from test_framework.redis.test_redis_manager import TestRedisManager
+from shared.isolated_environment import IsolatedEnvironment
 
 # Test framework import - using pytest fixtures instead
 
 import asyncio
 import time
 from typing import Dict, List, Optional
-from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 from sqlalchemy.exc import DisconnectionError, OperationalError, TimeoutError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 # Database test fixtures - using mocks
-from unittest.mock import Mock, AsyncMock, MagicMock
 DatabaseErrorSimulator = Mock
 MockConnectionPool = Mock
 async_session_mock = AsyncMock
@@ -77,6 +78,8 @@ class StagingDatabaseResilience:
 
 @pytest.fixture
 def staging_db_resilience():
+    """Use real service instance."""
+    # TODO: Initialize real service
     """Create staging database resilience tester."""
     return StagingDatabaseResilience()
 
@@ -228,7 +231,7 @@ class TestStagingDatabaseConnectionResilience:
             # Simulate recovery after reconnection
 # COMMENTED OUT: Mock-dependent test -             async_session_mock.execute.side_effect = None
             # Mock: Session isolation for controlled testing without external state
-# COMMENTED OUT: Mock-dependent test -             async_session_mock.execute.return_value = Mock()
+# COMMENTED OUT: Mock-dependent test -             async_session_mock.execute.return_value = return_value_instance  # Initialize appropriate service
 # COMMENTED OUT: Mock-dependent test -             
             # Verify connection works after recovery
 # COMMENTED OUT: Mock-dependent test -             result = await async_session_mock.execute("SELECT 1")
@@ -325,7 +328,7 @@ class TestStagingDatabaseConnectionResilience:
         # Test successful retry after timeout resolution
 # COMMENTED OUT: Mock-dependent test -         async_session_mock.execute.side_effect = None
         # Mock: Session isolation for controlled testing without external state
-# COMMENTED OUT: Mock-dependent test -         async_session_mock.execute.return_value = Mock()
+# COMMENTED OUT: Mock-dependent test -         async_session_mock.execute.return_value = return_value_instance  # Initialize appropriate service
 # COMMENTED OUT: Mock-dependent test -         
 # COMMENTED OUT: Mock-dependent test -         result = await async_session_mock.execute("SELECT 1")
 # COMMENTED OUT: Mock-dependent test -         assert result is not None

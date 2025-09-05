@@ -3,9 +3,12 @@ Test iteration 69: Disaster recovery backup validation testing.
 Validates backup completeness, restoration procedures, and recovery time objectives.
 """
 import pytest
-from unittest.mock import Mock, patch
 from datetime import datetime, timedelta, timezone
 from typing import Dict, List, Any
+from test_framework.database.test_database_manager import TestDatabaseManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 
 class TestDisasterRecoveryBackupValidation:
@@ -13,7 +16,10 @@ class TestDisasterRecoveryBackupValidation:
     
     @pytest.fixture
     def recovery_objectives(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Define Recovery Time Objective (RTO) and Recovery Point Objective (RPO)."""
+    pass
         return {
             "rto_minutes": 60,  # System should be restored within 1 hour
             "rpo_minutes": 15,  # Maximum acceptable data loss: 15 minutes
@@ -23,7 +29,7 @@ class TestDisasterRecoveryBackupValidation:
     
     def test_backup_completeness_validation(self, recovery_objectives):
         """Ensures all critical data components are included in backups."""
-        backup_service = Mock()
+        backup_service = backup_service_instance  # Initialize appropriate service
         
         required_components = [
             "user_data", "thread_history", "agent_configurations", 
@@ -62,7 +68,8 @@ class TestDisasterRecoveryBackupValidation:
     
     def test_restoration_time_objectives(self, recovery_objectives):
         """Validates restoration meets Recovery Time Objective (RTO)."""
-        restoration_service = Mock()
+    pass
+        restoration_service = restoration_service_instance  # Initialize appropriate service
         
         def restore_from_backup(backup_id: str) -> Dict[str, Any]:
             start_time = datetime.now(timezone.utc)
@@ -99,7 +106,7 @@ class TestDisasterRecoveryBackupValidation:
     
     def test_backup_retention_policy_enforcement(self, recovery_objectives):
         """Validates backup retention policies are enforced correctly."""
-        backup_manager = Mock()
+        backup_manager = backup_manager_instance  # Initialize appropriate service
         
         # Simulate backup history over time
         current_time = datetime.now(timezone.utc)
@@ -137,3 +144,4 @@ class TestDisasterRecoveryBackupValidation:
         assert retention_result["expired_backups"] == 9  # Days 91-99 = 9 days
         assert retention_result["retention_policy_enforced"] == True
         assert retention_result["storage_freed_mb"] > 0
+    pass

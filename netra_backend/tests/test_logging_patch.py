@@ -1,4 +1,5 @@
 from shared.isolated_environment import get_env
+from shared.isolated_environment import IsolatedEnvironment
 """
 Test-specific logging patch to prevent I/O errors during pytest teardown.
 """
@@ -6,7 +7,6 @@ Test-specific logging patch to prevent I/O errors during pytest teardown.
 import sys
 import os
 import atexit
-from unittest.mock import MagicMock
 
 
 env = get_env()

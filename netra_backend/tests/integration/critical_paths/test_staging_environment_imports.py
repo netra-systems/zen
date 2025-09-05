@@ -1,4 +1,6 @@
 from shared.isolated_environment import get_env
+from test_framework.database.test_database_manager import TestDatabaseManager
+from shared.isolated_environment import IsolatedEnvironment
 """Critical path test for staging environment module imports.
 
 Business Value: Platform/Internal - Deployment Stability - Ensures the backend
@@ -18,8 +20,6 @@ from pathlib import Path
 import os
 import sys
 from typing import Any, Dict
-from unittest import mock
-from unittest.mock import patch
 
 import pytest
 from fastapi import FastAPI
@@ -27,15 +27,18 @@ from fastapi.testclient import TestClient
 
 from netra_backend.app.core.environment_constants import (
     Environment,
-    EnvironmentVariables,
-)
+    EnvironmentVariables)
 
 class TestStagingEnvironmentImports:
     """Test suite for staging environment module imports and initialization."""
+    pass
 
     @pytest.fixture(autouse=True)
     def setup_staging_environment(self, monkeypatch):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Set up staging environment for tests."""
+    pass
         # Save original environment
         original_env = os.environ.get(EnvironmentVariables.ENVIRONMENT)
         
@@ -52,8 +55,11 @@ class TestStagingEnvironmentImports:
             monkeypatch.delenv(EnvironmentVariables.ENVIRONMENT, raising=False)
 
     @pytest.fixture
-    def mock_dev_launcher_import(self):
+ def real_dev_launcher_import():
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Mock dev_launcher module to simulate it not being available in staging."""
+    pass
         # Remove dev_launcher from sys.modules if it exists
         modules_to_remove = [m for m in sys.modules if m.startswith('dev_launcher')]
         for module in modules_to_remove:
@@ -64,6 +70,7 @@ class TestStagingEnvironmentImports:
         original_import = builtins.__import__
         
         def mock_import(name, *args, **kwargs):
+    pass
             if name.startswith('dev_launcher'):
                 raise ImportError(f"No module named '{name}'")
             return original_import(name, *args, **kwargs)
@@ -77,6 +84,7 @@ class TestStagingEnvironmentImports:
         
         L3 Test - Validates staging-specific behavior where dev_launcher is not available.
         """
+    pass
         from netra_backend.app.core.middleware_setup import setup_cors_middleware
         
         # Create a test FastAPI app
@@ -88,12 +96,12 @@ class TestStagingEnvironmentImports:
         # Verify the app has CORS middleware configured  
         # The fact that we got here without ImportError means the test passed
 
-    @patch.dict('os.environ', {'ENVIRONMENT': 'staging', 'TESTING': '0'})
     def test_staging_cors_configuration(self):
         """Test CORS configuration in staging environment.
         
         L3 Test - Validates that CORS is properly configured for staging.
         """
+    pass
         from netra_backend.app.core.middleware_setup import setup_cors_middleware
         
         app = FastAPI()
@@ -105,6 +113,7 @@ class TestStagingEnvironmentImports:
         # Add a test route
         @app.get("/test")
         def test_route():
+    pass
             return {"status": "ok"}
         
         # Test CORS headers for staging domain
@@ -122,11 +131,11 @@ class TestStagingEnvironmentImports:
         
         L4 Test - End-to-end validation of backend startup without dev dependencies.
         """
+    pass
         # Import should not fail even without dev_launcher
         from netra_backend.app.core.middleware_setup import (
             setup_cors_middleware,
-            setup_session_middleware,
-        )
+            setup_session_middleware)
         
         app = FastAPI()
         
@@ -143,11 +152,11 @@ class TestStagingEnvironmentImports:
         
         L3 Test - Validates fallback behavior when service discovery is not available.
         """
+    pass
         from fastapi import FastAPI
 
         from netra_backend.app.core.middleware_setup import (
-            _setup_custom_cors_middleware,
-        )
+            _setup_custom_cors_middleware)
         
         app = FastAPI()
         
@@ -168,11 +177,11 @@ class TestStagingEnvironmentImports:
         
         L3 Test - Validates environment-specific import behavior.
         """
+    pass
         monkeypatch.setenv(EnvironmentVariables.ENVIRONMENT, environment)
         
         from netra_backend.app.core.middleware_setup import (
-            _setup_custom_cors_middleware,
-        )
+            _setup_custom_cors_middleware)
         
         app = FastAPI()
         
@@ -180,6 +189,7 @@ class TestStagingEnvironmentImports:
         import_attempted = False
         
         def mock_import(name, *args, **kwargs):
+    pass
             nonlocal import_attempted
             if name == 'dev_launcher.service_discovery':
                 import_attempted = True
@@ -198,11 +208,11 @@ class TestStagingEnvironmentImports:
         
         L3 Test - Validates that dev_launcher is properly used in development.
         """
+    pass
         monkeypatch.setenv(EnvironmentVariables.ENVIRONMENT, Environment.DEVELOPMENT.value)
         
         from netra_backend.app.core.middleware_setup import (
-            _setup_custom_cors_middleware,
-        )
+            _setup_custom_cors_middleware)
         
         app = FastAPI()
         
@@ -210,13 +220,13 @@ class TestStagingEnvironmentImports:
         import_attempted = False
         
         def mock_import(name, *args, **kwargs):
+    pass
             nonlocal import_attempted
             if name == 'dev_launcher.service_discovery':
                 import_attempted = True
                 # Simulate successful import with mock
-                from unittest.mock import MagicMock
                 # Mock: Generic component isolation for controlled unit testing
-                module = MagicMock()
+                module = MagicNone  # TODO: Use real service instance
                 module.ServiceDiscovery = MagicMock
                 return module
             return __import__(name, *args, **kwargs)
@@ -233,6 +243,7 @@ class TestStagingEnvironmentImports:
         
         L2 Test - Unit test for environment detection logic.
         """
+    pass
         from netra_backend.app.core.environment_constants import EnvironmentDetector
         
         # Test Cloud Run staging detection

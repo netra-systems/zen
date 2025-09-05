@@ -8,6 +8,7 @@ Compliance: <300 lines, 25-line max functions, modular design.
 
 import sys
 from pathlib import Path
+from shared.isolated_environment import IsolatedEnvironment
 
 from netra_backend.tests.test_config_core import (
     ConfigStatusHelper as TestConfigStatus,

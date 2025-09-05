@@ -9,17 +9,18 @@ Shows real-world usage patterns that can replace existing test code.
 
 import sys
 from pathlib import Path
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from test_framework.database.test_database_manager import TestDatabaseManager
+from shared.isolated_environment import IsolatedEnvironment
 
 # Test framework import - using pytest fixtures instead
 
-from unittest.mock import Mock, AsyncMock, MagicMock
 
 import pytest
 
 from netra_backend.tests.fixtures.database_test_fixtures import (
     async_session_mock,
-    clickhouse_mocker,
-    connection_pool,
+    clickhouse_connection_pool,
     create_mock_message,
     create_mock_thread,
     create_mock_user,
@@ -40,11 +41,11 @@ class TestDatabaseFixtureExamples:
         # Mock: Database session isolation for transaction testing without real database dependency
         # session = AsyncMock(spec=AsyncSession)
         # Mock: Session isolation for controlled testing without external state
-        # session.add = Mock()
+        # session.add = add_instance  # Initialize appropriate service
         # Mock: Session isolation for controlled testing without external state
-        # session.commit = AsyncMock()
+        # session.commit = AsyncNone  # TODO: Use real service instance
         # Mock: Session isolation for controlled testing without external state
-        # session.refresh = AsyncMock()
+        # session.refresh = AsyncNone  # TODO: Use real service instance
         
         # NEW WAY (one line):
         # Use async_session_mock fixture directly
@@ -62,7 +63,7 @@ class TestDatabaseFixtureExamples:
         """Example: Replace complex query result mocking."""
         # OLD WAY (complex mock setup):
         # Mock: Generic component isolation for controlled unit testing
-        # mock_result = Mock()
+        # mock_result = mock_result_instance  # Initialize appropriate service
         # mock_result.scalars.return_value.first.return_value = user
         # session.execute.return_value = mock_result
         

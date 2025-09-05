@@ -12,8 +12,10 @@ import json
 import time
 from enum import Enum
 from typing import Dict, List, Optional
-from unittest.mock import AsyncMock, Mock
 from uuid import uuid4
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from auth_service.core.auth_manager import AuthManager
+from shared.isolated_environment import IsolatedEnvironment
 
 import pytest
 
@@ -31,9 +33,12 @@ class TestEventSourcingObservability:
     """Test suite for event sourcing observability patterns."""
     
     @pytest.fixture
-    def mock_event_store(self):
+ def real_event_store():
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create mock event store."""
-        store = Mock()
+    pass
+        store = store_instance  # Initialize appropriate service
         store.events = []
         store.snapshots = {}
         store.append_event = Mock(side_effect=lambda e: store.events.append(e))
@@ -97,6 +102,7 @@ class TestEventSourcingObservability:
     
     def test_event_ordering_validation(self, mock_event_store):
         """Test validation of event ordering and sequence numbers."""
+    pass
         aggregate_id = 'thread-789'
         
         # Events with potential ordering issues
@@ -142,9 +148,12 @@ class TestEventStreamingObservability:
     """Test suite for event streaming observability."""
     
     @pytest.fixture
-    def mock_event_stream(self):
+ def real_event_stream():
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create mock event stream."""
-        stream = Mock()
+    pass
+        stream = stream_instance  # Initialize appropriate service
         stream.partitions = ['partition-0', 'partition-1', 'partition-2']
         stream.consumers = {}
         stream.producers = {}
@@ -214,6 +223,7 @@ class TestEventStreamingObservability:
     
     def test_throughput_monitoring(self, mock_event_stream):
         """Test monitoring of event stream throughput."""
+    pass
         # Simulate throughput data over time
         throughput_data = [
             {'timestamp': 1000, 'events_per_second': 150, 'bytes_per_second': 75000},
@@ -307,8 +317,10 @@ class TestDistributedEventProcessing:
     @pytest.mark.asyncio
     async def test_event_replay_monitoring(self):
         """Test monitoring of event replay operations."""
+    pass
         class EventReplayMonitor:
             def __init__(self):
+    pass
                 self.replay_operations = {}
             
             async def start_replay(self, replay_id: str, from_timestamp: float, to_timestamp: float):
@@ -325,6 +337,7 @@ class TestDistributedEventProcessing:
             
             async def update_replay_progress(self, replay_id: str, current_timestamp: float, events_processed: int, events_failed: int):
                 """Update replay progress."""
+    pass
                 if replay_id in self.replay_operations:
                     operation = self.replay_operations[replay_id]
                     operation['current_timestamp'] = current_timestamp
@@ -365,3 +378,4 @@ class TestDistributedEventProcessing:
         assert operation['events_replayed'] == 15000  # 5000 + 10000
         assert operation['events_failed'] == 15  # 5 + 10
         assert operation['progress_percent'] == 100.0
+    pass

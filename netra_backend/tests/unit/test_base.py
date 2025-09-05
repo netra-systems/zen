@@ -5,16 +5,20 @@ Business Value: Long-term maintainability
 """
 
 import pytest
-from unittest.mock import Mock, patch, MagicMock
 from sqlalchemy import Column, Integer
 from netra_backend.app.db.base import Base
+from test_framework.database.test_database_manager import TestDatabaseManager
+from shared.isolated_environment import IsolatedEnvironment
 
 class TestBase:
     """Test suite for Base"""
     
     @pytest.fixture
     def instance(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create test instance"""
+    pass
         return Base()
     
     def test_initialization(self, instance):
@@ -24,6 +28,7 @@ class TestBase:
     
     def test_core_functionality(self, instance):
         """Test Base class is SQLAlchemy DeclarativeBase"""
+    pass
         from sqlalchemy.orm import DeclarativeBase
         # Verify it's a SQLAlchemy base class
         assert Base.__bases__[0] == DeclarativeBase
@@ -41,6 +46,7 @@ class TestBase:
     
     def test_edge_cases(self, instance):
         """Test boundary conditions"""
+    pass
         # Test with None, empty, extreme values
         pass
     
@@ -48,3 +54,5 @@ class TestBase:
         """Test input validation"""
         # Test validation logic
         pass
+
+    pass

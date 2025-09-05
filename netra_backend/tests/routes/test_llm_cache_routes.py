@@ -5,8 +5,9 @@ Tests for cache invalidation and metrics - app/routes/llm_cache.py
 
 import sys
 from pathlib import Path
+from test_framework.redis.test_redis_manager import TestRedisManager
+from shared.isolated_environment import IsolatedEnvironment
 
-from unittest.mock import patch, AsyncMock, MagicMock
 
 import pytest
 

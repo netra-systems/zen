@@ -6,6 +6,7 @@ Prevents schema type mismatches with database.
 
 import sys
 from pathlib import Path
+from shared.isolated_environment import IsolatedEnvironment
 
 from datetime import UTC, datetime
 

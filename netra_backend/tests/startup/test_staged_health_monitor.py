@@ -6,12 +6,12 @@ COMPLIANCE: 450-line max file, 25-line max functions, async test support.
 
 import sys
 from pathlib import Path
+from shared.isolated_environment import IsolatedEnvironment
 
 import asyncio
 import time
 from datetime import datetime, timedelta
 from typing import Callable, Dict, List, Optional
-from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 
@@ -23,8 +23,7 @@ from netra_backend.tests.startup.mock_health_monitor import (
     StageConfig,
     StagedHealthMonitor,
     create_process_health_check,
-    create_url_health_check,
-)
+    create_url_health_check)
 
 @pytest.fixture
 def health_monitor() -> StagedHealthMonitor:
@@ -46,7 +45,7 @@ def mock_service_config() -> ServiceConfig:
 def mock_process() -> Mock:
     """Create mock process for testing."""
     # Mock: Generic component isolation for controlled unit testing
-    process = Mock()
+    process = process_instance  # Initialize appropriate service
     process.poll.return_value = None  # Running process
     return process
 
@@ -174,7 +173,7 @@ class TestServiceRegistration:
         
         # Create mock monitoring task
         # Mock: Generic component isolation for controlled unit testing
-        mock_task = Mock()
+        mock_task = mock_task_instance  # Initialize appropriate service
         health_monitor._monitoring_tasks["test_service"] = mock_task
         
         # Unregister
@@ -206,7 +205,7 @@ class TestMonitoringLifecycle:
         # Mock: Component isolation for testing without external dependencies
         with patch('asyncio.create_task') as mock_create_task:
             # Mock: Generic component isolation for controlled unit testing
-            mock_task = Mock()
+            mock_task = mock_task_instance  # Initialize appropriate service
             mock_create_task.return_value = mock_task
             
             await health_monitor.start_monitoring("test_service")
@@ -218,14 +217,16 @@ class TestMonitoringLifecycle:
     async def test_stop_monitoring(self, health_monitor: StagedHealthMonitor) -> None:
         """Test stopping all monitoring tasks."""
         # Mock: Generic component isolation for controlled unit testing
-        mock_task1 = Mock()
+        mock_task1 = mock_task1_instance  # Initialize appropriate service
         # Mock: Generic component isolation for controlled unit testing
-        mock_task2 = Mock()
+        mock_task2 = mock_task2_instance  # Initialize appropriate service
         health_monitor._monitoring_tasks = {"service1": mock_task1, "service2": mock_task2}
         health_monitor._running = True
         
         async def mock_gather_func(*args, **kwargs):
-            return []
+    pass
+            await asyncio.sleep(0)
+    return []
         
         # Mock: Component isolation for testing without external dependencies
         with patch('asyncio.gather', side_effect=mock_gather_func):
@@ -270,6 +271,7 @@ class TestHealthChecks:
     async def test_check_service_health_exception(self, health_monitor: StagedHealthMonitor) -> None:
         """Test health check with exception."""
         async def raise_exception():
+    pass
             raise Exception("Health check failed")
         
         exception_config = ServiceConfig(
@@ -290,7 +292,8 @@ class TestHealthChecks:
         no_check_config = ServiceConfig(name="no_check_service")
         health_monitor.register_service(no_check_config)
         
-        # Should return without error when no check function
+        # Should await asyncio.sleep(0)
+    return without error when no check function
         await health_monitor._check_service_health("no_check_service")
 
 class TestCheckResultProcessing:
@@ -488,11 +491,10 @@ class TestHealthCheckFactories:
         assert check() is False
 
     # Mock: Component isolation for testing without external dependencies
-    @patch('requests.get')
-    def test_create_url_health_check_success(self, mock_get: Mock) -> None:
+        def test_create_url_health_check_success(self, mock_get: Mock) -> None:
         """Test URL health check for successful response."""
         # Mock: Generic component isolation for controlled unit testing
-        mock_response = Mock()
+        mock_response = mock_response_instance  # Initialize appropriate service
         mock_response.status_code = 200
         mock_get.return_value = mock_response
         
@@ -501,11 +503,10 @@ class TestHealthCheckFactories:
         mock_get.assert_called_once_with("http://api.example.com", timeout=5)
 
     # Mock: Component isolation for testing without external dependencies
-    @patch('requests.get')
-    def test_create_url_health_check_failure(self, mock_get: Mock) -> None:
+        def test_create_url_health_check_failure(self, mock_get: Mock) -> None:
         """Test URL health check for failed response."""
         # Mock: Generic component isolation for controlled unit testing
-        mock_response = Mock()
+        mock_response = mock_response_instance  # Initialize appropriate service
         mock_response.status_code = 500
         mock_get.return_value = mock_response
         
@@ -513,8 +514,7 @@ class TestHealthCheckFactories:
         assert check() is False
 
     # Mock: Component isolation for testing without external dependencies
-    @patch('requests.get')
-    def test_create_url_health_check_exception(self, mock_get: Mock) -> None:
+        def test_create_url_health_check_exception(self, mock_get: Mock) -> None:
         """Test URL health check with connection exception."""
         mock_get.side_effect = Exception("Connection failed")
         
@@ -522,11 +522,10 @@ class TestHealthCheckFactories:
         assert check() is False
 
     # Mock: Component isolation for testing without external dependencies
-    @patch('requests.get')
-    def test_create_url_health_check_custom_timeout(self, mock_get: Mock) -> None:
+        def test_create_url_health_check_custom_timeout(self, mock_get: Mock) -> None:
         """Test URL health check with custom timeout."""
         # Mock: Generic component isolation for controlled unit testing
-        mock_response = Mock()
+        mock_response = mock_response_instance  # Initialize appropriate service
         mock_response.status_code = 200
         mock_get.return_value = mock_response
         

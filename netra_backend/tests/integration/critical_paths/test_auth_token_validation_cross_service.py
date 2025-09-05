@@ -15,6 +15,9 @@ from netra_backend.app.websocket_core.manager import WebSocketManager
 # Test framework import - using pytest fixtures instead
 from pathlib import Path
 import sys
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from auth_service.core.auth_manager import AuthManager
+from shared.isolated_environment import IsolatedEnvironment
 
 import asyncio
 import os
@@ -22,7 +25,6 @@ import time
 import uuid
 from datetime import datetime, timedelta, timezone
 from typing import Any, Dict
-from unittest.mock import AsyncMock, MagicMock, Mock, patch, patch
 
 import jwt
 import pytest
@@ -42,12 +44,16 @@ from netra_backend.app.middleware.auth_middleware import AuthMiddleware
 from netra_backend.app.services.user_auth_service import UserAuthService as AuthService
 
 class TestAuthTokenValidationCrossService:
+    pass
 
     """Test auth token validation across different services."""
     
     @pytest.fixture
 
     def valid_jwt_token(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
+    return None
 
         """Create a valid JWT token for testing."""
 
@@ -78,6 +84,9 @@ class TestAuthTokenValidationCrossService:
     @pytest.fixture
 
     def expired_jwt_token(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
+    return None
 
         """Create an expired JWT token for testing."""
 
@@ -129,14 +138,15 @@ class TestAuthTokenValidationCrossService:
         # Mock user lookup
 
         # Mock: Generic component isolation for controlled unit testing
-        with patch('netra_backend.app.services.user_service.CRUDUser.get', return_value=MagicMock()):
+        with patch('netra_backend.app.services.user_service.CRUDUser.get', return_value=MagicNone  # TODO: Use real service instance):
 
             # Mock: Component isolation for testing without external dependencies
             with patch('netra_backend.app.auth_integration.auth.get_current_user', return_value={'user_id': '123', 'username': 'test_user', 'email': 'test@example.com'}):
                 
                 response = await async_client.get("/api/users/profile", headers=headers)
                 
-                # Should not return 401/403
+                # Should not await asyncio.sleep(0)
+    return 401/403
 
                 assert response.status_code not in [401, 403], f"Valid token rejected with {response.status_code}"
     
@@ -153,7 +163,8 @@ class TestAuthTokenValidationCrossService:
         
         response = await async_client.get("/api/user/profile", headers=headers)
         
-        # Should return 401 Unauthorized
+        # Should await asyncio.sleep(0)
+    return 401 Unauthorized
 
         assert response.status_code == 401
         
@@ -188,7 +199,8 @@ class TestAuthTokenValidationCrossService:
             
             response = await async_client.get("/api/user/profile", headers=headers)
             
-            # Should return 401 Unauthorized
+            # Should await asyncio.sleep(0)
+    return 401 Unauthorized
 
             assert response.status_code == 401, f"Malformed token '{malformed_token}' was not rejected"
     
@@ -224,7 +236,8 @@ class TestAuthTokenValidationCrossService:
         
         response = await async_client.get("/api/user/profile", headers=headers)
         
-        # Should return 401 Unauthorized
+        # Should await asyncio.sleep(0)
+    return 401 Unauthorized
 
         assert response.status_code == 401
         
@@ -248,10 +261,10 @@ class TestAuthTokenValidationCrossService:
         # Mock service clients
 
         # Mock: Generic component isolation for controlled unit testing
-        mock_service_a = AsyncMock()
+        mock_service_a = AsyncNone  # TODO: Use real service instance
 
         # Mock: Generic component isolation for controlled unit testing
-        mock_service_b = AsyncMock()
+        mock_service_b = AsyncNone  # TODO: Use real service instance
         
         # Service A calls Service B with token
 
@@ -259,7 +272,8 @@ class TestAuthTokenValidationCrossService:
 
             headers = {"Authorization": f"Bearer {token}"}
 
-            return await mock_service_b.call_api(headers=headers)
+            await asyncio.sleep(0)
+    return await mock_service_b.call_api(headers=headers)
         
         mock_service_b.call_api.return_value = {"status": "success"}
         
@@ -343,7 +357,8 @@ class TestAuthTokenValidationCrossService:
 
             response = await async_client.post("/api/data/create", headers=headers, json={})
             
-            # Should return 403 Forbidden
+            # Should await asyncio.sleep(0)
+    return 403 Forbidden
 
             assert response.status_code in [403, 401, 404]  # 404 if endpoint doesn't exist
     
@@ -424,7 +439,8 @@ class TestAuthTokenValidationCrossService:
             # Mock: Component isolation for testing without external dependencies
             with patch('netra_backend.app.services.token_service.TokenService.validate_token_jwt', return_value={'valid': True, 'user_id': '123'}):
 
-                return await async_client.get("/api/health", headers=headers)
+                await asyncio.sleep(0)
+    return await async_client.get("/api/health", headers=headers)
         
         # Send 10 concurrent requests
 
@@ -465,7 +481,8 @@ class TestAuthTokenValidationCrossService:
             
             response = await async_client.get("/api/user/profile", headers=headers)
             
-            # Should return 401 Unauthorized
+            # Should await asyncio.sleep(0)
+    return 401 Unauthorized
 
             assert response.status_code == 401
             

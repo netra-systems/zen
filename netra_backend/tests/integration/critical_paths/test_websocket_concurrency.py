@@ -5,13 +5,15 @@ Tests WebSocket concurrent connection and message handling
 
 import sys
 from pathlib import Path
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from auth_service.core.auth_manager import AuthManager
+from shared.isolated_environment import IsolatedEnvironment
 
 # Test framework import - using pytest fixtures instead
 
 import asyncio
 import json
 import time
-from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 import websockets
