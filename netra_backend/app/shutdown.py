@@ -88,7 +88,7 @@ async def _wait_for_monitoring_shutdown(task: asyncio.Task) -> None:
 async def close_database_connections() -> None:
     """Close Redis connection."""
     try:
-        await redis_manager.disconnect()
+        await redis_manager.shutdown()
     except asyncio.CancelledError:
         central_logger.get_logger(__name__).info("Redis disconnection cancelled during shutdown")
         # Re-raise to allow proper cancellation propagation if needed

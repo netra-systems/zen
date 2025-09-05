@@ -109,6 +109,18 @@ class UnifiedWebSocketManager:
                     logger.error(f"Failed to send to {conn_id}: {e}")
                     await self.remove_connection(conn_id)
     
+    async def send_to_thread(self, thread_id: str, message: Dict[str, Any]) -> bool:
+        """
+        Send a message to a thread (compatibility method).
+        Routes to send_to_user using thread_id as user_id.
+        """
+        try:
+            await self.send_to_user(thread_id, message)
+            return True
+        except Exception as e:
+            logger.error(f"Failed to send to thread {thread_id}: {e}")
+            return False
+    
     async def emit_critical_event(self, user_id: str, event_type: str, data: Dict[str, Any]) -> None:
         """
         Emit a critical event to a specific user.

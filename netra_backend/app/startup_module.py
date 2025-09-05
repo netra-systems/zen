@@ -1076,7 +1076,7 @@ async def _emergency_cleanup(logger: logging.Logger) -> None:
 
 async def _cleanup_connections() -> None:
     """Cleanup Redis connections."""
-    await redis_manager.disconnect()
+    await redis_manager.shutdown()
 
 
 async def validate_schema(logger: logging.Logger) -> None:

@@ -837,10 +837,8 @@ class StartupOrchestrator:
         """Initialize Redis connection - CRITICAL."""
         from netra_backend.app.redis_manager import redis_manager
         
-        # Test connection
-        await redis_manager.connect()
-        if not await redis_manager.ping():
-            raise DeterministicStartupError("Redis ping failed")
+        # Initialize Redis connection
+        await redis_manager.initialize()
         
         self.app.state.redis_manager = redis_manager
     
@@ -865,7 +863,7 @@ class StartupOrchestrator:
     def _initialize_tool_registry(self) -> None:
         """Initialize tool registry and dispatcher with AgentWebSocketBridge support - CRITICAL."""
         from netra_backend.app.core.registry.universal_registry import ToolRegistry
-        from netra_backend.app.agents.tool_dispatcher import ToolDispatcher, create_legacy_tool_dispatcher
+        from netra_backend.app.agents.tool_dispatcher import ToolDispatcher, create_tool_dispatcher
         from netra_backend.app.agents.tools.langchain_wrappers import (
             DataHelperTool, DeepResearchTool, ReliabilityScorerTool, SandboxedInterpreterTool
         )

@@ -279,7 +279,7 @@ class AgentWebSocketBridge(MonitorableComponent):
                 websocket_manager = get_websocket_manager()
                 if websocket_manager is not None:
                     # Validate the manager has required methods
-                    if hasattr(websocket_manager, 'connections') and hasattr(websocket_manager, 'send_to_thread'):
+                    if hasattr(websocket_manager, 'send_to_user') and hasattr(websocket_manager, 'get_user_connections'):
                         self._websocket_manager = websocket_manager
                         logger.info(f"WebSocket manager initialized successfully on attempt {attempt + 1}")
                         return
