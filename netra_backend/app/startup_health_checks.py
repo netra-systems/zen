@@ -203,18 +203,28 @@ class StartupHealthChecker:
         try:
             from netra_backend.app.redis_manager import redis_manager
             
-            # Try to ping Redis
-            if redis_manager and hasattr(redis_manager, 'redis_client'):
-                await redis_manager.redis_client.ping()
+            # Try to ping Redis - check for either redis_client or _client
+            if redis_manager:
+                ping_successful = False
+                if hasattr(redis_manager, 'redis_client'):
+                    await redis_manager.redis_client.ping()
+                    ping_successful = True
+                elif hasattr(redis_manager, '_client') and redis_manager._client:
+                    await redis_manager._client.ping()
+                    ping_successful = True
+                elif hasattr(redis_manager, '_connected'):
+                    # If there's a _connected flag, check that
+                    ping_successful = redis_manager._connected
                 
-                latency_ms = (asyncio.get_event_loop().time() - start_time) * 1000
-                return HealthCheckResult(
-                    service_name=service_name,
-                    status=ServiceStatus.HEALTHY,
-                    message="Redis connection successful",
-                    check_time=datetime.now(timezone.utc),
-                    latency_ms=latency_ms
-                )
+                if ping_successful:
+                    latency_ms = (asyncio.get_event_loop().time() - start_time) * 1000
+                    return HealthCheckResult(
+                        service_name=service_name,
+                        status=ServiceStatus.HEALTHY,
+                        message="Redis connection successful",
+                        check_time=datetime.now(timezone.utc),
+                        latency_ms=latency_ms
+                    )
             else:
                 return HealthCheckResult(
                     service_name=service_name,
