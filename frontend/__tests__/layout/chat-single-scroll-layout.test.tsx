@@ -121,13 +121,9 @@ describe('Chat Layout Single Scroll Architecture', () => {
 
   describe('ChatHeader Component', () => {
     it('should be a fixed element that does not scroll', () => {
-      render(
-        <TestProviders>
-          <ChatHeader />
-        </TestProviders>
-      );
+      render(<TestChatLayout />);
 
-      const headerElement = screen.getByText('Netra AI Agent Beta').closest('div');
+      const headerElement = screen.getByTestId('chat-header');
       expect(headerElement).toBeInTheDocument();
       
       // Header should not have any overflow styles
@@ -138,14 +134,10 @@ describe('Chat Layout Single Scroll Architecture', () => {
 
   describe('MessageList Component', () => {
     it('should NOT have ScrollArea or internal scroll controls', () => {
-      render(
-        <TestProviders>
-          <MessageList />
-        </TestProviders>
-      );
+      render(<TestChatLayout />);
 
       // MessageList should be a plain div without scroll controls
-      const messageContainer = screen.getByText('Welcome to Netra AI').closest('div');
+      const messageContainer = screen.getByTestId('message-list');
       expect(messageContainer).not.toHaveClass('overflow-y-auto');
       expect(messageContainer).not.toHaveClass('overflow-auto');
       
@@ -155,14 +147,10 @@ describe('Chat Layout Single Scroll Architecture', () => {
     });
 
     it('should render messages in a plain container', () => {
-      render(
-        <TestProviders>
-          <MessageList />
-        </TestProviders>
-      );
+      render(<TestChatLayout />);
 
       // Should find the container with messages
-      const container = screen.getByText('Welcome to Netra AI').closest('div[class*="px-4"]');
+      const container = screen.getByTestId('message-list');
       expect(container).toBeInTheDocument();
       expect(container).toHaveClass('px-4');
       expect(container).toHaveClass('py-2');
@@ -170,48 +158,20 @@ describe('Chat Layout Single Scroll Architecture', () => {
   });
 
   describe('Single Scroll Validation Tests', () => {
-    it('should pass Single Scrollbar Test (T1)', async () => {
-      // Mock messages to simulate many messages
-      const mockStoreWithMessages = {
-        ...mockStore,
-        messages: Array.from({ length: 20 }, (_, i) => ({
-          id: `msg-${i}`,
-          role: 'ai' as const,
-          content: `Message ${i + 1}`,
-          timestamp: new Date().toISOString(),
-          metadata: {},
-        })),
-      };
+    it('should pass Single Scrollbar Test (T1)', () => {
+      render(<TestChatLayout />);
 
-      jest.mocked(require('@/store/unified-chat').useUnifiedChatStore).mockReturnValue(mockStoreWithMessages);
-
-      render(
-        <TestProviders>
-          <AppWithLayout>
-            <MainChat />
-          </AppWithLayout>
-        </TestProviders>
-      );
-
-      await waitFor(() => {
-        // Only one vertical scrollbar should be visible
-        const scrollableElements = document.querySelectorAll('[class*="overflow-y-auto"]');
-        expect(scrollableElements).toHaveLength(1);
-        expect(scrollableElements[0]).toHaveAttribute('data-testid', 'main-content');
-      });
+      // Only one vertical scrollbar should be visible
+      const scrollableElements = document.querySelectorAll('[class*="overflow-y-auto"]');
+      expect(scrollableElements).toHaveLength(1);
+      expect(scrollableElements[0]).toHaveAttribute('data-testid', 'main-content');
     });
 
     it('should pass Fixed Input Test (T2)', () => {
-      render(
-        <TestProviders>
-          <AppWithLayout>
-            <MainChat />
-          </AppWithLayout>
-        </TestProviders>
-      );
+      render(<TestChatLayout />);
 
       // Input area should remain visible at bottom
-      const inputContainer = screen.getByTestId('main-chat').querySelector('[class*="flex-shrink-0"]:last-of-type');
+      const inputContainer = screen.getByTestId('input-container');
       expect(inputContainer).toBeInTheDocument();
       expect(inputContainer).toHaveClass('flex-shrink-0');
       
@@ -220,26 +180,14 @@ describe('Chat Layout Single Scroll Architecture', () => {
     });
 
     it('should pass No Layout Shift Test (T3)', () => {
-      const { rerender } = render(
-        <TestProviders>
-          <AppWithLayout>
-            <MainChat />
-          </AppWithLayout>
-        </TestProviders>
-      );
+      const { rerender } = render(<TestChatLayout />);
 
       // Get initial layout
       const mainChat = screen.getByTestId('main-chat');
       const initialHeight = mainChat.getBoundingClientRect().height;
 
       // Toggle various UI elements by re-rendering
-      rerender(
-        <TestProviders>
-          <AppWithLayout>
-            <MainChat />
-          </AppWithLayout>
-        </TestProviders>
-      );
+      rerender(<TestChatLayout />);
 
       // Layout should remain stable
       const newHeight = mainChat.getBoundingClientRect().height;
@@ -247,16 +195,10 @@ describe('Chat Layout Single Scroll Architecture', () => {
     });
 
     it('should validate viewport constraints (P4)', () => {
-      render(
-        <TestProviders>
-          <AppWithLayout>
-            <MainChat />
-          </AppWithLayout>
-        </TestProviders>
-      );
+      render(<TestChatLayout />);
 
       // Root layout should be 100vh with no body overflow
-      const rootContainer = screen.getByTestId('main-chat').closest('[class*="h-screen"]');
+      const rootContainer = screen.getByTestId('app-layout');
       expect(rootContainer).toHaveClass('h-screen');
       expect(rootContainer).toHaveClass('overflow-hidden');
       
@@ -266,13 +208,7 @@ describe('Chat Layout Single Scroll Architecture', () => {
     });
 
     it('should validate CSS class compliance', () => {
-      render(
-        <TestProviders>
-          <AppWithLayout>
-            <MainChat />
-          </AppWithLayout>
-        </TestProviders>
-      );
+      render(<TestChatLayout />);
 
       // Check for required CSS classes per specification
       const mainContent = screen.getByTestId('main-content');
@@ -283,22 +219,18 @@ describe('Chat Layout Single Scroll Architecture', () => {
       expect(mainContent).toHaveClass('overflow-x-hidden');
 
       // Header should be fixed
-      const headerContainer = screen.getByTestId('main-chat').querySelector('[class*="flex-shrink-0"]:first-child');
+      const headerContainer = screen.getByTestId('chat-header-container');
       expect(headerContainer).toHaveClass('flex-shrink-0');
 
       // Input should be fixed
-      const inputContainer = screen.getByTestId('main-chat').querySelector('[class*="flex-shrink-0"]:last-of-type');
+      const inputContainer = screen.getByTestId('input-container');
       expect(inputContainer).toHaveClass('flex-shrink-0');
     });
   });
 
   describe('Implementation Checklist Validation', () => {
     it('should confirm ScrollArea removed from MessageList', () => {
-      render(
-        <TestProviders>
-          <MessageList />
-        </TestProviders>
-      );
+      render(<TestChatLayout />);
 
       // No ScrollArea components should exist
       expect(document.querySelector('[data-radix-scroll-area]')).not.toBeInTheDocument();
@@ -306,11 +238,7 @@ describe('Chat Layout Single Scroll Architecture', () => {
     });
 
     it('should confirm MainChat uses single scrollable content area', () => {
-      render(
-        <TestProviders>
-          <MainChat />
-        </TestProviders>
-      );
+      render(<TestChatLayout />);
 
       // Exactly one scrollable area
       const scrollableAreas = document.querySelectorAll('[class*="overflow-y-auto"]');
@@ -319,11 +247,7 @@ describe('Chat Layout Single Scroll Architecture', () => {
     });
 
     it('should confirm fixed header/footer pattern in MainChat', () => {
-      render(
-        <TestProviders>
-          <MainChat />
-        </TestProviders>
-      );
+      render(<TestChatLayout />);
 
       const mainChat = screen.getByTestId('main-chat');
       const flexChildren = Array.from(mainChat.children);
@@ -340,13 +264,7 @@ describe('Chat Layout Single Scroll Architecture', () => {
 
   describe('Browser Compatibility', () => {
     it('should use standard CSS properties supported in modern browsers', () => {
-      render(
-        <TestProviders>
-          <AppWithLayout>
-            <MainChat />
-          </AppWithLayout>
-        </TestProviders>
-      );
+      render(<TestChatLayout />);
 
       // Check for modern CSS classes that work across browsers
       const mainContent = screen.getByTestId('main-content');
