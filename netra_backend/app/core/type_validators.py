@@ -12,7 +12,7 @@ from typing import Any, Callable, Dict, List, Optional, TypeVar, Union
 from beartype import beartype
 from beartype.roar import BeartypeException
 
-from netra_backend.app.agents.triage_sub_agent.models import TriageResult
+from netra_backend.app.agents.triage.unified_triage_agent import TriageResult
 from netra_backend.app.schemas.shared_types import (
     AgentState,
     AnomalyDetectionResponse,

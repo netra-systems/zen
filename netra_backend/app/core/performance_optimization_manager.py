@@ -1,88 +1,164 @@
-"""Performance optimization manager for comprehensive system optimization.
-
-This module provides centralized performance optimization capabilities including:
-- Database query optimization and caching
-- Connection pool monitoring and tuning
-- Memory usage optimization
-- Async operation improvements
-- WebSocket message batching
+"""
+Performance optimization management system.
+Provides performance monitoring and optimization recommendations.
 """
 
-import asyncio
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional
+from datetime import datetime, timedelta
 
-from netra_backend.app.core.performance_batch_processor import BatchProcessor
-from netra_backend.app.core.performance_cache import MemoryCache
-from netra_backend.app.core.performance_query_optimizer import QueryOptimizer
 from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 
-# Re-export components for backward compatibility
-__all__ = [
-    'MemoryCache',
-    'QueryOptimizer', 
-    'BatchProcessor',
-    'PerformanceOptimizationManager',
-    'performance_manager'
-]
-
 
 class PerformanceOptimizationManager:
-    """Central performance optimization manager."""
+    """Manages performance optimization strategies and recommendations."""
     
     def __init__(self):
-        self.query_optimizer = QueryOptimizer()
-        self.batch_processor = BatchProcessor()
-        self.connection_pool_monitor = None
-        self._cleanup_task: Optional[asyncio.Task] = None
+        self._metrics_history: List[Dict[str, Any]] = []
+        self._optimization_recommendations: List[Dict[str, Any]] = []
+        logger.debug("Initialized PerformanceOptimizationManager")
     
     async def initialize(self) -> None:
-        """Initialize performance optimization components."""
-        self._cleanup_task = asyncio.create_task(self._periodic_cleanup())
-        logger.info("Performance optimization manager initialized")
+        """Initialize the performance optimization manager."""
+        logger.info("PerformanceOptimizationManager initialized")
     
-    async def shutdown(self) -> None:
-        """Shutdown performance optimization components."""
-        if self._cleanup_task:
-            self._cleanup_task.cancel()
-            await self._wait_for_cleanup_task()
+    async def record_performance_metrics(self, metrics: Dict[str, Any]) -> None:
+        """Record performance metrics for analysis."""
+        metrics_with_timestamp = {
+            **metrics,
+            "timestamp": datetime.utcnow()
+        }
+        self._metrics_history.append(metrics_with_timestamp)
         
-        await self.batch_processor.flush_all()
-        logger.info("Performance optimization manager shut down")
+        # Keep only last 1000 entries
+        if len(self._metrics_history) > 1000:
+            self._metrics_history = self._metrics_history[-1000:]
+        
+        logger.debug(f"Recorded performance metrics: {len(metrics)} entries")
     
-    async def _wait_for_cleanup_task(self) -> None:
-        """Wait for cleanup task to complete."""
-        try:
-            await self._cleanup_task
-        except asyncio.CancelledError:
-            pass
-    
-    async def _periodic_cleanup(self) -> None:
-        """Periodic cleanup of expired cache entries."""
-        while True:
-            try:
-                await asyncio.sleep(300)  # Run every 5 minutes
-                await self._run_cleanup_cycle()
-            except asyncio.CancelledError:
-                break
-            except Exception as e:
-                logger.error(f"Error during periodic cleanup: {e}")
-    
-    async def _run_cleanup_cycle(self) -> None:
-        """Run a single cleanup cycle."""
-        expired_count = await self.query_optimizer.cache.clear_expired()
-        if expired_count > 0:
-            logger.debug(f"Cleaned up {expired_count} expired cache entries")
-    
-    def get_performance_stats(self) -> Dict[str, Any]:
-        """Get comprehensive performance statistics."""
+    async def get_performance_summary(self, time_window_hours: int = 1) -> Dict[str, Any]:
+        """Get performance summary for specified time window."""
+        cutoff_time = datetime.utcnow() - timedelta(hours=time_window_hours)
+        recent_metrics = [
+            m for m in self._metrics_history 
+            if m.get("timestamp", datetime.min) > cutoff_time
+        ]
+        
+        if not recent_metrics:
+            return {
+                "summary": "No recent metrics available",
+                "metrics_count": 0,
+                "time_window_hours": time_window_hours
+            }
+        
         return {
-            "query_optimizer": self.query_optimizer.get_performance_report(),
-            "cache_stats": self.query_optimizer.cache.get_stats(),
-            "batch_processor_stats": self.batch_processor.get_batch_stats()
+            "metrics_count": len(recent_metrics),
+            "time_window_hours": time_window_hours,
+            "avg_response_time": self._calculate_avg_response_time(recent_metrics),
+            "error_rate": self._calculate_error_rate(recent_metrics),
+            "throughput": self._calculate_throughput(recent_metrics),
+            "resource_utilization": self._calculate_resource_utilization(recent_metrics)
+        }
+    
+    def _calculate_avg_response_time(self, metrics: List[Dict[str, Any]]) -> float:
+        """Calculate average response time from metrics."""
+        response_times = [
+            m.get("response_time_ms", 0) for m in metrics 
+            if "response_time_ms" in m
+        ]
+        return sum(response_times) / len(response_times) if response_times else 0.0
+    
+    def _calculate_error_rate(self, metrics: List[Dict[str, Any]]) -> float:
+        """Calculate error rate from metrics."""
+        total_requests = len(metrics)
+        error_requests = len([m for m in metrics if m.get("has_error", False)])
+        return error_requests / total_requests if total_requests > 0 else 0.0
+    
+    def _calculate_throughput(self, metrics: List[Dict[str, Any]]) -> float:
+        """Calculate throughput (requests per minute)."""
+        if not metrics:
+            return 0.0
+        
+        time_span = (
+            max(m.get("timestamp", datetime.min) for m in metrics) -
+            min(m.get("timestamp", datetime.min) for m in metrics)
+        ).total_seconds() / 60.0  # Convert to minutes
+        
+        return len(metrics) / max(time_span, 1.0)
+    
+    def _calculate_resource_utilization(self, metrics: List[Dict[str, Any]]) -> Dict[str, float]:
+        """Calculate resource utilization metrics."""
+        cpu_values = [m.get("cpu_percent", 0) for m in metrics if "cpu_percent" in m]
+        memory_values = [m.get("memory_mb", 0) for m in metrics if "memory_mb" in m]
+        
+        return {
+            "avg_cpu_percent": sum(cpu_values) / len(cpu_values) if cpu_values else 0.0,
+            "avg_memory_mb": sum(memory_values) / len(memory_values) if memory_values else 0.0
+        }
+    
+    async def generate_optimization_recommendations(self) -> List[Dict[str, Any]]:
+        """Generate performance optimization recommendations."""
+        summary = await self.get_performance_summary(time_window_hours=24)
+        recommendations = []
+        
+        # Check response time
+        avg_response_time = summary.get("avg_response_time", 0)
+        if avg_response_time > 5000:  # 5 seconds
+            recommendations.append({
+                "type": "response_time",
+                "severity": "high",
+                "message": f"High response time detected ({avg_response_time:.1f}ms). Consider optimizing queries or adding caching.",
+                "metric_value": avg_response_time,
+                "threshold": 5000
+            })
+        
+        # Check error rate
+        error_rate = summary.get("error_rate", 0)
+        if error_rate > 0.05:  # 5%
+            recommendations.append({
+                "type": "error_rate",
+                "severity": "critical",
+                "message": f"High error rate detected ({error_rate:.1%}). Review error logs and implement fixes.",
+                "metric_value": error_rate,
+                "threshold": 0.05
+            })
+        
+        # Check resource utilization
+        resource_util = summary.get("resource_utilization", {})
+        cpu_percent = resource_util.get("avg_cpu_percent", 0)
+        if cpu_percent > 80:
+            recommendations.append({
+                "type": "cpu_utilization",
+                "severity": "medium",
+                "message": f"High CPU utilization detected ({cpu_percent:.1f}%). Consider scaling or optimizing CPU-intensive operations.",
+                "metric_value": cpu_percent,
+                "threshold": 80
+            })
+        
+        self._optimization_recommendations = recommendations
+        logger.info(f"Generated {len(recommendations)} optimization recommendations")
+        
+        return recommendations
+    
+    async def get_optimization_report(self) -> Dict[str, Any]:
+        """Get comprehensive optimization report."""
+        summary = await self.get_performance_summary(time_window_hours=24)
+        recommendations = await self.generate_optimization_recommendations()
+        
+        return {
+            "performance_summary": summary,
+            "recommendations": recommendations,
+            "report_timestamp": datetime.utcnow(),
+            "metrics_analyzed": len(self._metrics_history)
         }
 
 
 # Global instance
 performance_manager = PerformanceOptimizationManager()
+
+
+__all__ = [
+    "PerformanceOptimizationManager",
+    "performance_manager",
+]

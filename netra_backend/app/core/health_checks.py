@@ -216,7 +216,7 @@ class HealthMonitor:
     async def _check_websocket(self) -> tuple[HealthStatus, str, Dict[str, Any]]:
         """Check WebSocket components health."""
         try:
-            from netra_backend.app.websocket_core.manager import get_websocket_manager
+            from netra_backend.app.websocket_core.unified_manager import get_websocket_manager
             
             manager = get_websocket_manager()
             

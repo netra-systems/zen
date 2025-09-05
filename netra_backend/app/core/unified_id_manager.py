@@ -1,827 +1,307 @@
 """
-Unified ID Manager - Single Source of Truth for ALL ID generation in Netra platform.
+Unified ID Manager Module
 
-CRITICAL MISSION: This module consolidates competing ID generation implementations
-to fix SSOT violation causing 40% WebSocket routing failures.
-
-Business Value Justification:
-- Segment: Platform/Internal  
-- Business Goal: System Stability & WebSocket Reliability
-- Value Impact: Fixes production WebSocket failures by providing consistent ID parsing
-- Strategic Impact: Eliminates silent failures, ensures users receive real-time AI responses
-
-SSOT Consolidation:
-This module replaces and unifies:
-- IDManager (legacy): "run_{thread_id}_{uuid}" format
-- run_id_generator (newer): "thread_{thread_id}_run_{timestamp}_{uuid}" format
-
-The canonical format is: "thread_{thread_id}_run_{timestamp}_{8_hex_uuid}"
-All legacy formats are supported for backward compatibility.
-
-Format Evolution Documentation:
-1. Legacy IDManager: run_{thread_id}_{uuid} (circa 2024)
-2. run_id_generator: thread_{thread_id}_run_{timestamp}_{uuid} (current SSOT)
-3. UnifiedIDManager: Canonical format with full legacy support (this implementation)
-
-CRITICAL: WebSocket routing depends on thread ID extraction working across ALL formats.
+Provides centralized ID generation and management across the Netra platform.
+Ensures unique, consistent ID generation for all system components.
 """
 
-import re
-import time
-import uuid
 import logging
-from typing import Optional, Dict, Any, Tuple
+import uuid
+import time
+import threading
+from typing import Dict, Optional, Any, Set
 from dataclasses import dataclass
 from enum import Enum
 
-from netra_backend.app.logging_config import central_logger
-
-logger = central_logger.get_logger(__name__)
+logger = logging.getLogger(__name__)
 
 
-class IDFormat(Enum):
-    """ID format versions for tracking and migration."""
-    LEGACY_IDMANAGER = "legacy_idmanager"        # run_{thread_id}_{uuid}
-    CANONICAL = "canonical"                       # thread_{thread_id}_run_{timestamp}_{uuid}
-    UNKNOWN = "unknown"                          # Invalid or unrecognized format
+class IDType(Enum):
+    """Types of IDs managed by the system"""
+    USER = "user"
+    SESSION = "session"
+    REQUEST = "request"
+    AGENT = "agent"
+    TOOL = "tool"
+    TRANSACTION = "transaction"
+    WEBSOCKET = "websocket"
+    EXECUTION = "execution"
+    TRACE = "trace"
+    METRIC = "metric"
 
 
-@dataclass(frozen=True)
-class ParsedRunID:
-    """Complete parsed run ID information."""
-    thread_id: str
-    timestamp: Optional[int]
-    uuid_suffix: str
-    format_version: IDFormat
-    original_run_id: str
+@dataclass
+class IDMetadata:
+    """Metadata associated with generated IDs"""
+    id_value: str
+    id_type: IDType
+    created_at: float
+    prefix: Optional[str] = None
+    context: Dict[str, Any] = None
     
-    def is_legacy(self) -> bool:
-        """Check if this ID uses a legacy format."""
-        return self.format_version == IDFormat.LEGACY_IDMANAGER
-    
-    def to_canonical_format(self) -> str:
-        """Convert to canonical format, preserving thread_id."""
-        return UnifiedIDManager.generate_run_id(self.thread_id)
+    def __post_init__(self):
+        if self.context is None:
+            self.context = {}
 
 
 class UnifiedIDManager:
     """
-    Single Source of Truth for all ID generation in Netra platform.
+    Centralized ID management system.
     
-    This class consolidates all ID generation logic to eliminate SSOT violations
-    and provide consistent behavior across the entire platform.
-    
-    Supported Formats (Backward Compatible):
-    1. Canonical: "thread_{thread_id}_run_{timestamp}_{8_hex_uuid}" 
-    2. Legacy IDManager: "run_{thread_id}_{uuid}"
-    
-    Key Features:
-    - Thread ID extraction works across ALL formats 
-    - Prevents double prefixing (thread_thread_xyz)
-    - Comprehensive validation and error handling
-    - Migration utilities for legacy systems
-    - Performance optimized with compiled regex patterns
+    Provides consistent ID generation, tracking, and validation
+    across all system components.
     """
     
-    # SSOT: Format constants
-    THREAD_PREFIX = "thread_"
-    RUN_SEPARATOR = "_run_"
-    UUID_LENGTH = 8
+    def __init__(self):
+        self._id_registry: Dict[str, IDMetadata] = {}
+        self._active_ids: Dict[IDType, Set[str]] = {id_type: set() for id_type in IDType}
+        self._id_counters: Dict[IDType, int] = {id_type: 0 for id_type in IDType}
+        self._lock = threading.RLock()
+        logger.info("UnifiedIDManager initialized")
     
-    # SSOT: Compiled regex patterns for performance
-    CANONICAL_PATTERN = re.compile(
-        r'^thread_(.*?)_run_(\d+)_([a-f0-9A-F]{8})$'
-    )
-    LEGACY_IDMANAGER_PATTERN = re.compile(
-        r'^run_(.+)_([a-f0-9A-F]{8})$'
-    )
-    THREAD_ID_VALIDATION_PATTERN = re.compile(
-        r'^[a-zA-Z0-9][a-zA-Z0-9_\-]*$'
-    )
-    
-    @staticmethod
-    def generate_run_id(thread_id: str) -> str:
+    def generate_id(self, 
+                   id_type: IDType,
+                   prefix: Optional[str] = None,
+                   context: Optional[Dict[str, Any]] = None) -> str:
         """
-        Generate canonical run ID format.
-        
-        Format: thread_{thread_id}_run_{timestamp}_{8_hex_uuid}
-        
-        CRITICAL: This is the SINGLE SOURCE OF TRUTH for new run ID generation.
-        All new code MUST use this method for consistency.
+        Generate a new unique ID.
         
         Args:
-            thread_id: The thread identifier (will be normalized)
+            id_type: Type of ID to generate
+            prefix: Optional prefix for the ID
+            context: Additional context metadata
             
         Returns:
-            Canonical format run ID
-            
-        Raises:
-            ValueError: If thread_id is invalid or empty
-            
-        Example:
-            >>> UnifiedIDManager.generate_run_id("user_session_123")
-            'thread_user_session_123_run_1693430400000_a1b2c3d4'
-            
-            >>> UnifiedIDManager.generate_run_id("thread_already_prefixed")  
-            'thread_already_prefixed_run_1693430400123_e5f6g7h8'
+            Generated unique ID
         """
-        if not thread_id:
-            raise ValueError("thread_id cannot be empty or None")
-        
-        if not isinstance(thread_id, str):
-            raise ValueError(f"thread_id must be string, got {type(thread_id)}")
-        
-        # Check for forbidden sequences before normalization
-        if UnifiedIDManager.RUN_SEPARATOR in thread_id:
-            raise ValueError(f"thread_id cannot contain reserved sequence '{UnifiedIDManager.RUN_SEPARATOR}'")
-        
-        # Normalize thread_id (prevent double prefixing)
-        normalized_thread_id = UnifiedIDManager.normalize_thread_id(thread_id)
-        
-        # Check if empty after prefix removal
-        if not normalized_thread_id:
-            raise ValueError("thread_id cannot be empty after removing prefix")
-        
-        # Validate normalized thread_id format
-        if not UnifiedIDManager.validate_thread_id(normalized_thread_id):
-            raise ValueError(f"Invalid thread_id format after normalization: '{normalized_thread_id}'")
-        
-        # Generate timestamp (milliseconds for ordering)
-        timestamp = int(time.time() * 1000)
-        
-        # Generate 8-character UUID suffix
-        uuid_suffix = uuid.uuid4().hex[:UnifiedIDManager.UUID_LENGTH]
-        
-        # Build canonical format
-        run_id = f"{UnifiedIDManager.THREAD_PREFIX}{normalized_thread_id}{UnifiedIDManager.RUN_SEPARATOR}{timestamp}_{uuid_suffix}"
-        
-        logger.debug(f"Generated canonical run_id: {run_id} from thread_id: {thread_id}")
-        return run_id
-    
-    @staticmethod
-    def generate_thread_id() -> str:
-        """
-        Generate a new thread ID (no double prefixing).
-        
-        Returns thread_id in format suitable for use with generate_run_id().
-        Does NOT include "thread_" prefix to prevent double prefixing.
-        
-        Returns:
-            Thread ID without prefix: "session_{timestamp}_{uuid}"
+        with self._lock:
+            # Generate base UUID
+            base_uuid = str(uuid.uuid4())
             
-        Example:
-            >>> UnifiedIDManager.generate_thread_id()
-            'session_1693430400000_a1b2c3d4'
-        """
-        timestamp = int(time.time() * 1000)
-        uuid_suffix = uuid.uuid4().hex[:UnifiedIDManager.UUID_LENGTH]
-        
-        thread_id = f"session_{timestamp}_{uuid_suffix}"
-        logger.debug(f"Generated thread_id: {thread_id}")
-        return thread_id
-    
-    @staticmethod
-    def parse_run_id(run_id: str) -> Optional[ParsedRunID]:
-        """
-        Parse any run ID format (backward compatible).
-        
-        Handles ALL supported formats:
-        - Canonical: "thread_{thread_id}_run_{timestamp}_{uuid}"
-        - Legacy IDManager: "run_{thread_id}_{uuid}"
-        
-        Args:
-            run_id: Run ID in any supported format
+            # Increment counter for this ID type
+            self._id_counters[id_type] += 1
+            counter = self._id_counters[id_type]
             
-        Returns:
-            ParsedRunID with extracted components, or None if invalid
+            # Construct ID with optional prefix
+            if prefix:
+                id_value = f"{prefix}_{id_type.value}_{counter}_{base_uuid[:8]}"
+            else:
+                id_value = f"{id_type.value}_{counter}_{base_uuid[:8]}"
             
-        Example:
-            >>> mgr = UnifiedIDManager()
-            >>> parsed = mgr.parse_run_id("thread_user123_run_1693430400000_a1b2c3d4")
-            >>> parsed.thread_id
-            'user123'
-            >>> parsed.format_version
-            <IDFormat.CANONICAL: 'canonical'>
-            
-            >>> parsed = mgr.parse_run_id("run_user123_a1b2c3d4")
-            >>> parsed.thread_id
-            'user123'
-            >>> parsed.format_version
-            <IDFormat.LEGACY_IDMANAGER: 'legacy_idmanager'>
-        """
-        if not run_id or not isinstance(run_id, str):
-            return None
-        
-        # Try canonical format first (most common)
-        canonical_match = UnifiedIDManager.CANONICAL_PATTERN.match(run_id)
-        if canonical_match:
-            thread_id, timestamp_str, uuid_suffix = canonical_match.groups()
-            return ParsedRunID(
-                thread_id=thread_id,
-                timestamp=int(timestamp_str),
-                uuid_suffix=uuid_suffix,
-                format_version=IDFormat.CANONICAL,
-                original_run_id=run_id
+            # Create metadata
+            metadata = IDMetadata(
+                id_value=id_value,
+                id_type=id_type,
+                created_at=time.time(),
+                prefix=prefix,
+                context=context or {}
             )
-        
-        # Try legacy IDManager format using flexible parsing
-        if run_id.startswith('run_') and len(run_id) > 13:  # "run_" + at least 1 char + "_" + 8 char UUID
-            parts = run_id.split('_')
-            if len(parts) >= 3:
-                # Last part should be 8-character hex UUID
-                potential_uuid = parts[-1]
-                if len(potential_uuid) == 8 and re.match(r'^[a-f0-9A-F]+$', potential_uuid):
-                    # Everything between "run_" and the UUID is the thread_id
-                    # Handle consecutive underscores after "run_" prefix
-                    thread_parts = parts[1:-1]  # All parts between run_ and uuid
-                    
-                    # Remove leading empty strings (caused by consecutive underscores after run_)
-                    while thread_parts and thread_parts[0] == "":
-                        thread_parts.pop(0)
-                    
-                    # Join remaining parts, preserving internal consecutive underscores
-                    thread_id = '_'.join(thread_parts)
-                    
-                    # Allow empty thread_id (edge case handling)
-                    logger.debug(f"Parsed legacy IDManager format run_id: {run_id}")
-                    return ParsedRunID(
-                        thread_id=thread_id,
-                        timestamp=None,  # Legacy format doesn't have timestamp
-                        uuid_suffix=potential_uuid,
-                        format_version=IDFormat.LEGACY_IDMANAGER,
-                        original_run_id=run_id
-                    )
-        
-        # Unknown format
-        logger.warning(f"Unknown run_id format: {run_id}")
-        return None
+            
+            # Register ID
+            self._id_registry[id_value] = metadata
+            self._active_ids[id_type].add(id_value)
+            
+            logger.debug(f"Generated {id_type.value} ID: {id_value}")
+            return id_value
     
-    @staticmethod
-    def extract_thread_id(run_id: str) -> Optional[str]:
+    def register_existing_id(self,
+                           id_value: str,
+                           id_type: IDType,
+                           context: Optional[Dict[str, Any]] = None) -> bool:
         """
-        Extract thread ID from any run ID format.
-        
-        CRITICAL: This method MUST work with ALL legacy formats for WebSocket routing.
-        Used by WebSocket bridge to route events to correct threads.
+        Register an existing ID with the manager.
         
         Args:
-            run_id: Run ID in any supported format
+            id_value: Existing ID to register
+            id_type: Type of the ID
+            context: Additional context metadata
             
         Returns:
-            Extracted thread ID, or None if invalid format
-            
-        Example:
-            >>> UnifiedIDManager.extract_thread_id("thread_user123_run_1693430400000_a1b2c3d4")
-            'user123'
-            
-            >>> UnifiedIDManager.extract_thread_id("run_legacy_user123_a1b2c3d4")  
-            'legacy_user123'
+            True if registered successfully, False if already exists
         """
-        parsed = UnifiedIDManager.parse_run_id(run_id)
-        if parsed:
-            logger.debug(f"Extracted thread_id '{parsed.thread_id}' from run_id '{run_id}' (format: {parsed.format_version.value})")
-            return parsed.thread_id
-        
-        logger.warning(f"Could not extract thread_id from run_id: {run_id}")
-        return None
+        with self._lock:
+            if id_value in self._id_registry:
+                return False
+            
+            metadata = IDMetadata(
+                id_value=id_value,
+                id_type=id_type,
+                created_at=time.time(),
+                context=context or {}
+            )
+            
+            self._id_registry[id_value] = metadata
+            self._active_ids[id_type].add(id_value)
+            
+            logger.debug(f"Registered existing {id_type.value} ID: {id_value}")
+            return True
     
-    @staticmethod
-    def validate_run_id(run_id: str) -> bool:
+    def get_id_metadata(self, id_value: str) -> Optional[IDMetadata]:
+        """Get metadata for a specific ID"""
+        return self._id_registry.get(id_value)
+    
+    def is_valid_id(self, id_value: str, id_type: Optional[IDType] = None) -> bool:
         """
-        Validate run ID format (any supported format).
+        Check if an ID is valid and registered.
         
         Args:
-            run_id: Run ID to validate
+            id_value: ID to validate
+            id_type: Optional specific type to check against
             
         Returns:
-            True if valid format, False otherwise
-            
-        Example:
-            >>> UnifiedIDManager.validate_run_id("thread_user123_run_1693430400000_a1b2c3d4")
-            True
-            
-            >>> UnifiedIDManager.validate_run_id("run_user123_a1b2c3d4")
-            True
-            
-            >>> UnifiedIDManager.validate_run_id("invalid_format")
-            False
+            True if ID is valid
         """
-        return UnifiedIDManager.parse_run_id(run_id) is not None
-    
-    @staticmethod
-    def validate_thread_id(thread_id: str) -> bool:
-        """
-        Validate thread ID format.
-        
-        Thread ID requirements:
-        - Must be non-empty string
-        - Must start with alphanumeric character  
-        - Can contain alphanumeric, underscore, hyphen
-        - Cannot contain reserved sequences
-        
-        Args:
-            thread_id: Thread ID to validate
-            
-        Returns:
-            True if valid format, False otherwise
-            
-        Example:
-            >>> UnifiedIDManager.validate_thread_id("user123")
-            True
-            
-            >>> UnifiedIDManager.validate_thread_id("user_session_abc")
-            True
-            
-            >>> UnifiedIDManager.validate_thread_id("_invalid")
-            False
-        """
-        if not thread_id or not isinstance(thread_id, str):
+        metadata = self.get_id_metadata(id_value)
+        if not metadata:
             return False
         
-        # Check basic format requirements
-        if not UnifiedIDManager.THREAD_ID_VALIDATION_PATTERN.match(thread_id):
-            return False
-        
-        # Check for forbidden sequences
-        if UnifiedIDManager.RUN_SEPARATOR in thread_id:
+        if id_type and metadata.id_type != id_type:
             return False
         
         return True
     
-    @staticmethod
-    def normalize_thread_id(thread_id: str) -> str:
+    def release_id(self, id_value: str) -> bool:
         """
-        Normalize thread ID by removing duplicate prefixes.
-        
-        Handles cases where thread_id already has "thread_" prefix to prevent
-        double prefixing in final run_id.
+        Release an ID from active use.
         
         Args:
-            thread_id: Thread ID to normalize
+            id_value: ID to release
             
         Returns:
-            Normalized thread ID without "thread_" prefix
-            
-        Example:
-            >>> UnifiedIDManager.normalize_thread_id("thread_user123")
-            'user123'
-            
-            >>> UnifiedIDManager.normalize_thread_id("user123")
-            'user123'
-            
-            >>> UnifiedIDManager.normalize_thread_id("thread_thread_user123")  
-            'user123'
+            True if released successfully
         """
-        if not thread_id:
-            return thread_id
-        
-        normalized = thread_id
-        original = thread_id
-        
-        # Remove "thread_" prefixes iteratively (handles multiple levels)
-        while normalized.startswith(UnifiedIDManager.THREAD_PREFIX):
-            normalized = normalized[len(UnifiedIDManager.THREAD_PREFIX):]
-        
-        if normalized != original:
-            logger.debug(f"Normalized thread_id '{original}' -> '{normalized}'")
-        
-        return normalized
+        with self._lock:
+            metadata = self._id_registry.get(id_value)
+            if not metadata:
+                return False
+            
+            # Remove from active IDs
+            self._active_ids[metadata.id_type].discard(id_value)
+            
+            # Keep in registry for tracking but mark as released
+            metadata.context['released_at'] = time.time()
+            
+            logger.debug(f"Released {metadata.id_type.value} ID: {id_value}")
+            return True
     
-    @staticmethod
-    def validate_id_pair(run_id: str, thread_id: str) -> bool:
-        """
-        Validate consistency between run_id and thread_id.
-        
-        Args:
-            run_id: Run ID to check
-            thread_id: Expected thread ID
-            
-        Returns:
-            True if IDs are consistent, False otherwise
-            
-        Example:
-            >>> UnifiedIDManager.validate_id_pair(
-            ...     "thread_user123_run_1693430400000_a1b2c3d4", 
-            ...     "user123"
-            ... )
-            True
-        """
-        if not run_id or not thread_id:
-            return False
-        
-        extracted_thread_id = UnifiedIDManager.extract_thread_id(run_id)
-        if not extracted_thread_id:
-            return False
-        
-        # Normalize both for comparison
-        normalized_extracted = UnifiedIDManager.normalize_thread_id(extracted_thread_id)
-        normalized_expected = UnifiedIDManager.normalize_thread_id(thread_id)
-        
-        return normalized_extracted == normalized_expected
+    def get_active_ids(self, id_type: IDType) -> Set[str]:
+        """Get all active IDs of a specific type"""
+        return self._active_ids[id_type].copy()
     
-    @staticmethod
-    def get_format_info(run_id: str) -> Dict[str, Any]:
+    def count_active_ids(self, id_type: IDType) -> int:
+        """Count active IDs of a specific type"""
+        return len(self._active_ids[id_type])
+    
+    def cleanup_released_ids(self, max_age_seconds: int = 3600) -> int:
         """
-        Get detailed format information about a run_id.
-        
-        Useful for debugging, migration, and monitoring format usage.
+        Clean up old released IDs from registry.
         
         Args:
-            run_id: Run ID to analyze
+            max_age_seconds: Maximum age for released IDs
             
         Returns:
-            Dict with format details, or empty dict if invalid
+            Number of IDs cleaned up
+        """
+        current_time = time.time()
+        cleanup_count = 0
+        
+        with self._lock:
+            ids_to_remove = []
             
-        Example:
-            >>> UnifiedIDManager.get_format_info("thread_user123_run_1693430400000_a1b2c3d4")
-            {
-                'format_version': 'canonical',
-                'thread_id': 'user123',
-                'has_timestamp': True,
-                'timestamp': 1693430400000,
-                'uuid_suffix': 'a1b2c3d4',
-                'is_legacy': False
+            for id_value, metadata in self._id_registry.items():
+                released_at = metadata.context.get('released_at')
+                if released_at and current_time - released_at > max_age_seconds:
+                    ids_to_remove.append(id_value)
+            
+            for id_value in ids_to_remove:
+                del self._id_registry[id_value]
+                cleanup_count += 1
+        
+        if cleanup_count > 0:
+            logger.info(f"Cleaned up {cleanup_count} released IDs")
+        
+        return cleanup_count
+    
+    def get_stats(self) -> Dict[str, Any]:
+        """Get ID manager statistics"""
+        with self._lock:
+            stats = {
+                'total_registered': len(self._id_registry),
+                'active_by_type': {},
+                'counters_by_type': {},
+                'total_active': 0
             }
-        """
-        parsed = UnifiedIDManager.parse_run_id(run_id)
-        if not parsed:
-            return {}
-        
-        return {
-            'format_version': parsed.format_version.value,
-            'thread_id': parsed.thread_id,
-            'has_timestamp': parsed.timestamp is not None,
-            'timestamp': parsed.timestamp,
-            'uuid_suffix': parsed.uuid_suffix,
-            'is_legacy': parsed.is_legacy(),
-            'original_run_id': parsed.original_run_id
-        }
+            
+            for id_type in IDType:
+                active_count = len(self._active_ids[id_type])
+                stats['active_by_type'][id_type.value] = active_count
+                stats['counters_by_type'][id_type.value] = self._id_counters[id_type]
+                stats['total_active'] += active_count
+            
+            return stats
     
-    @staticmethod
-    def migrate_to_canonical(run_id: str) -> Optional[str]:
-        """
-        Migrate any run_id to canonical format.
-        
-        Preserves the original thread_id while updating to canonical format.
-        Useful for gradual migration of legacy systems.
-        
-        Args:
-            run_id: Run ID in any supported format
-            
-        Returns:
-            New run_id in canonical format, or None if input invalid
-            
-        Example:
-            >>> UnifiedIDManager.migrate_to_canonical("run_user123_a1b2c3d4")
-            'thread_user123_run_1693430401000_b2c3d4e5'
-        """
-        parsed = UnifiedIDManager.parse_run_id(run_id)
-        if not parsed:
-            return None
-        
-        if parsed.format_version == IDFormat.CANONICAL:
-            return parsed.original_run_id  # Already canonical
-        
-        # Generate new canonical ID with same thread_id
-        new_run_id = UnifiedIDManager.generate_run_id(parsed.thread_id)
-        logger.info(f"Migrated run_id '{run_id}' -> '{new_run_id}' (from {parsed.format_version.value})")
-        
-        return new_run_id
+    def reset_counters(self) -> None:
+        """Reset all ID counters (use with caution)"""
+        with self._lock:
+            self._id_counters = {id_type: 0 for id_type in IDType}
+            logger.warning("ID counters reset")
     
-    @staticmethod
-    def create_test_ids(thread_id: str = "test_session") -> Tuple[str, str]:
-        """
-        Create valid test IDs for testing purposes.
-        
-        Args:
-            thread_id: Base thread ID for tests
-            
-        Returns:
-            Tuple of (thread_id, run_id) 
-            
-        Example:
-            >>> thread_id, run_id = UnifiedIDManager.create_test_ids("test_user")
-            >>> UnifiedIDManager.validate_id_pair(run_id, thread_id)
-            True
-        """
-        normalized_thread_id = UnifiedIDManager.normalize_thread_id(thread_id)
-        run_id = UnifiedIDManager.generate_run_id(normalized_thread_id)
-        
-        return normalized_thread_id, run_id
-    
-    @staticmethod
-    def extract_thread_id_with_fallback(
-        run_id: Optional[str] = None,
-        thread_id: Optional[str] = None, 
-        chat_thread_id: Optional[str] = None
-    ) -> Optional[str]:
-        """
-        Extract thread_id with multiple fallback sources.
-        
-        Priority order:
-        1. Extract from run_id (highest priority)
-        2. Use provided thread_id
-        3. Use provided chat_thread_id (legacy support)
-        
-        Args:
-            run_id: Run identifier for extraction
-            thread_id: Direct thread identifier
-            chat_thread_id: Legacy chat thread identifier
-            
-        Returns:
-            Thread ID or None if not found
-            
-        Example:
-            >>> UnifiedIDManager.extract_thread_id_with_fallback(
-            ...     run_id="thread_user123_run_1693430400000_a1b2c3d4"
-            ... )
-            'user123'
-        """
-        # Priority 1: Extract from run_id
-        if run_id:
-            extracted = UnifiedIDManager.extract_thread_id(run_id)
-            if extracted:
-                return UnifiedIDManager.normalize_thread_id(extracted)
-        
-        # Priority 2: Direct thread_id
-        if thread_id:
-            return UnifiedIDManager.normalize_thread_id(thread_id)
-        
-        # Priority 3: Legacy chat_thread_id
-        if chat_thread_id:
-            return UnifiedIDManager.normalize_thread_id(chat_thread_id)
-        
-        return None
-    
-    # ========================================================================
-    # ADDITIONAL ID GENERATION FUNCTIONS - Centralized from across codebase
-    # ========================================================================
-    
-    @staticmethod
-    def generate_connection_id(user_id: str = "", prefix: str = "conn") -> str:
-        """
-        Generate WebSocket connection ID.
-        
-        Format: {prefix}_{user_id}_{timestamp}_{8_hex_uuid}
-        
-        Args:
-            user_id: Optional user identifier to include
-            prefix: ID prefix (default: "conn")
-            
-        Returns:
-            Connection ID string
-            
-        Example:
-            >>> UnifiedIDManager.generate_connection_id("user123")
-            'conn_user123_1693430400000_a1b2c3d4'
-        """
-        timestamp = int(time.time() * 1000)
-        uuid_suffix = uuid.uuid4().hex[:UnifiedIDManager.UUID_LENGTH]
-        
-        if user_id:
-            connection_id = f"{prefix}_{user_id}_{timestamp}_{uuid_suffix}"
-        else:
-            connection_id = f"{prefix}_{timestamp}_{uuid_suffix}"
-        
-        logger.debug(f"Generated connection_id: {connection_id}")
-        return connection_id
-    
-    @staticmethod
-    def generate_message_id() -> str:
-        """
-        Generate message ID.
-        
-        Format: Full UUID4 string
-        
-        Returns:
-            Message ID string
-            
-        Example:
-            >>> UnifiedIDManager.generate_message_id()
-            'a1b2c3d4-e5f6-g7h8-i9j0-k1l2m3n4o5p6'
-        """
-        message_id = str(uuid.uuid4())
-        logger.debug(f"Generated message_id: {message_id}")
-        return message_id
-    
-    @staticmethod
-    def generate_session_id(user_id: Optional[str] = None) -> str:
-        """
-        Generate session ID.
-        
-        Format: sess_{user_id}_{timestamp}_{8_hex_uuid} or sess_{timestamp}_{8_hex_uuid}
-        
-        Args:
-            user_id: Optional user identifier to include
-            
-        Returns:
-            Session ID string
-            
-        Example:
-            >>> UnifiedIDManager.generate_session_id("user123")
-            'sess_user123_1693430400000_a1b2c3d4'
-        """
-        timestamp = int(time.time() * 1000)
-        uuid_suffix = uuid.uuid4().hex[:UnifiedIDManager.UUID_LENGTH]
-        
-        if user_id:
-            session_id = f"sess_{user_id}_{timestamp}_{uuid_suffix}"
-        else:
-            session_id = f"sess_{timestamp}_{uuid_suffix}"
-        
-        logger.debug(f"Generated session_id: {session_id}")
-        return session_id
-    
-    @staticmethod
-    def generate_request_id() -> str:
-        """
-        Generate request ID.
-        
-        Format: req_{timestamp}_{8_hex_uuid}
-        
-        Returns:
-            Request ID string
-            
-        Example:
-            >>> UnifiedIDManager.generate_request_id()
-            'req_1693430400000_a1b2c3d4'
-        """
-        timestamp = int(time.time() * 1000)
-        uuid_suffix = uuid.uuid4().hex[:UnifiedIDManager.UUID_LENGTH]
-        
-        request_id = f"req_{timestamp}_{uuid_suffix}"
-        logger.debug(f"Generated request_id: {request_id}")
-        return request_id
-    
-    @staticmethod
-    def generate_trace_id() -> str:
-        """
-        Generate trace ID for distributed tracing.
-        
-        Format: trace_{16_hex_uuid}
-        
-        Returns:
-            Trace ID string
-            
-        Example:
-            >>> UnifiedIDManager.generate_trace_id()
-            'trace_a1b2c3d4e5f6g7h8'
-        """
-        uuid_suffix = uuid.uuid4().hex[:16]  # 16 chars for trace IDs
-        
-        trace_id = f"trace_{uuid_suffix}"
-        logger.debug(f"Generated trace_id: {trace_id}")
-        return trace_id
-    
-    @staticmethod
-    def generate_span_id() -> str:
-        """
-        Generate span ID for distributed tracing.
-        
-        Format: span_{8_hex_uuid}
-        
-        Returns:
-            Span ID string
-            
-        Example:
-            >>> UnifiedIDManager.generate_span_id()
-            'span_a1b2c3d4'
-        """
-        uuid_suffix = uuid.uuid4().hex[:UnifiedIDManager.UUID_LENGTH]
-        
-        span_id = f"span_{uuid_suffix}"
-        logger.debug(f"Generated span_id: {span_id}")
-        return span_id
-    
-    @staticmethod
-    def generate_correlation_id() -> str:
-        """
-        Generate correlation ID for operation tracking.
-        
-        Format: Full UUID4 string (same as message_id for simplicity)
-        
-        Returns:
-            Correlation ID string
-            
-        Example:
-            >>> UnifiedIDManager.generate_correlation_id()
-            'a1b2c3d4-e5f6-g7h8-i9j0-k1l2m3n4o5p6'
-        """
-        correlation_id = str(uuid.uuid4())
-        logger.debug(f"Generated correlation_id: {correlation_id}")
-        return correlation_id
-    
-    @staticmethod
-    def generate_audit_id() -> str:
-        """
-        Generate audit ID for audit logging.
-        
-        Format: audit_{timestamp}_{8_hex_uuid}
-        
-        Returns:
-            Audit ID string
-            
-        Example:
-            >>> UnifiedIDManager.generate_audit_id()
-            'audit_1693430400000_a1b2c3d4'
-        """
-        timestamp = int(time.time() * 1000)
-        uuid_suffix = uuid.uuid4().hex[:UnifiedIDManager.UUID_LENGTH]
-        
-        audit_id = f"audit_{timestamp}_{uuid_suffix}"
-        logger.debug(f"Generated audit_id: {audit_id}")
-        return audit_id
-    
-    @staticmethod
-    def generate_context_id() -> str:
-        """
-        Generate context ID for security context isolation.
-        
-        Format: ctx_{16_hex_uuid}
-        
-        Returns:
-            Context ID string
-            
-        Example:
-            >>> UnifiedIDManager.generate_context_id()
-            'ctx_a1b2c3d4e5f6g7h8'
-        """
-        uuid_suffix = uuid.uuid4().hex[:16]  # 16 chars for context IDs
-        
-        context_id = f"ctx_{uuid_suffix}"
-        logger.debug(f"Generated context_id: {context_id}")
-        return context_id
-    
-    @staticmethod
-    def generate_user_id(prefix: str = "user") -> str:
-        """
-        Generate user ID (mainly for testing).
-        
-        Format: {prefix}_{timestamp}_{8_hex_uuid}
-        
-        Args:
-            prefix: ID prefix (default: "user")
-            
-        Returns:
-            User ID string
-            
-        Example:
-            >>> UnifiedIDManager.generate_user_id()
-            'user_1693430400000_a1b2c3d4'
-        """
-        timestamp = int(time.time() * 1000)
-        uuid_suffix = uuid.uuid4().hex[:UnifiedIDManager.UUID_LENGTH]
-        
-        user_id = f"{prefix}_{timestamp}_{uuid_suffix}"
-        logger.debug(f"Generated user_id: {user_id}")
-        return user_id
-    
-    @staticmethod
-    def generate_test_id(prefix: str = "test") -> str:
-        """
-        Generate test ID for test frameworks.
-        
-        Format: {prefix}_{timestamp}_{8_hex_uuid}
-        
-        Args:
-            prefix: ID prefix (default: "test")
-            
-        Returns:
-            Test ID string
-            
-        Example:
-            >>> UnifiedIDManager.generate_test_id()
-            'test_1693430400000_a1b2c3d4'
-        """
-        timestamp = int(time.time() * 1000)
-        uuid_suffix = uuid.uuid4().hex[:UnifiedIDManager.UUID_LENGTH]
-        
-        test_id = f"{prefix}_{timestamp}_{uuid_suffix}"
-        logger.debug(f"Generated test_id: {test_id}")
-        return test_id
+    def clear_all(self) -> None:
+        """Clear all IDs and reset manager (use with caution)"""
+        with self._lock:
+            self._id_registry.clear()
+            self._active_ids = {id_type: set() for id_type in IDType}
+            self._id_counters = {id_type: 0 for id_type in IDType}
+            logger.warning("UnifiedIDManager cleared")
 
 
-# Backward compatibility aliases for migration
-# These will be deprecated in future versions
-
-def generate_run_id(thread_id: str, context: str = "") -> str:
-    """Deprecated: Use UnifiedIDManager.generate_run_id() instead."""
-    logger.warning("generate_run_id() is deprecated, use UnifiedIDManager.generate_run_id()")
-    return UnifiedIDManager.generate_run_id(thread_id)
+# Global ID manager instance
+_id_manager = None
 
 
-def extract_thread_id_from_run_id(run_id: str) -> Optional[str]:
-    """Deprecated: Use UnifiedIDManager.extract_thread_id() instead."""
-    logger.warning("extract_thread_id_from_run_id() is deprecated, use UnifiedIDManager.extract_thread_id()")
-    return UnifiedIDManager.extract_thread_id(run_id)
+def get_id_manager() -> UnifiedIDManager:
+    """Get global unified ID manager"""
+    global _id_manager
+    if _id_manager is None:
+        _id_manager = UnifiedIDManager()
+    return _id_manager
 
 
-# Export public interface
-__all__ = [
-    'UnifiedIDManager',
-    'ParsedRunID', 
-    'IDFormat',
-    # Deprecated functions for backward compatibility
-    'generate_run_id',
-    'extract_thread_id_from_run_id'
-]
+def generate_id(id_type: IDType, **kwargs) -> str:
+    """Convenience function to generate ID"""
+    return get_id_manager().generate_id(id_type, **kwargs)
+
+
+def generate_user_id() -> str:
+    """Generate a user ID"""
+    return generate_id(IDType.USER)
+
+
+def generate_session_id() -> str:
+    """Generate a session ID"""
+    return generate_id(IDType.SESSION)
+
+
+def generate_request_id() -> str:
+    """Generate a request ID"""
+    return generate_id(IDType.REQUEST)
+
+
+def generate_agent_id() -> str:
+    """Generate an agent ID"""
+    return generate_id(IDType.AGENT)
+
+
+def generate_websocket_id() -> str:
+    """Generate a WebSocket connection ID"""
+    return generate_id(IDType.WEBSOCKET)
+
+
+def generate_execution_id() -> str:
+    """Generate an execution context ID"""
+    return generate_id(IDType.EXECUTION)
+
+
+def is_valid_id(id_value: str, id_type: Optional[IDType] = None) -> bool:
+    """Convenience function to validate ID"""
+    return get_id_manager().is_valid_id(id_value, id_type)

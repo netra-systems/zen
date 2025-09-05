@@ -39,19 +39,11 @@ from netra_backend.app.auth_integration.auth import (
     require_permission,
 )
 
-# Type-safe interfaces
-from netra_backend.app.auth_integration.interfaces import (
-    AuditLoggerProtocol,
-    AuthClientProtocol,
-    AuthDependencies,
-    AuthServiceProtocol,
-    OAuthProviderProtocol,
-    PasswordManagerProtocol,
-    PermissionManagerProtocol,
-    RateLimiterProtocol,
-    SessionManagerProtocol,
-    TokenValidatorProtocol,
-)
+# Type-safe interfaces - Import from rate_limit_types where RateLimiterProtocol is defined
+from netra_backend.app.schemas.rate_limit_types import RateLimiterProtocol
+
+# Note: Other auth protocols (AuditLoggerProtocol, AuthClientProtocol, etc.) were in 
+# deleted interfaces.py file. These may need to be recreated if actually used.
 
 # Validation utilities
 from netra_backend.app.auth_integration.validators import (
@@ -149,16 +141,8 @@ __all__ = [
     'AuthValidationError',
     
     # Interfaces
-    'AuthClientProtocol',
-    'AuthServiceProtocol',
-    'SessionManagerProtocol',
-    'PermissionManagerProtocol',
-    'AuditLoggerProtocol',
-    'TokenValidatorProtocol',
-    'PasswordManagerProtocol',
-    'OAuthProviderProtocol',
     'RateLimiterProtocol',
-    'AuthDependencies'
+    # Note: Other auth protocols were removed with interfaces.py - add back if needed
 ]
 
 # Add dependency items if available
