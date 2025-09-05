@@ -389,7 +389,7 @@ class GitHubCIAutoFixer:
     
     def run_loop(self):
         """Main loop to monitor and fix CI."""
-        print(f"🔄 Starting GitHub CI Auto-Fix Loop")
+        print(f"[LOOP] Starting GitHub CI Auto-Fix Loop")
         print(f"   Repository: {self.repo}")
         print(f"   Branch: {self.branch}")
         print(f"   Max attempts: {self.max_attempts}")
