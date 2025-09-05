@@ -523,6 +523,8 @@ class AuthService:
         async def make_request():
             async with httpx.AsyncClient(timeout=30.0) as client:
                 # Verify token with Google
+                # Using Google's OAuth2 userinfo endpoint - this is a well-known OAuth2 endpoint
+                # and should remain hardcoded as it's part of the Google OAuth2 specification
                 response = await client.get(
                     "https://www.googleapis.com/oauth2/v2/userinfo",
                     headers={"Authorization": f"Bearer {token}"}

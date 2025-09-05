@@ -177,9 +177,13 @@ class AuthDatabaseConnection:
             # SQLite/aiosqlite specific connection args (if any needed in future)
             connect_args = {}
         
-        # Create engine with optimized timeout settings using AuthDatabaseManager
-        return AuthDatabaseManager.create_async_engine(
-            database_url=database_url,
+        # Create engine directly using SQLAlchemy since we have the database URL
+        from sqlalchemy.ext.asyncio import create_async_engine
+        from sqlalchemy.pool import AsyncAdaptedQueuePool
+        
+        return create_async_engine(
+            database_url,
+            poolclass=AsyncAdaptedQueuePool,
             connect_args=connect_args,
             pool_size=5,
             max_overflow=10, 
