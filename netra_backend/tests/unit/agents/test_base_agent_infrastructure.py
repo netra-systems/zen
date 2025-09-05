@@ -97,9 +97,9 @@ class TestBaseAgentReliabilityInfrastructure:
         
         # Verify reliability infrastructure is initialized
         assert agent._enable_reliability is True
-        assert agent._reliability_manager is not None
-        assert isinstance(agent._reliability_manager, ReliabilityManager)
-        assert agent._legacy_reliability is not None
+        assert agent.reliability_manager is not None
+        assert isinstance(agent.reliability_manager, ReliabilityManager)
+        assert agent.legacy_reliability is not None
         
         # Verify property access
         assert agent.reliability_manager is not None
@@ -119,8 +119,8 @@ class TestBaseAgentReliabilityInfrastructure:
         
         # Verify reliability infrastructure is not initialized
         assert agent._enable_reliability is False
-        assert agent._reliability_manager is None
-        assert agent._legacy_reliability is None
+        assert agent.reliability_manager is None
+        assert agent.legacy_reliability is None
         
         # Verify property access returns None
         assert agent.reliability_manager is None
@@ -247,8 +247,8 @@ class TestBaseAgentExecutionEngine:
         
         # Verify execution infrastructure is initialized
         assert agent._enable_execution_engine is True
-        assert agent._execution_engine is not None
-        assert isinstance(agent._execution_engine, BaseExecutionEngine)
+        assert agent.execution_engine is not None
+        assert isinstance(agent.execution_engine, BaseExecutionEngine)
         assert agent._execution_monitor is not None
         assert isinstance(agent._execution_monitor, ExecutionMonitor)
         
@@ -266,7 +266,7 @@ class TestBaseAgentExecutionEngine:
         
         # Verify execution infrastructure is not initialized
         assert agent._enable_execution_engine is False
-        assert agent._execution_engine is None
+        assert agent.execution_engine is None
         assert agent._execution_monitor is None
         
         # Verify property access returns None
@@ -619,8 +619,8 @@ class TestBaseAgentHealthMonitoring:
         )
         
         # Mock healthy components
-        with patch.object(agent._legacy_reliability, 'get_health_status') as mock_legacy_health:
-            with patch.object(agent._execution_engine, 'get_health_status') as mock_execution_health:
+        with patch.object(agent.legacy_reliability, 'get_health_status') as mock_legacy_health:
+            with patch.object(agent.execution_engine, 'get_health_status') as mock_execution_health:
                 # Test healthy state
                 mock_legacy_health.return_value = {"overall_health": "healthy"}
                 mock_execution_health.return_value = {"monitor": {"status": "healthy"}}
@@ -694,8 +694,8 @@ class TestBaseAgentPropertyInitialization:
         assert agent._user_id == "user_456"
         
         # Verify infrastructure components
-        assert agent._reliability_manager is not None
-        assert agent._execution_engine is not None
+        assert agent.reliability_manager is not None
+        assert agent.execution_engine is not None
         assert agent._execution_monitor is not None
         
         # Verify properties
@@ -715,8 +715,8 @@ class TestBaseAgentPropertyInitialization:
             enable_caching=False
         )
         
-        assert agent1._reliability_manager is not None
-        assert agent1._execution_engine is None
+        assert agent1.reliability_manager is not None
+        assert agent1.execution_engine is None
         assert agent1._execution_monitor is None
         
         # Only execution engine enabled (requires reliability)
@@ -728,8 +728,8 @@ class TestBaseAgentPropertyInitialization:
             enable_caching=False
         )
         
-        assert agent2._reliability_manager is not None
-        assert agent2._execution_engine is not None
+        assert agent2.reliability_manager is not None
+        assert agent2.execution_engine is not None
         assert agent2._execution_monitor is not None
         
         # Only caching enabled
@@ -742,8 +742,8 @@ class TestBaseAgentPropertyInitialization:
             redis_manager=mock_dependencies['redis_manager']
         )
         
-        assert agent3._reliability_manager is None
-        assert agent3._execution_engine is None
+        assert agent3.reliability_manager is None
+        assert agent3.execution_engine is None
         assert agent3.redis_manager is not None
         
     def test_caching_initialization_requirements(self, mock_llm_manager):
@@ -859,7 +859,7 @@ class TestBaseAgentEdgeCasesAndErrorScenarios:
         
         # Mock cleanup methods to raise errors
         with patch.object(agent.timing_collector, 'complete_execution', side_effect=Exception("Cleanup error")):
-            with patch.object(agent._reliability_manager, 'reset_health_tracking', side_effect=Exception("Health cleanup error")):
+            with patch.object(agent.reliability_manager, 'reset_health_tracking', side_effect=Exception("Health cleanup error")):
                 # Should not raise exception despite cleanup errors
                 await agent.shutdown()
                 assert agent.state == SubAgentLifecycle.SHUTDOWN
@@ -894,7 +894,7 @@ class TestBaseAgentEdgeCasesAndErrorScenarios:
                 enable_reliability=True
             )
             
-            assert agent._reliability_manager is not None
+            assert agent.reliability_manager is not None
             
     def test_concurrent_access_safety(self, mock_llm_manager):
         """Test agent properties are safe for concurrent access."""

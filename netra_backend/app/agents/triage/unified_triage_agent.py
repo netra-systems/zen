@@ -182,8 +182,10 @@ class UnifiedTriageAgent(BaseAgent):
             context: User execution context for isolation
             execution_priority: Execution order (0 = first)
         """
-        super().__init__()
-        self.llm_manager = llm_manager
+        super().__init__(
+            llm_manager=llm_manager,
+            name="UnifiedTriageAgent"
+        )
         self.tool_dispatcher = tool_dispatcher
         self.context = context
         self.execution_priority = execution_priority
@@ -192,7 +194,7 @@ class UnifiedTriageAgent(BaseAgent):
         self._cache_helper = CacheHelpers(None)
         
         # Initialize reliability manager - use private attribute to avoid property setter issue
-        self._reliability_manager_instance = get_reliability_manager("unified_triage")
+        self._reliability_manager_instance = get_reliability_manager()
         
         # Initialize processing components
         self._init_processing_components()
