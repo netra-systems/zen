@@ -27,21 +27,24 @@ Users are getting 401 Unauthorized errors when trying to access the staging API 
 ### Why #4: Why would SSOT consolidation affect authentication configuration?
 **Answer:** The aggressive removal of "duplicate" configurations failed to recognize that environment-specific configurations (TEST/STAGING/PROD) are NOT duplicates but necessary independent configs.
 
-### Why #5: Why did the system allow removal of critical authentication configurations?
-**Answer:** There was no dependency checking or cascade failure prevention mechanism in place to protect mission-critical named values like OAuth credentials and JWT secrets.
+### Why #5: Why did the system allow service implementation inconsistency?
+**Answer:** The auth service and backend service evolved independently without enforcing consistent JWT secret loading patterns, leading to backend supporting JWT_SECRET_STAGING while auth service only supports JWT_SECRET_KEY.
 
 ---
 
 ## 2. ROOT CAUSES IDENTIFIED
 
 ### Primary Root Cause
-**Configuration SSOT Anti-Pattern**: Overzealous consolidation removed environment-specific OAuth/JWT configurations thinking they were duplicates.
+**Service Implementation Inconsistency**: Auth service and backend service use different JWT secret loading logic.
+
+- **Backend Service**: Uses `JWT_SECRET_{ENVIRONMENT}` pattern (JWT_SECRET_STAGING)
+- **Auth Service**: Only looks for `JWT_SECRET_KEY` regardless of environment
 
 ### Contributing Factors
-1. **No ConfigDependencyMap validation** before deletion
-2. **Silent fallback to wrong environment configs**
-3. **Missing test coverage for staging auth flow**
-4. **No pre-deployment auth validation**
+1. **Inconsistent environment-specific handling** between services
+2. **Central config validator not universally adopted**
+3. **Missing test coverage for cross-service JWT validation**
+4. **No architectural consistency enforcement**
 
 ---
 
@@ -116,36 +119,60 @@ sequenceDiagram
 
 ---
 
-## 5. CONFIGURATION INVESTIGATION
+## 5. SPECIFIC ROOT CAUSE ANALYSIS
 
-### Critical Environment Variables to Check
-1. **JWT_SECRET_STAGING** - Must be different from TEST/PROD
-2. **OAUTH_CLIENT_ID_STAGING** - Staging-specific OAuth app
-3. **OAUTH_CLIENT_SECRET_STAGING** - Staging OAuth secret
-4. **OAUTH_REDIRECT_URI_STAGING** - Must match OAuth app config
-5. **AUTH_SERVICE_URL** - Must point to staging auth service
+### **CONFIRMED ROOT CAUSE: Service Implementation Mismatch**
 
-### Likely Missing Configurations
-Based on recent commits:
-- OAuth redirect URIs were deprecated without migration path
-- JWT secrets may be falling back to test environment
-- OAuth credentials might be using wrong environment
+#### Backend Service (✅ Working)
+- **Implementation**: `netra_backend/app/core/configuration/unified_secrets.py:94`
+- **Logic**: Tries `JWT_SECRET_{environment.upper()}` first (JWT_SECRET_STAGING for staging)
+- **Fallback Chain**: JWT_SECRET_STAGING → JWT_SECRET_KEY → JWT_SECRET → dev fallback
+- **Status**: ✅ CORRECTLY finds JWT_SECRET_STAGING from config/staging.env
+
+#### Auth Service (❌ Broken)  
+- **Implementation**: `auth_service/auth_core/auth_environment.py:49`
+- **Logic**: Only looks for `JWT_SECRET_KEY` 
+- **No Environment-Specific Handling**: Doesn't check JWT_SECRET_STAGING
+- **Failure Point**: Line 65 raises ValueError for staging when JWT_SECRET_KEY not found
+
+#### The Central Config Validator Issue
+- **Expected**: Auth service should use `AuthSecretLoader.get_jwt_secret()` → `CentralConfigValidator.get_jwt_secret()`
+- **Reality**: Auth service falls back to `AuthEnvironment.get_jwt_secret_key()` which only checks JWT_SECRET_KEY
+- **Missing**: The fallback in auth environment doesn't delegate to central validator
+
+### Configuration Analysis
+- **staging.env has**: `JWT_SECRET_STAGING=7SVLKvh7mJNeF6njiRJMoZpUWLya3NfsvJfRHPc0...`
+- **staging.env missing**: `JWT_SECRET_KEY` (which auth service expects)
+- **Backend service**: Correctly finds JWT_SECRET_STAGING
+- **Auth service**: Fails because it only looks for JWT_SECRET_KEY
 
 ---
 
 ## 6. IMPLEMENTATION PLAN
 
-### Immediate Actions
-1. **Restore staging-specific auth configs**
-2. **Add ConfigDependencyMap entries for auth**
-3. **Implement hard failures (no silent fallbacks)**
-4. **Add staging auth integration tests**
+### **Immediate Fix Options (Choose One)**
 
-### Long-term Prevention
-1. **Create MISSION_CRITICAL_NAMED_VALUES guard**
-2. **Implement cascade failure detection**
-3. **Add pre-deployment auth smoke tests**
-4. **Document environment isolation requirements**
+#### Option A: Fix Auth Service Implementation (RECOMMENDED)
+1. **Update auth_environment.py:49** to use environment-specific logic like backend
+2. **Add JWT_SECRET_STAGING support** in AuthEnvironment.get_jwt_secret_key()
+3. **Ensure fallback to CentralConfigValidator** when available
+4. **Test auth service can load JWT_SECRET_STAGING**
+
+#### Option B: Add JWT_SECRET_KEY to Staging Config (QUICK FIX)
+1. **Add `JWT_SECRET_KEY=7SVLKvh7mJNeF6njiRJMoZpUWLya3NfsvJfRHPc0...`** to staging.env
+2. **Duplicate JWT_SECRET_STAGING value** as JWT_SECRET_KEY for compatibility
+3. **Risk**: Violates environment-specific naming convention
+
+#### Option C: Force Central Config Validator Usage (ARCHITECTURAL)
+1. **Remove fallback to AuthEnvironment.get_jwt_secret_key()**
+2. **Make AuthSecretLoader.get_jwt_secret() always use central validator**
+3. **Ensure central validator is always available**
+
+### **Recommended Approach: Option A**
+- Maintains environment-specific naming conventions
+- Aligns auth service with backend service implementation
+- Preserves architectural consistency
+- Fixes root cause rather than symptoms
 
 ---
 
@@ -171,19 +198,36 @@ Based on recent commits:
 ## 8. LESSONS LEARNED
 
 ### What Went Wrong
-1. **SSOT misapplication**: Applied code SSOT principles to environment configs
-2. **No dependency analysis**: Removed configs without checking usage
-3. **Silent failures**: Fallbacks masked critical issues
-4. **Insufficient testing**: No staging-specific auth tests
+1. **Service implementation divergence**: Backend and auth service evolved different JWT loading patterns
+2. **Inconsistent environment handling**: No enforcement of consistent environment-specific variable naming
+3. **Central validator not universally adopted**: Fallback logic inconsistent between services
+4. **Missing cross-service integration tests**: No tests validating JWT secrets work across both services
 
 ### Prevention Measures
-1. **Environment configs are NOT duplicates**
-2. **Always check ConfigDependencyMap**
-3. **Hard failures over wrong configs**
-4. **Test each environment independently**
-5. **Guard mission-critical values**
+1. **Enforce consistent JWT loading patterns** across all services
+2. **Mandate central config validator usage** for all authentication secrets
+3. **Add cross-service integration tests** for JWT validation
+4. **Implement architectural consistency checks** in CI/CD
+5. **Document service environment variable contracts**
 
 ---
 
-## Status: INVESTIGATING ROOT CAUSE
-## Next Step: Check staging environment configuration files
+## Status: FIXED ✅ 
+## Implementation: Option A completed successfully
+
+**SOLUTION IMPLEMENTED**: Updated `auth_service/auth_core/auth_environment.py:46` to support environment-specific JWT secrets with proper fallback chain:
+
+1. `JWT_SECRET_{ENVIRONMENT}` (e.g., JWT_SECRET_STAGING)
+2. `JWT_SECRET_KEY` (generic fallback)  
+3. `JWT_SECRET` (legacy fallback)
+4. Development/test auto-generation
+
+**VERIFICATION RESULTS**:
+- ✅ Auth service now loads JWT_SECRET_STAGING correctly  
+- ✅ Fix tested with exact staging configuration scenario
+- ✅ No breaking changes to existing functionality
+- ✅ Consistent with backend service implementation
+- ✅ Ready for deployment
+
+**FILES MODIFIED**:
+- `auth_service/auth_core/auth_environment.py` (lines 46-103)
