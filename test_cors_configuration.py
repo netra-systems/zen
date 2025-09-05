@@ -62,7 +62,7 @@ def test_cors_staging_origins():
         "https://api.staging.netrasystems.ai",
         "http://localhost:3000",
         "https://evil.com",
-        "https://netra-auth-service-pnovr5vsba-uc.a.run.app",
+        "https://auth.staging.netrasystems.ai",
     ]
     
     for origin in test_origins:

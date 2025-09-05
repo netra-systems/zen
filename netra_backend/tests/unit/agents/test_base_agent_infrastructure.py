@@ -298,7 +298,7 @@ class TestBaseAgentExecutionEngine:
         
         # Verify execution result
         assert isinstance(result, ExecutionResult)
-        assert result.success is True
+        assert result.is_success is True
         assert result.result is not None
         assert result.result["status"] == "success"
         assert result.result["context_run_id"] == "test_run_789"
@@ -329,7 +329,7 @@ class TestBaseAgentExecutionEngine:
         )
         
         # Execution should fail due to validation
-        assert result.success is False
+        assert result.is_success is False
         assert result.error is not None
         assert agent.validation_calls == 1
         assert agent.core_logic_calls == 0  # Should not reach core logic
@@ -356,7 +356,7 @@ class TestBaseAgentExecutionEngine:
         )
         
         # Execution should fail in core logic
-        assert result.success is False
+        assert result.is_success is False
         assert result.error is not None
         assert "Simulated execution failure" in str(result.error)
         assert agent.validation_calls == 1

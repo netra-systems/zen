@@ -2501,7 +2501,7 @@
               "run.googleapis.com/ingress-status": "all",
               "run.googleapis.com/invoker-iam-disabled": "true",
               "run.googleapis.com/operation-id": "4935d290-8ae9-41f4-a31e-b34c97b30654",
-              "run.googleapis.com/urls": "[\"https://netra-auth-service-701982941522.us-central1.run.app\",\"https://netra-auth-service-pnovr5vsba-uc.a.run.app\"]",
+              "run.googleapis.com/urls": "[\"https://netra-auth-service-701982941522.us-central1.run.app\",\"https://auth.staging.netrasystems.ai\"]",
               "serving.knative.dev/creator": "netra-staging-deploy@netra-staging.iam.gserviceaccount.com",
               "serving.knative.dev/lastModifier": "netra-staging-deploy@netra-staging.iam.gserviceaccount.com"
             },
@@ -2586,7 +2586,7 @@
                 "revisionName": "netra-auth-service-00007-5rx"
               }
             ],
-            "url": "https://netra-auth-service-pnovr5vsba-uc.a.run.app"
+            "url": "https://auth.staging.netrasystems.ai"
           }
         }
       },
@@ -2640,7 +2640,7 @@
             "run.googleapis.com/ingress-status": "all",
             "run.googleapis.com/invoker-iam-disabled": "true",
             "run.googleapis.com/operation-id": "4935d290-8ae9-41f4-a31e-b34c97b30654",
-            "run.googleapis.com/urls": "[\"https://netra-auth-service-701982941522.us-central1.run.app\",\"https://netra-auth-service-pnovr5vsba-uc.a.run.app\"]",
+            "run.googleapis.com/urls": "[\"https://netra-auth-service-701982941522.us-central1.run.app\",\"https://auth.staging.netrasystems.ai\"]",
             "serving.knative.dev/creator": "netra-staging-deploy@netra-staging.iam.gserviceaccount.com",
             "serving.knative.dev/lastModifier": "netra-staging-deploy@netra-staging.iam.gserviceaccount.com"
           },
@@ -2896,7 +2896,7 @@
         },
         "status": {
           "address": {
-            "url": "https://netra-auth-service-pnovr5vsba-uc.a.run.app"
+            "url": "https://auth.staging.netrasystems.ai"
           },
           "conditions": [
             {
@@ -2925,7 +2925,7 @@
               "revisionName": "netra-auth-service-00007-5rx"
             }
           ],
-          "url": "https://netra-auth-service-pnovr5vsba-uc.a.run.app"
+          "url": "https://auth.staging.netrasystems.ai"
         }
       },
       "serviceName": "run.googleapis.com",

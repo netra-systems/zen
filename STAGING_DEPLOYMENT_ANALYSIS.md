@@ -4,7 +4,7 @@ Deployment Status: SUCCESSFUL with ISSUES
 
 ## Deployment Summary
 - **Backend Service**: Deployed successfully to https://netra-backend-staging-pnovr5vsba-uc.a.run.app
-- **Auth Service**: Deployed successfully to https://netra-auth-service-pnovr5vsba-uc.a.run.app  
+- **Auth Service**: Deployed successfully to https://auth.staging.netrasystems.ai  
 - **Frontend Service**: Deployed successfully to https://netra-frontend-staging-pnovr5vsba-uc.a.run.app
 
 ## Issues Identified and Five Whys Analysis
