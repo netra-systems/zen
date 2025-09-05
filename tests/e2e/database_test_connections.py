@@ -47,7 +47,7 @@ class DatabaseConnectionManager:
         self.test_id = f"{test_name}_{int(time.time())}"
         
         # SSOT environment management
-        self.env = IsolatedEnvironment(service_name=f"test_db_{test_name}")
+        self.env = IsolatedEnvironment()
         
         # Database manager using SSOT pattern
         self.db_manager: Optional[DatabaseManager] = None

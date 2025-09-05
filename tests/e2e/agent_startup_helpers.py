@@ -79,7 +79,7 @@ class ContextTestManager:
     
     def __init__(self):
         """Initialize context test manager."""
-        self.env = IsolatedEnvironment(service_name="test_e2e_context")
+        self.env = IsolatedEnvironment()
         self.db_manager: Optional[DatabaseManager] = None
         self.http_client = None
         self.harness = None
@@ -129,7 +129,7 @@ class MultiAgentTestManager:
     
     def __init__(self):
         """Initialize multi-agent test manager."""
-        self.env = IsolatedEnvironment(service_name="test_e2e_multiagent") 
+        self.env = IsolatedEnvironment() 
         self.http_client = None
         self.ws_connection = None
         self.harness = None

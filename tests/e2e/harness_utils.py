@@ -49,7 +49,7 @@ class TestHarnessContext:
         self.database_name = f"test_db_{self.context_id}"
         
         # SSOT environment management
-        self.env = IsolatedEnvironment(service_name=f"test_harness_{test_name}")
+        self.env = IsolatedEnvironment()
         
         # Resources to cleanup
         self.db_manager: Optional[DatabaseManager] = None
@@ -61,10 +61,7 @@ class TestHarnessContext:
         
         try:
             # Initialize database manager using SSOT pattern
-            self.db_manager = DatabaseManager(
-                postgres_config=self.env.get_database_config(),
-                clickhouse_config=self.env.get_clickhouse_config()
-            )
+            self.db_manager = DatabaseManager()
             await self.db_manager.initialize()
             
             # Seed data if requested
