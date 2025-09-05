@@ -1,0 +1,8 @@
+# INFRASTRUCTURE tier dependencies
+# Change frequency: Low
+
+aiohttp>=3.12.15
+bcrypt>=4.3.0
+cloud-sql-python-connector[asyncpg]>=1.18.4
+google-cloud-secret-manager>=2.20.0
+httpx>=0.28.1

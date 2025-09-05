@@ -1,0 +1,90 @@
+# .dockerignore - Optimize build context
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+.venv/
+pip-log.txt
+pip-delete-this-directory.txt
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+*.egg-info/
+*.egg
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Git
+.git/
+.gitignore
+
+# Documentation  
+*.md
+docs/
+README*
+LICENSE
+
+# Tests (exclude from production builds)
+tests/
+test_*.py
+*_test.py
+conftest.py
+
+# Development files
+.env
+.env.*
+!.env.example
+docker-compose*.yml
+Dockerfile*
+!docker/
+Makefile
+scripts/test_*.py
+scripts/*_test.py
+
+# Logs and databases
+*.log
+*.sqlite
+*.db
+logs/
+
+# CI/CD
+.github/
+.gitlab-ci.yml
+.travis.yml
+
+# Build artifacts
+dist/
+build/
+*.whl
+
+# Reports and temporary files
+reports/
+*.tmp
+*.bak
+*.cache
+tmp/
+
+# Node (if frontend assets exist)
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# Large data files
+*.csv
+*.json
+!requirements*.json
+*.parquet
+*.pkl
+*.h5
