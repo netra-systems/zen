@@ -339,9 +339,21 @@ class WebSocketService {
   }
 
   private processQueuedMessages(): void {
-    while (this.messageQueue.length > 0) {
+    // Limit batch processing to prevent blocking and memory issues
+    const maxBatchSize = 50;
+    let processed = 0;
+    
+    while (this.messageQueue.length > 0 && processed < maxBatchSize) {
       const msg = this.messageQueue.shift();
-      this.send(msg);
+      if (msg) {
+        this.send(msg);
+        processed++;
+      }
+    }
+    
+    // If more messages remain, schedule next batch to prevent blocking
+    if (this.messageQueue.length > 0) {
+      setTimeout(() => this.processQueuedMessages(), 10);
     }
   }
 
@@ -566,7 +578,22 @@ class WebSocketService {
     if (!this.options.rateLimit) return true;
     const now = Date.now();
     const windowStart = now - this.options.rateLimit.window;
+    
+    // Prevent unlimited growth of messageTimestamps array
+    const oldLength = this.messageTimestamps.length;
     this.messageTimestamps = this.messageTimestamps.filter(ts => ts > windowStart);
+    
+    // Log if we cleaned up many old timestamps (potential memory leak indicator)
+    if (oldLength - this.messageTimestamps.length > 100) {
+      logger.debug(`Cleaned up ${oldLength - this.messageTimestamps.length} old message timestamps`);
+    }
+    
+    // Hard limit on array size to prevent memory exhaustion
+    if (this.messageTimestamps.length > 1000) {
+      this.messageTimestamps = this.messageTimestamps.slice(-500); // Keep only last 500
+      logger.warn('Message timestamps array exceeded 1000 entries, truncated to 500');
+    }
+    
     return this.messageTimestamps.length < this.options.rateLimit.messages;
   }
 
@@ -1240,35 +1267,49 @@ class WebSocketService {
   public send(message: WebSocketMessage | UnifiedWebSocketEvent | AuthMessage | PingMessage | PongMessage) {
     // Check rate limit if configured
     if (this.options.rateLimit) {
-      const now = Date.now();
-      const windowStart = now - this.options.rateLimit.window;
-      
-      // Remove timestamps outside the window
-      this.messageTimestamps = this.messageTimestamps.filter(ts => ts > windowStart);
-      
-      // Check if we've exceeded the rate limit
-      if (this.messageTimestamps.length >= this.options.rateLimit.messages) {
+      if (!this.checkRateLimit()) {
         this.options.onRateLimit?.();
-        // Queue the message instead of dropping it
-        this.messageQueue.push(message);
+        
+        // Prevent unbounded queue growth
+        if (this.messageQueue.length < 100) {
+          this.messageQueue.push(message);
+        } else {
+          logger.warn('Message queue full, dropping message to prevent memory leak');
+        }
         return;
       }
       
       // Add current timestamp
-      this.messageTimestamps.push(now);
+      this.messageTimestamps.push(Date.now());
     }
     
-    // If refreshing token, queue message as pending
+    // If refreshing token, queue message as pending with size limit
     if (this.isRefreshingToken) {
-      this.pendingMessages.push(message);
+      if (this.pendingMessages.length < 50) {
+        this.pendingMessages.push(message);
+      } else {
+        logger.warn('Pending messages queue full, dropping message to prevent memory leak');
+      }
       return;
     }
     
     if (this.ws && this.ws.readyState === WebSocket.OPEN) {
-      this.ws.send(JSON.stringify(message));
+      try {
+        this.ws.send(JSON.stringify(message));
+      } catch (error) {
+        logger.error('Failed to send WebSocket message:', error);
+        // Queue for retry if connection is still valid
+        if (this.messageQueue.length < 100) {
+          this.messageQueue.push(message);
+        }
+      }
     } else {
-      // Queue message for sending when connected
-      this.messageQueue.push(message);
+      // Queue message for sending when connected with size limit
+      if (this.messageQueue.length < 100) {
+        this.messageQueue.push(message);
+      } else {
+        logger.warn('Message queue full, dropping message to prevent memory leak');
+      }
     }
   }
 
@@ -1285,20 +1326,28 @@ class WebSocketService {
     this.isIntentionalDisconnect = true;
     this.isConnecting = false;
     
+    // Clear ALL timers to prevent memory leaks
     if (this.reconnectTimer) {
       clearTimeout(this.reconnectTimer);
       this.reconnectTimer = null;
     }
     
-    // Clear status change timer
     if (this.statusChangeTimer) {
       clearTimeout(this.statusChangeTimer);
       this.statusChangeTimer = null;
     }
     
+    if (this.heartbeatTimer) {
+      clearInterval(this.heartbeatTimer);
+      this.heartbeatTimer = null;
+    }
+    
+    // Clear token refresh timers
     this.clearTokenRefreshTimers();
     
-    this.stopHeartbeat();
+    // Remove all event handlers to prevent memory leaks
+    this.onStatusChange = null;
+    this.onMessage = null;
     
     // Remove page unload handler
     if (this.beforeUnloadHandler && typeof window !== 'undefined') {
@@ -1306,7 +1355,14 @@ class WebSocketService {
       this.beforeUnloadHandler = null;
     }
     
-    if (this.ws && this.ws.readyState !== WebSocket.CLOSED) {
+    // Close WebSocket connection
+    if (this.ws) {
+      // Remove all event listeners to prevent memory leaks
+      this.ws.onopen = null;
+      this.ws.onmessage = null;
+      this.ws.onclose = null;
+      this.ws.onerror = null;
+      
       // Send graceful disconnect message if possible
       if (this.ws.readyState === WebSocket.OPEN) {
         try {
@@ -1321,24 +1377,39 @@ class WebSocketService {
           // Ignore errors during disconnect
         }
       }
-      this.ws.close(1000, 'Normal closure');
+      
+      if (this.ws.readyState !== WebSocket.CLOSED) {
+        this.ws.close(1000, 'Normal closure');
+      }
+      
+      this.ws = null;
     }
     
+    // Clear all state and data structures to free memory
     this.state = 'disconnected';
-    this.messageQueue = [];
+    this.status = 'CLOSED';
+    this.messageQueue.length = 0;
+    this.pendingMessages.length = 0;
+    this.messageTimestamps.length = 0;
     this.currentToken = null;
     this.isRefreshingToken = false;
-    this.pendingMessages = [];
     this.reconnectAttempts = 0;
+    this.options = {};
+    this.url = '';
     
     // Reset connection tracking
     this.connectionAttemptId = null;
     this.lastConnectionAttempt = 0;
     this.authRetryCount = 0;
     this.lastAuthFailure = 0;
+    this.lastRefreshAttempt = 0;
+    this.lastSuccessfulConnection = 0;
+    this.connectionId = '';
     
-    // Clean up large message assemblies
+    // Clean up large message assemblies and clear memory
     this.messageAssemblies.clear();
+    
+    logger.debug('WebSocketService fully disconnected and cleaned up');
   }
   
   private handlePageUnload(): void {
@@ -1642,18 +1713,34 @@ class WebSocketService {
     if (this.pendingMessages.length > 0) {
       logger.debug(`Processing ${this.pendingMessages.length} pending messages after token refresh`);
       
+      // Limit processing to prevent memory exhaustion
+      const maxPendingMessages = 100;
+      if (this.pendingMessages.length > maxPendingMessages) {
+        logger.warn(`Too many pending messages (${this.pendingMessages.length}), keeping only last ${maxPendingMessages}`);
+        this.pendingMessages = this.pendingMessages.slice(-maxPendingMessages);
+      }
+      
       // Move pending messages back to queue if not connected, or send if connected
       if (this.ws && this.ws.readyState === WebSocket.OPEN) {
-        // Send pending messages directly
-        this.pendingMessages.forEach(msg => {
+        // Send pending messages directly with batch processing
+        const messagesToSend = [...this.pendingMessages];
+        this.pendingMessages.length = 0; // Clear immediately to free memory
+        
+        messagesToSend.forEach(msg => {
           this.send(msg);
         });
       } else {
         // Move back to message queue for sending when connected
+        const totalMessages = this.messageQueue.length + this.pendingMessages.length;
+        if (totalMessages > 100) {
+          logger.warn(`Too many queued messages (${totalMessages}), dropping older messages`);
+          this.messageQueue = this.messageQueue.slice(-50);
+          this.pendingMessages = this.pendingMessages.slice(-50);
+        }
+        
         this.messageQueue.unshift(...this.pendingMessages);
+        this.pendingMessages.length = 0; // Clear to free memory
       }
-      
-      this.pendingMessages = [];
     }
   }
 
