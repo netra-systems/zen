@@ -51,7 +51,13 @@ Configuration SSOT ≠ Code SSOT: Environment-specific configs (TEST/DEV/STAGING
    - **Strict SSOT enforcement** - BUT provide migration paths and test credentials
    - **Examples** Good: FuncStaging() or Func(env=staging). Bad: Func() #staging Func() #prod (Bad because same name with no vars)
    - **Config changes = CASCADE FAILURES** - One missing env var can break entire flow 
-  7. The system is MULTI-USER.
+7. The system is MULTI-USER.
+8. **🚨 CRITICAL WEBSOCKET v2 MIGRATION:** See [WebSocket v2 Critical Miss](./SPEC/learnings/websocket_v2_migration_critical_miss_20250905.xml)
+   - **ALL entry points need factory patterns** - WebSocket, REST, gRPC, background tasks
+   - **WebSocket is PRIMARY path (90% traffic)** - Not just "transport layer"
+   - **Silent data leakage is WORST bug** - User A sees User B's data with no errors
+   - **MANDATORY UserExecutionContext** - Every message/request MUST have isolation
+   - **NO SINGLETONS for user data** - Factory patterns are NOT optional
 
 ### Related Architecture Documents:
 - **[User Context Architecture](./USER_CONTEXT_ARCHITECTURE.md)** - Factory patterns and execution isolation (START HERE)
