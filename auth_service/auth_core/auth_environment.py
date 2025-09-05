@@ -30,8 +30,8 @@ class AuthEnvironment:
         """Validate auth-specific configuration on initialization."""
         # Core auth requirements
         required_vars = [
-            "JWT_SECRET_KEY",
-            "DATABASE_URL"
+            "JWT_SECRET_KEY"
+            # DATABASE_URL is now built from components, not required directly
         ]
         
         missing = []
@@ -209,7 +209,7 @@ class AuthEnvironment:
     
     # Database Configuration
     def get_database_url(self) -> str:
-        """Get database connection URL with environment-specific behavior."""
+        """Get database connection URL using DatabaseURLBuilder."""
         env = self.get_environment()
         
         # CRITICAL: Test environment gets SQLite in-memory for isolation and speed (per CLAUDE.md)
@@ -220,24 +220,40 @@ class AuthEnvironment:
             logger.info("Using in-memory SQLite for test environment (permissive test mode per CLAUDE.md)")
             return url
         
-        # For non-test environments, check for explicit DATABASE_URL first
-        url = self.env.get("DATABASE_URL")
+        # Use DatabaseURLBuilder for all non-test environments
+        from shared.database_url_builder import DatabaseURLBuilder
         
-        if not url:
+        # Build environment variables dict for DatabaseURLBuilder
+        env_vars = {
+            "ENVIRONMENT": env,
+            "POSTGRES_HOST": self.env.get("POSTGRES_HOST"),
+            "POSTGRES_PORT": self.env.get("POSTGRES_PORT"),
+            "POSTGRES_DB": self.env.get("POSTGRES_DB"),
+            "POSTGRES_USER": self.env.get("POSTGRES_USER"),
+            "POSTGRES_PASSWORD": self.env.get("POSTGRES_PASSWORD"),
+            "DATABASE_URL": self.env.get("DATABASE_URL")  # For backward compatibility
+        }
+        
+        # Create URL builder
+        builder = DatabaseURLBuilder(env_vars)
+        
+        # Get URL for current environment
+        database_url = builder.get_url_for_environment(sync=False)  # async for auth service
+        
+        if not database_url:
+            # Fallback to manual construction for development
             if env == "development":
-                # Development: Use local PostgreSQL with standard dev database
                 host = self.get_postgres_host()
                 port = self.get_postgres_port()
-                user = self.get_postgres_user() 
+                user = self.get_postgres_user()
                 password = self.get_postgres_password()
                 db = self.get_postgres_db()
-                url = f"postgresql+asyncpg://{user}:{password}@{host}:{port}/{db}"
-                logger.info(f"Generated development database URL for host {host}")
-                return url
-            elif env in ["staging", "production"]:
-                raise ValueError(f"DATABASE_URL must be explicitly set in {env} environment")
+                database_url = f"postgresql+asyncpg://{user}:{password}@{host}:{port}/{db}"
+                logger.info(f"Generated fallback development database URL for host {host}")
+            else:
+                raise ValueError(f"Failed to build database URL for {env} environment")
         
-        return url
+        return database_url
     
     def get_postgres_host(self) -> str:
         """Get PostgreSQL host with environment-specific defaults."""
@@ -907,8 +923,8 @@ class AuthEnvironment:
         
         # Required variables
         required = {
-            "JWT_SECRET_KEY": self.get_jwt_secret_key(),
-            "DATABASE_URL": self.get_database_url()
+            "JWT_SECRET_KEY": self.get_jwt_secret_key()
+            # DATABASE_URL is validated through DatabaseURLBuilder
         }
         
         for name, value in required.items():
