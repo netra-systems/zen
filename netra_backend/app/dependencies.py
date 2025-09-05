@@ -10,7 +10,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 # Import from the single source of truth for database sessions
 from netra_backend.app.database import get_db
 
-from netra_backend.app.llm.client_factory import get_llm_client
 from netra_backend.app.llm.client_unified import ResilientLLMClient
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.services.security_service import SecurityService
@@ -302,8 +301,9 @@ UserScopedDbDep = Annotated[AsyncSession, Depends(get_user_scoped_db_session)]
 
 def get_llm_client_from_app(request: Request) -> ResilientLLMClient:
     """Get LLM client - updated from deleted LLMManager."""
-    from netra_backend.app.llm.client_factory import get_llm_client
-    return get_llm_client()
+    from netra_backend.app.llm.client_unified import ResilientLLMClient
+    llm_manager = get_llm_manager(request)
+    return ResilientLLMClient(llm_manager)
 
 # Legacy compatibility - DEPRECATED: use get_db_dependency() instead
 async def get_db_session() -> AsyncGenerator[AsyncSession, None]:

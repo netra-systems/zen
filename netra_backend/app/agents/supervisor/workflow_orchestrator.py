@@ -42,7 +42,7 @@ class WorkflowOrchestrator:
             # Create UserExecutionContext from ExecutionContext if available
             if hasattr(context, 'user_id') and hasattr(context, 'thread_id') and hasattr(context, 'run_id'):
                 from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
-                from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
+                from netra_backend.app.services.agent_websocket_bridge import create_agent_websocket_bridge
                 
                 user_context = UserExecutionContext(
                     user_id=context.user_id or "unknown_user",
@@ -50,7 +50,8 @@ class WorkflowOrchestrator:
                     run_id=context.run_id or "unknown_run"
                 )
                 
-                bridge = AgentWebSocketBridge()
+                # Use factory to create isolated bridge
+                bridge = await create_agent_websocket_bridge(user_context)
                 return await bridge.create_user_emitter(user_context)
             else:
                 logger.debug("ExecutionContext missing required fields for user emitter")
@@ -68,8 +69,9 @@ class WorkflowOrchestrator:
         # Create emitter if not already created (lazy initialization)
         if not self._websocket_emitter:
             try:
-                from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
-                bridge = AgentWebSocketBridge()
+                from netra_backend.app.services.agent_websocket_bridge import create_agent_websocket_bridge
+                # Use factory to create isolated bridge
+                bridge = await create_agent_websocket_bridge(self.user_context)
                 self._websocket_emitter = await bridge.create_user_emitter(self.user_context)
             except Exception as e:
                 logger.debug(f"Failed to create user emitter: {e}")

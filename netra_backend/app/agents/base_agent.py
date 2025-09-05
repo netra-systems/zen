@@ -365,7 +365,11 @@ class BaseAgent(ABC):
         Returns:
             The metadata value or default if not found
         """
-        return context.metadata.get(key, default)
+        if hasattr(context, 'metadata'):
+            return context.metadata.get(key, default)
+        elif hasattr(context, 'agent_context'):
+            return context.agent_context.get(key, default)
+        return default
     
     # === Token Management and Cost Optimization Methods ===
     
@@ -427,7 +431,7 @@ class BaseAgent(ABC):
         )
         
         # Get optimization metrics for logging
-        optimizations = enhanced_context.metadata.get("prompt_optimizations", [])
+        optimizations = self.get_metadata_value(enhanced_context, "prompt_optimizations", [])
         if optimizations:
             latest_optimization = optimizations[-1]
             self.logger.info(
@@ -457,7 +461,7 @@ class BaseAgent(ABC):
         )
         
         # Get suggestions from enhanced context
-        suggestions_data = enhanced_context.metadata.get("cost_optimization_suggestions", {})
+        suggestions_data = self.get_metadata_value(enhanced_context, "cost_optimization_suggestions", {})
         suggestions = suggestions_data.get("suggestions", [])
         
         return enhanced_context, suggestions
@@ -661,7 +665,7 @@ class BaseAgent(ABC):
             
             # Create temporary DeepAgentState bridge (DEPRECATED - will be removed)
             temp_state = DeepAgentState(
-                user_request=context.metadata.get('user_request', 'default_request'),
+                user_request=context.agent_context.get('user_request', 'default_request'),
                 chat_thread_id=context.thread_id,
                 user_id=context.user_id,
                 run_id=context.run_id

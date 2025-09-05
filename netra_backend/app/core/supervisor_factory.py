@@ -26,7 +26,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi import HTTPException
 
 from netra_backend.app.dependencies import create_user_execution_context
-from netra_backend.app.llm.client_factory import get_llm_client
 from netra_backend.app.logging_config import central_logger
 
 if TYPE_CHECKING:
@@ -99,7 +98,10 @@ async def create_supervisor_core(
         
         # Get or validate LLM client
         if not llm_client:
-            llm_client = get_llm_client()
+            from netra_backend.app.llm.client_unified import ResilientLLMClient
+            from netra_backend.app.llm.llm_manager import LLMManager
+            llm_manager = LLMManager()  # Create a new instance for this supervisor
+            llm_client = ResilientLLMClient(llm_manager)
         
         # Validate WebSocket bridge
         if not websocket_bridge:
@@ -181,7 +183,10 @@ def validate_supervisor_components(
     
     if not llm_client:
         try:
-            llm_client = get_llm_client()
+            from netra_backend.app.llm.client_unified import ResilientLLMClient
+            from netra_backend.app.llm.llm_manager import LLMManager
+            llm_manager = LLMManager()  # Create a new instance for this supervisor
+            llm_client = ResilientLLMClient(llm_manager)
         except Exception as e:
             missing_components.append(f"llm_client: {e}")
     

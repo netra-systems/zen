@@ -234,4 +234,11 @@
     <date_created>2025-08-26</date_created>
     <status>substantially_improved</status>
     <next_iteration>Focus on complete fallback consistency and WebSocket-specific improvements</next_iteration>
+    
+    <critical_update date="2025-09-05">
+        <discovery>THIS WAS A SYSTEMIC ISSUE NOT AN AUTH ISSUE</discovery>
+        <real_problem>MockCircuitBreaker had NO recovery mechanism - opened permanently on ANY error</real_problem>
+        <cross_reference>SPEC/learnings/permanent_failure_state_pattern_20250905.xml</cross_reference>
+        <lesson>The "auth failures" were just the most visible symptom of a codebase-wide anti-pattern</lesson>
+    </critical_update>
 </learning>

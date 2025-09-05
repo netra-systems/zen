@@ -17,6 +17,13 @@ from typing import Dict, Any, Optional, Tuple
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 
+# Import UnifiedCircuitBreaker for proper circuit breaker implementation
+from netra_backend.app.core.resilience.unified_circuit_breaker import (
+    UnifiedCircuitBreaker,
+    UnifiedCircuitConfig,
+    UnifiedCircuitBreakerState
+)
+
 logger = logging.getLogger(__name__)
 
 
@@ -377,19 +384,38 @@ class AuthCircuitBreakerManager:
     def __init__(self):
         """Initialize auth circuit breaker manager."""
         self._breakers: Dict[str, Any] = {}
-        logger.info("AuthCircuitBreakerManager initialized")
+        logger.info("AuthCircuitBreakerManager initialized with UnifiedCircuitBreaker")
     
     def get_breaker(self, name: str) -> Any:
         """Get circuit breaker by name."""
         if name not in self._breakers:
-            # Create a mock breaker for now
-            self._breakers[name] = MockCircuitBreaker(name)
+            # CRITICAL FIX: Use UnifiedCircuitBreaker with proper recovery mechanisms
+            # This fixes the bug where MockCircuitBreaker would open permanently on any error
+            config = UnifiedCircuitConfig(
+                name=name,
+                failure_threshold=5,  # Allow 5 failures before opening (was instant with Mock)
+                success_threshold=2,  # Need 2 successes to close from half-open
+                recovery_timeout=30,  # Attempt recovery after 30 seconds (Mock never recovered)
+                timeout_seconds=10.0,  # Individual request timeout
+                slow_call_threshold=5.0,  # Mark calls over 5s as slow
+                adaptive_threshold=False,  # Use fixed thresholds for predictability
+                exponential_backoff=True  # Use exponential backoff for recovery attempts
+            )
+            self._breakers[name] = UnifiedCircuitBreaker(config)
+            logger.info(f"Created UnifiedCircuitBreaker for '{name}' with recovery_timeout=30s, failure_threshold=5")
         return self._breakers[name]
     
     async def reset_all(self) -> None:
         """Reset all circuit breakers."""
-        for breaker in self._breakers.values():
-            if hasattr(breaker, 'reset'):
+        for name, breaker in self._breakers.items():
+            if isinstance(breaker, UnifiedCircuitBreaker):
+                # UnifiedCircuitBreaker uses state management
+                breaker.state = UnifiedCircuitBreakerState.CLOSED
+                breaker.failure_count = 0
+                breaker.success_count = 0
+                logger.info(f"Reset UnifiedCircuitBreaker '{name}' to CLOSED state")
+            elif hasattr(breaker, 'reset'):
+                # Fallback for any legacy breakers
                 breaker.reset()
         logger.info("All auth circuit breakers reset")
     
@@ -401,29 +427,65 @@ class AuthCircuitBreakerManager:
 
 
 class MockCircuitBreaker:
-    """Mock circuit breaker for development."""
+    """Enhanced mock circuit breaker with recovery capabilities.
+    
+    CRITICAL FIX: Added recovery timer and failure threshold to prevent permanent open state.
+    This is a fallback implementation if UnifiedCircuitBreaker is not available.
+    """
     
     def __init__(self, name: str):
         self.name = name
         self.is_open = False
+        self.failure_count = 0
+        self.failure_threshold = 5  # FIX: Add threshold instead of opening on first error
+        self.opened_at = None
+        self.recovery_timeout = 30  # FIX: Add recovery timeout (30 seconds)
+        logger.info(f"MockCircuitBreaker '{name}' initialized with recovery_timeout=30s, failure_threshold=5")
     
     def reset(self):
         """Reset circuit breaker."""
         self.is_open = False
+        self.failure_count = 0
+        self.opened_at = None
+        logger.info(f"MockCircuitBreaker '{self.name}' manually reset")
     
     async def call(self, func, *args, **kwargs):
-        """Execute function with circuit breaker protection."""
+        """Execute function with circuit breaker protection and automatic recovery."""
+        # FIX: Check if we should attempt recovery
         if self.is_open:
-            raise Exception(f"Circuit breaker {self.name} is open")
+            if self.opened_at and (time.time() - self.opened_at > self.recovery_timeout):
+                # Attempt recovery after timeout
+                logger.info(f"MockCircuitBreaker '{self.name}' attempting recovery after {self.recovery_timeout}s")
+                self.is_open = False
+                self.failure_count = 0
+                self.opened_at = None
+            else:
+                # Still in recovery timeout period
+                remaining = self.recovery_timeout - (time.time() - self.opened_at) if self.opened_at else 0
+                logger.warning(f"Circuit breaker '{self.name}' is open, recovery in {remaining:.1f}s")
+                raise Exception(f"Circuit breaker {self.name} is open")
         
         try:
             if asyncio.iscoroutinefunction(func):
-                return await func(*args, **kwargs)
+                result = await func(*args, **kwargs)
             else:
-                return func(*args, **kwargs)
+                result = func(*args, **kwargs)
+            
+            # FIX: Reset failure count on success
+            if self.failure_count > 0:
+                logger.info(f"MockCircuitBreaker '{self.name}' successful call, resetting failure count")
+            self.failure_count = 0
+            return result
+            
         except Exception as e:
-            # Simple logic - open after any error
-            self.is_open = True
+            # FIX: Increment failure count and only open after threshold
+            self.failure_count += 1
+            logger.warning(f"MockCircuitBreaker '{self.name}' failure {self.failure_count}/{self.failure_threshold}: {e}")
+            
+            if self.failure_count >= self.failure_threshold:
+                self.is_open = True
+                self.opened_at = time.time()
+                logger.critical(f"MockCircuitBreaker '{self.name}' OPENED after {self.failure_count} failures, will recover in {self.recovery_timeout}s")
             raise
 
 

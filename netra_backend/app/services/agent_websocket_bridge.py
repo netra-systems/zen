@@ -22,7 +22,7 @@ from dataclasses import dataclass, field
 from netra_backend.app.logging_config import central_logger
 # REMOVED: Singleton orchestrator import - replaced with per-request factory patterns
 # from netra_backend.app.orchestration.agent_execution_registry import get_agent_execution_registry
-from netra_backend.app.websocket_core import get_websocket_manager
+from netra_backend.app.websocket_core import create_websocket_manager, get_websocket_manager
 from netra_backend.app.services.thread_run_registry import get_thread_run_registry, ThreadRunRegistry
 from netra_backend.app.core.unified_id_manager import UnifiedIDManager
 from shared.monitoring.interfaces import MonitorableComponent
@@ -267,43 +267,24 @@ class AgentWebSocketBridge(MonitorableComponent):
                 )
     
     async def _initialize_websocket_manager(self) -> None:
-        """Initialize WebSocket manager with error handling and retry logic."""
+        """Initialize WebSocket manager with error handling and retry logic.
+        
+        CRITICAL: This now uses a placeholder manager that will be replaced
+        per-request via create_user_emitter() factory method for proper isolation.
+        """
         import asyncio
         
-        websocket_manager = None
-        last_error = None
+        # SECURITY FIX: Don't use singleton - create placeholder that will be 
+        # replaced per-request through create_user_emitter() factory
         
-        # CRITICAL FIX: Retry WebSocket manager initialization up to 3 times
-        for attempt in range(3):
-            try:
-                websocket_manager = get_websocket_manager()
-                if websocket_manager is not None:
-                    # Validate the manager has required methods
-                    if hasattr(websocket_manager, 'send_to_user') and hasattr(websocket_manager, 'get_user_connections'):
-                        self._websocket_manager = websocket_manager
-                        logger.info(f"WebSocket manager initialized successfully on attempt {attempt + 1}")
-                        return
-                    else:
-                        last_error = f"WebSocket manager missing required methods on attempt {attempt + 1}"
-                        logger.warning(last_error)
-                else:
-                    last_error = f"WebSocket manager is None on attempt {attempt + 1}"
-                    logger.warning(last_error)
-                
-                # Short delay before retry (except on last attempt)
-                if attempt < 2:
-                    await asyncio.sleep(0.05 * (attempt + 1))  # 0.05s, 0.1s
-                    
-            except Exception as e:
-                last_error = f"WebSocket manager creation failed on attempt {attempt + 1}: {e}"
-                logger.error(last_error)
-                if attempt < 2:
-                    await asyncio.sleep(0.05 * (attempt + 1))
+        # For backward compatibility, we keep the manager reference but it will
+        # be overridden per-request to ensure user isolation
+        self._websocket_manager = None  # Will be set per-request
         
-        # All attempts failed
-        error_msg = f"WebSocket manager initialization failed after 3 attempts. Last error: {last_error}"
-        logger.error(error_msg)
-        raise RuntimeError(error_msg)
+        logger.info(
+            "WebSocket manager initialization deferred - will use factory pattern "
+            "per-request via create_user_emitter() for proper user isolation"
+        )
     
     async def _initialize_registry(self) -> None:
         """DEPRECATED: Registry initialization removed - using per-request factory patterns.
@@ -2298,17 +2279,11 @@ class AgentWebSocketBridge(MonitorableComponent):
             # Validate user context before creating emitter
             validated_context = validate_user_context(user_context)
             
-            # Ensure WebSocket manager is available
-            if not self._websocket_manager:
-                await self._initialize_websocket_manager()
-                if not self._websocket_manager:
-                    raise ValueError("WebSocket manager not available")
+            # Create isolated WebSocket manager for this user context
+            isolated_manager = create_websocket_manager(validated_context)
             
-            # Create isolated emitter with connection pool reference
-            from netra_backend.app.services.websocket_connection_pool import get_websocket_connection_pool
-            connection_pool = get_websocket_connection_pool()
-            
-            emitter = WebSocketEventEmitter(validated_context, connection_pool)
+            # Create isolated emitter using the user-specific manager
+            emitter = WebSocketEventEmitter.create_scoped_emitter(isolated_manager, validated_context)
             
             logger.info(f"✅ USER EMITTER CREATED: {user_context.get_correlation_id()} - isolated from other users")
             return emitter
@@ -2382,10 +2357,10 @@ class AgentWebSocketBridge(MonitorableComponent):
         """
         # Import from the actual location - use the create_scoped_emitter function
         from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmitter
-        from netra_backend.app.websocket_core import get_websocket_manager
+        from netra_backend.app.websocket_core import create_websocket_manager, get_websocket_manager
         
-        # Create scoped emitter using the correct pattern
-        manager = get_websocket_manager()
+        # Create scoped emitter using the factory pattern for user isolation
+        manager = create_websocket_manager(user_context)
         emitter = UnifiedWebSocketEmitter.create_scoped_emitter(manager, user_context)
         try:
             yield emitter
@@ -2435,47 +2410,5 @@ def create_agent_websocket_bridge(user_context: 'UserExecutionContext' = None) -
     
     return bridge
 
-
-async def get_agent_websocket_bridge() -> AgentWebSocketBridge:
-    """
-    DEPRECATED: Get singleton AgentWebSocketBridge instance.
-    
-    WARNING: This function creates a non-isolated bridge instance that can cause
-    CRITICAL SECURITY VULNERABILITIES in multi-user environments. It should only
-    be used for backward compatibility in legacy code that cannot be immediately
-    migrated to the factory pattern.
-    
-    For new code, use:
-    - create_agent_websocket_bridge(user_context) for isolated bridges
-    - bridge.create_user_emitter(user_context) for per-user event emission
-    
-    Returns:
-        AgentWebSocketBridge: A NEW instance (not singleton) for basic compatibility
-    """
-    import warnings
-    
-    warnings.warn(
-        "get_agent_websocket_bridge() creates instances that can leak events "
-        "between users. Use create_agent_websocket_bridge(user_context) "
-        "for safe per-user event emission.",
-        DeprecationWarning,
-        stacklevel=2
-    )
-    
-    logger.warning(
-        "SECURITY WARNING: Using deprecated get_agent_websocket_bridge() function. "
-        "This creates a non-isolated bridge that can leak events between users. "
-        "Migrate to create_agent_websocket_bridge(user_context) for proper isolation."
-    )
-    
-    warnings.warn(
-        "SECURITY WARNING: Using deprecated get_agent_websocket_bridge() function. "
-        "This creates a non-isolated bridge that can leak events between users. "
-        "Migrate to create_agent_websocket_bridge(user_context) for proper isolation.",
-        UserWarning,
-        stacklevel=2
-    )
-    
-    # Return a NEW instance each time to prevent shared state
-    # This is still not ideal but safer than a true singleton
-    return AgentWebSocketBridge()
+# REMOVED: Deprecated get_agent_websocket_bridge() function that created security vulnerabilities
+# All code must use create_agent_websocket_bridge(user_context) for proper user isolation

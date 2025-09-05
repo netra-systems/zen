@@ -408,9 +408,9 @@ class FactoryAdapter:
                 thread_id=thread_id
             )
             
-            # CRITICAL: Use factory method instead of singleton
-            # Note: Don't pass user_context to avoid async emitter creation in sync context
-            bridge = create_agent_websocket_bridge()
+            # CRITICAL: Use factory method with user context for proper isolation
+            # Pass the user_context to ensure complete isolation
+            bridge = await create_agent_websocket_bridge(user_context)
             
             creation_time_ms = (time.time() - start_time) * 1000
             

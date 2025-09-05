@@ -140,8 +140,10 @@ async def _get_websocket_supervisor_components(app_state = None) -> dict:
     
     try:
         # Get LLM client
-        from netra_backend.app.llm.client_factory import get_llm_client
-        components["llm_client"] = get_llm_client()
+        from netra_backend.app.llm.client_unified import ResilientLLMClient
+        from netra_backend.app.llm.llm_manager import LLMManager
+        llm_manager = LLMManager()  # Create a new instance for this supervisor
+        components["llm_client"] = ResilientLLMClient(llm_manager)
         
     except Exception as e:
         logger.error(f"Failed to get LLM client for WebSocket supervisor: {e}")

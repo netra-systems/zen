@@ -116,9 +116,10 @@ class ConnectionLifecycleManager:
         self._managed_connections: Set[str] = set()
         self._connection_health: Dict[str, datetime] = {}
         self._cleanup_timer: Optional[asyncio.Task] = None
+        self._health_monitor_func = None
         self._is_active = True
         
-        # Start health monitoring
+        # Start health monitoring (deferred if no event loop)
         self._start_health_monitoring()
         
         logger.info(f"ConnectionLifecycleManager initialized for user {user_context.user_id[:8]}...")
@@ -192,6 +193,9 @@ class ConnectionLifecycleManager:
         if not self._is_active:
             return 0
         
+        # Ensure health monitoring is started now that we have an event loop
+        await self._ensure_health_monitoring_started()
+        
         expired_connections = []
         cutoff_time = datetime.utcnow() - timedelta(minutes=30)  # 30-minute timeout
         
@@ -258,7 +262,23 @@ class ConnectionLifecycleManager:
                 except Exception as e:
                     logger.error(f"Health monitoring error: {e}")
         
-        self._cleanup_timer = asyncio.create_task(health_monitor())
+        # Defer task creation - only create when event loop is available
+        try:
+            self._cleanup_timer = asyncio.create_task(health_monitor())
+        except RuntimeError:
+            # No event loop running - defer until first async operation
+            self._cleanup_timer = None
+            self._health_monitor_func = health_monitor
+    
+    async def _ensure_health_monitoring_started(self) -> None:
+        """Ensure health monitoring is started when async operations begin."""
+        if self._cleanup_timer is None and self._health_monitor_func is not None and self._is_active:
+            try:
+                self._cleanup_timer = asyncio.create_task(self._health_monitor_func())
+                self._health_monitor_func = None  # Clear reference
+            except RuntimeError:
+                # Still no event loop - will try again later
+                pass
 
 
 class IsolatedWebSocketManager:

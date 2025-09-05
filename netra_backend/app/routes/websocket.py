@@ -265,8 +265,9 @@ async def websocket_endpoint(websocket: WebSocket):
         # Create MessageHandlerService and AgentMessageHandler if dependencies exist
         if supervisor is not None and thread_service is not None:
             try:
-                # CRITICAL FIX: Pass WebSocket manager to enable real-time agent events
-                message_handler_service = MessageHandlerService(supervisor, thread_service, ws_manager)
+                # CRITICAL FIX: MessageHandlerService only takes supervisor and thread_service
+                # WebSocket manager is injected separately via supervisor
+                message_handler_service = MessageHandlerService(supervisor, thread_service)
                 agent_handler = AgentMessageHandler(message_handler_service, websocket)
                 
                 # Register agent handler with message router

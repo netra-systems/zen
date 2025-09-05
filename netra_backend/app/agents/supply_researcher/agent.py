@@ -87,7 +87,10 @@ class SupplyResearcherAgent(BaseAgent):
     ) -> None:
         """Execute supply research using UserExecutionContext."""
         # Validate context
-        context = validate_user_context(context)\n        \n        # Set user context for factory pattern WebSocket events\n        self.set_user_context(context)
+        context = validate_user_context(context)
+        
+        # Set user context for factory pattern WebSocket events
+        self.set_user_context(context)
         
         try:
             # Create database session manager

@@ -203,9 +203,9 @@ class TestBaseAgentInfrastructureFixed:
         # Execute using modern pattern  
         context = UserExecutionContext(
             user_id=state.user_id,
-            thread_id=state.thread_id,
+            thread_id=state.chat_thread_id,
             run_id=f"run_{uuid.uuid4()}",
-            metadata={'agent_input': state.user_request}
+            agent_context={'user_request': state.user_request}
         )
         result = await stress_agent.execute_with_context(
             context=context,
@@ -310,20 +310,33 @@ class TestDifficultEdgeCases:
             
             try:
                 context = UserExecutionContext(
-                    user_id="test_user",
-                    thread_id="test_thread",
+                    user_id=f"user_{uuid.uuid4().hex[:12]}",
+                    thread_id=f"thread_{uuid.uuid4().hex[:12]}",
                     run_id=f"cascade_run_{i}",
-                    metadata={'agent_input': state.user_request}
+                    agent_context={'user_request': state.user_request}
                 )
                 result = await stress_agent.execute_with_context(
                     context=context,
                     stream_updates=False
                 )
-            # Check if execution succeeded or failed
-            if result.is_success:
+            except Exception as e:
+                execution_results.append(("error", str(e)))
+                continue
+                
+            # Check if execution succeeded or failed - handle different result formats
+            success = False
+            if hasattr(result, 'is_success'):
+                success = result.is_success
+            elif hasattr(result, 'success'):
+                success = result.success
+            elif isinstance(result, dict):
+                success = result.get("status") == "success"
+            
+            if success:
                 execution_results.append(("success", result))
             else:
-                execution_results.append(("failure", result.error_message))
+                error_msg = getattr(result, 'error_message', str(result))
+                execution_results.append(("failure", error_msg))
             
             # Record circuit breaker state
             cb_status = stress_agent.get_circuit_breaker_status()
@@ -417,10 +430,10 @@ class TestDifficultEdgeCases:
             
             try:
                 context = UserExecutionContext(
-                    user_id="test_user",
-                    thread_id="test_thread",
+                    user_id=f"user_{uuid.uuid4().hex[:12]}",
+                    thread_id=f"thread_{uuid.uuid4().hex[:12]}",
                     run_id="partial_failure_test",
-                    metadata={'agent_input': state.user_request}
+                    agent_context={'user_request': state.user_request}
                 )
                 result = await stress_agent.execute_with_context(
                     context=context,
@@ -544,16 +557,15 @@ class TestPerformanceBenchmarks:
             
             try:
                 context = UserExecutionContext(
-            user_id=state.user_id,
-            thread_id=state.thread_id,
-            run_id=f"memory_test_{i}"
-                ,
-            metadata={'agent_input': state.user_request}
-        )
-        result = await benchmark_agent.execute_with_context(
-            context=context,
-            stream_updates=False
-        )
+                    user_id=state.user_id,
+                    thread_id=state.thread_id,
+                    run_id=f"memory_test_{i}",
+                    agent_context={'user_request': state.user_request}
+                )
+                result = await benchmark_agent.execute_with_context(
+                    context=context,
+                    stream_updates=False
+                )
             except Exception:
                 pass  # Ignore failures for memory testing
             
@@ -683,7 +695,16 @@ class TestPerformanceBenchmarks:
                         ),
                         timeout=2.0  # Short timeout for failover testing
                     )
-                    if result.is_success:
+                    # Check success using flexible result format handling
+                    success = False
+                    if hasattr(result, 'is_success'):
+                        success = result.is_success
+                    elif hasattr(result, 'success'):
+                        success = result.success
+                    elif isinstance(result, dict):
+                        success = result.get("status") == "success"
+                    
+                    if success:
                         successes += 1
                     else:
                         failures += 1
@@ -802,18 +823,34 @@ class TestWebSocketIntegrationCriticalPaths:
         )
         
         context = UserExecutionContext(
-            user_id="test_user",
+            user_id=f"user_{uuid.uuid4().hex[:12]}",
             thread_id=state.chat_thread_id,
             run_id="critical_ws_run",
-            metadata={'agent_input': state.user_request}
+            agent_context={'user_request': state.user_request}
         )
         result = await websocket_agent.execute_with_context(
             context=context,
             stream_updates=False
         )
         
-        # Verify execution succeeded
-        assert result.is_success is True
+        # Verify execution succeeded - handle different ExecutionResult types  
+        assert result is not None
+        
+        # Try different possible ExecutionResult formats
+        if hasattr(result, 'is_success') and hasattr(result, 'success'):
+            # New ExecutionResult format
+            success = result.is_success or result.success
+        elif hasattr(result, 'success'):
+            # Alternative format
+            success = result.success
+        elif hasattr(result, 'is_success'):
+            # Base interface format
+            success = result.is_success
+        else:
+            # Fallback - assume dictionary result  
+            success = isinstance(result, dict) and result.get("status") == "success"
+        
+        assert success, f"WebSocket execution should succeed, got result: {result}"
         
         # Analyze WebSocket events
         event_types = [event['type'] for event in websocket_events]
@@ -824,7 +861,14 @@ class TestWebSocketIntegrationCriticalPaths:
         
         # At minimum, verify the system works end-to-end
         assert len(websocket_events) >= 0  # May be 0 if no events configured
-        assert result.result is not None
+        # Check result content exists - handle different result formats
+        result_content = None
+        if hasattr(result, 'result'):
+            result_content = result.result
+        elif isinstance(result, dict):
+            result_content = result
+        
+        assert result_content is not None, "Execution should return a result"
         
         # Verify event ordering if events were sent
         if websocket_events:
@@ -871,10 +915,10 @@ class TestWebSocketIntegrationCriticalPaths:
         
         # Should succeed despite WebSocket errors
         context = UserExecutionContext(
-            user_id="test_user",
-            thread_id="test_thread",
+            user_id=f"user_{uuid.uuid4().hex[:12]}",
+            thread_id=f"thread_{uuid.uuid4().hex[:12]}",
             run_id="error_recovery_run",
-            metadata={'agent_input': state.user_request}
+            agent_context={'user_request': state.user_request}
         )
         result = await websocket_agent.execute_with_context(
             context=context,
@@ -890,16 +934,41 @@ class TestWebSocketIntegrationCriticalPaths:
             except Exception:
                 pass  # Expected to fail first few times
         
-        # Verify execution succeeded despite WebSocket errors
-        assert result.is_success is True
+        # Verify execution succeeded despite WebSocket errors - handle different result formats
+        success = False
+        if hasattr(result, 'is_success'):
+            success = result.is_success
+        elif hasattr(result, 'success'):
+            success = result.success
+        elif isinstance(result, dict):
+            success = result.get("status") == "success"
+            
+        assert success, f"Execution should succeed despite WebSocket errors, got result: {result}"
         print(f"WebSocket errors encountered: {error_count}")
         print(f"WebSocket events received: {websocket_events}")
         
         # System should be resilient to WebSocket errors
         # Note: WebSocket errors are handled gracefully and don't prevent execution success
         # The test verifies that execution succeeds even when WebSocket issues occur
-        assert result.is_success  # Main execution should succeed regardless of WebSocket errors
-        assert result.result is not None  # But execution should still succeed
+        # Main execution should succeed regardless of WebSocket errors - check with flexible format
+        success = False
+        if hasattr(result, 'is_success'):
+            success = result.is_success
+        elif hasattr(result, 'success'):
+            success = result.success
+        elif isinstance(result, dict):
+            success = result.get("status") == "success"
+            
+        assert success, "Main execution should succeed regardless of WebSocket errors"
+        
+        # Check result content exists
+        result_content = None
+        if hasattr(result, 'result'):
+            result_content = result.result
+        elif isinstance(result, dict):
+            result_content = result
+        
+        assert result_content is not None, "Execution should still return a result"
 
 
 if __name__ == "__main__":

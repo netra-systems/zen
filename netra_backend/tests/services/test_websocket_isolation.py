@@ -384,14 +384,22 @@ class TestAgentWebSocketBridgeRefactoring:
             # Expected if factory dependencies aren't mocked
             assert "UserWebSocketEmitter factory not available" in str(e)
     
-    async def test_legacy_singleton_deprecation_warning(self):
-        """Test legacy singleton function shows deprecation warning."""
-        from netra_backend.app.services.agent_websocket_bridge import get_agent_websocket_bridge
+    async def test_factory_creates_isolated_instances(self):
+        """Test factory pattern creates isolated instances."""
+        from netra_backend.app.services.agent_websocket_bridge import create_agent_websocket_bridge
+        from netra_backend.app.agents.supervisor.execution_factory import UserExecutionContext
         
-        # Should generate deprecation warning
-        with pytest.warns(DeprecationWarning, match="singleton that can leak events"):
-            bridge = await get_agent_websocket_bridge()
-            assert isinstance(bridge, AgentWebSocketBridge)
+        # Create different user contexts
+        context1 = UserExecutionContext(user_id="user1", request_id="req1", thread_id="thread1")
+        context2 = UserExecutionContext(user_id="user2", request_id="req2", thread_id="thread2")
+        
+        # Should create different instances for isolation
+        bridge1 = await create_agent_websocket_bridge(context1)
+        bridge2 = await create_agent_websocket_bridge(context2)
+        
+        assert isinstance(bridge1, AgentWebSocketBridge)
+        assert isinstance(bridge2, AgentWebSocketBridge)
+        assert bridge1 is not bridge2  # Different instances for isolation
 
 
 class TestCrossUserEventLeakagePrevention:
