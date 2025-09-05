@@ -185,9 +185,8 @@ class BaseAgent(ABC):
         # Store the original name for test compatibility
         self.circuit_breaker.name = name  # Override the prefixed name for test compatibility
         
-        # Initialize execution monitor first (needed by reliability manager)
+        # Initialize execution monitor (always created for basic tracking)
         self.monitor = ExecutionMonitor(max_history_size=1000)
-        # Store monitor as _execution_monitor for property access
         self._execution_monitor = self.monitor
         
         # Initialize reliability manager with simple parameters - enabled by default
@@ -1412,7 +1411,11 @@ class BaseAgent(ABC):
     
     async def send_processing_update(self, run_id: str, message: str = "") -> None:
         """Send processing status update (SSOT pattern)."""
-        await self._send_update(run_id, {"status": "processing", "message": message})
+        try:
+            await self._send_update(run_id, {"status": "processing", "message": message})
+        except Exception as e:
+            self.logger.debug(f"Failed to send processing update: {e}")
+            # Gracefully handle WebSocket errors - continue execution
     
     async def send_completion_update(self, run_id: str, result: Optional[Dict[str, Any]] = None, 
                                    fallback: bool = False) -> None:

@@ -40,7 +40,7 @@ def test_docker_service_detection():
             print(f"   - {service}: port {port}")
     else:
         print("\n[!] No Docker services found. Services may need to be started.")
-        print("   Run: docker compose -f docker-compose.alpine.yml up -d")
+        print("   Run: docker compose -f docker-compose.alpine-test.yml up -d")
     
     # Test port discovery
     print("\n[*] Testing port discovery...")
@@ -112,7 +112,7 @@ def main():
         print("\n[!] Docker infrastructure test failed.")
         print("\nTo fix:")
         print("1. Start Docker Desktop")
-        print("2. Run: docker compose -f docker-compose.alpine.yml up -d")
+        print("2. Run: docker compose -f docker-compose.alpine-test.yml up -d")
         print("3. Re-run this test")
         return 1
     

@@ -37,6 +37,7 @@ from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 from netra_backend.app.redis_manager import RedisManager
 from netra_backend.app.schemas.registry import DeepAgentState
+from netra_backend.app.models.user_execution_context import UserExecutionContext
 
 
 class PerformanceAgent(BaseAgent):
@@ -728,6 +729,9 @@ class TestWebSocketEventPerformance:
         
         end_time = time.time()
         total_time = end_time - start_time
+        # Prevent division by zero if operations complete too fast
+        if total_time == 0:
+            total_time = 0.001  # 1ms minimum
         events_per_second = 1000 / total_time
         
         # Performance requirements
@@ -761,10 +765,14 @@ class TestLargePayloadPerformance:
             
             # Measure processing time
             start_time = time.time()
-            result = await agent.execute_modern(state, f"large_payload_{size}")
+            with pytest.warns(DeprecationWarning):
+                result = await agent.execute_modern(state, f"large_payload_{size}")
             end_time = time.time()
             
             processing_time = end_time - start_time
+            # Prevent division by zero if operations complete too fast
+            if processing_time == 0:
+                processing_time = 0.001  # 1ms minimum
             throughput = size / processing_time  # Bytes per second
             
             performance_results[size] = {

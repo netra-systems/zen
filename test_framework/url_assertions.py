@@ -36,6 +36,32 @@ except ImportError:
 
 logger = logging.getLogger(__name__)
 
+# Public API exports
+__all__ = [
+    # Core assertion functions
+    'assert_base_url_matches',
+    'assert_url_pattern',
+    'assert_url_startswith',
+    
+    # Environment-specific assertions
+    'assert_is_localhost_url',
+    'assert_is_staging_url',
+    'assert_is_production_url',
+    'assert_no_localhost_in_url',
+    
+    # Service-aware assertions
+    'assert_service_url_valid',
+    'get_dynamic_service_url',
+    
+    # URL manipulation utilities
+    'extract_base_url',
+    'extract_port',
+    'build_url_with_port',
+    
+    # Context manager
+    'URLAssertion',
+]
+
 
 def assert_base_url_matches(actual: str, expected_base: str, 
                            ignore_port: bool = False,

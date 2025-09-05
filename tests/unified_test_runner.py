@@ -356,9 +356,53 @@ class UnifiedTestRunner:
             e2e_categories = {'e2e', 'e2e_critical', 'cypress'}
             running_e2e = bool(set(categories_to_run) & e2e_categories)
             
-            # Skip local service checks for staging - use remote staging services
+            # CRITICAL: Setup E2E Docker environment if running E2E tests
+            if running_e2e and args.env != 'staging':
+                try:
+                    print(f"[INFO] Detected E2E tests in categories: {set(categories_to_run) & e2e_categories}")
+                    print("[INFO] Setting up E2E Docker environment...")
+                    
+                    # Import E2E Docker helper
+                    from test_framework.e2e_docker_helper import E2EDockerHelper
+                    import asyncio
+                    
+                    # Setup E2E environment
+                    test_id = f"unified-runner-{int(time.time())}"
+                    self.e2e_docker_helper = E2EDockerHelper(test_id=test_id)
+                    
+                    # Run async setup
+                    loop = asyncio.new_event_loop()
+                    asyncio.set_event_loop(loop)
+                    try:
+                        service_urls = loop.run_until_complete(
+                            self.e2e_docker_helper.setup_e2e_environment(timeout=180)
+                        )
+                        print(f"[SUCCESS] E2E Docker environment ready!")
+                        print(f"   Backend: {service_urls['backend']}")
+                        print(f"   Auth: {service_urls['auth']}")
+                        print(f"   WebSocket: {service_urls['websocket']}")
+                        
+                        # Set environment variables for tests
+                        env = get_env()
+                        env.set('E2E_BACKEND_URL', service_urls['backend'], 'e2e_setup')
+                        env.set('E2E_AUTH_URL', service_urls['auth'], 'e2e_setup') 
+                        env.set('E2E_WEBSOCKET_URL', service_urls['websocket'], 'e2e_setup')
+                        env.set('E2E_POSTGRES_URL', service_urls['postgres'], 'e2e_setup')
+                        env.set('E2E_REDIS_URL', service_urls['redis'], 'e2e_setup')
+                        
+                    finally:
+                        loop.close()
+                        
+                except Exception as e:
+                    print(f"[ERROR] Failed to setup E2E Docker environment: {e}")
+                    print("[ERROR] E2E tests require Docker. Please ensure Docker is running and try again.")
+                    return 1
+            
+            # Skip local service checks for staging - use remote staging services  
             if args.env != 'staging' and (args.real_services or args.real_llm or args.env in ['dev'] or running_e2e):
-                self._check_service_availability(args)
+                # Only check services if we haven't already set up E2E Docker
+                if not (running_e2e and hasattr(self, 'e2e_docker_helper')):
+                    self._check_service_availability(args)
             
             # Start test tracking session
             if self.test_tracker:
@@ -623,7 +667,7 @@ class UnifiedTestRunner:
         try:
             # 1. Docker Compose cleanup with volumes and orphans
             compose_files = [
-                self.project_root / "docker-compose.test.yml",
+                self.project_root / "docker-compose.alpine-test.yml",
                 self.project_root / "docker-compose.yml"
             ]
             
@@ -742,6 +786,27 @@ class UnifiedTestRunner:
         """Clean up Docker environment (legacy method - calls comprehensive cleanup)."""
         # First do the comprehensive cleanup
         self.cleanup_test_environment()
+        
+        # Clean up E2E Docker environment if it was set up
+        if hasattr(self, 'e2e_docker_helper') and self.e2e_docker_helper:
+            try:
+                print("[INFO] Cleaning up E2E Docker environment...")
+                import asyncio
+                
+                # Run async cleanup
+                loop = asyncio.new_event_loop()
+                asyncio.set_event_loop(loop)
+                try:
+                    loop.run_until_complete(self.e2e_docker_helper.teardown_e2e_environment())
+                    print("[SUCCESS] E2E Docker environment cleaned up")
+                finally:
+                    loop.close()
+                    
+            except Exception as e:
+                print(f"[WARNING] Error cleaning up E2E Docker environment: {e}")
+            finally:
+                # Clean up reference
+                self.e2e_docker_helper = None
         
         # Then do the original manager-specific cleanup
         if self.docker_manager and self.docker_environment:
@@ -1160,7 +1225,7 @@ class UnifiedTestRunner:
             print(str(e))
             print(f"\nTIP: For mock testing, remove --real-services or --real-llm flags")
             print(f"TIP: For quick development setup, run: python scripts/dev_launcher.py")
-            print(f"TIP: To use Alpine-based services: docker-compose -f docker-compose.alpine.yml up -d\n")
+            print(f"TIP: To use Alpine-based services: docker-compose -f docker-compose.alpine-test.yml up -d\n")
             
             # Exit immediately - don't waste time on tests that will fail
             import sys

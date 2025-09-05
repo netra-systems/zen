@@ -438,16 +438,8 @@ class UnifiedDockerManager:
         except (subprocess.TimeoutExpired, subprocess.SubprocessError) as e:
             logger.debug(f"Could not detect environment from containers: {e}")
         
-        # Fallback to compose file detection
-        compose_file = self._get_compose_file()
-        if 'alpine' in compose_file.lower():
-            return EnvironmentType.SHARED
-        elif 'test' in compose_file.lower():
-            return EnvironmentType.SHARED
-        elif 'docker-compose.yml' == compose_file:
-            return EnvironmentType.DEVELOPMENT
-            
-        # Final fallback to configured environment type
+        # SSOT: No fallback detection - use configured environment type
+        # Environment type should be explicitly set, not guessed
         return self.environment_type
     
     def _initialize_port_allocator(self) -> DynamicPortAllocator:
@@ -579,18 +571,15 @@ class UnifiedDockerManager:
             for service_name, port in service_ports.items():
                 logger.debug(f"Allocated port {port} for {service_name}")
         else:
-            # Fall back to allocating ports individually
-            logger.warning(f"Batch allocation failed: {result.error_message}. Using fallback.")
-            service_ports = {}
-            for service_name, service_config in self.SERVICES.items():
-                try:
-                    fallback_port = self._find_available_port()
-                    service_ports[service_name] = fallback_port
-                    logger.warning(f"Using fallback port {fallback_port} for {service_name}")
-                except Exception as e:
-                    logger.error(f"Failed to allocate fallback port for {service_name}: {e}")
-                    # Use default port as last resort
-                    service_ports[service_name] = service_config['default_port']
+            # SSOT: NO FALLBACKS - Hard fail if port allocation fails
+            logger.error(f"❌ Port allocation failed: {result.error_message}")
+            logger.error("SSOT VIOLATION: Port allocation must succeed or system must fail")
+            logger.error("Solution: Fix port conflicts before starting containers")
+            raise RuntimeError(
+                f"SSOT PORT ALLOCATION FAILURE: {result.error_message}. "
+                "System must have available ports or fail cleanly. "
+                "No silent fallbacks allowed."
+            )
         
         self.allocated_ports = service_ports
         return service_ports
@@ -1130,35 +1119,23 @@ class UnifiedDockerManager:
     
     def _get_compose_file(self) -> str:
         """Get appropriate docker-compose file based on Alpine setting and environment type"""
-        # Choose compose files based on environment type
+        # SSOT Docker Configuration - NO FALLBACKS
+        # Based on docker/DOCKER_SSOT_MATRIX.md
         if self.environment_type == EnvironmentType.DEVELOPMENT:
-            # For development, prioritize main docker-compose.yml
-            if self.use_alpine:
-                compose_files = [
-                    "docker-compose.alpine.yml",
-                    "docker-compose.yml"
-                ]
-            else:
-                compose_files = [
-                    "docker-compose.yml"
-                ]
+            # LOCAL DEVELOPMENT: Use EXACTLY docker-compose.yml
+            compose_files = ["docker-compose.yml"]
         else:
-            # For test/shared environments, use test compose files
+            # AUTOMATED TESTING: Use EXACTLY docker-compose.alpine-test.yml  
             if self.use_alpine:
-                # Use Alpine compose files when Alpine support is enabled
-                # Prioritize alpine-test.yml for test environments, alpine.yml for others
-                compose_files = [
-                    "docker-compose.alpine-test.yml",
-                    "docker-compose.alpine.yml",
-                    "docker-compose.test.yml",  # Fallback to regular test compose
-                    "docker-compose.yml"  # Final fallback
-                ]
+                compose_files = ["docker-compose.alpine-test.yml"]
             else:
-                # Use regular compose files
-                compose_files = [
-                    "docker-compose.test.yml",
-                    "docker-compose.yml"
-                ]
+                # CRITICAL: This should not happen in SSOT world
+                # Tests should ALWAYS use Alpine for performance
+                raise RuntimeError(
+                    "SSOT VIOLATION: Non-alpine testing not supported. "
+                    "Tests must use docker-compose.alpine-test.yml "
+                    "See docker/DOCKER_SSOT_MATRIX.md"
+                )
         
         # Try to find git root first for most reliable path resolution
         try:
@@ -1595,9 +1572,14 @@ class UnifiedDockerManager:
                             ports[service] = external_port
                             logger.debug(f"🔌 {service}: {internal_port} -> {external_port}")
                         else:
-                            # Use internal port as fallback
-                            ports[service] = internal_port
-                            logger.debug(f"🔌 {service}: using internal port {internal_port}")
+                            # SSOT: No port mapping fallback - this is a configuration error
+                            logger.error(f"❌ SSOT VIOLATION: No external port mapping for {service}")
+                            logger.error(f"Container {container_name} has no port mapping configured")
+                            raise RuntimeError(
+                                f"SSOT PORT MAPPING FAILURE: Container {container_name} for service {service} "
+                                f"has no external port mapping. This indicates a compose file configuration error. "
+                                f"See docker/DOCKER_SSOT_MATRIX.md"
+                            )
                     else:
                         logger.debug(f"🔌 {service}: no port mapping found for {container_name}")
                 else:
@@ -1989,7 +1971,7 @@ class UnifiedDockerManager:
             return True
         except RuntimeError:
             logger.error("❌ No docker-compose files found")
-            logger.error("💡 Expected: docker-compose.test.yml or docker-compose.yml")
+            logger.error("💡 Expected: docker-compose.alpine-test.yml or docker-compose.yml")
             return False
 
     async def _start_missing_services_coordinated(self) -> bool:
@@ -2354,10 +2336,12 @@ class UnifiedDockerManager:
                     async with session.get(url, timeout=aiohttp.ClientTimeout(total=timeout)) as response:
                         return response.status == 200
             except ImportError:
-                # Fallback to port connectivity check
-                from urllib.parse import urlparse
-                parsed = urlparse(url)
-                return await self._check_port_connectivity(parsed.hostname, parsed.port, timeout)
+                # SSOT: aiohttp is required for health checks - no fallback
+                logger.error("❌ SSOT DEPENDENCY MISSING: aiohttp required for health checks")
+                raise RuntimeError(
+                    "SSOT DEPENDENCY FAILURE: aiohttp package is required for proper health checking. "
+                    "Install with: pip install aiohttp. No fallback connectivity checks allowed."
+                )
         except Exception:
             return False
 
@@ -3374,14 +3358,12 @@ class UnifiedDockerManager:
         if self._cleanup_scheduler is not None:
             return self._cleanup_scheduler.trigger_manual_cleanup(cleanup_types, force=True)
         else:
-            logger.warning("Cleanup scheduler not available for manual cleanup")
-            # Fallback to existing cleanup method
-            try:
-                self.cleanup_orphaned_containers()
-                return []
-            except Exception as e:
-                logger.error(f"Fallback cleanup failed: {e}")
-                return []
+            # SSOT: Cleanup scheduler should always be available - no fallback
+            logger.error("❌ SSOT SYSTEM ERROR: Cleanup scheduler not initialized")
+            raise RuntimeError(
+                "SSOT CLEANUP FAILURE: Cleanup scheduler is required for proper cleanup operations. "
+                "This indicates a system initialization problem. No fallback cleanup allowed."
+            )
     
     def _pre_cleanup_check(self) -> bool:
         """
@@ -3432,6 +3414,473 @@ class UnifiedDockerManager:
                     
         except Exception as e:
             logger.warning(f"Error in post-cleanup handler: {e}")
+    
+    def refresh_dev(self, services: Optional[List[str]] = None, clean: bool = False) -> bool:
+        """
+        Refresh development environment - integrated with UnifiedDockerManager.
+        
+        This method provides the official way to refresh local development containers
+        by stopping, rebuilding, and restarting services with health checks.
+        
+        Args:
+            services: Specific services to refresh (None for all)
+            clean: Force clean rebuild (slower but guaranteed fresh)
+            
+        Returns:
+            True if refresh successful, False otherwise
+            
+        Business Value Justification (BVJ):
+        1. Segment: Platform/Internal - Development Velocity
+        2. Business Goal: Eliminate developer friction, standardize refresh workflow
+        3. Value Impact: Saves 5-10 minutes per refresh, prevents environment drift
+        4. Revenue Impact: Saves 2-4 hours/week per developer, prevents deployment issues
+        """
+        logger.info("🔄 Refreshing development environment via UnifiedDockerManager...")
+        
+        try:
+            # Step 1: Gracefully stop existing containers
+            self._stop_dev_containers(services)
+            
+            # Step 2: Build fresh images
+            if not self._build_dev_images(services, clean):
+                return False
+            
+            # Step 3: Start services with health monitoring
+            if not self._start_dev_services(services):
+                return False
+            
+            logger.info("✨ Development environment refreshed successfully!")
+            return True
+            
+        except Exception as e:
+            logger.error(f"❌ Refresh failed: {e}")
+            return False
+    
+    def _stop_dev_containers(self, services: Optional[List[str]] = None):
+        """Stop development containers gracefully."""
+        logger.info("📦 Stopping existing development containers...")
+        
+        try:
+            # Check for existing netra-dev containers
+            result = subprocess.run([
+                "docker", "ps", "-a", 
+                "--filter", "name=netra-dev",
+                "--format", "{{.Names}}"
+            ], capture_output=True, text=True, timeout=10)
+            
+            if result.returncode == 0 and result.stdout.strip():
+                containers = result.stdout.strip().split('\n')
+                
+                if services:
+                    # Filter to only specified services
+                    service_containers = [c for c in containers 
+                                        if any(svc in c for svc in services)]
+                    containers = service_containers
+                
+                if containers:
+                    logger.info(f"   Stopping containers: {', '.join(containers)}")
+                    
+                    # Stop containers gracefully
+                    subprocess.run([
+                        "docker", "stop", "-t", "10"  # 10 second graceful shutdown
+                    ] + containers, capture_output=True, check=False)
+                    
+                    # Remove containers to ensure clean state
+                    subprocess.run([
+                        "docker", "rm", "-f"
+                    ] + containers, capture_output=True, check=False)
+                    
+                    logger.info("   ✅ Development containers stopped")
+                else:
+                    logger.info("   ℹ️ No matching development containers found")
+            else:
+                logger.info("   ℹ️ No development containers found")
+                
+        except Exception as e:
+            logger.warning(f"   ⚠️ Warning during container stop: {e}")
+    
+    def _build_dev_images(self, services: Optional[List[str]] = None, clean: bool = False) -> bool:
+        """Build development images using docker-compose."""
+        logger.info("🔨 Building development images...")
+        
+        cmd = ["docker-compose", "-f", "docker-compose.yml", "build", "--parallel"]
+        
+        if clean:
+            cmd.append("--no-cache")
+            logger.info("   🧹 Clean build enabled (slower but guaranteed fresh)")
+        else:
+            logger.info("   ⚡ Smart build enabled (fresh code, cached dependencies)")
+        
+        if services:
+            # Map service names to docker-compose service names
+            compose_services = [f"dev-{svc}" for svc in services]
+            cmd.extend(compose_services)
+            logger.info(f"   🎯 Building services: {', '.join(services)}")
+        
+        try:
+            project_root = Path(env.get("PROJECT_ROOT", Path(__file__).parent.parent))
+            result = subprocess.run(
+                cmd,
+                cwd=project_root,
+                check=True,
+                capture_output=False,  # Show build output
+                timeout=600  # 10 minute timeout for builds
+            )
+            logger.info("   ✅ Images built successfully")
+            return True
+            
+        except subprocess.CalledProcessError as e:
+            logger.error(f"   ❌ Build failed with exit code {e.returncode}")
+            return False
+        except subprocess.TimeoutExpired:
+            logger.error("   ❌ Build timed out after 10 minutes")
+            return False
+    
+    def _start_dev_services(self, services: Optional[List[str]] = None) -> bool:
+        """Start development services with health monitoring."""
+        logger.info("🚀 Starting development services...")
+        
+        cmd = ["docker-compose", "-f", "docker-compose.yml", "up", "-d"]
+        
+        if services:
+            # Map service names to docker-compose service names
+            compose_services = [f"dev-{svc}" for svc in services]
+            cmd.extend(compose_services)
+            logger.info(f"   🎯 Starting services: {', '.join(services)}")
+        
+        try:
+            # Start services
+            project_root = Path(env.get("PROJECT_ROOT", Path(__file__).parent.parent))
+            result = subprocess.run(
+                cmd,
+                cwd=project_root,
+                check=True,
+                capture_output=True,
+                text=True,
+                timeout=120
+            )
+            
+            logger.info("   ✅ Services started, checking health...")
+            
+            # Wait for services to be healthy
+            return self._wait_for_dev_health(timeout=60)
+            
+        except subprocess.CalledProcessError as e:
+            logger.error(f"   ❌ Failed to start services: {e.stderr}")
+            return False
+        except subprocess.TimeoutExpired:
+            logger.error("   ❌ Service start timed out")
+            return False
+    
+    def _wait_for_dev_health(self, timeout: int = 60) -> bool:
+        """Wait for development services to be healthy."""
+        logger.info(f"   ⏱️ Waiting up to {timeout}s for services to be ready...")
+        
+        start_time = time.time()
+        healthy_services = set()
+        required_services = {"dev-postgres", "dev-redis", "dev-backend", "dev-auth"}
+        
+        while time.time() - start_time < timeout:
+            try:
+                # Check container health
+                result = subprocess.run([
+                    "docker", "ps", 
+                    "--filter", "name=netra-dev",
+                    "--format", "{{.Names}}\t{{.Status}}"
+                ], capture_output=True, text=True, timeout=10)
+                
+                if result.returncode == 0 and result.stdout.strip():
+                    lines = result.stdout.strip().split('\n')
+                    current_healthy = set()
+                    
+                    for line in lines:
+                        if '\t' in line:
+                            name, status = line.split('\t', 1)
+                            if 'healthy' in status.lower() or 'up' in status.lower():
+                                current_healthy.add(name)
+                    
+                    # Check if all required services are healthy
+                    if current_healthy.issuperset(required_services):
+                        logger.info("   ✅ All development services are healthy")
+                        return True
+                    
+                    # Show progress
+                    newly_healthy = current_healthy - healthy_services
+                    if newly_healthy:
+                        logger.info(f"   🟢 Healthy: {', '.join(newly_healthy)}")
+                        healthy_services.update(newly_healthy)
+                
+                time.sleep(2)
+                
+            except Exception as e:
+                logger.debug(f"Health check error: {e}")
+                time.sleep(2)
+        
+        # Timeout reached
+        logger.error("   ❌ Services failed to become healthy within timeout")
+        self._show_dev_health_report()
+        return False
+    
+    def _show_dev_health_report(self):
+        """Show development container health for debugging."""
+        try:
+            logger.info("🔍 Development container status:")
+            
+            result = subprocess.run([
+                "docker", "ps", "-a",
+                "--filter", "name=netra-dev", 
+                "--format", "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
+            ], capture_output=True, text=True, timeout=10)
+            
+            if result.returncode == 0 and result.stdout.strip():
+                print(result.stdout)
+            
+            # Also check logs for any obvious errors
+            logger.info("Recent logs (last 20 lines):")
+            project_root = Path(env.get("PROJECT_ROOT", Path(__file__).parent.parent))
+            subprocess.run([
+                "docker-compose", "-f", "docker-compose.yml", "logs", "--tail=20"
+            ], cwd=project_root, timeout=30)
+            
+        except Exception as e:
+            logger.warning(f"Could not generate health report: {e}")
+
+    async def ensure_e2e_environment(self, force_alpine: bool = True, timeout: int = 180) -> bool:
+        """
+        Ensure E2E environment is ready for reliable testing.
+        ALWAYS uses docker-compose.alpine-test.yml for tests.
+        
+        Args:
+            force_alpine: Force use of Alpine test containers (default: True)
+            timeout: Maximum time to wait for services (default: 180s)
+            
+        Returns:
+            True if E2E environment is ready, False otherwise
+            
+        Raises:
+            RuntimeError: If Docker is not available or fails to start
+        """
+        logger.info("🚀 Setting up E2E environment for reliable testing")
+        
+        # CRITICAL: Validate Docker is running or FAIL
+        if not self._check_docker_availability():
+            raise RuntimeError(
+                "Docker is not available! E2E tests require Docker. "
+                "Please start Docker daemon and try again."
+            )
+        
+        # Force Alpine test configuration
+        if force_alpine:
+            self.use_alpine = True
+            logger.info("   📦 Using Alpine test containers for speed and isolation")
+        
+        # Use dedicated test ports to avoid conflicts
+        test_ports = {
+            "ALPINE_TEST_POSTGRES_PORT": "5435",
+            "ALPINE_TEST_REDIS_PORT": "6382", 
+            "ALPINE_TEST_CLICKHOUSE_HTTP": "8126",
+            "ALPINE_TEST_CLICKHOUSE_TCP": "9003",
+            "ALPINE_TEST_BACKEND_PORT": "8002",
+            "ALPINE_TEST_AUTH_PORT": "8083",
+            "ALPINE_TEST_FRONTEND_PORT": "3002"
+        }
+        
+        # Set test environment variables
+        test_env = os.environ.copy()
+        test_env.update(test_ports)
+        test_env["COMPOSE_PROJECT_NAME"] = f"netra-e2e-test-{int(time.time())}"
+        test_env["DOCKER_BUILDKIT"] = "1"  # Enable BuildKit for faster builds
+        
+        try:
+            # 1. Clean any stale test containers and data
+            await self._cleanup_stale_test_environment(test_env)
+            
+            # 2. Use EXACTLY docker-compose.alpine-test.yml
+            compose_file = Path(env.get("PROJECT_ROOT", Path(__file__).parent.parent)) / "docker-compose.alpine-test.yml"
+            if not compose_file.exists():
+                raise RuntimeError(f"Required E2E compose file not found: {compose_file}")
+            
+            logger.info(f"   🐳 Using compose file: {compose_file}")
+            
+            # 3. Start services with health checks
+            cmd = [
+                "docker-compose", "-f", str(compose_file),
+                "-p", test_env["COMPOSE_PROJECT_NAME"],
+                "up", "-d", "--build"
+            ]
+            
+            logger.info("   🔨 Building and starting E2E services...")
+            result = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout, env=test_env)
+            
+            if result.returncode != 0:
+                logger.error(f"❌ Failed to start E2E services: {result.stderr}")
+                return False
+            
+            # 4. Wait for all services to be healthy
+            services = ["alpine-test-postgres", "alpine-test-redis", "alpine-test-clickhouse", 
+                       "alpine-test-backend", "alpine-test-auth", "alpine-test-frontend"]
+            
+            logger.info("   ⏳ Waiting for services to become healthy...")
+            if not await self._wait_for_e2e_services_healthy(services, compose_file, test_env, timeout):
+                logger.error("❌ E2E services failed to become healthy")
+                await self._collect_e2e_failure_logs(compose_file, test_env)
+                return False
+            
+            # 5. Return service URLs for tests
+            service_urls = {
+                "backend": f"http://localhost:{test_ports['ALPINE_TEST_BACKEND_PORT']}",
+                "auth": f"http://localhost:{test_ports['ALPINE_TEST_AUTH_PORT']}",
+                "frontend": f"http://localhost:{test_ports['ALPINE_TEST_FRONTEND_PORT']}",
+                "websocket": f"ws://localhost:{test_ports['ALPINE_TEST_BACKEND_PORT']}/ws",
+                "postgres": f"postgresql://test:test@localhost:{test_ports['ALPINE_TEST_POSTGRES_PORT']}/netra_test",
+                "redis": f"redis://localhost:{test_ports['ALPINE_TEST_REDIS_PORT']}/0"
+            }
+            
+            # Store for cleanup
+            self._e2e_project_name = test_env["COMPOSE_PROJECT_NAME"]
+            self._e2e_compose_file = compose_file
+            self._e2e_service_urls = service_urls
+            
+            logger.info("✅ E2E environment is ready!")
+            logger.info(f"   Backend: {service_urls['backend']}")
+            logger.info(f"   Auth: {service_urls['auth']}")
+            logger.info(f"   WebSocket: {service_urls['websocket']}")
+            
+            return True
+            
+        except subprocess.TimeoutExpired:
+            logger.error(f"❌ E2E environment setup timed out after {timeout}s")
+            return False
+        except Exception as e:
+            logger.error(f"❌ E2E environment setup failed: {e}")
+            return False
+
+    async def _cleanup_stale_test_environment(self, test_env: Dict[str, str]):
+        """Clean up any stale test containers and volumes."""
+        try:
+            # Remove any existing test containers
+            subprocess.run([
+                "docker-compose", "-f", "docker-compose.alpine-test.yml",
+                "-p", test_env["COMPOSE_PROJECT_NAME"],
+                "down", "-v", "--remove-orphans"
+            ], capture_output=True, timeout=30, env=test_env)
+            
+            # Clean up any dangling test volumes
+            subprocess.run([
+                "docker", "volume", "prune", "-f",
+                "--filter", "label=com.docker.compose.project=netra-e2e-test"
+            ], capture_output=True, timeout=30)
+            
+            logger.info("   🧹 Cleaned up stale test environment")
+            
+        except Exception as e:
+            logger.warning(f"Warning: Could not clean stale environment: {e}")
+
+    async def _wait_for_e2e_services_healthy(self, services: List[str], compose_file: Path, 
+                                           test_env: Dict[str, str], timeout: int) -> bool:
+        """Wait for E2E services to become healthy with proper health checks."""
+        start_time = time.time()
+        healthy_services = set()
+        
+        while time.time() - start_time < timeout:
+            try:
+                # Check service health using docker-compose ps
+                result = subprocess.run([
+                    "docker-compose", "-f", str(compose_file),
+                    "-p", test_env["COMPOSE_PROJECT_NAME"],
+                    "ps", "--format", "json"
+                ], capture_output=True, text=True, timeout=10, env=test_env)
+                
+                if result.returncode == 0:
+                    import json
+                    current_healthy = set()
+                    
+                    for line in result.stdout.strip().split('\n'):
+                        if line.strip():
+                            try:
+                                container = json.loads(line)
+                                if container.get('Health', '').lower() == 'healthy' or \
+                                   (container.get('State', '').lower() == 'running' and 
+                                    'healthy' in container.get('Status', '').lower()):
+                                    current_healthy.add(container['Service'])
+                            except json.JSONDecodeError:
+                                continue
+                    
+                    # Check if all required services are healthy
+                    if current_healthy.issuperset(services):
+                        logger.info("   ✅ All E2E services are healthy")
+                        return True
+                    
+                    # Show progress
+                    newly_healthy = current_healthy - healthy_services
+                    if newly_healthy:
+                        logger.info(f"   🟢 Healthy: {', '.join(newly_healthy)}")
+                        healthy_services.update(newly_healthy)
+                
+                await asyncio.sleep(2)
+                
+            except Exception as e:
+                logger.debug(f"Health check error: {e}")
+                await asyncio.sleep(2)
+        
+        return False
+
+    async def _collect_e2e_failure_logs(self, compose_file: Path, test_env: Dict[str, str]):
+        """Collect logs from failed E2E services for debugging."""
+        try:
+            logger.info("🔍 Collecting failure logs...")
+            
+            result = subprocess.run([
+                "docker-compose", "-f", str(compose_file),
+                "-p", test_env["COMPOSE_PROJECT_NAME"],
+                "logs", "--tail=50"
+            ], capture_output=True, text=True, timeout=30, env=test_env)
+            
+            if result.stdout:
+                logger.error("E2E Service Logs:")
+                print(result.stdout)
+            
+        except Exception as e:
+            logger.warning(f"Could not collect failure logs: {e}")
+
+    async def teardown_e2e_environment(self):
+        """Clean teardown of E2E environment."""
+        if not hasattr(self, '_e2e_project_name'):
+            logger.info("No E2E environment to tear down")
+            return
+        
+        try:
+            logger.info("🧹 Tearing down E2E environment...")
+            
+            test_env = os.environ.copy()
+            test_env["COMPOSE_PROJECT_NAME"] = self._e2e_project_name
+            
+            # Stop and remove containers
+            subprocess.run([
+                "docker-compose", "-f", str(self._e2e_compose_file),
+                "-p", self._e2e_project_name,
+                "down", "-v", "--remove-orphans"
+            ], capture_output=True, timeout=60, env=test_env)
+            
+            logger.info("✅ E2E environment cleaned up")
+            
+        except Exception as e:
+            logger.warning(f"Warning during E2E teardown: {e}")
+        finally:
+            # Clean up stored references
+            if hasattr(self, '_e2e_project_name'):
+                delattr(self, '_e2e_project_name')
+            if hasattr(self, '_e2e_compose_file'):
+                delattr(self, '_e2e_compose_file')
+            if hasattr(self, '_e2e_service_urls'):
+                delattr(self, '_e2e_service_urls')
+
+    def get_e2e_service_urls(self) -> Dict[str, str]:
+        """Get E2E service URLs after environment setup."""
+        if hasattr(self, '_e2e_service_urls'):
+            return self._e2e_service_urls
+        else:
+            raise RuntimeError("E2E environment not set up. Call ensure_e2e_environment() first.")
 
 
 # Convenience functions for backward compatibility and async orchestration
@@ -3454,6 +3903,33 @@ def restart_service(service_name: str, force: bool = False) -> bool:
 def wait_for_services(services: Optional[List[str]] = None, timeout: int = 60) -> bool:
     """Wait for services using default manager"""
     return get_default_manager().wait_for_services(services, timeout)
+
+
+def refresh_dev(services: Optional[List[str]] = None, clean: bool = False) -> bool:
+    """
+    Refresh development environment using default manager.
+    
+    Convenience function for the most common developer workflow: refreshing
+    local development containers with latest code changes.
+    
+    Args:
+        services: Specific services to refresh (None for all)
+        clean: Force clean rebuild (slower but guaranteed fresh)
+        
+    Returns:
+        True if refresh successful, False otherwise
+        
+    Examples:
+        refresh_dev()              # Refresh all development services
+        refresh_dev(['backend'])   # Refresh just backend service  
+        refresh_dev(clean=True)    # Force clean rebuild
+    """
+    manager = UnifiedDockerManager(
+        environment_type=EnvironmentType.DEVELOPMENT,
+        use_alpine=False,  # Use regular containers for development
+        no_cache_app_code=True  # Always fresh code
+    )
+    return manager.refresh_dev(services, clean)
 
 
 async def orchestrate_e2e_services(
