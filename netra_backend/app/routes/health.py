@@ -448,11 +448,11 @@ async def ready(request: Request) -> Dict[str, Any]:
         
         # Only try to get database dependency after startup state check passes
         try:
-            # CRITICAL FIX: Use direct database context manager from DatabaseManager
-            # This bypasses the dependency injection layer to avoid async generator issues
-            from netra_backend.app.db.database_manager import DatabaseManager
+            # CRITICAL FIX: Use canonical database access pattern from database module SSOT
+            # This provides proper session lifecycle management with context manager
+            from netra_backend.app.database import get_db
             
-            async with DatabaseManager.get_async_session() as db:
+            async with get_db() as db:
                 try:
                     # CRITICAL FIX: Reduce timeout to align with faster database check (6.0s total allows for retries)
                     result = await asyncio.wait_for(_check_readiness_status(db), timeout=6.0)
