@@ -204,10 +204,17 @@ async def live(request: Request) -> Dict[str, Any]:
 async def _check_postgres_connection(db: AsyncSession) -> None:
     """Check Postgres database connection."""
     config = unified_config_manager.get_config()
-    database_url = getattr(config, 'database_url', '')
-    if "mock" not in database_url.lower():
+    database_url = getattr(config, 'database_url', None)
+    # Critical fix: Handle None database_url to prevent AttributeError
+    if database_url and "mock" not in database_url.lower():
         result = await db.execute(text("SELECT 1"))
         result.scalar_one_or_none()
+    elif database_url is None:
+        # Database URL not configured - this is a critical error in non-test environments
+        from shared.isolated_environment import get_env
+        env_name = get_env().get("ENVIRONMENT", "development")
+        if env_name not in ["testing", "development"]:
+            raise ValueError("DATABASE_URL is not configured")
 
 async def _check_clickhouse_connection() -> None:
     """Check ClickHouse database connection (non-blocking for readiness)."""
