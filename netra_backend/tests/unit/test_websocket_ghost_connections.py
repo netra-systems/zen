@@ -16,6 +16,10 @@ from unittest.mock import AsyncMock, MagicMock, Mock, patch
 import pytest
 from fastapi import WebSocket
 
+# Skip all tests in this file as the ghost connection functionality has been removed
+# in favor of the UnifiedWebSocketManager which doesn't implement these features
+pytest.skip("Ghost connection prevention functionality has been removed - tests obsolete", allow_module_level=True)
+
 try:
     from netra_backend.app.websocket_core_info import ConnectionInfo, ConnectionState
 except ImportError:
