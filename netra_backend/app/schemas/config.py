@@ -712,12 +712,35 @@ class StagingConfig(AppConfig):
 class NetraTestingConfig(AppConfig):
     """Testing-specific settings."""
     environment: str = "testing"
-    database_url: str = "postgresql+asyncpg://postgres:123@localhost/netra_test"
+    # database_url will be set dynamically via DatabaseURLBuilder in __init__
     auth_service_url: str = "http://localhost:8081"
     fast_startup_mode: str = "true"  # Enable fast startup for tests
     service_secret: str = "test-service-secret-for-cross-service-auth-32-chars-minimum-length"  # Test-safe default
     jwt_secret_key: str = "test_jwt_secret_key_for_testing_32_chars_minimum_required_length"  # Test-safe JWT secret
     fernet_key: str = "ZmDfcTF7_60GrrY167zsiPd67pEvs0aGOv2oasOM1Pg="  # Test-safe Fernet key (same as dev)
+    
+    def __init__(self, **data):
+        """Initialize test configuration using DatabaseURLBuilder."""
+        from shared.database_url_builder import DatabaseURLBuilder
+        from shared.isolated_environment import get_env
+        
+        env = get_env()
+        
+        # Use DatabaseURLBuilder as the SINGLE SOURCE OF TRUTH
+        builder = DatabaseURLBuilder(env.as_dict())
+        
+        # Get URL for test environment - uses test.auto_url which handles DATABASE_URL or test defaults
+        database_url = builder.test.auto_url
+        
+        if database_url:
+            data['database_url'] = database_url
+        else:
+            # For tests, if no URL available, let it fail properly
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.warning("No database URL available from DatabaseURLBuilder for test environment")
+        
+        super().__init__(**data)
 
 class LLMProvider(str, Enum):
     """LLM provider enum for configuration schemas (local to avoid circular imports)."""
