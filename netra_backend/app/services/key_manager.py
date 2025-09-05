@@ -55,6 +55,39 @@ class KeyManager:
         self._key_cache: Dict[str, str] = {}
         logger.info("KeyManager initialized")
     
+    @classmethod
+    def load_from_settings(cls, settings: Any) -> "KeyManager":
+        """
+        Load KeyManager from application settings.
+        
+        Args:
+            settings: Application settings object
+            
+        Returns:
+            Configured KeyManager instance
+        """
+        instance = cls()
+        
+        # Load any configured keys from settings
+        if hasattr(settings, 'jwt_secret'):
+            instance.store_key(
+                key_id="jwt_secret",
+                key_type=KeyType.JWT_SECRET,
+                value=str(settings.jwt_secret),
+                metadata={"source": "settings"}
+            )
+        
+        if hasattr(settings, 'api_key'):
+            instance.store_key(
+                key_id="api_key",
+                key_type=KeyType.API_KEY,
+                value=str(settings.api_key),
+                metadata={"source": "settings"}
+            )
+        
+        logger.info("KeyManager loaded from settings")
+        return instance
+    
     def generate_key(self, 
                     key_id: str, 
                     key_type: KeyType,
