@@ -119,7 +119,7 @@ def _create_llm_config() -> dict:
 
 def setup_llm_manager() -> object:
     """Initialize and return LLM manager with default configuration."""
-    llm_manager = LLMManager(_create_llm_config())
+    llm_manager = LLMManager()
     return llm_manager.get_llm("default")
 
 def setup_generation_config(args) -> dict:

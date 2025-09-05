@@ -1,7 +1,6 @@
 from shared.isolated_environment import get_env
 """Tests for project_utils module.
 
-env = get_env()
 This module tests the SSOT project utility functions for path resolution
 and test environment detection.
 
@@ -24,6 +23,7 @@ from netra_backend.app.core.project_utils import (
     is_test_environment
 )
 
+env = get_env()
 
 class TestProjectPathResolution:
     """Test project path resolution functions."""
