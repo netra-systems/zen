@@ -74,8 +74,8 @@ def _register_core_agents(registry: AgentClassRegistry) -> None:
     """Register core workflow agents."""
     try:
         # Import core agents - using delayed imports to avoid circular dependencies
-        from netra_backend.app.agents.triage_sub_agent.agent import TriageSubAgent
-        from netra_backend.app.agents.data_sub_agent.data_sub_agent import DataSubAgent
+        from netra_backend.app.agents.triage.unified_triage_agent import UnifiedTriageAgent
+        from netra_backend.app.agents.data_sub_agent import DataSubAgent
         from netra_backend.app.agents.optimizations_core_sub_agent import OptimizationsCoreSubAgent
         from netra_backend.app.agents.actions_to_meet_goals_sub_agent import ActionsToMeetGoalsSubAgent
         from netra_backend.app.agents.reporting_sub_agent import ReportingSubAgent
@@ -83,7 +83,7 @@ def _register_core_agents(registry: AgentClassRegistry) -> None:
         # Register core workflow agents
         registry.register(
             "triage",
-            TriageSubAgent,
+            UnifiedTriageAgent,
             "Handles user request triage and classification",
             version="2.0.0",
             dependencies=[],
@@ -165,7 +165,7 @@ def _register_specialized_agents(registry: AgentClassRegistry) -> None:
     
     # Corpus Admin Agent
     try:
-        from netra_backend.app.agents.corpus_admin.agent import CorpusAdminSubAgent
+        from netra_backend.app.admin.corpus import CorpusAdminSubAgent
         
         registry.register(
             "corpus_admin",

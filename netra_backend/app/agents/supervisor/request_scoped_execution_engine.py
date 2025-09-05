@@ -34,7 +34,9 @@ from netra_backend.app.agents.supervisor.user_execution_context import (
     UserExecutionContext,
     validate_user_context
 )
-from netra_backend.app.agents.supervisor.fallback_manager import FallbackManager
+# Legacy import removed - use SSOT from resilience
+# from netra_backend.app.agents.supervisor.fallback_manager import FallbackManager
+from netra_backend.app.core.resilience.fallback import FallbackManager
 from netra_backend.app.agents.supervisor.periodic_update_manager import PeriodicUpdateManager
 from netra_backend.app.agents.supervisor.observability_flow import (
     get_supervisor_flow_logger,

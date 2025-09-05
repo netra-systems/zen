@@ -43,7 +43,7 @@ from netra_backend.app.core.agent_execution_tracker import (
     ExecutionState
 )
 from netra_backend.app.logging_config import central_logger
-from netra_backend.app.services.websocket_event_emitter import WebSocketEventEmitter
+from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmitter as WebSocketEventEmitter
 
 logger = central_logger.get_logger(__name__)
 
@@ -746,7 +746,7 @@ async def create_full_request_execution_stack(
         result = await executor.execute_agent("MyAgent", state)
     """
     # Create event emitter
-    from netra_backend.app.services.websocket_event_emitter import WebSocketEventEmitterFactory
+    from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmitter as WebSocketEventEmitterFactory
     event_emitter = await WebSocketEventEmitterFactory.create_emitter(
         user_context, websocket_manager
     )

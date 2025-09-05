@@ -34,7 +34,9 @@ if TYPE_CHECKING:
     from netra_backend.app.services.websocket_bridge_factory import WebSocketBridgeFactory
     from netra_backend.app.services.websocket_bridge_factory import UserWebSocketEmitter
     from netra_backend.app.agents.supervisor.agent_execution_core import AgentExecutionCore
-    from netra_backend.app.agents.supervisor.fallback_manager import FallbackManager
+    # Legacy import removed - use SSOT from resilience
+    # from netra_backend.app.agents.supervisor.fallback_manager import FallbackManager
+    from netra_backend.app.core.resilience.fallback import FallbackManager
     from netra_backend.app.agents.supervisor.periodic_update_manager import PeriodicUpdateManager
     from netra_backend.app.core.types import DeepAgentState, AgentExecutionResult, AgentExecutionContext
 
@@ -304,7 +306,7 @@ class ExecutionEngineFactory:
             
             # Fallback: Create isolated WebSocket emitter directly
             if not websocket_emitter:
-                from netra_backend.app.websocket_core.isolated_event_emitter import IsolatedWebSocketEventEmitter
+                from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmitter as IsolatedWebSocketEventEmitter
                 websocket_emitter = IsolatedWebSocketEventEmitter.create_for_user(
                     user_id=user_context.user_id,
                     thread_id=user_context.thread_id,
@@ -428,7 +430,7 @@ class IsolatedExecutionEngine:
         # CRITICAL: Validate WebSocket emitter
         if websocket_emitter is None:
             logger.warning(f"WebSocket emitter is None for user {user_context.user_id} - creating fallback")
-            from netra_backend.app.websocket_core.isolated_event_emitter import IsolatedWebSocketEventEmitter
+            from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmitter as IsolatedWebSocketEventEmitter
             websocket_emitter = IsolatedWebSocketEventEmitter.create_for_user(
                 user_id=user_context.user_id,
                 thread_id=user_context.thread_id,
@@ -479,7 +481,9 @@ class IsolatedExecutionEngine:
     async def _get_or_create_fallback_manager(self) -> 'FallbackManager':
         """Get or create fallback manager."""
         if self._fallback_manager is None:
-            from netra_backend.app.agents.supervisor.fallback_manager import FallbackManager
+            # Legacy import removed - use SSOT from resilience
+            # from netra_backend.app.agents.supervisor.fallback_manager import FallbackManager
+            from netra_backend.app.core.resilience.fallback import FallbackManager
             self._fallback_manager = FallbackManager(
                 self.websocket_emitter,
                 self.user_context

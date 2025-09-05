@@ -26,7 +26,7 @@ from typing import Any, Dict, List, Optional, TYPE_CHECKING
 if TYPE_CHECKING:
     from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
     from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
-    from netra_backend.app.agents.supervisor.agent_instance_factory import UserWebSocketEmitter
+    from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmitter as UserWebSocketEmitter
 
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.agents.supervisor.agent_execution_core import AgentExecutionCore
@@ -39,8 +39,10 @@ from netra_backend.app.agents.supervisor.user_execution_context import (
     UserExecutionContext,
     validate_user_context
 )
-from netra_backend.app.agents.supervisor.fallback_manager import FallbackManager
-from netra_backend.app.agents.supervisor.periodic_update_manager import PeriodicUpdateManager
+# DISABLED: fallback_manager module removed
+# from netra_backend.app.agents.supervisor.fallback_manager import FallbackManager
+# DISABLED: periodic_update_manager module removed
+# from netra_backend.app.agents.supervisor.periodic_update_manager import PeriodicUpdateManager
 from netra_backend.app.agents.supervisor.observability_flow import (
     get_supervisor_flow_logger,
 )
@@ -162,9 +164,11 @@ class UserExecutionEngine:
                 raise ValueError("WebSocket bridge not available in factory")
             
             # Initialize components with user-scoped bridge
-            self.periodic_update_manager = PeriodicUpdateManager(websocket_bridge)
+            # periodic_update_manager removed - no longer needed
+            self.periodic_update_manager = None
             self.agent_core = AgentExecutionCore(registry, websocket_bridge) 
-            self.fallback_manager = FallbackManager(websocket_bridge)
+            # fallback_manager removed - no longer needed
+            self.fallback_manager = None
             self.flow_logger = get_supervisor_flow_logger()
             self.execution_tracker = get_execution_tracker()
             
