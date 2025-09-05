@@ -36,7 +36,7 @@ jobs:
   # Architecture Compliance
   architecture-check:
     name: Architecture Compliance
-    runs-on: ubuntu-latest
+    runs-on: warp-custom-default
     timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
@@ -54,7 +54,7 @@ jobs:
   # Integration Tests
   integration-tests:
     name: Integration Tests
-    runs-on: ubuntu-latest
+    runs-on: warp-custom-default
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
@@ -72,7 +72,7 @@ jobs:
   # Security Scan
   security-scan:
     name: Security Vulnerability Scan
-    runs-on: ubuntu-latest
+    runs-on: warp-custom-default
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
@@ -93,7 +93,7 @@ jobs:
   deployment-gate:
     name: Deployment Readiness Gate
     needs: [mission-critical, architecture-check, integration-tests, security-scan]
-    runs-on: ubuntu-latest
+    runs-on: warp-custom-default
     if: always()
     outputs:
       ready: ${{ steps.gate.outputs.ready }}

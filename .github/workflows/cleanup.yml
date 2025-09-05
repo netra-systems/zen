@@ -63,7 +63,7 @@ jobs:
       inputs.cleanup_type == 'pr-closed' ||
       inputs.cleanup_scope == 'pr-environments' ||
       inputs.cleanup_scope == 'all'
-    runs-on: ubuntu-latest
+    runs-on: warp-custom-default
     timeout-minutes: 10
     
     steps:
@@ -166,7 +166,7 @@ jobs:
       github.event_name == 'schedule' ||
       inputs.cleanup_scope == 'old-artifacts' ||
       inputs.cleanup_scope == 'all'
-    runs-on: ubuntu-latest
+    runs-on: warp-custom-default
     timeout-minutes: 10
     
     steps:
@@ -238,7 +238,7 @@ jobs:
       github.event_name == 'schedule' ||
       inputs.cleanup_scope == 'unused-images' ||
       inputs.cleanup_scope == 'all'
-    runs-on: ubuntu-latest
+    runs-on: warp-custom-default
     timeout-minutes: 15
     
     steps:
@@ -315,7 +315,7 @@ jobs:
     if: |
       github.event_name == 'schedule' ||
       inputs.cleanup_scope == 'all'
-    runs-on: ubuntu-latest
+    runs-on: warp-custom-default
     timeout-minutes: 10
     
     steps:
@@ -379,7 +379,7 @@ jobs:
       cleanup-workflow-runs
     ]
     if: always()
-    runs-on: ubuntu-latest
+    runs-on: warp-custom-default
     
     steps:
       - name: Generate summary report
