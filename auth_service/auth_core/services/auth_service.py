@@ -10,7 +10,7 @@ import re
 import secrets
 import time
 from datetime import datetime, timedelta, UTC
-from typing import Dict, Optional, Tuple
+from typing import Dict, List, Optional, Tuple
 
 import httpx
 from argon2 import PasswordHasher
@@ -168,6 +168,30 @@ class AuthService:
         except Exception as e:
             logger.error(f"Password hashing error: {e}")
             raise
+    
+    async def create_access_token(self, user_id: str, email: str, permissions: List[str] = None) -> str:
+        """Create an access token."""
+        return self.jwt_handler.create_access_token(
+            user_id=user_id,
+            email=email,
+            permissions=permissions or []
+        )
+    
+    async def create_refresh_token(self, user_id: str, email: str, permissions: List[str] = None) -> str:
+        """Create a refresh token."""
+        return self.jwt_handler.create_refresh_token(
+            user_id=user_id,
+            email=email,
+            permissions=permissions or []
+        )
+    
+    async def create_service_token(self, service_id: str) -> str:
+        """Create a service-to-service authentication token."""
+        return self.jwt_handler.create_access_token(
+            user_id=service_id,
+            email=f"{service_id}@service.internal",
+            permissions=["service:all"]
+        )
         
     async def login(self, request: LoginRequest, 
                    client_info: Dict) -> LoginResponse:
