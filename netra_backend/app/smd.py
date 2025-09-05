@@ -864,7 +864,7 @@ class StartupOrchestrator:
     
     def _initialize_tool_registry(self) -> None:
         """Initialize tool registry and dispatcher with AgentWebSocketBridge support - CRITICAL."""
-        from netra_backend.app.agents.tool_registry_unified import UnifiedToolRegistry
+        from netra_backend.app.core.registry.universal_registry import ToolRegistry
         from netra_backend.app.agents.tool_dispatcher import ToolDispatcher, create_legacy_tool_dispatcher
         from netra_backend.app.agents.tools.langchain_wrappers import (
             DataHelperTool, DeepResearchTool, ReliabilityScorerTool, SandboxedInterpreterTool

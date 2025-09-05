@@ -10,7 +10,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 # Import from the single source of truth for database sessions
 from netra_backend.app.database import get_db
 
-from netra_backend.app.llm.llm_manager import LLMManager
+from netra_backend.app.llm.client_factory import get_llm_client
+from netra_backend.app.llm.client_unified import ResilientLLMClient
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.services.security_service import SecurityService
 from netra_backend.app.websocket_core import get_websocket_manager
@@ -294,8 +295,10 @@ DbDep = Annotated[AsyncSession, Depends(get_request_scoped_db_session)]
 RequestScopedDbDep = Annotated[AsyncSession, Depends(get_request_scoped_db_session)]
 UserScopedDbDep = Annotated[AsyncSession, Depends(get_user_scoped_db_session)]
 
-def get_llm_manager(request: Request) -> LLMManager:
-    return request.app.state.llm_manager
+def get_llm_client_from_app(request: Request) -> ResilientLLMClient:
+    """Get LLM client - updated from deleted LLMManager."""
+    from netra_backend.app.llm.client_factory import get_llm_client
+    return get_llm_client()
 
 # Legacy compatibility - DEPRECATED: use get_db_dependency() instead
 async def get_db_session() -> AsyncGenerator[AsyncSession, None]:
@@ -312,7 +315,7 @@ def get_security_service(request: Request) -> SecurityService:
     logger.debug("Getting security service from app state")
     return request.app.state.security_service
 
-LLMManagerDep = Annotated[LLMManager, Depends(get_llm_manager)]
+LLMClientDep = Annotated[ResilientLLMClient, Depends(get_llm_client_from_app)]
 
 def get_agent_supervisor(request: Request) -> "Supervisor":
     """Get agent supervisor from app state - LEGACY mode.
@@ -499,7 +502,7 @@ async def get_request_scoped_supervisor(
         )
         
         # Get required components from app state (these should be stateless)
-        llm_manager = get_llm_manager(request)
+        llm_client = get_llm_client_from_app(request)
         
         # Get WebSocket bridge from app state
         websocket_bridge = getattr(request.app.state, 'websocket_bridge', None)
@@ -530,7 +533,7 @@ async def get_request_scoped_supervisor(
         # Create isolated SupervisorAgent using factory method
         from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
         supervisor = await SupervisorAgent.create_with_user_context(
-            llm_manager=llm_manager,
+            llm_client=llm_client,
             websocket_bridge=websocket_bridge,
             tool_dispatcher=tool_dispatcher,
             user_context=user_context,
@@ -811,6 +814,28 @@ def get_corpus_service(request: Request) -> "CorpusService":
         )
     
     return corpus_service
+
+def get_llm_manager(request: Request):
+    """Get LLM manager from app state.
+    
+    CRITICAL: This service MUST be initialized during startup.
+    """
+    if not hasattr(request.app.state, 'llm_manager'):
+        logger.critical("CRITICAL: llm_manager not initialized - startup sequence failed!")
+        raise RuntimeError(
+            "CRITICAL STARTUP FAILURE: llm_manager is not initialized. "
+            "This indicates the application started in a degraded state."
+        )
+    
+    llm_manager = request.app.state.llm_manager
+    if llm_manager is None:
+        logger.critical("CRITICAL: llm_manager is None - initialization failed!")
+        raise RuntimeError(
+            "CRITICAL INITIALIZATION FAILURE: llm_manager is None. "
+            "Critical services must never be None."
+        )
+    
+    return llm_manager
 
 def get_message_handler_service(request: Request):
     """Get message handler service from app state or create one.

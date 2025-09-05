@@ -13,7 +13,7 @@ See: app/auth_integration/CRITICAL_AUTH_ARCHITECTURE.md
 """
 import logging
 from pathlib import Path
-from netra_backend.app.core.project_utils import get_project_root as _get_project_root
+from app.core.project_utils import get_project_root as _get_project_root
 
 from shared.isolated_environment import get_env
 

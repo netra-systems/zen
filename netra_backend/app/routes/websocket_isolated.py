@@ -39,7 +39,7 @@ from netra_backend.app.logging_config import central_logger
 from netra_backend.app.services.monitoring.gcp_error_reporter import gcp_reportable, set_request_context, clear_request_context
 
 # Import isolated WebSocket components
-from netra_backend.app.websocket.manager import connection_scoped_manager, ConnectionScopedWebSocketManager
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager as ConnectionScopedWebSocketManager
 from netra_backend.app.websocket.connection_handler import connection_scope
 
 # Import authentication and security

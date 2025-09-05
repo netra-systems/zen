@@ -812,8 +812,8 @@ def register_websocket_handlers(app: FastAPI) -> None:
 
 def _create_tool_registry(app: FastAPI):
     """Create tool registry instance."""
-    from netra_backend.app.services.tool_registry import ToolRegistry
-    return ToolRegistry(app.state.db_session_factory)
+    from netra_backend.app.core.registry.universal_registry import ToolRegistry
+    return ToolRegistry()
 
 
 def _create_tool_dispatcher(tool_registry):
