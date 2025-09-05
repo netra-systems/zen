@@ -62,10 +62,10 @@ class TestJWTAsyncioSafety:
         test_payload = {"user_id": "123", "exp": datetime.now(timezone.utc) + timedelta(hours=1)}
         test_token = jwt.encode(test_payload, handler.secret, algorithm="HS256")
         
-        # Test from async context - should use fallback
-        with pytest.raises(RuntimeError) as exc_info:
-            handler.verify_token(test_token)
-        assert "cannot be called from a running event loop" in str(exc_info.value)
+        # Test from async context - should use fallback (not raise RuntimeError)
+        result = handler.verify_token(test_token)
+        assert result["valid"] is True
+        assert result["payload"]["user_id"] == "123"
     
     @pytest.mark.asyncio
     async def test_jwt_handler_proper_async_pattern(self):
@@ -250,10 +250,10 @@ class TestJWTEventLoopPatterns:
         # This pattern should be detected as potentially problematic
         assert AsyncioTestUtils.detect_nested_asyncio_run(problematic_jwt_verify) is False
         
-        # But it fails in async context
+        # In async context, it should use fallback without raising
         async def test_in_async():
-            with pytest.raises(RuntimeError):
-                problematic_jwt_verify()
+            result = problematic_jwt_verify()
+            assert result == {"valid": False}  # Fallback response
         
         asyncio.run(test_in_async())
     

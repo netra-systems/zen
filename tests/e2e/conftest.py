@@ -16,6 +16,7 @@ from test_framework.helpers.auth_helpers import AuthTestHelpers
 import pytest
 import asyncio
 import sys
+import time
 from shared.isolated_environment import get_env
 from typing import Any, Dict
 # ENFORCED: NO MOCKS in E2E tests - use real services only
@@ -112,6 +113,90 @@ class E2EEnvironmentValidator:
     def validate():
         """Validate E2E environment is ready."""
         return True
+
+# CRITICAL: E2E Docker Environment Fixtures
+@pytest.fixture(scope="session")
+async def e2e_docker_environment():
+    """
+    Pytest fixture that provides E2E Docker environment.
+    
+    CRITICAL: This is the ONLY way to run E2E tests with Docker.
+    - Uses docker-compose.alpine-test.yml 
+    - NO fallbacks
+    - Predictable test isolation
+    """
+    from test_framework.e2e_docker_helper import E2EDockerHelper
+    
+    test_id = f"pytest-session-{int(time.time())}"
+    helper = E2EDockerHelper(test_id=test_id)
+    
+    try:
+        # Setup E2E environment
+        service_urls = await helper.setup_e2e_environment(timeout=180)
+        
+        yield helper, service_urls
+        
+    finally:
+        # Always cleanup
+        await helper.teardown_e2e_environment()
+
+@pytest.fixture(scope="function")
+async def e2e_services(e2e_docker_environment):
+    """
+    Function-scoped fixture that provides service URLs for individual tests.
+    
+    Returns:
+        Dict of service URLs for the current test
+    """
+    helper, service_urls = e2e_docker_environment
+    
+    # Return service URLs for this test
+    yield service_urls
+    
+    # Function-level cleanup (if needed)
+    # Note: Session-level cleanup handles Docker teardown
+
+@pytest.fixture
+def e2e_backend_url(e2e_services):
+    """Get E2E backend URL."""
+    return e2e_services['backend']
+
+@pytest.fixture  
+def e2e_auth_url(e2e_services):
+    """Get E2E auth URL."""
+    return e2e_services['auth']
+
+@pytest.fixture
+def e2e_websocket_url(e2e_services):
+    """Get E2E WebSocket URL.""" 
+    return e2e_services['websocket']
+
+@pytest.fixture
+async def e2e_http_client(e2e_services):
+    """Get HTTP client configured for E2E services."""
+    import httpx
+    
+    async with httpx.AsyncClient(
+        base_url=e2e_services['backend'],
+        timeout=30.0,
+        follow_redirects=True
+    ) as client:
+        yield client
+
+@pytest.fixture
+async def e2e_websocket_client(e2e_services):
+    """Get WebSocket client configured for E2E services."""
+    import websockets
+    
+    websocket_url = e2e_services['websocket']
+    
+    async with websockets.connect(
+        websocket_url,
+        ping_interval=20,
+        ping_timeout=10,
+        close_timeout=10
+    ) as websocket:
+        yield websocket
 
 # Basic test setup fixtures
 @pytest.fixture

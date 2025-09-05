@@ -43,7 +43,8 @@ COPY --from=builder /usr/local/bin /usr/local/bin
 # Copy application code
 COPY --chown=netra:netra netra_backend/ ./netra_backend/
 COPY --chown=netra:netra shared/ ./shared/
-COPY --chown=netra:netra test_framework/ ./test_framework/
+# test_framework is excluded in .dockerignore for production builds
+# It's not needed in production containers - only for testing
 COPY --chown=netra:netra scripts/ ./scripts/
 COPY --chown=netra:netra SPEC/ ./SPEC/
 # Copy Python files if they exist

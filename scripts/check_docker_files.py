@@ -34,13 +34,14 @@ class DockerFileChecker:
         """Check that expected Docker files exist"""
         expected_files = {
             "docker/backend.Dockerfile": "Production backend",
-            "docker/backend.development.Dockerfile": "Development backend",
+            "docker/backend.alpine.Dockerfile": "Test backend (Alpine)",
+            "docker/backend.staging.Dockerfile": "Staging backend",
             "docker/auth.Dockerfile": "Production auth",
-            "docker/auth.development.Dockerfile": "Development auth",
-            "docker/auth.test.Dockerfile": "Test auth",
+            "docker/auth.alpine.Dockerfile": "Test auth (Alpine)",
+            "docker/auth.staging.Dockerfile": "Staging auth",
             "docker/frontend.Dockerfile": "Production frontend",
-            "docker/frontend.development.Dockerfile": "Development frontend",
-            "docker/frontend.test.Dockerfile": "Test frontend",
+            "docker/frontend.alpine.Dockerfile": "Test frontend (Alpine)",
+            "docker/frontend.staging.Dockerfile": "Staging frontend",
             "deployment/docker/backend.gcp.Dockerfile": "GCP backend",
             "deployment/docker/auth.gcp.Dockerfile": "GCP auth",
             "deployment/docker/frontend.gcp.Dockerfile": "GCP frontend"
@@ -55,9 +56,8 @@ class DockerFileChecker:
         """Check that docker-compose files reference existing Docker files"""
         compose_files = [
             "docker-compose.yml",
-            "docker-compose.dev.yml", 
-            "docker-compose.test.yml",
-            "docker-compose.all.yml"
+            "docker-compose.alpine-test.yml", 
+            "docker-compose.staging.yml"
         ]
         
         for compose_file in compose_files:

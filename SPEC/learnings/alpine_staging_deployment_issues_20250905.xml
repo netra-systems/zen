@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learning_document>
+    <metadata>
+        <title>Alpine Staging Deployment Issues and Resolution</title>
+        <date>2025-09-05</date>
+        <severity>CRITICAL</severity>
+        <tags>
+            <tag>deployment</tag>
+            <tag>alpine</tag>
+            <tag>cloud-run</tag>
+            <tag>docker</tag>
+            <tag>migrations</tag>
+        </tags>
+    </metadata>
+
+    <problem_statement>
+        Alpine-optimized Docker containers for staging failed to deploy to Cloud Run due to multiple issues:
+        1. wait_for_db.py script attempting to import requests module (not needed in Cloud Run)
+        2. pip install with --no-deps flag causing missing transitive dependencies (typing_extensions, urllib3)
+        3. Alembic migrations running at container startup (inappropriate for Cloud Run)
+        4. Missing alembic/env.py file in wrong directory structure
+    </problem_statement>
+
+    <root_causes>
+        <cause id="1">
+            <description>Misunderstanding of Cloud Run deployment model</description>
+            <details>
+                Cloud Run containers should NOT:
+                - Wait for databases (Cloud SQL is externally managed)
+                - Run migrations at startup (should be separate job)
+                - Include unnecessary scripts or dependencies
+            </details>
+        </cause>
+        <cause id="2">
+            <description>Incorrect pip install optimization</description>
+            <details>
+                Using --no-deps flag breaks transitive dependencies.
+                Alpine's minimal base requires ALL dependencies to be explicitly installed.
+            </details>
+        </cause>
+        <cause id="3">
+            <description>Wrong Alembic directory structure</description>
+            <details>
+                Alembic files are in netra_backend/app/alembic/ not root alembic/
+                Copying wrong directory leads to missing env.py
+            </details>
+        </cause>
+    </root_causes>
+
+    <fixes_applied>
+        <fix id="1">
+            <action>Removed wait_for_db.py script and references</action>
+            <file>docker/backend.staging.alpine.Dockerfile</file>
+        </fix>
+        <fix id="2">
+            <action>Removed --no-deps flag from pip install</action>
+            <file>docker/backend.staging.alpine.Dockerfile</file>
+        </fix>
+        <fix id="3">
+            <action>Removed Alembic migration from startup CMD</action>
+            <file>docker/backend.staging.alpine.Dockerfile</file>
+        </fix>
+        <fix id="4">
+            <action>Removed unnecessary Alembic file copies</action>
+            <file>docker/backend.staging.alpine.Dockerfile</file>
+        </fix>
+    </fixes_applied>
+
+    <lessons_learned>
+        <lesson id="1">
+            <title>Cloud Run containers must be stateless and fast-starting</title>
+            <description>
+                No database waits, no migrations, just application startup.
+                Migrations should be run as separate Cloud Run Jobs or Cloud Build steps.
+            </description>
+        </lesson>
+        <lesson id="2">
+            <title>Alpine requires complete dependency chains</title>
+            <description>
+                Never use --no-deps with Alpine. The minimal base means no system packages
+                provide fallback dependencies. Every Python package needs its full dependency tree.
+            </description>
+        </lesson>
+        <lesson id="3">
+            <title>Follow existing working patterns</title>
+            <description>
+                The non-Alpine GCP Dockerfile (deployment/docker/backend.gcp.Dockerfile) 
+                correctly doesn't run migrations. Always check working examples first.
+            </description>
+        </lesson>
+    </lessons_learned>
+
+    <best_practices>
+        <practice id="1">
+            <title>Separate concerns for Cloud Run</title>
+            <steps>
+                1. Application containers: Only run the application
+                2. Migration containers: Dedicated container/job for database migrations
+                3. Init containers: For one-time setup tasks
+            </steps>
+        </practice>
+        <practice id="2">
+            <title>Alpine optimization checklist</title>
+            <steps>
+                1. Install all build dependencies in builder stage
+                2. Use full pip install (no --no-deps)
+                3. Test locally with exact Alpine version
+                4. Minimize final image (remove build artifacts, docs, tests)
+            </steps>
+        </practice>
+    </best_practices>
+
+    <action_items>
+        <item priority="HIGH">Create dedicated migration container and deployment script</item>
+        <item priority="MEDIUM">Document Cloud Run deployment architecture</item>
+        <item priority="LOW">Consider using distroless images instead of Alpine for even smaller size</item>
+    </action_items>
+</learning_document>

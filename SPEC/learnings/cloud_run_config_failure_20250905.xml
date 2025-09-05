@@ -1,0 +1,230 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learning_document>
+    <metadata>
+        <title>Cloud Run Configuration Failure - Missing Environment Variables</title>
+        <date>2025-09-05</date>
+        <severity>P0_CRITICAL</severity>
+        <incident_type>DEPLOYMENT_CONFIGURATION_FAILURE</incident_type>
+        <tags>
+            <tag>cloud-run</tag>
+            <tag>configuration</tag>
+            <tag>environment-variables</tag>
+            <tag>staging</tag>
+            <tag>deployment</tag>
+        </tags>
+    </metadata>
+
+    <incident_summary>
+        <description>
+            Complete staging environment failure due to Cloud Run service deployed without ANY environment variables.
+            19 critical configuration values missing, causing immediate crash loops and probe failures.
+        </description>
+        <impact>
+            <item>100% staging environment downtime</item>
+            <item>No database connectivity possible</item>
+            <item>Authentication system non-functional</item>
+            <item>All API endpoints returning 503</item>
+            <item>Container crash loops with probe failures</item>
+        </impact>
+        <root_cause>
+            Deployment automation gap - Cloud Run service configuration not validated or properly set during deployment.
+            The deployment process pushed container but failed to configure environment variables.
+        </root_cause>
+    </incident_summary>
+
+    <five_whys_analysis>
+        <why number="1">
+            <question>Why is the service failing to start?</question>
+            <answer>Application cannot initialize - required environment variables are missing</answer>
+            <evidence>Config dependency: CRITICAL: Missing required config DATABASE_URL, JWT_SECRET_KEY, POSTGRES_HOST</evidence>
+        </why>
+        <why number="2">
+            <question>Why are the environment variables missing?</question>
+            <answer>Cloud Run service was deployed WITHOUT environment variable configuration</answer>
+            <evidence>Service configuration shows NO environment variables set despite requirement for 19+ configs</evidence>
+        </why>
+        <why number="3">
+            <question>Why were environment variables not configured during deployment?</question>
+            <answer>Deployment process either used incorrect config source, failed to apply configs, or had silent failure</answer>
+            <evidence>Deploy script exists but didn't verify env vars were applied to Cloud Run</evidence>
+        </why>
+        <why number="4">
+            <question>Why didn't the deployment process catch missing configs?</question>
+            <answer>No pre-deployment or post-deployment validation of Cloud Run service configuration</answer>
+            <evidence>No health check validation, no config verification, no rollback on failures</evidence>
+        </why>
+        <why number="5">
+            <question>Why is there no configuration validation in deployment?</question>
+            <answer>Deployment automation gap - assumed configs would persist or be set correctly</answer>
+            <evidence>Missing validation layer between deployment script and Cloud Run API</evidence>
+        </why>
+    </five_whys_analysis>
+
+    <missing_configurations>
+        <tier priority="1" description="Blocks application startup">
+            <config name="DATABASE_URL" type="connection_string" critical="true"/>
+            <config name="POSTGRES_HOST" type="cloudsql_socket" critical="true"/>
+            <config name="POSTGRES_PORT" type="port" critical="true"/>
+            <config name="POSTGRES_DB" type="database_name" critical="true"/>
+            <config name="POSTGRES_USER" type="username" critical="true"/>
+            <config name="POSTGRES_PASSWORD" type="password" critical="true"/>
+            <config name="JWT_SECRET_KEY" type="secret" critical="true"/>
+            <config name="SECRET_KEY" type="secret" critical="true"/>
+            <config name="ENV" type="environment" critical="true"/>
+        </tier>
+        <tier priority="2" description="Blocks core features">
+            <config name="REDIS_HOST" type="ip_address" critical="true"/>
+            <config name="REDIS_PORT" type="port" critical="true"/>
+            <config name="GOOGLE_CLIENT_ID" type="oauth" critical="false"/>
+            <config name="GOOGLE_CLIENT_SECRET" type="oauth_secret" critical="false"/>
+            <config name="FRONTEND_URL" type="url" critical="true"/>
+            <config name="API_BASE_URL" type="url" critical="true"/>
+            <config name="BACKEND_URL" type="url" critical="true"/>
+        </tier>
+        <tier priority="3" description="Optional with defaults">
+            <config name="JWT_ALGORITHM" type="algorithm" default="HS256"/>
+            <config name="JWT_EXPIRATION_MINUTES" type="integer" default="1440"/>
+            <config name="LOG_LEVEL" type="string" default="INFO"/>
+        </tier>
+    </missing_configurations>
+
+    <immediate_fix>
+        <step order="1">
+            <action>Set all missing environment variables in Cloud Run</action>
+            <command><![CDATA[
+gcloud run services update netra-backend \
+  --set-env-vars="ENV=staging,DATABASE_URL=postgresql://...,JWT_SECRET_KEY=..." \
+  --region=us-central1 \
+  --project=netra-staging
+            ]]></command>
+        </step>
+        <step order="2">
+            <action>Verify configuration is applied</action>
+            <command><![CDATA[
+gcloud run services describe netra-backend \
+  --region=us-central1 \
+  --project=netra-staging \
+  --format="value(spec.template.spec.containers[0].env[].name)"
+            ]]></command>
+        </step>
+        <step order="3">
+            <action>Monitor service health</action>
+            <command><![CDATA[
+gcloud run services describe netra-backend \
+  --region=us-central1 \
+  --project=netra-staging \
+  --format="value(status.conditions[0])"
+            ]]></command>
+        </step>
+    </immediate_fix>
+
+    <prevention_measures>
+        <measure priority="HIGH">
+            <title>Add configuration validation to deployment script</title>
+            <implementation>
+                Modify scripts/deploy_to_gcp.py to validate all required env vars are set
+                before considering deployment successful. Fail deployment if configs missing.
+            </implementation>
+        </measure>
+        <measure priority="HIGH">
+            <title>Create staging configuration template</title>
+            <implementation>
+                Create deployment/staging/.env.template with all required variables.
+                Use this as source of truth for staging deployments.
+            </implementation>
+        </measure>
+        <measure priority="MEDIUM">
+            <title>Implement configuration drift detection</title>
+            <implementation>
+                Add monitoring to detect when Cloud Run configs diverge from expected state.
+                Alert on missing or modified environment variables.
+            </implementation>
+        </measure>
+        <measure priority="MEDIUM">
+            <title>Use Secret Manager for sensitive configs</title>
+            <implementation>
+                Migrate secrets (JWT_SECRET_KEY, passwords) to Google Secret Manager.
+                Reference secrets in Cloud Run instead of inline values.
+            </implementation>
+        </measure>
+    </prevention_measures>
+
+    <lessons_learned>
+        <lesson id="1">
+            <title>Configuration is critical infrastructure</title>
+            <description>
+                Environment variables are as important as code. They must be versioned,
+                validated, and tested with same rigor as application code.
+            </description>
+            <action>Treat configuration as code with proper CI/CD validation</action>
+        </lesson>
+        <lesson id="2">
+            <title>Cloud Run configs don't persist automatically</title>
+            <description>
+                Cloud Run service configurations can be cleared or overwritten.
+                Never assume configs from previous deployments remain.
+            </description>
+            <action>Always explicitly set all configs on every deployment</action>
+        </lesson>
+        <lesson id="3">
+            <title>Silent configuration failures are catastrophic</title>
+            <description>
+                Deployment appearing successful while configs are missing causes
+                production outages. Better to fail deployment than runtime.
+            </description>
+            <action>Add explicit configuration validation gates</action>
+        </lesson>
+        <lesson id="4">
+            <title>Staging must mirror production configuration patterns</title>
+            <description>
+                Staging environment needs same configuration rigor as production.
+                Testing with different config patterns masks deployment issues.
+            </description>
+            <action>Use identical configuration management for all environments</action>
+        </lesson>
+    </lessons_learned>
+
+    <architecture_implications>
+        <implication>
+            <component>Deployment Pipeline</component>
+            <change>Must add configuration validation stage before marking deployment successful</change>
+        </implication>
+        <implication>
+            <component>Configuration Management</component>
+            <change>Need centralized config store (Secret Manager) instead of inline env vars</change>
+        </implication>
+        <implication>
+            <component>Health Checks</component>
+            <change>Add config validation to health check endpoints</change>
+        </implication>
+        <implication>
+            <component>Monitoring</component>
+            <change>Add configuration drift detection and alerting</change>
+        </implication>
+    </architecture_implications>
+
+    <related_files>
+        <file>scripts/deploy_to_gcp.py</file>
+        <file>netra_backend/config/staging.py</file>
+        <file>netra_backend/config/base.py</file>
+        <file>deployment/staging/.env.template (to be created)</file>
+    </related_files>
+
+    <action_items>
+        <immediate>
+            <item>Set all 19 missing environment variables in Cloud Run NOW</item>
+            <item>Verify service becomes healthy</item>
+            <item>Document actual staging configuration values</item>
+        </immediate>
+        <short_term>
+            <item>Update deploy_to_gcp.py with config validation</item>
+            <item>Create staging env template file</item>
+            <item>Add config check to deployment runbook</item>
+        </short_term>
+        <long_term>
+            <item>Migrate to Secret Manager for sensitive configs</item>
+            <item>Implement configuration as code with Terraform</item>
+            <item>Add automated config drift detection</item>
+        </long_term>
+    </action_items>
+</learning_document>

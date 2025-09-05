@@ -68,7 +68,9 @@ class EnvironmentChecker:
     
     def _get_optional_auth_vars(self) -> List[str]:
         """Get optional authentication environment variables"""
-        return ["GOOGLE_CLIENT_ID", "GOOGLE_CLIENT_SECRET"]
+        # OAuth credentials are handled by the auth service, not backend
+        # Backend only needs JWT tokens and service secrets for auth
+        return []
     
     def _check_missing_vars(self, vars_list: List[str]) -> List[str]:
         """Check for missing variables"""

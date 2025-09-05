@@ -42,12 +42,11 @@ class SecretConfig:
                 "JWT_SECRET_KEY",
                 "SECRET_KEY",  # CRITICAL: Backend requires SECRET_KEY
                 "SERVICE_SECRET",
+                "SERVICE_ID",  # CRITICAL: Required for inter-service auth with auth service
                 "FERNET_KEY"
             ],
-            "oauth": [
-                "GOOGLE_CLIENT_ID",  # Backend uses simplified names
-                "GOOGLE_CLIENT_SECRET"
-            ],
+            # OAuth removed - backend doesn't handle OAuth, only the auth service does
+            # Backend communicates with auth service for authentication needs
             "redis": [
                 "REDIS_HOST",
                 "REDIS_PORT",
@@ -114,10 +113,6 @@ class SecretConfig:
         "SERVICE_ID": "service-id-staging",
         "FERNET_KEY": "fernet-key-staging",
         
-        # OAuth - Backend uses simplified names
-        "GOOGLE_CLIENT_ID": "google-oauth-client-id-staging",
-        "GOOGLE_CLIENT_SECRET": "google-oauth-client-secret-staging",
-        
         # OAuth - Auth service uses environment-specific names
         "GOOGLE_OAUTH_CLIENT_ID_STAGING": "google-oauth-client-id-staging",
         "GOOGLE_OAUTH_CLIENT_SECRET_STAGING": "google-oauth-client-secret-staging",
@@ -144,6 +139,8 @@ class SecretConfig:
         "backend": [
             "SECRET_KEY",  # CRITICAL: Required for encryption
             "JWT_SECRET_KEY",  # CRITICAL: Required for JWT tokens
+            "SERVICE_SECRET",  # CRITICAL: Required for inter-service auth
+            "SERVICE_ID",  # CRITICAL: Required for inter-service auth
             "POSTGRES_PASSWORD",  # CRITICAL: Required for database
         ],
         "auth": [

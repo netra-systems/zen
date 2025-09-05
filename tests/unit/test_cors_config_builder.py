@@ -31,6 +31,12 @@ class TestCORSConfigurationBuilder:
     
     def test_environment_detection(self):
         """Test environment detection from various env vars."""
+        # List of all environment variable names that could interfere with detection
+        env_var_names = [
+            "ENVIRONMENT", "ENV", "NETRA_ENVIRONMENT", "NETRA_ENV", 
+            "NODE_ENV", "AUTH_ENV", "K_SERVICE", "GCP_PROJECT_ID"
+        ]
+        
         test_cases = [
             ({"ENVIRONMENT": "production"}, "production"),
             ({"ENV": "staging"}, "staging"),
@@ -41,8 +47,13 @@ class TestCORSConfigurationBuilder:
         ]
         
         for env_vars, expected in test_cases:
-            cors = CORSConfigurationBuilder(env_vars)
-            assert cors.environment == expected
+            # Create isolated environment by clearing all environment detection variables
+            # then setting only the specific one we want to test
+            isolated_env_vars = {var_name: None for var_name in env_var_names}
+            isolated_env_vars.update(env_vars)
+            
+            cors = CORSConfigurationBuilder(isolated_env_vars)
+            assert cors.environment == expected, f"Failed for env_vars={env_vars}, expected={expected}, got={cors.environment}"
     
     def test_sub_builders_exist(self):
         """Test that all sub-builders are initialized."""

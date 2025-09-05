@@ -192,10 +192,49 @@ async def websocket_endpoint(websocket: WebSocket):
         logger.info(f"WebSocket dependency check - Environment: {environment}, Testing: {is_testing}")
         logger.info(f"WebSocket dependency check - Supervisor: {supervisor is not None}, ThreadService: {thread_service is not None}")
         
-        # Check if startup is still in progress
+        # CRITICAL FIX: Wait for startup to complete before proceeding in staging/production
+        # This prevents race condition where WebSocket connections are attempted before services are ready
         startup_complete = getattr(websocket.app.state, 'startup_complete', False)
+        startup_in_progress = getattr(websocket.app.state, 'startup_in_progress', False)
+        
         if not startup_complete and environment in ["staging", "production"]:
-            logger.warning(f"WebSocket accessed before startup complete in {environment} - startup_complete={startup_complete}")
+            logger.warning(f"WebSocket accessed before startup complete in {environment} - waiting for startup")
+            
+            # Wait for startup to complete (max 10 seconds)
+            max_wait = 10.0
+            wait_interval = 0.1
+            waited = 0.0
+            
+            while waited < max_wait:
+                if getattr(websocket.app.state, 'startup_complete', False):
+                    logger.info(f"Startup completed after {waited:.1f}s wait")
+                    break
+                
+                if getattr(websocket.app.state, 'startup_failed', False):
+                    error_msg = getattr(websocket.app.state, 'startup_error', 'Startup failed')
+                    logger.error(f"Startup failed: {error_msg}")
+                    error_response = create_error_message(
+                        "STARTUP_FAILED",
+                        "Service initialization failed. Please try again later.",
+                        {"reason": error_msg}
+                    )
+                    await safe_websocket_send(websocket, error_response.model_dump())
+                    await safe_websocket_close(websocket, code=1011, reason="Startup failed")
+                    return
+                
+                await asyncio.sleep(wait_interval)
+                waited += wait_interval
+            
+            if waited >= max_wait:
+                logger.error(f"Startup did not complete within {max_wait}s")
+                error_response = create_error_message(
+                    "STARTUP_TIMEOUT",
+                    "Service initialization timeout. Please try again later.",
+                    {"waited": waited}
+                )
+                await safe_websocket_send(websocket, error_response.model_dump())
+                await safe_websocket_close(websocket, code=1011, reason="Startup timeout")
+                return
         
         # CRITICAL FIX: If thread_service is missing but supervisor exists, create it
         if supervisor is not None and thread_service is None:
@@ -297,8 +336,14 @@ async def websocket_endpoint(websocket: WebSocket):
                 connection_start_time = time.time()
                 logger.info(f"WebSocket authenticated for user: {user_id} at {datetime.now(timezone.utc).isoformat()}")
                 
-                # Register connection with manager
+                # CRITICAL FIX: Register connection with manager and ensure it's ready
+                # This prevents the race condition in staging where messages are sent before connection is registered
                 connection_id = await ws_manager.connect_user(user_id, websocket)
+                
+                # Small delay to ensure connection is fully propagated
+                # This is especially important in Cloud Run where there may be additional latency
+                if environment in ["staging", "production"]:
+                    await asyncio.sleep(0.05)  # 50ms delay for Cloud Run environments
                 
                 # Register with security manager
                 security_manager.register_connection(connection_id, auth_info, websocket)
@@ -313,7 +358,8 @@ async def websocket_endpoint(websocket: WebSocket):
                 )
                 await heartbeat.start(websocket)
                 
-                # Send welcome message
+                # Send welcome message with connection confirmation
+                # CRITICAL FIX: This serves as connection confirmation that the client can wait for
                 welcome_msg = create_server_message(
                     MessageType.SYSTEM_MESSAGE,
                     {
@@ -321,6 +367,9 @@ async def websocket_endpoint(websocket: WebSocket):
                         "connection_id": connection_id,
                         "user_id": user_id,
                         "server_time": datetime.now(timezone.utc).isoformat(),
+                        "connection_ready": True,  # CRITICAL: Indicates connection is ready for messages
+                        "environment": environment,
+                        "startup_complete": getattr(websocket.app.state, 'startup_complete', False),
                         "config": {
                             "heartbeat_interval": WEBSOCKET_CONFIG.heartbeat_interval_seconds,
                             "max_message_size": WEBSOCKET_CONFIG.max_message_size_bytes
@@ -329,7 +378,13 @@ async def websocket_endpoint(websocket: WebSocket):
                 )
                 await safe_websocket_send(websocket, welcome_msg.model_dump())
                 
-                logger.debug(f"WebSocket ready: {connection_id}")
+                # CRITICAL FIX: Log successful connection establishment for debugging
+                logger.info(f"WebSocket connection fully established for user {user_id} in {environment}")
+                
+                logger.debug(f"WebSocket ready: {connection_id} - Processing any queued messages...")
+                
+                # The UnifiedWebSocketManager will automatically process queued messages
+                # when the connection is added, but we log it here for visibility
                 
                 # Main message handling loop
                 logger.debug(f"Starting message handling loop for connection: {connection_id}")
