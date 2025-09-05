@@ -20,6 +20,7 @@ import asyncio
 import pytest
 from pathlib import Path
 from typing import List, Dict, Set, Any
+from shared.isolated_environment import IsolatedEnvironment
 
 # Add analytics_service to path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
