@@ -35,7 +35,7 @@ class GitHubCIAutoFixer:
     
     def trigger_workflow(self) -> Optional[str]:
         """Trigger the workflow and return run ID."""
-        print(f"\n🚀 Triggering workflow on branch {self.branch}...")
+        print(f"\n[TRIGGER] Triggering workflow on branch {self.branch}...")
         self.run_gh_command(["workflow", "run", str(self.workflow_id), 
                            "--repo", self.repo, "--ref", self.branch])
         time.sleep(5)  # Wait for workflow to be created
@@ -51,7 +51,7 @@ class GitHubCIAutoFixer:
     
     def wait_for_completion(self, run_id: str) -> Dict:
         """Wait for workflow to complete and return status."""
-        print(f"⏳ Waiting for run {run_id} to complete...")
+        print(f"[WAIT] Waiting for run {run_id} to complete...")
         
         while True:
             output = self.run_gh_command(["run", "view", run_id, "--repo", self.repo,
@@ -70,7 +70,7 @@ class GitHubCIAutoFixer:
     
     def fetch_failure_logs(self, run_id: str) -> List[Dict[str, str]]:
         """Fetch logs from failed jobs."""
-        print(f"\n📋 Fetching logs for failed jobs in run {run_id}...")
+        print(f"\n[LOGS] Fetching logs for failed jobs in run {run_id}...")
         
         # Get failed jobs
         output = self.run_gh_command(["run", "view", run_id, "--repo", self.repo,
@@ -141,7 +141,7 @@ class GitHubCIAutoFixer:
     
     def apply_fix(self, error: Dict[str, str]) -> bool:
         """Apply a fix based on the error type."""
-        print(f"\n🔧 Attempting to fix {error['type']}: {error['message']}")
+        print(f"\n[FIX] Attempting to fix {error['type']}: {error['message']}")
         
         error_type = error['type']
         details = error['details']
@@ -367,7 +367,7 @@ class GitHubCIAutoFixer:
     
     def commit_fixes(self, errors_fixed: List[Dict]):
         """Commit the fixes."""
-        print("\n📝 Committing fixes...")
+        print("\n[COMMIT] Committing fixes...")
         
         # Stage all changes
         self.run_command(["git", "add", "-A"])
@@ -403,39 +403,39 @@ class GitHubCIAutoFixer:
             # Trigger workflow
             run_id = self.trigger_workflow()
             if not run_id:
-                print("❌ Failed to trigger workflow")
+                print("[ERROR] Failed to trigger workflow")
                 time.sleep(60)
                 continue
             
-            print(f"✅ Workflow triggered: Run ID {run_id}")
+            print(f"[SUCCESS] Workflow triggered: Run ID {run_id}")
             
             # Wait for completion
             result = self.wait_for_completion(run_id)
             conclusion = result.get("conclusion", "")
             
             if conclusion == "success":
-                print(f"\n🎉 SUCCESS! All tests passed on attempt #{self.fix_attempt}")
+                print(f"\n[SUCCESS] All tests passed on attempt #{self.fix_attempt}")
                 print(f"   URL: {result.get('url', '')}")
                 
                 # Print summary of all fixes applied
                 if self.applied_fixes:
-                    print("\n📊 Summary of fixes applied:")
+                    print("\n[SUMMARY] Fixes applied:")
                     for fix in self.applied_fixes:
                         print(f"  - {fix}")
                 
                 return True
             
             elif conclusion == "failure":
-                print(f"\n❌ Tests failed. Analyzing errors...")
+                print(f"\n[FAILED] Tests failed. Analyzing errors...")
                 
                 # Fetch and parse error logs
                 errors = self.fetch_failure_logs(run_id)
                 
                 if not errors:
-                    print("⚠️ No specific errors found in logs")
+                    print("[WARNING] No specific errors found in logs")
                     break
                 
-                print(f"\n📋 Found {len(errors)} errors to fix")
+                print(f"\n[INFO] Found {len(errors)} errors to fix")
                 
                 # Apply fixes
                 fixed_errors = []
@@ -445,23 +445,23 @@ class GitHubCIAutoFixer:
                         self.applied_fixes.append(f"{error['type']}: {error['details'][:50]}")
                 
                 if fixed_errors:
-                    print(f"\n✅ Applied {len(fixed_errors)} fixes")
+                    print(f"\n[SUCCESS] Applied {len(fixed_errors)} fixes")
                     
                     # Commit and push fixes
                     self.commit_fixes(fixed_errors)
                     
-                    print("\n⏳ Waiting 30 seconds before next attempt...")
+                    print("\n[WAIT] Waiting 30 seconds before next attempt...")
                     time.sleep(30)
                 else:
-                    print("\n⚠️ Unable to apply any automatic fixes")
+                    print("\n[WARNING] Unable to apply any automatic fixes")
                     print("Manual intervention may be required")
                     break
             
             else:
-                print(f"\n⚠️ Unexpected conclusion: {conclusion}")
+                print(f"\n[WARNING] Unexpected conclusion: {conclusion}")
                 break
         
-        print(f"\n❌ Failed to fix all issues after {self.fix_attempt} attempts")
+        print(f"\n[ERROR] Failed to fix all issues after {self.fix_attempt} attempts")
         return False
 
 def main():
