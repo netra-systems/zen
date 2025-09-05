@@ -176,10 +176,10 @@ class SupplyDatabaseManager:
                         research_session_id
                     )
         
-        # Update timestamps
+        # Update timestamps and research source
         existing_item.last_updated = datetime.now(UTC)
         if research_session_id:
-            existing_item.last_research_session_id = research_session_id
+            existing_item.research_source = research_session_id
         
         return {
             "action": "updated",
@@ -209,17 +209,18 @@ class SupplyDatabaseManager:
             id=str(uuid.uuid4()),
             provider=item_data.get("provider", "unknown"),
             model_name=item_data.get("model_name", "unknown"),
-            model_family=item_data.get("model_family"),
+            model_version=item_data.get("model_version"),
             pricing_input=item_data.get("pricing_input"),
             pricing_output=item_data.get("pricing_output"),
+            pricing_currency=item_data.get("pricing_currency", "USD"),
             context_window=item_data.get("context_window"),
             max_output_tokens=item_data.get("max_output_tokens"),
             capabilities=item_data.get("capabilities", {}),
-            availability_status=item_data.get("availability_status", "unknown"),
+            availability_status=item_data.get("availability_status", "available"),
             api_endpoints=item_data.get("api_endpoints", {}),
             performance_metrics=item_data.get("performance_metrics", {}),
             confidence_score=item_data.get("confidence_score", 0.5),
-            last_research_session_id=research_session_id,
+            research_source=research_session_id,  # Store session ID as research source
             last_updated=datetime.now(UTC),
             created_at=datetime.now(UTC)
         )
