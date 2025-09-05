@@ -23,6 +23,14 @@ interface UnifiedApiConfig {
     threads: string;
     websocket: string;
     
+    // v1 Agent API endpoints (deprecated)
+    agentV1Optimization: string;
+    agentV1Data: string;
+    agentV1Triage: string;
+    
+    // v2 Agent API endpoints (new request-scoped)
+    agentV2Execute: string;
+    
     // Auth service endpoints
     authConfig: string;
     authLogin: string;
@@ -39,6 +47,9 @@ interface UnifiedApiConfig {
     useWebSocketSecure: boolean;
     corsEnabled: boolean;
     dynamicDiscovery: boolean;
+    // v2 Migration Feature Flags
+    enableV2AgentApi: boolean;
+    v2MigrationMode: 'disabled' | 'testing' | 'gradual' | 'full';
   };
 }
 
@@ -139,6 +150,14 @@ function getEnvironmentConfig(env: Environment): UnifiedApiConfig {
           threads: 'https://api.netrasystems.ai/api/threads',
           websocket: 'wss://api.netrasystems.ai/ws',
           
+          // v1 Agent API endpoints (deprecated)
+          agentV1Optimization: 'https://api.netrasystems.ai/api/agents/optimization',
+          agentV1Data: 'https://api.netrasystems.ai/api/agents/data',
+          agentV1Triage: 'https://api.netrasystems.ai/api/agents/triage',
+          
+          // v2 Agent API endpoints (new request-scoped)
+          agentV2Execute: 'https://api.netrasystems.ai/api/agent/v2/execute',
+          
           // Auth service endpoints
           authConfig: 'https://auth.netrasystems.ai/auth/config',
           authLogin: 'https://auth.netrasystems.ai/auth/login',
@@ -155,6 +174,9 @@ function getEnvironmentConfig(env: Environment): UnifiedApiConfig {
           useWebSocketSecure: true,
           corsEnabled: true,
           dynamicDiscovery: false,
+          // v2 Migration Feature Flags - Conservative for production
+          enableV2AgentApi: process.env.NEXT_PUBLIC_ENABLE_V2_API === 'true',
+          v2MigrationMode: (process.env.NEXT_PUBLIC_V2_MIGRATION_MODE as any) || 'disabled',
         },
       };
       
@@ -180,6 +202,14 @@ function getEnvironmentConfig(env: Environment): UnifiedApiConfig {
           threads: `${stagingApiUrl}/api/threads`,
           websocket: `${stagingWsUrl}/ws`,
           
+          // v1 Agent API endpoints (deprecated)
+          agentV1Optimization: `${stagingApiUrl}/api/agents/optimization`,
+          agentV1Data: `${stagingApiUrl}/api/agents/data`,
+          agentV1Triage: `${stagingApiUrl}/api/agents/triage`,
+          
+          // v2 Agent API endpoints (new request-scoped)
+          agentV2Execute: `${stagingApiUrl}/api/agent/v2/execute`,
+          
           // Auth service endpoints
           authConfig: `${stagingAuthUrl}/auth/config`,
           authLogin: `${stagingAuthUrl}/auth/login`,
@@ -196,6 +226,9 @@ function getEnvironmentConfig(env: Environment): UnifiedApiConfig {
           useWebSocketSecure: true,
           corsEnabled: true,
           dynamicDiscovery: false,
+          // v2 Migration Feature Flags - More permissive for staging
+          enableV2AgentApi: process.env.NEXT_PUBLIC_ENABLE_V2_API !== 'false', // Default true for staging
+          v2MigrationMode: (process.env.NEXT_PUBLIC_V2_MIGRATION_MODE as any) || 'testing',
         },
       };
       
@@ -215,6 +248,14 @@ function getEnvironmentConfig(env: Environment): UnifiedApiConfig {
           threads: 'http://localhost:8000/api/threads',
           websocket: 'ws://localhost:8000/ws',
           
+          // v1 Agent API endpoints (deprecated)
+          agentV1Optimization: 'http://localhost:8000/api/agents/optimization',
+          agentV1Data: 'http://localhost:8000/api/agents/data',
+          agentV1Triage: 'http://localhost:8000/api/agents/triage',
+          
+          // v2 Agent API endpoints (new request-scoped)
+          agentV2Execute: 'http://localhost:8000/api/agent/v2/execute',
+          
           authConfig: `${process.env.NEXT_PUBLIC_AUTH_URL || 'http://localhost:8081'}/auth/config`,
           authLogin: `${process.env.NEXT_PUBLIC_AUTH_URL || 'http://localhost:8081'}/auth/login`,
           authLogout: `${process.env.NEXT_PUBLIC_AUTH_URL || 'http://localhost:8081'}/auth/logout`,
@@ -230,6 +271,9 @@ function getEnvironmentConfig(env: Environment): UnifiedApiConfig {
           useWebSocketSecure: false,
           corsEnabled: false,
           dynamicDiscovery: false,
+          // v2 Migration Feature Flags - Full migration for testing
+          enableV2AgentApi: true, // Always enabled for testing
+          v2MigrationMode: (process.env.NEXT_PUBLIC_V2_MIGRATION_MODE as any) || 'full',
         },
       };
       
@@ -255,6 +299,14 @@ function getEnvironmentConfig(env: Environment): UnifiedApiConfig {
           threads: `${apiUrl}/api/threads`,
           websocket: `${wsUrl}/ws`,
           
+          // v1 Agent API endpoints (deprecated)
+          agentV1Optimization: `${apiUrl}/api/agents/optimization`,
+          agentV1Data: `${apiUrl}/api/agents/data`,
+          agentV1Triage: `${apiUrl}/api/agents/triage`,
+          
+          // v2 Agent API endpoints (new request-scoped)
+          agentV2Execute: `${apiUrl}/api/agent/v2/execute`,
+          
           // Auth endpoints use direct URLs even in development
           authConfig: `${process.env.NEXT_PUBLIC_AUTH_URL || 'http://localhost:8081'}/auth/config`,
           authLogin: `${process.env.NEXT_PUBLIC_AUTH_URL || 'http://localhost:8081'}/auth/login`,
@@ -271,6 +323,9 @@ function getEnvironmentConfig(env: Environment): UnifiedApiConfig {
           useWebSocketSecure: false,
           corsEnabled: false,
           dynamicDiscovery: true,
+          // v2 Migration Feature Flags - Flexible for development
+          enableV2AgentApi: process.env.NEXT_PUBLIC_ENABLE_V2_API !== 'false', // Default true for development
+          v2MigrationMode: (process.env.NEXT_PUBLIC_V2_MIGRATION_MODE as any) || 'gradual',
         },
       };
   }
@@ -358,6 +413,45 @@ export function isSecureEnvironment(): boolean {
 export function getWebSocketUrl(): string {
   const config = getUnifiedApiConfig();
   return config.endpoints.websocket;
+}
+
+/**
+ * Helper to determine if v2 Agent API should be used
+ */
+export function shouldUseV2AgentApi(): boolean {
+  const config = getUnifiedApiConfig();
+  return config.features.enableV2AgentApi;
+}
+
+/**
+ * Helper to get the appropriate agent endpoint based on migration mode
+ */
+export function getAgentEndpoint(agentType?: string): string {
+  const config = getUnifiedApiConfig();
+  
+  // Always use v2 if enabled
+  if (config.features.enableV2AgentApi) {
+    return config.endpoints.agentV2Execute;
+  }
+  
+  // Fallback to v1 endpoints
+  switch (agentType?.toLowerCase()) {
+    case 'optimization':
+      return config.endpoints.agentV1Optimization;
+    case 'data':
+      return config.endpoints.agentV1Data;
+    case 'triage':
+    default:
+      return config.endpoints.agentV1Triage;
+  }
+}
+
+/**
+ * Helper to get v2 migration mode
+ */
+export function getV2MigrationMode(): 'disabled' | 'testing' | 'gradual' | 'full' {
+  const config = getUnifiedApiConfig();
+  return config.features.v2MigrationMode;
 }
 
 /**
