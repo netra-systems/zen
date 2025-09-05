@@ -13,19 +13,23 @@ Completely rebuild Docker containers for a fresh development environment.
 
 ## Execution Steps
 
-### 1. Stop Existing Containers
-!echo "🔄 Stopping existing containers..."
-!docker compose down
+### 1. Stop Target Containers
+!echo "🔄 Stopping ${1:-all} containers..."
+!if [ -z "$ARGUMENTS" ]; then docker compose down; else docker compose stop $ARGUMENTS; fi
 
-### 2. Rebuild Without Cache
+### 2. Remove Old Images
+!echo "🗑️ Removing old images for ${1:-all services}..."
+!if [ -z "$ARGUMENTS" ]; then docker compose down --rmi local; else for service in $ARGUMENTS; do docker compose rm -s -f $service && docker rmi -f $(docker compose config | grep -A1 "^  $service:" | grep "image:" | cut -d: -f2 | tr -d ' ') 2>/dev/null || true; done; fi
+
+### 3. Rebuild Without Cache
 !echo "🏭 Building ${1:-all services} without cache..."
-!docker compose build --no-cache $ARGUMENTS
+!if [ -z "$ARGUMENTS" ]; then docker compose build --no-cache; else docker compose build --no-cache $ARGUMENTS; fi
 
-### 3. Start Fresh Containers
-!echo "🚀 Starting containers..."
-!docker compose up -d $ARGUMENTS
+### 4. Start Fresh Containers
+!echo "🚀 Starting ${1:-all} containers..."
+!if [ -z "$ARGUMENTS" ]; then docker compose up -d; else docker compose up -d $ARGUMENTS; fi
 
-### 4. Health Status Check
+### 5. Health Status Check
 !echo "🧑‍⚕️ Checking health status..."
 !sleep 5
 !docker compose ps
