@@ -36,7 +36,7 @@ from netra_backend.app.core.resilience.unified_retry_handler import (
 )
 from netra_backend.app.agents.base.executor import BaseExecutionEngine
 from netra_backend.app.agents.base.monitoring import ExecutionMonitor
-from netra_backend.app.agents.base.interface import ExecutionContext, ExecutionResult
+from netra_backend.app.agents.base.interface import ExecutionContext, ExecutionResult, ExecutionStatus as InterfaceExecutionStatus
 from netra_backend.app.schemas.core_enums import ExecutionStatus
 from netra_backend.app.core.unified_error_handler import agent_error_handler
 from netra_backend.app.redis_manager import RedisManager
@@ -924,6 +924,86 @@ class BaseAgent(ABC):
         return self._execution_monitor
     
     # === SSOT Standardized Execution Patterns ===
+    
+    async def execute_modern(self, state: 'DeepAgentState', run_id: str) -> ExecutionResult:
+        """Legacy compatibility method for execute_modern.
+        
+        This method provides backward compatibility for tests that still use
+        the execute_modern pattern. It bridges to the modern execution system.
+        
+        Args:
+            state: Legacy DeepAgentState object
+            run_id: Execution run ID
+            
+        Returns:
+            ExecutionResult from the execution
+            
+        Warning:
+            This method is for test compatibility only and should not be used
+            in production code. Use execute_with_context() instead.
+        """
+        import warnings
+        warnings.warn(
+            "execute_modern() is deprecated - use execute_with_context() instead",
+            DeprecationWarning,
+            stacklevel=2
+        )
+        
+        # Create temporary execution context for legacy bridge
+        # Create a simple mock context object with the needed attributes
+        class MockExecutionContext:
+            def __init__(self, run_id, state, agent_name, correlation_id):
+                self.request_id = run_id
+                self.run_id = run_id
+                self.state = state
+                self.agent_name = agent_name
+                self.correlation_id = correlation_id
+                self.user_id = getattr(state, 'user_id', None)
+                self.thread_id = getattr(state, 'chat_thread_id', None)
+                self.stream_updates = False
+                self.start_time = time.time()
+                self.metadata = {}
+                self.parameters = {}
+        
+        execution_context = MockExecutionContext(run_id, state, self.name, self.correlation_id)
+        
+        # Use the execution engine if available, otherwise direct execution
+        if self._execution_engine and False:  # Disable execution engine path for now
+            return await self._execution_engine.execute(self, execution_context)
+        else:
+            # Direct execution for backward compatibility
+            try:
+                start_time = time.time()
+                
+                # Validate preconditions
+                if not await self.validate_preconditions(execution_context):
+                    return ExecutionResult(
+                        status=InterfaceExecutionStatus.FAILED,
+                        request_id=run_id,
+                        data=None,
+                        error_message="Precondition validation failed",
+                        execution_time_ms=(time.time() - start_time) * 1000
+                    )
+                
+                # Execute core logic
+                result = await self.execute_core_logic(execution_context)
+                
+                return ExecutionResult(
+                    status=InterfaceExecutionStatus.SUCCESS,
+                    request_id=run_id,
+                    data=result,
+                    error_message=None,
+                    execution_time_ms=(time.time() - start_time) * 1000
+                )
+                
+            except Exception as e:
+                return ExecutionResult(
+                    status=InterfaceExecutionStatus.FAILED,
+                    request_id=run_id,
+                    data=None,
+                    error_message=str(e),
+                    execution_time_ms=(time.time() - start_time) * 1000
+                )
     
     async def execute_with_reliability(self, 
                                       operation: Callable[[], Awaitable[Any]], 

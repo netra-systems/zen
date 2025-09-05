@@ -39,10 +39,11 @@ from netra_backend.app.agents.supervisor.user_execution_context import (
     UserExecutionContext,
     validate_user_context
 )
-from netra_backend.app.services.websocket_event_emitter import (
+from netra_backend.app.websocket_core import (
     WebSocketEventEmitter,
-    WebSocketEventEmitterFactory
 )
+# WebSocketEventEmitterFactory is actually UnifiedWebSocketEmitter
+from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmitter as WebSocketEventEmitterFactory
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.schemas.tool import (
     SimpleToolPayload,

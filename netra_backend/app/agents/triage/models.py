@@ -56,6 +56,26 @@ class ToolRecommendation:
 
 
 @dataclass
+class KeyParameters:
+    """Key parameters extracted from user request"""
+    workload_type: Optional[str] = None
+    optimization_targets: List[str] = field(default_factory=list)
+    constraints: List[str] = field(default_factory=list)
+    priority_level: Optional[str] = None
+    time_sensitivity: Optional[str] = None
+    cost_constraints: Optional[float] = None
+
+
+@dataclass
+class SuggestedWorkflow:
+    """Suggested workflow for the request"""
+    next_agent: str = ""
+    workflow_steps: List[str] = field(default_factory=list)
+    parallel_execution: bool = False
+    estimated_duration: Optional[str] = None
+
+
+@dataclass
 class TriageMetadata:
     """Metadata for triage operations"""
     triage_duration_ms: float = 0.0
@@ -79,6 +99,8 @@ class TriageResult:
     extracted_entities: ExtractedEntities = field(default_factory=ExtractedEntities)
     user_intent: UserIntent = field(default_factory=UserIntent)
     tool_recommendation: ToolRecommendation = field(default_factory=ToolRecommendation)
+    key_parameters: KeyParameters = field(default_factory=KeyParameters)
+    suggested_workflow: SuggestedWorkflow = field(default_factory=SuggestedWorkflow)
     next_steps: List[str] = field(default_factory=list)
     metadata: Dict[str, Any] = field(default_factory=dict)
     reasoning: Optional[str] = None

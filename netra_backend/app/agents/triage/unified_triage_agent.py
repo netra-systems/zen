@@ -51,7 +51,9 @@ from netra_backend.app.agents.triage.models import (
     UserIntent,
     ToolRecommendation,
     TriageResult,
-    TriageMetadata
+    TriageMetadata,
+    KeyParameters,
+    SuggestedWorkflow
 )
 
 
