@@ -1,0 +1,247 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<specification>
+    <metadata>
+        <title>Frontend Chat Layout Architecture Specification</title>
+        <version>1.0.0</version>
+        <created>2025-01-05</created>
+        <priority>CRITICAL</priority>
+        <business-impact>Chat is primary channel for AI value delivery</business-impact>
+    </metadata>
+
+    <principles>
+        <principle id="P1">
+            <name>Single Scroll Container</name>
+            <rule>The chat interface MUST have exactly ONE scrollable element</rule>
+            <rationale>Multiple scroll containers create confusion and poor UX</rationale>
+        </principle>
+        
+        <principle id="P2">
+            <name>Fixed Layout Zones</name>
+            <rule>Header and input areas MUST be fixed position, only messages scroll</rule>
+            <rationale>Users expect consistent input location and visible header</rationale>
+        </principle>
+        
+        <principle id="P3">
+            <name>No Layout Shifts</name>
+            <rule>UI elements MUST NOT cause reflow when appearing/disappearing</rule>
+            <rationale>Layout shifts disrupt user reading and typing flow</rationale>
+        </principle>
+        
+        <principle id="P4">
+            <name>Viewport Constrained</name>
+            <rule>Total layout height MUST equal 100vh with no overflow on body</rule>
+            <rationale>Prevents browser scroll competing with chat scroll</rationale>
+        </principle>
+    </principles>
+
+    <layout-structure>
+        <container name="RootLayout">
+            <properties>
+                <height>100vh</height>
+                <overflow>hidden</overflow>
+                <display>flex</display>
+                <flex-direction>column</flex-direction>
+            </properties>
+            <children>
+                <child>AppHeader</child>
+                <child>ChatContainer</child>
+            </children>
+        </container>
+
+        <container name="ChatContainer">
+            <properties>
+                <flex>1</flex>
+                <overflow>hidden</overflow>
+                <display>flex</display>
+                <flex-direction>row</flex-direction>
+            </properties>
+            <children>
+                <child>ChatSidebar (optional)</child>
+                <child>MainChatArea</child>
+            </children>
+        </container>
+
+        <container name="MainChatArea">
+            <properties>
+                <flex>1</flex>
+                <display>flex</display>
+                <flex-direction>column</flex-direction>
+                <overflow>hidden</overflow>
+                <height>100%</height>
+            </properties>
+            <children>
+                <child>ChatHeader</child>
+                <child>ScrollableContent</child>
+                <child>MessageInputArea</child>
+            </children>
+        </container>
+
+        <container name="ChatHeader">
+            <properties>
+                <flex-shrink>0</flex-shrink>
+                <height>64px</height>
+                <position>relative</position>
+                <z-index>10</z-index>
+                <background>white</background>
+                <border-bottom>1px solid border</border-bottom>
+            </properties>
+        </container>
+
+        <container name="ScrollableContent">
+            <properties>
+                <flex>1</flex>
+                <overflow-y>auto</overflow-y>
+                <overflow-x>hidden</overflow-x>
+                <scroll-behavior>smooth</scroll-behavior>
+            </properties>
+            <note>This is the ONLY scrollable element in the entire chat interface</note>
+            <children>
+                <child>MessageList (no internal scroll)</child>
+                <child>ExamplePrompts (when applicable)</child>
+                <child>PersistentResponseCard (when processing)</child>
+                <child>ScrollAnchor (invisible div for auto-scroll)</child>
+            </children>
+        </container>
+
+        <container name="MessageInputArea">
+            <properties>
+                <flex-shrink>0</flex-shrink>
+                <min-height>80px</min-height>
+                <max-height>200px</max-height>
+                <position>relative</position>
+                <z-index>10</z-index>
+                <background>white</background>
+                <border-top>1px solid border</border-top>
+                <padding>16px</padding>
+            </properties>
+            <note>Always visible and fixed at bottom, never scrolls away</note>
+        </container>
+    </layout-structure>
+
+    <scroll-management>
+        <rule id="SM1">
+            <description>Auto-scroll to bottom on new messages</description>
+            <condition>User is not actively scrolling up</condition>
+            <implementation>Track scroll position, auto-scroll only when near bottom</implementation>
+        </rule>
+        
+        <rule id="SM2">
+            <description>Preserve scroll position on content changes</description>
+            <condition>User has scrolled up to read history</condition>
+            <implementation>Maintain scroll offset when new content loads above</implementation>
+        </rule>
+        
+        <rule id="SM3">
+            <description>Smooth scroll for programmatic navigation</description>
+            <condition>Jumping to specific message or bottom</condition>
+            <implementation>Use scrollIntoView with behavior: 'smooth'</implementation>
+        </rule>
+    </scroll-management>
+
+    <responsive-behavior>
+        <breakpoint size="mobile" max-width="768px">
+            <adjustment>Hide sidebar by default</adjustment>
+            <adjustment>Reduce header height to 56px</adjustment>
+            <adjustment>Reduce input padding to 12px</adjustment>
+        </breakpoint>
+        
+        <breakpoint size="tablet" min-width="769px" max-width="1024px">
+            <adjustment>Sidebar toggleable</adjustment>
+            <adjustment>Standard heights maintained</adjustment>
+        </breakpoint>
+        
+        <breakpoint size="desktop" min-width="1025px">
+            <adjustment>Sidebar visible by default</adjustment>
+            <adjustment>Maximum content width: 1200px centered</adjustment>
+        </breakpoint>
+    </responsive-behavior>
+
+    <css-classes>
+        <class name="chat-container">
+            <css>
+                height: 100vh;
+                display: flex;
+                flex-direction: column;
+                overflow: hidden;
+            </css>
+        </class>
+        
+        <class name="chat-header-fixed">
+            <css>
+                flex-shrink: 0;
+                position: sticky;
+                top: 0;
+                z-index: 10;
+            </css>
+        </class>
+        
+        <class name="chat-content-scrollable">
+            <css>
+                flex: 1;
+                overflow-y: auto;
+                overflow-x: hidden;
+                scroll-behavior: smooth;
+            </css>
+        </class>
+        
+        <class name="chat-input-fixed">
+            <css>
+                flex-shrink: 0;
+                position: sticky;
+                bottom: 0;
+                z-index: 10;
+            </css>
+        </class>
+    </css-classes>
+
+    <implementation-checklist>
+        <task status="pending">Remove ScrollArea from MessageList component</task>
+        <task status="pending">Remove overflow-y-auto from MainChat main-content div</task>
+        <task status="pending">Set AppWithLayout container to height: 100vh, overflow: hidden</task>
+        <task status="pending">Restructure MainChat to use fixed header/footer pattern</task>
+        <task status="pending">Create single scrollable content area</task>
+        <task status="pending">Test with various content heights</task>
+        <task status="pending">Test on mobile, tablet, desktop viewports</task>
+        <task status="pending">Add visual regression tests</task>
+        <task status="pending">Document scroll behavior in user guide</task>
+    </implementation-checklist>
+
+    <testing-requirements>
+        <test id="T1">
+            <name>Single Scrollbar Test</name>
+            <scenario>Load chat with many messages</scenario>
+            <expected>Only one vertical scrollbar visible in content area</expected>
+        </test>
+        
+        <test id="T2">
+            <name>Fixed Input Test</name>
+            <scenario>Scroll through long conversation</scenario>
+            <expected>Input area remains visible at bottom</expected>
+        </test>
+        
+        <test id="T3">
+            <name>No Layout Shift Test</name>
+            <scenario>Toggle various UI elements</scenario>
+            <expected>No content jumping or reflow</expected>
+        </test>
+        
+        <test id="T4">
+            <name>Auto-scroll Test</name>
+            <scenario>Receive new message while at bottom</scenario>
+            <expected>Automatically scrolls to show new message</expected>
+        </test>
+        
+        <test id="T5">
+            <name>Scroll Preservation Test</name>
+            <scenario>Read history while new messages arrive</scenario>
+            <expected>Scroll position maintained, no forced scroll</expected>
+        </test>
+    </testing-requirements>
+
+    <migration-notes>
+        <note>This is a breaking change to the chat layout</note>
+        <note>All custom scroll behaviors must be updated</note>
+        <note>Third-party scroll libraries should be removed</note>
+        <note>Browser testing required on all supported versions</note>
+    </migration-notes>
+</specification>
