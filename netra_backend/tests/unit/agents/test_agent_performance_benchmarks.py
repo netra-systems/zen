@@ -888,10 +888,20 @@ class TestLongRunningOperationStability:
     @pytest.mark.asyncio
     async def test_resource_cleanup_over_time(self):
         """Test that resources are properly cleaned up over extended execution."""
-        import resource
+        try:
+            import resource
+            has_resource_module = True
+        except ImportError:
+            # Windows doesn't have resource module, use psutil instead
+            has_resource_module = False
         
-        # Get initial resource usage
-        initial_usage = resource.getrusage(resource.RUSAGE_SELF)
+        if has_resource_module:
+            # Get initial resource usage
+            initial_usage = resource.getrusage(resource.RUSAGE_SELF)
+        else:
+            # Use psutil for Windows compatibility
+            import psutil
+            initial_memory = psutil.Process().memory_info().rss / 1024 / 1024  # MB
         
         # Run many operations with cleanup
         for cycle in range(10):
@@ -921,16 +931,21 @@ class TestLongRunningOperationStability:
             gc.collect()
         
         # Check final resource usage
-        final_usage = resource.getrusage(resource.RUSAGE_SELF)
-        
-        # Resource usage should be reasonable
-        memory_growth = final_usage.ru_maxrss - initial_usage.ru_maxrss
-        
-        # On some systems ru_maxrss is in KB, others in bytes
-        if memory_growth > 1000000:  # Likely in bytes
-            memory_growth_mb = memory_growth / 1024 / 1024
-        else:  # Likely in KB
-            memory_growth_mb = memory_growth / 1024
+        if has_resource_module:
+            final_usage = resource.getrusage(resource.RUSAGE_SELF)
+            
+            # Resource usage should be reasonable
+            memory_growth = final_usage.ru_maxrss - initial_usage.ru_maxrss
+            
+            # On some systems ru_maxrss is in KB, others in bytes
+            if memory_growth > 1000000:  # Likely in bytes
+                memory_growth_mb = memory_growth / 1024 / 1024
+            else:  # Likely in KB
+                memory_growth_mb = memory_growth / 1024
+        else:
+            # Use psutil for Windows compatibility
+            final_memory = psutil.Process().memory_info().rss / 1024 / 1024  # MB
+            memory_growth_mb = final_memory - initial_memory
         
         assert memory_growth_mb < 100  # Less than 100MB growth
         

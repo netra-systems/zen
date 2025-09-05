@@ -8,7 +8,8 @@ from unittest.mock import AsyncMock, MagicMock, Mock, patch
 import pytest
 from fastapi import HTTPException
 
-from netra_backend.app.routes.threads_route import ThreadUpdate, update_thread
+from netra_backend.app.routes.threads_route import ThreadUpdate
+from netra_backend.app.routes.utils.thread_handlers import handle_update_thread_request
 from netra_backend.tests.helpers.thread_test_helpers import (
     assert_http_exception,
     create_access_denied_thread,
@@ -37,100 +38,93 @@ def mock_user():
 
 class TestUpdateThread:
     """Test cases for PUT /{thread_id} endpoint"""
-    # Mock: Component isolation for testing without external dependencies
-    @patch('app.routes.utils.thread_helpers.time.time')
+    @patch('netra_backend.app.routes.utils.thread_validators.ThreadRepository')
+    @patch('netra_backend.app.routes.utils.thread_handlers.MessageRepository')
+    @patch('netra_backend.app.routes.utils.thread_handlers.time.time')
     @pytest.mark.asyncio
-    async def test_update_thread_success(self, mock_time, mock_db, mock_user):
+    async def test_update_thread_success(self, mock_time, MockMessageRepo, MockThreadRepo, mock_db, mock_user):
         """Test successful thread update"""
         create_thread_update_scenario(mock_time)
         mock_thread = create_mock_thread()
-        thread_repo = setup_thread_repo_mock(mock_thread)
-        message_repo = setup_message_repo_mock(15)
-        patches = setup_repos_with_patches(thread_repo, message_repo)
         
-        with patches[0], patches[1]:
-            thread_update = ThreadUpdate(title="Updated Title", metadata={"new_field": "value"})
-            result = await update_thread("thread_abc123", thread_update, mock_db, mock_user)
-            
+        # Setup mocks
+        thread_repo = MockThreadRepo.return_value
+        thread_repo.get_by_id = AsyncMock(return_value=mock_thread)
+        message_repo = MockMessageRepo.return_value
+        message_repo.count_by_thread = AsyncMock(return_value=15)
+        
+        thread_update = ThreadUpdate(title="Updated Title", metadata={"new_field": "value"})
+        result = await handle_update_thread_request(mock_db, "thread_abc123", thread_update, mock_user.id)
+        
         assert result.title == "Updated Title"
         assert mock_thread.metadata_["title"] == "Updated Title"
         assert mock_thread.metadata_["new_field"] == "value"
         assert mock_thread.metadata_["updated_at"] == 1234567900
         mock_db.commit.assert_called_once()
-    # Mock: Component isolation for testing without external dependencies
-    @patch('app.routes.utils.thread_helpers.time.time')
+    @patch('netra_backend.app.routes.utils.thread_validators.ThreadRepository')
+    @patch('netra_backend.app.routes.utils.thread_handlers.MessageRepository')
+    @patch('netra_backend.app.routes.utils.thread_handlers.time.time')
     @pytest.mark.asyncio
-    async def test_update_thread_empty_metadata(self, mock_time, mock_db, mock_user):
+    async def test_update_thread_empty_metadata(self, mock_time, MockMessageRepo, MockThreadRepo, mock_db, mock_user):
         """Test updating thread with empty initial metadata"""
         create_thread_update_scenario(mock_time)
         mock_thread = setup_thread_with_special_metadata()
         
-        # Mock: Component isolation for testing without external dependencies
-        with patch('app.routes.utils.thread_helpers.ThreadRepository') as MockThreadRepo, \
-             patch('app.routes.utils.thread_helpers.MessageRepository') as MockMessageRepo:
-            
-            thread_repo = MockThreadRepo.return_value
-            async def get_thread(db, thread_id):
-                if hasattr(mock_thread.metadata_, 'call_count') and mock_thread.metadata_.call_count > 0:
-                    mock_thread.metadata_ = None
-                return mock_thread
-            # Mock: Async component isolation for testing without real async operations
-            thread_repo.get_by_id = AsyncMock(side_effect=get_thread)
-            message_repo = MockMessageRepo.return_value
-            # Mock: Async component isolation for testing without real async operations
-            message_repo.count_by_thread = AsyncMock(return_value=0)
-            thread_update = ThreadUpdate(title="New Title")
-            
-            result = await update_thread("thread_abc123", thread_update, mock_db, mock_user)
-            
+        # Setup mocks
+        thread_repo = MockThreadRepo.return_value
+        async def get_thread(db, thread_id):
+            if hasattr(mock_thread.metadata_, 'call_count') and mock_thread.metadata_.call_count > 0:
+                mock_thread.metadata_ = None
+            return mock_thread
+        thread_repo.get_by_id = AsyncMock(side_effect=get_thread)
+        message_repo = MockMessageRepo.return_value
+        message_repo.count_by_thread = AsyncMock(return_value=0)
+        thread_update = ThreadUpdate(title="New Title")
+        
+        result = await handle_update_thread_request(mock_db, "thread_abc123", thread_update, mock_user.id)
+        
         assert mock_thread.metadata_ != None
         assert mock_thread.metadata_["title"] == "New Title"
         assert mock_thread.metadata_["updated_at"] == 1234567900
+    @patch('netra_backend.app.routes.utils.thread_validators.ThreadRepository')
     @pytest.mark.asyncio
-    async def test_update_thread_not_found(self, mock_db, mock_user):
+    async def test_update_thread_not_found(self, MockThreadRepo, mock_db, mock_user):
         """Test updating non-existent thread"""
-        # Mock: Component isolation for testing without external dependencies
-        with patch('app.routes.utils.thread_helpers.ThreadRepository') as MockThreadRepo:
-            thread_repo = MockThreadRepo.return_value
-            # Mock: Async component isolation for testing without real async operations
-            thread_repo.get_by_id = AsyncMock(return_value=None)
-            thread_update = ThreadUpdate(title="Update")
-            
-            with pytest.raises(HTTPException) as exc_info:
-                await update_thread("nonexistent", thread_update, mock_db, mock_user)
-            
-            assert_http_exception(exc_info, 404, "Thread not found")
+        # Setup mocks
+        thread_repo = MockThreadRepo.return_value
+        thread_repo.get_by_id = AsyncMock(return_value=None)
+        thread_update = ThreadUpdate(title="Update")
+        
+        with pytest.raises(HTTPException) as exc_info:
+            await handle_update_thread_request(mock_db, "nonexistent", thread_update, mock_user.id)
+        
+        assert_http_exception(exc_info, 404, "Thread not found")
+    @patch('netra_backend.app.routes.utils.thread_validators.ThreadRepository')
     @pytest.mark.asyncio
-    async def test_update_thread_access_denied(self, mock_db, mock_user):
+    async def test_update_thread_access_denied(self, MockThreadRepo, mock_db, mock_user):
         """Test updating thread owned by another user"""
         mock_thread = create_access_denied_thread()
         
-        # Mock: Component isolation for testing without external dependencies
-        with patch('app.routes.utils.thread_helpers.ThreadRepository') as MockThreadRepo:
-            thread_repo = MockThreadRepo.return_value
-            # Mock: Async component isolation for testing without real async operations
-            thread_repo.get_by_id = AsyncMock(return_value=mock_thread)
-            thread_update = ThreadUpdate(title="Update")
-            
-            with pytest.raises(HTTPException) as exc_info:
-                await update_thread("thread_abc123", thread_update, mock_db, mock_user)
-            
-            assert_http_exception(exc_info, 403, "Access denied")
+        # Setup mocks
+        thread_repo = MockThreadRepo.return_value
+        thread_repo.get_by_id = AsyncMock(return_value=mock_thread)
+        thread_update = ThreadUpdate(title="Update")
+        
+        with pytest.raises(HTTPException) as exc_info:
+            await handle_update_thread_request(mock_db, "thread_abc123", thread_update, mock_user.id)
+        
+        assert_http_exception(exc_info, 403, "Access denied")
+    @patch('netra_backend.app.routes.utils.thread_validators.ThreadRepository')
+    @patch('netra_backend.app.logging_config.central_logger.get_logger')
     @pytest.mark.asyncio
-    async def test_update_thread_exception(self, mock_db, mock_user):
+    async def test_update_thread_exception(self, mock_get_logger, MockThreadRepo, mock_db, mock_user):
         """Test general exception in update_thread"""
-        # Mock: Component isolation for testing without external dependencies
-        with patch('app.routes.utils.thread_helpers.ThreadRepository') as MockThreadRepo, \
-             patch('app.logging_config.central_logger.get_logger') as mock_get_logger:
-            
-            thread_repo = MockThreadRepo.return_value
-            # Mock: Database isolation for unit testing without external database connections
-            thread_repo.get_by_id = AsyncMock(side_effect=Exception("Database error"))
-            thread_update = ThreadUpdate(title="Update")
-            
-            with pytest.raises(HTTPException) as exc_info:
-                await update_thread("thread_abc123", thread_update, mock_db, mock_user)
-            
-            assert_http_exception(exc_info, 500, "Failed to update thread")
-            mock_logger = mock_get_logger.return_value
-            mock_logger.error.assert_called_once()
+        # Setup mocks
+        thread_repo = MockThreadRepo.return_value
+        thread_repo.get_by_id = AsyncMock(side_effect=Exception("Database error"))
+        thread_update = ThreadUpdate(title="Update")
+        
+        with pytest.raises(Exception) as exc_info:
+            await handle_update_thread_request(mock_db, "thread_abc123", thread_update, mock_user.id)
+        
+        assert str(exc_info.value) == "Database error"

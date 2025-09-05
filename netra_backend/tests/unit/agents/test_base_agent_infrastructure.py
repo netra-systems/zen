@@ -287,7 +287,7 @@ class TestBaseAgentExecutionEngine:
         # Create test state
         state = DeepAgentState()
         state.user_request = "Test user request"
-        state.thread_id = "test_thread_123"
+        state.chat_thread_id = "test_thread_123"
         state.user_id = "test_user_456"
         
         # Execute using modern pattern
@@ -304,7 +304,7 @@ class TestBaseAgentExecutionEngine:
         
         # Verify execution result
         assert isinstance(result, ExecutionResult)
-        assert result.success is True
+        assert result.is_success is True
         assert result.result is not None
         assert result.result["status"] == "success"
         assert result.result["context_run_id"] == "test_run_789"
@@ -341,7 +341,7 @@ class TestBaseAgentExecutionEngine:
         )
         
         # Execution should fail due to validation
-        assert result.success is False
+        assert result.is_success is False
         assert result.error is not None
         assert agent.validation_calls == 1
         assert agent.core_logic_calls == 0  # Should not reach core logic
@@ -374,7 +374,7 @@ class TestBaseAgentExecutionEngine:
         )
         
         # Execution should fail in core logic
-        assert result.success is False
+        assert result.is_success is False
         assert result.error is not None
         assert "Simulated execution failure" in str(result.error)
         assert agent.validation_calls == 1
@@ -436,54 +436,54 @@ class TestBaseAgentWebSocketInfrastructure:
             name="WebSocketEventsAgent"
         )
         
-        # Mock the WebSocket bridge
+        # Mock the WebSocket bridge with the methods that WebSocketBridgeAdapter actually calls
         mock_bridge = Mock()
-        mock_bridge.emit_agent_started = AsyncMock()
-        mock_bridge.emit_thinking = AsyncMock()
-        mock_bridge.emit_tool_executing = AsyncMock()
-        mock_bridge.emit_tool_completed = AsyncMock()
-        mock_bridge.emit_agent_completed = AsyncMock()
-        mock_bridge.emit_progress = AsyncMock()
-        mock_bridge.emit_error = AsyncMock()
-        mock_bridge.emit_tool_started = AsyncMock()
-        mock_bridge.emit_subagent_started = AsyncMock()
-        mock_bridge.emit_subagent_completed = AsyncMock()
+        mock_bridge.notify_agent_started = AsyncMock()
+        mock_bridge.notify_agent_thinking = AsyncMock()
+        mock_bridge.notify_tool_executing = AsyncMock()
+        mock_bridge.notify_tool_completed = AsyncMock()
+        mock_bridge.notify_agent_completed = AsyncMock()
+        mock_bridge.notify_progress_update = AsyncMock()  # emit_progress calls this
+        mock_bridge.notify_agent_error = AsyncMock()      # emit_error calls this
+        mock_bridge.notify_custom = AsyncMock()           # subagent methods call this
         
-        agent._websocket_adapter._websocket_bridge = mock_bridge
-        agent._websocket_adapter._run_id = "test_run"
-        agent._websocket_adapter._agent_name = "WebSocketEventsAgent"
+        # Use the proper method to set the bridge
+        agent.set_websocket_bridge(mock_bridge, "test_run")
         
         # Test all emission methods
         await agent.emit_agent_started("Agent started message")
-        mock_bridge.emit_agent_started.assert_called_once()
+        mock_bridge.notify_agent_started.assert_called_once()
         
         await agent.emit_thinking("Thinking about the problem", step_number=1)
-        mock_bridge.emit_thinking.assert_called_once()
+        mock_bridge.notify_agent_thinking.assert_called_once()
         
         await agent.emit_tool_executing("test_tool", {"param": "value"})
-        mock_bridge.emit_tool_executing.assert_called_once()
+        mock_bridge.notify_tool_executing.assert_called_once()
         
         await agent.emit_tool_completed("test_tool", {"result": "success"})
-        mock_bridge.emit_tool_completed.assert_called_once()
+        mock_bridge.notify_tool_completed.assert_called_once()
         
         await agent.emit_agent_completed({"final_result": "completed"})
-        mock_bridge.emit_agent_completed.assert_called_once()
+        mock_bridge.notify_agent_completed.assert_called_once()
         
         await agent.emit_progress("50% complete", is_complete=False)
-        mock_bridge.emit_progress.assert_called_once()
+        mock_bridge.notify_progress_update.assert_called_once()
         
         await agent.emit_error("Test error", "ValidationError", {"details": "test"})
-        mock_bridge.emit_error.assert_called_once()
+        mock_bridge.notify_agent_error.assert_called_once()
         
         # Test backward compatibility methods
         await agent.emit_tool_started("test_tool", {"param": "value"})
-        mock_bridge.emit_tool_started.assert_called_once()
+        # emit_tool_started calls emit_tool_executing, which calls notify_tool_executing
+        assert mock_bridge.notify_tool_executing.call_count == 2  # Called twice: once above, once here
         
         await agent.emit_subagent_started("SubAgent", "sub_123")
-        mock_bridge.emit_subagent_started.assert_called_once()
+        # emit_subagent_started calls notify_custom
+        assert mock_bridge.notify_custom.call_count == 1
         
         await agent.emit_subagent_completed("SubAgent", "sub_123", {"result": "done"}, 1500.0)
-        mock_bridge.emit_subagent_completed.assert_called_once()
+        # emit_subagent_completed also calls notify_custom
+        assert mock_bridge.notify_custom.call_count == 2
         
     @pytest.mark.asyncio
     @patch('netra_backend.app.agents.base_agent.get_agent_websocket_bridge')

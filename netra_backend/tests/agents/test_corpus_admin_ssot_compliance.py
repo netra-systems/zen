@@ -68,13 +68,20 @@ class TestCorpusAdminSubAgentSSOTCompliance:
     @pytest.fixture
     def mock_websocket_manager(self):
         """Create mock WebSocket manager."""
-        manager = Mock()
+        # Use MagicMock with specific attributes to avoid database-like methods
+        manager = MagicMock()
+        # Only add WebSocket-specific methods
         manager.emit_agent_started = AsyncMock()
         manager.emit_thinking = AsyncMock()
         manager.emit_tool_executing = AsyncMock()
         manager.emit_tool_completed = AsyncMock()
         manager.emit_agent_completed = AsyncMock()
         manager.emit_error = AsyncMock()
+        # Explicitly remove any database-like methods that Mock might add
+        if hasattr(manager, 'execute'):
+            delattr(manager, 'execute')
+        if hasattr(manager, 'commit'):
+            delattr(manager, 'commit')
         return manager
     
     @pytest.fixture

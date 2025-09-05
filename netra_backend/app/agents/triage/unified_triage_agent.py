@@ -226,13 +226,34 @@ class UnifiedTriageAgent(BaseAgent):
             "Corpus Management": ["manage_corpus", "update_knowledge_base", "index_documents"]
         }
         
-        # Fallback categories
+        # Fallback categories with comprehensive keyword matching
         self.fallback_categories = {
             "optimize": "Cost Optimization",
+            "optimization": "Cost Optimization", 
+            "cost": "Cost Optimization",
+            "budget": "Cost Optimization",
+            "bills": "Cost Optimization",
+            "expensive": "Cost Optimization",
+            "reduce": "Cost Optimization",
+            "save": "Cost Optimization",
             "performance": "Performance Optimization",
+            "latency": "Performance Optimization",
+            "throughput": "Performance Optimization",
+            "speed": "Performance Optimization",
+            "scaling": "Performance Optimization",
+            "bottleneck": "Performance Optimization",
+            "slow": "Performance Optimization",
             "analyze": "Workload Analysis",
+            "analysis": "Workload Analysis",
             "configure": "Configuration & Settings",
-            "report": "Monitoring & Reporting",
+            "configuration": "Configuration & Settings",
+            "setup": "Configuration & Settings",
+            "set up": "Configuration & Settings",
+            "deployment": "Configuration & Settings",
+            "environment": "Configuration & Settings",
+            "monitoring": "Monitoring & Reporting",
+            "alerting": "Monitoring & Reporting",
+            "report": "Monitoring & Reporting", 
             "model": "Model Selection",
             "supply": "Supply Catalog Management",
             "quality": "Quality Optimization"
@@ -621,14 +642,43 @@ Focus on:
         Returns:
             TriageResult with basic classification
         """
-        # Basic keyword-based categorization
+        # Basic keyword-based categorization with scoring
         category = "General Request"
         request_lower = request.lower()
         
+        # Score all matching keywords, accumulating scores for same categories
+        keyword_scores = {}
         for keyword, cat in self.fallback_categories.items():
             if keyword in request_lower:
-                category = cat
-                break
+                # Count occurrences and consider keyword length for specificity
+                count = request_lower.count(keyword)
+                specificity = len(keyword)
+                score = count + specificity * 0.1
+                if cat not in keyword_scores:
+                    keyword_scores[cat] = 0
+                keyword_scores[cat] += score
+        
+        # Pick the highest scoring category with tie-breaking preference
+        if keyword_scores:
+            # Define category priorities for tie-breaking (higher = more preferred)
+            category_priorities = {
+                "Cost Optimization": 10,
+                "Performance Optimization": 9, 
+                "Workload Analysis": 8,
+                "Configuration & Settings": 7,
+                "Monitoring & Reporting": 6,
+                "Model Selection": 5,
+                "Quality Optimization": 4,
+                "Supply Catalog Management": 3
+            }
+            
+            # Sort by score (descending), then by priority (descending)
+            sorted_categories = sorted(
+                keyword_scores.items(), 
+                key=lambda x: (x[1], category_priorities.get(x[0], 0)), 
+                reverse=True
+            )
+            category = sorted_categories[0][0]
         
         # Extract entities manually
         entities = self._extract_entities(request)

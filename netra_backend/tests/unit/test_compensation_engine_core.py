@@ -65,7 +65,7 @@ class TestCompensationEngineCore:
         """Create mock transaction recovery context."""
         # Mock: Component isolation for controlled unit testing
         context = Mock(spec=RecoveryContext)
-        context.operation_type = OperationType.DATABASE_WRITE
+        context.operation_type = OperationType.DATABASE_OPERATION
         context.operation_id = "txn-123"
         context.transaction_id = "db-txn-456"
         context.metadata = {"table": "user_transactions", "operation": "update"}

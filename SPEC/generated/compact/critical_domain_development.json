@@ -1,0 +1,8 @@
+{
+  "values": [
+    "localhost:3000",
+    "localhost:8000",
+    "localhost:8081",
+    "ws://localhost:8000"
+  ]
+}

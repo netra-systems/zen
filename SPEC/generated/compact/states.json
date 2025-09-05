@@ -1,7 +1,9 @@
 {
   "values": [
     "Active",
+    "Connected",
     "Disabled",
+    "Disconnected",
     "Enabled",
     "Error",
     "Failed",

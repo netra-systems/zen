@@ -118,21 +118,35 @@ class ExecutionEngine:
         # NEW: Store UserExecutionContext for per-request isolation
         instance.user_context = user_context
         
-        # Compatibility: Create WebSocketNotifier for tests expecting it
-        # If websocket_bridge is a WebSocketManager, wrap it with WebSocketNotifier
-        if websocket_bridge and not hasattr(websocket_bridge, 'notify_agent_started'):
-            # Bridge is a WebSocketManager, wrap it with deprecated WebSocketNotifier for compatibility
-            from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier
-            instance.websocket_notifier = WebSocketNotifier(websocket_bridge)
-        else:
-            # Bridge is already an AgentWebSocketBridge or compatible object
-            instance.websocket_notifier = websocket_bridge
+        # SECURITY FIX: Enforce mandatory AgentWebSocketBridge usage - no fallbacks allowed
+        if not websocket_bridge:
+            raise RuntimeError(
+                "AgentWebSocketBridge is mandatory for WebSocket security and user isolation. "
+                "No fallback paths allowed."
+            )
+        
+        # Validate that websocket_bridge is an AgentWebSocketBridge (not a deprecated notifier)
+        if not hasattr(websocket_bridge, 'notify_agent_started'):
+            raise RuntimeError(
+                f"websocket_bridge must be AgentWebSocketBridge instance with proper notification methods. "
+                f"Got: {type(websocket_bridge)}. Deprecated WebSocketNotifier fallbacks are eliminated for security."
+            )
+        
+        # Store validated bridge directly
+        instance.websocket_bridge = websocket_bridge
             
+        # RACE CONDITION FIX: Enhanced user isolation and state safety
         # NOTE: These remain as instance variables but are now scoped per ExecutionEngine instance
         # In the new architecture, each user request gets its own ExecutionEngine instance
         instance.active_runs = {}
         instance.run_history = []
         instance.execution_tracker = get_execution_tracker()
+        
+        # NEW: Per-user state isolation to prevent race conditions
+        instance._user_execution_states: Dict[str, Dict] = {}
+        instance._user_state_locks: Dict[str, asyncio.Lock] = {}
+        instance._state_lock_creation_lock = asyncio.Lock()
+        
         instance._init_components()
         instance._init_death_monitoring()
         
@@ -142,6 +156,50 @@ class ExecutionEngine:
             logger.info("ExecutionEngine initialized in legacy mode (no UserExecutionContext)")
         
         return instance
+    
+    async def _get_user_state_lock(self, user_id: str) -> asyncio.Lock:
+        """Get or create user-specific state lock for thread safety.
+        
+        Args:
+            user_id: User identifier for state lock isolation
+            
+        Returns:
+            User-specific asyncio Lock for execution state operations
+        """
+        if user_id not in self._user_state_locks:
+            async with self._state_lock_creation_lock:
+                # Double-check locking pattern
+                if user_id not in self._user_state_locks:
+                    self._user_state_locks[user_id] = asyncio.Lock()
+                    logger.debug(f"Created user-specific state lock for user: {user_id}")
+        return self._user_state_locks[user_id]
+    
+    async def _get_user_execution_state(self, user_id: str) -> Dict:
+        """Get or create user-specific execution state for complete isolation.
+        
+        Args:
+            user_id: User identifier for state isolation
+            
+        Returns:
+            User-specific execution state dictionary
+        """
+        if user_id not in self._user_execution_states:
+            # This is already protected by the user state lock in calling methods
+            self._user_execution_states[user_id] = {
+                'active_runs': {},
+                'run_history': [],
+                'execution_stats': {
+                    'total_executions': 0,
+                    'concurrent_executions': 0,
+                    'queue_wait_times': [],
+                    'execution_times': [],
+                    'failed_executions': 0,
+                    'dead_executions': 0,
+                    'timeout_executions': 0
+                }
+            }
+            logger.debug(f"Created user-specific execution state for user: {user_id}")
+        return self._user_execution_states[user_id]
         
     def _init_components(self) -> None:
         """Initialize execution components."""
@@ -392,12 +450,29 @@ class ExecutionEngine:
                 return result
                     
             except asyncio.TimeoutError:
+                # LOUD ERROR: Agent timeout is critical for user experience
+                logger.critical(
+                    f"AGENT TIMEOUT CRITICAL: {context.agent_name} timed out after {self.AGENT_EXECUTION_TIMEOUT}s "
+                    f"for user {context.user_id} (run_id: {context.run_id}). "
+                    f"User will experience failed request or blank screen."
+                )
+                
                 self.execution_stats['failed_executions'] += 1
                 # Mark execution as timed out
                 self.execution_tracker.update_execution_state(
                     execution_id, ExecutionState.TIMEOUT,
                     error=f"Execution timed out after {self.AGENT_EXECUTION_TIMEOUT}s"
                 )
+                
+                # ENHANCED: Notify user of timeout with user-friendly message
+                try:
+                    await self._notify_user_of_timeout(context, self.AGENT_EXECUTION_TIMEOUT)
+                except Exception as notify_error:
+                    logger.critical(
+                        f"TIMEOUT NOTIFICATION FAILED: Could not notify user {context.user_id} "
+                        f"about agent timeout: {notify_error}. User unaware of failure."
+                    )
+                
                 # Send timeout notification via death handler
                 await self.websocket_bridge.notify_agent_death(
                     context.run_id,
@@ -411,10 +486,28 @@ class ExecutionEngine:
                 return timeout_result
                 
             except Exception as e:
+                # LOUD ERROR: Unexpected execution failures are critical
+                logger.critical(
+                    f"UNEXPECTED AGENT FAILURE: {context.agent_name} failed with unexpected error "
+                    f"for user {context.user_id} (run_id: {context.run_id}): {e}. "
+                    f"Error type: {type(e).__name__}. This indicates a system-level issue."
+                )
+                
                 # Mark execution as failed for any other exception
                 self.execution_tracker.update_execution_state(
                     execution_id, ExecutionState.FAILED, error=str(e)
                 )
+                
+                # ENHANCED: Notify user of unexpected system error
+                try:
+                    await self._notify_user_of_system_error(context, e)
+                except Exception as notify_error:
+                    logger.critical(
+                        f"SYSTEM ERROR NOTIFICATION FAILED: Could not notify user {context.user_id} "
+                        f"about system error: {notify_error}. User unaware of system failure."
+                    )
+                
+                # Re-raise to propagate the error
                 raise
                 
             finally:
@@ -496,10 +589,37 @@ class ExecutionEngine:
     async def _handle_execution_error(self, context: AgentExecutionContext,
                                      state: DeepAgentState, error: Exception,
                                      start_time: float) -> AgentExecutionResult:
-        """Handle execution errors with retry and fallback."""
-        logger.error(f"Agent {context.agent_name} failed: {error}")
+        """Handle execution errors with enhanced user notification and loud error reporting."""
+        # LOUD ERROR: Make agent execution failures highly visible
+        logger.critical(
+            f"AGENT EXECUTION FAILURE: {context.agent_name} failed for user {context.user_id} "
+            f"(run_id: {context.run_id}): {error}. "
+            f"Error type: {type(error).__name__}. "
+            f"This will impact user experience directly."
+        )
+        
+        # Notify user via WebSocket about the execution failure
+        try:
+            await self._notify_user_of_execution_error(context, error)
+        except Exception as notify_error:
+            logger.critical(
+                f"DOUBLE FAILURE: Could not notify user {context.user_id} about agent execution failure: {notify_error}. "
+                f"User will experience silent failure."
+            )
+        
+        # Attempt retry if possible
         if self._can_retry(context):
+            logger.warning(
+                f"Attempting retry {context.retry_count + 1}/{context.max_retries} "
+                f"for agent {context.agent_name} (user: {context.user_id})"
+            )
             return await self._retry_execution(context, state)
+        
+        # Execute fallback strategy as last resort
+        logger.critical(
+            f"NO RETRY POSSIBLE: Executing fallback strategy for {context.agent_name} "
+            f"(user: {context.user_id}). Max retries ({context.max_retries}) exceeded."
+        )
         return await self._execute_fallback_strategy(context, state, error, start_time)
     
     def _can_retry(self, context: AgentExecutionContext) -> bool:
@@ -1039,6 +1159,115 @@ class ExecutionEngine:
         
         # WebSocket bridge shutdown is handled separately
         logger.info("ExecutionEngine shutdown complete")
+    
+    # ============================================================================
+    # ENHANCED USER NOTIFICATION METHODS FOR ERROR HANDLING
+    # ============================================================================
+    
+    async def _notify_user_of_execution_error(self, context: AgentExecutionContext, 
+                                            error: Exception) -> None:
+        """Notify user of agent execution error via WebSocket."""
+        try:
+            error_message = {
+                "type": "agent_execution_error",
+                "data": {
+                    "agent_name": context.agent_name,
+                    "message": f"The {context.agent_name} encountered an error while processing your request.",
+                    "user_friendly_message": (
+                        "Something went wrong while processing your request. "
+                        "Our system is automatically trying to recover. "
+                        "If this persists, please try again or contact support."
+                    ),
+                    "error_type": type(error).__name__,
+                    "severity": "error",
+                    "action_required": "The system is attempting to recover automatically",
+                    "support_code": f"AGENT_ERR_{context.user_id[:8]}_{context.agent_name}_{datetime.utcnow().strftime('%H%M%S')}"
+                },
+                "timestamp": datetime.utcnow().isoformat(),
+                "critical": True
+            }
+            
+            # Try to send via WebSocket bridge
+            await self.websocket_bridge.notify_agent_error(
+                context.run_id,
+                context.agent_name,
+                error_message["data"]
+            )
+            
+            logger.info(f"Notified user {context.user_id} of agent execution error")
+            
+        except Exception as e:
+            logger.error(f"Failed to notify user of execution error: {e}")
+    
+    async def _notify_user_of_timeout(self, context: AgentExecutionContext, 
+                                    timeout_seconds: float) -> None:
+        """Notify user of agent timeout via WebSocket."""
+        try:
+            timeout_message = {
+                "type": "agent_timeout",
+                "data": {
+                    "agent_name": context.agent_name,
+                    "message": f"The {context.agent_name} took longer than expected to respond.",
+                    "user_friendly_message": (
+                        f"Your request is taking longer than usual (over {timeout_seconds:.0f} seconds). "
+                        "This might be due to high system load or a complex request. "
+                        "Please try again with a simpler request or contact support if this continues."
+                    ),
+                    "timeout_seconds": timeout_seconds,
+                    "severity": "warning", 
+                    "action_required": "Consider trying a simpler request or refreshing the page",
+                    "support_code": f"TIMEOUT_{context.user_id[:8]}_{context.agent_name}_{datetime.utcnow().strftime('%H%M%S')}"
+                },
+                "timestamp": datetime.utcnow().isoformat(),
+                "critical": True
+            }
+            
+            # Try to send via WebSocket bridge
+            await self.websocket_bridge.notify_agent_error(
+                context.run_id,
+                context.agent_name,
+                timeout_message["data"]
+            )
+            
+            logger.info(f"Notified user {context.user_id} of agent timeout")
+            
+        except Exception as e:
+            logger.error(f"Failed to notify user of timeout: {e}")
+    
+    async def _notify_user_of_system_error(self, context: AgentExecutionContext, 
+                                         error: Exception) -> None:
+        """Notify user of system error via WebSocket."""
+        try:
+            system_error_message = {
+                "type": "system_error",
+                "data": {
+                    "agent_name": context.agent_name,
+                    "message": f"A system error occurred in the {context.agent_name}.",
+                    "user_friendly_message": (
+                        "We encountered an unexpected system error while processing your request. "
+                        "Our engineering team has been automatically notified. "
+                        "Please try again in a few moments, or contact support if the issue persists."
+                    ),
+                    "error_type": type(error).__name__,
+                    "severity": "critical",
+                    "action_required": "Try again in a few moments or contact support",
+                    "support_code": f"SYS_ERR_{context.user_id[:8]}_{context.agent_name}_{datetime.utcnow().strftime('%H%M%S')}"
+                },
+                "timestamp": datetime.utcnow().isoformat(),
+                "critical": True
+            }
+            
+            # Try to send via WebSocket bridge
+            await self.websocket_bridge.notify_agent_error(
+                context.run_id,
+                context.agent_name,
+                system_error_message["data"]
+            )
+            
+            logger.info(f"Notified user {context.user_id} of system error")
+            
+        except Exception as e:
+            logger.error(f"Failed to notify user of system error: {e}")
     
     # ============================================================================
     # NEW DELEGATION METHODS FOR USER ISOLATION

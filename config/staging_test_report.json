@@ -37,7 +37,7 @@
   "staging_urls": {
     "frontend": "https://netra-frontend-staging-pnovr5vsba-uc.a.run.app",
     "backend": "https://netra-backend-staging-pnovr5vsba-uc.a.run.app",
-    "auth": "https://netra-auth-service-pnovr5vsba-uc.a.run.app"
+    "auth": "https://auth.staging.netrasystems.ai"
   },
   "detailed_results": [
     {
@@ -305,7 +305,7 @@
       "error_message": null,
       "details": {
         "method": "GET",
-        "url": "https://netra-auth-service-pnovr5vsba-uc.a.run.app/health",
+        "url": "https://auth.staging.netrasystems.ai/health",
         "status_code": 200,
         "headers": {
           "Content-Type": "application/json",
@@ -340,7 +340,7 @@
       "error_message": null,
       "details": {
         "method": "HEAD",
-        "url": "https://netra-auth-service-pnovr5vsba-uc.a.run.app/health",
+        "url": "https://auth.staging.netrasystems.ai/health",
         "status_code": 200,
         "headers": {
           "Content-Type": "application/json",
@@ -366,7 +366,7 @@
       "error_message": null,
       "details": {
         "method": "OPTIONS",
-        "url": "https://netra-auth-service-pnovr5vsba-uc.a.run.app/health",
+        "url": "https://auth.staging.netrasystems.ai/health",
         "status_code": 405,
         "headers": {
           "Allow": "HEAD",
@@ -795,7 +795,7 @@
       "error": null,
       "details": {
         "method": "OPTIONS",
-        "url": "https://netra-auth-service-pnovr5vsba-uc.a.run.app/health",
+        "url": "https://auth.staging.netrasystems.ai/health",
         "status_code": 405,
         "headers": {
           "Allow": "HEAD",

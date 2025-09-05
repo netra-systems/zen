@@ -123,7 +123,7 @@ def _configure_staging_e2e_auth(self):
 ```python
 STAGING_SERVICES = {
     'backend': 'https://netra-backend-staging-pnovr5vsba-uc.a.run.app',
-    'auth': 'https://netra-auth-service-pnovr5vsba-uc.a.run.app',
+    'auth': 'https://auth.staging.netrasystems.ai',
     'frontend': 'https://netra-frontend-staging-pnovr5vsba-uc.a.run.app',
     'websocket': 'wss://netra-backend-staging-pnovr5vsba-uc.a.run.app/ws'
 }

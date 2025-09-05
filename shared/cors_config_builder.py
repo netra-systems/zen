@@ -203,7 +203,7 @@ class CORSConfigurationBuilder(ConfigBuilderBase):
                 # Cloud Run patterns for staging
                 "https://netra-frontend-701982941522.us-central1.run.app",
                 "https://netra-backend-701982941522.us-central1.run.app",
-                "https://netra-auth-service-pnovr5vsba-uc.a.run.app",  # Auth service Cloud Run URL
+                "https://auth.staging.netrasystems.ai",  # Auth service Cloud Run URL
                 
                 # Local development support for staging testing
                 "http://localhost:3000",

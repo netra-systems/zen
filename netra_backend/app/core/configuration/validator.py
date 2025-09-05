@@ -133,6 +133,7 @@ class ConfigurationValidator:
         errors.extend(self._collect_llm_errors_with_fallbacks(config))
         errors.extend(self._collect_auth_errors_with_fallbacks(config))
         errors.extend(self._collect_external_errors_with_fallbacks(config))
+        errors.extend(self._collect_config_dependency_errors(config))
         return errors
     
     def _calculate_config_health_score(self, config: AppConfig, errors: List[str], warnings: List[str]) -> int:
@@ -273,4 +274,40 @@ class ConfigurationValidator:
         except Exception as e:
             self._logger.warning(f"External service validation failed with fallback: {e}")
             # External services often have reasonable defaults or are optional
+            return []
+    
+    def _collect_config_dependency_errors(self, config: AppConfig) -> List[str]:
+        """Collect configuration dependency errors using ConfigDependencyMap."""
+        try:
+            from netra_backend.app.core.config_dependencies import ConfigDependencyMap
+            
+            # Check configuration consistency using the dependency map
+            config_dict = config.__dict__ if hasattr(config, '__dict__') else {}
+            consistency_issues = ConfigDependencyMap.check_config_consistency(config_dict)
+            
+            # Filter issues based on validation mode
+            rules = self._validation_rules.get(self._environment, {})
+            mode = ValidationMode(rules.get("validation_mode", ValidationMode.ENFORCE_ALL.value))
+            
+            errors = []
+            for issue in consistency_issues:
+                if mode == ValidationMode.WARN:
+                    # Convert all to warnings in permissive mode
+                    continue
+                elif mode == ValidationMode.ENFORCE_CRITICAL:
+                    # Only enforce critical issues
+                    if "CRITICAL" in issue:
+                        errors.append(f"Config dependency: {issue}")
+                else:  # ENFORCE_ALL
+                    # Enforce all dependency issues
+                    if "CRITICAL" in issue or "WARNING" in issue:
+                        errors.append(f"Config dependency: {issue}")
+            
+            return errors
+            
+        except ImportError:
+            self._logger.warning("ConfigDependencyMap not available - skipping dependency validation")
+            return []
+        except Exception as e:
+            self._logger.warning(f"Config dependency validation failed with fallback: {e}")
             return []

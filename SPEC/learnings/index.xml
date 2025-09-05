@@ -38,6 +38,25 @@
         </prevention>
     </learning>
     
+    <learning id="config-env-regression-prevention-2025-09-05">
+        <title>Configuration and Environment Regression Prevention Patterns</title>
+        <category>Configuration/Environment/RegressionPrevention</category>
+        <keywords>config-regression, oauth-failure, environment-isolation, ssot-config, dependency-mapping, migration-paths, test-credentials</keywords>
+        <path>config_env_regression_prevention_20250905.xml</path>
+        <critical-takeaway>
+            Configuration SSOT differs from code SSOT - environment-specific configs are NOT duplicates.
+            OAuth failed due to missing GOOGLE_OAUTH_CLIENT_ID_TEST after blind consolidation.
+            ALWAYS check ConfigDependencyMap before deletion. Each environment needs independent credentials.
+            Hard failures better than silent fallbacks. Test environments need real test configs, not mocks.
+        </critical-takeaway>
+        <severity>CRITICAL</severity>
+        <business-impact>Authentication completely broken, 503 errors, cascade failures across services</business-impact>
+        <prevention>
+            Never delete configs without dependency check. Provide test credentials. 
+            Run scripts/check_config_before_deploy.py. Monitor config health continuously.
+        </prevention>
+    </learning>
+    
     <learning id="orchestration-data-handling-patterns-2025-09-04">
         <title>Orchestration Data Handling Patterns - Partial and Insufficient Data</title>
         <category>Agent/Orchestration/DataHandling</category>

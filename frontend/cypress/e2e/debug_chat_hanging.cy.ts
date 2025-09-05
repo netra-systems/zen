@@ -163,7 +163,7 @@ describe('Debug Chat Hanging Issue', () => {
 
     // Test auth service health
     cy.request({
-      url: 'https://netra-auth-service-pnovr5vsba-uc.a.run.app/health',
+      url: 'https://auth.staging.netrasystems.ai/health',
       failOnStatusCode: false
     }).then((response) => {
       cy.log(`Auth service health status: ${response.status}`);

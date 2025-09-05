@@ -72,14 +72,14 @@ async def _validate_token_with_auth_service(token: str) -> Dict[str, str]:
         )
     return validation_result
 
+
 async def _get_user_from_database(db: AsyncSession, validation_result: Dict[str, str]) -> User:
     """Get or create user from database."""
     from sqlalchemy import select
+    from shared.database.session_validation import validate_db_session
     
-    # Debug: Check what type db actually is
-    if not isinstance(db, AsyncSession):
-        logger.error(f"ERROR: db is not AsyncSession, it's {type(db)}: {db}")
-        raise TypeError(f"Expected AsyncSession, got {type(db)}")
+    # Validate database session (handles both production and test scenarios)
+    validate_db_session(db, "get_user_from_database")
     
     user_id = validation_result.get("user_id")
     result = await db.execute(select(User).where(User.id == user_id))
@@ -93,6 +93,10 @@ async def _auto_create_user_if_needed(db: AsyncSession, validation_result: Dict[
     """Auto-create user from JWT claims."""
     from netra_backend.app.services.user_service import user_service
     from netra_backend.app.config import get_config
+    from shared.database.session_validation import validate_db_session
+    
+    # Validate database session (handles both production and test scenarios)
+    validate_db_session(db, "auto_create_user_if_needed")
     
     user_id = validation_result.get("user_id")
     email = validation_result.get("email", f"user_{user_id}@example.com")
@@ -112,10 +116,13 @@ async def get_current_user_optional(
     if not credentials:
         return None
     
-    # Debug: Check what type db actually is
+    # Validate database session (handles both production and test scenarios)
+    from shared.database.session_validation import validate_db_session
     logger.debug(f"get_current_user_optional - db type: {type(db)}")
-    if not isinstance(db, AsyncSession):
-        logger.error(f"ERROR in get_current_user_optional: db is {type(db)}, not AsyncSession")
+    try:
+        validate_db_session(db, "get_current_user_optional")
+    except TypeError as e:
+        logger.error(f"ERROR in get_current_user_optional: {e}")
     
     try:
         # Extract the token and validate it

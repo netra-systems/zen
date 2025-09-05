@@ -616,8 +616,11 @@ class AuthEnvironment:
             return host
             
         # Environment-specific defaults (no fallback pattern)
-        if env in ["production", "staging"]:
-            # Cloud Run binds to 0.0.0.0
+        if env == "production":
+            # Production Cloud Run: Bind to all interfaces
+            return "0.0.0.0"
+        elif env == "staging":
+            # Staging Cloud Run: Bind to all interfaces
             return "0.0.0.0"
         elif env == "development":
             # Development: Bind to all interfaces for Docker compatibility
@@ -629,12 +632,98 @@ class AuthEnvironment:
             return "0.0.0.0"
     
     def get_backend_url(self) -> str:
-        """Get backend service URL for callbacks."""
-        return self.env.get("BACKEND_URL", "http://localhost:8000")
+        """Get backend service URL with environment-specific defaults."""
+        env = self.get_environment()
+        
+        # Check for explicit override first
+        url = self.env.get("BACKEND_URL")
+        if url:
+            return url
+        
+        # Environment-specific defaults (no fallback pattern)
+        if env == "production":
+            return "https://api.netrasystems.ai"
+        elif env == "staging":
+            return "https://api.staging.netrasystems.ai"
+        elif env == "development":
+            return "http://localhost:8000"
+        elif env == "test":
+            return "http://localhost:8001"
+        else:
+            return "http://localhost:8000"
     
     def get_frontend_url(self) -> str:
-        """Get frontend URL for redirects."""
-        return self.env.get("FRONTEND_URL", "http://localhost:3000")
+        """Get frontend URL with environment-specific defaults."""
+        env = self.get_environment()
+        
+        # Check for explicit override first
+        url = self.env.get("FRONTEND_URL")
+        if url:
+            return url
+        
+        # Environment-specific defaults (no fallback pattern)
+        if env == "production":
+            return "https://app.netrasystems.ai"
+        elif env == "staging":
+            return "https://app.staging.netrasystems.ai"
+        elif env == "development":
+            return "http://localhost:3000"
+        elif env == "test":
+            return "http://localhost:3001"
+        else:
+            return "http://localhost:3000"
+    
+    def get_auth_service_url(self) -> str:
+        """Get complete auth service URL with environment-specific defaults."""
+        env = self.get_environment()
+        
+        # Check for explicit override first
+        url = self.env.get("AUTH_SERVICE_URL")
+        if url:
+            return url
+        
+        # Environment-specific defaults
+        if env == "production":
+            return "https://auth.netrasystems.ai"
+        elif env == "staging":
+            return "https://auth.staging.netrasystems.ai"
+        elif env == "development":
+            host = self.get_auth_service_host()
+            port = self.get_auth_service_port()
+            # For dev, use the bind address for URL construction
+            if host == "0.0.0.0":
+                host = "localhost"
+            return f"http://{host}:{port}"
+        elif env == "test":
+            host = self.get_auth_service_host()
+            port = self.get_auth_service_port()
+            return f"http://{host}:{port}"
+        else:
+            host = self.get_auth_service_host()
+            port = self.get_auth_service_port()
+            if host == "0.0.0.0":
+                host = "localhost"
+            return f"http://{host}:{port}"
+    
+    def get_oauth_redirect_uri(self, provider: str = "google") -> str:
+        """Get OAuth redirect URI with environment-specific defaults.
+        
+        Args:
+            provider: OAuth provider name (google, github, etc.)
+            
+        Returns:
+            Full OAuth callback URL for the provider
+        """
+        env = self.get_environment()
+        
+        # Check for explicit override first
+        uri = self.env.get("OAUTH_REDIRECT_URI")
+        if uri:
+            return uri
+        
+        # Build from frontend URL
+        frontend_url = self.get_frontend_url()
+        return f"{frontend_url}/auth/callback"
     
     # Environment & Deployment
     def get_environment(self) -> str:

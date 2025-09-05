@@ -27,11 +27,19 @@ class ChatStatePersistenceService {
   private options: Required<PersistenceOptions>;
   private saveTimer: NodeJS.Timeout | null = null;
   private debouncedSaveDelay = 500; // ms
+  private storage: Storage | null = null;
+  private isClientSide: boolean = false;
   
   constructor(options: PersistenceOptions = {}) {
     this.options = { ...this.defaultOptions, ...options };
-    this.setupEventListeners();
-    this.cleanupExpiredState();
+    
+    // SSR safety: Only initialize client-side features in browser environment
+    if (typeof window !== 'undefined' && typeof window.localStorage !== 'undefined') {
+      this.storage = window.localStorage;
+      this.isClientSide = true;
+      this.setupEventListeners();
+      this.cleanupExpiredState();
+    }
   }
   
   private setupEventListeners(): void {
@@ -53,8 +61,13 @@ class ChatStatePersistenceService {
   }
   
   private cleanupExpiredState(): void {
+    // SSR safety check
+    if (!this.storage) {
+      return;
+    }
+    
     try {
-      const stored = localStorage.getItem(this.options.storageKey);
+      const stored = this.storage.getItem(this.options.storageKey);
       if (!stored) return;
       
       const state: ChatStateData = JSON.parse(stored);
@@ -62,7 +75,7 @@ class ChatStatePersistenceService {
       const maxAge = this.options.ttlMinutes * 60 * 1000;
       
       if (age > maxAge) {
-        localStorage.removeItem(this.options.storageKey);
+        this.storage.removeItem(this.options.storageKey);
         logger.debug('Cleaned up expired chat state', undefined, {
           component: 'ChatStatePersistence',
           action: 'cleanup_expired',
@@ -89,6 +102,11 @@ class ChatStatePersistenceService {
   }
   
   private saveStateImmediate(data: Partial<ChatStateData> = {}): void {
+    // SSR safety check
+    if (!this.storage) {
+      return;
+    }
+    
     try {
       const currentState = this.getState();
       const newState: ChatStateData = {
@@ -107,7 +125,7 @@ class ChatStatePersistenceService {
         newState.draftMessage = newState.draftMessage.substring(0, 10000);
       }
       
-      localStorage.setItem(this.options.storageKey, JSON.stringify(newState));
+      this.storage.setItem(this.options.storageKey, JSON.stringify(newState));
       
       logger.debug('Chat state saved', undefined, {
         component: 'ChatStatePersistence',
@@ -132,12 +150,17 @@ class ChatStatePersistenceService {
   }
   
   private handleQuotaExceeded(): void {
+    // SSR safety check
+    if (!this.storage) {
+      return;
+    }
+    
     try {
       // Clear old messages to make room
       const state = this.getState();
       if (state.messages && state.messages.length > 10) {
         state.messages = state.messages.slice(-10);
-        localStorage.setItem(this.options.storageKey, JSON.stringify(state));
+        this.storage.setItem(this.options.storageKey, JSON.stringify(state));
         logger.warn('Reduced message history due to storage quota', undefined, {
           component: 'ChatStatePersistence',
           action: 'quota_exceeded_handled'
@@ -154,8 +177,13 @@ class ChatStatePersistenceService {
   }
   
   public getState(): ChatStateData {
+    // SSR safety check
+    if (!this.storage) {
+      return this.getDefaultState();
+    }
+    
     try {
-      const stored = localStorage.getItem(this.options.storageKey);
+      const stored = this.storage.getItem(this.options.storageKey);
       if (!stored) {
         return this.getDefaultState();
       }
@@ -190,8 +218,13 @@ class ChatStatePersistenceService {
   }
   
   public clearState(): void {
+    // SSR safety check
+    if (!this.storage) {
+      return;
+    }
+    
     try {
-      localStorage.removeItem(this.options.storageKey);
+      this.storage.removeItem(this.options.storageKey);
       logger.debug('Chat state cleared', undefined, {
         component: 'ChatStatePersistence',
         action: 'state_cleared'

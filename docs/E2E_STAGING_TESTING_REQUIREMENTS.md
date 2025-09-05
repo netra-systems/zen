@@ -8,7 +8,7 @@ Running E2E tests against staging.netrasystems.ai requires specific authenticati
 
 ✅ **Basic Health Tests**: All staging services are healthy and accessible
 - Backend: `https://netra-backend-staging-pnovr5vsba-uc.a.run.app` (200ms response)
-- Auth Service: `https://netra-auth-service-pnovr5vsba-uc.a.run.app` (172ms response) 
+- Auth Service: `https://auth.staging.netrasystems.ai` (172ms response) 
 - Frontend: `https://netra-frontend-staging-pnovr5vsba-uc.a.run.app` (204ms response)
 
 ❌ **Authenticated E2E Tests**: Require E2E_OAUTH_SIMULATION_KEY environment variable

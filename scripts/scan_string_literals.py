@@ -55,6 +55,52 @@ class StringLiteralScanner:
         r'^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$',  # UUIDs
     ]
     
+    # Mission critical environment variables that need special protection
+    CRITICAL_ENV_VARS = {
+        # Frontend critical - see MISSION_CRITICAL_NAMED_VALUES_INDEX.xml
+        'NEXT_PUBLIC_API_URL': {'environments': ['local', 'development', 'staging', 'production']},
+        'NEXT_PUBLIC_WS_URL': {'environments': ['local', 'development', 'staging', 'production']}, 
+        'NEXT_PUBLIC_AUTH_URL': {'environments': ['local', 'development', 'staging', 'production']},
+        'NEXT_PUBLIC_ENVIRONMENT': {'environments': ['local', 'development', 'staging', 'production']},
+        'NEXT_PUBLIC_WEBSOCKET_URL': {'environments': ['local', 'development', 'staging', 'production']},
+        # Backend critical
+        'DATABASE_URL': {'environments': ['local', 'development', 'staging', 'production']},
+        'REDIS_URL': {'environments': ['local', 'development', 'staging', 'production']},
+        'ENVIRONMENT': {'environments': ['local', 'development', 'staging', 'production']},
+        # Auth critical
+        'JWT_SECRET_KEY': {'environments': ['local', 'development', 'staging', 'production']},
+        'GOOGLE_CLIENT_ID': {'environments': ['local', 'development', 'staging', 'production']},
+        'GOOGLE_CLIENT_SECRET': {'environments': ['local', 'development', 'staging', 'production']},
+    }
+    
+    # Critical domain patterns for each environment
+    CRITICAL_DOMAINS = {
+        'staging': {
+            'frontend': 'app.staging.netrasystems.ai',
+            'api': 'api.staging.netrasystems.ai', 
+            'auth': 'auth.staging.netrasystems.ai',
+            'websocket': 'wss://api.staging.netrasystems.ai',
+        },
+        'production': {
+            'frontend': 'app.netrasystems.ai',
+            'api': 'api.netrasystems.ai',
+            'auth': 'auth.netrasystems.ai', 
+            'websocket': 'wss://api.netrasystems.ai',
+        },
+        'development': {
+            'frontend': 'localhost:3000',
+            'api': 'localhost:8000',
+            'auth': 'localhost:8081',
+            'websocket': 'ws://localhost:8000',
+        },
+        'local': {
+            'frontend': 'localhost:3000',
+            'api': 'localhost:8000', 
+            'auth': 'localhost:8081',
+            'websocket': 'ws://localhost:8000',
+        }
+    }
+    
     def __init__(self, root_dir: Path):
         self.root_dir = root_dir
         self.literals_by_category = defaultdict(lambda: defaultdict(list))
@@ -103,9 +149,18 @@ class StringLiteralScanner:
         if self.is_noise_literal(literal):
             return None
             
+        # Check if it's a critical environment variable
+        if literal in self.CRITICAL_ENV_VARS:
+            return 'critical_config'
+            
+        # Check if it's a critical domain
+        for env, domains in self.CRITICAL_DOMAINS.items():
+            if literal in domains.values():
+                return f'critical_domain_{env}'
+                
         # Environment variables
         if re.match(r'^[A-Z][A-Z0-9_]{2,}$', literal):
-            if any(prefix in literal for prefix in ['NETRA_', 'DATABASE_', 'REDIS_', 'API_', 'AUTH_']):
+            if any(prefix in literal for prefix in ['NETRA_', 'DATABASE_', 'REDIS_', 'API_', 'AUTH_', 'NEXT_PUBLIC_']):
                 return 'environment'
             elif len(literal) > 3:
                 return 'configuration'
@@ -312,19 +367,55 @@ class StringLiteralScanner:
         """Generate the final index structure."""
         index = {
             'metadata': {
-                'version': '3.0.0',
+                'version': '3.1.0',
                 'generated_at': datetime.now().isoformat(),
                 'root_directory': str(self.root_dir),
                 'files_scanned': self.file_count,
                 'total_literals': self.literal_count,
                 'unique_literals': sum(len(lits) for lits in self.literals_by_category.values()),
-                'errors': len(self.errors)
+                'errors': len(self.errors),
+                'cross_references': {
+                    'mission_critical': 'SPEC/MISSION_CRITICAL_NAMED_VALUES_INDEX.xml',
+                    'config_regression': 'CONFIG_REGRESSION_PREVENTION_PLAN.md',
+                    'oauth_regression': 'OAUTH_REGRESSION_ANALYSIS_20250905.md',
+                    'configuration_architecture': 'docs/configuration_architecture.md'
+                }
             },
-            'categories': {}
+            'categories': {},
+            'critical_config_protection': {
+                'description': 'Environment-specific critical configuration values',
+                'warning': 'NEVER delete or modify without checking all environments!',
+                'environments': {}
+            }
         }
+        
+        # Process critical configs separately for better visibility
+        critical_configs = {}
+        critical_domains = {}
         
         for category in sorted(self.literals_by_category.keys()):
             literals = self.literals_by_category[category]
+            
+            if category == 'critical_config':
+                # Special handling for critical config
+                for literal in literals:
+                    if literal in self.CRITICAL_ENV_VARS:
+                        critical_configs[literal] = {
+                            'environments': self.CRITICAL_ENV_VARS[literal]['environments'],
+                            'locations': literals[literal][:10],
+                            'cascade_warning': f'Deleting {literal} will break ALL environments that use it!'
+                        }
+            elif category.startswith('critical_domain_'):
+                # Extract environment from category
+                env = category.replace('critical_domain_', '')
+                if env not in critical_domains:
+                    critical_domains[env] = {}
+                for literal in literals:
+                    critical_domains[env][literal] = {
+                        'locations': literals[literal][:10],
+                        'warning': f'This is the CORRECT domain for {env} environment'
+                    }
+            
             index['categories'][category] = {
                 'count': len(literals),
                 'literals': {}
@@ -333,11 +424,34 @@ class StringLiteralScanner:
             # Include all literals with their locations
             for literal in sorted(literals.keys()):
                 locations = literals[literal]
-                index['categories'][category]['literals'][literal] = {
+                entry = {
                     'value': literal,
                     'category': category,
                     'locations': locations[:10]  # Limit locations to keep file size reasonable
                 }
+                
+                # Add warnings for critical items
+                if category == 'critical_config':
+                    entry['warning'] = 'CRITICAL: See MISSION_CRITICAL_NAMED_VALUES_INDEX.xml before modifying!'
+                elif category.startswith('critical_domain_'):
+                    env = category.replace('critical_domain_', '')
+                    entry['environment'] = env
+                    entry['warning'] = f'CRITICAL DOMAIN for {env} - verify before changing!'
+                    
+                index['categories'][category]['literals'][literal] = entry
+        
+        # Add critical protection section
+        index['critical_config_protection']['critical_variables'] = critical_configs
+        index['critical_config_protection']['critical_domains'] = critical_domains
+        
+        # Add environment-specific summaries
+        for env in ['local', 'development', 'staging', 'production']:
+            env_summary = {
+                'expected_domains': self.CRITICAL_DOMAINS.get(env, {}),
+                'required_variables': [var for var, info in self.CRITICAL_ENV_VARS.items() 
+                                      if env in info['environments']]
+            }
+            index['critical_config_protection']['environments'][env] = env_summary
                 
         return index
         

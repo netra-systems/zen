@@ -334,14 +334,14 @@ class OptimizedStartupChecker:
             
             # Fallback to regular connection test
             from netra_backend.app.db.postgres import async_session_factory
-                if async_session_factory:
-                    async with async_session_factory() as session:
-                        result = await session.execute("SELECT 1")
-                        await result.fetchone()
-                    return StartupCheckResult(
-                        name=check_name, success=True, critical=True,
-                        message="PostgreSQL connection successful"
-                    )
+            if async_session_factory:
+                async with async_session_factory() as session:
+                    result = await session.execute("SELECT 1")
+                    await result.fetchone()
+                return StartupCheckResult(
+                    name=check_name, success=True, critical=True,
+                    message="PostgreSQL connection successful"
+                )
         except Exception as e:
             return StartupCheckResult(
                 name=check_name, success=False, critical=True,

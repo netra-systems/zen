@@ -13,6 +13,8 @@ Tests validate:
 3. Health checks handle missing database configuration
 4. DatabaseURLBuilder is called correctly
 5. Critical configuration errors are raised appropriately
+
+Updated to test the SSOT method using DatabaseURLBuilder and IsolatedEnvironment.
 """
 
 import pytest
@@ -38,61 +40,101 @@ class TestDatabaseURLValidation:
         assert config.database_url is None
     
     def test_development_config_loads_database_url(self):
-        """Test that DevelopmentConfig properly loads database URL."""
-        with patch('shared.isolated_environment.get_env') as mock_env:
-            mock_env.return_value.as_dict.return_value = {
-                'ENVIRONMENT': 'development',
-                'DATABASE_URL': 'postgresql://user:pass@localhost/devdb'
-            }
-            
-            config = DevelopmentConfig()
-            assert config.database_url is not None
-            assert 'postgresql' in config.database_url
+        """Test that DevelopmentConfig properly loads database URL using SSOT method."""
+        # Mock the IsolatedEnvironment and DatabaseURLBuilder (SSOT method)
+        mock_env_dict = {
+            'ENVIRONMENT': 'development',
+            'DATABASE_URL': 'postgresql://user:pass@localhost/devdb'
+        }
+        
+        mock_env = MagicMock()
+        mock_env.as_dict.return_value = mock_env_dict
+        
+        mock_builder = MagicMock()
+        mock_development = MagicMock()
+        mock_development.auto_url = 'postgresql://user:pass@localhost/devdb'
+        mock_builder.development = mock_development
+        
+        with patch('shared.isolated_environment.get_env', return_value=mock_env):
+            with patch('shared.database_url_builder.DatabaseURLBuilder', return_value=mock_builder):
+                config = DevelopmentConfig()
+                assert config.database_url is not None
+                assert 'postgresql' in config.database_url
     
     def test_staging_config_loads_database_url_from_parts(self):
-        """Test that StagingConfig constructs database URL from individual parts."""
-        with patch('shared.isolated_environment.get_env') as mock_env:
-            mock_env.return_value.as_dict.return_value = {
-                'ENVIRONMENT': 'staging',
-                'POSTGRES_HOST': 'staging-db.example.com',
-                'POSTGRES_PORT': '5432',
-                'POSTGRES_USER': 'staging_user',
-                'POSTGRES_PASSWORD': 'staging_pass',
-                'POSTGRES_DB': 'staging_db'
-            }
-            
-            config = StagingConfig()
-            assert config.database_url is not None
-            assert 'staging-db.example.com' in config.database_url
-            assert 'staging_user' in config.database_url
-            assert 'staging_db' in config.database_url
+        """Test that StagingConfig constructs database URL from individual parts using SSOT method."""
+        # Mock the IsolatedEnvironment and DatabaseURLBuilder (SSOT method)
+        mock_env_dict = {
+            'ENVIRONMENT': 'staging',
+            'POSTGRES_HOST': 'staging-db.example.com',
+            'POSTGRES_PORT': '5432',
+            'POSTGRES_USER': 'staging_user',
+            'POSTGRES_PASSWORD': 'staging_pass',
+            'POSTGRES_DB': 'staging_db'
+        }
+        
+        mock_env = MagicMock()
+        mock_env.as_dict.return_value = mock_env_dict
+        
+        mock_builder = MagicMock()
+        mock_staging = MagicMock()
+        mock_staging.auto_url = 'postgresql://staging_user:staging_pass@staging-db.example.com:5432/staging_db'
+        mock_builder.staging = mock_staging
+        
+        with patch('shared.isolated_environment.get_env', return_value=mock_env):
+            with patch('shared.database_url_builder.DatabaseURLBuilder', return_value=mock_builder):
+                config = StagingConfig()
+                assert config.database_url is not None
+                assert 'staging-db.example.com' in config.database_url
+                assert 'staging_user' in config.database_url
+                assert 'staging_db' in config.database_url
     
     def test_staging_config_raises_without_database_config(self):
         """Test that StagingConfig raises error when database config is missing."""
-        with patch('shared.isolated_environment.get_env') as mock_env:
-            mock_env.return_value.as_dict.return_value = {
-                'ENVIRONMENT': 'staging'
-                # Missing all database configuration
-            }
-            
-            with pytest.raises(ValueError, match="DatabaseURLBuilder failed to construct URL"):
-                StagingConfig()
+        # Mock the IsolatedEnvironment with missing database configuration
+        mock_env_dict = {
+            'ENVIRONMENT': 'staging'
+            # Missing all database configuration
+        }
+        
+        mock_env = MagicMock()
+        mock_env.as_dict.return_value = mock_env_dict
+        
+        mock_builder = MagicMock()
+        mock_staging = MagicMock()
+        mock_staging.auto_url = None  # DatabaseURLBuilder fails to construct URL
+        mock_builder.staging = mock_staging
+        
+        with patch('shared.isolated_environment.get_env', return_value=mock_env):
+            with patch('shared.database_url_builder.DatabaseURLBuilder', return_value=mock_builder):
+                with pytest.raises(ValueError, match="DatabaseURLBuilder failed to construct URL"):
+                    StagingConfig()
     
     def test_production_config_loads_database_url(self):
-        """Test that ProductionConfig properly loads database URL."""
-        with patch('shared.isolated_environment.get_env') as mock_env:
-            mock_env.return_value.as_dict.return_value = {
-                'ENVIRONMENT': 'production',
-                'POSTGRES_HOST': 'prod-db.example.com',
-                'POSTGRES_PORT': '5432',
-                'POSTGRES_USER': 'prod_user',
-                'POSTGRES_PASSWORD': 'prod_pass',
-                'POSTGRES_DB': 'prod_db'
-            }
-            
-            config = ProductionConfig()
-            assert config.database_url is not None
-            assert 'prod-db.example.com' in config.database_url
+        """Test that ProductionConfig properly loads database URL using SSOT method."""
+        # Mock the IsolatedEnvironment and DatabaseURLBuilder (SSOT method)
+        mock_env_dict = {
+            'ENVIRONMENT': 'production',
+            'POSTGRES_HOST': 'prod-db.example.com',
+            'POSTGRES_PORT': '5432',
+            'POSTGRES_USER': 'prod_user',
+            'POSTGRES_PASSWORD': 'prod_pass',
+            'POSTGRES_DB': 'prod_db'
+        }
+        
+        mock_env = MagicMock()
+        mock_env.as_dict.return_value = mock_env_dict
+        
+        mock_builder = MagicMock()
+        mock_production = MagicMock()
+        mock_production.auto_url = 'postgresql://prod_user:prod_pass@prod-db.example.com:5432/prod_db'
+        mock_builder.production = mock_production
+        
+        with patch('shared.isolated_environment.get_env', return_value=mock_env):
+            with patch('shared.database_url_builder.DatabaseURLBuilder', return_value=mock_builder):
+                config = ProductionConfig()
+                assert config.database_url is not None
+                assert 'prod-db.example.com' in config.database_url
 
 
 class TestHealthCheckDatabaseValidation:
@@ -103,7 +145,8 @@ class TestHealthCheckDatabaseValidation:
         """Test that _check_postgres_connection handles None database_url gracefully."""
         from netra_backend.app.routes.health import _check_postgres_connection
         
-        mock_db = AsyncMock()
+        from sqlalchemy.ext.asyncio import AsyncSession
+        mock_db = AsyncMock(spec=AsyncSession)
         mock_config = MagicMock()
         mock_config.database_url = None
         
@@ -121,7 +164,8 @@ class TestHealthCheckDatabaseValidation:
         """Test that _check_postgres_connection raises in staging with None database_url."""
         from netra_backend.app.routes.health import _check_postgres_connection
         
-        mock_db = AsyncMock()
+        from sqlalchemy.ext.asyncio import AsyncSession
+        mock_db = AsyncMock(spec=AsyncSession)
         mock_config = MagicMock()
         mock_config.database_url = None
         
@@ -139,7 +183,8 @@ class TestHealthCheckDatabaseValidation:
         from netra_backend.app.routes.health import _check_postgres_connection
         from sqlalchemy import text
         
-        mock_db = AsyncMock()
+        from sqlalchemy.ext.asyncio import AsyncSession
+        mock_db = AsyncMock(spec=AsyncSession)
         mock_result = MagicMock()
         mock_result.scalar_one_or_none.return_value = 1
         mock_db.execute.return_value = mock_result
@@ -160,7 +205,8 @@ class TestHealthCheckDatabaseValidation:
         """Test that _check_postgres_connection skips execution for mock database."""
         from netra_backend.app.routes.health import _check_postgres_connection
         
-        mock_db = AsyncMock()
+        from sqlalchemy.ext.asyncio import AsyncSession
+        mock_db = AsyncMock(spec=AsyncSession)
         mock_config = MagicMock()
         mock_config.database_url = 'postgresql+mock://mockuser:mockpass@mockhost/mockdb'
         
@@ -176,7 +222,8 @@ class TestHealthCheckDatabaseValidation:
         from netra_backend.app.routes.health import _check_readiness_status
         from fastapi import HTTPException
         
-        mock_db = AsyncMock()
+        from sqlalchemy.ext.asyncio import AsyncSession
+        mock_db = AsyncMock(spec=AsyncSession)
         mock_db.execute.side_effect = Exception("Connection failed")
         
         mock_config = MagicMock()
