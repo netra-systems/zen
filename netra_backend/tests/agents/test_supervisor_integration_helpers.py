@@ -13,7 +13,7 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
-from netra_backend.app.agents.admin_tool_dispatcher import AdminToolDispatcher
+from netra_backend.app.admin.tools.unified_admin_dispatcher import UnifiedAdminToolDispatcher as AdminToolDispatcher
 from netra_backend.app.agents.state import DeepAgentState
 
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
