@@ -4,7 +4,6 @@
     "4. Update gtm_config.json with the correct account_id",
     "Added foreign key constraint for api_keys.user_id",
     "Added foreign key constraint for sessions.user_id",
-    "Data analysis execution failed for run_id",
     "Data assessment for run_id",
     "Error in DataHelperAgent for run_id",
     "From",
@@ -12,12 +11,10 @@
     "Starting synthetic data generation for run_id",
     "Synthetic data generation completed for run_id",
     "Synthetic data generation failed for run_id",
-    "Try without specifying workload_id",
     "Unexpected error in DataHelperAgent.run() for run_id",
     "Update",
     "User approval required for run_id",
     "Using run_id",
-    "WebSocket message not sent for run_id",
     "_created_at",
     "_current_request_id",
     "_pool_id",
@@ -195,7 +192,6 @@
     "pattern_id",
     "plan_expires_at",
     "plan_started_at",
-    "processed_at",
     "processing_started_at",
     "project_id",
     "property_id",
@@ -250,6 +246,7 @@
     "task_id",
     "template_id",
     "tenant_id",
+    "test_client_id",
     "test_id",
     "thread_id",
     "timeout_at",
@@ -276,10 +273,8 @@
     "violation_id",
     "websocket_client_id",
     "websocket_connection_id",
-    "where",
     "widget_id",
     "worker_id",
-    "workflow_id",
-    "workload_id"
+    "workflow_id"
   ]
 }

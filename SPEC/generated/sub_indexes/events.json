@@ -2,9 +2,9 @@
   "metadata": {
     "version": "3.0.0",
     "category": "events",
-    "generated_at": "2025-09-05T08:33:40.737372",
-    "root_directory": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1",
-    "total_literals": 35
+    "generated_at": "2025-09-05T09:42:05.446635",
+    "root_directory": "/Users/anthony/Documents/GitHub/netra-apex",
+    "total_literals": 33
   },
   "literals": {
     ":event": {
@@ -61,13 +61,6 @@
         "scripts/scan_string_literals.py:193"
       ]
     },
-    "cost_per_event": {
-      "value": "cost_per_event",
-      "category": "events",
-      "locations": [
-        "netra_backend/app/agents/_legacy_backup/data_sub_agent_backup_20250904/insights_usage_analyzer.py:82"
-      ]
-    },
     "def\\s+process_event": {
       "value": "def\\s+process_event",
       "category": "events",
@@ -113,14 +106,14 @@
       "locations": [
         "netra_backend/app/admin/corpus/unified_corpus_admin.py:825",
         "netra_backend/app/admin/tools/unified_admin_dispatcher.py:610",
-        "netra_backend/app/agents/_legacy_backup/data_sub_agent_backup_20250904/agent_data_processing.py:22",
-        "netra_backend/app/agents/_legacy_backup/data_sub_agent_backup_20250904/agent_data_processing.py:22",
-        "netra_backend/app/agents/_legacy_backup/data_sub_agent_backup_20250904/agent_data_processing.py:63",
-        "netra_backend/app/agents/_legacy_backup/data_sub_agent_backup_20250904/analysis_engine.py:91",
-        "netra_backend/app/agents/_legacy_backup/data_sub_agent_backup_20250904/analysis_engine.py:103",
-        "netra_backend/app/agents/_legacy_backup/data_sub_agent_backup_20250904/analysis_engine.py:179",
-        "netra_backend/app/agents/_legacy_backup/data_sub_agent_backup_20250904/clickhouse_operations.py:537",
-        "netra_backend/app/agents/_legacy_backup/data_sub_agent_backup_20250904/correlation_analysis.py:42"
+        "netra_backend/app/agents/actions_goals_plan_builder_uvs.py:41",
+        "netra_backend/app/agents/actions_goals_plan_builder_uvs.py:484",
+        "netra_backend/app/agents/actions_goals_plan_builder_uvs.py:700",
+        "netra_backend/app/agents/actions_goals_plan_builder_uvs.py:699",
+        "netra_backend/app/agents/actions_to_meet_goals_sub_agent.py:245",
+        "netra_backend/app/agents/admin_tool_executors.py:46",
+        "netra_backend/app/agents/admin_tool_executors.py:88",
+        "netra_backend/app/agents/admin_tool_executors.py:100"
       ]
     },
     "filtered_by_event": {
@@ -135,14 +128,6 @@
       "category": "events",
       "locations": [
         "netra_backend/app/websocket_core/event_validation_framework.py:908"
-      ]
-    },
-    "high_cost_per_event": {
-      "value": "high_cost_per_event",
-      "category": "events",
-      "locations": [
-        "netra_backend/app/agents/_legacy_backup/data_sub_agent_backup_20250904/insights_recommendations.py:75",
-        "netra_backend/app/agents/_legacy_backup/data_sub_agent_backup_20250904/insights_usage_analyzer.py:89"
       ]
     },
     "last_event": {
@@ -176,13 +161,13 @@
         "netra_backend/app/admin/corpus/compatibility.py:87",
         "netra_backend/app/admin/corpus/compatibility.py:112",
         "netra_backend/app/admin/corpus/compatibility.py:112",
-        "netra_backend/app/agents/_legacy_backup/data_sub_agent_backup_20250904/agent_data_processing.py:63",
-        "netra_backend/app/agents/_legacy_backup/data_sub_agent_backup_20250904/agent_execution.py:205",
-        "netra_backend/app/agents/_legacy_backup/data_sub_agent_backup_20250904/anomaly_detection.py:120",
-        "netra_backend/app/agents/_legacy_backup/data_sub_agent_backup_20250904/core/data_analysis_core.py:68",
-        "netra_backend/app/agents/_legacy_backup/data_sub_agent_backup_20250904/core/data_analysis_core.py:96",
-        "netra_backend/app/agents/_legacy_backup/data_sub_agent_backup_20250904/core/data_analysis_core.py:123",
-        "netra_backend/app/agents/_legacy_backup/data_sub_agent_backup_20250904/core/data_analysis_core.py:150"
+        "netra_backend/app/agents/actions_to_meet_goals_sub_agent.py:279",
+        "netra_backend/app/agents/admin_tool_executors.py:245",
+        "netra_backend/app/agents/agent_communication.py:61",
+        "netra_backend/app/agents/agent_communication.py:66",
+        "netra_backend/app/agents/agent_communication.py:82",
+        "netra_backend/app/agents/agent_lifecycle.py:169",
+        "netra_backend/app/agents/base/execution_context.py:114"
       ]
     },
     "newest_event": {
