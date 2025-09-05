@@ -1,7 +1,0 @@
-<?xml version="1.0" ?>
-<corpus domain="netra-general" update_frequency="static">
-  <prompt_response>
-    <prompt>Where can I find the Netra documentation?</prompt>
-    <response>The official technical documentation for Netra can be found at docs.netrasystems.ai. The 'Getting Started' guide is a good first entry point. </response>
-  </prompt_response>
-</corpus>
