@@ -237,22 +237,32 @@ class AuthEnvironment:
         # Create URL builder
         builder = DatabaseURLBuilder(env_vars)
         
-        # Get URL for current environment
+        # Get URL for current environment - NO MANUAL FALLBACKS
         database_url = builder.get_url_for_environment(sync=False)  # async for auth service
         
         if not database_url:
-            # Fallback to manual construction for development
-            if env == "development":
-                host = self.get_postgres_host()
-                port = self.get_postgres_port()
-                user = self.get_postgres_user()
-                password = self.get_postgres_password()
-                db = self.get_postgres_db()
-                database_url = f"postgresql+asyncpg://{user}:{password}@{host}:{port}/{db}"
-                logger.info(f"Generated fallback development database URL for host {host}")
+            # NO MANUAL FALLBACKS - DatabaseURLBuilder is the SINGLE SOURCE OF TRUTH
+            # Log the debug info to help diagnose the issue
+            debug_info = builder.debug_info()
+            logger.error(f"DatabaseURLBuilder failed to construct URL for {env} environment. Debug info: {debug_info}")
+            
+            # Provide helpful error message based on environment
+            if env == "production" or env == "staging":
+                raise ValueError(
+                    f"DatabaseURLBuilder failed to construct URL for {env} environment. "
+                    f"Ensure POSTGRES_HOST, POSTGRES_USER, POSTGRES_PASSWORD, and POSTGRES_DB are set, "
+                    f"or DATABASE_URL is provided. Debug info: {debug_info}"
+                )
             else:
-                raise ValueError(f"Failed to build database URL for {env} environment")
+                # For development/test, still fail but with more helpful message
+                raise ValueError(
+                    f"DatabaseURLBuilder failed to construct URL for {env} environment. "
+                    f"For development, ensure DATABASE_URL is set or use default localhost configuration. "
+                    f"Debug info: {debug_info}"
+                )
         
+        # Log safe connection info
+        logger.info(builder.get_safe_log_message())
         return database_url
     
     def get_postgres_host(self) -> str:
