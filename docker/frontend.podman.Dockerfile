@@ -7,9 +7,9 @@ WORKDIR /app
 # Copy package files first for better layer caching
 COPY frontend/package*.json ./frontend/
 
-# Install dependencies
+# Install all dependencies including dev for build
 WORKDIR /app/frontend
-RUN npm ci --only=production && npm cache clean --force
+RUN npm ci && npm cache clean --force
 
 # Copy source code
 COPY frontend/ ./
@@ -20,13 +20,11 @@ RUN npm run build
 # Production stage
 FROM node:20-slim
 
-# Install runtime dependencies
+# Install runtime dependencies and create user
 RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
-    && rm -rf /var/lib/apt/lists/*
-
-# Create non-root user (check if user exists first)
-RUN (useradd -m -u 1000 netra 2>/dev/null || true) && \
+    && rm -rf /var/lib/apt/lists/* && \
+    useradd -m -u 1000 netra && \
     mkdir -p /app && \
     chown -R 1000:1000 /app
 
