@@ -107,7 +107,7 @@ class TestDatabaseConnectionLeaks:
             
             # Use multiple sessions
             async def use_session():
-                async with DatabaseManager.get_async_session() as session:
+                async with DatabaseManager.get_db() as session:
                     await session.execute(text("SELECT 1"))
             
             # Run concurrent sessions
@@ -125,7 +125,7 @@ class TestDatabaseConnectionLeaks:
             
             async def create_and_abandon_session():
                 """Create a session and let it go out of scope."""
-                async with DatabaseManager.get_async_session() as session:
+                async with DatabaseManager.get_db() as session:
                     await session.execute(text("SELECT 1"))
                     # Session should be cleaned up when context exits
             
@@ -154,7 +154,7 @@ class TestDatabaseConnectionLeaks:
             async def worker(worker_id: int):
                 """Simulate a worker using database sessions."""
                 for i in range(3):
-                    async with DatabaseManager.get_async_session() as session:
+                    async with DatabaseManager.get_db() as session:
                         result = await session.execute(
                             text("SELECT :worker_id, :iteration"),
                             {"worker_id": worker_id, "iteration": i}
@@ -208,7 +208,7 @@ async def test_connection_leak_prevention_integration():
         tasks = []
         for i in range(20):
             async def task(task_id):
-                async with DatabaseManager.get_async_session() as session:
+                async with DatabaseManager.get_db() as session:
                     await session.execute(text(f"SELECT {task_id}"))
             tasks.append(task(i))
         
