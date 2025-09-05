@@ -1,0 +1,297 @@
+# Podman-Optimized Compose Configuration for macOS
+# Uses different ports to avoid conflicts with Docker Desktop
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: netra-postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-netra}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-netra123}
+      POSTGRES_DB: ${POSTGRES_DB:-netra_dev}
+      POSTGRES_HOST_AUTH_METHOD: md5
+      POSTGRES_INITDB_ARGS: "--auth-host=md5"
+    ports:
+      - "8090:5432"  # Changed from 5433 to avoid conflicts
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./scripts/init_db.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-netra}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '0.25'
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    container_name: netra-redis
+    command: redis-server --maxmemory 200mb --maxmemory-policy allkeys-lru --appendonly yes
+    ports:
+      - "8410:6379"  # Changed from 6380 to avoid conflicts
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+          cpus: '0.1'
+
+  # ClickHouse Analytics
+  clickhouse:
+    image: clickhouse/clickhouse-server:23-alpine
+    container_name: netra-clickhouse
+    environment:
+      CLICKHOUSE_DB: ${CLICKHOUSE_DB:-netra_analytics}
+      CLICKHOUSE_USER: ${CLICKHOUSE_USER:-netra}
+      CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD:-netra123}
+      CLICKHOUSE_DEFAULT_ACCESS_MANAGEMENT: 1
+      CLICKHOUSE_MAX_MEMORY_USAGE: 500000000
+    ports:
+      - "8492:8123"  # Changed HTTP port
+      - "9492:9000"  # Changed TCP port
+    volumes:
+      - clickhouse_data:/var/lib/clickhouse
+    healthcheck:
+      test: ["CMD", "clickhouse-client", "--query", "SELECT 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    deploy:
+      resources:
+        limits:
+          memory: 768M
+          cpus: '0.2'
+
+  # Auth Service - Build from Dockerfile
+  auth:
+    build:
+      context: .
+      dockerfile: ./docker/auth.podman.Dockerfile
+    image: netra-auth-alpine:latest
+    container_name: netra-auth
+    environment:
+      ENVIRONMENT: development
+      LOG_LEVEL: INFO
+      PYTHONPATH: /app
+      PYTHONDONTWRITEBYTECODE: 1
+      PYTHONUNBUFFERED: 1
+      
+      # Database
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_USER: ${POSTGRES_USER:-netra}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-netra123}
+      POSTGRES_DB: ${POSTGRES_DB:-netra_dev}
+      
+      # Redis
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      
+      # Server Config
+      PORT: 8081
+      HOST: 0.0.0.0
+      
+      # Auth Config
+      SERVICE_ID: auth-service
+      SERVICE_SECRET: ${SERVICE_SECRET:-test-secret-for-local-development-only-32chars}
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY:-dev-jwt-secret-key-must-be-at-least-32-characters}
+      JWT_ALGORITHM: HS256
+      ACCESS_TOKEN_EXPIRE_MINUTES: 30
+      
+      # OAuth Config
+      GOOGLE_OAUTH_CLIENT_ID_DEVELOPMENT: ${GOOGLE_OAUTH_CLIENT_ID_DEVELOPMENT}
+      GOOGLE_OAUTH_CLIENT_SECRET_DEVELOPMENT: ${GOOGLE_OAUTH_CLIENT_SECRET_DEVELOPMENT}
+      E2E_OAUTH_SIMULATION_KEY: ${E2E_OAUTH_SIMULATION_KEY}
+    ports:
+      - "8482:8081"  # Changed to avoid conflict
+    volumes:
+      - ./auth_service:/app/auth_service:ro
+      - ./shared:/app/shared:ro
+      - auth_cache:/app/.cache
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8081/health"]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+    deploy:
+      resources:
+        limits:
+          memory: 768M
+          cpus: '0.25'
+
+  # Backend Service - Build from Dockerfile
+  backend:
+    build:
+      context: .
+      dockerfile: ./docker/backend.podman.Dockerfile
+    image: netra-backend-alpine:latest
+    container_name: netra-backend
+    environment:
+      ENVIRONMENT: development
+      LOG_LEVEL: INFO
+      PYTHONPATH: /app
+      PYTHONDONTWRITEBYTECODE: 1
+      PYTHONUNBUFFERED: 1
+      
+      # Database
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_USER: ${POSTGRES_USER:-netra}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-netra123}
+      POSTGRES_DB: ${POSTGRES_DB:-netra_dev}
+      
+      # Redis
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      
+      # ClickHouse
+      CLICKHOUSE_HOST: clickhouse
+      CLICKHOUSE_PORT: 9000  # TCP port for standard connections
+      CLICKHOUSE_USER: ${CLICKHOUSE_USER:-netra}
+      CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD:-netra123}
+      CLICKHOUSE_DB: ${CLICKHOUSE_DB:-netra_analytics}
+      
+      # Auth Service
+      AUTH_SERVICE_URL: http://auth:8081
+      
+      # Server Config
+      PORT: 8000
+      HOST: 0.0.0.0
+      
+      # Secrets
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY:-dev-jwt-secret-key-must-be-at-least-32-characters}
+      SERVICE_SECRET: ${SERVICE_SECRET:-dev-service-secret-for-cross-service-auth}
+      FERNET_KEY: ${FERNET_KEY:-iZAG-Kz661gRuJXEGzxgghUFnFRamgDrjDXZE6HdJkw=}
+      SECRET_KEY: ${SECRET_KEY:-dev-secret-key-for-development}
+      
+      # AI/LLM Configuration
+      GEMINI_API_KEY: ${GEMINI_API_KEY}
+      
+      # Memory Monitoring
+      ENABLE_MEMORY_MONITORING: "true"
+      MEMORY_CHECK_INTERVAL: "60"
+      MEMORY_WARNING_THRESHOLD: "80"
+      MEMORY_CRITICAL_THRESHOLD: "90"
+      MEMORY_CLEANUP_ENABLED: "true"
+    ports:
+      - "8480:8000"  # Changed to avoid conflict
+    volumes:
+      - ./netra_backend:/app/netra_backend:ro
+      - ./shared:/app/shared:ro
+      - ./test_framework:/app/test_framework:ro
+      - ./SPEC:/app/SPEC:ro
+      - backend_cache:/app/.cache
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      clickhouse:
+        condition: service_healthy
+      auth:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+      start_period: 90s
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+          cpus: '0.4'
+
+  # Frontend Service - Build from Dockerfile  
+  frontend:
+    build:
+      context: .
+      dockerfile: ./docker/frontend.podman-dev.Dockerfile
+    image: netra-frontend-alpine:latest
+    container_name: netra-frontend
+    environment:
+      NODE_ENV: development
+      
+      # Backend API Configuration
+      NEXT_PUBLIC_BACKEND_URL: http://localhost:8480
+      NEXT_PUBLIC_AUTH_URL: http://localhost:8482
+      NEXT_PUBLIC_WS_URL: ws://localhost:8480/ws
+      
+      # Internal service URLs (for server-side requests)
+      BACKEND_URL: http://backend:8000
+      AUTH_URL: http://auth:8081
+      WS_URL: ws://backend:8000/ws
+      
+      # Feature flags
+      NEXT_PUBLIC_ENVIRONMENT: development
+      NEXT_PUBLIC_DEBUG_MODE: "true"
+      NEXT_PUBLIC_ENABLE_WEBSOCKETS: "true"
+      
+      # Security
+      NEXTAUTH_SECRET: ${NEXTAUTH_SECRET:-dev-nextauth-secret-for-development-only}
+      
+      # Port configuration
+      PORT: 3000
+      HOSTNAME: "0.0.0.0"
+    ports:
+      - "8470:3000"  # Changed to avoid conflicts
+    volumes:
+      - ./frontend:/app/frontend:ro
+      - frontend_cache:/app/.next
+    depends_on:
+      backend:
+        condition: service_healthy
+      auth:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/api/health"]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+      start_period: 90s
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+          cpus: '0.3'
+
+# Named volumes for persistent data
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+  clickhouse_data:
+    driver: local
+  auth_cache:
+    driver: local
+  backend_cache:
+    driver: local
+  frontend_cache:
+    driver: local
+
+# Single network for all services
+networks:
+  default:
+    driver: bridge
