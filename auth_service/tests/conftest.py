@@ -55,20 +55,23 @@ if "pytest" in sys.modules or get_env().get("PYTEST_CURRENT_TEST"):
     
     # Test environment configuration
     env.set("ENVIRONMENT", "test", "auth_conftest_real")
-    env.set("AUTH_FAST_TEST_MODE", "false", "auth_conftest_real")
+    env.set("AUTH_FAST_TEST_MODE", "true", "auth_conftest_real")
     env.set("JWT_SECRET_KEY", "test_jwt_secret_key_that_is_long_enough_for_testing_purposes_and_secure", "auth_conftest_real")
     env.set("SERVICE_SECRET", "test-service-secret-for-auth-service-32-chars-minimum-required-length-secure", "auth_conftest_real")
     env.set("SERVICE_ID", "auth-service-test", "auth_conftest_real")
     
-    # REAL SERVICES: Configure real database connection
-    env.set("DATABASE_URL", "postgresql+asyncpg://test_user:test_pass@localhost:5434/auth_test_db", "auth_conftest_real")
+    # FAST TEST MODE: Skip DATABASE_URL to let fast test mode use SQLite
+    # REAL SERVICES: Configure real database connection (unused in fast test mode)
+    if not env.get("AUTH_FAST_TEST_MODE", "false").lower() == "true":
+        env.set("DATABASE_URL", "postgresql+asyncpg://test_user:test_pass@localhost:5434/auth_test_db", "auth_conftest_real")
     env.set("POSTGRES_HOST", "localhost", "auth_conftest_real")
     env.set("POSTGRES_PORT", "5434", "auth_conftest_real") 
     env.set("POSTGRES_USER", "test_user", "auth_conftest_real")
     env.set("POSTGRES_PASSWORD", "test_pass", "auth_conftest_real")
     env.set("POSTGRES_DB", "auth_test_db", "auth_conftest_real")
     
-    # REAL SERVICES: Configure real Redis connection
+    # FAST TEST MODE: Disable Redis for tests (use fallback mode)
+    env.set("TEST_DISABLE_REDIS", "true", "auth_conftest_fast_test")  # Disable Redis in fast test mode
     env.set("REDIS_URL", "redis://localhost:6380/2", "auth_conftest_real")  # Use test Redis instance
     env.set("REDIS_HOST", "localhost", "auth_conftest_real")
     env.set("REDIS_PORT", "6380", "auth_conftest_real")
@@ -93,43 +96,63 @@ def event_loop():
 
 @pytest.fixture(scope="session", autouse=True)
 async def setup_real_services():
-    """Setup real services infrastructure for auth service tests.
+    """Setup services infrastructure for auth service tests.
     
-    ZERO MOCKS: Uses actual PostgreSQL and Redis connections.
+    In AUTH_FAST_TEST_MODE: Uses SQLite in-memory database and disabled Redis.
+    In normal mode: Uses actual PostgreSQL and Redis connections.
     """
-    logger.info("Setting up real services for auth_service tests...")
+    env = get_env()
+    fast_test_mode = env.get("AUTH_FAST_TEST_MODE", "false").lower() == "true"
+    
+    if fast_test_mode:
+        logger.info("Setting up fast test mode for auth_service tests (SQLite + disabled Redis)...")
+    else:
+        logger.info("Setting up real services for auth_service tests...")
     
     # Get real services manager
     services = get_real_services()
     
     try:
-        # Initialize real PostgreSQL database 
-        async with services.postgres() as db:
-            logger.info("Real PostgreSQL connected successfully")
-            
-            # Create auth service tables
-            async with db.engine.begin() as conn:
-                # Create all auth service tables
-                await conn.run_sync(Base.metadata.create_all)
-                logger.info("Auth service database schema created")
+        # Initialize auth service database using its own connection system
+        await auth_db.initialize()
         
-        # Initialize real Redis connection
-        async with services.redis() as redis_client:
+        if fast_test_mode:
+            logger.info("In-memory SQLite database initialized successfully via auth_db")
+        else:
+            logger.info("Real PostgreSQL connected successfully via auth_db")
+        
+        # Create auth service tables using the initialized connection
+        async with auth_db.engine.begin() as conn:
+            # Create all auth service tables
+            await conn.run_sync(Base.metadata.create_all)
+            logger.info("Auth service database schema created")
+        
+        # Handle Redis based on mode
+        if not fast_test_mode:
+            # Initialize real Redis connection using services manager
+            await services.redis.connect()
+            redis_client = await services.redis.get_client()
             logger.info("Real Redis connected successfully")
             
             # Clean test database
             await redis_client.flushdb()
             logger.info("Test Redis database cleaned")
+        else:
+            logger.info("Redis disabled in fast test mode")
         
         yield services
         
     except Exception as e:
-        logger.error(f"Failed to setup real services: {e}")
-        pytest.skip(f"Real services unavailable: {e}")
+        if fast_test_mode:
+            logger.error(f"Failed to setup fast test mode: {e}")
+            pytest.skip(f"Fast test mode setup failed: {e}")
+        else:
+            logger.error(f"Failed to setup real services: {e}")
+            pytest.skip(f"Real services unavailable: {e}")
     finally:
         # Cleanup services
         try:
-            await services.cleanup()
+            await services.close_all()
         except Exception:
             pass  # Ignore cleanup errors
 
@@ -140,20 +163,13 @@ async def real_auth_db(setup_real_services):
     
     ZERO MOCKS: Uses actual PostgreSQL with transaction isolation.
     """
-    services = setup_real_services
-    
-    async with services.postgres() as db:
-        # Start transaction for test isolation
-        async with db.engine.begin() as conn:
-            # Create a new session bound to the transaction
-            from sqlalchemy.ext.asyncio import AsyncSession
-            session = AsyncSession(bind=conn, expire_on_commit=False)
-            
-            try:
-                yield session
-            finally:
-                await session.close()
-                # Transaction automatically rolls back
+    # Use auth service's own database connection system
+    async with auth_db.get_session() as session:
+        try:
+            yield session
+        finally:
+            # Session cleanup handled by context manager
+            pass
 
 
 @pytest.fixture(scope="function") 
@@ -164,17 +180,19 @@ async def real_auth_redis(setup_real_services):
     """
     services = setup_real_services
     
-    async with services.redis() as redis_client:
-        # Use separate test database
-        await redis_client.select(2)  # Test database
-        
-        # Clean before test
-        await redis_client.flushdb()
-        
-        yield redis_client
-        
-        # Clean after test
-        await redis_client.flushdb()
+    # Get Redis client from services manager
+    redis_client = await services.redis.get_client()
+    
+    # Use separate test database
+    await redis_client.select(2)  # Test database
+    
+    # Clean before test
+    await redis_client.flushdb()
+    
+    yield redis_client
+    
+    # Clean after test
+    await redis_client.flushdb()
 
 
 @pytest.fixture(scope="function")

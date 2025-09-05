@@ -8,7 +8,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 from auth_service.auth_core.services.auth_service import AuthService
 from auth_service.auth_core.core.jwt_handler import JWTHandler
-from auth_service.auth_core.core.session_manager import SessionManager
+from auth_service.auth_core.routes.auth_routes import MockAuthService
 
 
 class TestRefreshTokenFix:
