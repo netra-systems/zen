@@ -706,24 +706,36 @@ class AuthEnvironment:
             return f"http://{host}:{port}"
     
     def get_oauth_redirect_uri(self, provider: str = "google") -> str:
-        """Get OAuth redirect URI with environment-specific defaults.
+        """DEPRECATED: DO NOT USE - Violates SSOT principles.
+        
+        **CRITICAL**: This method is deprecated and will be removed.
+        Use GoogleOAuthProvider.get_redirect_uri() instead.
+        
+        This method incorrectly returns frontend URLs which cannot handle OAuth callbacks.
+        See: /OAUTH_SSOT_COMPLIANCE_ANALYSIS.md for details.
+        See: /auth_service/auth_core/oauth/google_oauth.py:78 for SSOT implementation.
         
         Args:
             provider: OAuth provider name (google, github, etc.)
             
         Returns:
             Full OAuth callback URL for the provider
+            
+        Raises:
+            DeprecationWarning: Always - this method should not be used
         """
-        env = self.get_environment()
+        import warnings
+        warnings.warn(
+            "get_oauth_redirect_uri() is deprecated and violates SSOT. "
+            "Use GoogleOAuthProvider.get_redirect_uri() instead.",
+            DeprecationWarning,
+            stacklevel=2
+        )
         
-        # Check for explicit override first
-        uri = self.env.get("OAUTH_REDIRECT_URI")
-        if uri:
-            return uri
-        
-        # Build from frontend URL
-        frontend_url = self.get_frontend_url()
-        return f"{frontend_url}/auth/callback"
+        # TEMPORARY: Return auth service URL to fix immediate issue
+        # This entire method will be removed once all callers are updated
+        auth_url = self.get_auth_service_url()
+        return f"{auth_url}/auth/callback"
     
     # Environment & Deployment
     def get_environment(self) -> str:
