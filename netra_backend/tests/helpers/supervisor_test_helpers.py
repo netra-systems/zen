@@ -270,7 +270,7 @@ def assert_contains_error(error_message: str, expected_substring: str):
 
 def _create_triage_result(return_data: Dict[str, Any]):
     """Create triage result from return data."""
-    from netra_backend.app.agents.triage_sub_agent.models import TriageResult
+    from netra_backend.app.agents.triage.unified_triage_agent import TriageResult
     triage_dict = return_data.get('triage_result', {'message_type': 'query'})
     if isinstance(triage_dict, dict):
         return _build_triage_result_from_dict(TriageResult, triage_dict)
@@ -362,7 +362,7 @@ def _create_success_state(agent_name: str, success_data: Dict[str, Any]):
 
 def _process_triage_success_data(success_data: Dict[str, Any]) -> Dict[str, Any]:
     """Process triage success data."""
-    from netra_backend.app.agents.triage_sub_agent.models import TriageResult
+    from netra_backend.app.agents.triage.unified_triage_agent import TriageResult
     triage_dict = success_data['triage_result']
     if isinstance(triage_dict, dict):
         category = "success" if triage_dict.get('success') else triage_dict.get('message_type', 'query')

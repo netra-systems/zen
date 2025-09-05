@@ -29,7 +29,9 @@ from netra_backend.app.websocket_core import (
     JsonRpcHandler,
     ErrorHandler
 )
-from netra_backend.app.services.websocket.broadcast_manager import BroadcastManager
+# BroadcastManager removed - use UnifiedWebSocketManager from websocket_core instead
+# from netra_backend.app.services.websocket.broadcast_manager import BroadcastManager
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager as BroadcastManager
 from netra_backend.app.services.websocket.message_handler import MessageHandlerService
 from netra_backend.app.websocket_core.handlers import MessageRouter as ServiceMessageRouter
 
@@ -242,7 +244,9 @@ class TestCircularImportPrevention:
         )
         
         # Service imports should work
-        from netra_backend.app.services.websocket.broadcast_manager import BroadcastManager
+        # BroadcastManager removed - use UnifiedWebSocketManager from websocket_core instead
+# from netra_backend.app.services.websocket.broadcast_manager import BroadcastManager
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager as BroadcastManager
         from netra_backend.app.services.websocket.message_handler import MessageHandlerService
         from netra_backend.app.websocket_core.handlers import MessageRouter as ServiceMessageRouter
         
