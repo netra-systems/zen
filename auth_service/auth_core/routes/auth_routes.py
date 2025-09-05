@@ -2,7 +2,7 @@
 Basic Auth Routes for Auth Service
 Minimal implementation to get the service running
 """
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, FastAPI
 from typing import Dict, Any
 from datetime import datetime, UTC
 
