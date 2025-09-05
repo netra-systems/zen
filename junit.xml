@@ -1,9 +1,1 @@
-<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="1" failures="0" skipped="0" tests="1" time="0.711" timestamp="2025-09-05T08:51:43.416044-07:00" hostname="Anthony"><testcase classname="" name="tests.integration.test_auth_api_integration" time="0.000"><error message="collection failure">ImportError while importing test module 'C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\auth_service\tests\integration\test_auth_api_integration.py'.
-Hint: make sure your test modules/packages have valid Python names.
-Traceback:
-..\..\..\..\miniconda3\Lib\importlib\__init__.py:90: in import_module
-    return _bootstrap._gcd_import(name[level:], package, level)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-auth_service\tests\integration\test_auth_api_integration.py:15: in &lt;module&gt;
-    from auth_service.auth_core.database.repository import AuthRepository
-E   ImportError: cannot import name 'AuthRepository' from 'auth_service.auth_core.database.repository' (C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\auth_service\auth_core\database\repository.py)</error></testcase></testsuite></testsuites>
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="0" skipped="0" tests="4" time="1.834" timestamp="2025-09-05T09:38:14.711538-07:00" hostname="Shivanginis-MacBook-Pro.local"><testcase classname="tests.test_oauth_redirect_regression.TestOAuthRedirectURIRegression" name="test_redirect_uri_always_set_in_token_exchange" time="0.048" /><testcase classname="tests.test_oauth_redirect_regression.TestOAuthRedirectURIRegression" name="test_redirect_uri_consistent_across_calls" time="0.002" /><testcase classname="tests.test_oauth_redirect_regression.TestOAuthRedirectURIRegression" name="test_redirect_uri_uses_ssot_path" time="0.001" /><testcase classname="tests.test_oauth_redirect_regression.TestOAuthRedirectURIRegression" name="test_redirect_uri_environment_specific" time="0.003" /></testsuite></testsuites>
