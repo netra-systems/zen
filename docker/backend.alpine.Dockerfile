@@ -31,7 +31,6 @@ RUN --mount=type=cache,target=/root/.cache/pip \
     pip install --no-cache-dir --user \
     --no-warn-script-location \
     --disable-pip-version-check \
-    --no-deps \
     -r requirements.txt || \
     pip install --no-cache-dir --user \
     --no-warn-script-location \
@@ -117,7 +116,7 @@ CMD ["sh", "-c", "\
         --bind 0.0.0.0:8000 \
         --timeout ${TIMEOUT:-60} \
         --graceful-timeout 10 \
-        --keepalive 5 \
+        --keep-alive 5 \
         --max-requests 1000 \
         --max-requests-jitter 100 \
         --access-logfile - \

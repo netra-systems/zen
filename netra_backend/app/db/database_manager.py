@@ -196,6 +196,28 @@ class DatabaseManager:
         
         return database_url
     
+    @staticmethod
+    def get_migration_url_sync_format() -> str:
+        """Get database URL in sync format for Alembic migrations.
+        
+        Returns:
+            Properly formatted sync database URL for migrations
+        """
+        env = get_env()
+        url_builder = DatabaseURLBuilder(env.as_dict())
+        
+        # Get sync URL for migrations
+        migration_url = url_builder.get_url_for_environment(sync=True)
+        
+        if not migration_url:
+            raise ValueError("Could not determine migration database URL")
+        
+        # Ensure the URL is in sync format by removing async drivers
+        if "postgresql+asyncpg://" in migration_url:
+            migration_url = migration_url.replace("postgresql+asyncpg://", "postgresql://")
+        
+        return migration_url
+    
     @classmethod
     @asynccontextmanager
     async def get_async_session(cls, name: str = 'primary'):

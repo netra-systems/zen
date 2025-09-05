@@ -29,10 +29,10 @@ services:
         -c wal_buffers=16MB
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U test"]
-      interval: 5s
-      timeout: 3s
-      retries: 15
-      start_period: 30s
+      interval: 10s
+      timeout: 10s
+      retries: 30
+      start_period: 120s
     networks:
       - default
     deploy:
@@ -142,7 +142,7 @@ services:
       alpine-test-redis:
         condition: service_healthy
       alpine-test-clickhouse:
-        condition: service_healthy
+        condition: service_started
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
       interval: 10s

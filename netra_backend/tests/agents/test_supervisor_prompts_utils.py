@@ -29,11 +29,11 @@ from netra_backend.app.schemas import (
 )
 
 from netra_backend.app.agents.state import DeepAgentState
-from netra_backend.app.agents.base.execution_context import (
+from netra_backend.app.agents.supervisor.execution_context import (
     AgentExecutionContext,
     AgentExecutionResult,
-    ExecutionStrategy,
 )
+from netra_backend.app.core.interfaces_execution import ExecutionStrategy
 
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher

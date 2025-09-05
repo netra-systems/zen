@@ -25,9 +25,9 @@ class QualitySupervisor:
         result = await self.llm_manager.ask_llm("validate", "quality")
         return json.loads(result)
 
-# Import real AdminToolDispatcher - tests should use actual implementation
+# Import real UnifiedAdminToolDispatcher - tests should use actual implementation
 # If mocking is needed, use unittest.mock.Mock or pytest fixtures
-from netra_backend.app.agents.admin_tool_dispatcher import AdminToolDispatcher
+from netra_backend.app.admin.tools.unified_admin_dispatcher import UnifiedAdminToolDispatcher as AdminToolDispatcher
 
 class MockAdminToolDispatcher:
     """Mock AdminToolDispatcher for testing with required methods"""
