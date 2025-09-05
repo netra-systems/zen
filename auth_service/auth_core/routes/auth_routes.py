@@ -14,6 +14,9 @@ from fastapi.responses import JSONResponse
 from auth_service.auth_core.services.auth_service import AuthService
 from auth_service.auth_core.models.auth_models import RefreshRequest
 
+# Import MockAuthService for testing
+from auth_service.test_framework.mock_auth_service import MockAuthService
+
 logger = logging.getLogger(__name__)
 
 # Create router instances

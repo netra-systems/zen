@@ -8,7 +8,8 @@ import logging
 from typing import Dict, Any, Optional, List
 from contextlib import asynccontextmanager
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, AsyncEngine
-from sqlalchemy.pool import NullPool, QueuePool
+from sqlalchemy.pool import NullPool, QueuePool, StaticPool
+from sqlalchemy.pool import AsyncAdaptedQueuePool
 from sqlalchemy import text
 
 from netra_backend.app.core.config import get_config
@@ -36,14 +37,24 @@ class DatabaseManager:
             pool_size = getattr(self.config, 'database_pool_size', 5)
             max_overflow = getattr(self.config, 'database_max_overflow', 10)
             
+            # Use appropriate pool class for async engines
+            engine_kwargs = {
+                "echo": echo,
+                "pool_pre_ping": True,
+                "pool_recycle": 3600,
+            }
+            
+            # Configure pooling for async engines
+            if pool_size <= 0 or "sqlite" in self.config.database_url.lower():
+                # Use NullPool for SQLite or disabled pooling
+                engine_kwargs["poolclass"] = NullPool
+            else:
+                # Use StaticPool for async engines - it doesn't support pool_size/max_overflow
+                engine_kwargs["poolclass"] = StaticPool
+            
             primary_engine = create_async_engine(
                 self.config.database_url,
-                echo=echo,
-                poolclass=QueuePool if pool_size > 0 else NullPool,
-                pool_size=pool_size,
-                max_overflow=max_overflow,
-                pool_pre_ping=True,
-                pool_recycle=3600,
+                **engine_kwargs
             )
             
             self._engines['primary'] = primary_engine

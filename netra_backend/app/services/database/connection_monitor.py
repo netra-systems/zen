@@ -37,7 +37,7 @@ async def start_connection_monitoring() -> None:
     config = config_manager.get_config()
     # Skip monitoring if database is in mock mode
     database_url = getattr(config, 'database_url', '')
-    if "mock" in database_url.lower():
+    if database_url and "mock" in database_url.lower():
         logger.info("Skipping connection monitoring in mock mode")
         return
         
