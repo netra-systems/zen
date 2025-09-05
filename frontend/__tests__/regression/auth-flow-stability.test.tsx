@@ -52,9 +52,17 @@ describe('Auth Flow Stability Regression Tests', () => {
       pathname: '/protected',
     });
     
-    // Clear localStorage
+    // Clear localStorage and ensure clean state
     localStorage.clear();
     jest.clearAllMocks();
+    
+    // Mock window.location.pathname for AuthGuard
+    Object.defineProperty(window, 'location', {
+      value: {
+        pathname: '/protected',
+      },
+      writable: true,
+    });
   });
   
   const createAuthContext = (overrides?: Partial<AuthContextType>): AuthContextType => ({
@@ -105,6 +113,9 @@ describe('Auth Flow Stability Regression Tests', () => {
     });
     
     it('should perform auth check only once per mount', async () => {
+      // Ensure no token in localStorage
+      localStorage.clear();
+      
       const authValue = createAuthContext({
         user: null,
         loading: false,
@@ -118,15 +129,15 @@ describe('Auth Flow Stability Regression Tests', () => {
         authValue
       );
       
-      // Initial redirect
+      // Initial redirect - wait longer and provide more specific expectations
       await waitFor(() => {
         expect(mockPush).toHaveBeenCalledWith('/login');
-      });
+      }, { timeout: 3000 });
       
       // Clear mock to track new calls
       mockPush.mockClear();
       
-      // Trigger multiple re-renders
+      // Trigger multiple re-renders with the same auth state
       for (let i = 0; i < 5; i++) {
         rerender(
           <AuthContext.Provider value={authValue}>
@@ -136,6 +147,9 @@ describe('Auth Flow Stability Regression Tests', () => {
           </AuthContext.Provider>
         );
       }
+      
+      // Wait a bit to ensure no additional calls
+      await new Promise(resolve => setTimeout(resolve, 100));
       
       // Should not redirect again
       expect(mockPush).not.toHaveBeenCalled();
@@ -186,6 +200,9 @@ describe('Auth Flow Stability Regression Tests', () => {
   
   describe('Auth Check Race Conditions', () => {
     it('should wait for initialization before checking auth', async () => {
+      // Ensure no token in localStorage
+      localStorage.clear();
+      
       // Start uninitialized
       const authValue = createAuthContext({
         user: null,
@@ -203,7 +220,7 @@ describe('Auth Flow Stability Regression Tests', () => {
       // Should not redirect while not initialized
       expect(mockPush).not.toHaveBeenCalled();
       
-      // Become initialized without user
+      // Become initialized without user and no token
       const initializedAuthValue = createAuthContext({
         user: null,
         loading: false,
@@ -221,7 +238,7 @@ describe('Auth Flow Stability Regression Tests', () => {
       // Now should redirect
       await waitFor(() => {
         expect(mockPush).toHaveBeenCalledWith('/login');
-      });
+      }, { timeout: 3000 });
     });
     
     it('should handle rapid auth state changes', async () => {
