@@ -35,8 +35,9 @@ def get_database_url() -> str:
     
     if not database_url:
         raise RuntimeError(
-            "DATABASE_URL not configured. Either set DATABASE_URL directly or provide "
-            "POSTGRES_HOST, POSTGRES_PORT, POSTGRES_DB, POSTGRES_USER, and POSTGRES_PASSWORD"
+            "Database configuration not found. Please provide either: "
+            "1) Individual POSTGRES_HOST, POSTGRES_PORT, POSTGRES_DB, POSTGRES_USER, and POSTGRES_PASSWORD environment variables, or "
+            "2) A complete DATABASE_URL environment variable (deprecated, use individual variables instead)"
         )
     
     return database_url

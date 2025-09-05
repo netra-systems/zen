@@ -855,29 +855,34 @@ class DatabaseInitializer:
         import os
         from urllib.parse import urlparse
         
-        # Get database URL from environment
-        database_url = get_env().get("DATABASE_URL")
+        # Use DatabaseURLBuilder as SINGLE SOURCE OF TRUTH
+        from shared.database_url_builder import DatabaseURLBuilder
+        
+        env = get_env()
+        builder = DatabaseURLBuilder(env.as_dict())
+        
+        # Get database URL from builder
+        database_url = builder.get_url_for_environment(sync=False)
+        
         if not database_url:
-            # Use default development settings
-            config = DatabaseConfig(
-                type=DatabaseType.POSTGRESQL,
-                host="localhost",
-                port=5432,
-                database="netra_dev",
-                user="postgres",
-                password="postgres"
+            # NO MANUAL FALLBACKS - DatabaseURLBuilder is SSOT
+            raise ValueError(
+                "DatabaseURLBuilder failed to construct database URL. "
+                "Ensure DATABASE_URL is set or provide POSTGRES_* environment variables."
             )
-        else:
-            # Parse the DATABASE_URL
-            parsed = urlparse(database_url)
-            config = DatabaseConfig(
-                type=DatabaseType.POSTGRESQL,
-                host=parsed.hostname or "localhost",
-                port=parsed.port or 5432,
-                database=parsed.path.lstrip("/") if parsed.path else "netra_dev",
-                user=parsed.username or "postgres",
-                password=parsed.password or "postgres"
-            )
+        
+        # Parse the URL to get components for DatabaseConfig
+        parsed = urlparse(database_url)
+        
+        # Create config from parsed URL
+        config = DatabaseConfig(
+            type=DatabaseType.POSTGRESQL,
+            host=parsed.hostname or "localhost",
+            port=parsed.port or 5432,
+            database=parsed.path.lstrip("/") if parsed.path else "netra_dev",
+            user=parsed.username or "postgres",
+            password=parsed.password or ""
+        )
         
         self.add_database(config)
         logger.info(f"Auto-configured PostgreSQL: {config.host}:{config.port}/{config.database}")
