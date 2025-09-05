@@ -20,8 +20,9 @@ class SessionManager:
     This is a minimal implementation for backward compatibility.
     """
     
-    def __init__(self):
-        logger.debug("Initialized services SessionManager stub")
+    def __init__(self, model_name: Optional[str] = None):
+        self.model_name = model_name
+        logger.debug(f"Initialized services SessionManager stub for {model_name or 'general'}")
     
     @asynccontextmanager
     async def get_session(self) -> AsyncGenerator[Any, None]:

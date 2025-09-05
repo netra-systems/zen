@@ -51,7 +51,7 @@ except Exception:
     pass
 
 permission_service = ToolPermissionService(redis_client)
-tool_registry = UnifiedToolRegistry(permission_service=permission_service)
+tool_registry = UnifiedToolRegistry()
 
 
 async def extract_tool_data_components(current_user: User, category: Optional[str]) -> tuple:
