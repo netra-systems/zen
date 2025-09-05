@@ -53,6 +53,7 @@ class AuthService:
         self.max_login_attempts = int(get_env().get("MAX_LOGIN_ATTEMPTS", "5"))
         self.lockout_duration = int(get_env().get("LOCKOUT_DURATION_MINUTES", "15"))
         self.db_session = None  # Initialize as None, set later if database available
+        self._db_connection = None  # Store database connection
         
         # Circuit breaker for external API calls
         self._circuit_breaker_state = {}
@@ -62,6 +63,26 @@ class AuthService:
         
         # Simple in-memory user store for testing
         self._test_users = {}
+        
+        # Initialize database connection
+        self._initialize_database()
+    
+    def _initialize_database(self):
+        """Initialize database connection for auth service"""
+        try:
+            from auth_service.auth_core.database.connection import auth_db
+            self._db_connection = auth_db
+            logger.info("Auth service database connection initialized")
+        except Exception as e:
+            logger.error(f"Failed to initialize database connection: {e}")
+            self._db_connection = None
+    
+    async def _get_db_session(self):
+        """Get database session for operations"""
+        if self._db_connection:
+            async with self._db_connection.get_session() as session:
+                return session
+        return None
         
     def create_session(self, user_id: str, user_data: Dict) -> str:
         """Create a new user session."""
@@ -93,18 +114,53 @@ class AuthService:
     
     async def authenticate_user(self, email: str, password: str) -> Optional[Tuple[str, Dict]]:
         """Authenticate a user by email and password."""
+        from auth_service.auth_core.database.repository import AuthUserRepository
+        
         try:
-            # For testing, use simple in-memory store
+            # Try database authentication first
+            if self._db_connection:
+                async with self._db_connection.get_session() as session:
+                    try:
+                        user_repo = AuthUserRepository(session)
+                        user = await user_repo.get_by_email(email)
+                        
+                        if user and user.hashed_password:
+                            try:
+                                # Verify password
+                                self.password_hasher.verify(user.hashed_password, password)
+                                # Update last login
+                                user.last_login_at = datetime.now(UTC)
+                                await session.commit()
+                                
+                                user_data = {
+                                    "email": user.email,
+                                    "name": user.full_name or "",
+                                    "is_verified": user.is_verified,
+                                    "is_active": user.is_active
+                                }
+                                return str(user.id), user_data
+                            except VerifyMismatchError:
+                                logger.info(f"Invalid password for user: {email}")
+                                return None
+                    except Exception as e:
+                        await session.rollback()
+                        logger.error(f"Database error during authentication: {e}")
+                        raise
+            
+            # Fallback to test users for development
             if email == "dev@example.com" and password == "dev":
                 user_id = "dev-user-001"
                 user_data = {"email": email, "name": "Dev User"}
                 return user_id, user_data
             
-            # Check test users
+            # Check in-memory test users
             if email in self._test_users:
                 stored_user = self._test_users[email]
-                if self.password_hasher.verify(stored_user['password_hash'], password):
+                try:
+                    self.password_hasher.verify(stored_user['password_hash'], password)
                     return stored_user['id'], {"email": email, "name": stored_user.get('name', '')}
+                except VerifyMismatchError:
+                    return None
             
             return None
         except Exception as e:
@@ -112,26 +168,81 @@ class AuthService:
             return None
     
     async def create_user(self, email: str, password: str, name: str = "") -> Optional[str]:
-        """Create a new user."""
+        """Create a new user with database persistence."""
+        from auth_service.auth_core.database.repository import AuthUserRepository
+        from auth_service.auth_core.database.models import AuthUser
+        from sqlalchemy.exc import IntegrityError
+        
+        # Validate email format
+        email_pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+        if not re.match(email_pattern, email):
+            logger.error(f"Invalid email format: {email}")
+            return None
+        
         try:
-            # Check if user already exists
-            if email in self._test_users:
-                return None
-            
-            # Create new user
-            import uuid
-            user_id = str(uuid.uuid4())
-            password_hash = self.password_hasher.hash(password)
-            
-            self._test_users[email] = {
-                'id': user_id,
-                'email': email,
-                'name': name,
-                'password_hash': password_hash,
-                'created_at': datetime.now(UTC)
-            }
-            
-            return user_id
+            # Try to get database session
+            if self._db_connection:
+                async with self._db_connection.get_session() as session:
+                    try:
+                        user_repo = AuthUserRepository(session)
+                        
+                        # Check if user already exists
+                        existing_user = await user_repo.get_by_email(email)
+                        if existing_user:
+                            logger.info(f"User already exists: {email}")
+                            return None
+                        
+                        # Hash password
+                        password_hash = self.password_hasher.hash(password)
+                        
+                        # Create new user in database
+                        new_user = AuthUser(
+                            email=email,
+                            full_name=name,
+                            hashed_password=password_hash,
+                            auth_provider="local",
+                            is_active=True,
+                            is_verified=False,
+                            created_at=datetime.now(UTC),
+                            updated_at=datetime.now(UTC)
+                        )
+                        
+                        session.add(new_user)
+                        await session.commit()
+                        
+                        logger.info(f"User created successfully in database: {email}")
+                        return str(new_user.id)
+                    except IntegrityError as e:
+                        await session.rollback()
+                        logger.error(f"Database integrity error creating user: {e}")
+                        return None
+                    except Exception as e:
+                        await session.rollback()
+                        logger.error(f"Database error creating user: {e}")
+                        raise
+            else:
+                # Fallback to in-memory store for testing only
+                logger.warning("No database available, using in-memory store")
+                if email in self._test_users:
+                    return None
+                
+                import uuid
+                user_id = str(uuid.uuid4())
+                password_hash = self.password_hasher.hash(password)
+                
+                self._test_users[email] = {
+                    'id': user_id,
+                    'email': email,
+                    'name': name,
+                    'password_hash': password_hash,
+                    'created_at': datetime.now(UTC)
+                }
+                
+                return user_id
+                
+        except IntegrityError as e:
+            logger.error(f"Database integrity error creating user: {e}")
+            return None
         except Exception as e:
             logger.error(f"User creation error: {e}")
             return None
