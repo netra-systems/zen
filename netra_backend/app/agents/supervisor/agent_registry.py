@@ -91,7 +91,7 @@ class UserAgentSession:
             )
         
         # Use factory to create properly isolated bridge
-        bridge = await create_agent_websocket_bridge(user_context)
+        bridge = create_agent_websocket_bridge(user_context)
         self._websocket_bridge = bridge
         logger.debug(f"Factory-created WebSocket bridge set for user {self.user_id}")
         
@@ -298,7 +298,23 @@ class AgentRegistry(UniversalAgentRegistry):
             
         async with self._session_lock:
             if user_id not in self._user_sessions:
-                self._user_sessions[user_id] = UserAgentSession(user_id)
+                user_session = UserAgentSession(user_id)
+                
+                # If we have a WebSocket manager at the registry level, set it on the new session
+                if hasattr(self, 'websocket_manager') and self.websocket_manager is not None:
+                    try:
+                        from netra_backend.app.agents.supervisor.execution_factory import UserExecutionContext
+                        user_context = UserExecutionContext(
+                            user_id=user_id,
+                            request_id=f"session_init_{user_id}_{id(self)}",
+                            thread_id=f"session_thread_{user_id}"
+                        )
+                        await user_session.set_websocket_manager(self.websocket_manager, user_context)
+                        logger.debug(f"Set WebSocket manager on new user session for {user_id}")
+                    except Exception as e:
+                        logger.warning(f"Failed to set WebSocket manager on new user session for {user_id}: {e}")
+                
+                self._user_sessions[user_id] = user_session
                 logger.info(f"🔐 Created isolated session for user {user_id}")
             return self._user_sessions[user_id]
     
@@ -355,8 +371,8 @@ class AgentRegistry(UniversalAgentRegistry):
         
         # Set WebSocket manager if provided
         if websocket_manager:
-            # Use asyncio.create_task to handle async method
-            asyncio.create_task(user_session.set_websocket_manager(websocket_manager, user_context))
+            # Await the async method since we're already in async context
+            await user_session.set_websocket_manager(websocket_manager, user_context)
         
         # Create isolated execution context
         execution_context = await user_session.create_agent_execution_context(
@@ -364,7 +380,7 @@ class AgentRegistry(UniversalAgentRegistry):
         )
         
         # Use factory to create agent with proper isolation
-        agent = await self.get(agent_type, execution_context)
+        agent = await self.get_async(agent_type, execution_context)
         
         if agent is None:
             raise KeyError(f"No factory registered for agent type: {agent_type}")
@@ -511,6 +527,248 @@ class AgentRegistry(UniversalAgentRegistry):
             
             logger.warning(f"🚨 Emergency cleanup completed: {cleanup_report}")
             return cleanup_report
+    
+    # ===================== WEBSOCKET INTEGRATION =====================
+    
+    def set_websocket_manager(self, manager: 'WebSocketManager') -> None:
+        """Set WebSocket manager for agent events with user isolation support.
+        
+        This method integrates with the user isolation pattern by:
+        1. Storing the WebSocket manager at the registry level
+        2. Propagating it to all existing user sessions
+        3. Ensuring new user sessions get the WebSocket manager automatically
+        
+        CRITICAL: This enables real-time chat notifications across all user sessions.
+        
+        Args:
+            manager: WebSocket manager instance for agent events
+        """
+        from netra_backend.app.websocket_core.manager import WebSocketManager
+        from netra_backend.app.agents.supervisor.execution_factory import UserExecutionContext
+        
+        if manager is None:
+            logger.warning("WebSocket manager is None - WebSocket events will be disabled")
+            return
+        
+        # Store at registry level for new user sessions
+        super().set_websocket_manager(manager)  # Call parent class method
+        
+        # Propagate to all existing user sessions asynchronously
+        # We use asyncio.create_task to avoid blocking in sync context
+        if self._user_sessions:
+            logger.info(f"Propagating WebSocket manager to {len(self._user_sessions)} existing user sessions")
+            
+            # Create a coroutine to update all user sessions
+            async def update_user_sessions():
+                try:
+                    for user_id, user_session in self._user_sessions.items():
+                        try:
+                            # Create user context for this session
+                            user_context = UserExecutionContext(
+                                user_id=user_id,
+                                request_id=f"websocket_update_{user_id}_{id(self)}",
+                                thread_id=f"ws_thread_{user_id}"
+                            )
+                            # Set WebSocket manager on user session
+                            await user_session.set_websocket_manager(manager, user_context)
+                            logger.debug(f"Updated WebSocket manager for user {user_id}")
+                        except Exception as e:
+                            logger.error(f"Failed to update WebSocket manager for user {user_id}: {e}")
+                except Exception as e:
+                    logger.error(f"Failed to update user sessions with WebSocket manager: {e}")
+            
+            # Schedule the async update - don't wait for it in sync context
+            import asyncio
+            try:
+                # Try to get the current event loop
+                loop = asyncio.get_event_loop()
+                if loop.is_running():
+                    # If loop is running, schedule the task
+                    asyncio.create_task(update_user_sessions())
+                else:
+                    # If no loop is running, we can't schedule async tasks
+                    logger.warning("No event loop running - user sessions will get WebSocket manager on next access")
+            except RuntimeError:
+                # No event loop exists
+                logger.warning("No event loop available - user sessions will get WebSocket manager on next access")
+        
+        logger.info(f"✅ WebSocket manager set on AgentRegistry with user isolation support")
+    
+    async def set_websocket_manager_async(self, manager: 'WebSocketManager') -> None:
+        """Async version of set_websocket_manager for async contexts.
+        
+        This method can be used when we're already in an async context and want
+        to properly await the user session updates.
+        
+        Args:
+            manager: WebSocket manager instance for agent events
+        """
+        from netra_backend.app.websocket_core.manager import WebSocketManager
+        from netra_backend.app.agents.supervisor.execution_factory import UserExecutionContext
+        
+        if manager is None:
+            logger.warning("WebSocket manager is None - WebSocket events will be disabled")
+            return
+        
+        # Store at registry level for new user sessions
+        super().set_websocket_manager(manager)  # Call parent class method
+        
+        # Propagate to all existing user sessions
+        if self._user_sessions:
+            logger.info(f"Propagating WebSocket manager to {len(self._user_sessions)} existing user sessions")
+            
+            for user_id, user_session in self._user_sessions.items():
+                try:
+                    # Create user context for this session
+                    user_context = UserExecutionContext(
+                        user_id=user_id,
+                        request_id=f"websocket_update_{user_id}_{id(self)}",
+                        thread_id=f"ws_thread_{user_id}"
+                    )
+                    # Set WebSocket manager on user session
+                    await user_session.set_websocket_manager(manager, user_context)
+                    logger.debug(f"Updated WebSocket manager for user {user_id}")
+                except Exception as e:
+                    logger.error(f"Failed to update WebSocket manager for user {user_id}: {e}")
+        
+        logger.info(f"✅ WebSocket manager set on AgentRegistry with user isolation support (async)")
+    
+    # Override get method to pass WebSocket bridge to factories
+    def get(self, key: str, context: Optional['UserExecutionContext'] = None) -> Optional['BaseAgent']:
+        """Get singleton or create instance via factory with WebSocket bridge integration.
+        
+        This override ensures that agent factories receive the WebSocket bridge
+        for proper event handling.
+        
+        Args:
+            key: Agent type identifier
+            context: Optional context for factory creation
+            
+        Returns:
+            Agent instance or None if not found
+        """
+        with self._lock:
+            item_info = self._items.get(key)
+            if not item_info:
+                return None
+            
+            # Mark as accessed
+            if self.enable_metrics:
+                item_info.mark_accessed()
+                self._metrics['total_retrievals'] += 1
+            
+            # Return singleton if available
+            if item_info.value is not None:
+                return item_info.value
+            
+            # Try factory if context provided
+            if item_info.factory and context:
+                self._metrics['factory_creations'] += 1
+                
+                # Get WebSocket bridge from the appropriate user session
+                websocket_bridge = None
+                if context.user_id in self._user_sessions:
+                    user_session = self._user_sessions[context.user_id]
+                    websocket_bridge = user_session._websocket_bridge
+                
+                try:
+                    # Check if factory is async
+                    import asyncio
+                    import inspect
+                    
+                    if inspect.iscoroutinefunction(item_info.factory):
+                        # Factory is async, need to handle differently
+                        logger.warning(f"Agent {key} has async factory but get() is sync - use get_async() instead")
+                        
+                        # Try to run the async factory in the current event loop
+                        try:
+                            loop = asyncio.get_event_loop()
+                            if loop.is_running():
+                                # Can't use loop.run_until_complete in a running loop
+                                # Return None and log the issue
+                                logger.error(f"Cannot create async agent {key} in running event loop - use get_async() instead")
+                                return None
+                            else:
+                                # Loop exists but not running, can use run_until_complete
+                                return loop.run_until_complete(item_info.factory(context, websocket_bridge))
+                        except RuntimeError:
+                            # No event loop
+                            logger.error(f"No event loop available for async agent {key} - use get_async() instead")
+                            return None
+                    else:
+                        # Factory is sync
+                        return item_info.factory(context, websocket_bridge)
+                        
+                except Exception as e:
+                    logger.error(f"Failed to create agent {key} via factory: {e}")
+                    # Fallback: try calling factory with just context
+                    try:
+                        return item_info.factory(context)
+                    except Exception as e2:
+                        logger.error(f"Fallback factory call also failed for agent {key}: {e2}")
+                        return None
+            
+            return None
+    
+    async def get_async(self, key: str, context: Optional['UserExecutionContext'] = None) -> Optional['BaseAgent']:
+        """Async version of get method for proper async factory handling.
+        
+        This method properly handles async agent factories with WebSocket bridge integration.
+        
+        Args:
+            key: Agent type identifier
+            context: Optional context for factory creation
+            
+        Returns:
+            Agent instance or None if not found
+        """
+        async with self._session_lock:
+            item_info = self._items.get(key)
+            if not item_info:
+                return None
+            
+            # Mark as accessed
+            if self.enable_metrics:
+                item_info.mark_accessed()
+                self._metrics['total_retrievals'] += 1
+            
+            # Return singleton if available
+            if item_info.value is not None:
+                return item_info.value
+            
+            # Try factory if context provided
+            if item_info.factory and context:
+                self._metrics['factory_creations'] += 1
+                
+                # Get WebSocket bridge from the appropriate user session
+                websocket_bridge = None
+                if context.user_id in self._user_sessions:
+                    user_session = self._user_sessions[context.user_id]
+                    websocket_bridge = user_session._websocket_bridge
+                
+                try:
+                    import inspect
+                    
+                    if inspect.iscoroutinefunction(item_info.factory):
+                        # Factory is async
+                        return await item_info.factory(context, websocket_bridge)
+                    else:
+                        # Factory is sync
+                        return item_info.factory(context, websocket_bridge)
+                        
+                except Exception as e:
+                    logger.error(f"Failed to create agent {key} via async factory: {e}")
+                    # Fallback: try calling factory with just context
+                    try:
+                        if inspect.iscoroutinefunction(item_info.factory):
+                            return await item_info.factory(context)
+                        else:
+                            return item_info.factory(context)
+                    except Exception as e2:
+                        logger.error(f"Fallback async factory call also failed for agent {key}: {e2}")
+                        return None
+            
+            return None
     
     # ===================== BACKWARD COMPATIBILITY =====================
     
@@ -897,7 +1155,7 @@ class AgentRegistry(UniversalAgentRegistry):
     
     async def get_agent(self, name: str, context: Optional['UserExecutionContext'] = None) -> Optional['BaseAgent']:
         """Get agent with optional context for factory creation."""
-        return self.get(name, context)
+        return await self.get_async(name, context)
     
     async def reset_all_agents(self) -> Dict[str, Any]:
         """Reset is not needed with factory pattern - returns success."""
