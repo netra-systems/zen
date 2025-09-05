@@ -225,6 +225,14 @@ class StartupHealthChecker:
                         check_time=datetime.now(timezone.utc),
                         latency_ms=latency_ms
                     )
+                else:
+                    # Redis manager exists but ping failed or no connection
+                    return HealthCheckResult(
+                        service_name=service_name,
+                        status=ServiceStatus.DEGRADED,
+                        message="Redis manager exists but not connected",
+                        check_time=datetime.now(timezone.utc)
+                    )
             else:
                 return HealthCheckResult(
                     service_name=service_name,

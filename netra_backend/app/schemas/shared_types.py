@@ -12,6 +12,7 @@ This module provides shared type definitions used across multiple components.
 from abc import ABC, abstractmethod
 from enum import Enum
 from typing import Any, Dict, List, Optional, Union
+import uuid
 
 from pydantic import BaseModel, Field
 
@@ -69,13 +70,21 @@ class CacheKey(BaseModel):
 class ErrorContext(BaseModel):
     """Context for error reporting."""
     operation: str
-    module: str
+    module: Optional[str] = None
     function: Optional[str] = None
     user_id: Optional[str] = None
     request_id: Optional[str] = None
     trace_id: Optional[str] = None
     retry_count: int = 0
     additional_data: Dict[str, Any] = Field(default_factory=dict)
+    details: Optional[Dict[str, Any]] = None
+    component: Optional[str] = None
+    agent_name: Optional[str] = None
+    
+    @staticmethod
+    def generate_trace_id() -> str:
+        """Generate a unique trace ID."""
+        return str(uuid.uuid4())
 
 
 class EventContext(BaseModel):

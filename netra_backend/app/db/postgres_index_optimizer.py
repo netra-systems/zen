@@ -206,3 +206,7 @@ class PostgreSQLIndexOptimizer:
             except Exception as e:
                 logger.error(f"Error getting index usage stats: {e}")
                 return {}
+    
+    async def optimize(self) -> Dict[str, bool]:
+        """Optimize database indexes (wrapper for backward compatibility)."""
+        return await self.create_performance_indexes()

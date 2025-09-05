@@ -31,12 +31,17 @@ class DatabaseManager:
         
         try:
             # Create primary database engine
+            # Handle different config attribute names gracefully
+            echo = getattr(self.config, 'database_echo', False)
+            pool_size = getattr(self.config, 'database_pool_size', 5)
+            max_overflow = getattr(self.config, 'database_max_overflow', 10)
+            
             primary_engine = create_async_engine(
                 self.config.database_url,
-                echo=self.config.database_echo,
-                poolclass=QueuePool if self.config.database_pool_size > 0 else NullPool,
-                pool_size=self.config.database_pool_size,
-                max_overflow=self.config.database_max_overflow,
+                echo=echo,
+                poolclass=QueuePool if pool_size > 0 else NullPool,
+                pool_size=pool_size,
+                max_overflow=max_overflow,
                 pool_pre_ping=True,
                 pool_recycle=3600,
             )
@@ -112,6 +117,18 @@ class DatabaseManager:
         
         self._engines.clear()
         self._initialized = False
+    
+    @staticmethod
+    def create_application_engine() -> AsyncEngine:
+        """Create a new application engine for health checks."""
+        config = get_config()
+        return create_async_engine(
+            config.database_url,
+            echo=False,  # Don't echo in health checks
+            poolclass=NullPool,  # Use NullPool for health check connections
+            pool_pre_ping=True,
+            pool_recycle=3600,
+        )
 
 
 # Global database manager instance
