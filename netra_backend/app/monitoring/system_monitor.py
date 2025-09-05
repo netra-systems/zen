@@ -1,232 +1,250 @@
-"""Main system performance monitoring orchestrator for Netra platform.
-
-This module provides the main SystemPerformanceMonitor class that orchestrates
-all monitoring components including metrics collection, alerting, and dashboard reporting.
+"""
+System monitoring and performance management.
+Central orchestrator for system-wide monitoring capabilities.
 """
 
+from typing import Any, Dict, List, Optional
+from datetime import datetime, timedelta
 import asyncio
-from contextlib import asynccontextmanager
-from typing import Any, Dict, Optional
+import psutil
+import time
 
 from netra_backend.app.logging_config import central_logger
-from netra_backend.app.monitoring.dashboard import (
-    OperationMeasurement,
-    PerformanceDashboard,
-    SystemOverview,
-)
-from netra_backend.app.monitoring.metrics_collector import MetricsCollector
-from netra_backend.app.monitoring.performance_alerting import PerformanceAlertManager
 
 logger = central_logger.get_logger(__name__)
 
 
 class SystemPerformanceMonitor:
-    """Main performance monitoring orchestrator."""
+    """Monitors system performance metrics and resource utilization."""
     
     def __init__(self):
-        """Initialize system performance monitor."""
-        self._init_core_components()
-        self._init_monitoring_state()
-    
-    def _init_core_components(self) -> None:
-        """Initialize core monitoring components."""
-        self.metrics_collector = MetricsCollector()
-        self._init_performance_components()
-        self._init_measurement_components()
-
-    def _init_performance_components(self) -> None:
-        """Initialize performance-related components."""
-        self.alert_manager = PerformanceAlertManager(self.metrics_collector)
-        self.dashboard = PerformanceDashboard(self.metrics_collector)
-
-    def _init_measurement_components(self) -> None:
-        """Initialize measurement and overview components."""
-        self.operation_measurement = OperationMeasurement(self.metrics_collector)
-        self.system_overview = SystemOverview(self.metrics_collector)
-    
-    def _init_monitoring_state(self) -> None:
-        """Initialize monitoring state variables."""
-        self._monitoring_task: Optional[asyncio.Task] = None
-        self._shutdown = False
+        self._metrics_history: List[Dict[str, Any]] = []
+        self._monitoring_active = False
+        self._monitoring_interval = 30  # seconds
+        logger.debug("Initialized SystemPerformanceMonitor")
     
     async def start_monitoring(self) -> None:
-        """Start performance monitoring."""
-        await self._start_metrics_collection()
-        await self._start_alert_monitoring()
-        self._add_default_alert_handlers()
-        logger.info("Performance monitoring started")
-    
-    async def _start_metrics_collection(self) -> None:
-        """Start metrics collection process."""
-        await self.metrics_collector.start_collection()
-    
-    async def _start_alert_monitoring(self) -> None:
-        """Start alert monitoring loop."""
-        self._monitoring_task = asyncio.create_task(self._monitoring_loop())
-    
-    def _add_default_alert_handlers(self) -> None:
-        """Add default alert callback handlers."""
-        self.alert_manager.add_alert_callback(self._log_alert)
+        """Start system performance monitoring."""
+        if self._monitoring_active:
+            return
+        
+        self._monitoring_active = True
+        logger.info("Started system performance monitoring")
+        
+        # Start background monitoring task
+        asyncio.create_task(self._monitoring_loop())
     
     async def stop_monitoring(self) -> None:
-        """Stop performance monitoring."""
-        self._shutdown = True
-        await self._stop_all_monitoring_components()
-        logger.info("Performance monitoring stopped")
-
-    async def _stop_all_monitoring_components(self) -> None:
-        """Stop all monitoring components."""
-        await self._stop_monitoring_task()
-        await self._stop_metrics_collection()
-    
-    async def _stop_monitoring_task(self) -> None:
-        """Stop monitoring task gracefully."""
-        if self._monitoring_task:
-            await self._cancel_and_wait_monitoring_task()
-
-    async def _cancel_and_wait_monitoring_task(self) -> None:
-        """Cancel monitoring task and wait for completion."""
-        self._monitoring_task.cancel()
-        try:
-            await self._monitoring_task
-        except asyncio.CancelledError:
-            pass
-    
-    async def _stop_metrics_collection(self) -> None:
-        """Stop metrics collection process."""
-        await self.metrics_collector.stop_collection()
+        """Stop system performance monitoring."""
+        self._monitoring_active = False
+        logger.info("Stopped system performance monitoring")
     
     async def _monitoring_loop(self) -> None:
-        """Main monitoring loop."""
-        while not self._shutdown:
-            await self._process_monitoring_iteration()
-
-    async def _process_monitoring_iteration(self) -> None:
-        """Process single monitoring iteration."""
+        """Background monitoring loop."""
+        while self._monitoring_active:
+            try:
+                metrics = await self._collect_system_metrics()
+                self._metrics_history.append(metrics)
+                
+                # Keep only last 1440 entries (24 hours at 1 minute intervals)
+                if len(self._metrics_history) > 1440:
+                    self._metrics_history = self._metrics_history[-1440:]
+                
+                await asyncio.sleep(self._monitoring_interval)
+                
+            except Exception as e:
+                logger.error(f"Error in monitoring loop: {e}")
+                await asyncio.sleep(self._monitoring_interval)
+    
+    async def _collect_system_metrics(self) -> Dict[str, Any]:
+        """Collect current system metrics."""
         try:
-            await self._execute_monitoring_cycle()
-        except asyncio.CancelledError:
-            return
+            # CPU metrics
+            cpu_percent = psutil.cpu_percent(interval=1)
+            cpu_count = psutil.cpu_count()
+            
+            # Memory metrics
+            memory = psutil.virtual_memory()
+            
+            # Disk metrics
+            disk = psutil.disk_usage('/')
+            
+            # Network metrics (basic)
+            net_io = psutil.net_io_counters()
+            
+            return {
+                "timestamp": datetime.utcnow(),
+                "cpu_percent": cpu_percent,
+                "cpu_count": cpu_count,
+                "memory_total_gb": memory.total / (1024**3),
+                "memory_used_gb": memory.used / (1024**3),
+                "memory_available_gb": memory.available / (1024**3),
+                "memory_percent": memory.percent,
+                "disk_total_gb": disk.total / (1024**3),
+                "disk_used_gb": disk.used / (1024**3),
+                "disk_free_gb": disk.free / (1024**3),
+                "disk_percent": (disk.used / disk.total) * 100,
+                "network_bytes_sent": net_io.bytes_sent,
+                "network_bytes_recv": net_io.bytes_recv,
+                "network_packets_sent": net_io.packets_sent,
+                "network_packets_recv": net_io.packets_recv
+            }
+            
         except Exception as e:
-            await self._handle_monitoring_error(e)
+            logger.error(f"Error collecting system metrics: {e}")
+            return {
+                "timestamp": datetime.utcnow(),
+                "error": str(e)
+            }
     
-    async def _execute_monitoring_cycle(self) -> None:
-        """Execute one monitoring cycle."""
-        alerts = await self.alert_manager.check_alerts()
-        self._log_triggered_alerts(alerts)
-        await asyncio.sleep(30)  # Check alerts every 30 seconds
+    async def get_current_metrics(self) -> Dict[str, Any]:
+        """Get current system metrics."""
+        return await self._collect_system_metrics()
     
-    def _log_triggered_alerts(self, alerts: list) -> None:
-        """Log any triggered alerts."""
-        if alerts:
-            logger.warning(f"Performance alerts triggered: {len(alerts)}")
+    async def get_metrics_history(self, hours: int = 1) -> List[Dict[str, Any]]:
+        """Get metrics history for specified time period."""
+        cutoff_time = datetime.utcnow() - timedelta(hours=hours)
+        return [
+            m for m in self._metrics_history
+            if m.get("timestamp", datetime.min) > cutoff_time
+        ]
     
-    async def _handle_monitoring_error(self, error: Exception) -> None:
-        """Handle monitoring loop errors."""
-        logger.error(f"Error in monitoring loop: {error}")
-        await asyncio.sleep(30)
-    
-    def _log_alert(self, alert_name: str, alert_data: Dict[str, Any]) -> None:
-        """Default alert callback that logs alerts."""
-        severity = alert_data["rule"]["severity"]
-        metric_summary = alert_data["metric_summary"]
+    async def get_performance_summary(self, hours: int = 1) -> Dict[str, Any]:
+        """Get performance summary for specified time period."""
+        metrics_history = await self.get_metrics_history(hours)
         
-        self._log_alert_details(alert_name, severity, metric_summary, alert_data)
-    
-    def _log_alert_details(self, alert_name: str, severity: str, metric_summary: Dict, alert_data: Dict) -> None:
-        """Log detailed alert information."""
-        log_func = self._get_log_function(severity)
-        message = self._format_alert_message(alert_name, severity, metric_summary, alert_data)
-        log_func(message)
-
-    def _get_log_function(self, severity: str):
-        """Get appropriate log function based on severity."""
-        return logger.critical if severity == "critical" else logger.warning
-
-    def _format_alert_message(self, alert_name: str, severity: str, metric_summary: Dict, alert_data: Dict) -> str:
-        """Format alert message with details."""
-        base_message = f"Performance Alert [{severity.upper()}]: {alert_name}"
-        details = self._format_metric_details(metric_summary, alert_data)
-        return f"{base_message} - {details}"
-
-    def _format_metric_details(self, metric_summary: Dict, alert_data: Dict) -> str:
-        """Format metric details for alert message."""
-        current = metric_summary.get('current', 'N/A')
-        avg = metric_summary.get('avg', 'N/A')
-        threshold = alert_data['rule']['threshold']
-        return f"Current: {current}, Avg: {avg}, Threshold: {threshold}"
-    
-    def get_performance_dashboard(self) -> Dict[str, Any]:
-        """Get comprehensive performance dashboard data."""
-        return self.dashboard.get_dashboard_data()
-    
-    def get_system_health(self) -> Dict[str, Any]:
-        """Get system health overview."""
-        return self.system_overview.get_system_health()
-    
-    @asynccontextmanager
-    async def measure_operation(self, operation_name: str):
-        """Context manager to measure operation performance."""
-        async with self.operation_measurement.measure_operation(operation_name):
-            yield
-    
-    def add_alert_callback(self, callback) -> None:
-        """Add custom alert callback."""
-        self.alert_manager.add_alert_callback(callback)
-    
-    def get_metrics_summary(self, metric_name: str, duration_seconds: int = 300) -> Dict[str, float]:
-        """Get statistical summary of a specific metric."""
-        return self.metrics_collector.get_metric_summary(metric_name, duration_seconds)
-    
-    def get_recent_metrics(self, metric_name: str, duration_seconds: int = 300):
-        """Get recent metrics for a specific metric name.""" 
-        return self.metrics_collector.get_recent_metrics(metric_name, duration_seconds)
+        if not metrics_history:
+            return {
+                "summary": "No metrics available",
+                "hours": hours,
+                "samples": 0
+            }
+        
+        # Calculate averages
+        cpu_values = [m.get("cpu_percent", 0) for m in metrics_history if "cpu_percent" in m]
+        memory_values = [m.get("memory_percent", 0) for m in metrics_history if "memory_percent" in m]
+        disk_values = [m.get("disk_percent", 0) for m in metrics_history if "disk_percent" in m]
+        
+        return {
+            "hours": hours,
+            "samples": len(metrics_history),
+            "avg_cpu_percent": sum(cpu_values) / len(cpu_values) if cpu_values else 0,
+            "max_cpu_percent": max(cpu_values) if cpu_values else 0,
+            "avg_memory_percent": sum(memory_values) / len(memory_values) if memory_values else 0,
+            "max_memory_percent": max(memory_values) if memory_values else 0,
+            "avg_disk_percent": sum(disk_values) / len(disk_values) if disk_values else 0,
+            "max_disk_percent": max(disk_values) if disk_values else 0,
+            "timestamp": datetime.utcnow()
+        }
 
 
 class MonitoringManager:
-    """High-level monitoring manager for easy integration."""
+    """Central monitoring manager orchestrating all monitoring components."""
     
     def __init__(self):
-        """Initialize monitoring manager."""
-        self.monitor = SystemPerformanceMonitor()
-        self._started = False
+        self.performance_monitor = SystemPerformanceMonitor()
+        self._initialized = False
+        logger.debug("Initialized MonitoringManager")
     
-    async def start(self) -> None:
-        """Start monitoring if not already started."""
-        if not self._started:
-            await self.monitor.start_monitoring()
-            self._started = True
+    async def initialize(self) -> None:
+        """Initialize all monitoring components."""
+        if self._initialized:
+            return
+        
+        await self.performance_monitor.start_monitoring()
+        self._initialized = True
+        logger.info("MonitoringManager initialized")
     
-    async def stop(self) -> None:
-        """Stop monitoring if currently started."""
-        if self._started:
-            await self.monitor.stop_monitoring()
-            self._started = False
+    async def shutdown(self) -> None:
+        """Shutdown all monitoring components."""
+        await self.performance_monitor.stop_monitoring()
+        self._initialized = False
+        logger.info("MonitoringManager shut down")
     
-    async def restart(self) -> None:
-        """Restart monitoring system."""
-        await self.stop()
-        await self.start()
+    async def get_system_health(self) -> Dict[str, Any]:
+        """Get overall system health status."""
+        current_metrics = await self.performance_monitor.get_current_metrics()
+        
+        # Determine health status based on metrics
+        health_status = self._calculate_health_status(current_metrics)
+        
+        return {
+            "status": health_status["status"],
+            "score": health_status["score"],
+            "issues": health_status["issues"],
+            "current_metrics": current_metrics,
+            "timestamp": datetime.utcnow()
+        }
     
-    def get_dashboard(self) -> Dict[str, Any]:
-        """Get performance dashboard data."""
-        return self.monitor.get_performance_dashboard()
+    def _calculate_health_status(self, metrics: Dict[str, Any]) -> Dict[str, Any]:
+        """Calculate system health status from metrics."""
+        issues = []
+        score = 100
+        
+        # Check CPU usage
+        cpu_percent = metrics.get("cpu_percent", 0)
+        if cpu_percent > 90:
+            issues.append(f"Critical CPU usage: {cpu_percent:.1f}%")
+            score -= 30
+        elif cpu_percent > 80:
+            issues.append(f"High CPU usage: {cpu_percent:.1f}%")
+            score -= 15
+        
+        # Check memory usage
+        memory_percent = metrics.get("memory_percent", 0)
+        if memory_percent > 95:
+            issues.append(f"Critical memory usage: {memory_percent:.1f}%")
+            score -= 25
+        elif memory_percent > 85:
+            issues.append(f"High memory usage: {memory_percent:.1f}%")
+            score -= 10
+        
+        # Check disk usage
+        disk_percent = metrics.get("disk_percent", 0)
+        if disk_percent > 95:
+            issues.append(f"Critical disk usage: {disk_percent:.1f}%")
+            score -= 20
+        elif disk_percent > 90:
+            issues.append(f"High disk usage: {disk_percent:.1f}%")
+            score -= 10
+        
+        # Determine overall status
+        if score >= 90:
+            status = "healthy"
+        elif score >= 70:
+            status = "warning"
+        elif score >= 50:
+            status = "degraded"
+        else:
+            status = "critical"
+        
+        return {
+            "status": status,
+            "score": max(0, score),
+            "issues": issues
+        }
     
-    def get_health(self) -> Dict[str, Any]:
-        """Get system health status."""
-        return self.monitor.get_system_health()
-    
-    @asynccontextmanager
-    async def measure(self, operation_name: str):
-        """Measure operation performance."""
-        async with self.monitor.measure_operation(operation_name):
-            yield
-    
-    def is_running(self) -> bool:
-        """Check if monitoring is currently running."""
-        return self._started
+    async def get_monitoring_report(self) -> Dict[str, Any]:
+        """Get comprehensive monitoring report."""
+        health = await self.get_system_health()
+        performance_summary = await self.performance_monitor.get_performance_summary(hours=24)
+        
+        return {
+            "system_health": health,
+            "performance_summary": performance_summary,
+            "monitoring_active": self.performance_monitor._monitoring_active,
+            "report_timestamp": datetime.utcnow()
+        }
 
 
-# Global performance monitor instance
+# Global instances
 performance_monitor = SystemPerformanceMonitor()
 monitoring_manager = MonitoringManager()
+
+
+__all__ = [
+    "SystemPerformanceMonitor", 
+    "MonitoringManager",
+    "performance_monitor",
+    "monitoring_manager",
+]
