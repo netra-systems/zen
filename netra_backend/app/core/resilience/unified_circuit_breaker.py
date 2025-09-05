@@ -123,6 +123,27 @@ class UnifiedCircuitBreaker:
             return False
         return True
 
+    def record_success(self) -> None:
+        """Record a successful operation."""
+        self.success_count += 1
+        self.failure_count = 0
+        self.last_success_time = time.time()
+        
+        if self.state == UnifiedCircuitBreakerState.HALF_OPEN:
+            self.state = UnifiedCircuitBreakerState.CLOSED
+            self.opened_at = None
+
+    def record_failure(self, error_type: str = "Exception") -> None:
+        """Record a failed operation."""
+        self.failure_count += 1
+        self.last_failure_time = time.time()
+        
+        # Check if we should open the circuit
+        if self.failure_count >= self.config.failure_threshold:
+            if self.state == UnifiedCircuitBreakerState.CLOSED:
+                self.opened_at = time.time()
+            self.state = UnifiedCircuitBreakerState.OPEN
+
 
 class UnifiedCircuitBreakerManager:
     """Manager for unified circuit breakers."""
