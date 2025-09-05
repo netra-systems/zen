@@ -1,5 +1,7 @@
 """Redis manager for auth service.
 
+Uses SSOT AuthEnvironment for all configuration access.
+
 Provides Redis connection and management functionality specifically for
 authentication operations like session storage, token blacklisting, and
 cache management.
@@ -17,7 +19,7 @@ from datetime import datetime, timedelta
 import json
 import logging
 
-from shared.isolated_environment import get_env
+from auth_service.auth_core.auth_environment import get_auth_env
 
 logger = logging.getLogger(__name__)
 
@@ -30,15 +32,29 @@ class AuthRedisManager:
         self._connection_pool: Optional[redis.ConnectionPool] = None
         self.connected = False
         
-        # Get Redis configuration from environment
-        env = get_env()
-        self.host = env.get("REDIS_HOST", "localhost")
-        self.port = int(env.get("REDIS_PORT", 6379))
-        self.db = int(env.get("AUTH_REDIS_DB", 1))  # Use separate DB for auth
-        self.password = env.get("REDIS_PASSWORD")
-        self.ssl = env.get("REDIS_SSL", "false").lower() == "true"
+        # Get Redis configuration from SSOT AuthEnvironment
+        auth_env = get_auth_env()
+        self.host = auth_env.get_redis_host()
+        self.port = auth_env.get_redis_port()
+        self.db = 1  # Use separate DB for auth (default from AuthEnvironment Redis URL)
         
-        # Check if Redis is enabled (for testing environments)
+        # Extract password from Redis URL if available
+        redis_url = auth_env.get_redis_url()
+        self.password = None
+        if redis_url and ":" in redis_url and "@" in redis_url:
+            # Parse password from redis://user:password@host:port/db format
+            try:
+                import urllib.parse
+                parsed = urllib.parse.urlparse(redis_url)
+                self.password = parsed.password
+            except Exception:
+                self.password = None
+        
+        self.ssl = False  # Default to no SSL unless explicitly configured
+        
+        # Check if Redis is enabled (for testing environments) 
+        from shared.isolated_environment import get_env
+        env = get_env()  # Test-specific checks can still use get_env
         self.enabled = env.get("TEST_DISABLE_REDIS", "false").lower() != "true"
         
         # Auth-specific prefixes
