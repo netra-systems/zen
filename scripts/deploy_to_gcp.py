@@ -30,6 +30,8 @@ sys.path.insert(0, str(project_root))
 # Import centralized GCP authentication and environment management
 from scripts.gcp_auth_config import GCPAuthConfig
 from shared.isolated_environment import get_env
+# Import centralized secrets configuration
+from deployment.secrets_config import SecretConfig
 
 # Fix Unicode encoding issues on Windows
 if sys.platform == "win32":
@@ -882,16 +884,19 @@ CMD ["npm", "start"]
         # Add service-specific configurations
         if service.name == "backend":
             # Backend needs connections to databases and all required secrets from GSM
+            # Using centralized secrets configuration to prevent regressions
+            backend_secrets = SecretConfig.generate_secrets_string("backend", "staging")
             cmd.extend([
                 "--add-cloudsql-instances", f"{self.project_id}:us-central1:staging-shared-postgres,{self.project_id}:us-central1:netra-postgres",
-                "--set-secrets", "POSTGRES_HOST=postgres-host-staging:latest,POSTGRES_PORT=postgres-port-staging:latest,POSTGRES_DB=postgres-db-staging:latest,POSTGRES_USER=postgres-user-staging:latest,POSTGRES_PASSWORD=postgres-password-staging:latest,JWT_SECRET_STAGING=jwt-secret-staging:latest,JWT_SECRET_KEY=jwt-secret-key-staging:latest,SECRET_KEY=secret-key-staging:latest,OPENAI_API_KEY=openai-api-key-staging:latest,FERNET_KEY=fernet-key-staging:latest,GEMINI_API_KEY=gemini-api-key-staging:latest,GOOGLE_CLIENT_ID=google-oauth-client-id-staging:latest,GOOGLE_CLIENT_SECRET=google-oauth-client-secret-staging:latest,SERVICE_SECRET=service-secret-staging:latest,REDIS_URL=redis-url-staging:latest,REDIS_PASSWORD=redis-password-staging:latest,ANTHROPIC_API_KEY=anthropic-api-key-staging:latest,CLICKHOUSE_PASSWORD=clickhouse-password-staging:latest"
+                "--set-secrets", backend_secrets
             ])
         elif service.name == "auth":
             # Auth service needs database, JWT secrets, OAuth credentials from GSM only
-            # CRITICAL FIX: Use correct OAuth environment variable names expected by auth service
+            # Using centralized secrets configuration to prevent regressions like missing SECRET_KEY
+            auth_secrets = SecretConfig.generate_secrets_string("auth", "staging")
             cmd.extend([
                 "--add-cloudsql-instances", f"{self.project_id}:us-central1:staging-shared-postgres,{self.project_id}:us-central1:netra-postgres",
-                "--set-secrets", "POSTGRES_HOST=postgres-host-staging:latest,POSTGRES_PORT=postgres-port-staging:latest,POSTGRES_DB=postgres-db-staging:latest,POSTGRES_USER=postgres-user-staging:latest,POSTGRES_PASSWORD=postgres-password-staging:latest,JWT_SECRET_STAGING=jwt-secret-staging:latest,JWT_SECRET_KEY=jwt-secret-key-staging:latest,SECRET_KEY=secret-key-staging:latest,GOOGLE_OAUTH_CLIENT_ID_STAGING=google-oauth-client-id-staging:latest,GOOGLE_OAUTH_CLIENT_SECRET_STAGING=google-oauth-client-secret-staging:latest,SERVICE_SECRET=service-secret-staging:latest,SERVICE_ID=service-id-staging:latest,OAUTH_HMAC_SECRET=oauth-hmac-secret-staging:latest,REDIS_URL=redis-url-staging:latest,REDIS_PASSWORD=redis-password-staging:latest"
+                "--set-secrets", auth_secrets
             ])
         
         try:
