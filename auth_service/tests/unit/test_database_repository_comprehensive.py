@@ -7,7 +7,7 @@ from datetime import datetime, timedelta, timezone
 import pytest
 import pytest_asyncio
 from sqlalchemy import select
-from auth_service.auth_core.database.models import DBUser, DBSession, DBAuditLog
+from auth_service.auth_core.database.models import AuthUser as DBUser, AuthSession as DBSession, AuthAuditLog as DBAuditLog
 from auth_service.auth_core.database.repository import AuthRepository
 from auth_service.auth_core.database.connection import auth_db
 

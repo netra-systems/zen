@@ -9,7 +9,7 @@ from unittest.mock import Mock, AsyncMock, patch
 import pytest
 import pytest_asyncio
 from auth_service.auth_core.oauth_manager import OAuthManager
-from auth_service.auth_core.oauth.google_oauth import GoogleOAuthHandler
+from auth_service.auth_core.oauth.google_oauth import GoogleOAuthProvider as GoogleOAuthHandler
 from auth_service.auth_core.config import AuthConfig
 from shared.isolated_environment import get_env
 
