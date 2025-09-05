@@ -4,15 +4,19 @@ Comprehensive implementation with refresh token endpoint
 """
 import json
 import logging
+import secrets
 from typing import Dict, Any, Optional
 from datetime import datetime, UTC
+from urllib.parse import urlencode
 
-from fastapi import APIRouter, HTTPException, Request
-from fastapi.responses import JSONResponse
+from fastapi import APIRouter, HTTPException, Request, Query
+from fastapi.responses import JSONResponse, RedirectResponse
 
 # Import auth service models and services
 from auth_service.auth_core.services.auth_service import AuthService
 from auth_service.auth_core.models.auth_models import RefreshRequest
+from auth_service.auth_core.oauth_manager import OAuthManager
+from auth_service.auth_core.config import AuthConfig
 from shared.isolated_environment import get_env
 
 # Import MockAuthService for testing
@@ -176,9 +180,72 @@ async def refresh_tokens_endpoint(request: Request) -> Dict[str, Any]:
             detail="Internal server error"
         )
 
+@router.get("/auth/login")
+async def oauth_login_get(provider: str = Query(default=None), request: Request = None) -> Any:
+    """OAuth login endpoint - initiates OAuth flow for GET requests
+    
+    This endpoint handles GET requests to /auth/login?provider=google
+    and redirects to the Google OAuth authorization page.
+    """
+    if not provider:
+        # If no provider specified, return error for GET request
+        raise HTTPException(
+            status_code=400,
+            detail="Provider parameter is required for OAuth login"
+        )
+    
+    if provider != "google":
+        raise HTTPException(
+            status_code=400,
+            detail=f"Unsupported OAuth provider: {provider}"
+        )
+    
+    try:
+        # Initialize OAuth manager
+        oauth_manager = OAuthManager()
+        
+        # Check if Google provider is configured
+        if not oauth_manager.is_provider_configured("google"):
+            logger.error("Google OAuth provider not configured")
+            raise HTTPException(
+                status_code=503,
+                detail="OAuth provider not configured"
+            )
+        
+        # Get Google provider
+        google_provider = oauth_manager.get_provider("google")
+        if not google_provider:
+            raise HTTPException(
+                status_code=503,
+                detail="Failed to get OAuth provider"
+            )
+        
+        # Generate state for CSRF protection
+        state = secrets.token_urlsafe(32)
+        
+        # Store state in session or cache (for now, we'll pass it through)
+        # In production, this should be stored server-side
+        
+        # Get authorization URL
+        auth_url = google_provider.get_authorization_url(state)
+        
+        logger.info(f"Redirecting to Google OAuth: {auth_url[:50]}...")
+        
+        # Redirect to Google OAuth
+        return RedirectResponse(url=auth_url, status_code=302)
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"OAuth login failed: {e}")
+        raise HTTPException(
+            status_code=500,
+            detail="Failed to initiate OAuth login"
+        )
+
 @router.post("/auth/login")
 async def login_endpoint(request: Request) -> Dict[str, Any]:
-    """Login endpoint - authenticate user and return tokens"""
+    """Login endpoint - authenticate user and return tokens for POST requests"""
     try:
         body = await request.json()
         email = body.get("email")
@@ -492,11 +559,136 @@ async def create_token_endpoint(request: Request) -> Dict[str, Any]:
             detail="Token creation failed"
         )
 
+@router.get("/auth/oauth/callback")
+@router.get("/auth/callback")
+async def oauth_callback(
+    code: str = Query(default=None),
+    state: str = Query(default=None),
+    error: str = Query(default=None),
+    error_description: str = Query(default=None)
+) -> Any:
+    """OAuth callback endpoint - handles OAuth provider response"""
+    
+    # Check for OAuth errors
+    if error:
+        logger.error(f"OAuth callback error: {error} - {error_description}")
+        # Redirect to frontend with error
+        env = AuthConfig.get_environment()
+        if env == "staging":
+            frontend_url = "https://app.staging.netrasystems.ai"
+        elif env == "production":
+            frontend_url = "https://app.netrasystems.ai"
+        else:
+            frontend_url = "http://localhost:3000"
+        
+        error_params = urlencode({"error": error, "error_description": error_description or ""})
+        return RedirectResponse(
+            url=f"{frontend_url}/auth/error?{error_params}",
+            status_code=302
+        )
+    
+    if not code or not state:
+        raise HTTPException(
+            status_code=400,
+            detail="Missing authorization code or state"
+        )
+    
+    try:
+        # Initialize OAuth manager
+        oauth_manager = OAuthManager()
+        google_provider = oauth_manager.get_provider("google")
+        
+        if not google_provider:
+            raise HTTPException(
+                status_code=503,
+                detail="OAuth provider not available"
+            )
+        
+        # Exchange code for user info
+        user_info = google_provider.exchange_code_for_user_info(code, state)
+        
+        if not user_info:
+            raise HTTPException(
+                status_code=401,
+                detail="Failed to get user information from OAuth provider"
+            )
+        
+        # Create or update user in database
+        email = user_info.get("email")
+        name = user_info.get("name", "")
+        google_id = user_info.get("sub")
+        
+        if not email:
+            raise HTTPException(
+                status_code=400,
+                detail="Email not provided by OAuth provider"
+            )
+        
+        # Generate tokens for the user
+        # In a real implementation, you would create/update the user in the database first
+        access_token = await auth_service.create_access_token(
+            user_id=google_id or email,
+            email=email
+        )
+        
+        refresh_token = await auth_service.create_refresh_token(
+            user_id=google_id or email,
+            email=email
+        )
+        
+        # Redirect to frontend with tokens
+        env = AuthConfig.get_environment()
+        if env == "staging":
+            frontend_url = "https://app.staging.netrasystems.ai"
+        elif env == "production":
+            frontend_url = "https://app.netrasystems.ai"
+        else:
+            frontend_url = "http://localhost:3000"
+        
+        # Pass tokens to frontend via URL parameters (in production, use more secure method)
+        auth_params = urlencode({
+            "access_token": access_token,
+            "refresh_token": refresh_token,
+            "email": email,
+            "name": name
+        })
+        
+        return RedirectResponse(
+            url=f"{frontend_url}/auth/callback?{auth_params}",
+            status_code=302
+        )
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"OAuth callback failed: {e}")
+        raise HTTPException(
+            status_code=500,
+            detail="OAuth authentication failed"
+        )
+
 @oauth_router.get("/oauth/providers")
 async def oauth_providers() -> Dict[str, Any]:
-    """Basic OAuth providers endpoint"""
-    return {
-        "providers": ["google"],
-        "status": "configured",
-        "timestamp": datetime.now(UTC).isoformat()
-    }
+    """Get available OAuth providers"""
+    try:
+        oauth_manager = OAuthManager()
+        available_providers = oauth_manager.get_available_providers()
+        
+        provider_status = {}
+        for provider_name in available_providers:
+            provider_status[provider_name] = oauth_manager.get_provider_status(provider_name)
+        
+        return {
+            "providers": available_providers,
+            "status": "configured" if available_providers else "not_configured",
+            "provider_details": provider_status,
+            "timestamp": datetime.now(UTC).isoformat()
+        }
+    except Exception as e:
+        logger.error(f"Failed to get OAuth providers: {e}")
+        return {
+            "providers": [],
+            "status": "error",
+            "error": str(e),
+            "timestamp": datetime.now(UTC).isoformat()
+        }
