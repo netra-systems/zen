@@ -19,8 +19,13 @@ from auth_service.auth_core.oauth_manager import OAuthManager
 from auth_service.auth_core.config import AuthConfig
 from shared.isolated_environment import get_env
 
-# Import MockAuthService for testing
-from auth_service.test_framework.mock_auth_service import MockAuthService
+# Import MockAuthService for testing (conditional import for deployment safety)
+try:
+    from auth_service.test_framework.mock_auth_service import MockAuthService
+    MOCK_AUTH_AVAILABLE = True
+except ImportError:
+    MockAuthService = None
+    MOCK_AUTH_AVAILABLE = False
 
 # Get environment manager
 env = get_env()
