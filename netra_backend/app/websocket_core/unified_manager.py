@@ -70,6 +70,7 @@ class UnifiedWebSocketManager:
         self._connection_manager = self
         self.connection_manager = self
         self.active_connections = {}  # Compatibility mapping
+        self.connection_registry = {}  # Registry for connection objects
         
         logger.info("UnifiedWebSocketManager initialized")
     
@@ -200,11 +201,131 @@ class UnifiedWebSocketManager:
         await self.add_connection(connection)
         
         # Return a ConnectionInfo-like object for compatibility
-        return type('ConnectionInfo', (), {
+        conn_info = type('ConnectionInfo', (), {
             'user_id': user_id,
             'connection_id': connection_id,
             'websocket': websocket
         })()
+        
+        # Store in connection registry for compatibility
+        self.connection_registry[connection_id] = conn_info
+        
+        return conn_info
+    
+    async def disconnect_user(self, user_id: str, websocket: Any, code: int = 1000, reason: str = "Normal closure") -> None:
+        """Legacy compatibility method for disconnecting a user."""
+        # Find the connection by user_id and websocket
+        connection_ids = self.get_user_connections(user_id)
+        for conn_id in connection_ids:
+            connection = self.get_connection(conn_id)
+            if connection and connection.websocket == websocket:
+                await self.remove_connection(conn_id)
+                # Clean up connection registry
+                if conn_id in self.connection_registry:
+                    del self.connection_registry[conn_id]
+                logger.info(f"Disconnected user {user_id} with code {code}: {reason}")
+                return
+        logger.warning(f"Connection not found for user {user_id} during disconnect")
+    
+    async def find_connection(self, user_id: str, websocket: Any) -> Optional[Any]:
+        """Find a connection for the given user_id and websocket."""
+        connection_ids = self.get_user_connections(user_id)
+        for conn_id in connection_ids:
+            connection = self.get_connection(conn_id)
+            if connection and connection.websocket == websocket:
+                # Return a ConnectionInfo-like object for compatibility
+                return type('ConnectionInfo', (), {
+                    'user_id': user_id,
+                    'connection_id': conn_id,
+                    'websocket': websocket
+                })()
+        return None
+    
+    async def handle_message(self, user_id: str, websocket: Any, message: Dict[str, Any]) -> bool:
+        """Handle a message from a user (compatibility method)."""
+        try:
+            # For compatibility, just log the message handling
+            logger.debug(f"Handling message from {user_id}: {message}")
+            return True
+        except Exception as e:
+            logger.error(f"Failed to handle message from {user_id}: {e}")
+            return False
+    
+    async def connect_to_job(self, websocket: Any, job_id: str) -> Any:
+        """Connect to a job (room-like functionality for compatibility)."""
+        import uuid
+        from datetime import datetime
+        
+        # Validate job_id
+        if not isinstance(job_id, str):
+            logger.warning(f"Invalid job_id type: {type(job_id)}, converting to string")
+            job_id = f"job_{id(websocket)}"
+        
+        # Check for invalid job_id patterns (object representations)
+        if "<" in job_id or "object at" in job_id or "WebSocket" in job_id:
+            logger.warning(f"Invalid job_id detected: {job_id}, generating new one")
+            job_id = f"job_{uuid.uuid4().hex[:8]}"
+        
+        # Create a user_id based on job_id and websocket
+        user_id = f"job_{job_id}_{id(websocket)}"
+        
+        # Create connection
+        connection_id = str(uuid.uuid4())
+        connection = WebSocketConnection(
+            connection_id=connection_id,
+            user_id=user_id,
+            websocket=websocket,
+            connected_at=datetime.now(),
+            metadata={"job_id": job_id, "connection_type": "job"}
+        )
+        await self.add_connection(connection)
+        
+        # Initialize core and room_manager for compatibility
+        if not hasattr(self, 'core'):
+            self.core = type('Core', (), {})()
+            self.core.room_manager = type('RoomManager', (), {})()
+            self.core.room_manager.rooms = {}
+            self.core.room_manager.room_connections = {}
+        
+        # Add to room
+        if job_id not in self.core.room_manager.rooms:
+            self.core.room_manager.rooms[job_id] = set()
+            self.core.room_manager.room_connections[job_id] = set()
+        
+        self.core.room_manager.rooms[job_id].add(connection_id)
+        self.core.room_manager.room_connections[job_id].add(user_id)
+        
+        # Add get_stats method to room_manager
+        def get_stats():
+            return {
+                "room_connections": {
+                    room_id: list(connections) for room_id, connections in self.core.room_manager.room_connections.items()
+                }
+            }
+        
+        def get_room_connections(room_id: str):
+            return list(self.core.room_manager.room_connections.get(room_id, set()))
+        
+        self.core.room_manager.get_stats = get_stats
+        self.core.room_manager.get_room_connections = get_room_connections
+        
+        # Return a ConnectionInfo-like object for compatibility
+        conn_info = type('ConnectionInfo', (), {
+            'user_id': user_id,
+            'connection_id': connection_id,
+            'websocket': websocket,
+            'job_id': job_id
+        })()
+        
+        # Store in connection registry for compatibility
+        self.connection_registry[connection_id] = conn_info
+        
+        return conn_info
+    
+    async def disconnect_from_job(self, job_id: str, websocket: Any) -> None:
+        """Disconnect from a job."""
+        user_id = f"job_{job_id}_{id(websocket)}"
+        await self.disconnect_user(user_id, websocket)
 
 
 # Global instance
