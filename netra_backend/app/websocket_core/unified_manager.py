@@ -135,6 +135,15 @@ class UnifiedWebSocketManager:
                 self.active_connections[connection.user_id].append(conn_info)
                 
                 logger.info(f"Added connection {connection.connection_id} for user {connection.user_id} (thread-safe)")
+                
+                # CRITICAL FIX: Process any queued messages for this user after connection established
+                # This prevents race condition where messages are sent before connection is ready
+                if connection.user_id in self._message_recovery_queue:
+                    queued_messages = self._message_recovery_queue.get(connection.user_id, [])
+                    if queued_messages:
+                        logger.info(f"Processing {len(queued_messages)} queued messages for user {connection.user_id}")
+                        # Process outside the lock to prevent deadlock
+                        asyncio.create_task(self._process_queued_messages(connection.user_id))
     
     async def remove_connection(self, connection_id: str) -> None:
         """Remove a WebSocket connection with thread safety."""
@@ -265,6 +274,9 @@ class UnifiedWebSocketManager:
         Emit a critical event to a specific user with guaranteed delivery tracking.
         This is the main interface for sending WebSocket events.
         
+        CRITICAL FIX: Adds retry logic for staging/production environments to handle
+        race conditions during connection establishment.
+        
         Args:
             user_id: Target user ID
             event_type: Event type (e.g., 'agent_started', 'tool_executing')
@@ -279,24 +291,64 @@ class UnifiedWebSocketManager:
             logger.critical(f"INVALID EVENT_TYPE: Cannot emit empty event_type to user {user_id}")
             raise ValueError(f"event_type cannot be empty for user {user_id}")
         
-        # Check connection health before sending critical events
-        if not self.is_connection_active(user_id):
-            logger.critical(
-                f"CONNECTION HEALTH CHECK FAILED: No active connections for user {user_id} "
-                f"when trying to emit critical event {event_type}. "
-                f"User will not receive this critical update."
-            )
-            # Store for recovery instead of silently failing
-            message = {
-                "type": event_type,
-                "data": data,
-                "timestamp": datetime.utcnow().isoformat(),
-                "critical": True
-            }
-            await self._store_failed_message(user_id, message, "no_active_connections")
-            # Don't return silently - emit to user notification system
-            await self._emit_connection_error_notification(user_id, event_type)
-            return
+        # CRITICAL FIX: Add retry logic for staging/production
+        from shared.isolated_environment import get_env
+        environment = get_env().get("ENVIRONMENT", "development").lower()
+        
+        # Retry configuration based on environment
+        max_retries = 1  # Default for development
+        retry_delay = 0.5  # seconds
+        
+        if environment in ["staging", "production"]:
+            max_retries = 3  # More retries for cloud environments
+            retry_delay = 1.0  # Longer delay for Cloud Run
+        
+        # Try with retries
+        for attempt in range(max_retries):
+            # Check connection health before sending critical events
+            if self.is_connection_active(user_id):
+                # Connection exists, try to send
+                message = {
+                    "type": event_type,
+                    "data": data,
+                    "timestamp": datetime.utcnow().isoformat(),
+                    "critical": True,
+                    "attempt": attempt + 1 if attempt > 0 else None
+                }
+                
+                try:
+                    await self.send_to_user(user_id, message)
+                    # Success! Return immediately
+                    return
+                except Exception as e:
+                    logger.error(f"Failed to send critical event {event_type} to user {user_id} on attempt {attempt + 1}: {e}")
+                    # Continue to retry
+            
+            # No connection yet, wait before retry (except on last attempt)
+            if attempt < max_retries - 1:
+                logger.warning(
+                    f"No active connection for user {user_id} on attempt {attempt + 1}/{max_retries}. "
+                    f"Waiting {retry_delay}s before retry..."
+                )
+                await asyncio.sleep(retry_delay)
+        
+        # All retries failed
+        logger.critical(
+            f"CONNECTION HEALTH CHECK FAILED: No active connections for user {user_id} "
+            f"after {max_retries} attempts when trying to emit critical event {event_type}. "
+            f"User will not receive this critical update."
+        )
+        
+        # Store for recovery instead of silently failing
+        message = {
+            "type": event_type,
+            "data": data,
+            "timestamp": datetime.utcnow().isoformat(),
+            "critical": True
+        }
+        await self._store_failed_message(user_id, message, "no_active_connections_after_retry")
+        # Don't return silently - emit to user notification system
+        await self._emit_connection_error_notification(user_id, event_type)
         
         message = {
             "type": event_type,
@@ -935,6 +987,45 @@ class UnifiedWebSocketManager:
             'failed_tasks': len(self._task_failures),
             'tasks': task_status
         }
+    
+    async def _process_queued_messages(self, user_id: str) -> None:
+        """Process queued messages for a user after connection established.
+        
+        This is called when a new connection is established to deliver
+        any messages that were attempted while the user had no connections.
+        """
+        if user_id not in self._message_recovery_queue:
+            return
+        
+        messages = self._message_recovery_queue.get(user_id, [])
+        if not messages:
+            return
+        
+        logger.info(f"Processing {len(messages)} queued messages for user {user_id}")
+        
+        # Clear the queue first to prevent re-processing
+        self._message_recovery_queue[user_id] = []
+        
+        # Small delay to ensure connection is fully established
+        await asyncio.sleep(0.1)
+        
+        # Send each queued message
+        for msg in messages:
+            try:
+                # Remove recovery metadata before sending
+                clean_msg = {k: v for k, v in msg.items() 
+                           if k not in ['failure_reason', 'failed_at', 'recovery_attempts']}
+                
+                # Add a flag indicating this is a recovered message
+                clean_msg['recovered'] = True
+                
+                await self.send_to_user(user_id, clean_msg)
+                logger.debug(f"Successfully delivered queued message type '{clean_msg.get('type')}' to user {user_id}")
+                
+            except Exception as e:
+                logger.error(f"Failed to deliver queued message to user {user_id}: {e}")
+        
+        logger.info(f"Completed processing queued messages for user {user_id}")
     
     async def health_check_background_tasks(self) -> Dict[str, Any]:
         """Perform health check on background tasks and restart failed ones."""
