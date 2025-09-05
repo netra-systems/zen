@@ -1158,7 +1158,11 @@ class BaseAgent(ABC):
     
     def get_circuit_breaker_status(self) -> Dict[str, Any]:
         """Get circuit breaker status using unified reliability handler (SSOT pattern)."""
-        # First check primary circuit breaker
+        # First check if reliability is enabled
+        if not self._enable_reliability:
+            return {"status": "not_available", "reason": "reliability not enabled"}
+        
+        # Check primary circuit breaker
         if hasattr(self, 'circuit_breaker') and self.circuit_breaker:
             try:
                 cb_status = self.circuit_breaker.get_status()
@@ -1182,10 +1186,6 @@ class BaseAgent(ABC):
             status = self._unified_reliability_handler.get_circuit_breaker_status()
             if status:
                 return status
-        
-        # Circuit breaker not available
-        if not self._enable_reliability:
-            return {"status": "not_available", "reason": "reliability not enabled"}
         
         return {"status": "not_available", "reason": "circuit breaker disabled or unavailable"}
     
