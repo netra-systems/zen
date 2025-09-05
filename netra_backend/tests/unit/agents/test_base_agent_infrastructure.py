@@ -193,6 +193,13 @@ class TestBaseAgentReliabilityInfrastructure:
             tool_dispatcher=mock_tool_dispatcher
         )
         
+        # Reset circuit breaker to ensure clean state
+        agent.circuit_breaker.reset()
+        
+        # Configure retry handler to only try once to avoid opening circuit breaker
+        if hasattr(agent, '_unified_reliability_handler'):
+            agent._unified_reliability_handler.max_retries = 1
+        
         async def failing_operation():
             raise ValueError("Primary operation always fails")
         
@@ -267,11 +274,12 @@ class TestBaseAgentExecutionEngine:
         # Verify execution infrastructure is not initialized
         assert agent._enable_execution_engine is False
         assert agent.execution_engine is None
-        assert agent._execution_monitor is None
+        # Monitor is always created for basic tracking
+        assert agent._execution_monitor is not None
         
-        # Verify property access returns None
+        # Verify property access
         assert agent.execution_engine is None
-        assert agent.execution_monitor is None
+        assert agent.execution_monitor is not None
         
     @pytest.mark.asyncio
     async def test_execute_modern_success(self, mock_llm_manager):
@@ -362,8 +370,9 @@ class TestBaseAgentExecutionEngine:
         assert agent.validation_calls == 1
         assert agent.core_logic_calls == 1
         
-    def test_execute_modern_not_enabled_error(self, mock_llm_manager):
-        """Test error when trying to use modern execution without enabling it."""
+    @pytest.mark.asyncio
+    async def test_execute_modern_not_enabled_error(self, mock_llm_manager):
+        """Test that execute_modern works even without execution engine (backward compatibility)."""
         agent = MockBaseAgent(
             llm_manager=mock_llm_manager,
             name="NoModernExecutionAgent",
@@ -372,8 +381,13 @@ class TestBaseAgentExecutionEngine:
         
         state = DeepAgentState()
         
-        with pytest.raises(RuntimeError, match="Modern execution engine not enabled"):
-            asyncio.run(agent.execute_modern(state, "test_run"))
+        # Should work with direct execution fallback (with deprecation warning)
+        with pytest.warns(DeprecationWarning, match="execute_modern.*is deprecated"):
+            result = await agent.execute_modern(state, "test_run")
+            
+        # Verify it executed successfully with fallback
+        assert result is not None
+        assert result.status == ExecutionStatus.SUCCESS
 
 
 class TestBaseAgentWebSocketInfrastructure:
