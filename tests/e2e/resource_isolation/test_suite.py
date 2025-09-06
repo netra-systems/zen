@@ -1,30 +1,33 @@
-# REMOVED_SYNTAX_ERROR: '''
-# REMOVED_SYNTAX_ERROR: Resource Isolation Test Suite
+"""
+Resource Isolation Test Suite
 
-# REMOVED_SYNTAX_ERROR: This module provides a simplified interface to the test suite components
-# REMOVED_SYNTAX_ERROR: for resource isolation testing.
+This module provides a simplified interface to the test suite components
+for resource isolation testing.
 
-# REMOVED_SYNTAX_ERROR: The test suite has been split into focused modules to maintain file size limits:
-    # REMOVED_SYNTAX_ERROR: - test_suite_core.py - Core test suite implementation
-    # REMOVED_SYNTAX_ERROR: - agent_manager.py - Tenant agent management
-    # REMOVED_SYNTAX_ERROR: - workload_generator.py - Workload generation patterns
-    # REMOVED_SYNTAX_ERROR: - fixtures.py - Pytest fixtures
+The test suite has been split into focused modules to maintain file size limits:
+- test_suite_core.py - Core test suite implementation
+- agent_manager.py - Tenant agent management
+- workload_generator.py - Workload generation patterns
+- fixtures.py - Pytest fixtures
 
-    # REMOVED_SYNTAX_ERROR: Business Value Justification (BVJ):
-        # REMOVED_SYNTAX_ERROR: - Segment: Enterprise (multi-tenant isolation requirements)
-        # REMOVED_SYNTAX_ERROR: - Business Goal: Provide comprehensive resource isolation testing
-        # REMOVED_SYNTAX_ERROR: - Value Impact: Ensures reliable operation of $500K+ enterprise contracts
-        # REMOVED_SYNTAX_ERROR: - Revenue Impact: Essential for maintaining enterprise trust and SLA compliance
-        # REMOVED_SYNTAX_ERROR: '''
+Business Value Justification (BVJ):
+- Segment: Enterprise (multi-tenant isolation requirements)
+- Business Goal: Provide comprehensive resource isolation testing
+- Value Impact: Ensures reliable operation of $500K+ enterprise contracts
+- Revenue Impact: Essential for maintaining enterprise trust and SLA compliance
+"""
 
-        # Re-export all suite components for backward compatibility
-        # REMOVED_SYNTAX_ERROR: from tests.e2e.resource_isolation.suite import ( )
-        # REMOVED_SYNTAX_ERROR: from shared.isolated_environment import IsolatedEnvironment
-        # REMOVED_SYNTAX_ERROR: TestResourceIsolationSuite, TEST_CONFIG, TenantAgentManager,
-        # REMOVED_SYNTAX_ERROR: WorkloadGenerator, resource_isolation_suite, tenant_agents
-        
+# Re-export all suite components for backward compatibility
+from tests.e2e.resource_isolation.suite.fixtures import (
+    resource_isolation_suite, 
+    tenant_agents
+)
+from tests.e2e.resource_isolation.suite.test_suite_core import (
+    TestResourceIsolationSuite
+)
 
-        # REMOVED_SYNTAX_ERROR: __all__ = [ )
-        # REMOVED_SYNTAX_ERROR: 'TestResourceIsolationSuite', 'TEST_CONFIG', 'TenantAgentManager',
-        # REMOVED_SYNTAX_ERROR: 'WorkloadGenerator', 'resource_isolation_suite', 'tenant_agents'
-        
+__all__ = [
+    'TestResourceIsolationSuite',
+    'resource_isolation_suite', 
+    'tenant_agents'
+]
