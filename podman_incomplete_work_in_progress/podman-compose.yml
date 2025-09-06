@@ -1,0 +1,146 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: netra-postgres
+    environment:
+      POSTGRES_USER: netra
+      POSTGRES_PASSWORD: netra123
+      POSTGRES_DB: netra_dev
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - netra-network
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    container_name: netra-redis
+    command: redis-server --appendonly yes --maxmemory 200mb --maxmemory-policy allkeys-lru
+    ports:
+      - "6380:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - netra-network
+
+  # ClickHouse Analytics
+  clickhouse:
+    image: clickhouse/clickhouse-server:23.8
+    container_name: netra-clickhouse
+    environment:
+      CLICKHOUSE_DB: netra_analytics
+      CLICKHOUSE_USER: netra
+      CLICKHOUSE_PASSWORD: netra123
+      CLICKHOUSE_DEFAULT_ACCESS_MANAGEMENT: 1
+    ports:
+      - "8124:8123"
+      - "9001:9000"
+    volumes:
+      - clickhouse_data:/var/lib/clickhouse
+    networks:
+      - netra-network
+
+  # Auth Service
+  auth:
+    image: netra-dev-auth:latest
+    container_name: netra-auth
+    environment:
+      ENVIRONMENT: development
+      LOG_LEVEL: DEBUG
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_USER: netra
+      POSTGRES_PASSWORD: netra123
+      POSTGRES_DB: netra_dev
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      PORT: 8081
+      HOST: 0.0.0.0
+      SERVICE_ID: auth-service
+      SERVICE_SECRET: test-secret-for-local-development-only-32chars
+      JWT_SECRET_KEY: dev-jwt-secret-key-must-be-at-least-32-characters
+      JWT_ALGORITHM: HS256
+      ACCESS_TOKEN_EXPIRE_MINUTES: 30
+    ports:
+      - "8081:8081"
+    volumes:
+      - auth_data:/app/data
+    networks:
+      - netra-network
+    depends_on:
+      - postgres
+      - redis
+
+  # Backend Service
+  backend:
+    image: netra-dev-backend:latest
+    container_name: netra-backend
+    environment:
+      ENVIRONMENT: development
+      LOG_LEVEL: DEBUG
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_USER: netra
+      POSTGRES_PASSWORD: netra123
+      POSTGRES_DB: netra_dev
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      CLICKHOUSE_HOST: clickhouse
+      CLICKHOUSE_PORT: 9000
+      CLICKHOUSE_USER: netra
+      CLICKHOUSE_PASSWORD: netra123
+      CLICKHOUSE_DB: netra_analytics
+      AUTH_SERVICE_URL: http://auth:8081
+      PORT: 8000
+      HOST: 0.0.0.0
+      JWT_SECRET_KEY: dev-jwt-secret-key-must-be-at-least-32-characters
+      SERVICE_SECRET: dev-service-secret-for-cross-service-auth
+      FERNET_KEY: iZAG-Kz661gRuJXEGzxgghUFnFRamgDrjDXZE6HdJkw=
+      SECRET_KEY: dev-secret-key-for-development
+      ENABLE_MEMORY_MONITORING: "true"
+      MEMORY_CHECK_INTERVAL: "30"
+      MEMORY_WARNING_THRESHOLD: "80"
+      MEMORY_CRITICAL_THRESHOLD: "90"
+      MEMORY_CLEANUP_ENABLED: "true"
+    ports:
+      - "8000:8000"
+    volumes:
+      - backend_data:/app/data
+    networks:
+      - netra-network
+    depends_on:
+      - postgres
+      - redis
+      - clickhouse
+      - auth
+
+  # Frontend Service
+  frontend:
+    image: netra-dev-frontend:latest
+    container_name: netra-frontend
+    environment:
+      NODE_ENV: development
+      PORT: 3000
+    ports:
+      - "3000:3000"
+    networks:
+      - netra-network
+    depends_on:
+      - backend
+      - auth
+
+volumes:
+  postgres_data:
+  redis_data:
+  clickhouse_data:
+  auth_data:
+  backend_data:
+
+networks:
+  netra-network:
+    driver: bridge
