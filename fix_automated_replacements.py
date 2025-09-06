@@ -132,8 +132,8 @@ class AdvancedTestFixer:
         if 'TestDatabaseManager' in content and 'from test_framework.database.test_database_manager import TestDatabaseManager' not in content:
             required_imports.append('from test_framework.database.test_database_manager import TestDatabaseManager')
         
-        if 'TestRedisManager' in content and 'from test_framework.redis.test_redis_manager import TestRedisManager' not in content:
-            required_imports.append('from test_framework.redis.test_redis_manager import TestRedisManager')
+        if 'TestRedisManager' in content and 'from test_framework.redis_test_utils_test_utils.test_redis_manager import TestRedisManager' not in content:
+            required_imports.append('from test_framework.redis_test_utils_test_utils.test_redis_manager import TestRedisManager')
         
         if 'AuthManager' in content and 'from auth_service.core.auth_manager import AuthManager' not in content:
             required_imports.append('from auth_service.core.auth_manager import AuthManager')
