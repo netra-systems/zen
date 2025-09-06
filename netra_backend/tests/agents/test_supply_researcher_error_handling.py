@@ -2,7 +2,7 @@ from unittest.mock import AsyncMock, Mock, patch, MagicMock
 
 """
 Error handling tests for SupplyResearcherAgent
-""""
+"""""
 
 import sys
 from pathlib import Path
@@ -25,7 +25,7 @@ import asyncio
 
 class TestSupplyResearcherErrorHandling:
     """Test suite for SupplyResearcherAgent error handling"""
-    
+
     @pytest.fixture
     def real_db():
         """Use real service instance."""
@@ -42,18 +42,18 @@ class TestSupplyResearcherErrorHandling:
         # Mock: Generic component isolation for controlled unit testing
         db.rollback = AsyncMock()  # TODO: Use real service instance
         return db
-    
-        @pytest.fixture
-        def real_llm_manager():
+
+    @pytest.fixture
+    def real_llm_manager():
         """Use real service instance."""
         # TODO: Initialize real service
         """Create mock LLM manager"""
         # Mock: LLM service isolation for fast testing without API calls or rate limits
         llm = Mock(spec=LLMManager)
         return llm
-    
-        @pytest.fixture
-        def real_supply_service():
+
+    @pytest.fixture
+    def real_supply_service():
         """Use real service instance."""
         # TODO: Initialize real service
         """Create mock supply research service"""
@@ -67,32 +67,32 @@ class TestSupplyResearcherErrorHandling:
         # Mock: Component isolation for controlled unit testing
         service.validate_supply_data = Mock(return_value=(True, []))
         return service
-    
-        @pytest.fixture
-        def agent(self, mock_llm_manager, mock_db, mock_supply_service):
+
+    @pytest.fixture
+    def agent(self, mock_llm_manager, mock_db, mock_supply_service):
         """Use real service instance."""
         # TODO: Initialize real service
         """Create SupplyResearcherAgent instance"""
         return SupplyResearcherAgent(
-        llm_manager=mock_llm_manager,
-        db=mock_db,
-        supply_service=mock_supply_service
-        )
-        @pytest.mark.asyncio
-        async def test_api_failure_handling(self, agent, mock_db):
+    llm_manager=mock_llm_manager,
+    db=mock_db,
+    supply_service=mock_supply_service
+    )
+    @pytest.mark.asyncio
+    async def test_api_failure_handling(self, agent, mock_db):
         """Test handling Deep Research API failures"""
         state = DeepAgentState(
         user_request="Update pricing",
         chat_thread_id="test_thread",
         user_id="test_user"
         )
-        
+
         with patch.object(agent.research_engine, 'call_deep_research_api', side_effect=Exception("API Error")):
         # Mock: Component isolation for controlled unit testing
-        mock_db.query().filter().first.return_value = Mock(status="failed")
-            
-        with pytest.raises(Exception):
-        await agent.execute(state, "test_run", False)
-            
-        assert state.supply_research_result["status"] == "error"
-        pass
+            mock_db.query().filter().first.return_value = Mock(status="failed")
+
+            with pytest.raises(Exception):
+                await agent.execute(state, "test_run", False)
+
+                assert state.supply_research_result["status"] == "error"
+                pass
