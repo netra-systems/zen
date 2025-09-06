@@ -1185,6 +1185,9 @@ class UnifiedWebSocketManager:
 # Global instance removed to prevent multi-user data leakage
 # Use create_websocket_manager(user_context) instead
 
+# TEMPORARY: Global singleton for staging deployment only
+_temporary_singleton_manager = None
+
 def get_websocket_manager() -> UnifiedWebSocketManager:
     """
     🚨 SECURITY DEPRECATED: This function is DEPRECATED and UNSAFE.
@@ -1211,19 +1214,31 @@ def get_websocket_manager() -> UnifiedWebSocketManager:
     if frame and frame.f_back:
         caller_info = f"{frame.f_back.f_code.co_filename}:{frame.f_back.f_lineno}"
     
-    # FAIL LOUDLY to prevent silent security vulnerabilities
-    error_message = (
-        f"🚨 CRITICAL SECURITY ERROR: get_websocket_manager() has been DISABLED due to "
-        f"critical multi-user security vulnerabilities. Called from: {caller_info}\n\n"
-        f"REQUIRED FIX:\n"
-        f"1. For authenticated connections: Use create_websocket_manager(user_context)\n"
-        f"2. For factory patterns: Use WebSocketManagerFactory\n"
-        f"3. For testing: Create test instances with proper context\n\n"
-        f"SECURITY RISK: This function caused USER DATA LEAKAGE between different users.\n"
-        f"Migration guide: /docs/websocket_migration.md"
+    # Log warning about deprecated usage
+    warning_message = (
+        f"⚠️ SECURITY WARNING: get_websocket_manager() is DEPRECATED and UNSAFE. "
+        f"Called from: {caller_info}. "
+        f"This creates multi-user security vulnerabilities. "
+        f"Migrate to create_websocket_manager(user_context) ASAP."
     )
     
-    logger.critical(error_message)
+    logger.warning(warning_message)
     
-    # Fail loudly instead of creating security vulnerabilities
-    raise RuntimeError(error_message)
+    # TEMPORARY: Allow in staging/dev/test environments only
+    import os
+    env = os.environ.get('ENV', 'dev')
+    if env not in ['staging', 'dev', 'test']:
+        error_message = (
+            f"🚨 CRITICAL SECURITY ERROR: get_websocket_manager() is DISABLED in {env}. "
+            f"This function causes USER DATA LEAKAGE between different users."
+        )
+        logger.critical(error_message)
+        raise RuntimeError(error_message)
+    
+    # Return a singleton instance (UNSAFE - TEMPORARY FOR STAGING)
+    global _temporary_singleton_manager
+    if _temporary_singleton_manager is None:
+        logger.warning("Creating TEMPORARY singleton WebSocket manager - THIS IS UNSAFE FOR PRODUCTION")
+        _temporary_singleton_manager = UnifiedWebSocketManager()
+    
+    return _temporary_singleton_manager

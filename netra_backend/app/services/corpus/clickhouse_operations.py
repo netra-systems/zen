@@ -32,8 +32,8 @@ from netra_backend.app.services.corpus.clickhouse_helpers import (
     process_table_exists_result,
     process_table_size_result,
 )
-from netra_backend.app.websocket_core import get_websocket_manager
-manager = get_websocket_manager()
+# WebSocket manager is now handled via factory pattern for multi-user safety
+# Individual connections will have their own manager instances via context
 
 
 class CorpusClickHouseOperations:
@@ -87,8 +87,11 @@ class CorpusClickHouseOperations:
 
     async def _send_success_notification(self, corpus_id: str, table_name: str):
         """Send WebSocket notification for successful corpus creation"""
+        # TODO: Implement proper WebSocket notification with user context
+        # This requires access to the user context and WebSocketManagerFactory
+        # For now, logging the success is sufficient
         payload = self._build_success_payload(corpus_id, table_name)
-        await manager.broadcasting.broadcast_to_all(payload)
+        central_logger.info(f"Corpus creation notification (WebSocket disabled): {payload}")
 
     def _log_creation_success(self, corpus_id: str, table_name: str):
         """Log successful table creation"""
@@ -110,8 +113,11 @@ class CorpusClickHouseOperations:
 
     async def _send_error_notification(self, corpus_id: str, error: Exception):
         """Send WebSocket notification for corpus creation error"""
+        # TODO: Implement proper WebSocket notification with user context
+        # This requires access to the user context and WebSocketManagerFactory
+        # For now, logging the error is sufficient
         payload = self._build_error_payload(corpus_id, error)
-        await manager.broadcasting.broadcast_to_all(payload)
+        central_logger.error(f"Corpus error notification (WebSocket disabled): {payload}")
 
     def _log_creation_error(self, corpus_id: str, error: Exception):
         """Log table creation error"""

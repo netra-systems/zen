@@ -9,8 +9,6 @@ from fastapi import FastAPI
 
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.redis_manager import redis_manager
-from netra_backend.app.websocket_core import get_websocket_manager
-websocket_manager = get_websocket_manager()
 from netra_backend.app.utils.multiprocessing_cleanup import cleanup_multiprocessing
 from netra_backend.app.services.background_task_manager import background_task_manager
 
@@ -128,17 +126,9 @@ async def cleanup_resources(app: FastAPI) -> None:
     except (AttributeError, Exception) as e:
         logger.warning(f"Agent supervisor shutdown error: {e}")
     
-    # Shutdown WebSocket manager with timeout to prevent blocking
-    try:
-        await asyncio.wait_for(websocket_manager.shutdown(), timeout=3.0)
-        logger.info("WebSocket manager shutdown completed")
-    except asyncio.CancelledError:
-        logger.info("WebSocket manager shutdown cancelled during application shutdown")
-        # Continue cleanup despite cancellation
-    except asyncio.TimeoutError:
-        logger.warning("WebSocket manager shutdown timed out after 3 seconds - forcing cleanup")
-    except Exception as e:
-        logger.warning(f"WebSocket manager shutdown error: {e}")
+    # WebSocket manager shutdown is handled per-context now with factory pattern
+    # No global websocket_manager to shutdown - each connection handles its own cleanup
+    logger.info("WebSocket connections handled by factory pattern - individual cleanup via context")
 
 
 async def finalize_shutdown() -> None:
