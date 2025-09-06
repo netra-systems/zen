@@ -1,244 +1,244 @@
-"""Test Configuration Helpers - Unified Config System Integration
+# REMOVED_SYNTAX_ERROR: '''Test Configuration Helpers - Unified Config System Integration
 
-Business Value Justification (BVJ):
-- Segment: Enterprise
-- Business Goal: Zero configuration-related test failures
-- Value Impact: Prevents $12K MRR loss from config inconsistencies
-- Strategic Impact: Ensures all tests use unified configuration system
+# REMOVED_SYNTAX_ERROR: Business Value Justification (BVJ):
+    # REMOVED_SYNTAX_ERROR: - Segment: Enterprise
+    # REMOVED_SYNTAX_ERROR: - Business Goal: Zero configuration-related test failures
+    # REMOVED_SYNTAX_ERROR: - Value Impact: Prevents $12K MRR loss from config inconsistencies
+    # REMOVED_SYNTAX_ERROR: - Strategic Impact: Ensures all tests use unified configuration system
 
-This module provides helper functions for tests to access configuration
-through the unified system while maintaining test isolation.
+    # REMOVED_SYNTAX_ERROR: This module provides helper functions for tests to access configuration
+    # REMOVED_SYNTAX_ERROR: through the unified system while maintaining test isolation.
 
-Each function ≤8 lines, file ≤300 lines.
-"""
+    # REMOVED_SYNTAX_ERROR: Each function ≤8 lines, file ≤300 lines.
+    # REMOVED_SYNTAX_ERROR: '''
 
-from typing import Any, Dict, Optional
-from test_framework.database.test_database_manager import TestDatabaseManager
-from test_framework.redis_test_utils_test_utils.test_redis_manager import TestRedisManager
-from shared.isolated_environment import IsolatedEnvironment
+    # REMOVED_SYNTAX_ERROR: from typing import Any, Dict, Optional
+    # REMOVED_SYNTAX_ERROR: from test_framework.database.test_database_manager import TestDatabaseManager
+    # REMOVED_SYNTAX_ERROR: from test_framework.redis_test_utils_test_utils.test_redis_manager import TestRedisManager
+    # REMOVED_SYNTAX_ERROR: from shared.isolated_environment import IsolatedEnvironment
 
-import pytest
+    # REMOVED_SYNTAX_ERROR: import pytest
 
-from shared.isolated_environment import get_env
+    # REMOVED_SYNTAX_ERROR: from shared.isolated_environment import get_env
 
-# Import unified configuration system
-try:
-    from netra_backend.app.config import get_config, reload_config
-    from netra_backend.app.core.configuration.base import get_unified_config
-except ImportError:
-    # Fallback for when running from within netra_backend directory
-    import sys
-    from pathlib import Path
-    from netra_backend.app.config import get_config, reload_config
-    from netra_backend.app.core.configuration.base import get_unified_config
-
-
-def get_test_config():
-    """Get configuration for tests using unified system.
-    
-    **PREFERRED METHOD**: Use this in tests that need app config.
-    Ensures tests use the same config system as production.
-    """
-    pass
-    return get_unified_config()
+    # Import unified configuration system
+    # REMOVED_SYNTAX_ERROR: try:
+        # REMOVED_SYNTAX_ERROR: from netra_backend.app.config import get_config, reload_config
+        # REMOVED_SYNTAX_ERROR: from netra_backend.app.core.configuration.base import get_unified_config
+        # REMOVED_SYNTAX_ERROR: except ImportError:
+            # Fallback for when running from within netra_backend directory
+            # REMOVED_SYNTAX_ERROR: import sys
+            # REMOVED_SYNTAX_ERROR: from pathlib import Path
+            # REMOVED_SYNTAX_ERROR: from netra_backend.app.config import get_config, reload_config
+            # REMOVED_SYNTAX_ERROR: from netra_backend.app.core.configuration.base import get_unified_config
 
 
-def with_test_config_override(config_overrides: Dict[str, Any]):
-    """Context manager to temporarily override config for tests.
-    
-    Args:
-        config_overrides: Dictionary of config attributes to override
-        
-    Usage:
-        with with_test_config_override({"debug": True}):
-            config = get_test_config()
-            assert config.debug is True
-    """
-    def decorator(func):
-        def wrapper(*args, **kwargs):
-            # Get original config
-            original_config = get_test_config()
-            
-            # Apply overrides temporarily
-            for key, value in config_overrides.items():
-                setattr(original_config, key, value)
-            
-            try:
-                return func(*args, **kwargs)
-            finally:
+# REMOVED_SYNTAX_ERROR: def get_test_config():
+    # REMOVED_SYNTAX_ERROR: '''Get configuration for tests using unified system.
+
+    # REMOVED_SYNTAX_ERROR: **PREFERRED METHOD**: Use this in tests that need app config.
+    # REMOVED_SYNTAX_ERROR: Ensures tests use the same config system as production.
+    # REMOVED_SYNTAX_ERROR: '''
+    # REMOVED_SYNTAX_ERROR: pass
+    # REMOVED_SYNTAX_ERROR: return get_unified_config()
+
+
+# REMOVED_SYNTAX_ERROR: def with_test_config_override(config_overrides: Dict[str, Any]):
+    # REMOVED_SYNTAX_ERROR: '''Context manager to temporarily override config for tests.
+
+    # REMOVED_SYNTAX_ERROR: Args:
+        # REMOVED_SYNTAX_ERROR: config_overrides: Dictionary of config attributes to override
+
+        # REMOVED_SYNTAX_ERROR: Usage:
+            # REMOVED_SYNTAX_ERROR: with with_test_config_override({"debug": True}):
+                # REMOVED_SYNTAX_ERROR: config = get_test_config()
+                # REMOVED_SYNTAX_ERROR: assert config.debug is True
+                # REMOVED_SYNTAX_ERROR: '''
+# REMOVED_SYNTAX_ERROR: def decorator(func):
+# REMOVED_SYNTAX_ERROR: def wrapper(*args, **kwargs):
+    # Get original config
+    # REMOVED_SYNTAX_ERROR: original_config = get_test_config()
+
+    # Apply overrides temporarily
+    # REMOVED_SYNTAX_ERROR: for key, value in config_overrides.items():
+        # REMOVED_SYNTAX_ERROR: setattr(original_config, key, value)
+
+        # REMOVED_SYNTAX_ERROR: try:
+            # REMOVED_SYNTAX_ERROR: return func(*args, **kwargs)
+            # REMOVED_SYNTAX_ERROR: finally:
                 # Reload config to restore original state
-                reload_config(force=True)
-        return wrapper
-    return decorator
+                # REMOVED_SYNTAX_ERROR: reload_config(force=True)
+                # REMOVED_SYNTAX_ERROR: return wrapper
+                # REMOVED_SYNTAX_ERROR: return decorator
 
 
-@pytest.fixture
-def test_config():
-    """Use real service instance."""
+                # REMOVED_SYNTAX_ERROR: @pytest.fixture
+# REMOVED_SYNTAX_ERROR: def test_config():
+    # REMOVED_SYNTAX_ERROR: """Use real service instance."""
     # TODO: Initialize real service
-    """Pytest fixture providing unified config for tests."""
-    pass
-    return get_test_config()
+    # REMOVED_SYNTAX_ERROR: """Pytest fixture providing unified config for tests."""
+    # REMOVED_SYNTAX_ERROR: pass
+    # REMOVED_SYNTAX_ERROR: return get_test_config()
 
 
-@pytest.fixture  
-def clean_test_config():
-    """Use real service instance."""
+    # REMOVED_SYNTAX_ERROR: @pytest.fixture
+# REMOVED_SYNTAX_ERROR: def clean_test_config():
+    # REMOVED_SYNTAX_ERROR: """Use real service instance."""
     # TODO: Initialize real service
-    """Pytest fixture ensuring clean config state for each test."""
-    pass
+    # REMOVED_SYNTAX_ERROR: """Pytest fixture ensuring clean config state for each test."""
+    # REMOVED_SYNTAX_ERROR: pass
     # Force reload to ensure clean state
-    reload_config(force=True)
-    config = get_test_config()
-    yield config
+    # REMOVED_SYNTAX_ERROR: reload_config(force=True)
+    # REMOVED_SYNTAX_ERROR: config = get_test_config()
+    # REMOVED_SYNTAX_ERROR: yield config
     # Clean up after test
-    reload_config(force=True)
+    # REMOVED_SYNTAX_ERROR: reload_config(force=True)
 
 
-@pytest.fixture
- def real_config_env_vars():
-    """Use real service instance."""
+    # REMOVED_SYNTAX_ERROR: @pytest.fixture
+# REMOVED_SYNTAX_ERROR: def real_config_env_vars():
+    # REMOVED_SYNTAX_ERROR: """Use real service instance."""
     # TODO: Initialize real service
-    """Pytest fixture for mocking environment variables safely.
+    # REMOVED_SYNTAX_ERROR: '''Pytest fixture for mocking environment variables safely.
+
+    # REMOVED_SYNTAX_ERROR: **IMPORTANT**: Use this instead of direct os.environ access in tests.
+    # REMOVED_SYNTAX_ERROR: Ensures proper cleanup and isolation between tests.
+    # REMOVED_SYNTAX_ERROR: '''
+    # REMOVED_SYNTAX_ERROR: pass
+    # REMOVED_SYNTAX_ERROR: env_manager = get_env()
+    # REMOVED_SYNTAX_ERROR: original_env = env_manager.get_all()
+
+# REMOVED_SYNTAX_ERROR: def set_env_var(key: str, value: str):
+    # REMOVED_SYNTAX_ERROR: """Set environment variable for test duration."""
+    # REMOVED_SYNTAX_ERROR: env_manager.set(key, value, "test_config_helpers")
+
+# REMOVED_SYNTAX_ERROR: def get_env_var(key: str, default: Optional[str] = None) -> Optional[str]:
+    # REMOVED_SYNTAX_ERROR: """Get environment variable safely."""
+    # REMOVED_SYNTAX_ERROR: pass
+    # REMOVED_SYNTAX_ERROR: return env_manager.get(key, default)
+
+    # REMOVED_SYNTAX_ERROR: yield { )
+    # REMOVED_SYNTAX_ERROR: 'set': set_env_var,
+    # REMOVED_SYNTAX_ERROR: 'get': get_env_var,
+    # REMOVED_SYNTAX_ERROR: 'environ': env_manager.get_all()
     
-    **IMPORTANT**: Use this instead of direct os.environ access in tests.
-    Ensures proper cleanup and isolation between tests.
-    """
-    pass
-    env_manager = get_env()
-    original_env = env_manager.get_all()
-    
-    def set_env_var(key: str, value: str):
-        """Set environment variable for test duration."""
-        env_manager.set(key, value, "test_config_helpers")
-        
-    def get_env_var(key: str, default: Optional[str] = None) -> Optional[str]:
-        """Get environment variable safely."""
-    pass
-        return env_manager.get(key, default)
-        
-    yield {
-        'set': set_env_var,
-        'get': get_env_var,
-        'environ': env_manager.get_all()
-    }
-    
+
     # Restore original environment
-    env_manager.clear()
-    env_manager.update(original_env, "test_config_helpers_restore")
+    # REMOVED_SYNTAX_ERROR: env_manager.clear()
+    # REMOVED_SYNTAX_ERROR: env_manager.update(original_env, "test_config_helpers_restore")
     # Reload config to pick up environment changes
-    reload_config(force=True)
+    # REMOVED_SYNTAX_ERROR: reload_config(force=True)
 
 
-def assert_config_uses_unified_system():
-    """Assertion helper to verify config is using unified system.
-    
-    Use in tests to ensure unified config integration.
-    """
-    pass
-    config = get_test_config()
-    assert hasattr(config, 'environment'), "Config missing environment attribute"
-    assert hasattr(config, 'database_url'), "Config missing database_url attribute"
+# REMOVED_SYNTAX_ERROR: def assert_config_uses_unified_system():
+    # REMOVED_SYNTAX_ERROR: '''Assertion helper to verify config is using unified system.
+
+    # REMOVED_SYNTAX_ERROR: Use in tests to ensure unified config integration.
+    # REMOVED_SYNTAX_ERROR: '''
+    # REMOVED_SYNTAX_ERROR: pass
+    # REMOVED_SYNTAX_ERROR: config = get_test_config()
+    # REMOVED_SYNTAX_ERROR: assert hasattr(config, 'environment'), "Config missing environment attribute"
+    # REMOVED_SYNTAX_ERROR: assert hasattr(config, 'database_url'), "Config missing database_url attribute"
     # Verify it's from unified system by checking config type
-    try:
-        from netra_backend.app.schemas.config import AppConfig
-    except ImportError:
-        from netra_backend.app.schemas.config import AppConfig
-    assert isinstance(config, AppConfig), "Config not from unified system"
+    # REMOVED_SYNTAX_ERROR: try:
+        # REMOVED_SYNTAX_ERROR: from netra_backend.app.schemas.config import AppConfig
+        # REMOVED_SYNTAX_ERROR: except ImportError:
+            # REMOVED_SYNTAX_ERROR: from netra_backend.app.schemas.config import AppConfig
+            # REMOVED_SYNTAX_ERROR: assert isinstance(config, AppConfig), "Config not from unified system"
 
 
-def get_test_database_config() -> Dict[str, str]:
-    """Get database configuration for tests using unified system."""
-    config = get_test_config()
-    return {
-        'database_url': config.database_url,
-        'redis_url': getattr(config, 'redis_url', 'redis://localhost:6379/0'),
-        'environment': config.environment
-    }
-
-
-def get_test_llm_config() -> Dict[str, Any]:
-    """Get LLM configuration for tests using unified system.""" 
-    config = get_test_config()
-    env_manager = get_env()
-    return {
-        'llm_configs': getattr(config, 'llm_configs', {}),
-        'enable_real_llm': env_manager.get('ENABLE_REAL_LLM_TESTING') == 'true'
-    }
-
-
-def skip_if_not_test_environment():
-    """Pytest skip decorator for tests requiring test environment."""
-    config = get_test_config()
-    return pytest.mark.skipif(
-        config.environment != 'testing',
-        reason="Test requires testing environment"
-    )
-
-
-def skip_if_no_database():
-    """Pytest skip decorator for tests requiring database."""
-    pass
-    config = get_test_config()
-    return pytest.mark.skipif(
-        not config.database_url,
-        reason="Test requires database configuration"
-    )
-
-
-def require_unified_config(func):
-    """Decorator to ensure test function uses unified config system.
+# REMOVED_SYNTAX_ERROR: def get_test_database_config() -> Dict[str, str]:
+    # REMOVED_SYNTAX_ERROR: """Get database configuration for tests using unified system."""
+    # REMOVED_SYNTAX_ERROR: config = get_test_config()
+    # REMOVED_SYNTAX_ERROR: return { )
+    # REMOVED_SYNTAX_ERROR: 'database_url': config.database_url,
+    # REMOVED_SYNTAX_ERROR: 'redis_url': getattr(config, 'redis_url', 'redis://localhost:6379/0'),
+    # REMOVED_SYNTAX_ERROR: 'environment': config.environment
     
-    Adds assertion at start of test to verify unified config usage.
-    """
-    pass
-    def wrapper(*args, **kwargs):
-    pass
-        assert_config_uses_unified_system()
-        return func(*args, **kwargs)
-    return wrapper
 
 
-# Test validation helpers
-def validate_test_config_consistency():
-    """Validate that test configuration is consistent and complete."""
-    config = get_test_config()
-    issues = []
+# REMOVED_SYNTAX_ERROR: def get_test_llm_config() -> Dict[str, Any]:
+    # REMOVED_SYNTAX_ERROR: """Get LLM configuration for tests using unified system."""
+    # REMOVED_SYNTAX_ERROR: config = get_test_config()
+    # REMOVED_SYNTAX_ERROR: env_manager = get_env()
+    # REMOVED_SYNTAX_ERROR: return { )
+    # REMOVED_SYNTAX_ERROR: 'llm_configs': getattr(config, 'llm_configs', {}),
+    # REMOVED_SYNTAX_ERROR: 'enable_real_llm': env_manager.get('ENABLE_REAL_LLM_TESTING') == 'true'
     
+
+
+# REMOVED_SYNTAX_ERROR: def skip_if_not_test_environment():
+    # REMOVED_SYNTAX_ERROR: """Pytest skip decorator for tests requiring test environment."""
+    # REMOVED_SYNTAX_ERROR: config = get_test_config()
+    # REMOVED_SYNTAX_ERROR: return pytest.mark.skipif( )
+    # REMOVED_SYNTAX_ERROR: config.environment != 'testing',
+    # REMOVED_SYNTAX_ERROR: reason="Test requires testing environment"
+    
+
+
+# REMOVED_SYNTAX_ERROR: def skip_if_no_database():
+    # REMOVED_SYNTAX_ERROR: """Pytest skip decorator for tests requiring database."""
+    # REMOVED_SYNTAX_ERROR: pass
+    # REMOVED_SYNTAX_ERROR: config = get_test_config()
+    # REMOVED_SYNTAX_ERROR: return pytest.mark.skipif( )
+    # REMOVED_SYNTAX_ERROR: not config.database_url,
+    # REMOVED_SYNTAX_ERROR: reason="Test requires database configuration"
+    
+
+
+# REMOVED_SYNTAX_ERROR: def require_unified_config(func):
+    # REMOVED_SYNTAX_ERROR: '''Decorator to ensure test function uses unified config system.
+
+    # REMOVED_SYNTAX_ERROR: Adds assertion at start of test to verify unified config usage.
+    # REMOVED_SYNTAX_ERROR: '''
+    # REMOVED_SYNTAX_ERROR: pass
+# REMOVED_SYNTAX_ERROR: def wrapper(*args, **kwargs):
+    # REMOVED_SYNTAX_ERROR: pass
+    # REMOVED_SYNTAX_ERROR: assert_config_uses_unified_system()
+    # REMOVED_SYNTAX_ERROR: return func(*args, **kwargs)
+    # REMOVED_SYNTAX_ERROR: return wrapper
+
+
+    # Test validation helpers
+# REMOVED_SYNTAX_ERROR: def validate_test_config_consistency():
+    # REMOVED_SYNTAX_ERROR: """Validate that test configuration is consistent and complete."""
+    # REMOVED_SYNTAX_ERROR: config = get_test_config()
+    # REMOVED_SYNTAX_ERROR: issues = []
+
     # Check required attributes
-    required_attrs = ['environment', 'database_url']
-    for attr in required_attrs:
-        if not hasattr(config, attr):
-            issues.append(f"Missing required config attribute: {attr}")
-    
-    # Check environment is appropriate for testing
-    if hasattr(config, 'environment') and config.environment not in ['testing', 'development']:
-        issues.append(f"Unexpected environment for tests: {config.environment}")
-    
-    return issues
+    # REMOVED_SYNTAX_ERROR: required_attrs = ['environment', 'database_url']
+    # REMOVED_SYNTAX_ERROR: for attr in required_attrs:
+        # REMOVED_SYNTAX_ERROR: if not hasattr(config, attr):
+            # REMOVED_SYNTAX_ERROR: issues.append("formatted_string")
+
+            # Check environment is appropriate for testing
+            # REMOVED_SYNTAX_ERROR: if hasattr(config, 'environment') and config.environment not in ['testing', 'development']:
+                # REMOVED_SYNTAX_ERROR: issues.append("formatted_string")
+
+                # REMOVED_SYNTAX_ERROR: return issues
 
 
-class ConfigValidatorHelper:
-    """Helper class for validating test configuration patterns."""
+# REMOVED_SYNTAX_ERROR: class ConfigValidatorHelper:
+    # REMOVED_SYNTAX_ERROR: """Helper class for validating test configuration patterns."""
+
+# REMOVED_SYNTAX_ERROR: def __init__(self):
+    # REMOVED_SYNTAX_ERROR: pass
+    # REMOVED_SYNTAX_ERROR: self.config = get_test_config()
+
+# REMOVED_SYNTAX_ERROR: def is_test_environment(self) -> bool:
+    # REMOVED_SYNTAX_ERROR: """SSOT: Check test environment via centralized utils."""
+    # REMOVED_SYNTAX_ERROR: from netra_backend.app.core.project_utils import is_test_environment
+    # REMOVED_SYNTAX_ERROR: return is_test_environment()
+
+# REMOVED_SYNTAX_ERROR: def has_database_config(self) -> bool:
+    # REMOVED_SYNTAX_ERROR: """Check if database is configured."""
+    # REMOVED_SYNTAX_ERROR: return bool(getattr(self.config, 'database_url', None))
+
+# REMOVED_SYNTAX_ERROR: def get_config_summary(self) -> Dict[str, Any]:
+    # REMOVED_SYNTAX_ERROR: """Get summary of current test configuration."""
+    # REMOVED_SYNTAX_ERROR: return { )
+    # REMOVED_SYNTAX_ERROR: 'environment': self.config.environment,
+    # REMOVED_SYNTAX_ERROR: 'has_database': self.has_database_config(),
+    # REMOVED_SYNTAX_ERROR: 'database_url_set': bool(getattr(self.config, 'database_url', None)),
+    # REMOVED_SYNTAX_ERROR: 'config_type': type(self.config).__name__
     
-    def __init__(self):
-    pass
-        self.config = get_test_config()
-    
-    def is_test_environment(self) -> bool:
-        """SSOT: Check test environment via centralized utils."""
-        from netra_backend.app.core.project_utils import is_test_environment
-        return is_test_environment()
-    
-    def has_database_config(self) -> bool:
-        """Check if database is configured."""
-        return bool(getattr(self.config, 'database_url', None))
-    
-    def get_config_summary(self) -> Dict[str, Any]:
-        """Get summary of current test configuration."""
-        return {
-            'environment': self.config.environment,
-            'has_database': self.has_database_config(),
-            'database_url_set': bool(getattr(self.config, 'database_url', None)),
-            'config_type': type(self.config).__name__
-        }
