@@ -15,9 +15,25 @@ from unittest.mock import AsyncMock, Mock, patch, MagicMock
     # REMOVED_SYNTAX_ERROR: 9.  Concurrent corpus operations isolation between users
     # REMOVED_SYNTAX_ERROR: 10.  Memory cleanup and resource management
 
-    # REMOVED_SYNTAX_ERROR: CRITICAL: These tests are designed to FAIL if SSOT violations exist.
-    # REMOVED_SYNTAX_ERROR: They test the exact fixes we made to ensure no regression.
-    # REMOVED_SYNTAX_ERROR: """"
+import asyncio
+import os
+import json
+import hashlib
+import time
+import threading
+import uuid
+import gc
+import inspect
+from typing import Any, Dict, List, Optional
+import pytest
+from datetime import datetime, timedelta
+import concurrent.futures
+import weakref
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from test_framework.database.test_database_manager import TestDatabaseManager
+from auth_service.core.auth_manager import AuthManager
+from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
+from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
 
     # REMOVED_SYNTAX_ERROR: import asyncio
     # REMOVED_SYNTAX_ERROR: import os

@@ -5,12 +5,13 @@ from unittest.mock import AsyncMock, Mock, patch, MagicMock
 # REMOVED_SYNTAX_ERROR: Performance metrics, concurrency, error recovery, and complete optimization flows
 # REMOVED_SYNTAX_ERROR: Split from oversized test_llm_agent_e2e_real.py to maintain 450-line limit
 
-# REMOVED_SYNTAX_ERROR: BVJ:
-    # REMOVED_SYNTAX_ERROR: 1. Segment: Growth & Enterprise
-    # REMOVED_SYNTAX_ERROR: 2. Business Goal: Ensure agent performance meets customer SLA requirements
-    # REMOVED_SYNTAX_ERROR: 3. Value Impact: Prevents performance degradation that could reduce optimization efficiency
-    # REMOVED_SYNTAX_ERROR: 4. Revenue Impact: Maintains customer satisfaction and prevents performance-related churn
-    # REMOVED_SYNTAX_ERROR: """"
+import asyncio
+import pytest
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from test_framework.database.test_database_manager import TestDatabaseManager
+from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
+from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
     # REMOVED_SYNTAX_ERROR: import sys
     # REMOVED_SYNTAX_ERROR: from pathlib import Path

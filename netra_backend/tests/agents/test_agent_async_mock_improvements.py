@@ -8,7 +8,7 @@ from unittest.mock import AsyncMock, Mock, patch, MagicMock
 import asyncio
 import pytest
 from typing import Dict, Any
-from test_framework.redis_test_utils_test_utils.test_redis_manager import TestRedisManager
+from test_framework.redis.test_redis_manager import TestRedisManager
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
 from shared.isolated_environment import IsolatedEnvironment

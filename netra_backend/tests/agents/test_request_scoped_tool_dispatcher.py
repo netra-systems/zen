@@ -5,14 +5,13 @@ from unittest.mock import AsyncMock, Mock, patch, MagicMock
 # REMOVED_SYNTAX_ERROR: This test suite validates that the request-scoped tool execution system provides
 # REMOVED_SYNTAX_ERROR: complete user isolation and eliminates global state issues.
 
-# REMOVED_SYNTAX_ERROR: Test Categories:
-    # REMOVED_SYNTAX_ERROR: - User isolation validation
-    # REMOVED_SYNTAX_ERROR: - WebSocket event routing
-    # REMOVED_SYNTAX_ERROR: - Concurrent user handling
-    # REMOVED_SYNTAX_ERROR: - Resource cleanup
-    # REMOVED_SYNTAX_ERROR: - Performance monitoring
-    # REMOVED_SYNTAX_ERROR: - Error handling and recovery
-    # REMOVED_SYNTAX_ERROR: """"
+import asyncio
+import pytest
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from test_framework.database.test_database_manager import TestDatabaseManager
+from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
+from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
     # REMOVED_SYNTAX_ERROR: import asyncio
     # REMOVED_SYNTAX_ERROR: import pytest

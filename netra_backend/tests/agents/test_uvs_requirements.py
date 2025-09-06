@@ -3,21 +3,13 @@ import asyncio
 
 # REMOVED_SYNTAX_ERROR: '''Test UVS Requirements - Only 2 Required Agents.
 
-# REMOVED_SYNTAX_ERROR: This test validates that the system correctly implements the UVS simplified architecture:
-    # REMOVED_SYNTAX_ERROR: - Only Triage and Reporting (with UVS) are required agents
-    # REMOVED_SYNTAX_ERROR: - Default flow is Triage → Data Helper → Reporting
-    # REMOVED_SYNTAX_ERROR: - Reporting handles all failure scenarios gracefully
-    # REMOVED_SYNTAX_ERROR: """"
-
-    # REMOVED_SYNTAX_ERROR: import pytest
-    # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
-    # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.supervisor.workflow_orchestrator import WorkflowOrchestrator
-    # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.base.interface import ExecutionContext
-    # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.registry.agent_class_registry import AgentClassRegistry
-    # REMOVED_SYNTAX_ERROR: from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
-    # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
-    # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
-    # REMOVED_SYNTAX_ERROR: from shared.isolated_environment import IsolatedEnvironment
+import asyncio
+import pytest
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from test_framework.database.test_database_manager import TestDatabaseManager
+from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
+from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 
 # REMOVED_SYNTAX_ERROR: def create_supervisor():

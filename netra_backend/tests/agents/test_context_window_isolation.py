@@ -1,15 +1,13 @@
 from unittest.mock import AsyncMock, Mock, patch, MagicMock
+import asyncio
+import sys
+from typing import Any, Dict, List, Optional
+from auth_service.core.auth_manager import AuthManager
+from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
+from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 """Tests for Agent Context Window Isolation and Management."""
-
-# REMOVED_SYNTAX_ERROR: This test suite validates:
-    # REMOVED_SYNTAX_ERROR: 1. Context window size limits
-    # REMOVED_SYNTAX_ERROR: 2. Prompt truncation behavior
-    # REMOVED_SYNTAX_ERROR: 3. Context isolation between agents
-    # REMOVED_SYNTAX_ERROR: 4. Token counting and limits
-    # REMOVED_SYNTAX_ERROR: 5. Context overflow handling
-    # REMOVED_SYNTAX_ERROR: 6. Memory management
-    # REMOVED_SYNTAX_ERROR: """"
 
     # REMOVED_SYNTAX_ERROR: import asyncio
     # REMOVED_SYNTAX_ERROR: import sys

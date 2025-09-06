@@ -1,15 +1,13 @@
 from unittest.mock import AsyncMock, Mock, patch, MagicMock
-
-# REMOVED_SYNTAX_ERROR: '''
-# REMOVED_SYNTAX_ERROR: Comprehensive Agent Orchestration Tests
-# REMOVED_SYNTAX_ERROR: Tests critical agent system functionality including lifecycle management,
-# REMOVED_SYNTAX_ERROR: communication patterns, and multi-agent coordination.
-
-# REMOVED_SYNTAX_ERROR: This test file focuses on orchestration gaps not covered by existing tests:
-    # REMOVED_SYNTAX_ERROR: 1. Agent lifecycle state management and transitions
-    # REMOVED_SYNTAX_ERROR: 2. WebSocket communication failure recovery patterns
-    # REMOVED_SYNTAX_ERROR: 3. Multi-agent coordination and error propagation
-    # REMOVED_SYNTAX_ERROR: """"
+import asyncio
+import time
+from typing import Dict, Any
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from test_framework.database.test_database_manager import TestDatabaseManager
+from auth_service.core.auth_manager import AuthManager
+from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
+from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
     # REMOVED_SYNTAX_ERROR: import asyncio
     # REMOVED_SYNTAX_ERROR: import time

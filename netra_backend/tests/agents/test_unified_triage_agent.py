@@ -1,21 +1,19 @@
 from unittest.mock import AsyncMock, Mock, patch, MagicMock
-
-# REMOVED_SYNTAX_ERROR: '''Comprehensive tests for UnifiedTriageAgent - SSOT Implementation
-
-# REMOVED_SYNTAX_ERROR: Tests verify:
-    # REMOVED_SYNTAX_ERROR: 1. Correct execution order (MUST RUN FIRST)
-    # REMOVED_SYNTAX_ERROR: 2. Factory pattern for user isolation
-    # REMOVED_SYNTAX_ERROR: 3. WebSocket event emissions
-    # REMOVED_SYNTAX_ERROR: 4. Metadata SSOT methods
-    # REMOVED_SYNTAX_ERROR: 5. All critical triage logic preserved
-    # REMOVED_SYNTAX_ERROR: """"
+import asyncio
+import json
+import pytest
+from typing import Dict, Any
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from test_framework.redis.test_redis_manager import TestRedisManager
+from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
+from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
     # REMOVED_SYNTAX_ERROR: import asyncio
     # REMOVED_SYNTAX_ERROR: import json
     # REMOVED_SYNTAX_ERROR: import pytest
     # REMOVED_SYNTAX_ERROR: from typing import Dict, Any
     # REMOVED_SYNTAX_ERROR: from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
-    # REMOVED_SYNTAX_ERROR: from test_framework.redis_test_utils_test_utils.test_redis_manager import TestRedisManager
     # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
     # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
     # REMOVED_SYNTAX_ERROR: from shared.isolated_environment import IsolatedEnvironment

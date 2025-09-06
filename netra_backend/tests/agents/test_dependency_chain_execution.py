@@ -2,13 +2,13 @@ from unittest.mock import AsyncMock, Mock, patch, MagicMock
 
 # REMOVED_SYNTAX_ERROR: '''Test multi-agent dependency chain execution and context propagation.
 
-# REMOVED_SYNTAX_ERROR: CRITICAL: This test validates that:
-    # REMOVED_SYNTAX_ERROR: 1. Agent dependencies are properly validated
-    # REMOVED_SYNTAX_ERROR: 2. Context and WebSocket manager propagate through the hierarchy
-    # REMOVED_SYNTAX_ERROR: 3. Results are passed correctly between dependent agents
-    # REMOVED_SYNTAX_ERROR: 4. Retry logic works for recoverable errors
-    # REMOVED_SYNTAX_ERROR: 5. Graceful degradation for optional dependencies
-    # REMOVED_SYNTAX_ERROR: """"
+import asyncio
+import pytest
+from uuid import uuid4
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
+from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
     # REMOVED_SYNTAX_ERROR: import asyncio
     # REMOVED_SYNTAX_ERROR: import pytest

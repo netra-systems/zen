@@ -12,7 +12,13 @@ from unittest.mock import AsyncMock, Mock, patch, MagicMock
     # REMOVED_SYNTAX_ERROR: 4. Revenue Impact: Maintains customer trust and prevents churn from failed optimizations
     # REMOVED_SYNTAX_ERROR: """"
 
-    # Test framework import - using pytest fixtures instead
+import sys
+from pathlib import Path
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from test_framework.database.test_database_manager import TestDatabaseManager
+from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
+from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
     # REMOVED_SYNTAX_ERROR: import sys
     # REMOVED_SYNTAX_ERROR: from pathlib import Path

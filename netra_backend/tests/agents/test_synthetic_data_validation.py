@@ -6,12 +6,13 @@ from unittest.mock import AsyncMock, Mock, patch, MagicMock
 # REMOVED_SYNTAX_ERROR: PRODUCTION CRITICAL: Complete validation test coverage for synthetic data generation.
 # REMOVED_SYNTAX_ERROR: Tests data quality, format validation, consistency, workload profiles, and metrics.
 
-# REMOVED_SYNTAX_ERROR: Business Value Justification:
-    # REMOVED_SYNTAX_ERROR: - Segment: Enterprise, Mid
-    # REMOVED_SYNTAX_ERROR: - Business Goal: Platform Reliability, Risk Reduction
-    # REMOVED_SYNTAX_ERROR: - Value Impact: Prevents data quality issues, ensures customer trust
-    # REMOVED_SYNTAX_ERROR: - Strategic Impact: $9.4M protection against data quality failures
-    # REMOVED_SYNTAX_ERROR: """"
+import asyncio
+import pytest
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from test_framework.database.test_database_manager import TestDatabaseManager
+from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
+from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
     # REMOVED_SYNTAX_ERROR: import asyncio
     # REMOVED_SYNTAX_ERROR: import json
