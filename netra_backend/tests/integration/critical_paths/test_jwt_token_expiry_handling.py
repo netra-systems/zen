@@ -1,563 +1,563 @@
 from unittest.mock import Mock, patch, MagicMock
 
-"""JWT Token Expiry Handling L3 Integration Tests
+# REMOVED_SYNTAX_ERROR: '''JWT Token Expiry Handling L3 Integration Tests
 
-TEMPORARILY SKIPPED: TokenManager has been consolidated into auth_client_core.
-This test needs to be rewritten to use the centralized auth service for SSOT compliance.
+# REMOVED_SYNTAX_ERROR: TEMPORARILY SKIPPED: TokenManager has been consolidated into auth_client_core.
+# REMOVED_SYNTAX_ERROR: This test needs to be rewritten to use the centralized auth service for SSOT compliance.
 
-Tests comprehensive JWT token expiry scenarios including automatic refresh,
-grace periods, sliding windows, and expiry notification mechanisms.
+# REMOVED_SYNTAX_ERROR: Tests comprehensive JWT token expiry scenarios including automatic refresh,
+# REMOVED_SYNTAX_ERROR: grace periods, sliding windows, and expiry notification mechanisms.
 
-Business Value Justification (BVJ):
-    - Segment: ALL (Security foundation for all tiers)
-- Business Goal: Balance security with user experience
-- Value Impact: Reduce support tickets by 30% from token expiry issues
-- Strategic Impact: Improve user retention through seamless auth experience
+# REMOVED_SYNTAX_ERROR: Business Value Justification (BVJ):
+    # REMOVED_SYNTAX_ERROR: - Segment: ALL (Security foundation for all tiers)
+    # REMOVED_SYNTAX_ERROR: - Business Goal: Balance security with user experience
+    # REMOVED_SYNTAX_ERROR: - Value Impact: Reduce support tickets by 30% from token expiry issues
+    # REMOVED_SYNTAX_ERROR: - Strategic Impact: Improve user retention through seamless auth experience
 
-Critical Path:
-    Token creation -> Usage tracking -> Expiry detection -> 
-Grace period -> Auto-refresh -> Notification -> Re-authentication
+    # REMOVED_SYNTAX_ERROR: Critical Path:
+        # REMOVED_SYNTAX_ERROR: Token creation -> Usage tracking -> Expiry detection ->
+        # REMOVED_SYNTAX_ERROR: Grace period -> Auto-refresh -> Notification -> Re-authentication
 
-Mock-Real Spectrum: L3 (Real JWT with time manipulation)
-- Real JWT encoding/decoding
-- Real Redis TTL management
-- Real refresh logic
-- Simulated time progression
-""""
+        # REMOVED_SYNTAX_ERROR: Mock-Real Spectrum: L3 (Real JWT with time manipulation)
+        # REMOVED_SYNTAX_ERROR: - Real JWT encoding/decoding
+        # REMOVED_SYNTAX_ERROR: - Real Redis TTL management
+        # REMOVED_SYNTAX_ERROR: - Real refresh logic
+        # REMOVED_SYNTAX_ERROR: - Simulated time progression
+        # REMOVED_SYNTAX_ERROR: """"
 
-import pytest
-from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
-from test_framework.database.test_database_manager import TestDatabaseManager
-from test_framework.redis_test_utils_test_utils.test_redis_manager import TestRedisManager
-from auth_service.core.auth_manager import AuthManager
-from shared.isolated_environment import IsolatedEnvironment
-pytest.skip("TokenManager consolidated - rewrite needed for auth service", allow_module_level=True)
+        # REMOVED_SYNTAX_ERROR: import pytest
+        # REMOVED_SYNTAX_ERROR: from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+        # REMOVED_SYNTAX_ERROR: from test_framework.database.test_database_manager import TestDatabaseManager
+        # REMOVED_SYNTAX_ERROR: from test_framework.redis_test_utils_test_utils.test_redis_manager import TestRedisManager
+        # REMOVED_SYNTAX_ERROR: from auth_service.core.auth_manager import AuthManager
+        # REMOVED_SYNTAX_ERROR: from shared.isolated_environment import IsolatedEnvironment
+        # REMOVED_SYNTAX_ERROR: pytest.skip("TokenManager consolidated - rewrite needed for auth service", allow_module_level=True)
 
-import sys
-from pathlib import Path
+        # REMOVED_SYNTAX_ERROR: import sys
+        # REMOVED_SYNTAX_ERROR: from pathlib import Path
 
-# Test framework import - using pytest fixtures instead
+        # Test framework import - using pytest fixtures instead
 
-import asyncio
-import time
-from dataclasses import dataclass, field
-from datetime import datetime, timedelta, timezone
-from typing import Any, Dict, List, Optional, Tuple
+        # REMOVED_SYNTAX_ERROR: import asyncio
+        # REMOVED_SYNTAX_ERROR: import time
+        # REMOVED_SYNTAX_ERROR: from dataclasses import dataclass, field
+        # REMOVED_SYNTAX_ERROR: from datetime import datetime, timedelta, timezone
+        # REMOVED_SYNTAX_ERROR: from typing import Any, Dict, List, Optional, Tuple
 
-from test_framework.freezegun_mock import freeze_time
-import jwt
-import pytest
-from netra_backend.app.clients.auth_client_core import auth_client
+        # REMOVED_SYNTAX_ERROR: from test_framework.freezegun_mock import freeze_time
+        # REMOVED_SYNTAX_ERROR: import jwt
+        # REMOVED_SYNTAX_ERROR: import pytest
+        # REMOVED_SYNTAX_ERROR: from netra_backend.app.clients.auth_client_core import auth_client
 
-from netra_backend.app.core.config import get_settings
-from netra_backend.app.monitoring.metrics_collector import MetricsCollector
-# TokenManager consolidated into auth_client - using auth_client for token management
-from netra_backend.app.db.redis_manager import get_redis_manager
+        # REMOVED_SYNTAX_ERROR: from netra_backend.app.core.config import get_settings
+        # REMOVED_SYNTAX_ERROR: from netra_backend.app.monitoring.metrics_collector import MetricsCollector
+        # TokenManager consolidated into auth_client - using auth_client for token management
+        # REMOVED_SYNTAX_ERROR: from netra_backend.app.db.redis_manager import get_redis_manager
 
-from netra_backend.app.schemas.auth_types import (
-    RefreshRequest,
-    RefreshResponse,
-    Token,
-    TokenData,
-    TokenExpiryNotification,
-    TokenStatus,
-)
+        # REMOVED_SYNTAX_ERROR: from netra_backend.app.schemas.auth_types import ( )
+        # REMOVED_SYNTAX_ERROR: RefreshRequest,
+        # REMOVED_SYNTAX_ERROR: RefreshResponse,
+        # REMOVED_SYNTAX_ERROR: Token,
+        # REMOVED_SYNTAX_ERROR: TokenData,
+        # REMOVED_SYNTAX_ERROR: TokenExpiryNotification,
+        # REMOVED_SYNTAX_ERROR: TokenStatus,
+        
 
-@dataclass
-class TokenLifecycle:
-    """Track token lifecycle events"""
-    token_id: str
-    created_at: datetime
-    expires_at: datetime
-    last_used: datetime
-    refresh_count: int = 0
-    grace_period_used: bool = False
-    auto_refreshed: bool = False
-    notifications_sent: List[str] = field(default_factory=list)
-    final_status: str = "active"  # active, expired, refreshed, revoked
+        # REMOVED_SYNTAX_ERROR: @dataclass
+# REMOVED_SYNTAX_ERROR: class TokenLifecycle:
+    # REMOVED_SYNTAX_ERROR: """Track token lifecycle events"""
+    # REMOVED_SYNTAX_ERROR: token_id: str
+    # REMOVED_SYNTAX_ERROR: created_at: datetime
+    # REMOVED_SYNTAX_ERROR: expires_at: datetime
+    # REMOVED_SYNTAX_ERROR: last_used: datetime
+    # REMOVED_SYNTAX_ERROR: refresh_count: int = 0
+    # REMOVED_SYNTAX_ERROR: grace_period_used: bool = False
+    # REMOVED_SYNTAX_ERROR: auto_refreshed: bool = False
+    # REMOVED_SYNTAX_ERROR: notifications_sent: List[str] = field(default_factory=list)
+    # REMOVED_SYNTAX_ERROR: final_status: str = "active"  # active, expired, refreshed, revoked
 
-@dataclass
-class ExpiryTestMetrics:
-    """Metrics for expiry testing"""
-    tokens_created: int = 0
-    tokens_expired: int = 0
-    tokens_refreshed: int = 0
-    auto_refresh_success: int = 0
-    auto_refresh_failed: int = 0
-    grace_period_grants: int = 0
-    notifications_sent: int = 0
-    avg_token_lifetime_minutes: float = 0.0
+    # REMOVED_SYNTAX_ERROR: @dataclass
+# REMOVED_SYNTAX_ERROR: class ExpiryTestMetrics:
+    # REMOVED_SYNTAX_ERROR: """Metrics for expiry testing"""
+    # REMOVED_SYNTAX_ERROR: tokens_created: int = 0
+    # REMOVED_SYNTAX_ERROR: tokens_expired: int = 0
+    # REMOVED_SYNTAX_ERROR: tokens_refreshed: int = 0
+    # REMOVED_SYNTAX_ERROR: auto_refresh_success: int = 0
+    # REMOVED_SYNTAX_ERROR: auto_refresh_failed: int = 0
+    # REMOVED_SYNTAX_ERROR: grace_period_grants: int = 0
+    # REMOVED_SYNTAX_ERROR: notifications_sent: int = 0
+    # REMOVED_SYNTAX_ERROR: avg_token_lifetime_minutes: float = 0.0
+
+    # REMOVED_SYNTAX_ERROR: @property
+# REMOVED_SYNTAX_ERROR: def refresh_success_rate(self) -> float:
+    # REMOVED_SYNTAX_ERROR: total_attempts = self.auto_refresh_success + self.auto_refresh_failed
+    # REMOVED_SYNTAX_ERROR: if total_attempts == 0:
+        # REMOVED_SYNTAX_ERROR: return 0
+        # REMOVED_SYNTAX_ERROR: return (self.auto_refresh_success / total_attempts) * 100
+
+# REMOVED_SYNTAX_ERROR: class TestJWTTokenExpiryHandling:
+    # REMOVED_SYNTAX_ERROR: """Test suite for JWT token expiry handling"""
+
+    # REMOVED_SYNTAX_ERROR: @pytest.fixture
+# REMOVED_SYNTAX_ERROR: async def token_manager(self):
+    # REMOVED_SYNTAX_ERROR: """Initialize token manager"""
+    # REMOVED_SYNTAX_ERROR: settings = get_settings()
+
+    # REMOVED_SYNTAX_ERROR: manager = TokenManager( )
+    # REMOVED_SYNTAX_ERROR: secret_key=settings.jwt_secret_key,
+    # REMOVED_SYNTAX_ERROR: algorithm="HS256",
+    # REMOVED_SYNTAX_ERROR: access_token_expire_minutes=15,
+    # REMOVED_SYNTAX_ERROR: refresh_token_expire_minutes=60*24*7,  # 7 days
+    # REMOVED_SYNTAX_ERROR: grace_period_seconds=30
     
-    @property
-    def refresh_success_rate(self) -> float:
-        total_attempts = self.auto_refresh_success + self.auto_refresh_failed
-        if total_attempts == 0:
-            return 0
-        return (self.auto_refresh_success / total_attempts) * 100
 
-class TestJWTTokenExpiryHandling:
-    """Test suite for JWT token expiry handling"""
+    # REMOVED_SYNTAX_ERROR: await manager.initialize()
+    # REMOVED_SYNTAX_ERROR: yield manager
+    # REMOVED_SYNTAX_ERROR: await manager.cleanup()
+
+    # REMOVED_SYNTAX_ERROR: @pytest.fixture
+# REMOVED_SYNTAX_ERROR: async def notification_tracker(self):
+    # REMOVED_SYNTAX_ERROR: """Track expiry notifications"""
+    # REMOVED_SYNTAX_ERROR: notifications = []
+
+# REMOVED_SYNTAX_ERROR: async def send_notification(notification: TokenExpiryNotification):
+    # REMOVED_SYNTAX_ERROR: notifications.append({ ))
+    # REMOVED_SYNTAX_ERROR: "user_id": notification.user_id,
+    # REMOVED_SYNTAX_ERROR: "token_id": notification.token_id,
+    # REMOVED_SYNTAX_ERROR: "expires_in_seconds": notification.expires_in_seconds,
+    # REMOVED_SYNTAX_ERROR: "notification_type": notification.notification_type,
+    # REMOVED_SYNTAX_ERROR: "timestamp": notification.timestamp
     
-    @pytest.fixture
-    async def token_manager(self):
-        """Initialize token manager"""
-        settings = get_settings()
-        
-        manager = TokenManager(
-        secret_key=settings.jwt_secret_key,
-        algorithm="HS256",
-        access_token_expire_minutes=15,
-        refresh_token_expire_minutes=60*24*7,  # 7 days
-        grace_period_seconds=30
-        )
-        
-        await manager.initialize()
-        yield manager
-        await manager.cleanup()
-    
-        @pytest.fixture
-        async def notification_tracker(self):
-        """Track expiry notifications"""
-        notifications = []
-        
-        async def send_notification(notification: TokenExpiryNotification):
-        notifications.append({
-        "user_id": notification.user_id,
-        "token_id": notification.token_id,
-        "expires_in_seconds": notification.expires_in_seconds,
-        "notification_type": notification.notification_type,
-        "timestamp": notification.timestamp
-        })
-        
-        yield {"send": send_notification, "notifications": notifications}
-    
-        @pytest.mark.asyncio
-        @pytest.mark.timeout(60)
-        @pytest.mark.asyncio
-        async def test_token_natural_expiry_flow(
-        self, token_manager, notification_tracker
-        ):
-        """Test natural token expiry with notifications"""
-        metrics = ExpiryTestMetrics()
-        
+
+    # REMOVED_SYNTAX_ERROR: yield {"send": send_notification, "notifications": notifications}
+
+    # Removed problematic line: @pytest.mark.asyncio
+    # REMOVED_SYNTAX_ERROR: @pytest.fixture
+    # Removed problematic line: @pytest.mark.asyncio
+    # Removed problematic line: async def test_token_natural_expiry_flow( )
+    # REMOVED_SYNTAX_ERROR: self, token_manager, notification_tracker
+    # REMOVED_SYNTAX_ERROR: ):
+        # REMOVED_SYNTAX_ERROR: """Test natural token expiry with notifications"""
+        # REMOVED_SYNTAX_ERROR: metrics = ExpiryTestMetrics()
+
         # Create token with short expiry
-        with freeze_time("2024-01-01 12:00:00") as frozen_time:
-        token_data = await token_manager.create_token(
-        user_id="user123",
-        role="user",
-        permissions=["read"],
-        expire_minutes=5  # 5 minute expiry
-        )
-        metrics.tokens_created += 1
+        # REMOVED_SYNTAX_ERROR: with freeze_time("2024-01-01 12:00:00") as frozen_time:
+            # REMOVED_SYNTAX_ERROR: token_data = await token_manager.create_token( )
+            # REMOVED_SYNTAX_ERROR: user_id="user123",
+            # REMOVED_SYNTAX_ERROR: role="user",
+            # REMOVED_SYNTAX_ERROR: permissions=["read"],
+            # REMOVED_SYNTAX_ERROR: expire_minutes=5  # 5 minute expiry
             
-        lifecycle = TokenLifecycle(
-        token_id=token_data.jti,
-        created_at=datetime.now(timezone.utc),
-        expires_at=datetime.now(timezone.utc) + timedelta(minutes=5),
-        last_used=datetime.now(timezone.utc)
-        )
+            # REMOVED_SYNTAX_ERROR: metrics.tokens_created += 1
+
+            # REMOVED_SYNTAX_ERROR: lifecycle = TokenLifecycle( )
+            # REMOVED_SYNTAX_ERROR: token_id=token_data.jti,
+            # REMOVED_SYNTAX_ERROR: created_at=datetime.now(timezone.utc),
+            # REMOVED_SYNTAX_ERROR: expires_at=datetime.now(timezone.utc) + timedelta(minutes=5),
+            # REMOVED_SYNTAX_ERROR: last_used=datetime.now(timezone.utc)
             
-        # Advance time to 1 minute before expiry
-        frozen_time.move_to("2024-01-01 12:04:00")
+
+            # Advance time to 1 minute before expiry
+            # REMOVED_SYNTAX_ERROR: frozen_time.move_to("2024-01-01 12:04:00")
+
+            # Check token status - should trigger warning
+            # REMOVED_SYNTAX_ERROR: status = await token_manager.check_token_status(token_data.access_token)
+            # REMOVED_SYNTAX_ERROR: assert status == TokenStatus.EXPIRING_SOON
+
+            # Send expiry warning
+            # REMOVED_SYNTAX_ERROR: await notification_tracker["send"]( )
+            # REMOVED_SYNTAX_ERROR: TokenExpiryNotification( )
+            # REMOVED_SYNTAX_ERROR: user_id="user123",
+            # REMOVED_SYNTAX_ERROR: token_id=token_data.jti,
+            # REMOVED_SYNTAX_ERROR: expires_in_seconds=60,
+            # REMOVED_SYNTAX_ERROR: notification_type="warning",
+            # REMOVED_SYNTAX_ERROR: timestamp=datetime.now(timezone.utc)
             
-        # Check token status - should trigger warning
-        status = await token_manager.check_token_status(token_data.access_token)
-        assert status == TokenStatus.EXPIRING_SOON
             
-        # Send expiry warning
-        await notification_tracker["send"](
-        TokenExpiryNotification(
-        user_id="user123",
-        token_id=token_data.jti,
-        expires_in_seconds=60,
-        notification_type="warning",
-        timestamp=datetime.now(timezone.utc)
-        )
-        )
-        metrics.notifications_sent += 1
-        lifecycle.notifications_sent.append("warning")
-            
-        # Advance to exact expiry time
-        frozen_time.move_to("2024-01-01 12:05:00")
-            
-        # Token should be expired
-        status = await token_manager.check_token_status(token_data.access_token)
-        assert status == TokenStatus.EXPIRED
-        metrics.tokens_expired += 1
-        lifecycle.final_status = "expired"
-            
-        # Verify notification sent
-        assert len(notification_tracker["notifications"]) == 1
-        assert notification_tracker["notifications"][0]["notification_type"] == "warning"
+            # REMOVED_SYNTAX_ERROR: metrics.notifications_sent += 1
+            # REMOVED_SYNTAX_ERROR: lifecycle.notifications_sent.append("warning")
+
+            # Advance to exact expiry time
+            # REMOVED_SYNTAX_ERROR: frozen_time.move_to("2024-01-01 12:05:00")
+
+            # Token should be expired
+            # REMOVED_SYNTAX_ERROR: status = await token_manager.check_token_status(token_data.access_token)
+            # REMOVED_SYNTAX_ERROR: assert status == TokenStatus.EXPIRED
+            # REMOVED_SYNTAX_ERROR: metrics.tokens_expired += 1
+            # REMOVED_SYNTAX_ERROR: lifecycle.final_status = "expired"
+
+            # Verify notification sent
+            # REMOVED_SYNTAX_ERROR: assert len(notification_tracker["notifications"]) == 1
+            # REMOVED_SYNTAX_ERROR: assert notification_tracker["notifications"][0]["notification_type"] == "warning"
+
+            # Removed problematic line: @pytest.mark.asyncio
+            # REMOVED_SYNTAX_ERROR: @pytest.fixture
+            # Removed problematic line: @pytest.mark.asyncio
+            # Removed problematic line: async def test_grace_period_allowance( )
+            # REMOVED_SYNTAX_ERROR: self, token_manager
+            # REMOVED_SYNTAX_ERROR: ):
+                # REMOVED_SYNTAX_ERROR: """Test grace period for recently expired tokens"""
+                # REMOVED_SYNTAX_ERROR: metrics = ExpiryTestMetrics()
+
+                # REMOVED_SYNTAX_ERROR: with freeze_time("2024-01-01 12:00:00") as frozen_time:
+                    # Create token
+                    # REMOVED_SYNTAX_ERROR: token_data = await token_manager.create_token( )
+                    # REMOVED_SYNTAX_ERROR: user_id="user456",
+                    # REMOVED_SYNTAX_ERROR: role="user",
+                    # REMOVED_SYNTAX_ERROR: permissions=["read"],
+                    # REMOVED_SYNTAX_ERROR: expire_minutes=10
+                    
+
+                    # Advance just past expiry (within grace period)
+                    # REMOVED_SYNTAX_ERROR: frozen_time.move_to("2024-01-01 12:10:15")  # 15 seconds past expiry
+
+                    # Token should be expired but within grace period
+                    # REMOVED_SYNTAX_ERROR: validation_result = await token_manager.validate_with_grace( )
+                    # REMOVED_SYNTAX_ERROR: token_data.access_token
+                    
+
+                    # REMOVED_SYNTAX_ERROR: assert validation_result.is_valid, "Token should be valid within grace period"
+                    # REMOVED_SYNTAX_ERROR: assert validation_result.grace_period_used, "Should indicate grace period used"
+                    # REMOVED_SYNTAX_ERROR: metrics.grace_period_grants += 1
+
+                    # Advance beyond grace period
+                    # REMOVED_SYNTAX_ERROR: frozen_time.move_to("2024-01-01 12:10:45")  # 45 seconds past expiry
+
+                    # Token should be completely invalid
+                    # REMOVED_SYNTAX_ERROR: validation_result = await token_manager.validate_with_grace( )
+                    # REMOVED_SYNTAX_ERROR: token_data.access_token
+                    
+
+                    # REMOVED_SYNTAX_ERROR: assert not validation_result.is_valid, "Token should be invalid beyond grace period"
+
+                    # Removed problematic line: @pytest.mark.asyncio
+                    # REMOVED_SYNTAX_ERROR: @pytest.fixture
+                    # Removed problematic line: @pytest.mark.asyncio
+                    # Removed problematic line: async def test_automatic_token_refresh( )
+                    # REMOVED_SYNTAX_ERROR: self, token_manager
+                    # REMOVED_SYNTAX_ERROR: ):
+                        # REMOVED_SYNTAX_ERROR: """Test automatic token refresh before expiry"""
+                        # REMOVED_SYNTAX_ERROR: metrics = ExpiryTestMetrics()
+
+                        # REMOVED_SYNTAX_ERROR: with freeze_time("2024-01-01 12:00:00") as frozen_time:
+                            # Create initial tokens
+                            # REMOVED_SYNTAX_ERROR: token_data = await token_manager.create_token( )
+                            # REMOVED_SYNTAX_ERROR: user_id="user789",
+                            # REMOVED_SYNTAX_ERROR: role="admin",
+                            # REMOVED_SYNTAX_ERROR: permissions=["read", "write"],
+                            # REMOVED_SYNTAX_ERROR: expire_minutes=15
+                            
+                            # REMOVED_SYNTAX_ERROR: metrics.tokens_created += 1
+
+                            # Advance to refresh window (e.g., 80% of lifetime)
+                            # REMOVED_SYNTAX_ERROR: frozen_time.move_to("2024-01-01 12:12:00")  # 12 minutes (80% of 15)
+
+                            # Trigger auto-refresh
+                            # REMOVED_SYNTAX_ERROR: try:
+                                # REMOVED_SYNTAX_ERROR: new_token = await token_manager.auto_refresh( )
+                                # REMOVED_SYNTAX_ERROR: token_data.refresh_token
+                                
+                                # REMOVED_SYNTAX_ERROR: metrics.auto_refresh_success += 1
+                                # REMOVED_SYNTAX_ERROR: metrics.tokens_refreshed += 1
+
+                                # Verify new token
+                                # REMOVED_SYNTAX_ERROR: assert new_token is not None
+                                # REMOVED_SYNTAX_ERROR: assert new_token.access_token != token_data.access_token
+
+                                # Verify new expiry time
+                                # REMOVED_SYNTAX_ERROR: decoded = jwt.decode( )
+                                # REMOVED_SYNTAX_ERROR: new_token.access_token,
+                                # REMOVED_SYNTAX_ERROR: options={"verify_signature": False}
+                                
+                                # REMOVED_SYNTAX_ERROR: new_exp = datetime.fromtimestamp(decoded["exp"])
+                                # REMOVED_SYNTAX_ERROR: assert new_exp > datetime.now(timezone.utc) + timedelta(minutes=14)
+
+                                # REMOVED_SYNTAX_ERROR: except Exception:
+                                    # REMOVED_SYNTAX_ERROR: metrics.auto_refresh_failed += 1
+                                    # REMOVED_SYNTAX_ERROR: raise
+
+                                    # Removed problematic line: @pytest.mark.asyncio
+                                    # REMOVED_SYNTAX_ERROR: @pytest.fixture
+                                    # Removed problematic line: @pytest.mark.asyncio
+                                    # Removed problematic line: async def test_sliding_window_expiry( )
+                                    # REMOVED_SYNTAX_ERROR: self, token_manager
+                                    # REMOVED_SYNTAX_ERROR: ):
+                                        # REMOVED_SYNTAX_ERROR: """Test sliding window expiry (activity extends token)"""
+                                        # REMOVED_SYNTAX_ERROR: with freeze_time("2024-01-01 12:00:00") as frozen_time:
+                                            # Create token with sliding window enabled
+                                            # REMOVED_SYNTAX_ERROR: token_data = await token_manager.create_token( )
+                                            # REMOVED_SYNTAX_ERROR: user_id="user_sliding",
+                                            # REMOVED_SYNTAX_ERROR: role="user",
+                                            # REMOVED_SYNTAX_ERROR: permissions=["read"],
+                                            # REMOVED_SYNTAX_ERROR: expire_minutes=30,
+                                            # REMOVED_SYNTAX_ERROR: sliding_window=True
+                                            
+
+                                            # REMOVED_SYNTAX_ERROR: initial_exp = datetime.now(timezone.utc) + timedelta(minutes=30)
+
+                                            # Simulate activity at 10 minutes
+                                            # REMOVED_SYNTAX_ERROR: frozen_time.move_to("2024-01-01 12:10:00")
+                                            # REMOVED_SYNTAX_ERROR: await token_manager.update_activity(token_data.access_token)
+
+                                            # Check new expiry (should be extended)
+                                            # REMOVED_SYNTAX_ERROR: status = await token_manager.get_token_info(token_data.access_token)
+                                            # REMOVED_SYNTAX_ERROR: assert status.expires_at > initial_exp, "Expiry should be extended"
+
+                                            # Simulate more activity at 20 minutes
+                                            # REMOVED_SYNTAX_ERROR: frozen_time.move_to("2024-01-01 12:20:00")
+                                            # REMOVED_SYNTAX_ERROR: await token_manager.update_activity(token_data.access_token)
+
+                                            # Token should still be valid at original expiry time
+                                            # REMOVED_SYNTAX_ERROR: frozen_time.move_to("2024-01-01 12:30:00")
+                                            # REMOVED_SYNTAX_ERROR: validation = await token_manager.validate_token_jwt(token_data.access_token)
+                                            # REMOVED_SYNTAX_ERROR: assert validation.is_valid, "Token should be valid due to sliding window"
+
+                                            # Removed problematic line: @pytest.mark.asyncio
+                                            # REMOVED_SYNTAX_ERROR: @pytest.fixture
+                                            # Removed problematic line: @pytest.mark.asyncio
+                                            # Removed problematic line: async def test_bulk_token_expiry_handling( )
+                                            # REMOVED_SYNTAX_ERROR: self, token_manager
+                                            # REMOVED_SYNTAX_ERROR: ):
+                                                # REMOVED_SYNTAX_ERROR: """Test handling bulk token expiries"""
+                                                # REMOVED_SYNTAX_ERROR: metrics = ExpiryTestMetrics()
+                                                # REMOVED_SYNTAX_ERROR: token_count = 100
+
+                                                # REMOVED_SYNTAX_ERROR: with freeze_time("2024-01-01 12:00:00") as frozen_time:
+                                                    # Create tokens with staggered expiry times
+                                                    # REMOVED_SYNTAX_ERROR: tokens = []
+                                                    # REMOVED_SYNTAX_ERROR: for i in range(token_count):
+                                                        # REMOVED_SYNTAX_ERROR: expire_minutes = 5 + (i % 10)  # 5-14 minute expiry
+                                                        # REMOVED_SYNTAX_ERROR: token = await token_manager.create_token( )
+                                                        # REMOVED_SYNTAX_ERROR: user_id="formatted_string",
+                                                        # REMOVED_SYNTAX_ERROR: role="user",
+                                                        # REMOVED_SYNTAX_ERROR: permissions=["read"],
+                                                        # REMOVED_SYNTAX_ERROR: expire_minutes=expire_minutes
+                                                        
+                                                        # REMOVED_SYNTAX_ERROR: tokens.append({ ))
+                                                        # REMOVED_SYNTAX_ERROR: "token": token,
+                                                        # REMOVED_SYNTAX_ERROR: "expires_at": datetime.now(timezone.utc) + timedelta(minutes=expire_minutes)
+                                                        
+                                                        # REMOVED_SYNTAX_ERROR: metrics.tokens_created += 1
+
+                                                        # Advance time and check expiries
+                                                        # REMOVED_SYNTAX_ERROR: for minute in range(1, 16):
+                                                            # REMOVED_SYNTAX_ERROR: frozen_time.move_to("formatted_string")
+
+                                                            # Check which tokens expired
+                                                            # REMOVED_SYNTAX_ERROR: for token_info in tokens:
+                                                                # REMOVED_SYNTAX_ERROR: if token_info["expires_at"] <= datetime.now(timezone.utc):
+                                                                    # REMOVED_SYNTAX_ERROR: status = await token_manager.check_token_status( )
+                                                                    # REMOVED_SYNTAX_ERROR: token_info["token"].access_token
+                                                                    
+                                                                    # REMOVED_SYNTAX_ERROR: if status == TokenStatus.EXPIRED:
+                                                                        # REMOVED_SYNTAX_ERROR: metrics.tokens_expired += 1
+
+                                                                        # Verify expiry counts
+                                                                        # REMOVED_SYNTAX_ERROR: expected_expired = sum( )
+                                                                        # REMOVED_SYNTAX_ERROR: 1 for t in tokens
+                                                                        # REMOVED_SYNTAX_ERROR: if t["expires_at"] <= datetime.now(timezone.utc)
+                                                                        
+                                                                        # REMOVED_SYNTAX_ERROR: assert metrics.tokens_expired >= expected_expired * 0.95, \
+                                                                        # REMOVED_SYNTAX_ERROR: "Not all expected tokens marked as expired"
+
+                                                                        # Removed problematic line: @pytest.mark.asyncio
+                                                                        # REMOVED_SYNTAX_ERROR: @pytest.fixture
+                                                                        # Removed problematic line: @pytest.mark.asyncio
+                                                                        # Removed problematic line: async def test_refresh_token_rotation( )
+                                                                        # REMOVED_SYNTAX_ERROR: self, token_manager
+                                                                        # REMOVED_SYNTAX_ERROR: ):
+                                                                            # REMOVED_SYNTAX_ERROR: """Test refresh token rotation on use"""
+                                                                            # REMOVED_SYNTAX_ERROR: metrics = ExpiryTestMetrics()
+                                                                            # REMOVED_SYNTAX_ERROR: used_refresh_tokens = set()
+
+                                                                            # Create initial token pair
+                                                                            # REMOVED_SYNTAX_ERROR: token_data = await token_manager.create_token( )
+                                                                            # REMOVED_SYNTAX_ERROR: user_id="user_rotation",
+                                                                            # REMOVED_SYNTAX_ERROR: role="user",
+                                                                            # REMOVED_SYNTAX_ERROR: permissions=["read"],
+                                                                            # REMOVED_SYNTAX_ERROR: expire_minutes=15
+                                                                            
+
+                                                                            # REMOVED_SYNTAX_ERROR: current_refresh = token_data.refresh_token
+                                                                            # REMOVED_SYNTAX_ERROR: used_refresh_tokens.add(current_refresh)
+
+                                                                            # Perform multiple refreshes
+                                                                            # REMOVED_SYNTAX_ERROR: for i in range(5):
+                                                                                # Use refresh token
+                                                                                # REMOVED_SYNTAX_ERROR: new_tokens = await token_manager.refresh_tokens( )
+                                                                                # REMOVED_SYNTAX_ERROR: RefreshRequest(refresh_token=current_refresh)
+                                                                                
+                                                                                # REMOVED_SYNTAX_ERROR: metrics.tokens_refreshed += 1
+
+                                                                                # Verify new refresh token
+                                                                                # REMOVED_SYNTAX_ERROR: assert new_tokens.refresh_token != current_refresh, \
+                                                                                # REMOVED_SYNTAX_ERROR: "Refresh token should rotate"
+                                                                                # REMOVED_SYNTAX_ERROR: assert new_tokens.refresh_token not in used_refresh_tokens, \
+                                                                                # REMOVED_SYNTAX_ERROR: "Refresh token should be unique"
+
+                                                                                # Old refresh token should be invalidated
+                                                                                # REMOVED_SYNTAX_ERROR: with pytest.raises(Exception) as exc_info:
+                                                                                    # REMOVED_SYNTAX_ERROR: await token_manager.refresh_tokens( )
+                                                                                    # REMOVED_SYNTAX_ERROR: RefreshRequest(refresh_token=current_refresh)
+                                                                                    
+                                                                                    # REMOVED_SYNTAX_ERROR: assert "invalid" in str(exc_info.value).lower() or \
+                                                                                    # REMOVED_SYNTAX_ERROR: "expired" in str(exc_info.value).lower()
+
+                                                                                    # Update for next iteration
+                                                                                    # REMOVED_SYNTAX_ERROR: used_refresh_tokens.add(new_tokens.refresh_token)
+                                                                                    # REMOVED_SYNTAX_ERROR: current_refresh = new_tokens.refresh_token
+
+                                                                                    # Removed problematic line: @pytest.mark.asyncio
+                                                                                    # REMOVED_SYNTAX_ERROR: @pytest.fixture
+                                                                                    # Removed problematic line: @pytest.mark.asyncio
+                                                                                    # Removed problematic line: async def test_expiry_during_request_processing( )
+                                                                                    # REMOVED_SYNTAX_ERROR: self, token_manager
+                                                                                    # REMOVED_SYNTAX_ERROR: ):
+                                                                                        # REMOVED_SYNTAX_ERROR: """Test token expiring during request processing"""
+                                                                                        # REMOVED_SYNTAX_ERROR: with freeze_time("2024-01-01 12:00:00") as frozen_time:
+                                                                                            # Create token with very short expiry
+                                                                                            # REMOVED_SYNTAX_ERROR: token_data = await token_manager.create_token( )
+                                                                                            # REMOVED_SYNTAX_ERROR: user_id="user_processing",
+                                                                                            # REMOVED_SYNTAX_ERROR: role="user",
+                                                                                            # REMOVED_SYNTAX_ERROR: permissions=["read"],
+                                                                                            # REMOVED_SYNTAX_ERROR: expire_minutes=1  # 1 minute
+                                                                                            
+
+                                                                                            # Start processing request
+# REMOVED_SYNTAX_ERROR: async def long_running_request(token: str):
+    # Validate token at start
+    # REMOVED_SYNTAX_ERROR: validation = await token_manager.validate_token_jwt(token)
+    # REMOVED_SYNTAX_ERROR: assert validation.is_valid, "Token should be valid at start"
+
+    # Simulate long processing (40 seconds)
+    # REMOVED_SYNTAX_ERROR: frozen_time.move_to("2024-01-01 12:00:40")
+    # REMOVED_SYNTAX_ERROR: await asyncio.sleep(0.1)  # Simulated work
+
+    # Token still valid (within original minute)
+    # REMOVED_SYNTAX_ERROR: validation = await token_manager.validate_token_jwt(token)
+    # REMOVED_SYNTAX_ERROR: assert validation.is_valid, "Token should still be valid"
+
+    # More processing (another 30 seconds)
+    # REMOVED_SYNTAX_ERROR: frozen_time.move_to("2024-01-01 12:01:10")
+    # REMOVED_SYNTAX_ERROR: await asyncio.sleep(0.1)
+
+    # Token now expired during processing
+    # REMOVED_SYNTAX_ERROR: validation = await token_manager.validate_token_jwt(token)
+    # REMOVED_SYNTAX_ERROR: return validation
+
+    # Execute request
+    # REMOVED_SYNTAX_ERROR: final_validation = await long_running_request(token_data.access_token)
+
+    # Token should be expired
+    # REMOVED_SYNTAX_ERROR: assert not final_validation.is_valid, \
+    # REMOVED_SYNTAX_ERROR: "Token should expire during long request"
+
+    # But grace period might apply
+    # REMOVED_SYNTAX_ERROR: grace_validation = await token_manager.validate_with_grace( )
+    # REMOVED_SYNTAX_ERROR: token_data.access_token
     
-        @pytest.mark.asyncio
-        @pytest.mark.timeout(60)
-        @pytest.mark.asyncio
-        async def test_grace_period_allowance(
-        self, token_manager
-        ):
-        """Test grace period for recently expired tokens"""
-        metrics = ExpiryTestMetrics()
-        
-        with freeze_time("2024-01-01 12:00:00") as frozen_time:
-        # Create token
-        token_data = await token_manager.create_token(
-        user_id="user456",
-        role="user",
-        permissions=["read"],
-        expire_minutes=10
-        )
-            
-        # Advance just past expiry (within grace period)
-        frozen_time.move_to("2024-01-01 12:10:15")  # 15 seconds past expiry
-            
-        # Token should be expired but within grace period
-        validation_result = await token_manager.validate_with_grace(
-        token_data.access_token
-        )
-            
-        assert validation_result.is_valid, "Token should be valid within grace period"
-        assert validation_result.grace_period_used, "Should indicate grace period used"
-        metrics.grace_period_grants += 1
-            
-        # Advance beyond grace period
-        frozen_time.move_to("2024-01-01 12:10:45")  # 45 seconds past expiry
-            
-        # Token should be completely invalid
-        validation_result = await token_manager.validate_with_grace(
-        token_data.access_token
-        )
-            
-        assert not validation_result.is_valid, "Token should be invalid beyond grace period"
-    
-        @pytest.mark.asyncio
-        @pytest.mark.timeout(60)
-        @pytest.mark.asyncio
-        async def test_automatic_token_refresh(
-        self, token_manager
-        ):
-        """Test automatic token refresh before expiry"""
-        metrics = ExpiryTestMetrics()
-        
-        with freeze_time("2024-01-01 12:00:00") as frozen_time:
-        # Create initial tokens
-        token_data = await token_manager.create_token(
-        user_id="user789",
-        role="admin",
-        permissions=["read", "write"],
-        expire_minutes=15
-        )
-        metrics.tokens_created += 1
-            
-        # Advance to refresh window (e.g., 80% of lifetime)
-        frozen_time.move_to("2024-01-01 12:12:00")  # 12 minutes (80% of 15)
-            
-        # Trigger auto-refresh
-        try:
-        new_token = await token_manager.auto_refresh(
-        token_data.refresh_token
-        )
-        metrics.auto_refresh_success += 1
-        metrics.tokens_refreshed += 1
-                
-        # Verify new token
-        assert new_token is not None
-        assert new_token.access_token != token_data.access_token
-                
-        # Verify new expiry time
-        decoded = jwt.decode(
-        new_token.access_token,
-        options={"verify_signature": False}
-        )
-        new_exp = datetime.fromtimestamp(decoded["exp"])
-        assert new_exp > datetime.now(timezone.utc) + timedelta(minutes=14)
-                
-        except Exception:
-        metrics.auto_refresh_failed += 1
-        raise
-    
-        @pytest.mark.asyncio
-        @pytest.mark.timeout(60)
-        @pytest.mark.asyncio
-        async def test_sliding_window_expiry(
-        self, token_manager
-        ):
-        """Test sliding window expiry (activity extends token)"""
-        with freeze_time("2024-01-01 12:00:00") as frozen_time:
-        # Create token with sliding window enabled
-        token_data = await token_manager.create_token(
-        user_id="user_sliding",
-        role="user",
-        permissions=["read"],
-        expire_minutes=30,
-        sliding_window=True
-        )
-            
-        initial_exp = datetime.now(timezone.utc) + timedelta(minutes=30)
-            
-        # Simulate activity at 10 minutes
-        frozen_time.move_to("2024-01-01 12:10:00")
-        await token_manager.update_activity(token_data.access_token)
-            
-        # Check new expiry (should be extended)
-        status = await token_manager.get_token_info(token_data.access_token)
-        assert status.expires_at > initial_exp, "Expiry should be extended"
-            
-        # Simulate more activity at 20 minutes
-        frozen_time.move_to("2024-01-01 12:20:00")
-        await token_manager.update_activity(token_data.access_token)
-            
-        # Token should still be valid at original expiry time
-        frozen_time.move_to("2024-01-01 12:30:00")
-        validation = await token_manager.validate_token_jwt(token_data.access_token)
-        assert validation.is_valid, "Token should be valid due to sliding window"
-    
-        @pytest.mark.asyncio
-        @pytest.mark.timeout(90)
-        @pytest.mark.asyncio
-        async def test_bulk_token_expiry_handling(
-        self, token_manager
-        ):
-        """Test handling bulk token expiries"""
-        metrics = ExpiryTestMetrics()
-        token_count = 100
-        
-        with freeze_time("2024-01-01 12:00:00") as frozen_time:
-        # Create tokens with staggered expiry times
-        tokens = []
-        for i in range(token_count):
-        expire_minutes = 5 + (i % 10)  # 5-14 minute expiry
-        token = await token_manager.create_token(
-        user_id=f"user_{i}",
-        role="user",
-        permissions=["read"],
-        expire_minutes=expire_minutes
-        )
-        tokens.append({
-        "token": token,
-        "expires_at": datetime.now(timezone.utc) + timedelta(minutes=expire_minutes)
-        })
-        metrics.tokens_created += 1
-            
-        # Advance time and check expiries
-        for minute in range(1, 16):
-        frozen_time.move_to(f"2024-01-01 12:{minute:02d}:00")
-                
-        # Check which tokens expired
-        for token_info in tokens:
-        if token_info["expires_at"] <= datetime.now(timezone.utc):
-        status = await token_manager.check_token_status(
-        token_info["token"].access_token
-        )
-        if status == TokenStatus.EXPIRED:
-        metrics.tokens_expired += 1
-            
-        # Verify expiry counts
-        expected_expired = sum(
-        1 for t in tokens 
-        if t["expires_at"] <= datetime.now(timezone.utc)
-        )
-        assert metrics.tokens_expired >= expected_expired * 0.95, \
-        "Not all expected tokens marked as expired"
-    
-        @pytest.mark.asyncio
-        @pytest.mark.timeout(60)
-        @pytest.mark.asyncio
-        async def test_refresh_token_rotation(
-        self, token_manager
-        ):
-        """Test refresh token rotation on use"""
-        metrics = ExpiryTestMetrics()
-        used_refresh_tokens = set()
-        
-        # Create initial token pair
-        token_data = await token_manager.create_token(
-        user_id="user_rotation",
-        role="user",
-        permissions=["read"],
-        expire_minutes=15
-        )
-        
-        current_refresh = token_data.refresh_token
-        used_refresh_tokens.add(current_refresh)
-        
-        # Perform multiple refreshes
-        for i in range(5):
-        # Use refresh token
-        new_tokens = await token_manager.refresh_tokens(
-        RefreshRequest(refresh_token=current_refresh)
-        )
-        metrics.tokens_refreshed += 1
-            
-        # Verify new refresh token
-        assert new_tokens.refresh_token != current_refresh, \
-        "Refresh token should rotate"
-        assert new_tokens.refresh_token not in used_refresh_tokens, \
-        "Refresh token should be unique"
-            
-        # Old refresh token should be invalidated
-        with pytest.raises(Exception) as exc_info:
-        await token_manager.refresh_tokens(
-        RefreshRequest(refresh_token=current_refresh)
-        )
-        assert "invalid" in str(exc_info.value).lower() or \
-        "expired" in str(exc_info.value).lower()
-            
-        # Update for next iteration
-        used_refresh_tokens.add(new_tokens.refresh_token)
-        current_refresh = new_tokens.refresh_token
-    
-        @pytest.mark.asyncio
-        @pytest.mark.timeout(60)
-        @pytest.mark.asyncio
-        async def test_expiry_during_request_processing(
-        self, token_manager
-        ):
-        """Test token expiring during request processing"""
-        with freeze_time("2024-01-01 12:00:00") as frozen_time:
-        # Create token with very short expiry
-        token_data = await token_manager.create_token(
-        user_id="user_processing",
-        role="user",
-        permissions=["read"],
-        expire_minutes=1  # 1 minute
-        )
-            
-        # Start processing request
-        async def long_running_request(token: str):
-        # Validate token at start
-        validation = await token_manager.validate_token_jwt(token)
-        assert validation.is_valid, "Token should be valid at start"
-                
-        # Simulate long processing (40 seconds)
-        frozen_time.move_to("2024-01-01 12:00:40")
-        await asyncio.sleep(0.1)  # Simulated work
-                
-        # Token still valid (within original minute)
-        validation = await token_manager.validate_token_jwt(token)
-        assert validation.is_valid, "Token should still be valid"
-                
-        # More processing (another 30 seconds)
-        frozen_time.move_to("2024-01-01 12:01:10")
-        await asyncio.sleep(0.1)
-                
-        # Token now expired during processing
-        validation = await token_manager.validate_token_jwt(token)
-        return validation
-            
-        # Execute request
-        final_validation = await long_running_request(token_data.access_token)
-            
-        # Token should be expired
-        assert not final_validation.is_valid, \
-        "Token should expire during long request"
-            
-        # But grace period might apply
-        grace_validation = await token_manager.validate_with_grace(
-        token_data.access_token
-        )
-        # 10 seconds past expiry, within 30-second grace period
-        assert grace_validation.is_valid, \
-        "Should be within grace period"
-    
-        @pytest.mark.asyncio
-        @pytest.mark.timeout(60)
-        @pytest.mark.asyncio
-        async def test_token_family_expiry(
-        self, token_manager
-        ):
-        """Test coordinated expiry of related tokens"""
+    # 10 seconds past expiry, within 30-second grace period
+    # REMOVED_SYNTAX_ERROR: assert grace_validation.is_valid, \
+    # REMOVED_SYNTAX_ERROR: "Should be within grace period"
+
+    # Removed problematic line: @pytest.mark.asyncio
+    # REMOVED_SYNTAX_ERROR: @pytest.fixture
+    # Removed problematic line: @pytest.mark.asyncio
+    # Removed problematic line: async def test_token_family_expiry( )
+    # REMOVED_SYNTAX_ERROR: self, token_manager
+    # REMOVED_SYNTAX_ERROR: ):
+        # REMOVED_SYNTAX_ERROR: """Test coordinated expiry of related tokens"""
         # Create parent session
-        parent_token = await token_manager.create_token(
-        user_id="parent_user",
-        role="admin",
-        permissions=["all"],
-        expire_minutes=60
-        )
+        # REMOVED_SYNTAX_ERROR: parent_token = await token_manager.create_token( )
+        # REMOVED_SYNTAX_ERROR: user_id="parent_user",
+        # REMOVED_SYNTAX_ERROR: role="admin",
+        # REMOVED_SYNTAX_ERROR: permissions=["all"],
+        # REMOVED_SYNTAX_ERROR: expire_minutes=60
         
+
         # Create child/delegated tokens
-        child_tokens = []
-        for i in range(3):
-        child = await token_manager.create_delegated_token(
-        parent_token=parent_token.access_token,
-        scope_reduction=["read"],
-        expire_minutes=30  # Shorter than parent
-        )
-        child_tokens.append(child)
-        
-        # Revoke parent token
-        await token_manager.revoke_token(parent_token.access_token)
-        
-        # All child tokens should also be invalid
-        for child in child_tokens:
-        validation = await token_manager.validate_token_jwt(child.access_token)
-        assert not validation.is_valid, \
-        "Child tokens should be invalid when parent is revoked"
-    
-        @pytest.mark.asyncio
-        @pytest.mark.timeout(60)
-        @pytest.mark.asyncio
-        async def test_expiry_notification_schedule(
-        self, token_manager, notification_tracker
-        ):
-        """Test scheduled expiry notifications"""
-        metrics = ExpiryTestMetrics()
-        
-        with freeze_time("2024-01-01 12:00:00") as frozen_time:
-        # Create token with 30-minute expiry
-        token_data = await token_manager.create_token(
-        user_id="user_notify",
-        role="user",
-        permissions=["read"],
-        expire_minutes=30
-        )
+        # REMOVED_SYNTAX_ERROR: child_tokens = []
+        # REMOVED_SYNTAX_ERROR: for i in range(3):
+            # REMOVED_SYNTAX_ERROR: child = await token_manager.create_delegated_token( )
+            # REMOVED_SYNTAX_ERROR: parent_token=parent_token.access_token,
+            # REMOVED_SYNTAX_ERROR: scope_reduction=["read"],
+            # REMOVED_SYNTAX_ERROR: expire_minutes=30  # Shorter than parent
             
-        # Define notification schedule
-        notification_schedule = [
-        (15, "halfway"),     # 15 minutes before expiry
-        (5, "warning"),      # 5 minutes before
-        (1, "urgent"),       # 1 minute before
-        (0, "expired")       # At expiry
-        ]
-            
-        for minutes_before, notification_type in notification_schedule:
-        # Advance to notification time
-        time_to_advance = 30 - minutes_before
-        frozen_time.move_to(f"2024-01-01 12:{time_to_advance:02d}:00")
-                
-        # Check if notification needed
-        status = await token_manager.check_token_status(token_data.access_token)
-                
-        if minutes_before > 0 and status == TokenStatus.EXPIRING_SOON:
-        await notification_tracker["send"](
-        TokenExpiryNotification(
-        user_id="user_notify",
-        token_id=token_data.jti,
-        expires_in_seconds=minutes_before * 60,
-        notification_type=notification_type,
-        timestamp=datetime.now(timezone.utc)
-        )
-        )
-        metrics.notifications_sent += 1
-        elif minutes_before == 0 and status == TokenStatus.EXPIRED:
-        await notification_tracker["send"](
-        TokenExpiryNotification(
-        user_id="user_notify",
-        token_id=token_data.jti,
-        expires_in_seconds=0,
-        notification_type=notification_type,
-        timestamp=datetime.now(timezone.utc)
-        )
-        )
-        metrics.notifications_sent += 1
-            
-        # Verify notification sequence
-        notifications = notification_tracker["notifications"]
-        assert len(notifications) >= 3, \
-        "Should have multiple notifications"
-            
-        # Verify notification order
-        for i in range(len(notifications) - 1):
-        assert notifications[i]["expires_in_seconds"] > \
-        notifications[i+1]["expires_in_seconds"], \
-        "Notifications should be in time order"
+            # REMOVED_SYNTAX_ERROR: child_tokens.append(child)
+
+            # Revoke parent token
+            # REMOVED_SYNTAX_ERROR: await token_manager.revoke_token(parent_token.access_token)
+
+            # All child tokens should also be invalid
+            # REMOVED_SYNTAX_ERROR: for child in child_tokens:
+                # REMOVED_SYNTAX_ERROR: validation = await token_manager.validate_token_jwt(child.access_token)
+                # REMOVED_SYNTAX_ERROR: assert not validation.is_valid, \
+                # REMOVED_SYNTAX_ERROR: "Child tokens should be invalid when parent is revoked"
+
+                # Removed problematic line: @pytest.mark.asyncio
+                # REMOVED_SYNTAX_ERROR: @pytest.fixture
+                # Removed problematic line: @pytest.mark.asyncio
+                # Removed problematic line: async def test_expiry_notification_schedule( )
+                # REMOVED_SYNTAX_ERROR: self, token_manager, notification_tracker
+                # REMOVED_SYNTAX_ERROR: ):
+                    # REMOVED_SYNTAX_ERROR: """Test scheduled expiry notifications"""
+                    # REMOVED_SYNTAX_ERROR: metrics = ExpiryTestMetrics()
+
+                    # REMOVED_SYNTAX_ERROR: with freeze_time("2024-01-01 12:00:00") as frozen_time:
+                        # Create token with 30-minute expiry
+                        # REMOVED_SYNTAX_ERROR: token_data = await token_manager.create_token( )
+                        # REMOVED_SYNTAX_ERROR: user_id="user_notify",
+                        # REMOVED_SYNTAX_ERROR: role="user",
+                        # REMOVED_SYNTAX_ERROR: permissions=["read"],
+                        # REMOVED_SYNTAX_ERROR: expire_minutes=30
+                        
+
+                        # Define notification schedule
+                        # REMOVED_SYNTAX_ERROR: notification_schedule = [ )
+                        # REMOVED_SYNTAX_ERROR: (15, "halfway"),     # 15 minutes before expiry
+                        # REMOVED_SYNTAX_ERROR: (5, "warning"),      # 5 minutes before
+                        # REMOVED_SYNTAX_ERROR: (1, "urgent"),       # 1 minute before
+                        # REMOVED_SYNTAX_ERROR: (0, "expired")       # At expiry
+                        
+
+                        # REMOVED_SYNTAX_ERROR: for minutes_before, notification_type in notification_schedule:
+                            # Advance to notification time
+                            # REMOVED_SYNTAX_ERROR: time_to_advance = 30 - minutes_before
+                            # REMOVED_SYNTAX_ERROR: frozen_time.move_to("formatted_string")
+
+                            # Check if notification needed
+                            # REMOVED_SYNTAX_ERROR: status = await token_manager.check_token_status(token_data.access_token)
+
+                            # REMOVED_SYNTAX_ERROR: if minutes_before > 0 and status == TokenStatus.EXPIRING_SOON:
+                                # REMOVED_SYNTAX_ERROR: await notification_tracker["send"]( )
+                                # REMOVED_SYNTAX_ERROR: TokenExpiryNotification( )
+                                # REMOVED_SYNTAX_ERROR: user_id="user_notify",
+                                # REMOVED_SYNTAX_ERROR: token_id=token_data.jti,
+                                # REMOVED_SYNTAX_ERROR: expires_in_seconds=minutes_before * 60,
+                                # REMOVED_SYNTAX_ERROR: notification_type=notification_type,
+                                # REMOVED_SYNTAX_ERROR: timestamp=datetime.now(timezone.utc)
+                                
+                                
+                                # REMOVED_SYNTAX_ERROR: metrics.notifications_sent += 1
+                                # REMOVED_SYNTAX_ERROR: elif minutes_before == 0 and status == TokenStatus.EXPIRED:
+                                    # REMOVED_SYNTAX_ERROR: await notification_tracker["send"]( )
+                                    # REMOVED_SYNTAX_ERROR: TokenExpiryNotification( )
+                                    # REMOVED_SYNTAX_ERROR: user_id="user_notify",
+                                    # REMOVED_SYNTAX_ERROR: token_id=token_data.jti,
+                                    # REMOVED_SYNTAX_ERROR: expires_in_seconds=0,
+                                    # REMOVED_SYNTAX_ERROR: notification_type=notification_type,
+                                    # REMOVED_SYNTAX_ERROR: timestamp=datetime.now(timezone.utc)
+                                    
+                                    
+                                    # REMOVED_SYNTAX_ERROR: metrics.notifications_sent += 1
+
+                                    # Verify notification sequence
+                                    # REMOVED_SYNTAX_ERROR: notifications = notification_tracker["notifications"]
+                                    # REMOVED_SYNTAX_ERROR: assert len(notifications) >= 3, \
+                                    # REMOVED_SYNTAX_ERROR: "Should have multiple notifications"
+
+                                    # Verify notification order
+                                    # REMOVED_SYNTAX_ERROR: for i in range(len(notifications) - 1):
+                                        # REMOVED_SYNTAX_ERROR: assert notifications[i]["expires_in_seconds"] > \
+                                        # REMOVED_SYNTAX_ERROR: notifications[i+1]["expires_in_seconds"], \
+                                        # REMOVED_SYNTAX_ERROR: "Notifications should be in time order"

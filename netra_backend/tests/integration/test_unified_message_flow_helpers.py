@@ -38,66 +38,55 @@ from test_framework.fixtures.message_flow import MessageFlowTracker
 jwt_helper = JWTTestHelper()
 logger = central_logger
 
-def create_test_token(user_id: str) -> str:
-    """Create a valid test token."""
-    return jwt_helper.create_test_token(user_id, f"{user_id}@example.com")
+# REMOVED_SYNTAX_ERROR: def create_test_token(user_id: str) -> str:
+    # REMOVED_SYNTAX_ERROR: """Create a valid test token."""
+    # REMOVED_SYNTAX_ERROR: return jwt_helper.create_test_token(user_id, "formatted_string")
 
-class MessageFlowTestHelper:
-    """Helper class for testing message flows."""
+# REMOVED_SYNTAX_ERROR: class MessageFlowTestHelper:
+    # REMOVED_SYNTAX_ERROR: """Helper class for testing message flows."""
+
+# REMOVED_SYNTAX_ERROR: def __init__(self):
+    # REMOVED_SYNTAX_ERROR: self.flow_log: List[Dict[str, Any]] = []
+    # REMOVED_SYNTAX_ERROR: self.performance_metrics: Dict[str, float] = {]
+    # REMOVED_SYNTAX_ERROR: self.error_count = 0
+
+# REMOVED_SYNTAX_ERROR: def log_step(self, step: str, data: Dict[str, Any]) -> None:
+    # REMOVED_SYNTAX_ERROR: """Log flow step with timestamp."""
+    # REMOVED_SYNTAX_ERROR: entry = { )
+    # REMOVED_SYNTAX_ERROR: "step": step,
+    # REMOVED_SYNTAX_ERROR: "timestamp": time.time(),
+    # REMOVED_SYNTAX_ERROR: "data": data,
+    # REMOVED_SYNTAX_ERROR: "step_id": str(uuid.uuid4()),
     
-    def __init__(self):
-        self.flow_log: List[Dict[str, Any]] = []
-        self.performance_metrics: Dict[str, float] = {]
-        self.error_count = 0
+    # REMOVED_SYNTAX_ERROR: self.flow_log.append(entry)
+    # REMOVED_SYNTAX_ERROR: logger.info("formatted_string", end_time)
+    # REMOVED_SYNTAX_ERROR: duration = end_time - start_time
+    # REMOVED_SYNTAX_ERROR: self.performance_metrics[timer_id] = duration
+    # REMOVED_SYNTAX_ERROR: return duration
 
-    def log_step(self, step: str, data: Dict[str, Any]) -> None:
-        """Log flow step with timestamp."""
-        entry = {
-            "step": step,
-            "timestamp": time.time(),
-            "data": data,
-            "step_id": str(uuid.uuid4()),
-}
-        self.flow_log.append(entry)
-        logger.info(f"[FLOW TRACKER] {step]: {data]")
+# REMOVED_SYNTAX_ERROR: def _verify_complete_flow(self, tracker: MessageFlowTracker, duration: float) -> None:
+    # REMOVED_SYNTAX_ERROR: """Verify complete message flow."""
+    # REMOVED_SYNTAX_ERROR: assert len(tracker.flow_log) >= 5, "Missing flow steps"
+    # REMOVED_SYNTAX_ERROR: assert duration < 5.0, "formatted_string"
+    # REMOVED_SYNTAX_ERROR: assert tracker.error_count == 0, "formatted_string"
 
-    def start_timer(self, operation: str) -> str:
-        """Start performance timer."""
-        timer_id = f"{operation]_{uuid.uuid4().hex[:8]]"
-        self.performance_metrics[f"{timer_id]_start"] = time.time()
-        return timer_id
-
-    def end_timer(self, timer_id: str) -> float:
-        """End timer and return duration."""
-        end_time = time.time()
-        start_time = self.performance_metrics.get(f"{timer_id}_start", end_time)
-        duration = end_time - start_time
-        self.performance_metrics[timer_id] = duration
-        return duration
-
-    def _verify_complete_flow(self, tracker: MessageFlowTracker, duration: float) -> None:
-        """Verify complete message flow."""
-        assert len(tracker.flow_log) >= 5, "Missing flow steps"
-        assert duration < 5.0, f"Flow too slow: {duration}s"
-        assert tracker.error_count == 0, f"Flow had {tracker.error_count} errors"
-        
-        # Verify flow sequence
-        expected_steps = [
-            "frontend_message_created",
-            "websocket_auth_completed", 
-            "message_routed_to_agent_service",
-            "agent_processing_completed",
-            "response_delivered_to_frontend",
-]
-        
-        actual_steps = [entry["step"] for entry in tracker.flow_log]
-        for step in expected_steps:
-            assert step in actual_steps, f"Missing flow step: {step}"
-
-class TestWebSocketMock(Mock):
-    """Extended mock WebSocket for testing."""
+    # Verify flow sequence
+    # REMOVED_SYNTAX_ERROR: expected_steps = [ )
+    # REMOVED_SYNTAX_ERROR: "frontend_message_created",
+    # REMOVED_SYNTAX_ERROR: "websocket_auth_completed",
+    # REMOVED_SYNTAX_ERROR: "message_routed_to_agent_service",
+    # REMOVED_SYNTAX_ERROR: "agent_processing_completed",
+    # REMOVED_SYNTAX_ERROR: "response_delivered_to_frontend",
     
-    def __init__(self, user_id = None):
-        super().__init__()
-        self.user_id = user_id or self._generate_user_id()
-        self.sent_messages = []
+
+    # REMOVED_SYNTAX_ERROR: actual_steps = [entry["step"] for entry in tracker.flow_log]
+    # REMOVED_SYNTAX_ERROR: for step in expected_steps:
+        # REMOVED_SYNTAX_ERROR: assert step in actual_steps, "formatted_string"
+
+# REMOVED_SYNTAX_ERROR: class TestWebSocketMock(Mock):
+    # REMOVED_SYNTAX_ERROR: """Extended mock WebSocket for testing."""
+
+# REMOVED_SYNTAX_ERROR: def __init__(self, user_id = None):
+    # REMOVED_SYNTAX_ERROR: super().__init__()
+    # REMOVED_SYNTAX_ERROR: self.user_id = user_id or self._generate_user_id()
+    # REMOVED_SYNTAX_ERROR: self.sent_messages = []

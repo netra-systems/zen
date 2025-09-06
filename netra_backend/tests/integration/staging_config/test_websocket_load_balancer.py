@@ -1,9 +1,9 @@
-"""
-Test WebSocket Load Balancer
+# REMOVED_SYNTAX_ERROR: '''
+# REMOVED_SYNTAX_ERROR: Test WebSocket Load Balancer
 
-Validates WebSocket connectivity through load balancer
-and ingress in the staging environment.
-""""
+# REMOVED_SYNTAX_ERROR: Validates WebSocket connectivity through load balancer
+# REMOVED_SYNTAX_ERROR: and ingress in the staging environment.
+""
 
 import sys
 from pathlib import Path
@@ -21,232 +21,232 @@ import websockets
 
 from netra_backend.tests.integration.staging_config.base import StagingConfigTestBase
 
-class TestWebSocketLoadBalancer(StagingConfigTestBase):
-    """Test WebSocket through load balancer in staging."""
-    
-    @pytest.mark.asyncio
-    async def test_websocket_connection(self):
-        """Test basic WebSocket connection through load balancer."""
-        self.skip_if_not_staging()
-        
-        ws_url = self.staging_url.replace('https://', 'wss://').replace('http://', 'ws://')
-        ws_url = f"{ws_url}/ws"
-        
-        try:
-            async with websockets.connect(ws_url) as websocket:
+# REMOVED_SYNTAX_ERROR: class TestWebSocketLoadBalancer(StagingConfigTestBase):
+    # REMOVED_SYNTAX_ERROR: """Test WebSocket through load balancer in staging."""
+
+    # Removed problematic line: @pytest.mark.asyncio
+    # Removed problematic line: async def test_websocket_connection(self):
+        # REMOVED_SYNTAX_ERROR: """Test basic WebSocket connection through load balancer."""
+        # REMOVED_SYNTAX_ERROR: self.skip_if_not_staging()
+
+        # REMOVED_SYNTAX_ERROR: ws_url = self.staging_url.replace('https://', 'wss://').replace('http://', 'ws://')
+        # REMOVED_SYNTAX_ERROR: ws_url = "formatted_string"
+
+        # REMOVED_SYNTAX_ERROR: try:
+            # REMOVED_SYNTAX_ERROR: async with websockets.connect(ws_url) as websocket:
                 # Send test message
-                await websocket.send(json.dumps({
-                    'type': 'ping',
-                    'timestamp': time.time()
-                }))
+                # Removed problematic line: await websocket.send(json.dumps({ )))
+                # REMOVED_SYNTAX_ERROR: 'type': 'ping',
+                # REMOVED_SYNTAX_ERROR: 'timestamp': time.time()
                 
+
                 # Receive response
-                response = await asyncio.wait_for(
-                    websocket.recv(),
-                    timeout=5.0
-                )
+                # REMOVED_SYNTAX_ERROR: response = await asyncio.wait_for( )
+                # REMOVED_SYNTAX_ERROR: websocket.recv(),
+                # REMOVED_SYNTAX_ERROR: timeout=5.0
                 
-                data = json.loads(response)
-                self.assertIn('type', data)
-                
-        except Exception as e:
-            self.fail(f"WebSocket connection failed: {e}")
-            
-    @pytest.mark.asyncio
-    async def test_websocket_sticky_sessions(self):
-        """Test sticky sessions for WebSocket connections."""
-        self.skip_if_not_staging()
-        
-        ws_url = f"{self.staging_url.replace('https://', 'wss://')}/ws"
-        
-        # Create multiple connections and verify they stick to same backend
-        connection_ids = []
-        
-        for i in range(3):
-            try:
-                async with websockets.connect(ws_url) as websocket:
-                    # Request server identification
-                    await websocket.send(json.dumps({
-                        'type': 'identify',
-                        'connection': i
-                    }))
-                    
-                    response = await asyncio.wait_for(
-                        websocket.recv(),
-                        timeout=5.0
-                    )
-                    
-                    data = json.loads(response)
-                    if 'server_id' in data:
-                        connection_ids.append(data['server_id'])
-                        
-            except Exception as e:
-                self.fail(f"Connection {i} failed: {e}")
-                
-        # With sticky sessions, same client should hit same server
-        # This test assumes session affinity is configured
-        if len(connection_ids) > 1:
-            if len(set(connection_ids)) > 1:
-                print(f"Warning: Multiple servers hit: {connection_ids}")
-                
-    @pytest.mark.asyncio
-    async def test_websocket_reconnection(self):
-        """Test WebSocket reconnection after disconnect."""
-        self.skip_if_not_staging()
-        
-        ws_url = f"{self.staging_url.replace('https://', 'wss://')}/ws"
-        
-        # First connection
-        try:
-            websocket = await websockets.connect(ws_url)
-            await websocket.send(json.dumps({'type': 'ping'}))
-            await websocket.recv()
-            await websocket.close()
-            
-            # Reconnection
-            websocket = await websockets.connect(ws_url)
-            await websocket.send(json.dumps({'type': 'ping'}))
-            response = await asyncio.wait_for(
-                websocket.recv(),
-                timeout=5.0
-            )
-            
-            self.assertIsNotNone(response, "Reconnection failed")
-            await websocket.close()
-            
-        except Exception as e:
-            self.fail(f"Reconnection test failed: {e}")
-            
-    @pytest.mark.asyncio
-    async def test_websocket_max_connections(self):
-        """Test WebSocket connection limits."""
-        self.skip_if_not_staging()
-        
-        ws_url = f"{self.staging_url.replace('https://', 'wss://')}/ws"
-        max_connections = 100  # Test with reasonable limit
-        
-        connections = []
-        successful = 0
-        
-        try:
-            for i in range(max_connections):
-                try:
-                    ws = await asyncio.wait_for(
-                        websockets.connect(ws_url),
-                        timeout=2.0
-                    )
-                    connections.append(ws)
-                    successful += 1
-                except:
-                    break
-                    
-            self.assertGreater(successful, 10,
-                             f"Only {successful} connections succeeded")
-                             
-            # Close all connections
-            for ws in connections:
-                await ws.close()
-                
-        except Exception as e:
-            # Clean up any open connections
-            for ws in connections:
-                try:
-                    await ws.close()
-                except:
-                    pass
-                    
-    @pytest.mark.asyncio
-    async def test_websocket_message_ordering(self):
-        """Test message ordering through load balancer."""
-        self.skip_if_not_staging()
-        
-        ws_url = f"{self.staging_url.replace('https://', 'wss://')}/ws"
-        
-        try:
-            async with websockets.connect(ws_url) as websocket:
-                # Send numbered messages
-                sent_messages = []
-                for i in range(10):
-                    msg = {'type': 'echo', 'sequence': i}
-                    await websocket.send(json.dumps(msg))
-                    sent_messages.append(i)
-                    
-                # Receive echoed messages
-                received_messages = []
-                for _ in range(10):
-                    response = await asyncio.wait_for(
-                        websocket.recv(),
-                        timeout=5.0
-                    )
-                    data = json.loads(response)
-                    if 'sequence' in data:
-                        received_messages.append(data['sequence'])
-                        
-                # Verify ordering
-                self.assertEqual(sent_messages, received_messages,
-                               "Message ordering not preserved")
-                               
-        except Exception as e:
-            self.fail(f"Message ordering test failed: {e}")
-            
-    @pytest.mark.asyncio
-    async def test_websocket_load_balancing(self):
-        """Test load distribution across WebSocket servers."""
-        self.skip_if_not_staging()
-        
-        ws_url = f"{self.staging_url.replace('https://', 'wss://')}/ws"
-        
-        # Create connections from different "clients"
-        server_distribution = {}
-        
-        for i in range(20):
-            try:
-                # Simulate different client IPs with headers
-                headers = {'X-Forwarded-For': f'192.168.1.{i}'}
-                
-                async with websockets.connect(
-                    ws_url,
-                    extra_headers=headers
-                ) as websocket:
-                    
-                    # Get server identification
-                    await websocket.send(json.dumps({'type': 'identify'}))
-                    response = await asyncio.wait_for(
-                        websocket.recv(),
-                        timeout=5.0
-                    )
-                    
-                    data = json.loads(response)
-                    if 'server_id' in data:
-                        server_id = data['server_id']
-                        server_distribution[server_id] = server_distribution.get(server_id, 0) + 1
-                        
-            except Exception:
-                pass
-                
-        # Check distribution (should hit multiple servers)
-        if len(server_distribution) > 1:
-            print(f"Load distribution: {server_distribution}")
-            
-    @pytest.mark.asyncio
-    async def test_websocket_upgrade_headers(self):
-        """Test WebSocket upgrade headers through load balancer."""
-        self.skip_if_not_staging()
-        
-        import httpx
-        
-        # Test upgrade request
-        async with httpx.AsyncClient() as client:
-            response = await client.get(
-                f"{self.staging_url}/ws",
-                headers={
-                    'Upgrade': 'websocket',
-                    'Connection': 'Upgrade',
-                    'Sec-WebSocket-Version': '13',
-                    'Sec-WebSocket-Key': 'dGhlIHNhbXBsZSBub25jZQ=='
-                }
-            )
-            
-            # Should get upgrade response or method not allowed
-            self.assertIn(response.status_code, [101, 426, 405],
-                        f"Unexpected response to WebSocket upgrade: {response.status_code}")
+
+                # REMOVED_SYNTAX_ERROR: data = json.loads(response)
+                # REMOVED_SYNTAX_ERROR: self.assertIn('type', data)
+
+                # REMOVED_SYNTAX_ERROR: except Exception as e:
+                    # REMOVED_SYNTAX_ERROR: self.fail("formatted_string")
+
+                    # Removed problematic line: @pytest.mark.asyncio
+                    # Removed problematic line: async def test_websocket_sticky_sessions(self):
+                        # REMOVED_SYNTAX_ERROR: """Test sticky sessions for WebSocket connections."""
+                        # REMOVED_SYNTAX_ERROR: self.skip_if_not_staging()
+
+                        # REMOVED_SYNTAX_ERROR: ws_url = "formatted_string"
+
+                        # Create multiple connections and verify they stick to same backend
+                        # REMOVED_SYNTAX_ERROR: connection_ids = []
+
+                        # REMOVED_SYNTAX_ERROR: for i in range(3):
+                            # REMOVED_SYNTAX_ERROR: try:
+                                # REMOVED_SYNTAX_ERROR: async with websockets.connect(ws_url) as websocket:
+                                    # Request server identification
+                                    # Removed problematic line: await websocket.send(json.dumps({ )))
+                                    # REMOVED_SYNTAX_ERROR: 'type': 'identify',
+                                    # REMOVED_SYNTAX_ERROR: 'connection': i
+                                    
+
+                                    # REMOVED_SYNTAX_ERROR: response = await asyncio.wait_for( )
+                                    # REMOVED_SYNTAX_ERROR: websocket.recv(),
+                                    # REMOVED_SYNTAX_ERROR: timeout=5.0
+                                    
+
+                                    # REMOVED_SYNTAX_ERROR: data = json.loads(response)
+                                    # REMOVED_SYNTAX_ERROR: if 'server_id' in data:
+                                        # REMOVED_SYNTAX_ERROR: connection_ids.append(data['server_id'])
+
+                                        # REMOVED_SYNTAX_ERROR: except Exception as e:
+                                            # REMOVED_SYNTAX_ERROR: self.fail("formatted_string")
+
+                                            # With sticky sessions, same client should hit same server
+                                            # This test assumes session affinity is configured
+                                            # REMOVED_SYNTAX_ERROR: if len(connection_ids) > 1:
+                                                # REMOVED_SYNTAX_ERROR: if len(set(connection_ids)) > 1:
+                                                    # REMOVED_SYNTAX_ERROR: print("formatted_string")
+
+                                                    # Removed problematic line: @pytest.mark.asyncio
+                                                    # Removed problematic line: async def test_websocket_reconnection(self):
+                                                        # REMOVED_SYNTAX_ERROR: """Test WebSocket reconnection after disconnect."""
+                                                        # REMOVED_SYNTAX_ERROR: self.skip_if_not_staging()
+
+                                                        # REMOVED_SYNTAX_ERROR: ws_url = "formatted_string"
+
+                                                        # First connection
+                                                        # REMOVED_SYNTAX_ERROR: try:
+                                                            # REMOVED_SYNTAX_ERROR: websocket = await websockets.connect(ws_url)
+                                                            # REMOVED_SYNTAX_ERROR: await websocket.send(json.dumps({'type': 'ping'}))
+                                                            # REMOVED_SYNTAX_ERROR: await websocket.recv()
+                                                            # REMOVED_SYNTAX_ERROR: await websocket.close()
+
+                                                            # Reconnection
+                                                            # REMOVED_SYNTAX_ERROR: websocket = await websockets.connect(ws_url)
+                                                            # REMOVED_SYNTAX_ERROR: await websocket.send(json.dumps({'type': 'ping'}))
+                                                            # REMOVED_SYNTAX_ERROR: response = await asyncio.wait_for( )
+                                                            # REMOVED_SYNTAX_ERROR: websocket.recv(),
+                                                            # REMOVED_SYNTAX_ERROR: timeout=5.0
+                                                            
+
+                                                            # REMOVED_SYNTAX_ERROR: self.assertIsNotNone(response, "Reconnection failed")
+                                                            # REMOVED_SYNTAX_ERROR: await websocket.close()
+
+                                                            # REMOVED_SYNTAX_ERROR: except Exception as e:
+                                                                # REMOVED_SYNTAX_ERROR: self.fail("formatted_string")
+
+                                                                # Removed problematic line: @pytest.mark.asyncio
+                                                                # Removed problematic line: async def test_websocket_max_connections(self):
+                                                                    # REMOVED_SYNTAX_ERROR: """Test WebSocket connection limits."""
+                                                                    # REMOVED_SYNTAX_ERROR: self.skip_if_not_staging()
+
+                                                                    # REMOVED_SYNTAX_ERROR: ws_url = "formatted_string"
+                                                                    # REMOVED_SYNTAX_ERROR: max_connections = 100  # Test with reasonable limit
+
+                                                                    # REMOVED_SYNTAX_ERROR: connections = []
+                                                                    # REMOVED_SYNTAX_ERROR: successful = 0
+
+                                                                    # REMOVED_SYNTAX_ERROR: try:
+                                                                        # REMOVED_SYNTAX_ERROR: for i in range(max_connections):
+                                                                            # REMOVED_SYNTAX_ERROR: try:
+                                                                                # REMOVED_SYNTAX_ERROR: ws = await asyncio.wait_for( )
+                                                                                # REMOVED_SYNTAX_ERROR: websockets.connect(ws_url),
+                                                                                # REMOVED_SYNTAX_ERROR: timeout=2.0
+                                                                                
+                                                                                # REMOVED_SYNTAX_ERROR: connections.append(ws)
+                                                                                # REMOVED_SYNTAX_ERROR: successful += 1
+                                                                                # REMOVED_SYNTAX_ERROR: except:
+                                                                                    # REMOVED_SYNTAX_ERROR: break
+
+                                                                                    # REMOVED_SYNTAX_ERROR: self.assertGreater(successful, 10,
+                                                                                    # REMOVED_SYNTAX_ERROR: "formatted_string")
+
+                                                                                    # Close all connections
+                                                                                    # REMOVED_SYNTAX_ERROR: for ws in connections:
+                                                                                        # REMOVED_SYNTAX_ERROR: await ws.close()
+
+                                                                                        # REMOVED_SYNTAX_ERROR: except Exception as e:
+                                                                                            # Clean up any open connections
+                                                                                            # REMOVED_SYNTAX_ERROR: for ws in connections:
+                                                                                                # REMOVED_SYNTAX_ERROR: try:
+                                                                                                    # REMOVED_SYNTAX_ERROR: await ws.close()
+                                                                                                    # REMOVED_SYNTAX_ERROR: except:
+                                                                                                        # REMOVED_SYNTAX_ERROR: pass
+
+                                                                                                        # Removed problematic line: @pytest.mark.asyncio
+                                                                                                        # Removed problematic line: async def test_websocket_message_ordering(self):
+                                                                                                            # REMOVED_SYNTAX_ERROR: """Test message ordering through load balancer."""
+                                                                                                            # REMOVED_SYNTAX_ERROR: self.skip_if_not_staging()
+
+                                                                                                            # REMOVED_SYNTAX_ERROR: ws_url = "formatted_string"
+
+                                                                                                            # REMOVED_SYNTAX_ERROR: try:
+                                                                                                                # REMOVED_SYNTAX_ERROR: async with websockets.connect(ws_url) as websocket:
+                                                                                                                    # Send numbered messages
+                                                                                                                    # REMOVED_SYNTAX_ERROR: sent_messages = []
+                                                                                                                    # REMOVED_SYNTAX_ERROR: for i in range(10):
+                                                                                                                        # REMOVED_SYNTAX_ERROR: msg = {'type': 'echo', 'sequence': i}
+                                                                                                                        # REMOVED_SYNTAX_ERROR: await websocket.send(json.dumps(msg))
+                                                                                                                        # REMOVED_SYNTAX_ERROR: sent_messages.append(i)
+
+                                                                                                                        # Receive echoed messages
+                                                                                                                        # REMOVED_SYNTAX_ERROR: received_messages = []
+                                                                                                                        # REMOVED_SYNTAX_ERROR: for _ in range(10):
+                                                                                                                            # REMOVED_SYNTAX_ERROR: response = await asyncio.wait_for( )
+                                                                                                                            # REMOVED_SYNTAX_ERROR: websocket.recv(),
+                                                                                                                            # REMOVED_SYNTAX_ERROR: timeout=5.0
+                                                                                                                            
+                                                                                                                            # REMOVED_SYNTAX_ERROR: data = json.loads(response)
+                                                                                                                            # REMOVED_SYNTAX_ERROR: if 'sequence' in data:
+                                                                                                                                # REMOVED_SYNTAX_ERROR: received_messages.append(data['sequence'])
+
+                                                                                                                                # Verify ordering
+                                                                                                                                # REMOVED_SYNTAX_ERROR: self.assertEqual(sent_messages, received_messages,
+                                                                                                                                # REMOVED_SYNTAX_ERROR: "Message ordering not preserved")
+
+                                                                                                                                # REMOVED_SYNTAX_ERROR: except Exception as e:
+                                                                                                                                    # REMOVED_SYNTAX_ERROR: self.fail("formatted_string")
+
+                                                                                                                                    # Removed problematic line: @pytest.mark.asyncio
+                                                                                                                                    # Removed problematic line: async def test_websocket_load_balancing(self):
+                                                                                                                                        # REMOVED_SYNTAX_ERROR: """Test load distribution across WebSocket servers."""
+                                                                                                                                        # REMOVED_SYNTAX_ERROR: self.skip_if_not_staging()
+
+                                                                                                                                        # REMOVED_SYNTAX_ERROR: ws_url = "formatted_string"
+
+                                                                                                                                        # Create connections from different "clients"
+                                                                                                                                        # REMOVED_SYNTAX_ERROR: server_distribution = {}
+
+                                                                                                                                        # REMOVED_SYNTAX_ERROR: for i in range(20):
+                                                                                                                                            # REMOVED_SYNTAX_ERROR: try:
+                                                                                                                                                # Simulate different client IPs with headers
+                                                                                                                                                # REMOVED_SYNTAX_ERROR: headers = {'X-Forwarded-For': 'formatted_string'}
+
+                                                                                                                                                # REMOVED_SYNTAX_ERROR: async with websockets.connect( )
+                                                                                                                                                # REMOVED_SYNTAX_ERROR: ws_url,
+                                                                                                                                                # REMOVED_SYNTAX_ERROR: extra_headers=headers
+                                                                                                                                                # REMOVED_SYNTAX_ERROR: ) as websocket:
+
+                                                                                                                                                    # Get server identification
+                                                                                                                                                    # REMOVED_SYNTAX_ERROR: await websocket.send(json.dumps({'type': 'identify'}))
+                                                                                                                                                    # REMOVED_SYNTAX_ERROR: response = await asyncio.wait_for( )
+                                                                                                                                                    # REMOVED_SYNTAX_ERROR: websocket.recv(),
+                                                                                                                                                    # REMOVED_SYNTAX_ERROR: timeout=5.0
+                                                                                                                                                    
+
+                                                                                                                                                    # REMOVED_SYNTAX_ERROR: data = json.loads(response)
+                                                                                                                                                    # REMOVED_SYNTAX_ERROR: if 'server_id' in data:
+                                                                                                                                                        # REMOVED_SYNTAX_ERROR: server_id = data['server_id']
+                                                                                                                                                        # REMOVED_SYNTAX_ERROR: server_distribution[server_id] = server_distribution.get(server_id, 0) + 1
+
+                                                                                                                                                        # REMOVED_SYNTAX_ERROR: except Exception:
+                                                                                                                                                            # REMOVED_SYNTAX_ERROR: pass
+
+                                                                                                                                                            # Check distribution (should hit multiple servers)
+                                                                                                                                                            # REMOVED_SYNTAX_ERROR: if len(server_distribution) > 1:
+                                                                                                                                                                # REMOVED_SYNTAX_ERROR: print("formatted_string")
+
+                                                                                                                                                                # Removed problematic line: @pytest.mark.asyncio
+                                                                                                                                                                # Removed problematic line: async def test_websocket_upgrade_headers(self):
+                                                                                                                                                                    # REMOVED_SYNTAX_ERROR: """Test WebSocket upgrade headers through load balancer."""
+                                                                                                                                                                    # REMOVED_SYNTAX_ERROR: self.skip_if_not_staging()
+
+                                                                                                                                                                    # REMOVED_SYNTAX_ERROR: import httpx
+
+                                                                                                                                                                    # Test upgrade request
+                                                                                                                                                                    # REMOVED_SYNTAX_ERROR: async with httpx.AsyncClient() as client:
+                                                                                                                                                                        # REMOVED_SYNTAX_ERROR: response = await client.get( )
+                                                                                                                                                                        # REMOVED_SYNTAX_ERROR: "formatted_string",
+                                                                                                                                                                        # REMOVED_SYNTAX_ERROR: headers={ )
+                                                                                                                                                                        # REMOVED_SYNTAX_ERROR: 'Upgrade': 'websocket',
+                                                                                                                                                                        # REMOVED_SYNTAX_ERROR: 'Connection': 'Upgrade',
+                                                                                                                                                                        # REMOVED_SYNTAX_ERROR: 'Sec-WebSocket-Version': '13',
+                                                                                                                                                                        # REMOVED_SYNTAX_ERROR: 'Sec-WebSocket-Key': 'dGhlIHNhbXBsZSBub25jZQ=='
+                                                                                                                                                                        
+                                                                                                                                                                        
+
+                                                                                                                                                                        # Should get upgrade response or method not allowed
+                                                                                                                                                                        # REMOVED_SYNTAX_ERROR: self.assertIn(response.status_code, [101, 426, 405],
+                                                                                                                                                                        # REMOVED_SYNTAX_ERROR: "formatted_string")

@@ -66,9 +66,7 @@ async def _setup():
     engine = create_async_engine(db_url, echo=False)
 
     async_session = sessionmaker(
-
-    engine, class_=AsyncSession, expire_on_commit=False
-
+        engine, class_=AsyncSession, expire_on_commit=False
     )
             
     # Create tables
@@ -83,49 +81,34 @@ async def _setup():
             
         await asyncio.sleep(0)
         return {
-
-    "session": session,
-
-    "engine": engine,
-
-    "db_file": db_file.name
-
-    }
-
+            "session": session,
+            "engine": engine,
+            "db_file": db_file.name
+        }
+    
     return _setup
 
 @pytest.fixture
 def setup_integration_infrastructure():
-    """Use real service instance."""
-    # TODO: Initialize real service
-    return None
-
-"""Setup integrated infrastructure for testing"""
+    """Setup integrated infrastructure for testing"""
     # Real WebSocket Manager
-
-websocket_manager = WebSocketManager()
+    websocket_manager = WebSocketManager()
         
     # Mock LLM Manager with realistic responses
-
     # Mock: LLM provider isolation to prevent external API usage and costs
-llm_manager = llm_manager_instance  # Initialize appropriate service
+    llm_manager = Mock()  # Initialize appropriate service
 
     # Mock: LLM service isolation for fast testing without API calls or rate limits
-llm_manager.call_llm = AsyncMock(side_effect=self._mock_llm_response)
+    llm_manager.call_llm = AsyncMock(side_effect=lambda *args, **kwargs: {"content": "test response"})
 
     # Mock: LLM service isolation for fast testing without API calls or rate limits
-llm_manager.ask_llm = AsyncMock(side_effect=self._mock_ask_llm_response)
+    llm_manager.ask_llm = AsyncMock(side_effect=lambda *args, **kwargs: "test response")
         
     # Real state persistence service
-
-state_service = StatePersistenceService()
+    state_service = StatePersistenceService()
         
-return {
-
-"websocket_manager": websocket_manager,
-
-"llm_manager": llm_manager,
-
-"state_service": state_service
-
-}
+    return {
+        "websocket_manager": websocket_manager,
+        "llm_manager": llm_manager,
+        "state_service": state_service
+    }

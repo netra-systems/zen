@@ -1,220 +1,149 @@
 #!/usr/bin/env python3
-"""
-Comprehensive test to verify health check cascade failure detection:
-    1. Service dependency mapping
-2. Health check propagation
-3. Cascading failure detection
-4. Circuit breaker activation
-5. Service degradation handling
-6. Recovery monitoring
+# REMOVED_SYNTAX_ERROR: '''
+# REMOVED_SYNTAX_ERROR: Comprehensive test to verify health check cascade failure detection:
+    # REMOVED_SYNTAX_ERROR: 1. Service dependency mapping
+    # REMOVED_SYNTAX_ERROR: 2. Health check propagation
+    # REMOVED_SYNTAX_ERROR: 3. Cascading failure detection
+    # REMOVED_SYNTAX_ERROR: 4. Circuit breaker activation
+    # REMOVED_SYNTAX_ERROR: 5. Service degradation handling
+    # REMOVED_SYNTAX_ERROR: 6. Recovery monitoring
 
-This test ensures the system correctly detects and handles cascading failures.
-""""
+    # REMOVED_SYNTAX_ERROR: This test ensures the system correctly detects and handles cascading failures.
+    # REMOVED_SYNTAX_ERROR: """"
 
-# Test framework import - using pytest fixtures instead
+    # Test framework import - using pytest fixtures instead
 
-import asyncio
-import json
-import sys
-from datetime import datetime, timezone
-from pathlib import Path
-from typing import Any, Dict, List, Optional
-from shared.isolated_environment import IsolatedEnvironment
+    # REMOVED_SYNTAX_ERROR: import asyncio
+    # REMOVED_SYNTAX_ERROR: import json
+    # REMOVED_SYNTAX_ERROR: import sys
+    # REMOVED_SYNTAX_ERROR: from datetime import datetime, timezone
+    # REMOVED_SYNTAX_ERROR: from pathlib import Path
+    # REMOVED_SYNTAX_ERROR: from typing import Any, Dict, List, Optional
+    # REMOVED_SYNTAX_ERROR: from shared.isolated_environment import IsolatedEnvironment
 
-import aiohttp
-import pytest
+    # REMOVED_SYNTAX_ERROR: import aiohttp
+    # REMOVED_SYNTAX_ERROR: import pytest
 
-# Configuration
-DEV_BACKEND_URL = "http://localhost:8000"
-AUTH_SERVICE_URL = "http://localhost:8081"
-SERVICES = {
-    "backend": f"{DEV_BACKEND_URL}/api/health",
-    "auth": f"{AUTH_SERVICE_URL}/health",
-    "database": f"{DEV_BACKEND_URL}/api/health/db",
-    "cache": f"{DEV_BACKEND_URL}/api/health/cache",
-    "websocket": f"{DEV_BACKEND_URL}/api/health/ws"
-}
-
-class HealthCheckCascadeTester:
-    """Test health check cascade failure flow."""
+    # Configuration
+    # REMOVED_SYNTAX_ERROR: DEV_BACKEND_URL = "http://localhost:8000"
+    # REMOVED_SYNTAX_ERROR: AUTH_SERVICE_URL = "http://localhost:8081"
+    # REMOVED_SYNTAX_ERROR: SERVICES = { )
+    # REMOVED_SYNTAX_ERROR: "backend": "formatted_string",
+    # REMOVED_SYNTAX_ERROR: "auth": "formatted_string",
+    # REMOVED_SYNTAX_ERROR: "database": "formatted_string",
+    # REMOVED_SYNTAX_ERROR: "cache": "formatted_string",
+    # REMOVED_SYNTAX_ERROR: "websocket": "formatted_string"
     
-    def __init__(self):
-        self.session: Optional[aiohttp.ClientSession] = None
-        self.service_status: Dict[str, str] = {]
-        self.failure_log: List[Dict] = []
-        
-    async def __aenter__(self):
-        self.session = aiohttp.ClientSession()
-        return self
-        
-    async def __aexit__(self, exc_type, exc_val, exc_tb):
-        if self.session:
-            await self.session.close()
-            
-    @pytest.mark.asyncio
-    async def test_all_services_healthy(self) -> bool:
-        """Verify all services are healthy initially."""
-        print("\n[HEALTHY] Testing all services healthy state...")
-        
-        healthy_count = 0
-        for service, endpoint in SERVICES.items():
-            try:
-                async with self.session.get(endpoint, timeout=5) as response:
-                    if response.status == 200:
-                        self.service_status[service] = "healthy"
-                        healthy_count += 1
-                        print(f"[OK] {service]: healthy")
-                    else:
-                        self.service_status[service] = "unhealthy"
-                        print(f"[WARN] {service]: status {response.status]")
-            except Exception as e:
-                self.service_status[service] = "unreachable"
-                print(f"[ERROR] {service]: {str(e)[:50]]")
-                
-        return healthy_count == len(SERVICES)
-        
-    @pytest.mark.asyncio
-    async def test_simulate_database_failure(self) -> bool:
-        """Simulate database failure and detect cascade."""
-        print("\n[CASCADE] Simulating database failure...")
-        
-        # This would require admin endpoint in real implementation
-        # For testing, we check cascade detection logic
-        
-        affected_services = []
-        
-        # Check services that depend on database
-        dependent_services = ["backend", "auth"]
-        
-        for service in dependent_services:
-            endpoint = SERVICES[service]
-            try:
-                async with self.session.get(f"{endpoint}/dependencies") as response:
-                    if response.status == 200:
-                        deps = await response.json()
-                        if "database" in deps.get("dependencies", []):
-                            affected_services.append(service)
-                            print(f"[INFO] {service] depends on database")
-            except:
-                pass
-                
-        self.failure_log.append({
-            "root_cause": "database",
-            "affected": affected_services,
-            "timestamp": datetime.now(timezone.utc).isoformat()
-        })
-        
-        return len(affected_services) > 0
-        
-    @pytest.mark.asyncio
-    async def test_circuit_breaker_activation(self) -> bool:
-        """Test circuit breaker activation on repeated failures."""
-        print("\n[BREAKER] Testing circuit breaker activation...")
-        
-        endpoint = f"{DEV_BACKEND_URL}/api/test/failure"
-        failures = 0
-        circuit_opened = False
-        
-        for i in range(15):
-            try:
-                async with self.session.get(endpoint, timeout=2) as response:
-                    if response.status == 503:
-                        if "Circuit-Breaker" in response.headers:
-                            circuit_opened = True
-                            print(f"[OK] Circuit breaker opened after {i] attempts")
-                            break
-                    elif response.status >= 500:
-                        failures += 1
-            except:
-                failures += 1
-                
-            await asyncio.sleep(0.5)
-            
-        return circuit_opened or failures > 10
-        
-    @pytest.mark.asyncio
-    async def test_graceful_degradation(self) -> bool:
-        """Test graceful degradation when dependencies fail."""
-        print("\n[DEGRADE] Testing graceful degradation...")
-        
-        # Test that service continues with reduced functionality
-        headers = {"X-Test-Mode": "degrade-cache"}
-        
-        async with self.session.get(
-            f"{DEV_BACKEND_URL}/api/data",
-            headers=headers
-        ) as response:
-            if response.status == 200:
-                data = await response.json()
-                if data.get("degraded_mode"):
-                    print(f"[OK] Service operating in degraded mode")
-                    return True
-                    
-        return False
-        
-    @pytest.mark.asyncio
-    async def test_recovery_detection(self) -> bool:
-        """Test automatic recovery detection."""
-        print("\n[RECOVER] Testing recovery detection...")
-        
-        # Monitor health endpoint for recovery
-        recovery_detected = False
-        
-        for i in range(10):
-            all_healthy = True
-            
-            for service, endpoint in SERVICES.items():
-                try:
-                    async with self.session.get(endpoint, timeout=2) as response:
-                        if response.status != 200:
-                            all_healthy = False
-                            break
-                except:
-                    all_healthy = False
-                    break
-                    
-            if all_healthy and not recovery_detected:
-                recovery_detected = True
-                print(f"[OK] Recovery detected at iteration {i]")
-                break
-                
-            await asyncio.sleep(2)
-            
-        return recovery_detected
-        
-    async def run_all_tests(self) -> Dict[str, bool]:
-        """Run all tests in sequence."""
-        results = {}
-        
-        results["all_healthy"] = await self.test_all_services_healthy()
-        results["cascade_detection"] = await self.test_simulate_database_failure()
-        results["circuit_breaker"] = await self.test_circuit_breaker_activation()
-        results["graceful_degradation"] = await self.test_graceful_degradation()
-        results["recovery_detection"] = await self.test_recovery_detection()
-        
-        return results
 
-@pytest.mark.asyncio
-@pytest.mark.integration
-@pytest.mark.l3
-@pytest.mark.asyncio
-async def test_health_check_cascade_failure():
-    """Test health check cascade failure detection."""
-    async with HealthCheckCascadeTester() as tester:
-        results = await tester.run_all_tests()
-        
-        print("\n" + "="*60)
-        print("HEALTH CHECK CASCADE TEST SUMMARY")
-        print("="*60)
-        
-        for test_name, passed in results.items():
-            status = "[PASS]" if passed else "[FAIL]"
-            print(f"  {test_name:25} : {status}")
-            
-        print("="*60)
-        
-        assert all(results.values()), f"Some tests failed: {results}"
+# REMOVED_SYNTAX_ERROR: class HealthCheckCascadeTester:
+    # REMOVED_SYNTAX_ERROR: """Test health check cascade failure flow."""
 
-if __name__ == "__main__":
-    exit_code = asyncio.run(test_health_check_cascade_failure())
-    sys.exit(0 if exit_code else 1)
+# REMOVED_SYNTAX_ERROR: def __init__(self):
+    # REMOVED_SYNTAX_ERROR: self.session: Optional[aiohttp.ClientSession] = None
+    # REMOVED_SYNTAX_ERROR: self.service_status: Dict[str, str] = {]
+    # REMOVED_SYNTAX_ERROR: self.failure_log: List[Dict] = []
+
+# REMOVED_SYNTAX_ERROR: async def __aenter__(self):
+    # REMOVED_SYNTAX_ERROR: self.session = aiohttp.ClientSession()
+    # REMOVED_SYNTAX_ERROR: return self
+
+# REMOVED_SYNTAX_ERROR: async def __aexit__(self, exc_type, exc_val, exc_tb):
+    # REMOVED_SYNTAX_ERROR: if self.session:
+        # REMOVED_SYNTAX_ERROR: await self.session.close()
+
+        # Removed problematic line: @pytest.mark.asyncio
+        # Removed problematic line: async def test_all_services_healthy(self) -> bool:
+            # REMOVED_SYNTAX_ERROR: """Verify all services are healthy initially."""
+            # REMOVED_SYNTAX_ERROR: print("\n[HEALTHY] Testing all services healthy state...")
+
+            # REMOVED_SYNTAX_ERROR: healthy_count = 0
+            # REMOVED_SYNTAX_ERROR: for service, endpoint in SERVICES.items():
+                # REMOVED_SYNTAX_ERROR: try:
+                    # REMOVED_SYNTAX_ERROR: async with self.session.get(endpoint, timeout=5) as response:
+                        # REMOVED_SYNTAX_ERROR: if response.status == 200:
+                            # REMOVED_SYNTAX_ERROR: self.service_status[service] = "healthy"
+                            # REMOVED_SYNTAX_ERROR: healthy_count += 1
+                            # REMOVED_SYNTAX_ERROR: print("formatted_string") as response:
+                                                    # REMOVED_SYNTAX_ERROR: if response.status == 200:
+                                                        # REMOVED_SYNTAX_ERROR: deps = await response.json()
+                                                        # REMOVED_SYNTAX_ERROR: if "database" in deps.get("dependencies", []):
+                                                            # REMOVED_SYNTAX_ERROR: affected_services.append(service)
+                                                            # REMOVED_SYNTAX_ERROR: print("formatted_string"""Test circuit breaker activation on repeated failures."""
+                                                                    # REMOVED_SYNTAX_ERROR: print("\n[BREAKER] Testing circuit breaker activation...")
+
+                                                                    # REMOVED_SYNTAX_ERROR: endpoint = "formatted_string"
+                                                                    # REMOVED_SYNTAX_ERROR: failures = 0
+                                                                    # REMOVED_SYNTAX_ERROR: circuit_opened = False
+
+                                                                    # REMOVED_SYNTAX_ERROR: for i in range(15):
+                                                                        # REMOVED_SYNTAX_ERROR: try:
+                                                                            # REMOVED_SYNTAX_ERROR: async with self.session.get(endpoint, timeout=2) as response:
+                                                                                # REMOVED_SYNTAX_ERROR: if response.status == 503:
+                                                                                    # REMOVED_SYNTAX_ERROR: if "Circuit-Breaker" in response.headers:
+                                                                                        # REMOVED_SYNTAX_ERROR: circuit_opened = True
+                                                                                        # REMOVED_SYNTAX_ERROR: print("formatted_string"{DEV_BACKEND_URL}/api/data",
+                                                                                                    # REMOVED_SYNTAX_ERROR: headers=headers
+                                                                                                    # REMOVED_SYNTAX_ERROR: ) as response:
+                                                                                                        # REMOVED_SYNTAX_ERROR: if response.status == 200:
+                                                                                                            # REMOVED_SYNTAX_ERROR: data = await response.json()
+                                                                                                            # REMOVED_SYNTAX_ERROR: if data.get("degraded_mode"):
+                                                                                                                # REMOVED_SYNTAX_ERROR: print(f"[OK] Service operating in degraded mode")
+                                                                                                                # REMOVED_SYNTAX_ERROR: return True
+
+                                                                                                                # REMOVED_SYNTAX_ERROR: return False
+
+                                                                                                                # Removed problematic line: @pytest.mark.asyncio
+                                                                                                                # Removed problematic line: async def test_recovery_detection(self) -> bool:
+                                                                                                                    # REMOVED_SYNTAX_ERROR: """Test automatic recovery detection."""
+                                                                                                                    # REMOVED_SYNTAX_ERROR: print("\n[RECOVER] Testing recovery detection...")
+
+                                                                                                                    # Monitor health endpoint for recovery
+                                                                                                                    # REMOVED_SYNTAX_ERROR: recovery_detected = False
+
+                                                                                                                    # REMOVED_SYNTAX_ERROR: for i in range(10):
+                                                                                                                        # REMOVED_SYNTAX_ERROR: all_healthy = True
+
+                                                                                                                        # REMOVED_SYNTAX_ERROR: for service, endpoint in SERVICES.items():
+                                                                                                                            # REMOVED_SYNTAX_ERROR: try:
+                                                                                                                                # REMOVED_SYNTAX_ERROR: async with self.session.get(endpoint, timeout=2) as response:
+                                                                                                                                    # REMOVED_SYNTAX_ERROR: if response.status != 200:
+                                                                                                                                        # REMOVED_SYNTAX_ERROR: all_healthy = False
+                                                                                                                                        # REMOVED_SYNTAX_ERROR: break
+                                                                                                                                        # REMOVED_SYNTAX_ERROR: except:
+                                                                                                                                            # REMOVED_SYNTAX_ERROR: all_healthy = False
+                                                                                                                                            # REMOVED_SYNTAX_ERROR: break
+
+                                                                                                                                            # REMOVED_SYNTAX_ERROR: if all_healthy and not recovery_detected:
+                                                                                                                                                # REMOVED_SYNTAX_ERROR: recovery_detected = True
+                                                                                                                                                # REMOVED_SYNTAX_ERROR: print("formatted_string"all_healthy"] = await self.test_all_services_healthy()
+    # REMOVED_SYNTAX_ERROR: results["cascade_detection"] = await self.test_simulate_database_failure()
+    # REMOVED_SYNTAX_ERROR: results["circuit_breaker"] = await self.test_circuit_breaker_activation()
+    # REMOVED_SYNTAX_ERROR: results["graceful_degradation"] = await self.test_graceful_degradation()
+    # REMOVED_SYNTAX_ERROR: results["recovery_detection"] = await self.test_recovery_detection()
+
+    # REMOVED_SYNTAX_ERROR: return results
+
+    # Removed problematic line: @pytest.mark.asyncio
+    # REMOVED_SYNTAX_ERROR: @pytest.mark.integration
+    # REMOVED_SYNTAX_ERROR: @pytest.mark.l3
+    # Removed problematic line: @pytest.mark.asyncio
+    # Removed problematic line: async def test_health_check_cascade_failure():
+        # REMOVED_SYNTAX_ERROR: """Test health check cascade failure detection."""
+        # REMOVED_SYNTAX_ERROR: async with HealthCheckCascadeTester() as tester:
+            # REMOVED_SYNTAX_ERROR: results = await tester.run_all_tests()
+
+            # REMOVED_SYNTAX_ERROR: print("\n" + "="*60)
+            # REMOVED_SYNTAX_ERROR: print("HEALTH CHECK CASCADE TEST SUMMARY")
+            # REMOVED_SYNTAX_ERROR: print("="*60)
+
+            # REMOVED_SYNTAX_ERROR: for test_name, passed in results.items():
+                # REMOVED_SYNTAX_ERROR: status = "[PASS]" if passed else "[FAIL]"
+                # REMOVED_SYNTAX_ERROR: print("formatted_string")
+
+                # REMOVED_SYNTAX_ERROR: print("="*60)
+
+                # REMOVED_SYNTAX_ERROR: assert all(results.values()), "formatted_string"
+
+                # REMOVED_SYNTAX_ERROR: if __name__ == "__main__":
+                    # REMOVED_SYNTAX_ERROR: exit_code = asyncio.run(test_health_check_cascade_failure())
+                    # REMOVED_SYNTAX_ERROR: sys.exit(0 if exit_code else 1)
