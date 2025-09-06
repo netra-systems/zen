@@ -574,20 +574,20 @@ class AuthService:
                         email = user.email
                         # For now, use default permissions (in future this could come from user roles)
                         permissions = ["read", "write"]
-                        logger.info(f"Refresh token: Retrieved user data from database for {email}")
+                        logger.debug(f"Refresh token: Successfully retrieved user data from database for {email}")
                     else:
                         logger.warning(f"Refresh token: User {user_id} not found in database, using token payload")
                 except Exception as db_error:
                     logger.warning(f"Refresh token: Database lookup failed for user {user_id}: {db_error}, using token payload")
                     # Fallback to token payload or defaults
             else:
-                logger.info(f"Refresh token: No database session, using token payload for user {user_id}")
+                logger.debug(f"Refresh token: Operating in stateless mode (no DB session) - using token payload for user {user_id}")
             
             # Generate new tokens with proper user data and unique timestamps
             new_access = self.jwt_handler.create_access_token(user_id, email, permissions)
             new_refresh = self.jwt_handler.create_refresh_token(user_id, email, permissions)
             
-            logger.info(f"Refresh token: Generated new tokens for user {user_id} with email {email}")
+            logger.debug(f"Refresh token: Successfully generated new tokens for user {user_id} ({email})")
             return new_access, new_refresh
             
         except Exception as e:
