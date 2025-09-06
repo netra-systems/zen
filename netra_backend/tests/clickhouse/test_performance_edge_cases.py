@@ -3,7 +3,7 @@ from unittest.mock import AsyncMock, Mock, patch, MagicMock
 """
 Test Suite 2: Performance and Edge Cases Tests
 Tests query performance characteristics and edge case handling
-""""
+"""
 
 import sys
 from pathlib import Path

@@ -3,7 +3,7 @@ from unittest.mock import AsyncMock, Mock, patch, MagicMock
 """
 Test Suite 1: Query Correctness Tests
 Tests the correctness of ClickHouse queries and their results
-""""
+"""
 
 from netra_backend.app.monitoring.metrics_collector import PerformanceMetric
 # Test framework import - using pytest fixtures instead
