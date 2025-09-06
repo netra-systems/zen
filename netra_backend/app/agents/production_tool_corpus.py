@@ -61,7 +61,8 @@ class CorpusToolExecutor:
     async def _create_corpus(self, corpus_name: str, parameters: Dict[str, Any], user_id: str) -> Any:
         """Create corpus using corpus service"""
         from netra_backend.app.schemas.corpus import CorpusCreate
-        from netra_backend.app.services.corpus import corpus_service
+        from netra_backend.app.services.corpus import get_corpus_service
+        corpus_service = get_corpus_service()  # Create without user context for backward compatibility
         
         corpus_data = self._build_corpus_create_data(corpus_name, parameters)
         return await corpus_service.create_corpus(corpus_data, user_id)
@@ -123,7 +124,8 @@ class CorpusToolExecutor:
     
     async def _search_corpus(self, corpus_id: str, parameters: Dict[str, Any]) -> Any:
         """Search corpus using corpus service"""
-        from netra_backend.app.services.corpus import corpus_service
+        from netra_backend.app.services.corpus import get_corpus_service
+        corpus_service = get_corpus_service()  # Create without user context for backward compatibility
         
         search_params = self._build_search_params(parameters)
         return await corpus_service.search_corpus_content(None, corpus_id, search_params)
@@ -186,7 +188,8 @@ class CorpusToolExecutor:
     async def _update_corpus(self, corpus_id: str, parameters: Dict[str, Any]) -> Any:
         """Update corpus using corpus service"""
         from netra_backend.app.schemas.corpus import CorpusUpdate
-        from netra_backend.app.services.corpus import corpus_service
+        from netra_backend.app.services.corpus import get_corpus_service
+        corpus_service = get_corpus_service()  # Create without user context for backward compatibility
         
         update_data = self._build_corpus_update_data(parameters)
         return await corpus_service.update_corpus(None, corpus_id, update_data)
@@ -227,7 +230,8 @@ class CorpusToolExecutor:
     
     async def _delete_corpus(self, corpus_id: str) -> None:
         """Delete corpus using corpus service"""
-        from netra_backend.app.services.corpus import corpus_service
+        from netra_backend.app.services.corpus import get_corpus_service
+        corpus_service = get_corpus_service()  # Create without user context for backward compatibility
         await corpus_service.delete_corpus(None, corpus_id)
     
     def _create_delete_success_response(self, corpus_id: str) -> Dict[str, Any]:
@@ -261,7 +265,8 @@ class CorpusToolExecutor:
     
     async def _get_corpus_statistics(self, corpus_id: str) -> Any:
         """Get corpus statistics using corpus service"""
-        from netra_backend.app.services.corpus import corpus_service
+        from netra_backend.app.services.corpus import get_corpus_service
+        corpus_service = get_corpus_service()  # Create without user context for backward compatibility
         return await corpus_service.get_corpus_statistics(None, corpus_id)
     
     def _create_analyze_success_response(self, stats: Any) -> Dict[str, Any]:
@@ -340,7 +345,8 @@ class CorpusToolExecutor:
     
     async def _get_corpus(self, corpus_id: str) -> Any:
         """Get corpus using corpus service"""
-        from netra_backend.app.services.corpus import corpus_service
+        from netra_backend.app.services.corpus import get_corpus_service
+        corpus_service = get_corpus_service()  # Create without user context for backward compatibility
         return await corpus_service.get_corpus(None, corpus_id)
     
     def _create_validation_result(self, corpus: Any) -> Dict[str, Any]:

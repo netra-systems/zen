@@ -254,13 +254,40 @@ async def websocket_endpoint(websocket: WebSocket):
                 await safe_websocket_close(websocket, code=1011, reason="Startup timeout")
                 return
         
-        # CRITICAL FIX: If thread_service is missing but supervisor exists, create it
-        if supervisor is not None and thread_service is None:
-            logger.warning("thread_service missing but supervisor available - creating thread_service")
+        # CRITICAL FIX: Create missing dependencies in staging environment  
+        # This fixes the staging issue where agent_supervisor and thread_service are not initialized
+        if supervisor is None and environment in ["staging", "production"]:
+            logger.warning(f"agent_supervisor missing in {environment} - creating minimal supervisor for WebSocket events")
+            try:
+                # Create minimal supervisor for WebSocket event handling in staging
+                # This ensures the 5 critical WebSocket events can be transmitted
+                from netra_backend.app.services.agent_websocket_bridge import create_agent_websocket_bridge
+                from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
+                from netra_backend.app.llm.llm_manager import LLMManager
+                from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
+                
+                # Create minimal dependencies for staging
+                websocket_bridge = create_agent_websocket_bridge()
+                llm_manager = LLMManager()
+                
+                # Create supervisor with minimal dependencies
+                supervisor = SupervisorAgent(
+                    llm_manager=llm_manager,
+                    websocket_bridge=websocket_bridge
+                )
+                websocket.app.state.agent_supervisor = supervisor
+                logger.info(f"✅ Created minimal agent_supervisor for WebSocket events in {environment}")
+            except Exception as e:
+                logger.error(f"❌ Failed to create agent_supervisor in {environment}: {e}")
+                # Continue without supervisor - will use fallback
+        
+        # CRITICAL FIX: If thread_service is missing, create it
+        if thread_service is None:
+            logger.warning(f"thread_service missing in {environment} - creating thread_service")
             from netra_backend.app.services.thread_service import ThreadService
             thread_service = ThreadService()
             websocket.app.state.thread_service = thread_service
-            logger.info("Created missing thread_service for WebSocket handler")
+            logger.info(f"Created missing thread_service for WebSocket handler in {environment}")
         
         # Create MessageHandlerService and AgentMessageHandler if dependencies exist
         if supervisor is not None and thread_service is not None:
