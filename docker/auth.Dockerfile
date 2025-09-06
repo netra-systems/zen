@@ -44,7 +44,7 @@ COPY --chown=netra:netra shared /app/shared
 
 # Set Python path
 ENV PATH=/home/netra/.local/bin:$PATH
-ENV PYTHONPATH=/app:$PYTHONPATH
+ENV PYTHONPATH=/app
 
 # Docker environment indicator
 ENV RUNNING_IN_DOCKER=true
