@@ -64,27 +64,6 @@ import logging
 import os
 import subprocess
 import sys
-
-# Fix Unicode encoding issues on Windows - MUST be done early
-if sys.platform == "win32":
-    import io
-    # Set UTF-8 for subprocess and all Python I/O
-    os.environ['PYTHONIOENCODING'] = 'utf-8'
-    os.environ['PYTHONUTF8'] = '1'
-    
-    # Force Windows console to use UTF-8
-    try:
-        import ctypes
-        kernel32 = ctypes.windll.kernel32
-        kernel32.SetConsoleCP(65001)
-        kernel32.SetConsoleOutputCP(65001)
-    except Exception:
-        pass
-    
-    # Reconfigure stdout/stderr for UTF-8
-    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace')
-    sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8', errors='replace')
-
 import time
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
@@ -97,6 +76,10 @@ PROJECT_ROOT = Path(__file__).parent.parent.absolute()
 
 # Add project root to path for absolute imports
 sys.path.insert(0, str(PROJECT_ROOT))
+
+# Import Windows encoding SSOT and set up encoding
+from shared.windows_encoding import setup_windows_encoding
+setup_windows_encoding()
 
 # Load environment variables from .env file to ensure CONTAINER_RUNTIME is set
 try:
