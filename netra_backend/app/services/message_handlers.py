@@ -84,6 +84,7 @@ class MessageHandlerService(IMessageHandlerService):
     def __init__(self, supervisor: 'SupervisorAgent', thread_service: ThreadService):
         self.supervisor = supervisor
         self.thread_service = thread_service
+        self.handler_base = None  # Will be initialized per request with WebSocket manager
     
     async def handle_start_agent(
         self,
@@ -100,6 +101,7 @@ class MessageHandlerService(IMessageHandlerService):
         
         # Create isolated WebSocket manager for this user context
         websocket_manager = create_websocket_manager(user_context)
+        self.handler_base = MessageHandlerBase(websocket_manager)
         
         # CRITICAL FIX: Ensure thread association before agent processing
         if thread and websocket:
@@ -115,7 +117,9 @@ class MessageHandlerService(IMessageHandlerService):
     
     def _extract_user_request(self, payload: StartAgentPayloadTyped) -> str:
         """Extract user request from payload"""
-        return MessageHandlerBase.extract_user_request(payload)
+        # Create a temporary handler_base without WebSocket for extraction
+        temp_handler = MessageHandlerBase()
+        return temp_handler.extract_user_request(payload)
     
     async def _get_or_validate_thread(
         self, user_id: str, payload: StartAgentPayloadTyped, db_session: AsyncSession
@@ -132,7 +136,9 @@ class MessageHandlerService(IMessageHandlerService):
         self, user_id: str, thread_id: str, db_session: AsyncSession
     ) -> Optional[Thread]:
         """Validate user has access to thread"""
-        return await MessageHandlerBase.validate_thread_access(
+        # Use handler_base if available, otherwise create temporary instance
+        handler = self.handler_base if self.handler_base else MessageHandlerBase()
+        return await handler.validate_thread_access(
             self.thread_service, user_id, thread_id, db_session
         )
     
@@ -140,7 +146,9 @@ class MessageHandlerService(IMessageHandlerService):
         self, user_id: str, db_session: AsyncSession
     ) -> Optional[Thread]:
         """Get or create thread for user"""
-        return await MessageHandlerBase.get_or_create_thread(
+        # Use handler_base if available, otherwise create temporary instance
+        handler = self.handler_base if self.handler_base else MessageHandlerBase()
+        return await handler.get_or_create_thread(
             self.thread_service, user_id, db_session
         )
     
@@ -178,6 +186,7 @@ class MessageHandlerService(IMessageHandlerService):
         self, thread: Thread, content: str, user_id: str, db_session: AsyncSession
     ) -> None:
         """Create user message in thread"""
+        # Create_user_message doesn't need WebSocket, so using static is OK
         await MessageHandlerBase.create_user_message(
             self.thread_service, thread, content, user_id, db_session
         )
@@ -186,12 +195,14 @@ class MessageHandlerService(IMessageHandlerService):
         self, thread: Thread, db_session: AsyncSession
     ) -> Run:
         """Create run for thread"""
+        # Create_run doesn't need WebSocket, so using static is OK
         return await MessageHandlerBase.create_run(
             self.thread_service, thread, db_session
         )
     
     def _configure_supervisor(self, user_id: str, thread: Thread, db_session: AsyncSession, websocket_manager) -> None:
         """Configure supervisor with context"""
+        # Configure_supervisor doesn't need WebSocket, so using static is OK
         MessageHandlerBase.configure_supervisor(
             self.supervisor, user_id, thread, db_session
         )
@@ -319,19 +330,27 @@ class MessageHandlerService(IMessageHandlerService):
         self, thread: Thread, response: Any, run: Run, db_session: AsyncSession
     ) -> None:
         """Save assistant response if present"""
+        # Save_response doesn't need WebSocket, so using static is OK
         await MessageHandlerBase.save_response(
             self.thread_service, thread, response, run, db_session
         )
     
     async def _complete_run(self, run: Run, db_session: AsyncSession) -> None:
         """Mark run as completed"""
+        # Complete_run doesn't need WebSocket, so using static is OK
         await MessageHandlerBase.complete_run(
             self.thread_service, run, db_session
         )
     
     async def _send_completion(self, user_context: UserExecutionContext, response: Any, websocket_manager) -> None:
         """Send completion message to user"""
-        await MessageHandlerBase.send_completion(user_context.user_id, response, websocket_manager)
+        # Use handler_base for WebSocket operations
+        if self.handler_base:
+            await self.handler_base.send_completion(user_context.user_id, response)
+        else:
+            # Fallback: create temporary handler with the websocket_manager
+            temp_handler = MessageHandlerBase(websocket_manager)
+            await temp_handler.send_completion(user_context.user_id, response)
     
     async def handle_user_message(
         self,
@@ -347,6 +366,7 @@ class MessageHandlerService(IMessageHandlerService):
         
         # Create isolated WebSocket manager for this user context
         websocket_manager = create_websocket_manager(user_context)
+        self.handler_base = MessageHandlerBase(websocket_manager)
         
         # Don't process empty messages - prevents wasted agent resources
         if not text or not text.strip():
@@ -485,11 +505,13 @@ class MessageHandlerService(IMessageHandlerService):
         db_session: Optional[AsyncSession]
     ) -> None:
         """Handle get_thread_history message type"""
-        await _handle_thread_history(self.thread_service, user_context.user_id, db_session)
+        websocket_manager = create_websocket_manager(user_context)
+        await _handle_thread_history(self.thread_service, user_context.user_id, db_session, websocket_manager)
     
     async def handle_stop_agent(self, user_context: UserExecutionContext) -> None:
         """Handle stop_agent message type"""
-        await _handle_stop_agent(user_context.user_id)
+        websocket_manager = create_websocket_manager(user_context)
+        await _handle_stop_agent(user_context.user_id, websocket_manager)
     
     async def handle_switch_thread(
         self,

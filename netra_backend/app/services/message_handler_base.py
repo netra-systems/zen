@@ -9,16 +9,17 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from netra_backend.app.db.models_postgres import Run, Thread
 from netra_backend.app.logging_config import central_logger
-from netra_backend.app.websocket_core import get_websocket_manager
-manager = get_websocket_manager()
 
 logger = central_logger.get_logger(__name__)
 
 class MessageHandlerBase:
     """Base methods for message handling"""
     
-    @staticmethod
-    def extract_user_request(payload: Dict[str, Any]) -> str:
+    def __init__(self, websocket_manager=None):
+        """Initialize with optional WebSocket manager for notifications"""
+        self.manager = websocket_manager
+    
+    def extract_user_request(self, payload: Dict[str, Any]) -> str:
         """Extract user request from payload - supports multiple field names for consistency"""
         # First check for direct content/text fields (same as user_message)
         if "content" in payload:
@@ -32,25 +33,29 @@ class MessageHandlerBase:
         request_data = payload.get("request", {})
         return request_data.get("query", "") or request_data.get("user_request", "")
     
-    @staticmethod
     async def validate_thread_access(
-        thread_service, user_id: str, thread_id: str, db_session: AsyncSession
+        self, thread_service, user_id: str, thread_id: str, db_session: AsyncSession
     ) -> Optional[Thread]:
         """Validate user has access to thread"""
         thread = await thread_service.get_thread(thread_id, db_session)
         if thread and thread.metadata_.get("user_id") != user_id:
-            await manager.send_error(user_id, "Access denied to thread")
+            if self.manager:
+                await self.manager.send_error(user_id, "Access denied to thread")
+            else:
+                logger.error(f"Access denied to thread {thread_id} for user {user_id}")
             return None
         return thread
     
-    @staticmethod
     async def get_or_create_thread(
-        thread_service, user_id: str, db_session: AsyncSession
+        self, thread_service, user_id: str, db_session: AsyncSession
     ) -> Optional[Thread]:
         """Get or create thread for user"""
         thread = await thread_service.get_or_create_thread(user_id, db_session)
         if not thread:
-            await manager.send_error(user_id, "Failed to create or retrieve thread")
+            if self.manager:
+                await self.manager.send_error(user_id, "Failed to create or retrieve thread")
+            else:
+                logger.error(f"Failed to create or retrieve thread for user {user_id}")
         return thread
     
     @staticmethod
@@ -107,12 +112,14 @@ class MessageHandlerBase:
             run.id, status="completed", db=db_session
         )
     
-    @staticmethod
-    async def send_completion(user_id: str, response: Any) -> None:
+    async def send_completion(self, user_id: str, response: Any) -> None:
         """Send completion message to user"""
-        await manager.send_message(
-            user_id, {"type": "agent_completed", "payload": response}
-        )
+        if self.manager:
+            await self.manager.send_message(
+                user_id, {"type": "agent_completed", "payload": response}
+            )
+        else:
+            logger.info(f"Agent completed for user {user_id}: {response}")
     
     @staticmethod
     def convert_response_to_dict(response: Any) -> Any:
