@@ -196,12 +196,11 @@ async def test_connection_with_auth_config():
         
         logger.info(f"Using URL: {DatabaseURLBuilder.mask_url_for_logging(database_url)}")
         
-        # Parse the URL to extract connection parameters
-        if database_url.startswith("postgresql+asyncpg://"):
-            # Remove the driver prefix for asyncpg.connect
-            url_without_driver = database_url.replace("postgresql+asyncpg://", "postgresql://")
-            
-            conn = await asyncpg.connect(url_without_driver)
+        # Normalize URL for asyncpg compatibility
+        from shared.database_url_builder import DatabaseURLBuilder
+        normalized_url = DatabaseURLBuilder.format_for_asyncpg_driver(database_url)
+        
+        conn = await asyncpg.connect(normalized_url)
             
             result = await conn.fetchval('SELECT version()')
             logger.info(f"SUCCESS: AuthConfig URL connection successful!")

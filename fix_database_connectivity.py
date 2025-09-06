@@ -49,7 +49,7 @@ POSTGRES_PASSWORD=test
 POSTGRES_DB=netra_test
 
 # Use the available PostgreSQL service on port 5432
-DATABASE_URL=postgresql+asyncpg://postgres:postgres@localhost:5432/netra_test
+DATABASE_URL=postgresql://postgres:postgres@localhost:5432/netra_test
 
 # Test Redis Configuration (optional)
 REDIS_HOST=localhost
@@ -90,7 +90,7 @@ FAST_STARTUP_MODE=true
     os.environ['POSTGRES_USER'] = 'postgres'
     os.environ['POSTGRES_PASSWORD'] = 'postgres'
     os.environ['POSTGRES_DB'] = 'netra_test'
-    os.environ['DATABASE_URL'] = 'postgresql+asyncpg://postgres:postgres@localhost:5432/netra_test'
+    os.environ['DATABASE_URL'] = 'postgresql://postgres:postgres@localhost:5432/netra_test'
     
     print("[OK] Set environment variables for current session")
 
@@ -258,7 +258,7 @@ async def test_db():
     try:
         # Set test environment
         os.environ['ENVIRONMENT'] = 'test'
-        os.environ['DATABASE_URL'] = 'postgresql+asyncpg://postgres:postgres@localhost:5432/netra_test'
+        os.environ['DATABASE_URL'] = 'postgresql://postgres:postgres@localhost:5432/netra_test'
         
         from netra_backend.app.db.database_manager import get_database_manager
         

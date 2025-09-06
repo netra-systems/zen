@@ -63,7 +63,7 @@ if "pytest" in sys.modules or get_env().get("PYTEST_CURRENT_TEST"):
     # FAST TEST MODE: Skip DATABASE_URL to let fast test mode use SQLite
     # REAL SERVICES: Configure real database connection (unused in fast test mode)
     if not env.get("AUTH_FAST_TEST_MODE", "false").lower() == "true":
-        env.set("DATABASE_URL", "postgresql+asyncpg://test_user:test_pass@localhost:5434/auth_test_db", "auth_conftest_real")
+        env.set("DATABASE_URL", "postgresql://test_user:test_pass@localhost:5434/auth_test_db", "auth_conftest_real")
     env.set("POSTGRES_HOST", "localhost", "auth_conftest_real")
     env.set("POSTGRES_PORT", "5434", "auth_conftest_real") 
     env.set("POSTGRES_USER", "test_user", "auth_conftest_real")

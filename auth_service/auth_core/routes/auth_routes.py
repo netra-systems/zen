@@ -460,10 +460,9 @@ async def service_token_endpoint(request: Request) -> Dict[str, Any]:
                 detail="Service ID and secret are required"
             )
         
-        # Validate service credentials
-        # In a real implementation, validate against configured services
-        expected_secret = env.get("SERVICE_SECRET")
-        if service_secret != expected_secret:
+        # Validate service credentials using auth service validation logic
+        # This will handle development mode fallbacks and proper service validation
+        if not await auth_service._validate_service(service_id, service_secret):
             raise HTTPException(
                 status_code=401,
                 detail="Invalid service credentials"
