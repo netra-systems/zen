@@ -1,6 +1,6 @@
 # Alpine-based Production Dockerfile for Frontend Service
 # Optimized for test isolation and minimal size
-FROM node:20-alpine3.19 as builder
+FROM node:23-alpine as builder
 
 # Build arguments
 ARG BUILD_ENV=test
@@ -34,7 +34,7 @@ ENV NEXT_TELEMETRY_DISABLED=1
 RUN npm run build
 
 # Production stage - minimal Alpine image
-FROM node:20-alpine3.19
+FROM node:23-alpine
 
 # Install runtime dependencies only
 RUN apk add --no-cache \
