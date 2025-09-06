@@ -970,7 +970,9 @@ def _setup_agent_state(app: FastAPI, supervisor) -> None:
     app.state.agent_supervisor = supervisor
     app.state.agent_service = AgentService(supervisor)
     app.state.thread_service = ThreadService()
-    app.state.corpus_service = CorpusService()
+    # NOTE: CorpusService now requires user context for WebSocket notifications
+    # This will be created per-request with user context instead of singleton
+    app.state.corpus_service = CorpusService()  # Default without user context for backward compatibility
 
 
 async def initialize_websocket_components(logger: logging.Logger) -> None:

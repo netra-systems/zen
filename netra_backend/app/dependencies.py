@@ -797,11 +797,23 @@ def get_thread_service(request: Request) -> "ThreadService":
     
     return thread_service
 
-def get_corpus_service(request: Request) -> "CorpusService":
-    """Get corpus service from app state.
+def get_corpus_service(request: Request, user_context=None) -> "CorpusService":
+    """Get corpus service from app state or create with user context.
+    
+    Args:
+        request: FastAPI request object
+        user_context: Optional UserExecutionContext for WebSocket isolation.
+                     If provided, creates a new instance with WebSocket support.
+                     If None, returns the singleton without WebSocket support.
     
     CRITICAL: This service MUST be initialized during startup.
     """
+    # If user context is provided, create a new instance for isolation
+    if user_context:
+        from netra_backend.app.services.corpus_service import CorpusService
+        return CorpusService(user_context=user_context)
+    
+    # Otherwise return the singleton
     if not hasattr(request.app.state, 'corpus_service'):
         logger.critical("CRITICAL: corpus_service not initialized - startup sequence failed!")
         raise RuntimeError(

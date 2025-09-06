@@ -1025,7 +1025,9 @@ class StartupOrchestrator:
         self.app.state.agent_supervisor = supervisor
         self.app.state.agent_service = AgentService(supervisor)
         self.app.state.thread_service = ThreadService()
-        self.app.state.corpus_service = CorpusService()
+        # NOTE: CorpusService now requires user context for WebSocket notifications
+        # This will be created per-request with user context instead of singleton
+        self.app.state.corpus_service = CorpusService()  # Default without user context for backward compatibility
         
         # CRITICAL VALIDATION: Ensure services are never None
         critical_services = [
