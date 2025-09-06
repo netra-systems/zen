@@ -121,8 +121,8 @@ class GCPDeployer:
                 port=8080,
                 dockerfile="docker/auth.staging.alpine.Dockerfile" if self.use_alpine else "deployment/docker/auth.gcp.Dockerfile",
                 cloud_run_name="netra-auth-service",
-                memory="256Mi" if self.use_alpine else "512Mi",
-                cpu="0.5" if self.use_alpine else "1",
+                memory="512Mi",  # Gen2 requires minimum 512Mi with CPU always allocated
+                cpu="1",  # Cloud Run requires minimum 1 CPU with concurrency
                 min_instances=1,
                 max_instances=10,
                 environment_vars={
@@ -762,13 +762,27 @@ CMD ["npm", "start"]
         
         image_tag = f"{self.registry}/{service.cloud_run_name}:latest"
         
-        # Create cloudbuild.yaml for this build
+        # Create cloudbuild.yaml using Kaniko for better caching and BuildKit support
         cloudbuild_config = {
             "steps": [{
-                "name": "gcr.io/cloud-builders/docker",
-                "args": ["build", "-t", image_tag, "-f", service.dockerfile, "."]
+                "name": "gcr.io/kaniko-project/executor:latest",
+                "args": [
+                    "--dockerfile=" + service.dockerfile,
+                    "--destination=" + image_tag,
+                    "--cache=true",
+                    "--cache-ttl=24h",
+                    "--cache-repo=gcr.io/" + self.project_id + "/cache",
+                    "--compressed-caching=false",
+                    "--use-new-run",  # Enable BuildKit-style RUN --mount support
+                    "--snapshot-mode=redo",
+                    "--build-arg", f"BUILD_ENV={self.project_id.replace('netra-', '')}",
+                    "--build-arg", f"ENVIRONMENT={self.project_id.replace('netra-', '')}"
+                ]
             }],
-            "images": [image_tag]
+            "options": {
+                "logging": "CLOUD_LOGGING_ONLY",
+                "machineType": "E2_HIGHCPU_8"
+            }
         }
         
         cloudbuild_file = self.project_root / f"cloudbuild-{service.name}.yaml"
