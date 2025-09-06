@@ -501,7 +501,8 @@ class UnifiedTestRunner:
             return
             
         # First, try to use the simple Docker manager for automatic startup
-        print("\\n" + "="*60)
+        print("
+" + "="*60)
         print("DOCKER SERVICE INITIALIZATION")
         print("="*60)
         
@@ -527,11 +528,14 @@ class UnifiedTestRunner:
             
             if not can_proceed:
                 print("\n" + "="*60)
-                print("⚠️  MEMORY CHECK FAILED")
+                print("
+" + "="*60)
                 print("="*60)
-                print(f"\\n{details['message']}")
+                print(f"
+{details["message"]}")
                 print(f"\\nProfile: {profile.value}")
-                print(f"Required: {details['required_mb']:,} MB")
+                print(f"
+Profile: {profile.value}")
                 print(f"Available: {details['system_available_mb']:,} MB")
                 
                 if details.get('alternatives'):
@@ -539,7 +543,8 @@ class UnifiedTestRunner:
                     for alt in details['alternatives']:
                         print(f"  - {alt['profile']}: {alt['description']} ({alt['required_mb']}MB)")
                 
-                print("\nTo proceed anyway, set: TEST_SKIP_MEMORY_CHECK=true")
+                print("
+Alternative profiles that could work:")
                 print("="*60 + "\n")
                 
                 # Check if we should skip the check
@@ -627,11 +632,13 @@ class UnifiedTestRunner:
                         print("  1. python scripts/docker.py health       # Check service health")
                         print("  2. python scripts/docker.py restart      # Restart all services")
                         print("  3. python scripts/docker.py logs backend # Check logs for errors")
-                        print("="*60 + "\n")
+                        print("
+" + "="*60)
                         raise RuntimeError("Docker services not healthy for testing")
                         
         except Exception as e:
-            print(f"\n[ERROR] Docker environment setup failed: {e}")
+            print("
+Some services failed health checks. To fix:")
             print("\nTo manually manage Docker services:")
             print("  python scripts/docker.py start     # Start services")
             print("  python scripts/docker.py status    # Check status")
