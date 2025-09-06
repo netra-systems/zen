@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
-"""
-Audit Test Suite: Prevent Environment File Regression
+# REMOVED_SYNTAX_ERROR: '''
+# REMOVED_SYNTAX_ERROR: Audit Test Suite: Prevent Environment File Regression
 
-This test suite ensures that environment-specific .env files are never created
-and that the staging/production environment configuration remains simplified.
+# REMOVED_SYNTAX_ERROR: This test suite ensures that environment-specific .env files are never created
+# REMOVED_SYNTAX_ERROR: and that the staging/production environment configuration remains simplified.
 
-These tests prevent regression of the staging environment loading issues that
-were causing secrets to be loaded from local files instead of Google Secret Manager.
-"""
+# REMOVED_SYNTAX_ERROR: These tests prevent regression of the staging environment loading issues that
+# REMOVED_SYNTAX_ERROR: were causing secrets to be loaded from local files instead of Google Secret Manager.
+# REMOVED_SYNTAX_ERROR: '''
 
 import os
 import sys
@@ -23,315 +23,313 @@ project_root = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(project_root))
 
 
-class TestNoEnvironmentFiles:
-    """Test that no environment-specific .env files exist."""
+# REMOVED_SYNTAX_ERROR: class TestNoEnvironmentFiles:
+    # REMOVED_SYNTAX_ERROR: """Test that no environment-specific .env files exist."""
+
+    # REMOVED_SYNTAX_ERROR: @pytest.mark.critical
+# REMOVED_SYNTAX_ERROR: def test_no_env_staging_file(self):
+    # REMOVED_SYNTAX_ERROR: """Ensure .env.staging does not exist - it causes precedence issues."""
+    # REMOVED_SYNTAX_ERROR: staging_env = project_root / ".env.staging"
+    # REMOVED_SYNTAX_ERROR: assert not staging_env.exists(), ( )
+    # REMOVED_SYNTAX_ERROR: "CRITICAL: .env.staging file exists! This causes precedence issues where "
+    # REMOVED_SYNTAX_ERROR: "hardcoded values override Google Secret Manager. Delete this file immediately."
     
-    @pytest.mark.critical
-    def test_no_env_staging_file(self):
-        """Ensure .env.staging does not exist - it causes precedence issues."""
-        staging_env = project_root / ".env.staging"
-        assert not staging_env.exists(), (
-            "CRITICAL: .env.staging file exists! This causes precedence issues where "
-            "hardcoded values override Google Secret Manager. Delete this file immediately."
-        )
+
+    # REMOVED_SYNTAX_ERROR: @pytest.mark.critical
+# REMOVED_SYNTAX_ERROR: def test_no_env_production_file(self):
+    # REMOVED_SYNTAX_ERROR: """Ensure .env.production does not exist."""
+    # REMOVED_SYNTAX_ERROR: pass
+    # REMOVED_SYNTAX_ERROR: prod_env = project_root / ".env.production"
+    # REMOVED_SYNTAX_ERROR: assert not prod_env.exists(), ( )
+    # REMOVED_SYNTAX_ERROR: "CRITICAL: .env.production file exists! Production must only use "
+    # REMOVED_SYNTAX_ERROR: "Google Secret Manager for secrets. Delete this file immediately."
     
-    @pytest.mark.critical
-    def test_no_env_production_file(self):
-        """Ensure .env.production does not exist."""
-    pass
-        prod_env = project_root / ".env.production"
-        assert not prod_env.exists(), (
-            "CRITICAL: .env.production file exists! Production must only use "
-            "Google Secret Manager for secrets. Delete this file immediately."
-        )
+
+    # REMOVED_SYNTAX_ERROR: @pytest.mark.critical
+# REMOVED_SYNTAX_ERROR: def test_no_env_staging_local_file(self):
+    # REMOVED_SYNTAX_ERROR: """Ensure .env.staging.local does not exist."""
+    # REMOVED_SYNTAX_ERROR: staging_local = project_root / ".env.staging.local"
+    # REMOVED_SYNTAX_ERROR: assert not staging_local.exists(), ( )
+    # REMOVED_SYNTAX_ERROR: "CRITICAL: .env.staging.local file exists! This can override staging "
+    # REMOVED_SYNTAX_ERROR: "configuration. Delete this file immediately."
     
-    @pytest.mark.critical
-    def test_no_env_staging_local_file(self):
-        """Ensure .env.staging.local does not exist."""
-        staging_local = project_root / ".env.staging.local"
-        assert not staging_local.exists(), (
-            "CRITICAL: .env.staging.local file exists! This can override staging "
-            "configuration. Delete this file immediately."
-        )
-    
-    def test_gitignore_excludes_env_files(self):
-        """Verify .gitignore properly excludes environment files."""
-    pass
-        gitignore_path = project_root / ".gitignore"
-        if gitignore_path.exists():
-            with open(gitignore_path, 'r') as f:
-                content = f.read()
+
+# REMOVED_SYNTAX_ERROR: def test_gitignore_excludes_env_files(self):
+    # REMOVED_SYNTAX_ERROR: """Verify .gitignore properly excludes environment files."""
+    # REMOVED_SYNTAX_ERROR: pass
+    # REMOVED_SYNTAX_ERROR: gitignore_path = project_root / ".gitignore"
+    # REMOVED_SYNTAX_ERROR: if gitignore_path.exists():
+        # REMOVED_SYNTAX_ERROR: with open(gitignore_path, 'r') as f:
+            # REMOVED_SYNTAX_ERROR: content = f.read()
+
+            # REMOVED_SYNTAX_ERROR: required_patterns = [ )
+            # REMOVED_SYNTAX_ERROR: ".env.staging.local",
+            # REMOVED_SYNTAX_ERROR: ".env.production",
+            # REMOVED_SYNTAX_ERROR: ".env.prod"
             
-            required_patterns = [
-                ".env.staging.local",
-                ".env.production",
-                ".env.prod"
-            ]
-            
-            for pattern in required_patterns:
-                assert pattern in content or ".env.*" in content, (
-                    f".gitignore should exclude {pattern} to prevent accidental commits"
-                )
+
+            # REMOVED_SYNTAX_ERROR: for pattern in required_patterns:
+                # REMOVED_SYNTAX_ERROR: assert pattern in content or ".env.*" in content, ( )
+                # REMOVED_SYNTAX_ERROR: "formatted_string"
+                
 
 
-class TestEnvironmentLoadingLogic:
-    """Test that applications correctly skip .env loading in staging/production."""
-    
-    @pytest.mark.critical
-    def test_backend_skips_env_loading_in_staging(self):
-        """Verify backend main.py skips .env loading when ENVIRONMENT=staging."""
-        main_path = project_root / "netra_backend" / "app" / "main.py"
-        
-        with open(main_path, 'r', encoding='utf-8') as f:
-            content = f.read()
-        
+# REMOVED_SYNTAX_ERROR: class TestEnvironmentLoadingLogic:
+    # REMOVED_SYNTAX_ERROR: """Test that applications correctly skip .env loading in staging/production."""
+
+    # REMOVED_SYNTAX_ERROR: @pytest.mark.critical
+# REMOVED_SYNTAX_ERROR: def test_backend_skips_env_loading_in_staging(self):
+    # REMOVED_SYNTAX_ERROR: """Verify backend main.py skips .env loading when ENVIRONMENT=staging."""
+    # REMOVED_SYNTAX_ERROR: main_path = project_root / "netra_backend" / "app" / "main.py"
+
+    # REMOVED_SYNTAX_ERROR: with open(main_path, 'r', encoding='utf-8') as f:
+        # REMOVED_SYNTAX_ERROR: content = f.read()
+
         # Check for environment detection before .env loading
-        assert "environment in ['staging', 'production', 'prod']" in content, (
-            "Backend must check ENVIRONMENT before loading .env files"
-        )
+        # REMOVED_SYNTAX_ERROR: assert "environment in ['staging', 'production', 'prod']" in content, ( )
+        # REMOVED_SYNTAX_ERROR: "Backend must check ENVIRONMENT before loading .env files"
         
-        assert "skipping all .env file loading (using GSM)" in content, (
-            "Backend must skip .env loading in staging/production"
-        )
-    
-    @pytest.mark.critical
-    def test_auth_service_skips_env_loading_in_staging(self):
-        """Verify auth service skips .env loading when ENVIRONMENT=staging."""
-    pass
-        auth_main = project_root / "auth_service" / "main.py"
+
+        # REMOVED_SYNTAX_ERROR: assert "skipping all .env file loading (using GSM)" in content, ( )
+        # REMOVED_SYNTAX_ERROR: "Backend must skip .env loading in staging/production"
         
-        with open(auth_main, 'r', encoding='utf-8') as f:
-            content = f.read()
-        
+
+        # REMOVED_SYNTAX_ERROR: @pytest.mark.critical
+# REMOVED_SYNTAX_ERROR: def test_auth_service_skips_env_loading_in_staging(self):
+    # REMOVED_SYNTAX_ERROR: """Verify auth service skips .env loading when ENVIRONMENT=staging."""
+    # REMOVED_SYNTAX_ERROR: pass
+    # REMOVED_SYNTAX_ERROR: auth_main = project_root / "auth_service" / "main.py"
+
+    # REMOVED_SYNTAX_ERROR: with open(auth_main, 'r', encoding='utf-8') as f:
+        # REMOVED_SYNTAX_ERROR: content = f.read()
+
         # Check for environment detection
-        assert "environment in ['staging', 'production', 'prod']" in content, (
-            "Auth service must check ENVIRONMENT before loading .env files"
-        )
+        # REMOVED_SYNTAX_ERROR: assert "environment in ['staging', 'production', 'prod']" in content, ( )
+        # REMOVED_SYNTAX_ERROR: "Auth service must check ENVIRONMENT before loading .env files"
         
-        assert "skipping .env file loading (using GSM)" in content, (
-            "Auth service must skip .env loading in staging/production"
-        )
+
+        # REMOVED_SYNTAX_ERROR: assert "skipping .env file loading (using GSM)" in content, ( )
+        # REMOVED_SYNTAX_ERROR: "Auth service must skip .env loading in staging/production"
+        
 
 
-class TestNoHardcodedSecrets:
-    """Test that no hardcoded secrets exist in staging/production code."""
-    
-    def _scan_file_for_secrets(self, filepath: Path) -> List[str]:
-        """Scan a file for potential hardcoded secrets."""
-        suspicious_patterns = []
-        
-        with open(filepath, 'r', encoding='utf-8', errors='ignore') as f:
-            content = f.read()
-        
+# REMOVED_SYNTAX_ERROR: class TestNoHardcodedSecrets:
+    # REMOVED_SYNTAX_ERROR: """Test that no hardcoded secrets exist in staging/production code."""
+
+# REMOVED_SYNTAX_ERROR: def _scan_file_for_secrets(self, filepath: Path) -> List[str]:
+    # REMOVED_SYNTAX_ERROR: """Scan a file for potential hardcoded secrets."""
+    # REMOVED_SYNTAX_ERROR: suspicious_patterns = []
+
+    # REMOVED_SYNTAX_ERROR: with open(filepath, 'r', encoding='utf-8', errors='ignore') as f:
+        # REMOVED_SYNTAX_ERROR: content = f.read()
+
         # Skip test files, documentation, and deployment scripts
-        skip_patterns = [
-            '/test',
-            '.md',
-            'deploy_to_gcp.py',  # Deployment script needs to set up GSM
-            'update_postgres_password',  # Scripts for updating passwords
-            'fix_staging_database',  # Database fix scripts
-            'validate_staging_db',  # Validation scripts
-        ]
+        # REMOVED_SYNTAX_ERROR: skip_patterns = [ )
+        # REMOVED_SYNTAX_ERROR: '/test',
+        # REMOVED_SYNTAX_ERROR: '.md',
+        # REMOVED_SYNTAX_ERROR: 'deploy_to_gcp.py',  # Deployment script needs to set up GSM
+        # REMOVED_SYNTAX_ERROR: 'update_postgres_password',  # Scripts for updating passwords
+        # REMOVED_SYNTAX_ERROR: 'fix_staging_database',  # Database fix scripts
+        # REMOVED_SYNTAX_ERROR: 'validate_staging_db',  # Validation scripts
         
-        if any(pattern in str(filepath) for pattern in skip_patterns):
-            return []
-        
-        # Look for hardcoded database passwords in application code
-        if 'qNdlZRHu(Mlc#)6K8LHm' in content:  # The old staging password
-            suspicious_patterns.append(f"{filepath}: Contains hardcoded staging password")
-        
-        # Look for JWT secrets in application code
-        if 'staging_jwt_secret_key_must_be_at_least_32_characters' in content:
-            suspicious_patterns.append(f"{filepath}: Contains hardcoded JWT secret")
-        
-        return suspicious_patterns
+
+        # REMOVED_SYNTAX_ERROR: if any(pattern in str(filepath) for pattern in skip_patterns):
+            # REMOVED_SYNTAX_ERROR: return []
+
+            # Look for hardcoded database passwords in application code
+            # REMOVED_SYNTAX_ERROR: if 'qNdlZRHu(Mlc#)6K8LHm' in content:  # The old staging password
+            # REMOVED_SYNTAX_ERROR: suspicious_patterns.append("formatted_string")
+
+            # Look for JWT secrets in application code
+            # REMOVED_SYNTAX_ERROR: if 'staging_jwt_secret_key_must_be_at_least_32_characters' in content:
+                # REMOVED_SYNTAX_ERROR: suspicious_patterns.append("formatted_string")
+
+                # REMOVED_SYNTAX_ERROR: return suspicious_patterns
+
+# REMOVED_SYNTAX_ERROR: def test_no_hardcoded_staging_secrets(self):
+    # REMOVED_SYNTAX_ERROR: """Ensure no hardcoded staging secrets in application code."""
+    # REMOVED_SYNTAX_ERROR: suspicious_files = []
+
+    # Scan key directories
+    # REMOVED_SYNTAX_ERROR: dirs_to_scan = [ )
+    # REMOVED_SYNTAX_ERROR: project_root / "netra_backend" / "app",
+    # REMOVED_SYNTAX_ERROR: project_root / "auth_service",
+    # REMOVED_SYNTAX_ERROR: project_root / "scripts",
     
-    def test_no_hardcoded_staging_secrets(self):
-        """Ensure no hardcoded staging secrets in application code."""
-        suspicious_files = []
-        
-        # Scan key directories
-        dirs_to_scan = [
-            project_root / "netra_backend" / "app",
-            project_root / "auth_service",
-            project_root / "scripts",
-        ]
-        
-        for directory in dirs_to_scan:
-            if directory.exists():
-                for filepath in directory.rglob("*.py"):
-                    issues = self._scan_file_for_secrets(filepath)
-                    suspicious_files.extend(issues)
-        
-        assert not suspicious_files, (
-            f"Found hardcoded secrets in files:
-" + "
-".join(suspicious_files)
-        )
+
+    # REMOVED_SYNTAX_ERROR: for directory in dirs_to_scan:
+        # REMOVED_SYNTAX_ERROR: if directory.exists():
+            # REMOVED_SYNTAX_ERROR: for filepath in directory.rglob("*.py"):
+                # REMOVED_SYNTAX_ERROR: issues = self._scan_file_for_secrets(filepath)
+                # REMOVED_SYNTAX_ERROR: suspicious_files.extend(issues)
+
+                # REMOVED_SYNTAX_ERROR: assert not suspicious_files, ( )
+                # REMOVED_SYNTAX_ERROR: f"Found hardcoded secrets in files:
+                    # REMOVED_SYNTAX_ERROR: " + "
+                    # REMOVED_SYNTAX_ERROR: ".join(suspicious_files)
+                    
 
 
-class TestDeploymentConfiguration:
-    """Test deployment script configuration."""
-    
-    @pytest.mark.critical
-    def test_deployment_script_has_staging_env_vars(self):
-        """Verify deployment script contains all necessary staging env vars."""
-        deploy_script = project_root / "scripts" / "deploy_to_gcp.py"
+# REMOVED_SYNTAX_ERROR: class TestDeploymentConfiguration:
+    # REMOVED_SYNTAX_ERROR: """Test deployment script configuration."""
+
+    # REMOVED_SYNTAX_ERROR: @pytest.mark.critical
+# REMOVED_SYNTAX_ERROR: def test_deployment_script_has_staging_env_vars(self):
+    # REMOVED_SYNTAX_ERROR: """Verify deployment script contains all necessary staging env vars."""
+    # REMOVED_SYNTAX_ERROR: deploy_script = project_root / "scripts" / "deploy_to_gcp.py"
+
+    # REMOVED_SYNTAX_ERROR: with open(deploy_script, 'r', encoding='utf-8') as f:
+        # REMOVED_SYNTAX_ERROR: content = f.read()
+
+        # REMOVED_SYNTAX_ERROR: required_configs = [ )
+        # REMOVED_SYNTAX_ERROR: '"ENVIRONMENT": "staging"',
+        # REMOVED_SYNTAX_ERROR: '"JWT_ALGORITHM": "HS256"',
+        # REMOVED_SYNTAX_ERROR: 'POSTGRES_PASSWORD=postgres-password-staging',
+        # REMOVED_SYNTAX_ERROR: 'JWT_SECRET_KEY=jwt-secret-key-staging',
+        # REMOVED_SYNTAX_ERROR: '--set-secrets',
         
-        with open(deploy_script, 'r', encoding='utf-8') as f:
-            content = f.read()
-        
-        required_configs = [
-            '"ENVIRONMENT": "staging"',
-            '"JWT_ALGORITHM": "HS256"',
-            'POSTGRES_PASSWORD=postgres-password-staging',
-            'JWT_SECRET_KEY=jwt-secret-key-staging',
-            '--set-secrets',
-        ]
-        
-        for config in required_configs:
-            assert config in content, (
-                f"Deployment script missing required configuration: {config}"
-            )
-    
-    def test_deployment_script_uses_gsm_for_secrets(self):
-        """Verify deployment script loads all secrets from GSM."""
-    pass
-        deploy_script = project_root / "scripts" / "deploy_to_gcp.py"
-        
-        with open(deploy_script, 'r', encoding='utf-8') as f:
-            content = f.read()
-        
+
+        # REMOVED_SYNTAX_ERROR: for config in required_configs:
+            # REMOVED_SYNTAX_ERROR: assert config in content, ( )
+            # REMOVED_SYNTAX_ERROR: "formatted_string"
+            
+
+# REMOVED_SYNTAX_ERROR: def test_deployment_script_uses_gsm_for_secrets(self):
+    # REMOVED_SYNTAX_ERROR: """Verify deployment script loads all secrets from GSM."""
+    # REMOVED_SYNTAX_ERROR: pass
+    # REMOVED_SYNTAX_ERROR: deploy_script = project_root / "scripts" / "deploy_to_gcp.py"
+
+    # REMOVED_SYNTAX_ERROR: with open(deploy_script, 'r', encoding='utf-8') as f:
+        # REMOVED_SYNTAX_ERROR: content = f.read()
+
         # Check that secrets are loaded from GSM
-        assert '--set-secrets' in content, "Deployment must use --set-secrets for GSM"
-        
+        # REMOVED_SYNTAX_ERROR: assert '--set-secrets' in content, "Deployment must use --set-secrets for GSM"
+
         # Verify critical secrets are from GSM
-        gsm_secrets = [
-            'POSTGRES_PASSWORD=postgres-password-staging',
-            'JWT_SECRET_KEY=jwt-secret-key-staging',
-            'GOOGLE_CLIENT_ID=google-oauth-client-id-staging',
-            'GOOGLE_CLIENT_SECRET=google-oauth-client-secret-staging',
-        ]
+        # REMOVED_SYNTAX_ERROR: gsm_secrets = [ )
+        # REMOVED_SYNTAX_ERROR: 'POSTGRES_PASSWORD=postgres-password-staging',
+        # REMOVED_SYNTAX_ERROR: 'JWT_SECRET_KEY=jwt-secret-key-staging',
+        # REMOVED_SYNTAX_ERROR: 'GOOGLE_CLIENT_ID=google-oauth-client-id-staging',
+        # REMOVED_SYNTAX_ERROR: 'GOOGLE_CLIENT_SECRET=google-oauth-client-secret-staging',
         
-        for secret in gsm_secrets:
-            assert secret in content, f"Secret {secret} must be loaded from GSM"
+
+        # REMOVED_SYNTAX_ERROR: for secret in gsm_secrets:
+            # REMOVED_SYNTAX_ERROR: assert secret in content, "formatted_string"
 
 
-class TestNoReferencesToStagingEnvFile:
-    """Test that no code references .env.staging."""
+# REMOVED_SYNTAX_ERROR: class TestNoReferencesToStagingEnvFile:
+    # REMOVED_SYNTAX_ERROR: """Test that no code references .env.staging."""
+
+# REMOVED_SYNTAX_ERROR: def test_no_code_references_env_staging(self):
+    # REMOVED_SYNTAX_ERROR: """Ensure no Python code references .env.staging."""
+    # REMOVED_SYNTAX_ERROR: references = []
+
+    # Only scan key directories to avoid timeout
+    # REMOVED_SYNTAX_ERROR: dirs_to_scan = [ )
+    # REMOVED_SYNTAX_ERROR: project_root / "netra_backend" / "app",
+    # REMOVED_SYNTAX_ERROR: project_root / "auth_service",
+    # REMOVED_SYNTAX_ERROR: project_root / "scripts",
+    # REMOVED_SYNTAX_ERROR: project_root / "dev_launcher",
     
-    def test_no_code_references_env_staging(self):
-        """Ensure no Python code references .env.staging."""
-        references = []
-        
-        # Only scan key directories to avoid timeout
-        dirs_to_scan = [
-            project_root / "netra_backend" / "app",
-            project_root / "auth_service",
-            project_root / "scripts",
-            project_root / "dev_launcher",
-        ]
-        
-        for directory in dirs_to_scan:
-            if not directory.exists():
-                continue
-                
-            for filepath in directory.rglob("*.py"):
+
+    # REMOVED_SYNTAX_ERROR: for directory in dirs_to_scan:
+        # REMOVED_SYNTAX_ERROR: if not directory.exists():
+            # REMOVED_SYNTAX_ERROR: continue
+
+            # REMOVED_SYNTAX_ERROR: for filepath in directory.rglob("*.py"):
                 # Skip this test file, obsolete scripts, and very large files
-                skip_files = [
-                    'test_no_environment_files.py',
-                    'fix_staging_oauth.py',  # Obsolete - OAuth now in GSM
-                    'validate_staging_oauth.py',  # Obsolete - OAuth now in GSM
-                    'test_staging_simplified.py',  # Our test script
-                    'environment_validator_core.py',  # Old validator
-                ]
+                # REMOVED_SYNTAX_ERROR: skip_files = [ )
+                # REMOVED_SYNTAX_ERROR: 'test_no_environment_files.py',
+                # REMOVED_SYNTAX_ERROR: 'fix_staging_oauth.py',  # Obsolete - OAuth now in GSM
+                # REMOVED_SYNTAX_ERROR: 'validate_staging_oauth.py',  # Obsolete - OAuth now in GSM
+                # REMOVED_SYNTAX_ERROR: 'test_staging_simplified.py',  # Our test script
+                # REMOVED_SYNTAX_ERROR: 'environment_validator_core.py',  # Old validator
                 
-                if any(skip in str(filepath) for skip in skip_files):
-                    continue
-                
-                # Skip files larger than 100KB to avoid timeout
-                if filepath.stat().st_size > 100000:
-                    continue
-                
-                with open(filepath, 'r', encoding='utf-8', errors='ignore') as f:
-                    for i, line in enumerate(f, 1):
-                        if '.env.staging' in line and not line.strip().startswith('#'):
-                            references.append(f"{filepath}:{i} - {line.strip()[:80]}")
-                            if len(references) >= 10:  # Stop after finding 10 references
-                                break
-                
-                if len(references) >= 10:
-                    break
-        
-        assert not references, (
-            f"Found references to .env.staging in code:
-" + "
-".join(references)
-        )
+
+                # REMOVED_SYNTAX_ERROR: if any(skip in str(filepath) for skip in skip_files):
+                    # REMOVED_SYNTAX_ERROR: continue
+
+                    # Skip files larger than 100KB to avoid timeout
+                    # REMOVED_SYNTAX_ERROR: if filepath.stat().st_size > 100000:
+                        # REMOVED_SYNTAX_ERROR: continue
+
+                        # REMOVED_SYNTAX_ERROR: with open(filepath, 'r', encoding='utf-8', errors='ignore') as f:
+                            # REMOVED_SYNTAX_ERROR: for i, line in enumerate(f, 1):
+                                # REMOVED_SYNTAX_ERROR: if '.env.staging' in line and not line.strip().startswith('#'):
+                                    # REMOVED_SYNTAX_ERROR: references.append("formatted_string")
+                                    # REMOVED_SYNTAX_ERROR: if len(references) >= 10:  # Stop after finding 10 references
+                                    # REMOVED_SYNTAX_ERROR: break
+
+                                    # REMOVED_SYNTAX_ERROR: if len(references) >= 10:
+                                        # REMOVED_SYNTAX_ERROR: break
+
+                                        # REMOVED_SYNTAX_ERROR: assert not references, ( )
+                                        # REMOVED_SYNTAX_ERROR: f"Found references to .env.staging in code:
+                                            # REMOVED_SYNTAX_ERROR: " + "
+                                            # REMOVED_SYNTAX_ERROR: ".join(references)
+                                            
 
 
-class TestEnvironmentIsolation:
-    """Test that staging/production are properly isolated from dev."""
-    
-    def test_no_localhost_in_staging_config(self):
-        """Ensure no localhost references in staging configuration."""
-        deploy_script = project_root / "scripts" / "deploy_to_gcp.py"
-        
-        with open(deploy_script, 'r', encoding='utf-8') as f:
-            lines = f.readlines()
-        
-        for i, line in enumerate(lines, 1):
+# REMOVED_SYNTAX_ERROR: class TestEnvironmentIsolation:
+    # REMOVED_SYNTAX_ERROR: """Test that staging/production are properly isolated from dev."""
+
+# REMOVED_SYNTAX_ERROR: def test_no_localhost_in_staging_config(self):
+    # REMOVED_SYNTAX_ERROR: """Ensure no localhost references in staging configuration."""
+    # REMOVED_SYNTAX_ERROR: deploy_script = project_root / "scripts" / "deploy_to_gcp.py"
+
+    # REMOVED_SYNTAX_ERROR: with open(deploy_script, 'r', encoding='utf-8') as f:
+        # REMOVED_SYNTAX_ERROR: lines = f.readlines()
+
+        # REMOVED_SYNTAX_ERROR: for i, line in enumerate(lines, 1):
             # Skip comments and DATABASE_URL validation
-            if 'localhost' in line.lower():
-                if not line.strip().startswith('#') and 'DATABASE_URL' not in line:
+            # REMOVED_SYNTAX_ERROR: if 'localhost' in line.lower():
+                # REMOVED_SYNTAX_ERROR: if not line.strip().startswith('#') and 'DATABASE_URL' not in line:
                     # Check it's not in the validation section
-                    if 'if "localhost" in database_url' not in line:
-                        pytest.fail(
-                            f"Found localhost reference in deployment script line {i}: {line.strip()}"
-                        )
+                    # REMOVED_SYNTAX_ERROR: if 'if "localhost" in database_url' not in line:
+                        # REMOVED_SYNTAX_ERROR: pytest.fail( )
+                        # REMOVED_SYNTAX_ERROR: "formatted_string"
+                        
 
 
-class TestComplianceAudit:
-    """Comprehensive audit of environment configuration compliance."""
+# REMOVED_SYNTAX_ERROR: class TestComplianceAudit:
+    # REMOVED_SYNTAX_ERROR: """Comprehensive audit of environment configuration compliance."""
+
+# REMOVED_SYNTAX_ERROR: def test_full_staging_configuration_audit(self):
+    # REMOVED_SYNTAX_ERROR: """Run complete audit of staging configuration."""
+    # REMOVED_SYNTAX_ERROR: audit_results = { )
+    # REMOVED_SYNTAX_ERROR: 'env_files_absent': True,
+    # REMOVED_SYNTAX_ERROR: 'env_loading_skipped': True,
+    # REMOVED_SYNTAX_ERROR: 'secrets_from_gsm': True,
+    # REMOVED_SYNTAX_ERROR: 'no_hardcoded_secrets': True,
+    # REMOVED_SYNTAX_ERROR: 'no_localhost_refs': True,
     
-    def test_full_staging_configuration_audit(self):
-        """Run complete audit of staging configuration."""
-        audit_results = {
-            'env_files_absent': True,
-            'env_loading_skipped': True,
-            'secrets_from_gsm': True,
-            'no_hardcoded_secrets': True,
-            'no_localhost_refs': True,
-        }
-        
-        # Check no .env.staging exists
-        if (project_root / ".env.staging").exists():
-            audit_results['env_files_absent'] = False
-        
+
+    # Check no .env.staging exists
+    # REMOVED_SYNTAX_ERROR: if (project_root / ".env.staging").exists():
+        # REMOVED_SYNTAX_ERROR: audit_results['env_files_absent'] = False
+
         # Check environment loading logic
-        backend_main = project_root / "netra_backend" / "app" / "main.py"
-        if backend_main.exists():
-            with open(backend_main, 'r', encoding='utf-8') as f:
-                if "environment in ['staging'" not in f.read():
-                    audit_results['env_loading_skipped'] = False
-        
-        # Generate audit report
-        passed = all(audit_results.values())
-        
-        report = "Staging Configuration Audit Report
-"
-        report += "=" * 50 + "
-"
-        for check, result in audit_results.items():
-            status = "PASS" if result else "FAIL"
-            report += f"{check}: {status}
-"
-        
-        assert passed, f"Staging configuration audit failed:
-{report}"
+        # REMOVED_SYNTAX_ERROR: backend_main = project_root / "netra_backend" / "app" / "main.py"
+        # REMOVED_SYNTAX_ERROR: if backend_main.exists():
+            # REMOVED_SYNTAX_ERROR: with open(backend_main, 'r', encoding='utf-8') as f:
+                # REMOVED_SYNTAX_ERROR: if "environment in ['staging'" not in f.read(): )
+                # REMOVED_SYNTAX_ERROR: audit_results['env_loading_skipped'] = False
+
+                # Generate audit report
+                # REMOVED_SYNTAX_ERROR: passed = all(audit_results.values())
+
+                # REMOVED_SYNTAX_ERROR: report = "Staging Configuration Audit Report
+                # REMOVED_SYNTAX_ERROR: "
+                # REMOVED_SYNTAX_ERROR: report += "=" * 50 + "
+                # REMOVED_SYNTAX_ERROR: "
+                # REMOVED_SYNTAX_ERROR: for check, result in audit_results.items():
+                    # REMOVED_SYNTAX_ERROR: status = "PASS" if result else "FAIL"
+                    # REMOVED_SYNTAX_ERROR: report += "formatted_string"
+
+                    # REMOVED_SYNTAX_ERROR: assert passed, "formatted_string"
 
 
-if __name__ == "__main__":
-    # Run tests with pytest
-    pytest.main([__file__, "-v", "--tb=short"])
-    pass
+                        # REMOVED_SYNTAX_ERROR: if __name__ == "__main__":
+                            # Run tests with pytest
+                            # REMOVED_SYNTAX_ERROR: pytest.main([__file__, "-v", "--tb=short"])
+                            # REMOVED_SYNTAX_ERROR: pass

@@ -1,286 +1,286 @@
-class TestWebSocketConnection:
-    """Real WebSocket connection for testing instead of mocks."""
-    
-    def __init__(self):
-    pass
-        self.messages_sent = []
-        self.is_connected = True
-        self._closed = False
-        
-    async def send_json(self, message: dict):
-        """Send JSON message."""
-        if self._closed:
-            raise RuntimeError("WebSocket is closed")
-        self.messages_sent.append(message)
-        
-    async def close(self, code: int = 1000, reason: str = "Normal closure"):
-        """Close WebSocket connection."""
-    pass
-        self._closed = True
-        self.is_connected = False
-        
-    def get_messages(self) -> list:
-        """Get all sent messages."""
-        await asyncio.sleep(0)
-    return self.messages_sent.copy()
+# REMOVED_SYNTAX_ERROR: class TestWebSocketConnection:
+    # REMOVED_SYNTAX_ERROR: """Real WebSocket connection for testing instead of mocks."""
 
-"""
-Tests for Docker Rate Limiter
+# REMOVED_SYNTAX_ERROR: def __init__(self):
+    # REMOVED_SYNTAX_ERROR: pass
+    # REMOVED_SYNTAX_ERROR: self.messages_sent = []
+    # REMOVED_SYNTAX_ERROR: self.is_connected = True
+    # REMOVED_SYNTAX_ERROR: self._closed = False
 
-Verifies that Docker commands are properly rate-limited to prevent API storms.
-"""
+# REMOVED_SYNTAX_ERROR: async def send_json(self, message: dict):
+    # REMOVED_SYNTAX_ERROR: """Send JSON message."""
+    # REMOVED_SYNTAX_ERROR: if self._closed:
+        # REMOVED_SYNTAX_ERROR: raise RuntimeError("WebSocket is closed")
+        # REMOVED_SYNTAX_ERROR: self.messages_sent.append(message)
 
-import threading
-import time
-import pytest
-from test_framework.docker_rate_limiter import (
-from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
-from netra_backend.app.db.database_manager import DatabaseManager
-from netra_backend.app.clients.auth_client_core import AuthServiceClient
-from shared.isolated_environment import get_env
-from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
-from test_framework.docker.unified_docker_manager import UnifiedDockerManager
-from test_framework.database.test_database_manager import TestDatabaseManager
-from auth_service.core.auth_manager import AuthManager
-from shared.isolated_environment import IsolatedEnvironment
-import asyncio
-    DockerRateLimiter,
-    get_docker_rate_limiter,
-    execute_docker_command,
-    docker_health_check
-)
+# REMOVED_SYNTAX_ERROR: async def close(self, code: int = 1000, reason: str = "Normal closure"):
+    # REMOVED_SYNTAX_ERROR: """Close WebSocket connection."""
+    # REMOVED_SYNTAX_ERROR: pass
+    # REMOVED_SYNTAX_ERROR: self._closed = True
+    # REMOVED_SYNTAX_ERROR: self.is_connected = False
+
+# REMOVED_SYNTAX_ERROR: def get_messages(self) -> list:
+    # REMOVED_SYNTAX_ERROR: """Get all sent messages."""
+    # REMOVED_SYNTAX_ERROR: await asyncio.sleep(0)
+    # REMOVED_SYNTAX_ERROR: return self.messages_sent.copy()
+
+    # REMOVED_SYNTAX_ERROR: '''
+    # REMOVED_SYNTAX_ERROR: Tests for Docker Rate Limiter
+
+    # REMOVED_SYNTAX_ERROR: Verifies that Docker commands are properly rate-limited to prevent API storms.
+    # REMOVED_SYNTAX_ERROR: '''
+
+    # REMOVED_SYNTAX_ERROR: import threading
+    # REMOVED_SYNTAX_ERROR: import time
+    # REMOVED_SYNTAX_ERROR: import pytest
+    # REMOVED_SYNTAX_ERROR: from test_framework.docker_rate_limiter import ( )
+    # REMOVED_SYNTAX_ERROR: from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+    # REMOVED_SYNTAX_ERROR: from netra_backend.app.db.database_manager import DatabaseManager
+    # REMOVED_SYNTAX_ERROR: from netra_backend.app.clients.auth_client_core import AuthServiceClient
+    # REMOVED_SYNTAX_ERROR: from shared.isolated_environment import get_env
+    # REMOVED_SYNTAX_ERROR: from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+    # REMOVED_SYNTAX_ERROR: from test_framework.docker.unified_docker_manager import UnifiedDockerManager
+    # REMOVED_SYNTAX_ERROR: from test_framework.database.test_database_manager import TestDatabaseManager
+    # REMOVED_SYNTAX_ERROR: from auth_service.core.auth_manager import AuthManager
+    # REMOVED_SYNTAX_ERROR: from shared.isolated_environment import IsolatedEnvironment
+    # REMOVED_SYNTAX_ERROR: import asyncio
+    # REMOVED_SYNTAX_ERROR: DockerRateLimiter,
+    # REMOVED_SYNTAX_ERROR: get_docker_rate_limiter,
+    # REMOVED_SYNTAX_ERROR: execute_docker_command,
+    # REMOVED_SYNTAX_ERROR: docker_health_check
+    
 
 
-class TestDockerRateLimiter:
-    """Test Docker rate limiter functionality."""
+# REMOVED_SYNTAX_ERROR: class TestDockerRateLimiter:
+    # REMOVED_SYNTAX_ERROR: """Test Docker rate limiter functionality."""
+
+# REMOVED_SYNTAX_ERROR: def test_rate_limiter_initialization(self):
+    # REMOVED_SYNTAX_ERROR: """Test rate limiter initializes with correct parameters."""
+    # REMOVED_SYNTAX_ERROR: rate_limiter = DockerRateLimiter( )
+    # REMOVED_SYNTAX_ERROR: min_interval=1.0,
+    # REMOVED_SYNTAX_ERROR: max_concurrent=2,
+    # REMOVED_SYNTAX_ERROR: max_retries=5,
+    # REMOVED_SYNTAX_ERROR: base_backoff=2.0
     
-    def test_rate_limiter_initialization(self):
-        """Test rate limiter initializes with correct parameters."""
-        rate_limiter = DockerRateLimiter(
-            min_interval=1.0,
-            max_concurrent=2,
-            max_retries=5,
-            base_backoff=2.0
-        )
-        
-        assert rate_limiter.min_interval == 1.0
-        assert rate_limiter.max_concurrent == 2
-        assert rate_limiter.max_retries == 5
-        assert rate_limiter.base_backoff == 2.0
+
+    # REMOVED_SYNTAX_ERROR: assert rate_limiter.min_interval == 1.0
+    # REMOVED_SYNTAX_ERROR: assert rate_limiter.max_concurrent == 2
+    # REMOVED_SYNTAX_ERROR: assert rate_limiter.max_retries == 5
+    # REMOVED_SYNTAX_ERROR: assert rate_limiter.base_backoff == 2.0
+
+# REMOVED_SYNTAX_ERROR: def test_singleton_rate_limiter(self):
+    # REMOVED_SYNTAX_ERROR: """Test that get_docker_rate_limiter returns singleton."""
+    # REMOVED_SYNTAX_ERROR: pass
+    # REMOVED_SYNTAX_ERROR: limiter1 = get_docker_rate_limiter()
+    # REMOVED_SYNTAX_ERROR: limiter2 = get_docker_rate_limiter()
+
+    # REMOVED_SYNTAX_ERROR: assert limiter1 is limiter2
+
+# REMOVED_SYNTAX_ERROR: def test_successful_command_execution(self, mock_run):
+    # REMOVED_SYNTAX_ERROR: """Test successful Docker command execution."""
+    # REMOVED_SYNTAX_ERROR: mock_run.return_value = MagicMock( )
+    # REMOVED_SYNTAX_ERROR: returncode=0,
+    # REMOVED_SYNTAX_ERROR: stdout="Docker version 20.10.0",
+    # REMOVED_SYNTAX_ERROR: stderr=""
     
-    def test_singleton_rate_limiter(self):
-        """Test that get_docker_rate_limiter returns singleton."""
-    pass
-        limiter1 = get_docker_rate_limiter()
-        limiter2 = get_docker_rate_limiter()
-        
-        assert limiter1 is limiter2
+
+    # REMOVED_SYNTAX_ERROR: rate_limiter = DockerRateLimiter(min_interval=0.1)
+    # REMOVED_SYNTAX_ERROR: result = rate_limiter.execute_docker_command(["docker", "version"])
+
+    # REMOVED_SYNTAX_ERROR: assert result.returncode == 0
+    # REMOVED_SYNTAX_ERROR: assert "Docker version" in result.stdout
+    # REMOVED_SYNTAX_ERROR: assert result.retry_count == 0
+    # REMOVED_SYNTAX_ERROR: mock_run.assert_called_once()
+
+# REMOVED_SYNTAX_ERROR: def test_rate_limiting_enforced(self, mock_run):
+    # REMOVED_SYNTAX_ERROR: """Test that rate limiting is enforced between commands."""
+    # REMOVED_SYNTAX_ERROR: pass
+    # REMOVED_SYNTAX_ERROR: mock_run.return_value = MagicMock(returncode=0, stdout="", stderr="")
+
+    # REMOVED_SYNTAX_ERROR: rate_limiter = DockerRateLimiter(min_interval=0.5)
+
+    # REMOVED_SYNTAX_ERROR: start_time = time.time()
+    # REMOVED_SYNTAX_ERROR: rate_limiter.execute_docker_command(["docker", "version"])
+    # REMOVED_SYNTAX_ERROR: rate_limiter.execute_docker_command(["docker", "ps"])
+    # REMOVED_SYNTAX_ERROR: end_time = time.time()
+
+    # Should take at least min_interval seconds
+    # REMOVED_SYNTAX_ERROR: assert end_time - start_time >= 0.4  # Account for some timing variance
+
+# REMOVED_SYNTAX_ERROR: def test_concurrent_operations_limited(self, mock_run):
+    # REMOVED_SYNTAX_ERROR: """Test that concurrent operations are limited."""
+    # Mock a slow operation
+# REMOVED_SYNTAX_ERROR: def slow_operation(*args, **kwargs):
+    # REMOVED_SYNTAX_ERROR: time.sleep(0.2)
+    # REMOVED_SYNTAX_ERROR: return MagicMock(returncode=0, stdout="", stderr="")
+
+    # REMOVED_SYNTAX_ERROR: mock_run.side_effect = slow_operation
+
+    # REMOVED_SYNTAX_ERROR: rate_limiter = DockerRateLimiter(min_interval=0.1, max_concurrent=2)
+
+    # REMOVED_SYNTAX_ERROR: results = []
+# REMOVED_SYNTAX_ERROR: def execute_command():
+    # REMOVED_SYNTAX_ERROR: result = rate_limiter.execute_docker_command(["docker", "version"])
+    # REMOVED_SYNTAX_ERROR: results.append(result)
+
+    # Start 5 threads concurrently
+    # REMOVED_SYNTAX_ERROR: threads = []
+    # REMOVED_SYNTAX_ERROR: start_time = time.time()
+
+    # REMOVED_SYNTAX_ERROR: for _ in range(5):
+        # REMOVED_SYNTAX_ERROR: thread = threading.Thread(target=execute_command)
+        # REMOVED_SYNTAX_ERROR: threads.append(thread)
+        # REMOVED_SYNTAX_ERROR: thread.start()
+
+        # REMOVED_SYNTAX_ERROR: for thread in threads:
+            # REMOVED_SYNTAX_ERROR: thread.join()
+
+            # REMOVED_SYNTAX_ERROR: end_time = time.time()
+
+            # With max_concurrent=2, should take longer than if all ran concurrently
+            # REMOVED_SYNTAX_ERROR: assert len(results) == 5
+            # REMOVED_SYNTAX_ERROR: assert end_time - start_time > 0.4  # Should take at least 0.4s with queuing
+
+# REMOVED_SYNTAX_ERROR: def test_retry_with_exponential_backoff(self, mock_run):
+    # REMOVED_SYNTAX_ERROR: """Test retry mechanism with exponential backoff."""
+    # REMOVED_SYNTAX_ERROR: pass
+    # First two calls fail, third succeeds
+    # REMOVED_SYNTAX_ERROR: mock_run.side_effect = [ )
+    # REMOVED_SYNTAX_ERROR: Exception("Connection failed"),
+    # REMOVED_SYNTAX_ERROR: Exception("Connection failed"),
+    # REMOVED_SYNTAX_ERROR: MagicMock(returncode=0, stdout="success", stderr="")
     
-        def test_successful_command_execution(self, mock_run):
-        """Test successful Docker command execution."""
-        mock_run.return_value = MagicMock(
-            returncode=0,
-            stdout="Docker version 20.10.0",
-            stderr=""
-        )
-        
-        rate_limiter = DockerRateLimiter(min_interval=0.1)
-        result = rate_limiter.execute_docker_command(["docker", "version"])
-        
-        assert result.returncode == 0
-        assert "Docker version" in result.stdout
-        assert result.retry_count == 0
-        mock_run.assert_called_once()
+
+    # REMOVED_SYNTAX_ERROR: rate_limiter = DockerRateLimiter( )
+    # REMOVED_SYNTAX_ERROR: min_interval=0.1,
+    # REMOVED_SYNTAX_ERROR: max_retries=3,
+    # REMOVED_SYNTAX_ERROR: base_backoff=0.1
     
-        def test_rate_limiting_enforced(self, mock_run):
-        """Test that rate limiting is enforced between commands."""
-    pass
-        mock_run.return_value = MagicMock(returncode=0, stdout="", stderr="")
-        
-        rate_limiter = DockerRateLimiter(min_interval=0.5)
-        
-        start_time = time.time()
-        rate_limiter.execute_docker_command(["docker", "version"])
-        rate_limiter.execute_docker_command(["docker", "ps"])
-        end_time = time.time()
-        
-        # Should take at least min_interval seconds
-        assert end_time - start_time >= 0.4  # Account for some timing variance
+
+    # REMOVED_SYNTAX_ERROR: start_time = time.time()
+    # REMOVED_SYNTAX_ERROR: result = rate_limiter.execute_docker_command(["docker", "version"])
+    # REMOVED_SYNTAX_ERROR: end_time = time.time()
+
+    # REMOVED_SYNTAX_ERROR: assert result.returncode == 0
+    # REMOVED_SYNTAX_ERROR: assert result.retry_count == 2
+    # Should have backoff delays: 0.1s + 0.2s = 0.3s minimum
+    # REMOVED_SYNTAX_ERROR: assert end_time - start_time >= 0.2
+    # REMOVED_SYNTAX_ERROR: assert mock_run.call_count == 3
+
+# REMOVED_SYNTAX_ERROR: def test_max_retries_exceeded(self, mock_run):
+    # REMOVED_SYNTAX_ERROR: """Test that commands fail after max retries."""
+    # REMOVED_SYNTAX_ERROR: mock_run.side_effect = Exception("Persistent failure")
+
+    # REMOVED_SYNTAX_ERROR: rate_limiter = DockerRateLimiter( )
+    # REMOVED_SYNTAX_ERROR: min_interval=0.1,
+    # REMOVED_SYNTAX_ERROR: max_retries=2,
+    # REMOVED_SYNTAX_ERROR: base_backoff=0.1
     
-        def test_concurrent_operations_limited(self, mock_run):
-        """Test that concurrent operations are limited."""
-        # Mock a slow operation
-        def slow_operation(*args, **kwargs):
-            time.sleep(0.2)
-            return MagicMock(returncode=0, stdout="", stderr="")
-        
-        mock_run.side_effect = slow_operation
-        
-        rate_limiter = DockerRateLimiter(min_interval=0.1, max_concurrent=2)
-        
-        results = []
-        def execute_command():
-            result = rate_limiter.execute_docker_command(["docker", "version"])
-            results.append(result)
-        
-        # Start 5 threads concurrently
-        threads = []
-        start_time = time.time()
-        
-        for _ in range(5):
-            thread = threading.Thread(target=execute_command)
-            threads.append(thread)
-            thread.start()
-        
-        for thread in threads:
-            thread.join()
-        
-        end_time = time.time()
-        
-        # With max_concurrent=2, should take longer than if all ran concurrently
-        assert len(results) == 5
-        assert end_time - start_time > 0.4  # Should take at least 0.4s with queuing
-    
-        def test_retry_with_exponential_backoff(self, mock_run):
-        """Test retry mechanism with exponential backoff."""
-    pass
-        # First two calls fail, third succeeds
-        mock_run.side_effect = [
-            Exception("Connection failed"),
-            Exception("Connection failed"),
-            MagicMock(returncode=0, stdout="success", stderr="")
-        ]
-        
-        rate_limiter = DockerRateLimiter(
-            min_interval=0.1,
-            max_retries=3,
-            base_backoff=0.1
-        )
-        
-        start_time = time.time()
-        result = rate_limiter.execute_docker_command(["docker", "version"])
-        end_time = time.time()
-        
-        assert result.returncode == 0
-        assert result.retry_count == 2
-        # Should have backoff delays: 0.1s + 0.2s = 0.3s minimum
-        assert end_time - start_time >= 0.2
-        assert mock_run.call_count == 3
-    
-        def test_max_retries_exceeded(self, mock_run):
-        """Test that commands fail after max retries."""
-        mock_run.side_effect = Exception("Persistent failure")
-        
-        rate_limiter = DockerRateLimiter(
-            min_interval=0.1,
-            max_retries=2,
-            base_backoff=0.1
-        )
-        
-        with pytest.raises(RuntimeError, match="failed after 3 attempts"):
-            rate_limiter.execute_docker_command(["docker", "version"])
-        
-        assert mock_run.call_count == 3  # Initial + 2 retries
-    
-    def test_statistics_tracking(self):
-        """Test that statistics are properly tracked."""
-    pass
-        with patch('subprocess.run') as mock_run:
-            mock_run.return_value = MagicMock(returncode=0, stdout="", stderr="")
-            
-            rate_limiter = DockerRateLimiter(min_interval=0.1)
-            
-            # Execute some commands
-            rate_limiter.execute_docker_command(["docker", "version"])
-            rate_limiter.execute_docker_command(["docker", "ps"])
-            
-            stats = rate_limiter.get_statistics()
-            
-            assert stats["total_operations"] == 2
-            assert stats["failed_operations"] == 0
-            assert stats["success_rate"] == 100.0
-            assert stats["current_concurrent"] == 0
-    
-    def test_batch_operations(self):
-        """Test batch operations context manager."""
-        with patch('subprocess.run') as mock_run:
-            mock_run.return_value = MagicMock(returncode=0, stdout="", stderr="")
-            
-            rate_limiter = DockerRateLimiter(min_interval=0.4)
-            
-            start_time = time.time()
-            with rate_limiter.batch_operation():
-                rate_limiter.execute_docker_command(["docker", "version"])
-                rate_limiter.execute_docker_command(["docker", "ps"])
-            end_time = time.time()
-            
+
+    # REMOVED_SYNTAX_ERROR: with pytest.raises(RuntimeError, match="failed after 3 attempts"):
+        # REMOVED_SYNTAX_ERROR: rate_limiter.execute_docker_command(["docker", "version"])
+
+        # REMOVED_SYNTAX_ERROR: assert mock_run.call_count == 3  # Initial + 2 retries
+
+# REMOVED_SYNTAX_ERROR: def test_statistics_tracking(self):
+    # REMOVED_SYNTAX_ERROR: """Test that statistics are properly tracked."""
+    # REMOVED_SYNTAX_ERROR: pass
+    # REMOVED_SYNTAX_ERROR: with patch('subprocess.run') as mock_run:
+        # REMOVED_SYNTAX_ERROR: mock_run.return_value = MagicMock(returncode=0, stdout="", stderr="")
+
+        # REMOVED_SYNTAX_ERROR: rate_limiter = DockerRateLimiter(min_interval=0.1)
+
+        # Execute some commands
+        # REMOVED_SYNTAX_ERROR: rate_limiter.execute_docker_command(["docker", "version"])
+        # REMOVED_SYNTAX_ERROR: rate_limiter.execute_docker_command(["docker", "ps"])
+
+        # REMOVED_SYNTAX_ERROR: stats = rate_limiter.get_statistics()
+
+        # REMOVED_SYNTAX_ERROR: assert stats["total_operations"] == 2
+        # REMOVED_SYNTAX_ERROR: assert stats["failed_operations"] == 0
+        # REMOVED_SYNTAX_ERROR: assert stats["success_rate"] == 100.0
+        # REMOVED_SYNTAX_ERROR: assert stats["current_concurrent"] == 0
+
+# REMOVED_SYNTAX_ERROR: def test_batch_operations(self):
+    # REMOVED_SYNTAX_ERROR: """Test batch operations context manager."""
+    # REMOVED_SYNTAX_ERROR: with patch('subprocess.run') as mock_run:
+        # REMOVED_SYNTAX_ERROR: mock_run.return_value = MagicMock(returncode=0, stdout="", stderr="")
+
+        # REMOVED_SYNTAX_ERROR: rate_limiter = DockerRateLimiter(min_interval=0.4)
+
+        # REMOVED_SYNTAX_ERROR: start_time = time.time()
+        # REMOVED_SYNTAX_ERROR: with rate_limiter.batch_operation():
+            # REMOVED_SYNTAX_ERROR: rate_limiter.execute_docker_command(["docker", "version"])
+            # REMOVED_SYNTAX_ERROR: rate_limiter.execute_docker_command(["docker", "ps"])
+            # REMOVED_SYNTAX_ERROR: end_time = time.time()
+
             # Batch operations should have reduced interval (0.2s instead of 0.4s)
-            assert end_time - start_time < 0.35  # Should be faster than normal
-    
-        def test_health_check(self, mock_run):
-        """Test Docker health check functionality."""
-    pass
-        # Test successful health check
-        mock_run.return_value = MagicMock(returncode=0, stdout="20.10.0", stderr="")
-        
-        rate_limiter = DockerRateLimiter()
-        assert rate_limiter.health_check() is True
-        
-        # Test failed health check
-        mock_run.side_effect = Exception("Docker not available")
-        assert rate_limiter.health_check() is False
-    
-        def test_convenience_functions(self, mock_run):
-        """Test convenience functions work correctly."""
-        mock_run.return_value = MagicMock(returncode=0, stdout="version", stderr="")
-        
-        # Test execute_docker_command convenience function
-        result = execute_docker_command(["docker", "version"])
-        assert result.returncode == 0
-        
-        # Test docker_health_check convenience function
-        assert docker_health_check() is True
-    
-    def test_statistics_reset(self):
-        """Test statistics reset functionality."""
-    pass
-        with patch('subprocess.run') as mock_run:
-            mock_run.return_value = MagicMock(returncode=0, stdout="", stderr="")
-            
-            rate_limiter = DockerRateLimiter(min_interval=0.1)
-            
-            # Execute commands and accumulate stats
-            rate_limiter.execute_docker_command(["docker", "version"])
-            assert rate_limiter.get_statistics()["total_operations"] == 1
-            
-            # Reset stats
-            rate_limiter.reset_statistics()
-            stats = rate_limiter.get_statistics()
-            assert stats["total_operations"] == 0
-            assert stats["failed_operations"] == 0
-            assert stats["rate_limited_operations"] == 0
+            # REMOVED_SYNTAX_ERROR: assert end_time - start_time < 0.35  # Should be faster than normal
+
+# REMOVED_SYNTAX_ERROR: def test_health_check(self, mock_run):
+    # REMOVED_SYNTAX_ERROR: """Test Docker health check functionality."""
+    # REMOVED_SYNTAX_ERROR: pass
+    # Test successful health check
+    # REMOVED_SYNTAX_ERROR: mock_run.return_value = MagicMock(returncode=0, stdout="20.10.0", stderr="")
+
+    # REMOVED_SYNTAX_ERROR: rate_limiter = DockerRateLimiter()
+    # REMOVED_SYNTAX_ERROR: assert rate_limiter.health_check() is True
+
+    # Test failed health check
+    # REMOVED_SYNTAX_ERROR: mock_run.side_effect = Exception("Docker not available")
+    # REMOVED_SYNTAX_ERROR: assert rate_limiter.health_check() is False
+
+# REMOVED_SYNTAX_ERROR: def test_convenience_functions(self, mock_run):
+    # REMOVED_SYNTAX_ERROR: """Test convenience functions work correctly."""
+    # REMOVED_SYNTAX_ERROR: mock_run.return_value = MagicMock(returncode=0, stdout="version", stderr="")
+
+    # Test execute_docker_command convenience function
+    # REMOVED_SYNTAX_ERROR: result = execute_docker_command(["docker", "version"])
+    # REMOVED_SYNTAX_ERROR: assert result.returncode == 0
+
+    # Test docker_health_check convenience function
+    # REMOVED_SYNTAX_ERROR: assert docker_health_check() is True
+
+# REMOVED_SYNTAX_ERROR: def test_statistics_reset(self):
+    # REMOVED_SYNTAX_ERROR: """Test statistics reset functionality."""
+    # REMOVED_SYNTAX_ERROR: pass
+    # REMOVED_SYNTAX_ERROR: with patch('subprocess.run') as mock_run:
+        # REMOVED_SYNTAX_ERROR: mock_run.return_value = MagicMock(returncode=0, stdout="", stderr="")
+
+        # REMOVED_SYNTAX_ERROR: rate_limiter = DockerRateLimiter(min_interval=0.1)
+
+        # Execute commands and accumulate stats
+        # REMOVED_SYNTAX_ERROR: rate_limiter.execute_docker_command(["docker", "version"])
+        # REMOVED_SYNTAX_ERROR: assert rate_limiter.get_statistics()["total_operations"] == 1
+
+        # Reset stats
+        # REMOVED_SYNTAX_ERROR: rate_limiter.reset_statistics()
+        # REMOVED_SYNTAX_ERROR: stats = rate_limiter.get_statistics()
+        # REMOVED_SYNTAX_ERROR: assert stats["total_operations"] == 0
+        # REMOVED_SYNTAX_ERROR: assert stats["failed_operations"] == 0
+        # REMOVED_SYNTAX_ERROR: assert stats["rate_limited_operations"] == 0
 
 
-class TestIntegration:
-    """Integration tests for rate limiter with actual components."""
-    
-    def test_unified_docker_manager_uses_rate_limiter(self):
-        """Test that UnifiedDockerManager uses the rate limiter."""
-        from test_framework.unified_docker_manager import UnifiedDockerManager
-        
-        manager = UnifiedDockerManager()
-        assert hasattr(manager, 'docker_rate_limiter')
-        assert manager.docker_rate_limiter is not None
-    
-    def test_docker_orchestrator_uses_rate_limiter(self):
-        """Test that DockerOrchestrator uses the rate limiter."""
-    pass
-        from test_framework.docker_orchestrator import DockerOrchestrator
-        
-                    orchestrator = DockerOrchestrator()
-            assert hasattr(orchestrator, 'docker_rate_limiter')
-            assert orchestrator.docker_rate_limiter is not None
+# REMOVED_SYNTAX_ERROR: class TestIntegration:
+    # REMOVED_SYNTAX_ERROR: """Integration tests for rate limiter with actual components."""
+
+# REMOVED_SYNTAX_ERROR: def test_unified_docker_manager_uses_rate_limiter(self):
+    # REMOVED_SYNTAX_ERROR: """Test that UnifiedDockerManager uses the rate limiter."""
+    # REMOVED_SYNTAX_ERROR: from test_framework.unified_docker_manager import UnifiedDockerManager
+
+    # REMOVED_SYNTAX_ERROR: manager = UnifiedDockerManager()
+    # REMOVED_SYNTAX_ERROR: assert hasattr(manager, 'docker_rate_limiter')
+    # REMOVED_SYNTAX_ERROR: assert manager.docker_rate_limiter is not None
+
+# REMOVED_SYNTAX_ERROR: def test_docker_orchestrator_uses_rate_limiter(self):
+    # REMOVED_SYNTAX_ERROR: """Test that DockerOrchestrator uses the rate limiter."""
+    # REMOVED_SYNTAX_ERROR: pass
+    # REMOVED_SYNTAX_ERROR: from test_framework.docker_orchestrator import DockerOrchestrator
+
+    # REMOVED_SYNTAX_ERROR: orchestrator = DockerOrchestrator()
+    # REMOVED_SYNTAX_ERROR: assert hasattr(orchestrator, 'docker_rate_limiter')
+    # REMOVED_SYNTAX_ERROR: assert orchestrator.docker_rate_limiter is not None
 
 
-if __name__ == "__main__":
-    pytest.main([__file__])
+    # REMOVED_SYNTAX_ERROR: if __name__ == "__main__":
+        # REMOVED_SYNTAX_ERROR: pytest.main([__file__])

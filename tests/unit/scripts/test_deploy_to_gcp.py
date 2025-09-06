@@ -25,5 +25,6 @@ class TestWebSocketConnection:
         
                     def get_messages(self) -> list:
                         """Get all sent messages."""
-                        await asyncio.sleep(0)
+                        # FIXED: await outside async - using pass
+                        pass
                         return self.messages_sent.copy()

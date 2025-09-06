@@ -1,257 +1,257 @@
-"""
-E2E Test: Service Startup Sequence Validation
+# REMOVED_SYNTAX_ERROR: '''
+# REMOVED_SYNTAX_ERROR: E2E Test: Service Startup Sequence Validation
 
-This test validates that all services start up in the correct order with proper
-dependency resolution and health checks.
+# REMOVED_SYNTAX_ERROR: This test validates that all services start up in the correct order with proper
+# REMOVED_SYNTAX_ERROR: dependency resolution and health checks.
 
-Business Value Justification (BVJ):
-- Segment: Platform/Internal (affects all customer segments)
-- Business Goal: System Reliability and Zero-downtime deployments  
-- Value Impact: Ensures services start correctly without cascading failures
-- Strategic/Revenue Impact: Prevents service outages that could impact customer experience
-"""
+# REMOVED_SYNTAX_ERROR: Business Value Justification (BVJ):
+    # REMOVED_SYNTAX_ERROR: - Segment: Platform/Internal (affects all customer segments)
+    # REMOVED_SYNTAX_ERROR: - Business Goal: System Reliability and Zero-downtime deployments
+    # REMOVED_SYNTAX_ERROR: - Value Impact: Ensures services start correctly without cascading failures
+    # REMOVED_SYNTAX_ERROR: - Strategic/Revenue Impact: Prevents service outages that could impact customer experience
+    # REMOVED_SYNTAX_ERROR: '''
 
-# Setup test path for absolute imports following CLAUDE.md standards
-import sys
-from pathlib import Path
-project_root = Path(__file__).parent.parent.parent
-if str(project_root) not in sys.path:
-    sys.path.insert(0, str(project_root))
+    # Setup test path for absolute imports following CLAUDE.md standards
+    # REMOVED_SYNTAX_ERROR: import sys
+    # REMOVED_SYNTAX_ERROR: from pathlib import Path
+    # REMOVED_SYNTAX_ERROR: project_root = Path(__file__).parent.parent.parent
+    # REMOVED_SYNTAX_ERROR: if str(project_root) not in sys.path:
+        # REMOVED_SYNTAX_ERROR: sys.path.insert(0, str(project_root))
 
-# Absolute imports following CLAUDE.md standards
-import asyncio
-import aiohttp
-import pytest
-from typing import Dict, List, Optional, Tuple
-import time
+        # Absolute imports following CLAUDE.md standards
+        # REMOVED_SYNTAX_ERROR: import asyncio
+        # REMOVED_SYNTAX_ERROR: import aiohttp
+        # REMOVED_SYNTAX_ERROR: import pytest
+        # REMOVED_SYNTAX_ERROR: from typing import Dict, List, Optional, Tuple
+        # REMOVED_SYNTAX_ERROR: import time
 
-# CLAUDE.md compliance: Use IsolatedEnvironment for ALL environment access
-from shared.isolated_environment import get_env
+        # CLAUDE.md compliance: Use IsolatedEnvironment for ALL environment access
+        # REMOVED_SYNTAX_ERROR: from shared.isolated_environment import get_env
 
-@pytest.mark.e2e
-@pytest.mark.asyncio
-async def test_service_startup_sequence_validation():
-    """Test that all services start up in the correct dependency order.
-    
-    This test should FAIL until proper startup sequencing is implemented.
-    """
-    
-    # CLAUDE.md compliance: Use IsolatedEnvironment for ALL environment access
-    env = get_env()
-    env.set("ENVIRONMENT", "development", "test_service_startup_sequence")
-    env.set("NETRA_ENVIRONMENT", "development", "test_service_startup_sequence")
-    
-    # Define expected startup sequence
-    startup_sequence = [
-        {
-            "service": "auth_service",
-            "port": 8001,
-            "depends_on": [],
-            "health_endpoint": "/health",
-            "startup_time_limit": 30  # seconds
-        },
-        {
-            "service": "netra_backend", 
-            "port": 8000,
-            "depends_on": ["auth_service"],
-            "health_endpoint": "/api/health",
-            "startup_time_limit": 45  # seconds
-        },
-        {
-            "service": "frontend",
-            "port": 3000, 
-            "depends_on": ["netra_backend", "auth_service"],
-            "health_endpoint": "/",
-            "startup_time_limit": 20  # seconds
-        }
-    ]
-    
-    startup_results = []
-    failed_services = []
-    
-    async with aiohttp.ClientSession() as session:
-        for service_config in startup_sequence:
-            service_name = service_config["service"]
-            port = service_config["port"]
-            health_endpoint = service_config["health_endpoint"]
-            depends_on = service_config["depends_on"]
-            time_limit = service_config["startup_time_limit"]
+        # REMOVED_SYNTAX_ERROR: @pytest.mark.e2e
+        # Removed problematic line: @pytest.mark.asyncio
+        # Removed problematic line: async def test_service_startup_sequence_validation():
+            # REMOVED_SYNTAX_ERROR: '''Test that all services start up in the correct dependency order.
+
+            # REMOVED_SYNTAX_ERROR: This test should FAIL until proper startup sequencing is implemented.
+            # REMOVED_SYNTAX_ERROR: '''
+
+            # CLAUDE.md compliance: Use IsolatedEnvironment for ALL environment access
+            # REMOVED_SYNTAX_ERROR: env = get_env()
+            # REMOVED_SYNTAX_ERROR: env.set("ENVIRONMENT", "development", "test_service_startup_sequence")
+            # REMOVED_SYNTAX_ERROR: env.set("NETRA_ENVIRONMENT", "development", "test_service_startup_sequence")
+
+            # Define expected startup sequence
+            # REMOVED_SYNTAX_ERROR: startup_sequence = [ )
+            # REMOVED_SYNTAX_ERROR: { )
+            # REMOVED_SYNTAX_ERROR: "service": "auth_service",
+            # REMOVED_SYNTAX_ERROR: "port": 8001,
+            # REMOVED_SYNTAX_ERROR: "depends_on": [],
+            # REMOVED_SYNTAX_ERROR: "health_endpoint": "/health",
+            # REMOVED_SYNTAX_ERROR: "startup_time_limit": 30  # seconds
+            # REMOVED_SYNTAX_ERROR: },
+            # REMOVED_SYNTAX_ERROR: { )
+            # REMOVED_SYNTAX_ERROR: "service": "netra_backend",
+            # REMOVED_SYNTAX_ERROR: "port": 8000,
+            # REMOVED_SYNTAX_ERROR: "depends_on": ["auth_service"],
+            # REMOVED_SYNTAX_ERROR: "health_endpoint": "/api/health",
+            # REMOVED_SYNTAX_ERROR: "startup_time_limit": 45  # seconds
+            # REMOVED_SYNTAX_ERROR: },
+            # REMOVED_SYNTAX_ERROR: { )
+            # REMOVED_SYNTAX_ERROR: "service": "frontend",
+            # REMOVED_SYNTAX_ERROR: "port": 3000,
+            # REMOVED_SYNTAX_ERROR: "depends_on": ["netra_backend", "auth_service"],
+            # REMOVED_SYNTAX_ERROR: "health_endpoint": "/",
+            # REMOVED_SYNTAX_ERROR: "startup_time_limit": 20  # seconds
             
-            print(f"Testing startup for {service_name}...")
             
-            # Check dependencies are running first
-            for dependency in depends_on:
-                dep_healthy = await _check_service_health(session, dependency)
-                if not dep_healthy:
-                    failed_services.append({
-                        "service": service_name,
-                        "reason": f"Dependency {dependency} not healthy",
-                        "startup_order_violated": True
-                    })
-                    continue
-            
-            # Test service startup within time limit
-            start_time = time.time()
-            service_healthy = False
-            
-            while time.time() - start_time < time_limit:
-                try:
-                    url = f"http://localhost:{port}{health_endpoint}"
-                    async with session.get(url, timeout=aiohttp.ClientTimeout(total=2)) as response:
-                        if response.status == 200:
-                            service_healthy = True
-                            startup_time = time.time() - start_time
-                            startup_results.append({
-                                "service": service_name,
-                                "startup_time": startup_time,
-                                "status": "healthy"
-                            })
-                            print(f"SUCCESS: {service_name} healthy after {startup_time:.2f}s")
-                            break
-                except (aiohttp.ClientError, asyncio.TimeoutError):
-                    await asyncio.sleep(1)
-            
-            if not service_healthy:
-                failed_services.append({
-                    "service": service_name, 
-                    "reason": f"Failed to start within {time_limit}s",
-                    "startup_timeout": True
-                })
-                print(f"FAILED: {service_name} failed to start within {time_limit}s")
-    
-    # Validate startup sequence compliance
-    sequence_violations = []
-    
-    for i, result in enumerate(startup_results):
-        service_config = startup_sequence[i]
-        expected_service = service_config["service"]
-        
-        if result["service"] != expected_service:
-            sequence_violations.append(f"Expected {expected_service} at position {i}, got {result['service']}")
-    
-    # Test comprehensive failure scenarios
-    startup_issues = []
-    
-    # 1. Check for race conditions in startup
-    if len(startup_results) > 1:
-        startup_times = [r["startup_time"] for r in startup_results]
-        if not _is_startup_sequence_ordered(startup_times, startup_sequence):
-            startup_issues.append("Services did not start in dependency order")
-    
-    # 2. Check for resource conflicts
-    port_conflicts = _detect_port_conflicts(startup_sequence)
-    if port_conflicts:
-        startup_issues.extend(port_conflicts)
-    
-    # 3. Check for missing health checks
-    missing_health_checks = _detect_missing_health_checks(startup_results, startup_sequence)
-    if missing_health_checks:
-        startup_issues.extend(missing_health_checks)
-    
-    # Fail test if any issues found
-    if failed_services or sequence_violations or startup_issues:
-        failure_report = []
-        
-        if failed_services:
-            failure_report.append("FAILED Services:")
-            for failure in failed_services:
-                failure_report.append(f"  - {failure['service']}: {failure['reason']}")
-        
-        if sequence_violations:
-            failure_report.append("Startup Sequence Violations:")
-            for violation in sequence_violations:
-                failure_report.append(f"  - {violation}")
-        
-        if startup_issues:
-            failure_report.append("Startup Issues:")
-            for issue in startup_issues:
-                failure_report.append(f"  - {issue}")
-        
-        pytest.fail(f"Service startup sequence validation failed:
-" + "
-".join(failure_report))
-    
-    print(f"SUCCESS: All {len(startup_results)} services started successfully in correct order")
+
+            # REMOVED_SYNTAX_ERROR: startup_results = []
+            # REMOVED_SYNTAX_ERROR: failed_services = []
+
+            # REMOVED_SYNTAX_ERROR: async with aiohttp.ClientSession() as session:
+                # REMOVED_SYNTAX_ERROR: for service_config in startup_sequence:
+                    # REMOVED_SYNTAX_ERROR: service_name = service_config["service"]
+                    # REMOVED_SYNTAX_ERROR: port = service_config["port"]
+                    # REMOVED_SYNTAX_ERROR: health_endpoint = service_config["health_endpoint"]
+                    # REMOVED_SYNTAX_ERROR: depends_on = service_config["depends_on"]
+                    # REMOVED_SYNTAX_ERROR: time_limit = service_config["startup_time_limit"]
+
+                    # REMOVED_SYNTAX_ERROR: print("formatted_string")
+
+                    # Check dependencies are running first
+                    # REMOVED_SYNTAX_ERROR: for dependency in depends_on:
+                        # REMOVED_SYNTAX_ERROR: dep_healthy = await _check_service_health(session, dependency)
+                        # REMOVED_SYNTAX_ERROR: if not dep_healthy:
+                            # REMOVED_SYNTAX_ERROR: failed_services.append({ ))
+                            # REMOVED_SYNTAX_ERROR: "service": service_name,
+                            # REMOVED_SYNTAX_ERROR: "reason": "formatted_string",
+                            # REMOVED_SYNTAX_ERROR: "startup_order_violated": True
+                            
+                            # REMOVED_SYNTAX_ERROR: continue
+
+                            # Test service startup within time limit
+                            # REMOVED_SYNTAX_ERROR: start_time = time.time()
+                            # REMOVED_SYNTAX_ERROR: service_healthy = False
+
+                            # REMOVED_SYNTAX_ERROR: while time.time() - start_time < time_limit:
+                                # REMOVED_SYNTAX_ERROR: try:
+                                    # REMOVED_SYNTAX_ERROR: url = "formatted_string"
+                                    # REMOVED_SYNTAX_ERROR: async with session.get(url, timeout=aiohttp.ClientTimeout(total=2)) as response:
+                                        # REMOVED_SYNTAX_ERROR: if response.status == 200:
+                                            # REMOVED_SYNTAX_ERROR: service_healthy = True
+                                            # REMOVED_SYNTAX_ERROR: startup_time = time.time() - start_time
+                                            # REMOVED_SYNTAX_ERROR: startup_results.append({ ))
+                                            # REMOVED_SYNTAX_ERROR: "service": service_name,
+                                            # REMOVED_SYNTAX_ERROR: "startup_time": startup_time,
+                                            # REMOVED_SYNTAX_ERROR: "status": "healthy"
+                                            
+                                            # REMOVED_SYNTAX_ERROR: print("formatted_string")
+                                            # REMOVED_SYNTAX_ERROR: break
+                                            # REMOVED_SYNTAX_ERROR: except (aiohttp.ClientError, asyncio.TimeoutError):
+                                                # REMOVED_SYNTAX_ERROR: await asyncio.sleep(1)
+
+                                                # REMOVED_SYNTAX_ERROR: if not service_healthy:
+                                                    # REMOVED_SYNTAX_ERROR: failed_services.append({ ))
+                                                    # REMOVED_SYNTAX_ERROR: "service": service_name,
+                                                    # REMOVED_SYNTAX_ERROR: "reason": "formatted_string",
+                                                    # REMOVED_SYNTAX_ERROR: "startup_timeout": True
+                                                    
+                                                    # REMOVED_SYNTAX_ERROR: print("formatted_string")
+
+                                                    # Validate startup sequence compliance
+                                                    # REMOVED_SYNTAX_ERROR: sequence_violations = []
+
+                                                    # REMOVED_SYNTAX_ERROR: for i, result in enumerate(startup_results):
+                                                        # REMOVED_SYNTAX_ERROR: service_config = startup_sequence[i]
+                                                        # REMOVED_SYNTAX_ERROR: expected_service = service_config["service"]
+
+                                                        # REMOVED_SYNTAX_ERROR: if result["service"] != expected_service:
+                                                            # REMOVED_SYNTAX_ERROR: sequence_violations.append("formatted_string")
+
+                                                            # Test comprehensive failure scenarios
+                                                            # REMOVED_SYNTAX_ERROR: startup_issues = []
+
+                                                            # 1. Check for race conditions in startup
+                                                            # REMOVED_SYNTAX_ERROR: if len(startup_results) > 1:
+                                                                # REMOVED_SYNTAX_ERROR: startup_times = [r["startup_time"] for r in startup_results]
+                                                                # REMOVED_SYNTAX_ERROR: if not _is_startup_sequence_ordered(startup_times, startup_sequence):
+                                                                    # REMOVED_SYNTAX_ERROR: startup_issues.append("Services did not start in dependency order")
+
+                                                                    # 2. Check for resource conflicts
+                                                                    # REMOVED_SYNTAX_ERROR: port_conflicts = _detect_port_conflicts(startup_sequence)
+                                                                    # REMOVED_SYNTAX_ERROR: if port_conflicts:
+                                                                        # REMOVED_SYNTAX_ERROR: startup_issues.extend(port_conflicts)
+
+                                                                        # 3. Check for missing health checks
+                                                                        # REMOVED_SYNTAX_ERROR: missing_health_checks = _detect_missing_health_checks(startup_results, startup_sequence)
+                                                                        # REMOVED_SYNTAX_ERROR: if missing_health_checks:
+                                                                            # REMOVED_SYNTAX_ERROR: startup_issues.extend(missing_health_checks)
+
+                                                                            # Fail test if any issues found
+                                                                            # REMOVED_SYNTAX_ERROR: if failed_services or sequence_violations or startup_issues:
+                                                                                # REMOVED_SYNTAX_ERROR: failure_report = []
+
+                                                                                # REMOVED_SYNTAX_ERROR: if failed_services:
+                                                                                    # REMOVED_SYNTAX_ERROR: failure_report.append("FAILED Services:")
+                                                                                    # REMOVED_SYNTAX_ERROR: for failure in failed_services:
+                                                                                        # REMOVED_SYNTAX_ERROR: failure_report.append("formatted_string")
+
+                                                                                        # REMOVED_SYNTAX_ERROR: if sequence_violations:
+                                                                                            # REMOVED_SYNTAX_ERROR: failure_report.append("Startup Sequence Violations:")
+                                                                                            # REMOVED_SYNTAX_ERROR: for violation in sequence_violations:
+                                                                                                # REMOVED_SYNTAX_ERROR: failure_report.append("formatted_string")
+
+                                                                                                # REMOVED_SYNTAX_ERROR: if startup_issues:
+                                                                                                    # REMOVED_SYNTAX_ERROR: failure_report.append("Startup Issues:")
+                                                                                                    # REMOVED_SYNTAX_ERROR: for issue in startup_issues:
+                                                                                                        # REMOVED_SYNTAX_ERROR: failure_report.append("formatted_string")
+
+                                                                                                        # REMOVED_SYNTAX_ERROR: pytest.fail(f"Service startup sequence validation failed: )
+                                                                                                        # REMOVED_SYNTAX_ERROR: " + "
+                                                                                                        # REMOVED_SYNTAX_ERROR: ".join(failure_report))
+
+                                                                                                        # REMOVED_SYNTAX_ERROR: print("formatted_string")
 
 
-async def _check_service_health(session: aiohttp.ClientSession, service_name: str) -> bool:
-    """Check if a service is healthy based on service name."""
-    service_ports = {
-        "auth_service": 8001,
-        "netra_backend": 8000, 
-        "frontend": 3000
-    }
+# REMOVED_SYNTAX_ERROR: async def _check_service_health(session: aiohttp.ClientSession, service_name: str) -> bool:
+    # REMOVED_SYNTAX_ERROR: """Check if a service is healthy based on service name."""
+    # REMOVED_SYNTAX_ERROR: service_ports = { )
+    # REMOVED_SYNTAX_ERROR: "auth_service": 8001,
+    # REMOVED_SYNTAX_ERROR: "netra_backend": 8000,
+    # REMOVED_SYNTAX_ERROR: "frontend": 3000
     
-    service_endpoints = {
-        "auth_service": "/health",
-        "netra_backend": "/api/health",
-        "frontend": "/"
-    }
+
+    # REMOVED_SYNTAX_ERROR: service_endpoints = { )
+    # REMOVED_SYNTAX_ERROR: "auth_service": "/health",
+    # REMOVED_SYNTAX_ERROR: "netra_backend": "/api/health",
+    # REMOVED_SYNTAX_ERROR: "frontend": "/"
     
-    if service_name not in service_ports:
-        await asyncio.sleep(0)
-    return False
-    
-    port = service_ports[service_name]
-    endpoint = service_endpoints[service_name]
-    
-    try:
-        url = f"http://localhost:{port}{endpoint}"
-        async with session.get(url, timeout=aiohttp.ClientTimeout(total=10)) as response:
-            return response.status == 200
-    except (aiohttp.ClientError, asyncio.TimeoutError):
-        return False
+
+    # REMOVED_SYNTAX_ERROR: if service_name not in service_ports:
+        # REMOVED_SYNTAX_ERROR: await asyncio.sleep(0)
+        # REMOVED_SYNTAX_ERROR: return False
+
+        # REMOVED_SYNTAX_ERROR: port = service_ports[service_name]
+        # REMOVED_SYNTAX_ERROR: endpoint = service_endpoints[service_name]
+
+        # REMOVED_SYNTAX_ERROR: try:
+            # REMOVED_SYNTAX_ERROR: url = "formatted_string"
+            # REMOVED_SYNTAX_ERROR: async with session.get(url, timeout=aiohttp.ClientTimeout(total=10)) as response:
+                # REMOVED_SYNTAX_ERROR: return response.status == 200
+                # REMOVED_SYNTAX_ERROR: except (aiohttp.ClientError, asyncio.TimeoutError):
+                    # REMOVED_SYNTAX_ERROR: return False
 
 
-def _is_startup_sequence_ordered(startup_times: List[float], startup_sequence: List[Dict]) -> bool:
-    """Check if services started in dependency order.
-    
-    Since this test runs sequentially (not concurrent startup), we validate that:
-    1. All dependencies were available when each service was tested
-    2. Services were tested in the correct dependency order
-    """
-    # For sequential testing, the order is inherently correct if we reach this point
-    # because the test already validates dependencies are healthy before testing each service
-    
-    # Verify that services with dependencies appear later in the sequence
-    for i, service_config in enumerate(startup_sequence):
-        dependencies = service_config["depends_on"]
-        
-        for dep in dependencies:
-            dep_index = next((j for j, s in enumerate(startup_sequence) if s["service"] == dep), -1)
-            if dep_index >= i:  # Dependency should appear earlier in sequence
-                return False
-    
-    return True
+# REMOVED_SYNTAX_ERROR: def _is_startup_sequence_ordered(startup_times: List[float], startup_sequence: List[Dict]) -> bool:
+    # REMOVED_SYNTAX_ERROR: '''Check if services started in dependency order.
+
+    # REMOVED_SYNTAX_ERROR: Since this test runs sequentially (not concurrent startup), we validate that:
+        # REMOVED_SYNTAX_ERROR: 1. All dependencies were available when each service was tested
+        # REMOVED_SYNTAX_ERROR: 2. Services were tested in the correct dependency order
+        # REMOVED_SYNTAX_ERROR: '''
+        # For sequential testing, the order is inherently correct if we reach this point
+        # because the test already validates dependencies are healthy before testing each service
+
+        # Verify that services with dependencies appear later in the sequence
+        # REMOVED_SYNTAX_ERROR: for i, service_config in enumerate(startup_sequence):
+            # REMOVED_SYNTAX_ERROR: dependencies = service_config["depends_on"]
+
+            # REMOVED_SYNTAX_ERROR: for dep in dependencies:
+                # REMOVED_SYNTAX_ERROR: dep_index = next((j for j, s in enumerate(startup_sequence) if s["service"] == dep), -1)
+                # REMOVED_SYNTAX_ERROR: if dep_index >= i:  # Dependency should appear earlier in sequence
+                # REMOVED_SYNTAX_ERROR: return False
+
+                # REMOVED_SYNTAX_ERROR: return True
 
 
-def _detect_port_conflicts(startup_sequence: List[Dict]) -> List[str]:
-    """Detect port conflicts in service configuration."""
-    ports = [service["port"] for service in startup_sequence]
-    conflicts = []
-    
-    for i, port in enumerate(ports):
-        for j, other_port in enumerate(ports[i+1:], i+1):
-            if port == other_port:
-                service1 = startup_sequence[i]["service"]
-                service2 = startup_sequence[j]["service"] 
-                conflicts.append(f"Port conflict: {service1} and {service2} both use port {port}")
-    
-    return conflicts
+# REMOVED_SYNTAX_ERROR: def _detect_port_conflicts(startup_sequence: List[Dict]) -> List[str]:
+    # REMOVED_SYNTAX_ERROR: """Detect port conflicts in service configuration."""
+    # REMOVED_SYNTAX_ERROR: ports = [service["port"] for service in startup_sequence]
+    # REMOVED_SYNTAX_ERROR: conflicts = []
+
+    # REMOVED_SYNTAX_ERROR: for i, port in enumerate(ports):
+        # REMOVED_SYNTAX_ERROR: for j, other_port in enumerate(ports[i+1:], i+1):
+            # REMOVED_SYNTAX_ERROR: if port == other_port:
+                # REMOVED_SYNTAX_ERROR: service1 = startup_sequence[i]["service"]
+                # REMOVED_SYNTAX_ERROR: service2 = startup_sequence[j]["service"]
+                # REMOVED_SYNTAX_ERROR: conflicts.append("formatted_string")
+
+                # REMOVED_SYNTAX_ERROR: return conflicts
 
 
-def _detect_missing_health_checks(startup_results: List[Dict], startup_sequence: List[Dict]) -> List[str]:
-    """Detect services missing health check implementations."""
-    missing = []
-    
-    expected_services = {s["service"] for s in startup_sequence}
-    actual_services = {r["service"] for r in startup_results}
-    
-    for service in expected_services - actual_services:
-        missing.append(f"Service {service} missing health check endpoint")
-    
-    return missing
+# REMOVED_SYNTAX_ERROR: def _detect_missing_health_checks(startup_results: List[Dict], startup_sequence: List[Dict]) -> List[str]:
+    # REMOVED_SYNTAX_ERROR: """Detect services missing health check implementations."""
+    # REMOVED_SYNTAX_ERROR: missing = []
+
+    # REMOVED_SYNTAX_ERROR: expected_services = {s["service"] for s in startup_sequence}
+    # REMOVED_SYNTAX_ERROR: actual_services = {r["service"] for r in startup_results}
+
+    # REMOVED_SYNTAX_ERROR: for service in expected_services - actual_services:
+        # REMOVED_SYNTAX_ERROR: missing.append("formatted_string")
+
+        # REMOVED_SYNTAX_ERROR: return missing
 
 
-if __name__ == "__main__":
-    pytest.main([__file__, "-v", "--tb=short"])
+        # REMOVED_SYNTAX_ERROR: if __name__ == "__main__":
+            # REMOVED_SYNTAX_ERROR: pytest.main([__file__, "-v", "--tb=short"])

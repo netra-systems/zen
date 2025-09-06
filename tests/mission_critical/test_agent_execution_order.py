@@ -1,8 +1,8 @@
-"""
-Mission Critical Test: Verify Agent Execution Order is Logical
-Date: 2025-09-04
-Purpose: Ensure agents execute in correct dependency order (data before optimization)
-"""
+# REMOVED_SYNTAX_ERROR: '''
+# REMOVED_SYNTAX_ERROR: Mission Critical Test: Verify Agent Execution Order is Logical
+# REMOVED_SYNTAX_ERROR: Date: 2025-09-04
+# REMOVED_SYNTAX_ERROR: Purpose: Ensure agents execute in correct dependency order (data before optimization)
+# REMOVED_SYNTAX_ERROR: '''
 
 import pytest
 from typing import Dict, Any, List
@@ -17,180 +17,180 @@ from netra_backend.app.agents.supervisor.workflow_orchestrator import WorkflowOr
 from netra_backend.app.agents.supervisor.execution_context import PipelineStep
 
 
-class TestAgentExecutionOrder:
-    """Verify agent execution follows logical dependency chain."""
-    
-    def test_sufficient_data_workflow_order(self):
-        """Test that data collection happens BEFORE optimization in sufficient data workflow."""
-        # Create mock objects
-        orchestrator = WorkflowOrchestrator(None, None, None)
-        
-        # Simulate triage result with sufficient data
-        triage_result = {"data_sufficiency": "sufficient"}
-        
-        # Get the workflow steps
-        steps = orchestrator._define_workflow_based_on_triage(triage_result)
-        
-        # Extract agent names in order
-        agent_order = [step.agent_name for step in steps]
-        
-        # Verify correct order
-        assert agent_order == ["triage", "data", "optimization", "actions", "reporting"], \
-            f"Incorrect order: {agent_order}. Data must come BEFORE optimization!"
-        
-        # Verify dependencies
-        step_dict = {step.agent_name: step for step in steps}
-        
-        assert step_dict["triage"].dependencies == []
-        assert step_dict["data"].dependencies == ["triage"]
-        assert step_dict["optimization"].dependencies == ["data"], \
-            "Optimization MUST depend on data!"
-        assert step_dict["actions"].dependencies == ["optimization"]
-        assert step_dict["reporting"].dependencies == ["actions"]
-    
-    def test_partial_data_workflow_order(self):
-        """Test that data_helper runs early in partial data workflow."""
-    pass
-        orchestrator = WorkflowOrchestrator(None, None, None)
-        
-        # Simulate triage result with partial data
-        triage_result = {"data_sufficiency": "partial"}
-        
-        # Get the workflow steps
-        steps = orchestrator._define_workflow_based_on_triage(triage_result)
-        
-        # Extract agent names in order
-        agent_order = [step.agent_name for step in steps]
-        
-        # Verify data_helper comes early (right after triage)
-        assert agent_order[0] == "triage"
-        assert agent_order[1] == "data_helper", \
-            "Data helper must run early to identify gaps!"
-        
-        # Verify data comes before optimization
-        data_index = agent_order.index("data")
-        opt_index = agent_order.index("optimization")
-        assert data_index < opt_index, \
-            f"Data (index {data_index}) must come before optimization (index {opt_index})!"
-        
-        # Full expected order
-        assert agent_order == ["triage", "data_helper", "data", "optimization", "actions", "reporting"]
-    
-    def test_insufficient_data_workflow_order(self):
-        """Test minimal workflow for insufficient data."""
-        orchestrator = WorkflowOrchestrator(None, None, None)
-        
-        # Simulate triage result with insufficient data
-        triage_result = {"data_sufficiency": "insufficient"}
-        
-        # Get the workflow steps  
-        steps = orchestrator._define_workflow_based_on_triage(triage_result)
-        
-        # Extract agent names in order
-        agent_order = [step.agent_name for step in steps]
-        
-        # Should be minimal - just triage and data_helper
-        assert agent_order == ["triage", "data_helper"], \
-            "Insufficient data should only run triage and data_helper!"
-    
-    def test_default_fallback_workflow_order(self):
-        """Test that default/unknown workflow uses correct order."""
-    pass
-        orchestrator = WorkflowOrchestrator(None, None, None)
-        
-        # Simulate unknown data sufficiency
-        triage_result = {"data_sufficiency": "unknown"}
-        
-        # Get the workflow steps
-        steps = orchestrator._define_workflow_based_on_triage(triage_result)
-        
-        # Extract agent names in order
-        agent_order = [step.agent_name for step in steps]
-        
-        # Default should use the logical order
-        assert agent_order == ["triage", "data", "optimization", "actions", "reporting"], \
-            f"Default workflow has incorrect order: {agent_order}"
-    
-    def test_all_steps_marked_sequential(self):
-        """Verify all steps are marked for sequential execution."""
-        orchestrator = WorkflowOrchestrator(None, None, None)
-        
-        # Test all workflow types
-        for data_sufficiency in ["sufficient", "partial", "insufficient", "unknown"]:
-            triage_result = {"data_sufficiency": data_sufficiency}
-            steps = orchestrator._define_workflow_based_on_triage(triage_result)
-            
-            for step in steps:
-                # Check strategy is SEQUENTIAL
-                assert str(step.strategy).endswith("SEQUENTIAL"), \
-                    f"Step {step.agent_name} not marked sequential in {data_sufficiency} workflow!"
-                
-                # Check metadata flag
-                assert step.metadata.get("requires_sequential") == True, \
-                    f"Step {step.agent_name} missing requires_sequential flag!"
-    
-    def test_dependency_chain_integrity(self):
-        """Verify each agent depends on the previous one in the chain."""
-    pass
-        orchestrator = WorkflowOrchestrator(None, None, None)
-        
-        # Test sufficient data workflow (most complete)
-        triage_result = {"data_sufficiency": "sufficient"}
-        steps = orchestrator._define_workflow_based_on_triage(triage_result)
-        
-        for i, step in enumerate(steps):
-            if i == 0:
-                # First step should have no dependencies
-                assert step.dependencies == [], \
-                    f"First step {step.agent_name} should have no dependencies!"
-            else:
+# REMOVED_SYNTAX_ERROR: class TestAgentExecutionOrder:
+    # REMOVED_SYNTAX_ERROR: """Verify agent execution follows logical dependency chain."""
+
+# REMOVED_SYNTAX_ERROR: def test_sufficient_data_workflow_order(self):
+    # REMOVED_SYNTAX_ERROR: """Test that data collection happens BEFORE optimization in sufficient data workflow."""
+    # Create mock objects
+    # REMOVED_SYNTAX_ERROR: orchestrator = WorkflowOrchestrator(None, None, None)
+
+    # Simulate triage result with sufficient data
+    # REMOVED_SYNTAX_ERROR: triage_result = {"data_sufficiency": "sufficient"}
+
+    # Get the workflow steps
+    # REMOVED_SYNTAX_ERROR: steps = orchestrator._define_workflow_based_on_triage(triage_result)
+
+    # Extract agent names in order
+    # REMOVED_SYNTAX_ERROR: agent_order = [step.agent_name for step in steps]
+
+    # Verify correct order
+    # REMOVED_SYNTAX_ERROR: assert agent_order == ["triage", "data", "optimization", "actions", "reporting"], \
+    # REMOVED_SYNTAX_ERROR: "formatted_string"
+
+    # Verify dependencies
+    # REMOVED_SYNTAX_ERROR: step_dict = {step.agent_name: step for step in steps}
+
+    # REMOVED_SYNTAX_ERROR: assert step_dict["triage"].dependencies == []
+    # REMOVED_SYNTAX_ERROR: assert step_dict["data"].dependencies == ["triage"]
+    # REMOVED_SYNTAX_ERROR: assert step_dict["optimization"].dependencies == ["data"], \
+    # REMOVED_SYNTAX_ERROR: "Optimization MUST depend on data!"
+    # REMOVED_SYNTAX_ERROR: assert step_dict["actions"].dependencies == ["optimization"]
+    # REMOVED_SYNTAX_ERROR: assert step_dict["reporting"].dependencies == ["actions"]
+
+# REMOVED_SYNTAX_ERROR: def test_partial_data_workflow_order(self):
+    # REMOVED_SYNTAX_ERROR: """Test that data_helper runs early in partial data workflow."""
+    # REMOVED_SYNTAX_ERROR: pass
+    # REMOVED_SYNTAX_ERROR: orchestrator = WorkflowOrchestrator(None, None, None)
+
+    # Simulate triage result with partial data
+    # REMOVED_SYNTAX_ERROR: triage_result = {"data_sufficiency": "partial"}
+
+    # Get the workflow steps
+    # REMOVED_SYNTAX_ERROR: steps = orchestrator._define_workflow_based_on_triage(triage_result)
+
+    # Extract agent names in order
+    # REMOVED_SYNTAX_ERROR: agent_order = [step.agent_name for step in steps]
+
+    # Verify data_helper comes early (right after triage)
+    # REMOVED_SYNTAX_ERROR: assert agent_order[0] == "triage"
+    # REMOVED_SYNTAX_ERROR: assert agent_order[1] == "data_helper", \
+    # REMOVED_SYNTAX_ERROR: "Data helper must run early to identify gaps!"
+
+    # Verify data comes before optimization
+    # REMOVED_SYNTAX_ERROR: data_index = agent_order.index("data")
+    # REMOVED_SYNTAX_ERROR: opt_index = agent_order.index("optimization")
+    # REMOVED_SYNTAX_ERROR: assert data_index < opt_index, \
+    # REMOVED_SYNTAX_ERROR: "formatted_string"
+
+    # Full expected order
+    # REMOVED_SYNTAX_ERROR: assert agent_order == ["triage", "data_helper", "data", "optimization", "actions", "reporting"]
+
+# REMOVED_SYNTAX_ERROR: def test_insufficient_data_workflow_order(self):
+    # REMOVED_SYNTAX_ERROR: """Test minimal workflow for insufficient data."""
+    # REMOVED_SYNTAX_ERROR: orchestrator = WorkflowOrchestrator(None, None, None)
+
+    # Simulate triage result with insufficient data
+    # REMOVED_SYNTAX_ERROR: triage_result = {"data_sufficiency": "insufficient"}
+
+    # Get the workflow steps
+    # REMOVED_SYNTAX_ERROR: steps = orchestrator._define_workflow_based_on_triage(triage_result)
+
+    # Extract agent names in order
+    # REMOVED_SYNTAX_ERROR: agent_order = [step.agent_name for step in steps]
+
+    # Should be minimal - just triage and data_helper
+    # REMOVED_SYNTAX_ERROR: assert agent_order == ["triage", "data_helper"], \
+    # REMOVED_SYNTAX_ERROR: "Insufficient data should only run triage and data_helper!"
+
+# REMOVED_SYNTAX_ERROR: def test_default_fallback_workflow_order(self):
+    # REMOVED_SYNTAX_ERROR: """Test that default/unknown workflow uses correct order."""
+    # REMOVED_SYNTAX_ERROR: pass
+    # REMOVED_SYNTAX_ERROR: orchestrator = WorkflowOrchestrator(None, None, None)
+
+    # Simulate unknown data sufficiency
+    # REMOVED_SYNTAX_ERROR: triage_result = {"data_sufficiency": "unknown"}
+
+    # Get the workflow steps
+    # REMOVED_SYNTAX_ERROR: steps = orchestrator._define_workflow_based_on_triage(triage_result)
+
+    # Extract agent names in order
+    # REMOVED_SYNTAX_ERROR: agent_order = [step.agent_name for step in steps]
+
+    # Default should use the logical order
+    # REMOVED_SYNTAX_ERROR: assert agent_order == ["triage", "data", "optimization", "actions", "reporting"], \
+    # REMOVED_SYNTAX_ERROR: "formatted_string"
+
+# REMOVED_SYNTAX_ERROR: def test_all_steps_marked_sequential(self):
+    # REMOVED_SYNTAX_ERROR: """Verify all steps are marked for sequential execution."""
+    # REMOVED_SYNTAX_ERROR: orchestrator = WorkflowOrchestrator(None, None, None)
+
+    # Test all workflow types
+    # REMOVED_SYNTAX_ERROR: for data_sufficiency in ["sufficient", "partial", "insufficient", "unknown"]:
+        # REMOVED_SYNTAX_ERROR: triage_result = {"data_sufficiency": data_sufficiency}
+        # REMOVED_SYNTAX_ERROR: steps = orchestrator._define_workflow_based_on_triage(triage_result)
+
+        # REMOVED_SYNTAX_ERROR: for step in steps:
+            # Check strategy is SEQUENTIAL
+            # REMOVED_SYNTAX_ERROR: assert str(step.strategy).endswith("SEQUENTIAL"), \
+            # REMOVED_SYNTAX_ERROR: "formatted_string"
+
+            # Check metadata flag
+            # REMOVED_SYNTAX_ERROR: assert step.metadata.get("requires_sequential") == True, \
+            # REMOVED_SYNTAX_ERROR: "formatted_string"
+
+# REMOVED_SYNTAX_ERROR: def test_dependency_chain_integrity(self):
+    # REMOVED_SYNTAX_ERROR: """Verify each agent depends on the previous one in the chain."""
+    # REMOVED_SYNTAX_ERROR: pass
+    # REMOVED_SYNTAX_ERROR: orchestrator = WorkflowOrchestrator(None, None, None)
+
+    # Test sufficient data workflow (most complete)
+    # REMOVED_SYNTAX_ERROR: triage_result = {"data_sufficiency": "sufficient"}
+    # REMOVED_SYNTAX_ERROR: steps = orchestrator._define_workflow_based_on_triage(triage_result)
+
+    # REMOVED_SYNTAX_ERROR: for i, step in enumerate(steps):
+        # REMOVED_SYNTAX_ERROR: if i == 0:
+            # First step should have no dependencies
+            # REMOVED_SYNTAX_ERROR: assert step.dependencies == [], \
+            # REMOVED_SYNTAX_ERROR: "formatted_string"
+            # REMOVED_SYNTAX_ERROR: else:
                 # Each step should depend on the previous
-                prev_step = steps[i-1]
-                assert prev_step.agent_name in step.dependencies, \
-                    f"Step {step.agent_name} should depend on {prev_step.agent_name}!"
+                # REMOVED_SYNTAX_ERROR: prev_step = steps[i-1]
+                # REMOVED_SYNTAX_ERROR: assert prev_step.agent_name in step.dependencies, \
+                # REMOVED_SYNTAX_ERROR: "formatted_string"
 
 
-if __name__ == "__main__":
-    print("Running Agent Execution Order Tests...")
-    print("=" * 60)
-    
-    test = TestAgentExecutionOrder()
-    
-    # Run all tests
-    tests = [
-        ("Sufficient Data Order", test.test_sufficient_data_workflow_order),
-        ("Partial Data Order", test.test_partial_data_workflow_order),
-        ("Insufficient Data Order", test.test_insufficient_data_workflow_order),
-        ("Default Fallback Order", test.test_default_fallback_workflow_order),
-        ("Sequential Execution", test.test_all_steps_marked_sequential),
-        ("Dependency Chain", test.test_dependency_chain_integrity),
-    ]
-    
-    passed = 0
-    failed = 0
-    
-    for test_name, test_func in tests:
-        try:
-            test_func()
-            print(f"[PASSED] {test_name}")
-            passed += 1
-        except AssertionError as e:
-            print(f"[FAILED] {test_name}")
-            print(f"   Error: {e}")
-            failed += 1
-        except Exception as e:
-            print(f"[ERROR] {test_name}")
-            print(f"   Unexpected error: {e}")
-            failed += 1
-    
-    print("=" * 60)
-    print(f"Results: {passed} passed, {failed} failed")
-    
-    if failed == 0:
-        print("
-[SUCCESS] All agent execution order tests passed!")
-        print("Agents will execute in logical order: Triage -> Data -> Optimization -> Actions -> Reporting")
-    else:
-        print("
-[FAILURE] Some tests failed - agent execution order may be incorrect!")
-        sys.exit(1)
+                # REMOVED_SYNTAX_ERROR: if __name__ == "__main__":
+                    # REMOVED_SYNTAX_ERROR: print("Running Agent Execution Order Tests...")
+                    # REMOVED_SYNTAX_ERROR: print("=" * 60)
+
+                    # REMOVED_SYNTAX_ERROR: test = TestAgentExecutionOrder()
+
+                    # Run all tests
+                    # REMOVED_SYNTAX_ERROR: tests = [ )
+                    # REMOVED_SYNTAX_ERROR: ("Sufficient Data Order", test.test_sufficient_data_workflow_order),
+                    # REMOVED_SYNTAX_ERROR: ("Partial Data Order", test.test_partial_data_workflow_order),
+                    # REMOVED_SYNTAX_ERROR: ("Insufficient Data Order", test.test_insufficient_data_workflow_order),
+                    # REMOVED_SYNTAX_ERROR: ("Default Fallback Order", test.test_default_fallback_workflow_order),
+                    # REMOVED_SYNTAX_ERROR: ("Sequential Execution", test.test_all_steps_marked_sequential),
+                    # REMOVED_SYNTAX_ERROR: ("Dependency Chain", test.test_dependency_chain_integrity),
+                    
+
+                    # REMOVED_SYNTAX_ERROR: passed = 0
+                    # REMOVED_SYNTAX_ERROR: failed = 0
+
+                    # REMOVED_SYNTAX_ERROR: for test_name, test_func in tests:
+                        # REMOVED_SYNTAX_ERROR: try:
+                            # REMOVED_SYNTAX_ERROR: test_func()
+                            # REMOVED_SYNTAX_ERROR: print("formatted_string")
+                            # REMOVED_SYNTAX_ERROR: passed += 1
+                            # REMOVED_SYNTAX_ERROR: except AssertionError as e:
+                                # REMOVED_SYNTAX_ERROR: print("formatted_string")
+                                # REMOVED_SYNTAX_ERROR: print("formatted_string")
+                                # REMOVED_SYNTAX_ERROR: failed += 1
+                                # REMOVED_SYNTAX_ERROR: except Exception as e:
+                                    # REMOVED_SYNTAX_ERROR: print("formatted_string")
+                                    # REMOVED_SYNTAX_ERROR: print("formatted_string")
+                                    # REMOVED_SYNTAX_ERROR: failed += 1
+
+                                    # REMOVED_SYNTAX_ERROR: print("=" * 60)
+                                    # REMOVED_SYNTAX_ERROR: print("formatted_string")
+
+                                    # REMOVED_SYNTAX_ERROR: if failed == 0:
+                                        # REMOVED_SYNTAX_ERROR: print(" )
+                                        # REMOVED_SYNTAX_ERROR: [SUCCESS] All agent execution order tests passed!")
+                                        # REMOVED_SYNTAX_ERROR: print("Agents will execute in logical order: Triage -> Data -> Optimization -> Actions -> Reporting")
+                                        # REMOVED_SYNTAX_ERROR: else:
+                                            # REMOVED_SYNTAX_ERROR: print(" )
+                                            # REMOVED_SYNTAX_ERROR: [FAILURE] Some tests failed - agent execution order may be incorrect!")
+                                            # REMOVED_SYNTAX_ERROR: sys.exit(1)

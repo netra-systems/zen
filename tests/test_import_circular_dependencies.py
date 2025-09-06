@@ -1,9 +1,9 @@
-"""
-Tests to verify no circular imports exist in critical modules.
+# REMOVED_SYNTAX_ERROR: '''
+# REMOVED_SYNTAX_ERROR: Tests to verify no circular imports exist in critical modules.
 
-These tests ensure that the circular import fixes prevent pytest collection crashes
-and Docker container startup failures.
-"""
+# REMOVED_SYNTAX_ERROR: These tests ensure that the circular import fixes prevent pytest collection crashes
+# REMOVED_SYNTAX_ERROR: and Docker container startup failures.
+# REMOVED_SYNTAX_ERROR: '''
 import pytest
 import sys
 import importlib
@@ -12,336 +12,336 @@ from typing import List
 from shared.isolated_environment import IsolatedEnvironment
 
 # Set up Python path for imports
-def _setup_test_paths():
-    """Set up Python path for test execution."""
-    project_root = Path(__file__).parent.parent
-    if str(project_root) not in sys.path:
-        sys.path.insert(0, str(project_root))
+# REMOVED_SYNTAX_ERROR: def _setup_test_paths():
+    # REMOVED_SYNTAX_ERROR: """Set up Python path for test execution."""
+    # REMOVED_SYNTAX_ERROR: project_root = Path(__file__).parent.parent
+    # REMOVED_SYNTAX_ERROR: if str(project_root) not in sys.path:
+        # REMOVED_SYNTAX_ERROR: sys.path.insert(0, str(project_root))
 
-_setup_test_paths()
+        # REMOVED_SYNTAX_ERROR: _setup_test_paths()
 
 
-class TestCircularImports:
-    """Test suite for circular import detection and validation."""
+# REMOVED_SYNTAX_ERROR: class TestCircularImports:
+    # REMOVED_SYNTAX_ERROR: """Test suite for circular import detection and validation."""
+
+    # REMOVED_SYNTAX_ERROR: CRITICAL_MODULES = [ )
+    # REMOVED_SYNTAX_ERROR: 'shared.isolated_environment',
+    # REMOVED_SYNTAX_ERROR: 'netra_backend.app.startup_module',
+    # REMOVED_SYNTAX_ERROR: 'netra_backend.app.dependencies',
+    # REMOVED_SYNTAX_ERROR: 'netra_backend.app.services.memory_optimization_service',
+    # REMOVED_SYNTAX_ERROR: 'netra_backend.app.services.session_memory_manager',
+    # REMOVED_SYNTAX_ERROR: 'netra_backend.app.database.session_manager'
     
-    CRITICAL_MODULES = [
-        'shared.isolated_environment',
-        'netra_backend.app.startup_module', 
-        'netra_backend.app.dependencies',
-        'netra_backend.app.services.memory_optimization_service',
-        'netra_backend.app.services.session_memory_manager',
-        'netra_backend.app.database.session_manager'
-    ]
-    
-    def test_all_critical_modules_import_successfully(self):
-        """Test that all critical modules can be imported without circular import errors."""
-        failed_imports = []
-        circular_import_errors = []
-        
-        for module in self.CRITICAL_MODULES:
-            try:
-                # Clear module from sys.modules to force fresh import
-                if module in sys.modules:
-                    del sys.modules[module]
-                
+
+# REMOVED_SYNTAX_ERROR: def test_all_critical_modules_import_successfully(self):
+    # REMOVED_SYNTAX_ERROR: """Test that all critical modules can be imported without circular import errors."""
+    # REMOVED_SYNTAX_ERROR: failed_imports = []
+    # REMOVED_SYNTAX_ERROR: circular_import_errors = []
+
+    # REMOVED_SYNTAX_ERROR: for module in self.CRITICAL_MODULES:
+        # REMOVED_SYNTAX_ERROR: try:
+            # Clear module from sys.modules to force fresh import
+            # REMOVED_SYNTAX_ERROR: if module in sys.modules:
+                # REMOVED_SYNTAX_ERROR: del sys.modules[module]
+
                 # Import the module
-                importlib.import_module(module)
-                
-            except ImportError as e:
-                error_msg = str(e)
-                if "circular import" in error_msg.lower() or "partially initialized module" in error_msg:
-                    circular_import_errors.append(f"{module}: {error_msg}")
-                else:
-                    failed_imports.append(f"{module}: {error_msg}")
-            except Exception as e:
-                failed_imports.append(f"{module}: {type(e).__name__}: {e}")
-        
-        # Assert no circular imports detected
-        if circular_import_errors:
-            pytest.fail(
-                f"Circular imports detected:
-" + 
-                "
-".join(f"  - {error}" for error in circular_import_errors)
-            )
-        
-        # Assert no other import failures
-        if failed_imports:
-            pytest.fail(
-                f"Module import failures:
-" + 
-                "
-".join(f"  - {error}" for error in failed_imports)
-            )
-    
-    def test_startup_module_import_order(self):
-        """Test that startup_module imports in correct order."""
-    pass
-        # Clear startup module if already imported
-        module_name = 'netra_backend.app.startup_module'
-        if module_name in sys.modules:
-            del sys.modules[module_name]
-        
-        try:
-            import netra_backend.app.startup_module
-            
+                # REMOVED_SYNTAX_ERROR: importlib.import_module(module)
+
+                # REMOVED_SYNTAX_ERROR: except ImportError as e:
+                    # REMOVED_SYNTAX_ERROR: error_msg = str(e)
+                    # REMOVED_SYNTAX_ERROR: if "circular import" in error_msg.lower() or "partially initialized module" in error_msg:
+                        # REMOVED_SYNTAX_ERROR: circular_import_errors.append("formatted_string")
+                        # REMOVED_SYNTAX_ERROR: else:
+                            # REMOVED_SYNTAX_ERROR: failed_imports.append("formatted_string")
+                            # REMOVED_SYNTAX_ERROR: except Exception as e:
+                                # REMOVED_SYNTAX_ERROR: failed_imports.append("formatted_string")
+
+                                # Assert no circular imports detected
+                                # REMOVED_SYNTAX_ERROR: if circular_import_errors:
+                                    # REMOVED_SYNTAX_ERROR: pytest.fail( )
+                                    # REMOVED_SYNTAX_ERROR: f"Circular imports detected:
+                                        # REMOVED_SYNTAX_ERROR: " +
+                                        # REMOVED_SYNTAX_ERROR: "
+                                        # REMOVED_SYNTAX_ERROR: ".join("formatted_string" for error in circular_import_errors)
+                                        
+
+                                        # Assert no other import failures
+                                        # REMOVED_SYNTAX_ERROR: if failed_imports:
+                                            # REMOVED_SYNTAX_ERROR: pytest.fail( )
+                                            # REMOVED_SYNTAX_ERROR: f"Module import failures:
+                                                # REMOVED_SYNTAX_ERROR: " +
+                                                # REMOVED_SYNTAX_ERROR: "
+                                                # REMOVED_SYNTAX_ERROR: ".join("formatted_string" for error in failed_imports)
+                                                
+
+# REMOVED_SYNTAX_ERROR: def test_startup_module_import_order(self):
+    # REMOVED_SYNTAX_ERROR: """Test that startup_module imports in correct order."""
+    # REMOVED_SYNTAX_ERROR: pass
+    # Clear startup module if already imported
+    # REMOVED_SYNTAX_ERROR: module_name = 'netra_backend.app.startup_module'
+    # REMOVED_SYNTAX_ERROR: if module_name in sys.modules:
+        # REMOVED_SYNTAX_ERROR: del sys.modules[module_name]
+
+        # REMOVED_SYNTAX_ERROR: try:
+            # REMOVED_SYNTAX_ERROR: import netra_backend.app.startup_module
+
             # Verify that shared.isolated_environment is accessible
-            assert hasattr(netra_backend.app.startup_module, 'get_env'), \
-                "startup_module should have get_env accessible after import"
-                
-        except ImportError as e:
-            if "circular import" in str(e).lower():
-                pytest.fail(f"Circular import in startup_module: {e}")
-            raise
-    
-    def test_dependencies_module_lazy_imports(self):
-        """Test that dependencies module properly uses lazy imports."""
-        # Clear dependencies module if already imported
-        module_name = 'netra_backend.app.dependencies'
-        if module_name in sys.modules:
-            del sys.modules[module_name]
-        
-        try:
-            import netra_backend.app.dependencies as deps_module
-            
+            # REMOVED_SYNTAX_ERROR: assert hasattr(netra_backend.app.startup_module, 'get_env'), \
+            # REMOVED_SYNTAX_ERROR: "startup_module should have get_env accessible after import"
+
+            # REMOVED_SYNTAX_ERROR: except ImportError as e:
+                # REMOVED_SYNTAX_ERROR: if "circular import" in str(e).lower():
+                    # REMOVED_SYNTAX_ERROR: pytest.fail("formatted_string")
+                    # REMOVED_SYNTAX_ERROR: raise
+
+# REMOVED_SYNTAX_ERROR: def test_dependencies_module_lazy_imports(self):
+    # REMOVED_SYNTAX_ERROR: """Test that dependencies module properly uses lazy imports."""
+    # Clear dependencies module if already imported
+    # REMOVED_SYNTAX_ERROR: module_name = 'netra_backend.app.dependencies'
+    # REMOVED_SYNTAX_ERROR: if module_name in sys.modules:
+        # REMOVED_SYNTAX_ERROR: del sys.modules[module_name]
+
+        # REMOVED_SYNTAX_ERROR: try:
+            # REMOVED_SYNTAX_ERROR: import netra_backend.app.dependencies as deps_module
+
             # Verify lazy import functions exist
-            assert hasattr(deps_module, '_get_session_scope_validator'), \
-                "dependencies module should have lazy import function _get_session_scope_validator"
-            
-            assert hasattr(deps_module, '_get_session_isolation_error'), \
-                "dependencies module should have lazy import function _get_session_isolation_error"
-            
-            assert hasattr(deps_module, '_get_managed_session'), \
-                "dependencies module should have lazy import function _get_managed_session"
-            
+            # REMOVED_SYNTAX_ERROR: assert hasattr(deps_module, '_get_session_scope_validator'), \
+            # REMOVED_SYNTAX_ERROR: "dependencies module should have lazy import function _get_session_scope_validator"
+
+            # REMOVED_SYNTAX_ERROR: assert hasattr(deps_module, '_get_session_isolation_error'), \
+            # REMOVED_SYNTAX_ERROR: "dependencies module should have lazy import function _get_session_isolation_error"
+
+            # REMOVED_SYNTAX_ERROR: assert hasattr(deps_module, '_get_managed_session'), \
+            # REMOVED_SYNTAX_ERROR: "dependencies module should have lazy import function _get_managed_session"
+
             # Test that lazy imports work
-            validator_class = deps_module._get_session_scope_validator()
-            assert validator_class is not None, "Lazy import should return valid class"
-            
-        except ImportError as e:
-            if "circular import" in str(e).lower():
-                pytest.fail(f"Circular import in dependencies: {e}")
-            raise
-    
-    def test_session_manager_type_checking_imports(self):
-        """Test that session_manager uses TYPE_CHECKING pattern correctly."""
-    pass
-        # Clear session_manager module if already imported
-        module_name = 'netra_backend.app.database.session_manager'
-        if module_name in sys.modules:
-            del sys.modules[module_name]
-        
-        try:
-            import netra_backend.app.database.session_manager as sm_module
-            
+            # REMOVED_SYNTAX_ERROR: validator_class = deps_module._get_session_scope_validator()
+            # REMOVED_SYNTAX_ERROR: assert validator_class is not None, "Lazy import should return valid class"
+
+            # REMOVED_SYNTAX_ERROR: except ImportError as e:
+                # REMOVED_SYNTAX_ERROR: if "circular import" in str(e).lower():
+                    # REMOVED_SYNTAX_ERROR: pytest.fail("formatted_string")
+                    # REMOVED_SYNTAX_ERROR: raise
+
+# REMOVED_SYNTAX_ERROR: def test_session_manager_type_checking_imports(self):
+    # REMOVED_SYNTAX_ERROR: """Test that session_manager uses TYPE_CHECKING pattern correctly."""
+    # REMOVED_SYNTAX_ERROR: pass
+    # Clear session_manager module if already imported
+    # REMOVED_SYNTAX_ERROR: module_name = 'netra_backend.app.database.session_manager'
+    # REMOVED_SYNTAX_ERROR: if module_name in sys.modules:
+        # REMOVED_SYNTAX_ERROR: del sys.modules[module_name]
+
+        # REMOVED_SYNTAX_ERROR: try:
+            # REMOVED_SYNTAX_ERROR: import netra_backend.app.database.session_manager as sm_module
+
             # Verify lazy import function exists
-            assert hasattr(sm_module, '_get_user_execution_context_type'), \
-                "session_manager should have lazy import function _get_user_execution_context_type"
-            
+            # REMOVED_SYNTAX_ERROR: assert hasattr(sm_module, '_get_user_execution_context_type'), \
+            # REMOVED_SYNTAX_ERROR: "session_manager should have lazy import function _get_user_execution_context_type"
+
             # Test that lazy import works
-            context_class = sm_module._get_user_execution_context_type()
-            assert context_class is not None, "Lazy import should return valid class"
-            
-        except ImportError as e:
-            if "circular import" in str(e).lower():
-                pytest.fail(f"Circular import in session_manager: {e}")
-            raise
+            # REMOVED_SYNTAX_ERROR: context_class = sm_module._get_user_execution_context_type()
+            # REMOVED_SYNTAX_ERROR: assert context_class is not None, "Lazy import should return valid class"
+
+            # REMOVED_SYNTAX_ERROR: except ImportError as e:
+                # REMOVED_SYNTAX_ERROR: if "circular import" in str(e).lower():
+                    # REMOVED_SYNTAX_ERROR: pytest.fail("formatted_string")
+                    # REMOVED_SYNTAX_ERROR: raise
+
+# REMOVED_SYNTAX_ERROR: def test_import_order_isolation(self):
+    # REMOVED_SYNTAX_ERROR: """Test that modules can be imported in any order without issues."""
+    # Test different import orders to ensure robustness
+    # REMOVED_SYNTAX_ERROR: import_orders = [ )
+    # Standard order
+    # REMOVED_SYNTAX_ERROR: ['shared.isolated_environment', 'netra_backend.app.database.session_manager', 'netra_backend.app.dependencies'],
+
+    # Reverse order
+    # REMOVED_SYNTAX_ERROR: ['netra_backend.app.dependencies', 'netra_backend.app.database.session_manager', 'shared.isolated_environment'],
+
+    # Mixed order
+    # REMOVED_SYNTAX_ERROR: ['netra_backend.app.database.session_manager', 'shared.isolated_environment', 'netra_backend.app.dependencies'],
     
-    def test_import_order_isolation(self):
-        """Test that modules can be imported in any order without issues."""
-        # Test different import orders to ensure robustness
-        import_orders = [
-            # Standard order
-            ['shared.isolated_environment', 'netra_backend.app.database.session_manager', 'netra_backend.app.dependencies'],
-            
-            # Reverse order 
-            ['netra_backend.app.dependencies', 'netra_backend.app.database.session_manager', 'shared.isolated_environment'],
-            
-            # Mixed order
-            ['netra_backend.app.database.session_manager', 'shared.isolated_environment', 'netra_backend.app.dependencies'],
-        ]
-        
-        for i, order in enumerate(import_orders):
-            # Clear modules
-            for module in order:
-                if module in sys.modules:
-                    del sys.modules[module]
-            
-            try:
-                # Import in this order
-                for module in order:
-                    importlib.import_module(module)
-                    
-            except ImportError as e:
-                if "circular import" in str(e).lower():
-                    pytest.fail(f"Circular import detected in order #{i+1} {order}: {e}")
-                raise
-    
-    def test_pytest_collection_compatibility(self):
-        """Test that modules work properly during pytest collection."""
-    pass
-        # Simulate pytest collection scenario
-        original_modules = dict(sys.modules)
-        
-        try:
-            # Clear modules that might be problematic
-            modules_to_clear = [m for m in sys.modules.keys() 
-                              if m.startswith('netra_backend.app') or m.startswith('shared.')]
-            
-            for module in modules_to_clear:
-                if module in sys.modules:
-                    del sys.modules[module]
-            
-            # Import modules as pytest would during collection
-            for module in self.CRITICAL_MODULES:
-                try:
-                    importlib.import_module(module)
-                except ImportError as e:
-                    if "circular import" in str(e).lower():
-                        pytest.fail(f"Pytest collection would fail due to circular import in {module}: {e}")
-                    raise
-        finally:
-            # Restore original module state
-            sys.modules.clear()
-            sys.modules.update(original_modules)
-    
-    def test_import_guards_effectiveness(self):
-        """Test that import guards prevent runtime circular import issues."""
-        # Test that TYPE_CHECKING imports don't affect runtime
-        try:
-            from netra_backend.app.database.session_manager import DatabaseSessionManager
-            from netra_backend.app.dependencies import get_db_dependency
-            
-            # These should work without triggering circular imports
-            assert DatabaseSessionManager is not None
-            assert get_db_dependency is not None
-            
-        except ImportError as e:
-            if "circular import" in str(e).lower():
-                pytest.fail(f"Import guards failed to prevent circular import: {e}")
-            raise
-    
-    @pytest.mark.parametrize("module_name", CRITICAL_MODULES)
-    def test_individual_module_import(self, module_name: str):
-        """Test each critical module can be imported individually."""
-    pass
-        # Clear the specific module
-        if module_name in sys.modules:
-            del sys.modules[module_name]
-        
-        try:
-            importlib.import_module(module_name)
-        except ImportError as e:
-            if "circular import" in str(e).lower():
-                pytest.fail(f"Circular import in {module_name}: {e}")
-            raise
-    
-    def test_memory_service_integration(self):
-        """Test memory services work without circular imports."""
-        try:
-            from netra_backend.app.services.memory_optimization_service import get_memory_service
-            from netra_backend.app.services.session_memory_manager import get_session_manager
-            
-            # These should be importable and callable
-            memory_service = get_memory_service()
-            session_manager = get_session_manager()
-            
-            assert memory_service is not None
-            assert session_manager is not None
-            
-        except ImportError as e:
-            if "circular import" in str(e).lower():
-                pytest.fail(f"Circular import in memory services: {e}")
-            raise
+
+    # REMOVED_SYNTAX_ERROR: for i, order in enumerate(import_orders):
+        # Clear modules
+        # REMOVED_SYNTAX_ERROR: for module in order:
+            # REMOVED_SYNTAX_ERROR: if module in sys.modules:
+                # REMOVED_SYNTAX_ERROR: del sys.modules[module]
+
+                # REMOVED_SYNTAX_ERROR: try:
+                    # Import in this order
+                    # REMOVED_SYNTAX_ERROR: for module in order:
+                        # REMOVED_SYNTAX_ERROR: importlib.import_module(module)
+
+                        # REMOVED_SYNTAX_ERROR: except ImportError as e:
+                            # REMOVED_SYNTAX_ERROR: if "circular import" in str(e).lower():
+                                # REMOVED_SYNTAX_ERROR: pytest.fail("formatted_string")
+                                # REMOVED_SYNTAX_ERROR: raise
+
+# REMOVED_SYNTAX_ERROR: def test_pytest_collection_compatibility(self):
+    # REMOVED_SYNTAX_ERROR: """Test that modules work properly during pytest collection."""
+    # REMOVED_SYNTAX_ERROR: pass
+    # Simulate pytest collection scenario
+    # REMOVED_SYNTAX_ERROR: original_modules = dict(sys.modules)
+
+    # REMOVED_SYNTAX_ERROR: try:
+        # Clear modules that might be problematic
+        # REMOVED_SYNTAX_ERROR: modules_to_clear = [m for m in sys.modules.keys() )
+        # REMOVED_SYNTAX_ERROR: if m.startswith('netra_backend.app') or m.startswith('shared.')]
+
+        # REMOVED_SYNTAX_ERROR: for module in modules_to_clear:
+            # REMOVED_SYNTAX_ERROR: if module in sys.modules:
+                # REMOVED_SYNTAX_ERROR: del sys.modules[module]
+
+                # Import modules as pytest would during collection
+                # REMOVED_SYNTAX_ERROR: for module in self.CRITICAL_MODULES:
+                    # REMOVED_SYNTAX_ERROR: try:
+                        # REMOVED_SYNTAX_ERROR: importlib.import_module(module)
+                        # REMOVED_SYNTAX_ERROR: except ImportError as e:
+                            # REMOVED_SYNTAX_ERROR: if "circular import" in str(e).lower():
+                                # REMOVED_SYNTAX_ERROR: pytest.fail("formatted_string")
+                                # REMOVED_SYNTAX_ERROR: raise
+                                # REMOVED_SYNTAX_ERROR: finally:
+                                    # Restore original module state
+                                    # REMOVED_SYNTAX_ERROR: sys.modules.clear()
+                                    # REMOVED_SYNTAX_ERROR: sys.modules.update(original_modules)
+
+# REMOVED_SYNTAX_ERROR: def test_import_guards_effectiveness(self):
+    # REMOVED_SYNTAX_ERROR: """Test that import guards prevent runtime circular import issues."""
+    # Test that TYPE_CHECKING imports don't affect runtime
+    # REMOVED_SYNTAX_ERROR: try:
+        # REMOVED_SYNTAX_ERROR: from netra_backend.app.database.session_manager import DatabaseSessionManager
+        # REMOVED_SYNTAX_ERROR: from netra_backend.app.dependencies import get_db_dependency
+
+        # These should work without triggering circular imports
+        # REMOVED_SYNTAX_ERROR: assert DatabaseSessionManager is not None
+        # REMOVED_SYNTAX_ERROR: assert get_db_dependency is not None
+
+        # REMOVED_SYNTAX_ERROR: except ImportError as e:
+            # REMOVED_SYNTAX_ERROR: if "circular import" in str(e).lower():
+                # REMOVED_SYNTAX_ERROR: pytest.fail("formatted_string")
+                # REMOVED_SYNTAX_ERROR: raise
+
+                # REMOVED_SYNTAX_ERROR: @pytest.fixture
+# REMOVED_SYNTAX_ERROR: def test_individual_module_import(self, module_name: str):
+    # REMOVED_SYNTAX_ERROR: """Test each critical module can be imported individually."""
+    # REMOVED_SYNTAX_ERROR: pass
+    # Clear the specific module
+    # REMOVED_SYNTAX_ERROR: if module_name in sys.modules:
+        # REMOVED_SYNTAX_ERROR: del sys.modules[module_name]
+
+        # REMOVED_SYNTAX_ERROR: try:
+            # REMOVED_SYNTAX_ERROR: importlib.import_module(module_name)
+            # REMOVED_SYNTAX_ERROR: except ImportError as e:
+                # REMOVED_SYNTAX_ERROR: if "circular import" in str(e).lower():
+                    # REMOVED_SYNTAX_ERROR: pytest.fail("formatted_string")
+                    # REMOVED_SYNTAX_ERROR: raise
+
+# REMOVED_SYNTAX_ERROR: def test_memory_service_integration(self):
+    # REMOVED_SYNTAX_ERROR: """Test memory services work without circular imports."""
+    # REMOVED_SYNTAX_ERROR: try:
+        # REMOVED_SYNTAX_ERROR: from netra_backend.app.services.memory_optimization_service import get_memory_service
+        # REMOVED_SYNTAX_ERROR: from netra_backend.app.services.session_memory_manager import get_session_manager
+
+        # These should be importable and callable
+        # REMOVED_SYNTAX_ERROR: memory_service = get_memory_service()
+        # REMOVED_SYNTAX_ERROR: session_manager = get_session_manager()
+
+        # REMOVED_SYNTAX_ERROR: assert memory_service is not None
+        # REMOVED_SYNTAX_ERROR: assert session_manager is not None
+
+        # REMOVED_SYNTAX_ERROR: except ImportError as e:
+            # REMOVED_SYNTAX_ERROR: if "circular import" in str(e).lower():
+                # REMOVED_SYNTAX_ERROR: pytest.fail("formatted_string")
+                # REMOVED_SYNTAX_ERROR: raise
 
 
-class TestImportHierarchy:
-    """Test the overall import hierarchy for correctness."""
+# REMOVED_SYNTAX_ERROR: class TestImportHierarchy:
+    # REMOVED_SYNTAX_ERROR: """Test the overall import hierarchy for correctness."""
+
+# REMOVED_SYNTAX_ERROR: def test_shared_isolated_environment_is_foundation(self):
+    # REMOVED_SYNTAX_ERROR: """Test that shared.isolated_environment can be imported first."""
+    # This should always work as it's the foundation
+    # REMOVED_SYNTAX_ERROR: import shared.isolated_environment
+    # REMOVED_SYNTAX_ERROR: assert hasattr(shared.isolated_environment, 'get_env')
+
+# REMOVED_SYNTAX_ERROR: def test_startup_module_path_setup(self):
+    # REMOVED_SYNTAX_ERROR: """Test that startup_module sets up paths correctly."""
+    # REMOVED_SYNTAX_ERROR: pass
+    # REMOVED_SYNTAX_ERROR: import netra_backend.app.startup_module as startup
+
+    # Verify the _setup_paths function exists
+    # REMOVED_SYNTAX_ERROR: assert hasattr(startup, '_setup_paths'), \
+    # REMOVED_SYNTAX_ERROR: "startup_module should have _setup_paths function"
+
+# REMOVED_SYNTAX_ERROR: def test_lazy_import_functions_work(self):
+    # REMOVED_SYNTAX_ERROR: """Test that all lazy import functions work correctly."""
+    # REMOVED_SYNTAX_ERROR: from netra_backend.app.dependencies import ( )
+    # REMOVED_SYNTAX_ERROR: _get_session_scope_validator,
+    # REMOVED_SYNTAX_ERROR: _get_session_isolation_error,
+    # REMOVED_SYNTAX_ERROR: _get_managed_session
     
-    def test_shared_isolated_environment_is_foundation(self):
-        """Test that shared.isolated_environment can be imported first."""
-        # This should always work as it's the foundation
-        import shared.isolated_environment
-        assert hasattr(shared.isolated_environment, 'get_env')
-    
-    def test_startup_module_path_setup(self):
-        """Test that startup_module sets up paths correctly."""
-    pass
-        import netra_backend.app.startup_module as startup
-        
-        # Verify the _setup_paths function exists
-        assert hasattr(startup, '_setup_paths'), \
-            "startup_module should have _setup_paths function"
-    
-    def test_lazy_import_functions_work(self):
-        """Test that all lazy import functions work correctly."""
-        from netra_backend.app.dependencies import (
-            _get_session_scope_validator,
-            _get_session_isolation_error,
-            _get_managed_session
-        )
-        
-        # Test lazy imports work
-        validator = _get_session_scope_validator()
-        error_class = _get_session_isolation_error()
-        managed_fn = _get_managed_session()
-        
-        assert validator is not None
-        assert error_class is not None  
-        assert managed_fn is not None
-    
-    def test_type_checking_imports_isolation(self):
-        """Test that TYPE_CHECKING imports don't cause runtime issues."""
-    pass
-        # Import modules that use TYPE_CHECKING
-        import netra_backend.app.database.session_manager
-        import netra_backend.app.dependencies
-        
-        # Should not have runtime errors from TYPE_CHECKING imports
-        assert netra_backend.app.database.session_manager is not None
-        assert netra_backend.app.dependencies is not None
+
+    # Test lazy imports work
+    # REMOVED_SYNTAX_ERROR: validator = _get_session_scope_validator()
+    # REMOVED_SYNTAX_ERROR: error_class = _get_session_isolation_error()
+    # REMOVED_SYNTAX_ERROR: managed_fn = _get_managed_session()
+
+    # REMOVED_SYNTAX_ERROR: assert validator is not None
+    # REMOVED_SYNTAX_ERROR: assert error_class is not None
+    # REMOVED_SYNTAX_ERROR: assert managed_fn is not None
+
+# REMOVED_SYNTAX_ERROR: def test_type_checking_imports_isolation(self):
+    # REMOVED_SYNTAX_ERROR: """Test that TYPE_CHECKING imports don't cause runtime issues."""
+    # REMOVED_SYNTAX_ERROR: pass
+    # Import modules that use TYPE_CHECKING
+    # REMOVED_SYNTAX_ERROR: import netra_backend.app.database.session_manager
+    # REMOVED_SYNTAX_ERROR: import netra_backend.app.dependencies
+
+    # Should not have runtime errors from TYPE_CHECKING imports
+    # REMOVED_SYNTAX_ERROR: assert netra_backend.app.database.session_manager is not None
+    # REMOVED_SYNTAX_ERROR: assert netra_backend.app.dependencies is not None
 
 
-if __name__ == "__main__":
-    # Run tests directly for verification
-    print("Testing circular imports...")
-    
-    test_instance = TestCircularImports()
-    
-    try:
-        test_instance.test_all_critical_modules_import_successfully()
-        print("PASS: All critical modules import successfully")
-    except Exception as e:
-        print(f"FAIL: Critical modules test failed: {e}")
-        
-    try:
-        test_instance.test_import_order_isolation()
-        print("PASS: Import order isolation test passed")
-    except Exception as e:
-        print(f"FAIL: Import order test failed: {e}")
-        
-    try:
-        test_instance.test_import_guards_effectiveness()
-        print("PASS: Import guards effectiveness test passed")  
-    except Exception as e:
-        print(f"FAIL: Import guards test failed: {e}")
-    
-    print("\
-Testing import hierarchy...")
-    
-    hierarchy_test = TestImportHierarchy()
-    
-    try:
-        hierarchy_test.test_shared_isolated_environment_is_foundation()
-        print("PASS: shared.isolated_environment foundation test passed")
-    except Exception as e:
-        print(f"FAIL: Foundation test failed: {e}")
-        
-    try:
-        hierarchy_test.test_startup_module_path_setup()
-        print("PASS: startup_module path setup test passed")
-    except Exception as e:
-        print(f"FAIL: Path setup test failed: {e}")
-        
-    print("\
-Circular import testing complete!")
+    # REMOVED_SYNTAX_ERROR: if __name__ == "__main__":
+        # Run tests directly for verification
+        # REMOVED_SYNTAX_ERROR: print("Testing circular imports...")
+
+        # REMOVED_SYNTAX_ERROR: test_instance = TestCircularImports()
+
+        # REMOVED_SYNTAX_ERROR: try:
+            # REMOVED_SYNTAX_ERROR: test_instance.test_all_critical_modules_import_successfully()
+            # REMOVED_SYNTAX_ERROR: print("PASS: All critical modules import successfully")
+            # REMOVED_SYNTAX_ERROR: except Exception as e:
+                # REMOVED_SYNTAX_ERROR: print("formatted_string")
+
+                # REMOVED_SYNTAX_ERROR: try:
+                    # REMOVED_SYNTAX_ERROR: test_instance.test_import_order_isolation()
+                    # REMOVED_SYNTAX_ERROR: print("PASS: Import order isolation test passed")
+                    # REMOVED_SYNTAX_ERROR: except Exception as e:
+                        # REMOVED_SYNTAX_ERROR: print("formatted_string")
+
+                        # REMOVED_SYNTAX_ERROR: try:
+                            # REMOVED_SYNTAX_ERROR: test_instance.test_import_guards_effectiveness()
+                            # REMOVED_SYNTAX_ERROR: print("PASS: Import guards effectiveness test passed")
+                            # REMOVED_SYNTAX_ERROR: except Exception as e:
+                                # REMOVED_SYNTAX_ERROR: print("formatted_string")
+
+                                # REMOVED_SYNTAX_ERROR: print("\
+                                # REMOVED_SYNTAX_ERROR: Testing import hierarchy...")
+
+                                # REMOVED_SYNTAX_ERROR: hierarchy_test = TestImportHierarchy()
+
+                                # REMOVED_SYNTAX_ERROR: try:
+                                    # REMOVED_SYNTAX_ERROR: hierarchy_test.test_shared_isolated_environment_is_foundation()
+                                    # REMOVED_SYNTAX_ERROR: print("PASS: shared.isolated_environment foundation test passed")
+                                    # REMOVED_SYNTAX_ERROR: except Exception as e:
+                                        # REMOVED_SYNTAX_ERROR: print("formatted_string")
+
+                                        # REMOVED_SYNTAX_ERROR: try:
+                                            # REMOVED_SYNTAX_ERROR: hierarchy_test.test_startup_module_path_setup()
+                                            # REMOVED_SYNTAX_ERROR: print("PASS: startup_module path setup test passed")
+                                            # REMOVED_SYNTAX_ERROR: except Exception as e:
+                                                # REMOVED_SYNTAX_ERROR: print("formatted_string")
+
+                                                # REMOVED_SYNTAX_ERROR: print("\
+                                                # REMOVED_SYNTAX_ERROR: Circular import testing complete!")
