@@ -446,6 +446,102 @@ async def dev_login() -> Dict[str, Any]:
             detail="Failed to generate development tokens"
         )
 
+@router.post("/auth/e2e/test-auth")
+async def e2e_test_auth(request: Request) -> Dict[str, Any]:
+    """E2E test authentication endpoint - simulates OAuth flow for staging/test environments
+    
+    This endpoint is protected by E2E_OAUTH_SIMULATION_KEY and only works in non-production
+    environments. It simulates a successful OAuth authentication flow for E2E testing.
+    """
+    from auth_service.auth_core.config import AuthConfig
+    from auth_service.auth_core.secret_loader import AuthSecretLoader
+    
+    env = AuthConfig.get_environment()
+    
+    # Prevent usage in production
+    if env == "production":
+        logger.warning("E2E test auth attempted in production environment")
+        raise HTTPException(
+            status_code=403,
+            detail="E2E test authentication is not available in production"
+        )
+    
+    # Verify E2E bypass key
+    bypass_key = request.headers.get("X-E2E-Bypass-Key")
+    if not bypass_key:
+        logger.warning("E2E test auth attempted without bypass key")
+        raise HTTPException(
+            status_code=401,
+            detail="E2E bypass key required"
+        )
+    
+    # Load expected E2E key from secrets
+    expected_key = AuthSecretLoader.get_E2E_OAUTH_SIMULATION_KEY()
+    
+    if not expected_key:
+        logger.error("E2E_OAUTH_SIMULATION_KEY not configured")
+        raise HTTPException(
+            status_code=503,
+            detail="E2E authentication not configured"
+        )
+    
+    if bypass_key != expected_key:
+        logger.warning(f"Invalid E2E bypass key provided")
+        raise HTTPException(
+            status_code=401,
+            detail="Invalid E2E bypass key"
+        )
+    
+    try:
+        # Parse request body
+        body = await request.json()
+        email = body.get("email", "e2e-test@staging.netrasystems.ai")
+        name = body.get("name", "E2E Test User")
+        permissions = body.get("permissions", ["read", "write"])
+        simulate_oauth = body.get("simulate_oauth", True)
+        
+        # Generate user ID based on email
+        user_id = f"e2e-{email.split('@')[0]}"
+        
+        # Generate tokens simulating OAuth authentication
+        access_token = await auth_service.create_access_token(
+            user_id=user_id,
+            email=email
+        )
+        
+        refresh_token = await auth_service.create_refresh_token(
+            user_id=user_id,
+            email=email
+        )
+        
+        logger.info(f"E2E test auth successful for {email} in {env} environment")
+        
+        return {
+            "access_token": access_token,
+            "refresh_token": refresh_token,
+            "token_type": "Bearer",
+            "expires_in": 900,  # 15 minutes
+            "user": {
+                "id": user_id,
+                "email": email,
+                "name": name,
+                "permissions": permissions,
+                "oauth_simulated": simulate_oauth
+            }
+        }
+        
+    except json.JSONDecodeError:
+        raise HTTPException(
+            status_code=422,
+            detail="Invalid JSON body"
+        )
+    except Exception as e:
+        logger.error(f"E2E test auth failed: {e}")
+        raise HTTPException(
+            status_code=500,
+            detail="Failed to generate E2E test tokens"
+        )
+
 @router.post("/auth/service-token")
 async def service_token_endpoint(request: Request) -> Dict[str, Any]:
     """Generate service-to-service authentication token"""
