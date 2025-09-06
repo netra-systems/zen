@@ -486,6 +486,7 @@ python scripts/refresh_dev_services.py logs --services backend -f
 IMPORTANT: Use real services, real llm, docker compose etc. whenever possible for testing.
 MOCKS are FORBIDDEN in dev, staging or production.
 
+**See [`TEST_CREATION_GUIDE.md`](TEST_CREATION_GUIDE.md) for the AUTHORITATIVE guide on creating tests with SSOT patterns.**
 **See [`tests/TEST_ARCHITECTURE_VISUAL_OVERVIEW.md`](tests/TEST_ARCHITECTURE_VISUAL_OVERVIEW.md) for complete visual guide to test infrastructure, layers, and execution flows.**
 
 **The test runner automatically starts Docker when needed:**

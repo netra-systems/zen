@@ -2,6 +2,7 @@
 
 ## Related Documentation
 
+- **[Test Creation Guide](../TEST_CREATION_GUIDE.md)** - AUTHORITATIVE guide for creating tests with SSOT patterns
 - **[User Context Architecture](../USER_CONTEXT_ARCHITECTURE.md)** - Factory patterns and user isolation
 - **[Agent Architecture Disambiguation Guide](../docs/AGENT_ARCHITECTURE_DISAMBIGUATION_GUIDE.md)** - Agent component relationships
 - **[Docker Orchestration](../docs/docker_orchestration.md)** - Docker management and Alpine containers
