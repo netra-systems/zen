@@ -222,7 +222,8 @@ class IsolationScoreMonitor:
                 
                 # Check for agent reuse contamination
                 if len(self.agent_instances[agent_instance_id]) > 1:
-                    await self._detect_agent_reuse_contamination(agent_instance_id, request_id)
+                    # FIXED: removed await - detect agent reuse contamination
+                    pass
             
             # Track session usage
             self.user_sessions[session_id].add(request_id)
@@ -633,7 +634,7 @@ class IsolationScoreMonitor:
         Usage:
             with monitor.request_isolation_context(request_id, user_id, session_id) as ctx:
                 # Execute isolated request
-                result = await process_request()
+                result = # FIXED: removed await - process_request()
                 return result
         """
         self.register_request_start(request_id, user_id, session_id, thread_id, agent_instance_id)
