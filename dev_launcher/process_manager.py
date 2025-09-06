@@ -58,3 +58,52 @@ class ProcessManager:
         if name in self.processes:
             return self.processes[name].poll() is None
         return False
+    
+    def terminate_process(self, name: str, timeout: int = 5) -> bool:
+        """Terminate a process gracefully."""
+        if name in self.processes:
+            process = self.processes[name]
+            try:
+                process.terminate()
+                process.wait(timeout=timeout)
+                del self.processes[name]
+                return True
+            except subprocess.TimeoutExpired:
+                return False
+            except Exception as e:
+                print(f"Failed to terminate process {name}: {e}", file=sys.stderr)
+                return False
+        return False
+    
+    def kill_process(self, name: str) -> bool:
+        """Force kill a process."""
+        if name in self.processes:
+            process = self.processes[name]
+            try:
+                process.kill()
+                process.wait(timeout=2)
+                del self.processes[name]
+                return True
+            except Exception as e:
+                print(f"Failed to kill process {name}: {e}", file=sys.stderr)
+                return False
+        return False
+    
+    def add_process(self, name: str, process: subprocess.Popen) -> None:
+        """Add an existing process to management."""
+        self.processes[name] = process
+    
+    async def cleanup_all(self) -> None:
+        """Cleanup all processes - alias for cleanup()."""
+        await self.cleanup()
+    
+    async def wait_for_all(self) -> None:
+        """Wait for all processes to complete."""
+        for name, process in list(self.processes.items()):
+            try:
+                process.wait()
+            except Exception as e:
+                print(f"Error waiting for process {name}: {e}", file=sys.stderr)
+            finally:
+                if name in self.processes:
+                    del self.processes[name]

@@ -7,6 +7,7 @@ Pre-populates caches to improve startup performance.
 import asyncio
 import logging
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from datetime import datetime
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional
 
@@ -228,7 +229,3 @@ class CacheWarmer:
                 self.project_root / "auth_service" / "requirements.txt"
             ]
         return []
-
-
-# Import datetime after the class definition to avoid circular imports
-from datetime import datetime
