@@ -532,7 +532,6 @@ class TestIndividualWebSocketEvents:
         CRITICAL: This event provides real-time reasoning visibility,
         showing users the AI is working on valuable solutions.
         """
-    pass
         validator = MissionCriticalEventValidator(strict_mode=True)
         
         agent_thinking_event = {
@@ -567,7 +566,6 @@ class TestIndividualWebSocketEvents:
         CRITICAL: This event demonstrates the AI's problem-solving approach
         by showing which tools are being used and why.
         """
-    pass
         validator = MissionCriticalEventValidator(strict_mode=True)
         
         tool_executing_event = {
@@ -605,7 +603,6 @@ class TestIndividualWebSocketEvents:
         CRITICAL: This event delivers actionable insights by showing
         tool results and execution metrics.
         """
-    pass
         validator = MissionCriticalEventValidator(strict_mode=True)
         
         tool_completed_event = {
@@ -646,7 +643,6 @@ class TestIndividualWebSocketEvents:
         CRITICAL: This event signals when valuable AI response is ready,
         completing the chat interaction loop.
         """
-    pass
         validator = MissionCriticalEventValidator(strict_mode=True)
         
         agent_completed_event = {
@@ -711,7 +707,6 @@ class TestEventSequenceAndTiming:
         CRITICAL: Events must flow in logical order to provide
         coherent user experience during AI interactions.
         """
-    pass
         validator = MissionCriticalEventValidator(strict_mode=True)
         
         # Send complete event sequence
@@ -775,7 +770,6 @@ class TestEventSequenceAndTiming:
         CRITICAL: Low latency ensures responsive chat experience
         for real-time AI interactions.
         """
-    pass
         validator = MissionCriticalEventValidator(strict_mode=True)
         start_time = time.time()
         
@@ -824,7 +818,6 @@ class TestEventSequenceAndTiming:
         CRITICAL: System must gracefully handle sequence variations
         while maintaining chat coherence.
         """
-    pass
         validator = MissionCriticalEventValidator(strict_mode=False)  # More lenient
         
         # Send events out of order
@@ -891,7 +884,6 @@ class TestRealWebSocketIntegration:
     @pytest.mark.timeout(45)
     async def test_real_agent_websocket_events(self):
         """Test complete flow with REAL WebSocket connections and agent events."""
-    pass
         test_context = self.test_contexts[0]
         validator = MissionCriticalEventValidator()
         
@@ -966,7 +958,6 @@ class TestRealWebSocketIntegration:
     @pytest.mark.timeout(45)
     async def test_real_websocket_error_handling(self):
         """Test error handling with REAL WebSocket connections."""
-    pass
         test_context = self.test_contexts[1]
         
         # Send an invalid message to test error handling
@@ -1070,7 +1061,6 @@ class TestRealE2EWebSocketAgentFlow:
     @pytest.mark.timeout(90)
     async def test_real_e2e_agent_conversation_flow(self):
         """Test complete agent conversation flow with REAL WebSocket connections."""
-    pass
         test_context = self.e2e_contexts[0]
         validator = MissionCriticalEventValidator(strict_mode=False)
         
@@ -1153,7 +1143,7 @@ class TestRealE2EWebSocketAgentFlow:
                         logger.warning(f"Resilience message {i} failed: {e}")
                         
                 await asyncio.sleep(0)
-    return messages_sent
+                return messages_sent
             
             # Execute concurrently
             tasks = [send_resilience_messages(context) for context in resilience_contexts]
@@ -1215,7 +1205,6 @@ class TestWebSocketChaosAndResilience:
         CRITICAL: Chat must remain functional even with network instability.
         Users expect reliable AI interactions despite connection issues.
         """
-    pass
         connection_count = 5
         recovery_contexts = []
         successful_recoveries = 0
@@ -1318,7 +1307,6 @@ class TestWebSocketChaosAndResilience:
         CRITICAL: System must handle rapid reconnection attempts
         without degrading chat performance.
         """
-    pass
         stress_context = await self.test_base.create_test_context(user_id="stress_reconnect_user")
         reconnection_attempts = 10
         successful_reconnections = 0
@@ -1373,7 +1361,6 @@ class TestWebSocketChaosAndResilience:
         CRITICAL: Chat value depends on reliable event delivery.
         Agent events must not be lost during network disruptions.
         """
-    pass
         validator = MissionCriticalEventValidator()
         test_context = await self.test_base.create_test_context(user_id="message_loss_test")
         
@@ -1459,7 +1446,6 @@ class TestConcurrentUserIsolation:
         CRITICAL: User isolation ensures private AI interactions.
         Each user's chat session must be completely separate.
         """
-    pass
         user_count = 12  # Test with more than 10 users as required
         user_contexts = []
         isolation_results = []
@@ -1594,7 +1580,6 @@ class TestConcurrentUserIsolation:
         CRITICAL: Chat performance must remain acceptable even
         with many simultaneous AI interactions.
         """
-    pass
         user_count = 15  # Test with high concurrency
         performance_contexts = []
         performance_metrics = []
@@ -1736,7 +1721,6 @@ class TestRealWebSocketPerformance:
     @pytest.mark.timeout(120)
     async def test_real_high_throughput_websocket_connections(self):
         """Test high throughput with REAL WebSocket connections."""
-    pass
         connection_count = 10  # Realistic for real connections
         messages_per_connection = 5
         
@@ -1852,7 +1836,6 @@ class TestRealWebSocketPerformance:
 @pytest.mark.timeout(60)
 async def test_real_websocket_agent_event_flow_comprehensive():
     """Comprehensive test of real WebSocket agent event flow - standalone test."""
-    pass
     async with WebSocketTestBase().real_websocket_test_session() as test_base:
         # Create test context
         test_context = await test_base.create_test_context()
@@ -1908,7 +1891,6 @@ async def test_comprehensive_event_content_validation():
     CRITICAL: Event content must contain all required fields and meaningful data
     to deliver substantive chat value to users.
     """
-    pass
     async with WebSocketTestBase().real_websocket_test_session() as test_base:
         test_context = await test_base.create_test_context(user_id="content_validation_user")
         await test_context.setup_websocket_connection(endpoint="/ws/test", auth_required=False)
@@ -2090,7 +2072,6 @@ async def test_event_latency_performance_validation():
     CRITICAL: Low latency ensures responsive chat experience.
     Users expect immediate feedback during AI interactions.
     """
-    pass
     async with WebSocketTestBase().real_websocket_test_session() as test_base:
         test_context = await test_base.create_test_context(user_id="latency_test_user")
         await test_context.setup_websocket_connection(endpoint="/ws/test", auth_required=False)
@@ -2186,7 +2167,6 @@ async def test_reconnection_within_3_seconds():
     CRITICAL: Fast reconnection maintains chat continuity.
     Users must not experience long interruptions in AI interactions.
     """
-    pass
     async with WebSocketTestBase().real_websocket_test_session() as test_base:
         reconnection_attempts = 8
         successful_reconnections = 0
@@ -2386,7 +2366,6 @@ async def test_malformed_event_handling():
     CRITICAL: System must gracefully handle malformed events
     without breaking chat functionality.
     """
-    pass
     async with WebSocketTestBase().real_websocket_test_session() as test_base:
         test_context = await test_base.create_test_context(user_id="malformed_test_user")
         await test_context.setup_websocket_connection(endpoint="/ws/test", auth_required=False)
@@ -2481,7 +2460,6 @@ async def test_event_burst_handling():
     CRITICAL: Chat must handle bursts of agent activity
     during complex AI reasoning without losing events.
     """
-    pass
     async with WebSocketTestBase().real_websocket_test_session() as test_base:
         test_context = await test_base.create_test_context(user_id="burst_test_user")
         await test_context.setup_websocket_connection(endpoint="/ws/test", auth_required=False)
@@ -2581,7 +2559,6 @@ class TestEnhancedWebSocketScenarios:
         
         async def load_test_connection(connection_id: str):
             """Generate high-frequency events to test ordering."""
-    pass
             test_base = WebSocketTestBase()
             
             async with test_base.real_websocket_test_session() as test_session:
@@ -2693,7 +2670,6 @@ class TestEnhancedWebSocketScenarios:
         
         async def isolated_user_scenario(user_id: str):
             """Run isolated user scenario with contamination detection."""
-    pass
             test_base = WebSocketTestBase()
             user_signature = f"isolation_sig_{user_id}_{uuid.uuid4()}"
             
