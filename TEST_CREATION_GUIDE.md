@@ -360,6 +360,43 @@ async def test_agent():
     assert_agent_execution(result, expected_tools=["analyze_costs"])
 ```
 
+## Handling Legacy Tests
+
+### When Encountering Really Bad Legacy Tests
+
+When you encounter a legacy test that is fundamentally flawed (e.g., testing mocks instead of real behavior, violating SSOT principles, or not providing business value), follow this process:
+
+1. **Capture Intent** - Understand what the legacy test was TRYING to validate
+2. **Create ALL NEW Test** - Write a completely new test file following current standards:
+   - Use real services and real system behavior
+   - Follow latest CLAUDE.md standards
+   - Implement proper SSOT patterns from test_framework/
+   - Ensure the test validates actual business value
+3. **Delete Legacy Test** - Remove the old test file entirely
+   - Use the deleted file ONLY as inspiration for general intent
+   - Do NOT copy any code patterns from the legacy test
+
+**Example:**
+```python
+# LEGACY TEST (to be deleted): tests/old_test_mock_agent.py
+def test_agent_mock():  # BAD: Tests mocks, not real system
+    mock_agent = Mock()
+    mock_agent.execute.return_value = "mocked"
+    assert mock_agent.execute() == "mocked"  # Proves nothing!
+
+# NEW TEST (complete replacement): tests/integration/test_agent_execution.py  
+async def test_agent_delivers_business_value(real_services_fixture):
+    """Test agent provides real optimization insights."""
+    # Real agent, real database, real value
+    agent = await create_real_agent("cost_optimizer")
+    result = await agent.execute_with_context(
+        message="Analyze costs",
+        user_context=real_user_context
+    )
+    assert result.contains_actionable_insights()
+    assert result.potential_savings > 0  # Real business value!
+```
+
 ## What NOT to Do
 
 ### ❌ FORBIDDEN Patterns
