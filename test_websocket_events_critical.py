@@ -35,14 +35,13 @@ class WebSocketEventTester:
         
         try:
             from netra_backend.app.services.agent_websocket_bridge import create_agent_websocket_bridge
-            from netra_backend.app.models.user_execution_context import UserExecutionContext
+            from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
             
-            # Create user context using constructor (models version doesn't have from_request)
-            user_context = UserExecutionContext(
+            # Create user context using from_request (supervisor version has this method)
+            user_context = UserExecutionContext.from_request(
                 user_id="test_user_12345",
                 thread_id="test_thread_12345", 
                 run_id="test_run_12345",
-                request_id="test_request_12345",  # Required field for models version
                 websocket_connection_id="test_ws_12345"
             )
             
@@ -100,12 +99,11 @@ class WebSocketEventTester:
             from netra_backend.app.websocket_core.websocket_manager_factory import create_websocket_manager
             from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
             
-            # Create user context using constructor (models version doesn't have from_request)
-            user_context = UserExecutionContext(
+            # Create user context using from_request (supervisor version has this method)
+            user_context = UserExecutionContext.from_request(
                 user_id="test_user_12345",
                 thread_id="test_thread_12345", 
                 run_id="test_run_12345",
-                request_id="test_request_12345",  # Required field for models version
                 websocket_connection_id="test_ws_12345"
             )
             
@@ -125,14 +123,13 @@ class WebSocketEventTester:
         
         try:
             from netra_backend.app.services.agent_websocket_bridge import create_agent_websocket_bridge
-            from netra_backend.app.models.user_execution_context import UserExecutionContext
+            from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
             
-            # Create user context using constructor (models version doesn't have from_request)
-            user_context = UserExecutionContext(
+            # Create user context using from_request (supervisor version has this method)
+            user_context = UserExecutionContext.from_request(
                 user_id="test_user_12345",
                 thread_id="test_thread_12345", 
                 run_id="test_run_12345",
-                request_id="test_request_12345",  # Required field for models version
                 websocket_connection_id="test_ws_12345"
             )
             

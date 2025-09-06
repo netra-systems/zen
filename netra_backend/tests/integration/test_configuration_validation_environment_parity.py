@@ -312,7 +312,9 @@ class TestConfigurationValidationEnvironmentParity:
         # Test actual database connectivity (basic smoke test)
         try:
             import asyncpg
-            conn = await asyncpg.connect(db_url)
+            from shared.database_url_builder import DatabaseURLBuilder
+            normalized_url = DatabaseURLBuilder.format_for_asyncpg_driver(db_url)
+            conn = await asyncpg.connect(normalized_url)
             await conn.close()
             # If we can connect, database URL is fundamentally valid
         except Exception as e:

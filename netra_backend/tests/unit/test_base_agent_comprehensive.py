@@ -14,8 +14,8 @@ from netra_backend.app.agents.base.timing_collector import ExecutionTimingCollec
 from netra_backend.app.core.config import get_config
 import asyncio
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
-from netra_backend.app.core.agent_registry import AgentRegistry
-from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
+from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
 from shared.isolated_environment import IsolatedEnvironment
 
 
@@ -36,10 +36,10 @@ class TestBaseAgentComprehensive:
     
     @pytest.fixture
     def real_llm_manager(self):
+        pass
     """Use real service instance."""
     # TODO: Initialize real service
         """Create a real LLM manager instance"""
-    pass
         # Using real instance to minimize mocking
         return LLMManager()
     
@@ -92,7 +92,6 @@ class TestBaseAgentComprehensive:
     
     def test_correlation_id_generation_uniqueness_tracking(self, real_llm_manager):
         """Test 2: Tests correlation ID generation, uniqueness, and propagation"""
-    pass
         # Create multiple agents
         agents = []
         correlation_ids = set()
@@ -132,6 +131,7 @@ class TestBaseAgentComprehensive:
         assert test_agent.correlation_id == initial_id
     
             def test_config_loading_error_resilience(self, mock_get_env, mock_get_config, real_llm_manager):
+                pass
         """Test 3: Validates robust error handling when configuration loading fails"""
         # Test 1: Config loading raises exception
         mock_get_env.return_value = {}
@@ -166,8 +166,8 @@ class TestBaseAgentComprehensive:
         assert agent4._subagent_logging_enabled is True
     
                 def test_subagent_logging_configuration_states(self, mock_logger, mock_get_env, mock_get_config, real_llm_manager):
+                    pass
         """Test 4: Tests different logging configuration states and their effects"""
-    pass
         mock_get_env.return_value = {}
         
         # Test 1: Logging enabled
@@ -243,7 +243,6 @@ class TestBaseAgentComprehensive:
     @pytest.mark.asyncio
     async def test_shutdown_comprehensive(self, real_llm_manager):
         """Additional test: Comprehensive shutdown behavior validation"""
-    pass
         agent = ConcreteConcreteTestAgent(llm_manager=real_llm_manager, name="ShutdownConcreteTestAgent")
         
         # Set up some state (using modern patterns)

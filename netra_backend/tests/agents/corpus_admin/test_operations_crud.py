@@ -6,8 +6,8 @@ Business Value: Revenue-critical component
 
 import pytest
 from netra_backend.app.agents.corpus_admin.operations_crud import CorpusCRUDOperations
-from netra_backend.app.core.agent_registry import AgentRegistry
-from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
+from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
 from shared.isolated_environment import IsolatedEnvironment
 
 class TestOperationsCrud:

@@ -1,0 +1,274 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<specification>
+    <metadata>
+        <title>First Message Experience Specification</title>
+        <version>1.0.0</version>
+        <created>2025-01-06</created>
+        <category>mission-critical</category>
+        <business-impact>critical</business-impact>
+        <description>
+            Defines the complete E2E requirements and test scenarios for a user's first message interaction
+            with Netra Apex. This is the most critical user touchpoint for conversion and retention.
+        </description>
+    </metadata>
+
+    <business-context>
+        <value-proposition>
+            First message experience determines user activation and conversion pathway.
+            90% of platform value delivered through chat interactions.
+            Poor first experience = immediate churn.
+        </value-proposition>
+        <target-segment>Free tier users (conversion focus)</target-segment>
+        <success-metrics>
+            <metric name="response-time-p99">45 seconds</metric>
+            <metric name="success-rate">99.9%</metric>
+            <metric name="completion-rate">100%</metric>
+            <metric name="concurrent-users">50+</metric>
+        </success-metrics>
+    </business-context>
+
+    <technical-requirements>
+        <websocket-events>
+            <mandatory-sequence>
+                <event order="1" name="message_received" timing="&lt;100ms">
+                    <description>Confirms message processing started</description>
+                    <payload>
+                        <field name="message_id" type="string" required="true"/>
+                        <field name="timestamp" type="ISO8601" required="true"/>
+                        <field name="user_id" type="string" required="true"/>
+                    </payload>
+                </event>
+                <event order="2" name="agent_started" timing="&lt;500ms">
+                    <description>User sees AI agent has begun working</description>
+                    <payload>
+                        <field name="agent_id" type="string" required="true"/>
+                        <field name="agent_type" type="string" required="true"/>
+                        <field name="message" type="string" required="true"/>
+                    </payload>
+                </event>
+                <event order="3" name="agent_thinking" timing="2-5s intervals">
+                    <description>Real-time reasoning visibility</description>
+                    <payload>
+                        <field name="thought" type="string" required="true"/>
+                        <field name="progress" type="number" required="false"/>
+                    </payload>
+                </event>
+                <event order="4" name="tool_executing" timing="as-needed">
+                    <description>Tool usage transparency</description>
+                    <payload>
+                        <field name="tool_name" type="string" required="true"/>
+                        <field name="purpose" type="string" required="true"/>
+                    </payload>
+                </event>
+                <event order="5" name="tool_completed" timing="after-execution">
+                    <description>Tool results display</description>
+                    <payload>
+                        <field name="tool_name" type="string" required="true"/>
+                        <field name="result_summary" type="string" required="true"/>
+                    </payload>
+                </event>
+                <event order="6" name="agent_completed" timing="&lt;45s">
+                    <description>Final response ready</description>
+                    <payload>
+                        <field name="response" type="string" required="true"/>
+                        <field name="agent_id" type="string" required="true"/>
+                    </payload>
+                </event>
+                <event order="7" name="response_complete" timing="final">
+                    <description>Full interaction cycle finished</description>
+                    <payload>
+                        <field name="total_time_ms" type="number" required="true"/>
+                        <field name="success" type="boolean" required="true"/>
+                    </payload>
+                </event>
+            </mandatory-sequence>
+        </websocket-events>
+
+        <isolation-requirements>
+            <requirement name="user-context-factory">
+                Every first message MUST create a new UserExecutionContext via factory pattern
+            </requirement>
+            <requirement name="no-shared-state">
+                Zero shared state between concurrent first-time users
+            </requirement>
+            <requirement name="memory-isolation">
+                User A's processing cannot affect User B's memory/resources
+            </requirement>
+            <requirement name="database-isolation">
+                User-specific data remains completely separate
+            </requirement>
+        </isolation-requirements>
+
+        <agent-processing>
+            <requirement name="multi-agent-support">
+                Support specialized agents (UnifiedDataAgent, OptimizationAgent, etc.)
+            </requirement>
+            <requirement name="execution-order">
+                Follow AGENT_EXECUTION_ORDER_REASONING.md - Data BEFORE Optimization
+            </requirement>
+            <requirement name="tool-integration">
+                Seamless access to analysis tools via EnhancedToolExecutionEngine
+            </requirement>
+            <requirement name="websocket-notifications">
+                AgentRegistry MUST enhance tool dispatcher with WebSocketNotifier
+            </requirement>
+        </agent-processing>
+    </technical-requirements>
+
+    <test-scenarios>
+        <scenario id="happy-path" priority="critical">
+            <name>New User First Message Success</name>
+            <steps>
+                1. New user connects via WebSocket
+                2. User sends first message (e.g., "Help me optimize my AI costs")
+                3. System processes through agent pipeline
+                4. All WebSocket events sent in correct order
+                5. User receives complete, helpful response within 45s
+            </steps>
+            <validation>
+                - All 7 mandatory events received
+                - Response is substantive and actionable
+                - No errors in logs
+                - User context properly isolated
+            </validation>
+        </scenario>
+
+        <scenario id="concurrent-users" priority="critical">
+            <name>Multiple First-Time Users Simultaneously</name>
+            <steps>
+                1. Spawn 10+ WebSocket connections
+                2. Each sends unique first message
+                3. System processes all concurrently
+                4. Each user gets isolated response
+            </steps>
+            <validation>
+                - No data leakage between users
+                - All users receive correct responses
+                - Response times within SLO
+                - Resource usage remains stable
+            </validation>
+        </scenario>
+
+        <scenario id="service-degradation" priority="high">
+            <name>First Message During System Stress</name>
+            <steps>
+                1. Simulate slow LLM responses (10s delay)
+                2. User sends first message
+                3. System shows processing updates
+                4. Response completes despite delays
+            </steps>
+            <validation>
+                - agent_thinking events sent every 2-5s
+                - User informed of processing status
+                - Response eventually completes
+                - No timeout errors to user
+            </validation>
+        </scenario>
+
+        <scenario id="rapid-messages" priority="high">
+            <name>Multiple Messages in Quick Succession</name>
+            <steps>
+                1. User sends first message
+                2. Immediately sends 2-3 more messages
+                3. System queues and processes in order
+                4. All messages get responses
+            </steps>
+            <validation>
+                - Messages processed in FIFO order
+                - No lost messages
+                - Context maintained across messages
+                - WebSocket events properly sequenced
+            </validation>
+        </scenario>
+
+        <scenario id="connection-drop" priority="high">
+            <name>Network Issues During Processing</name>
+            <steps>
+                1. User sends first message
+                2. Disconnect WebSocket after agent_started
+                3. Processing continues server-side
+                4. User reconnects
+                5. User receives completed response
+            </steps>
+            <validation>
+                - Processing not interrupted by disconnect
+                - Response available on reconnect
+                - User context preserved
+                - No duplicate processing
+            </validation>
+        </scenario>
+
+        <scenario id="malformed-input" priority="medium">
+            <name>Invalid Message Handling</name>
+            <steps>
+                1. User sends empty message
+                2. User sends 10MB message
+                3. User sends special characters/emojis
+                4. User sends potential injection attempt
+            </steps>
+            <validation>
+                - Graceful error messages to user
+                - No system crashes
+                - Proper input sanitization
+                - Security boundaries maintained
+            </validation>
+        </scenario>
+
+        <scenario id="auth-edge-cases" priority="medium">
+            <name>Authentication Boundary Conditions</name>
+            <steps>
+                1. Anonymous user sends first message
+                2. Token expires during processing
+                3. Invalid session attempts message
+                4. Rate limited user attempts message
+            </steps>
+            <validation>
+                - Anonymous users can send first message
+                - Token renewal transparent to user
+                - Clear error messages for invalid sessions
+                - Rate limit communication is helpful
+            </validation>
+        </scenario>
+    </test-scenarios>
+
+    <implementation-guidelines>
+        <guideline name="use-real-services">
+            ALL tests MUST use real services (Docker, LLM, databases).
+            MOCKS ARE FORBIDDEN for E2E tests.
+        </guideline>
+        <guideline name="websocket-validation">
+            Use test_websocket_agent_events_suite.py patterns for event validation
+        </guideline>
+        <guideline name="factory-patterns">
+            Follow USER_CONTEXT_ARCHITECTURE.md for isolation patterns
+        </guideline>
+        <guideline name="performance-monitoring">
+            Include timing measurements for all critical paths
+        </guideline>
+        <guideline name="error-visibility">
+            Make all errors loud in logs while keeping user messages helpful
+        </guideline>
+    </implementation-guidelines>
+
+    <compliance-checklist>
+        <item>WebSocket event sequence matches specification</item>
+        <item>User isolation via factory patterns implemented</item>
+        <item>Response times meet SLO requirements</item>
+        <item>Error handling provides user-friendly messages</item>
+        <item>Concurrent user support validated</item>
+        <item>Service degradation handled gracefully</item>
+        <item>All scenarios tested with real services</item>
+        <item>Performance metrics collected and validated</item>
+        <item>Security boundaries maintained</item>
+        <item>Business value delivered (substantive AI responses)</item>
+    </compliance-checklist>
+
+    <related-specs>
+        <spec>USER_CONTEXT_ARCHITECTURE.md</spec>
+        <spec>learnings/websocket_agent_integration_critical.xml</spec>
+        <spec>learnings/agent_execution_order_fix_20250904.xml</spec>
+        <spec>AGENT_EXECUTION_ORDER_REASONING.md</spec>
+        <spec>docs/GOLDEN_AGENT_INDEX.md</spec>
+        <spec>tests/mission_critical/test_websocket_agent_events_suite.py</spec>
+    </related-specs>
+</specification>

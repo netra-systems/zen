@@ -20,7 +20,7 @@ import time
 from contextlib import asynccontextmanager
 from test_framework.database.test_database_manager import TestDatabaseManager
 from shared.isolated_environment import IsolatedEnvironment
-from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
 
 from netra_backend.app.db.postgres import get_async_db
 from netra_backend.app.dependencies import get_db_dependency

@@ -25,22 +25,19 @@ from datetime import datetime, timedelta
 from typing import Dict, List, Set, Any, Optional
 import threading
 import random
-from netra_backend.app.core.agent_registry import AgentRegistry
-from shared.isolated_environment import IsolatedEnvironment
-
 # CRITICAL: Add project root to Python path for imports
 project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
 if project_root not in sys.path:
     sys.path.insert(0, project_root)
 
 # Import environment after path setup
-from shared.isolated_environment import get_env
+from shared.isolated_environment import get_env, IsolatedEnvironment
 
 import pytest
 from loguru import logger
 
 # Import production components
-from netra_backend.app.core.registry.universal_registry import AgentRegistry
+from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
 from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
 from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext

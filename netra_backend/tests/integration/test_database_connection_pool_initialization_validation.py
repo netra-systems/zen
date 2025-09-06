@@ -99,7 +99,9 @@ class TestDatabaseConnectionPoolInitializationValidation:
         
         # Test implementation
         # PostgreSQL pool test
-        conn = await asyncpg.connect(test_containers['postgres']['url'])
+        from shared.database_url_builder import DatabaseURLBuilder
+        normalized_url = DatabaseURLBuilder.format_for_asyncpg_driver(test_containers['postgres']['url'])
+        conn = await asyncpg.connect(normalized_url)
         
         # Validate scenario
         assert True, "Test implementation needed"

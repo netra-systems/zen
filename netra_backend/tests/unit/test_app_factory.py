@@ -42,7 +42,6 @@ from netra_backend.app.core.exceptions_base import NetraException
     """Use real service instance."""
     # TODO: Initialize real service
     """Mock FastAPI application."""
-    pass
     # Mock: Component isolation for controlled unit testing
     app = Mock(spec=FastAPI)
     # Mock: Generic component isolation for controlled unit testing
@@ -62,7 +61,6 @@ def minimal_app():
     """Use real service instance."""
     # TODO: Initialize real service
     """Real minimal FastAPI app for lifecycle testing."""
-    pass
     return FastAPI()
 
 @pytest.fixture
@@ -70,7 +68,6 @@ def real_app():
     """Use real service instance."""
     # TODO: Initialize real service
     """Real FastAPI application for integration tests."""
-    pass
     return FastAPI()
 
 @pytest.fixture
@@ -78,7 +75,6 @@ def real_app():
     """Use real service instance."""
     # TODO: Initialize real service
     """Mock lifespan manager."""
-    pass
     # Mock: Component isolation for testing without external dependencies
     with patch('netra_backend.app.core.app_factory.lifespan') as mock:
         yield mock
@@ -92,7 +88,6 @@ def assert_exception_handler_added(app, exception_type):
 
 def assert_middleware_added(app, middleware_type):
     """Assert middleware was added to app."""
-    pass
     calls = app.middleware.call_args_list if hasattr(app.middleware, 'call_args_list') else []
     assert any("http" in str(call) for call in calls) or app.middleware.called
 
@@ -102,7 +97,6 @@ def get_handler_calls(app):
 
 def get_middleware_calls(app):
     """Get middleware calls from netra_backend.app."""
-    pass
     return app.middleware.call_args_list if hasattr(app.middleware, 'call_args_list') else []
 
 def assert_router_included(app, expected_count=None):
@@ -114,14 +108,12 @@ def assert_router_included(app, expected_count=None):
 
 def create_mock_router():
     """Create a mock router for testing."""
-    pass
     # Mock: Generic component isolation for controlled unit testing
     return None  # TODO: Use real service instance
 
 # Core app factory functionality tests
 class TestFastAPIAppCreation:
     """Test FastAPI application creation."""
-    pass
 
     def test_create_fastapi_app_returns_fastapi_instance(self, mock_lifespan):
         """create_fastapi_app returns FastAPI instance."""
@@ -130,7 +122,6 @@ class TestFastAPIAppCreation:
 
     def test_create_fastapi_app_uses_lifespan(self, mock_lifespan):
         """create_fastapi_app uses lifespan manager."""
-    pass
         create_fastapi_app()
         # Lifespan should be imported and used
 
@@ -149,7 +140,6 @@ class TestFastAPIAppCreation:
 
     def test_create_app_calls_configuration_methods(self, mock_app):
         """create_app calls all configuration methods."""
-    pass
         # Mock: Component isolation for testing without external dependencies
         with patch('netra_backend.app.core.app_factory.create_fastapi_app', return_value=mock_app):
             # Mock: Component isolation for testing without external dependencies
@@ -162,7 +152,6 @@ class TestFastAPIAppCreation:
 
 class TestErrorHandlerRegistration:
     """Test error handler registration."""
-    pass
 
     def test_register_error_handlers_adds_all_handlers(self, mock_app):
         """register_error_handlers adds all required handlers."""
@@ -171,7 +160,6 @@ class TestErrorHandlerRegistration:
 
     def test_netra_exception_handler_registered(self, mock_app):
         """NetraException handler is registered."""
-    pass
         register_error_handlers(mock_app)
         calls = get_handler_calls(mock_app)
         exception_types = [call[0][0] for call in calls]
@@ -186,7 +174,6 @@ class TestErrorHandlerRegistration:
 
     def test_http_exception_handler_registered(self, mock_app):
         """HTTPException handler is registered."""
-    pass
         register_error_handlers(mock_app)
         calls = get_handler_calls(mock_app)
         exception_types = [call[0][0] for call in calls]
@@ -201,7 +188,6 @@ class TestErrorHandlerRegistration:
 
 class TestSecurityMiddleware:
     """Test security middleware setup."""
-    pass
 
     def test_setup_security_middleware_calls_all_components(self, mock_app):
         """setup_security_middleware sets up all security components."""
@@ -216,7 +202,6 @@ class TestSecurityMiddleware:
 
     def test_path_traversal_middleware_added(self, mock_app):
         """Path traversal protection middleware is added."""
-    pass
         # Mock: Component isolation for testing without external dependencies
         with patch('netra_backend.app.middleware.path_traversal_protection.path_traversal_protection_middleware'):
             from netra_backend.app.core.app_factory import (
@@ -238,7 +223,6 @@ class TestSecurityMiddleware:
 
 class TestRequestMiddleware:
     """Test request middleware setup."""
-    pass
 
     def test_setup_request_middleware_calls_all_components(self, mock_app):
         """setup_request_middleware sets up all request components."""
@@ -264,7 +248,6 @@ class TestRequestMiddleware:
 
     def test_middleware_setup_calls_all_components(self, mock_app):
         """setup_middleware calls both security and request middleware."""
-    pass
         # Mock: Security service isolation for auth testing without real token validation
         with patch('netra_backend.app.core.app_factory.setup_security_middleware') as mock_security:
             # Mock: Component isolation for testing without external dependencies
@@ -275,7 +258,6 @@ class TestRequestMiddleware:
 
 class TestRouteRegistration:
     """Test API route registration."""
-    pass
 
     def test_register_api_routes_imports_and_registers(self, mock_app):
         """register_api_routes imports and registers routes."""
@@ -286,7 +268,6 @@ class TestRouteRegistration:
 
     def test_import_and_register_routes_process(self, mock_app):
         """_import_and_register_routes follows correct process."""
-    pass
         # Mock: Component isolation for testing without external dependencies
         with patch('netra_backend.app.core.app_factory.import_all_route_modules') as mock_import:
             # Mock: Component isolation for testing without external dependencies
@@ -313,7 +294,6 @@ class TestRouteRegistration:
 
     def test_multiple_routes_registration(self, mock_app):
         """Multiple routes are registered correctly."""
-    pass
         routes_config = {
             'route1': (create_mock_router(), '/api/route1', ['tag1']),
             'route2': (create_mock_router(), '/api/route2', ['tag2'])
@@ -324,7 +304,6 @@ class TestRouteRegistration:
 
 class TestRootEndpoint:
     """Test root endpoint setup."""
-    pass
 
     def test_setup_root_endpoint_adds_route(self, mock_app):
         """setup_root_endpoint adds root route."""
@@ -333,7 +312,6 @@ class TestRootEndpoint:
 
     def test_root_endpoint_handler_created(self, real_app):
         """Root endpoint handler is created correctly."""
-    pass
         # Mock: Component isolation for testing without external dependencies
         with patch('netra_backend.app.logging_config.central_logger') as mock_logger:
             # Mock: Generic component isolation for controlled unit testing
@@ -350,7 +328,6 @@ class TestRootEndpoint:
 
 class TestOAuthInitialization:
     """Test OAuth initialization."""
-    pass
 
     def test_initialize_oauth_is_noop(self, mock_app):
         """initialize_oauth is currently a no-op."""
@@ -360,14 +337,12 @@ class TestOAuthInitialization:
 
     def test_oauth_handled_by_auth_service(self, mock_app):
         """OAuth is handled by auth service, not app factory."""
-    pass
         # Test that the function acknowledges auth service handles OAuth
         result = initialize_oauth(mock_app)
         assert result is None  # Should return None (no-op)
 
 class TestConfigurationMethods:
     """Test configuration helper methods."""
-    pass
 
     def test_configure_app_handlers_calls_all_setup(self, mock_app):
         """_configure_app_handlers calls all handler setup methods."""
@@ -386,7 +361,6 @@ class TestConfigurationMethods:
 
     def test_configure_app_routes_calls_route_setup(self, mock_app):
         """_configure_app_routes calls route setup methods."""
-    pass
         # Mock: Component isolation for testing without external dependencies
         with patch('netra_backend.app.core.app_factory.register_api_routes') as mock_routes:
             # Mock: Component isolation for testing without external dependencies
@@ -398,7 +372,6 @@ class TestConfigurationMethods:
 
 class TestIntegrationScenarios:
     """Test integration scenarios and edge cases."""
-    pass
 
     def test_full_app_creation_integration(self):
         """Full app creation works end-to-end."""
@@ -411,7 +384,6 @@ class TestIntegrationScenarios:
 
     def test_error_handler_registration_order(self, mock_app):
         """Error handlers are registered in correct order."""
-    pass
         register_error_handlers(mock_app)
         calls = get_handler_calls(mock_app)
         # Should have at least 4 handlers registered
@@ -430,19 +402,16 @@ class TestIntegrationScenarios:
 
     def test_app_startup_shutdown_lifecycle(self, minimal_app):
         """App startup and shutdown lifecycle works correctly."""
-    pass
         startup_called = False
         shutdown_called = False
         
         @minimal_app.on_event("startup")
         def startup_event():
-    pass
             nonlocal startup_called
             startup_called = True
         
         @minimal_app.on_event("shutdown")
         def shutdown_event():
-    pass
             nonlocal shutdown_called
             shutdown_called = True
         

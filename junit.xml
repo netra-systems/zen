@@ -1,45 +1,17 @@
-<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="31" failures="0" skipped="1" tests="32" time="7.610" timestamp="2025-09-05T17:30:55.868685-07:00" hostname="Anthony"><testcase classname="" name="tests.critical.test_oauth_configuration_missing_staging_regression" time="0.000"><error message="collection failure">ImportError while importing test module 'C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\auth_service\tests\critical\test_oauth_configuration_missing_staging_regression.py'.
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="31" failures="0" skipped="1" tests="32" time="4.609" timestamp="2025-09-05T18:58:26.294410-07:00" hostname="Anthony"><testcase classname="" name="tests.critical.test_oauth_configuration_missing_staging_regression" time="0.000"><error message="collection failure">ImportError while importing test module 'C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\auth_service\tests\critical\test_oauth_configuration_missing_staging_regression.py'.
 Hint: make sure your test modules/packages have valid Python names.
 Traceback:
-..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\python.py:498: in importtestmodule
-    mod = import_path(
-..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\pathlib.py:587: in import_path
-    importlib.import_module(module_name)
 ..\..\..\..\miniconda3\Lib\importlib\__init__.py:90: in import_module
     return _bootstrap._gcd_import(name[level:], package, level)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-&lt;frozen importlib._bootstrap&gt;:1387: in _gcd_import
-    ???
-&lt;frozen importlib._bootstrap&gt;:1360: in _find_and_load
-    ???
-&lt;frozen importlib._bootstrap&gt;:1331: in _find_and_load_unlocked
-    ???
-&lt;frozen importlib._bootstrap&gt;:935: in _load_unlocked
-    ???
-..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\assertion\rewrite.py:186: in exec_module
-    exec(co, module.__dict__)
 auth_service\tests\critical\test_oauth_configuration_missing_staging_regression.py:26: in &lt;module&gt;
     from test_framework.database.test_database_manager import TestDatabaseManager
 E   ModuleNotFoundError: No module named 'test_framework.database'</error></testcase><testcase classname="" name="tests.helpers.test_repository_factory" time="0.000"><error message="collection failure">ImportError while importing test module 'C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\auth_service\tests\helpers\test_repository_factory.py'.
 Hint: make sure your test modules/packages have valid Python names.
 Traceback:
-..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\python.py:498: in importtestmodule
-    mod = import_path(
-..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\pathlib.py:587: in import_path
-    importlib.import_module(module_name)
 ..\..\..\..\miniconda3\Lib\importlib\__init__.py:90: in import_module
     return _bootstrap._gcd_import(name[level:], package, level)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-&lt;frozen importlib._bootstrap&gt;:1387: in _gcd_import
-    ???
-&lt;frozen importlib._bootstrap&gt;:1360: in _find_and_load
-    ???
-&lt;frozen importlib._bootstrap&gt;:1331: in _find_and_load_unlocked
-    ???
-&lt;frozen importlib._bootstrap&gt;:935: in _load_unlocked
-    ???
-..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\assertion\rewrite.py:186: in exec_module
-    exec(co, module.__dict__)
 auth_service\tests\helpers\test_repository_factory.py:7: in &lt;module&gt;
     from test_framework.database.test_database_manager import TestDatabaseManager
 E   ModuleNotFoundError: No module named 'test_framework.database'</error></testcase><testcase classname="" name="tests.integration.test_auth_endpoint_regression_prevention_integration" time="0.000"><error message="collection failure">..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\python.py:498: in importtestmodule
@@ -123,89 +95,33 @@ E       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 E   IndentationError: expected an indented block after function definition on line 31</error></testcase><testcase classname="" name="tests.test_auth_port_configuration" time="0.000"><error message="collection failure">ImportError while importing test module 'C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\auth_service\tests\test_auth_port_configuration.py'.
 Hint: make sure your test modules/packages have valid Python names.
 Traceback:
-..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\python.py:498: in importtestmodule
-    mod = import_path(
-..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\pathlib.py:587: in import_path
-    importlib.import_module(module_name)
 ..\..\..\..\miniconda3\Lib\importlib\__init__.py:90: in import_module
     return _bootstrap._gcd_import(name[level:], package, level)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-&lt;frozen importlib._bootstrap&gt;:1387: in _gcd_import
-    ???
-&lt;frozen importlib._bootstrap&gt;:1360: in _find_and_load
-    ???
-&lt;frozen importlib._bootstrap&gt;:1331: in _find_and_load_unlocked
-    ???
-&lt;frozen importlib._bootstrap&gt;:935: in _load_unlocked
-    ???
-..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\assertion\rewrite.py:186: in exec_module
-    exec(co, module.__dict__)
 auth_service\tests\test_auth_port_configuration.py:23: in &lt;module&gt;
     from test_framework.docker.unified_docker_manager import UnifiedDockerManager
 E   ModuleNotFoundError: No module named 'test_framework.docker'</error></testcase><testcase classname="" name="tests.test_auth_real_services_comprehensive" time="0.000"><skipped message="collection skipped">('C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\auth_service\\tests\\test_auth_real_services_comprehensive.py', 50, 'Skipped: Test framework functions have been removed')</skipped></testcase><testcase classname="" name="tests.test_auth_session_persistence_edge_cases" time="0.000"><error message="collection failure">ImportError while importing test module 'C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\auth_service\tests\test_auth_session_persistence_edge_cases.py'.
 Hint: make sure your test modules/packages have valid Python names.
 Traceback:
-..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\python.py:498: in importtestmodule
-    mod = import_path(
-..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\pathlib.py:587: in import_path
-    importlib.import_module(module_name)
 ..\..\..\..\miniconda3\Lib\importlib\__init__.py:90: in import_module
     return _bootstrap._gcd_import(name[level:], package, level)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-&lt;frozen importlib._bootstrap&gt;:1387: in _gcd_import
-    ???
-&lt;frozen importlib._bootstrap&gt;:1360: in _find_and_load
-    ???
-&lt;frozen importlib._bootstrap&gt;:1331: in _find_and_load_unlocked
-    ???
-&lt;frozen importlib._bootstrap&gt;:935: in _load_unlocked
-    ???
-..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\assertion\rewrite.py:186: in exec_module
-    exec(co, module.__dict__)
 auth_service\tests\test_auth_session_persistence_edge_cases.py:10: in &lt;module&gt;
     from test_framework.database.test_database_manager import TestDatabaseManager
 E   ModuleNotFoundError: No module named 'test_framework.database'</error></testcase><testcase classname="" name="tests.test_critical_bugs_simple" time="0.000"><error message="collection failure">ImportError while importing test module 'C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\auth_service\tests\test_critical_bugs_simple.py'.
 Hint: make sure your test modules/packages have valid Python names.
 Traceback:
-..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\python.py:498: in importtestmodule
-    mod = import_path(
-..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\pathlib.py:587: in import_path
-    importlib.import_module(module_name)
 ..\..\..\..\miniconda3\Lib\importlib\__init__.py:90: in import_module
     return _bootstrap._gcd_import(name[level:], package, level)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-&lt;frozen importlib._bootstrap&gt;:1387: in _gcd_import
-    ???
-&lt;frozen importlib._bootstrap&gt;:1360: in _find_and_load
-    ???
-&lt;frozen importlib._bootstrap&gt;:1331: in _find_and_load_unlocked
-    ???
-&lt;frozen importlib._bootstrap&gt;:935: in _load_unlocked
-    ???
-..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\assertion\rewrite.py:186: in exec_module
-    exec(co, module.__dict__)
 auth_service\tests\test_critical_bugs_simple.py:9: in &lt;module&gt;
     from test_framework.database.test_database_manager import TestDatabaseManager
 E   ModuleNotFoundError: No module named 'test_framework.database'</error></testcase><testcase classname="" name="tests.test_dev_login_endpoint" time="0.000"><error message="collection failure">ImportError while importing test module 'C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\auth_service\tests\test_dev_login_endpoint.py'.
 Hint: make sure your test modules/packages have valid Python names.
 Traceback:
-..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\python.py:498: in importtestmodule
-    mod = import_path(
-..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\pathlib.py:587: in import_path
-    importlib.import_module(module_name)
 ..\..\..\..\miniconda3\Lib\importlib\__init__.py:90: in import_module
     return _bootstrap._gcd_import(name[level:], package, level)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-&lt;frozen importlib._bootstrap&gt;:1387: in _gcd_import
-    ???
-&lt;frozen importlib._bootstrap&gt;:1360: in _find_and_load
-    ???
-&lt;frozen importlib._bootstrap&gt;:1331: in _find_and_load_unlocked
-    ???
-&lt;frozen importlib._bootstrap&gt;:935: in _load_unlocked
-    ???
-..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\assertion\rewrite.py:186: in exec_module
-    exec(co, module.__dict__)
 auth_service\tests\test_dev_login_endpoint.py:5: in &lt;module&gt;
     from auth_service.core.auth_manager import AuthManager
 E   ModuleNotFoundError: No module named 'auth_service.core'</error></testcase><testcase classname="" name="tests.test_oauth_redirect_regression" time="0.000"><error message="collection failure">..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\python.py:498: in importtestmodule
@@ -237,23 +153,9 @@ E                           ^
 E   IndentationError: unindent does not match any outer indentation level</error></testcase><testcase classname="" name="tests.test_oauth_security_vulnerabilities" time="0.000"><error message="collection failure">ImportError while importing test module 'C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\auth_service\tests\test_oauth_security_vulnerabilities.py'.
 Hint: make sure your test modules/packages have valid Python names.
 Traceback:
-..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\python.py:498: in importtestmodule
-    mod = import_path(
-..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\pathlib.py:587: in import_path
-    importlib.import_module(module_name)
 ..\..\..\..\miniconda3\Lib\importlib\__init__.py:90: in import_module
     return _bootstrap._gcd_import(name[level:], package, level)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-&lt;frozen importlib._bootstrap&gt;:1387: in _gcd_import
-    ???
-&lt;frozen importlib._bootstrap&gt;:1360: in _find_and_load
-    ???
-&lt;frozen importlib._bootstrap&gt;:1331: in _find_and_load_unlocked
-    ???
-&lt;frozen importlib._bootstrap&gt;:935: in _load_unlocked
-    ???
-..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\assertion\rewrite.py:186: in exec_module
-    exec(co, module.__dict__)
 auth_service\tests\test_oauth_security_vulnerabilities.py:12: in &lt;module&gt;
     from test_framework.database.test_database_manager import TestDatabaseManager
 E   ModuleNotFoundError: No module named 'test_framework.database'</error></testcase><testcase classname="" name="tests.test_oauth_state_validation" time="0.000"><error message="collection failure">..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\python.py:498: in importtestmodule
@@ -415,23 +317,9 @@ E       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 E   IndentationError: expected an indented block after function definition on line 20</error></testcase><testcase classname="" name="tests.test_restored_endpoints" time="0.000"><error message="collection failure">ImportError while importing test module 'C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\auth_service\tests\test_restored_endpoints.py'.
 Hint: make sure your test modules/packages have valid Python names.
 Traceback:
-..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\python.py:498: in importtestmodule
-    mod = import_path(
-..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\pathlib.py:587: in import_path
-    importlib.import_module(module_name)
 ..\..\..\..\miniconda3\Lib\importlib\__init__.py:90: in import_module
     return _bootstrap._gcd_import(name[level:], package, level)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-&lt;frozen importlib._bootstrap&gt;:1387: in _gcd_import
-    ???
-&lt;frozen importlib._bootstrap&gt;:1360: in _find_and_load
-    ???
-&lt;frozen importlib._bootstrap&gt;:1331: in _find_and_load_unlocked
-    ???
-&lt;frozen importlib._bootstrap&gt;:935: in _load_unlocked
-    ???
-..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\assertion\rewrite.py:186: in exec_module
-    exec(co, module.__dict__)
 auth_service\tests\test_restored_endpoints.py:4: in &lt;module&gt;
     from auth_service.core.auth_manager import AuthManager
 E   ModuleNotFoundError: No module named 'auth_service.core'</error></testcase><testcase classname="" name="tests.test_session_security_cycles_36_40" time="0.000"><error message="collection failure">..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\python.py:498: in importtestmodule
@@ -463,23 +351,9 @@ E       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 E   IndentationError: expected an indented block after function definition on line 57</error></testcase><testcase classname="" name="tests.test_signup_flow_comprehensive" time="0.000"><error message="collection failure">ImportError while importing test module 'C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\auth_service\tests\test_signup_flow_comprehensive.py'.
 Hint: make sure your test modules/packages have valid Python names.
 Traceback:
-..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\python.py:498: in importtestmodule
-    mod = import_path(
-..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\pathlib.py:587: in import_path
-    importlib.import_module(module_name)
 ..\..\..\..\miniconda3\Lib\importlib\__init__.py:90: in import_module
     return _bootstrap._gcd_import(name[level:], package, level)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-&lt;frozen importlib._bootstrap&gt;:1387: in _gcd_import
-    ???
-&lt;frozen importlib._bootstrap&gt;:1360: in _find_and_load
-    ???
-&lt;frozen importlib._bootstrap&gt;:1331: in _find_and_load_unlocked
-    ???
-&lt;frozen importlib._bootstrap&gt;:935: in _load_unlocked
-    ???
-..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\assertion\rewrite.py:186: in exec_module
-    exec(co, module.__dict__)
 auth_service\tests\test_signup_flow_comprehensive.py:9: in &lt;module&gt;
     from test_framework.database.test_database_manager import TestDatabaseManager
 E   ModuleNotFoundError: No module named 'test_framework.database'</error></testcase><testcase classname="" name="tests.test_token_validation_security_cycles_31_35" time="0.000"><error message="collection failure">..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\python.py:498: in importtestmodule
@@ -511,23 +385,9 @@ E       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 E   IndentationError: expected an indented block after function definition on line 43</error></testcase><testcase classname="" name="tests.unit.test_auth_config_comprehensive" time="0.000"><error message="collection failure">ImportError while importing test module 'C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\auth_service\tests\unit\test_auth_config_comprehensive.py'.
 Hint: make sure your test modules/packages have valid Python names.
 Traceback:
-..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\python.py:498: in importtestmodule
-    mod = import_path(
-..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\pathlib.py:587: in import_path
-    importlib.import_module(module_name)
 ..\..\..\..\miniconda3\Lib\importlib\__init__.py:90: in import_module
     return _bootstrap._gcd_import(name[level:], package, level)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-&lt;frozen importlib._bootstrap&gt;:1387: in _gcd_import
-    ???
-&lt;frozen importlib._bootstrap&gt;:1360: in _find_and_load
-    ???
-&lt;frozen importlib._bootstrap&gt;:1331: in _find_and_load_unlocked
-    ???
-&lt;frozen importlib._bootstrap&gt;:935: in _load_unlocked
-    ???
-..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\assertion\rewrite.py:186: in exec_module
-    exec(co, module.__dict__)
 auth_service\tests\unit\test_auth_config_comprehensive.py:10: in &lt;module&gt;
     from test_framework.database.test_database_manager import TestDatabaseManager
 E   ModuleNotFoundError: No module named 'test_framework.database'</error></testcase><testcase classname="" name="tests.unit.test_auth_endpoint_response_consistency" time="0.000"><error message="collection failure">..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\python.py:498: in importtestmodule
@@ -688,23 +548,9 @@ E       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 E   IndentationError: expected an indented block after function definition on line 22</error></testcase><testcase classname="" name="tests.unit.test_oauth_redirect_uri_regression" time="0.000"><error message="collection failure">ImportError while importing test module 'C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\auth_service\tests\unit\test_oauth_redirect_uri_regression.py'.
 Hint: make sure your test modules/packages have valid Python names.
 Traceback:
-..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\python.py:498: in importtestmodule
-    mod = import_path(
-..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\pathlib.py:587: in import_path
-    importlib.import_module(module_name)
 ..\..\..\..\miniconda3\Lib\importlib\__init__.py:90: in import_module
     return _bootstrap._gcd_import(name[level:], package, level)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-&lt;frozen importlib._bootstrap&gt;:1387: in _gcd_import
-    ???
-&lt;frozen importlib._bootstrap&gt;:1360: in _find_and_load
-    ???
-&lt;frozen importlib._bootstrap&gt;:1331: in _find_and_load_unlocked
-    ???
-&lt;frozen importlib._bootstrap&gt;:935: in _load_unlocked
-    ???
-..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\assertion\rewrite.py:186: in exec_module
-    exec(co, module.__dict__)
 auth_service\tests\unit\test_oauth_redirect_uri_regression.py:12: in &lt;module&gt;
     from test_framework.redis.test_redis_manager import TestRedisManager
 E   ModuleNotFoundError: No module named 'test_framework.redis'</error></testcase><testcase classname="" name="tests.unit.test_refresh_endpoint" time="0.000"><error message="collection failure">..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\python.py:498: in importtestmodule
@@ -736,23 +582,9 @@ E                               ^
 E   IndentationError: unindent does not match any outer indentation level</error></testcase><testcase classname="" name="tests.unit.test_registration_regression" time="0.000"><error message="collection failure">ImportError while importing test module 'C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\auth_service\tests\unit\test_registration_regression.py'.
 Hint: make sure your test modules/packages have valid Python names.
 Traceback:
-..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\python.py:498: in importtestmodule
-    mod = import_path(
-..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\pathlib.py:587: in import_path
-    importlib.import_module(module_name)
 ..\..\..\..\miniconda3\Lib\importlib\__init__.py:90: in import_module
     return _bootstrap._gcd_import(name[level:], package, level)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-&lt;frozen importlib._bootstrap&gt;:1387: in _gcd_import
-    ???
-&lt;frozen importlib._bootstrap&gt;:1360: in _find_and_load
-    ???
-&lt;frozen importlib._bootstrap&gt;:1331: in _find_and_load_unlocked
-    ???
-&lt;frozen importlib._bootstrap&gt;:935: in _load_unlocked
-    ???
-..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\assertion\rewrite.py:186: in exec_module
-    exec(co, module.__dict__)
 auth_service\tests\unit\test_registration_regression.py:9: in &lt;module&gt;
     from test_framework.database.test_database_manager import TestDatabaseManager
 E   ModuleNotFoundError: No module named 'test_framework.database'</error></testcase></testsuite></testsuites>

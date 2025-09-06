@@ -16,10 +16,11 @@ This test suite validates that action plans:
 import pytest
 from typing import Dict, Any, List
 import json
+from unittest.mock import AsyncMock
 from test_framework.redis.test_redis_manager import TestRedisManager
 from auth_service.core.auth_manager import AuthManager
-from netra_backend.app.core.agent_registry import AgentRegistry
-from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
+from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
 from shared.isolated_environment import IsolatedEnvironment
 
 from netra_backend.app.agents.actions_to_meet_goals_sub_agent import ActionsToMeetGoalsSubAgent
@@ -36,20 +37,19 @@ class TestActionFeasibilityLogic:
     @pytest.fixture
     async def actions_agent(self):
         """Create actions agent with mocked dependencies."""
-        llm_manager = AsyncNone  # TODO: Use real service instance
-        tool_dispatcher = AsyncNone  # TODO: Use real service instance
+        llm_manager = AsyncMock()
+        tool_dispatcher = AsyncMock()
         
         agent = ActionsToMeetGoalsSubAgent(
             llm_manager=llm_manager,
             tool_dispatcher=tool_dispatcher
         )
         await asyncio.sleep(0)
-    return agent
+        return agent
     
     @pytest.fixture
     def action_scenarios(self) -> List[Dict[str, Any]]:
         """Realistic action planning scenarios."""
-    pass
         return [
             {
                 "name": "model_switching_implementation",
@@ -286,7 +286,6 @@ class TestActionFeasibilityLogic:
     @pytest.mark.asyncio
     async def test_edge_case_handling(self, actions_agent):
         """Test handling of edge cases in action planning."""
-    pass
         edge_cases = [
             {
                 "name": "vague_optimization",
@@ -393,7 +392,6 @@ class TestActionFeasibilityLogic:
     @pytest.mark.asyncio
     async def test_dependency_management(self, actions_agent, action_scenarios):
         """Test that action dependencies are properly defined."""
-    pass
         scenario = action_scenarios[0]  # Has dependencies
         
         context = ExecutionContext(
@@ -426,15 +424,13 @@ class TestActionFeasibilityLogic:
         
         # Check for circular dependencies (simplified)
         def has_circular_dep(actions):
-    """Use real service instance."""
-    # TODO: Initialize real service
+            """Check for circular dependencies in actions."""
             visited = set()
             rec_stack = set()
             
             def visit(action_title):
                 if action_title in rec_stack:
-                    await asyncio.sleep(0)
-    return True
+                    return True
                 if action_title in visited:
                     return False
                 
@@ -460,7 +456,6 @@ class TestActionFeasibilityLogic:
     @pytest.mark.asyncio
     async def test_resource_allocation(self, actions_agent):
         """Test realistic resource allocation in action plans."""
-    pass
         context = ExecutionContext(
             thread_id="test_resources",
             user_message="Plan with resource constraints",
@@ -585,7 +580,6 @@ class TestActionFeasibilityLogic:
     @pytest.mark.asyncio
     async def test_success_metrics_definition(self, actions_agent):
         """Test that actions define clear, measurable success metrics."""
-    pass
         context = ExecutionContext(
             thread_id="test_success_metrics",
             user_message="Define success metrics",

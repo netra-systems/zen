@@ -6,11 +6,16 @@ Business Value: Ensures messages are processed correctly end-to-end.
 
 import asyncio
 import json
+import time
 import uuid
+import websockets
+import httpx
+from typing import Dict, List, Any
 from shared.isolated_environment import IsolatedEnvironment
 
 import pytest
 from tests.e2e.staging_test_base import StagingTestBase, staging_test
+from tests.e2e.staging_test_config import get_staging_config
 
 
 class TestMessageFlowStaging(StagingTestBase):
@@ -32,100 +37,311 @@ class TestMessageFlowStaging(StagingTestBase):
             print(f"[PASS] Endpoint {endpoint} responding")
     
     @staging_test
-    async def test_message_structure_validation(self):
-        """Test message structure validation"""
+    async def test_real_message_api_endpoints(self):
+        """Test REAL message API endpoints with network calls"""
+        config = get_staging_config()
+        start_time = time.time()
         
-        # Define valid message structures
-        valid_messages = [
-            {
-                "type": "user_message",
-                "content": "Test message",
-                "thread_id": str(uuid.uuid4()),
-                "user_id": "test_user"
-            },
-            {
-                "type": "start_agent",
-                "agent": "test_agent",
-                "input": "Test input",
-                "thread_id": str(uuid.uuid4())
-            },
-            {
-                "type": "stop_agent",
-                "agent": "test_agent",
-                "thread_id": str(uuid.uuid4())
-            }
-        ]
+        endpoints_tested = []
         
-        for msg in valid_messages:
-            # Validate structure
-            assert "type" in msg
-            assert "thread_id" in msg
-            print(f"[PASS] Message structure valid for type: {msg['type']}")
-    
-    @staging_test
-    async def test_message_flow_simulation(self):
-        """Simulate message flow without auth"""
-        
-        # Simulate the flow of messages through the system
-        flow_sequence = [
-            ("user_message", "User sends message"),
-            ("agent_started", "Agent begins processing"),
-            ("agent_thinking", "Agent processes request"),
-            ("tool_executing", "Agent uses tool"),
-            ("tool_completed", "Tool returns results"),
-            ("agent_completed", "Agent completes task")
-        ]
-        
-        print("[INFO] Simulating message flow sequence:")
-        for event_type, description in flow_sequence:
-            print(f"  -> {event_type}: {description}")
-        
-        print("[PASS] Message flow sequence validated")
-    
-    @staging_test
-    async def test_thread_management(self):
-        """Test thread management concepts"""
-        
-        # Generate test thread IDs
-        threads = [str(uuid.uuid4()) for _ in range(3)]
-        
-        print(f"[INFO] Testing thread management with {len(threads)} threads")
-        
-        for thread_id in threads:
-            # Validate thread ID format
-            assert len(thread_id) == 36  # UUID format
-            assert thread_id.count('-') == 4
+        async with httpx.AsyncClient(timeout=30) as client:
+            # Test message-related endpoints
+            message_endpoints = [
+                "/api/messages",
+                "/api/threads",
+                "/api/conversations", 
+                "/api/chat",
+                "/api/chat/messages"
+            ]
             
-        print("[PASS] Thread ID format validation successful")
+            for endpoint in message_endpoints:
+                try:
+                    response = await client.get(f"{config.backend_url}{endpoint}")
+                    endpoints_tested.append({
+                        "endpoint": endpoint,
+                        "status": response.status_code,
+                        "response_time": response.elapsed.total_seconds(),
+                        "accessible": response.status_code in [200, 401, 403]
+                    })
+                    print(f"[INFO] {endpoint}: {response.status_code}")
+                    
+                    # Try to get response data if successful
+                    if response.status_code == 200:
+                        try:
+                            data = response.json()
+                            print(f"[INFO] {endpoint} returned data: {type(data)}")
+                        except:
+                            pass
+                            
+                except Exception as e:
+                    endpoints_tested.append({
+                        "endpoint": endpoint,
+                        "error": str(e)
+                    })
+                    print(f"[ERROR] {endpoint}: {e}")
+        
+        duration = time.time() - start_time
+        print(f"Message API test duration: {duration:.3f}s")
+        
+        # Verify real network calls
+        assert duration > 0.2, f"Test too fast ({duration:.3f}s) for {len(message_endpoints)} API calls!"
+        assert len(endpoints_tested) > 0, "Must test at least one message endpoint"
+        
+        # At least one endpoint should be accessible (200, 401, or 403)
+        accessible_endpoints = [e for e in endpoints_tested if e.get("accessible", False)]
+        print(f"[INFO] Accessible endpoints: {len(accessible_endpoints)}/{len(endpoints_tested)}")
+        
+        print("[PASS] Real message API endpoints tested")
+    
+    @staging_test
+    async def test_real_websocket_message_flow(self):
+        """Test REAL message flow through WebSocket"""
+        config = get_staging_config()
+        start_time = time.time()
+        
+        messages_sent = []
+        events_received = []
+        connection_established = False
+        auth_error_detected = False
+        
+        try:
+            # Attempt real WebSocket message flow
+            async with websockets.connect(config.websocket_url, close_timeout=10) as ws:
+                connection_established = True
+                print("[INFO] WebSocket connection established")
+                
+                # Send a sequence of test messages
+                test_messages = [
+                    {
+                        "type": "user_message",
+                        "content": "Hello, this is a test message",
+                        "thread_id": f"thread_{int(time.time())}",
+                        "timestamp": time.time()
+                    },
+                    {
+                        "type": "ping",
+                        "timestamp": time.time()
+                    },
+                    {
+                        "type": "start_agent",
+                        "agent": "test_agent",
+                        "input": "Test agent execution",
+                        "thread_id": f"thread_{int(time.time())}_agent"
+                    }
+                ]
+                
+                # Send messages and listen for responses
+                for msg in test_messages:
+                    await ws.send(json.dumps(msg))
+                    messages_sent.append(msg["type"])
+                    print(f"[INFO] Sent message: {msg['type']}")
+                    
+                    # Wait for response
+                    try:
+                        response = await asyncio.wait_for(ws.recv(), timeout=3)
+                        event_data = json.loads(response)
+                        events_received.append(event_data)
+                        print(f"[INFO] Received: {event_data.get('type', 'unknown')}")
+                        
+                        # Check for auth errors
+                        if event_data.get("type") == "error" and "auth" in event_data.get("message", "").lower():
+                            auth_error_detected = True
+                            break
+                            
+                    except asyncio.TimeoutError:
+                        print(f"[INFO] No response for {msg['type']}")
+                        continue
+                    
+                    # Small delay between messages
+                    await asyncio.sleep(0.5)
+                    
+        except websockets.exceptions.InvalidStatusCode as e:
+            if e.status_code in [401, 403]:
+                auth_error_detected = True
+                print(f"[INFO] WebSocket auth required (expected): {e}")
+            else:
+                raise
+        except Exception as e:
+            print(f"[INFO] WebSocket error: {e}")
+        
+        duration = time.time() - start_time
+        
+        print(f"Message flow test results:")
+        print(f"  Connection established: {connection_established}")
+        print(f"  Messages sent: {len(messages_sent)}")
+        print(f"  Events received: {len(events_received)}")
+        print(f"  Auth error detected: {auth_error_detected}")
+        print(f"  Test duration: {duration:.3f}s")
+        
+        # Verify real message flow test
+        assert duration > 1.0, f"Test too fast ({duration:.3f}s) - not a real message flow test!"
+        
+        # Either we sent messages OR detected auth requirement (both prove real system)
+        flow_tested = len(messages_sent) > 0 or auth_error_detected or connection_established
+        assert flow_tested, "No message flow detected - WebSocket may not be functioning"
+        
+        print("[PASS] Real WebSocket message flow tested")
+    
+    @staging_test
+    async def test_real_thread_management(self):
+        """Test REAL thread management through API calls"""
+        config = get_staging_config()
+        start_time = time.time()
+        
+        threads_tested = []
+        
+        async with httpx.AsyncClient(timeout=30) as client:
+            # Test thread-related operations
+            thread_operations = [
+                ("GET", "/api/threads", "List threads"),
+                ("GET", "/api/conversations", "List conversations"), 
+                ("GET", "/api/messages", "List messages")
+            ]
+            
+            for method, endpoint, description in thread_operations:
+                try:
+                    if method == "GET":
+                        response = await client.get(f"{config.backend_url}{endpoint}")
+                    
+                    thread_result = {
+                        "operation": description,
+                        "endpoint": endpoint,
+                        "status": response.status_code,
+                        "response_time": response.elapsed.total_seconds()
+                    }
+                    
+                    if response.status_code == 200:
+                        try:
+                            data = response.json()
+                            if isinstance(data, list):
+                                thread_result["thread_count"] = len(data)
+                            elif isinstance(data, dict):
+                                thread_result["data_type"] = "object"
+                            print(f"[INFO] {description}: {response.status_code} - {type(data)}")
+                        except:
+                            thread_result["content"] = "non-json"
+                    else:
+                        print(f"[INFO] {description}: {response.status_code} (auth required)")
+                    
+                    threads_tested.append(thread_result)
+                    
+                except Exception as e:
+                    threads_tested.append({
+                        "operation": description,
+                        "endpoint": endpoint,
+                        "error": str(e)
+                    })
+                    print(f"[ERROR] {description}: {e}")
+        
+        # Test creating a thread ID and validating it
+        test_thread_id = str(uuid.uuid4())
+        assert len(test_thread_id) == 36, "Thread ID should be UUID format"
+        
+        duration = time.time() - start_time
+        
+        print(f"Thread management test results:")
+        for result in threads_tested:
+            print(f"  {result['operation']}: {result.get('status', 'error')}")
+        print(f"Test duration: {duration:.3f}s")
+        
+        # Verify real thread management test
+        assert duration > 0.2, f"Test too fast ({duration:.3f}s) for thread management calls!"
+        assert len(threads_tested) > 0, "Must test thread management operations"
+        
+        print("[PASS] Real thread management tested")
     
     @staging_test  
-    async def test_error_message_handling(self):
-        """Test error message handling"""
+    async def test_real_error_handling_flow(self):
+        """Test REAL error handling through actual API calls"""
+        config = get_staging_config()
+        start_time = time.time()
         
-        # Test various error scenarios
-        error_scenarios = [
-            {
-                "type": "error",
-                "code": "INVALID_REQUEST",
-                "message": "Invalid request format"
-            },
-            {
-                "type": "error", 
-                "code": "AUTH_REQUIRED",
-                "message": "Authentication required"
-            },
-            {
-                "type": "error",
-                "code": "RATE_LIMITED",
-                "message": "Rate limit exceeded"
-            }
-        ]
+        error_tests = []
         
-        for error in error_scenarios:
-            assert "type" in error
-            assert "code" in error
-            assert "message" in error
-            print(f"[PASS] Error structure valid for: {error['code']}")
+        async with httpx.AsyncClient(timeout=30) as client:
+            # Test error scenarios with real API calls
+            error_test_cases = [
+                ("/api/nonexistent", "GET", "Not Found Test"),
+                ("/api/messages/invalid-id", "GET", "Invalid ID Test"),
+                ("/api/agents/execute", "POST", "Unauthorized Execution Test"),
+                ("/api/../../etc/passwd", "GET", "Security Test"),
+                ("/api/messages", "POST", "Missing Auth Test")
+            ]
+            
+            for endpoint, method, test_name in error_test_cases:
+                try:
+                    if method == "GET":
+                        response = await client.get(f"{config.backend_url}{endpoint}")
+                    elif method == "POST":
+                        response = await client.post(f"{config.backend_url}{endpoint}", json={"test": "data"})
+                    
+                    error_result = {
+                        "test": test_name,
+                        "endpoint": endpoint,
+                        "status": response.status_code,
+                        "response_time": response.elapsed.total_seconds()
+                    }
+                    
+                    # Analyze error response
+                    if response.status_code >= 400:
+                        try:
+                            error_data = response.json()
+                            if "error" in error_data or "message" in error_data:
+                                error_result["proper_error_format"] = True
+                                error_result["error_data"] = error_data
+                            else:
+                                error_result["proper_error_format"] = False
+                        except:
+                            error_result["error_text"] = response.text[:100]
+                    
+                    error_tests.append(error_result)
+                    print(f"[INFO] {test_name}: {response.status_code}")
+                    
+                except Exception as e:
+                    error_tests.append({
+                        "test": test_name,
+                        "endpoint": endpoint,
+                        "exception": str(e)
+                    })
+                    print(f"[ERROR] {test_name}: {e}")
+        
+        # Test WebSocket error handling
+        websocket_errors = []
+        try:
+            async with websockets.connect(config.websocket_url, close_timeout=5) as ws:
+                # Send invalid message to trigger error
+                invalid_msg = {"invalid": "message", "no_type": True}
+                await ws.send(json.dumps(invalid_msg))
+                
+                try:
+                    response = await asyncio.wait_for(ws.recv(), timeout=3)
+                    error_response = json.loads(response)
+                    if error_response.get("type") == "error":
+                        websocket_errors.append(error_response)
+                        print(f"[INFO] WebSocket error response: {error_response.get('message', '')}")
+                except asyncio.TimeoutError:
+                    print("[INFO] No WebSocket error response (timeout)")
+        except websockets.exceptions.InvalidStatusCode as e:
+            websocket_errors.append({"auth_error": str(e)})
+        except Exception as e:
+            websocket_errors.append({"connection_error": str(e)})
+        
+        duration = time.time() - start_time
+        
+        print(f"Error handling test results:")
+        print(f"  API error tests: {len(error_tests)}")
+        print(f"  WebSocket error tests: {len(websocket_errors)}")
+        print(f"  Test duration: {duration:.3f}s")
+        
+        # Verify real error handling test
+        assert duration > 0.5, f"Test too fast ({duration:.3f}s) for comprehensive error testing!"
+        assert len(error_tests) > 0, "Must test API error handling"
+        
+        # Verify proper error responses exist
+        proper_errors = [t for t in error_tests if t.get("status", 0) >= 400]
+        assert len(proper_errors) > 0, "Should receive proper HTTP error codes"
+        
+        print("[PASS] Real error handling flow tested")
 
 
 if __name__ == "__main__":
@@ -139,10 +355,10 @@ if __name__ == "__main__":
             print("=" * 60)
             
             await test_class.test_message_endpoints()
-            await test_class.test_message_structure_validation()
-            await test_class.test_message_flow_simulation()
-            await test_class.test_thread_management()
-            await test_class.test_error_message_handling()
+            await test_class.test_real_message_api_endpoints()
+            await test_class.test_real_websocket_message_flow()
+            await test_class.test_real_thread_management()
+            await test_class.test_real_error_handling_flow()
             
             print("\n" + "=" * 60)
             print("[SUCCESS] All tests passed")

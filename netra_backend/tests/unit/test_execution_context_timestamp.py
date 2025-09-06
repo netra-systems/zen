@@ -4,8 +4,8 @@ import pytest
 from datetime import datetime, timezone
 import time
 from netra_backend.app.agents.base.execution_context import (
-from netra_backend.app.core.agent_registry import AgentRegistry
-from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
+from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
 from shared.isolated_environment import IsolatedEnvironment
     ExecutionContext,
     ExecutionMetadata,
@@ -36,7 +36,6 @@ class TestExecutionContextTimestamp:
         
     def test_agent_execution_context_has_timestamp(self):
         """Test that AgentExecutionContext has a timestamp attribute."""
-    pass
         context = AgentExecutionContext(
             context_id="agent-context-123",
             agent_id="test-agent",
@@ -73,7 +72,6 @@ class TestExecutionContextTimestamp:
             
     def test_execution_metadata_has_timestamp_compatibility(self):
         """Test ExecutionMetadata provides timestamp through start_time."""
-    pass
         metadata = ExecutionMetadata(
             agent_id="test",
             operation="test-op"

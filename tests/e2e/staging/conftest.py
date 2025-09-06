@@ -120,7 +120,7 @@ def generate_test_report():
     report_path = Path("STAGING_TEST_REPORT_PYTEST.md")
     summary = collector.get_summary()
     
-    with open(report_path, "w") as f:
+    with open(report_path, "w", encoding="utf-8") as f:
         f.write("# Staging E2E Test Report - Pytest Results\n\n")
         f.write(f"**Generated:** {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
         f.write(f"**Environment:** Staging\n")
@@ -151,7 +151,7 @@ def generate_test_report():
                 f.write("|-----------|--------|----------|------|\n")
                 
                 for result in priority_results:
-                    status_icon = "✅" if result["outcome"] == "passed" else "❌" if result["outcome"] == "failed" else "⏭️"
+                    status_icon = "PASS" if result["outcome"] == "passed" else "FAIL" if result["outcome"] == "failed" else "SKIP"
                     f.write(f"| {result['test_name']} | {status_icon} {result['outcome']} | {result['duration']:.3f}s | {Path(result['test_file']).name} |\n")
                 f.write("\n")
         
@@ -161,7 +161,7 @@ def generate_test_report():
             failed_results = [r for r in collector.results if r["outcome"] == "failed"]
             
             for result in failed_results:
-                f.write(f"### ❌ {result['test_name']}\n")
+                f.write(f"### FAILED: {result['test_name']}\n")
                 f.write(f"- **File:** {result['test_file']}\n")
                 f.write(f"- **Duration:** {result['duration']:.3f}s\n")
                 if "error" in result:

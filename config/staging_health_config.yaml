@@ -1,0 +1,603 @@
+# Staging Environment Health Check Configuration
+# This configuration defines health check intervals, alert thresholds,
+# notification channels, and auto-remediation actions.
+
+# Global health monitoring settings
+global:
+  environment: staging
+  service_name: netra_staging_environment
+  version: "1.0.0"
+  sla_target: 99.5
+  monitoring_enabled: true
+  
+# Health check intervals and timeouts
+intervals:
+  # How often to run comprehensive health checks (seconds)
+  comprehensive_check_interval: 300  # 5 minutes
+  
+  # How often to run critical component checks (seconds)
+  critical_check_interval: 60  # 1 minute
+  
+  # How often to run performance metrics collection (seconds)
+  performance_check_interval: 30  # 30 seconds
+  
+  # How often to run resource monitoring (seconds)
+  resource_check_interval: 15  # 15 seconds
+  
+  # Timeout for individual health checks (seconds)
+  health_check_timeout: 10.0
+  
+  # Timeout for API health checks (seconds)
+  api_check_timeout: 5.0
+  
+  # Timeout for database health checks (seconds)
+  database_check_timeout: 3.0
+
+# Alert thresholds and conditions
+thresholds:
+  # Overall system health
+  overall_health_threshold: 0.8  # Alert if below 80%
+  overall_health_critical_threshold: 0.6  # Critical alert if below 60%
+  
+  # Component failures
+  component_failure_threshold: 2  # Alert if 2+ components fail
+  component_failure_critical_threshold: 3  # Critical alert if 3+ components fail
+  
+  # Response time thresholds (milliseconds)
+  api_response_time_warning: 500
+  api_response_time_critical: 1000
+  websocket_latency_warning: 100
+  websocket_latency_critical: 200
+  database_query_time_warning: 50
+  database_query_time_critical: 100
+  
+  # Resource usage thresholds (percentage)
+  cpu_usage_warning: 70
+  cpu_usage_critical: 85
+  memory_usage_warning: 80
+  memory_usage_critical: 90
+  disk_usage_warning: 85
+  disk_usage_critical: 95
+  
+  # Connection thresholds
+  connection_count_warning: 800
+  connection_count_critical: 1000
+  
+  # Consecutive failure thresholds
+  consecutive_failure_warning: 3
+  consecutive_failure_critical: 5
+  
+  # Business impact thresholds
+  user_impact_warning: 10  # Warn if >10% users impacted
+  user_impact_critical: 50  # Critical if >50% users impacted
+
+# Health check components configuration
+components:
+  # WebSocket monitoring
+  websocket:
+    enabled: true
+    priority: critical
+    check_interval: 60
+    timeout: 10.0
+    checks:
+      - server_availability
+      - event_transmission
+      - event_pipeline
+      - critical_events_support
+    thresholds:
+      health_score_warning: 0.8
+      health_score_critical: 0.6
+      event_delivery_success_rate: 0.95
+  
+  # Database monitoring
+  databases:
+    postgres:
+      enabled: true
+      priority: critical
+      check_interval: 30
+      timeout: 5.0
+      connection_string_env: "DATABASE_URL"
+      checks:
+        - connectivity
+        - query_performance
+        - connection_pool_status
+      thresholds:
+        query_time_warning: 50  # ms
+        query_time_critical: 100  # ms
+        connection_pool_utilization_warning: 0.8
+        connection_pool_utilization_critical: 0.95
+    
+    redis:
+      enabled: true
+      priority: high
+      check_interval: 30
+      timeout: 3.0
+      checks:
+        - connectivity
+        - response_time
+        - memory_usage
+      thresholds:
+        response_time_warning: 10  # ms
+        response_time_critical: 50  # ms
+        memory_usage_warning: 0.8
+        memory_usage_critical: 0.95
+    
+    clickhouse:
+      enabled: true
+      priority: medium
+      check_interval: 60
+      timeout: 10.0
+      checks:
+        - connectivity
+        - query_performance
+      thresholds:
+        query_time_warning: 100  # ms
+        query_time_critical: 500  # ms
+  
+  # Service dependencies
+  services:
+    auth_service:
+      enabled: true
+      priority: critical
+      check_interval: 30
+      timeout: 5.0
+      endpoint: "http://localhost:8081/health"
+      checks:
+        - availability
+        - response_time
+        - authentication_functionality
+      thresholds:
+        response_time_warning: 200  # ms
+        response_time_critical: 500  # ms
+    
+    backend:
+      enabled: true
+      priority: critical
+      check_interval: 30
+      timeout: 5.0
+      endpoint: "http://localhost:8000/health"
+      checks:
+        - availability
+        - response_time
+        - api_functionality
+      thresholds:
+        response_time_warning: 300  # ms
+        response_time_critical: 1000  # ms
+    
+    frontend:
+      enabled: true
+      priority: medium
+      check_interval: 60
+      timeout: 10.0
+      endpoint: "http://localhost:3000/health"
+      checks:
+        - availability
+        - static_assets
+      thresholds:
+        response_time_warning: 1000  # ms
+        response_time_critical: 3000  # ms
+  
+  # System resources
+  resources:
+    enabled: true
+    priority: high
+    check_interval: 15
+    checks:
+      - cpu_usage
+      - memory_usage
+      - disk_usage
+      - network_connections
+    thresholds:
+      cpu_warning: 70  # percentage
+      cpu_critical: 85  # percentage
+      memory_warning: 80  # percentage
+      memory_critical: 90  # percentage
+      disk_warning: 85  # percentage
+      disk_critical: 95  # percentage
+  
+  # Configuration consistency
+  configuration:
+    enabled: true
+    priority: medium
+    check_interval: 300  # 5 minutes
+    checks:
+      - environment_variables
+      - database_configuration
+      - auth_configuration
+      - websocket_configuration
+    required_env_vars:
+      - DATABASE_URL
+      - JWT_SECRET_KEY
+      - ENVIRONMENT
+      - WEBSOCKET_ENABLED
+
+# Deployment-specific health checks
+deployment:
+  pre_deployment:
+    enabled: true
+    timeout: 180  # 3 minutes total timeout
+    required_checks:
+      - websocket_health
+      - database_health
+      - service_health
+      - configuration_health
+      - resource_availability
+    approval_criteria:
+      min_health_score: 0.8
+      max_failed_components: 1
+      max_critical_failures: 0
+  
+  post_deployment:
+    enabled: true
+    timeout: 300  # 5 minutes total timeout
+    stabilization_wait: 30  # Wait 30 seconds for deployment to stabilize
+    required_checks:
+      - websocket_health
+      - database_health
+      - service_health
+      - configuration_health
+      - performance_metrics
+      - business_impact
+    rollback_criteria:
+      min_health_score: 0.5
+      max_failed_components: 3
+      max_critical_failures: 1
+      business_impact_critical: true
+
+# Continuous monitoring configuration
+continuous_monitoring:
+  enabled: true
+  interval: 60  # seconds
+  retention_period: 86400  # 24 hours in seconds
+  
+  checks:
+    - critical_components
+    - performance_degradation
+    - resource_exhaustion
+    - alert_conditions
+  
+  # Trend analysis settings
+  trend_analysis:
+    enabled: true
+    history_window: 3600  # 1 hour
+    min_data_points: 10
+    degradation_threshold: 0.1  # 10% degradation triggers alert
+  
+  # Performance prediction
+  performance_prediction:
+    enabled: true
+    prediction_window: 1800  # 30 minutes
+    confidence_threshold: 0.7
+    models:
+      - linear_regression
+      - moving_average
+
+# Alert and notification configuration
+alerts:
+  # Alert levels
+  levels:
+    info:
+      enabled: true
+      cooldown: 300  # 5 minutes
+    warning:
+      enabled: true
+      cooldown: 120  # 2 minutes
+    critical:
+      enabled: true
+      cooldown: 60  # 1 minute
+      escalation_timeout: 300  # 5 minutes
+  
+  # Alert aggregation
+  aggregation:
+    enabled: true
+    window: 60  # seconds
+    max_alerts_per_window: 5
+  
+  # Alert routing
+  routing:
+    - condition: "severity == 'critical'"
+      channels: ["slack_critical", "email_oncall", "webhook_primary"]
+    - condition: "severity == 'warning'"
+      channels: ["slack_general", "webhook_primary"]
+    - condition: "severity == 'info'"
+      channels: ["webhook_primary"]
+
+# Notification channels
+notifications:
+  # Webhook configurations
+  webhooks:
+    webhook_primary:
+      enabled: true
+      url: "${HEALTH_WEBHOOK_URL}"  # Environment variable
+      timeout: 10
+      retry_attempts: 3
+      retry_delay: 5
+      headers:
+        Content-Type: "application/json"
+        Authorization: "Bearer ${WEBHOOK_TOKEN}"
+    
+    webhook_secondary:
+      enabled: false
+      url: "${HEALTH_WEBHOOK_SECONDARY_URL}"
+      timeout: 10
+      retry_attempts: 2
+  
+  # Email configurations
+  email:
+    smtp_server: "${SMTP_SERVER}"
+    smtp_port: 587
+    smtp_username: "${SMTP_USERNAME}"
+    smtp_password: "${SMTP_PASSWORD}"
+    from_address: "staging-health@netra.ai"
+    
+    recipients:
+      oncall:
+        - "${ONCALL_EMAIL}"
+      general:
+        - "${TEAM_EMAIL}"
+  
+  # Slack configurations
+  slack:
+    webhook_url: "${SLACK_WEBHOOK_URL}"
+    
+    channels:
+      slack_critical:
+        channel: "#alerts-critical"
+        username: "Staging Health Monitor"
+        icon_emoji: ":rotating_light:"
+      
+      slack_general:
+        channel: "#staging-health"
+        username: "Staging Health Monitor"
+        icon_emoji: ":hospital:"
+
+# Auto-remediation actions
+remediation:
+  enabled: true
+  max_attempts: 3
+  cooldown: 300  # 5 minutes between attempts
+  
+  actions:
+    # Service restart actions
+    restart_websocket:
+      trigger_conditions:
+        - "websocket.health_score < 0.6"
+        - "websocket.consecutive_failures > 3"
+      command: "docker restart netra-backend"
+      timeout: 60
+      verification_delay: 30
+      verification_check: "websocket_health"
+    
+    restart_auth_service:
+      trigger_conditions:
+        - "auth_service.health_score < 0.5"
+        - "auth_service.consecutive_failures > 2"
+      command: "docker restart netra-auth"
+      timeout: 60
+      verification_delay: 30
+      verification_check: "service_health"
+    
+    # Database connection pool reset
+    reset_db_connections:
+      trigger_conditions:
+        - "postgres.connection_pool_utilization > 0.95"
+        - "postgres.query_time > 100"
+      command: "curl -X POST http://localhost:8000/admin/reset-db-pool"
+      timeout: 30
+      verification_delay: 10
+      verification_check: "database_health"
+    
+    # Resource cleanup actions
+    cleanup_resources:
+      trigger_conditions:
+        - "resources.memory_usage > 90"
+        - "resources.disk_usage > 95"
+      command: "python scripts/cleanup_staging_resources.py"
+      timeout: 120
+      verification_delay: 30
+      verification_check: "resource_availability"
+
+# Rollback configuration
+rollback:
+  enabled: true
+  triggers:
+    # Automatic rollback triggers
+    critical_component_failures: 3
+    overall_health_below: 0.5
+    business_impact_critical: true
+    consecutive_failures: 5
+    user_impact_above: 75  # percentage
+  
+  # Rollback execution
+  execution:
+    timeout: 600  # 10 minutes
+    verification_delay: 60  # 1 minute
+    verification_checks:
+      - websocket_health
+      - service_health
+      - database_health
+    
+    # Rollback commands (would be customized for actual deployment system)
+    commands:
+      - "echo 'Triggering rollback via deployment system'"
+      - "curl -X POST http://deployment-service/rollback/${DEPLOYMENT_ID}"
+  
+  # Post-rollback actions
+  post_rollback:
+    - send_notifications
+    - generate_incident_report
+    - schedule_post_mortem
+
+# Dashboard configuration
+dashboard:
+  enabled: true
+  refresh_interval: 5  # seconds
+  historical_data_retention: 604800  # 7 days in seconds
+  
+  # Dashboard sections
+  sections:
+    overview:
+      enabled: true
+      components:
+        - overall_status
+        - health_score
+        - component_summary
+        - business_impact
+        - active_alerts
+    
+    components:
+      enabled: true
+      max_displayed: 15
+      sort_by: "health_score"  # or "name", "status"
+    
+    performance:
+      enabled: true
+      metrics:
+        - api_response_time
+        - websocket_latency
+        - database_query_time
+        - cpu_usage
+        - memory_usage
+    
+    trends:
+      enabled: true
+      time_windows:
+        - "1h"
+        - "6h"
+        - "24h"
+        - "7d"
+  
+  # Export settings
+  export:
+    enabled: true
+    formats: ["json", "csv", "pdf"]
+    retention: 2592000  # 30 days
+
+# Logging and audit configuration
+logging:
+  level: INFO
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  
+  # Log destinations
+  destinations:
+    file:
+      enabled: true
+      path: "/var/log/staging-health.log"
+      max_size: "100MB"
+      backup_count: 5
+    
+    syslog:
+      enabled: false
+      facility: "local0"
+      address: "localhost"
+      port: 514
+    
+    centralized:
+      enabled: true
+      endpoint: "${LOG_AGGREGATION_ENDPOINT}"
+      api_key: "${LOG_API_KEY}"
+  
+  # Audit logging
+  audit:
+    enabled: true
+    events:
+      - health_check_execution
+      - alert_generation
+      - remediation_action
+      - rollback_trigger
+      - configuration_change
+
+# Security and access control
+security:
+  # API access control
+  api_access:
+    enabled: true
+    authentication: "bearer_token"
+    token_env_var: "HEALTH_API_TOKEN"
+    
+    # Rate limiting
+    rate_limiting:
+      enabled: true
+      requests_per_minute: 120
+      requests_per_hour: 1000
+  
+  # Webhook security
+  webhook_security:
+    enabled: true
+    verify_ssl: true
+    require_authentication: true
+    
+    # Webhook signatures
+    signatures:
+      enabled: true
+      algorithm: "sha256"
+      secret_env_var: "WEBHOOK_SECRET"
+  
+  # Data privacy
+  data_privacy:
+    enabled: true
+    anonymize_sensitive_data: true
+    data_retention_days: 90
+    
+    # PII scrubbing
+    scrub_patterns:
+      - "password"
+      - "secret"
+      - "token"
+      - "key"
+
+# Integration settings
+integrations:
+  # Docker integration
+  docker:
+    enabled: true
+    socket_path: "/var/run/docker.sock"
+    
+    # Container monitoring
+    containers:
+      - "netra-backend"
+      - "netra-auth"
+      - "netra-postgres"
+      - "netra-redis"
+      - "netra-clickhouse"
+  
+  # Kubernetes integration (if applicable)
+  kubernetes:
+    enabled: false
+    namespace: "staging"
+    kubeconfig_path: "${KUBECONFIG}"
+  
+  # Cloud monitoring integration
+  cloud_monitoring:
+    gcp:
+      enabled: false
+      project_id: "${GCP_PROJECT_ID}"
+      service_account_key: "${GCP_SERVICE_ACCOUNT_KEY}"
+    
+    aws:
+      enabled: false
+      region: "${AWS_REGION}"
+      access_key: "${AWS_ACCESS_KEY}"
+      secret_key: "${AWS_SECRET_KEY}"
+
+# Development and testing settings
+development:
+  # Mock services for testing
+  mock_services:
+    enabled: false
+    services:
+      - auth_service
+      - external_api
+  
+  # Test data generation
+  test_data:
+    enabled: false
+    generate_synthetic_metrics: false
+    simulate_failures: false
+  
+  # Debug settings
+  debug:
+    enabled: false
+    verbose_logging: false
+    save_raw_responses: false
+    disable_alerts: false

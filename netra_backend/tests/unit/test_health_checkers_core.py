@@ -13,7 +13,7 @@ from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketMan
 from test_framework.database.test_database_manager import TestDatabaseManager
 from test_framework.redis.test_redis_manager import TestRedisManager
 from shared.isolated_environment import IsolatedEnvironment
-from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
 
 
 import pytest

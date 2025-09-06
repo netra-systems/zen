@@ -14,10 +14,9 @@ class TestDisasterRecoveryDataReplication:
     
     @pytest.fixture
     def replication_config(self):
-    """Use real service instance."""
-    # TODO: Initialize real service
+        """Use real service instance."""
+        # TODO: Initialize real service
         """Configuration for data replication testing."""
-    pass
         return {
             "replication_lag_threshold": 30,  # seconds
             "consistency_check_interval": 300,  # 5 minutes
@@ -58,7 +57,6 @@ class TestDisasterRecoveryDataReplication:
     
     def test_backup_data_integrity_validation(self, replication_config):
         """Validates backup data integrity and restoration capabilities."""
-    pass
         backup_service = backup_service_instance  # Initialize appropriate service
         
         # Simulate backup data with checksums

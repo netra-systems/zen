@@ -33,10 +33,10 @@ class TestCostLimitEnforcement:
     
     @pytest.fixture
     def llm_manager(self):
+        pass
     """Use real service instance."""
     # TODO: Initialize real service
         """Create LLM manager with small budget for testing."""
-    pass
         return LLMManager(daily_budget=Decimal("1.00"))  # $1 daily budget
     
     @pytest.mark.asyncio
@@ -64,7 +64,6 @@ class TestCostLimitEnforcement:
     @pytest.mark.asyncio
     async def test_cost_limit_allows_cheap_request(self, llm_manager):
         """Test that requests within cost limit are allowed."""
-    pass
         # Initialize the manager
         await llm_manager.initialize()
         
@@ -109,7 +108,6 @@ class TestCostLimitEnforcement:
     @pytest.mark.asyncio
     async def test_budget_tracking_across_requests(self, llm_manager):
         """Test that budget is tracked across multiple requests."""
-    pass
         # Initialize the manager
         await llm_manager.initialize()
         
@@ -147,7 +145,6 @@ class TestCostLimitEnforcement:
     
     def test_check_cost_limit_method(self, llm_manager):
         """Test the internal cost limit checking method."""
-    pass
         # Test that the method exists and returns a boolean
         result = llm_manager._check_cost_limit(LLMModel.GEMINI_2_5_FLASH.value, 100)
         assert isinstance(result, bool)
@@ -170,7 +167,6 @@ class TestCostLimitEnforcement:
     @pytest.mark.asyncio
     async def test_budget_reset(self, llm_manager):
         """Test that budget can be reset."""
-    pass
         # Initialize and use some budget
         await llm_manager.initialize()
         

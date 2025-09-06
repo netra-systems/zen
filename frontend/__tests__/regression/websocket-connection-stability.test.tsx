@@ -366,14 +366,35 @@ describe('WebSocket Connection Stability Regression Tests', () => {
   describe('Connection State Management', () => {
     it('should properly track connection state transitions', async () => {
       const stateChanges: string[] = [];
+      let hasDisconnected = false;
       
       mockWebSocketService.onStatusChange = (status: string) => {
         stateChanges.push(status);
       };
       
+      // Override disconnect to track when disconnect was called
+      const originalDisconnect = mockWebSocketService.disconnect.mockImplementation(() => {
+        isConnected = false;
+        hasDisconnected = true;
+        // Simulate close callback
+        setTimeout(() => {
+          connectCallbacks.onClose?.();
+        }, 10);
+      });
+      
       // Override getStatus to track state changes
       mockWebSocketService.getStatus.mockImplementation(() => {
-        const status = isConnected ? 'OPEN' : connectionCount > 0 ? 'CONNECTING' : 'CLOSED';
+        let status;
+        if (isConnected) {
+          status = 'OPEN';
+        } else if (hasDisconnected) {
+          status = 'CLOSED';
+        } else if (connectionCount > 0) {
+          status = 'CONNECTING';
+        } else {
+          status = 'CLOSED';
+        }
+        
         if (stateChanges[stateChanges.length - 1] !== status) {
           stateChanges.push(status);
         }

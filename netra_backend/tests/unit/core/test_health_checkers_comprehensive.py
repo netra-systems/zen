@@ -12,7 +12,7 @@ from test_framework.database.test_database_manager import TestDatabaseManager
 from test_framework.redis.test_redis_manager import TestRedisManager
 from auth_service.core.auth_manager import AuthManager
 from shared.isolated_environment import IsolatedEnvironment
-from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
 
 import psutil
 

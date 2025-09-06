@@ -3,8 +3,8 @@
 This test ensures that all LLM configurations have proper API key mappings
 to prevent regression of the issue where 'actions_to_meet_goals' was missing
 from the Gemini API key mapping.
-from netra_backend.app.core.agent_registry import AgentRegistry
-from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
+from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
 from shared.isolated_environment import IsolatedEnvironment
 """
 

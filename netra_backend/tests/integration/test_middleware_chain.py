@@ -8,8 +8,8 @@ from fastapi import FastAPI, Request, Response
 from fastapi.testclient import TestClient
 from fastapi.responses import JSONResponse
 from test_framework.redis.test_redis_manager import TestRedisManager
-from netra_backend.app.core.agent_registry import AgentRegistry
-from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
+from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
 from shared.isolated_environment import IsolatedEnvironment
 
 from netra_backend.app.middleware.cors_fix_middleware import CORSFixMiddleware

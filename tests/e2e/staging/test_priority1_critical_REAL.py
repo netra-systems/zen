@@ -46,7 +46,6 @@ class TestRealCriticalWebSocket:
             # Attempt WebSocket connection
             async with websockets.connect(
                 config.websocket_url,
-                timeout=10,
                 close_timeout=10
             ) as ws:
                 # If we get here, connection was established
@@ -99,7 +98,7 @@ class TestRealCriticalWebSocket:
         
         try:
             # Try to connect without auth
-            async with websockets.connect(config.websocket_url, timeout=10) as ws:
+            async with websockets.connect(config.websocket_url) as ws:
                 # Send message without auth
                 await ws.send(json.dumps({
                     "type": "message",

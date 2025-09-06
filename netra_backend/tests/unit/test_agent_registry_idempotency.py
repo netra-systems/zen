@@ -6,8 +6,8 @@ See: SPEC/learnings/agent_registration_idempotency.xml
 
 import asyncio
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
-from netra_backend.app.core.agent_registry import AgentRegistry
-from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
+from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
 from shared.isolated_environment import IsolatedEnvironment
 
 import pytest
@@ -17,28 +17,26 @@ from netra_backend.app.core.registry.universal_registry import AgentRegistry
 
 class TestAgentRegistryIdempotency:
     """Test suite for agent registry idempotency."""
-    pass
 
     @pytest.fixture
- def real_llm_manager():
-    """Use real service instance."""
-    # TODO: Initialize real service
+    def real_llm_manager(self):
+        """Use real service instance."""
+        # TODO: Initialize real service
         """Create mock LLM manager."""
-        return MagicNone  # TODO: Use real service instance
+        return None  # TODO: Use real service instance
 
     @pytest.fixture
- def real_tool_dispatcher():
-    """Use real service instance."""
-    # TODO: Initialize real service
+    def real_tool_dispatcher(self):
+        """Use real service instance."""
+        # TODO: Initialize real service
         """Create mock tool dispatcher."""
-        return MagicNone  # TODO: Use real service instance
+        return None  # TODO: Use real service instance
 
     @pytest.fixture
     def agent_registry(self, mock_llm_manager, mock_tool_dispatcher):
-    """Use real service instance."""
-    # TODO: Initialize real service
+        """Use real service instance."""
+        # TODO: Initialize real service
         """Create agent registry instance."""
-    pass
         return AgentRegistry()
 
     def test_register_default_agents_idempotency(self, agent_registry):
@@ -68,7 +66,7 @@ class TestAgentRegistryIdempotency:
 
     def test_register_method_prevents_duplicates(self, agent_registry):
         """Test that register method prevents duplicate agent registration."""
-        mock_agent = MagicNone  # TODO: Use real service instance
+        mock_agent = None  # TODO: Use real service instance
         
         # First registration
         agent_registry.register("test_agent", mock_agent)
@@ -76,7 +74,7 @@ class TestAgentRegistryIdempotency:
         assert agent_registry.agents["test_agent"] == mock_agent
         
         # Second registration with different instance (should be skipped)
-        mock_agent_2 = MagicNone  # TODO: Use real service instance
+        mock_agent_2 = None  # TODO: Use real service instance
         agent_registry.register("test_agent", mock_agent_2)
         
         # Verify original agent is still registered
@@ -96,13 +94,11 @@ class TestAgentRegistryIdempotency:
 
     def test_concurrent_registration_safety(self, agent_registry):
         """Test thread safety of agent registration."""
-    pass
         import threading
         
         registration_count = 0
         
         def register_agents():
-    pass
             nonlocal registration_count
             agent_registry.register_default_agents()
             if len(agent_registry.agents) == 8:
@@ -138,8 +134,7 @@ class TestAgentRegistryIdempotency:
 
     def test_websocket_manager_assignment(self, agent_registry):
         """Test that websocket manager is properly assigned to agents."""
-        mock_websocket_manager = MagicNone  # TODO: Use real service instance
-    pass
+        mock_websocket_manager = None  # TODO: Use real service instance
         agent_registry.set_websocket_manager(mock_websocket_manager)
         
         agent_registry.register_default_agents()
@@ -166,9 +161,8 @@ class TestAgentRegistryIdempotency:
         all_agents = agent_registry.get_all_agents()
         assert len(all_agents) == 8
 
-        def test_logging_behavior(self, mock_logger, agent_registry):
+    def test_logging_behavior(self, mock_logger, agent_registry):
         """Test that appropriate logging occurs during registration."""
-    pass
         # First registration - should log debug for each agent and info for summary
         agent_registry.register_default_agents()
         assert mock_logger.debug.call_count == 8  # One for each agent
@@ -189,16 +183,15 @@ class TestAgentRegistryIdempotency:
         agent_registry.register_default_agents()
         
         # Should be able to register new agent
-        mock_custom_agent = MagicNone  # TODO: Use real service instance
+        mock_custom_agent = None  # TODO: Use real service instance
         agent_registry.register("custom_agent", mock_custom_agent)
         
         assert len(agent_registry.agents) == 9
         assert "custom_agent" in agent_registry.agents
         
         # But not duplicate of existing
-        mock_duplicate = MagicNone  # TODO: Use real service instance
+        mock_duplicate = None  # TODO: Use real service instance
         agent_registry.register("triage", mock_duplicate)
         
         # Should still have 9 agents, not 10
         assert len(agent_registry.agents) == 9
-    pass

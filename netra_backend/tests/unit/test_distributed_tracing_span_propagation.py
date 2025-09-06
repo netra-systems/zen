@@ -25,10 +25,9 @@ class TestDistributedTracingSpanPropagation:
     
     @pytest.fixture
     def tracer_setup(self):
-    """Use real service instance."""
-    # TODO: Initialize real service
+        """Use real service instance."""
+        # TODO: Initialize real service
         """Setup OpenTelemetry tracer for testing."""
-    pass
         if not OPENTELEMETRY_AVAILABLE:
             pytest.skip("OpenTelemetry not available - skipping tracing tests")
         tracer_provider = TracerProvider()
@@ -62,11 +61,9 @@ class TestDistributedTracingSpanPropagation:
     @pytest.mark.skipif(not OPENTELEMETRY_AVAILABLE, reason="OpenTelemetry not available")
     async def test_async_span_context_preservation(self, tracer_setup):
         """Validates span context preservation in async operations."""
-    pass
         tracer = tracer_setup
         
         async def async_operation():
-    pass
             # Verify context is preserved across await boundaries
             current_span = trace.get_current_span()
             await asyncio.sleep(0.001)

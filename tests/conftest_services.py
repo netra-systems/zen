@@ -244,7 +244,7 @@ async def memory_optimization_service():
         mock_service.get_memory_stats = MagicMock()
         mock_service.get_active_scopes_count = MagicMock(return_value=0)
         mock_service.request_scope = asynccontextmanager(
-            lambda request_id, user_id, **kwargs: Magic        )
+            lambda request_id, user_id, **kwargs: MagicMock())
         
         await mock_service.start()
         try:
@@ -277,10 +277,11 @@ async def session_memory_manager():
     """
     if not _lazy_import_phase0():
         # Mock session manager
-        mock_manager = Magic        mock_manager.websocket = TestWebSocketConnection()
+        mock_manager = MagicMock()
+        mock_manager.websocket = TestWebSocketConnection()
         mock_manager.cleanup_session = AsyncMock(return_value=True)
         mock_manager.session_scope = asynccontextmanager(
-            lambda session_id, user_id, **kwargs: Magic        )
+            lambda session_id, user_id, **kwargs: MagicMock())
         
         await mock_manager.start()
         try:
@@ -333,7 +334,11 @@ async def request_scoped_supervisor(valid_user_execution_context, isolated_db_se
     
     try:
         # Create mock FastAPI request for supervisor creation
-        mock_request = Magic        mock_request.app.state.llm_manager = Magic        mock_request.app.state.websocket_bridge = Magic        mock_request.app.state.agent_supervisor = Magic        mock_request.app.state.agent_supervisor.tool_dispatcher = Magic        
+        mock_request = MagicMock()
+        mock_request.app.state.llm_manager = MagicMock()
+        mock_request.app.state.websocket_bridge = MagicMock()
+        mock_request.app.state.agent_supervisor = MagicMock()
+        mock_request.app.state.agent_supervisor.tool_dispatcher = MagicMock()
         # Create request-scoped context
         context = RequestScopedContext(
             user_id=valid_user_execution_context.user_id,
@@ -379,7 +384,11 @@ def factory_pattern_mocks():
         Dict[str, Any]: Dictionary of mock factory components
     """
     return {
-        'execution_engine_factory': Magic        'websocket_bridge_factory': Magic        'factory_adapter': Magic        'agent_instance_factory': Magic    }
+        'execution_engine_factory': MagicMock(),
+        'websocket_bridge_factory': MagicMock(),
+        'factory_adapter': MagicMock(),
+        'agent_instance_factory': MagicMock()
+    }
 
 # =============================================================================
 # COMPLETE PHASE 0 TEST ENVIRONMENT

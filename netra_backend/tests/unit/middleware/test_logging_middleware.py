@@ -7,8 +7,8 @@ import pytest
 import time
 from fastapi import Request, Response
 from fastapi.responses import JSONResponse
-from netra_backend.app.core.agent_registry import AgentRegistry
-from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
+from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
 from shared.isolated_environment import IsolatedEnvironment
 
 from netra_backend.app.middleware.logging_middleware import LoggingMiddleware

@@ -27,8 +27,8 @@ import threading
 from concurrent.futures import ThreadPoolExecutor
 from typing import Dict, Any, List
 from test_framework.redis.test_redis_manager import TestRedisManager
-from netra_backend.app.core.agent_registry import AgentRegistry
-from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
+from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
 from shared.isolated_environment import IsolatedEnvironment
 
 from netra_backend.app.agents.base_agent import BaseAgent
@@ -48,7 +48,6 @@ class MockFailingAgent(BaseAgent):
     """Agent that can simulate various failure modes for testing."""
     
     def __init__(self, *args, **kwargs):
-    pass
         self.failure_mode = kwargs.pop('failure_mode', 'none')
         self.failure_count = 0
         self.max_failures = kwargs.pop('max_failures', 3)
@@ -104,7 +103,6 @@ class TestCircuitBreakerEdgeCases:
     
     def test_circuit_breaker_rapid_failures(self, mock_llm_manager):
         """Test circuit breaker behavior with rapid consecutive failures."""
-    pass
         agent = MockFailingAgent(
             llm_manager=mock_llm_manager,
             failure_mode='execution',
@@ -118,7 +116,6 @@ class TestCircuitBreakerEdgeCases:
         
         # Execute many failing operations rapidly
         async def rapid_failure_test():
-    pass
             for i in range(15):
                 try:
                     state = DeepAgentState()
@@ -169,7 +166,6 @@ class TestCircuitBreakerEdgeCases:
         
     def test_circuit_breaker_under_concurrent_load(self, mock_llm_manager):
         """Test circuit breaker behavior under high concurrent load."""
-    pass
         agent = MockFailingAgent(
             llm_manager=mock_llm_manager,
             failure_mode='execution',
@@ -178,7 +174,6 @@ class TestCircuitBreakerEdgeCases:
         )
         
         async def concurrent_load_test():
-    pass
             # Create many concurrent failing operations
             tasks = []
             for i in range(50):
@@ -257,7 +252,6 @@ class TestRetryMechanismEdgeCases:
     @pytest.mark.asyncio
     async def test_retry_exhaustion_behavior(self, mock_llm_manager):
         """Test behavior when all retries are exhausted."""
-    pass
         agent = MockFailingAgent(
             llm_manager=mock_llm_manager,
             failure_mode='execution',
@@ -316,7 +310,6 @@ class TestRetryMechanismEdgeCases:
     @pytest.mark.asyncio
     async def test_retry_with_different_exception_types(self, mock_llm_manager):
         """Test retry behavior with different types of exceptions."""
-    pass
         exception_types = [
             ValueError("Validation error"),
             RuntimeError("Runtime error"),
@@ -385,7 +378,6 @@ class TestCacheCorruptionScenarios:
     """Use real service instance."""
     # TODO: Initialize real service
         """Redis manager that simulates various corruption scenarios."""
-    pass
         redis = Mock(spec=RedisManager)
         
         # Simulate corrupt data
@@ -400,7 +392,6 @@ class TestCacheCorruptionScenarios:
         
         call_count = 0
         async def get_corrupt_data(key):
-    pass
             nonlocal call_count
             if call_count < len(corrupt_data):
                 result = corrupt_data[call_count]
@@ -418,12 +409,10 @@ class TestCacheCorruptionScenarios:
     """Use real service instance."""
     # TODO: Initialize real service
         """Redis manager that fails intermittently."""
-    pass
         redis = Mock(spec=RedisManager)
         
         call_count = 0
         async def intermittent_failure(*args, **kwargs):
-    pass
             nonlocal call_count
             call_count += 1
             if call_count % 3 == 0:  # Fail every 3rd call
@@ -447,7 +436,6 @@ class TestCacheCorruptionScenarios:
  def real_tool_dispatcher():
     """Use real service instance."""
     # TODO: Initialize real service
-    pass
         dispatcher = Mock(spec=ToolDispatcher)
         dispatcher.dispatch = AsyncNone  # TODO: Use real service instance
         return dispatcher
@@ -477,7 +465,6 @@ class TestCacheCorruptionScenarios:
     @pytest.mark.asyncio
     async def test_cache_write_failures(self, mock_llm_manager, mock_tool_dispatcher, failing_redis_manager):
         """Test handling of cache write failures."""
-    pass
         agent = MockFailingAgent(
             llm_manager=mock_llm_manager,
             tool_dispatcher=mock_tool_dispatcher,
@@ -532,13 +519,11 @@ class TestCacheCorruptionScenarios:
     @pytest.mark.asyncio
     async def test_cache_memory_pressure(self, mock_llm_manager, mock_tool_dispatcher):
         """Test cache behavior under memory pressure."""
-    pass
         redis = Mock(spec=RedisManager)
         
         # Simulate memory pressure by raising MemoryError occasionally
         call_count = 0
         async def memory_pressure_cache(*args, **kwargs):
-    pass
             nonlocal call_count
             call_count += 1
             if call_count % 4 == 0:  # Every 4th call
@@ -582,7 +567,6 @@ class TestValidationEdgeCases:
  def real_tool_dispatcher():
     """Use real service instance."""
     # TODO: Initialize real service
-    pass
         dispatcher = Mock(spec=ToolDispatcher)
         dispatcher.dispatch = AsyncNone  # TODO: Use real service instance
         return dispatcher
@@ -599,7 +583,6 @@ class TestValidationEdgeCases:
     @pytest.mark.asyncio
     async def test_malformed_state_objects(self, mock_llm_manager, mock_tool_dispatcher, mock_redis_manager):
         """Test handling of malformed state objects."""
-    pass
         agent = MockFailingAgent(
             llm_manager=mock_llm_manager,
             tool_dispatcher=mock_tool_dispatcher,
@@ -648,7 +631,6 @@ class TestValidationEdgeCases:
     @pytest.mark.asyncio
     async def test_unicode_and_encoding_edge_cases(self, mock_llm_manager, mock_tool_dispatcher, mock_redis_manager):
         """Test handling of various Unicode and encoding scenarios."""
-    pass
         agent = MockFailingAgent(
             llm_manager=mock_llm_manager,
             tool_dispatcher=mock_tool_dispatcher,
@@ -705,7 +687,6 @@ class TestValidationEdgeCases:
     @pytest.mark.asyncio
     async def test_boundary_value_inputs(self, mock_llm_manager, mock_tool_dispatcher, mock_redis_manager):
         """Test handling of boundary value inputs."""
-    pass
         agent = MockFailingAgent(
             llm_manager=mock_llm_manager,
             tool_dispatcher=mock_tool_dispatcher,
@@ -748,7 +729,6 @@ class TestConcurrencyEdgeCases:
  def real_tool_dispatcher():
     """Use real service instance."""
     # TODO: Initialize real service
-    pass
         dispatcher = Mock(spec=ToolDispatcher)
         dispatcher.dispatch = AsyncNone  # TODO: Use real service instance
         return dispatcher
@@ -765,7 +745,6 @@ class TestConcurrencyEdgeCases:
     @pytest.mark.asyncio
     async def test_concurrent_state_modifications(self, mock_llm_manager, mock_tool_dispatcher, mock_redis_manager):
         """Test behavior when agent state is modified concurrently."""
-    pass
         agent = MockFailingAgent(
             llm_manager=mock_llm_manager,
             tool_dispatcher=mock_tool_dispatcher,
@@ -775,7 +754,6 @@ class TestConcurrencyEdgeCases:
         
         # Create concurrent tasks that modify agent state
         async def modify_state_task(task_id):
-    pass
             state = DeepAgentState()
             state.user_request = f"Concurrent state modification test {task_id}"
             
@@ -837,7 +815,6 @@ class TestConcurrencyEdgeCases:
     @pytest.mark.asyncio
     async def test_concurrent_cache_access(self, mock_llm_manager, mock_tool_dispatcher):
         """Test concurrent access to cache operations."""
-    pass
         # Create Redis manager with tracking
         cache_access_count = 0
         cache_lock = asyncio.Lock()
@@ -845,7 +822,6 @@ class TestConcurrencyEdgeCases:
         redis = Mock(spec=RedisManager)
         
         async def concurrent_cache_get(key):
-    pass
             nonlocal cache_access_count
             async with cache_lock:
                 cache_access_count += 1
@@ -854,7 +830,6 @@ class TestConcurrencyEdgeCases:
     return None  # Cache miss
         
         async def concurrent_cache_set(key, value, **kwargs):
-    pass
             nonlocal cache_access_count
             async with cache_lock:
                 cache_access_count += 1
@@ -872,7 +847,6 @@ class TestConcurrencyEdgeCases:
         
         # Execute concurrent operations that access cache
         async def cache_access_task(task_id):
-    pass
             state = DeepAgentState()
             state.user_request = f"Concurrent cache test {task_id}"
             
@@ -948,7 +922,6 @@ class TestResourceExhaustionScenarios:
     @pytest.mark.asyncio
     async def test_memory_exhaustion_handling(self, mock_llm_manager):
         """Test behavior when system is under memory pressure."""
-    pass
         agent = MockFailingAgent(
             llm_manager=mock_llm_manager,
             failure_mode='memory',
@@ -1014,7 +987,6 @@ class TestResourceExhaustionScenarios:
     @pytest.mark.asyncio
     async def test_cpu_intensive_operations(self, mock_llm_manager):
         """Test behavior with CPU-intensive operations."""
-    pass
         agent = MockFailingAgent(
             llm_manager=mock_llm_manager,
             enable_reliability=True
@@ -1022,7 +994,6 @@ class TestResourceExhaustionScenarios:
         
         # Mock CPU-intensive core logic
         async def cpu_intensive_logic(context):
-    pass
             # Simulate CPU-intensive work
             total = 0
             for i in range(100000):  # Significant but not excessive computation

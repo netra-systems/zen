@@ -11,8 +11,8 @@ import asyncio
 import time
 from concurrent.futures import ThreadPoolExecutor
 from uuid import uuid4
-from netra_backend.app.core.agent_registry import AgentRegistry
-from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
+from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
 from shared.isolated_environment import IsolatedEnvironment
 
 import pytest
@@ -26,7 +26,6 @@ class TestDistributedStateConsistency:
     """Use real service instance."""
     # TODO: Initialize real service
         """Create mock distributed state manager."""
-    pass
         manager = manager_instance  # Initialize appropriate service
         manager.state_versions = {}
         manager.consensus_threshold = 2
@@ -39,7 +38,6 @@ class TestDistributedStateConsistency:
     """Use real service instance."""
     # TODO: Initialize real service
         """Create mock vector clock for distributed ordering."""
-    pass
         clock = clock_instance  # Initialize appropriate service
         clock.timestamps = {'node1': 0, 'node2': 0, 'node3': 0}
         clock.increment = Mock(side_effect=lambda node: setattr(clock, 'timestamps', 
@@ -69,7 +67,6 @@ class TestDistributedStateConsistency:
     
     def test_vector_clock_ordering(self, mock_vector_clock):
         """Test vector clock for event ordering in distributed system."""
-    pass
         # Simulate events across nodes
         events = [
             {'node': 'node1', 'event': 'create_thread', 'data': {'id': 1}},
@@ -111,14 +108,12 @@ class TestDistributedStateConsistency:
         
         class DistributedLock:
             def __init__(self, resource_id: str):
-    pass
                 self.resource_id = resource_id
                 self.holder = None
                 self.waiters = []
                 self.lease_expiry = None
             
             async def acquire(self, node_id: str, timeout: float = 1.0):
-    pass
                 if self.holder is None:
                     self.holder = node_id
                     self.lease_expiry = time.time() + timeout
@@ -127,7 +122,6 @@ class TestDistributedStateConsistency:
                 return False
             
             async def release(self, node_id: str):
-    pass
                 if self.holder == node_id:
                     self.holder = None
                     self.lease_expiry = None
@@ -172,7 +166,6 @@ class TestDistributedStateConsistency:
     
     def test_state_synchronization_metrics(self, mock_state_manager):
         """Test collection of state synchronization metrics."""
-    pass
         sync_metrics = {
             'sync_operations_total': 0,
             'sync_conflicts_resolved': 0,
@@ -226,7 +219,6 @@ class TestAgentStateCoordination:
     """Use real service instance."""
     # TODO: Initialize real service
         """Create mock agent state coordinator."""
-    pass
         coordinator = coordinator_instance  # Initialize appropriate service
         coordinator.agent_states = {}
         coordinator.state_listeners = []
@@ -261,7 +253,6 @@ class TestAgentStateCoordination:
     
     def test_agent_state_aggregation(self, mock_agent_coordinator):
         """Test aggregation of agent states for system-wide view."""
-    pass
         agent_states = {
             'supervisor_001': {'status': 'active', 'load': 0.3, 'tasks': 2},
             'data_agent_001': {'status': 'active', 'load': 0.7, 'tasks': 5},

@@ -13,10 +13,9 @@ class TestFileUtils:
     
     @pytest.fixture
     def instance(self):
-    """Use real service instance."""
-    # TODO: Initialize real service
+        """Use real service instance."""
+        # TODO: Initialize real service
         """Create test instance"""
-    pass
         return FileUtils()
     
     def test_initialization(self, instance):

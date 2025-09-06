@@ -18,8 +18,8 @@ from netra_backend.app.core.agent_health_checker import (
     convert_legacy_result
 )
 from netra_backend.app.core.health_types import HealthCheckResult
-from netra_backend.app.core.agent_registry import AgentRegistry
-from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
+from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
 from shared.isolated_environment import IsolatedEnvironment
 import asyncio
 

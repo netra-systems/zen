@@ -35,8 +35,8 @@ import time
 from test_framework.database.test_database_manager import TestDatabaseManager
 from test_framework.redis.test_redis_manager import TestRedisManager
 from auth_service.core.auth_manager import AuthManager
-from netra_backend.app.core.agent_registry import AgentRegistry
-from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
+from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
 
 from netra_backend.app.agents.actions_goals_plan_builder import ActionPlanBuilder
 from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext

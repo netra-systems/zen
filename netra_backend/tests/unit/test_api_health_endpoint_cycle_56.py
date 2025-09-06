@@ -32,22 +32,21 @@ from netra_backend.app.core.app_factory import create_app
 
 class TestHealthEndpointRoutingIssue:
     """Test health endpoint routing configuration - these tests should FAIL to prove the issue."""
-    pass
 
     @pytest.fixture
     def app(self):
+        pass
     """Use real service instance."""
     # TODO: Initialize real service
         """Create test application."""
-    pass
         return create_app()
 
     @pytest.fixture
     def client(self, app):
+        pass
     """Use real service instance."""
     # TODO: Initialize real service
         """Create test client."""
-    pass
         return TestClient(app)
 
     @pytest.fixture
@@ -56,7 +55,6 @@ class TestHealthEndpointRoutingIssue:
     # TODO: Initialize real service
         """Mock app state for health endpoint tests."""
         mock_state = MagicNone  # TODO: Use real service instance
-    pass
         mock_state.startup_complete = True
         mock_state.startup_in_progress = False
         mock_state.startup_failed = False
@@ -74,7 +72,6 @@ class TestHealthEndpointRoutingIssue:
         This test WILL FAIL and proves the routing issue exists.
         The health endpoint should be accessible at /api/health but isn't properly routed.
         """
-    pass
         # This should return 200 but will likely return 404 -> 401 due to security middleware
         response = client.get("/api/health")
         
@@ -111,7 +108,6 @@ class TestHealthEndpointRoutingIssue:
         
         This test will FAIL because the route doesn't exist and returns 404/401.
         """
-    pass
         response = client.get("/api/health")
         
         # This will fail if route returns 404
@@ -147,7 +143,6 @@ class TestHealthEndpointRoutingIssue:
         This test will FAIL because 404 gets converted to 401 by security middleware.
         Health endpoints should not require authentication but the routing issue causes auth errors.
         """
-    pass
         # Make request without authentication headers
         response = client.get("/api/health")
         
@@ -189,7 +184,6 @@ class TestHealthEndpointRoutingIssue:
         
         This will FAIL in test environment, indicating broader routing issue.
         """
-    pass
         response = client.get("/api/health")
         
         # Should work regardless of environment
@@ -206,22 +200,21 @@ class TestHealthEndpointRoutingIssue:
 
 class TestAlternativeHealthEndpointPaths:
     """Test alternative health endpoint path configurations to understand current routing."""
-    pass
 
     @pytest.fixture
     def app(self):
+        pass
     """Use real service instance."""
     # TODO: Initialize real service
         """Create test application."""
-    pass
         return create_app()
 
     @pytest.fixture
     def client(self, app):
+        pass
     """Use real service instance."""
     # TODO: Initialize real service
         """Create test client."""
-    pass
         return TestClient(app)
 
     @pytest.fixture
@@ -230,7 +223,6 @@ class TestAlternativeHealthEndpointPaths:
     # TODO: Initialize real service
         """Mock app state for health endpoint tests."""
         mock_state = MagicNone  # TODO: Use real service instance
-    pass
         mock_state.startup_complete = True
         mock_state.startup_in_progress = False
         mock_state.startup_failed = False
@@ -247,7 +239,6 @@ class TestAlternativeHealthEndpointPaths:
         
         Verifies that both /health and /api/health endpoints are properly configured.
         """
-    pass
         test_paths = [
             "/health",           # Health router at /health prefix
             "/health/",          # With trailing slash
@@ -304,7 +295,6 @@ class TestAlternativeHealthEndpointPaths:
         
         Both /health and /api/health endpoints should be properly configured and working.
         """
-    pass
         # Test both configured paths
         health_response = client.get("/health")
         api_health_response = client.get("/api/health") 
@@ -337,18 +327,18 @@ class TestHealthEndpointCurrentConfiguration:
     
     @pytest.fixture
     def app(self):
+        pass
     """Use real service instance."""
     # TODO: Initialize real service
         """Create test application.""" 
-    pass
         return create_app()
 
     @pytest.fixture
     def client(self, app):
+        pass
     """Use real service instance."""
     # TODO: Initialize real service
         """Create test client."""
-    pass
         return TestClient(app)
 
     @pytest.mark.unit
@@ -360,7 +350,6 @@ class TestHealthEndpointCurrentConfiguration:
         
         This test examines the actual registered routes to confirm proper configuration.
         """
-    pass
         print(f"
 === REGISTERED ROUTES ANALYSIS ===")
         
@@ -418,22 +407,21 @@ ALL HEALTH ROUTES:")
 
 class TestHealthEndpointSecurityBypass:
     """Test that health endpoints properly bypass security middleware when they exist."""
-    pass
 
     @pytest.fixture
     def app(self):
+        pass
     """Use real service instance."""
     # TODO: Initialize real service
         """Create test application."""
-    pass
         return create_app()
 
     @pytest.fixture  
     def client(self, app):
+        pass
     """Use real service instance."""
     # TODO: Initialize real service
         """Create test client."""
-    pass
         return TestClient(app)
 
     @pytest.fixture
@@ -442,7 +430,6 @@ class TestHealthEndpointSecurityBypass:
     # TODO: Initialize real service
         """Mock app state for health endpoint tests."""
         mock_state = MagicNone  # TODO: Use real service instance
-    pass
         mock_state.startup_complete = True
         app.state = mock_state
         return mock_state
@@ -457,7 +444,6 @@ class TestHealthEndpointSecurityBypass:
         This will FAIL because /api/health doesn't exist, so it returns 404 -> 401.
         When it exists, it should ignore auth headers completely.
         """
-    pass
         # Send invalid authorization header
         headers = {"Authorization": "Bearer invalid_token_12345"}
         response = client.get("/api/health", headers=headers)
@@ -490,18 +476,18 @@ class TestExpectedHealthEndpointBehavior:
     
     @pytest.fixture
     def app(self):
+        pass
     """Use real service instance."""
     # TODO: Initialize real service
         """Create test application."""
-    pass
         return create_app()
 
     @pytest.fixture
     def client(self, app):
+        pass
     """Use real service instance."""
     # TODO: Initialize real service
         """Create test client."""
-    pass
         return TestClient(app)
 
     @pytest.fixture
@@ -510,7 +496,6 @@ class TestExpectedHealthEndpointBehavior:
     # TODO: Initialize real service
         """Mock app state for health endpoint tests."""
         mock_state = MagicNone  # TODO: Use real service instance
-    pass
         mock_state.startup_complete = True
         mock_state.startup_in_progress = False
         mock_state.startup_failed = False
@@ -527,7 +512,6 @@ class TestExpectedHealthEndpointBehavior:
         
         Verifies the API health endpoint returns the expected JSON structure.
         """
-    pass
         # Test the API health endpoint specifically
         response = client.get("/api/health")
         
@@ -563,7 +547,6 @@ class TestExpectedHealthEndpointBehavior:
         
         Health endpoints must be fast for monitoring systems.
         """
-    pass
         start_time = time.time()
         response = client.get("/api/health")  # Test the API endpoint specifically
         end_time = time.time()

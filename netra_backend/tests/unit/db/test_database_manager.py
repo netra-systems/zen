@@ -38,7 +38,7 @@ from contextlib import asynccontextmanager
 from test_framework.database.test_database_manager import TestDatabaseManager
 from test_framework.redis.test_redis_manager import TestRedisManager
 from shared.isolated_environment import IsolatedEnvironment
-from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
 
 # Import the class under test
 from netra_backend.app.db.database_manager import DatabaseManager, get_database_manager, get_db_session

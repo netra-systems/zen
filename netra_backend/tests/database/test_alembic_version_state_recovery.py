@@ -19,7 +19,7 @@ from pathlib import Path
 from typing import Dict, List, Set, Optional
 from test_framework.database.test_database_manager import TestDatabaseManager
 from shared.isolated_environment import IsolatedEnvironment
-from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
 
 # Mock imports to avoid database dependencies
 try:

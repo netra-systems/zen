@@ -23,10 +23,9 @@ class TestDistributedTracingContextPreservation:
     
     @pytest.fixture
     def tracer(self):
-    """Use real service instance."""
-    # TODO: Initialize real service
+        """Use real service instance."""
+        # TODO: Initialize real service
         """Setup tracer for high-load testing."""
-    pass
         if not OPENTELEMETRY_AVAILABLE:
             pytest.skip("OpenTelemetry not available - skipping tracing tests")
         provider = TracerProvider()
@@ -55,7 +54,6 @@ class TestDistributedTracingContextPreservation:
     @pytest.mark.skipif(not OPENTELEMETRY_AVAILABLE, reason="OpenTelemetry not available")
     def test_span_context_under_exception_conditions(self, tracer):
         """Validates context preservation when exceptions occur."""
-    pass
         context_before_exception = None
         context_after_exception = None
         

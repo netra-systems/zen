@@ -6,8 +6,8 @@ Business Value: Revenue-critical component
 
 import pytest
 from netra_backend.app.agents.corpus_admin.corpus_upload_handlers import CorpusUploadHandlers
-from netra_backend.app.core.agent_registry import AgentRegistry
-from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
+from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
 from shared.isolated_environment import IsolatedEnvironment
 
 class TestCorpusUploadHandlers:
@@ -15,10 +15,7 @@ class TestCorpusUploadHandlers:
     
     @pytest.fixture
     def instance(self):
-    """Use real service instance."""
-    # TODO: Initialize real service
         """Create test instance"""
-    pass
         return CorpusUploadHandlers()
     
     def test_initialization(self, instance):

@@ -8,8 +8,8 @@ provide robust error handling and proper operation delegation.
 
 import pytest
 from datetime import datetime, timezone
-from netra_backend.app.core.agent_registry import AgentRegistry
-from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
+from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
 from shared.isolated_environment import IsolatedEnvironment
 
 from netra_backend.app.agents.corpus_admin.operations_handler import CorpusOperationHandler

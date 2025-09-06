@@ -83,13 +83,13 @@ def test_agent_websocket_bridge_factory():
     
     try:
         from netra_backend.app.services.agent_websocket_bridge import create_agent_websocket_bridge, AgentWebSocketBridge
-        from netra_backend.app.agents.supervisor.execution_factory import UserExecutionContext
+        from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
         
         # Create a test user context
         user_context = UserExecutionContext(
             user_id="test_user",
-            request_id="test_request",
-            thread_id="test_thread"
+            thread_id="test_thread",
+            run_id="test_run"
         )
         
         # Test factory function exists and works
@@ -142,17 +142,22 @@ def test_agent_registry_websocket_wiring():
     try:
         from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
         from netra_backend.app.websocket_core import get_websocket_manager
-        from netra_backend.app.agents.supervisor.execution_factory import UserExecutionContext
+        from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
+        from netra_backend.app.llm.llm_manager import LLMManager
         
         # Create test components
         user_context = UserExecutionContext(
             user_id="test_user",
             request_id="test_request", 
-            thread_id="test_thread"
+            thread_id="test_thread",
+            run_id="test_run"
         )
         
+        # Create LLM manager for AgentRegistry initialization
+        llm_manager = LLMManager()
+        
         # Test AgentRegistry creation and WebSocket manager setup
-        registry = AgentRegistry()
+        registry = AgentRegistry(llm_manager)
         websocket_manager = get_websocket_manager()
         
         print(f"OK AgentRegistry created: {type(registry)}")
@@ -203,16 +208,21 @@ def test_execution_engine_factory_pattern():
         from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
         from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
         from netra_backend.app.services.agent_websocket_bridge import create_agent_websocket_bridge
-        from netra_backend.app.agents.supervisor.execution_factory import UserExecutionContext
+        from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
         
         # Test ExecutionEngine direct instantiation (should fail)
         try:
-            registry = AgentRegistry()
+            # Create LLM manager for AgentRegistry
+            from netra_backend.app.llm.llm_manager import LLMManager
+            llm_manager = LLMManager()
+            
+            registry = AgentRegistry(llm_manager)
             bridge = create_agent_websocket_bridge()
             user_context = UserExecutionContext(
                 user_id="test_user",
                 request_id="test_request",
-                thread_id="test_thread"
+                thread_id="test_thread",
+                run_id="test_run"
             )
             
             # This should throw RuntimeError according to the code
@@ -301,13 +311,13 @@ async def test_complete_websocket_event_flow():
     
     try:
         from netra_backend.app.services.agent_websocket_bridge import create_agent_websocket_bridge
-        from netra_backend.app.agents.supervisor.execution_factory import UserExecutionContext
+        from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
         
         # Create test context
         user_context = UserExecutionContext(
             user_id="test_user",
-            request_id="test_request",
-            thread_id="test_thread"
+            thread_id="test_thread",
+            run_id="test_run"
         )
         
         # Create bridge with mock manager
@@ -317,7 +327,7 @@ async def test_complete_websocket_event_flow():
         bridge._websocket_manager = MockWebSocketManager()
         
         # Create user emitter
-        emitter = bridge.create_user_emitter(user_context)
+        emitter = await bridge.create_user_emitter(user_context)
         
         # Test all 5 critical events
         critical_events = [

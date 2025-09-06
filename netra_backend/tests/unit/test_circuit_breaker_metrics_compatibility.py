@@ -5,8 +5,8 @@ missing attributes caused agent execution failures.
 """
 
 import pytest
-from netra_backend.app.core.agent_registry import AgentRegistry
-from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
+from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
 from shared.isolated_environment import IsolatedEnvironment
 
 # Skip test if any imports fail due to missing dependencies
@@ -37,7 +37,6 @@ class TestCircuitBreakerMetricsCompatibility:
         
     def test_slow_requests_tracked_on_slow_response(self):
         """Verify slow requests are tracked when response time exceeds threshold."""
-    pass
         metrics = CircuitBreakerMetrics()
         
         # Record fast request
@@ -64,7 +63,6 @@ class TestCircuitBreakerMetricsCompatibility:
         
     def test_slow_requests_reset_on_general_reset(self):
         """Verify slow_requests is reset when metrics are cleared."""
-    pass
         metrics = CircuitBreakerMetrics()
         
         # Add some slow requests
@@ -92,7 +90,6 @@ class TestCircuitBreakerMetricsCompatibility:
         
     def test_metrics_compatibility_with_unified_circuit_breaker(self):
         """Verify metrics work with unified circuit breaker without AttributeError."""
-    pass
         config = CircuitConfig(
             name="test_circuit",
             failure_threshold=3,
@@ -126,7 +123,6 @@ class TestCircuitBreakerMetricsCompatibility:
         
     def test_collector_preserves_slow_requests(self):
         """Verify CircuitBreakerMetricsCollector maintains slow_requests."""
-    pass
         collector = CircuitBreakerMetricsCollector()
         
         # Record slow request through collector
@@ -148,7 +144,6 @@ class TestCircuitBreakerMetricsCompatibility:
         
     def test_metrics_interface_consistency(self):
         """Verify all metric implementations have consistent interfaces."""
-    pass
         # Service metrics
         service_metrics = CircuitBreakerMetrics()
         
@@ -175,7 +170,6 @@ class TestMetricsAttributeSafety:
         """Test helper function for safe attribute access."""
         def safe_get_metric(metrics, attr_name, default=0):
             """Safely get metric attribute with default."""
-    pass
             await asyncio.sleep(0)
     return getattr(metrics, attr_name, default)
         
@@ -201,8 +195,8 @@ class TestMetricsAttributeSafety:
         assert not hasattr(mock_metrics, 'slow_requests')
         
         def test_patched_metrics_compatibility(self, mock_metrics_class):
+            pass
         """Test compatibility when metrics class is patched/mocked."""
-    pass
         mock_instance = mock_instance_instance  # Initialize appropriate service
         mock_instance.slow_requests = 5
         mock_metrics_class.return_value = mock_instance
@@ -228,7 +222,6 @@ class TestMetricsRegressionPrevention:
             
     def test_circuit_breaker_state_transition_with_metrics(self):
         """Test circuit breaker state transitions don't fail on metrics access."""
-    pass
         config = CircuitConfig(
             name="test",
             failure_threshold=2,
@@ -238,7 +231,6 @@ class TestMetricsRegressionPrevention:
         
         # Simulate failures that would trigger state transition
         async def failing_op():
-    pass
             raise Exception("Test failure")
         
         # These operations should not raise AttributeError

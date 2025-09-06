@@ -4,8 +4,8 @@ import sys
 from pathlib import Path
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
 from test_framework.database.test_database_manager import TestDatabaseManager
-from netra_backend.app.core.agent_registry import AgentRegistry
-from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
+from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
 from shared.isolated_environment import IsolatedEnvironment
 
 import asyncio
@@ -21,7 +21,6 @@ from netra_backend.app.core.error_recovery import OperationType
 class EnhancedErrorRecoverySystem:
     """Mock class for testing."""
     def __init__(self):
-    pass
         # Mock: Generic component isolation for controlled unit testing
         self.circuit_breaker_registry = circuit_breaker_registry_instance  # Initialize appropriate service
         # Mock: Generic component isolation for controlled unit testing
@@ -46,7 +45,6 @@ class EnhancedErrorRecoverySystem:
 
     def _determine_severity_from_status(self, status):
         """Mock severity determination from status."""
-    pass
         if status in [500, 502]:
             return ErrorSeverity.HIGH
         elif status in [404, 429]:
@@ -70,7 +68,6 @@ class EnhancedErrorRecoverySystem:
 
     def _prepare_error_data(self, agent_name, function_name, error, context, user_id):
         """Mock error data preparation."""
-    pass
         return {
             'error_type': type(error).__name__,
             'module': f'agent_{agent_name}',
@@ -94,7 +91,6 @@ class EnhancedErrorRecoverySystem:
 def recovery_system():
     """Use real service instance."""
     # TODO: Initialize real service
-    pass
     """Create recovery system instance for testing."""
     return EnhancedErrorRecoverySystem()
 
@@ -103,11 +99,9 @@ def recovery_system():
     """Use real service instance."""
     # TODO: Initialize real service
     """Create mock error for testing."""
-    pass
     return ConnectionError("Test connection error")
 
 class TestErrorRecoveryIntegration:
-    pass
 
     def test_determine_severity(self, recovery_system):
         """Test error severity determination."""
@@ -119,7 +113,6 @@ class TestErrorRecoveryIntegration:
 
     def test_determine_severity_from_status(self, recovery_system):
         """Test severity determination from HTTP status codes."""
-    pass
         assert recovery_system._determine_severity_from_status(500) == ErrorSeverity.HIGH
         assert recovery_system._determine_severity_from_status(502) == ErrorSeverity.HIGH
         assert recovery_system._determine_severity_from_status(404) == ErrorSeverity.MEDIUM
@@ -156,7 +149,6 @@ class TestErrorRecoveryIntegration:
 
     def test_prepare_error_data(self, recovery_system):
         """Test error data preparation."""
-    pass
         error = ValueError("Test error")
         
         result = recovery_system._prepare_error_data(

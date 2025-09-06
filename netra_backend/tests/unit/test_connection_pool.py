@@ -30,9 +30,7 @@ class TestAsyncConnectionPool:
     @pytest.fixture
     async def close_connection(self):
         """Mock connection close function"""
-    pass
         async def _close(conn):
-    pass
             pass
         await asyncio.sleep(0)
     return _close
@@ -53,7 +51,6 @@ class TestAsyncConnectionPool:
     @pytest.mark.asyncio
     async def test_initialization(self, create_connection, close_connection):
         """Test proper initialization"""
-    pass
         pool = AsyncConnectionPool(
             create_connection=create_connection,
             close_connection=close_connection,
@@ -74,7 +71,6 @@ class TestAsyncConnectionPool:
     @pytest.mark.asyncio
     async def test_connection_acquisition(self, pool_instance):
         """Test connection acquisition and release"""
-    pass
         async with pool_instance.acquire() as conn:
             assert conn is not None
             assert pool_instance.active_count == 1
@@ -94,7 +90,6 @@ class TestAsyncConnectionPool:
     @pytest.mark.asyncio
     async def test_pool_closure(self, create_connection, close_connection):
         """Test proper pool closure"""
-    pass
         pool = AsyncConnectionPool(
             create_connection=create_connection,
             close_connection=close_connection,

@@ -12,8 +12,8 @@ import asyncio
 import pytest
 from typing import Dict, Any
 from test_framework.redis.test_redis_manager import TestRedisManager
-from netra_backend.app.core.agent_registry import AgentRegistry
-from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
+from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
 from shared.isolated_environment import IsolatedEnvironment
 
 from netra_backend.app.agents.actions_goals_plan_builder_uvs import (
@@ -295,7 +295,6 @@ class TestActionPlanUVS:
     @pytest.mark.asyncio
     async def test_ensures_reporting_compatibility(self, builder, user_context):
         """Test that all plans are compatible with ReportingSubAgent"""
-    pass
         # Test with minimal plan
         minimal_plan = ActionPlanResult()
         uvs_context = UVSPlanContext(

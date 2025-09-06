@@ -5,8 +5,8 @@ from netra_backend.app.agents.state import DeepAgentState, OptimizationsResult, 
 from netra_backend.app.schemas.shared_types import DataAnalysisResponse
 from netra_backend.app.agents.base.errors import ValidationError
 from netra_backend.app.agents.base.interface import ExecutionContext
-from netra_backend.app.core.agent_registry import AgentRegistry
-from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
+from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
 from shared.isolated_environment import IsolatedEnvironment
 import asyncio
 

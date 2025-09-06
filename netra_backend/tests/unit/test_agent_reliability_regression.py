@@ -11,8 +11,8 @@ Temporarily skipped to allow focus on higher-value test fixes.
 """
 
 import pytest
-from netra_backend.app.core.agent_registry import AgentRegistry
-from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
+from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
 from shared.isolated_environment import IsolatedEnvironment
 
 pytestmark = pytest.mark.skip(reason="Complex refactor needed - tests use legacy DeepAgentState pattern. Migrate to UserExecutionContext pattern. See USER_CONTEXT_ARCHITECTURE.md")

@@ -14,10 +14,10 @@ class TestDisasterRecoveryFailover:
     
     @pytest.fixture
     def failover_config(self):
+        pass
     """Use real service instance."""
     # TODO: Initialize real service
         """Configuration for failover testing."""
-    pass
         return {
             "primary_region": "us-east-1",
             "backup_region": "us-west-2", 
@@ -58,7 +58,6 @@ class TestDisasterRecoveryFailover:
     
     def test_service_health_monitoring(self, failover_config):
         """Validates health monitoring triggers failover decisions."""
-    pass
         health_monitor = health_monitor_instance  # Initialize appropriate service
         service_states = {"primary": "healthy", "backup": "healthy"}
         failure_count = {"primary": 0}

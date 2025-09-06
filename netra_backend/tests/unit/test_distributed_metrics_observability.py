@@ -13,8 +13,8 @@ import time
 from collections import defaultdict
 from uuid import uuid4
 from auth_service.core.auth_manager import AuthManager
-from netra_backend.app.core.agent_registry import AgentRegistry
-from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
+from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
 from shared.isolated_environment import IsolatedEnvironment
 
 import pytest
@@ -28,7 +28,6 @@ class TestDistributedMetricsCollection:
     """Use real service instance."""
     # TODO: Initialize real service
         """Create mock distributed metrics collector."""
-    pass
         collector = collector_instance  # Initialize appropriate service
         collector.metrics_buffer = []
         collector.aggregation_window_seconds = 60
@@ -38,10 +37,10 @@ class TestDistributedMetricsCollection:
     
     @pytest.fixture
     def sample_service_metrics(self):
+        pass
     """Use real service instance."""
     # TODO: Initialize real service
         """Generate sample service metrics."""
-    pass
         return {
             'auth_service': {
                 'request_count_total': 15000,
@@ -360,7 +359,6 @@ class TestObservabilityDataPipeline:
     """Use real service instance."""
     # TODO: Initialize real service
         """Create mock observability data pipeline."""
-    pass
         pipeline = pipeline_instance  # Initialize appropriate service
         pipeline.ingestion_rate_per_second = 1000
         pipeline.processing_stages = ['validate', 'enrich', 'aggregate', 'store']
@@ -462,7 +460,6 @@ class TestObservabilityDataPipeline:
         
         class DataEnricher:
             def __init__(self):
-    pass
                 self.service_metadata = {
                     'auth_service': {
                         'version': '2.1.4',
@@ -485,7 +482,6 @@ class TestObservabilityDataPipeline:
                 }
             
             async def enrich_data_point(self, data_point):
-    pass
                 enriched = data_point.copy()
                 service = data_point.get('service')
                 
