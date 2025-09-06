@@ -14,16 +14,24 @@ from netra_backend.app.services.corpus.content_operations import (
 )
 from netra_backend.app.services.corpus.corpus_creation import CorpusCreationService
 from netra_backend.app.services.corpus.corpus_crud import CorpusCrudService
+from netra_backend.app.models.user_execution_context import UserExecutionContext
 
 
 class CorpusService:
     """Unified corpus service combining all operations"""
     
-    def __init__(self):
-        """Initialize component services"""
-        self.creation_service = CorpusCreationService()
-        self.crud_service = CorpusCrudService()
-        self.content_service = ContentOperationsService()
+    def __init__(self, user_context: Optional[UserExecutionContext] = None):
+        """Initialize component services
+        
+        Args:
+            user_context: Optional user context for WebSocket isolation.
+                         If provided, enables WebSocket notifications.
+                         If None, notifications are logged only.
+        """
+        self.user_context = user_context
+        self.creation_service = CorpusCreationService(user_context=user_context)
+        self.crud_service = CorpusCrudService(user_context=user_context)
+        self.content_service = ContentOperationsService(user_context=user_context)
     
     # Corpus creation operations
     async def create_corpus(self, db: AsyncSession, corpus_data: schemas.CorpusCreate,

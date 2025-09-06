@@ -4,7 +4,7 @@ Handles table creation, management, and database-specific operations
 """
 
 import asyncio
-from typing import Dict
+from typing import Dict, Optional
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -32,12 +32,42 @@ from netra_backend.app.services.corpus.clickhouse_helpers import (
     process_table_exists_result,
     process_table_size_result,
 )
-# WebSocket manager is now handled via factory pattern for multi-user safety
-# Individual connections will have their own manager instances via context
+from netra_backend.app.models.user_execution_context import UserExecutionContext
 
 
 class CorpusClickHouseOperations:
     """Handles ClickHouse-specific operations for corpus management"""
+    
+    def __init__(self, user_context: Optional[UserExecutionContext] = None):
+        """Initialize with optional user context for WebSocket notifications.
+        
+        Args:
+            user_context: Optional user context for WebSocket isolation.
+                         If provided, enables WebSocket notifications.
+                         If None, notifications are logged only.
+        """
+        self.user_context = user_context
+        self._websocket_manager = None
+        
+        # Initialize isolated WebSocket manager if user context is provided
+        if self.user_context:
+            try:
+                from netra_backend.app.websocket_core.websocket_manager_factory import create_websocket_manager
+                self._websocket_manager = create_websocket_manager(self.user_context)
+                central_logger.info(
+                    f"Initialized CorpusClickHouseOperations with WebSocket support for user {user_context.user_id[:8]}..."
+                )
+            except Exception as e:
+                central_logger.warning(
+                    f"Failed to initialize WebSocket manager for corpus operations: {e}. "
+                    "Notifications will be logged only."
+                )
+                self._websocket_manager = None
+        else:
+            central_logger.debug(
+                "CorpusClickHouseOperations initialized without user context. "
+                "WebSocket notifications disabled."
+            )
     
     def _get_table_columns(self) -> str:
         """Get table column definitions"""
@@ -87,11 +117,20 @@ class CorpusClickHouseOperations:
 
     async def _send_success_notification(self, corpus_id: str, table_name: str):
         """Send WebSocket notification for successful corpus creation"""
-        # TODO: Implement proper WebSocket notification with user context
-        # This requires access to the user context and WebSocketManagerFactory
-        # For now, logging the success is sufficient
         payload = self._build_success_payload(corpus_id, table_name)
-        central_logger.info(f"Corpus creation notification (WebSocket disabled): {payload}")
+        
+        if self._websocket_manager:
+            try:
+                await self._websocket_manager.emit_critical_event(
+                    event_type="corpus:created",
+                    data=payload["payload"]
+                )
+                central_logger.info(f"Sent corpus creation notification via WebSocket: {payload}")
+            except Exception as e:
+                central_logger.error(f"Failed to send WebSocket notification: {e}")
+                central_logger.info(f"Corpus creation notification (fallback to log): {payload}")
+        else:
+            central_logger.info(f"Corpus creation notification (WebSocket not available): {payload}")
 
     def _log_creation_success(self, corpus_id: str, table_name: str):
         """Log successful table creation"""
@@ -113,11 +152,20 @@ class CorpusClickHouseOperations:
 
     async def _send_error_notification(self, corpus_id: str, error: Exception):
         """Send WebSocket notification for corpus creation error"""
-        # TODO: Implement proper WebSocket notification with user context
-        # This requires access to the user context and WebSocketManagerFactory
-        # For now, logging the error is sufficient
         payload = self._build_error_payload(corpus_id, error)
-        central_logger.error(f"Corpus error notification (WebSocket disabled): {payload}")
+        
+        if self._websocket_manager:
+            try:
+                await self._websocket_manager.emit_critical_event(
+                    event_type="corpus:error",
+                    data=payload["payload"]
+                )
+                central_logger.error(f"Sent corpus error notification via WebSocket: {payload}")
+            except Exception as e:
+                central_logger.error(f"Failed to send WebSocket error notification: {e}")
+                central_logger.error(f"Corpus error notification (fallback to log): {payload}")
+        else:
+            central_logger.error(f"Corpus error notification (WebSocket not available): {payload}")
 
     def _log_creation_error(self, corpus_id: str, error: Exception):
         """Log table creation error"""

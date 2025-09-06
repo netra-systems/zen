@@ -12,6 +12,7 @@ from netra_backend.app.services.corpus.clickhouse_operations import (
 from netra_backend.app.services.corpus.search_operations import SearchOperations
 from netra_backend.app.db import models_postgres as models
 from netra_backend.app import schemas
+from netra_backend.app.models.user_execution_context import UserExecutionContext
 
 
 class CorpusManager:
@@ -126,13 +127,20 @@ class ValidationManager:
 class BaseCorpusService:
     """Base corpus service providing component initialization and management"""
     
-    def __init__(self):
-        """Initialize available corpus service components"""
+    def __init__(self, user_context: Optional[UserExecutionContext] = None):
+        """Initialize available corpus service components
+        
+        Args:
+            user_context: Optional user context for WebSocket isolation.
+                         If provided, enables WebSocket notifications.
+                         If None, notifications are logged only.
+        """
         self.search_operations = SearchOperations()
-        self.clickhouse_ops = CorpusClickHouseOperations()
+        self.clickhouse_ops = CorpusClickHouseOperations(user_context=user_context)
         self.corpus_manager = CorpusManager()
         self.document_manager = DocumentManager()
         self.validation_manager = ValidationManager()
+        self.user_context = user_context
     
     def get_search_operations(self) -> SearchOperations:
         """Get search operations instance"""

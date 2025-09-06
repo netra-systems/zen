@@ -23,8 +23,24 @@ from netra_backend.app.services.corpus.base_service import (
 )
 from netra_backend.app.services.corpus.search_operations import SearchOperations
 
-# Create singleton instance
-corpus_service = CorpusService()
+# NOTE: Singleton corpus_service removed to support user context isolation.
+# Create CorpusService instances with user_context for WebSocket notifications:
+#   corpus_service = CorpusService(user_context=user_execution_context)
+# Or without for logging-only mode:
+#   corpus_service = CorpusService()
+
+def get_corpus_service(user_context=None):
+    """Factory function to create corpus service with optional user context.
+    
+    Args:
+        user_context: Optional UserExecutionContext for WebSocket isolation.
+                     If provided, enables WebSocket notifications.
+                     If None, notifications are logged only.
+    
+    Returns:
+        CorpusService instance configured with the given context.
+    """
+    return CorpusService(user_context=user_context)
 
 __all__ = [
     "CorpusService",
@@ -35,5 +51,5 @@ __all__ = [
     "CorpusManager",
     "CorpusStatus",
     "ContentSource",
-    "corpus_service"
+    "get_corpus_service"
 ]
