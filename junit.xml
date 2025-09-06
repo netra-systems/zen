@@ -1,20 +1,24 @@
-<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="31" failures="0" skipped="1" tests="32" time="4.609" timestamp="2025-09-05T18:58:26.294410-07:00" hostname="Anthony"><testcase classname="" name="tests.critical.test_oauth_configuration_missing_staging_regression" time="0.000"><error message="collection failure">ImportError while importing test module 'C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\auth_service\tests\critical\test_oauth_configuration_missing_staging_regression.py'.
-Hint: make sure your test modules/packages have valid Python names.
-Traceback:
-..\..\..\..\miniconda3\Lib\importlib\__init__.py:90: in import_module
-    return _bootstrap._gcd_import(name[level:], package, level)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-auth_service\tests\critical\test_oauth_configuration_missing_staging_regression.py:26: in &lt;module&gt;
-    from test_framework.database.test_database_manager import TestDatabaseManager
-E   ModuleNotFoundError: No module named 'test_framework.database'</error></testcase><testcase classname="" name="tests.helpers.test_repository_factory" time="0.000"><error message="collection failure">ImportError while importing test module 'C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\auth_service\tests\helpers\test_repository_factory.py'.
-Hint: make sure your test modules/packages have valid Python names.
-Traceback:
-..\..\..\..\miniconda3\Lib\importlib\__init__.py:90: in import_module
-    return _bootstrap._gcd_import(name[level:], package, level)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-auth_service\tests\helpers\test_repository_factory.py:7: in &lt;module&gt;
-    from test_framework.database.test_database_manager import TestDatabaseManager
-E   ModuleNotFoundError: No module named 'test_framework.database'</error></testcase><testcase classname="" name="tests.integration.test_auth_endpoint_regression_prevention_integration" time="0.000"><error message="collection failure">..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\python.py:498: in importtestmodule
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="31" failures="0" skipped="1" tests="32" time="6.468" timestamp="2025-09-05T19:23:14.578272-07:00" hostname="Anthony"><testcase classname="tests.critical.test_oauth_configuration_missing_staging_regression" name="TestDatabaseManager" time="0.000"><error message="collection failure">..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\runner.py:344: in from_call
+    result: TResult | None = func()
+                             ^^^^^^
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\runner.py:389: in collect
+    return list(collector.collect())
+                ^^^^^^^^^^^^^^^^^^^
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\python.py:752: in collect
+    self.warn(
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\nodes.py:271: in warn
+    warnings.warn_explicit(
+E   pytest.PytestCollectionWarning: cannot collect test class 'TestDatabaseManager' because it has a __init__ constructor (from: tests/critical/test_oauth_configuration_missing_staging_regression.py)</error></testcase><testcase classname="tests.helpers.test_repository_factory" name="TestDatabaseManager" time="0.000"><error message="collection failure">..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\runner.py:344: in from_call
+    result: TResult | None = func()
+                             ^^^^^^
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\runner.py:389: in collect
+    return list(collector.collect())
+                ^^^^^^^^^^^^^^^^^^^
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\python.py:752: in collect
+    self.warn(
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\nodes.py:271: in warn
+    warnings.warn_explicit(
+E   pytest.PytestCollectionWarning: cannot collect test class 'TestDatabaseManager' because it has a __init__ constructor (from: tests/helpers/test_repository_factory.py)</error></testcase><testcase classname="" name="tests.integration.test_auth_endpoint_regression_prevention_integration" time="0.000"><error message="collection failure">..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\python.py:498: in importtestmodule
     mod = import_path(
 ..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\pathlib.py:587: in import_path
     importlib.import_module(module_name)
@@ -92,39 +96,54 @@ E   IndentationError: expected an indented block after function definition on li
 E     File "C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\auth_service\tests\test_auth_comprehensive_audit.py", line 32
 E       """Use real service instance."""
 E       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-E   IndentationError: expected an indented block after function definition on line 31</error></testcase><testcase classname="" name="tests.test_auth_port_configuration" time="0.000"><error message="collection failure">ImportError while importing test module 'C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\auth_service\tests\test_auth_port_configuration.py'.
-Hint: make sure your test modules/packages have valid Python names.
-Traceback:
-..\..\..\..\miniconda3\Lib\importlib\__init__.py:90: in import_module
-    return _bootstrap._gcd_import(name[level:], package, level)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-auth_service\tests\test_auth_port_configuration.py:23: in &lt;module&gt;
-    from test_framework.docker.unified_docker_manager import UnifiedDockerManager
-E   ModuleNotFoundError: No module named 'test_framework.docker'</error></testcase><testcase classname="" name="tests.test_auth_real_services_comprehensive" time="0.000"><skipped message="collection skipped">('C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\auth_service\\tests\\test_auth_real_services_comprehensive.py', 50, 'Skipped: Test framework functions have been removed')</skipped></testcase><testcase classname="" name="tests.test_auth_session_persistence_edge_cases" time="0.000"><error message="collection failure">ImportError while importing test module 'C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\auth_service\tests\test_auth_session_persistence_edge_cases.py'.
-Hint: make sure your test modules/packages have valid Python names.
-Traceback:
-..\..\..\..\miniconda3\Lib\importlib\__init__.py:90: in import_module
-    return _bootstrap._gcd_import(name[level:], package, level)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-auth_service\tests\test_auth_session_persistence_edge_cases.py:10: in &lt;module&gt;
-    from test_framework.database.test_database_manager import TestDatabaseManager
-E   ModuleNotFoundError: No module named 'test_framework.database'</error></testcase><testcase classname="" name="tests.test_critical_bugs_simple" time="0.000"><error message="collection failure">ImportError while importing test module 'C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\auth_service\tests\test_critical_bugs_simple.py'.
-Hint: make sure your test modules/packages have valid Python names.
-Traceback:
-..\..\..\..\miniconda3\Lib\importlib\__init__.py:90: in import_module
-    return _bootstrap._gcd_import(name[level:], package, level)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-auth_service\tests\test_critical_bugs_simple.py:9: in &lt;module&gt;
-    from test_framework.database.test_database_manager import TestDatabaseManager
-E   ModuleNotFoundError: No module named 'test_framework.database'</error></testcase><testcase classname="" name="tests.test_dev_login_endpoint" time="0.000"><error message="collection failure">ImportError while importing test module 'C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\auth_service\tests\test_dev_login_endpoint.py'.
-Hint: make sure your test modules/packages have valid Python names.
-Traceback:
-..\..\..\..\miniconda3\Lib\importlib\__init__.py:90: in import_module
-    return _bootstrap._gcd_import(name[level:], package, level)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-auth_service\tests\test_dev_login_endpoint.py:5: in &lt;module&gt;
-    from auth_service.core.auth_manager import AuthManager
-E   ModuleNotFoundError: No module named 'auth_service.core'</error></testcase><testcase classname="" name="tests.test_oauth_redirect_regression" time="0.000"><error message="collection failure">..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\python.py:498: in importtestmodule
+E   IndentationError: expected an indented block after function definition on line 31</error></testcase><testcase classname="" name="tests.test_auth_port_configuration" time="0.000"><error message="collection failure">auth_service\tests\test_auth_port_configuration.py:22: in &lt;module&gt;
+    from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+netra_backend\app\websocket_core\__init__.py:27: in &lt;module&gt;
+    from netra_backend.app.websocket_core.websocket_manager_factory import (
+netra_backend\app\websocket_core\websocket_manager_factory.py:39: in &lt;module&gt;
+    from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
+netra_backend\app\agents\supervisor\__init__.py:5: in &lt;module&gt;
+    from netra_backend.app.services.unified_tool_registry.execution_engine import (
+netra_backend\app\services\unified_tool_registry\execution_engine.py:26: in &lt;module&gt;
+    from netra_backend.app.services.tool_permission_service import ToolPermissionService
+netra_backend\app\services\tool_permission_service.py:29: in &lt;module&gt;
+    from netra_backend.app.services.tool_permissions.rate_limiter import RateLimiter
+netra_backend\app\services\tool_permissions\rate_limiter.py:19: in &lt;module&gt;
+    class ToolPermissionRateLimiter:
+netra_backend\app\services\tool_permissions\rate_limiter.py:22: in ToolPermissionRateLimiter
+    def __init__(self, redis_client: Optional[redis.Redis] = None):
+                                              ^^^^^
+E   NameError: name 'redis' is not defined</error></testcase><testcase classname="" name="tests.test_auth_real_services_comprehensive" time="0.000"><skipped message="collection skipped">('C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\auth_service\\tests\\test_auth_real_services_comprehensive.py', 50, 'Skipped: Test framework functions have been removed')</skipped></testcase><testcase classname="tests.test_auth_session_persistence_edge_cases" name="TestDatabaseManager" time="0.000"><error message="collection failure">..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\runner.py:344: in from_call
+    result: TResult | None = func()
+                             ^^^^^^
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\runner.py:389: in collect
+    return list(collector.collect())
+                ^^^^^^^^^^^^^^^^^^^
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\python.py:752: in collect
+    self.warn(
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\nodes.py:271: in warn
+    warnings.warn_explicit(
+E   pytest.PytestCollectionWarning: cannot collect test class 'TestDatabaseManager' because it has a __init__ constructor (from: tests/test_auth_session_persistence_edge_cases.py)</error></testcase><testcase classname="tests.test_auth_session_persistence_edge_cases" name="TestRedisManager" time="0.000"><error message="collection failure">..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\runner.py:344: in from_call
+    result: TResult | None = func()
+                             ^^^^^^
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\runner.py:389: in collect
+    return list(collector.collect())
+                ^^^^^^^^^^^^^^^^^^^
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\python.py:752: in collect
+    self.warn(
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\nodes.py:271: in warn
+    warnings.warn_explicit(
+E   pytest.PytestCollectionWarning: cannot collect test class 'TestRedisManager' because it has a __init__ constructor (from: tests/test_auth_session_persistence_edge_cases.py)</error></testcase><testcase classname="tests.test_critical_bugs_simple" name="TestDatabaseManager" time="0.000"><error message="collection failure">..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\runner.py:344: in from_call
+    result: TResult | None = func()
+                             ^^^^^^
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\runner.py:389: in collect
+    return list(collector.collect())
+                ^^^^^^^^^^^^^^^^^^^
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\python.py:752: in collect
+    self.warn(
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\nodes.py:271: in warn
+    warnings.warn_explicit(
+E   pytest.PytestCollectionWarning: cannot collect test class 'TestDatabaseManager' because it has a __init__ constructor (from: tests/test_critical_bugs_simple.py)</error></testcase><testcase classname="" name="tests.test_oauth_redirect_regression" time="0.000"><error message="collection failure">..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\python.py:498: in importtestmodule
     mod = import_path(
 ..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\pathlib.py:587: in import_path
     importlib.import_module(module_name)
@@ -150,15 +169,17 @@ E   ModuleNotFoundError: No module named 'auth_service.core'</error></testcase><
 E     File "C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\auth_service\tests\test_oauth_redirect_regression.py", line 25
 E       def real_auth_env():
 E                           ^
-E   IndentationError: unindent does not match any outer indentation level</error></testcase><testcase classname="" name="tests.test_oauth_security_vulnerabilities" time="0.000"><error message="collection failure">ImportError while importing test module 'C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\auth_service\tests\test_oauth_security_vulnerabilities.py'.
-Hint: make sure your test modules/packages have valid Python names.
-Traceback:
-..\..\..\..\miniconda3\Lib\importlib\__init__.py:90: in import_module
-    return _bootstrap._gcd_import(name[level:], package, level)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-auth_service\tests\test_oauth_security_vulnerabilities.py:12: in &lt;module&gt;
-    from test_framework.database.test_database_manager import TestDatabaseManager
-E   ModuleNotFoundError: No module named 'test_framework.database'</error></testcase><testcase classname="" name="tests.test_oauth_state_validation" time="0.000"><error message="collection failure">..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\python.py:498: in importtestmodule
+E   IndentationError: unindent does not match any outer indentation level</error></testcase><testcase classname="tests.test_oauth_security_vulnerabilities" name="TestDatabaseManager" time="0.000"><error message="collection failure">..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\runner.py:344: in from_call
+    result: TResult | None = func()
+                             ^^^^^^
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\runner.py:389: in collect
+    return list(collector.collect())
+                ^^^^^^^^^^^^^^^^^^^
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\python.py:752: in collect
+    self.warn(
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\nodes.py:271: in warn
+    warnings.warn_explicit(
+E   pytest.PytestCollectionWarning: cannot collect test class 'TestDatabaseManager' because it has a __init__ constructor (from: tests/test_oauth_security_vulnerabilities.py)</error></testcase><testcase classname="" name="tests.test_oauth_state_validation" time="0.000"><error message="collection failure">..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\python.py:498: in importtestmodule
     mod = import_path(
 ..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\pathlib.py:587: in import_path
     importlib.import_module(module_name)
@@ -314,15 +335,7 @@ E   IndentationError: expected an indented block after function definition on li
 E     File "C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\auth_service\tests\test_refresh_token_fix.py", line 21
 E       """Use real service instance."""
 E       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-E   IndentationError: expected an indented block after function definition on line 20</error></testcase><testcase classname="" name="tests.test_restored_endpoints" time="0.000"><error message="collection failure">ImportError while importing test module 'C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\auth_service\tests\test_restored_endpoints.py'.
-Hint: make sure your test modules/packages have valid Python names.
-Traceback:
-..\..\..\..\miniconda3\Lib\importlib\__init__.py:90: in import_module
-    return _bootstrap._gcd_import(name[level:], package, level)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-auth_service\tests\test_restored_endpoints.py:4: in &lt;module&gt;
-    from auth_service.core.auth_manager import AuthManager
-E   ModuleNotFoundError: No module named 'auth_service.core'</error></testcase><testcase classname="" name="tests.test_session_security_cycles_36_40" time="0.000"><error message="collection failure">..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\python.py:498: in importtestmodule
+E   IndentationError: expected an indented block after function definition on line 20</error></testcase><testcase classname="" name="tests.test_session_security_cycles_36_40" time="0.000"><error message="collection failure">..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\python.py:498: in importtestmodule
     mod = import_path(
 ..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\pathlib.py:587: in import_path
     importlib.import_module(module_name)
@@ -348,15 +361,17 @@ E   ModuleNotFoundError: No module named 'auth_service.core'</error></testcase><
 E     File "C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\auth_service\tests\test_session_security_cycles_36_40.py", line 58
 E       """Use real service instance."""
 E       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-E   IndentationError: expected an indented block after function definition on line 57</error></testcase><testcase classname="" name="tests.test_signup_flow_comprehensive" time="0.000"><error message="collection failure">ImportError while importing test module 'C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\auth_service\tests\test_signup_flow_comprehensive.py'.
-Hint: make sure your test modules/packages have valid Python names.
-Traceback:
-..\..\..\..\miniconda3\Lib\importlib\__init__.py:90: in import_module
-    return _bootstrap._gcd_import(name[level:], package, level)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-auth_service\tests\test_signup_flow_comprehensive.py:9: in &lt;module&gt;
-    from test_framework.database.test_database_manager import TestDatabaseManager
-E   ModuleNotFoundError: No module named 'test_framework.database'</error></testcase><testcase classname="" name="tests.test_token_validation_security_cycles_31_35" time="0.000"><error message="collection failure">..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\python.py:498: in importtestmodule
+E   IndentationError: expected an indented block after function definition on line 57</error></testcase><testcase classname="tests.test_signup_flow_comprehensive" name="TestDatabaseManager" time="0.000"><error message="collection failure">..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\runner.py:344: in from_call
+    result: TResult | None = func()
+                             ^^^^^^
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\runner.py:389: in collect
+    return list(collector.collect())
+                ^^^^^^^^^^^^^^^^^^^
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\python.py:752: in collect
+    self.warn(
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\nodes.py:271: in warn
+    warnings.warn_explicit(
+E   pytest.PytestCollectionWarning: cannot collect test class 'TestDatabaseManager' because it has a __init__ constructor (from: tests/test_signup_flow_comprehensive.py)</error></testcase><testcase classname="" name="tests.test_token_validation_security_cycles_31_35" time="0.000"><error message="collection failure">..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\python.py:498: in importtestmodule
     mod = import_path(
 ..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\pathlib.py:587: in import_path
     importlib.import_module(module_name)
@@ -382,15 +397,27 @@ E   ModuleNotFoundError: No module named 'test_framework.database'</error></test
 E     File "C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\auth_service\tests\test_token_validation_security_cycles_31_35.py", line 44
 E       """Use real service instance."""
 E       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-E   IndentationError: expected an indented block after function definition on line 43</error></testcase><testcase classname="" name="tests.unit.test_auth_config_comprehensive" time="0.000"><error message="collection failure">ImportError while importing test module 'C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\auth_service\tests\unit\test_auth_config_comprehensive.py'.
-Hint: make sure your test modules/packages have valid Python names.
-Traceback:
-..\..\..\..\miniconda3\Lib\importlib\__init__.py:90: in import_module
-    return _bootstrap._gcd_import(name[level:], package, level)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-auth_service\tests\unit\test_auth_config_comprehensive.py:10: in &lt;module&gt;
-    from test_framework.database.test_database_manager import TestDatabaseManager
-E   ModuleNotFoundError: No module named 'test_framework.database'</error></testcase><testcase classname="" name="tests.unit.test_auth_endpoint_response_consistency" time="0.000"><error message="collection failure">..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\python.py:498: in importtestmodule
+E   IndentationError: expected an indented block after function definition on line 43</error></testcase><testcase classname="tests.unit.test_auth_config_comprehensive" name="TestDatabaseManager" time="0.000"><error message="collection failure">..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\runner.py:344: in from_call
+    result: TResult | None = func()
+                             ^^^^^^
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\runner.py:389: in collect
+    return list(collector.collect())
+                ^^^^^^^^^^^^^^^^^^^
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\python.py:752: in collect
+    self.warn(
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\nodes.py:271: in warn
+    warnings.warn_explicit(
+E   pytest.PytestCollectionWarning: cannot collect test class 'TestDatabaseManager' because it has a __init__ constructor (from: tests/unit/test_auth_config_comprehensive.py)</error></testcase><testcase classname="tests.unit.test_auth_config_comprehensive" name="TestRedisManager" time="0.000"><error message="collection failure">..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\runner.py:344: in from_call
+    result: TResult | None = func()
+                             ^^^^^^
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\runner.py:389: in collect
+    return list(collector.collect())
+                ^^^^^^^^^^^^^^^^^^^
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\python.py:752: in collect
+    self.warn(
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\nodes.py:271: in warn
+    warnings.warn_explicit(
+E   pytest.PytestCollectionWarning: cannot collect test class 'TestRedisManager' because it has a __init__ constructor (from: tests/unit/test_auth_config_comprehensive.py)</error></testcase><testcase classname="" name="tests.unit.test_auth_endpoint_response_consistency" time="0.000"><error message="collection failure">..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\python.py:498: in importtestmodule
     mod = import_path(
 ..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\pathlib.py:587: in import_path
     importlib.import_module(module_name)
@@ -545,15 +572,17 @@ E   IndentationError: unexpected indent</error></testcase><testcase classname=""
 E     File "C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\auth_service\tests\unit\test_oauth_comprehensive.py", line 23
 E       """Use real service instance."""
 E       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-E   IndentationError: expected an indented block after function definition on line 22</error></testcase><testcase classname="" name="tests.unit.test_oauth_redirect_uri_regression" time="0.000"><error message="collection failure">ImportError while importing test module 'C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\auth_service\tests\unit\test_oauth_redirect_uri_regression.py'.
-Hint: make sure your test modules/packages have valid Python names.
-Traceback:
-..\..\..\..\miniconda3\Lib\importlib\__init__.py:90: in import_module
-    return _bootstrap._gcd_import(name[level:], package, level)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-auth_service\tests\unit\test_oauth_redirect_uri_regression.py:12: in &lt;module&gt;
-    from test_framework.redis.test_redis_manager import TestRedisManager
-E   ModuleNotFoundError: No module named 'test_framework.redis'</error></testcase><testcase classname="" name="tests.unit.test_refresh_endpoint" time="0.000"><error message="collection failure">..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\python.py:498: in importtestmodule
+E   IndentationError: expected an indented block after function definition on line 22</error></testcase><testcase classname="tests.unit.test_oauth_redirect_uri_regression" name="TestRedisManager" time="0.000"><error message="collection failure">..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\runner.py:344: in from_call
+    result: TResult | None = func()
+                             ^^^^^^
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\runner.py:389: in collect
+    return list(collector.collect())
+                ^^^^^^^^^^^^^^^^^^^
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\python.py:752: in collect
+    self.warn(
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\nodes.py:271: in warn
+    warnings.warn_explicit(
+E   pytest.PytestCollectionWarning: cannot collect test class 'TestRedisManager' because it has a __init__ constructor (from: tests/unit/test_oauth_redirect_uri_regression.py)</error></testcase><testcase classname="" name="tests.unit.test_refresh_endpoint" time="0.000"><error message="collection failure">..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\python.py:498: in importtestmodule
     mod = import_path(
 ..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\pathlib.py:587: in import_path
     importlib.import_module(module_name)
@@ -579,12 +608,14 @@ E   ModuleNotFoundError: No module named 'test_framework.redis'</error></testcas
 E     File "C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\auth_service\tests\unit\test_refresh_endpoint.py", line 23
 E       def real_auth_service():
 E                               ^
-E   IndentationError: unindent does not match any outer indentation level</error></testcase><testcase classname="" name="tests.unit.test_registration_regression" time="0.000"><error message="collection failure">ImportError while importing test module 'C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\auth_service\tests\unit\test_registration_regression.py'.
-Hint: make sure your test modules/packages have valid Python names.
-Traceback:
-..\..\..\..\miniconda3\Lib\importlib\__init__.py:90: in import_module
-    return _bootstrap._gcd_import(name[level:], package, level)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-auth_service\tests\unit\test_registration_regression.py:9: in &lt;module&gt;
-    from test_framework.database.test_database_manager import TestDatabaseManager
-E   ModuleNotFoundError: No module named 'test_framework.database'</error></testcase></testsuite></testsuites>
+E   IndentationError: unindent does not match any outer indentation level</error></testcase><testcase classname="tests.unit.test_registration_regression" name="TestDatabaseManager" time="0.000"><error message="collection failure">..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\runner.py:344: in from_call
+    result: TResult | None = func()
+                             ^^^^^^
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\runner.py:389: in collect
+    return list(collector.collect())
+                ^^^^^^^^^^^^^^^^^^^
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\python.py:752: in collect
+    self.warn(
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\nodes.py:271: in warn
+    warnings.warn_explicit(
+E   pytest.PytestCollectionWarning: cannot collect test class 'TestDatabaseManager' because it has a __init__ constructor (from: tests/unit/test_registration_regression.py)</error></testcase></testsuite></testsuites>
