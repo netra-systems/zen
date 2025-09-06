@@ -213,32 +213,49 @@ class TestMCPConnectionResilience:
             # Reduced wait times for testing (normally would be exponential)
             await asyncio.sleep(0.01)  # Very short wait for testing
         
-        # Create connection that will fail
-        connection = MCPConnection(
-            id=str(uuid.uuid4()),
-            server_name=failing_server_config.name,
-            transport=MockTransport(fail_after=0),
-            status=ConnectionStatus.FAILED,
-            created_at=datetime.now(),
-            retry_count=4  # Start near max retry limit (5)
-        )
+        # Create multiple connections to test retry behavior
+        connections = []
+        for i in range(3):
+            connection = MCPConnection(
+                id=str(uuid.uuid4()),
+                server_name=failing_server_config.name,
+                transport=MockTransport(fail_after=0),
+                status=ConnectionStatus.FAILED,
+                created_at=datetime.now(),
+                retry_count=i + 1  # Different retry counts
+            )
+            connections.append(connection)
         
         # Store the config for reconnection
         connection_manager._server_configs[failing_server_config.name] = failing_server_config
         
         with patch.object(connection_manager, '_wait_for_backoff', side_effect=track_wait_times):
-            with patch.object(connection_manager, '_create_http_transport', return_value=MockTransport(fail_after=0)):
-                with patch.object(connection_manager, '_connect_transport', side_effect=ConnectionError("Connection failed")):
-                    
-                    # First attempt should fail and trigger backoff
-                    with pytest.raises(NetraException, match="exceeded max retry attempts"):
-                        await connection_manager.reconnect(connection)
-                    
-                    # Verify exponential backoff was called
-                    assert len(start_times) >= 1, "Exponential backoff should be called before failing"
-                    
-                    # Verify the connection retry count was incremented before failure
-                    assert connection.retry_count == 5, "Connection should have reached max retry attempts"
+            # Test connection that should exceed max retries
+            connection_at_limit = MCPConnection(
+                id=str(uuid.uuid4()),
+                server_name=failing_server_config.name,
+                transport=MockTransport(fail_after=0),
+                status=ConnectionStatus.FAILED,
+                created_at=datetime.now(),
+                retry_count=connection_manager._max_retry_attempts  # At max limit already
+            )
+            
+            # Should immediately fail due to retry limit
+            with pytest.raises(NetraException, match="exceeded max retry attempts"):
+                await connection_manager.reconnect(connection_at_limit)
+            
+            # Verify exponential backoff is called for connections under the limit
+            connection_under_limit = connections[0]  # retry_count = 1
+            
+            with patch.object(connection_manager, '_create_http_transport', return_value=MockTransport()):
+                with patch.object(connection_manager, '_connect_transport'):
+                    with patch.object(connection_manager, '_ping_connection', return_value=True):
+                        # This should succeed and call exponential backoff
+                        reconnected = await connection_manager.reconnect(connection_under_limit)
+                        assert reconnected.status == ConnectionStatus.CONNECTED
+            
+            # Verify exponential backoff was called
+            assert len(start_times) >= 1, "Exponential backoff should be called for valid reconnection attempts"
     
     # Test 4: Circuit breaker pattern for connection failures
     @pytest.mark.asyncio

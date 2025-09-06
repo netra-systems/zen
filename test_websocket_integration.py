@@ -78,8 +78,13 @@ async def test_agent_registry_websocket_integration():
                 
                 if has_dispatcher:
                     print("11. Testing tool dispatcher has WebSocket integration...")
-                    has_websocket_emitter = hasattr(agent.tool_dispatcher, 'websocket_emitter')
-                    print(f"    Tool dispatcher has websocket_emitter: {has_websocket_emitter}")
+                    has_websocket_manager = hasattr(agent.tool_dispatcher, 'websocket_manager') and agent.tool_dispatcher.websocket_manager is not None
+                    has_websocket_bridge = hasattr(agent.tool_dispatcher, '_websocket_bridge') and agent.tool_dispatcher._websocket_bridge is not None
+                    has_websocket_support = hasattr(agent.tool_dispatcher, 'has_websocket_support') and agent.tool_dispatcher.has_websocket_support
+                    
+                    print(f"    Tool dispatcher has websocket_manager: {has_websocket_manager}")
+                    print(f"    Tool dispatcher has _websocket_bridge: {has_websocket_bridge}")
+                    print(f"    Tool dispatcher has_websocket_support: {has_websocket_support}")
                     
         except Exception as e:
             print(f"   Error creating agent: {e}")
