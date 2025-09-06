@@ -20,7 +20,7 @@ import websockets
 
 from netra_backend.app.config import get_config
 
-from netra_backend.app.websocket_core.manager import WebSocketManager
+from netra_backend.app.websocket_core import WebSocketManager
 
 class TestWebSocketMessageDeliveryL3:
     """Test WebSocket message delivery scenarios"""

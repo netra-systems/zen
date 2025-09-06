@@ -18,7 +18,7 @@ from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 from netra_backend.app.llm.llm_manager import LLMManager
 from shared.isolated_environment import IsolatedEnvironment
-from netra_backend.app.database import get_async_session
+from netra_backend.app.database import get_db
 from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
@@ -30,7 +30,7 @@ env = IsolatedEnvironment()
 @pytest.fixture
 async def db_session():
     """Get real database session."""
-    async for session in get_async_session():
+    async for session in get_db():
         yield session
         await session.rollback()
 

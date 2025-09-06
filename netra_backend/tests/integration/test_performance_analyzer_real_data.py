@@ -21,7 +21,7 @@ from netra_backend.app.agents.data_sub_agent.performance_analyzer import Perform
 from netra_backend.app.agents.data_sub_agent.performance_data_processor import PerformanceDataProcessor
 from netra_backend.app.agents.data_sub_agent.insights_performance_analyzer import PerformanceInsightsAnalyzer
 from shared.isolated_environment import IsolatedEnvironment
-from netra_backend.app.database import get_async_session
+from netra_backend.app.database import get_db
 from netra_backend.app.llm.llm_manager import LLMManager
 # SQL models not found - commenting out for now
 # from netra_backend.app.models.sql_models import (
@@ -68,7 +68,7 @@ class TestPerformanceAnalyzerRealData:
     @pytest.fixture
     async def real_database_session(self):
         """Get real database session for testing."""
-        async for session in get_async_session():
+        async for session in get_db():
             yield session
             await session.rollback()
 

@@ -191,7 +191,7 @@ class TestAuthDatabaseRegression:
         """Test async session management for SQLite."""
     pass
         if hasattr(sqlite_db_manager, 'get_async_session'):
-            async with sqlite_db_manager.get_async_session() as session:
+            async with sqlite_db_manager.get_db() as session:
                 assert session is not None
                 # Session should be usable for async operations
 

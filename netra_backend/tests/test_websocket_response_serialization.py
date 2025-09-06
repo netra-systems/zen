@@ -18,7 +18,7 @@ from typing import Any, Dict
 import pytest
 
 # Import backend schemas
-from netra_backend.app.schemas.registry import (
+from netra_backend.app.schemas import (
     StreamChunk,
     StreamComplete,
     WebSocketMessage,

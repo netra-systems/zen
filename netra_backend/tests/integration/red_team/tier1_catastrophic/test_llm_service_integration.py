@@ -80,7 +80,7 @@ except ImportError:
 AgentRun = Mock
 
 try:
-    from netra_backend.app.database import get_db_session
+    from netra_backend.app.database import get_db
 except ImportError:
     from netra_backend.app.db.database_manager import DatabaseManager
     get_db_session = lambda: DatabaseManager().get_session()

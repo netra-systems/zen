@@ -30,7 +30,7 @@ from netra_backend.app.websocket_core import (
     get_websocket_manager
 )
 from netra_backend.app.websocket_core.handlers import (
-    BaseMessageHandler,
+    UserMessageHandler,
     UserMessageHandler,
     HeartbeatHandler
 )

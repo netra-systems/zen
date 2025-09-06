@@ -21,7 +21,7 @@ import asyncio
 from typing import Dict, Any, List
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
 from netra_backend.app.agents.base.interface import ExecutionContext, UserExecutionContext
-from netra_backend.app.agents.registry.agent_class_registry import AgentClassRegistry
+from netra_backend.app.agents.supervisor.agent_class_registry import AgentClassRegistry
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
 from netra_backend.app.services.tool_dispatcher.factory import RequestScopedToolDispatcherFactory

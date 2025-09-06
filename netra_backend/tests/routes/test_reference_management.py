@@ -8,7 +8,7 @@ from datetime import datetime
 import pytest
 from fastapi.testclient import TestClient
 
-from netra_backend.app.database import get_db_session
+from netra_backend.app.database import get_db
 from netra_backend.app.main import app
 
 class TestReferenceManagement:

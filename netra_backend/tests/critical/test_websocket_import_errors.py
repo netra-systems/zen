@@ -20,7 +20,7 @@ class TestWebSocketImportErrors:
         """Test that shutdown.py imports WebSocket correctly."""
         # This test should pass now that the import is fixed
         from netra_backend.app.shutdown import websocket_manager
-        from netra_backend.app.websocket_core.manager import WebSocketManager
+        from netra_backend.app.websocket_core import WebSocketManager
         
         assert websocket_manager is not None
         assert isinstance(websocket_manager, WebSocketManager)
@@ -106,7 +106,7 @@ class TestLegacyWebSocketMigration:
     def test_legacy_compatibility_function_warns(self):
         """Test that using legacy compatibility functions raises warnings."""
         import warnings
-        from netra_backend.app.websocket_core.manager import get_websocket_manager as get_unified_manager
+        from netra_backend.app.websocket_core import get_websocket_manager as get_unified_manager
         
         with warnings.catch_warnings(record=True) as w:
             warnings.simplefilter("always")
@@ -119,7 +119,7 @@ class TestLegacyWebSocketMigration:
     
     def test_websocket_manager_singleton(self):
         """Test that WebSocket manager is a singleton."""
-        from netra_backend.app.websocket_core.manager import get_websocket_manager
+        from netra_backend.app.websocket_core import get_websocket_manager
         
         manager1 = get_websocket_manager()
         manager2 = get_websocket_manager()
@@ -149,7 +149,7 @@ class TestWebSocketImportPatterns:
             assert netra_backend.app.startup_module is not None
             
             # Verify websocket_core is used internally (it imports get_unified_manager)
-            from netra_backend.app.websocket_core.manager import get_websocket_manager, WebSocketManager
+            from netra_backend.app.websocket_core import get_websocket_manager, WebSocketManager
             manager = get_websocket_manager()
             assert manager is not None
             assert isinstance(manager, WebSocketManager)

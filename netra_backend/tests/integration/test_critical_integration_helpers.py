@@ -1,6 +1,6 @@
 """Utilities Tests - Split from test_critical_integration.py"""
 
-from netra_backend.app.websocket_core.manager import WebSocketManager
+from netra_backend.app.websocket_core import WebSocketManager
 # Test framework import - using pytest fixtures instead
 from pathlib import Path
 import sys
@@ -36,14 +36,14 @@ from netra_backend.app.agents.supervisor_consolidated import (
 from netra_backend.app.db.base import Base
 from netra_backend.app.db.models_postgres import Run
 from netra_backend.app.schemas.agent import AgentStarted
-from netra_backend.app.schemas.registry import UserBase
+from netra_backend.app.schemas import UserBase
 from netra_backend.app.services.agent_service import AgentService
 from netra_backend.app.services.database.message_repository import MessageRepository
 from netra_backend.app.services.database.run_repository import RunRepository
 from netra_backend.app.services.database.thread_repository import ThreadRepository
 from netra_backend.app.services.state_persistence import StatePersistenceService
-from netra_backend.app.services.websocket.message_handler import BaseMessageHandler
-from netra_backend.app.websocket_core.manager import WebSocketManager
+from netra_backend.app.services.websocket.message_handler import UserMessageHandler
+from netra_backend.app.websocket_core import WebSocketManager
 
 class TestSyntaxFix:
 

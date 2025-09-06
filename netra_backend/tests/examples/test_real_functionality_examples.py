@@ -36,7 +36,7 @@ from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
 
 import pytest
-from netra_backend.app.database import get_db_session as get_database_session
+from netra_backend.app.database import get_db as get_database_session
 from netra_backend.app.logging_config import central_logger
 
 from netra_backend.app.agents.base_agent import BaseAgent

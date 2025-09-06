@@ -10,7 +10,7 @@ Business Value Justification (BVJ):
 L3 Test: Uses real Redis containers via Docker for WebSocket pub/sub validation.
 """
 
-from netra_backend.app.websocket_core.manager import WebSocketManager
+from netra_backend.app.websocket_core import WebSocketManager
 # Test framework import - using pytest fixtures instead
 from pathlib import Path
 import sys
@@ -31,7 +31,7 @@ import redis.asyncio as redis
 from netra_backend.app.schemas import User
 
 from netra_backend.app.redis_manager import RedisManager
-from netra_backend.app.websocket_core.manager import WebSocketManager
+from netra_backend.app.websocket_core import WebSocketManager
 
 from netra_backend.tests.integration.helpers.redis_l3_helpers import (
 

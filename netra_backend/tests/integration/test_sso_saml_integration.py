@@ -46,8 +46,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from netra_backend.app.core.auth_constants import AuthConstants, JWTConstants
 
-from netra_backend.app.database import get_db_session
-from netra_backend.app.schemas.registry import WebSocketMessage
+from netra_backend.app.database import get_db
+from netra_backend.app.schemas import WebSocketMessage
 from netra_backend.tests.integration.sso_saml_components import (
     EnterpriseSessionManager,
     EnterpriseTokenManager,
@@ -95,7 +95,7 @@ async def enterprise_tenant_id():
 @pytest.fixture
 async def db_session():
     """Database session fixture"""
-    async with get_db_session() as session:
+    async with get_db() as session:
         try:
             yield session
         finally:

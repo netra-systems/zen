@@ -26,7 +26,7 @@ pytest.skip("WebSocket connection lifecycle tests obsolete - API changed", allow
 try:
     from netra_backend.app.websocket_core_info import ConnectionInfo
     from netra_backend.app.websocket_core.types import ConnectionInfo as CoreConnectionInfo
-    from netra_backend.app.websocket_core.manager import WebSocketManager
+    from netra_backend.app.websocket_core import WebSocketManager
 except ImportError:
     pytest.skip("Required modules have been removed or have missing dependencies", allow_module_level=True)
 

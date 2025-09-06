@@ -20,7 +20,7 @@ from typing import Any, Dict, List
 
 import pytest
 
-from netra_backend.app.schemas.registry import (
+from netra_backend.app.schemas import (
     DeepAgentState,
     Message,
     MessageType,
@@ -35,7 +35,7 @@ from netra_backend.app.schemas.websocket_message_types import (
     StartAgentMessage,
     UserMessage)
 from netra_backend.app.services.state_persistence import DateTimeEncoder
-from netra_backend.app.websocket_core.manager import WebSocketManager  # BroadcastManager functionality is in WebSocketManager
+from netra_backend.app.websocket_core import WebSocketManager  # BroadcastManager functionality is in WebSocketManager
 from netra_backend.app.schemas.websocket_models import BroadcastResult
 from netra_backend.app.websocket_core.utils import validate_message_structure as MessageValidator
 

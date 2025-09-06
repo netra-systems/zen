@@ -25,7 +25,7 @@ from netra_backend.app.websocket_core.types import (
     PendingMessage,
 )
 from netra_backend.app.websocket_core.types import ConnectionInfo
-from netra_backend.app.websocket_core.manager import WebSocketManager as ConnectionManager
+from netra_backend.app.websocket_core import WebSocketManager as ConnectionManager
 
 class TestNetworkFailureZeroMessageLoss:
     """Test zero message loss during network failures."""

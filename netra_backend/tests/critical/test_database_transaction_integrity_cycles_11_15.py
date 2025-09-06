@@ -59,7 +59,7 @@ class TestDatabaseTransactionIntegrity:
         initial_balance = 1000
         
         async def concurrent_transaction_1():
-            async with db_manager.get_async_session() as session:
+            async with db_manager.get_db() as session:
                 async with session.begin():
                     # Read balance
                     result = await session.execute(
@@ -78,7 +78,7 @@ class TestDatabaseTransactionIntegrity:
                     )
 
         async def concurrent_transaction_2():
-            async with db_manager.get_async_session() as session:
+            async with db_manager.get_db() as session:
                 async with session.begin():
                     # Read balance
                     result = await session.execute(
@@ -97,7 +97,7 @@ class TestDatabaseTransactionIntegrity:
                     )
 
         # Initialize test account
-        async with db_manager.get_async_session() as session:
+        async with db_manager.get_db() as session:
             await session.execute(
                 text("INSERT INTO user_accounts (user_id, balance) VALUES (:user_id, :balance) ON CONFLICT (user_id) DO UPDATE SET balance = :balance"),
                 {"user_id": test_user_id, "balance": initial_balance}
@@ -111,7 +111,7 @@ class TestDatabaseTransactionIntegrity:
         )
 
         # Verify final balance is consistent (one transaction should have failed or been serialized)
-        async with db_manager.get_async_session() as session:
+        async with db_manager.get_db() as session:
             result = await session.execute(
                 text("SELECT balance FROM user_accounts WHERE user_id = :user_id"),
                 {"user_id": test_user_id}
@@ -136,7 +136,7 @@ class TestDatabaseTransactionIntegrity:
         resource_2_id = "resource_deadlock_2"
         
         async def transaction_a():
-            async with db_manager.get_async_session() as session:
+            async with db_manager.get_db() as session:
                 async with session.begin():
                     # Lock resource 1 first
                     await session.execute(
@@ -154,7 +154,7 @@ class TestDatabaseTransactionIntegrity:
                     )
 
         async def transaction_b():
-            async with db_manager.get_async_session() as session:
+            async with db_manager.get_db() as session:
                 async with session.begin():
                     # Lock resource 2 first
                     await session.execute(
@@ -172,7 +172,7 @@ class TestDatabaseTransactionIntegrity:
                     )
 
         # Initialize test resources
-        async with db_manager.get_async_session() as session:
+        async with db_manager.get_db() as session:
             await session.execute(
                 text("INSERT INTO test_resources (resource_id, data) VALUES (:id1, 'data1'), (:id2, 'data2') ON CONFLICT (resource_id) DO NOTHING"),
                 {"id1": resource_1_id, "id2": resource_2_id}
@@ -203,7 +203,7 @@ class TestDatabaseTransactionIntegrity:
         test_thread_id = "thread_rollback_test"
         
         with pytest.raises(IntegrityError):
-            async with postgres_core.get_async_session() as session:
+            async with postgres_core.get_db() as session:
                 async with session.begin():
                     # Insert valid thread
                     await session.execute(
@@ -224,7 +224,7 @@ class TestDatabaseTransactionIntegrity:
                     )
 
         # Verify complete rollback - no thread or messages should exist
-        async with postgres_core.get_async_session() as session:
+        async with postgres_core.get_db() as session:
             thread_result = await session.execute(
                 text("SELECT COUNT(*) FROM threads WHERE id = :id"),
                 {"id": test_thread_id}
@@ -257,7 +257,7 @@ class TestDatabaseTransactionIntegrity:
             max_sessions = 15  # Conservative estimate for pool exhaustion
             for i in range(max_sessions):
                 try:
-                    session = await db_manager.get_async_session().__aenter__()
+                    session = await db_manager.get_db().__aenter__()
                     sessions.append(session)
                 except Exception as e:
                     logger.info(f"Pool exhausted after {i} sessions: {e}")
@@ -266,7 +266,7 @@ class TestDatabaseTransactionIntegrity:
             # Verify system can still handle requests (should queue or reject gracefully)
             start_time = time.time()
             try:
-                async with db_manager.get_async_session() as session:
+                async with db_manager.get_db() as session:
                     await session.execute(text("SELECT 1"))
                     connection_time = time.time() - start_time
                     assert connection_time < 30.0, f"Connection took too long: {connection_time}s"
@@ -283,7 +283,7 @@ class TestDatabaseTransactionIntegrity:
                     pass
 
         # Verify pool recovery
-        async with db_manager.get_async_session() as session:
+        async with db_manager.get_db() as session:
             result = await session.execute(text("SELECT 1"))
             assert result.scalar() == 1, "Pool failed to recover"
         
@@ -301,13 +301,13 @@ class TestDatabaseTransactionIntegrity:
         # Test transaction that exceeds reasonable timeout
         with pytest.raises((SQLAlchemyError, asyncio.TimeoutError)):
             async with asyncio.timeout(5.0):  # 5 second timeout
-                async with postgres_core.get_async_session() as session:
+                async with postgres_core.get_db() as session:
                     async with session.begin():
                         # Start a long-running operation
                         await session.execute(text("SELECT pg_sleep(10)"))  # 10 second sleep
 
         # Verify system is still responsive after timeout
-        async with postgres_core.get_async_session() as session:
+        async with postgres_core.get_db() as session:
             result = await session.execute(text("SELECT 1"))
             assert result.scalar() == 1, "System not responsive after timeout"
         

@@ -67,7 +67,7 @@ class TestCircularImportRegression:
     
     def test_websocket_modules_use_local_execution(self):
         """Verify WebSocket modules use local execution patterns."""
-        from netra_backend.app.websocket_core.manager import WebSocketManager
+        from netra_backend.app.websocket_core import WebSocketManager
         
         # Verify execution_engine is None or local implementation
         manager = WebSocketManager()
@@ -112,7 +112,7 @@ class TestCircularImportRegression:
         # Import in problematic order
         from netra_backend.app.core.registry.universal_registry import AgentRegistry
         from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
-        from netra_backend.app.websocket_core.manager import WebSocketManager
+        from netra_backend.app.websocket_core import WebSocketManager
         
         # Verify classes are accessible
         assert WebSocketManager is not None
@@ -133,12 +133,12 @@ class TestCircularImportRegression:
     def test_websocket_handler_without_execution_engine(self):
         """Test WebSocket handlers work without BaseExecutionEngine."""
         from netra_backend.app.websocket_core.handlers import (
-            BaseMessageHandler,
+            UserMessageHandler,
         )
         
         # Create handler with required parameters
         from netra_backend.app.websocket_core.types import MessageType
-        handler = BaseMessageHandler([MessageType.USER_MESSAGE])
+        handler = UserMessageHandler([MessageType.USER_MESSAGE])
         
         # Verify it doesn't have execution_engine or it's None
         if hasattr(handler, 'execution_engine'):
@@ -214,7 +214,7 @@ class TestConnectionModuleCircularImportPrevention:
         # Import connection module
         # Note: The connection module was removed in unified WebSocket architecture
         # These components are now part of WebSocketManager
-        from netra_backend.app.websocket_core.manager import WebSocketManager, get_websocket_manager
+        from netra_backend.app.websocket_core import WebSocketManager, get_websocket_manager
         
         # Verify WebSocketManager can be imported without circular dependencies
         assert WebSocketManager is not None, \

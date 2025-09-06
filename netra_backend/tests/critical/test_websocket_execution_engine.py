@@ -18,12 +18,12 @@ from typing import Any, Dict
 
 import pytest
 
-from netra_backend.app.websocket_core import (
+from netra_backend.app.websocket_core.handlers import (
     ConnectionInfo, 
     WebSocketManager,
     MessageRouter,
     get_message_router,
-    BaseMessageHandler,
+    UserMessageHandler,
     UserMessageHandler,
     HeartbeatHandler,
     JsonRpcHandler,
@@ -235,10 +235,10 @@ class TestCircularImportPrevention:
         # This test verifies imports don't cause circular dependency issues
         
         # Core WebSocket imports should work
-        from netra_backend.app.websocket_core import (
+        from netra_backend.app.websocket_core.handlers import (
             WebSocketManager,
             MessageRouter,
-            BaseMessageHandler,
+            UserMessageHandler,
             UserMessageHandler,
             get_message_router
         )

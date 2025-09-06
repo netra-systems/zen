@@ -20,7 +20,7 @@ from netra_backend.app.agents.data_sub_agent.cost_optimizer import CostOptimizer
 from netra_backend.app.agents.data_sub_agent.configuration_manager import DataSubAgentConfigurationManager
 from netra_backend.app.agents.data_sub_agent.data_fetching import DataFetching
 from shared.isolated_environment import IsolatedEnvironment
-from netra_backend.app.database import get_async_session
+from netra_backend.app.database import get_db
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.core.config import get_config
 # TODO: These models and services don't exist yet - need implementation
@@ -46,7 +46,7 @@ class TestCostOptimizerRealServices:
     @pytest.fixture
     async def real_database_session(self):
         """Get real database session for testing."""
-        async for session in get_async_session():
+        async for session in get_db():
             yield session
             await session.rollback()  # Rollback after test
 

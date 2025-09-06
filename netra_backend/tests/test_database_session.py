@@ -22,7 +22,7 @@ from netra_backend.app.db.postgres import (
     get_async_db,
 )
 
-from netra_backend.app.database import get_db_session
+from netra_backend.app.database import get_db
 
 class TestDatabaseConnectionPooling:
     """Test database connection pooling behavior."""
@@ -68,7 +68,7 @@ class TestDatabaseConnectionPooling:
             pytest.skip("Database session not available")
         
         try:
-            async with get_db_session() as session:
+            async with get_db() as session:
                 assert isinstance(session, AsyncSession)
                 result = await session.execute("SELECT 1")
                 assert result.scalar() == 1
@@ -116,7 +116,7 @@ class TestSessionManagement:
     async def test_get_db_session_context_manager(self):
         """Test database session context manager."""
         try:
-            async with get_db_session() as session:
+            async with get_db() as session:
                 assert isinstance(session, AsyncSession)
                 # Try a simple query
                 result = await session.execute("SELECT 1")
@@ -129,7 +129,7 @@ class TestSessionManagement:
         """Test session rollback on exception."""
         try:
             with pytest.raises(ValueError):
-                async with get_db_session() as session:
+                async with get_db() as session:
                     await session.execute("SELECT 1")
                     raise ValueError("Test error")
         except Exception as e:

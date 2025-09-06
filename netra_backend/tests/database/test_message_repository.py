@@ -16,7 +16,7 @@ from datetime import datetime, timedelta, timezone
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from netra_backend.app.schemas.registry import Message, MessageType
+from netra_backend.app.schemas import Message, MessageType
 
 from netra_backend.app.services.database.message_repository import MessageRepository
 

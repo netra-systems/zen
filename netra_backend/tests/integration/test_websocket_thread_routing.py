@@ -18,7 +18,7 @@ from shared.isolated_environment import IsolatedEnvironment
 
 from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
 from netra_backend.app.core.unified_id_manager import UnifiedIDManager
-from netra_backend.app.websocket_core.manager import WebSocketManager, get_websocket_manager
+from netra_backend.app.websocket_core import WebSocketManager, get_websocket_manager
 
 
 class TestWebSocketThreadRouting:

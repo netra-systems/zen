@@ -17,7 +17,7 @@ from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketMan
 from auth_service.core.auth_manager import AuthManager
 from shared.isolated_environment import IsolatedEnvironment
 
-from netra_backend.app.websocket_core.manager import WebSocketManager
+from netra_backend.app.websocket_core import WebSocketManager
 from netra_backend.app.core.unified_logging import get_logger
 
 logger = get_logger(__name__)

@@ -1,6 +1,6 @@
 """Utilities Tests - Split from test_websocket_integration.py"""
 
-from netra_backend.app.websocket_core.manager import WebSocketManager
+from netra_backend.app.websocket_core import WebSocketManager
 # Test framework import - using pytest fixtures instead
 from pathlib import Path
 import sys
@@ -29,7 +29,7 @@ from netra_backend.app.websocket_core import (
 
 )
 from netra_backend.app.websocket_core.handlers import (
-    BaseMessageHandler,
+    UserMessageHandler,
     UserMessageHandler,
     HeartbeatHandler
 )

@@ -30,7 +30,8 @@ from netra_backend.app.agents.triage.unified_triage_agent import (
     Priority,
     TriageResult,
     UserIntent,
-    ValidationStatus)
+)
+from netra_backend.app.core.cross_service_validators.validator_framework import ValidationStatus
 
 from netra_backend.app.agents.triage.unified_triage_agent import UnifiedTriageAgent
 from netra_backend.app.llm.llm_manager import LLMManager

@@ -26,7 +26,7 @@ from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 
 from netra_backend.app.websocket_core.agent_handler import AgentMessageHandler
 from netra_backend.app.websocket_core.types import MessageType, WebSocketMessage
-from netra_backend.app.websocket_core.manager import WebSocketManager
+from netra_backend.app.websocket_core import WebSocketManager
 from netra_backend.app.services.message_handlers import MessageHandlerService
 from netra_backend.app.dependencies import (
     create_user_execution_context,

@@ -29,7 +29,7 @@ from netra_backend.app.services.quality_gate_service import (
     QualityLevel,
 
 )
-from netra_backend.app.websocket_core.manager import WebSocketManager
+from netra_backend.app.websocket_core import WebSocketManager
 
 @pytest.fixture
 

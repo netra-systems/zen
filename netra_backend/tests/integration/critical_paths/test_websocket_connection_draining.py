@@ -11,7 +11,7 @@ L3 Test: Uses real Redis for connection draining and graceful shutdown.
 Draining target: 100% connection preservation during graceful shutdown.
 """
 
-from netra_backend.app.websocket_core.manager import WebSocketManager
+from netra_backend.app.websocket_core import WebSocketManager
 # Test framework import - using pytest fixtures instead
 from pathlib import Path
 import sys
@@ -30,7 +30,7 @@ from datetime import datetime, timezone
 from uuid import uuid4
 
 import redis.asyncio as redis
-from netra_backend.app.websocket_core.manager import WebSocketManager
+from netra_backend.app.websocket_core import WebSocketManager
 from netra_backend.app.redis_manager import RedisManager
 from netra_backend.app.schemas import User
 # Removed mock import - using real service testing per CLAUDE.md "MOCKS = Abomination"

@@ -27,11 +27,11 @@ from netra_backend.app.agents.triage.unified_triage_agent import (
 )
 from netra_backend.app.clients.auth_client_core import AuthServiceClient
 from shared.isolated_environment import IsolatedEnvironment
-from netra_backend.app.database import get_db_session
+from netra_backend.app.database import get_db
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.redis_manager import RedisManager
-from netra_backend.app.websocket_core.manager import WebSocketManager
+from netra_backend.app.websocket_core import WebSocketManager
 
 logger = central_logger.get_logger(__name__)
 

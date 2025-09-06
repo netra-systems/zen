@@ -26,7 +26,7 @@ from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.schemas.agent import SubAgentLifecycle
 from netra_backend.app.websocket_core import WebSocketManager
-from netra_backend.app.database import get_db_session
+from netra_backend.app.database import get_db
 from netra_backend.app.core.config import get_config
 from netra_backend.app.logging_config import central_logger
 
@@ -102,7 +102,7 @@ class TestBaseAgentRealServices:
     @pytest.fixture
     async def real_database_session(self):
         """Get real database session for integration testing"""
-        async with get_db_session() as session:
+        async with get_db() as session:
             yield session
             break
     

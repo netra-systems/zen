@@ -22,7 +22,7 @@ from netra_backend.app.schemas.agent_state import (
 )
 from netra_backend.app.services.state_persistence import state_persistence_service
 from netra_backend.app.services.thread_service import ThreadService
-from netra_backend.app.websocket_core.manager import get_websocket_manager as get_unified_manager
+from netra_backend.app.websocket_core import get_websocket_manager as get_unified_manager
 manager = get_unified_manager()
 
 class ThreadTestDataFactory:

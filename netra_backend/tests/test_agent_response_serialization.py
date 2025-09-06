@@ -21,7 +21,7 @@ from netra_backend.app.schemas.agent import (
     AgentErrorMessage,
     AgentStarted,
 )
-from netra_backend.app.schemas.registry import AgentUpdate
+from netra_backend.app.schemas import AgentUpdate
 from netra_backend.app.schemas.tool import ToolCompleted, ToolStarted, ToolStatus
 
 class TestAgentResponseSerialization:

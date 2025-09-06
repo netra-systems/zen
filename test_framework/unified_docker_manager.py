@@ -68,6 +68,12 @@ from test_framework.docker_rate_limiter import (
     execute_docker_command,
     get_docker_rate_limiter
 )
+from test_framework.resource_monitor import (
+    DockerResourceMonitor, 
+    ResourceThresholdLevel, 
+    DockerResourceSnapshot
+)
+from test_framework.memory_guardian import MemoryGuardian, TestProfile
 
 logger = logging.getLogger(__name__)
 
@@ -374,6 +380,19 @@ class UnifiedDockerManager:
         
         # Initialize Docker rate limiter
         self.docker_rate_limiter = get_docker_rate_limiter()
+        
+        # Memory and resource monitoring
+        self.resource_monitor = DockerResourceMonitor(
+            enable_auto_cleanup=True,
+            cleanup_aggressive=False
+        )
+        self.memory_guardian = MemoryGuardian(
+            profile=TestProfile.STANDARD if environment_type != EnvironmentType.PRODUCTION else TestProfile.PERFORMANCE
+        )
+        
+        # Memory monitoring state
+        self.memory_warnings_issued = set()
+        self.last_memory_check = None
         
         # Initialize state
         self._load_state()
@@ -1851,8 +1870,16 @@ class UnifiedDockerManager:
         env_name = self._get_environment_name()
         start_time = time.time()
         
+        logger.info(f"⏳ Waiting for services to become healthy: {', '.join(services)}")
+        
         while time.time() - start_time < timeout:
             all_healthy = True
+            
+            # Monitor memory periodically during health checks
+            if int(time.time() - start_time) % 10 == 0:  # Every 10 seconds
+                memory_snapshot = self.monitor_memory_during_operations()
+                if memory_snapshot and memory_snapshot.get_max_threshold_level() == ResourceThresholdLevel.EMERGENCY:
+                    logger.error("🚨 Emergency memory condition during health check - may cause failures")
             
             for service in services:
                 if not self._is_service_healthy(env_name, service):
@@ -1860,9 +1887,23 @@ class UnifiedDockerManager:
                     break
             
             if all_healthy:
+                # Final memory check when all services are healthy
+                final_snapshot = self.monitor_memory_during_operations()
+                if final_snapshot:
+                    logger.info(f"✅ All services healthy - Memory: {final_snapshot.system_memory.percentage:.1f}% "
+                              f"({int(final_snapshot.docker_containers.current_usage)} containers)")
                 return True
             
             time.sleep(2)
+        
+        # Health check timeout - perform memory analysis
+        timeout_snapshot = self.monitor_memory_during_operations()
+        if timeout_snapshot:
+            logger.error(f"⏰ Health check timeout - Memory: {timeout_snapshot.system_memory.percentage:.1f}% "
+                        f"({int(timeout_snapshot.docker_containers.current_usage)} containers)")
+            
+            if timeout_snapshot.get_max_threshold_level() in [ResourceThresholdLevel.CRITICAL, ResourceThresholdLevel.EMERGENCY]:
+                logger.error("💥 High memory usage may have caused health check failures")
         
         return False
     
@@ -2498,7 +2539,7 @@ class UnifiedDockerManager:
                 logger.warning(f"⚠️ Service cleanup failed: {e}")
 
     def get_health_report(self) -> str:
-        """Generate comprehensive health report."""
+        """Generate comprehensive health report with memory monitoring."""
         if not self.service_health:
             return "No service health data available"
         
@@ -2514,14 +2555,284 @@ class UnifiedDockerManager:
         report_lines.append(f"Healthy services: {healthy_count}/{len(self.service_health)}")
         report_lines.append("")
         
+        # Add memory and resource monitoring section
+        try:
+            resource_snapshot = self.resource_monitor.check_system_resources()
+            memory_status = self._get_memory_status_report(resource_snapshot)
+            report_lines.extend(memory_status)
+            report_lines.append("")
+        except Exception as e:
+            report_lines.append(f"⚠️  Memory monitoring error: {e}")
+            report_lines.append("")
+        
         for service, health in self.service_health.items():
             status = "✅ HEALTHY" if health.is_healthy else "❌ UNHEALTHY"
-            report_lines.append(f"{service:12} | {status:12} | Port: {health.port:5} | {health.response_time_ms:6.1f}ms")
+            
+            # Get container memory stats if available
+            memory_info = self._get_container_memory_info(service)
+            memory_display = f" | Memory: {memory_info}" if memory_info else ""
+            
+            report_lines.append(f"{service:12} | {status:12} | Port: {health.port:5} | {health.response_time_ms:6.1f}ms{memory_display}")
             if health.error_message:
                 report_lines.append(f"             | Error: {health.error_message}")
         
+        # Add container memory details
+        container_details = self._get_detailed_container_memory_report()
+        if container_details:
+            report_lines.append("")
+            report_lines.append("CONTAINER MEMORY DETAILS:")
+            report_lines.extend(container_details)
+        
         report_lines.append("=" * 60)
         return "\n".join(report_lines)
+
+    def _get_memory_status_report(self, snapshot: DockerResourceSnapshot) -> List[str]:
+        """Generate memory status section for health report."""
+        lines = ["MEMORY & RESOURCE STATUS:"]
+        
+        # System memory
+        memory = snapshot.system_memory
+        memory_status = self._get_threshold_indicator(memory.threshold_level)
+        lines.append(f"System Memory   | {memory_status} {memory.percentage:5.1f}% | "
+                    f"{memory.current_usage / (1024**3):5.1f}GB / {memory.max_limit / (1024**3):5.1f}GB")
+        
+        # System CPU
+        cpu = snapshot.system_cpu
+        cpu_status = self._get_threshold_indicator(cpu.threshold_level)
+        lines.append(f"System CPU      | {cpu_status} {cpu.percentage:5.1f}% | "
+                    f"Current load")
+        
+        # Docker containers
+        containers = snapshot.docker_containers
+        container_status = self._get_threshold_indicator(containers.threshold_level)
+        lines.append(f"Containers      | {container_status} {containers.percentage:5.1f}% | "
+                    f"{int(containers.current_usage)} / {int(containers.max_limit)}")
+        
+        # Docker networks
+        networks = snapshot.docker_networks
+        network_status = self._get_threshold_indicator(networks.threshold_level)
+        lines.append(f"Networks        | {network_status} {networks.percentage:5.1f}% | "
+                    f"{int(networks.current_usage)} / {int(networks.max_limit)}")
+        
+        # Docker volumes
+        volumes = snapshot.docker_volumes
+        volume_status = self._get_threshold_indicator(volumes.threshold_level)
+        lines.append(f"Volumes         | {volume_status} {volumes.percentage:5.1f}% | "
+                    f"{int(volumes.current_usage)} / {int(volumes.max_limit)}")
+        
+        # Overall status and warnings
+        max_level = snapshot.get_max_threshold_level()
+        if max_level == ResourceThresholdLevel.EMERGENCY:
+            lines.append("🚨 EMERGENCY: Critical resource exhaustion!")
+            lines.append("   Immediate cleanup required to prevent failures")
+        elif max_level == ResourceThresholdLevel.CRITICAL:
+            lines.append("⚠️  CRITICAL: Resource usage very high")
+            lines.append("   Monitor closely and consider cleanup")
+        elif max_level == ResourceThresholdLevel.WARNING:
+            lines.append("⚠️  WARNING: Resource usage elevated")
+        
+        return lines
+
+    def _get_threshold_indicator(self, level: ResourceThresholdLevel) -> str:
+        """Get visual indicator for threshold level."""
+        if level == ResourceThresholdLevel.EMERGENCY:
+            return "🚨"
+        elif level == ResourceThresholdLevel.CRITICAL:
+            return "❌"
+        elif level == ResourceThresholdLevel.WARNING:
+            return "⚠️ "
+        else:
+            return "✅"
+
+    def _get_container_memory_info(self, service: str) -> Optional[str]:
+        """Get memory information for a specific container."""
+        try:
+            container_name = self._get_container_name(service)
+            if not container_name:
+                return None
+                
+            # Use docker stats to get memory usage
+            result = execute_docker_command([
+                "docker", "stats", "--no-stream", "--format", 
+                "table {{.MemUsage}}", container_name
+            ])
+            
+            if result.returncode == 0 and result.stdout:
+                lines = result.stdout.strip().split('\n')
+                if len(lines) > 1:  # Skip header
+                    memory_usage = lines[1].strip()
+                    return memory_usage
+                    
+        except Exception as e:
+            logger.debug(f"Could not get memory info for {service}: {e}")
+            
+        return None
+
+    def _get_detailed_container_memory_report(self) -> List[str]:
+        """Get detailed memory report for all containers."""
+        lines = []
+        
+        try:
+            # Get detailed stats for all containers
+            result = execute_docker_command([
+                "docker", "stats", "--no-stream", "--format",
+                "table {{.Container}}\\t{{.MemUsage}}\\t{{.MemPerc}}\\t{{.CPUPerc}}"
+            ])
+            
+            if result.returncode == 0 and result.stdout:
+                stats_lines = result.stdout.strip().split('\n')
+                if len(stats_lines) > 1:  # Has data beyond header
+                    # Add header
+                    lines.append("Container        | Memory Usage     | Mem %  | CPU %")
+                    lines.append("-" * 55)
+                    
+                    # Process each container
+                    for line in stats_lines[1:]:  # Skip header
+                        parts = line.split('\t')
+                        if len(parts) >= 4:
+                            container = parts[0][:15]  # Truncate long names
+                            memory = parts[1]
+                            mem_perc = parts[2]
+                            cpu_perc = parts[3]
+                            
+                            # Check for high memory usage and add warning
+                            try:
+                                mem_val = float(mem_perc.rstrip('%'))
+                                warning = " ⚠️" if mem_val > 80 else ""
+                            except:
+                                warning = ""
+                            
+                            lines.append(f"{container:16} | {memory:15} | {mem_perc:5} | {cpu_perc:5}{warning}")
+                    
+                    # Add memory warnings
+                    high_memory_containers = self._check_container_memory_thresholds()
+                    if high_memory_containers:
+                        lines.append("")
+                        lines.append("MEMORY WARNINGS:")
+                        for container, usage in high_memory_containers:
+                            lines.append(f"  ⚠️  {container}: {usage:.1f}% memory usage")
+                            
+        except Exception as e:
+            logger.debug(f"Could not generate detailed memory report: {e}")
+            
+        return lines
+
+    def _check_container_memory_thresholds(self) -> List[Tuple[str, float]]:
+        """Check for containers exceeding memory thresholds."""
+        high_memory_containers = []
+        
+        try:
+            result = execute_docker_command([
+                "docker", "stats", "--no-stream", "--format",
+                "{{.Container}} {{.MemPerc}}"
+            ])
+            
+            if result.returncode == 0:
+                for line in result.stdout.strip().split('\n'):
+                    if line.strip():
+                        parts = line.strip().split()
+                        if len(parts) >= 2:
+                            container = parts[0]
+                            mem_perc_str = parts[1]
+                            try:
+                                mem_perc = float(mem_perc_str.rstrip('%'))
+                                if mem_perc > 80:  # 80% threshold
+                                    high_memory_containers.append((container, mem_perc))
+                                    
+                                    # Issue warning if not already issued
+                                    if container not in self.memory_warnings_issued:
+                                        logger.warning(f"🚨 Container {container} using {mem_perc:.1f}% memory")
+                                        self.memory_warnings_issued.add(container)
+                                        
+                            except ValueError:
+                                continue
+                                
+        except Exception as e:
+            logger.debug(f"Error checking container memory thresholds: {e}")
+            
+        return high_memory_containers
+
+    def _get_container_name(self, service: str) -> Optional[str]:
+        """Get the actual container name for a service."""
+        try:
+            service_config = self.SERVICES.get(service, {})
+            container_name = service_config.get("container", f"netra-{service}")
+            
+            # Check if container exists
+            result = execute_docker_command(["docker", "ps", "-q", "--filter", f"name={container_name}"])
+            if result.returncode == 0 and result.stdout.strip():
+                return container_name
+                
+        except Exception as e:
+            logger.debug(f"Could not get container name for {service}: {e}")
+            
+        return None
+
+    def perform_memory_pre_flight_check(self) -> bool:
+        """Perform memory pre-flight check before starting services."""
+        try:
+            logger.info("🔍 Performing memory pre-flight check...")
+            
+            # Use memory guardian for pre-flight check
+            can_proceed, details = self.memory_guardian.pre_flight_check()
+            
+            if not can_proceed:
+                logger.error(f"❌ Memory pre-flight check failed: {details['message']}")
+                
+                # Show alternatives if available
+                if details.get('alternatives'):
+                    logger.info("💡 Alternative test profiles that could work:")
+                    for alt in details['alternatives']:
+                        logger.info(f"   - {alt['profile']}: {alt['description']} ({alt['required_mb']}MB)")
+                
+                return False
+            
+            logger.info(f"✅ Memory pre-flight check passed: {details['message']}")
+            
+            # Also check current Docker resource usage
+            snapshot = self.resource_monitor.check_system_resources()
+            max_level = snapshot.get_max_threshold_level()
+            
+            if max_level in [ResourceThresholdLevel.CRITICAL, ResourceThresholdLevel.EMERGENCY]:
+                logger.warning("⚠️  High resource usage detected - performing cleanup before starting services")
+                cleanup_report = self.resource_monitor.cleanup_if_needed(force_cleanup=True)
+                logger.info(f"🧹 Cleanup completed: {cleanup_report.containers_removed} containers, "
+                          f"{cleanup_report.networks_removed} networks removed")
+            
+            return True
+            
+        except Exception as e:
+            logger.error(f"❌ Memory pre-flight check error: {e}")
+            return False
+
+    def monitor_memory_during_operations(self) -> Optional[DockerResourceSnapshot]:
+        """Monitor memory usage during operations with warnings."""
+        try:
+            snapshot = self.resource_monitor.check_system_resources()
+            self.last_memory_check = snapshot
+            
+            max_level = snapshot.get_max_threshold_level()
+            
+            # Issue warnings for high resource usage
+            if max_level == ResourceThresholdLevel.EMERGENCY:
+                logger.critical("🚨 EMERGENCY: Critical resource exhaustion detected!")
+                logger.critical("   Services may fail or become unresponsive")
+                # Perform emergency cleanup
+                cleanup_report = self.resource_monitor.cleanup_if_needed(force_cleanup=True)
+                logger.info(f"🚨 Emergency cleanup: {cleanup_report.containers_removed} containers removed")
+                
+            elif max_level == ResourceThresholdLevel.CRITICAL:
+                logger.warning("⚠️  CRITICAL: Very high resource usage")
+                logger.warning("   Monitor closely - consider stopping non-essential services")
+                
+            elif max_level == ResourceThresholdLevel.WARNING:
+                logger.info("⚠️  Resource usage elevated - monitoring...")
+            
+            return snapshot
+            
+        except Exception as e:
+            logger.debug(f"Memory monitoring error: {e}")
+            return None
 
     def cleanup_old_environments(self, max_age_hours: int = 24):
         """Clean up old test environments"""
@@ -2552,7 +2863,7 @@ class UnifiedDockerManager:
             self._save_state(state)
 
     def get_statistics(self) -> Dict[str, Any]:
-        """Get Docker management statistics with orchestration data."""
+        """Get Docker management statistics with orchestration data and memory monitoring."""
         state = self._load_state()
         
         stats = {
@@ -2574,6 +2885,32 @@ class UnifiedDockerManager:
         # Restart statistics
         for service, history in self._restart_history.items():
             stats["restart_counts"][service] = len(history)
+        
+        # Add memory and resource monitoring statistics
+        try:
+            resource_snapshot = self.resource_monitor.check_system_resources()
+            monitoring_stats = self.resource_monitor.get_monitoring_stats()
+            
+            stats["memory_monitoring"] = {
+                "system_memory_percent": resource_snapshot.system_memory.percentage,
+                "system_cpu_percent": resource_snapshot.system_cpu.percentage,
+                "docker_containers_count": int(resource_snapshot.docker_containers.current_usage),
+                "docker_networks_count": int(resource_snapshot.docker_networks.current_usage),
+                "docker_volumes_count": int(resource_snapshot.docker_volumes.current_usage),
+                "overall_threshold_level": resource_snapshot.get_max_threshold_level().value,
+                "total_cleanups_performed": monitoring_stats["total_cleanups_performed"],
+                "monitor_uptime_seconds": monitoring_stats["monitor_uptime_seconds"]
+            }
+            
+            # Add container memory warnings
+            high_memory_containers = self._check_container_memory_thresholds()
+            if high_memory_containers:
+                stats["memory_monitoring"]["high_memory_containers"] = [
+                    {"container": container, "memory_percent": usage} 
+                    for container, usage in high_memory_containers
+                ]
+        except Exception as e:
+            stats["memory_monitoring"] = {"error": str(e)}
         
         return stats
 
@@ -2738,6 +3075,11 @@ class UnifiedDockerManager:
         Returns:
             True if all services started successfully
         """
+        # Perform memory pre-flight check before starting services
+        if not self.perform_memory_pre_flight_check():
+            logger.error("❌ Memory pre-flight check failed - cannot start services safely")
+            return False
+        
         # Run pre-test cleanup before starting services
         if not self.pre_test_cleanup():
             logger.warning("Pre-test cleanup had issues, continuing anyway...")
@@ -2830,11 +3172,24 @@ class UnifiedDockerManager:
                    "-p", self._get_project_name(), "up", "-d"] + mapped_services
             
             try:
+                # Monitor memory during service startup
+                pre_start_snapshot = self.monitor_memory_during_operations()
+                if pre_start_snapshot and pre_start_snapshot.get_max_threshold_level() == ResourceThresholdLevel.EMERGENCY:
+                    logger.error("❌ Emergency memory condition detected - aborting service start")
+                    return False
+                
+                logger.info(f"🚀 Starting services: {', '.join(mapped_services)}")
                 result = subprocess.run(cmd, capture_output=True, text=True, timeout=120, env=env)
                 
                 if result.returncode != 0:
                     logger.error(f"Failed to start services: {result.stderr}")
                     return False
+                
+                # Monitor memory after service startup
+                post_start_snapshot = self.monitor_memory_during_operations()
+                if post_start_snapshot:
+                    logger.info(f"📊 Post-startup memory: {post_start_snapshot.system_memory.percentage:.1f}% "
+                              f"({int(post_start_snapshot.docker_containers.current_usage)} containers)")
                     
             except subprocess.TimeoutExpired:
                 logger.error(f"Timeout starting services: {', '.join(services_to_start)}")

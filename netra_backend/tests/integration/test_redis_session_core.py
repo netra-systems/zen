@@ -34,7 +34,7 @@ from shared.isolated_environment import get_env
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.services.redis.session_manager import RedisSessionManager
 from netra_backend.app.services.redis_service import RedisService
-from netra_backend.app.websocket_core.manager import WebSocketManager, get_websocket_manager
+from netra_backend.app.websocket_core import WebSocketManager, get_websocket_manager
 
 # Set up environment using IsolatedEnvironment
 env = get_env()

@@ -20,7 +20,7 @@ from netra_backend.app.services.message_handlers import MessageHandlerService
 from netra_backend.app.websocket_core.types import ConnectionInfo
 
 from netra_backend.app.websocket_core.handlers import (
-    BaseMessageHandler as MessageHandler,
+    UserMessageHandler as MessageHandler,
 )
 from netra_backend.app.agents.example_message_processor import ExampleMessageProcessor as MessageProcessor
 from netra_backend.app.agents.synthetic_data_approval_handler import ApprovalMessageBuilder as MessageBuilder

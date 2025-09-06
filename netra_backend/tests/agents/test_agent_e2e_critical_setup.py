@@ -38,7 +38,7 @@ from netra_backend.app.services.agent_service import AgentService
 from netra_backend.app.services.apex_optimizer_agent.tools.tool_dispatcher import (
     ApexToolSelector)
 from netra_backend.app.services.state_persistence import state_persistence_service
-from netra_backend.app.services.websocket.message_handler import BaseMessageHandler
+from netra_backend.app.services.websocket.message_handler import UserMessageHandler
 
 class AgentE2ETestBase:
     """Base class for critical end-to-end agent tests"""

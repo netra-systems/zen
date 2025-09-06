@@ -66,7 +66,8 @@ class AgentMessageHandler(BaseMessageHandler):
         Feature flag: USE_WEBSOCKET_SUPERVISOR_V3 controls the new clean pattern.
         """
         # Check feature flag for WebSocket supervisor v3 (clean pattern)
-        use_v3_pattern = os.getenv("USE_WEBSOCKET_SUPERVISOR_V3", "false").lower() == "true"
+        # CRITICAL: V3 pattern is now DEFAULT for proper multi-user isolation
+        use_v3_pattern = os.getenv("USE_WEBSOCKET_SUPERVISOR_V3", "true").lower() == "true"
         
         if use_v3_pattern:
             logger.debug(f"Using clean WebSocket pattern (v3) for user {user_id}")

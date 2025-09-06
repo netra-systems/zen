@@ -11,7 +11,7 @@ L3 Test: Uses real Redis containers and connection pooling for WebSocket validat
 Performance target: 1000+ concurrent connections with <100ms message latency.
 """
 
-from netra_backend.app.websocket_core.manager import WebSocketManager
+from netra_backend.app.websocket_core import WebSocketManager
 # Test framework import - using pytest fixtures instead
 from pathlib import Path
 import sys
@@ -29,7 +29,7 @@ from typing import Dict, Any, List
 from datetime import datetime, timezone
 
 import redis.asyncio as redis
-from netra_backend.app.websocket_core.manager import WebSocketManager
+from netra_backend.app.websocket_core import WebSocketManager
 from netra_backend.app.redis_manager import RedisManager
 from netra_backend.app.schemas import User
 # Removed mock import - using real service testing per CLAUDE.md "MOCKS = Abomination"

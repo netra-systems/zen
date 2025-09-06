@@ -14,7 +14,7 @@ COVERAGE TARGET: 100% for basic reconnection functionality
 All functions ≤8 lines per CLAUDE.md requirements.
 """
 
-from netra_backend.app.websocket_core.manager import WebSocketManager
+from netra_backend.app.websocket_core import WebSocketManager
 # Test framework import - using pytest fixtures instead
 from pathlib import Path
 import sys
@@ -27,7 +27,7 @@ import pytest
 
 from netra_backend.app.websocket_core.reconnection_types import ReconnectionConfig
 
-from netra_backend.app.websocket_core.manager import WebSocketManager
+from netra_backend.app.websocket_core import WebSocketManager
 from netra_backend.tests.integration.websocket_recovery_fixtures import (
 
     MockWebSocket,

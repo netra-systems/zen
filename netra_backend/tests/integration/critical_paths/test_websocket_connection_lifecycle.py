@@ -19,7 +19,7 @@ import websockets
 
 from shared.isolated_environment import get_env
 from netra_backend.app.config import get_config
-from netra_backend.app.websocket_core.manager import WebSocketManager
+from netra_backend.app.websocket_core import WebSocketManager
 from test_framework.test_patterns import L3IntegrationTest
 
 class TestWebSocketConnectionLifecycleL3(L3IntegrationTest):

@@ -305,14 +305,14 @@ class TestDatabaseConnectivityL3:
             # db_manager = get_db_manager()  # DEPRECATED
             
             # Test async session creation using DatabaseManager directly
-            async with DatabaseManager.get_async_session() as session:
+            async with DatabaseManager.get_db() as session:
                 result = await session.execute(text("SELECT current_database()"))
                 db_name = result.fetchone()[0]
                 assert db_name == 'netra_dev'
             
             # Test multiple concurrent sessions
             async def test_session(session_id):
-                async with db_manager.get_async_session() as session:
+                async with db_manager.get_db() as session:
                     result = await session.execute(text(f"SELECT {session_id} as session_id"))
                     return result.fetchone()[0]
             

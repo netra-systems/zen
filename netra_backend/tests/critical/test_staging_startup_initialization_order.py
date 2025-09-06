@@ -145,7 +145,7 @@ class TestStagingStartupInitializationOrder:
                 
                 # This should fail because WebSocket manager starts before dependencies
                 with pytest.raises(RuntimeError) as exc_info:
-                    from netra_backend.app.websocket_core.manager import WebSocketManager
+                    from netra_backend.app.websocket_core import WebSocketManager
                     manager = WebSocketManager()
                 
                 assert "not initialized" in str(exc_info.value)
@@ -238,7 +238,7 @@ class TestApplicationLifecycleInitializationOrder:
         def mock_get_websocket_dependency():
             injection_attempts.append("websocket_dependency_injection")
             # Try to inject WebSocket service that isn't ready  
-            from netra_backend.app.websocket_core.manager import get_websocket_manager
+            from netra_backend.app.websocket_core import get_websocket_manager
             return get_websocket_manager()  # Should fail if not ready
         
         # Mock services to not be ready during dependency injection

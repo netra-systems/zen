@@ -35,7 +35,7 @@ from netra_backend.app.services.external_api_client import (
     http_client_manager
 )
 from netra_backend.app.core.resilience.unified_circuit_breaker import UnifiedCircuitBreakerManager
-from netra_backend.app.websocket_core.manager import WebSocketManager
+from netra_backend.app.websocket_core import WebSocketManager
 from netra_backend.app.core.unified_logging import get_logger
 from netra_backend.app.llm.llm_provider_manager import LLMProviderManager
 from test_framework.environment_markers import env, dev_and_staging

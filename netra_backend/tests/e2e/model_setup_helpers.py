@@ -7,7 +7,7 @@ from netra_backend.app.agents.data_sub_agent import DataSubAgent
 from netra_backend.app.agents.state import AgentMetadata, DeepAgentState
 from netra_backend.app.agents.triage.unified_triage_agent import UnifiedTriageAgent
 from netra_backend.app.llm.llm_manager import LLMManager
-from netra_backend.app.websocket_core.manager import WebSocketManager
+from netra_backend.app.websocket_core import WebSocketManager
 from typing import Dict
 import pytest
 import uuid

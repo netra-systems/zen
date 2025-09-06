@@ -33,7 +33,7 @@ from typing import Any, Dict, List, Optional, Tuple
 import pytest
 
 from netra_backend.app.core.exceptions_base import NetraException
-from netra_backend.app.schemas.registry import TaskPriority
+from netra_backend.app.schemas import TaskPriority
 
 logger = logging.getLogger(__name__)
 

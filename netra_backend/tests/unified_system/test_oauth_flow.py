@@ -3,7 +3,7 @@ OAuth Flow End-to-End Tests
 Business Value: $25K MRR - Critical authentication path validation
 """
 
-from netra_backend.app.websocket_core.manager import WebSocketManager
+from netra_backend.app.websocket_core import WebSocketManager
 from pathlib import Path
 import sys
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager

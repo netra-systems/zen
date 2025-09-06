@@ -3,7 +3,7 @@ Critical Integration Tests - Audit-driven failing tests for basic functions
 Tests designed to fail initially to expose integration gaps per testing.xml L3 requirements
 """
 
-from netra_backend.app.websocket_core.manager import WebSocketManager
+from netra_backend.app.websocket_core import WebSocketManager
 # Test framework import - using pytest fixtures instead
 from pathlib import Path
 import sys
@@ -240,7 +240,7 @@ class TestWebSocketIntegration:
 
         """Test WebSocket reconnection preserves message order"""
         # Will fail - no message replay on reconnect
-        from netra_backend.app.websocket_core.manager import WebSocketManager
+        from netra_backend.app.websocket_core import WebSocketManager
         
         manager = WebSocketManager()
 

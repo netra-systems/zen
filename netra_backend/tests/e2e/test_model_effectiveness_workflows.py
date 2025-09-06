@@ -13,7 +13,7 @@ from shared.isolated_environment import IsolatedEnvironment
 import pytest
 import pytest_asyncio
 from netra_backend.app.schemas.agent import SubAgentLifecycle
-from netra_backend.app.websocket_core.manager import WebSocketManager as UnifiedWebSocketManager
+from netra_backend.app.websocket_core import WebSocketManager as UnifiedWebSocketManager
 from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
 
 from netra_backend.app.agents.data_sub_agent import DataSubAgent
@@ -24,7 +24,7 @@ from netra_backend.app.core.exceptions import NetraException
 from netra_backend.app.llm.llm_manager import LLMManager
 
 # Import WebSocketManager for type annotations
-from netra_backend.app.websocket_core.manager import WebSocketManager
+from netra_backend.app.websocket_core import WebSocketManager
 
 @pytest.fixture
 

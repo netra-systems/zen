@@ -22,7 +22,7 @@ import pytest
 import asyncio
 
 try:
-    from netra_backend.app.websocket_core.manager import WebSocketManager
+    from netra_backend.app.websocket_core import WebSocketManager
     from netra_backend.app.websocket_core.types import WebSocketConnectionState as ConnectionState, MessageType
 except ImportError:
     pytest.skip("Required modules have been removed or have missing dependencies", allow_module_level=True)

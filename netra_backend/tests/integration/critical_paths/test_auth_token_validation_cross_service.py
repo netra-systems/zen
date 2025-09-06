@@ -11,7 +11,7 @@ Business Value Justification (BVJ):
 """
 
 from shared.isolated_environment import get_env
-from netra_backend.app.websocket_core.manager import WebSocketManager
+from netra_backend.app.websocket_core import WebSocketManager
 # Test framework import - using pytest fixtures instead
 from pathlib import Path
 import sys
