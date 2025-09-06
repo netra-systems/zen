@@ -1,6 +1,6 @@
 # Alpine-based Production Dockerfile for Auth Service
 # Optimized for test isolation and minimal size
-FROM python:3.11-alpine3.19 as builder
+FROM python:3.11-alpine3.19 AS builder
 
 # Build arguments
 ARG BUILD_ENV=test
@@ -52,11 +52,11 @@ COPY --chown=netra:netra shared /app/shared
 
 # Set environment
 ENV PATH=/home/netra/.local/bin:$PATH
-ENV PYTHONPATH=/app:$PYTHONPATH
+ENV PYTHONPATH=/app
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 ENV RUNNING_IN_DOCKER=true
-ENV BUILD_ENV=${BUILD_ENV}
+ENV BUILD_ENV=test
 
 # Security: Drop all capabilities
 USER netra
