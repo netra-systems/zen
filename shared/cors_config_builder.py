@@ -193,12 +193,12 @@ class CORSConfigurationBuilder(ConfigBuilderBase):
         def _get_staging_origins(self) -> List[str]:
             """Get staging CORS origins."""
             return [
-                # Staging domains - CRITICAL: Include base domain
+                # Staging domains - CRITICAL: Include all origins
                 "https://staging.netrasystems.ai",  # CRITICAL: Base staging domain
-                "https://app.staging.netrasystems.ai",
-                "https://auth.staging.netrasystems.ai",
-                "https://api.staging.netrasystems.ai",
-                "https://backend.staging.netrasystems.ai",
+                "https://app.staging.netrasystems.ai",  # Frontend app
+                "https://auth.staging.netrasystems.ai",  # Auth service
+                "https://api.staging.netrasystems.ai",  # API gateway
+                "https://backend.staging.netrasystems.ai",  # Backend service
                 
                 # Cloud Run patterns for staging
                 "https://netra-frontend-701982941522.us-central1.run.app",
