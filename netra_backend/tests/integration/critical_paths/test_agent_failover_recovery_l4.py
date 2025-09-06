@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Comprehensive test for agent failover and recovery:
-1. Agent health monitoring and detection
+    1. Agent health monitoring and detection
 2. Automatic failover to backup agents
 3. State persistence and recovery
 4. Task redistribution during failures
@@ -11,7 +11,7 @@ Comprehensive test for agent failover and recovery:
 8. Data consistency after recovery
 
 This test validates the complete agent failover and recovery system.
-"""
+""""
 
 # Test framework import - using pytest fixtures instead
 
@@ -64,7 +64,7 @@ class AgentInstance:
         self.agent_type = agent_type
         self.status = "healthy"
         self.tasks: List[str] = []
-        self.state: Dict[str, Any] = {}
+        self.state: Dict[str, Any] = {]
         self.websocket = None
         self.last_heartbeat = time.time()
         self.failure_count = 0
@@ -75,11 +75,11 @@ class AgentFailoverTester:
     
     def __init__(self):
         self.session: Optional[aiohttp.ClientSession] = None
-        self.agents: Dict[str, AgentInstance] = {}
-        self.tasks: Dict[str, Dict[str, Any]] = {}
+        self.agents: Dict[str, AgentInstance] = {]
+        self.tasks: Dict[str, Dict[str, Any]] = {]
         self.admin_token: Optional[str] = None
         self.failure_events: List[Dict[str, Any]] = []
-        self.recovery_metrics: Dict[str, float] = {}
+        self.recovery_metrics: Dict[str, float] = {]
         
     async def __aenter__(self):
         """Setup test environment."""
@@ -101,12 +101,12 @@ class AgentFailoverTester:
             
     async def setup_agents(self) -> bool:
         """Setup test agents."""
-        print(f"\n[SETUP] Creating {NUM_AGENTS} test agents...")
+        print(f"\n[SETUP] Creating {NUM_AGENTS] test agents...")
         
         agent_types = ["supervisor", "worker", "analyzer", "validator", "coordinator"]
         
         for i in range(NUM_AGENTS):
-            agent_id = f"agent_{uuid.uuid4().hex[:8]}"
+            agent_id = f"agent_{uuid.uuid4().hex[:8]]"
             agent_type = agent_types[i % len(agent_types)]
             agent = AgentInstance(agent_id, agent_type)
             
@@ -128,9 +128,9 @@ class AgentFailoverTester:
                         data = await response.json()
                         agent.state = data.get("initial_state", {})
                         self.agents[agent_id] = agent
-                        print(f"[OK] Registered {agent_type} agent: {agent_id}")
+                        print(f"[OK] Registered {agent_type] agent: {agent_id]")
                     else:
-                        print(f"[ERROR] Failed to register agent: {response.status}")
+                        print(f"[ERROR] Failed to register agent: {response.status]")
                         
                 # Connect WebSocket for agent
                 agent.websocket = await websockets.connect(
@@ -141,7 +141,7 @@ class AgentFailoverTester:
                 asyncio.create_task(self._agent_heartbeat(agent))
                 
             except Exception as e:
-                print(f"[ERROR] Agent setup failed: {e}")
+                print(f"[ERROR] Agent setup failed: {e]")
                 
         return len(self.agents) == NUM_AGENTS
         
@@ -166,10 +166,10 @@ class AgentFailoverTester:
                 
     async def create_tasks(self) -> bool:
         """Create tasks for agents to process."""
-        print(f"\n[TASKS] Creating {NUM_TASKS} test tasks...")
+        print(f"\n[TASKS] Creating {NUM_TASKS] test tasks...")
         
         for i in range(NUM_TASKS):
-            task_id = f"task_{uuid.uuid4().hex[:8]}"
+            task_id = f"task_{uuid.uuid4().hex[:8]]"
             task = {
                 "task_id": task_id,
                 "type": random.choice(["analyze", "process", "validate", "transform"]),
@@ -198,16 +198,16 @@ class AgentFailoverTester:
                         if task["assigned_agent"] in self.agents:
                             self.agents[task["assigned_agent"]].tasks.append(task_id)
                             
-                        print(f"[OK] Created task {task_id} -> {task['assigned_agent']}")
+                        print(f"[OK] Created task {task_id] -> {task['assigned_agent']]")
                         
             except Exception as e:
-                print(f"[ERROR] Task creation failed: {e}")
+                print(f"[ERROR] Task creation failed: {e]")
                 
         return len(self.tasks) == NUM_TASKS
         
     async def simulate_agent_failure(self, agent_id: str, failure_type: str) -> bool:
         """Simulate an agent failure."""
-        print(f"\n[FAILURE] Simulating {failure_type} for {agent_id}...")
+        print(f"\n[FAILURE] Simulating {failure_type] for {agent_id]...")
         
         if agent_id not in self.agents:
             return False
@@ -222,13 +222,13 @@ class AgentFailoverTester:
                 if agent.websocket:
                     await agent.websocket.close()
                     agent.websocket = None
-                print(f"[OK] Agent {agent_id} crashed")
+                print(f"[OK] Agent {agent_id] crashed")
                 
             elif failure_type == "network_partition":
                 # Simulate network issue
                 agent.status = "unreachable"
                 # Don't close WebSocket but stop heartbeats
-                print(f"[OK] Agent {agent_id} network partitioned")
+                print(f"[OK] Agent {agent_id] network partitioned")
                 
             elif failure_type == "resource_exhaustion":
                 # Simulate resource exhaustion
@@ -239,20 +239,20 @@ class AgentFailoverTester:
                     "memory_usage": 98,
                     "error": "Resource exhaustion"
                 })
-                print(f"[OK] Agent {agent_id} resource exhausted")
+                print(f"[OK] Agent {agent_id] resource exhausted")
                 
             elif failure_type == "deadlock":
                 # Simulate deadlock
                 agent.status = "deadlocked"
                 agent.last_heartbeat = 0  # Stop heartbeat updates
-                print(f"[OK] Agent {agent_id} deadlocked")
+                print(f"[OK] Agent {agent_id] deadlocked")
                 
             elif failure_type == "timeout":
                 # Simulate processing timeout
                 agent.status = "timeout"
                 for task_id in agent.tasks[:]:
                     self.tasks[task_id]["status"] = "timeout"
-                print(f"[OK] Agent {agent_id} timed out")
+                print(f"[OK] Agent {agent_id] timed out")
                 
             # Record failure event
             self.failure_events.append({
@@ -265,7 +265,7 @@ class AgentFailoverTester:
             return True
             
         except Exception as e:
-            print(f"[ERROR] Failure simulation failed: {e}")
+            print(f"[ERROR] Failure simulation failed: {e]")
             return False
             
     async def _send_agent_status(self, agent_id: str, status: Dict[str, Any]):
@@ -316,9 +316,9 @@ class AgentFailoverTester:
         detection_time = time.time() - detection_start
         
         if detected:
-            print(f"[OK] Failure detected in {detection_time:.2f}s")
+            print(f"[OK] Failure detected in {detection_time:.2f]s")
         else:
-            print(f"[ERROR] Failure not detected within {RTO_TARGETS['detection_time']}s")
+            print(f"[ERROR] Failure not detected within {RTO_TARGETS['detection_time']]s")
             
         return detected, detection_time
         
@@ -372,7 +372,7 @@ class AgentFailoverTester:
         failover_time = time.time() - failover_start
         success = redistributed >= len(affected_tasks) * 0.8
         
-        print(f"[{'OK' if success else 'ERROR'}] Redistributed {redistributed}/{len(affected_tasks)} tasks in {failover_time:.2f}s")
+        print(f"[{'OK' if success else 'ERROR']] Redistributed {redistributed]/{len(affected_tasks)] tasks in {failover_time:.2f]s")
         
         return success, failover_time
         
@@ -418,7 +418,7 @@ class AgentFailoverTester:
                     for key, value in original_state.items():
                         if recovered_state.get(key) != value:
                             state_consistent = False
-                            print(f"[WARN] State mismatch for key {key}")
+                            print(f"[WARN] State mismatch for key {key]")
                             
                     if state_consistent:
                         recovering_agent.status = "healthy"
@@ -426,12 +426,12 @@ class AgentFailoverTester:
                         asyncio.create_task(self._agent_heartbeat(recovering_agent))
                         
                     recovery_time = time.time() - recovery_start
-                    print(f"[OK] Agent recovered in {recovery_time:.2f}s")
+                    print(f"[OK] Agent recovered in {recovery_time:.2f]s")
                     
                     return state_consistent, recovery_time
                     
         except Exception as e:
-            print(f"[ERROR] State recovery failed: {e}")
+            print(f"[ERROR] State recovery failed: {e]")
             
         return False, time.time() - recovery_start
         
@@ -457,7 +457,7 @@ class AgentFailoverTester:
                         
                         if data.get("circuit_breaker_open"):
                             test_agent.circuit_breaker_open = True
-                            print(f"[OK] Circuit breaker opened after {i+1} failures")
+                            print(f"[OK] Circuit breaker opened after {i+1] failures")
                             
                             # Verify no new tasks assigned
                             test_task = {
@@ -474,7 +474,7 @@ class AgentFailoverTester:
                                     return True
                                     
             except Exception as e:
-                print(f"[ERROR] Circuit breaker test failed: {e}")
+                print(f"[ERROR] Circuit breaker test failed: {e]")
                 
         return test_agent.circuit_breaker_open
         
@@ -508,7 +508,7 @@ class AgentFailoverTester:
                         degradation_level = data.get("degradation_level", "normal")
                         degradation_levels.append(degradation_level)
                         
-                        print(f"[INFO] System degradation level: {degradation_level} ({healthy_count} agents healthy)")
+                        print(f"[INFO] System degradation level: {degradation_level] ({healthy_count] agents healthy)")
                         
                         # Verify appropriate degradation
                         if healthy_count <= 2 and degradation_level not in ["degraded", "critical"]:
@@ -556,7 +556,7 @@ class AgentFailoverTester:
                 pass
                 
         if inconsistencies:
-            print(f"[WARN] Found {len(inconsistencies)} inconsistencies:")
+            print(f"[WARN] Found {len(inconsistencies)] inconsistencies:")
             for issue in inconsistencies[:5]:  # Show first 5
                 print(f"  - {issue}")
         else:
@@ -575,9 +575,9 @@ class AgentFailoverTester:
             actual = self.recovery_metrics.get(metric, float('inf'))
             
             if actual <= target:
-                print(f"[OK] {metric}: {actual:.2f}s <= {target}s target")
+                print(f"[OK] {metric]: {actual:.2f]s <= {target]s target")
             else:
-                print(f"[FAIL] {metric}: {actual:.2f}s > {target}s target")
+                print(f"[FAIL] {metric]: {actual:.2f]s > {target]s target")
                 metrics_met = False
                 
         return metrics_met
@@ -652,7 +652,7 @@ async def test_agent_failover_recovery():
             print("\nFAILURE EVENTS:")
             print("-"*40)
             for event in tester.failure_events:
-                print(f"  {event['agent_id']}: {event['failure_type']} ({event['tasks_affected']} tasks)")
+                print(f"  {event['agent_id']]: {event['failure_type']] ({event['tasks_affected']] tasks)")
                 
         # Recovery metrics
         print("\nRECOVERY METRICS:")

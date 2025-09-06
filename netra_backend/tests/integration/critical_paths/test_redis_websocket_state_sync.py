@@ -1,15 +1,17 @@
+from unittest.mock import AsyncMock, Mock, patch, MagicMock
+
 """
 L3 Integration Test: Redis Session Store → WebSocket State Sync
 
 Business Value Justification (BVJ):
-- Segment: All Tiers (Free, Early, Mid, Enterprise)
+    - Segment: All Tiers (Free, Early, Mid, Enterprise)
 - Business Goal: Session Consistency - Ensures WebSocket reconnection preserves user context
 - Value Impact: Eliminates $8K MRR loss from session data loss, improves user experience
 - Revenue Impact: Protects session state across reconnections, prevents user frustration and churn
 
 L3 Test: Uses real Redis instance and real WebSocket connections to validate complete 
 session store → state sync pipeline with actual serialization/deserialization.
-"""
+""""
 
 from netra_backend.app.websocket_core import WebSocketManager
 # Test framework import - using pytest fixtures instead
@@ -18,7 +20,7 @@ import sys
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
 from test_framework.docker.unified_docker_manager import UnifiedDockerManager
 from test_framework.database.test_database_manager import TestDatabaseManager
-from test_framework.redis.test_redis_manager import TestRedisManager
+from test_framework.redis_test_utils_test_utils.test_redis_manager import TestRedisManager
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
 from shared.isolated_environment import IsolatedEnvironment
@@ -47,14 +49,12 @@ from netra_backend.app.websocket_core import WebSocketManager
 class ApplicationState:
     """Mock ApplicationState for testing."""
     def __init__(self, **kwargs):
-    pass
         for key, value in kwargs.items():
             setattr(self, key, value)
 
 class StateUpdate:
     """Mock StateUpdate for testing."""
     def __init__(self, **kwargs):
-    pass
         for key, value in kwargs.items():
             setattr(self, key, value)
 from netra_backend.tests.integration.helpers.redis_l3_helpers import (
@@ -80,12 +80,10 @@ from test_framework.real_services import get_real_services
 @pytest.mark.l3_realism
 
 class TestRedisWebSocketStateSyncL3:
-    pass
 
     """L3 tests for Redis session store to WebSocket state synchronization."""
     
     @pytest.fixture
-
     async def redis_container(self):
 
         """Set up real Redis container for L3 testing."""
@@ -98,9 +96,8 @@ class TestRedisWebSocketStateSyncL3:
 
         await container.stop()
     
-    @pytest.fixture
-
-    async def redis_client(self, redis_container):
+        @pytest.fixture
+        async def redis_client(self, redis_container):
 
         """Create Redis client for session storage."""
 
@@ -112,9 +109,8 @@ class TestRedisWebSocketStateSyncL3:
 
         await client.close()
     
-    @pytest.fixture
-
-    async def session_store(self, redis_container):
+        @pytest.fixture
+        async def session_store(self, redis_container):
 
         """Create session store using real Redis."""
 
@@ -126,9 +122,8 @@ class TestRedisWebSocketStateSyncL3:
 
         await client.close()
     
-    @pytest.fixture
-
-    async def ws_manager_with_redis(self, redis_container):
+        @pytest.fixture
+        async def ws_manager_with_redis(self, redis_container):
 
         """Create WebSocket manager with Redis session integration."""
 
@@ -139,55 +134,54 @@ class TestRedisWebSocketStateSyncL3:
         # Mock: Redis external service isolation for fast, reliable tests without network dependency
         with patch('netra_backend.app.redis_manager.redis_manager') as mock_redis_mgr:
 
-            test_redis_mgr = RedisManager()
+        test_redis_mgr = RedisManager()
 
-            test_redis_mgr.enabled = True
+        test_redis_mgr.enabled = True
 
-            test_redis_mgr.redis_client = redis.Redis.from_url(redis_url, decode_responses=True)
+        test_redis_mgr.redis_client = redis.Redis.from_url(redis_url, decode_responses=True)
             
-            # Configure mock to await asyncio.sleep(0)
-    return our test redis manager
+        # Configure mock to await asyncio.sleep(0)
+        return our test redis manager
 
-            # Mock: Redis external service isolation for fast, reliable tests without network dependency
-            mock_redis_mgr.get_client = AsyncMock(return_value=test_redis_mgr.redis_client)
+        # Mock: Redis external service isolation for fast, reliable tests without network dependency
+        mock_redis_mgr.get_client = AsyncMock(return_value=test_redis_mgr.redis_client)
 
-            # Mock: Redis external service isolation for fast, reliable tests without network dependency
-            mock_redis_mgr.get = AsyncMock(side_effect=test_redis_mgr.get)
+        # Mock: Redis external service isolation for fast, reliable tests without network dependency
+        mock_redis_mgr.get = AsyncMock(side_effect=test_redis_mgr.get)
 
-            # Mock: Redis external service isolation for fast, reliable tests without network dependency
-            mock_redis_mgr.set = AsyncMock(side_effect=test_redis_mgr.set)
+        # Mock: Redis external service isolation for fast, reliable tests without network dependency
+        mock_redis_mgr.set = AsyncMock(side_effect=test_redis_mgr.set)
             
-            manager = WebSocketManager()
+        manager = WebSocketManager()
 
-            yield manager
+        yield manager
             
-            await test_redis_mgr.redis_client.close()
+        await test_redis_mgr.redis_client.close()
     
-    @pytest.fixture
-
-    def test_user(self):
-    """Use real service instance."""
-    # TODO: Initialize real service
-    return None
+        @pytest.fixture
+        def test_user(self):
+        """Use real service instance."""
+        # TODO: Initialize real service
+        return None
 
         """Create test user for session state testing."""
 
         return User(
 
-            id="state_sync_user_123",
+        id="state_sync_user_123",
 
-            email="statesync@example.com",
+        email="statesync@example.com",
 
-            username="statesync_user",
+        username="statesync_user",
 
-            is_active=True,
+        is_active=True,
 
-            created_at=datetime.now(timezone.utc)
+        created_at=datetime.now(timezone.utc)
 
         )
     
-    @pytest.mark.asyncio
-    async def test_session_store_websocket_state_recovery(self, redis_client, session_store, test_user):
+        @pytest.mark.asyncio
+        async def test_session_store_websocket_state_recovery(self, redis_client, session_store, test_user):
 
         """Test L3 Redis session state storage and retrieval integration."""
 
@@ -197,35 +191,35 @@ class TestRedisWebSocketStateSyncL3:
 
         session_state = {
 
-            "conversation_history": [
+        "conversation_history": [
 
-                {"role": "user", "content": "Optimize my AI costs"},
+        {"role": "user", "content": "Optimize my AI costs"},
 
-                {"role": "assistant", "content": "I'll analyze your usage patterns"}
+        {"role": "assistant", "content": "I'll analyze your usage patterns"}
 
-            ],
+        ],
 
-            "current_thread": "thread_optimization_123",
+        "current_thread": "thread_optimization_123",
 
-            "agent_context": {
+        "agent_context": {
 
-                "mode": "cost_optimization",
+        "mode": "cost_optimization",
 
-                "analysis_depth": "comprehensive",
+        "analysis_depth": "comprehensive",
 
-                "user_preferences": {"detailed_reports": True}
+        "user_preferences": {"detailed_reports": True}
 
-            },
+        },
 
-            "ui_state": {
+        "ui_state": {
 
-                "active_tab": "optimization",
+        "active_tab": "optimization",
 
-                "sidebar_collapsed": False,
+        "sidebar_collapsed": False,
 
-                "theme": "dark"
+        "theme": "dark"
 
-            }
+        }
 
         }
         
@@ -259,11 +253,11 @@ class TestRedisWebSocketStateSyncL3:
 
         websocket_sync_message = {
 
-            "type": "session_recovery",
+        "type": "session_recovery",
 
-            "recovered_state": recovered_state,
+        "recovered_state": recovered_state,
 
-            "recovery_timestamp": datetime.now(timezone.utc).isoformat()
+        "recovery_timestamp": datetime.now(timezone.utc).isoformat()
 
         }
         
@@ -275,8 +269,8 @@ class TestRedisWebSocketStateSyncL3:
 
         assert deserialized["recovered_state"]["current_thread"] == "thread_optimization_123"
     
-    @pytest.mark.asyncio
-    async def test_multiple_websocket_connections_share_redis_session(self, redis_client, session_store, test_user):
+        @pytest.mark.asyncio
+        async def test_multiple_websocket_connections_share_redis_session(self, redis_client, session_store, test_user):
 
         """Test L3 Redis session sharing across multiple connection simulations."""
 
@@ -290,21 +284,21 @@ class TestRedisWebSocketStateSyncL3:
 
         shared_state = {
 
-            "shared_context": {
+        "shared_context": {
 
-                "optimization_settings": {
+        "optimization_settings": {
 
-                    "target_cost_reduction": 25,
+        "target_cost_reduction": 25,
 
-                    "preserve_performance": True
+        "preserve_performance": True
 
-                }
+        }
 
-            },
+        },
 
-            "active_connections": connection_count,
+        "active_connections": connection_count,
 
-            "sync_timestamp": datetime.now(timezone.utc).isoformat()
+        "sync_timestamp": datetime.now(timezone.utc).isoformat()
 
         }
         
@@ -315,35 +309,35 @@ class TestRedisWebSocketStateSyncL3:
         connection_results = []
 
         for i in range(connection_count):
-            # Each connection reads from Redis
+        # Each connection reads from Redis
 
-            connection_state = await session_store.get_session_state(session_key)
+        connection_state = await session_store.get_session_state(session_key)
 
-            assert connection_state is not None
+        assert connection_state is not None
 
-            assert connection_state["shared_context"]["target_cost_reduction"] == 25
+        assert connection_state["shared_context"]["target_cost_reduction"] == 25
             
-            # Simulate connection-specific state update (using nested structure)
+        # Simulate connection-specific state update (using nested structure)
 
-            connection_update = {
+        connection_update = {
 
-                "connection_tracking": {
+        "connection_tracking": {
 
-                    f"connection_{i}": {
+        f"connection_{i}": {
 
-                        "last_access": datetime.now(timezone.utc).isoformat(),
+        "last_access": datetime.now(timezone.utc).isoformat(),
 
-                        "status": "active"
+        "status": "active"
 
-                    }
+        }
 
-                }
+        }
 
-            }
+        }
 
-            await session_store.merge_session_state(session_key, connection_update)
+        await session_store.merge_session_state(session_key, connection_update)
 
-            connection_results.append(connection_update)
+        connection_results.append(connection_update)
         
         # L3 Test: Verify final merged state contains all connection updates
 
@@ -355,14 +349,14 @@ class TestRedisWebSocketStateSyncL3:
         
         for i in range(connection_count):
 
-            connection_key = f"connection_{i}"
+        connection_key = f"connection_{i}"
 
-            assert connection_key in final_state["connection_tracking"]
+        assert connection_key in final_state["connection_tracking"]
 
-            assert final_state["connection_tracking"][connection_key]["status"] == "active"
+        assert final_state["connection_tracking"][connection_key]["status"] == "active"
     
-    @pytest.mark.asyncio
-    async def test_session_expiry_and_cleanup_from_redis(self, session_store, redis_client, test_user):
+        @pytest.mark.asyncio
+        async def test_session_expiry_and_cleanup_from_redis(self, session_store, redis_client, test_user):
 
         """Test session expiry and cleanup mechanisms."""
 
@@ -374,9 +368,9 @@ class TestRedisWebSocketStateSyncL3:
 
         session_data = {
 
-            "temporary_context": "short_lived_optimization_session",
+        "temporary_context": "short_lived_optimization_session",
 
-            "expires_at": datetime.now(timezone.utc).isoformat()
+        "expires_at": datetime.now(timezone.utc).isoformat()
 
         }
         
@@ -402,8 +396,8 @@ class TestRedisWebSocketStateSyncL3:
 
         assert expired_session is None
     
-    @pytest.mark.asyncio
-    async def test_concurrent_session_updates_from_multiple_connections(self, session_store, test_user):
+        @pytest.mark.asyncio
+        async def test_concurrent_session_updates_from_multiple_connections(self, session_store, test_user):
 
         """Test L3 Redis concurrent session updates simulation."""
 
@@ -417,13 +411,13 @@ class TestRedisWebSocketStateSyncL3:
 
         initial_state = {
 
-            "base_session": {
+        "base_session": {
 
-                "user_id": user_id,
+        "user_id": user_id,
 
-                "created_at": datetime.now(timezone.utc).isoformat()
+        "created_at": datetime.now(timezone.utc).isoformat()
 
-            }
+        }
 
         }
 
@@ -435,23 +429,23 @@ class TestRedisWebSocketStateSyncL3:
 
         for conn_id in range(connection_count):
 
-            state_update = {
+        state_update = {
 
-                f"connection_{conn_id}_data": {
+        f"connection_{conn_id}_data": {
 
-                    "last_activity": datetime.now(timezone.utc).isoformat(),
+        "last_activity": datetime.now(timezone.utc).isoformat(),
 
-                    "connection_specific": f"data_from_conn_{conn_id}",
+        "connection_specific": f"data_from_conn_{conn_id}",
 
-                    "update_sequence": conn_id
+        "update_sequence": conn_id
 
-                }
+        }
 
-            }
+        }
             
-            task = session_store.merge_session_state(session_key, state_update)
+        task = session_store.merge_session_state(session_key, state_update)
 
-            update_tasks.append(task)
+        update_tasks.append(task)
         
         # L3 Test: Execute concurrent updates
 
@@ -469,16 +463,16 @@ class TestRedisWebSocketStateSyncL3:
 
         for conn_id in range(connection_count):
 
-            connection_key = f"connection_{conn_id}_data"
+        connection_key = f"connection_{conn_id}_data"
 
-            assert connection_key in final_state
+        assert connection_key in final_state
 
-            assert final_state[connection_key]["connection_specific"] == f"data_from_conn_{conn_id}"
+        assert final_state[connection_key]["connection_specific"] == f"data_from_conn_{conn_id]"
 
-            assert final_state[connection_key]["update_sequence"] == conn_id
+        assert final_state[connection_key]["update_sequence"] == conn_id
     
-    @pytest.mark.asyncio
-    async def test_state_recovery_after_redis_restart(self, redis_container, session_store, test_user):
+        @pytest.mark.asyncio
+        async def test_state_recovery_after_redis_restart(self, redis_container, session_store, test_user):
 
         """Test L3 Redis state persistence through restart simulation."""
 
@@ -492,25 +486,25 @@ class TestRedisWebSocketStateSyncL3:
 
         critical_state = {
 
-            "critical_optimization_context": {
+        "critical_optimization_context": {
 
-                "analysis_progress": 75,
+        "analysis_progress": 75,
 
-                "identified_savings": "$1,250/month",
+        "identified_savings": "$1,250/month",
 
-                "recommendations": ["GPU optimization", "Request batching"]
+        "recommendations": ["GPU optimization", "Request batching"]
 
-            },
+        },
 
-            "session_persistence": True,
+        "session_persistence": True,
 
-            "recovery_markers": {
+        "recovery_markers": {
 
-                "checkpoint_time": datetime.now(timezone.utc).isoformat(),
+        "checkpoint_time": datetime.now(timezone.utc).isoformat(),
 
-                "recovery_enabled": True
+        "recovery_enabled": True
 
-            }
+        }
 
         }
         
@@ -546,7 +540,6 @@ class TestRedisWebSocketStateSyncL3:
         assert post_restart_state == pre_restart_state
 
 class SessionStore:
-    pass
 
     """Redis session store for L3 testing."""
     

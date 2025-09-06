@@ -1,7 +1,7 @@
 """Peak Load Auto-Scaling L4 Critical Path Tests
 
 Business Value Justification (BVJ):
-- Segment: Enterprise
+    - Segment: Enterprise
 - Business Goal: Performance Scalability and High Availability  
 - Value Impact: Ensures system handles 10x load spikes without degradation
 - Strategic Impact: $30K MRR protection from performance failures
@@ -10,17 +10,17 @@ Critical Path: Load detection -> Auto-scaling trigger -> Resource provisioning -
 Coverage: Horizontal/vertical scaling, service discovery updates, cost-aware scaling, performance SLA maintenance
 
 L4 Requirements:
-- Real staging environment testing
+    - Real staging environment testing
 - Actual infrastructure scaling
 - Performance metrics validation
 - Cost optimization verification
 - Cross-service coordination
-"""
+""""
 
 import sys
 from pathlib import Path
 from test_framework.docker.unified_docker_manager import UnifiedDockerManager
-from test_framework.redis.test_redis_manager import TestRedisManager
+from test_framework.redis_test_utils_test_utils.test_redis_manager import TestRedisManager
 from auth_service.core.auth_manager import AuthManager
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
@@ -113,7 +113,7 @@ class AutoScalingOrchestrator:
     async def trigger_horizontal_scaling(self, service_name: str, 
                                        target_instances: int, 
                                        scaling_reason: str) -> Dict[str, Any]:
-        """Trigger horizontal scaling for a service."""
+                                           """Trigger horizontal scaling for a service."""
         start_time = time.time()
         current_instances = self.current_instances.get(service_name, 1)
         
@@ -168,7 +168,7 @@ class AutoScalingOrchestrator:
     async def trigger_vertical_scaling(self, service_name: str, 
                                      target_instance_type: str,
                                      scaling_reason: str) -> Dict[str, Any]:
-        """Trigger vertical scaling for a service."""
+                                         """Trigger vertical scaling for a service."""
         start_time = time.time()
         current_type = "medium"  # Default current type
         
@@ -216,7 +216,7 @@ class AutoScalingOrchestrator:
     
     async def update_service_discovery(self, service_name: str, 
                                      instances: List[Dict[str, Any]]) -> Dict[str, Any]:
-        """Update service discovery with new instance information."""
+                                         """Update service discovery with new instance information."""
         try:
             update_start = time.time()
             
@@ -260,7 +260,7 @@ class AutoScalingOrchestrator:
             scale_factor = min(cpu_usage / self.performance_thresholds["cpu_threshold"], 3.0)
             recommendations.append({
                 "type": "horizontal_scale_up",
-                "reason": f"CPU usage {cpu_usage:.1f}% exceeds threshold {self.performance_thresholds['cpu_threshold']}%",
+                "reason": f"CPU usage {cpu_usage:.1f]% exceeds threshold {self.performance_thresholds['cpu_threshold']]%",
                 "scale_factor": scale_factor,
                 "priority": "high"
             })
@@ -269,7 +269,7 @@ class AutoScalingOrchestrator:
         if memory_usage > self.performance_thresholds["memory_threshold"]:
             recommendations.append({
                 "type": "vertical_scale_up",
-                "reason": f"Memory usage {memory_usage:.1f}% exceeds threshold {self.performance_thresholds['memory_threshold']}%",
+                "reason": f"Memory usage {memory_usage:.1f]% exceeds threshold {self.performance_thresholds['memory_threshold']]%",
                 "target_instance_type": "large",
                 "priority": "high"
             })
@@ -278,7 +278,7 @@ class AutoScalingOrchestrator:
         if response_time > self.performance_thresholds["response_time_threshold"]:
             recommendations.append({
                 "type": "horizontal_scale_up",
-                "reason": f"Response time {response_time:.2f}s exceeds threshold {self.performance_thresholds['response_time_threshold']}s",
+                "reason": f"Response time {response_time:.2f]s exceeds threshold {self.performance_thresholds['response_time_threshold']]s",
                 "scale_factor": 1.5,
                 "priority": "medium"
             })
@@ -287,7 +287,7 @@ class AutoScalingOrchestrator:
         if error_rate > self.performance_thresholds["error_rate_threshold"]:
             recommendations.append({
                 "type": "horizontal_scale_up",
-                "reason": f"Error rate {error_rate:.1f}% exceeds threshold {self.performance_thresholds['error_rate_threshold']}%",
+                "reason": f"Error rate {error_rate:.1f]% exceeds threshold {self.performance_thresholds['error_rate_threshold']]%",
                 "scale_factor": 2.0,
                 "priority": "critical"
             })
@@ -295,7 +295,7 @@ class AutoScalingOrchestrator:
         # Scale down recommendations for cost optimization
         if (cpu_usage < 30.0 and memory_usage < 50.0 and 
             response_time < 0.5 and error_rate < 1.0):
-            recommendations.append({
+                recommendations.append({
                 "type": "horizontal_scale_down",
                 "reason": "Resource utilization low, cost optimization opportunity",
                 "scale_factor": 0.7,
@@ -406,7 +406,7 @@ class PeakLoadAutoScalingL4Test(L4StagingCriticalPathTestBase):
     async def make_performance_request(self, endpoint: str, 
                                      user_id: str = None, 
                                      timeout: float = 10.0) -> Dict[str, Any]:
-        """Make a performance-instrumented request to an endpoint."""
+                                         """Make a performance-instrumented request to an endpoint."""
         start_time = time.time()
         
         if not user_id:
@@ -608,7 +608,7 @@ class PeakLoadAutoScalingL4Test(L4StagingCriticalPathTestBase):
             scaling_analysis = self.auto_scaler.calculate_scaling_recommendation(current_metrics)
             
             if scaling_analysis["recommendations"]:
-                logger.info(f"Scaling recommendations during {phase}: {len(scaling_analysis['recommendations'])}")
+                logger.info(f"Scaling recommendations during {phase]: {len(scaling_analysis['recommendations'])]")
                 
                 for recommendation in scaling_analysis["recommendations"]:
                     if recommendation["priority"] in ["critical", "high"]:
@@ -985,7 +985,7 @@ class PeakLoadAutoScalingL4Test(L4StagingCriticalPathTestBase):
             if all_validations_passed:
                 logger.info("Auto-scaling critical path validation PASSED")
             else:
-                logger.error(f"Auto-scaling critical path validation FAILED: {len([r for r in validation_results if not r])}/{len(validation_results)} checks failed")
+                logger.error(f"Auto-scaling critical path validation FAILED: {len([r for r in validation_results if not r])]/{len(validation_results)] checks failed")
             
             return all_validations_passed
             
@@ -1018,9 +1018,9 @@ async def peak_load_autoscaling_test():
     """Create peak load auto-scaling test instance."""
     test_instance = PeakLoadAutoScalingL4Test()
     try:
-        yield test_instance
+    yield test_instance
     finally:
-        await test_instance.cleanup_l4_resources()
+    await test_instance.cleanup_l4_resources()
 
 @pytest.mark.asyncio
 @pytest.mark.integration

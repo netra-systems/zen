@@ -3,7 +3,7 @@ from shared.isolated_environment import IsolatedEnvironment
 #!/usr/bin/env python3
 """
 Comprehensive test for agent collaboration workflow:
-1. Supervisor agent initialization
+    1. Supervisor agent initialization
 2. Sub-agent spawning and registration
 3. Task delegation and distribution
 4. Inter-agent communication
@@ -13,7 +13,7 @@ Comprehensive test for agent collaboration workflow:
 8. Collaborative task completion
 
 This test validates the entire multi-agent collaboration system.
-"""
+""""
 
 # Test framework import - using pytest fixtures instead
 
@@ -87,11 +87,11 @@ class AgentCollaborationTester:
         self.session: Optional[aiohttp.ClientSession] = None
         self.auth_token: Optional[str] = None
         self.ws_connection = None
-        self.agents: Dict[str, AgentInfo] = {}
-        self.task_results: Dict[str, Any] = {}
+        self.agents: Dict[str, AgentInfo] = {]
+        self.task_results: Dict[str, Any] = {]
         self.message_log: List[Dict] = []
-        self.test_email = f"agent_test_{uuid.uuid4().hex[:8]}@example.com"
-        self.test_password = f"TestPass123_{uuid.uuid4().hex[:8]}"
+        self.test_email = f"agent_test_{uuid.uuid4().hex[:8]]@example.com"
+        self.test_password = f"TestPass123_{uuid.uuid4().hex[:8]]"
         
     async def __aenter__(self):
         """Setup test environment."""
@@ -118,9 +118,9 @@ class AgentCollaborationTester:
                     headers=headers
                 ) as response:
                     if response.status in [200, 204, 404]:
-                        print(f"[CLEANUP] Agent {agent_id} cleaned up")
+                        print(f"[CLEANUP] Agent {agent_id] cleaned up")
         except Exception as e:
-            print(f"[WARNING] Failed to cleanup agent {agent_id}: {e}")
+            print(f"[WARNING] Failed to cleanup agent {agent_id]: {e]")
             
     async def setup_test_account(self) -> bool:
         """Setup test account and authentication."""
@@ -160,7 +160,7 @@ class AgentCollaborationTester:
             return False
             
         except Exception as e:
-            print(f"[ERROR] Setup error: {e}")
+            print(f"[ERROR] Setup error: {e]")
             return False
             
     @pytest.mark.asyncio
@@ -204,16 +204,16 @@ class AgentCollaborationTester:
                         sub_agents=[]
                     )
                     
-                    print(f"[OK] Supervisor initialized: {agent_id}")
-                    print(f"[INFO] Status: {data.get('status')}")
+                    print(f"[OK] Supervisor initialized: {agent_id]")
+                    print(f"[INFO] Status: {data.get('status')]")
                     return True
                 else:
                     text = await response.text()
-                    print(f"[ERROR] Supervisor initialization failed: {response.status} - {text}")
+                    print(f"[ERROR] Supervisor initialization failed: {response.status] - {text]")
                     return False
                     
         except Exception as e:
-            print(f"[ERROR] Supervisor init error: {e}")
+            print(f"[ERROR] Supervisor init error: {e]")
             return False
             
     @pytest.mark.asyncio
@@ -276,19 +276,19 @@ class AgentCollaborationTester:
                         spawned_agents.append(agent_id)
                         supervisor.sub_agents.append(agent_id)
                         
-                        print(f"[OK] Spawned {agent_type.value}: {agent_id}")
+                        print(f"[OK] Spawned {agent_type.value]: {agent_id]")
                     else:
-                        print(f"[ERROR] Failed to spawn {agent_type.value}: {response.status}")
+                        print(f"[ERROR] Failed to spawn {agent_type.value]: {response.status]")
                         
             if len(spawned_agents) >= 2:
-                print(f"[OK] Successfully spawned {len(spawned_agents)} sub-agents")
+                print(f"[OK] Successfully spawned {len(spawned_agents)] sub-agents")
                 return True
             else:
-                print(f"[WARNING] Only spawned {len(spawned_agents)} sub-agents")
+                print(f"[WARNING] Only spawned {len(spawned_agents)] sub-agents")
                 return False
                 
         except Exception as e:
-            print(f"[ERROR] Sub-agent spawning error: {e}")
+            print(f"[ERROR] Sub-agent spawning error: {e]")
             return False
             
     @pytest.mark.asyncio
@@ -319,7 +319,7 @@ class AgentCollaborationTester:
             
             # Create a complex task that requires delegation
             complex_task = {
-                "task_id": f"task_{uuid.uuid4().hex[:8]}",
+                "task_id": f"task_{uuid.uuid4().hex[:8]]",
                 "type": "complex_analysis",
                 "description": "Analyze codebase and suggest improvements",
                 "subtasks": [
@@ -355,8 +355,8 @@ class AgentCollaborationTester:
                     task_id = data.get("task_id")
                     delegations = data.get("delegations", [])
                     
-                    print(f"[OK] Task submitted: {task_id}")
-                    print(f"[INFO] Delegations: {len(delegations)}")
+                    print(f"[OK] Task submitted: {task_id]")
+                    print(f"[INFO] Delegations: {len(delegations)]")
                     
                     # Track delegations
                     for delegation in delegations:
@@ -365,16 +365,16 @@ class AgentCollaborationTester:
                         
                         if agent_id in self.agents:
                             self.agents[agent_id].current_task = subtask_id
-                            print(f"[INFO] {subtask_id} -> Agent {agent_id}")
+                            print(f"[INFO] {subtask_id] -> Agent {agent_id]")
                             
                     return len(delegations) > 0
                 else:
                     text = await response.text()
-                    print(f"[ERROR] Task delegation failed: {response.status} - {text}")
+                    print(f"[ERROR] Task delegation failed: {response.status] - {text]")
                     return False
                     
         except Exception as e:
-            print(f"[ERROR] Task delegation error: {e}")
+            print(f"[ERROR] Task delegation error: {e]")
             return False
             
     @pytest.mark.asyncio
@@ -442,7 +442,7 @@ class AgentCollaborationTester:
                     headers=headers
                 ) as response:
                     if response.status in [200, 201]:
-                        print(f"[OK] Message sent from {sender_id} to {receiver_id}")
+                        print(f"[OK] Message sent from {sender_id] to {receiver_id]")
                         
                         # Wait for message propagation via WebSocket
                         try:
@@ -461,7 +461,7 @@ class AgentCollaborationTester:
                             return True  # Message was sent successfully
                             
                     else:
-                        print(f"[ERROR] Failed to send message: {response.status}")
+                        print(f"[ERROR] Failed to send message: {response.status]")
                         return False
                         
             else:
@@ -469,7 +469,7 @@ class AgentCollaborationTester:
                 return False
                 
         except Exception as e:
-            print(f"[ERROR] Communication test error: {e}")
+            print(f"[ERROR] Communication test error: {e]")
             return False
             
     @pytest.mark.asyncio
@@ -522,9 +522,9 @@ class AgentCollaborationTester:
                     ) as response:
                         if response.status in [200, 201]:
                             results_submitted += 1
-                            print(f"[OK] Result submitted by {agent_id}")
+                            print(f"[OK] Result submitted by {agent_id]")
                         else:
-                            print(f"[ERROR] Failed to submit result for {agent_id}")
+                            print(f"[ERROR] Failed to submit result for {agent_id]")
                             
             # Request aggregated results from supervisor
             async with self.session.get(
@@ -536,8 +536,8 @@ class AgentCollaborationTester:
                     aggregated = data.get("aggregated_results", {})
                     
                     print(f"[OK] Aggregated results retrieved")
-                    print(f"[INFO] Total results: {len(aggregated)}")
-                    print(f"[INFO] Results submitted: {results_submitted}")
+                    print(f"[INFO] Total results: {len(aggregated)]")
+                    print(f"[INFO] Results submitted: {results_submitted]")
                     
                     if len(aggregated) >= results_submitted:
                         print("[OK] All results properly aggregated")
@@ -546,11 +546,11 @@ class AgentCollaborationTester:
                         print("[WARNING] Not all results aggregated")
                         return False
                 else:
-                    print(f"[ERROR] Failed to get aggregated results: {response.status}")
+                    print(f"[ERROR] Failed to get aggregated results: {response.status]")
                     return False
                     
         except Exception as e:
-            print(f"[ERROR] Result aggregation error: {e}")
+            print(f"[ERROR] Result aggregation error: {e]")
             return False
             
     @pytest.mark.asyncio
@@ -591,7 +591,7 @@ class AgentCollaborationTester:
                 headers=headers
             ) as response:
                 if response.status in [200, 201]:
-                    print(f"[OK] Error reported by {sub_agent.agent_id}")
+                    print(f"[OK] Error reported by {sub_agent.agent_id]")
                     
                     # Check if supervisor received the error
                     supervisor = None
@@ -622,11 +622,11 @@ class AgentCollaborationTester:
                     
                     return True  # Error was reported successfully
                 else:
-                    print(f"[ERROR] Failed to report error: {response.status}")
+                    print(f"[ERROR] Failed to report error: {response.status]")
                     return False
                     
         except Exception as e:
-            print(f"[ERROR] Error propagation test error: {e}")
+            print(f"[ERROR] Error propagation test error: {e]")
             return False
             
     @pytest.mark.asyncio
@@ -662,7 +662,7 @@ class AgentCollaborationTester:
                 if response.status in [200, 201]:
                     data = await response.json()
                     pool_id = data.get("pool_id")
-                    print(f"[OK] Resource pool created: {pool_id}")
+                    print(f"[OK] Resource pool created: {pool_id]")
                     
                     # Request resources for each agent
                     allocations = []
@@ -686,22 +686,22 @@ class AgentCollaborationTester:
                             if alloc_response.status in [200, 201]:
                                 alloc_data = await alloc_response.json()
                                 allocations.append(alloc_data)
-                                print(f"[OK] Resources allocated to {agent_id}")
+                                print(f"[OK] Resources allocated to {agent_id]")
                             else:
-                                print(f"[ERROR] Failed to allocate to {agent_id}")
+                                print(f"[ERROR] Failed to allocate to {agent_id]")
                                 
                     if len(allocations) >= 2:
-                        print(f"[OK] Resource pooling working: {len(allocations)} allocations")
+                        print(f"[OK] Resource pooling working: {len(allocations)] allocations")
                         return True
                     else:
                         print("[WARNING] Insufficient allocations")
                         return False
                 else:
-                    print(f"[ERROR] Failed to create resource pool: {response.status}")
+                    print(f"[ERROR] Failed to create resource pool: {response.status]")
                     return False
                     
         except Exception as e:
-            print(f"[ERROR] Resource pooling error: {e}")
+            print(f"[ERROR] Resource pooling error: {e]")
             return False
             
     @pytest.mark.asyncio
@@ -718,7 +718,7 @@ class AgentCollaborationTester:
             
             # Create a collaborative task
             collab_task = {
-                "task_id": f"collab_{uuid.uuid4().hex[:8]}",
+                "task_id": f"collab_{uuid.uuid4().hex[:8]]",
                 "type": "collaborative",
                 "description": "Build a complete feature with research, implementation, and review",
                 "phases": [
@@ -753,7 +753,7 @@ class AgentCollaborationTester:
                 if response.status in [200, 201]:
                     data = await response.json()
                     task_id = data.get("task_id")
-                    print(f"[OK] Collaborative task created: {task_id}")
+                    print(f"[OK] Collaborative task created: {task_id]")
                     
                     # Monitor task progress
                     max_checks = 10
@@ -772,7 +772,7 @@ class AgentCollaborationTester:
                                 progress = status_data.get("progress_percentage", 0)
                                 status = status_data.get("status")
                                 
-                                print(f"[INFO] Phase: {current_phase}, Progress: {progress}%, Status: {status}")
+                                print(f"[INFO] Phase: {current_phase], Progress: {progress]%, Status: {status]")
                                 
                                 if status == "completed":
                                     completed = True
@@ -792,16 +792,16 @@ class AgentCollaborationTester:
                                 phases_completed = results.get("phases_completed", [])
                                 
                                 print(f"[OK] Task completed successfully")
-                                print(f"[INFO] Phases completed: {phases_completed}")
+                                print(f"[INFO] Phases completed: {phases_completed]")
                                 return len(phases_completed) >= 2
                                 
                     return False
                 else:
-                    print(f"[ERROR] Failed to create collaborative task: {response.status}")
+                    print(f"[ERROR] Failed to create collaborative task: {response.status]")
                     return False
                     
         except Exception as e:
-            print(f"[ERROR] Collaborative completion error: {e}")
+            print(f"[ERROR] Collaborative completion error: {e]")
             return False
             
     @pytest.mark.asyncio
@@ -830,7 +830,7 @@ class AgentCollaborationTester:
                         status = health_data.get("status")
                         metrics = health_data.get("metrics", {})
                         
-                        print(f"[INFO] Agent {agent_id}: {status}")
+                        print(f"[INFO] Agent {agent_id]: {status]")
                         print(f"       CPU: {metrics.get('cpu_usage', 0)}%, Memory: {metrics.get('memory_usage', 0)}%")
                         
                         if status == "healthy":
@@ -840,7 +840,7 @@ class AgentCollaborationTester:
                             
             # If any unhealthy agents, test recovery
             if unhealthy_agents:
-                print(f"[WARNING] Found {len(unhealthy_agents)} unhealthy agents")
+                print(f"[WARNING] Found {len(unhealthy_agents)] unhealthy agents")
                 
                 for agent_id in unhealthy_agents:
                     # Attempt recovery
@@ -855,15 +855,15 @@ class AgentCollaborationTester:
                         headers=headers
                     ) as response:
                         if response.status in [200, 201]:
-                            print(f"[OK] Recovery initiated for {agent_id}")
+                            print(f"[OK] Recovery initiated for {agent_id]")
                         else:
-                            print(f"[ERROR] Failed to recover {agent_id}")
+                            print(f"[ERROR] Failed to recover {agent_id]")
                             
-            print(f"[SUMMARY] Healthy: {len(healthy_agents)}, Unhealthy: {len(unhealthy_agents)}")
+            print(f"[SUMMARY] Healthy: {len(healthy_agents)], Unhealthy: {len(unhealthy_agents)]")
             return len(healthy_agents) > 0
             
         except Exception as e:
-            print(f"[ERROR] Health monitoring error: {e}")
+            print(f"[ERROR] Health monitoring error: {e]")
             return False
             
     async def run_all_tests(self) -> Dict[str, bool]:

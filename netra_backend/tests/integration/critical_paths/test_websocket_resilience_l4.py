@@ -1,16 +1,18 @@
+from unittest.mock import AsyncMock, Mock, patch, MagicMock
+
 """WebSocket Resilience L4 Integration Tests
 
 Business Value Justification (BVJ):
-- Segment: All tiers (core real-time communication infrastructure)
+    - Segment: All tiers (core real-time communication infrastructure)
 - Business Goal: Ensure WebSocket reliability under production load conditions
 - Value Impact: Protects $8K MRR through reliable real-time user experience
 - Strategic Impact: Critical for user engagement and session persistence across platform
 
 Critical Path: 
-Connection establishment -> Load testing -> Network interruption -> Reconnection -> Message delivery verification
+    Connection establishment -> Load testing -> Network interruption -> Reconnection -> Message delivery verification
 
 Coverage: 100+ concurrent connections, network fault injection, message delivery guarantees, staging environment validation
-"""
+""""
 
 from netra_backend.app.websocket_core.manager import WebSocketManager
 # Test framework import - using pytest fixtures instead
@@ -19,7 +21,7 @@ import sys
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
 from test_framework.docker.unified_docker_manager import UnifiedDockerManager
 from test_framework.database.test_database_manager import TestDatabaseManager
-from test_framework.redis.test_redis_manager import TestRedisManager
+from test_framework.redis_test_utils_test_utils.test_redis_manager import TestRedisManager
 from auth_service.core.auth_manager import AuthManager
 from shared.isolated_environment import IsolatedEnvironment
 
@@ -39,15 +41,15 @@ import pytest
 import websockets
 from websockets import ServerConnection
 
-StagingTestSuite = AsyncNone  # TODO: Use real service instance
+StagingTestSuite = AsyncMock()  # TODO: Use real service instance
 
-get_staging_suite = AsyncNone  # TODO: Use real service instance
+get_staging_suite = AsyncMock()  # TODO: Use real service instance
 # from netra_backend.app.websocket_core.manager import WebSocketManager
 
-WebSocketManager = AsyncNone  # TODO: Use real service instance
+WebSocketManager = AsyncMock()  # TODO: Use real service instance
 # from app.services.redis.session_manager import RedisSessionManager
 
-RedisSessionManager = AsyncNone  # TODO: Use real service instance
+RedisSessionManager = AsyncMock()  # TODO: Use real service instance
 
 @dataclass
 
@@ -79,11 +81,11 @@ class WebSocketL4TestSuite:
 
         self.websocket_url: str = ""
 
-        self.active_connections: Dict[str, websockets.ServerConnection] = {}
+        self.active_connections: Dict[str, websockets.ServerConnection] = {]
 
-        self.connection_metrics: Dict[str, Dict] = {}
+        self.connection_metrics: Dict[str, Dict] = {]
 
-        self.message_queues: Dict[str, List] = {}
+        self.message_queues: Dict[str, List] = {]
 
         self.test_metrics = {
 
@@ -134,7 +136,7 @@ class WebSocketL4TestSuite:
 
                                         auth_token: Optional[str] = None) -> Dict[str, Any]:
 
-        """Create authenticated WebSocket connection to staging."""
+                                            """Create authenticated WebSocket connection to staging."""
 
         start_time = time.time()
         
@@ -145,7 +147,7 @@ class WebSocketL4TestSuite:
 
             if auth_token:
 
-                headers["Authorization"] = f"Bearer {auth_token}"
+                headers["Authorization"] = f"Bearer {auth_token]"
             
             # Create SSL context for staging
 
@@ -235,7 +237,7 @@ class WebSocketL4TestSuite:
 
         for i in range(connection_count):
 
-            connection_id = f"load_test_conn_{i}_{uuid.uuid4().hex[:8]}"
+            connection_id = f"load_test_conn_{i]_{uuid.uuid4().hex[:8]]"
 
             auth_token = f"test_token_{i}"  # Simulate different auth tokens
             
@@ -355,7 +357,7 @@ class WebSocketL4TestSuite:
 
                                      connection_id: str, message: Dict) -> Dict[str, Any]:
 
-        """Send message and verify delivery."""
+                                         """Send message and verify delivery."""
 
         try:
             # Send message
@@ -410,7 +412,7 @@ class WebSocketL4TestSuite:
 
                                                   websocket: websockets.ServerConnection) -> Dict[str, Any]:
 
-        """Simulate network disconnection and test reconnection."""
+                                                      """Simulate network disconnection and test reconnection."""
 
         try:
             # Close existing connection
@@ -473,7 +475,7 @@ class WebSocketL4TestSuite:
 
             else:
 
-                return {"success": False, "error": reconnection_result["error"]}
+                return {"success": False, "error": reconnection_result["error"]]
                 
         except Exception as e:
 
@@ -517,7 +519,7 @@ class WebSocketL4TestSuite:
 
         """Test temporary disconnection recovery."""
 
-        connection_id = f"temp_disconnect_{uuid.uuid4().hex[:8]}"
+        connection_id = f"temp_disconnect_{uuid.uuid4().hex[:8]]"
         
         # Create connection
 
@@ -579,7 +581,7 @@ class WebSocketL4TestSuite:
 
         """Test handling of intermittent connectivity issues."""
 
-        connection_id = f"intermittent_{uuid.uuid4().hex[:8]}"
+        connection_id = f"intermittent_{uuid.uuid4().hex[:8]]"
         
         # Create connection
 
@@ -645,7 +647,7 @@ class WebSocketL4TestSuite:
 
         """Test connection timeout handling."""
 
-        connection_id = f"timeout_test_{uuid.uuid4().hex[:8]}"
+        connection_id = f"timeout_test_{uuid.uuid4().hex[:8]]"
         
         try:
             # Attempt connection with very short timeout
@@ -726,7 +728,7 @@ class WebSocketL4TestSuite:
 
         """Test ping/pong failure handling."""
 
-        connection_id = f"ping_test_{uuid.uuid4().hex[:8]}"
+        connection_id = f"ping_test_{uuid.uuid4().hex[:8]]"
         
         try:
             # Create connection with aggressive ping settings
@@ -817,7 +819,6 @@ class WebSocketL4TestSuite:
         self.message_queues.clear()
 
 @pytest.fixture
-
 async def websocket_l4_suite():
 
     """Create L4 WebSocket test suite."""
@@ -925,7 +926,7 @@ async def test_websocket_message_delivery_guarantees_l4(websocket_l4_suite):
 
     """Test message delivery guarantees under various conditions."""
 
-    connection_id = f"delivery_test_{uuid.uuid4().hex[:8]}"
+    connection_id = f"delivery_test_{uuid.uuid4().hex[:8]]"
     
     # Create connection
 
@@ -977,7 +978,7 @@ async def test_websocket_message_delivery_guarantees_l4(websocket_l4_suite):
 
         if "sequence" in received:
 
-            assert received["sequence"] == i, f"Message ordering violation at position {i}"
+            assert received["sequence"] == i, f"Message ordering violation at position {i]"
     
     await websocket.close()
 
@@ -997,7 +998,7 @@ async def test_websocket_reconnection_success_rate_l4(websocket_l4_suite):
     
     for i in range(connection_count):
 
-        connection_id = f"reconnect_test_{i}_{uuid.uuid4().hex[:8]}"
+        connection_id = f"reconnect_test_{i]_{uuid.uuid4().hex[:8]]"
 
         conn_result = await websocket_l4_suite.create_websocket_connection(connection_id)
         
@@ -1031,7 +1032,7 @@ async def test_websocket_performance_under_stress_l4(websocket_l4_suite):
     """Test WebSocket performance under stress conditions."""
     # Create stress test with high message volume
 
-    connection_id = f"stress_test_{uuid.uuid4().hex[:8]}"
+    connection_id = f"stress_test_{uuid.uuid4().hex[:8]]"
 
     conn_result = await websocket_l4_suite.create_websocket_connection(connection_id)
     

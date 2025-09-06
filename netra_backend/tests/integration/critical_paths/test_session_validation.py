@@ -1,7 +1,7 @@
 """
 L3 Integration Test: Session Validation
 Tests session validation and verification scenarios
-"""
+""""
 
 import sys
 from pathlib import Path

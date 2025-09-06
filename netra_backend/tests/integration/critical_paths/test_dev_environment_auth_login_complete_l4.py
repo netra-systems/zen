@@ -3,7 +3,7 @@
 L4 Integration Test: Dev Environment Complete Authentication and Login Flow
 
 Tests the complete authentication and login process:
-1. User registration with validation
+    1. User registration with validation
 2. Email verification flow
 3. Login with credentials
 4. JWT token generation and validation
@@ -13,11 +13,11 @@ Tests the complete authentication and login process:
 8. Cross-service authentication propagation
 
 BVJ:
-- Segment: Free, Early, Mid, Enterprise
+    - Segment: Free, Early, Mid, Enterprise
 - Business Goal: Conversion
 - Value Impact: Secure and seamless authentication for all users
 - Strategic Impact: Foundation for user trust and platform access
-"""
+""""
 
 # Test framework import - using pytest fixtures instead
 
@@ -73,10 +73,10 @@ class AuthenticationFlowTester:
     
     def __init__(self):
         self.session: Optional[aiohttp.ClientSession] = None
-        self.user_tokens: Dict[str, Dict[str, Any]] = {}
-        self.user_sessions: Dict[str, Dict[str, Any]] = {}
+        self.user_tokens: Dict[str, Dict[str, Any]] = {]
+        self.user_sessions: Dict[str, Dict[str, Any]] = {]
         self.auth_logs: List[str] = []
-        self.test_results: Dict[str, Any] = {}
+        self.test_results: Dict[str, Any] = {]
         
     async def __aenter__(self):
         """Setup test environment."""
@@ -91,7 +91,7 @@ class AuthenticationFlowTester:
     def log_auth_event(self, user: str, event: str, details: str = ""):
         """Log authentication events for analysis."""
         timestamp = datetime.now().isoformat()
-        log_entry = f"[{timestamp}] [{user}] {event}"
+        log_entry = f"[{timestamp]] [{user]] {event]"
         if details:
             log_entry += f" - {details}"
         self.auth_logs.append(log_entry)
@@ -110,7 +110,7 @@ class AuthenticationFlowTester:
         start_time = time.time()
         email = user_data["email"]
         
-        self.log_auth_event(email, "REGISTRATION_START", f"Registering {user_data['role']} user")
+        self.log_auth_event(email, "REGISTRATION_START", f"Registering {user_data['role']] user")
         
         try:
             # Validate input
@@ -141,7 +141,7 @@ class AuthenticationFlowTester:
                     data = await response.json()
                     result["registered"] = True
                     result["user_id"] = data.get("user_id")
-                    self.log_auth_event(email, "REGISTRATION_SUCCESS", f"User ID: {result['user_id']}")
+                    self.log_auth_event(email, "REGISTRATION_SUCCESS", f"User ID: {result['user_id']]")
                     
                 elif response.status == 409:
                     self.log_auth_event(email, "USER_EXISTS", "User already registered")
@@ -233,7 +233,7 @@ class AuthenticationFlowTester:
                     result["access_token"] = data.get("access_token")
                     result["refresh_token"] = data.get("refresh_token")
                     result["token_expiry"] = data.get("expires_in")
-                    result["user_data"] = data.get("user", {})
+                    result["user_data"] = data.get("user", {])
                     
                     # Store tokens for later use
                     self.user_tokens[email] = {
@@ -242,7 +242,7 @@ class AuthenticationFlowTester:
                         "expiry": datetime.now() + timedelta(seconds=result["token_expiry"] or 3600)
                     }
                     
-                    self.log_auth_event(email, "LOGIN_SUCCESS", f"Token expires in {result['token_expiry']}s")
+                    self.log_auth_event(email, "LOGIN_SUCCESS", f"Token expires in {result['token_expiry']]s")
                     
                 else:
                     error_text = await response.text()
@@ -272,7 +272,7 @@ class AuthenticationFlowTester:
         
         try:
             # Validate token with auth service
-            headers = {"Authorization": f"Bearer {tokens['access_token']}"}
+            headers = {"Authorization": f"Bearer {tokens['access_token']]"]
             
             async with self.session.get(
                 f"{AUTH_SERVICE_URL}/auth/validate",
@@ -281,8 +281,8 @@ class AuthenticationFlowTester:
                 if response.status == 200:
                     data = await response.json()
                     result["token_valid"] = True
-                    result["token_claims"] = data.get("claims", {})
-                    self.log_auth_event(email, "TOKEN_VALID", f"Claims: {result['token_claims']}")
+                    result["token_claims"] = data.get("claims", {])
+                    self.log_auth_event(email, "TOKEN_VALID", f"Claims: {result['token_claims']]")
                     
                 else:
                     error_text = await response.text()
@@ -363,7 +363,7 @@ class AuthenticationFlowTester:
             
         self.log_auth_event(email, "CROSS_SERVICE_TEST", "Testing cross-service authentication")
         
-        headers = {"Authorization": f"Bearer {tokens['access_token']}"}
+        headers = {"Authorization": f"Bearer {tokens['access_token']]"]
         
         # Test backend authentication
         try:
@@ -386,7 +386,7 @@ class AuthenticationFlowTester:
         try:
             import websockets
             
-            ws_headers = {"Authorization": f"Bearer {tokens['access_token']}"}
+            ws_headers = {"Authorization": f"Bearer {tokens['access_token']]"]
             async with websockets.connect(WEBSOCKET_URL, extra_headers=ws_headers) as ws:
                 # Send auth message
                 auth_msg = {
@@ -428,7 +428,7 @@ class AuthenticationFlowTester:
         self.log_auth_event(email, "SESSION_CREATE", "Creating user session")
         
         try:
-            headers = {"Authorization": f"Bearer {tokens['access_token']}"}
+            headers = {"Authorization": f"Bearer {tokens['access_token']]"]
             
             # Create session
             session_payload = {
@@ -445,7 +445,7 @@ class AuthenticationFlowTester:
                     data = await response.json()
                     result["session_created"] = True
                     result["session_id"] = data.get("session_id")
-                    result["session_data"] = data.get("session", {})
+                    result["session_data"] = data.get("session", {])
                     result["session_ttl"] = data.get("ttl", 0)
                     
                     # Store session info
@@ -455,7 +455,7 @@ class AuthenticationFlowTester:
                         "ttl": result["session_ttl"]
                     }
                     
-                    self.log_auth_event(email, "SESSION_CREATED", f"Session ID: {result['session_id']}")
+                    self.log_auth_event(email, "SESSION_CREATED", f"Session ID: {result['session_id']]")
                     
         except Exception as e:
             self.log_auth_event(email, "SESSION_ERROR", str(e))
@@ -478,7 +478,7 @@ class AuthenticationFlowTester:
         self.log_auth_event(email, "LOGOUT_START", "Initiating logout")
         
         try:
-            headers = {"Authorization": f"Bearer {tokens['access_token']}"}
+            headers = {"Authorization": f"Bearer {tokens['access_token']]"]
             
             async with self.session.post(
                 f"{AUTH_SERVICE_URL}/auth/logout",
@@ -512,7 +512,7 @@ class AuthenticationFlowTester:
     def _validate_email(self, email: str) -> bool:
         """Validate email format."""
         import re
-        pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+        pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,]$'
         return bool(re.match(pattern, email))
     
     def _validate_password(self, password: str) -> bool:
@@ -526,7 +526,7 @@ class AuthenticationFlowTester:
             return False
         if not any(c.isdigit() for c in password):
             return False
-        if not any(c in "!@#$%^&*()_+-=[]{}|;:,.<>?" for c in password):
+        if not any(c in "!@#$%^&*()_+-=[]{]|;:,.<>?" for c in password):
             return False
         return True
     
@@ -631,38 +631,38 @@ async def test_dev_environment_auth_login_complete():
             
             # Registration
             reg = user_results["registration"]
-            print(f"  Registration: {'✓' if reg['registered'] else '✗'} ({reg['registration_time']:.2f}s)")
+            print(f"  Registration: {'✓' if reg['registered'] else '✗'] ({reg['registration_time']:.2f]s)")
             
             # Login
             login = user_results["login"]
-            print(f"  Login: {'✓' if login['login_success'] else '✗'} ({login['login_time']:.2f}s)")
+            print(f"  Login: {'✓' if login['login_success'] else '✗'] ({login['login_time']:.2f]s)")
             
             # Token validation
             token = user_results["token_validation"]
-            print(f"  Token Valid: {'✓' if token['token_valid'] else '✗'}")
+            print(f"  Token Valid: {'✓' if token['token_valid'] else '✗']")
             
             # Cross-service auth
             cross = user_results["cross_service_auth"]
-            print(f"  Backend Auth: {'✓' if cross['backend_auth'] else '✗'}")
-            print(f"  WebSocket Auth: {'✓' if cross['websocket_auth'] else '✗'}")
+            print(f"  Backend Auth: {'✓' if cross['backend_auth'] else '✗']")
+            print(f"  WebSocket Auth: {'✓' if cross['websocket_auth'] else '✗']")
             
             # Logout
             logout = user_results["logout"]
-            print(f"  Logout: {'✓' if logout['logout_success'] else '✗'}")
+            print(f"  Logout: {'✓' if logout['logout_success'] else '✗']")
             
         # Summary
         summary = results["summary"]
         print("\n" + "="*60)
         print("SUMMARY")
         print("="*60)
-        print(f"Total Tests: {summary['total_tests']}")
-        print(f"Passed Tests: {summary['passed_tests']}")
-        print(f"Success Rate: {summary['success_rate']:.1f}%")
-        print(f"Users Authenticated: {summary['users_authenticated']}")
-        print(f"Active Sessions: {summary['active_sessions']}")
+        print(f"Total Tests: {summary['total_tests']]")
+        print(f"Passed Tests: {summary['passed_tests']]")
+        print(f"Success Rate: {summary['success_rate']:.1f]%")
+        print(f"Users Authenticated: {summary['users_authenticated']]")
+        print(f"Active Sessions: {summary['active_sessions']]")
         
         # Assert critical conditions
-        assert summary["success_rate"] >= 75, f"Success rate too low: {summary['success_rate']:.1f}%"
+        assert summary["success_rate"] >= 75, f"Success rate too low: {summary['success_rate']:.1f]%"
         assert summary["users_authenticated"] >= 2, "Not enough users authenticated"
         
         print("\n[SUCCESS] Authentication and login flow tests completed!")

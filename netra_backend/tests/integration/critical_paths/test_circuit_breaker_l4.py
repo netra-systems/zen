@@ -1,16 +1,18 @@
+from unittest.mock import Mock, patch, MagicMock
+
 """Circuit Breaker Cascade Prevention L4 Integration Tests
 
 Business Value Justification (BVJ):
-- Segment: Enterprise/Platform (system resilience foundation)
+    - Segment: Enterprise/Platform (system resilience foundation)
 - Business Goal: Prevent cascading failures that could take down entire platform
 - Value Impact: Protects $25K MRR through system-wide availability and resilience
 - Strategic Impact: Critical for maintaining SLA commitments and preventing revenue loss during partial service degradation
 
 Critical Path: 
-Service health monitoring -> Failure threshold detection -> Circuit breaker activation -> Graceful degradation -> Recovery monitoring
+    Service health monitoring -> Failure threshold detection -> Circuit breaker activation -> Graceful degradation -> Recovery monitoring
 
 Coverage: Real service failures, circuit breaker state transitions, cascade prevention, staging environment validation
-"""
+""""
 
 import sys
 from pathlib import Path
@@ -89,7 +91,7 @@ class CircuitBreakerL4TestSuite:
         self.health_monitor: Optional[ServiceHealthMonitor] = None
         self.failure_detector: Optional[FailureDetector] = None
         self.metrics_collector: Optional[MetricsCollector] = None
-        self.service_endpoints: Dict[str, str] = {}
+        self.service_endpoints: Dict[str, str] = {]
         self.test_metrics = {
             "circuit_breaker_activations": 0,
             "cascade_failures_prevented": 0,
@@ -156,7 +158,7 @@ class CircuitBreakerL4TestSuite:
     
     async def monitor_service_health(self, service_name: str, 
                                    duration_seconds: int = 60) -> ServiceHealthMetrics:
-        """Monitor service health over specified duration."""
+                                       """Monitor service health over specified duration."""
         start_time = time.time()
         end_time = start_time + duration_seconds
         
@@ -240,7 +242,7 @@ class CircuitBreakerL4TestSuite:
     
     async def simulate_service_failure(self, service_name: str, 
                                      failure_type: str = "high_latency") -> Dict[str, Any]:
-        """Simulate service failure to trigger circuit breaker."""
+                                         """Simulate service failure to trigger circuit breaker."""
         failure_start_time = time.time()
         
         try:
@@ -806,7 +808,7 @@ async def test_circuit_breaker_activation_on_service_failure_l4(circuit_breaker_
     transition_result = await circuit_breaker_l4_suite.test_circuit_breaker_state_transitions("backend")
     
     # Validate state transitions
-    assert transition_result["success"] is True, f"State transition test failed: {transition_result.get('error')}"
+    assert transition_result["success"] is True, f"State transition test failed: {transition_result.get('error')]"
     
     # Validate failure triggered circuit breaker
     failure_result = transition_result["failure_result"]
@@ -901,12 +903,12 @@ async def test_circuit_breaker_recovery_monitoring_l4(circuit_breaker_l4_suite):
     recovery_result = await circuit_breaker_l4_suite.test_recovery_monitoring("websocket")
     
     # Validate recovery process
-    assert recovery_result["success"] is True, f"Recovery test failed: {recovery_result.get('error')}"
+    assert recovery_result["success"] is True, f"Recovery test failed: {recovery_result.get('error')]"
     assert recovery_result["recovery_successful"] is True, "Service recovery was not successful"
     assert recovery_result["final_state"] == CircuitBreakerState.CLOSED, "Circuit breaker did not return to CLOSED state"
     
     # Validate recovery time
-    assert recovery_result["recovery_time"] < 60.0, f"Recovery took too long: {recovery_result['recovery_time']}s"
+    assert recovery_result["recovery_time"] < 60.0, f"Recovery took too long: {recovery_result['recovery_time']]s"
     
     # Validate metrics
     assert circuit_breaker_l4_suite.test_metrics["service_recoveries"] >= 1

@@ -1,9 +1,11 @@
 from shared.isolated_environment import get_env
 from shared.isolated_environment import IsolatedEnvironment
 #!/usr/bin/env python3
+from unittest.mock import Mock, patch, MagicMock
+
 """
 Comprehensive test for Redis session management flow:
-1. Redis cluster health and connectivity
+    1. Redis cluster health and connectivity
 2. Session creation and storage
 3. Session retrieval and validation
 4. Session expiration and TTL
@@ -11,7 +13,7 @@ Comprehensive test for Redis session management flow:
 6. Session migration between nodes
 7. Session data consistency
 8. Cluster failover handling
-"""
+""""
 
 # Test framework import - using pytest fixtures instead
 
@@ -38,7 +40,7 @@ class RedisSessionTester:
     def __init__(self):
         self.session: Optional[aiohttp.ClientSession] = None
         self.redis_client: Optional[redis.Redis] = None
-        self.test_sessions: Dict[str, Any] = {}
+        self.test_sessions: Dict[str, Any] = {]
         
     async def __aenter__(self):
         self.session = aiohttp.ClientSession()
@@ -63,21 +65,21 @@ class RedisSessionTester:
                 
             # Check cluster info
             info = await self.redis_client.info()
-            print(f"[INFO] Redis version: {info.get('redis_version')}")
-            print(f"[INFO] Connected clients: {info.get('connected_clients')}")
-            print(f"[INFO] Used memory: {info.get('used_memory_human')}")
+            print(f"[INFO] Redis version: {info.get('redis_version')]")
+            print(f"[INFO] Connected clients: {info.get('connected_clients')]")
+            print(f"[INFO] Used memory: {info.get('used_memory_human')]")
             
             # Check via API
             async with self.session.get(f"{BACKEND_URL}/api/redis/health") as response:
                 if response.status == 200:
                     data = await response.json()
-                    print(f"[OK] Redis health via API: {data.get('status')}")
+                    print(f"[OK] Redis health via API: {data.get('status')]")
                     return True
                     
             return pong
             
         except Exception as e:
-            print(f"[ERROR] Redis health check failed: {e}")
+            print(f"[ERROR] Redis health check failed: {e]")
             return False
             
     @pytest.mark.asyncio
@@ -87,7 +89,7 @@ class RedisSessionTester:
         try:
             # Create multiple test sessions
             for i in range(5):
-                session_id = f"session_{uuid.uuid4().hex[:16]}"
+                session_id = f"session_{uuid.uuid4().hex[:16]]"
                 session_data = {
                     "user_id": f"user_{i}",
                     "created_at": datetime.now(timezone.utc).isoformat(),
@@ -101,7 +103,7 @@ class RedisSessionTester:
                 ) as response:
                     if response.status in [200, 201]:
                         self.test_sessions[session_id] = session_data
-                        print(f"[OK] Session created: {session_id}")
+                        print(f"[OK] Session created: {session_id]")
                         
                         # Verify in Redis
                         stored = await self.redis_client.get(f"session:{session_id}")
@@ -111,7 +113,7 @@ class RedisSessionTester:
             return len(self.test_sessions) >= 3
             
         except Exception as e:
-            print(f"[ERROR] Session creation failed: {e}")
+            print(f"[ERROR] Session creation failed: {e]")
             return False
             
     @pytest.mark.asyncio
@@ -132,17 +134,17 @@ class RedisSessionTester:
                         # Validate data integrity
                         if data.get("user_id") == expected_data["user_id"]:
                             retrieved_count += 1
-                            print(f"[OK] Session retrieved and validated: {session_id}")
+                            print(f"[OK] Session retrieved and validated: {session_id]")
                         else:
-                            print(f"[ERROR] Data mismatch for {session_id}")
+                            print(f"[ERROR] Data mismatch for {session_id]")
                             
             success_rate = retrieved_count / len(self.test_sessions) if self.test_sessions else 0
-            print(f"[INFO] Retrieved {retrieved_count}/{len(self.test_sessions)} sessions")
+            print(f"[INFO] Retrieved {retrieved_count]/{len(self.test_sessions)] sessions")
             
             return success_rate >= 0.8
             
         except Exception as e:
-            print(f"[ERROR] Session retrieval failed: {e}")
+            print(f"[ERROR] Session retrieval failed: {e]")
             return False
             
     @pytest.mark.asyncio
@@ -151,7 +153,7 @@ class RedisSessionTester:
         print("\n[EXPIRATION] Testing session expiration...")
         try:
             # Create session with short TTL
-            short_session_id = f"expire_{uuid.uuid4().hex[:8]}"
+            short_session_id = f"expire_{uuid.uuid4().hex[:8]]"
             
             async with self.session.post(
                 f"{BACKEND_URL}/api/sessions",
@@ -162,11 +164,11 @@ class RedisSessionTester:
                 }
             ) as response:
                 if response.status in [200, 201]:
-                    print(f"[OK] Short-lived session created: {short_session_id}")
+                    print(f"[OK] Short-lived session created: {short_session_id]")
                     
                     # Check TTL
                     ttl = await self.redis_client.ttl(f"session:{short_session_id}")
-                    print(f"[INFO] TTL: {ttl} seconds")
+                    print(f"[INFO] TTL: {ttl] seconds")
                     
                     # Wait for expiration
                     await asyncio.sleep(3)
@@ -185,7 +187,7 @@ class RedisSessionTester:
             return True
             
         except Exception as e:
-            print(f"[ERROR] Session expiration test failed: {e}")
+            print(f"[ERROR] Session expiration test failed: {e]")
             return False
             
     @pytest.mark.asyncio
@@ -214,7 +216,7 @@ class RedisSessionTester:
             results = await asyncio.gather(*tasks)
             successful = sum(1 for r in results if r)
             
-            print(f"[OK] Created {successful}/{concurrent_count} concurrent sessions")
+            print(f"[OK] Created {successful]/{concurrent_count] concurrent sessions")
             
             # Test concurrent reads
             read_tasks = []
@@ -232,12 +234,12 @@ class RedisSessionTester:
             read_results = await asyncio.gather(*read_tasks)
             read_successful = sum(1 for r in read_results if r)
             
-            print(f"[OK] Read {read_successful}/{concurrent_count} concurrent sessions")
+            print(f"[OK] Read {read_successful]/{concurrent_count] concurrent sessions")
             
             return successful >= concurrent_count * 0.9
             
         except Exception as e:
-            print(f"[ERROR] Concurrent session test failed: {e}")
+            print(f"[ERROR] Concurrent session test failed: {e]")
             return False
             
     @pytest.mark.asyncio
@@ -248,7 +250,7 @@ class RedisSessionTester:
             # This would require Redis cluster setup
             # For now, test session replication
             
-            migration_session_id = f"migrate_{uuid.uuid4().hex[:8]}"
+            migration_session_id = f"migrate_{uuid.uuid4().hex[:8]]"
             session_data = {"migrate_test": "data", "timestamp": datetime.now(timezone.utc).isoformat()}
             
             # Create session
@@ -257,7 +259,7 @@ class RedisSessionTester:
                 json={"session_id": migration_session_id, "data": session_data}
             ) as response:
                 if response.status in [200, 201]:
-                    print(f"[OK] Session created for migration: {migration_session_id}")
+                    print(f"[OK] Session created for migration: {migration_session_id]")
                     
                     # Simulate migration by forcing reconnection
                     async with self.session.post(
@@ -277,7 +279,7 @@ class RedisSessionTester:
             return True  # Migration might not be implemented
             
         except Exception as e:
-            print(f"[ERROR] Session migration test failed: {e}")
+            print(f"[ERROR] Session migration test failed: {e]")
             return False
             
     @pytest.mark.asyncio
@@ -285,8 +287,8 @@ class RedisSessionTester:
         """Test session data consistency."""
         print("\n[CONSISTENCY] Testing data consistency...")
         try:
-            consistency_session_id = f"consistency_{uuid.uuid4().hex[:8]}"
-            initial_data = {"counter": 0, "values": []}
+            consistency_session_id = f"consistency_{uuid.uuid4().hex[:8]]"
+            initial_data = {"counter": 0, "values": []]
             
             # Create session
             async with self.session.post(
@@ -294,7 +296,7 @@ class RedisSessionTester:
                 json={"session_id": consistency_session_id, "data": initial_data}
             ) as response:
                 if response.status in [200, 201]:
-                    print(f"[OK] Session created: {consistency_session_id}")
+                    print(f"[OK] Session created: {consistency_session_id]")
                     
                     # Perform concurrent updates
                     update_tasks = []
@@ -324,16 +326,16 @@ class RedisSessionTester:
                             actual_counter = final_data.get("counter", 0)
                             
                             if actual_counter == expected_counter:
-                                print(f"[OK] Data consistency maintained: counter={actual_counter}")
+                                print(f"[OK] Data consistency maintained: counter={actual_counter]")
                                 return True
                             else:
-                                print(f"[WARNING] Inconsistent counter: {actual_counter} != {expected_counter}")
+                                print(f"[WARNING] Inconsistent counter: {actual_counter] != {expected_counter]")
                                 return False
                                 
             return False
             
         except Exception as e:
-            print(f"[ERROR] Data consistency test failed: {e}")
+            print(f"[ERROR] Data consistency test failed: {e]")
             return False
             
     @pytest.mark.asyncio
@@ -342,14 +344,14 @@ class RedisSessionTester:
         print("\n[FAILOVER] Testing cluster failover...")
         try:
             # Create session before failover
-            failover_session_id = f"failover_{uuid.uuid4().hex[:8]}"
+            failover_session_id = f"failover_{uuid.uuid4().hex[:8]]"
             
             async with self.session.post(
                 f"{BACKEND_URL}/api/sessions",
                 json={"session_id": failover_session_id, "data": {"test": "failover"}}
             ) as response:
                 if response.status in [200, 201]:
-                    print(f"[OK] Session created: {failover_session_id}")
+                    print(f"[OK] Session created: {failover_session_id]")
                     
                     # Simulate failover
                     async with self.session.post(
@@ -375,7 +377,7 @@ class RedisSessionTester:
             return True  # Failover simulation might not be implemented
             
         except Exception as e:
-            print(f"[ERROR] Cluster failover test failed: {e}")
+            print(f"[ERROR] Cluster failover test failed: {e]")
             return False
             
     @pytest.mark.asyncio
@@ -383,7 +385,7 @@ class RedisSessionTester:
         """Test session locking for atomic operations."""
         print("\n[LOCKING] Testing session locking...")
         try:
-            lock_session_id = f"lock_{uuid.uuid4().hex[:8]}"
+            lock_session_id = f"lock_{uuid.uuid4().hex[:8]]"
             
             # Create session with critical section
             async with self.session.post(
@@ -391,7 +393,7 @@ class RedisSessionTester:
                 json={"session_id": lock_session_id, "data": {"balance": 100}}
             ) as response:
                 if response.status in [200, 201]:
-                    print(f"[OK] Session created: {lock_session_id}")
+                    print(f"[OK] Session created: {lock_session_id]")
                     
                     # Concurrent transactions with locking
                     async def transaction(amount):
@@ -408,7 +410,7 @@ class RedisSessionTester:
                     results = await asyncio.gather(*tx_tasks)
                     successful_tx = sum(1 for r in results if r)
                     
-                    print(f"[OK] {successful_tx}/10 transactions completed")
+                    print(f"[OK] {successful_tx]/10 transactions completed")
                     
                     # Verify final balance
                     async with self.session.get(
@@ -420,15 +422,15 @@ class RedisSessionTester:
                             expected_balance = 100 + (5 * 10) - (5 * 5)  # 125
                             
                             if final_balance == expected_balance:
-                                print(f"[OK] Locking maintained consistency: {final_balance}")
+                                print(f"[OK] Locking maintained consistency: {final_balance]")
                                 return True
                             else:
-                                print(f"[WARNING] Balance mismatch: {final_balance} != {expected_balance}")
+                                print(f"[WARNING] Balance mismatch: {final_balance] != {expected_balance]")
                                 
             return True
             
         except Exception as e:
-            print(f"[ERROR] Session locking test failed: {e}")
+            print(f"[ERROR] Session locking test failed: {e]")
             return False
             
     async def run_all_tests(self) -> Dict[str, bool]:

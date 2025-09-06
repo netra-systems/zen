@@ -3,10 +3,10 @@
 Agent Supervisor Initialization Test
 
 This test validates:
-1. Agent supervisor is properly initialized during app startup
+    1. Agent supervisor is properly initialized during app startup
 2. WebSocket can access agent supervisor from app state
 3. Agent supervisor error is resolved
-"""
+""""
 
 import asyncio
 import json
@@ -70,9 +70,9 @@ class TestAgentSupervisorInitialization(L3IntegrationTest):
                     # Check for agent supervisor error
                     if (response_data.get("type") == "error" and 
                         "agent_supervisor" in response_data.get("error", "")):
-                        print("❌ Agent supervisor error detected!")
-                        print(f"Error: {response_data['error']}")
-                        pytest.fail(f"Agent supervisor initialization failed: {response_data['error']}")
+                            print("❌ Agent supervisor error detected!")
+                        print(f"Error: {response_data['error']]")
+                        pytest.fail(f"Agent supervisor initialization failed: {response_data['error']]")
                     
                     print("✅ No agent supervisor error - system appears healthy")
                     
@@ -114,12 +114,12 @@ class TestAgentSupervisorInitialization(L3IntegrationTest):
                 ]
                 
                 for i, message in enumerate(test_messages):
-                    message["id"] = f"test_{i}"
+                    message["id"] = f"test_{i]"
                     message["timestamp"] = datetime.now(timezone.utc).isoformat()
                     
                     try:
                         await websocket.send(json.dumps(message))
-                        print(f"📤 Sent test message {i}: {message['type']}")
+                        print(f"📤 Sent test message {i]: {message['type']]")
                         
                         # Wait for response
                         response = await asyncio.wait_for(websocket.recv(), timeout=3.0)
@@ -127,10 +127,10 @@ class TestAgentSupervisorInitialization(L3IntegrationTest):
                         
                         if (response_data.get("type") == "error" and 
                             "agent_supervisor" in response_data.get("error", "")):
-                            agent_supervisor_error_found = True
+                                agent_supervisor_error_found = True
                             error_details = response_data
-                            print(f"🎯 Found agent_supervisor error with message type '{message['type']}'")
-                            print(f"Error: {response_data['error']}")
+                            print(f"🎯 Found agent_supervisor error with message type '{message['type']]'")
+                            print(f"Error: {response_data['error']]")
                             break
                             
                     except asyncio.TimeoutError:

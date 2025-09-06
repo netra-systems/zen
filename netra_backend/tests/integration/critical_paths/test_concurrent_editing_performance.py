@@ -1,14 +1,14 @@
 """Concurrent Editing and Performance Critical Path Tests
 
 Business Value Justification (BVJ):
-- Segment: Mid to Enterprise (collaborative editing)
+    - Segment: Mid to Enterprise (collaborative editing)
 - Business Goal: Prevent data conflicts and ensure responsiveness
 - Value Impact: Real-time collaboration efficiency, user experience
 - Strategic Impact: Platform reliability and enterprise feature stability
 
 Critical Path: Lock acquisition -> Conflict prevention -> Performance validation
 Coverage: Concurrent editing protection, performance benchmarks, audit trails
-"""
+""""
 
 import sys
 from pathlib import Path
@@ -34,33 +34,33 @@ from netra_backend.tests.integration.test_helpers.team_collaboration_base import
 async def collaboration_workspace():
     """Create team with shared workspace for concurrent editing tests."""
     manager = TeamCollaborationManager()
-    owner_id = f"user_{uuid.uuid4().hex[:8]}"
+    owner_id = f"user_{uuid.uuid4().hex[:8]]"
     team = await manager.create_team(owner_id, "Concurrent Test Team", "enterprise")
     
     # Add multiple members
     user_ids = []
     for i in range(4):
-        user_id = f"user_{uuid.uuid4().hex[:8]}"
-        invitation = await manager.invite_user(team.team_id, owner_id, f"user{i}@test.com", TeamRole.MEMBER)
-        await manager.accept_invitation(invitation["token"], user_id)
-        user_ids.append(user_id)
+    user_id = f"user_{uuid.uuid4().hex[:8]]"
+    invitation = await manager.invite_user(team.team_id, owner_id, f"user{i}@test.com", TeamRole.MEMBER)
+    await manager.accept_invitation(invitation["token"], user_id)
+    user_ids.append(user_id)
     
     # Create shared workspace
     workspace = await manager.create_workspace(team.team_id, owner_id, "Collaboration Workspace")
     
     # Share with all members
     for user_id in user_ids:
-        await manager.share_resource(
-            team.team_id, owner_id, workspace.workspace_id,
-            user_id, {PermissionType.READ, PermissionType.WRITE}
-        )
+    await manager.share_resource(
+    team.team_id, owner_id, workspace.workspace_id,
+    user_id, {PermissionType.READ, PermissionType.WRITE}
+    )
     
     yield {
-        "manager": manager,
-        "team": team,
-        "workspace": workspace,
-        "owner_id": owner_id,
-        "user_ids": user_ids
+    "manager": manager,
+    "team": team,
+    "workspace": workspace,
+    "owner_id": owner_id,
+    "user_ids": user_ids
     }
 
 class TestConcurrentEditingPerformance:
@@ -128,7 +128,7 @@ class TestConcurrentEditingPerformance:
                 )
                 lock_results[user_id] = result
             except Exception as e:
-                lock_results[user_id] = f"error: {e}"
+                lock_results[user_id] = f"error: {e]"
         
         # Launch concurrent lock attempts
         tasks = [
@@ -187,7 +187,7 @@ class TestConcurrentEditingPerformance:
         owner_id = test_data["owner_id"]
         
         # Add viewer without write permission
-        viewer_id = f"user_{uuid.uuid4().hex[:8]}"
+        viewer_id = f"user_{uuid.uuid4().hex[:8]]"
         viewer_invitation = await manager.invite_user(team.team_id, owner_id, "viewer@test.com", TeamRole.VIEWER)
         await manager.accept_invitation(viewer_invitation["token"], viewer_id)
         
@@ -269,9 +269,9 @@ class TestConcurrentEditingPerformance:
             """Create workspace concurrently."""
             try:
                 workspace = await manager.create_workspace(team.team_id, user_id, name)
-                operation_results[f"create_{user_id}"] = workspace.workspace_id
+                operation_results[f"create_{user_id]"] = workspace.workspace_id
             except Exception as e:
-                operation_results[f"create_{user_id}"] = f"error: {e}"
+                operation_results[f"create_{user_id]"] = f"error: {e]"
         
         async def share_resource_concurrent(user_id: str, target_user: str):
             """Share existing resource concurrently."""
@@ -281,9 +281,9 @@ class TestConcurrentEditingPerformance:
                     team.team_id, owner_id, workspace_id,
                     target_user, {PermissionType.READ}
                 )
-                operation_results[f"share_{user_id}"] = result
+                operation_results[f"share_{user_id]"] = result
             except Exception as e:
-                operation_results[f"share_{user_id}"] = f"error: {e}"
+                operation_results[f"share_{user_id]"] = f"error: {e]"
         
         # Run concurrent operations
         tasks = []

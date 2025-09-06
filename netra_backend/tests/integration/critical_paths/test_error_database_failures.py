@@ -1,7 +1,7 @@
 """
 L3 Integration Test: Database Error Handling
 Tests error handling for database failures
-"""
+""""
 
 import sys
 from pathlib import Path
@@ -79,7 +79,7 @@ class TestErrorDatabaseFailuresL3:
             deadlock_count += 1
             if deadlock_count < 3:
                 raise psycopg2.extensions.TransactionRollbackError("deadlock detected")
-            return [{"id": 1}]
+            return [{"id": 1]]
         
         with patch.object(db_service, '_execute', side_effect=simulate_deadlock):
             result = await db_service.execute_with_retry("UPDATE users SET status='active'")

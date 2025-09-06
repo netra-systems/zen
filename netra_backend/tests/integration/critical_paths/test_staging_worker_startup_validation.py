@@ -1,7 +1,9 @@
+from unittest.mock import Mock, patch, MagicMock
+
 """L3 Integration Test: Staging Worker Startup Validation
 
 Business Value Justification (BVJ):
-- Segment: Platform/Internal
+    - Segment: Platform/Internal
 - Business Goal: Platform Stability in Staging
 - Value Impact: Prevents staging worker crashes that block feature validation
 - Revenue Impact: $150K MRR - Staging failures delay releases affecting all customers
@@ -10,13 +12,13 @@ This test validates staging worker startup configuration, dependency initializat
 and error handling to catch issues like worker exits with code 3.
 
 L3 Realism Level: Real staging configuration, containerized services, production-like errors
-"""
+""""
 
 import sys
 from pathlib import Path
 from test_framework.docker.unified_docker_manager import UnifiedDockerManager
 from test_framework.database.test_database_manager import TestDatabaseManager
-from test_framework.redis.test_redis_manager import TestRedisManager
+from test_framework.redis_test_utils_test_utils.test_redis_manager import TestRedisManager
 from auth_service.core.auth_manager import AuthManager
 from shared.isolated_environment import IsolatedEnvironment
 
@@ -66,7 +68,7 @@ class StagingWorkerValidator:
     """Validates staging worker startup and configuration."""
     
     def __init__(self):
-        self.metrics: Dict[int, WorkerStartupMetrics] = {}
+        self.metrics: Dict[int, WorkerStartupMetrics] = {]
         self.critical_configs = [
             "DATABASE_URL",
             "REDIS_URL", 
@@ -289,7 +291,7 @@ class StagingWorkerValidator:
             
         # Return top errors
         sorted_errors = sorted(error_counts.items(), key=lambda x: x[1], reverse=True)
-        return [f"{error} ({count} occurrences)" for error, count in sorted_errors[:5]]
+        return [f"{error] ({count] occurrences)" for error, count in sorted_errors[:5]]
 
 @pytest.mark.l3
 @pytest.mark.staging
@@ -339,7 +341,7 @@ class TestStagingWorkerStartup:
              patch.object(validator, '_check_postgres_connection', return_value=False), \
              patch.object(validator, '_check_auth_service', return_value=False):
             
-            metrics = await validator.validate_worker_config(worker_id=3)
+                 metrics = await validator.validate_worker_config(worker_id=3)
             
             assert metrics.failed or len(metrics.dependency_failures) > 0
             assert "Redis connection failed" in metrics.dependency_failures

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Comprehensive test to verify API rate limiting enforcement:
-1. Test per-user rate limits
+    1. Test per-user rate limits
 2. Test per-IP rate limits
 3. Test per-endpoint rate limits
 4. Test burst handling
@@ -11,7 +11,7 @@ Comprehensive test to verify API rate limiting enforcement:
 8. Test rate limit bypass for premium users
 
 This test ensures rate limiting protects the API from abuse.
-"""
+""""
 
 # Test framework import - using pytest fixtures instead
 
@@ -66,10 +66,10 @@ class RateLimitTester:
     """Test API rate limiting enforcement."""
     
     def __init__(self):
-        self.sessions: Dict[str, aiohttp.ClientSession] = {}
-        self.user_tokens: Dict[str, str] = {}
+        self.sessions: Dict[str, aiohttp.ClientSession] = {]
+        self.user_tokens: Dict[str, str] = {]
         self.request_log: List[Dict] = []
-        self.rate_limit_hits: Dict[str, int] = {}
+        self.rate_limit_hits: Dict[str, int] = {]
         
     async def __aenter__(self):
         """Setup test environment."""
@@ -93,7 +93,7 @@ class RateLimitTester:
                 register_data = {
                     "email": user["email"],
                     "password": user["password"],
-                    "name": f"{user['tier'].capitalize()} User",
+                    "name": f"{user['tier'].capitalize()] User",
                     "tier": user["tier"]
                 }
                 
@@ -102,7 +102,7 @@ class RateLimitTester:
                     json=register_data
                 ) as response:
                     if response.status not in [200, 201, 409]:
-                        print(f"[ERROR] Registration failed for {user['email']}: {response.status}")
+                        print(f"[ERROR] Registration failed for {user['email']]: {response.status]")
                         return False
                         
                 # Login
@@ -118,16 +118,16 @@ class RateLimitTester:
                     if response.status == 200:
                         data = await response.json()
                         self.user_tokens[user["email"]] = data.get("access_token")
-                        print(f"[OK] Setup {user['tier']} user: {user['email']}")
+                        print(f"[OK] Setup {user['tier']] user: {user['email']]")
                     else:
-                        print(f"[ERROR] Login failed for {user['email']}: {response.status}")
+                        print(f"[ERROR] Login failed for {user['email']]: {response.status]")
                         return False
                         
-            print(f"[OK] All {len(TEST_USERS)} test users setup")
+            print(f"[OK] All {len(TEST_USERS)] test users setup")
             return True
             
         except Exception as e:
-            print(f"[ERROR] User setup error: {e}")
+            print(f"[ERROR] User setup error: {e]")
             return False
             
     @pytest.mark.asyncio
@@ -160,7 +160,7 @@ class RateLimitTester:
                             reset = response.headers.get("X-RateLimit-Reset", "")
                             
                             if i == user["rate_limit"]:  # First rate limit hit
-                                print(f"[OK] Rate limit hit at request {i+1}")
+                                print(f"[OK] Rate limit hit at request {i+1]")
                                 print(f"  - Limit: {limit}")
                                 print(f"  - Remaining: {remaining}")
                                 print(f"  - Reset: {reset}")
@@ -174,14 +174,14 @@ class RateLimitTester:
                     })
                     
             if rate_limited_count > 0:
-                print(f"[OK] Rate limiting enforced: {success_count} allowed, {rate_limited_count} blocked")
+                print(f"[OK] Rate limiting enforced: {success_count] allowed, {rate_limited_count] blocked")
                 return True
             else:
-                print(f"[ERROR] No rate limiting detected after {success_count} requests")
+                print(f"[ERROR] No rate limiting detected after {success_count] requests")
                 return False
                 
         except Exception as e:
-            print(f"[ERROR] Basic rate limit test failed: {e}")
+            print(f"[ERROR] Basic rate limit test failed: {e]")
             return False
             
     @pytest.mark.asyncio
@@ -217,19 +217,19 @@ class RateLimitTester:
             success_count = sum(1 for _, status in results if status == 200)
             rate_limited_count = sum(1 for _, status in results if status == 429)
             
-            print(f"[INFO] Burst test: {burst_size} requests in {duration:.2f}s")
+            print(f"[INFO] Burst test: {burst_size] requests in {duration:.2f]s")
             print(f"  - Successful: {success_count}")
             print(f"  - Rate limited: {rate_limited_count}")
             
             if rate_limited_count > 0:
-                print(f"[OK] Burst protection active: {rate_limited_count}/{burst_size} blocked")
+                print(f"[OK] Burst protection active: {rate_limited_count]/{burst_size] blocked")
                 return True
             else:
                 print(f"[WARNING] No burst protection detected")
                 return False
                 
         except Exception as e:
-            print(f"[ERROR] Burst handling test failed: {e}")
+            print(f"[ERROR] Burst handling test failed: {e]")
             return False
             
     @pytest.mark.asyncio
@@ -284,14 +284,14 @@ class RateLimitTester:
                 print(f"[OK] Per-endpoint rate limits detected:")
                 for endpoint, result in results.items():
                     endpoint_name = endpoint.split("/")[-1]
-                    print(f"  - {endpoint_name}: {result['success']} requests before limit")
+                    print(f"  - {endpoint_name]: {result['success']] requests before limit")
                 return True
             else:
                 print(f"[ERROR] No per-endpoint differentiation detected")
                 return False
                 
         except Exception as e:
-            print(f"[ERROR] Per-endpoint limits test failed: {e}")
+            print(f"[ERROR] Per-endpoint limits test failed: {e]")
             return False
             
     @pytest.mark.asyncio
@@ -338,14 +338,14 @@ class RateLimitTester:
             if free_limit < premium_limit < enterprise_limit:
                 print(f"[OK] Tier-based limits enforced:")
                 for tier, result in tier_results.items():
-                    print(f"  - {tier}: {result['actual_requests']} requests")
+                    print(f"  - {tier]: {result['actual_requests']] requests")
                 return True
             else:
                 print(f"[ERROR] Tier limits not properly differentiated")
                 return False
                 
         except Exception as e:
-            print(f"[ERROR] Tier-based limits test failed: {e}")
+            print(f"[ERROR] Tier-based limits test failed: {e]")
             return False
             
     @pytest.mark.asyncio
@@ -369,11 +369,11 @@ class RateLimitTester:
                         # Check for Retry-After header
                         retry_after = response.headers.get("Retry-After")
                         if retry_after:
-                            print(f"[OK] Retry-After header present: {retry_after} seconds")
+                            print(f"[OK] Retry-After header present: {retry_after] seconds")
                             
                             # Wait and retry
                             wait_time = int(retry_after) + 1
-                            print(f"[INFO] Waiting {wait_time} seconds before retry...")
+                            print(f"[INFO] Waiting {wait_time] seconds before retry...")
                             await asyncio.sleep(wait_time)
                             
                             # Try again
@@ -389,7 +389,7 @@ class RateLimitTester:
             return False
             
         except Exception as e:
-            print(f"[ERROR] Retry-After test failed: {e}")
+            print(f"[ERROR] Retry-After test failed: {e]")
             return False
             
     @pytest.mark.asyncio
@@ -435,7 +435,7 @@ class RateLimitTester:
             total_success = sum(r["success"] for r in results)
             total_limited = sum(r["limited"] for r in results)
             
-            print(f"[INFO] Distributed test across {len(sessions)} sessions:")
+            print(f"[INFO] Distributed test across {len(sessions)] sessions:")
             print(f"  - Total successful: {total_success}")
             print(f"  - Total rate limited: {total_limited}")
             
@@ -447,7 +447,7 @@ class RateLimitTester:
                 return False
                 
         except Exception as e:
-            print(f"[ERROR] Distributed rate limiting test failed: {e}")
+            print(f"[ERROR] Distributed rate limiting test failed: {e]")
             return False
             
     @pytest.mark.asyncio
@@ -469,7 +469,7 @@ class RateLimitTester:
                     if response.status == 200:
                         phase1_success += 1
                     elif response.status == 429:
-                        print(f"[OK] Rate limit hit after {phase1_success} requests")
+                        print(f"[OK] Rate limit hit after {phase1_success] requests")
                         
                         # Get reset time
                         reset_header = response.headers.get("X-RateLimit-Reset")
@@ -477,7 +477,7 @@ class RateLimitTester:
                             reset_time = int(reset_header)
                             current_time = int(time.time())
                             wait_time = max(reset_time - current_time + 1, 1)
-                            print(f"[INFO] Waiting {wait_time}s for reset...")
+                            print(f"[INFO] Waiting {wait_time]s for reset...")
                         else:
                             wait_time = 61  # Default to 1 minute
                             
@@ -497,14 +497,14 @@ class RateLimitTester:
                         return False
                         
             if phase2_success > 0:
-                print(f"[OK] Rate limit reset successful: {phase2_success} new requests allowed")
+                print(f"[OK] Rate limit reset successful: {phase2_success] new requests allowed")
                 return True
             else:
                 print(f"[ERROR] Failed to make requests after reset")
                 return False
                 
         except Exception as e:
-            print(f"[ERROR] Rate limit reset test failed: {e}")
+            print(f"[ERROR] Rate limit reset test failed: {e]")
             return False
             
     @pytest.mark.asyncio
@@ -528,21 +528,21 @@ class RateLimitTester:
                             success_count += 1
                         elif response.status == 429:
                             rate_limited = True
-                            print(f"[OK] IP rate limit hit after {success_count} requests")
+                            print(f"[OK] IP rate limit hit after {success_count] requests")
                             break
                             
                 if rate_limited:
                     print(f"[OK] IP-based rate limiting active for unauthenticated requests")
                     return True
                 else:
-                    print(f"[WARNING] No IP-based rate limiting detected after {success_count} requests")
+                    print(f"[WARNING] No IP-based rate limiting detected after {success_count] requests")
                     return success_count > 30  # Some limit should be in place
                     
             finally:
                 await session.close()
                 
         except Exception as e:
-            print(f"[ERROR] IP-based limiting test failed: {e}")
+            print(f"[ERROR] IP-based limiting test failed: {e]")
             return False
             
     @pytest.mark.asyncio
@@ -591,7 +591,7 @@ class RateLimitTester:
             return True
             
         except Exception as e:
-            print(f"[WARNING] Metrics collection failed: {e}")
+            print(f"[WARNING] Metrics collection failed: {e]")
             return True  # Non-critical test
             
     async def run_all_tests(self) -> Dict[str, bool]:
@@ -659,7 +659,7 @@ async def test_api_rate_limiting_enforcement():
         if passed_tests == total_tests:
             print("\n[SUCCESS] All rate limiting tests passed!")
         else:
-            print(f"\n[WARNING] {total_tests - passed_tests} tests failed.")
+            print(f"\n[WARNING] {total_tests - passed_tests] tests failed.")
             
         # Assert all tests passed
         assert all(results.values()), f"Some tests failed: {results}"

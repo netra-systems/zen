@@ -3,7 +3,7 @@
 L3 Integration Test: Error Handling and Recovery
 Tests comprehensive error handling, recovery mechanisms, and resilience patterns
 across different system components.
-"""
+""""
 
 import sys
 from pathlib import Path
@@ -202,14 +202,14 @@ class TestErrorHandlingRecovery(L3IntegrationTest):
             # Thread A needs resource 1 then 2
             tasks.append(session.post(
                 f"{self.backend_url}/api/resources/lock",
-                json={"resources": ["resource1", "resource2"], "order": "sequential"},
+                json={"resources": ["resource1", "resource2"], "order": "sequential"],
                 headers={"Authorization": f"Bearer {token}"}
             ))
             
             # Thread B needs resource 2 then 1
             tasks.append(session.post(
                 f"{self.backend_url}/api/resources/lock",
-                json={"resources": ["resource2", "resource1"], "order": "sequential"},
+                json={"resources": ["resource2", "resource1"], "order": "sequential"],
                 headers={"Authorization": f"Bearer {token}"}
             ))
             

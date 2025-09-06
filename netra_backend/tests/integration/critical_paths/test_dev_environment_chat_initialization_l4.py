@@ -3,7 +3,7 @@
 L4 Integration Test: Dev Environment Chat Thread Initialization
 
 Tests comprehensive chat thread creation and initialization flow:
-1. Thread creation with proper metadata
+    1. Thread creation with proper metadata
 2. Context loading and agent assignment
 3. Thread state persistence
 4. Thread validation and constraints
@@ -13,11 +13,11 @@ Tests comprehensive chat thread creation and initialization flow:
 8. Error handling and recovery
 
 BVJ:
-- Segment: Free, Early, Mid, Enterprise
+    - Segment: Free, Early, Mid, Enterprise
 - Business Goal: Conversion, Retention
 - Value Impact: Core chat functionality enabling AI agent interactions
 - Strategic Impact: Foundation for all user-agent conversations and value delivery
-"""
+""""
 
 # Test framework import - using pytest fixtures instead
 
@@ -100,8 +100,8 @@ class ChatInitializationTester:
     
     def __init__(self):
         self.session: Optional[aiohttp.ClientSession] = None
-        self.user_tokens: Dict[str, str] = {}
-        self.websocket_connections: Dict[str, Any] = {}
+        self.user_tokens: Dict[str, str] = {]
+        self.websocket_connections: Dict[str, Any] = {]
         self.created_threads: List[Dict[str, Any]] = []
         self.test_logs: List[str] = []
         self.performance_metrics: Dict[str, List[float]] = {
@@ -131,7 +131,7 @@ class ChatInitializationTester:
     def log_event(self, user: str, event: str, details: str = ""):
         """Log test events for analysis."""
         timestamp = datetime.now().isoformat()
-        log_entry = f"[{timestamp}] [{user}] {event}"
+        log_entry = f"[{timestamp]] [{user]] {event]"
         if details:
             log_entry += f" - {details}"
         self.test_logs.append(log_entry)
@@ -194,7 +194,7 @@ class ChatInitializationTester:
         self.log_event(email, "WS_CONNECT_START", "Establishing WebSocket connection")
         
         try:
-            headers = {"Authorization": f"Bearer {self.user_tokens[email]}"}
+            headers = {"Authorization": f"Bearer {self.user_tokens[email]]"]
             
             ws = await websockets.connect(
                 WEBSOCKET_URL,
@@ -246,7 +246,7 @@ class ChatInitializationTester:
             
         start_time = time.time()
         
-        self.log_event(email, "THREAD_CREATE_START", f"Creating: {thread_case['title']}")
+        self.log_event(email, "THREAD_CREATE_START", f"Creating: {thread_case['title']]")
         
         try:
             # Create thread
@@ -287,7 +287,7 @@ class ChatInitializationTester:
                 thread_data = data.get("thread", {})
                 if (thread_data.get("title") == thread_case["title"] and
                     thread_data.get("description") == thread_case["description"]):
-                    result["metadata_valid"] = True
+                        result["metadata_valid"] = True
                 
                 # Check agent assignment
                 if thread_data.get("assigned_agent"):
@@ -305,7 +305,7 @@ class ChatInitializationTester:
                 })
                 
                 self.log_event(email, "THREAD_CREATE_SUCCESS", 
-                             f"ID: {result['thread_id']}, Time: {creation_time:.2f}s")
+                             f"ID: {result['thread_id']], Time: {creation_time:.2f]s")
                 
             elif data.get("type") == "error":
                 self.log_event(email, "THREAD_CREATE_ERROR", data.get("message", "Unknown error"))
@@ -365,7 +365,7 @@ class ChatInitializationTester:
                 result["context_types"] = context_data.get("types", [])
                 
                 self.log_event(email, "CONTEXT_LOAD_SUCCESS", 
-                             f"Size: {result['context_size']}, Time: {loading_time:.2f}s")
+                             f"Size: {result['context_size']], Time: {loading_time:.2f]s")
                 
             elif data.get("type") == "context_loading":
                 result["context_loading_started"] = True
@@ -445,7 +445,7 @@ class ChatInitializationTester:
                 result["agent_capabilities"] = agent_data.get("capabilities", [])
                 
                 self.log_event(email, "AGENT_ASSIGN_SUCCESS", 
-                             f"Type: {result['agent_type']}, ID: {result['agent_id']}, Time: {assignment_time:.2f}s")
+                             f"Type: {result['agent_type']], ID: {result['agent_id']], Time: {assignment_time:.2f]s")
                 
             elif data.get("type") == "agent_assignment_failed":
                 self.log_event(email, "AGENT_ASSIGN_FAILED", data.get("reason", "Unknown reason"))
@@ -514,7 +514,7 @@ class ChatInitializationTester:
                 # Compare states
                 if (initial_state.get("thread", {}).get("id") == 
                     recovered_state.get("thread", {}).get("id")):
-                    result["state_consistency"] = True
+                        result["state_consistency"] = True
                     result["state_persisted"] = True
                     
                 self.log_event(email, "STATE_PERSIST_SUCCESS", "Thread state recovered")
@@ -672,7 +672,7 @@ class ChatInitializationTester:
                 
                 # Test basic thread creation
                 creation_result = await self.test_basic_thread_creation(email, thread_case)
-                user_results[f"{case_name}_creation"] = creation_result
+                user_results[f"{case_name]_creation"] = creation_result
                 
                 thread_id = creation_result.get("thread_id")
                 if thread_id:
@@ -680,13 +680,13 @@ class ChatInitializationTester:
                     context_result = await self.test_context_loading(
                         email, thread_id, thread_case.get("context_requirements", [])
                     )
-                    user_results[f"{case_name}_context"] = context_result
+                    user_results[f"{case_name]_context"] = context_result
                     
                     # Test agent assignment
                     agent_result = await self.test_agent_assignment(
                         email, thread_id, thread_case.get("expected_agent_type", "general")
                     )
-                    user_results[f"{case_name}_agent"] = agent_result
+                    user_results[f"{case_name]_agent"] = agent_result
                     
                     # Test state persistence (only for first thread)
                     if case_name == "simple_query_thread":
@@ -808,24 +808,24 @@ async def test_dev_environment_chat_initialization():
         print("\n" + "="*60)
         print("PERFORMANCE METRICS")
         print("="*60)
-        print(f"Avg Thread Creation: {perf['avg_thread_creation_time']:.2f}s")
-        print(f"Avg Context Loading: {perf['avg_context_loading_time']:.2f}s")
-        print(f"Avg Agent Assignment: {perf['avg_agent_assignment_time']:.2f}s")
-        print(f"Total Threads Created: {perf['total_threads_created']}")
+        print(f"Avg Thread Creation: {perf['avg_thread_creation_time']:.2f]s")
+        print(f"Avg Context Loading: {perf['avg_context_loading_time']:.2f]s")
+        print(f"Avg Agent Assignment: {perf['avg_agent_assignment_time']:.2f]s")
+        print(f"Total Threads Created: {perf['total_threads_created']]")
         
         # Summary
         summary = results["summary"]
         print("\n" + "="*60)
         print("SUMMARY")
         print("="*60)
-        print(f"Total Tests: {summary['total_tests']}")
-        print(f"Passed Tests: {summary['passed_tests']}")
-        print(f"Success Rate: {summary['success_rate']:.1f}%")
-        print(f"Threads Created: {summary['total_threads_created']}")
-        print(f"Active Connections: {summary['active_connections']}")
+        print(f"Total Tests: {summary['total_tests']]")
+        print(f"Passed Tests: {summary['passed_tests']]")
+        print(f"Success Rate: {summary['success_rate']:.1f]%")
+        print(f"Threads Created: {summary['total_threads_created']]")
+        print(f"Active Connections: {summary['active_connections']]")
         
         # Assert critical conditions
-        assert summary["success_rate"] >= 70, f"Success rate too low: {summary['success_rate']:.1f}%"
+        assert summary["success_rate"] >= 70, f"Success rate too low: {summary['success_rate']:.1f]%"
         assert summary["total_threads_created"] >= 5, "Not enough threads created"
         assert perf["avg_thread_creation_time"] < 10, "Thread creation too slow"
         

@@ -1,7 +1,9 @@
+from unittest.mock import Mock, patch, MagicMock
+
 """
 L3 Integration Test: Authentication Session Persistence
 Tests session persistence across service restarts and Redis operations
-"""
+""""
 
 import asyncio
 import json
@@ -9,7 +11,7 @@ import time
 import uuid
 from typing import Any, Dict, Optional
 from test_framework.database.test_database_manager import TestDatabaseManager
-from test_framework.redis.test_redis_manager import TestRedisManager
+from test_framework.redis_test_utils_test_utils.test_redis_manager import TestRedisManager
 from auth_service.core.auth_manager import AuthManager
 from shared.isolated_environment import IsolatedEnvironment
 
@@ -58,7 +60,7 @@ class MockAuthService:
             self.redis_data[session_key] = json.dumps(session_data)
             
             # Set TTL simulation
-            self.redis_data[f"{session_key}:ttl"] = self.session_timeout
+            self.redis_data[f"{session_key]:ttl"] = self.session_timeout
             
             self.sessions[session_id] = session_data
             
@@ -113,7 +115,7 @@ class MockAuthService:
         if session_key in self.redis_data:
             del self.redis_data[session_key]
             if f"{session_key}:ttl" in self.redis_data:
-                del self.redis_data[f"{session_key}:ttl"]
+                del self.redis_data[f"{session_key]:ttl"]
         
         # Remove from sessions
         if session_id in self.sessions:

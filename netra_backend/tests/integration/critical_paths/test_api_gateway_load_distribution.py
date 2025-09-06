@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Comprehensive test for API gateway load distribution:
-1. Gateway initialization and health checks
+    1. Gateway initialization and health checks
 2. Backend service registration
 3. Load balancing algorithms
 4. Circuit breaker functionality
@@ -9,7 +9,7 @@ Comprehensive test for API gateway load distribution:
 6. Request routing and forwarding
 7. Response caching
 8. Failover handling
-"""
+""""
 
 # Test framework import - using pytest fixtures instead
 
@@ -43,7 +43,7 @@ class APIGatewayTester:
     
     def __init__(self):
         self.session: Optional[aiohttp.ClientSession] = None
-        self.request_distribution: Dict[str, int] = {}
+        self.request_distribution: Dict[str, int] = {]
         self.response_times: List[float] = []
         
     async def __aenter__(self):
@@ -63,13 +63,13 @@ class APIGatewayTester:
             async with self.session.get(f"{GATEWAY_URL}/health") as response:
                 if response.status == 200:
                     data = await response.json()
-                    print(f"[OK] Gateway healthy: {data.get('status')}")
-                    print(f"[INFO] Uptime: {data.get('uptime_seconds')}s")
-                    print(f"[INFO] Active backends: {data.get('active_backends')}")
+                    print(f"[OK] Gateway healthy: {data.get('status')]")
+                    print(f"[INFO] Uptime: {data.get('uptime_seconds')]s")
+                    print(f"[INFO] Active backends: {data.get('active_backends')]")
                     return True
                 return False
         except Exception as e:
-            print(f"[ERROR] Gateway health check failed: {e}")
+            print(f"[ERROR] Gateway health check failed: {e]")
             return False
             
     @pytest.mark.asyncio
@@ -81,13 +81,13 @@ class APIGatewayTester:
             async with self.session.get(f"{GATEWAY_URL}/api/backends") as response:
                 if response.status == 200:
                     backends = await response.json()
-                    print(f"[OK] {len(backends)} backends registered")
+                    print(f"[OK] {len(backends)] backends registered")
                     for backend in backends:
-                        print(f"[INFO] Backend: {backend.get('url')} - {backend.get('status')}")
+                        print(f"[INFO] Backend: {backend.get('url')] - {backend.get('status')]")
                     return len(backends) > 0
                 return False
         except Exception as e:
-            print(f"[ERROR] Backend registration test failed: {e}")
+            print(f"[ERROR] Backend registration test failed: {e]")
             return False
             
     @pytest.mark.asyncio
@@ -117,7 +117,7 @@ class APIGatewayTester:
             results = await asyncio.gather(*tasks)
             successful = sum(1 for r in results if r)
             
-            print(f"[OK] {successful}/{num_requests} requests successful")
+            print(f"[OK] {successful]/{num_requests] requests successful")
             print("[INFO] Distribution:")
             for backend, count in self.request_distribution.items():
                 percentage = (count / num_requests) * 100
@@ -131,7 +131,7 @@ class APIGatewayTester:
             return successful > num_requests * 0.9
             
         except Exception as e:
-            print(f"[ERROR] Load balancing test failed: {e}")
+            print(f"[ERROR] Load balancing test failed: {e]")
             return False
             
     @pytest.mark.asyncio
@@ -158,18 +158,18 @@ class APIGatewayTester:
                     breakers = data.get("breakers", {})
                     
                     for backend, status in breakers.items():
-                        print(f"[INFO] {backend}: {status.get('state')} - Failures: {status.get('failure_count')}")
+                        print(f"[INFO] {backend]: {status.get('state')] - Failures: {status.get('failure_count')]")
                         
                     # Check if any circuit is open
                     open_circuits = [b for b, s in breakers.items() if s.get("state") == "open"]
                     if open_circuits:
-                        print(f"[OK] Circuit breaker activated for: {open_circuits}")
+                        print(f"[OK] Circuit breaker activated for: {open_circuits]")
                         return True
                         
             return True  # Circuit breaker monitoring works
             
         except Exception as e:
-            print(f"[ERROR] Circuit breaker test failed: {e}")
+            print(f"[ERROR] Circuit breaker test failed: {e]")
             return False
             
     @pytest.mark.asyncio
@@ -188,8 +188,8 @@ class APIGatewayTester:
                 ) as response:
                     if response.status == 429:
                         rate_limited = True
-                        print(f"[OK] Rate limited after {i+1} requests")
-                        print(f"[INFO] Retry-After: {response.headers.get('Retry-After')}s")
+                        print(f"[OK] Rate limited after {i+1] requests")
+                        print(f"[INFO] Retry-After: {response.headers.get('Retry-After')]s")
                         break
                         
             if not rate_limited:
@@ -198,7 +198,7 @@ class APIGatewayTester:
             return True
             
         except Exception as e:
-            print(f"[ERROR] Rate limiting test failed: {e}")
+            print(f"[ERROR] Rate limiting test failed: {e]")
             return False
             
     @pytest.mark.asyncio
@@ -220,15 +220,15 @@ class APIGatewayTester:
                     routed_to = response.headers.get("X-Routed-To", "unknown")
                     
                     if expected_service in routed_to.lower():
-                        print(f"[OK] {route} -> {routed_to}")
+                        print(f"[OK] {route] -> {routed_to]")
                     else:
-                        print(f"[WARNING] {route} -> {routed_to} (expected {expected_service})")
+                        print(f"[WARNING] {route] -> {routed_to] (expected {expected_service])")
                         routing_works = False
                         
             return routing_works
             
         except Exception as e:
-            print(f"[ERROR] Request routing test failed: {e}")
+            print(f"[ERROR] Request routing test failed: {e]")
             return False
             
     @pytest.mark.asyncio
@@ -237,7 +237,7 @@ class APIGatewayTester:
         print("\n[CACHING] Testing response caching...")
         
         try:
-            cache_key = f"test-{uuid.uuid4().hex[:8]}"
+            cache_key = f"test-{uuid.uuid4().hex[:8]]"
             
             # First request (cache miss)
             start_time = time.time()
@@ -247,7 +247,7 @@ class APIGatewayTester:
             ) as response:
                 first_time = time.time() - start_time
                 cache_status = response.headers.get("X-Cache", "MISS")
-                print(f"[INFO] First request: {cache_status} ({first_time*1000:.2f}ms)")
+                print(f"[INFO] First request: {cache_status] ({first_time*1000:.2f]ms)")
                 
             # Second request (should be cached)
             start_time = time.time()
@@ -257,16 +257,16 @@ class APIGatewayTester:
             ) as response:
                 second_time = time.time() - start_time
                 cache_status = response.headers.get("X-Cache", "MISS")
-                print(f"[INFO] Second request: {cache_status} ({second_time*1000:.2f}ms)")
+                print(f"[INFO] Second request: {cache_status] ({second_time*1000:.2f]ms)")
                 
                 if cache_status == "HIT":
-                    print(f"[OK] Cache hit, {(first_time/second_time):.1f}x faster")
+                    print(f"[OK] Cache hit, {(first_time/second_time):.1f]x faster")
                     return True
                     
             return True  # Caching might be disabled
             
         except Exception as e:
-            print(f"[ERROR] Response caching test failed: {e}")
+            print(f"[ERROR] Response caching test failed: {e]")
             return False
             
     @pytest.mark.asyncio
@@ -295,13 +295,13 @@ class APIGatewayTester:
                         failures += 1
                 await asyncio.sleep(0.5)
                 
-            print(f"[INFO] During failover: {successes} succeeded, {failures} failed")
+            print(f"[INFO] During failover: {successes] succeeded, {failures] failed")
             
             # Success if most requests succeeded (failover worked)
             return successes > failures
             
         except Exception as e:
-            print(f"[ERROR] Failover handling test failed: {e}")
+            print(f"[ERROR] Failover handling test failed: {e]")
             return False
             
     @pytest.mark.asyncio
@@ -335,7 +335,7 @@ class APIGatewayTester:
                         max_time = max(self.response_times)
                         min_time = min(self.response_times)
                         
-                        print(f"[INFO] Response times: avg={avg_time*1000:.2f}ms, "
+                        print(f"[INFO] Response times: avg={avg_time*1000:.2f]ms, "
                               f"min={min_time*1000:.2f}ms, max={max_time*1000:.2f}ms")
                         
                     return True
@@ -343,7 +343,7 @@ class APIGatewayTester:
             return False
             
         except Exception as e:
-            print(f"[ERROR] Performance metrics test failed: {e}")
+            print(f"[ERROR] Performance metrics test failed: {e]")
             return False
             
     async def run_all_tests(self) -> Dict[str, bool]:

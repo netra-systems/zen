@@ -1,3 +1,5 @@
+from unittest.mock import Mock, patch, MagicMock
+
 """Auth Token Refresh During High Load L3 Integration Tests
 
 Tests token refresh mechanism under high concurrent load conditions to ensure
@@ -5,13 +7,13 @@ the auth service can handle enterprise-scale token refresh operations without
 degradation or race conditions.
 
 Business Value Justification (BVJ):
-- Segment: Mid/Enterprise (High concurrent user sessions)
+    - Segment: Mid/Enterprise (High concurrent user sessions)
 - Business Goal: Support 10K+ concurrent users without auth failures
 - Value Impact: Prevents auth bottlenecks that could lose $100K+ MRR
 - Strategic Impact: Enterprise readiness and scalability confidence
 
 Critical Path:
-Multiple concurrent token refresh -> Rate limiting -> Queue management ->
+    Multiple concurrent token refresh -> Rate limiting -> Queue management ->
 Token validation -> Session update -> Response coordination
 
 Mock-Real Spectrum: L3 (Real auth service with simulated load)
@@ -19,12 +21,12 @@ Mock-Real Spectrum: L3 (Real auth service with simulated load)
 - Real Redis session store
 - Real rate limiting
 - Simulated concurrent users
-"""
+""""
 
 import sys
 from pathlib import Path
 from test_framework.database.test_database_manager import TestDatabaseManager
-from test_framework.redis.test_redis_manager import TestRedisManager
+from test_framework.redis_test_utils_test_utils.test_redis_manager import TestRedisManager
 from auth_service.core.auth_manager import AuthManager
 from shared.isolated_environment import IsolatedEnvironment
 
@@ -95,64 +97,64 @@ class TestAuthTokenRefreshHighLoad:
         """Mock auth client for high load testing"""
         # Mock: Component isolation for testing without external dependencies
         with patch('netra_backend.app.clients.auth_client_core.auth_client') as mock_client:
-            # Configure mock to simulate successful refresh responses
-            async def mock_refresh_token(refresh_token: str) -> Optional[Dict]:
-                if refresh_token.startswith("invalid_"):
-                    raise Exception("Invalid refresh token")
-                yield {
-                    "access_token": f"new_access_token_{time.time()}",
-                    "refresh_token": f"new_refresh_token_{time.time()}",
-                    "token_type": "bearer",
-                    "expires_in": 3600
-                }
+        # Configure mock to simulate successful refresh responses
+        async def mock_refresh_token(refresh_token: str) -> Optional[Dict]:
+        if refresh_token.startswith("invalid_"):
+        raise Exception("Invalid refresh token")
+        yield {
+        "access_token": f"new_access_token_{time.time()}",
+        "refresh_token": f"new_refresh_token_{time.time()}",
+        "token_type": "bearer",
+        "expires_in": 3600
+        }
             
-            mock_client.refresh_token = mock_refresh_token
-            yield mock_client
+        mock_client.refresh_token = mock_refresh_token
+        yield mock_client
     
-    @pytest.fixture
-    async def load_generator(self):
+        @pytest.fixture
+        async def load_generator(self):
         """Generate concurrent refresh requests"""
         settings = get_settings()
         
         async def generate_user_tokens(count: int) -> List[Dict[str, str]]:
-            """Generate initial tokens for test users"""
-            tokens = []
-            for i in range(count):
-                user_data = {
-                    "user_id": f"test_user_{i}",
-                    "email": f"user{i}@test.com",
-                    "exp": int(time.time()) + 300  # 5 min expiry
-                }
-                access_token = jwt.encode(
-                    user_data,
-                    settings.jwt_secret_key,
-                    algorithm="HS256"
-                )
-                refresh_token = jwt.encode(
-                    {"user_id": user_data["user_id"], "type": "refresh"},
-                    settings.jwt_secret_key,
-                    algorithm="HS256"
-                )
-                tokens.append({
-                    "access_token": access_token,
-                    "refresh_token": refresh_token,
-                    "user_id": user_data["user_id"]
-                })
-            yield tokens
+        """Generate initial tokens for test users"""
+        tokens = []
+        for i in range(count):
+        user_data = {
+        "user_id": f"test_user_{i}",
+        "email": f"user{i}@test.com",
+        "exp": int(time.time()) + 300  # 5 min expiry
+        }
+        access_token = jwt.encode(
+        user_data,
+        settings.jwt_secret_key,
+        algorithm="HS256"
+        )
+        refresh_token = jwt.encode(
+        {"user_id": user_data["user_id"], "type": "refresh"],
+        settings.jwt_secret_key,
+        algorithm="HS256"
+        )
+        tokens.append({
+        "access_token": access_token,
+        "refresh_token": refresh_token,
+        "user_id": user_data["user_id"]
+        })
+        yield tokens
         
         yield generate_user_tokens
     
-    @pytest.fixture
-    async def metrics_tracker(self):
+        @pytest.fixture
+        async def metrics_tracker(self):
         """Track load test metrics"""
         yield LoadTestMetrics()
     
-    @pytest.mark.asyncio
-    @pytest.mark.timeout(120)
-    @pytest.mark.asyncio
-    async def test_concurrent_token_refresh_1000_users(
+        @pytest.mark.asyncio
+        @pytest.mark.timeout(120)
+        @pytest.mark.asyncio
+        async def test_concurrent_token_refresh_1000_users(
         self, load_generator, metrics_tracker, auth_client_mock
-    ):
+        ):
         """Test 1000 concurrent token refresh operations"""
         # Generate initial tokens
         user_count = 1000
@@ -161,26 +163,26 @@ class TestAuthTokenRefreshHighLoad:
         
         # Create refresh tasks
         async def refresh_token(token_data: Dict[str, str]) -> Optional[Dict]:
-            """Single token refresh operation"""
-            start_time = time.time()
-            try:
-                response = await auth_client_mock.refresh_token(
-                    token_data["refresh_token"]
-                )
-                elapsed = time.time() - start_time
-                metrics_tracker.response_times.append(elapsed)
-                metrics_tracker.successful_refreshes += 1
-                return response
-            except Exception as e:
-                elapsed = time.time() - start_time
-                metrics_tracker.response_times.append(elapsed)
-                metrics_tracker.failed_refreshes += 1
-                error_type = type(e).__name__
-                metrics_tracker.error_types[error_type] = \
-                    metrics_tracker.error_types.get(error_type, 0) + 1
-                if "rate_limit" in str(e).lower():
-                    metrics_tracker.rate_limited += 1
-                return None
+        """Single token refresh operation"""
+        start_time = time.time()
+        try:
+        response = await auth_client_mock.refresh_token(
+        token_data["refresh_token"]
+        )
+        elapsed = time.time() - start_time
+        metrics_tracker.response_times.append(elapsed)
+        metrics_tracker.successful_refreshes += 1
+        return response
+        except Exception as e:
+        elapsed = time.time() - start_time
+        metrics_tracker.response_times.append(elapsed)
+        metrics_tracker.failed_refreshes += 1
+        error_type = type(e).__name__
+        metrics_tracker.error_types[error_type] = \
+        metrics_tracker.error_types.get(error_type, 0) + 1
+        if "rate_limit" in str(e).lower():
+        metrics_tracker.rate_limited += 1
+        return None
         
         # Execute concurrent refreshes
         tasks = [refresh_token(token) for token in tokens]
@@ -190,13 +192,13 @@ class TestAuthTokenRefreshHighLoad:
         
         # Validate results
         assert metrics_tracker.success_rate >= 95.0, \
-            f"Success rate {metrics_tracker.success_rate}% below 95% threshold"
+        f"Success rate {metrics_tracker.success_rate}% below 95% threshold"
         
         assert metrics_tracker.avg_response_time < 1.0, \
-            f"Average response time {metrics_tracker.avg_response_time}s exceeds 1s"
+        f"Average response time {metrics_tracker.avg_response_time}s exceeds 1s"
         
         assert metrics_tracker.p95_response_time < 2.0, \
-            f"P95 response time {metrics_tracker.p95_response_time}s exceeds 2s"
+        f"P95 response time {metrics_tracker.p95_response_time}s exceeds 2s"
         
         # Check for memory leaks
         import psutil
@@ -209,12 +211,12 @@ class TestAuthTokenRefreshHighLoad:
         print(f"P95 response time: {metrics_tracker.p95_response_time:.3f}s")
         print(f"Total time: {total_time:.2f}s")
     
-    @pytest.mark.asyncio
-    @pytest.mark.timeout(180)
-    @pytest.mark.asyncio
-    async def test_sustained_refresh_load_pattern(
+        @pytest.mark.asyncio
+        @pytest.mark.timeout(180)
+        @pytest.mark.asyncio
+        async def test_sustained_refresh_load_pattern(
         self, load_generator, metrics_tracker, auth_client_mock
-    ):
+        ):
         """Test sustained refresh load with realistic patterns"""
         # Simulate realistic refresh pattern over 30 seconds (reduced for testing)
         duration_seconds = 30
@@ -222,38 +224,38 @@ class TestAuthTokenRefreshHighLoad:
         peak_users = 50
         
         async def generate_refresh_wave(user_count: int, wave_id: int):
-            """Generate a wave of refresh requests"""
-            tokens = await load_generator(user_count)
-            tasks = []
+        """Generate a wave of refresh requests"""
+        tokens = await load_generator(user_count)
+        tasks = []
             
-            for token in tokens:
-                # Add jitter to simulate real-world timing
-                delay = random.uniform(0, 2)
+        for token in tokens:
+        # Add jitter to simulate real-world timing
+        delay = random.uniform(0, 2)
                 
-                async def delayed_refresh(t, d):
-                    await asyncio.sleep(d)
-                    try:
-                        return await auth_client_mock.refresh_token(
-                            t["refresh_token"]
-                        )
-                    except Exception as e:
-                        return None
+        async def delayed_refresh(t, d):
+        await asyncio.sleep(d)
+        try:
+        return await auth_client_mock.refresh_token(
+        t["refresh_token"]
+        )
+        except Exception as e:
+        return None
                 
-                tasks.append(delayed_refresh(token, delay))
+        tasks.append(delayed_refresh(token, delay))
             
-            return await asyncio.gather(*tasks, return_exceptions=True)
+        return await asyncio.gather(*tasks, return_exceptions=True)
         
         # Generate waves with varying intensity (reduced number of waves)
         waves = []
         for i in range(5):  # Reduced from 10 to 5 waves
-            # Simulate traffic spikes
-            if i % 3 == 0:
-                user_count = peak_users
-            else:
-                user_count = base_users + random.randint(-5, 10)  # Reduced variance
+        # Simulate traffic spikes
+        if i % 3 == 0:
+        user_count = peak_users
+        else:
+        user_count = base_users + random.randint(-5, 10)  # Reduced variance
             
-            waves.append(generate_refresh_wave(user_count, i))
-            await asyncio.sleep(duration_seconds / 5)  # Adjusted for 5 waves
+        waves.append(generate_refresh_wave(user_count, i))
+        await asyncio.sleep(duration_seconds / 5)  # Adjusted for 5 waves
         
         results = await asyncio.gather(*waves, return_exceptions=True)
         
@@ -262,10 +264,10 @@ class TestAuthTokenRefreshHighLoad:
         circuit_state = await redis_manager.get("auth_circuit_breaker_state")
         assert circuit_state != "OPEN", "Circuit breaker tripped during sustained load"
     
-    @pytest.mark.asyncio
-    @pytest.mark.timeout(60)
-    @pytest.mark.asyncio
-    async def test_token_refresh_race_conditions(self, load_generator, auth_client_mock):
+        @pytest.mark.asyncio
+        @pytest.mark.timeout(60)
+        @pytest.mark.asyncio
+        async def test_token_refresh_race_conditions(self, load_generator, auth_client_mock):
         """Test for race conditions in concurrent refresh of same token"""
         # Generate single user token that will be invalidated after first use
         tokens = await load_generator(1)
@@ -275,16 +277,16 @@ class TestAuthTokenRefreshHighLoad:
         token_used = False
         
         async def mock_refresh_with_race_condition(refresh_token: str):
-            nonlocal token_used
-            if token_used:
-                raise Exception("Invalid refresh token - already used")
-            token_used = True
-            return {
-                "access_token": f"new_access_token_{time.time()}",
-                "refresh_token": f"new_refresh_token_{time.time()}",
-                "token_type": "bearer",
-                "expires_in": 3600
-            }
+        nonlocal token_used
+        if token_used:
+        raise Exception("Invalid refresh token - already used")
+        token_used = True
+        return {
+        "access_token": f"new_access_token_{time.time()}",
+        "refresh_token": f"new_refresh_token_{time.time()}",
+        "token_type": "bearer",
+        "expires_in": 3600
+        }
         
         auth_client_mock.refresh_token = mock_refresh_with_race_condition
         
@@ -292,12 +294,12 @@ class TestAuthTokenRefreshHighLoad:
         concurrent_refreshes = 50
         
         async def refresh_same_token():
-            try:
-                return await auth_client_mock.refresh_token(
-                    token_data["refresh_token"]
-                )
-            except Exception as e:
-                return e
+        try:
+        return await auth_client_mock.refresh_token(
+        token_data["refresh_token"]
+        )
+        except Exception as e:
+        return e
         
         tasks = [refresh_same_token() for _ in range(concurrent_refreshes)]
         results = await asyncio.gather(*tasks, return_exceptions=True)
@@ -308,17 +310,17 @@ class TestAuthTokenRefreshHighLoad:
         
         # Exactly one refresh should succeed (token should be invalidated after first use)
         assert len(successful) == 1, \
-            f"Expected 1 successful refresh, got {len(successful)}"
+        f"Expected 1 successful refresh, got {len(successful)}"
         
         # Verify all failures are due to invalid token
         for failure in failed:
-            assert "invalid" in str(failure).lower() or "expired" in str(failure).lower(), \
-                f"Unexpected error: {failure}"
+        assert "invalid" in str(failure).lower() or "expired" in str(failure).lower(), \
+        f"Unexpected error: {failure}"
     
-    @pytest.mark.asyncio
-    @pytest.mark.timeout(90)
-    @pytest.mark.asyncio
-    async def test_refresh_with_memory_pressure(self, load_generator, metrics_tracker, auth_client_mock):
+        @pytest.mark.asyncio
+        @pytest.mark.timeout(90)
+        @pytest.mark.asyncio
+        async def test_refresh_with_memory_pressure(self, load_generator, metrics_tracker, auth_client_mock):
         """Test token refresh under memory pressure conditions"""
         import gc
         
@@ -338,36 +340,36 @@ class TestAuthTokenRefreshHighLoad:
         memory_samples = []
         
         async def refresh_with_monitoring(token_data):
-            result = await auth_client_mock.refresh_token(
-                token_data["refresh_token"]
-            )
-            current_memory = process.memory_info().rss / 1024 / 1024
-            memory_samples.append(current_memory)
-            return result
+        result = await auth_client_mock.refresh_token(
+        token_data["refresh_token"]
+        )
+        current_memory = process.memory_info().rss / 1024 / 1024
+        memory_samples.append(current_memory)
+        return result
         
         # Execute refreshes in batches to stress memory
         batch_size = 50  # Reduced batch size for faster testing
         for i in range(0, user_count, batch_size):
-            batch = tokens[i:i+batch_size]
-            tasks = [refresh_with_monitoring(t) for t in batch]
-            await asyncio.gather(*tasks, return_exceptions=True)
+        batch = tokens[i:i+batch_size]
+        tasks = [refresh_with_monitoring(t) for t in batch]
+        await asyncio.gather(*tasks, return_exceptions=True)
             
-            # Force garbage collection between batches
-            gc.collect()
-            await asyncio.sleep(0.5)
+        # Force garbage collection between batches
+        gc.collect()
+        await asyncio.sleep(0.5)
         
         # Verify memory didn't grow excessively
         final_memory = process.memory_info().rss / 1024 / 1024
         memory_growth = final_memory - initial_memory
         
         assert memory_growth < 100, \
-            f"Excessive memory growth: {memory_growth}MB"
+        f"Excessive memory growth: {memory_growth}MB"
         
         # Check for memory leak pattern
         if len(memory_samples) > 10:
-            first_half_avg = statistics.mean(memory_samples[:len(memory_samples)//2])
-            second_half_avg = statistics.mean(memory_samples[len(memory_samples)//2:])
-            leak_indicator = second_half_avg - first_half_avg
+        first_half_avg = statistics.mean(memory_samples[:len(memory_samples)//2])
+        second_half_avg = statistics.mean(memory_samples[len(memory_samples)//2:])
+        leak_indicator = second_half_avg - first_half_avg
             
-            assert leak_indicator < 50, \
-                f"Potential memory leak detected: {leak_indicator}MB growth"
+        assert leak_indicator < 50, \
+        f"Potential memory leak detected: {leak_indicator}MB growth"

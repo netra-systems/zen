@@ -1,7 +1,9 @@
+from unittest.mock import AsyncMock, Mock, patch, MagicMock
+
 """L4 Integration Test: Complete OAuth → JWT → WebSocket Authentication Flow
 
 Business Value Justification (BVJ):
-- Segment: Enterprise segment  
+    - Segment: Enterprise segment  
 - Business Goal: Complete authentication flow reliability
 - Value Impact: $30K MRR - Complete auth flow critical for real-time features
 - Strategic Impact: Validates end-to-end authentication from OAuth login through WebSocket connection
@@ -10,16 +12,16 @@ L4 Test: Real staging environment validation of complete OAuth → JWT → WebSo
 Tests against real staging services including auth.staging.netrasystems.ai with full JWT lifecycle.
 
 Critical Path:
-OAuth initiation → User authorization → Token exchange → JWT validation → Session creation → WebSocket auth → Message flow → Token refresh → Logout
+    OAuth initiation → User authorization → Token exchange → JWT validation → Session creation → WebSocket auth → Message flow → Token refresh → Logout
 
 Coverage: Complete OAuth flow, JWT lifecycle, WebSocket authentication, session persistence, token refresh, cross-service validation
-"""
+""""
 
 import sys
 from pathlib import Path
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
 from test_framework.database.test_database_manager import TestDatabaseManager
-from test_framework.redis.test_redis_manager import TestRedisManager
+from test_framework.redis_test_utils_test_utils.test_redis_manager import TestRedisManager
 from auth_service.core.auth_manager import AuthManager
 from shared.isolated_environment import IsolatedEnvironment
 
@@ -51,11 +53,11 @@ OAuthService = AsyncMock
 # from app.auth_integration.auth import create_access_token
 
 # Mock: Generic component isolation for controlled unit testing
-create_access_token = AsyncNone  # TODO: Use real service instance
+create_access_token = AsyncMock()  # TODO: Use real service instance
 # from app.core.unified.jwt_validator import validate_token_jwt
 
 # Mock: Generic component isolation for controlled unit testing
-validate_token_jwt = AsyncNone  # TODO: Use real service instance
+validate_token_jwt = AsyncMock()  # TODO: Use real service instance
 JWTService = AsyncMock
 # Session manager replaced with mock
 SessionManager = AsyncMock
@@ -71,7 +73,7 @@ class OAuthJWTWebSocketFlowL4Test(L4StagingCriticalPathTestBase):
         self.oauth_service: Optional[OAuthService] = None
         self.jwt_service: Optional[JWTService] = None
         self.session_manager: Optional[SessionManager] = None
-        self.active_sessions: Dict[str, Dict] = {}
+        self.active_sessions: Dict[str, Dict] = {]
         
     async def setup_test_specific_environment(self) -> None:
         """Setup OAuth JWT WebSocket specific test environment."""
@@ -108,7 +110,7 @@ class OAuthJWTWebSocketFlowL4Test(L4StagingCriticalPathTestBase):
         """Build OAuth authorization parameters."""
         code_verifier = self._generate_code_verifier()
         code_challenge = self._generate_code_challenge(code_verifier)
-        state = f"oauth_l4_{uuid.uuid4().hex[:16]}"
+        state = f"oauth_l4_{uuid.uuid4().hex[:16]]"
         
         return {
             "response_type": "code",
@@ -193,11 +195,11 @@ class OAuthJWTWebSocketFlowL4Test(L4StagingCriticalPathTestBase):
         
         user_id = jwt_validation["user_id"]
         session_data = await self._create_session(user_id, access_token)
-        return {"session_id": session_data["session_id"], "user_id": user_id, "access_token": access_token}
+        return {"session_id": session_data["session_id"], "user_id": user_id, "access_token": access_token]
     
     async def _create_session(self, user_id: str, access_token: str) -> Dict[str, Any]:
         """Create session in Redis and local tracking."""
-        session_id = f"session_l4_{uuid.uuid4().hex[:8]}"
+        session_id = f"session_l4_{uuid.uuid4().hex[:8]]"
         session_data = {
             "session_id": session_id,
             "user_id": user_id,
@@ -250,7 +252,7 @@ class OAuthJWTWebSocketFlowL4Test(L4StagingCriticalPathTestBase):
         test_message = {
             "type": "thread_message",
             "data": {
-                "thread_id": f"test_thread_{uuid.uuid4().hex[:8]}",
+                "thread_id": f"test_thread_{uuid.uuid4().hex[:8]]",
                 "content": "L4 WebSocket auth test message",
                 "user_id": user_id
             },

@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
 """
 Comprehensive test to verify the complete agent lifecycle flow:
-1. Agent initialization and registration
+    1. Agent initialization and registration
 2. Task delegation and execution
 3. Context management and memory
 4. Error handling and recovery
 5. Graceful termination and cleanup
 
 This test runs against the actual dev environment to ensure agent system works end-to-end.
-"""
+""""
 
 # Test framework import - using pytest fixtures instead
 
@@ -80,7 +80,7 @@ class AgentLifecycleTester:
                 json=register_data
             ) as response:
                 if response.status not in [200, 201, 409]:
-                    print(f"[ERROR] Registration failed: {response.status}")
+                    print(f"[ERROR] Registration failed: {response.status]")
                     return False
                     
             # Login
@@ -99,11 +99,11 @@ class AgentLifecycleTester:
                     print(f"[OK] Authentication successful")
                     return True
                 else:
-                    print(f"[ERROR] Login failed: {response.status}")
+                    print(f"[ERROR] Login failed: {response.status]")
                     return False
                     
         except Exception as e:
-            print(f"[ERROR] Authentication error: {e}")
+            print(f"[ERROR] Authentication error: {e]")
             return False
             
     @pytest.mark.asyncio
@@ -142,15 +142,15 @@ class AgentLifecycleTester:
                 if response.status in [200, 201]:
                     data = await response.json()
                     self.agent_id = data.get("agent_id")
-                    print(f"[OK] Agent initialized: {self.agent_id}")
+                    print(f"[OK] Agent initialized: {self.agent_id]")
                     return True
                 else:
                     text = await response.text()
-                    print(f"[ERROR] Agent initialization failed: {response.status} - {text}")
+                    print(f"[ERROR] Agent initialization failed: {response.status] - {text]")
                     return False
                     
         except Exception as e:
-            print(f"[ERROR] Agent initialization error: {e}")
+            print(f"[ERROR] Agent initialization error: {e]")
             return False
             
     @pytest.mark.asyncio
@@ -179,15 +179,15 @@ class AgentLifecycleTester:
             ) as response:
                 if response.status == 200:
                     data = await response.json()
-                    print(f"[OK] Agent registered: {data}")
+                    print(f"[OK] Agent registered: {data]")
                     return True
                 else:
                     text = await response.text()
-                    print(f"[ERROR] Registration failed: {response.status} - {text}")
+                    print(f"[ERROR] Registration failed: {response.status] - {text]")
                     return False
                     
         except Exception as e:
-            print(f"[ERROR] Registration error: {e}")
+            print(f"[ERROR] Registration error: {e]")
             return False
             
     @pytest.mark.asyncio
@@ -227,15 +227,15 @@ class AgentLifecycleTester:
                 if response.status == 200:
                     data = await response.json()
                     self.thread_id = data.get("thread_id")
-                    print(f"[OK] Context created: {self.thread_id}")
+                    print(f"[OK] Context created: {self.thread_id]")
                     return True
                 else:
                     text = await response.text()
-                    print(f"[ERROR] Context creation failed: {response.status} - {text}")
+                    print(f"[ERROR] Context creation failed: {response.status] - {text]")
                     return False
                     
         except Exception as e:
-            print(f"[ERROR] Context creation error: {e}")
+            print(f"[ERROR] Context creation error: {e]")
             return False
             
     @pytest.mark.asyncio
@@ -273,15 +273,15 @@ class AgentLifecycleTester:
             ) as response:
                 if response.status == 200:
                     data = await response.json()
-                    print(f"[OK] Task delegated: {data.get('task_id')}")
+                    print(f"[OK] Task delegated: {data.get('task_id')]")
                     return True
                 else:
                     text = await response.text()
-                    print(f"[ERROR] Task delegation failed: {response.status} - {text}")
+                    print(f"[ERROR] Task delegation failed: {response.status] - {text]")
                     return False
                     
         except Exception as e:
-            print(f"[ERROR] Task delegation error: {e}")
+            print(f"[ERROR] Task delegation error: {e]")
             return False
             
     @pytest.mark.asyncio
@@ -341,11 +341,11 @@ class AgentLifecycleTester:
                     print(f"[OK] Subscribed to agent events")
                     return True
                     
-            print(f"[ERROR] WebSocket setup failed: {data}")
+            print(f"[ERROR] WebSocket setup failed: {data]")
             return False
             
         except Exception as e:
-            print(f"[ERROR] WebSocket error: {e}")
+            print(f"[ERROR] WebSocket error: {e]")
             return False
             
     @pytest.mark.asyncio
@@ -380,15 +380,15 @@ class AgentLifecycleTester:
             ) as response:
                 if response.status == 200:
                     data = await response.json()
-                    print(f"[OK] Sub-agent created: {data.get('sub_agent_id')}")
+                    print(f"[OK] Sub-agent created: {data.get('sub_agent_id')]")
                     return True
                 else:
                     text = await response.text()
-                    print(f"[ERROR] Sub-agent creation failed: {response.status} - {text}")
+                    print(f"[ERROR] Sub-agent creation failed: {response.status] - {text]")
                     return False
                     
         except Exception as e:
-            print(f"[ERROR] Sub-agent creation error: {e}")
+            print(f"[ERROR] Sub-agent creation error: {e]")
             return False
             
     @pytest.mark.asyncio
@@ -432,17 +432,17 @@ class AgentLifecycleTester:
                     ) as recovery_response:
                         if recovery_response.status == 200:
                             data = await recovery_response.json()
-                            print(f"[OK] Agent recovered: {data}")
+                            print(f"[OK] Agent recovered: {data]")
                             return True
                         else:
-                            print(f"[ERROR] Recovery failed: {recovery_response.status}")
+                            print(f"[ERROR] Recovery failed: {recovery_response.status]")
                             return False
                 else:
-                    print(f"[ERROR] Expected error not triggered: {response.status}")
+                    print(f"[ERROR] Expected error not triggered: {response.status]")
                     return False
                     
         except Exception as e:
-            print(f"[ERROR] Recovery test error: {e}")
+            print(f"[ERROR] Recovery test error: {e]")
             return False
             
     @pytest.mark.asyncio
@@ -494,7 +494,7 @@ class AgentLifecycleTester:
             return False
             
         except Exception as e:
-            print(f"[ERROR] Context persistence error: {e}")
+            print(f"[ERROR] Context persistence error: {e]")
             return False
             
     @pytest.mark.asyncio
@@ -540,7 +540,7 @@ class AgentLifecycleTester:
             return False
             
         except Exception as e:
-            print(f"[ERROR] Termination error: {e}")
+            print(f"[ERROR] Termination error: {e]")
             return False
             
     async def run_all_tests(self) -> Dict[str, bool]:
@@ -595,7 +595,7 @@ async def test_agent_lifecycle_end_to_end():
         if passed_tests == total_tests:
             print("\n[SUCCESS] All agent lifecycle tests passed!")
         else:
-            print(f"\n[WARNING] {total_tests - passed_tests} tests failed.")
+            print(f"\n[WARNING] {total_tests - passed_tests] tests failed.")
             
         # Assert all tests passed
         assert all(results.values()), f"Some tests failed: {results}"

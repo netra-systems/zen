@@ -2,11 +2,13 @@ from shared.isolated_environment import get_env
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
 from test_framework.docker.unified_docker_manager import UnifiedDockerManager
 from test_framework.database.test_database_manager import TestDatabaseManager
-from test_framework.redis.test_redis_manager import TestRedisManager
+from test_framework.redis_test_utils_test_utils.test_redis_manager import TestRedisManager
 from auth_service.core.auth_manager import AuthManager
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
 from shared.isolated_environment import IsolatedEnvironment
+from unittest.mock import Mock, patch, MagicMock
+
 """System Startup Sequences L4 Integration Tests
 
 Tests comprehensive system initialization and startup sequences across all services.
@@ -14,13 +16,13 @@ These L4 tests validate the entire platform startup process including service di
 health checks, dependency resolution, and graceful degradation.
 
 Business Value Justification (BVJ):
-- Segment: ALL (Platform foundation for all tiers)
+    - Segment: ALL (Platform foundation for all tiers)
 - Business Goal: Ensure 99.9% uptime through reliable startup and recovery
 - Value Impact: Prevents $50K+ MRR loss from startup failures
 - Strategic Impact: Platform stability directly impacts customer retention (30% churn reduction)
 
 Critical Path:
-Infrastructure init -> Service discovery -> Health checks -> Auth init -> 
+    Infrastructure init -> Service discovery -> Health checks -> Auth init -> 
 WebSocket init -> Agent pool init -> Cache warming -> Ready state
 
 Mock-Real Spectrum: L4 (Production-like staging environment)
@@ -29,7 +31,7 @@ Mock-Real Spectrum: L4 (Production-like staging environment)
 - Real database connections
 - Real message queues
 - Real monitoring
-"""
+""""
 
 import sys
 from pathlib import Path
@@ -97,7 +99,7 @@ class SystemStartupL4TestSuite:
     
     def __init__(self):
         self.settings = get_settings()
-        self.services: Dict[str, ServiceStatus] = {}
+        self.services: Dict[str, ServiceStatus] = {]
         self.startup_metrics = StartupMetrics()
         self.logger = logging.getLogger(__name__)
         
@@ -247,21 +249,21 @@ class TestSystemStartupSequencesL4:
         # Cleanup
         await asyncio.sleep(0.1)
     
-    @pytest.mark.asyncio
-    async def test_complete_system_cold_start(self, startup_suite):
+        @pytest.mark.asyncio
+        async def test_complete_system_cold_start(self, startup_suite):
         """Test 1: Complete system cold start with all services."""
         start_time = time.perf_counter()
         
         # Initialize services in dependency order
         startup_order = [
-            "postgres", "redis", "auth_service", 
-            "backend", "websocket", "agent_pool", "monitoring"
+        "postgres", "redis", "auth_service", 
+        "backend", "websocket", "agent_pool", "monitoring"
         ]
         
         for service_name in startup_order:
-            service = await startup_suite.initialize_service(service_name)
-            assert service.status in ["healthy", "degraded"], \
-                f"Service {service_name} failed to start: {service.error_message}"
+        service = await startup_suite.initialize_service(service_name)
+        assert service.status in ["healthy", "degraded"], \
+        f"Service {service_name} failed to start: {service.error_message}"
         
         # Warm caches
         await startup_suite.warm_caches()
@@ -275,111 +277,111 @@ class TestSystemStartupSequencesL4:
         
         # Verify startup completed within acceptable time
         assert startup_suite.startup_metrics.total_startup_time < 30.0, \
-            "System startup took too long"
+        "System startup took too long"
         
         # Verify all critical services are healthy
         critical_services = ["postgres", "redis", "auth_service", "backend", "websocket"]
         for service_name in critical_services:
-            assert startup_suite.services[service_name].status == "healthy", \
-                f"Critical service {service_name} not healthy"
+        assert startup_suite.services[service_name].status == "healthy", \
+        f"Critical service {service_name} not healthy"
     
-    @pytest.mark.asyncio
-    async def test_startup_with_auth_service_delay(self, startup_suite):
+        @pytest.mark.asyncio
+        async def test_startup_with_auth_service_delay(self, startup_suite):
         """Test 2: System startup when auth service is slow to initialize."""
         
         # Mock slow auth service
         async def slow_auth_init(*args, **kwargs):
-            if args[0] == "auth_service":
-                await asyncio.sleep(5)  # Simulate slow startup
-            return await startup_suite.check_service_health(*args, **kwargs)
+        if args[0] == "auth_service":
+        await asyncio.sleep(5)  # Simulate slow startup
+        return await startup_suite.check_service_health(*args, **kwargs)
         
         with patch.object(startup_suite, 'check_service_health', side_effect=slow_auth_init):
-            # Start non-dependent services
-            await startup_suite.initialize_service("postgres")
-            await startup_suite.initialize_service("redis")
+        # Start non-dependent services
+        await startup_suite.initialize_service("postgres")
+        await startup_suite.initialize_service("redis")
             
-            # Auth service should be slow
-            auth_start = time.perf_counter()
-            await startup_suite.initialize_service("auth_service")
-            auth_time = time.perf_counter() - auth_start
+        # Auth service should be slow
+        auth_start = time.perf_counter()
+        await startup_suite.initialize_service("auth_service")
+        auth_time = time.perf_counter() - auth_start
             
-            assert auth_time >= 5.0, "Auth service should have been slow"
+        assert auth_time >= 5.0, "Auth service should have been slow"
             
-            # Backend should wait for auth
-            await startup_suite.initialize_service("backend")
+        # Backend should wait for auth
+        await startup_suite.initialize_service("backend")
             
-            # Verify cascade delays are handled
-            assert startup_suite.services["backend"].status == "healthy"
+        # Verify cascade delays are handled
+        assert startup_suite.services["backend"].status == "healthy"
     
-    @pytest.mark.asyncio
-    async def test_startup_with_database_unavailable(self, startup_suite):
+        @pytest.mark.asyncio
+        async def test_startup_with_database_unavailable(self, startup_suite):
         """Test 3: System startup when database is initially unavailable."""
         
         # Mock database unavailable then available
         call_count = 0
         
         async def database_recovery(*args, **kwargs):
-            nonlocal call_count
-            if args[0] == "postgres":
-                call_count += 1
-                if call_count < 3:
-                    return False  # Fail first 2 attempts
-            return await startup_suite.check_service_health(*args, **kwargs)
+        nonlocal call_count
+        if args[0] == "postgres":
+        call_count += 1
+        if call_count < 3:
+        return False  # Fail first 2 attempts
+        return await startup_suite.check_service_health(*args, **kwargs)
         
         with patch.object(startup_suite, 'check_service_health', side_effect=database_recovery):
-            # First attempts should fail
-            service = await startup_suite.initialize_service("postgres")
-            assert service.status == "failed"
+        # First attempts should fail
+        service = await startup_suite.initialize_service("postgres")
+        assert service.status == "failed"
             
-            # Retry
-            service = await startup_suite.initialize_service("postgres")
-            assert service.status == "failed"
+        # Retry
+        service = await startup_suite.initialize_service("postgres")
+        assert service.status == "failed"
             
-            # Third attempt succeeds
-            service = await startup_suite.initialize_service("postgres")
-            assert service.status == "healthy"
+        # Third attempt succeeds
+        service = await startup_suite.initialize_service("postgres")
+        assert service.status == "healthy"
             
-            # Dependent services can now start
-            await startup_suite.initialize_service("auth_service")
-            assert startup_suite.services["auth_service"].status == "healthy"
+        # Dependent services can now start
+        await startup_suite.initialize_service("auth_service")
+        assert startup_suite.services["auth_service"].status == "healthy"
     
-    @pytest.mark.asyncio
-    async def test_startup_graceful_degradation(self, startup_suite):
+        @pytest.mark.asyncio
+        async def test_startup_graceful_degradation(self, startup_suite):
         """Test 4: System starts in degraded mode when non-critical services fail."""
         
         # Mock monitoring service failure
         async def monitoring_fails(*args, **kwargs):
-            if args[0] == "monitoring":
-                return False
-            return await startup_suite.check_service_health(*args, **kwargs)
+        if args[0] == "monitoring":
+        return False
+        return await startup_suite.check_service_health(*args, **kwargs)
         
         with patch.object(startup_suite, 'check_service_health', side_effect=monitoring_fails):
-            # Start critical services
-            await startup_suite.initialize_service("postgres")
-            await startup_suite.initialize_service("redis")
-            await startup_suite.initialize_service("auth_service")
-            await startup_suite.initialize_service("backend")
-            await startup_suite.initialize_service("websocket")
+        # Start critical services
+        await startup_suite.initialize_service("postgres")
+        await startup_suite.initialize_service("redis")
+        await startup_suite.initialize_service("auth_service")
+        await startup_suite.initialize_service("backend")
+        await startup_suite.initialize_service("websocket")
             
-            # Non-critical service fails
-            await startup_suite.initialize_service("monitoring")
+        # Non-critical service fails
+        await startup_suite.initialize_service("monitoring")
             
-            # System should be operational despite monitoring failure
-            assert startup_suite.services["monitoring"].status in ["failed", "degraded"]
+        # System should be operational despite monitoring failure
+        assert startup_suite.services["monitoring"].status in ["failed", "degraded"]
             
-            # Critical services should still be healthy
-            assert startup_suite.services["backend"].status == "healthy"
-            assert startup_suite.services["auth_service"].status == "healthy"
+        # Critical services should still be healthy
+        assert startup_suite.services["backend"].status == "healthy"
+        assert startup_suite.services["auth_service"].status == "healthy"
     
-    @pytest.mark.asyncio
-    async def test_startup_parallel_initialization(self, startup_suite):
+        @pytest.mark.asyncio
+        async def test_startup_parallel_initialization(self, startup_suite):
         """Test 5: Parallel initialization of independent services."""
         start_time = time.perf_counter()
         
         # Initialize independent services in parallel
         tasks = [
-            startup_suite.initialize_service("postgres"),
-            startup_suite.initialize_service("redis")
+        startup_suite.initialize_service("postgres"),
+        startup_suite.initialize_service("redis")
         ]
         
         results = await asyncio.gather(*tasks)
@@ -395,8 +397,8 @@ class TestSystemStartupSequencesL4:
         await startup_suite.initialize_service("auth_service")
         assert startup_suite.services["auth_service"].status == "healthy"
     
-    @pytest.mark.asyncio
-    async def test_startup_auth_token_generation(self, startup_suite):
+        @pytest.mark.asyncio
+        async def test_startup_auth_token_generation(self, startup_suite):
         """Test 6: Auth token generation during system startup."""
         # Initialize required services
         await startup_suite.initialize_service("postgres")
@@ -407,16 +409,16 @@ class TestSystemStartupSequencesL4:
         service_tokens = {}
         
         for service in ["backend", "websocket", "agent_pool"]:
-            # Mock token generation
-            token = f"service_token_{service}_{time.time()}"
-            service_tokens[service] = token
+        # Mock token generation
+        token = f"service_token_{service}_{time.time()}"
+        service_tokens[service] = token
         
         # Verify all services have tokens
         assert len(service_tokens) == 3
         assert all(token for token in service_tokens.values())
     
-    @pytest.mark.asyncio
-    async def test_startup_websocket_auth_initialization(self, startup_suite):
+        @pytest.mark.asyncio
+        async def test_startup_websocket_auth_initialization(self, startup_suite):
         """Test 7: WebSocket authentication subsystem initialization."""
         # Initialize dependencies
         await startup_suite.initialize_service("postgres")
@@ -431,33 +433,33 @@ class TestSystemStartupSequencesL4:
         # Verify WebSocket can authenticate
         # Mock WebSocket auth check
         auth_config = {
-            "jwt_secret": "test_secret",
-            "jwt_algorithm": "HS256",
-            "session_timeout": 3600
+        "jwt_secret": "test_secret",
+        "jwt_algorithm": "HS256",
+        "session_timeout": 3600
         }
         
         assert auth_config["jwt_secret"] is not None
         assert auth_config["session_timeout"] > 0
     
-    @pytest.mark.asyncio
-    async def test_startup_session_recovery(self, startup_suite):
+        @pytest.mark.asyncio
+        async def test_startup_session_recovery(self, startup_suite):
         """Test 8: Recover existing sessions during startup."""
         # Mock existing sessions in Redis
         existing_sessions = [
-            SessionInfo(
-                session_id="session_1",
-                user_id="user_1",
-                created_at=datetime.now(timezone.utc) - timedelta(hours=1),
-                last_activity=datetime.now(timezone.utc) - timedelta(minutes=5),
-                metadata={"tier": "enterprise"}
-            ),
-            SessionInfo(
-                session_id="session_2",
-                user_id="user_2",
-                created_at=datetime.now(timezone.utc) - timedelta(hours=2),
-                last_activity=datetime.now(timezone.utc) - timedelta(minutes=10),
-                metadata={"tier": "mid"}
-            )
+        SessionInfo(
+        session_id="session_1",
+        user_id="user_1",
+        created_at=datetime.now(timezone.utc) - timedelta(hours=1),
+        last_activity=datetime.now(timezone.utc) - timedelta(minutes=5),
+        metadata={"tier": "enterprise"}
+        ),
+        SessionInfo(
+        session_id="session_2",
+        user_id="user_2",
+        created_at=datetime.now(timezone.utc) - timedelta(hours=2),
+        last_activity=datetime.now(timezone.utc) - timedelta(minutes=10),
+        metadata={"tier": "mid"}
+        )
         ]
         
         # Initialize services
@@ -471,29 +473,29 @@ class TestSystemStartupSequencesL4:
         # In production, would check actual Redis
         assert startup_suite.startup_metrics.cache_warming_time > 0
     
-    @pytest.mark.asyncio
-    async def test_startup_circuit_breaker_initialization(self, startup_suite):
+        @pytest.mark.asyncio
+        async def test_startup_circuit_breaker_initialization(self, startup_suite):
         """Test 9: Circuit breaker initialization for all services."""
         # Initialize services
         services = ["postgres", "redis", "auth_service", "backend"]
         
         for service in services:
-            await startup_suite.initialize_service(service)
+        await startup_suite.initialize_service(service)
         
         # Mock circuit breaker states
         circuit_breakers = {
-            "auth_service": {"state": "closed", "failure_count": 0},
-            "backend": {"state": "closed", "failure_count": 0},
-            "websocket": {"state": "closed", "failure_count": 0},
-            "database": {"state": "closed", "failure_count": 0}
+        "auth_service": {"state": "closed", "failure_count": 0},
+        "backend": {"state": "closed", "failure_count": 0},
+        "websocket": {"state": "closed", "failure_count": 0},
+        "database": {"state": "closed", "failure_count": 0}
         }
         
         # Verify all circuit breakers are initialized
         assert all(cb["state"] == "closed" for cb in circuit_breakers.values())
         assert all(cb["failure_count"] == 0 for cb in circuit_breakers.values())
     
-    @pytest.mark.asyncio
-    async def test_startup_rate_limiter_initialization(self, startup_suite):
+        @pytest.mark.asyncio
+        async def test_startup_rate_limiter_initialization(self, startup_suite):
         """Test 10: Rate limiter initialization with proper defaults."""
         # Initialize auth service
         await startup_suite.initialize_service("redis")
@@ -501,43 +503,43 @@ class TestSystemStartupSequencesL4:
         
         # Mock rate limiter configuration
         rate_limits = {
-            "login": {"requests": 10, "window": 60},
-            "token_refresh": {"requests": 5, "window": 60},
-            "websocket_connect": {"requests": 20, "window": 60},
-            "api_calls": {"requests": 100, "window": 60}
+        "login": {"requests": 10, "window": 60},
+        "token_refresh": {"requests": 5, "window": 60},
+        "websocket_connect": {"requests": 20, "window": 60},
+        "api_calls": {"requests": 100, "window": 60}
         }
         
         # Verify rate limiters are configured
         assert all(limit["requests"] > 0 for limit in rate_limits.values())
         assert all(limit["window"] > 0 for limit in rate_limits.values())
     
-    @pytest.mark.asyncio
-    async def test_startup_health_check_cascade(self, startup_suite):
+        @pytest.mark.asyncio
+        async def test_startup_health_check_cascade(self, startup_suite):
         """Test 11: Health check cascade during startup."""
         # Initialize services
         startup_order = ["postgres", "redis", "auth_service", "backend", "websocket"]
         
         for service in startup_order:
-            await startup_suite.initialize_service(service)
+        await startup_suite.initialize_service(service)
         
         # Perform cascading health checks
         health_results = {}
         
         for service_name, service in startup_suite.services.items():
-            # Check service and its dependencies
-            is_healthy = service.status == "healthy"
-            deps_healthy = all(
-                startup_suite.services.get(dep, ServiceStatus("", "failed", "", [])).status == "healthy"
-                for dep in service.dependencies
-            )
+        # Check service and its dependencies
+        is_healthy = service.status == "healthy"
+        deps_healthy = all(
+        startup_suite.services.get(dep, ServiceStatus("", "failed", "", [])).status == "healthy"
+        for dep in service.dependencies
+        )
             
-            health_results[service_name] = is_healthy and deps_healthy
+        health_results[service_name] = is_healthy and deps_healthy
         
         # All should be healthy
         assert all(health_results.values())
     
-    @pytest.mark.asyncio
-    async def test_startup_memory_pressure_handling(self, startup_suite):
+        @pytest.mark.asyncio
+        async def test_startup_memory_pressure_handling(self, startup_suite):
         """Test 12: System startup under memory pressure."""
         # Mock memory pressure
         initial_memory = psutil.Process().memory_info().rss / 1024 / 1024
@@ -546,31 +548,31 @@ class TestSystemStartupSequencesL4:
         services = ["postgres", "redis", "auth_service", "backend"]
         
         for service in services:
-            await startup_suite.initialize_service(service)
+        await startup_suite.initialize_service(service)
             
-            # Check memory after each service
-            current_memory = psutil.Process().memory_info().rss / 1024 / 1024
-            memory_increase = current_memory - initial_memory
+        # Check memory after each service
+        current_memory = psutil.Process().memory_info().rss / 1024 / 1024
+        memory_increase = current_memory - initial_memory
             
-            # Verify memory usage is reasonable (< 500MB increase)
-            assert memory_increase < 500, f"Excessive memory usage: {memory_increase}MB"
+        # Verify memory usage is reasonable (< 500MB increase)
+        assert memory_increase < 500, f"Excessive memory usage: {memory_increase}MB"
         
         # Collect final metrics
         startup_suite.collect_system_metrics()
         assert startup_suite.startup_metrics.memory_usage_mb < 1000
     
-    @pytest.mark.asyncio
-    async def test_startup_configuration_validation(self, startup_suite):
+        @pytest.mark.asyncio
+        async def test_startup_configuration_validation(self, startup_suite):
         """Test 13: Configuration validation during startup."""
         # Mock configuration
         config = {
-            "jwt_secret": get_env().get("JWT_SECRET", "test_secret"),
-            "database_url": get_env().get("DATABASE_URL", "postgresql://localhost/test"),
-            "redis_url": get_env().get("REDIS_URL", "redis://localhost:6379"),
-            "auth_service_url": get_env().get("AUTH_SERVICE_URL", "http://localhost:8001"),
-            "enable_monitoring": True,
-            "enable_rate_limiting": True,
-            "max_connections": 100
+        "jwt_secret": get_env().get("JWT_SECRET", "test_secret"),
+        "database_url": get_env().get("DATABASE_URL", "postgresql://localhost/test"),
+        "redis_url": get_env().get("REDIS_URL", "redis://localhost:6379"),
+        "auth_service_url": get_env().get("AUTH_SERVICE_URL", "http://localhost:8001"),
+        "enable_monitoring": True,
+        "enable_rate_limiting": True,
+        "max_connections": 100
         }
         
         # Validate required configuration
@@ -583,88 +585,88 @@ class TestSystemStartupSequencesL4:
         assert isinstance(config["enable_monitoring"], bool)
         assert isinstance(config["enable_rate_limiting"], bool)
     
-    @pytest.mark.asyncio
-    async def test_startup_ssl_certificate_loading(self, startup_suite):
+        @pytest.mark.asyncio
+        async def test_startup_ssl_certificate_loading(self, startup_suite):
         """Test 14: SSL certificate loading and validation during startup."""
         # Mock SSL configuration
         ssl_config = {
-            "enabled": get_env().get("SSL_ENABLED", "false") == "true",
-            "cert_path": get_env().get("SSL_CERT_PATH", "/certs/cert.pem"),
-            "key_path": get_env().get("SSL_KEY_PATH", "/certs/key.pem"),
-            "ca_path": get_env().get("SSL_CA_PATH", "/certs/ca.pem")
+        "enabled": get_env().get("SSL_ENABLED", "false") == "true",
+        "cert_path": get_env().get("SSL_CERT_PATH", "/certs/cert.pem"),
+        "key_path": get_env().get("SSL_KEY_PATH", "/certs/key.pem"),
+        "ca_path": get_env().get("SSL_CA_PATH", "/certs/ca.pem")
         }
         
         if ssl_config["enabled"]:
-            # In production, would validate actual certificates
-            assert ssl_config["cert_path"] != ""
-            assert ssl_config["key_path"] != ""
+        # In production, would validate actual certificates
+        assert ssl_config["cert_path"] != ""
+        assert ssl_config["key_path"] != ""
         
         # WebSocket should use WSS if SSL enabled
         ws_protocol = "wss" if ssl_config["enabled"] else "ws"
         assert ws_protocol in ["ws", "wss"]
     
-    @pytest.mark.asyncio
-    async def test_startup_distributed_lock_acquisition(self, startup_suite):
+        @pytest.mark.asyncio
+        async def test_startup_distributed_lock_acquisition(self, startup_suite):
         """Test 15: Distributed lock acquisition during startup."""
         # Initialize Redis for distributed locking
         await startup_suite.initialize_service("redis")
         
         # Mock distributed lock acquisition
         startup_locks = {
-            "schema_migration": False,
-            "cache_warming": False,
-            "agent_pool_init": False
+        "schema_migration": False,
+        "cache_warming": False,
+        "agent_pool_init": False
         }
         
         # Acquire locks in order
         for lock_name in startup_locks:
-            # Mock lock acquisition
-            startup_locks[lock_name] = True
-            await asyncio.sleep(0.1)  # Simulate work under lock
+        # Mock lock acquisition
+        startup_locks[lock_name] = True
+        await asyncio.sleep(0.1)  # Simulate work under lock
         
         # Verify all locks were acquired
         assert all(startup_locks.values())
     
-    @pytest.mark.asyncio
-    async def test_startup_rollback_on_critical_failure(self, startup_suite):
+        @pytest.mark.asyncio
+        async def test_startup_rollback_on_critical_failure(self, startup_suite):
         """Test 16: Rollback mechanism when critical service fails."""
         initialized_services = []
         
         try:
-            # Start initializing services
-            await startup_suite.initialize_service("postgres")
-            initialized_services.append("postgres")
+        # Start initializing services
+        await startup_suite.initialize_service("postgres")
+        initialized_services.append("postgres")
             
-            await startup_suite.initialize_service("redis")
-            initialized_services.append("redis")
+        await startup_suite.initialize_service("redis")
+        initialized_services.append("redis")
             
-            # Mock critical failure
-            async def auth_fails(*args, **kwargs):
-                if args[0] == "auth_service":
-                    raise Exception("Critical auth service failure")
-                return await startup_suite.check_service_health(*args, **kwargs)
+        # Mock critical failure
+        async def auth_fails(*args, **kwargs):
+        if args[0] == "auth_service":
+        raise Exception("Critical auth service failure")
+        return await startup_suite.check_service_health(*args, **kwargs)
             
-            with patch.object(startup_suite, 'check_service_health', side_effect=auth_fails):
-                service = await startup_suite.initialize_service("auth_service")
+        with patch.object(startup_suite, 'check_service_health', side_effect=auth_fails):
+        service = await startup_suite.initialize_service("auth_service")
                 
-                if service.status == "failed":
-                    # Rollback: shutdown initialized services
-                    for service_name in reversed(initialized_services):
-                        # Mock service shutdown
-                        startup_suite.services[service_name].status = "stopped"
+        if service.status == "failed":
+        # Rollback: shutdown initialized services
+        for service_name in reversed(initialized_services):
+        # Mock service shutdown
+        startup_suite.services[service_name].status = "stopped"
                     
-                    raise Exception("Startup failed - rolling back")
+        raise Exception("Startup failed - rolling back")
                     
         except Exception as e:
-            # Verify rollback occurred
-            assert "rolling back" in str(e).lower()
-            assert all(
-                startup_suite.services.get(s, ServiceStatus("", "stopped", "", [])).status == "stopped"
-                for s in initialized_services
-            )
+        # Verify rollback occurred
+        assert "rolling back" in str(e).lower()
+        assert all(
+        startup_suite.services.get(s, ServiceStatus("", "stopped", "", [])).status == "stopped"
+        for s in initialized_services
+        )
     
-    @pytest.mark.asyncio
-    async def test_startup_metric_collection(self, startup_suite):
+        @pytest.mark.asyncio
+        async def test_startup_metric_collection(self, startup_suite):
         """Test 17: Comprehensive metric collection during startup."""
         start_time = time.perf_counter()
         
@@ -672,13 +674,13 @@ class TestSystemStartupSequencesL4:
         services = ["postgres", "redis", "auth_service", "backend", "websocket"]
         
         for service in services:
-            service_start = time.perf_counter()
-            await startup_suite.initialize_service(service)
-            service_time = time.perf_counter() - service_start
+        service_start = time.perf_counter()
+        await startup_suite.initialize_service(service)
+        service_time = time.perf_counter() - service_start
             
-            # Record detailed metrics
-            assert service in startup_suite.startup_metrics.service_init_times
-            assert startup_suite.startup_metrics.service_init_times[service] > 0
+        # Record detailed metrics
+        assert service in startup_suite.startup_metrics.service_init_times
+        assert startup_suite.startup_metrics.service_init_times[service] > 0
         
         # Warm caches
         await startup_suite.warm_caches()
@@ -699,49 +701,49 @@ class TestSystemStartupSequencesL4:
         assert startup_suite.startup_metrics.memory_usage_mb > 0
         assert len(startup_suite.startup_metrics.service_init_times) == len(services)
     
-    @pytest.mark.asyncio
-    async def test_startup_emergency_mode(self, startup_suite):
+        @pytest.mark.asyncio
+        async def test_startup_emergency_mode(self, startup_suite):
         """Test 18: System starts in emergency mode when multiple services fail."""
         failed_count = 0
         
         # Mock multiple service failures
         async def multiple_failures(*args, **kwargs):
-            nonlocal failed_count
-            if args[0] in ["monitoring", "agent_pool"]:
-                failed_count += 1
-                return False
-            return await startup_suite.check_service_health(*args, **kwargs)
+        nonlocal failed_count
+        if args[0] in ["monitoring", "agent_pool"]:
+        failed_count += 1
+        return False
+        return await startup_suite.check_service_health(*args, **kwargs)
         
         with patch.object(startup_suite, 'check_service_health', side_effect=multiple_failures):
-            # Initialize core services
-            await startup_suite.initialize_service("postgres")
-            await startup_suite.initialize_service("redis")
-            await startup_suite.initialize_service("auth_service")
-            await startup_suite.initialize_service("backend")
+        # Initialize core services
+        await startup_suite.initialize_service("postgres")
+        await startup_suite.initialize_service("redis")
+        await startup_suite.initialize_service("auth_service")
+        await startup_suite.initialize_service("backend")
             
-            # Non-critical services fail
-            await startup_suite.initialize_service("monitoring")
-            await startup_suite.initialize_service("agent_pool")
+        # Non-critical services fail
+        await startup_suite.initialize_service("monitoring")
+        await startup_suite.initialize_service("agent_pool")
             
-            # Check for emergency mode activation
-            failed_services = [
-                s for s, status in startup_suite.services.items()
-                if status.status == "failed"
-            ]
+        # Check for emergency mode activation
+        failed_services = [
+        s for s, status in startup_suite.services.items()
+        if status.status == "failed"
+        ]
             
-            if len(failed_services) >= 2:
-                # System should enter emergency mode
-                emergency_mode = True
+        if len(failed_services) >= 2:
+        # System should enter emergency mode
+        emergency_mode = True
                 
-                # In emergency mode, only critical services run
-                critical_services = ["postgres", "redis", "auth_service", "backend"]
-                for service in critical_services:
-                    assert startup_suite.services[service].status == "healthy"
+        # In emergency mode, only critical services run
+        critical_services = ["postgres", "redis", "auth_service", "backend"]
+        for service in critical_services:
+        assert startup_suite.services[service].status == "healthy"
                 
-                assert emergency_mode
+        assert emergency_mode
     
-    @pytest.mark.asyncio
-    async def test_startup_configuration_hot_reload_preparation(self, startup_suite):
+        @pytest.mark.asyncio
+        async def test_startup_configuration_hot_reload_preparation(self, startup_suite):
         """Test 19: Prepare configuration hot-reload capability during startup."""
         # Initialize services
         await startup_suite.initialize_service("redis")
@@ -749,10 +751,10 @@ class TestSystemStartupSequencesL4:
         
         # Mock configuration watcher setup
         config_watcher = {
-            "enabled": True,
-            "watch_paths": ["/config", "/secrets"],
-            "reload_delay": 5,
-            "validation_enabled": True
+        "enabled": True,
+        "watch_paths": ["/config", "/secrets"],
+        "reload_delay": 5,
+        "validation_enabled": True
         }
         
         # Verify hot-reload is configured
@@ -764,22 +766,22 @@ class TestSystemStartupSequencesL4:
         handlers_registered = ["auth_config", "rate_limits", "circuit_breakers"]
         assert len(handlers_registered) > 0
     
-    @pytest.mark.asyncio
-    async def test_startup_zero_downtime_deployment_readiness(self, startup_suite):
+        @pytest.mark.asyncio
+        async def test_startup_zero_downtime_deployment_readiness(self, startup_suite):
         """Test 20: Verify system is ready for zero-downtime deployments."""
         # Initialize all services
         services = ["postgres", "redis", "auth_service", "backend", "websocket"]
         
         for service in services:
-            await startup_suite.initialize_service(service)
+        await startup_suite.initialize_service(service)
         
         # Verify readiness for zero-downtime deployment
         deployment_readiness = {
-            "health_endpoints": all(s.health_endpoint for s in startup_suite.services.values()),
-            "graceful_shutdown": True,  # Mock graceful shutdown capability
-            "session_migration": True,  # Mock session migration capability
-            "connection_draining": True,  # Mock connection draining
-            "rolling_update_support": True  # Mock rolling update support
+        "health_endpoints": all(s.health_endpoint for s in startup_suite.services.values()),
+        "graceful_shutdown": True,  # Mock graceful shutdown capability
+        "session_migration": True,  # Mock session migration capability
+        "connection_draining": True,  # Mock connection draining
+        "rolling_update_support": True  # Mock rolling update support
         }
         
         # All capabilities should be ready

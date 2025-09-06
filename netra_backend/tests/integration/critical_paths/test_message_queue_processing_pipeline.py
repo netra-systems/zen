@@ -3,7 +3,7 @@ from shared.isolated_environment import IsolatedEnvironment
 #!/usr/bin/env python3
 """
 Comprehensive test for message queue processing pipeline:
-1. Queue initialization and health
+    1. Queue initialization and health
 2. Message publishing
 3. Consumer group management
 4. Message ordering guarantees
@@ -11,7 +11,7 @@ Comprehensive test for message queue processing pipeline:
 6. Retry mechanisms
 7. Batch processing
 8. Queue overflow handling
-"""
+""""
 
 # Test framework import - using pytest fixtures instead
 
@@ -55,12 +55,12 @@ class MessageQueueTester:
                 if response.status == 200:
                     data = await response.json()
                     print(f"[OK] Queue service healthy")
-                    print(f"[INFO] Active queues: {data.get('queue_count')}")
-                    print(f"[INFO] Pending messages: {data.get('pending_messages')}")
+                    print(f"[INFO] Active queues: {data.get('queue_count')]")
+                    print(f"[INFO] Pending messages: {data.get('pending_messages')]")
                     return True
                 return False
         except Exception as e:
-            print(f"[ERROR] Queue health check failed: {e}")
+            print(f"[ERROR] Queue health check failed: {e]")
             return False
             
     @pytest.mark.asyncio
@@ -71,7 +71,7 @@ class MessageQueueTester:
             test_messages = []
             for i in range(10):
                 message = {
-                    "id": f"msg_{uuid.uuid4().hex[:8]}",
+                    "id": f"msg_{uuid.uuid4().hex[:8]]",
                     "type": "test_message",
                     "payload": {"index": i, "timestamp": datetime.now(timezone.utc).isoformat()},
                     "priority": i % 3
@@ -85,11 +85,11 @@ class MessageQueueTester:
                         self.messages_sent.append(message["id"])
                         test_messages.append(message["id"])
                         
-            print(f"[OK] Published {len(test_messages)} messages")
+            print(f"[OK] Published {len(test_messages)] messages")
             return len(test_messages) >= 8
             
         except Exception as e:
-            print(f"[ERROR] Message publishing failed: {e}")
+            print(f"[ERROR] Message publishing failed: {e]")
             return False
             
     @pytest.mark.asyncio
@@ -99,7 +99,7 @@ class MessageQueueTester:
         try:
             # Create consumer group
             group_data = {
-                "group_id": f"group_{uuid.uuid4().hex[:8]}",
+                "group_id": f"group_{uuid.uuid4().hex[:8]]",
                 "queue": "test_queue",
                 "max_consumers": 5
             }
@@ -109,7 +109,7 @@ class MessageQueueTester:
                 json=group_data
             ) as response:
                 if response.status in [200, 201]:
-                    print(f"[OK] Consumer group created: {group_data['group_id']}")
+                    print(f"[OK] Consumer group created: {group_data['group_id']]")
                     
                     # Add consumers
                     for i in range(3):
@@ -122,14 +122,14 @@ class MessageQueueTester:
                             json=consumer_data
                         ) as consumer_response:
                             if consumer_response.status in [200, 201]:
-                                print(f"[OK] Consumer {i} added")
+                                print(f"[OK] Consumer {i] added")
                                 
                     return True
                     
             return False
             
         except Exception as e:
-            print(f"[ERROR] Consumer group test failed: {e}")
+            print(f"[ERROR] Consumer group test failed: {e]")
             return False
             
     @pytest.mark.asyncio
@@ -172,7 +172,7 @@ class MessageQueueTester:
             return True
             
         except Exception as e:
-            print(f"[ERROR] Message ordering test failed: {e}")
+            print(f"[ERROR] Message ordering test failed: {e]")
             return False
             
     @pytest.mark.asyncio
@@ -182,7 +182,7 @@ class MessageQueueTester:
         try:
             # Send message that will fail processing
             poison_message = {
-                "id": f"poison_{uuid.uuid4().hex[:8]}",
+                "id": f"poison_{uuid.uuid4().hex[:8]]",
                 "type": "poison_pill",
                 "should_fail": True
             }
@@ -192,7 +192,7 @@ class MessageQueueTester:
                 json={"queue": "main_queue", "message": poison_message}
             ) as response:
                 if response.status in [200, 201]:
-                    print(f"[OK] Poison message sent: {poison_message['id']}")
+                    print(f"[OK] Poison message sent: {poison_message['id']]")
                     
             # Wait for processing attempts
             await asyncio.sleep(3)
@@ -215,7 +215,7 @@ class MessageQueueTester:
             return True
             
         except Exception as e:
-            print(f"[ERROR] DLQ test failed: {e}")
+            print(f"[ERROR] DLQ test failed: {e]")
             return False
             
     @pytest.mark.asyncio
@@ -225,7 +225,7 @@ class MessageQueueTester:
         try:
             # Send message with retry policy
             retry_message = {
-                "id": f"retry_{uuid.uuid4().hex[:8]}",
+                "id": f"retry_{uuid.uuid4().hex[:8]]",
                 "retry_policy": {
                     "max_retries": 3,
                     "backoff_seconds": 1,
@@ -242,18 +242,18 @@ class MessageQueueTester:
                     
                     # Get retry status
                     async with self.session.get(
-                        f"{QUEUE_SERVICE_URL}/messages/{retry_message['id']}/retries"
+                        f"{QUEUE_SERVICE_URL]/messages/{retry_message['id']]/retries"
                     ) as retry_response:
                         if retry_response.status == 200:
                             retry_data = await retry_response.json()
-                            print(f"[INFO] Retry attempts: {retry_data.get('attempts')}")
-                            print(f"[INFO] Next retry: {retry_data.get('next_retry')}")
+                            print(f"[INFO] Retry attempts: {retry_data.get('attempts')]")
+                            print(f"[INFO] Next retry: {retry_data.get('next_retry')]")
                             return True
                             
             return True
             
         except Exception as e:
-            print(f"[ERROR] Retry test failed: {e}")
+            print(f"[ERROR] Retry test failed: {e]")
             return False
             
     @pytest.mark.asyncio
@@ -274,7 +274,7 @@ class MessageQueueTester:
                 json={"queue": "batch_queue", "messages": batch_messages}
             ) as response:
                 if response.status in [200, 201]:
-                    print(f"[OK] Batch of {len(batch_messages)} messages sent")
+                    print(f"[OK] Batch of {len(batch_messages)] messages sent")
                     
                     # Process batch
                     async with self.session.post(
@@ -283,13 +283,13 @@ class MessageQueueTester:
                     ) as process_response:
                         if process_response.status == 200:
                             result = await process_response.json()
-                            print(f"[OK] Processed {result.get('processed')} messages in batches")
+                            print(f"[OK] Processed {result.get('processed')] messages in batches")
                             return True
                             
             return False
             
         except Exception as e:
-            print(f"[ERROR] Batch processing test failed: {e}")
+            print(f"[ERROR] Batch processing test failed: {e]")
             return False
             
     @pytest.mark.asyncio
@@ -316,13 +316,13 @@ class MessageQueueTester:
                                 overflow_count += 1
                                 
                     if overflow_count > 0:
-                        print(f"[OK] Queue overflow handled: {overflow_count} messages rejected")
+                        print(f"[OK] Queue overflow handled: {overflow_count] messages rejected")
                         return True
                         
             return True
             
         except Exception as e:
-            print(f"[ERROR] Queue overflow test failed: {e}")
+            print(f"[ERROR] Queue overflow test failed: {e]")
             return False
             
     @pytest.mark.asyncio
@@ -334,7 +334,7 @@ class MessageQueueTester:
             priorities = []
             for priority in [3, 1, 2, 1, 3]:
                 msg = {
-                    "id": f"prio_{priority}_{uuid.uuid4().hex[:4]}",
+                    "id": f"prio_{priority]_{uuid.uuid4().hex[:4]]",
                     "priority": priority
                 }
                 priorities.append((priority, msg["id"]))
@@ -365,7 +365,7 @@ class MessageQueueTester:
                 return True
                 
         except Exception as e:
-            print(f"[ERROR] Priority processing test failed: {e}")
+            print(f"[ERROR] Priority processing test failed: {e]")
             return False
             
     async def run_all_tests(self) -> Dict[str, bool]:

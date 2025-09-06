@@ -1,7 +1,7 @@
 """
 L3 Integration Test: Session Cleanup
 Tests session cleanup and garbage collection
-"""
+""""
 
 import sys
 from pathlib import Path

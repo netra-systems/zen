@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
 """
 Comprehensive test to verify multi-tenant session isolation:
-1. Multiple users create separate sessions
+    1. Multiple users create separate sessions
 2. Data isolation between tenants
 3. Concurrent operations without interference
 4. Resource quota enforcement per tenant
 5. Cross-tenant security validation
 
 This test ensures complete isolation between different tenant sessions.
-"""
+""""
 
 # Test framework import - using pytest fixtures instead
 
@@ -83,7 +83,7 @@ class TenantSession:
                 }
             ) as response:
                 if response.status not in [200, 201, 409]:
-                    print(f"[{self.config['name']}] Registration failed: {response.status}")
+                    print(f"[{self.config['name']]] Registration failed: {response.status]")
                     return False
                     
             # Login
@@ -100,11 +100,11 @@ class TenantSession:
                     self.user_id = data.get("user_id")
                     return True
                 else:
-                    print(f"[{self.config['name']}] Login failed: {response.status}")
+                    print(f"[{self.config['name']]] Login failed: {response.status]")
                     return False
                     
         except Exception as e:
-            print(f"[{self.config['name']}] Setup error: {e}")
+            print(f"[{self.config['name']]] Setup error: {e]")
             return False
             
     async def cleanup(self):
@@ -138,12 +138,12 @@ class MultiTenantIsolationTester:
             tenant = TenantSession(config)
             if await tenant.setup():
                 self.tenants.append(tenant)
-                print(f"[OK] Tenant {config['name']} setup complete")
+                print(f"[OK] Tenant {config['name']] setup complete")
             else:
-                print(f"[ERROR] Tenant {config['name']} setup failed")
+                print(f"[ERROR] Tenant {config['name']] setup failed")
                 return False
                 
-        print(f"[OK] All {len(self.tenants)} tenants setup successfully")
+        print(f"[OK] All {len(self.tenants)] tenants setup successfully")
         return True
         
     @pytest.mark.asyncio
@@ -157,8 +157,8 @@ class MultiTenantIsolationTester:
             # Create threads
             for i in range(3):
                 thread_data = {
-                    "title": f"{tenant.config['name']} Thread {i+1}",
-                    "description": f"Private thread for {tenant.config['org_id']}",
+                    "title": f"{tenant.config['name']] Thread {i+1]",
+                    "description": f"Private thread for {tenant.config['org_id']]",
                     "metadata": {
                         "org_id": tenant.config["org_id"],
                         "private": True
@@ -174,10 +174,10 @@ class MultiTenantIsolationTester:
                         data = await response.json()
                         tenant.thread_ids.append(data.get("thread_id"))
                     else:
-                        print(f"[ERROR] Thread creation failed for {tenant.config['name']}")
+                        print(f"[ERROR] Thread creation failed for {tenant.config['name']]")
                         return False
                         
-            print(f"[OK] Created {len(tenant.thread_ids)} threads for {tenant.config['name']}")
+            print(f"[OK] Created {len(tenant.thread_ids)] threads for {tenant.config['name']]")
             
         return True
         
@@ -200,15 +200,15 @@ class MultiTenantIsolationTester:
                         headers=headers
                     ) as response:
                         if response.status == 200:
-                            print(f"[CRITICAL] {tenant.config['name']} accessed {other_tenant.config['name']}'s thread!")
+                            print(f"[CRITICAL] {tenant.config['name']] accessed {other_tenant.config['name']]'s thread!")
                             return False
                         elif response.status in [403, 404]:
                             # Expected - access denied or not found
                             pass
                         else:
-                            print(f"[WARNING] Unexpected status {response.status} for isolation check")
+                            print(f"[WARNING] Unexpected status {response.status] for isolation check")
                             
-            print(f"[OK] {tenant.config['name']} properly isolated from other tenants")
+            print(f"[OK] {tenant.config['name']] properly isolated from other tenants")
             
         return True
         
@@ -228,7 +228,7 @@ class MultiTenantIsolationTester:
                     thread_id = random.choice(tenant.thread_ids)
                     message_data = {
                         "thread_id": thread_id,
-                        "content": f"Message {i} from {tenant.config['name']}",
+                        "content": f"Message {i] from {tenant.config['name']]",
                         "timestamp": datetime.now(timezone.utc).isoformat()
                     }
                     
@@ -285,13 +285,13 @@ class MultiTenantIsolationTester:
                 
                 data = json.loads(response)
                 if data.get("type") != "auth_success":
-                    print(f"[ERROR] WebSocket auth failed for {tenant.config['name']}")
+                    print(f"[ERROR] WebSocket auth failed for {tenant.config['name']]")
                     return False
                     
-                print(f"[OK] WebSocket connected for {tenant.config['name']}")
+                print(f"[OK] WebSocket connected for {tenant.config['name']]")
                 
             except Exception as e:
-                print(f"[ERROR] WebSocket connection failed for {tenant.config['name']}: {e}")
+                print(f"[ERROR] WebSocket connection failed for {tenant.config['name']]: {e]")
                 return False
                 
         # Test message isolation
@@ -299,7 +299,7 @@ class MultiTenantIsolationTester:
             # Send a private message
             private_message = {
                 "type": "private_message",
-                "content": f"Private data from {tenant.config['org_id']}",
+                "content": f"Private data from {tenant.config['org_id']]",
                 "org_id": tenant.config["org_id"]
             }
             await tenant.ws_connection.send(json.dumps(private_message))
@@ -321,7 +321,7 @@ class MultiTenantIsolationTester:
                         
                         # Verify message belongs to this tenant
                         if "org_id" in data and data["org_id"] != tenant.config["org_id"]:
-                            print(f"[CRITICAL] {tenant.config['name']} received message from {data['org_id']}!")
+                            print(f"[CRITICAL] {tenant.config['name']] received message from {data['org_id']]!")
                             return False
                             
                         tenant.received_messages.append(data)
@@ -330,7 +330,7 @@ class MultiTenantIsolationTester:
                         break  # No more messages
                         
             except Exception as e:
-                print(f"[ERROR] Message receive error for {tenant.config['name']}: {e}")
+                print(f"[ERROR] Message receive error for {tenant.config['name']]: {e]")
                 
         print(f"[OK] WebSocket message isolation verified")
         return True
@@ -350,7 +350,7 @@ class MultiTenantIsolationTester:
             ) as response:
                 if response.status == 200:
                     usage_data = await response.json()
-                    print(f"[INFO] {tenant.config['name']} usage: {usage_data}")
+                    print(f"[INFO] {tenant.config['name']] usage: {usage_data]")
                     
             # Try to exceed quota (create many threads)
             quota_exceeded = False
@@ -367,14 +367,14 @@ class MultiTenantIsolationTester:
                 ) as response:
                     if response.status == 429:  # Rate limited or quota exceeded
                         quota_exceeded = True
-                        print(f"[OK] Quota enforced for {tenant.config['name']} at thread {i}")
+                        print(f"[OK] Quota enforced for {tenant.config['name']] at thread {i]")
                         break
                     elif response.status not in [200, 201]:
                         # Other error
                         break
                         
             if not quota_exceeded and i > 50:
-                print(f"[WARNING] No quota enforcement detected for {tenant.config['name']}")
+                print(f"[WARNING] No quota enforcement detected for {tenant.config['name']]")
                 
         return True
         
@@ -394,7 +394,7 @@ class MultiTenantIsolationTester:
                 headers=headers
             ) as response:
                 if response.status == 200:
-                    print(f"[OK] {tenant.config['name']} logged out")
+                    print(f"[OK] {tenant.config['name']] logged out")
                     
             # Try to use the old token
             async with tenant.session.get(
@@ -405,7 +405,7 @@ class MultiTenantIsolationTester:
                     print(f"[OK] Old token properly invalidated")
                     return True
                 else:
-                    print(f"[ERROR] Old token still active: {response.status}")
+                    print(f"[ERROR] Old token still active: {response.status]")
                     return False
                     
         return True
@@ -432,7 +432,7 @@ class MultiTenantIsolationTester:
             },
             # Path traversal attempt
             {
-                "endpoint": f"{DEV_BACKEND_URL}/api/threads/../../../{victim.thread_ids[0] if victim.thread_ids else 'test'}",
+                "endpoint": f"{DEV_BACKEND_URL]/api/threads/../../../{victim.thread_ids[0] if victim.thread_ids else 'test']",
                 "method": "GET",
                 "params": {}
             },
@@ -440,7 +440,7 @@ class MultiTenantIsolationTester:
             {
                 "endpoint": f"{DEV_BACKEND_URL}/api/threads",
                 "method": "GET",
-                "headers_override": {"Authorization": f"Bearer {victim.auth_token[:20]}fake"}
+                "headers_override": {"Authorization": f"Bearer {victim.auth_token[:20]]fake"]
             }
         ]
         
@@ -461,7 +461,7 @@ class MultiTenantIsolationTester:
                             data = await response.json()
                             # Check if we got victim's data
                             if victim.config["org_id"] in str(data):
-                                print(f"[CRITICAL] Security breach detected: {vector}")
+                                print(f"[CRITICAL] Security breach detected: {vector]")
                                 return False
                                 
             except Exception as e:
@@ -487,7 +487,7 @@ class MultiTenantIsolationTester:
                     headers=headers
                 ) as response:
                     if response.status not in [200, 204]:
-                        print(f"[ERROR] Failed to delete thread {thread_id}")
+                        print(f"[ERROR] Failed to delete thread {thread_id]")
                         
             # Verify deletion
             async with tenant.session.get(
@@ -497,7 +497,7 @@ class MultiTenantIsolationTester:
                 if response.status == 200:
                     data = await response.json()
                     if len(data.get("threads", [])) == 0:
-                        print(f"[OK] All data cleaned up for {tenant.config['name']}")
+                        print(f"[OK] All data cleaned up for {tenant.config['name']]")
                         return True
                         
         return True
@@ -553,7 +553,7 @@ async def test_multi_tenant_session_isolation():
         if passed_tests == total_tests:
             print("\n[SUCCESS] All multi-tenant isolation tests passed!")
         else:
-            print(f"\n[WARNING] {total_tests - passed_tests} tests failed.")
+            print(f"\n[WARNING] {total_tests - passed_tests] tests failed.")
             
         # Assert all tests passed
         assert all(results.values()), f"Some tests failed: {results}"

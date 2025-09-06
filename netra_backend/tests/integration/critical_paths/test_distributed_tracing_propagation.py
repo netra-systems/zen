@@ -1,7 +1,9 @@
+from unittest.mock import Mock, patch, MagicMock
+
 """Distributed Tracing Propagation L3 Integration Tests
 
 Business Value Justification (BVJ):
-- Segment: Platform/Internal (operational excellence for all tiers)
+    - Segment: Platform/Internal (operational excellence for all tiers)
 - Business Goal: Complete request tracing for performance optimization and debugging
 - Value Impact: Enables precise performance bottleneck identification worth $20K MRR optimization
 - Strategic Impact: Reduces MTTR from hours to minutes, preventing customer churn
@@ -9,7 +11,7 @@ Business Value Justification (BVJ):
 Critical Path: Request initiation -> Trace context creation -> Cross-service propagation -> Span correlation -> Performance analysis
 Coverage: OpenTelemetry integration, trace context propagation, span relationships, performance correlation
 L3 Realism: Tests with real distributed services and actual trace propagation
-"""
+""""
 
 import sys
 from pathlib import Path
@@ -177,7 +179,7 @@ class DistributedTracingValidator:
     
     async def _create_child_span(self, trace_id: str, parent_span_id: str, 
                                service_name: str, trace_start: datetime) -> TraceSpan:
-        """Create child span for specific service."""
+                                   """Create child span for specific service."""
         span_id = str(uuid.uuid4())
         
         # Service-specific operation durations and characteristics
@@ -200,7 +202,7 @@ class DistributedTracingValidator:
             "websocket-service": {
                 "duration_ms": 15 + (time.time() % 10),  # 15-25ms
                 "operation": "send_response",
-                "tags": {"ws.connection_id": str(uuid.uuid4())[:8], "ws.room": "user_session"}
+                "tags": {"ws.connection_id": str(uuid.uuid4())[:8], "ws.room": "user_session"]
             }
         }
         
@@ -234,7 +236,7 @@ class DistributedTracingValidator:
                 {
                     "timestamp": span_start.isoformat(),
                     "level": "info",
-                    "message": f"Started {config['operation']} in {service_name}",
+                    "message": f"Started {config['operation']] in {service_name]",
                     "parent_span_id": parent_span_id
                 }
             ],
@@ -484,11 +486,11 @@ async def distributed_tracing_validator():
     await validator.cleanup()
 
 @pytest.mark.asyncio
-async def test_trace_context_propagation_l3(distributed_tracing_validator):
-    """Test trace context propagation across distributed services.
+    async def test_trace_context_propagation_l3(distributed_tracing_validator):
+        """Test trace context propagation across distributed services.
     
     L3: Tests with real service calls and trace context propagation.
-    """
+    """"
     # Create distributed trace across multiple services
     trace_context = await distributed_tracing_validator.create_distributed_trace(
         "user_agent_interaction", service_count=4
@@ -516,7 +518,7 @@ async def test_trace_performance_analysis_l3(distributed_tracing_validator):
     """Test trace performance analysis and bottleneck identification.
     
     L3: Tests performance correlation across real service traces.
-    """
+    """"
     # Create trace with varying performance characteristics
     trace_context = await distributed_tracing_validator.create_distributed_trace(
         "performance_test_operation", service_count=5
@@ -542,7 +544,7 @@ async def test_concurrent_trace_correlation_l3(distributed_tracing_validator):
     """Test trace correlation accuracy with concurrent operations.
     
     L3: Tests correlation accuracy under concurrent load.
-    """
+    """"
     # Test correlation with multiple concurrent traces
     correlation_results = await distributed_tracing_validator.test_correlation_accuracy(trace_count=8)
     
@@ -560,7 +562,7 @@ async def test_trace_error_propagation_l3(distributed_tracing_validator):
     """Test error propagation and status tracking in distributed traces.
     
     L3: Tests error tracking across service boundaries.
-    """
+    """"
     # Create trace with simulated errors
     trace_context = await distributed_tracing_validator.create_distributed_trace(
         "error_test_operation", service_count=3
@@ -596,7 +598,7 @@ async def test_trace_sampling_consistency_l3(distributed_tracing_validator):
     """Test trace sampling consistency across service boundaries.
     
     L3: Tests sampling decisions propagate correctly.
-    """
+    """"
     # Create multiple traces to test sampling
     sampled_traces = []
     for i in range(20):

@@ -1,15 +1,17 @@
+from unittest.mock import Mock, patch, MagicMock
+
 """
 L3 Integration Test: WebSocket Binary Message Handling with Redis
 
 Business Value Justification (BVJ):
-- Segment: Enterprise
+    - Segment: Enterprise
 - Business Goal: Feature enablement - Support file uploads and rich media
 - Value Impact: Enables document sharing and multimedia collaboration
 - Strategic Impact: $60K MRR - Binary data support for enterprise workflows
 
 L3 Test: Uses real Redis for binary message storage and WebSocket transmission.
 Binary target: 10MB file support with <5% corruption rate.
-"""
+""""
 
 from netra_backend.app.websocket_core import WebSocketManager
 # Test framework import - using pytest fixtures instead
@@ -17,7 +19,7 @@ from pathlib import Path
 import sys
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
 from test_framework.docker.unified_docker_manager import UnifiedDockerManager
-from test_framework.redis.test_redis_manager import TestRedisManager
+from test_framework.redis_test_utils_test_utils.test_redis_manager import TestRedisManager
 from shared.isolated_environment import IsolatedEnvironment
 
 import pytest
@@ -50,7 +52,6 @@ from netra_backend.tests.integration.helpers.redis_l3_helpers import (
 )
 
 class BinaryMessageHandler:
-    pass
 
     """Handle binary message transmission for WebSocket."""
     
@@ -180,7 +181,7 @@ class BinaryMessageHandler:
             
             # Delete chunks
 
-            chunk_keys = [f"{self.binary_storage_prefix}:{chunk_id}" for chunk_id in manifest["chunk_ids"]]
+            chunk_keys = [f"{self.binary_storage_prefix]:{chunk_id]" for chunk_id in manifest["chunk_ids"]]
 
             if chunk_keys:
 
@@ -221,12 +222,10 @@ class BinaryMessageHandler:
 @pytest.mark.integration
 
 class TestWebSocketBinaryMessageHandlingL3:
-    pass
 
     """L3 integration tests for WebSocket binary message handling."""
     
     @pytest.fixture(scope="class")
-
     async def redis_container(self):
 
         """Set up Redis container for binary message testing."""
@@ -239,9 +238,8 @@ class TestWebSocketBinaryMessageHandlingL3:
 
         await container.stop()
     
-    @pytest.fixture
-
-    async def redis_client(self, redis_container):
+        @pytest.fixture
+        async def redis_client(self, redis_container):
 
         """Create Redis client for binary storage."""
 
@@ -254,9 +252,8 @@ class TestWebSocketBinaryMessageHandlingL3:
 
         await client.close()
     
-    @pytest.fixture
-
-    async def websocket_manager(self, redis_container):
+        @pytest.fixture
+        async def websocket_manager(self, redis_container):
 
         """Create WebSocket manager for binary testing."""
 
@@ -265,61 +262,59 @@ class TestWebSocketBinaryMessageHandlingL3:
         # Mock: Redis external service isolation for fast, reliable tests without network dependency
         with patch('netra_backend.app.websocket_manager.redis_manager') as mock_redis_mgr:
 
-            test_redis_mgr = RedisManager()
+        test_redis_mgr = RedisManager()
 
-            test_redis_mgr.enabled = True
+        test_redis_mgr.enabled = True
 
-            test_redis_mgr.redis_client = redis.Redis.from_url(redis_url, decode_responses=False)
+        test_redis_mgr.redis_client = redis.Redis.from_url(redis_url, decode_responses=False)
 
-            mock_redis_mgr.return_value = test_redis_mgr
+        mock_redis_mgr.return_value = test_redis_mgr
 
-            mock_redis_mgr.get_client.return_value = test_redis_mgr.redis_client
+        mock_redis_mgr.get_client.return_value = test_redis_mgr.redis_client
             
-            manager = WebSocketManager()
+        manager = WebSocketManager()
 
-            yield manager
+        yield manager
             
-            await test_redis_mgr.redis_client.close()
+        await test_redis_mgr.redis_client.close()
     
-    @pytest.fixture
-
-    async def binary_handler(self, redis_client):
+        @pytest.fixture
+        async def binary_handler(self, redis_client):
 
         """Create binary message handler."""
 
         await asyncio.sleep(0)
-    return BinaryMessageHandler(redis_client)
+        return BinaryMessageHandler(redis_client)
     
-    @pytest.fixture
-
-    def test_users(self):
-    """Use real service instance."""
-    # TODO: Initialize real service
-    return None
+        @pytest.fixture
+        def test_users(self):
+        """Use real service instance."""
+        # TODO: Initialize real service
+        return None
 
         """Create test users for binary testing."""
 
         return [
 
-            User(
+        User(
 
-                id=f"binary_user_{i}",
+        id=f"binary_user_{i}",
 
-                email=f"binaryuser{i}@example.com", 
+        email=f"binaryuser{i}@example.com", 
 
-                username=f"binaryuser{i}",
+        username=f"binaryuser{i}",
 
-                is_active=True,
+        is_active=True,
 
-                created_at=datetime.now(timezone.utc)
+        created_at=datetime.now(timezone.utc)
 
-            )
+        )
 
-            for i in range(3)
+        for i in range(3)
 
         ]
     
-    def create_test_binary_data(self, size_kb: int = 100) -> bytes:
+        def create_test_binary_data(self, size_kb: int = 100) -> bytes:
 
         """Create test binary data of specified size."""
         # Create pseudo-random binary data
@@ -328,11 +323,11 @@ class TestWebSocketBinaryMessageHandlingL3:
 
         for i in range(size_kb * 1024):
 
-            data.append((i * 7 + 13) % 256)  # Pseudo-random pattern
+        data.append((i * 7 + 13) % 256)  # Pseudo-random pattern
 
         return bytes(data)
     
-    def create_test_image_data(self) -> Tuple[bytes, str]:
+        def create_test_image_data(self) -> Tuple[bytes, str]:
 
         """Create test image-like binary data."""
         # Simple BMP header + data
@@ -367,16 +362,16 @@ class TestWebSocketBinaryMessageHandlingL3:
 
         for y in range(height):
 
-            for x in range(width):
+        for x in range(width):
 
-                blue = (x * 255) // width
+        blue = (x * 255) // width
 
-                pixel_data.extend([blue, 0, 0])  # BGR format
+        pixel_data.extend([blue, 0, 0])  # BGR format
         
         return header + pixel_data, "test_image.bmp"
     
-    @pytest.mark.asyncio
-    async def test_basic_binary_message_creation(self, binary_handler):
+        @pytest.mark.asyncio
+        async def test_basic_binary_message_creation(self, binary_handler):
 
         """Test basic binary message creation and structure."""
 
@@ -384,11 +379,11 @@ class TestWebSocketBinaryMessageHandlingL3:
         
         binary_message = binary_handler.create_binary_message(
 
-            test_data, 
+        test_data, 
 
-            "application/pdf", 
+        "application/pdf", 
 
-            "test_document.pdf"
+        "test_document.pdf"
 
         )
         
@@ -420,8 +415,8 @@ class TestWebSocketBinaryMessageHandlingL3:
 
         assert binary_message["hash"] == expected_hash
     
-    @pytest.mark.asyncio
-    async def test_binary_chunked_storage_and_retrieval(self, binary_handler):
+        @pytest.mark.asyncio
+        async def test_binary_chunked_storage_and_retrieval(self, binary_handler):
 
         """Test binary data chunked storage and retrieval."""
 
@@ -459,8 +454,8 @@ class TestWebSocketBinaryMessageHandlingL3:
 
         await binary_handler.cleanup_binary_message(message_id)
     
-    @pytest.mark.asyncio
-    async def test_large_binary_file_handling(self, binary_handler):
+        @pytest.mark.asyncio
+        async def test_large_binary_file_handling(self, binary_handler):
 
         """Test handling of large binary files."""
 
@@ -506,8 +501,8 @@ class TestWebSocketBinaryMessageHandlingL3:
 
         await binary_handler.cleanup_binary_message(message_id)
     
-    @pytest.mark.asyncio
-    async def test_binary_message_websocket_transmission(self, websocket_manager, binary_handler, test_users):
+        @pytest.mark.asyncio
+        async def test_binary_message_websocket_transmission(self, websocket_manager, binary_handler, test_users):
 
         """Test binary message transmission through WebSocket."""
 
@@ -527,11 +522,11 @@ class TestWebSocketBinaryMessageHandlingL3:
 
         binary_message = binary_handler.create_binary_message(
 
-            image_data, 
+        image_data, 
 
-            "image/bmp", 
+        "image/bmp", 
 
-            filename
+        filename
 
         )
         
@@ -545,17 +540,17 @@ class TestWebSocketBinaryMessageHandlingL3:
 
         notification_message = {
 
-            "type": "binary_notification",
+        "type": "binary_notification",
 
-            "message_id": message_id,
+        "message_id": message_id,
 
-            "content_type": binary_message["content_type"],
+        "content_type": binary_message["content_type"],
 
-            "filename": binary_message["filename"],
+        "filename": binary_message["filename"],
 
-            "size": binary_message["size"],
+        "size": binary_message["size"],
 
-            "hash": binary_message["hash"]
+        "hash": binary_message["hash"]
 
         }
         
@@ -581,8 +576,8 @@ class TestWebSocketBinaryMessageHandlingL3:
 
         await binary_handler.cleanup_binary_message(message_id)
     
-    @pytest.mark.asyncio
-    async def test_concurrent_binary_uploads(self, binary_handler, test_users):
+        @pytest.mark.asyncio
+        async def test_concurrent_binary_uploads(self, binary_handler, test_users):
 
         """Test concurrent binary file uploads."""
 
@@ -596,11 +591,11 @@ class TestWebSocketBinaryMessageHandlingL3:
 
         for i in range(concurrent_uploads):
 
-            test_data = self.create_test_binary_data(100 + i * 50)  # Varying sizes
+        test_data = self.create_test_binary_data(100 + i * 50)  # Varying sizes
 
-            message_id = str(uuid4())
+        message_id = str(uuid4())
 
-            test_data_sets.append((message_id, test_data))
+        test_data_sets.append((message_id, test_data))
         
         # Start concurrent uploads
 
@@ -608,9 +603,9 @@ class TestWebSocketBinaryMessageHandlingL3:
 
         for message_id, test_data in test_data_sets:
 
-            task = binary_handler.store_binary_chunks(message_id, test_data)
+        task = binary_handler.store_binary_chunks(message_id, test_data)
 
-            upload_tasks.append((message_id, test_data, task))
+        upload_tasks.append((message_id, test_data, task))
         
         # Wait for uploads to complete
 
@@ -618,15 +613,15 @@ class TestWebSocketBinaryMessageHandlingL3:
 
         for message_id, test_data, task in upload_tasks:
 
-            try:
+        try:
 
-                chunk_ids = await task
+        chunk_ids = await task
 
-                upload_results.append((message_id, test_data, chunk_ids, True))
+        upload_results.append((message_id, test_data, chunk_ids, True))
 
-            except Exception as e:
+        except Exception as e:
 
-                upload_results.append((message_id, test_data, None, False))
+        upload_results.append((message_id, test_data, None, False))
         
         upload_time = time.time() - upload_start
         
@@ -646,11 +641,11 @@ class TestWebSocketBinaryMessageHandlingL3:
         
         for message_id, original_data, chunk_ids, success in upload_results:
 
-            if success:
+        if success:
 
-                task = binary_handler.retrieve_binary_chunks(message_id)
+        task = binary_handler.retrieve_binary_chunks(message_id)
 
-                retrieval_tasks.append((message_id, original_data, task))
+        retrieval_tasks.append((message_id, original_data, task))
         
         # Wait for retrievals
 
@@ -658,17 +653,17 @@ class TestWebSocketBinaryMessageHandlingL3:
 
         for message_id, original_data, task in retrieval_tasks:
 
-            try:
+        try:
 
-                retrieved_data = await task
+        retrieved_data = await task
 
-                integrity = binary_handler.verify_binary_integrity(original_data, retrieved_data)
+        integrity = binary_handler.verify_binary_integrity(original_data, retrieved_data)
 
-                retrieval_results.append((message_id, integrity["hash_match"]))
+        retrieval_results.append((message_id, integrity["hash_match"]))
 
-            except Exception:
+        except Exception:
 
-                retrieval_results.append((message_id, False))
+        retrieval_results.append((message_id, False))
         
         retrieval_time = time.time() - retrieval_start
         
@@ -684,12 +679,12 @@ class TestWebSocketBinaryMessageHandlingL3:
 
         for message_id, _, _, success in upload_results:
 
-            if success:
+        if success:
 
-                await binary_handler.cleanup_binary_message(message_id)
+        await binary_handler.cleanup_binary_message(message_id)
     
-    @pytest.mark.asyncio
-    async def test_binary_message_size_limits(self, binary_handler):
+        @pytest.mark.asyncio
+        async def test_binary_message_size_limits(self, binary_handler):
 
         """Test binary message size limit enforcement."""
         # Test within limits
@@ -720,8 +715,8 @@ class TestWebSocketBinaryMessageHandlingL3:
         
         # The size limit would be enforced at application level before storage
     
-    @pytest.mark.asyncio
-    async def test_binary_corruption_detection(self, binary_handler):
+        @pytest.mark.asyncio
+        async def test_binary_corruption_detection(self, binary_handler):
 
         """Test detection of binary data corruption."""
 
@@ -735,7 +730,7 @@ class TestWebSocketBinaryMessageHandlingL3:
         
         # Simulate corruption by modifying a chunk
 
-        corrupt_chunk_key = f"{binary_handler.binary_storage_prefix}:{chunk_ids[len(chunk_ids)//2]}"
+        corrupt_chunk_key = f"{binary_handler.binary_storage_prefix]:{chunk_ids[len(chunk_ids)//2]]"
 
         corrupted_data = b"CORRUPTED_DATA_" + b"x" * 1000
 

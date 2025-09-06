@@ -1,14 +1,16 @@
+import asyncio
+
 """Team Creation and Permission Management Critical Path Tests
 
 Business Value Justification (BVJ):
-- Segment: Mid to Enterprise (team collaboration features)
+    - Segment: Mid to Enterprise (team collaboration features)
 - Business Goal: Multi-user workflows protecting $100K-$200K MRR
 - Value Impact: Team productivity, enterprise sales, user retention
 - Strategic Impact: Revenue pipeline tier differentiation
 
 Critical Path: Team creation -> Role assignment -> Permission validation
 Coverage: Team ownership, role-based permissions, permission inheritance
-"""
+""""
 
 import sys
 from pathlib import Path
@@ -39,7 +41,7 @@ class TestTeamCreationPermissions:
     @pytest.mark.asyncio
     async def test_team_creation_and_ownership(self, team_manager: TeamCollaborationManager):
         """Test team creation and owner permission assignment."""
-        owner_id = f"user_{uuid.uuid4().hex[:8]}"
+        owner_id = f"user_{uuid.uuid4().hex[:8]]"
         team = await team_manager.create_team(owner_id, "New Team", "pro")
         
         # Verify team creation
@@ -62,14 +64,14 @@ class TestTeamCreationPermissions:
     async def test_role_based_permission_matrix(self, team_manager: TeamCollaborationManager):
         """Test comprehensive role-based permission matrix validation."""
         # Create team with owner
-        owner_id = f"user_{uuid.uuid4().hex[:8]}"
+        owner_id = f"user_{uuid.uuid4().hex[:8]]"
         team = await team_manager.create_team(owner_id, "Test Team", "enterprise")
         
         # Add members with different roles
-        admin_id = f"user_{uuid.uuid4().hex[:8]}"
-        member_id = f"user_{uuid.uuid4().hex[:8]}"
-        guest_id = f"user_{uuid.uuid4().hex[:8]}"
-        viewer_id = f"user_{uuid.uuid4().hex[:8]}"
+        admin_id = f"user_{uuid.uuid4().hex[:8]]"
+        member_id = f"user_{uuid.uuid4().hex[:8]]"
+        guest_id = f"user_{uuid.uuid4().hex[:8]]"
+        viewer_id = f"user_{uuid.uuid4().hex[:8]]"
         
         # Create and accept invitations
         admin_invitation = await team_manager.invite_user(team.team_id, owner_id, "admin@test.com", TeamRole.ADMIN)
@@ -133,11 +135,11 @@ class TestTeamCreationPermissions:
     @pytest.mark.asyncio
     async def test_permission_inheritance_and_override(self, team_manager: TeamCollaborationManager):
         """Test permission inheritance and custom permission overrides."""
-        owner_id = f"user_{uuid.uuid4().hex[:8]}"
+        owner_id = f"user_{uuid.uuid4().hex[:8]]"
         team = await team_manager.create_team(owner_id, "Inheritance Team", "enterprise")
         
         # Add member
-        member_id = f"user_{uuid.uuid4().hex[:8]}"
+        member_id = f"user_{uuid.uuid4().hex[:8]]"
         member_invitation = await team_manager.invite_user(team.team_id, owner_id, "member@test.com", TeamRole.MEMBER)
         await team_manager.accept_invitation(member_invitation["token"], member_id)
         
@@ -166,9 +168,9 @@ class TestTeamCreationPermissions:
     async def test_plan_tier_restrictions(self, team_manager: TeamCollaborationManager):
         """Test plan tier-based restrictions for team features."""
         # Create teams with different plan tiers
-        free_owner_id = f"user_{uuid.uuid4().hex[:8]}"
-        pro_owner_id = f"user_{uuid.uuid4().hex[:8]}"
-        enterprise_owner_id = f"user_{uuid.uuid4().hex[:8]}"
+        free_owner_id = f"user_{uuid.uuid4().hex[:8]]"
+        pro_owner_id = f"user_{uuid.uuid4().hex[:8]]"
+        enterprise_owner_id = f"user_{uuid.uuid4().hex[:8]]"
         
         free_team = await team_manager.create_team(free_owner_id, "Free Team", "free")
         pro_team = await team_manager.create_team(pro_owner_id, "Pro Team", "pro")

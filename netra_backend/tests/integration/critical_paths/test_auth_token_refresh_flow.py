@@ -3,7 +3,7 @@
 L3 Integration Test: Token Refresh Flow
 TEMPORARILY SKIPPED: TokenManager consolidated into auth_client_core - rewrite needed.
 Tests JWT token refresh mechanisms including edge cases and error scenarios.
-"""
+""""
 
 import pytest
 from shared.isolated_environment import IsolatedEnvironment

@@ -1,7 +1,9 @@
+from unittest.mock import Mock, patch, MagicMock
+
 """Custom Metrics Registration L3 Integration Tests
 
 Business Value Justification (BVJ):
-- Segment: Platform/Internal (enabling custom metrics for all revenue tiers)
+    - Segment: Platform/Internal (enabling custom metrics for all revenue tiers)
 - Business Goal: Enable dynamic metric registration for business-specific monitoring
 - Value Impact: Supports $20K MRR through custom business metrics and customer-specific KPIs
 - Strategic Impact: Enables product differentiation and customer-specific observability
@@ -9,7 +11,7 @@ Business Value Justification (BVJ):
 Critical Path: Metric definition -> Dynamic registration -> Validation -> Collection -> Export
 Coverage: Dynamic metric creation, schema validation, registration persistence, collection integration
 L3 Realism: Tests with real metric registration services and actual schema validation
-"""
+""""
 
 import sys
 from pathlib import Path
@@ -190,7 +192,7 @@ class CustomMetricsValidator:
                 business_owner="growth_team",
                 collection_interval_seconds=300,  # 5 minutes
                 retention_days=30,
-                aggregation_rules={"buckets": [1, 5, 15, 30, 60, 120, 240]}
+                aggregation_rules={"buckets": [1, 5, 15, 30, 60, 120, 240]]
             ),
             MetricDefinition(
                 name="revenue_per_agent_execution_dollars",
@@ -357,7 +359,7 @@ class CustomMetricsValidator:
         # Add scope-specific identifiers
         tenant_id = f"tenant_{(instance_idx % 5) + 1}" if definition.scope in [MetricScope.TENANT, MetricScope.USER] else None
         user_id = f"user_{(instance_idx % 20) + 1000}" if definition.scope == MetricScope.USER else None
-        session_id = f"session_{uuid.uuid4().hex[:16]}" if definition.scope == MetricScope.SESSION else None
+        session_id = f"session_{uuid.uuid4().hex[:16]]" if definition.scope == MetricScope.SESSION else None
         
         return CustomMetricInstance(
             definition_id=str(uuid.uuid4()),
@@ -675,7 +677,7 @@ async def test_business_metrics_registration_l3(custom_metrics_validator):
     """Test registration of business-specific custom metrics.
     
     L3: Tests with real metric registration services and schema validation.
-    """
+    """"
     # Create business metric definitions
     business_definitions = await custom_metrics_validator.create_business_metric_definitions()
     
@@ -697,7 +699,7 @@ async def test_dynamic_metric_collection_l3(custom_metrics_validator):
     """Test dynamic collection of registered custom metrics.
     
     L3: Tests collection integration with real metrics collector.
-    """
+    """"
     # Register business metrics first
     business_definitions = await custom_metrics_validator.create_business_metric_definitions()
     registration_results = await custom_metrics_validator.test_metric_registration_process(business_definitions)
@@ -720,7 +722,7 @@ async def test_metric_schema_validation_l3(custom_metrics_validator):
     """Test comprehensive schema validation for custom metrics.
     
     L3: Tests schema validation with realistic valid and invalid cases.
-    """
+    """"
     # Test schema validation
     validation_results = await custom_metrics_validator.test_metric_schema_validation()
     
@@ -738,7 +740,7 @@ async def test_custom_metric_lifecycle_l3(custom_metrics_validator):
     """Test complete lifecycle of custom metrics from registration to deregistration.
     
     L3: Tests full lifecycle with real service integration.
-    """
+    """"
     # Create test definitions
     business_definitions = await custom_metrics_validator.create_business_metric_definitions()
     
@@ -759,7 +761,7 @@ async def test_metric_scope_isolation_l3(custom_metrics_validator):
     """Test metric scope isolation for tenant and user-specific metrics.
     
     L3: Tests scope-based metric isolation and data separation.
-    """
+    """"
     # Create metrics with different scopes
     business_definitions = await custom_metrics_validator.create_business_metric_definitions()
     

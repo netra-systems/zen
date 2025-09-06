@@ -1,9 +1,11 @@
+from unittest.mock import AsyncMock, Mock, patch, MagicMock
+
 """
 Critical Path Tests: WebSocket Silent Failure Detection
 
 This test suite verifies that our fixes prevent silent failures in the chat system.
 Tests cover the 5 critical failure points identified in the audit.
-"""
+""""
 
 import asyncio
 import pytest
@@ -36,38 +38,36 @@ class TestWebSocketSilentFailures:
         manager._ping_connection = AsyncMock(return_value=True)
         manager.check_connection_health = AsyncMock(return_value=True)
         await asyncio.sleep(0)
-    return manager
+        return manager
     
-    @pytest.fixture
-    async def mock_context(self):
+        @pytest.fixture
+        async def mock_context(self):
         """Create a mock execution context."""
-    pass
         context = Mock(spec=AgentExecutionContext)
         context.thread_id = f"test_thread_{uuid.uuid4()}"
         context.agent_name = "test_agent"
         context.user_id = "test_user"
         await asyncio.sleep(0)
-    return context
+        return context
     
-    @pytest.fixture
-    async def event_monitor(self):
+        @pytest.fixture
+        async def event_monitor(self):
         """Create an event monitor for testing."""
         monitor = ChatEventMonitor()
         await monitor.start_monitoring()
         yield monitor
         await monitor.stop_monitoring()
     
-    @pytest.mark.asyncio
-    async def test_rank1_websocket_event_non_emission_fallback(self, mock_context):
+        @pytest.mark.asyncio
+        async def test_rank1_websocket_event_non_emission_fallback(self, mock_context):
         """
-    pass
         Test RANK 1: WebSocket Event Non-Emission
         Verify that fallback logging occurs when WebSocket is unavailable.
-        """
+        """"
         # Create execution engine without WebSocket notifier
         engine = UnifiedToolExecutionEngine(
-            tool_dispatcher=tool_dispatcher_instance  # Initialize appropriate service,
-            websocket_notifier=None  # No WebSocket notifier
+        tool_dispatcher=tool_dispatcher_instance  # Initialize appropriate service,
+        websocket_notifier=None  # No WebSocket notifier
         )
         
         tool = tool_instance  # Initialize appropriate service
@@ -76,34 +76,33 @@ class TestWebSocketSilentFailures:
         
         # Capture critical logs
         with patch('netra_backend.app.agents.unified_tool_execution.logger') as mock_logger:
-            # Execute tool without WebSocket
-            result = await engine.execute_tool_unified(
-                tool=tool,
-                kwargs={"test": "param"},
-                context=mock_context
-            )
+        # Execute tool without WebSocket
+        result = await engine.execute_tool_unified(
+        tool=tool,
+        kwargs={"test": "param"},
+        context=mock_context
+        )
             
-            # Verify fallback logging occurred
-            critical_calls = [
-                call for call in mock_logger.critical.call_args_list
-                if "WEBSOCKET UNAVAILABLE" in str(call)
-            ]
-            assert len(critical_calls) >= 2, "Should log critical warnings for missing WebSocket"
+        # Verify fallback logging occurred
+        critical_calls = [
+        call for call in mock_logger.critical.call_args_list
+        if "WEBSOCKET UNAVAILABLE" in str(call)
+        ]
+        assert len(critical_calls) >= 2, "Should log critical warnings for missing WebSocket"
             
-            # Verify tool still executed successfully
-            assert result['success'] is True
-            assert result['output'] == "test_result"
+        # Verify tool still executed successfully
+        assert result['success'] is True
+        assert result['output'] == "test_result"
     
-    @pytest.mark.asyncio
-    async def test_rank1_websocket_event_emission_with_missing_context(self):
+        @pytest.mark.asyncio
+        async def test_rank1_websocket_event_emission_with_missing_context(self):
         """
         Test RANK 1: WebSocket Event Non-Emission with missing context.
         Verify that missing context is detected and logged.
-        """
-    pass
+        """"
         engine = UnifiedToolExecutionEngine(
-            tool_dispatcher=tool_dispatcher_instance  # Initialize appropriate service,
-            websocket_notifier=Mock(spec=WebSocketNotifier)
+        tool_dispatcher=tool_dispatcher_instance  # Initialize appropriate service,
+        websocket_notifier=Mock(spec=WebSocketNotifier)
         )
         
         tool = tool_instance  # Initialize appropriate service
@@ -111,27 +110,26 @@ class TestWebSocketSilentFailures:
         tool.execute = AsyncMock(return_value="test_result")
         
         with patch('netra_backend.app.agents.unified_tool_execution.logger') as mock_logger:
-            # Execute without context
-            result = await engine.execute_tool_unified(
-                tool=tool,
-                kwargs={"test": "param"},
-                context=None  # No context provided
-            )
+        # Execute without context
+        result = await engine.execute_tool_unified(
+        tool=tool,
+        kwargs={"test": "param"},
+        context=None  # No context provided
+        )
             
-            # Verify critical logging for missing context
-            critical_calls = [
-                call for call in mock_logger.critical.call_args_list
-                if "MISSING CONTEXT" in str(call)
-            ]
-            assert len(critical_calls) >= 2, "Should log critical warnings for missing context"
+        # Verify critical logging for missing context
+        critical_calls = [
+        call for call in mock_logger.critical.call_args_list
+        if "MISSING CONTEXT" in str(call)
+        ]
+        assert len(critical_calls) >= 2, "Should log critical warnings for missing context"
     
-    @pytest.mark.asyncio
-    async def test_rank2_agent_registry_enhancement_failure(self, mock_websocket_manager):
+        @pytest.mark.asyncio
+        async def test_rank2_agent_registry_enhancement_failure(self, mock_websocket_manager):
         """
         Test RANK 2: Agent Registry WebSocket Enhancement Failure
         Verify that enhancement failure is detected at startup.
-        """
-    pass
+        """"
         registry = AgentRegistry()
         
         # Mock tool dispatcher without enhancement
@@ -141,24 +139,23 @@ class TestWebSocketSilentFailures:
         
         # Try to set WebSocket manager
         with patch.object(registry, 'tool_dispatcher', mock_dispatcher):
-            # This should detect that enhancement failed
-            registry.set_websocket_manager(mock_websocket_manager)
+        # This should detect that enhancement failed
+        registry.set_websocket_manager(mock_websocket_manager)
             
-            # Verify enhancement was attempted
-            assert hasattr(registry.tool_dispatcher, 'websocket_notifier')
+        # Verify enhancement was attempted
+        assert hasattr(registry.tool_dispatcher, 'websocket_notifier')
             
-            # In real scenario, startup would fail if enhancement didn't work
-            # Let's simulate the startup check
-            if not getattr(registry.tool_dispatcher, '_websocket_enhanced', False):
-                with pytest.raises(RuntimeError, match="WebSocket enhancement failed"):
-                    raise RuntimeError("Tool dispatcher WebSocket enhancement failed")
+        # In real scenario, startup would fail if enhancement didn't work
+        # Let's simulate the startup check
+        if not getattr(registry.tool_dispatcher, '_websocket_enhanced', False):
+        with pytest.raises(RuntimeError, match="WebSocket enhancement failed"):
+        raise RuntimeError("Tool dispatcher WebSocket enhancement failed")
     
-    @pytest.mark.asyncio
-    async def test_rank2_startup_validation_detects_enhancement_failure(self):
+        @pytest.mark.asyncio
+        async def test_rank2_startup_validation_detects_enhancement_failure(self):
         """
         Test RANK 2: Startup validation detects WebSocket enhancement failure.
-        """
-    pass
+        """"
         app = app_instance  # Initialize appropriate service
         app.state = state_instance  # Initialize appropriate service
         
@@ -175,23 +172,22 @@ class TestWebSocketSilentFailures:
         
         # Verify startup validation would fail
         with pytest.raises(DeterministicStartupError, match="Tool dispatcher not enhanced"):
-            await orchestrator._verify_websocket_events()
+        await orchestrator._verify_websocket_events()
     
-    @pytest.mark.asyncio
-    async def test_rank3_connection_health_checking(self, mock_websocket_manager):
+        @pytest.mark.asyncio
+        async def test_rank3_connection_health_checking(self, mock_websocket_manager):
         """
         Test RANK 3: WebSocket Connection Cleanup Race Conditions
         Verify active health checking prevents sending to dead connections.
-        """
-    pass
+        """"
         # Simulate unhealthy connection
         mock_websocket_manager._ping_connection = AsyncMock(return_value=False)
         mock_websocket_manager.connections = {
-            "test_conn": {
-                "websocket": None  # TODO: Use real service instance,
-                "is_healthy": False,
-                "user_id": "test_user"
-            }
+        "test_conn": {
+        "websocket": Mock()  # TODO: Use real service instance,
+        "is_healthy": False,
+        "user_id": "test_user"
+        }
         }
         
         # Try to send message
@@ -203,20 +199,19 @@ class TestWebSocketSilentFailures:
         # Verify ping was attempted
         mock_websocket_manager._ping_connection.assert_called_once_with("test_conn")
     
-    @pytest.mark.asyncio
-    async def test_rank4_startup_event_verification(self):
+        @pytest.mark.asyncio
+        async def test_rank4_startup_event_verification(self):
         """
         Test RANK 4: Startup Validation with Event Verification
         Verify that startup actually tests WebSocket functionality.
-        """
-    pass
+        """"
         app = app_instance  # Initialize appropriate service
         app.state = state_instance  # Initialize appropriate service
         
         orchestrator = StartupOrchestrator(app)
         
         # Mock WebSocket manager
-        mock_manager = AsyncNone  # TODO: Use real service instance
+        mock_manager = AsyncMock()  # TODO: Use real service instance
         mock_manager.send_to_thread = AsyncMock(return_value=True)
         
         # Mock supervisor with enhanced dispatcher
@@ -229,22 +224,21 @@ class TestWebSocketSilentFailures:
         app.state.agent_supervisor = mock_supervisor
         
         with patch('netra_backend.app.smd.get_websocket_manager', return_value=mock_manager):
-            # Should succeed with proper setup
-            await orchestrator._verify_websocket_events()
+        # Should succeed with proper setup
+        await orchestrator._verify_websocket_events()
             
-            # Verify test message was sent
-            mock_manager.send_to_thread.assert_called_once()
-            call_args = mock_manager.send_to_thread.call_args
-            assert "startup_test" in call_args[0][0]  # Thread ID contains startup_test
-            assert call_args[0][1]["type"] == "startup_test"  # Message type
+        # Verify test message was sent
+        mock_manager.send_to_thread.assert_called_once()
+        call_args = mock_manager.send_to_thread.call_args
+        assert "startup_test" in call_args[0][0]  # Thread ID contains startup_test
+        assert call_args[0][1]["type"] == "startup_test"  # Message type
     
-    @pytest.mark.asyncio
-    async def test_rank5_event_delivery_confirmation(self, mock_websocket_manager, mock_context):
+        @pytest.mark.asyncio
+        async def test_rank5_event_delivery_confirmation(self, mock_websocket_manager, mock_context):
         """
         Test RANK 5: Event Delivery Confirmation System
         Verify critical events require and track confirmation.
-        """
-    pass
+        """"
         notifier = WebSocketNotifier(mock_websocket_manager)
         
         # Send critical event
@@ -252,29 +246,28 @@ class TestWebSocketSilentFailures:
         message.model_dump = Mock(return_value={"type": "agent_started"})
         
         with patch.object(notifier, '_attempt_delivery', return_value=True) as mock_attempt:
-            success = await notifier._send_critical_event(
-                thread_id=mock_context.thread_id,
-                message=message,
-                event_type="agent_started"
-            )
+        success = await notifier._send_critical_event(
+        thread_id=mock_context.thread_id,
+        message=message,
+        event_type="agent_started"
+        )
             
-            assert success is True
+        assert success is True
             
-            # Verify confirmation tracking was set up
-            assert len(notifier.delivery_confirmations) > 0
+        # Verify confirmation tracking was set up
+        assert len(notifier.delivery_confirmations) > 0
             
-            # Get the message_id that was created
-            confirmation_data = list(notifier.delivery_confirmations.values())[0]
-            assert confirmation_data['thread_id'] == mock_context.thread_id
-            assert confirmation_data['event_type'] == "agent_started"
-            assert confirmation_data['confirmed'] is False
+        # Get the message_id that was created
+        confirmation_data = list(notifier.delivery_confirmations.values())[0]
+        assert confirmation_data['thread_id'] == mock_context.thread_id
+        assert confirmation_data['event_type'] == "agent_started"
+        assert confirmation_data['confirmed'] is False
     
-    @pytest.mark.asyncio
-    async def test_emergency_notification_on_critical_failure(self, mock_websocket_manager, mock_context):
+        @pytest.mark.asyncio
+        async def test_emergency_notification_on_critical_failure(self, mock_websocket_manager, mock_context):
         """
         Test that emergency notifications are triggered for critical failures.
-        """
-    pass
+        """"
         notifier = WebSocketNotifier(mock_websocket_manager)
         
         # Simulate delivery failure
@@ -284,27 +277,26 @@ class TestWebSocketSilentFailures:
         message.model_dump = Mock(return_value={"type": "agent_started"})
         
         with patch.object(notifier, '_trigger_emergency_notification') as mock_emergency:
-            with patch.object(notifier, '_attempt_delivery', return_value=False):
-                success = await notifier._send_critical_event(
-                    thread_id=mock_context.thread_id,
-                    message=message,
-                    event_type="agent_started"
-                )
+        with patch.object(notifier, '_attempt_delivery', return_value=False):
+        success = await notifier._send_critical_event(
+        thread_id=mock_context.thread_id,
+        message=message,
+        event_type="agent_started"
+        )
                 
-                assert success is False
+        assert success is False
                 
-                # Verify emergency notification was triggered
-                mock_emergency.assert_called_once_with(
-                    mock_context.thread_id,
-                    "agent_started"
-                )
+        # Verify emergency notification was triggered
+        mock_emergency.assert_called_once_with(
+        mock_context.thread_id,
+        "agent_started"
+        )
     
-    @pytest.mark.asyncio
-    async def test_event_monitor_detects_silent_failures(self, event_monitor):
+        @pytest.mark.asyncio
+        async def test_event_monitor_detects_silent_failures(self, event_monitor):
         """
         Test that event monitor detects silent failures in event sequences.
-        """
-    pass
+        """"
         thread_id = "test_thread"
         
         # Record agent started
@@ -312,9 +304,9 @@ class TestWebSocketSilentFailures:
         
         # Record tool completed without tool executing (silent failure!)
         await event_monitor.record_event(
-            "tool_completed", 
-            thread_id,
-            tool_name="test_tool"
+        "tool_completed", 
+        thread_id,
+        tool_name="test_tool"
         )
         
         # Check health
@@ -324,12 +316,11 @@ class TestWebSocketSilentFailures:
         assert len(event_monitor.silent_failures) > 0
         assert "tool_completed without tool_executing" in event_monitor.silent_failures[0]['reason']
     
-    @pytest.mark.asyncio
-    async def test_event_monitor_detects_stale_threads(self, event_monitor):
+        @pytest.mark.asyncio
+        async def test_event_monitor_detects_stale_threads(self, event_monitor):
         """
         Test that event monitor detects stale threads.
-        """
-    pass
+        """"
         thread_id = "stale_thread"
         
         # Record an event
@@ -348,12 +339,11 @@ class TestWebSocketSilentFailures:
         assert len(health['stale_threads']) > 0
         assert health['stale_threads'][0]['thread_id'] == thread_id
     
-    @pytest.mark.asyncio
-    async def test_event_monitor_tracks_latency(self, event_monitor):
+        @pytest.mark.asyncio
+        async def test_event_monitor_tracks_latency(self, event_monitor):
         """
         Test that event monitor tracks event latency.
-        """
-    pass
+        """"
         thread_id = "latency_test"
         
         # Record events with delay
@@ -368,12 +358,11 @@ class TestWebSocketSilentFailures:
         assert 'avg_latency' in health['metrics']
         assert health['metrics']['avg_latency'] >= 0.1
     
-    @pytest.mark.asyncio
-    async def test_comprehensive_silent_failure_scenario(self, mock_websocket_manager, mock_context):
+        @pytest.mark.asyncio
+        async def test_comprehensive_silent_failure_scenario(self, mock_websocket_manager, mock_context):
         """
         Test a comprehensive scenario with multiple potential silent failures.
-        """
-    pass
+        """"
         # Set up monitoring
         monitor = ChatEventMonitor()
         
@@ -383,11 +372,11 @@ class TestWebSocketSilentFailures:
         notifier = WebSocketNotifier(None)  # No WebSocket
         
         with patch('netra_backend.app.agents.supervisor.websocket_notifier.logger') as mock_logger:
-            # Try to send events without WebSocket
-            await notifier.send_agent_started(mock_context)
+        # Try to send events without WebSocket
+        await notifier.send_agent_started(mock_context)
             
-            # Should log critical warning
-            assert any("WebSocket manager not available" in str(call) for call in mock_logger.warning.call_args_list)
+        # Should log critical warning
+        assert any("WebSocket manager not available" in str(call) for call in mock_logger.warning.call_args_list)
         
         # 2. Connection health check failures
         mock_websocket_manager._ping_connection = AsyncMock(return_value=False)
@@ -408,8 +397,7 @@ class TestWebSocketSilentFailures:
 async def test_integration_full_websocket_flow_with_monitoring():
     """
     Integration test: Full WebSocket flow with all safety mechanisms.
-    """
-    pass
+    """"
     # Create real components
     manager = WebSocketManager()
     monitor = ChatEventMonitor()

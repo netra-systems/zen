@@ -1,7 +1,7 @@
 """
 L3 Integration Test: WebSocket Concurrency
 Tests WebSocket concurrent connection and message handling
-"""
+""""
 
 import sys
 from pathlib import Path
@@ -185,7 +185,7 @@ class TestWebSocketConcurrencyL3:
                 }))
             
             broadcast_tasks = [
-                broadcast_from_client(clients[i], f"msg_{i}")
+                broadcast_from_client(clients[i], f"msg_{i]")
                 for i in range(5)
             ]
             

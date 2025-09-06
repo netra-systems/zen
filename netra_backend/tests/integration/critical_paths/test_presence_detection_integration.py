@@ -1,20 +1,22 @@
+from unittest.mock import AsyncMock, Mock, patch, MagicMock
+
 """
 Integration Tests for Presence Detection System
 
 Business Value Justification:
-- Segment: All (Free, Early, Mid, Enterprise)
+    - Segment: All (Free, Early, Mid, Enterprise)
 - Business Goal: User Experience & System Reliability
 - Value Impact: Accurate presence detection critical for real-time features
 - Strategic Impact: Ensures chat responsiveness and connection state accuracy
 
 Tests the complete presence detection flow including:
-- WebSocket connection lifecycle
+    - WebSocket connection lifecycle
 - Heartbeat mechanism
 - Presence state transitions
 - Multi-user scenarios
 - Network interruption handling
 - Recovery mechanisms
-"""
+""""
 
 import asyncio
 import json
@@ -97,10 +99,10 @@ class MockWebSocket:
 async def heartbeat_manager():
     """Create heartbeat manager for testing."""
     config = HeartbeatConfig(
-        heartbeat_interval_seconds=1,
-        heartbeat_timeout_seconds=3,
-        max_missed_heartbeats=2,
-        cleanup_interval_seconds=5
+    heartbeat_interval_seconds=1,
+    heartbeat_timeout_seconds=3,
+    max_missed_heartbeats=2,
+    cleanup_interval_seconds=5
     )
     manager = UnifiedWebSocketManager(config)
     await manager.start()
@@ -300,7 +302,7 @@ class TestPresenceDetectionIntegration:
     @pytest.mark.asyncio
     async def test_concurrent_heartbeat_operations(self, heartbeat_manager):
         """Test thread safety with concurrent heartbeat operations."""
-        connections = [f"conn_{i}" for i in range(10)]
+        connections = [f"conn_{i]" for i in range(10)]
         
         async def register_and_ping(conn_id):
             ws = MockWebSocket(conn_id)
@@ -431,7 +433,7 @@ class TestPresenceDetectionErrorScenarios:
         connection_id = "error_conn"
         
         # Create mock that raises errors
-        ws = MagicNone  # TODO: Use real service instance
+        ws = MagicMock()  # TODO: Use real service instance
         ws.ping = AsyncMock(side_effect=ConnectionError("Connection lost"))
         
         await heartbeat_manager.register_connection(connection_id)

@@ -3,7 +3,7 @@ from shared.isolated_environment import IsolatedEnvironment
 #!/usr/bin/env python3
 """
 Comprehensive test for free tier limitations enforcement:
-1. Account creation with free tier
+    1. Account creation with free tier
 2. API rate limiting validation
 3. Storage quota enforcement
 4. Agent count restrictions
@@ -13,7 +13,7 @@ Comprehensive test for free tier limitations enforcement:
 8. Upgrade path validation
 
 This test ensures free tier users are properly limited while maintaining good UX.
-"""
+""""
 
 # Test framework import - using pytest fixtures instead
 
@@ -62,8 +62,8 @@ class FreeTierLimitsTester:
         self.user_id: Optional[str] = None
         self.workspace_id: Optional[str] = None
         self.ws_connections: List[websockets.ClientConnection] = []
-        self.test_email = f"freetier_{uuid.uuid4().hex[:8]}@example.com"
-        self.test_password = f"TestPass123_{uuid.uuid4().hex[:8]}"
+        self.test_email = f"freetier_{uuid.uuid4().hex[:8]]@example.com"
+        self.test_password = f"TestPass123_{uuid.uuid4().hex[:8]]"
         self.api_call_times: List[float] = []
         
     async def __aenter__(self):
@@ -98,7 +98,7 @@ class FreeTierLimitsTester:
                 if response.status in [200, 201]:
                     data = await response.json()
                     self.user_id = data.get("user_id")
-                    print(f"[OK] Free tier account created: {self.user_id}")
+                    print(f"[OK] Free tier account created: {self.user_id]")
                     
                     # Login to get token
                     login_data = {
@@ -120,7 +120,7 @@ class FreeTierLimitsTester:
                 return False
                 
         except Exception as e:
-            print(f"[ERROR] Setup error: {e}")
+            print(f"[ERROR] Setup error: {e]")
             return False
             
     @pytest.mark.asyncio
@@ -156,30 +156,30 @@ class FreeTierLimitsTester:
                         rate_limited = True
                         remaining = response.headers.get("X-RateLimit-Remaining", "0")
                         reset_time = response.headers.get("X-RateLimit-Reset", "unknown")
-                        print(f"[OK] Rate limited after {calls_made} calls")
-                        print(f"[INFO] Remaining: {remaining}, Reset: {reset_time}")
+                        print(f"[OK] Rate limited after {calls_made] calls")
+                        print(f"[INFO] Remaining: {remaining], Reset: {reset_time]")
                         break
                     elif response.status == 200:
                         calls_made += 1
-                        print(f"[INFO] Call {calls_made} succeeded")
+                        print(f"[INFO] Call {calls_made] succeeded")
                     else:
-                        print(f"[ERROR] Unexpected status: {response.status}")
+                        print(f"[ERROR] Unexpected status: {response.status]")
                         
                 # Small delay to avoid overwhelming
                 await asyncio.sleep(0.1)
                 
             if rate_limited:
-                print(f"[OK] Rate limiting enforced correctly at {calls_made} calls")
+                print(f"[OK] Rate limiting enforced correctly at {calls_made] calls")
                 return True
             elif calls_made >= limit_per_minute:
-                print(f"[WARNING] Made {calls_made} calls without rate limiting")
+                print(f"[WARNING] Made {calls_made] calls without rate limiting")
                 return False
             else:
-                print(f"[INFO] Rate limit not reached with {calls_made} calls")
+                print(f"[INFO] Rate limit not reached with {calls_made] calls")
                 return True
                 
         except Exception as e:
-            print(f"[ERROR] Rate limiting test error: {e}")
+            print(f"[ERROR] Rate limiting test error: {e]")
             return False
             
     @pytest.mark.asyncio
@@ -204,7 +204,7 @@ class FreeTierLimitsTester:
                     data = await response.json()
                     current_usage_mb = data.get("used_mb", 0)
                     limit_mb = data.get("limit_mb", storage_limit_mb)
-                    print(f"[INFO] Current storage: {current_usage_mb}/{limit_mb} MB")
+                    print(f"[INFO] Current storage: {current_usage_mb]/{limit_mb] MB")
                     
             # Try to upload data that would exceed quota
             # Create a large payload (1MB)
@@ -227,25 +227,25 @@ class FreeTierLimitsTester:
                 ) as response:
                     if response.status in [200, 201]:
                         uploads_succeeded += 1
-                        print(f"[INFO] Upload {i+1} succeeded")
+                        print(f"[INFO] Upload {i+1] succeeded")
                     elif response.status in [413, 507]:  # Payload too large or Insufficient storage
                         quota_exceeded = True
                         data = await response.json()
-                        print(f"[OK] Storage quota exceeded after {uploads_succeeded} uploads")
-                        print(f"[INFO] Error: {data.get('error', 'Storage limit exceeded')}")
+                        print(f"[OK] Storage quota exceeded after {uploads_succeeded] uploads")
+                        print(f"[INFO] Error: {data.get('error', 'Storage limit exceeded')]")
                         break
                     else:
-                        print(f"[WARNING] Unexpected status: {response.status}")
+                        print(f"[WARNING] Unexpected status: {response.status]")
                         
             if quota_exceeded:
                 print("[OK] Storage quota properly enforced")
                 return True
             else:
-                print(f"[INFO] Uploaded {uploads_succeeded} files without hitting quota")
+                print(f"[INFO] Uploaded {uploads_succeeded] files without hitting quota")
                 return True
                 
         except Exception as e:
-            print(f"[ERROR] Storage quota test error: {e}")
+            print(f"[ERROR] Storage quota test error: {e]")
             return False
             
     @pytest.mark.asyncio
@@ -263,7 +263,7 @@ class FreeTierLimitsTester:
             
             # Create workspace first
             workspace_data = {
-                "name": f"Test Workspace {uuid.uuid4().hex[:4]}",
+                "name": f"Test Workspace {uuid.uuid4().hex[:4]]",
                 "description": "Testing agent limits"
             }
             
@@ -275,7 +275,7 @@ class FreeTierLimitsTester:
                 if response.status in [200, 201]:
                     data = await response.json()
                     self.workspace_id = data.get("workspace_id")
-                    print(f"[INFO] Workspace created: {self.workspace_id}")
+                    print(f"[INFO] Workspace created: {self.workspace_id]")
                     
             agents_created = []
             limit_reached = False
@@ -297,28 +297,28 @@ class FreeTierLimitsTester:
                     if response.status in [200, 201]:
                         data = await response.json()
                         agents_created.append(data.get("agent_id"))
-                        print(f"[INFO] Agent {i+1} created")
+                        print(f"[INFO] Agent {i+1] created")
                     elif response.status == 402:
                         limit_reached = True
                         data = await response.json()
-                        print(f"[OK] Agent limit reached after {len(agents_created)} agents")
-                        print(f"[INFO] Message: {data.get('message', 'Limit exceeded')}")
+                        print(f"[OK] Agent limit reached after {len(agents_created)] agents")
+                        print(f"[INFO] Message: {data.get('message', 'Limit exceeded')]")
                         break
                     else:
-                        print(f"[WARNING] Unexpected status: {response.status}")
+                        print(f"[WARNING] Unexpected status: {response.status]")
                         
             if limit_reached and len(agents_created) == agent_limit:
-                print(f"[OK] Agent count limit ({agent_limit}) properly enforced")
+                print(f"[OK] Agent count limit ({agent_limit]) properly enforced")
                 return True
             elif len(agents_created) > agent_limit:
-                print(f"[ERROR] Created {len(agents_created)} agents, exceeding limit of {agent_limit}")
+                print(f"[ERROR] Created {len(agents_created)] agents, exceeding limit of {agent_limit]")
                 return False
             else:
-                print(f"[INFO] Created {len(agents_created)} agents within limit")
+                print(f"[INFO] Created {len(agents_created)] agents within limit")
                 return True
                 
         except Exception as e:
-            print(f"[ERROR] Agent limit test error: {e}")
+            print(f"[ERROR] Agent limit test error: {e]")
             return False
             
     @pytest.mark.asyncio
@@ -361,36 +361,36 @@ class FreeTierLimitsTester:
                     if data.get("type") == "auth_success":
                         self.ws_connections.append(ws)
                         connections_established += 1
-                        print(f"[INFO] Connection {i+1} established")
+                        print(f"[INFO] Connection {i+1] established")
                     elif data.get("type") == "connection_limit_exceeded":
                         limit_reached = True
-                        print(f"[OK] Connection limit reached after {connections_established} connections")
+                        print(f"[OK] Connection limit reached after {connections_established] connections")
                         await ws.close()
                         break
                     else:
-                        print(f"[WARNING] Unexpected response: {data}")
+                        print(f"[WARNING] Unexpected response: {data]")
                         await ws.close()
                         
                 except websockets.exceptions.WebSocketException as e:
                     if "403" in str(e) or "limit" in str(e).lower():
                         limit_reached = True
-                        print(f"[OK] Connection rejected after {connections_established} connections")
+                        print(f"[OK] Connection rejected after {connections_established] connections")
                         break
                     else:
-                        print(f"[ERROR] WebSocket error: {e}")
+                        print(f"[ERROR] WebSocket error: {e]")
                         
             if limit_reached and connections_established == connection_limit:
-                print(f"[OK] Connection limit ({connection_limit}) properly enforced")
+                print(f"[OK] Connection limit ({connection_limit]) properly enforced")
                 return True
             elif connections_established > connection_limit:
-                print(f"[WARNING] Established {connections_established} connections, exceeding limit")
+                print(f"[WARNING] Established {connections_established] connections, exceeding limit")
                 return False
             else:
-                print(f"[INFO] Established {connections_established} connections within limit")
+                print(f"[INFO] Established {connections_established] connections within limit")
                 return True
                 
         except Exception as e:
-            print(f"[ERROR] Connection limit test error: {e}")
+            print(f"[ERROR] Connection limit test error: {e]")
             return False
             
     @pytest.mark.asyncio
@@ -426,7 +426,7 @@ class FreeTierLimitsTester:
                         print("[OK] Custom models restricted")
                     else:
                         accessible_features.append("custom_models")
-                        print(f"[WARNING] Custom models accessible: {response.status}")
+                        print(f"[WARNING] Custom models accessible: {response.status]")
                         
             # Test enterprise features (should be restricted)
             if not FREE_TIER_LIMITS.get("enterprise_features", True):
@@ -444,10 +444,10 @@ class FreeTierLimitsTester:
                     ) as response:
                         if response.status in [403, 402]:
                             restricted_features.append(feature)
-                            print(f"[OK] {feature} restricted")
+                            print(f"[OK] {feature] restricted")
                         else:
                             accessible_features.append(feature)
-                            print(f"[WARNING] {feature} accessible: {response.status}")
+                            print(f"[WARNING] {feature] accessible: {response.status]")
                             
             # Test team member addition (should be limited to 1)
             team_member_data = {
@@ -465,15 +465,15 @@ class FreeTierLimitsTester:
                     print("[OK] Team expansion restricted")
                 else:
                     accessible_features.append("team_expansion")
-                    print(f"[INFO] Team member invite status: {response.status}")
+                    print(f"[INFO] Team member invite status: {response.status]")
                     
-            print(f"\n[SUMMARY] Restricted features: {restricted_features}")
-            print(f"[SUMMARY] Accessible features: {accessible_features}")
+            print(f"\n[SUMMARY] Restricted features: {restricted_features]")
+            print(f"[SUMMARY] Accessible features: {accessible_features]")
             
             return len(restricted_features) > 0
             
         except Exception as e:
-            print(f"[ERROR] Feature restriction test error: {e}")
+            print(f"[ERROR] Feature restriction test error: {e]")
             return False
             
     @pytest.mark.asyncio
@@ -496,7 +496,7 @@ class FreeTierLimitsTester:
                 if response.status == 200:
                     initial_usage = await response.json()
                     initial_api_calls = initial_usage.get("api_calls", 0)
-                    print(f"[INFO] Initial API calls: {initial_api_calls}")
+                    print(f"[INFO] Initial API calls: {initial_api_calls]")
                     
             # Make some tracked API calls
             tracked_calls = 5
@@ -506,7 +506,7 @@ class FreeTierLimitsTester:
                     headers=headers
                 ) as response:
                     if response.status == 200:
-                        print(f"[INFO] Made tracked call {i+1}")
+                        print(f"[INFO] Made tracked call {i+1]")
                         
                 await asyncio.sleep(0.5)  # Avoid rate limiting
                 
@@ -520,18 +520,18 @@ class FreeTierLimitsTester:
                     updated_api_calls = updated_usage.get("api_calls", 0)
                     calls_tracked = updated_api_calls - initial_api_calls
                     
-                    print(f"[INFO] Updated API calls: {updated_api_calls}")
-                    print(f"[INFO] Calls tracked: {calls_tracked}")
+                    print(f"[INFO] Updated API calls: {updated_api_calls]")
+                    print(f"[INFO] Calls tracked: {calls_tracked]")
                     
                     if calls_tracked >= tracked_calls:
-                        print(f"[OK] Usage tracking accurate: {calls_tracked}/{tracked_calls}")
+                        print(f"[OK] Usage tracking accurate: {calls_tracked]/{tracked_calls]")
                         return True
                     else:
-                        print(f"[WARNING] Usage tracking mismatch: {calls_tracked}/{tracked_calls}")
+                        print(f"[WARNING] Usage tracking mismatch: {calls_tracked]/{tracked_calls]")
                         return False
                         
         except Exception as e:
-            print(f"[ERROR] Usage tracking test error: {e}")
+            print(f"[ERROR] Usage tracking test error: {e]")
             return False
             
     @pytest.mark.asyncio
@@ -554,10 +554,10 @@ class FreeTierLimitsTester:
                 if response.status == 200:
                     data = await response.json()
                     plans = data.get("plans", [])
-                    print(f"[OK] Upgrade options available: {len(plans)} plans")
+                    print(f"[OK] Upgrade options available: {len(plans)] plans")
                     
                     for plan in plans:
-                        print(f"[INFO] Plan: {plan.get('name')} - ${plan.get('price')}/mo")
+                        print(f"[INFO] Plan: {plan.get('name')] - ${plan.get('price')]/mo")
                         print(f"       Limits: {plan.get('limits', {})}")
                         
                     # Simulate upgrade intent
@@ -574,19 +574,19 @@ class FreeTierLimitsTester:
                         if upgrade_response.status == 200:
                             upgrade_result = await upgrade_response.json()
                             print(f"[OK] Upgrade intent created")
-                            print(f"[INFO] Checkout URL: {upgrade_result.get('checkout_url')}")
-                            print(f"[INFO] Session ID: {upgrade_result.get('session_id')}")
+                            print(f"[INFO] Checkout URL: {upgrade_result.get('checkout_url')]")
+                            print(f"[INFO] Session ID: {upgrade_result.get('session_id')]")
                             return True
                         else:
-                            print(f"[WARNING] Upgrade intent status: {upgrade_response.status}")
+                            print(f"[WARNING] Upgrade intent status: {upgrade_response.status]")
                             return True  # Not critical
                             
                 else:
-                    print(f"[ERROR] Failed to get upgrade options: {response.status}")
+                    print(f"[ERROR] Failed to get upgrade options: {response.status]")
                     return False
                     
         except Exception as e:
-            print(f"[ERROR] Upgrade path test error: {e}")
+            print(f"[ERROR] Upgrade path test error: {e]")
             return False
             
     @pytest.mark.asyncio
@@ -612,9 +612,9 @@ class FreeTierLimitsTester:
                     current_daily_calls = data.get("daily_api_calls", 0)
                     remaining_calls = data.get("daily_remaining", FREE_TIER_LIMITS["api_calls_per_day"])
                     
-                    print(f"[INFO] Current daily calls: {current_daily_calls}")
-                    print(f"[INFO] Remaining calls: {remaining_calls}")
-                    print(f"[INFO] Reset time: {reset_time}")
+                    print(f"[INFO] Current daily calls: {current_daily_calls]")
+                    print(f"[INFO] Remaining calls: {remaining_calls]")
+                    print(f"[INFO] Reset time: {reset_time]")
                     
                     # Verify reset time is within 24 hours
                     if reset_time:
@@ -623,17 +623,17 @@ class FreeTierLimitsTester:
                         time_until_reset = (reset_dt - now).total_seconds() / 3600
                         
                         if 0 < time_until_reset <= 24:
-                            print(f"[OK] Reset in {time_until_reset:.1f} hours")
+                            print(f"[OK] Reset in {time_until_reset:.1f] hours")
                             return True
                         else:
-                            print(f"[WARNING] Unexpected reset time: {time_until_reset:.1f} hours")
+                            print(f"[WARNING] Unexpected reset time: {time_until_reset:.1f] hours")
                             return False
                     else:
                         print("[WARNING] No reset time provided")
                         return True
                         
         except Exception as e:
-            print(f"[ERROR] Daily reset test error: {e}")
+            print(f"[ERROR] Daily reset test error: {e]")
             return False
             
     async def run_all_tests(self) -> Dict[str, bool]:

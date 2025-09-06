@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Comprehensive test to verify message queue overflow and recovery:
-1. Queue capacity monitoring
+    1. Queue capacity monitoring
 2. Overflow detection
 3. Back-pressure handling
 4. Dead letter queue routing
@@ -9,7 +9,7 @@ Comprehensive test to verify message queue overflow and recovery:
 6. Recovery procedures
 
 This test ensures message queues handle overflow gracefully.
-"""
+""""
 
 # Test framework import - using pytest fixtures instead
 
@@ -74,7 +74,7 @@ class MessageQueueOverflowTester:
                 data = await response.json()
                 capacity = data.get("capacity", 0)
                 used = data.get("used", 0)
-                print(f"[OK] Queue capacity: {used}/{capacity}")
+                print(f"[OK] Queue capacity: {used]/{capacity]")
                 return True
                 
         return False
@@ -106,7 +106,7 @@ class MessageQueueOverflowTester:
                 elif response.status == 503:  # Service unavailable
                     overflow_detected = True
                     self.messages_failed.append(message["id"])
-                    print(f"[OK] Overflow detected at message {i}")
+                    print(f"[OK] Overflow detected at message {i]")
                     break
                 elif response.status == 429:  # Too many requests
                     overflow_detected = True
@@ -129,7 +129,7 @@ class MessageQueueOverflowTester:
             if response.status == 200:
                 data = await response.json()
                 if data.get("active"):
-                    print(f"[OK] Back-pressure active: {data}")
+                    print(f"[OK] Back-pressure active: {data]")
                     return True
                     
         # Alternative: check rate limiting
@@ -177,7 +177,7 @@ class MessageQueueOverflowTester:
                     if dlq_response.status == 200:
                         dlq_data = await dlq_response.json()
                         if dlq_data.get("messages"):
-                            print(f"[OK] DLQ contains {len(dlq_data['messages'])} messages")
+                            print(f"[OK] DLQ contains {len(dlq_data['messages'])] messages")
                             self.dlq_messages = dlq_data["messages"]
                             return True
                             
@@ -261,7 +261,7 @@ class MessageQueueOverflowTester:
                     recovery_success += 1
                     
         if recovery_success > 5:
-            print(f"[OK] Queue recovered: {recovery_success}/10 messages accepted")
+            print(f"[OK] Queue recovered: {recovery_success]/10 messages accepted")
             return True
             
         return False

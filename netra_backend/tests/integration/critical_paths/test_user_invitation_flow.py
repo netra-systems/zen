@@ -1,14 +1,16 @@
+import asyncio
+
 """User Invitation and Collaboration Flow Critical Path Tests
 
 Business Value Justification (BVJ):
-- Segment: Mid to Enterprise (team collaboration onboarding)
+    - Segment: Mid to Enterprise (team collaboration onboarding)
 - Business Goal: User onboarding and team adoption
 - Value Impact: Smooth team expansion, reduced friction
 - Strategic Impact: Team productivity and enterprise conversion
 
 Critical Path: Invitation creation -> Email delivery -> Acceptance -> Role activation
 Coverage: Invitation workflow, permission validation, edge cases
-"""
+""""
 
 import sys
 from pathlib import Path
@@ -32,19 +34,19 @@ from netra_backend.tests.integration.test_helpers.team_collaboration_base import
 async def team_with_admin():
     """Create team with owner and admin for invitation testing."""
     manager = TeamCollaborationManager()
-    owner_id = f"user_{uuid.uuid4().hex[:8]}"
+    owner_id = f"user_{uuid.uuid4().hex[:8]]"
     team = await manager.create_team(owner_id, "Invitation Test Team", "pro")
     
     # Add admin
-    admin_id = f"user_{uuid.uuid4().hex[:8]}"
+    admin_id = f"user_{uuid.uuid4().hex[:8]]"
     admin_invitation = await manager.invite_user(team.team_id, owner_id, "admin@test.com", TeamRole.ADMIN)
     await manager.accept_invitation(admin_invitation["token"], admin_id)
     
     yield {
-        "manager": manager,
-        "team": team,
-        "owner_id": owner_id,
-        "admin_id": admin_id
+    "manager": manager,
+    "team": team,
+    "owner_id": owner_id,
+    "admin_id": admin_id
     }
 
 class TestUserInvitationFlow:
@@ -76,7 +78,7 @@ class TestUserInvitationFlow:
         assert invitation["token"] in team.invitation_tokens
         
         # Test invitation acceptance
-        new_user_id = f"user_{uuid.uuid4().hex[:8]}"
+        new_user_id = f"user_{uuid.uuid4().hex[:8]]"
         new_member = await manager.accept_invitation(invitation["token"], new_user_id)
         
         # Validate new member
@@ -103,11 +105,11 @@ class TestUserInvitationFlow:
         admin_id = team_data["admin_id"]
         
         # Add member and viewer without invitation permissions
-        member_id = f"user_{uuid.uuid4().hex[:8]}"
+        member_id = f"user_{uuid.uuid4().hex[:8]]"
         member_invitation = await manager.invite_user(team.team_id, admin_id, "member@test.com", TeamRole.MEMBER)
         await manager.accept_invitation(member_invitation["token"], member_id)
         
-        viewer_id = f"user_{uuid.uuid4().hex[:8]}"
+        viewer_id = f"user_{uuid.uuid4().hex[:8]]"
         viewer_invitation = await manager.invite_user(team.team_id, admin_id, "viewer@test.com", TeamRole.VIEWER)
         await manager.accept_invitation(viewer_invitation["token"], viewer_id)
         
@@ -149,11 +151,11 @@ class TestUserInvitationFlow:
         # Test expired invitation
         invitation["expires_at"] = (datetime.now(timezone.utc) - timedelta(days=1)).isoformat()
         with pytest.raises(ValueError, match="Invitation has expired"):
-            await manager.accept_invitation(invitation["token"], f"user_{uuid.uuid4().hex[:8]}")
+            await manager.accept_invitation(invitation["token"], f"user_{uuid.uuid4().hex[:8]]")
         
         # Reset invitation and accept it
         invitation["expires_at"] = (datetime.now(timezone.utc) + timedelta(days=7)).isoformat()
-        user_id = f"user_{uuid.uuid4().hex[:8]}"
+        user_id = f"user_{uuid.uuid4().hex[:8]]"
         await manager.accept_invitation(invitation["token"], user_id)
         
         # Test duplicate invitation acceptance
@@ -173,7 +175,7 @@ class TestUserInvitationFlow:
         
         # Perform invitation workflow
         invitation = await manager.invite_user(team.team_id, admin_id, "audit@test.com", TeamRole.GUEST)
-        user_id = f"user_{uuid.uuid4().hex[:8]}"
+        user_id = f"user_{uuid.uuid4().hex[:8]]"
         await manager.accept_invitation(invitation["token"], user_id)
         
         # Validate audit trail
@@ -206,7 +208,7 @@ class TestUserInvitationFlow:
             assert invitation["role"] == role.value
             
             # Accept invitation
-            user_id = f"user_{uuid.uuid4().hex[:8]}"
+            user_id = f"user_{uuid.uuid4().hex[:8]]"
             member = await manager.accept_invitation(invitation["token"], user_id)
             
             # Verify role assignment

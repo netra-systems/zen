@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Comprehensive test to verify background job orchestration:
-1. Job scheduling and queuing
+    1. Job scheduling and queuing
 2. Job execution and monitoring
 3. Job dependencies and chaining
 4. Retry and failure handling
@@ -9,7 +9,7 @@ Comprehensive test to verify background job orchestration:
 6. Cron-based scheduling
 
 This test ensures background jobs are properly orchestrated.
-"""
+""""
 
 # Test framework import - using pytest fixtures instead
 
@@ -62,7 +62,7 @@ class BackgroundJobOrchestrationTester:
         
         async with self.session.post(
             f"{AUTH_SERVICE_URL}/auth/login",
-            json={"email": user_data["email"], "password": user_data["password"]}
+            json={"email": user_data["email"], "password": user_data["password"]]
         ) as response:
             if response.status == 200:
                 data = await response.json()
@@ -92,7 +92,7 @@ class BackgroundJobOrchestrationTester:
                 data = await response.json()
                 job_id = data.get("job_id")
                 self.scheduled_jobs.append(job_id)
-                print(f"[OK] Job scheduled: {job_id}")
+                print(f"[OK] Job scheduled: {job_id]")
                 return True
                 
         return False
@@ -134,7 +134,7 @@ class BackgroundJobOrchestrationTester:
                     if status_response.status == 200:
                         status_data = await status_response.json()
                         if status_data.get("status") == "scheduled":
-                            print(f"[OK] Delayed job scheduled for: {run_at}")
+                            print(f"[OK] Delayed job scheduled for: {run_at]")
                             return True
                             
         return False
@@ -180,7 +180,7 @@ class BackgroundJobOrchestrationTester:
                         child_id = child_data.get("job_id")
                         
                         self.scheduled_jobs.extend([parent_id, child_id])
-                        print(f"[OK] Job chain created: {parent_id} -> {child_id}")
+                        print(f"[OK] Job chain created: {parent_id] -> {child_id]")
                         return True
                         
         return False
@@ -207,7 +207,7 @@ class BackgroundJobOrchestrationTester:
                     data = await response.json()
                     status = data.get("status")
                     
-                    print(f"[INFO] Job {job_id[:8]} status: {status}")
+                    print(f"[INFO] Job {job_id[:8]] status: {status]")
                     
                     if status == "completed":
                         self.completed_jobs.append(job_id)
@@ -262,7 +262,7 @@ class BackgroundJobOrchestrationTester:
                         attempts = history.get("attempts", [])
                         
                         if len(attempts) > 1:
-                            print(f"[OK] Job retried {len(attempts)} times")
+                            print(f"[OK] Job retried {len(attempts)] times")
                             return True
                             
         return False
@@ -343,7 +343,7 @@ class BackgroundJobOrchestrationTester:
                     if cron_response.status == 200:
                         cron_data = await cron_response.json()
                         next_run = cron_data.get("next_run")
-                        print(f"[OK] Cron job scheduled. Next run: {next_run}")
+                        print(f"[OK] Cron job scheduled. Next run: {next_run]")
                         return True
                         
         return False

@@ -2,20 +2,20 @@
 L4 Staging Critical Path Test: Cross-Service Transaction Atomicity
 
 Business Value Justification (BVJ):
-- Segment: Enterprise
+    - Segment: Enterprise
 - Business Goal: Transaction Integrity and Data Consistency
 - Value Impact: Ensures ACID properties across distributed services, protecting against data corruption
 - Strategic Impact: $45K MRR protection from transaction inconsistencies, critical for enterprise compliance
 
 L4 Test: Uses real staging environment to validate distributed transaction atomicity across:
-- PostgreSQL (operational data)
+    - PostgreSQL (operational data)
 - ClickHouse (analytics data) 
 - Redis (session state)
 - All microservices (backend, auth, frontend)
 
 Tests include two-phase commit protocol, saga pattern implementation, compensation transactions,
 network partition simulation, and service failure recovery scenarios.
-"""
+""""
 
 import sys
 from pathlib import Path
@@ -137,9 +137,9 @@ class L4TransactionAtomicityTest(L4StagingCriticalPathTestBase):
         self.postgres_engine = None
         self.clickhouse_client = None
         self.redis_client = None
-        self.distributed_transactions: Dict[str, DistributedTransaction] = {}
-        self.network_failures: Dict[ServiceType, bool] = {}
-        self.service_crashes: Dict[ServiceType, bool] = {}
+        self.distributed_transactions: Dict[str, DistributedTransaction] = {]
+        self.network_failures: Dict[ServiceType, bool] = {]
+        self.service_crashes: Dict[ServiceType, bool] = {]
         
     async def setup_test_specific_environment(self) -> None:
         """Setup distributed transaction testing environment."""
@@ -201,7 +201,7 @@ class L4TransactionAtomicityTest(L4StagingCriticalPathTestBase):
                     timeout_seconds INTEGER DEFAULT 120,
                     metadata JSONB DEFAULT '{}'
                 )
-            """)
+            """)"
             
             # Service transaction participants
             await conn.execute("""
@@ -218,7 +218,7 @@ class L4TransactionAtomicityTest(L4StagingCriticalPathTestBase):
                     compensation_data JSONB DEFAULT '{}',
                     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                 )
-            """)
+            """)"
             
             # Transaction operations log
             await conn.execute("""
@@ -231,7 +231,7 @@ class L4TransactionAtomicityTest(L4StagingCriticalPathTestBase):
                     executed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                     compensation_executed BOOLEAN DEFAULT FALSE
                 )
-            """)
+            """)"
             
             # Business entity for testing (user accounts)
             await conn.execute("""
@@ -243,7 +243,7 @@ class L4TransactionAtomicityTest(L4StagingCriticalPathTestBase):
                     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                 )
-            """)
+            """)"
             
             # Transaction events for analytics
             await conn.execute("""
@@ -256,7 +256,7 @@ class L4TransactionAtomicityTest(L4StagingCriticalPathTestBase):
                     metadata JSONB DEFAULT '{}',
                     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                 )
-            """)
+            """)"
     
     async def execute_critical_path_test(self) -> Dict[str, Any]:
         """Execute the comprehensive distributed transaction atomicity test."""
@@ -514,7 +514,7 @@ class L4TransactionAtomicityTest(L4StagingCriticalPathTestBase):
                         raise Exception("Insufficient balance")
                     
                     # Reserve the amount (prepare phase)
-                    service_tx.compensation_data = {"original_balance": account[0]}
+                    service_tx.compensation_data = {"original_balance": account[0]]
                     service_tx.prepared = True
             
             elif service_type == ServiceType.REDIS:
@@ -686,27 +686,27 @@ class L4TransactionAtomicityTest(L4StagingCriticalPathTestBase):
     async def _test_saga_pattern_implementation(self) -> List[Dict[str, Any]]:
         """Test saga pattern for long-running transactions."""
         # Implementation for saga pattern testing
-        return [{"scenario": "saga_test", "status": "success", "service_calls": 5}]
+        return [{"scenario": "saga_test", "status": "success", "service_calls": 5]]
     
     async def _test_compensation_transactions(self) -> List[Dict[str, Any]]:
         """Test compensation transaction mechanisms."""
         # Implementation for compensation testing
-        return [{"scenario": "compensation_test", "status": "success", "service_calls": 3}]
+        return [{"scenario": "compensation_test", "status": "success", "service_calls": 3]]
     
     async def _test_network_partition_scenarios(self) -> List[Dict[str, Any]]:
         """Test transaction behavior during network partitions."""
         # Implementation for network partition testing
-        return [{"scenario": "network_partition_test", "status": "success", "service_calls": 8}]
+        return [{"scenario": "network_partition_test", "status": "success", "service_calls": 8]]
     
     async def _test_service_crash_recovery(self) -> List[Dict[str, Any]]:
         """Test transaction recovery after service crashes."""
         # Implementation for crash recovery testing
-        return [{"scenario": "crash_recovery_test", "status": "success", "service_calls": 6}]
+        return [{"scenario": "crash_recovery_test", "status": "success", "service_calls": 6]]
     
     async def _test_deadlock_resolution(self) -> List[Dict[str, Any]]:
         """Test deadlock detection and resolution."""
         # Implementation for deadlock testing
-        return [{"scenario": "deadlock_resolution_test", "status": "success", "service_calls": 4}]
+        return [{"scenario": "deadlock_resolution_test", "status": "success", "service_calls": 4]]
     
     async def _collect_performance_metrics(self) -> Dict[str, Any]:
         """Collect performance metrics for distributed transactions."""
@@ -805,10 +805,10 @@ async def l4_transaction_atomicity_test():
     """Fixture for L4 transaction atomicity test."""
     test_instance = L4TransactionAtomicityTest()
     try:
-        await test_instance.initialize_l4_environment()
-        yield test_instance
+    await test_instance.initialize_l4_environment()
+    yield test_instance
     finally:
-        await test_instance.cleanup_l4_resources()
+    await test_instance.cleanup_l4_resources()
 
 @pytest.mark.L4
 @pytest.mark.staging

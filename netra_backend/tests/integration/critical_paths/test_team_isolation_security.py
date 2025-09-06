@@ -1,14 +1,16 @@
+import asyncio
+
 """Team Isolation and Security Critical Path Tests
 
 Business Value Justification (BVJ):
-- Segment: Enterprise (security and compliance)
+    - Segment: Enterprise (security and compliance)
 - Business Goal: Data isolation and security compliance
 - Value Impact: Enterprise trust, compliance adherence, data protection
 - Strategic Impact: Enterprise sales enablement and risk mitigation
 
 Critical Path: Team isolation -> Cross-team access prevention -> Security validation
 Coverage: Multi-tenant isolation, edge case handling, security boundaries
-"""
+""""
 
 import sys
 from pathlib import Path
@@ -35,27 +37,27 @@ async def multi_team_environment():
     # Create three separate teams
     teams_data = []
     for i in range(3):
-        owner_id = f"owner_{uuid.uuid4().hex[:8]}"
-        team = await manager.create_team(owner_id, f"Team {i+1}", "enterprise")
+    owner_id = f"owner_{uuid.uuid4().hex[:8]]"
+    team = await manager.create_team(owner_id, f"Team {i+1}", "enterprise")
         
-        # Add members to each team
-        member_id = f"member_{uuid.uuid4().hex[:8]}"
-        member_invitation = await manager.invite_user(team.team_id, owner_id, f"member{i}@test.com", TeamRole.MEMBER)
-        await manager.accept_invitation(member_invitation["token"], member_id)
+    # Add members to each team
+    member_id = f"member_{uuid.uuid4().hex[:8]]"
+    member_invitation = await manager.invite_user(team.team_id, owner_id, f"member{i}@test.com", TeamRole.MEMBER)
+    await manager.accept_invitation(member_invitation["token"], member_id)
         
-        # Create workspace for each team
-        workspace = await manager.create_workspace(team.team_id, owner_id, f"Team {i+1} Workspace")
+    # Create workspace for each team
+    workspace = await manager.create_workspace(team.team_id, owner_id, f"Team {i+1} Workspace")
         
-        teams_data.append({
-            "team": team,
-            "owner_id": owner_id,
-            "member_id": member_id,
-            "workspace": workspace
-        })
+    teams_data.append({
+    "team": team,
+    "owner_id": owner_id,
+    "member_id": member_id,
+    "workspace": workspace
+    })
     
     yield {
-        "manager": manager,
-        "teams": teams_data
+    "manager": manager,
+    "teams": teams_data
     }
 
 class TestTeamIsolationSecurity:
@@ -136,7 +138,7 @@ class TestTeamIsolationSecurity:
         assert invitation["token"] not in team2["team"].invitation_tokens
         
         # Accept invitation for Team1
-        new_user_id = f"user_{uuid.uuid4().hex[:8]}"
+        new_user_id = f"user_{uuid.uuid4().hex[:8]]"
         new_member = await manager.accept_invitation(invitation["token"], new_user_id)
         
         # Verify user is member of Team1
@@ -173,8 +175,8 @@ class TestTeamIsolationSecurity:
         assert lock_acquired_team2, "Team2 owner should acquire lock on Team2 workspace"
         
         # Verify locks are independent
-        team1_lock_key = f"{team1['team'].team_id}:{team1['workspace'].workspace_id}"
-        team2_lock_key = f"{team2['team'].team_id}:{team2['workspace'].workspace_id}"
+        team1_lock_key = f"{team1['team'].team_id]:{team1['workspace'].workspace_id]"
+        team2_lock_key = f"{team2['team'].team_id]:{team2['workspace'].workspace_id]"
         
         assert team1_lock_key in manager.concurrent_locks
         assert team2_lock_key in manager.concurrent_locks
@@ -243,7 +245,7 @@ class TestTeamIsolationSecurity:
         # Test sharing operations with invalid team
         invalid_success = await manager.share_resource(
             invalid_team_id, team1["owner_id"], "invalid_workspace",
-            team1["member_id"], {PermissionType.READ}
+            team1["member_id"], {PermissionType.READ]
         )
         assert not invalid_success, "Should not allow sharing on invalid team"
 
@@ -257,7 +259,7 @@ class TestTeamIsolationSecurity:
         team1 = teams[0]
         
         # Create user not in any team
-        non_member_id = f"outsider_{uuid.uuid4().hex[:8]}"
+        non_member_id = f"outsider_{uuid.uuid4().hex[:8]]"
         
         # Non-member should not have any permissions
         for permission in PermissionType:
@@ -287,8 +289,8 @@ class TestTeamIsolationSecurity:
         manager = test_data["manager"]
         
         # Create teams with different plan tiers
-        free_owner_id = f"free_owner_{uuid.uuid4().hex[:8]}"
-        enterprise_owner_id = f"ent_owner_{uuid.uuid4().hex[:8]}"
+        free_owner_id = f"free_owner_{uuid.uuid4().hex[:8]]"
+        enterprise_owner_id = f"ent_owner_{uuid.uuid4().hex[:8]]"
         
         free_team = await manager.create_team(free_owner_id, "Free Team", "free")
         enterprise_team = await manager.create_team(enterprise_owner_id, "Enterprise Team", "enterprise")

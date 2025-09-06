@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Comprehensive test for multi-tenant data isolation:
-1. Tenant creation and configuration
+    1. Tenant creation and configuration
 2. Data segregation at database level
 3. Cache isolation between tenants
 4. WebSocket channel isolation
@@ -11,7 +11,7 @@ Comprehensive test for multi-tenant data isolation:
 8. Audit trail per tenant
 
 This test validates complete data isolation in a multi-tenant environment.
-"""
+""""
 
 # Test framework import - using pytest fixtures instead
 
@@ -64,7 +64,7 @@ class MultiTenantIsolationTester:
     
     def __init__(self):
         self.session: Optional[aiohttp.ClientSession] = None
-        self.tenants: Dict[str, TenantData] = {}
+        self.tenants: Dict[str, TenantData] = {]
         self.admin_token: Optional[str] = None
         self.isolation_violations: List[str] = []
         
@@ -107,16 +107,16 @@ class MultiTenantIsolationTester:
                     print(f"[OK] Admin authenticated")
                     return True
                 else:
-                    print(f"[ERROR] Admin login failed: {response.status}")
+                    print(f"[ERROR] Admin login failed: {response.status]")
                     return False
                     
         except Exception as e:
-            print(f"[ERROR] Admin setup failed: {e}")
+            print(f"[ERROR] Admin setup failed: {e]")
             return False
             
     async def create_tenants(self) -> bool:
         """Create multiple tenant organizations."""
-        print(f"\n[TENANT] Creating {NUM_TENANTS} tenants...")
+        print(f"\n[TENANT] Creating {NUM_TENANTS] tenants...")
         
         for i in range(NUM_TENANTS):
             tenant_id = str(uuid.uuid4())[:8]
@@ -148,20 +148,20 @@ class MultiTenantIsolationTester:
                         data = await response.json()
                         tenant.tenant_id = data.get("tenant_id", tenant.tenant_id)
                         self.tenants[tenant.tenant_id] = tenant
-                        print(f"[OK] Created tenant: {tenant.name}")
+                        print(f"[OK] Created tenant: {tenant.name]")
                     else:
-                        print(f"[ERROR] Failed to create tenant {tenant.name}: {response.status}")
+                        print(f"[ERROR] Failed to create tenant {tenant.name]: {response.status]")
                         return False
                         
             except Exception as e:
-                print(f"[ERROR] Tenant creation failed: {e}")
+                print(f"[ERROR] Tenant creation failed: {e]")
                 return False
                 
         return len(self.tenants) == NUM_TENANTS
         
     async def create_tenant_users(self) -> bool:
         """Create users for each tenant."""
-        print(f"\n[USERS] Creating {NUM_USERS_PER_TENANT} users per tenant...")
+        print(f"\n[USERS] Creating {NUM_USERS_PER_TENANT] users per tenant...")
         
         for tenant in self.tenants.values():
             for i in range(NUM_USERS_PER_TENANT):
@@ -195,10 +195,10 @@ class MultiTenantIsolationTester:
                                     login_info = await login_response.json()
                                     tenant.users.append(user_info)
                                     tenant.tokens.append(login_info["access_token"])
-                                    print(f"[OK] Created user for {tenant.name}: {user_data['email']}")
+                                    print(f"[OK] Created user for {tenant.name]: {user_data['email']]")
                                     
                         elif response.status == 409:
-                            print(f"[INFO] User already exists: {user_data['email']}")
+                            print(f"[INFO] User already exists: {user_data['email']]")
                             # Try to login anyway
                             login_data = {
                                 "email": user_data["email"],
@@ -214,13 +214,13 @@ class MultiTenantIsolationTester:
                                     tenant.tokens.append(login_info["access_token"])
                                     
                 except Exception as e:
-                    print(f"[ERROR] User creation failed: {e}")
+                    print(f"[ERROR] User creation failed: {e]")
                     
         return all(len(t.tokens) > 0 for t in self.tenants.values())
         
     async def create_tenant_resources(self) -> bool:
         """Create isolated resources for each tenant."""
-        print(f"\n[RESOURCES] Creating {NUM_RESOURCES_PER_TENANT} resources per tenant...")
+        print(f"\n[RESOURCES] Creating {NUM_RESOURCES_PER_TENANT] resources per tenant...")
         
         for tenant in self.tenants.values():
             if not tenant.tokens:
@@ -253,12 +253,12 @@ class MultiTenantIsolationTester:
                             data = await response.json()
                             resource_id = data.get("thread_id", data.get("id"))
                             tenant.resources.append(resource_id)
-                            print(f"[OK] Created resource for {tenant.name}: {resource_id}")
+                            print(f"[OK] Created resource for {tenant.name]: {resource_id]")
                         else:
-                            print(f"[ERROR] Failed to create resource: {response.status}")
+                            print(f"[ERROR] Failed to create resource: {response.status]")
                             
                 except Exception as e:
-                    print(f"[ERROR] Resource creation failed: {e}")
+                    print(f"[ERROR] Resource creation failed: {e]")
                     
         return all(len(t.resources) > 0 for t in self.tenants.values())
         
@@ -286,7 +286,7 @@ class MultiTenantIsolationTester:
                     try:
                         async with self.session.get(
                             f"{BASE_URL}/api/threads/{resource_id}",
-                            headers={"Authorization": f"Bearer {tenant_a.tokens[0]}"}
+                            headers={"Authorization": f"Bearer {tenant_a.tokens[0]]"]
                         ) as response:
                             if response.status == 200:
                                 violations.append(
@@ -299,7 +299,7 @@ class MultiTenantIsolationTester:
                                 print(f"[OK] Resource not visible across tenants")
                                 
                     except Exception as e:
-                        print(f"[ERROR] Segregation test failed: {e}")
+                        print(f"[ERROR] Segregation test failed: {e]")
                         
         self.isolation_violations.extend(violations)
         return len(violations) == 0
@@ -324,13 +324,13 @@ class MultiTenantIsolationTester:
                 async with self.session.post(
                     f"{BASE_URL}/api/cache/set",
                     json={"key": cache_key, "value": cache_value},
-                    headers={"Authorization": f"Bearer {tenant.tokens[0]}"}
+                    headers={"Authorization": f"Bearer {tenant.tokens[0]]"]
                 ) as response:
                     if response.status == 200:
-                        print(f"[OK] Cache set for {tenant.name}")
+                        print(f"[OK] Cache set for {tenant.name]")
                         
             except Exception as e:
-                print(f"[ERROR] Cache set failed: {e}")
+                print(f"[ERROR] Cache set failed: {e]")
                 
         # Now try cross-tenant cache access
         for tenant_a in self.tenants.values():
@@ -347,7 +347,7 @@ class MultiTenantIsolationTester:
                     # Try to get other tenant's cache
                     async with self.session.get(
                         f"{BASE_URL}/api/cache/get?key={cache_key}",
-                        headers={"Authorization": f"Bearer {tenant_a.tokens[0]}"}
+                        headers={"Authorization": f"Bearer {tenant_a.tokens[0]]"]
                     ) as response:
                         if response.status == 200:
                             data = await response.json()
@@ -360,7 +360,7 @@ class MultiTenantIsolationTester:
                             print(f"[OK] Cache isolated between tenants")
                             
                 except Exception as e:
-                    print(f"[ERROR] Cache isolation test failed: {e}")
+                    print(f"[ERROR] Cache isolation test failed: {e]")
                     
         self.isolation_violations.extend(violations)
         return len(violations) == 0
@@ -381,7 +381,7 @@ class MultiTenantIsolationTester:
                 # Connect WebSocket
                 ws = await websockets.connect(
                     WS_URL,
-                    extra_headers={"Authorization": f"Bearer {tenant.tokens[0]}"}
+                    extra_headers={"Authorization": f"Bearer {tenant.tokens[0]]"]
                 )
                 tenant.websocket_connections.append(ws)
                 
@@ -391,10 +391,10 @@ class MultiTenantIsolationTester:
                     "channel": f"tenant_{tenant.tenant_id}"
                 }))
                 
-                print(f"[OK] WebSocket connected for {tenant.name}")
+                print(f"[OK] WebSocket connected for {tenant.name]")
                 
             except Exception as e:
-                print(f"[ERROR] WebSocket connection failed: {e}")
+                print(f"[ERROR] WebSocket connection failed: {e]")
                 
         # Test cross-tenant message isolation
         for tenant_a in self.tenants.values():
@@ -435,7 +435,7 @@ class MultiTenantIsolationTester:
                 except asyncio.TimeoutError:
                     print(f"[OK] WebSocket channels isolated")
                 except Exception as e:
-                    print(f"[ERROR] WebSocket test error: {e}")
+                    print(f"[ERROR] WebSocket test error: {e]")
                     
         self.isolation_violations.extend(violations)
         return len(violations) == 0
@@ -453,11 +453,11 @@ class MultiTenantIsolationTester:
                 # Check current usage
                 async with self.session.get(
                     f"{BASE_URL}/api/tenant/usage",
-                    headers={"Authorization": f"Bearer {tenant.tokens[0]}"}
+                    headers={"Authorization": f"Bearer {tenant.tokens[0]]"]
                 ) as response:
                     if response.status == 200:
                         usage = await response.json()
-                        print(f"[OK] {tenant.name} usage: {usage}")
+                        print(f"[OK] {tenant.name] usage: {usage]")
                         
                         # Verify usage is within limits
                         if usage.get("api_calls", 0) > 1000000:
@@ -471,7 +471,7 @@ class MultiTenantIsolationTester:
                     rapid_requests.append(
                         self.session.get(
                             f"{BASE_URL}/api/health",
-                            headers={"Authorization": f"Bearer {tenant.tokens[0]}"}
+                            headers={"Authorization": f"Bearer {tenant.tokens[0]]"]
                         )
                     )
                     
@@ -482,12 +482,12 @@ class MultiTenantIsolationTester:
                 )
                 
                 if rate_limited > 0:
-                    print(f"[OK] Rate limiting enforced: {rate_limited}/100 requests limited")
+                    print(f"[OK] Rate limiting enforced: {rate_limited]/100 requests limited")
                 else:
                     print(f"[WARN] No rate limiting detected")
                     
             except Exception as e:
-                print(f"[ERROR] Quota test failed: {e}")
+                print(f"[ERROR] Quota test failed: {e]")
                 
         return True
         
@@ -511,7 +511,7 @@ class MultiTenantIsolationTester:
                 async with self.session.post(
                     f"{BASE_URL}/api/secure/store",
                     json=sensitive_data,
-                    headers={"Authorization": f"Bearer {tenant.tokens[0]}"}
+                    headers={"Authorization": f"Bearer {tenant.tokens[0]]"]
                 ) as response:
                     if response.status in [200, 201]:
                         data = await response.json()
@@ -520,7 +520,7 @@ class MultiTenantIsolationTester:
                         # Verify data is encrypted with tenant key
                         async with self.session.get(
                             f"{BASE_URL}/api/secure/retrieve/{stored_id}",
-                            headers={"Authorization": f"Bearer {tenant.tokens[0]}"}
+                            headers={"Authorization": f"Bearer {tenant.tokens[0]]"]
                         ) as retrieve_response:
                             if retrieve_response.status == 200:
                                 retrieved = await retrieve_response.json()
@@ -530,7 +530,7 @@ class MultiTenantIsolationTester:
                                     print(f"[ERROR] Wrong encryption key used")
                                     
             except Exception as e:
-                print(f"[ERROR] Encryption test failed: {e}")
+                print(f"[ERROR] Encryption test failed: {e]")
                 
         return True
         
@@ -547,7 +547,7 @@ class MultiTenantIsolationTester:
                 # Get audit logs for tenant
                 async with self.session.get(
                     f"{BASE_URL}/api/audit/logs",
-                    headers={"Authorization": f"Bearer {tenant.tokens[0]}"}
+                    headers={"Authorization": f"Bearer {tenant.tokens[0]]"]
                 ) as response:
                     if response.status == 200:
                         logs = await response.json()
@@ -564,10 +564,10 @@ class MultiTenantIsolationTester:
                             )
                             print(f"[VIOLATION] Cross-tenant audit log access!")
                         else:
-                            print(f"[OK] Audit logs isolated for {tenant.name}")
+                            print(f"[OK] Audit logs isolated for {tenant.name]")
                             
             except Exception as e:
-                print(f"[ERROR] Audit trail test failed: {e}")
+                print(f"[ERROR] Audit trail test failed: {e]")
                 
         return len(self.isolation_violations) == 0
         
@@ -593,12 +593,12 @@ class MultiTenantIsolationTester:
                         )
                         
                         if tenant_partition:
-                            print(f"[OK] Partition found for {tenant.name}: {tenant_partition.get('name')}")
+                            print(f"[OK] Partition found for {tenant.name]: {tenant_partition.get('name')]")
                         else:
-                            print(f"[WARN] No partition found for {tenant.name}")
+                            print(f"[WARN] No partition found for {tenant.name]")
                             
         except Exception as e:
-            print(f"[ERROR] Partition test failed: {e}")
+            print(f"[ERROR] Partition test failed: {e]")
             
         return True
         
@@ -684,7 +684,7 @@ async def test_multi_tenant_data_isolation():
         if passed_tests == total_tests:
             print("\n[SUCCESS] Complete multi-tenant isolation verified!")
         else:
-            print(f"\n[WARNING] {total_tests - passed_tests} tests failed")
+            print(f"\n[WARNING] {total_tests - passed_tests] tests failed")
 
 async def main():
     """Run the test standalone."""

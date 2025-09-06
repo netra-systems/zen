@@ -1,7 +1,9 @@
+from unittest.mock import Mock, patch, MagicMock
+
 """
 L3 Integration Test: Brute Force Protection
 Tests authentication brute force protection mechanisms
-"""
+""""
 
 import sys
 from pathlib import Path

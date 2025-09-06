@@ -1,3 +1,5 @@
+from unittest.mock import AsyncMock, Mock, patch, MagicMock
+
 """
 Test for Database Initialization Duplication Prevention
 
@@ -5,18 +7,18 @@ This test ensures that database initialization is not duplicated during startup,
 preventing infinite loops and connection pool exhaustion.
 
 Business Value Justification (BVJ):
-- Segment: Platform/Internal
+    - Segment: Platform/Internal
 - Business Goal: Platform Stability
 - Value Impact: Prevents startup failures due to duplicate database initialization
 - Strategic Impact: Ensures reliable service startup and prevents downtime
-"""
+""""
 
 import asyncio
 import pytest
 from fastapi import FastAPI
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
 from test_framework.database.test_database_manager import TestDatabaseManager
-from test_framework.redis.test_redis_manager import TestRedisManager
+from test_framework.redis_test_utils_test_utils.test_redis_manager import TestRedisManager
 from auth_service.core.auth_manager import AuthManager
 from shared.isolated_environment import IsolatedEnvironment
 from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
@@ -36,7 +38,7 @@ class TestDatabaseInitializationDuplication:
         This test prevents the regression where DatabaseInitializer.initialize_postgresql()
         and setup_database_connections() were both called, causing duplicate initialization
         and potential infinite loops of database queries.
-        """
+        """"
         # Create a test app
         app = FastAPI()
         app.state = state_instance  # Initialize appropriate service
@@ -53,13 +55,13 @@ class TestDatabaseInitializationDuplication:
              patch('netra_backend.app.startup_module.initialize_postgres') as mock_init_postgres, \
              patch('netra_backend.app.startup_module._ensure_database_tables_exist') as mock_ensure_tables:
             
-            # Configure mocks
+                 # Configure mocks
             mock_setup_connections.return_value = None
             mock_init_postgres.return_value = return_value_instance  # Initialize appropriate service  # Return a mock session factory
             mock_ensure_tables.return_value = None
             
             # Create a mock DatabaseInitializer instance
-            mock_db_initializer = AsyncNone  # TODO: Use real service instance
+            mock_db_initializer = AsyncMock()  # TODO: Use real service instance
             mock_db_initializer.initialize_postgresql = AsyncMock(return_value=True)
             mock_db_initializer_class.return_value = mock_db_initializer
             
@@ -81,7 +83,7 @@ class TestDatabaseInitializationDuplication:
         
         This test ensures that the test_connection_with_retry method doesn't
         get called repeatedly in a loop during startup.
-        """
+        """"
         from netra_backend.app.db.database_manager import DatabaseManager
         
         # Mock the database engine and connection test
@@ -117,7 +119,7 @@ class TestDatabaseInitializationDuplication:
         
         Multiple calls to this function can cause excessive database queries and
         connection pool exhaustion.
-        """
+        """"
         from netra_backend.app.startup_module import setup_database_connections
         
         app = FastAPI()
@@ -128,7 +130,7 @@ class TestDatabaseInitializationDuplication:
              patch('netra_backend.app.startup_module._ensure_database_tables_exist') as mock_ensure_tables, \
              patch('netra_backend.app.startup_module.central_logger'):
             
-            # Configure mocks
+                 # Configure mocks
             mock_config.return_value = Mock(
                 database_url="postgresql://test:test@localhost/test",
                 graceful_startup_mode="false"
@@ -149,7 +151,7 @@ class TestDatabaseInitializationDuplication:
         Test that each startup component is initialized exactly once.
         
         This prevents duplicate initialization of any component, not just the database.
-        """
+        """"
         startup_manager = StartupManager()
         
         # Track initialization calls for each component

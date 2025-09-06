@@ -1,7 +1,7 @@
 """
 L3 Integration Test: API Response Handling
 Tests API response formatting and error handling
-"""
+""""
 
 import sys
 from pathlib import Path

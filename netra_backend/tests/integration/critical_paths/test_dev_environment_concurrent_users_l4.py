@@ -3,7 +3,7 @@
 L4 Integration Test: Dev Environment Concurrent Users
 
 Tests multiple concurrent user flows, isolation, and resource management:
-1. Concurrent user registration and login
+    1. Concurrent user registration and login
 2. Simultaneous thread creation and management
 3. Parallel agent interactions
 4. Resource isolation between users
@@ -13,11 +13,11 @@ Tests multiple concurrent user flows, isolation, and resource management:
 8. Rate limiting and fair resource allocation
 
 BVJ:
-- Segment: Early, Mid, Enterprise
+    - Segment: Early, Mid, Enterprise
 - Business Goal: Scalability, Platform Stability
 - Value Impact: Platform capability to serve multiple users simultaneously
 - Strategic Impact: Foundation for enterprise adoption and revenue scaling
-"""
+""""
 
 # Test framework import - using pytest fixtures instead
 
@@ -94,11 +94,11 @@ class ConcurrentUserTester:
     """Test concurrent user functionality and isolation."""
     
     def __init__(self):
-        self.sessions: Dict[str, aiohttp.ClientSession] = {}
-        self.user_tokens: Dict[str, str] = {}
-        self.websocket_connections: Dict[str, Any] = {}
-        self.user_threads: Dict[str, List[str]] = {}
-        self.test_results: Dict[str, Any] = {}
+        self.sessions: Dict[str, aiohttp.ClientSession] = {]
+        self.user_tokens: Dict[str, str] = {]
+        self.websocket_connections: Dict[str, Any] = {]
+        self.user_threads: Dict[str, List[str]] = {]
+        self.test_results: Dict[str, Any] = {]
         self.performance_metrics: Dict[str, List[float]] = {
             "registration_times": [],
             "login_times": [],
@@ -138,7 +138,7 @@ class ConcurrentUserTester:
     def log_event(self, user: str, event: str, details: str = ""):
         """Log test events for analysis."""
         timestamp = datetime.now().isoformat()
-        log_entry = f"[{timestamp}] [{user}] {event}"
+        log_entry = f"[{timestamp]] [{user]] {event]"
         if details:
             log_entry += f" - {details}"
         self.test_logs.append(log_entry)
@@ -204,7 +204,7 @@ class ConcurrentUserTester:
                     result["success"] = True
                     self.log_event(email, "REGISTRATION_SUCCESS", f"Status: {response.status}")
                 else:
-                    result["error"] = f"Status: {response.status}"
+                    result["error"] = f"Status: {response.status]"
                     self.log_event(email, "REGISTRATION_FAILED", result["error"])
                     
         except Exception as e:
@@ -250,7 +250,7 @@ class ConcurrentUserTester:
                     self.user_tokens[email] = result["token"]
                     self.log_event(email, "LOGIN_SUCCESS", "Token obtained")
                 else:
-                    result["error"] = f"Status: {response.status}"
+                    result["error"] = f"Status: {response.status]"
                     self.log_event(email, "LOGIN_FAILED", result["error"])
                     
         except Exception as e:
@@ -278,7 +278,7 @@ class ConcurrentUserTester:
         start_time = time.time()
         
         try:
-            headers = {"Authorization": f"Bearer {self.user_tokens[email]}"}
+            headers = {"Authorization": f"Bearer {self.user_tokens[email]]"]
             
             ws = await websockets.connect(
                 WEBSOCKET_URL,
@@ -304,7 +304,7 @@ class ConcurrentUserTester:
                 result["session_id"] = data.get("session_id")
                 self.websocket_connections[email] = ws
                 self.user_threads[email] = []
-                self.log_event(email, "WS_CONNECT_SUCCESS", f"Session: {result['session_id']}")
+                self.log_event(email, "WS_CONNECT_SUCCESS", f"Session: {result['session_id']]")
             else:
                 result["error"] = str(data)
                 await ws.close()
@@ -356,7 +356,7 @@ class ConcurrentUserTester:
                 result["success"] = True
                 result["thread_id"] = data.get("thread_id")
                 self.user_threads[email].append(result["thread_id"])
-                self.log_event(email, "THREAD_CREATED", f"ID: {result['thread_id']}")
+                self.log_event(email, "THREAD_CREATED", f"ID: {result['thread_id']]")
             else:
                 result["error"] = str(data)
                 
@@ -455,7 +455,7 @@ class ConcurrentUserTester:
                     result["profile_data"] = data
                     self.log_event(email, "PROFILE_SUCCESS", "Profile retrieved")
                 else:
-                    result["error"] = f"Status: {response.status}"
+                    result["error"] = f"Status: {response.status]"
                     
         except Exception as e:
             result["error"] = str(e)
@@ -729,7 +729,7 @@ class ConcurrentUserTester:
             result["success_rate"] = result["operations_completed"] / result["total_operations"] * 100
             
         self.log_event("SCENARIO", f"COMPLETE_{scenario_name.upper()}", 
-                     f"Success: {result['success_rate']:.1f}%, Time: {result['concurrent_time']:.2f}s")
+                     f"Success: {result['success_rate']:.1f]%, Time: {result['concurrent_time']:.2f]s")
         
         return result
     
@@ -753,8 +753,8 @@ class ConcurrentUserTester:
         # Run each concurrent scenario
         for scenario in CONCURRENT_SCENARIOS:
             print(f"\n{'-'*40}")
-            print(f"Running scenario: {scenario['name']}")
-            print(f"Description: {scenario['description']}")
+            print(f"Running scenario: {scenario['name']]")
+            print(f"Description: {scenario['description']]")
             print(f"{'-'*40}")
             
             scenario_result = await self.test_concurrent_scenario(scenario)
@@ -867,38 +867,38 @@ async def test_dev_environment_concurrent_users():
         print("\n" + "="*60)
         print("PERFORMANCE METRICS")
         print("="*60)
-        print(f"Avg Registration Time: {perf['avg_registration_time']:.2f}s")
-        print(f"Avg Login Time: {perf['avg_login_time']:.2f}s")
-        print(f"Avg Thread Creation: {perf['avg_thread_creation_time']:.2f}s")
-        print(f"Avg Message Time: {perf['avg_message_time']:.2f}s")
-        print(f"Total Operations: {perf['total_operations']}")
+        print(f"Avg Registration Time: {perf['avg_registration_time']:.2f]s")
+        print(f"Avg Login Time: {perf['avg_login_time']:.2f]s")
+        print(f"Avg Thread Creation: {perf['avg_thread_creation_time']:.2f]s")
+        print(f"Avg Message Time: {perf['avg_message_time']:.2f]s")
+        print(f"Total Operations: {perf['total_operations']]")
         
         # Resource metrics
         resources = results["resource_metrics"]
         print("\n" + "="*60)
         print("RESOURCE METRICS")
         print("="*60)
-        print(f"Peak Memory: {resources['peak_memory_mb']:.1f} MB")
-        print(f"Avg Memory: {resources['avg_memory_mb']:.1f} MB")
-        print(f"Peak CPU: {resources['peak_cpu_percent']:.1f}%")
-        print(f"Max Connections: {resources['max_connections']}")
+        print(f"Peak Memory: {resources['peak_memory_mb']:.1f] MB")
+        print(f"Avg Memory: {resources['avg_memory_mb']:.1f] MB")
+        print(f"Peak CPU: {resources['peak_cpu_percent']:.1f]%")
+        print(f"Max Connections: {resources['max_connections']]")
         
         # Summary
         summary = results["summary"]
         print("\n" + "="*60)
         print("SUMMARY")
         print("="*60)
-        print(f"Scenarios: {summary['successful_scenarios']}/{summary['total_scenarios']}")
-        print(f"Scenario Success Rate: {summary['scenario_success_rate']:.1f}%")
-        print(f"Total Operations: {summary['total_operations']}")
-        print(f"Isolation Violations: {summary['isolation_violations']}")
-        print(f"Isolation Score: {summary['isolation_score']:.2f}")
-        print(f"Resource Efficiency: {summary['resource_efficiency']}")
+        print(f"Scenarios: {summary['successful_scenarios']]/{summary['total_scenarios']]")
+        print(f"Scenario Success Rate: {summary['scenario_success_rate']:.1f]%")
+        print(f"Total Operations: {summary['total_operations']]")
+        print(f"Isolation Violations: {summary['isolation_violations']]")
+        print(f"Isolation Score: {summary['isolation_score']:.2f]")
+        print(f"Resource Efficiency: {summary['resource_efficiency']]")
         
         # Assert critical conditions
-        assert summary["scenario_success_rate"] >= 70, f"Scenario success rate too low: {summary['scenario_success_rate']:.1f}%"
-        assert summary["isolation_score"] >= 0.9, f"Isolation score too low: {summary['isolation_score']:.2f}"
-        assert resources["peak_memory_mb"] < 2000, f"Memory usage too high: {resources['peak_memory_mb']:.1f} MB"
+        assert summary["scenario_success_rate"] >= 70, f"Scenario success rate too low: {summary['scenario_success_rate']:.1f]%"
+        assert summary["isolation_score"] >= 0.9, f"Isolation score too low: {summary['isolation_score']:.2f]"
+        assert resources["peak_memory_mb"] < 2000, f"Memory usage too high: {resources['peak_memory_mb']:.1f] MB"
         assert perf["avg_login_time"] < 5, "Login time too slow under concurrent load"
         
         print("\n[SUCCESS] Concurrent user tests completed!")

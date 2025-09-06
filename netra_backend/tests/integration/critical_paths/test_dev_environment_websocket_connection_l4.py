@@ -3,7 +3,7 @@
 L4 Integration Test: Dev Environment WebSocket Connection Establishment
 
 Tests comprehensive WebSocket connection scenarios:
-1. Initial connection handshake
+    1. Initial connection handshake
 2. Authentication via WebSocket
 3. Connection persistence and heartbeat
 4. Reconnection logic
@@ -13,11 +13,11 @@ Tests comprehensive WebSocket connection scenarios:
 8. Rate limiting and backpressure
 
 BVJ:
-- Segment: Free, Early, Mid, Enterprise
+    - Segment: Free, Early, Mid, Enterprise
 - Business Goal: Retention
 - Value Impact: Real-time communication for AI agent interactions
 - Strategic Impact: Core platform capability for live agent responses
-"""
+""""
 
 # Test framework import - using pytest fixtures instead
 
@@ -53,9 +53,9 @@ class WebSocketConnectionTester:
     
     def __init__(self):
         self.session: Optional[aiohttp.ClientSession] = None
-        self.connections: Dict[str, Any] = {}
-        self.message_queues: Dict[str, deque] = {}
-        self.connection_stats: Dict[str, Dict] = {}
+        self.connections: Dict[str, Any] = {]
+        self.message_queues: Dict[str, deque] = {]
+        self.connection_stats: Dict[str, Dict] = {]
         self.auth_token: Optional[str] = None
         self.test_logs: List[str] = []
         
@@ -84,7 +84,7 @@ class WebSocketConnectionTester:
         # Login
         async with self.session.post(
             f"{AUTH_SERVICE_URL}/auth/login",
-            json={"email": user_data["email"], "password": user_data["password"]}
+            json={"email": user_data["email"], "password": user_data["password"]]
         ) as response:
             if response.status == 200:
                 data = await response.json()
@@ -99,7 +99,7 @@ class WebSocketConnectionTester:
     def log_event(self, conn_id: str, event: str, details: str = ""):
         """Log WebSocket events."""
         timestamp = datetime.now().isoformat()
-        log_entry = f"[{timestamp}] [{conn_id}] {event}"
+        log_entry = f"[{timestamp]] [{conn_id]] {event]"
         if details:
             log_entry += f" - {details}"
         self.test_logs.append(log_entry)
@@ -140,7 +140,7 @@ class WebSocketConnectionTester:
                     result["handshake_data"] = data
                     
             result["connection_time"] = time.time() - start_time
-            self.log_event(conn_id, "CONNECTION_SUCCESS", f"Time: {result['connection_time']:.2f}s")
+            self.log_event(conn_id, "CONNECTION_SUCCESS", f"Time: {result['connection_time']:.2f]s")
             
         except Exception as e:
             self.log_event(conn_id, "CONNECTION_FAILED", str(e))
@@ -459,21 +459,21 @@ async def test_dev_environment_websocket_connection():
         # Basic connection
         basic = results["basic_connection"]
         print(f"\nBasic Connection:")
-        print(f"  Connected: {'✓' if basic['connected'] else '✗'}")
-        print(f"  Authenticated: {'✓' if basic['authenticated'] else '✗'}")
-        print(f"  Connection Time: {basic['connection_time']:.2f}s")
+        print(f"  Connected: {'✓' if basic['connected'] else '✗']")
+        print(f"  Authenticated: {'✓' if basic['authenticated'] else '✗']")
+        print(f"  Connection Time: {basic['connection_time']:.2f]s")
         
         # Concurrent connections
         concurrent = results["concurrent_connections"]
         print(f"\nConcurrent Connections:")
-        print(f"  Success: {concurrent['successful_connections']}/{concurrent['target_connections']}")
-        print(f"  Avg Time: {concurrent['avg_connection_time']:.2f}s")
+        print(f"  Success: {concurrent['successful_connections']]/{concurrent['target_connections']]")
+        print(f"  Avg Time: {concurrent['avg_connection_time']:.2f]s")
         
         # Message delivery
         delivery = results["message_delivery"]
         print(f"\nMessage Delivery:")
-        print(f"  Delivery Rate: {delivery['delivery_rate']:.1f}%")
-        print(f"  Avg Latency: {delivery['avg_latency']*1000:.1f}ms")
+        print(f"  Delivery Rate: {delivery['delivery_rate']:.1f]%")
+        print(f"  Avg Latency: {delivery['avg_latency']*1000:.1f]ms")
         
         # Assert critical conditions
         assert basic["connected"], "Failed to establish basic WebSocket connection"

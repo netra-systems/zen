@@ -1,7 +1,9 @@
+from unittest.mock import Mock, patch, MagicMock
+
 """Prometheus Metrics Accuracy L3 Integration Tests
 
 Business Value Justification (BVJ):
-- Segment: Platform/Internal (operational excellence for all tiers)
+    - Segment: Platform/Internal (operational excellence for all tiers)
 - Business Goal: Accurate metrics collection and reporting for operational decisions
 - Value Impact: Ensures correct business metrics drive $20K MRR optimizations
 - Strategic Impact: Prevents revenue loss from inaccurate metrics leading to wrong business decisions
@@ -9,7 +11,7 @@ Business Value Justification (BVJ):
 Critical Path: Real metric generation -> Prometheus collection -> Accuracy validation -> Business alerting
 Coverage: Prometheus metric accuracy, cardinality management, timestamp precision, label consistency
 L3 Realism: Tests with actual Prometheus instances and real metric collection
-"""
+""""
 
 import sys
 from pathlib import Path
@@ -407,7 +409,7 @@ async def test_prometheus_metrics_collection_accuracy_l3(prometheus_accuracy_val
     """Test accuracy of metrics collection and export to Prometheus.
     
     L3: Tests with real Prometheus instance to validate metric accuracy.
-    """
+    """"
     # Generate test metrics with known values
     test_metrics = await prometheus_accuracy_validator.generate_test_metrics(50)
     assert len(test_metrics) == 50
@@ -432,7 +434,7 @@ async def test_prometheus_revenue_metrics_precision_l3(prometheus_accuracy_valid
     """Test precision of revenue-critical metrics in Prometheus.
     
     L3: Validates business-critical revenue metrics maintain precision.
-    """
+    """"
     # Generate only revenue metrics
     revenue_metrics = prometheus_accuracy_validator._create_revenue_test_metrics()
     prometheus_accuracy_validator.test_metrics = revenue_metrics
@@ -460,7 +462,7 @@ async def test_prometheus_timestamp_accuracy_l3(prometheus_accuracy_validator):
     """Test timestamp accuracy and drift in Prometheus ingestion.
     
     L3: Validates timestamp precision for time-series accuracy.
-    """
+    """"
     # Generate metrics with precise timestamps
     await prometheus_accuracy_validator.generate_test_metrics(25)
     
@@ -486,7 +488,7 @@ async def test_prometheus_label_consistency_l3(prometheus_accuracy_validator):
     """Test label consistency and cardinality management.
     
     L3: Validates labels are preserved accurately in Prometheus.
-    """
+    """"
     # Generate metrics with complex label sets
     await prometheus_accuracy_validator.generate_test_metrics(30)
     
@@ -514,7 +516,7 @@ async def test_prometheus_error_handling_accuracy_l3(prometheus_accuracy_validat
     """Test error handling and metric accuracy under failure conditions.
     
     L3: Validates metrics remain accurate even with system errors.
-    """
+    """"
     # Generate normal metrics
     await prometheus_accuracy_validator.generate_test_metrics(20)
     

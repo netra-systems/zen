@@ -1,15 +1,17 @@
+from unittest.mock import Mock, patch, MagicMock
+
 """
 L3 Integration Test: WebSocket Connection Establishment on First Load
 
 Business Value Justification (BVJ):
-- Segment: All segments
+    - Segment: All segments
 - Business Goal: User Experience & Retention
 - Value Impact: Real-time features require WebSocket connectivity
 - Revenue Impact: $40K MRR - Real-time collaboration features
 
 L3 Test: Uses real WebSocket server, Redis pub/sub, and authentication service.
 Performance target: WebSocket connection establishment < 2 seconds with 50+ concurrent connections.
-"""
+""""
 
 from netra_backend.app.websocket_core import WebSocketManager
 # Test framework import - using pytest fixtures instead
@@ -17,7 +19,7 @@ from pathlib import Path
 import sys
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
 from test_framework.docker.unified_docker_manager import UnifiedDockerManager
-from test_framework.redis.test_redis_manager import TestRedisManager
+from test_framework.redis_test_utils_test_utils.test_redis_manager import TestRedisManager
 from auth_service.core.auth_manager import AuthManager
 from shared.isolated_environment import IsolatedEnvironment
 
@@ -52,7 +54,6 @@ from netra_backend.tests.integration.helpers.redis_l3_helpers import (
 )
 
 class WebSocketConnectionTracker:
-    pass
 
     """Track WebSocket connection establishment metrics."""
     
@@ -161,7 +162,6 @@ class WebSocketConnectionTracker:
         }
 
 class RealWebSocketClient:
-    pass
 
     """Real WebSocket client for L3 testing."""
     
@@ -286,12 +286,10 @@ class RealWebSocketClient:
 @pytest.mark.integration
 
 class TestWebSocketFirstLoadL3:
-    pass
 
     """L3 integration tests for WebSocket connection establishment on first load."""
     
     @pytest.fixture(scope="function")
-
     async def redis_container(self):
 
         """Set up real Redis container for connection tracking."""
@@ -304,9 +302,8 @@ class TestWebSocketFirstLoadL3:
 
         await container.stop()
     
-    @pytest.fixture
-
-    async def redis_client(self, redis_container):
+        @pytest.fixture
+        async def redis_client(self, redis_container):
 
         """Create Redis client for connection tracking."""
 
@@ -318,18 +315,16 @@ class TestWebSocketFirstLoadL3:
 
         await client.close()
     
-    @pytest.fixture
-
-    async def connection_tracker(self, redis_client):
+        @pytest.fixture
+        async def connection_tracker(self, redis_client):
 
         """Create WebSocket connection tracker."""
 
         await asyncio.sleep(0)
-    return WebSocketConnectionTracker(redis_client)
+        return WebSocketConnectionTracker(redis_client)
     
-    @pytest.fixture
-
-    async def ws_manager(self, redis_container):
+        @pytest.fixture
+        async def ws_manager(self, redis_container):
 
         """Create WebSocket manager with Redis integration."""
 
@@ -342,72 +337,70 @@ class TestWebSocketFirstLoadL3:
 
         yield manager
     
-    @pytest.fixture
-
-    def test_users(self):
-    """Use real service instance."""
-    # TODO: Initialize real service
-    await asyncio.sleep(0)
-    return None
+        @pytest.fixture
+        def test_users(self):
+        """Use real service instance."""
+        # TODO: Initialize real service
+        await asyncio.sleep(0)
+        return None
 
         """Create test users for connection testing."""
 
         return [
 
-            User(
+        User(
 
-                id=f"first_load_user_{i}",
+        id=f"first_load_user_{i}",
 
-                email=f"firstloaduser{i}@example.com", 
+        email=f"firstloaduser{i}@example.com", 
 
-                username=f"firstloaduser{i}",
+        username=f"firstloaduser{i}",
 
-                is_active=True,
+        is_active=True,
 
-                created_at=datetime.now(timezone.utc)
+        created_at=datetime.now(timezone.utc)
 
-            )
+        )
 
-            for i in range(60)  # More users for stress testing
+        for i in range(60)  # More users for stress testing
 
         ]
     
-    @pytest.fixture
-
-    async def mock_auth_token(self):
+        @pytest.fixture
+        async def mock_auth_token(self):
 
         """Mock authentication token for testing."""
 
         with patch.object(auth_client, 'validate_token') as mock_validate:
 
-            mock_validate.return_value = {
+        mock_validate.return_value = {
 
-                "user_id": "test_user",
+        "user_id": "test_user",
 
-                "exp": time.time() + 3600,  # 1 hour expiry
+        "exp": time.time() + 3600,  # 1 hour expiry
 
-                "valid": True
+        "valid": True
 
-            }
+        }
 
-            yield "mock_jwt_token_for_testing"
+        yield "mock_jwt_token_for_testing"
     
-    @pytest.mark.asyncio
-    async def test_websocket_upgrade_from_http(self, ws_manager, redis_client, mock_auth_token):
+        @pytest.mark.asyncio
+        async def test_websocket_upgrade_from_http(self, ws_manager, redis_client, mock_auth_token):
 
         """Test WebSocket upgrade from HTTP successful."""
 
         user = User(
 
-            id="upgrade_test_user",
+        id="upgrade_test_user",
 
-            email="upgrade@example.com",
+        email="upgrade@example.com",
 
-            username="upgradeuser",
+        username="upgradeuser",
 
-            is_active=True,
+        is_active=True,
 
-            created_at=datetime.now(timezone.utc)
+        created_at=datetime.now(timezone.utc)
 
         )
         
@@ -437,7 +430,7 @@ class TestWebSocketFirstLoadL3:
 
         await ws_manager.disconnect_user(user.id, websocket)
     
-    @pytest.mark.asyncio
+        @pytest.mark.asyncio
 # COMMENTED OUT: Mock-dependent test -     async def test_authentication_token_validation(self, ws_manager, redis_client, mock_auth_token):
 # COMMENTED OUT: Mock-dependent test - 
 # COMMENTED OUT: Mock-dependent test -         """Test authentication token validation before connection."""

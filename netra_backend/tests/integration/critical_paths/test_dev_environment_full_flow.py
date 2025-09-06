@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 """
 Comprehensive test to verify the complete dev environment flow:
-1. Dev launcher starts successfully
+    1. Dev launcher starts successfully
 2. User can log in via auth service
 3. WebSocket authenticates properly
 4. Data flows correctly through WebSocket connection
 
 This test runs against the actual dev environment to ensure everything works end-to-end.
-"""
+""""
 
 # Test framework import - using pytest fixtures instead
 
@@ -113,7 +113,7 @@ class DevEnvironmentTester:
             return False
             
         except Exception as e:
-            print(f"[ERROR] Failed to start dev launcher: {e}")
+            print(f"[ERROR] Failed to start dev launcher: {e]")
             return False
             
     @pytest.mark.asyncio
@@ -125,13 +125,13 @@ class DevEnvironmentTester:
             async with self.session.get(f"{DEV_BACKEND_URL}/api/health") as response:
                 if response.status == 200:
                     data = await response.json()
-                    print(f"[OK] Backend healthy: {data}")
+                    print(f"[OK] Backend healthy: {data]")
                     return True
                 else:
-                    print(f"[ERROR] Backend unhealthy: {response.status}")
+                    print(f"[ERROR] Backend unhealthy: {response.status]")
                     return False
         except Exception as e:
-            print(f"[ERROR] Backend health check failed: {e}")
+            print(f"[ERROR] Backend health check failed: {e]")
             return False
             
     @pytest.mark.asyncio
@@ -143,13 +143,13 @@ class DevEnvironmentTester:
             async with self.session.get(f"{AUTH_SERVICE_URL}/health") as response:
                 if response.status == 200:
                     data = await response.json()
-                    print(f"[OK] Auth service healthy: {data}")
+                    print(f"[OK] Auth service healthy: {data]")
                     return True
                 else:
-                    print(f"[ERROR] Auth service unhealthy: {response.status}")
+                    print(f"[ERROR] Auth service unhealthy: {response.status]")
                     return False
         except Exception as e:
-            print(f"[ERROR] Auth service check failed: {e}")
+            print(f"[ERROR] Auth service check failed: {e]")
             return False
             
     async def register_test_user(self) -> bool:
@@ -169,17 +169,17 @@ class DevEnvironmentTester:
             ) as response:
                 if response.status in [200, 201]:
                     data = await response.json()
-                    print(f"[OK] User registered: {data.get('email')}")
+                    print(f"[OK] User registered: {data.get('email')]")
                     return True
                 elif response.status == 409:
                     print("[INFO] User already exists (this is fine)")
                     return True
                 else:
                     text = await response.text()
-                    print(f"[ERROR] Registration failed: {response.status} - {text}")
+                    print(f"[ERROR] Registration failed: {response.status] - {text]")
                     return False
         except Exception as e:
-            print(f"[ERROR] Registration error: {e}")
+            print(f"[ERROR] Registration error: {e]")
             return False
             
     async def login_user(self) -> bool:
@@ -200,17 +200,17 @@ class DevEnvironmentTester:
                     data = await response.json()
                     self.auth_token = data.get("access_token")
                     if self.auth_token:
-                        print(f"[OK] Login successful, token: {self.auth_token[:20]}...")
+                        print(f"[OK] Login successful, token: {self.auth_token[:20]]...")
                         return True
                     else:
                         print("[ERROR] No token in response")
                         return False
                 else:
                     text = await response.text()
-                    print(f"[ERROR] Login failed: {response.status} - {text}")
+                    print(f"[ERROR] Login failed: {response.status] - {text]")
                     return False
         except Exception as e:
-            print(f"[ERROR] Login error: {e}")
+            print(f"[ERROR] Login error: {e]")
             return False
             
     @pytest.mark.asyncio
@@ -232,17 +232,17 @@ class DevEnvironmentTester:
             ) as response:
                 if response.status == 200:
                     data = await response.json()
-                    print(f"[OK] Authenticated API works: {data}")
+                    print(f"[OK] Authenticated API works: {data]")
                     return True
                 elif response.status == 401:
                     print("[ERROR] Authentication failed")
                     return False
                 else:
                     text = await response.text()
-                    print(f"[ERROR] API call failed: {response.status} - {text}")
+                    print(f"[ERROR] API call failed: {response.status] - {text]")
                     return False
         except Exception as e:
-            print(f"[ERROR] API error: {e}")
+            print(f"[ERROR] API error: {e]")
             return False
             
     @pytest.mark.asyncio
@@ -280,17 +280,17 @@ class DevEnvironmentTester:
             
             data = json.loads(response)
             if data.get("type") == "auth_success":
-                print(f"[OK] WebSocket authenticated: {data}")
+                print(f"[OK] WebSocket authenticated: {data]")
                 return True
             else:
-                print(f"[ERROR] WebSocket auth failed: {data}")
+                print(f"[ERROR] WebSocket auth failed: {data]")
                 return False
                 
         except asyncio.TimeoutError:
             print("[ERROR] WebSocket auth timeout")
             return False
         except Exception as e:
-            print(f"[ERROR] WebSocket error: {e}")
+            print(f"[ERROR] WebSocket error: {e]")
             return False
             
     @pytest.mark.asyncio
@@ -311,7 +311,7 @@ class DevEnvironmentTester:
             }
             
             await self.ws_connection.send(json.dumps(test_message))
-            print(f"[SEND] Sent: {test_message}")
+            print(f"[SEND] Sent: {test_message]")
             
             # Wait for echo or response
             response = await asyncio.wait_for(
@@ -320,7 +320,7 @@ class DevEnvironmentTester:
             )
             
             data = json.loads(response)
-            print(f"[RECV] Received: {data}")
+            print(f"[RECV] Received: {data]")
             
             # Verify we got some response
             if data:
@@ -334,7 +334,7 @@ class DevEnvironmentTester:
             print("[ERROR] WebSocket data timeout")
             return False
         except Exception as e:
-            print(f"[ERROR] WebSocket data error: {e}")
+            print(f"[ERROR] WebSocket data error: {e]")
             return False
             
     @pytest.mark.asyncio
@@ -357,7 +357,7 @@ class DevEnvironmentTester:
             }
             
             await self.ws_connection.send(json.dumps(create_message))
-            print(f"[CREATE] Creating thread: {create_message}")
+            print(f"[CREATE] Creating thread: {create_message]")
             
             # Wait for response
             response = await asyncio.wait_for(
@@ -366,20 +366,20 @@ class DevEnvironmentTester:
             )
             
             data = json.loads(response)
-            print(f"[RESPONSE] Thread response: {data}")
+            print(f"[RESPONSE] Thread response: {data]")
             
             if data.get("type") == "thread_created" or data.get("thread_id"):
-                print(f"[OK] Thread created successfully: {data.get('thread_id')}")
+                print(f"[OK] Thread created successfully: {data.get('thread_id')]")
                 return True
             else:
-                print(f"[ERROR] Thread creation failed: {data}")
+                print(f"[ERROR] Thread creation failed: {data]")
                 return False
                 
         except asyncio.TimeoutError:
             print("[ERROR] Thread creation timeout")
             return False
         except Exception as e:
-            print(f"[ERROR] Thread creation error: {e}")
+            print(f"[ERROR] Thread creation error: {e]")
             return False
             
     async def run_all_tests(self) -> Dict[str, bool]:
@@ -436,7 +436,7 @@ async def test_dev_environment_full_flow():
         if passed_tests == total_tests:
             print("\n[SUCCESS] All tests passed! Dev environment is fully functional.")
         else:
-            print(f"\n[WARNING] {total_tests - passed_tests} tests failed.")
+            print(f"\n[WARNING] {total_tests - passed_tests] tests failed.")
             
         # Assert all tests passed
         assert all(results.values()), f"Some tests failed: {results}"

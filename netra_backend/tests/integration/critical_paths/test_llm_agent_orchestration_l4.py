@@ -1,26 +1,26 @@
 """L4 Real LLM Agent Orchestration Test Suite
 
 Business Value Justification (BVJ):
-- Segment: Enterprise
+    - Segment: Enterprise
 - Business Goal: AI Response Quality and Cost Control  
 - Value Impact: Validates complete AI agent workflow with real LLM calls
 - Strategic Impact: $60K MRR protection from AI service failures
 
 This test validates real-world LLM agent orchestration including:
-- Supervisor agent dispatching to sub-agents
+    - Supervisor agent dispatching to sub-agents
 - Real LLM API calls (OpenAI, Anthropic, Google)
 - Response quality validation
 - Token usage and cost tracking
 - Fallback and retry mechanisms
 - Context management across agents
-"""
+""""
 
 import sys
 from pathlib import Path
 from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
 from test_framework.database.test_database_manager import TestDatabaseManager
-from test_framework.redis.test_redis_manager import TestRedisManager
+from test_framework.redis_test_utils_test_utils.test_redis_manager import TestRedisManager
 from auth_service.core.auth_manager import AuthManager
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
@@ -373,9 +373,9 @@ class L4RealLLMAgentOrchestrationTest(L4StagingCriticalPathTestBase):
         try:
             # Create execution context for scenario
             execution_context = ExecutionContext(
-                user_id=f"test_user_{uuid.uuid4().hex[:8]}",
-                thread_id=f"test_thread_{uuid.uuid4().hex[:8]}",
-                message_id=f"test_message_{uuid.uuid4().hex[:8]}",
+                user_id=f"test_user_{uuid.uuid4().hex[:8]]",
+                thread_id=f"test_thread_{uuid.uuid4().hex[:8]]",
+                message_id=f"test_message_{uuid.uuid4().hex[:8]]",
                 user_message=scenario.prompt,
                 metadata={
                     "test_scenario": scenario.name,
@@ -416,7 +416,7 @@ class L4RealLLMAgentOrchestrationTest(L4StagingCriticalPathTestBase):
             self.orchestration_metrics.agent_orchestration_count += 1
             
         except asyncio.TimeoutError:
-            scenario_result["error"] = f"Scenario timed out after {scenario.timeout_seconds}s"
+            scenario_result["error"] = f"Scenario timed out after {scenario.timeout_seconds]s"
             scenario_result["response_time"] = time.time() - start_time
         except Exception as e:
             scenario_result["error"] = str(e)
@@ -536,12 +536,12 @@ class L4RealLLMAgentOrchestrationTest(L4StagingCriticalPathTestBase):
                 AI Response: {response}
                 
                 Rate the {quality_dimension} on a scale of 0.0 to 1.0 where:
-                - 0.0 = Very poor {quality_dimension}
+                    - 0.0 = Very poor {quality_dimension}
                 - 0.5 = Adequate {quality_dimension}
                 - 1.0 = Excellent {quality_dimension}
                 
                 Respond with only a decimal number between 0.0 and 1.0.
-                """
+                """"
                 
                 score_response = await self.llm_manager.ask_llm(evaluation_prompt, "openai")
                 
@@ -635,23 +635,23 @@ class L4RealLLMAgentOrchestrationTest(L4StagingCriticalPathTestBase):
         
         # Check LLM success rate
         if overall_metrics["llm_success_rate"] < quality_gates["min_llm_success_rate"]:
-            logger.warning(f"LLM success rate {overall_metrics['llm_success_rate']:.1f}% below threshold {quality_gates['min_llm_success_rate']}%")
+            logger.warning(f"LLM success rate {overall_metrics['llm_success_rate']:.1f]% below threshold {quality_gates['min_llm_success_rate']]%")
             return False
         
         # Check average quality score
         if overall_metrics["average_quality_score"] < quality_gates["min_average_quality_score"]:
-            logger.warning(f"Average quality score {overall_metrics['average_quality_score']:.2f} below threshold {quality_gates['min_average_quality_score']}")
+            logger.warning(f"Average quality score {overall_metrics['average_quality_score']:.2f] below threshold {quality_gates['min_average_quality_score']]")
             return False
         
         # Check cost per scenario
         cost_per_scenario = overall_metrics["total_cost_usd"] / max(1, overall_metrics["total_scenarios"])
         if cost_per_scenario > quality_gates["max_cost_per_scenario"]:
-            logger.warning(f"Cost per scenario ${cost_per_scenario:.2f} above threshold ${quality_gates['max_cost_per_scenario']}")
+            logger.warning(f"Cost per scenario ${cost_per_scenario:.2f] above threshold ${quality_gates['max_cost_per_scenario']]")
             return False
         
         # Check context preservation
         if overall_metrics["context_preservation_rate"] < quality_gates["min_context_preservation_rate"]:
-            logger.warning(f"Context preservation rate {overall_metrics['context_preservation_rate']:.1f}% below threshold {quality_gates['min_context_preservation_rate']}%")
+            logger.warning(f"Context preservation rate {overall_metrics['context_preservation_rate']:.1f]% below threshold {quality_gates['min_context_preservation_rate']]%")
             return False
         
         return True
@@ -692,20 +692,20 @@ class L4RealLLMAgentOrchestrationTest(L4StagingCriticalPathTestBase):
     async def _log_comprehensive_results(self, test_results: Dict[str, Any]) -> None:
         """Log comprehensive test results for analysis."""
         logger.info("=== L4 LLM Agent Orchestration Test Results ===")
-        logger.info(f"Overall Quality Gates Passed: {test_results['quality_gates_passed']}")
-        logger.info(f"Cost Efficiency Score: {test_results['cost_efficiency_score']:.2f}")
-        logger.info(f"Orchestration Effectiveness: {test_results['orchestration_effectiveness']:.2f}")
+        logger.info(f"Overall Quality Gates Passed: {test_results['quality_gates_passed']]")
+        logger.info(f"Cost Efficiency Score: {test_results['cost_efficiency_score']:.2f]")
+        logger.info(f"Orchestration Effectiveness: {test_results['orchestration_effectiveness']:.2f]")
         
         overall_metrics = test_results["overall_metrics"]
-        logger.info(f"Total LLM Calls: {overall_metrics['total_llm_calls']}")
-        logger.info(f"LLM Success Rate: {overall_metrics['llm_success_rate']:.1f}%")
-        logger.info(f"Total Cost: ${overall_metrics['total_cost_usd']:.2f}")
-        logger.info(f"Average Quality Score: {overall_metrics['average_quality_score']:.2f}")
-        logger.info(f"Context Preservation Rate: {overall_metrics['context_preservation_rate']:.1f}%")
+        logger.info(f"Total LLM Calls: {overall_metrics['total_llm_calls']]")
+        logger.info(f"LLM Success Rate: {overall_metrics['llm_success_rate']:.1f]%")
+        logger.info(f"Total Cost: ${overall_metrics['total_cost_usd']:.2f]")
+        logger.info(f"Average Quality Score: {overall_metrics['average_quality_score']:.2f]")
+        logger.info(f"Context Preservation Rate: {overall_metrics['context_preservation_rate']:.1f]%")
         
         # Log scenario-specific results
         for result in test_results["scenario_results"]:
-            logger.info(f"Scenario {result['scenario_name']}: Success={result['success']}, Time={result['response_time']:.1f}s, Cost=${result['cost_usd']:.2f}")
+            logger.info(f"Scenario {result['scenario_name']]: Success={result['success']], Time={result['response_time']:.1f]s, Cost=${result['cost_usd']:.2f]")
     
     async def validate_critical_path_results(self, results: Dict[str, Any]) -> bool:
         """Validate critical path test results meet business requirements."""
@@ -819,9 +819,9 @@ async def test_l4_llm_cost_optimization_scenario():
         result = await test_instance._execute_scenario(cost_scenario)
         
         # Validate cost and quality requirements
-        assert result["success"], f"Cost optimization scenario failed: {result.get('error')}"
-        assert result["cost_usd"] <= 0.50, f"Cost ${result['cost_usd']:.2f} exceeds $0.50 limit"
-        assert result["response_time"] <= 30.0, f"Response time {result['response_time']:.1f}s exceeds 30s limit"
+        assert result["success"], f"Cost optimization scenario failed: {result.get('error')]"
+        assert result["cost_usd"] <= 0.50, f"Cost ${result['cost_usd']:.2f] exceeds $0.50 limit"
+        assert result["response_time"] <= 30.0, f"Response time {result['response_time']:.1f]s exceeds 30s limit"
         
         # Validate quality scores meet requirements
         quality_scores = result.get("quality_scores", {})
@@ -829,7 +829,7 @@ async def test_l4_llm_cost_optimization_scenario():
             required_score = cost_scenario.quality_requirements.get(dimension, 0.8)
             assert score >= required_score, f"Quality score for {dimension} ({score:.2f}) below requirement ({required_score})"
         
-        logger.info(f"Cost optimization scenario validated - Cost: ${result['cost_usd']:.2f}, Quality: {quality_scores}")
+        logger.info(f"Cost optimization scenario validated - Cost: ${result['cost_usd']:.2f], Quality: {quality_scores]")
         
     finally:
         await test_instance.cleanup_l4_resources()

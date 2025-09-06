@@ -1,14 +1,16 @@
+import asyncio
+
 """API Circuit Breaker Per-Endpoint L3 Integration Tests
 
 Business Value Justification (BVJ):
-- Segment: All tiers (API reliability infrastructure)
+    - Segment: All tiers (API reliability infrastructure)
 - Business Goal: Prevent cascading failures and maintain service availability
 - Value Impact: Protects against downstream service failures
 - Strategic Impact: $15K MRR protection through fault-tolerant API gateway
 
 Critical Path: Request processing -> Failure detection -> Circuit state management -> Fallback response -> Recovery monitoring
 Coverage: Per-endpoint circuit breakers, failure thresholds, recovery mechanisms, fallback strategies
-"""
+""""
 
 import pytest
 from shared.isolated_environment import IsolatedEnvironment

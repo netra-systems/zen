@@ -1,7 +1,7 @@
 """
 L3 Integration Test: PostgreSQL Data Persistence
 Tests PostgreSQL data persistence and integrity
-"""
+""""
 
 import sys
 from pathlib import Path
@@ -135,13 +135,13 @@ class TestDataPersistencePostgresL3:
                 where={"id": user_id}
             )
         
-        tasks = [update_name(f"Name{i}") for i in range(5)]
+        tasks = [update_name(f"Name{i]") for i in range(5)]
         results = await asyncio.gather(*tasks, return_exceptions=True)
         
         # Check final state
         final = await pg_service.get_by_id("users", user_id)
         assert final["version"] == 2
-        assert final["name"] in [f"Name{i}" for i in range(5)]
+        assert final["name"] in [f"Name{i]" for i in range(5)]
     
     @pytest.mark.asyncio
     @pytest.mark.integration

@@ -4,11 +4,11 @@ Critical tests for complete corpus admin orchestration flows.
 This module tests the complete multi-agent flow focusing on the real CorpusAdminSubAgent interface.
 
 Business Value Justification (BVJ):
-- Segment: Enterprise, Mid
+    - Segment: Enterprise, Mid
 - Business Goal: Platform Stability, Data Integrity
 - Value Impact: Ensures knowledge base integrity for all agent decisions
 - Strategic Impact: Prevents corpus corruption affecting $50K+ MRR enterprise customers
-"""
+""""
 
 import asyncio
 import pytest
@@ -68,7 +68,7 @@ class TestCorpusAdminOrchestrationFlows:
         # Validate agent is properly initialized
         assert env["corpus_admin"] is not None, "Corpus admin agent should be created"
         assert hasattr(env["corpus_admin"], "name"), "Agent should have name attribute"
-        assert env["corpus_admin"].name == "CorpusAdminSubAgent", f"Expected 'CorpusAdminSubAgent', got '{env['corpus_admin'].name}'"
+        assert env["corpus_admin"].name == "CorpusAdminSubAgent", f"Expected 'CorpusAdminSubAgent', got '{env['corpus_admin'].name]'"
         
         # Test that basic attributes exist
         assert hasattr(env["corpus_admin"], "description"), "Agent should have description"
@@ -133,9 +133,9 @@ class TestCorpusAdminOrchestrationFlows:
         print(f"Execution completed - Result: {has_result}, Error: {has_error}")
         
         if has_error:
-            print(f"Corpus admin execution error: {env['deep_state'].corpus_admin_error}")
+            print(f"Corpus admin execution error: {env['deep_state'].corpus_admin_error]")
         if has_result:
-            print(f"Corpus admin execution result: {env['deep_state'].corpus_admin_result}")
+            print(f"Corpus admin execution result: {env['deep_state'].corpus_admin_result]")
 
     @pytest.mark.asyncio
     @pytest.mark.integration
@@ -173,9 +173,9 @@ class TestCorpusAdminOrchestrationFlows:
         print(f"Admin mode execution - Result: {has_result}, Error: {has_error}")
         
         if has_error:
-            print(f"Admin mode execution error: {env['deep_state'].corpus_admin_error}")
+            print(f"Admin mode execution error: {env['deep_state'].corpus_admin_error]")
         if has_result:
-            print(f"Admin mode execution result: {env['deep_state'].corpus_admin_result}")
+            print(f"Admin mode execution result: {env['deep_state'].corpus_admin_result]")
 
     @pytest.mark.asyncio
     @pytest.mark.integration
@@ -210,9 +210,9 @@ class TestCorpusAdminOrchestrationFlows:
         print(f"State management - Result: {has_result}, Error: {has_error}")
         
         if has_error:
-            print(f"State management error: {env['deep_state'].corpus_admin_error}")
+            print(f"State management error: {env['deep_state'].corpus_admin_error]")
         if has_result:
-            print(f"State management result: {env['deep_state'].corpus_admin_result}")
+            print(f"State management result: {env['deep_state'].corpus_admin_result]")
 
     @pytest.mark.asyncio
     @pytest.mark.integration
@@ -295,9 +295,9 @@ class TestCorpusAdminOrchestrationFlows:
             print(f"Request {i} execution - Result: {has_result}, Error: {has_error}")
             
             if has_error:
-                print(f"Request {i} error: {env['deep_state'].corpus_admin_error}")
+                print(f"Request {i] error: {env['deep_state'].corpus_admin_error]")
             if has_result:
-                print(f"Request {i} result: {env['deep_state'].corpus_admin_result}")
+                print(f"Request {i] result: {env['deep_state'].corpus_admin_result]")
             
             # Clean up for next request
             if hasattr(env["deep_state"], 'corpus_admin_result'):

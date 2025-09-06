@@ -1,7 +1,7 @@
 """
 L3 Integration Test: API Request Validation
 Tests API request validation and sanitization
-"""
+""""
 
 import sys
 from pathlib import Path

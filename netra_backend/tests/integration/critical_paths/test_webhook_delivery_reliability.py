@@ -3,7 +3,7 @@ from shared.isolated_environment import IsolatedEnvironment
 #!/usr/bin/env python3
 """
 Comprehensive test for webhook delivery reliability:
-1. Webhook registration and validation
+    1. Webhook registration and validation
 2. Event triggering and payload generation
 3. Delivery attempts and retries
 4. Exponential backoff handling
@@ -11,7 +11,7 @@ Comprehensive test for webhook delivery reliability:
 6. Signature verification
 7. Concurrent webhook processing
 8. Circuit breaker for failing endpoints
-"""
+""""
 
 # Test framework import - using pytest fixtures instead
 
@@ -42,7 +42,7 @@ class WebhookReliabilityTester:
         self.webhook_server: Optional[web.Application] = None
         self.webhook_runner: Optional[web.AppRunner] = None
         self.received_webhooks: List[Dict] = []
-        self.webhook_secret = f"secret_{uuid.uuid4().hex[:16]}"
+        self.webhook_secret = f"secret_{uuid.uuid4().hex[:16]]"
         
     async def __aenter__(self):
         self.session = aiohttp.ClientSession()
@@ -66,7 +66,7 @@ class WebhookReliabilityTester:
         await self.webhook_runner.setup()
         site = web.TCPSite(self.webhook_runner, "localhost", TEST_WEBHOOK_PORT)
         await site.start()
-        print(f"[INFO] Test webhook receiver started on port {TEST_WEBHOOK_PORT}")
+        print(f"[INFO] Test webhook receiver started on port {TEST_WEBHOOK_PORT]")
         
     async def handle_webhook(self, request):
         """Handle incoming webhook."""
@@ -109,7 +109,7 @@ class WebhookReliabilityTester:
                 if response.status in [200, 201]:
                     data = await response.json()
                     webhook_id = data.get("webhook_id")
-                    print(f"[OK] Webhook registered: {webhook_id}")
+                    print(f"[OK] Webhook registered: {webhook_id]")
                     
                     # Validate webhook
                     async with self.session.post(
@@ -122,7 +122,7 @@ class WebhookReliabilityTester:
             return False
             
         except Exception as e:
-            print(f"[ERROR] Webhook registration failed: {e}")
+            print(f"[ERROR] Webhook registration failed: {e]")
             return False
             
     @pytest.mark.asyncio
@@ -169,7 +169,7 @@ class WebhookReliabilityTester:
                             await asyncio.sleep(2)
                             
                             if self.received_webhooks:
-                                print(f"[OK] Webhook received: {len(self.received_webhooks)} deliveries")
+                                print(f"[OK] Webhook received: {len(self.received_webhooks)] deliveries")
                                 return True
                             else:
                                 print("[WARNING] No webhook received")
@@ -178,7 +178,7 @@ class WebhookReliabilityTester:
             return False
             
         except Exception as e:
-            print(f"[ERROR] Event triggering failed: {e}")
+            print(f"[ERROR] Event triggering failed: {e]")
             return False
             
     @pytest.mark.asyncio
@@ -224,16 +224,16 @@ class WebhookReliabilityTester:
                                     attempts = deliveries.get("attempts", [])
                                     
                                     if len(attempts) >= 2:
-                                        print(f"[OK] Retry attempts: {len(attempts)}")
+                                        print(f"[OK] Retry attempts: {len(attempts)]")
                                         return True
                                     else:
-                                        print(f"[WARNING] Only {len(attempts)} attempts")
+                                        print(f"[WARNING] Only {len(attempts)] attempts")
                                         return False
                                         
             return False
             
         except Exception as e:
-            print(f"[ERROR] Delivery retry test failed: {e}")
+            print(f"[ERROR] Delivery retry test failed: {e]")
             return False
             
     @pytest.mark.asyncio
@@ -285,7 +285,7 @@ class WebhookReliabilityTester:
                                             delay = (t2 - t1).total_seconds()
                                             delays.append(delay)
                                             
-                                        print(f"[INFO] Backoff delays: {delays}")
+                                        print(f"[INFO] Backoff delays: {delays]")
                                         
                                         # Check if delays are increasing
                                         if all(delays[i] <= delays[i+1] * 1.5 for i in range(len(delays)-1)):
@@ -295,7 +295,7 @@ class WebhookReliabilityTester:
             return True  # Backoff might not be perfectly exponential
             
         except Exception as e:
-            print(f"[ERROR] Exponential backoff test failed: {e}")
+            print(f"[ERROR] Exponential backoff test failed: {e]")
             return False
             
     @pytest.mark.asyncio
@@ -311,7 +311,7 @@ class WebhookReliabilityTester:
                     dlq_data = await response.json()
                     failed_count = dlq_data.get("count", 0)
                     
-                    print(f"[INFO] DLQ contains {failed_count} failed webhooks")
+                    print(f"[INFO] DLQ contains {failed_count] failed webhooks")
                     
                     if failed_count > 0:
                         # Try to reprocess
@@ -320,7 +320,7 @@ class WebhookReliabilityTester:
                         ) as reprocess_response:
                             if reprocess_response.status == 200:
                                 result = await reprocess_response.json()
-                                print(f"[OK] Reprocessed {result.get('reprocessed', 0)} webhooks")
+                                print(f"[OK] Reprocessed {result.get('reprocessed', 0)] webhooks")
                                 return True
                                 
                     return True  # DLQ is working
@@ -328,7 +328,7 @@ class WebhookReliabilityTester:
             return False
             
         except Exception as e:
-            print(f"[ERROR] DLQ test failed: {e}")
+            print(f"[ERROR] DLQ test failed: {e]")
             return False
             
     @pytest.mark.asyncio
@@ -385,7 +385,7 @@ class WebhookReliabilityTester:
             return False
             
         except Exception as e:
-            print(f"[ERROR] Signature verification test failed: {e}")
+            print(f"[ERROR] Signature verification test failed: {e]")
             return False
             
     @pytest.mark.asyncio
@@ -399,7 +399,7 @@ class WebhookReliabilityTester:
             for i in range(5):
                 webhook_data = {
                     "url": f"http://localhost:{TEST_WEBHOOK_PORT}/webhook",
-                    "events": [f"concurrent.test.{i}"]
+                    "events": [f"concurrent.test.{i]"]
                 }
                 
                 async with self.session.post(
@@ -426,20 +426,20 @@ class WebhookReliabilityTester:
             responses = await asyncio.gather(*tasks)
             successful = sum(1 for r in responses if r.status == 200)
             
-            print(f"[OK] {successful}/5 events triggered")
+            print(f"[OK] {successful]/5 events triggered")
             
             # Wait for deliveries
             await asyncio.sleep(3)
             
             if len(self.received_webhooks) >= successful:
-                print(f"[OK] Received {len(self.received_webhooks)} concurrent webhooks")
+                print(f"[OK] Received {len(self.received_webhooks)] concurrent webhooks")
                 return True
             else:
-                print(f"[WARNING] Only {len(self.received_webhooks)} webhooks received")
+                print(f"[WARNING] Only {len(self.received_webhooks)] webhooks received")
                 return False
                 
         except Exception as e:
-            print(f"[ERROR] Concurrent processing test failed: {e}")
+            print(f"[ERROR] Concurrent processing test failed: {e]")
             return False
             
     @pytest.mark.asyncio
@@ -486,13 +486,13 @@ class WebhookReliabilityTester:
                                 print("[OK] Circuit breaker opened after failures")
                                 return True
                             else:
-                                print(f"[INFO] Circuit state: {state}")
+                                print(f"[INFO] Circuit state: {state]")
                                 return True  # Circuit breaker exists
                                 
             return True  # Circuit breaker might not be implemented
             
         except Exception as e:
-            print(f"[ERROR] Circuit breaker test failed: {e}")
+            print(f"[ERROR] Circuit breaker test failed: {e]")
             return False
             
     async def run_all_tests(self) -> Dict[str, bool]:

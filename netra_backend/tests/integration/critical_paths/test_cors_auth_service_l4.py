@@ -1,14 +1,14 @@
 """CORS Auth Service L4 Integration Test
 
 Business Value Justification (BVJ):
-- Segment: Free, Early, Mid, Enterprise
+    - Segment: Free, Early, Mid, Enterprise
 - Business Goal: Conversion (Users cannot even start trial without auth working)
 - Value Impact: Enables authentication flow for 100% of users
 - Revenue Impact: $50K MRR at risk if users cannot authenticate
 
 Critical Path: Frontend CORS -> Auth Service -> Authentication Flow
 Coverage: Real Docker containers, actual HTTP headers, browser-like requests
-"""
+""""
 
 import sys
 from pathlib import Path
@@ -343,7 +343,7 @@ class CorsAuthServiceL4Test(L4StagingCriticalPathTestBase):
     
     async def _make_cors_request(self, url: str, method: str = "GET", 
                                origin: str = "", headers: Optional[Dict[str, str]] = None) -> CorsTestResult:
-        """Make CORS request and return structured result."""
+                                   """Make CORS request and return structured result."""
         request_headers = headers or {}
         if origin:
             request_headers["Origin"] = origin
@@ -457,9 +457,9 @@ async def cors_auth_l4_test():
     """Fixture for CORS auth service L4 test."""
     test_instance = CorsAuthServiceL4Test()
     try:
-        yield test_instance
+    yield test_instance
     finally:
-        await test_instance.cleanup_l4_resources()
+    await test_instance.cleanup_l4_resources()
 
 @pytest.mark.asyncio
 @pytest.mark.integration

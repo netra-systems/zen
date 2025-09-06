@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Comprehensive test to verify authentication session expiry and refresh:
-1. Initial authentication
+    1. Initial authentication
 2. Token expiry monitoring
 3. Automatic refresh handling
 4. Session invalidation
@@ -9,7 +9,7 @@ Comprehensive test to verify authentication session expiry and refresh:
 6. Refresh token rotation
 
 This test ensures proper session lifecycle management.
-"""
+""""
 
 # Test framework import - using pytest fixtures instead
 
@@ -67,7 +67,7 @@ class AuthenticationSessionTester:
         # Login
         async with self.session.post(
             f"{AUTH_SERVICE_URL}/auth/login",
-            json={"email": user_data["email"], "password": user_data["password"]}
+            json={"email": user_data["email"], "password": user_data["password"]]
         ) as response:
             if response.status == 200:
                 data = await response.json()
@@ -79,7 +79,7 @@ class AuthenticationSessionTester:
                 try:
                     payload = jwt.decode(self.access_token, options={"verify_signature": False})
                     self.token_expiry = datetime.fromtimestamp(payload.get("exp", 0))
-                    print(f"[OK] Authenticated. Token expires at: {self.token_expiry}")
+                    print(f"[OK] Authenticated. Token expires at: {self.token_expiry]")
                 except:
                     pass
                     
@@ -140,7 +140,7 @@ class AuthenticationSessionTester:
                     
                     # Verify new token is different
                     if old_access != new_access:
-                        print(f"[OK] Token refreshed successfully (attempt {self.refresh_count})")
+                        print(f"[OK] Token refreshed successfully (attempt {self.refresh_count])")
                         return True
                         
         return False
@@ -163,7 +163,7 @@ class AuthenticationSessionTester:
                 print("[OK] Expired/invalid token rejected")
                 return True
             else:
-                print(f"[ERROR] Invalid token not rejected: {response.status}")
+                print(f"[ERROR] Invalid token not rejected: {response.status]")
                 return False
                 
     @pytest.mark.asyncio
@@ -190,7 +190,7 @@ class AuthenticationSessionTester:
                     
                     if new_refresh and new_refresh != self.refresh_token:
                         self.refresh_token = new_refresh
-                        print(f"[OK] Refresh token rotated (iteration {i+1})")
+                        print(f"[OK] Refresh token rotated (iteration {i+1])")
                         
             await asyncio.sleep(1)
             
@@ -271,10 +271,10 @@ class AuthenticationSessionTester:
                     })
                     
         if len(sessions) == 3:
-            print(f"[OK] Created {len(sessions)} device sessions")
+            print(f"[OK] Created {len(sessions)] device sessions")
             
             # Invalidate one session
-            headers = {"Authorization": f"Bearer {sessions[0]['token']}"}
+            headers = {"Authorization": f"Bearer {sessions[0]['token']]"]
             async with self.session.post(
                 f"{AUTH_SERVICE_URL}/auth/logout",
                 headers=headers
@@ -283,7 +283,7 @@ class AuthenticationSessionTester:
                     # Check other sessions still valid
                     other_valid = True
                     for sess in sessions[1:]:
-                        headers = {"Authorization": f"Bearer {sess['token']}"}
+                        headers = {"Authorization": f"Bearer {sess['token']]"]
                         async with self.session.get(
                             f"{DEV_BACKEND_URL}/api/user/profile",
                             headers=headers
@@ -314,7 +314,7 @@ class AuthenticationSessionTester:
             time_to_expiry = (self.token_expiry - datetime.now(timezone.utc)).total_seconds()
             
             if time_to_expiry < 300:  # Less than 5 minutes
-                print(f"[INFO] Token expiring in {time_to_expiry}s, refreshing...")
+                print(f"[INFO] Token expiring in {time_to_expiry]s, refreshing...")
                 
                 if await self.test_token_refresh():
                     print("[OK] Automatic refresh successful")

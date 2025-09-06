@@ -1,14 +1,16 @@
+import asyncio
+
 """Workspace Management and Resource Sharing Critical Path Tests
 
 Business Value Justification (BVJ):
-- Segment: Mid to Enterprise (collaborative workspaces)
+    - Segment: Mid to Enterprise (collaborative workspaces)
 - Business Goal: Team productivity and resource collaboration
 - Value Impact: Shared workspace efficiency, resource access control
 - Strategic Impact: Enterprise feature differentiation and retention
 
 Critical Path: Workspace creation -> Access control -> Resource sharing -> Permission validation
 Coverage: Workspace management, sharing permissions, access isolation
-"""
+""""
 
 import sys
 from pathlib import Path
@@ -31,36 +33,36 @@ from netra_backend.tests.integration.test_helpers.team_collaboration_base import
 async def team_with_multiple_roles():
     """Create team with multiple role types for workspace testing."""
     manager = TeamCollaborationManager()
-    owner_id = f"user_{uuid.uuid4().hex[:8]}"
+    owner_id = f"user_{uuid.uuid4().hex[:8]]"
     team = await manager.create_team(owner_id, "Workspace Test Team", "enterprise")
     
     # Add members with different roles
-    admin_id = f"user_{uuid.uuid4().hex[:8]}"
+    admin_id = f"user_{uuid.uuid4().hex[:8]]"
     admin_invitation = await manager.invite_user(team.team_id, owner_id, "admin@test.com", TeamRole.ADMIN)
     await manager.accept_invitation(admin_invitation["token"], admin_id)
     
-    member_id = f"user_{uuid.uuid4().hex[:8]}"
+    member_id = f"user_{uuid.uuid4().hex[:8]]"
     member_invitation = await manager.invite_user(team.team_id, owner_id, "member@test.com", TeamRole.MEMBER)
     await manager.accept_invitation(member_invitation["token"], member_id)
     
-    guest_id = f"user_{uuid.uuid4().hex[:8]}"
+    guest_id = f"user_{uuid.uuid4().hex[:8]]"
     guest_invitation = await manager.invite_user(team.team_id, admin_id, "guest@test.com", TeamRole.GUEST)
     await manager.accept_invitation(guest_invitation["token"], guest_id)
     
-    viewer_id = f"user_{uuid.uuid4().hex[:8]}"
+    viewer_id = f"user_{uuid.uuid4().hex[:8]]"
     viewer_invitation = await manager.invite_user(team.team_id, admin_id, "viewer@test.com", TeamRole.VIEWER)
     await manager.accept_invitation(viewer_invitation["token"], viewer_id)
     
     yield {
-        "manager": manager,
-        "team": team,
-        "members": {
-            "owner": owner_id,
-            "admin": admin_id,
-            "member": member_id,
-            "guest": guest_id,
-            "viewer": viewer_id
-        }
+    "manager": manager,
+    "team": team,
+    "members": {
+    "owner": owner_id,
+    "admin": admin_id,
+    "member": member_id,
+    "guest": guest_id,
+    "viewer": viewer_id
+    }
     }
 
 class TestWorkspaceResourceSharing:
@@ -131,7 +133,7 @@ class TestWorkspaceResourceSharing:
         workspace = team.workspaces[workspace.workspace_id]
         assert workspace.is_shared
         assert members["member"] in workspace.sharing_permissions
-        assert workspace.sharing_permissions[members["member"]] == {PermissionType.READ}
+        assert workspace.sharing_permissions[members["member"]] == {PermissionType.READ]
         assert members["member"] in workspace.access_members
         
         # Test shared read access
@@ -267,7 +269,7 @@ class TestWorkspaceResourceSharing:
         invalid_workspace_id = "invalid_workspace_123"
         success = await manager.share_resource(
             team.team_id, members["admin"], invalid_workspace_id,
-            members["member"], {PermissionType.READ}
+            members["member"], {PermissionType.READ]
         )
         assert not success
         
@@ -309,12 +311,12 @@ class TestWorkspaceResourceSharing:
         
         await manager.share_resource(
             team.team_id, members["admin"], workspace.workspace_id,
-            members["member"], {PermissionType.READ}
+            members["member"], {PermissionType.READ]
         )
         
         await manager.share_resource(
             team.team_id, members["admin"], workspace.workspace_id,
-            members["guest"], {PermissionType.READ, PermissionType.WRITE}
+            members["guest"], {PermissionType.READ, PermissionType.WRITE]
         )
         
         # Validate audit trail

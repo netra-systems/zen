@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Comprehensive test to verify health check cascade failure detection:
-1. Service dependency mapping
+    1. Service dependency mapping
 2. Health check propagation
 3. Cascading failure detection
 4. Circuit breaker activation
@@ -9,7 +9,7 @@ Comprehensive test to verify health check cascade failure detection:
 6. Recovery monitoring
 
 This test ensures the system correctly detects and handles cascading failures.
-"""
+""""
 
 # Test framework import - using pytest fixtures instead
 
@@ -40,7 +40,7 @@ class HealthCheckCascadeTester:
     
     def __init__(self):
         self.session: Optional[aiohttp.ClientSession] = None
-        self.service_status: Dict[str, str] = {}
+        self.service_status: Dict[str, str] = {]
         self.failure_log: List[Dict] = []
         
     async def __aenter__(self):
@@ -63,13 +63,13 @@ class HealthCheckCascadeTester:
                     if response.status == 200:
                         self.service_status[service] = "healthy"
                         healthy_count += 1
-                        print(f"[OK] {service}: healthy")
+                        print(f"[OK] {service]: healthy")
                     else:
                         self.service_status[service] = "unhealthy"
-                        print(f"[WARN] {service}: status {response.status}")
+                        print(f"[WARN] {service]: status {response.status]")
             except Exception as e:
                 self.service_status[service] = "unreachable"
-                print(f"[ERROR] {service}: {str(e)[:50]}")
+                print(f"[ERROR] {service]: {str(e)[:50]]")
                 
         return healthy_count == len(SERVICES)
         
@@ -94,7 +94,7 @@ class HealthCheckCascadeTester:
                         deps = await response.json()
                         if "database" in deps.get("dependencies", []):
                             affected_services.append(service)
-                            print(f"[INFO] {service} depends on database")
+                            print(f"[INFO] {service] depends on database")
             except:
                 pass
                 
@@ -121,7 +121,7 @@ class HealthCheckCascadeTester:
                     if response.status == 503:
                         if "Circuit-Breaker" in response.headers:
                             circuit_opened = True
-                            print(f"[OK] Circuit breaker opened after {i} attempts")
+                            print(f"[OK] Circuit breaker opened after {i] attempts")
                             break
                     elif response.status >= 500:
                         failures += 1
@@ -175,7 +175,7 @@ class HealthCheckCascadeTester:
                     
             if all_healthy and not recovery_detected:
                 recovery_detected = True
-                print(f"[OK] Recovery detected at iteration {i}")
+                print(f"[OK] Recovery detected at iteration {i]")
                 break
                 
             await asyncio.sleep(2)

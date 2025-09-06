@@ -1,7 +1,7 @@
 """Service Mesh Routing and Load Balancing Tests
 
 Business Value Justification (BVJ):
-- Segment: Platform/Internal (infrastructure reliability for all tiers)
+    - Segment: Platform/Internal (infrastructure reliability for all tiers)
 - Business Goal: Effective load distribution and traffic routing
 - Value Impact: Ensures optimal resource utilization and response times
 - Strategic Impact: $3K MRR protection through routing efficiency
@@ -9,7 +9,7 @@ Business Value Justification (BVJ):
 Critical Path: Instance selection -> Load distribution -> Algorithm effectiveness -> Zone awareness
 Coverage: Load balancing algorithms, traffic distribution, zone affinity
 L4 Realism: Tests against staging service mesh infrastructure with real microservices
-"""
+""""
 
 import sys
 from pathlib import Path
@@ -146,7 +146,7 @@ class LoadBalancingL4Tests:
                 else:
                     weight = 1
                 
-                instance_id = f"{instance['host']}:{instance['port']}"
+                instance_id = f"{instance['host']]:{instance['port']]"
                 instance_weights[instance_id] = weight
             
             requests_per_instance = {}
@@ -195,7 +195,7 @@ class LoadBalancingL4Tests:
         """Test least connections load balancing."""
         try:
             # Simulate connection tracking
-            connection_counts = {f"{inst['host']}:{inst['port']}": 0 for inst in instances}
+            connection_counts = {f"{inst['host']]:{inst['port']]": 0 for inst in instances]
             requests_per_instance = {}
             total_requests = 25
             
@@ -442,14 +442,14 @@ async def test_round_robin_distribution_fairness(service_mesh_l4):
     # Test round-robin distribution
     rr_result = await lb_tests.test_round_robin_lb(service_mesh_l4, service_name, instances)
     
-    assert rr_result["success"], f"Round-robin test failed: {rr_result.get('error')}"
-    assert rr_result["evenness_score"] > 0.8, f"Round-robin distribution not fair enough: {rr_result['evenness_score']}"
+    assert rr_result["success"], f"Round-robin test failed: {rr_result.get('error')]"
+    assert rr_result["evenness_score"] > 0.8, f"Round-robin distribution not fair enough: {rr_result['evenness_score']]"
     
     # Verify all instances received requests
     requests_per_instance = rr_result["requests_per_instance"]
     assert len(requests_per_instance) >= len(instances), "Not all instances received requests"
     
-    logger.info(f"Round-robin fairness: evenness score {rr_result['evenness_score']:.3f}, "
+    logger.info(f"Round-robin fairness: evenness score {rr_result['evenness_score']:.3f], "
                f"distribution: {requests_per_instance}")
 
 @pytest.mark.asyncio
@@ -471,8 +471,8 @@ async def test_weighted_load_balancing_compliance(service_mesh_l4):
     # Test weighted round-robin
     weighted_result = await lb_tests.test_weighted_round_robin_lb(service_mesh_l4, service_name, instances)
     
-    assert weighted_result["success"], f"Weighted round-robin test failed: {weighted_result.get('error')}"
-    assert weighted_result["avg_weight_compliance"] < 0.3, f"Weight compliance poor: {weighted_result['avg_weight_compliance']}"
+    assert weighted_result["success"], f"Weighted round-robin test failed: {weighted_result.get('error')]"
+    assert weighted_result["avg_weight_compliance"] < 0.3, f"Weight compliance poor: {weighted_result['avg_weight_compliance']]"
     
     # Verify weights were considered
     instance_weights = weighted_result["instance_weights"]
@@ -495,7 +495,7 @@ async def test_weighted_load_balancing_compliance(service_mesh_l4):
             assert requests >= prev_requests * 0.7, "Higher weight instance got significantly fewer requests"
         prev_weight, prev_requests = weight, requests
     
-    logger.info(f"Weighted load balancing: avg compliance {weighted_result['avg_weight_compliance']:.3f}, "
+    logger.info(f"Weighted load balancing: avg compliance {weighted_result['avg_weight_compliance']:.3f], "
                f"weights: {instance_weights}, requests: {requests_per_instance}")
 
 @pytest.mark.asyncio
@@ -522,7 +522,7 @@ async def test_zone_aware_routing(service_mesh_l4):
     # Test zone-aware routing
     zone_result = await lb_tests.test_zone_aware_lb(service_mesh_l4, service_name, instances)
     
-    assert zone_result["success"], f"Zone-aware test failed: {zone_result.get('error')}"
+    assert zone_result["success"], f"Zone-aware test failed: {zone_result.get('error')]"
     
     # Verify zone distribution
     requests_per_zone = zone_result["requests_per_zone"]
@@ -636,10 +636,10 @@ async def test_load_balancing_algorithm_performance(service_mesh_l4):
     
     # Verify all algorithms performed reasonably
     for algorithm, perf in algorithm_performance.items():
-        assert perf["success"], f"Algorithm {algorithm} failed"
-        assert perf["execution_time"] < 30.0, f"Algorithm {algorithm} too slow: {perf['execution_time']}s"
+        assert perf["success"], f"Algorithm {algorithm] failed"
+        assert perf["execution_time"] < 30.0, f"Algorithm {algorithm] too slow: {perf['execution_time']]s"
         
         if "throughput" in perf:
-            assert perf["throughput"] > 0.5, f"Algorithm {algorithm} throughput too low: {perf['throughput']} req/s"
+            assert perf["throughput"] > 0.5, f"Algorithm {algorithm] throughput too low: {perf['throughput']] req/s"
     
     logger.info(f"Algorithm performance: {algorithm_performance}")

@@ -1,7 +1,9 @@
+from unittest.mock import Mock, patch, MagicMock
+
 """Health Check Cascade During Service Initialization L3 Integration Tests
 
 Business Value Justification (BVJ):
-- Segment: Platform/Internal
+    - Segment: Platform/Internal
 - Business Goal: Platform Stability & Monitoring  
 - Value Impact: Early failure detection prevents cascading outages
 - Revenue Impact: $55K MRR - Health monitoring prevents downtime
@@ -9,13 +11,13 @@ Business Value Justification (BVJ):
 Critical Path: Service initialization -> Health check activation -> Dependency validation -> Cascade detection -> Alert triggering
 Coverage: Health check timing, dependency chain validation, cascading failure detection, performance overhead monitoring
 L3 Realism: Tests with real health check endpoints and actual service dependency chains
-"""
+""""
 
 import sys
 from pathlib import Path
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
 from test_framework.database.test_database_manager import TestDatabaseManager
-from test_framework.redis.test_redis_manager import TestRedisManager
+from test_framework.redis_test_utils_test_utils.test_redis_manager import TestRedisManager
 from auth_service.core.auth_manager import AuthManager
 from shared.isolated_environment import IsolatedEnvironment
 
@@ -397,7 +399,7 @@ class HealthCheckCascadeInitializationValidator:
     
     async def _detect_and_handle_cascade_failure(self, failed_service: str, 
                                                error_msg: str = None) -> Optional[Dict[str, Any]]:
-        """Detect cascade failures and generate alerts."""
+                                                   """Detect cascade failures and generate alerts."""
         if not self.cascade_detection_enabled:
             return None
         
@@ -439,7 +441,7 @@ class HealthCheckCascadeInitializationValidator:
     
     async def _generate_cascade_alert(self, cascade_event: Dict[str, Any], 
                                     error_msg: str = None) -> Dict[str, Any]:
-        """Generate alert for cascade failure event."""
+                                        """Generate alert for cascade failure event."""
         alert = {
             "alert_id": str(uuid.uuid4()),
             "alert_type": "cascade_failure",
@@ -448,7 +450,7 @@ class HealthCheckCascadeInitializationValidator:
             "affected_services": cascade_event["affected_services"],
             "cascade_depth": cascade_event["cascade_depth"],
             "timestamp": cascade_event["trigger_time"],
-            "message": f"Cascade failure detected: {cascade_event['trigger_service']} failure affected {len(cascade_event['affected_services'])} dependent services",
+            "message": f"Cascade failure detected: {cascade_event['trigger_service']] failure affected {len(cascade_event['affected_services'])] dependent services",
             "error_details": error_msg,
             "escalation_required": len(cascade_event["affected_services"]) > 1
         }
@@ -487,7 +489,7 @@ class HealthCheckCascadeInitializationValidator:
     
     async def _validate_dependency_chain(self, service_name: str, 
                                        service_dep: ServiceDependency) -> Dict[str, Any]:
-        """Validate a single service's dependency chain."""
+                                           """Validate a single service's dependency chain."""
         chain_validation = {
             "service_name": service_name,
             "dependencies": service_dep.depends_on,
@@ -632,7 +634,7 @@ async def test_health_check_cascade_during_initialization_l3(health_cascade_vali
     """Test health check cascade behavior during service initialization.
     
     L3: Tests with real health check endpoints and actual service dependencies.
-    """
+    """"
     validator = health_cascade_validator
     
     # Test full initialization cascade
@@ -659,7 +661,7 @@ async def test_dependency_chain_validation_l3(health_cascade_validator):
     """Test dependency chain validation during initialization.
     
     L3: Tests actual service dependency relationships and validation logic.
-    """
+    """"
     validator = health_cascade_validator
     
     # Test dependency chain validation
@@ -684,7 +686,7 @@ async def test_cascading_failure_detection_l3(health_cascade_validator):
     """Test cascading failure detection and alert generation.
     
     L3: Tests real cascade detection logic with actual service dependencies.
-    """
+    """"
     validator = health_cascade_validator
     
     # Initialize services first
@@ -711,7 +713,7 @@ async def test_health_status_aggregation_l3(health_cascade_validator):
     """Test health status aggregation across service dependencies.
     
     L3: Tests real health status aggregation and reporting.
-    """
+    """"
     validator = health_cascade_validator
     
     # Initialize services and run health checks
@@ -738,7 +740,7 @@ async def test_alert_triggering_on_failures_l3(health_cascade_validator):
     """Test alert triggering on health check failures.
     
     L3: Tests real alert generation and escalation logic.
-    """
+    """"
     validator = health_cascade_validator
     
     # Initialize services
@@ -772,7 +774,7 @@ async def test_recovery_detection_within_30s_l3(health_cascade_validator):
     """Test recovery detection within 30 seconds.
     
     L3: Tests real recovery detection and cascade restoration.
-    """
+    """"
     validator = health_cascade_validator
     
     # Initialize services first
@@ -797,7 +799,7 @@ async def test_performance_overhead_less_than_1_percent_l3(health_cascade_valida
     """Test performance overhead is less than 1% of requests.
     
     L3: Tests real performance impact of health monitoring system.
-    """
+    """"
     validator = health_cascade_validator
     
     # Test performance overhead
@@ -818,7 +820,7 @@ async def test_health_check_initialization_timing_l3(health_cascade_validator):
     """Test health checks activate within 5 seconds of initialization.
     
     L3: Tests real timing requirements for health check activation.
-    """
+    """"
     validator = health_cascade_validator
     
     # Run initialization with timing measurement

@@ -1,15 +1,17 @@
+from unittest.mock import Mock, patch, MagicMock
+
 """
 L3 Integration Test: WebSocket Connection Draining with Redis
 
 Business Value Justification (BVJ):
-- Segment: Platform/Internal
+    - Segment: Platform/Internal
 - Business Goal: Reliability - Graceful shutdown without data loss
 - Value Impact: Ensures zero-downtime deployments and maintenance
 - Strategic Impact: $60K MRR - Enterprise-grade deployment reliability
 
 L3 Test: Uses real Redis for connection draining and graceful shutdown.
 Draining target: 100% connection preservation during graceful shutdown.
-"""
+""""
 
 from netra_backend.app.websocket_core import WebSocketManager
 # Test framework import - using pytest fixtures instead
@@ -18,7 +20,7 @@ import sys
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
 from test_framework.docker.unified_docker_manager import UnifiedDockerManager
 from test_framework.database.test_database_manager import TestDatabaseManager
-from test_framework.redis.test_redis_manager import TestRedisManager
+from test_framework.redis_test_utils_test_utils.test_redis_manager import TestRedisManager
 from shared.isolated_environment import IsolatedEnvironment
 
 import pytest
@@ -55,7 +57,6 @@ class TestWebSocketConnectionDrainingL3:
     """L3 integration tests for WebSocket connection draining."""
     
     @pytest.fixture(scope="class")
-
     async def redis_container(self):
 
         """Set up Redis container for connection draining testing."""
@@ -68,9 +69,8 @@ class TestWebSocketConnectionDrainingL3:
 
         await container.stop()
     
-    @pytest.fixture
-
-    async def redis_client(self, redis_container):
+        @pytest.fixture
+        async def redis_client(self, redis_container):
 
         """Create Redis client for draining state management."""
 
@@ -82,9 +82,8 @@ class TestWebSocketConnectionDrainingL3:
 
         await client.close()
     
-    @pytest.fixture
-
-    async def websocket_manager(self, redis_container):
+        @pytest.fixture
+        async def websocket_manager(self, redis_container):
 
         """Create WebSocket manager for draining testing."""
 
@@ -93,24 +92,24 @@ class TestWebSocketConnectionDrainingL3:
         # Mock: Redis external service isolation for fast, reliable tests without network dependency
         with patch('netra_backend.app.websocket_manager.redis_manager') as mock_redis_mgr:
 
-            test_redis_mgr = RedisManager()
+        test_redis_mgr = RedisManager()
 
-            test_redis_mgr.enabled = True
+        test_redis_mgr.enabled = True
 
-            test_redis_mgr.redis_client = redis.Redis.from_url(redis_url, decode_responses=True)
+        test_redis_mgr.redis_client = redis.Redis.from_url(redis_url, decode_responses=True)
 
-            mock_redis_mgr.return_value = test_redis_mgr
+        mock_redis_mgr.return_value = test_redis_mgr
 
-            mock_redis_mgr.get_client.return_value = test_redis_mgr.redis_client
+        mock_redis_mgr.get_client.return_value = test_redis_mgr.redis_client
             
-            manager = WebSocketManager()
+        manager = WebSocketManager()
 
-            yield manager
+        yield manager
             
-            await test_redis_mgr.redis_client.close()
+        await test_redis_mgr.redis_client.close()
     
-    @pytest.mark.asyncio
-    async def test_graceful_connection_draining(self, websocket_manager, redis_client):
+        @pytest.mark.asyncio
+        async def test_graceful_connection_draining(self, websocket_manager, redis_client):
 
         """Test graceful draining of WebSocket connections."""
         # Establish multiple connections
@@ -119,15 +118,15 @@ class TestWebSocketConnectionDrainingL3:
 
         for i in range(10):
 
-            user_id = f"drain_user_{i}"
+        user_id = f"drain_user_{i}"
 
-            websocket = MockWebSocketForRedis(user_id)
+        websocket = MockWebSocketForRedis(user_id)
 
-            connection_info = await websocket_manager.connect_user(user_id, websocket)
+        connection_info = await websocket_manager.connect_user(user_id, websocket)
 
-            if connection_info:
+        if connection_info:
 
-                connections.append((user_id, websocket))
+        connections.append((user_id, websocket))
         
         initial_count = len(connections)
 
@@ -138,21 +137,21 @@ class TestWebSocketConnectionDrainingL3:
         drain_start = time.time()
 
         for user_id, websocket in connections:
-            # Send drain notification
+        # Send drain notification
 
-            drain_message = create_test_message("connection_draining", user_id, 
+        drain_message = create_test_message("connection_draining", user_id, 
 
-                                              {"reason": "server_maintenance"})
+        {"reason": "server_maintenance"})
 
-            await websocket_manager.send_message_to_user(user_id, drain_message)
+        await websocket_manager.send_message_to_user(user_id, drain_message)
 
-            await asyncio.sleep(0.1)  # Brief delay between notifications
+        await asyncio.sleep(0.1)  # Brief delay between notifications
         
         # Gracefully disconnect all
 
         for user_id, websocket in connections:
 
-            await websocket_manager.disconnect_user(user_id, websocket)
+        await websocket_manager.disconnect_user(user_id, websocket)
         
         drain_time = time.time() - drain_start
 
@@ -160,8 +159,8 @@ class TestWebSocketConnectionDrainingL3:
 
         assert len(websocket_manager.active_connections) == 0
 
-    @pytest.mark.asyncio
-    async def test_connection_migration_during_draining(self, redis_client):
+        @pytest.mark.asyncio
+        async def test_connection_migration_during_draining(self, redis_client):
 
         """Test connection migration during draining process."""
         # Store connection states for migration
@@ -170,47 +169,47 @@ class TestWebSocketConnectionDrainingL3:
 
         for i in range(5):
 
-            user_id = f"migrate_user_{i}"
+        user_id = f"migrate_user_{i}"
 
-            connection_state = {
+        connection_state = {
 
-                "user_id": user_id,
+        "user_id": user_id,
 
-                "active_threads": [f"thread_{j}" for j in range(3)],
+        "active_threads": [f"thread_{j]" for j in range(3)],
 
-                "last_activity": time.time(),
+        "last_activity": time.time(),
 
-                "migration_target": "new_server_instance"
+        "migration_target": "new_server_instance"
 
-            }
+        }
             
-            state_key = f"migration_state:{user_id}"
+        state_key = f"migration_state:{user_id}"
 
-            await redis_client.set(state_key, json.dumps(connection_state), ex=300)
+        await redis_client.set(state_key, json.dumps(connection_state), ex=300)
 
-            migration_data.append((user_id, connection_state))
+        migration_data.append((user_id, connection_state))
         
         # Verify migration state stored
 
         for user_id, _ in migration_data:
 
-            state_key = f"migration_state:{user_id}"
+        state_key = f"migration_state:{user_id}"
 
-            stored_state = await redis_client.get(state_key)
+        stored_state = await redis_client.get(state_key)
 
-            assert stored_state is not None
+        assert stored_state is not None
             
-            state = json.loads(stored_state)
+        state = json.loads(stored_state)
 
-            assert state["user_id"] == user_id
+        assert state["user_id"] == user_id
 
-            assert "migration_target" in state
+        assert "migration_target" in state
         
         # Cleanup migration states
 
         for user_id, _ in migration_data:
 
-            await redis_client.delete(f"migration_state:{user_id}")
+        await redis_client.delete(f"migration_state:{user_id}")
 
 @pytest.mark.L3
 
@@ -221,7 +220,6 @@ class TestWebSocketLoadBalancerAffinityL3:
     """L3 integration tests for WebSocket load balancer affinity."""
     
     @pytest.fixture(scope="class")
-
     async def redis_container(self):
 
         """Set up Redis container for affinity testing."""
@@ -234,8 +232,8 @@ class TestWebSocketLoadBalancerAffinityL3:
 
         await container.stop()
     
-    @pytest.mark.asyncio
-    async def test_sticky_session_management(self, redis_container):
+        @pytest.mark.asyncio
+        async def test_sticky_session_management(self, redis_container):
 
         """Test sticky session management for load balancing."""
 
@@ -251,42 +249,42 @@ class TestWebSocketLoadBalancerAffinityL3:
         
         for i in range(15):
 
-            user_id = f"sticky_user_{i}"
-            # Assign to server based on user hash (sticky session)
+        user_id = f"sticky_user_{i}"
+        # Assign to server based on user hash (sticky session)
 
-            server_index = hash(user_id) % len(server_instances)
+        server_index = hash(user_id) % len(server_instances)
 
-            assigned_server = server_instances[server_index]
+        assigned_server = server_instances[server_index]
             
-            session_key = f"sticky_session:{user_id}"
+        session_key = f"sticky_session:{user_id}"
 
-            session_data = {
+        session_data = {
 
-                "user_id": user_id,
+        "user_id": user_id,
 
-                "assigned_server": assigned_server,
+        "assigned_server": assigned_server,
 
-                "created_at": time.time()
+        "created_at": time.time()
 
-            }
+        }
             
-            await client.set(session_key, json.dumps(session_data), ex=3600)
+        await client.set(session_key, json.dumps(session_data), ex=3600)
 
-            user_sessions[user_id] = assigned_server
+        user_sessions[user_id] = assigned_server
         
         # Verify session stickiness
 
         for user_id, expected_server in user_sessions.items():
 
-            session_key = f"sticky_session:{user_id}"
+        session_key = f"sticky_session:{user_id}"
 
-            stored_data = await client.get(session_key)
+        stored_data = await client.get(session_key)
 
-            assert stored_data is not None
+        assert stored_data is not None
             
-            session = json.loads(stored_data)
+        session = json.loads(stored_data)
 
-            assert session["assigned_server"] == expected_server
+        assert session["assigned_server"] == expected_server
         
         await client.close()
 
@@ -299,7 +297,6 @@ class TestWebSocketRedisFailoverL3:
     """L3 integration tests for Redis failover handling."""
     
     @pytest.fixture(scope="class")
-
     async def redis_container(self):
 
         """Set up Redis container for failover testing."""
@@ -312,8 +309,8 @@ class TestWebSocketRedisFailoverL3:
 
         await container.stop()
     
-    @pytest.mark.asyncio
-    async def test_redis_failover_resilience(self, redis_container):
+        @pytest.mark.asyncio
+        async def test_redis_failover_resilience(self, redis_container):
 
         """Test WebSocket resilience during Redis failover."""
 
@@ -325,9 +322,9 @@ class TestWebSocketRedisFailoverL3:
 
         critical_data = {
 
-            "active_connections": ["user_1", "user_2", "user_3"],
+        "active_connections": ["user_1", "user_2", "user_3"],
 
-            "message_queue": [{"id": i, "content": f"msg_{i}"} for i in range(5)]
+        "message_queue": [{"id": i, "content": f"msg_{i]"] for i in range(5)]
 
         }
         
@@ -343,19 +340,18 @@ class TestWebSocketRedisFailoverL3:
 
         try:
 
-            await client.set("failover_test", "before_failure")
-            # Redis continues to work in this test scenario
+        await client.set("failover_test", "before_failure")
+        # Redis continues to work in this test scenario
 
-            await client.set("failover_test", "after_recovery")
+        await client.set("failover_test", "after_recovery")
 
-            recovery_data = await client.get("failover_test")
+        recovery_data = await client.get("failover_test")
 
-            assert recovery_data == "after_recovery"
+        assert recovery_data == "after_recovery"
 
         except Exception:
-            # Handle failover scenario
+        # Handle failover scenario
 
-            pass
         
         await client.close()
 
@@ -368,7 +364,6 @@ class TestWebSocketMessageReplayL3:
     """L3 integration tests for message replay functionality."""
     
     @pytest.fixture(scope="class")
-
     async def redis_container(self):
 
         """Set up Redis container for message replay testing."""
@@ -381,8 +376,8 @@ class TestWebSocketMessageReplayL3:
 
         await container.stop()
     
-    @pytest.mark.asyncio
-    async def test_message_replay_after_reconnection(self, redis_container):
+        @pytest.mark.asyncio
+        async def test_message_replay_after_reconnection(self, redis_container):
 
         """Test message replay for reconnected users."""
 
@@ -398,15 +393,15 @@ class TestWebSocketMessageReplayL3:
 
         for i in range(10):
 
-            message = create_test_message("missed_message", user_id, 
+        message = create_test_message("missed_message", user_id, 
 
-                                        {"sequence": i, "content": f"Missed message {i}"})
+        {"sequence": i, "content": f"Missed message {i}"})
 
-            missed_messages.append(message)
+        missed_messages.append(message)
             
-            message_key = f"missed_messages:{user_id}:{i}"
+        message_key = f"missed_messages:{user_id}:{i}"
 
-            await client.lpush(f"missed_queue:{user_id}", json.dumps(message))
+        await client.lpush(f"missed_queue:{user_id}", json.dumps(message))
         
         await client.expire(f"missed_queue:{user_id}", 86400)  # 24 hour TTL
         
@@ -422,13 +417,13 @@ class TestWebSocketMessageReplayL3:
 
         while await client.llen(f"missed_queue:{user_id}") > 0:
 
-            message_data = await client.rpop(f"missed_queue:{user_id}")
+        message_data = await client.rpop(f"missed_queue:{user_id}")
 
-            if message_data:
+        if message_data:
 
-                message = json.loads(message_data)
+        message = json.loads(message_data)
 
-                replayed_messages.append(message)
+        replayed_messages.append(message)
         
         # Verify all messages replayed
 
@@ -445,7 +440,6 @@ class TestWebSocketConcurrentMutationsL3:
     """L3 integration tests for concurrent state mutations."""
     
     @pytest.fixture(scope="class")
-
     async def redis_container(self):
 
         """Set up Redis container for concurrency testing."""
@@ -458,8 +452,8 @@ class TestWebSocketConcurrentMutationsL3:
 
         await container.stop()
     
-    @pytest.mark.asyncio
-    async def test_concurrent_state_updates(self, redis_container):
+        @pytest.mark.asyncio
+        async def test_concurrent_state_updates(self, redis_container):
 
         """Test concurrent WebSocket state updates."""
 
@@ -471,7 +465,7 @@ class TestWebSocketConcurrentMutationsL3:
 
         shared_state_key = "shared_websocket_state"
 
-        initial_state = {"counter": 0, "active_users": []}
+        initial_state = {"counter": 0, "active_users": []]
 
         await client.set(shared_state_key, json.dumps(initial_state))
         
@@ -479,12 +473,12 @@ class TestWebSocketConcurrentMutationsL3:
 
         async def update_counter():
 
-            for _ in range(10):
-                # Atomic increment
+        for _ in range(10):
+        # Atomic increment
 
-                await client.hincrby("shared_counter", "value", 1)
+        await client.hincrby("shared_counter", "value", 1)
 
-                await asyncio.sleep(0.01)
+        await asyncio.sleep(0.01)
         
         # Run concurrent updates
 
@@ -509,7 +503,6 @@ class TestWebSocketMemoryLeakPreventionL3:
     """L3 integration tests for memory leak prevention."""
     
     @pytest.fixture(scope="class")
-
     async def redis_container(self):
 
         """Set up Redis container for memory testing."""
@@ -522,8 +515,8 @@ class TestWebSocketMemoryLeakPreventionL3:
 
         await container.stop()
     
-    @pytest.mark.asyncio
-    async def test_long_running_connection_stability(self, redis_container):
+        @pytest.mark.asyncio
+        async def test_long_running_connection_stability(self, redis_container):
 
         """Test long-running connection memory stability."""
 
@@ -540,19 +533,19 @@ class TestWebSocketMemoryLeakPreventionL3:
         # Simulate long-running operations
 
         for cycle in range(10):
-            # Create temporary data
+        # Create temporary data
 
-            temp_keys = []
+        temp_keys = []
 
-            for i in range(100):
+        for i in range(100):
 
-                key = f"temp_data:{cycle}:{i}"
+        key = f"temp_data:{cycle}:{i}"
 
-                await client.set(key, f"data_{i}", ex=1)  # 1 second TTL
+        await client.set(key, f"data_{i}", ex=1)  # 1 second TTL
 
-                temp_keys.append(key)
+        temp_keys.append(key)
             
-            await asyncio.sleep(1.5)  # Allow TTL to expire
+        await asyncio.sleep(1.5)  # Allow TTL to expire
         
         # Check memory usage
 
@@ -577,7 +570,6 @@ class TestWebSocketProtocolUpgradeL3:
     """L3 integration tests for protocol version negotiation."""
     
     @pytest.fixture(scope="class")
-
     async def redis_container(self):
 
         """Set up Redis container for protocol testing."""
@@ -590,8 +582,8 @@ class TestWebSocketProtocolUpgradeL3:
 
         await container.stop()
     
-    @pytest.mark.asyncio
-    async def test_protocol_version_negotiation(self, redis_container):
+        @pytest.mark.asyncio
+        async def test_protocol_version_negotiation(self, redis_container):
 
         """Test WebSocket protocol version negotiation."""
 
@@ -611,36 +603,36 @@ class TestWebSocketProtocolUpgradeL3:
         
         for client_version in client_versions:
 
-            stored_versions = await client.get("supported_protocols")
+        stored_versions = await client.get("supported_protocols")
 
-            versions = json.loads(stored_versions)
+        versions = json.loads(stored_versions)
             
-            if client_version in versions:
-                # Store negotiated version
+        if client_version in versions:
+        # Store negotiated version
 
-                negotiation_key = f"protocol_negotiation:{uuid4()}"
+        negotiation_key = f"protocol_negotiation:{uuid4()}"
 
-                negotiation_data = {
+        negotiation_data = {
 
-                    "client_version": client_version,
+        "client_version": client_version,
 
-                    "server_version": client_version,
+        "server_version": client_version,
 
-                    "negotiated_at": time.time()
+        "negotiated_at": time.time()
 
-                }
+        }
 
-                await client.set(negotiation_key, json.dumps(negotiation_data), ex=300)
+        await client.set(negotiation_key, json.dumps(negotiation_data), ex=300)
                 
-                # Verify negotiation
+        # Verify negotiation
 
-                stored_negotiation = await client.get(negotiation_key)
+        stored_negotiation = await client.get(negotiation_key)
 
-                assert stored_negotiation is not None
+        assert stored_negotiation is not None
                 
-                negotiation = json.loads(stored_negotiation)
+        negotiation = json.loads(stored_negotiation)
 
-                assert negotiation["client_version"] == client_version
+        assert negotiation["client_version"] == client_version
         
         await client.close()
 

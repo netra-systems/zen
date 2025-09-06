@@ -1,7 +1,7 @@
 """Service Discovery During Initial Bootstrap Critical Path Test - L3
 
 Business Value Justification (BVJ):
-- Segment: Platform/Internal
+    - Segment: Platform/Internal
 - Business Goal: Platform Reliability
 - Value Impact: Services must find each other to function
 - Revenue Impact: $60K MRR - Service mesh coordination
@@ -11,7 +11,7 @@ Coverage: Bootstrap sequence, service registry (Redis), discovery mechanisms, he
 
 This L3 test uses real Redis as service registry with multiple service instances
 testing actual registration/discovery flow during system bootstrap.
-"""
+""""
 
 import sys
 from pathlib import Path
@@ -151,10 +151,10 @@ class ServiceRegistry:
                 if instance_data:
                     # Parse JSON fields
                     try:
-                        instance_data["metadata"] = json.loads(instance_data.get("metadata", "{}"))
+                        instance_data["metadata"] = json.loads(instance_data.get("metadata", "{]"))
                         instance_data["tags"] = json.loads(instance_data.get("tags", "[]"))
                     except json.JSONDecodeError:
-                        instance_data["metadata"] = {}
+                        instance_data["metadata"] = {]
                         instance_data["tags"] = []
                     
                     # Check health status
@@ -187,7 +187,7 @@ class ServiceRegistry:
     
     async def update_instance_health(self, service_name: str, instance_id: str, 
                                    status: str, health_data: Dict[str, Any] = None) -> bool:
-        """Update health status of service instance."""
+                                       """Update health status of service instance."""
         try:
             instance_key = f"{self.instances_prefix}:{service_name}:{instance_id}"
             
@@ -262,7 +262,7 @@ class ServiceDiscoveryBootstrapL3:
         self.load_balancer = LoadBalancer()
         self.registered_services: List[ServiceInstance] = []
         self.metrics = BootstrapMetrics()
-        self.test_key_prefix = f"test_bootstrap_{uuid.uuid4().hex[:8]}"
+        self.test_key_prefix = f"test_bootstrap_{uuid.uuid4().hex[:8]]"
         
     async def initialize(self):
         """Initialize Redis connection and service registry."""
@@ -317,7 +317,7 @@ class ServiceDiscoveryBootstrapL3:
         for config in service_configs:
             instance = ServiceInstance(
                 service_name=config["service_name"],
-                instance_id=f"{config['service_name']}_{config.get('instance_id', uuid.uuid4().hex[:8])}",
+                instance_id=f"{config['service_name']]_{config.get('instance_id', uuid.uuid4().hex[:8])]",
                 host=config.get("host", "localhost"),
                 port=config.get("port", 8080),
                 health_endpoint=config.get("health_endpoint", "/health"),
@@ -670,7 +670,7 @@ async def test_health_status_propagation_l3(service_discovery_bootstrap):
     manager = service_discovery_bootstrap
     
     # Register service
-    service_configs = [{"service_name": "health_test_service", "port": 8080}]
+    service_configs = [{"service_name": "health_test_service", "port": 8080]]
     await manager.simulate_bootstrap_sequence(service_configs)
     
     service_instance = manager.registered_services[0]

@@ -1,7 +1,9 @@
+from unittest.mock import Mock, patch, MagicMock
+
 """Log Aggregation Pipeline L3 Integration Tests
 
 Business Value Justification (BVJ):
-- Segment: Platform/Internal (operational excellence for all tiers)
+    - Segment: Platform/Internal (operational excellence for all tiers)
 - Business Goal: Comprehensive log aggregation for debugging and audit compliance
 - Value Impact: Enables rapid issue diagnosis, reducing MTTR and preventing $20K MRR loss
 - Strategic Impact: Ensures audit compliance and operational visibility across all services
@@ -9,7 +11,7 @@ Business Value Justification (BVJ):
 Critical Path: Log generation -> Collection -> Aggregation -> Storage -> Query/Analysis
 Coverage: Log collection accuracy, aggregation performance, structured logging, audit trails
 L3 Realism: Tests with real log aggregation services and actual log volumes
-"""
+""""
 
 import sys
 from pathlib import Path
@@ -119,7 +121,7 @@ class LogAggregationValidator:
     
     async def generate_realistic_log_stream(self, duration_seconds: int = 30, 
                                           logs_per_second: int = 50) -> List[LogEntry]:
-        """Generate realistic log stream across multiple services."""
+                                              """Generate realistic log stream across multiple services."""
         log_stream = []
         start_time = datetime.now(timezone.utc)
         
@@ -155,7 +157,7 @@ class LogAggregationValidator:
     
     async def _create_realistic_log_entry(self, service: str, component: str, 
                                         timestamp: datetime, log_index: int) -> LogEntry:
-        """Create realistic log entry based on service and component."""
+                                            """Create realistic log entry based on service and component."""
         # Determine log level based on realistic distribution
         level_distribution = [
             (LogLevel.DEBUG, 0.4),    # 40% debug
@@ -202,7 +204,7 @@ class LogAggregationValidator:
     
     def _generate_service_specific_content(self, service: str, component: str, 
                                          level: LogLevel, log_index: int) -> tuple:
-        """Generate service-specific log content."""
+                                             """Generate service-specific log content."""
         message_templates = {
             "api-gateway": {
                 "request_handler": {
@@ -457,7 +459,7 @@ class LogAggregationValidator:
                 for service in services_in_trace:
                     if service not in correlation_results["cross_service_correlation"]:
                         correlation_results["cross_service_correlation"][service] = set()
-                    correlation_results["cross_service_correlation"][service].update(services_in_trace - {service})
+                    correlation_results["cross_service_correlation"][service].update(services_in_trace - {service])
             else:
                 correlation_results["incomplete_traces"] += 1
                 correlation_results["missing_correlations"].append({
@@ -534,7 +536,7 @@ class LogStorage:
         """Store aggregated logs."""
         await asyncio.sleep(0.015)  # Simulate storage time
         self.stored_logs.extend(aggregated_data["aggregated_logs"])
-        return {"success": True, "stored_count": len(aggregated_data["aggregated_logs"])}
+        return {"success": True, "stored_count": len(aggregated_data["aggregated_logs"])]
     
     async def query_logs(self, query: Dict[str, Any]) -> List[LogEntry]:
         """Query stored logs."""
@@ -572,7 +574,7 @@ async def test_log_aggregation_pipeline_performance_l3(log_aggregation_validator
     """Test log aggregation pipeline performance under realistic load.
     
     L3: Tests with real log aggregation infrastructure and realistic volumes.
-    """
+    """"
     # Generate realistic log stream
     log_stream = await log_aggregation_validator.generate_realistic_log_stream(
         duration_seconds=15, logs_per_second=40
@@ -595,7 +597,7 @@ async def test_log_audit_compliance_l3(log_aggregation_validator):
     """Test log audit compliance and data governance.
     
     L3: Tests compliance with real audit requirements.
-    """
+    """"
     # Generate logs with various compliance scenarios
     log_stream = await log_aggregation_validator.generate_realistic_log_stream(
         duration_seconds=10, logs_per_second=30
@@ -615,7 +617,7 @@ async def test_cross_service_log_correlation_l3(log_aggregation_validator):
     """Test log correlation across distributed services.
     
     L3: Tests correlation accuracy with real service interactions.
-    """
+    """"
     # Generate correlated log stream
     log_stream = await log_aggregation_validator.generate_realistic_log_stream(
         duration_seconds=8, logs_per_second=35
@@ -638,7 +640,7 @@ async def test_log_structured_data_integrity_l3(log_aggregation_validator):
     """Test structured data integrity through aggregation pipeline.
     
     L3: Tests preservation of structured data and metadata.
-    """
+    """"
     # Generate logs with rich structured data
     log_stream = await log_aggregation_validator.generate_realistic_log_stream(
         duration_seconds=5, logs_per_second=25
@@ -662,7 +664,7 @@ async def test_log_error_handling_resilience_l3(log_aggregation_validator):
     """Test log aggregation resilience under error conditions.
     
     L3: Tests pipeline behavior with simulated failures.
-    """
+    """"
     # Generate log stream
     log_stream = await log_aggregation_validator.generate_realistic_log_stream(
         duration_seconds=6, logs_per_second=30
@@ -676,7 +678,7 @@ async def test_log_error_handling_resilience_l3(log_aggregation_validator):
                 return {"success": False, "error": "Storage temporarily unavailable"}
             else:
                 await asyncio.sleep(0.015)
-                return {"success": True, "stored_count": len(batch["aggregated_logs"])}
+                return {"success": True, "stored_count": len(batch["aggregated_logs"])]
         
         mock_store.side_effect = failing_store
         

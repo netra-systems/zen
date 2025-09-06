@@ -1,17 +1,17 @@
 """Cost Tracking and Billing Pipeline L4 Critical Test
 
 Business Value Justification (BVJ):
-- Segment: All paid tiers (core revenue mechanism)
+    - Segment: All paid tiers (core revenue mechanism)
 - Business Goal: Ensure accurate cost tracking and billing across all AI operations
 - Value Impact: Protects $25K+ MRR through accurate billing and prevents revenue leakage
 - Strategic Impact: Critical for business sustainability, financial reporting, and customer trust
 
 Critical Path:
-Usage tracking -> Cost calculation -> Billing accumulation -> Quota enforcement -> 
+    Usage tracking -> Cost calculation -> Billing accumulation -> Quota enforcement -> 
 Invoice generation -> Payment processing -> Usage analytics
 
 Coverage: LLM usage tracking, cost calculation accuracy, billing pipeline integrity, quota enforcement
-"""
+""""
 
 import sys
 from pathlib import Path
@@ -71,7 +71,7 @@ class CostTrackingBillingL4Test(L4StagingCriticalPathTestBase):
         self.invoice_generator: Optional[InvoiceGenerator] = None
         self.test_scenarios: List[BillingTestScenario] = []
         self.usage_operations: List[UsageOperation] = []
-        self.billing_test_data: Dict[str, Any] = {}
+        self.billing_test_data: Dict[str, Any] = {]
         
     async def setup_test_specific_environment(self) -> None:
         """Setup billing-specific test environment."""
@@ -234,7 +234,7 @@ class CostTrackingBillingL4Test(L4StagingCriticalPathTestBase):
     
     async def _configure_tier_quotas(self, user_id: str, 
                                    scenario: BillingTestScenario) -> Dict[str, Any]:
-        """Configure quotas and rates for specific billing tier."""
+                                       """Configure quotas and rates for specific billing tier."""
         try:
             quota_config = {
                 "user_id": user_id,
@@ -299,7 +299,7 @@ class CostTrackingBillingL4Test(L4StagingCriticalPathTestBase):
     
     async def _simulate_tier_usage_pattern(self, user_id: str, access_token: str, 
                                          scenario: BillingTestScenario) -> Dict[str, Any]:
-        """Simulate realistic usage pattern for a specific tier."""
+                                             """Simulate realistic usage pattern for a specific tier."""
         try:
             operations = []
             models_for_tier = self._get_models_for_tier(scenario.tier)
@@ -363,7 +363,7 @@ class CostTrackingBillingL4Test(L4StagingCriticalPathTestBase):
     
     def _select_model_for_operation(self, available_models: List[str], 
                                   operation_type: str) -> str:
-        """Select appropriate model for operation type."""
+                                      """Select appropriate model for operation type."""
         # Simple model selection logic
         if operation_type in ["simple_analysis", "chat_completion"]:
             return available_models[0]  # Use most cost-effective model
@@ -396,9 +396,9 @@ class CostTrackingBillingL4Test(L4StagingCriticalPathTestBase):
     async def _execute_billable_operation(self, user_id: str, access_token: str,
                                         operation_type: str, model_used: str, 
                                         token_usage: int) -> Dict[str, Any]:
-        """Execute a billable operation and track usage."""
+                                            """Execute a billable operation and track usage."""
         try:
-            operation_id = f"op_{uuid.uuid4().hex[:12]}"
+            operation_id = f"op_{uuid.uuid4().hex[:12]]"
             
             # Execute operation via API
             operation_data = {
@@ -573,7 +573,7 @@ class CostTrackingBillingL4Test(L4StagingCriticalPathTestBase):
     
     async def _test_quota_limit_enforcement(self, user_id: str, access_token: str,
                                           quota_limit: int) -> Dict[str, Any]:
-        """Test that quota limits are properly enforced."""
+                                              """Test that quota limits are properly enforced."""
         try:
             # Attempt operation that would exceed quota
             large_operation = {
@@ -610,7 +610,7 @@ class CostTrackingBillingL4Test(L4StagingCriticalPathTestBase):
     
     async def _test_overage_billing(self, user_id: str, access_token: str, 
                                   tier: str) -> Dict[str, Any]:
-        """Test overage billing for paid tiers."""
+                                      """Test overage billing for paid tiers."""
         try:
             # For paid tiers, overage should be allowed but billed at higher rate
             overage_operation = {
@@ -772,7 +772,7 @@ class CostTrackingBillingL4Test(L4StagingCriticalPathTestBase):
             ]
             
             if not all(critical_phases):
-                failed_phases = [f"phase_{i+1}" for i, success in enumerate(critical_phases) if not success]
+                failed_phases = [f"phase_{i+1]" for i, success in enumerate(critical_phases) if not success]
                 self.test_metrics.errors.append(f"Failed critical phases: {', '.join(failed_phases)}")
                 return False
             
@@ -852,7 +852,7 @@ async def test_billing_accuracy_validation_l4(cost_tracking_billing_test):
     # Validate individual accuracy scores
     for result in accuracy_results["validation_results"]:
         if result.get("success"):
-            assert result["accuracy"] >= 0.99, f"Accuracy too low for user {result['user_id']}: {result['accuracy']}"
+            assert result["accuracy"] >= 0.99, f"Accuracy too low for user {result['user_id']]: {result['accuracy']]"
 
 @pytest.mark.asyncio
 @pytest.mark.staging
@@ -874,7 +874,7 @@ async def test_quota_enforcement_across_tiers_l4(cost_tracking_billing_test):
             tier = result["tier"]
             if tier == "free":
                 # Free tier should have strict quota enforcement
-                assert result.get("quota_enforced", False), f"Free tier quota not enforced for {result['user_id']}"
+                assert result.get("quota_enforced", False), f"Free tier quota not enforced for {result['user_id']]"
             else:
                 # Paid tiers should allow overage with proper billing
                 assert result.get("overage_allowed", False), f"Paid tier {tier} overage not allowed"

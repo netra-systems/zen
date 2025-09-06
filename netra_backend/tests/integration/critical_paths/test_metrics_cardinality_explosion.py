@@ -1,7 +1,9 @@
+from unittest.mock import Mock, patch, MagicMock
+
 """Metrics Cardinality Explosion Protection L3 Integration Tests
 
 Business Value Justification (BVJ):
-- Segment: Platform/Internal (protecting all revenue tiers from monitoring costs)
+    - Segment: Platform/Internal (protecting all revenue tiers from monitoring costs)
 - Business Goal: Prevent metrics cardinality explosion that causes $20K+ monitoring cost overruns
 - Value Impact: Ensures sustainable monitoring costs while maintaining observability
 - Strategic Impact: Protects infrastructure budget and prevents monitoring system degradation
@@ -9,7 +11,7 @@ Business Value Justification (BVJ):
 Critical Path: Metric ingestion -> Cardinality analysis -> Protection triggers -> Label optimization -> Cost control
 Coverage: High cardinality detection, label sanitization, metric dropping, cost projection, alerting
 L3 Realism: Tests with real Prometheus instances and actual cardinality limits
-"""
+""""
 
 import sys
 from pathlib import Path
@@ -166,7 +168,7 @@ class CardinalityProtectionValidator:
                 "user_id": f"user_{index}_{random.randint(1000, 999999)}",  # High cardinality
                 "event_type": random.choice(["login", "logout", "action", "view"]),
                 "region": random.choice(["us-east", "us-west", "eu-central"]),
-                "app_version": f"v{random.choice(['1.2.3', '1.2.4', '1.3.0'])}"
+                "app_version": f"v{random.choice(['1.2.3', '1.2.4', '1.3.0'])]"
             },
             timestamp=datetime.now(timezone.utc)
         )
@@ -226,7 +228,7 @@ class CardinalityProtectionValidator:
             metric_name="websocket_messages_sent_total",
             value=random.randint(1, 50),
             labels={
-                "session_id": f"sess_{uuid.uuid4().hex[:16]}",  # High cardinality
+                "session_id": f"sess_{uuid.uuid4().hex[:16]]",  # High cardinality
                 "user_tier": random.choice(["free", "early", "mid", "enterprise"]),
                 "message_type": random.choice(["chat", "system", "notification"]),
                 "server": f"ws-server-{random.randint(1, 3)}"
@@ -282,7 +284,7 @@ class CardinalityProtectionValidator:
             
             # Track unique values for each label
             for label_key, label_value in metric.labels.items():
-                label_cardinality[f"{metric.metric_name}:{label_key}"].add(label_value)
+                label_cardinality[f"{metric.metric_name]:{label_key]"].add(label_value)
         
         # Detect violations
         violations = []
@@ -495,14 +497,14 @@ class CardinalityMonitor:
         
         metric_key = metric.metric_name
         if metric_key not in self.monitored_metrics:
-            self.monitored_metrics[metric_key] = {"series_count": 0, "labels": defaultdict(set)}
+            self.monitored_metrics[metric_key] = {"series_count": 0, "labels": defaultdict(set)]
         
         # Track series and label cardinality
         self.monitored_metrics[metric_key]["series_count"] += 1
         for label_key, label_value in metric.labels.items():
             self.monitored_metrics[metric_key]["labels"][label_key].add(label_value)
         
-        return {"monitored": True, "current_cardinality": self.monitored_metrics[metric_key]["series_count"]}
+        return {"monitored": True, "current_cardinality": self.monitored_metrics[metric_key]["series_count"]]
     
     async def shutdown(self):
         """Shutdown cardinality monitor."""
@@ -521,7 +523,7 @@ async def test_high_cardinality_detection_l3(cardinality_protection_validator):
     """Test detection of high cardinality metrics and labels.
     
     L3: Tests with real cardinality analysis and Prometheus-like limits.
-    """
+    """"
     # Generate high cardinality metrics
     high_cardinality_metrics = await cardinality_protection_validator.generate_high_cardinality_metrics(800)
     
@@ -542,7 +544,7 @@ async def test_cardinality_protection_actions_l3(cardinality_protection_validato
     """Test cardinality protection actions and cost control.
     
     L3: Tests protection mechanisms with real cost calculations.
-    """
+    """"
     # Generate problematic high cardinality metrics
     high_cardinality_metrics = await cardinality_protection_validator.generate_high_cardinality_metrics(600)
     
@@ -563,7 +565,7 @@ async def test_cardinality_cost_projection_l3(cardinality_protection_validator):
     """Test accuracy of cardinality cost projections.
     
     L3: Tests cost calculations with realistic Prometheus pricing.
-    """
+    """"
     # Generate metrics with known cardinality patterns
     low_cardinality_metrics = await cardinality_protection_validator.generate_high_cardinality_metrics(100)
     high_cardinality_metrics = await cardinality_protection_validator.generate_high_cardinality_metrics(1000)
@@ -585,7 +587,7 @@ async def test_cardinality_growth_simulation_l3(cardinality_protection_validator
     """Test cardinality growth patterns and protection triggers.
     
     L3: Tests cardinality evolution over time with realistic growth patterns.
-    """
+    """"
     # Simulate cardinality growth over time
     growth_simulation = await cardinality_protection_validator.simulate_cardinality_growth(duration_minutes=3)
     
@@ -608,7 +610,7 @@ async def test_label_sanitization_effectiveness_l3(cardinality_protection_valida
     """Test effectiveness of label sanitization for cardinality control.
     
     L3: Tests label transformation and cardinality reduction techniques.
-    """
+    """"
     # Generate metrics with specific problematic labels
     problematic_metrics = []
     
@@ -641,7 +643,7 @@ async def test_cardinality_alerting_thresholds_l3(cardinality_protection_validat
     """Test cardinality alerting at different threshold levels.
     
     L3: Tests alert generation for cardinality violations.
-    """
+    """"
     # Generate metrics that will trigger different alert levels
     extreme_cardinality_metrics = await cardinality_protection_validator.generate_high_cardinality_metrics(1200)
     

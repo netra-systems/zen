@@ -1,14 +1,16 @@
+from unittest.mock import AsyncMock, Mock, patch, MagicMock
+
 """Agent Cost Tracking and Budgeting L3 Integration Tests
 
 Business Value Justification (BVJ):
-- Segment: All tiers (cost control and optimization)
+    - Segment: All tiers (cost control and optimization)
 - Business Goal: Cost control and budget enforcement, accurate cost tracking
 - Value Impact: $100K MRR - Ensures precise cost calculation >99% accuracy and budget compliance
 - Strategic Impact: Cost tracking enables predictable scaling and prevents budget overruns
 
 Critical Path: Cost calculation -> Real-time tracking -> Budget monitoring -> Alerts -> Usage forecasting -> Attribution
 Coverage: Cost calculation accuracy, budget enforcement, real-time tracking, cost attribution, usage forecasting, alert systems
-"""
+""""
 
 import sys
 from pathlib import Path
@@ -117,7 +119,6 @@ class CostCalculator:
     """Accurate cost calculation engine with >99% accuracy target."""
     
     def __init__(self):
-    pass
         self.unit_costs = {
             CostType.LLM_TOKENS: Decimal('0.000002'),  # $0.000002 per token
             CostType.COMPUTE_TIME: Decimal('0.001'),   # $0.001 per second
@@ -130,7 +131,7 @@ class CostCalculator:
     
     def calculate_cost(self, cost_type: CostType, quantity: int, 
                       metadata: Optional[Dict[str, Any]] = None) -> Decimal:
-        """Calculate cost with high precision."""
+                          """Calculate cost with high precision."""
         if cost_type not in self.unit_costs:
             raise NetraException(f"Unknown cost type: {cost_type}")
         
@@ -149,7 +150,7 @@ class CostCalculator:
     
     def _apply_cost_modifiers(self, cost_type: CostType, base_cost: Decimal, 
                             metadata: Dict[str, Any]) -> Decimal:
-        """Apply cost modifiers based on usage patterns and metadata."""
+                                """Apply cost modifiers based on usage patterns and metadata."""
         modified_cost = base_cost
         
         # Volume discounts
@@ -176,7 +177,7 @@ class CostCalculator:
     
     def validate_calculation_accuracy(self, expected_cost: Decimal, 
                                     calculated_cost: Decimal) -> float:
-        """Validate calculation accuracy against expected cost."""
+                                        """Validate calculation accuracy against expected cost."""
         if expected_cost == 0:
             return 100.0 if calculated_cost == 0 else 0.0
         
@@ -187,9 +188,8 @@ class BudgetEnforcer:
     """Budget enforcement and monitoring system."""
     
     def __init__(self):
-    pass
-        self.budget_limits: Dict[str, BudgetLimit] = {}
-        self.current_usage: Dict[str, Dict[BudgetPeriod, Decimal]] = {}
+        self.budget_limits: Dict[str, BudgetLimit] = {]
+        self.current_usage: Dict[str, Dict[BudgetPeriod, Decimal]] = {]
         self.alert_callbacks: List[AsyncMock] = []
         self.violation_history: List[Dict[str, Any]] = []
     
@@ -202,7 +202,6 @@ class BudgetEnforcer:
     
     async def track_cost_entry(self, cost_entry: CostEntry) -> Dict[str, Any]:
         """Track cost entry against budget limits."""
-    pass
         tracking_result = {
             "entry_id": cost_entry.id,
             "cost": cost_entry.calculate_total_cost(),
@@ -231,7 +230,7 @@ class BudgetEnforcer:
     
     async def _check_budget_limit(self, budget_id: str, budget_limit: BudgetLimit,
                                 cost: Decimal, timestamp: datetime) -> Dict[str, Any]:
-        """Check cost against specific budget limit."""
+                                    """Check cost against specific budget limit."""
         period = budget_limit.period
         period_usage = self._get_period_usage(budget_id, period, timestamp)
         
@@ -266,7 +265,7 @@ class BudgetEnforcer:
     
     def _get_period_usage(self, budget_id: str, period: BudgetPeriod, 
                          timestamp: datetime) -> Decimal:
-        """Get current usage for the budget period."""
+                             """Get current usage for the budget period."""
         # Simplified implementation - in reality would query database
         return self.current_usage.get(budget_id, {}).get(period, Decimal('0'))
     
@@ -284,7 +283,6 @@ class BudgetEnforcer:
     
     async def _handle_budget_violation(self, budget_limit: BudgetLimit, check_result: Dict[str, Any]):
         """Handle budget violation."""
-    pass
         violation_record = {
             "budget_id": budget_limit.budget_id,
             "violation_amount": check_result["current_usage"] - budget_limit.limit_amount,
@@ -309,7 +307,6 @@ class UsageForecaster:
     """Usage and cost forecasting system."""
     
     def __init__(self):
-    pass
         self.usage_history: List[CostEntry] = []
         self.forecast_accuracy_history: List[float] = []
     
@@ -323,7 +320,6 @@ class UsageForecaster:
     
     def forecast_usage(self, cost_type: CostType, forecast_period: timedelta) -> Dict[str, Any]:
         """Forecast usage for a given period."""
-    pass
         # Filter relevant history
         relevant_history = [
             entry for entry in self.usage_history 
@@ -381,7 +377,7 @@ class UsageForecaster:
     
     def validate_forecast_accuracy(self, forecast: Dict[str, Any], 
                                  actual_usage: int) -> float:
-        """Validate forecast accuracy against actual usage."""
+                                     """Validate forecast accuracy against actual usage."""
         if not forecast["forecast_available"]:
             return 0.0
         
@@ -401,7 +397,6 @@ class AgentCostTracker:
     """Comprehensive agent cost tracking and budgeting system."""
     
     def __init__(self):
-    pass
         self.calculator = CostCalculator()
         self.budget_enforcer = BudgetEnforcer()
         self.usage_forecaster = UsageForecaster()
@@ -410,20 +405,20 @@ class AgentCostTracker:
         
         # Initialize alert system
         # Mock: Generic component isolation for controlled unit testing
-        self.budget_enforcer.alert_callbacks.append(AsyncNone  # TODO: Use real service instance)
+        self.budget_enforcer.alert_callbacks.append(AsyncMock()  # TODO: Use real service instance)
     
     async def track_cost(self, cost_type: CostType, quantity: int,
                         user_id: Optional[str] = None, agent_id: Optional[str] = None,
                         session_id: Optional[str] = None, 
                         metadata: Optional[Dict[str, Any]] = None) -> CostEntry:
-        """Track a cost with real-time budget monitoring."""
+                            """Track a cost with real-time budget monitoring."""
         # Calculate cost
         unit_cost = self.calculator.unit_costs[cost_type]
         total_cost = self.calculator.calculate_cost(cost_type, quantity, metadata)
         
         # Create cost entry
         cost_entry = CostEntry(
-            id=f"cost_{uuid.uuid4().hex[:8]}",
+            id=f"cost_{uuid.uuid4().hex[:8]]",
             cost_type=cost_type,
             amount=total_cost,
             unit_cost=unit_cost,
@@ -539,7 +534,6 @@ class AgentCostTracker:
         
         # Create concurrent cost tracking operations
         async def track_single_cost(operation_id: int):
-    pass
             cost_type = list(CostType)[operation_id % len(CostType)]
             quantity = (operation_id % 100) + 1
             
@@ -652,10 +646,10 @@ class TestAgentCostTrackingL3:
         
         # Verify accuracy requirements
         assert accuracy_test["accuracy_target_met"], \
-            f"Cost calculation accuracy {accuracy_test['overall_accuracy']:.2f}% should exceed 99%"
+            f"Cost calculation accuracy {accuracy_test['overall_accuracy']:.2f]% should exceed 99%"
         
         assert accuracy_test["overall_accuracy"] >= 99.0, \
-            f"Overall accuracy {accuracy_test['overall_accuracy']:.2f}% must be ≥99%"
+            f"Overall accuracy {accuracy_test['overall_accuracy']:.2f]% must be ≥99%"
         
         # Verify individual test cases
         failed_cases = accuracy_test["failed_cases"]
@@ -665,12 +659,11 @@ class TestAgentCostTrackingL3:
         # Verify precision in calculations
         for result in accuracy_test["individual_results"]:
             assert result["within_tolerance"], \
-                f"Cost calculation for {result['cost_type']} should meet tolerance"
+                f"Cost calculation for {result['cost_type']] should meet tolerance"
     
     @pytest.mark.asyncio
     async def test_real_time_cost_tracking(self, agent_cost_tracker):
         """Test real-time cost tracking performance and accuracy."""
-    pass
         tracker = agent_cost_tracker
         
         # Test real-time tracking performance
@@ -678,13 +671,13 @@ class TestAgentCostTrackingL3:
         
         # Verify real-time performance
         assert performance_test["real_time_performance_acceptable"], \
-            f"Real-time tracking should complete within 5s, took {performance_test['total_time']:.2f}s"
+            f"Real-time tracking should complete within 5s, took {performance_test['total_time']:.2f]s"
         
         assert performance_test["operations_per_second"] >= 10.0, \
-            f"Should handle ≥10 operations/second, got {performance_test['operations_per_second']:.1f}"
+            f"Should handle ≥10 operations/second, got {performance_test['operations_per_second']:.1f]"
         
         assert performance_test["failed_operations"] == 0, \
-            f"No operations should fail, got {performance_test['failed_operations']} failures"
+            f"No operations should fail, got {performance_test['failed_operations']] failures"
         
         # Verify tracking accuracy in real-time
         metrics = tracker.get_comprehensive_metrics()
@@ -750,7 +743,6 @@ class TestAgentCostTrackingL3:
     @pytest.mark.asyncio
     async def test_cost_attribution_accuracy(self, agent_cost_tracker):
         """Test accurate cost attribution to users, agents, and sessions."""
-    pass
         tracker = agent_cost_tracker
         
         # Create cost entries with various attribution patterns
@@ -852,7 +844,7 @@ class TestAgentCostTrackingL3:
             "Forecast should be available with sufficient historical data"
         
         assert forecast["confidence_level"] >= 0.6, \
-            f"Forecast confidence {forecast['confidence_level']:.2f} should be ≥0.6"
+            f"Forecast confidence {forecast['confidence_level']:.2f] should be ≥0.6"
         
         assert forecast["forecasted_quantity"] > 0, \
             "Forecast should predict positive usage"
@@ -870,7 +862,6 @@ class TestAgentCostTrackingL3:
     @pytest.mark.asyncio
     async def test_budget_alert_systems(self, agent_cost_tracker):
         """Test budget alert and notification systems."""
-    pass
         tracker = agent_cost_tracker
         
         # Set up budget with low threshold for testing alerts
@@ -897,7 +888,6 @@ class TestAgentCostTrackingL3:
         
         # Mock alert callback to capture alerts
         async def alert_callback(alert_data):
-    pass
             if alert_data["type"] == "budget_alert":
                 alerts_received.append(alert_data)
             elif alert_data["type"] == "budget_violation":
@@ -979,7 +969,6 @@ class TestAgentCostTrackingL3:
     @pytest.mark.asyncio
     async def test_comprehensive_cost_management_workflow(self, agent_cost_tracker):
         """Test complete cost management workflow from tracking to forecasting."""
-    pass
         tracker = agent_cost_tracker
         
         # Phase 1: Set up budget

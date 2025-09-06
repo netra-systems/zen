@@ -1,7 +1,7 @@
 """
 L3 Integration Test: Session Creation
 Tests session creation and initialization scenarios
-"""
+""""
 
 import sys
 from pathlib import Path

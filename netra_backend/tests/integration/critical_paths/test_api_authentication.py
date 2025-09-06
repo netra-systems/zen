@@ -1,7 +1,9 @@
+from unittest.mock import AsyncMock, Mock, patch, MagicMock
+
 """
 L3 Integration Test: API Authentication
 Tests API authentication mechanisms and flows
-"""
+""""
 
 import sys
 from pathlib import Path
@@ -29,12 +31,12 @@ class TestAPIAuthenticationL3:
     async def test_api_requires_authentication(self):
         """Test API endpoints require authentication"""
         # Mock the HTTP client to simulate authentication requirement
-        mock_response = MagicNone  # TODO: Use real service instance
+        mock_response = MagicMock()  # TODO: Use real service instance
         mock_response.status_code = 401
         mock_response.json.return_value = {"error": "Unauthorized access"}
         
         with patch('httpx.AsyncClient') as mock_client_class:
-            mock_client = AsyncNone  # TODO: Use real service instance
+            mock_client = AsyncMock()  # TODO: Use real service instance
             mock_client_class.return_value.__aenter__.return_value = mock_client
             mock_client.get.return_value = mock_response
             
@@ -54,12 +56,12 @@ class TestAPIAuthenticationL3:
     async def test_bearer_token_authentication(self):
         """Test Bearer token authentication"""
         # Mock successful authentication response
-        mock_response = MagicNone  # TODO: Use real service instance
+        mock_response = MagicMock()  # TODO: Use real service instance
         mock_response.status_code = 200
         mock_response.json.return_value = {"data": "authenticated access granted"}
         
         with patch('httpx.AsyncClient') as mock_client_class:
-            mock_client = AsyncNone  # TODO: Use real service instance
+            mock_client = AsyncMock()  # TODO: Use real service instance
             mock_client_class.return_value.__aenter__.return_value = mock_client
             mock_client.get.return_value = mock_response
             
@@ -84,12 +86,12 @@ class TestAPIAuthenticationL3:
     async def test_api_key_authentication(self):
         """Test API key authentication"""
         # Mock API key authentication response
-        mock_response = MagicNone  # TODO: Use real service instance
+        mock_response = MagicMock()  # TODO: Use real service instance
         mock_response.status_code = 200
         mock_response.json.return_value = {"data": "api key authenticated"}
         
         with patch('httpx.AsyncClient') as mock_client_class:
-            mock_client = AsyncNone  # TODO: Use real service instance
+            mock_client = AsyncMock()  # TODO: Use real service instance
             mock_client_class.return_value.__aenter__.return_value = mock_client
             mock_client.get.return_value = mock_response
             
@@ -110,12 +112,12 @@ class TestAPIAuthenticationL3:
     async def test_expired_token_rejection(self):
         """Test expired token is rejected"""
         # Mock expired token rejection response
-        mock_response = MagicNone  # TODO: Use real service instance
+        mock_response = MagicMock()  # TODO: Use real service instance
         mock_response.status_code = 401
         mock_response.json.return_value = {"error": "Token expired"}
         
         with patch('httpx.AsyncClient') as mock_client_class:
-            mock_client = AsyncNone  # TODO: Use real service instance
+            mock_client = AsyncMock()  # TODO: Use real service instance
             mock_client_class.return_value.__aenter__.return_value = mock_client
             mock_client.get.return_value = mock_response
             
@@ -142,17 +144,17 @@ class TestAPIAuthenticationL3:
     async def test_invalid_token_format(self):
         """Test invalid token format handling"""
         # Mock invalid token response
-        mock_response = MagicNone  # TODO: Use real service instance
+        mock_response = MagicMock()  # TODO: Use real service instance
         mock_response.status_code = 401
         mock_response.json.return_value = {"error": "Invalid token format"}
         
         # Mock second response for basic auth
-        mock_response_basic = MagicNone  # TODO: Use real service instance
+        mock_response_basic = MagicMock()  # TODO: Use real service instance
         mock_response_basic.status_code = 403
         mock_response_basic.json.return_value = {"error": "Forbidden"}
         
         with patch('httpx.AsyncClient') as mock_client_class:
-            mock_client = AsyncNone  # TODO: Use real service instance
+            mock_client = AsyncMock()  # TODO: Use real service instance
             mock_client_class.return_value.__aenter__.return_value = mock_client
             # Set up different responses for different calls
             mock_client.get.side_effect = [mock_response, mock_response_basic]

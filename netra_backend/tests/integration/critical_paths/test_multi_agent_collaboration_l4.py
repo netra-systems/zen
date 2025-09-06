@@ -1,16 +1,18 @@
+from unittest.mock import AsyncMock, Mock, patch, MagicMock
+
 """Multi-Agent Collaboration L4 Integration Tests
 
 Business Value Justification (BVJ):
-- Segment: Enterprise (core AI optimization functionality)
+    - Segment: Enterprise (core AI optimization functionality)
 - Business Goal: Ensure multi-agent coordination operates correctly in production-like environment
 - Value Impact: Validates $20K MRR protection through reliable agent delegation and state management
 - Strategic Impact: Critical path for AI optimization workflows that generate customer value
 
 Critical Path: 
-User request -> Supervisor Agent -> Sub-agent delegation -> State persistence -> Result aggregation -> Response delivery
+    User request -> Supervisor Agent -> Sub-agent delegation -> State persistence -> Result aggregation -> Response delivery
 
 Coverage: Real LLM calls, agent lifecycle management, cross-agent state persistence, staging environment validation
-"""
+""""
 
 import asyncio
 import json
@@ -21,7 +23,7 @@ from typing import Any, Dict, Optional
 from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
 from test_framework.database.test_database_manager import TestDatabaseManager
-from test_framework.redis.test_redis_manager import TestRedisManager
+from test_framework.redis_test_utils_test_utils.test_redis_manager import TestRedisManager
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
 from shared.isolated_environment import IsolatedEnvironment
@@ -62,31 +64,31 @@ class MultiAgentL4TestSuite:
         
         # Create mock components with proper async behavior
         # Mock: Redis caching isolation to prevent test interference and external dependencies
-        self.redis_session = MagicNone  # TODO: Use real service instance
+        self.redis_session = MagicMock()  # TODO: Use real service instance
         # Mock: Redis caching isolation to prevent test interference and external dependencies
-        self.redis_session.initialize = AsyncNone  # TODO: Use real service instance
+        self.redis_session.initialize = AsyncMock()  # TODO: Use real service instance
         # Mock: Redis caching isolation to prevent test interference and external dependencies
-        self.redis_session.delete_session = AsyncNone  # TODO: Use real service instance
+        self.redis_session.delete_session = AsyncMock()  # TODO: Use real service instance
         # Mock: Redis caching isolation to prevent test interference and external dependencies
-        self.redis_session.close = AsyncNone  # TODO: Use real service instance
+        self.redis_session.close = AsyncMock()  # TODO: Use real service instance
         
         # Mock: LLM provider isolation to prevent external API usage and costs
-        self.llm_manager = MagicNone  # TODO: Use real service instance
+        self.llm_manager = MagicMock()  # TODO: Use real service instance
         # Mock: LLM provider isolation to prevent external API usage and costs
-        self.llm_manager.initialize = AsyncNone  # TODO: Use real service instance
+        self.llm_manager.initialize = AsyncMock()  # TODO: Use real service instance
         # Mock: LLM provider isolation to prevent external API usage and costs
-        self.llm_manager.shutdown = AsyncNone  # TODO: Use real service instance
+        self.llm_manager.shutdown = AsyncMock()  # TODO: Use real service instance
         
         # Mock: WebSocket connection isolation for testing without network overhead
-        self.websocket_manager = MagicNone  # TODO: Use real service instance
+        self.websocket_manager = MagicMock()  # TODO: Use real service instance
         # Mock: WebSocket connection isolation for testing without network overhead
-        self.websocket_manager.initialize = AsyncNone  # TODO: Use real service instance
+        self.websocket_manager.initialize = AsyncMock()  # TODO: Use real service instance
         # Mock: WebSocket connection isolation for testing without network overhead
-        self.websocket_manager.shutdown = AsyncNone  # TODO: Use real service instance
+        self.websocket_manager.shutdown = AsyncMock()  # TODO: Use real service instance
         
         # Initialize supervisor with mock dependencies
         # Mock: Generic component isolation for controlled unit testing
-        self.supervisor_agent = AsyncNone  # TODO: Use real service instance
+        self.supervisor_agent = AsyncMock()  # TODO: Use real service instance
         # Mock: Async component isolation for testing without real async operations
         self.supervisor_agent.run = AsyncMock(return_value={"status": "completed", "result": "test_result"})
     
@@ -127,10 +129,10 @@ class MultiAgentL4TestSuite:
         # Create state as dict instead of object
         state = {
             "user_request": scenario_data["user_request"],
-            "user_id": f"enterprise_user_{uuid.uuid4().hex[:8]}",
-            "chat_thread_id": f"thread_{scenario}_{uuid.uuid4().hex[:8]}",
+            "user_id": f"enterprise_user_{uuid.uuid4().hex[:8]]",
+            "chat_thread_id": f"thread_{scenario]_{uuid.uuid4().hex[:8]]",
             "conversation_history": [
-                {"role": "user", "content": scenario_data["user_request"], "timestamp": time.time()}
+                {"role": "user", "content": scenario_data["user_request"], "timestamp": time.time()]
             ],
             "context_metadata": scenario_data["context"]
         }
@@ -140,7 +142,7 @@ class MultiAgentL4TestSuite:
     async def execute_multi_agent_workflow(self, initial_state: Dict[str, Any]) -> Dict[str, Any]:
         """Execute complete multi-agent workflow with real LLM calls."""
         workflow_start = time.time()
-        run_id = f"l4_test_{uuid.uuid4().hex[:12]}"
+        run_id = f"l4_test_{uuid.uuid4().hex[:12]]"
         
         try:
             # Step 1: Supervisor processes initial request
@@ -217,9 +219,9 @@ class MultiAgentL4TestSuite:
         try:
             # Mock sub-agent creation and execution
             # Mock: Generic component isolation for controlled unit testing
-            optimization_agent = AsyncNone  # TODO: Use real service instance
+            optimization_agent = AsyncMock()  # TODO: Use real service instance
             # Mock: Generic component isolation for controlled unit testing
-            analysis_agent = AsyncNone  # TODO: Use real service instance
+            analysis_agent = AsyncMock()  # TODO: Use real service instance
             
             # Mock execution results
             # Mock: Async component isolation for testing without real async operations
@@ -334,7 +336,7 @@ async def test_enterprise_cost_optimization_workflow_l4(multi_agent_l4_suite):
     workflow_result = await multi_agent_l4_suite.execute_multi_agent_workflow(initial_state)
     
     # Validate workflow success
-    assert workflow_result["success"] is True, f"Workflow failed: {workflow_result.get('error')}"
+    assert workflow_result["success"] is True, f"Workflow failed: {workflow_result.get('error')]"
     assert workflow_result["workflow_duration"] < 60.0, "Workflow took too long"
     
     # Validate supervisor execution
@@ -450,7 +452,7 @@ async def test_agent_failure_recovery_l4(multi_agent_l4_suite):
     )
     
     # Simulate partial workflow execution
-    run_id = f"failure_test_{uuid.uuid4().hex[:12]}"
+    run_id = f"failure_test_{uuid.uuid4().hex[:12]]"
     
     # Start supervisor execution
     supervisor_result = await multi_agent_l4_suite.supervisor_agent.run(
@@ -469,7 +471,7 @@ async def test_agent_failure_recovery_l4(multi_agent_l4_suite):
     assert persistence_check["state_age_seconds"] < 60, "State not recently persisted"
     
     # Mock recovery capability validation
-    recovery_result = [{"thread_state": json.dumps({"user_request": initial_state["user_request"]})}]
+    recovery_result = [{"thread_state": json.dumps({"user_request": initial_state["user_request"]])]]
     
     assert len(recovery_result) > 0, "No recoverable state found"
     

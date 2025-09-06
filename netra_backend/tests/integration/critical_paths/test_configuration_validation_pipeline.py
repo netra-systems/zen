@@ -1,20 +1,22 @@
+from unittest.mock import Mock, patch, MagicMock
+
 """Configuration Validation Pipeline L3 Integration Tests
 
 Business Value Justification (BVJ):
-- Segment: Platform stability (all tiers)
+    - Segment: Platform stability (all tiers)
 - Business Goal: Prevent misconfiguration-induced outages and data corruption
 - Value Impact: $75K MRR - Configuration errors cause 40% of production incidents
 - Strategic Impact: Ensures system reliability through automated configuration validation
 
 Critical Path: Configuration ingestion -> Schema validation -> Dependency checking -> Environment validation -> Breaking change detection -> Safe deployment
 Coverage: Multi-environment config validation, schema compliance, dependency resolution, breaking change detection, rollback mechanisms
-"""
+""""
 
 import sys
 from pathlib import Path
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
 from test_framework.database.test_database_manager import TestDatabaseManager
-from test_framework.redis.test_redis_manager import TestRedisManager
+from test_framework.redis_test_utils_test_utils.test_redis_manager import TestRedisManager
 from auth_service.core.auth_manager import AuthManager
 from shared.isolated_environment import IsolatedEnvironment
 
@@ -168,7 +170,7 @@ class ConfigurationValidationPipeline:
     
     async def validate_configuration(self, config_name: str, config_data: Dict[str, Any], 
                                    environment: str = "development") -> ConfigValidationResult:
-        """Validate configuration against schema and dependencies."""
+                                       """Validate configuration against schema and dependencies."""
         start_time = time.time()
         result = ConfigValidationResult(config_name=config_name, is_valid=True, validation_time=0)
         
@@ -264,11 +266,11 @@ class ConfigurationValidationPipeline:
         
         if "min" in constraints and isinstance(value, (int, float)):
             if value < constraints["min"]:
-                errors.append(f"Field '{field_name}' value {value} is below minimum {constraints['min']}")
+                errors.append(f"Field '{field_name]' value {value] is below minimum {constraints['min']]")
         
         if "max" in constraints and isinstance(value, (int, float)):
             if value > constraints["max"]:
-                errors.append(f"Field '{field_name}' value {value} exceeds maximum {constraints['max']}")
+                errors.append(f"Field '{field_name]' value {value] exceeds maximum {constraints['max']]")
         
         if "pattern" in constraints and isinstance(value, str):
             import re
@@ -277,13 +279,13 @@ class ConfigurationValidationPipeline:
         
         if "allowed_values" in constraints:
             if value not in constraints["allowed_values"]:
-                errors.append(f"Field '{field_name}' value '{value}' not in allowed values: {constraints['allowed_values']}")
+                errors.append(f"Field '{field_name]' value '{value]' not in allowed values: {constraints['allowed_values']]")
         
         return errors
     
     async def _validate_dependencies(self, config_name: str, config_data: Dict[str, Any], 
                                    environment: str) -> List[str]:
-        """Validate configuration dependencies."""
+                                       """Validate configuration dependencies."""
         errors = []
         
         if config_name not in self.schemas:
@@ -360,7 +362,7 @@ class ConfigurationValidationPipeline:
     
     async def _validate_environment_specific(self, config_name: str, config_data: Dict[str, Any], 
                                            environment: str) -> List[str]:
-        """Validate environment-specific configuration requirements."""
+                                               """Validate environment-specific configuration requirements."""
         errors = []
         
         if environment == "production":
@@ -427,7 +429,7 @@ class ConfigurationValidationPipeline:
             for field in critical_fields[config_name]:
                 if field in previous_config and field in config_data:
                     if previous_config[field] != config_data[field]:
-                        breaking_changes.append(f"Critical field '{field}' value changed from '{previous_config[field]}' to '{config_data[field]}'")
+                        breaking_changes.append(f"Critical field '{field]' value changed from '{previous_config[field]]' to '{config_data[field]]'")
         
         return breaking_changes
     
@@ -467,7 +469,7 @@ class ConfigurationValidationPipeline:
     
     async def validate_multiple_configs(self, configs: Dict[str, Dict[str, Any]], 
                                       environment: str = "development") -> Dict[str, ConfigValidationResult]:
-        """Validate multiple configurations concurrently."""
+                                          """Validate multiple configurations concurrently."""
         validation_tasks = []
         
         for config_name, config_data in configs.items():
@@ -486,7 +488,7 @@ class ConfigurationValidationPipeline:
                     config_name=config_name,
                     is_valid=False,
                     validation_time=0,
-                    schema_errors=[f"Validation exception: {str(results[i])}"]
+                    schema_errors=[f"Validation exception: {str(results[i])]"]
                 )
         
         return validated_configs
@@ -495,15 +497,15 @@ class ConfigurationValidationPipeline:
 async def redis_client():
     """Create Redis client for configuration caching."""
     try:
-        import redis.asyncio as redis
-        client = redis.Redis(host="localhost", port=6379, decode_responses=True, db=1)
-        # Test connection
-        await client.ping()
-        yield client
-        await client.close()
+    import redis.asyncio as redis
+    client = redis.Redis(host="localhost", port=6379, decode_responses=True, db=1)
+    # Test connection
+    await client.ping()
+    yield client
+    await client.close()
     except Exception:
-        # If Redis not available, return None
-        yield None
+    # If Redis not available, return None
+    yield None
 
 @pytest.fixture
 async def config_validator(redis_client):
@@ -822,9 +824,9 @@ class TestConfigurationValidationPipelineL3:
         
         # Assert consistency and performance
         for config_name, metrics in consistency_results.items():
-            assert metrics["consistent"], f"Inconsistent validation results for {config_name}"
-            assert metrics["avg_time"] < 10.0, f"Average validation time too high for {config_name}"
-            assert metrics["max_time"] < 30.0, f"Maximum validation time exceeded for {config_name}"
+            assert metrics["consistent"], f"Inconsistent validation results for {config_name]"
+            assert metrics["avg_time"] < 10.0, f"Average validation time too high for {config_name]"
+            assert metrics["max_time"] < 30.0, f"Maximum validation time exceeded for {config_name]"
     
     @pytest.mark.asyncio
     async def test_validation_timeout_handling(self, config_validator):

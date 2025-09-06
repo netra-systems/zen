@@ -1,15 +1,17 @@
 from shared.isolated_environment import get_env
 from shared.isolated_environment import IsolatedEnvironment
+from unittest.mock import Mock, patch, MagicMock
+
 """L4 Compliance Audit Trail Critical Path Test
 
 Business Value Justification (BVJ):
-- Segment: Enterprise
+    - Segment: Enterprise
 - Business Goal: Regulatory Compliance and Audit Readiness
 - Value Impact: Ensures SOC2/GDPR compliance for enterprise customers
 - Strategic Impact: $20K MRR protection from compliance violations
 
 Requirements:
-- Complete audit trail generation
+    - Complete audit trail generation
 - Data retention policy validation
 - PII handling and masking
 - Access control logging
@@ -21,7 +23,7 @@ Requirements:
 
 This test validates end-to-end compliance audit trail functionality in staging environment
 ensuring enterprise customers maintain regulatory compliance.
-"""
+""""
 
 import sys
 from pathlib import Path
@@ -82,8 +84,8 @@ class L4ComplianceAuditTrailTest(L4StagingCriticalPathTestBase):
         self.compliance_metrics = ComplianceAuditMetrics()
         self.test_user_accounts: List[Dict[str, Any]] = []
         self.audit_trail_data: List[Dict[str, Any]] = []
-        self.compliance_reports: Dict[str, Any] = {}
-        self.pii_test_data: Dict[str, Any] = {}
+        self.compliance_reports: Dict[str, Any] = {]
+        self.pii_test_data: Dict[str, Any] = {]
         
     async def _validate_staging_connectivity(self) -> None:
         """Override connectivity validation for compliance testing."""
@@ -262,7 +264,7 @@ class L4ComplianceAuditTrailTest(L4StagingCriticalPathTestBase):
             gdpr_rights = results.get("data_subject_rights_validation", {})
             if (gdpr_rights.get("export_requests_processed", 0) >= 2 and 
                 gdpr_rights.get("deletion_requests_processed", 0) >= 2):
-                validation_results.append(True)
+                    validation_results.append(True)
                 self.compliance_metrics.data_export_requests = gdpr_rights["export_requests_processed"]
                 self.compliance_metrics.data_deletion_requests = gdpr_rights["deletion_requests_processed"]
             else:
@@ -384,17 +386,17 @@ class L4ComplianceAuditTrailTest(L4StagingCriticalPathTestBase):
     
     async def _test_user_action_audit_logging(self) -> Dict[str, Any]:
         """Test comprehensive user action audit logging."""
-        results = {"service_calls": 0, "audit_events_logged": 0, "events": []}
+        results = {"service_calls": 0, "audit_events_logged": 0, "events": []]
         
         try:
             # Simulate various user actions requiring audit logging
             user_actions = [
-                {"action": "user_login", "user": self.test_user_accounts[0], "sensitive": True},
-                {"action": "data_search", "user": self.test_user_accounts[1], "sensitive": True},
-                {"action": "file_upload", "user": self.test_user_accounts[2], "sensitive": True},
-                {"action": "admin_action", "user": self.test_user_accounts[3], "sensitive": True},
-                {"action": "api_access", "user": self.test_user_accounts[0], "sensitive": True},
-                {"action": "config_change", "user": self.test_user_accounts[3], "sensitive": True}
+                {"action": "user_login", "user": self.test_user_accounts[0], "sensitive": True],
+                {"action": "data_search", "user": self.test_user_accounts[1], "sensitive": True],
+                {"action": "file_upload", "user": self.test_user_accounts[2], "sensitive": True],
+                {"action": "admin_action", "user": self.test_user_accounts[3], "sensitive": True],
+                {"action": "api_access", "user": self.test_user_accounts[0], "sensitive": True],
+                {"action": "config_change", "user": self.test_user_accounts[3], "sensitive": True]
             ]
             
             for action_spec in user_actions:
@@ -419,7 +421,7 @@ class L4ComplianceAuditTrailTest(L4StagingCriticalPathTestBase):
     
     async def _test_data_access_logging_with_pii_masking(self) -> Dict[str, Any]:
         """Test data access logging with PII masking."""
-        results = {"service_calls": 0, "pii_fields_masked": 0, "access_logs": []}
+        results = {"service_calls": 0, "pii_fields_masked": 0, "access_logs": []]
         
         try:
             # Test data access scenarios with PII
@@ -457,16 +459,16 @@ class L4ComplianceAuditTrailTest(L4StagingCriticalPathTestBase):
     
     async def _test_access_control_logging(self) -> Dict[str, Any]:
         """Test access control logging functionality."""
-        results = {"service_calls": 0, "access_control_events": 0, "events": []}
+        results = {"service_calls": 0, "access_control_events": 0, "events": []]
         
         try:
             # Test different access control scenarios
             access_scenarios = [
-                {"type": "permission_grant", "user": self.test_user_accounts[0], "resource": "api_access"},
-                {"type": "permission_deny", "user": self.test_user_accounts[1], "resource": "admin_panel"},
-                {"type": "role_change", "user": self.test_user_accounts[2], "from_role": "user", "to_role": "premium"},
-                {"type": "access_attempt", "user": self.test_user_accounts[3], "resource": "billing_data"},
-                {"type": "token_validation", "user": self.test_user_accounts[0], "token_type": "api_key"}
+                {"type": "permission_grant", "user": self.test_user_accounts[0], "resource": "api_access"],
+                {"type": "permission_deny", "user": self.test_user_accounts[1], "resource": "admin_panel"],
+                {"type": "role_change", "user": self.test_user_accounts[2], "from_role": "user", "to_role": "premium"],
+                {"type": "access_attempt", "user": self.test_user_accounts[3], "resource": "billing_data"],
+                {"type": "token_validation", "user": self.test_user_accounts[0], "token_type": "api_key"]
             ]
             
             for scenario in access_scenarios:
@@ -522,7 +524,7 @@ class L4ComplianceAuditTrailTest(L4StagingCriticalPathTestBase):
     
     async def _test_compliance_report_generation(self) -> Dict[str, Any]:
         """Test compliance report generation for SOC2 and GDPR."""
-        results = {"service_calls": 0, "generated_reports": [], "report_quality": {}}
+        results = {"service_calls": 0, "generated_reports": [], "report_quality": {]]
         
         try:
             # Generate SOC2 compliance report
@@ -891,7 +893,7 @@ class L4ComplianceAuditTrailTest(L4StagingCriticalPathTestBase):
     async def _validate_automated_cleanup_processes(self) -> Dict[str, Any]:
         """Validate automated cleanup processes."""
         try:
-            return {"processes_verified": True, "cleanup_schedules": ["daily", "weekly", "monthly"]}
+            return {"processes_verified": True, "cleanup_schedules": ["daily", "weekly", "monthly"]]
         except Exception as e:
             return {"processes_verified": False, "error": str(e)}
     
@@ -932,21 +934,21 @@ class L4ComplianceAuditTrailTest(L4StagingCriticalPathTestBase):
     async def _track_configuration_changes(self) -> Dict[str, Any]:
         """Track configuration changes."""
         try:
-            return {"changes_logged": 3, "config_types": ["security", "database", "api"]}
+            return {"changes_logged": 3, "config_types": ["security", "database", "api"]]
         except Exception as e:
             return {"changes_logged": 0, "error": str(e)}
     
     async def _track_schema_changes(self) -> Dict[str, Any]:
         """Track database schema changes."""
         try:
-            return {"changes_logged": 2, "schema_types": ["postgres", "clickhouse"]}
+            return {"changes_logged": 2, "schema_types": ["postgres", "clickhouse"]]
         except Exception as e:
             return {"changes_logged": 0, "error": str(e)}
     
     async def _track_permission_changes(self) -> Dict[str, Any]:
         """Track user permission changes."""
         try:
-            return {"changes_logged": 4, "permission_types": ["role_update", "access_grant"]}
+            return {"changes_logged": 4, "permission_types": ["role_update", "access_grant"]]
         except Exception as e:
             return {"changes_logged": 0, "error": str(e)}
     
@@ -961,7 +963,7 @@ class L4ComplianceAuditTrailTest(L4StagingCriticalPathTestBase):
         """Assess SOC2 compliance."""
         try:
             score = 98.5  # High compliance score
-            return {"score": score, "areas": ["security", "availability", "confidentiality"]}
+            return {"score": score, "areas": ["security", "availability", "confidentiality"]]
         except Exception as e:
             return {"score": 0.0, "error": str(e)}
     
@@ -969,7 +971,7 @@ class L4ComplianceAuditTrailTest(L4StagingCriticalPathTestBase):
         """Assess GDPR compliance."""
         try:
             score = 97.8  # High compliance score
-            return {"score": score, "areas": ["data_protection", "subject_rights", "breach_notification"]}
+            return {"score": score, "areas": ["data_protection", "subject_rights", "breach_notification"]]
         except Exception as e:
             return {"score": 0.0, "error": str(e)}
     
@@ -1013,7 +1015,7 @@ async def test_l4_compliance_audit_trail_critical_path():
     L4 Critical Path Test: Compliance Audit Trail
     
     BVJ: $20K MRR protection through enterprise compliance validation
-    """
+    """"
     test_instance = L4ComplianceAuditTrailTest()
     
     try:
@@ -1043,7 +1045,7 @@ async def test_l4_compliance_audit_trail_critical_path():
         # Log compliance test success metrics
         print(f"""
 L4 Compliance Audit Trail Test Results:
-- Duration: {test_results.duration:.2f}s
+    - Duration: {test_results.duration:.2f}s
 - Service Calls: {test_results.service_calls}
 - Audit Events Logged: {test_instance.compliance_metrics.audit_events_logged}
 - PII Fields Masked: {test_instance.compliance_metrics.pii_fields_masked}
@@ -1054,7 +1056,7 @@ L4 Compliance Audit Trail Test Results:
 - Data Export Requests Processed: {test_instance.compliance_metrics.data_export_requests}
 - Data Deletion Requests Processed: {test_instance.compliance_metrics.data_deletion_requests}
 - Retention Policies Validated: {test_instance.compliance_metrics.retention_policies_validated}
-        """)
+        """)"
         
         return test_results
         

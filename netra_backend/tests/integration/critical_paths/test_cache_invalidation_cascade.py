@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Comprehensive test to verify cache invalidation cascade:
-1. Setup multi-layer cache (Redis, in-memory, CDN simulation)
+    1. Setup multi-layer cache (Redis, in-memory, CDN simulation)
 2. Write data to all cache layers
 3. Verify cache coherence
 4. Trigger invalidation events
@@ -11,7 +11,7 @@ Comprehensive test to verify cache invalidation cascade:
 8. Monitor cache hit/miss ratios
 
 This test ensures cache consistency across all service layers.
-"""
+""""
 
 # Test framework import - using pytest fixtures instead
 
@@ -51,7 +51,7 @@ class CacheLayer:
     def __init__(self, name: str, level: int):
         self.name = name
         self.level = level
-        self.data: Dict[str, Any] = {}
+        self.data: Dict[str, Any] = {]
         self.hit_count = 0
         self.miss_count = 0
         self.invalidation_count = 0
@@ -125,7 +125,7 @@ class CacheInvalidationTester:
             CacheLayer("L3_CDN", 3)
         ]
         
-        self.test_data: Dict[str, Any] = {}
+        self.test_data: Dict[str, Any] = {]
         self.invalidation_log: List[Dict] = []
         
     async def __aenter__(self):
@@ -157,7 +157,7 @@ class CacheInvalidationTester:
                 json=register_data
             ) as response:
                 if response.status not in [200, 201, 409]:
-                    print(f"[ERROR] Registration failed: {response.status}")
+                    print(f"[ERROR] Registration failed: {response.status]")
                     return False
                     
             # Login
@@ -176,11 +176,11 @@ class CacheInvalidationTester:
                     print(f"[OK] Authentication successful")
                     return True
                 else:
-                    print(f"[ERROR] Login failed: {response.status}")
+                    print(f"[ERROR] Login failed: {response.status]")
                     return False
                     
         except Exception as e:
-            print(f"[ERROR] Authentication error: {e}")
+            print(f"[ERROR] Authentication error: {e]")
             return False
             
     @pytest.mark.asyncio
@@ -196,12 +196,12 @@ class CacheInvalidationTester:
             
             # Get info
             info = await self.redis_client.info()
-            print(f"[OK] Connected to Redis: v{info.get('redis_version', 'unknown')}")
+            print(f"[OK] Connected to Redis: v{info.get('redis_version', 'unknown')]")
             
             return True
             
         except Exception as e:
-            print(f"[ERROR] Redis connection failed: {e}")
+            print(f"[ERROR] Redis connection failed: {e]")
             return False
             
     @pytest.mark.asyncio
@@ -241,17 +241,17 @@ class CacheInvalidationTester:
                             json.dumps(value)
                         )
                         
-            print(f"[OK] Populated {len(test_keys)} keys across {len(self.cache_layers)} layers")
+            print(f"[OK] Populated {len(test_keys)] keys across {len(self.cache_layers)] layers")
             
             # Verify population
             for layer in self.cache_layers:
                 stats = layer.get_stats()
-                print(f"  - {layer.name}: {stats['current_keys']} keys")
+                print(f"  - {layer.name]: {stats['current_keys']] keys")
                 
             return True
             
         except Exception as e:
-            print(f"[ERROR] Cache population failed: {e}")
+            print(f"[ERROR] Cache population failed: {e]")
             return False
             
     @pytest.mark.asyncio
@@ -290,16 +290,16 @@ class CacheInvalidationTester:
                     })
                     
             if inconsistencies:
-                print(f"[ERROR] Found {len(inconsistencies)} inconsistencies")
+                print(f"[ERROR] Found {len(inconsistencies)] inconsistencies")
                 for inc in inconsistencies[:3]:  # Show first 3
-                    print(f"  - Key {inc['key']}: {len(inc['layers'])} different values")
+                    print(f"  - Key {inc['key']]: {len(inc['layers'])] different values")
                 return False
             else:
-                print(f"[OK] Cache coherence verified for {len(sample_keys)} keys")
+                print(f"[OK] Cache coherence verified for {len(sample_keys)] keys")
                 return True
                 
         except Exception as e:
-            print(f"[ERROR] Coherence check failed: {e}")
+            print(f"[ERROR] Coherence check failed: {e]")
             return False
             
     @pytest.mark.asyncio
@@ -315,23 +315,23 @@ class CacheInvalidationTester:
             headers = {"Authorization": f"Bearer {self.auth_token}"}
             
             async with self.session.delete(
-                f"{CACHE_ENDPOINTS['user']}/{test_key}",
+                f"{CACHE_ENDPOINTS['user']]/{test_key]",
                 headers=headers
             ) as response:
                 if response.status not in [200, 204]:
-                    print(f"[ERROR] API invalidation failed: {response.status}")
+                    print(f"[ERROR] API invalidation failed: {response.status]")
                     return False
                     
             # Simulate cascade propagation
             for layer in self.cache_layers:
                 if layer.invalidate(test_key):
-                    print(f"[OK] Invalidated {test_key} from {layer.name}")
+                    print(f"[OK] Invalidated {test_key] from {layer.name]")
                     
             # Invalidate from Redis
             if self.redis_client:
                 deleted = await self.redis_client.delete(test_key)
                 if deleted:
-                    print(f"[OK] Invalidated {test_key} from Redis")
+                    print(f"[OK] Invalidated {test_key] from Redis")
                     
             # Log invalidation
             self.invalidation_log.append({
@@ -346,7 +346,7 @@ class CacheInvalidationTester:
             for layer in self.cache_layers:
                 if layer.get(test_key):
                     key_found = True
-                    print(f"[ERROR] Key still in {layer.name}")
+                    print(f"[ERROR] Key still in {layer.name]")
                     
             if self.redis_client:
                 if await self.redis_client.get(test_key):
@@ -354,13 +354,13 @@ class CacheInvalidationTester:
                     print(f"[ERROR] Key still in Redis")
                     
             if not key_found:
-                print(f"[OK] Key {test_key} successfully invalidated from all layers")
+                print(f"[OK] Key {test_key] successfully invalidated from all layers")
                 return True
             else:
                 return False
                 
         except Exception as e:
-            print(f"[ERROR] Single key invalidation failed: {e}")
+            print(f"[ERROR] Single key invalidation failed: {e]")
             return False
             
     @pytest.mark.asyncio
@@ -377,18 +377,18 @@ class CacheInvalidationTester:
             headers = {"Authorization": f"Bearer {self.auth_token}"}
             
             async with self.session.delete(
-                f"{CACHE_ENDPOINTS['thread']}/pattern",
+                f"{CACHE_ENDPOINTS['thread']]/pattern",
                 json={"pattern": pattern},
                 headers=headers
             ) as response:
                 if response.status not in [200, 204]:
-                    print(f"[WARNING] API pattern invalidation status: {response.status}")
+                    print(f"[WARNING] API pattern invalidation status: {response.status]")
                     
             # Cascade through layers
             for layer in self.cache_layers:
                 count = layer.invalidate_pattern(pattern)
                 total_invalidated += count
-                print(f"[OK] Invalidated {count} keys from {layer.name}")
+                print(f"[OK] Invalidated {count] keys from {layer.name]")
                 
             # Invalidate from Redis
             if self.redis_client:
@@ -407,7 +407,7 @@ class CacheInvalidationTester:
                         break
                         
                 total_invalidated += redis_count
-                print(f"[OK] Invalidated {redis_count} keys from Redis")
+                print(f"[OK] Invalidated {redis_count] keys from Redis")
                 
             # Log invalidation
             self.invalidation_log.append({
@@ -417,11 +417,11 @@ class CacheInvalidationTester:
                 "keys_invalidated": total_invalidated
             })
             
-            print(f"[OK] Pattern invalidation complete: {total_invalidated} total keys")
+            print(f"[OK] Pattern invalidation complete: {total_invalidated] total keys")
             return total_invalidated > 0
             
         except Exception as e:
-            print(f"[ERROR] Pattern invalidation failed: {e}")
+            print(f"[ERROR] Pattern invalidation failed: {e]")
             return False
             
     @pytest.mark.asyncio
@@ -445,7 +445,7 @@ class CacheInvalidationTester:
                     
                 short_ttl_keys.append(key)
                 
-            print(f"[OK] Created {len(short_ttl_keys)} short-TTL keys")
+            print(f"[OK] Created {len(short_ttl_keys)] short-TTL keys")
             
             # Wait for expiration
             await asyncio.sleep(3)
@@ -459,14 +459,14 @@ class CacheInvalidationTester:
                         expired_count += 1
                         
             if expired_count == len(short_ttl_keys):
-                print(f"[OK] All {expired_count} keys expired as expected")
+                print(f"[OK] All {expired_count] keys expired as expected")
                 return True
             else:
-                print(f"[WARNING] Only {expired_count}/{len(short_ttl_keys)} keys expired")
+                print(f"[WARNING] Only {expired_count]/{len(short_ttl_keys)] keys expired")
                 return expired_count > 0
                 
         except Exception as e:
-            print(f"[ERROR] TTL expiration test failed: {e}")
+            print(f"[ERROR] TTL expiration test failed: {e]")
             return False
             
     @pytest.mark.asyncio
@@ -502,9 +502,9 @@ class CacheInvalidationTester:
             ) as response:
                 if response.status == 200:
                     result = await response.json()
-                    print(f"[OK] Cache warmup triggered: {result}")
+                    print(f"[OK] Cache warmup triggered: {result]")
                 else:
-                    print(f"[WARNING] Warmup API returned: {response.status}")
+                    print(f"[WARNING] Warmup API returned: {response.status]")
                     
             # Simulate warmup by loading critical data
             critical_keys = ["user:0", "user:1", "config:0", "config:1"]
@@ -527,14 +527,14 @@ class CacheInvalidationTester:
                     warmed_count += 1
                     
             if warmed_count == len(critical_keys):
-                print(f"[OK] Cache warmup complete: {warmed_count} critical keys loaded")
+                print(f"[OK] Cache warmup complete: {warmed_count] critical keys loaded")
                 return True
             else:
-                print(f"[WARNING] Partial warmup: {warmed_count}/{len(critical_keys)} keys")
+                print(f"[WARNING] Partial warmup: {warmed_count]/{len(critical_keys)] keys")
                 return warmed_count > 0
                 
         except Exception as e:
-            print(f"[ERROR] Cache warmup failed: {e}")
+            print(f"[ERROR] Cache warmup failed: {e]")
             return False
             
     @pytest.mark.asyncio
@@ -570,11 +570,11 @@ class CacheInvalidationTester:
             for layer in self.cache_layers:
                 stats = layer.get_stats()
                 print(f"  {layer.name}:")
-                print(f"    - Hits: {stats['hits']}")
-                print(f"    - Misses: {stats['misses']}")
-                print(f"    - Hit Rate: {stats['hit_rate']:.1f}%")
-                print(f"    - Invalidations: {stats['invalidations']}")
-                print(f"    - Current Keys: {stats['current_keys']}")
+                print(f"    - Hits: {stats['hits']]")
+                print(f"    - Misses: {stats['misses']]")
+                print(f"    - Hit Rate: {stats['hit_rate']:.1f]%")
+                print(f"    - Invalidations: {stats['invalidations']]")
+                print(f"    - Current Keys: {stats['current_keys']]")
                 
                 overall_hit_rate += stats['hit_rate']
                 
@@ -588,14 +588,14 @@ class CacheInvalidationTester:
                 print(f"    - Keyspace misses: {info.get('keyspace_misses', 0)}")
                 
             if avg_hit_rate > 50:  # Expect at least 50% hit rate
-                print(f"\n[OK] Average hit rate: {avg_hit_rate:.1f}%")
+                print(f"\n[OK] Average hit rate: {avg_hit_rate:.1f]%")
                 return True
             else:
-                print(f"\n[WARNING] Low hit rate: {avg_hit_rate:.1f}%")
+                print(f"\n[WARNING] Low hit rate: {avg_hit_rate:.1f]%")
                 return False
                 
         except Exception as e:
-            print(f"[ERROR] Metrics collection failed: {e}")
+            print(f"[ERROR] Metrics collection failed: {e]")
             return False
             
     @pytest.mark.asyncio
@@ -614,7 +614,7 @@ class CacheInvalidationTester:
                 return key
                 
             # Select keys for concurrent invalidation
-            keys_to_invalidate = [f"agent:{i}" for i in range(5)]
+            keys_to_invalidate = [f"agent:{i]" for i in range(5)]
             
             # Run concurrent invalidations
             tasks = [invalidate_key(key) for key in keys_to_invalidate]
@@ -622,7 +622,7 @@ class CacheInvalidationTester:
             
             successful = [r for r in results if not isinstance(r, Exception)]
             
-            print(f"[OK] Concurrent invalidation: {len(successful)}/{len(keys_to_invalidate)} successful")
+            print(f"[OK] Concurrent invalidation: {len(successful)]/{len(keys_to_invalidate)] successful")
             
             # Verify all keys are gone
             remaining = 0
@@ -636,11 +636,11 @@ class CacheInvalidationTester:
                 print(f"[OK] All concurrent invalidations completed successfully")
                 return True
             else:
-                print(f"[WARNING] {remaining} keys still in cache after concurrent invalidation")
+                print(f"[WARNING] {remaining] keys still in cache after concurrent invalidation")
                 return False
                 
         except Exception as e:
-            print(f"[ERROR] Concurrent invalidation failed: {e}")
+            print(f"[ERROR] Concurrent invalidation failed: {e]")
             return False
             
     async def run_all_tests(self) -> Dict[str, bool]:
@@ -690,7 +690,7 @@ async def test_cache_invalidation_cascade():
         # Print invalidation log
         print(f"\nInvalidation Log ({len(tester.invalidation_log)} events):")
         for event in tester.invalidation_log:
-            print(f"  - {event['type']}: {event.get('keys_invalidated', 1)} keys")
+            print(f"  - {event['type']]: {event.get('keys_invalidated', 1)] keys")
             
         # Calculate overall result
         total_tests = len(results)
@@ -701,7 +701,7 @@ async def test_cache_invalidation_cascade():
         if passed_tests == total_tests:
             print("\n[SUCCESS] All cache invalidation tests passed!")
         else:
-            print(f"\n[WARNING] {total_tests - passed_tests} tests failed.")
+            print(f"\n[WARNING] {total_tests - passed_tests] tests failed.")
             
         # Assert all tests passed
         assert all(results.values()), f"Some tests failed: {results}"

@@ -1,19 +1,21 @@
+from unittest.mock import AsyncMock, Mock, patch, MagicMock
+
 """Configuration Hot Reload L3 Integration Tests
 
 Business Value Justification (BVJ):
-- Segment: Platform operations (all tiers)
+    - Segment: Platform operations (all tiers)
 - Business Goal: Zero-downtime configuration updates, operational efficiency
 - Value Impact: $75K MRR - Enables rapid configuration changes without service interruption
 - Strategic Impact: Hot reload capabilities reduce deployment overhead and improve system agility
 
 Critical Path: Config change detection -> Validation -> Rollback preparation -> Service coordination -> Hot reload <10s -> Verification
 Coverage: Runtime configuration updates, validation mechanisms, rollback capabilities, service coordination, zero-downtime operations
-"""
+""""
 
 import sys
 from pathlib import Path
 from test_framework.database.test_database_manager import TestDatabaseManager
-from test_framework.redis.test_redis_manager import TestRedisManager
+from test_framework.redis_test_utils_test_utils.test_redis_manager import TestRedisManager
 from shared.isolated_environment import IsolatedEnvironment
 
 # Test framework import - using pytest fixtures instead
@@ -106,7 +108,7 @@ class ConfigurationValidator:
     
     async def validate_configuration(self, config_type: ConfigurationType, 
                                    new_config: Dict[str, Any]) -> Dict[str, Any]:
-        """Validate new configuration against rules."""
+                                       """Validate new configuration against rules."""
         validation_result = {
             "valid": False,
             "errors": [],
@@ -119,40 +121,40 @@ class ConfigurationValidator:
                 validator_func = self.validation_rules[config_type]
                 validation_result = await validator_func(new_config)
             else:
-                validation_result["errors"].append(f"No validator for {config_type.value}")
+                validation_result["errors"].append(f"No validator for {config_type.value]")
             
             validation_result["valid"] = len(validation_result["errors"]) == 0
             
         except Exception as e:
-            validation_result["errors"].append(f"Validation exception: {str(e)}")
+            validation_result["errors"].append(f"Validation exception: {str(e)]")
             validation_result["valid"] = False
         
         return validation_result
     
     async def _validate_service_settings(self, config: Dict[str, Any]) -> Dict[str, Any]:
         """Validate service settings configuration."""
-        result = {"errors": [], "warnings": []}
+        result = {"errors": [], "warnings": []]
         
         required_fields = ["service_name", "port", "timeout"]
         for field in required_fields:
             if field not in config:
-                result["errors"].append(f"Missing required field: {field}")
+                result["errors"].append(f"Missing required field: {field]")
         
         if "port" in config:
             port = config["port"]
             if not isinstance(port, int) or port < 1024 or port > 65535:
-                result["errors"].append(f"Invalid port: {port}")
+                result["errors"].append(f"Invalid port: {port]")
         
         if "timeout" in config:
             timeout = config["timeout"]
             if not isinstance(timeout, (int, float)) or timeout <= 0:
-                result["errors"].append(f"Invalid timeout: {timeout}")
+                result["errors"].append(f"Invalid timeout: {timeout]")
         
         return result
     
     async def _validate_feature_flags(self, config: Dict[str, Any]) -> Dict[str, Any]:
         """Validate feature flags configuration."""
-        result = {"errors": [], "warnings": []}
+        result = {"errors": [], "warnings": []]
         
         if not isinstance(config, dict):
             result["errors"].append("Feature flags must be a dictionary")
@@ -160,72 +162,72 @@ class ConfigurationValidator:
         
         for flag_name, flag_value in config.items():
             if not isinstance(flag_name, str):
-                result["errors"].append(f"Flag name must be string: {flag_name}")
+                result["errors"].append(f"Flag name must be string: {flag_name]")
             
             if not isinstance(flag_value, bool):
-                result["errors"].append(f"Flag value must be boolean: {flag_name}")
+                result["errors"].append(f"Flag value must be boolean: {flag_name]")
         
         return result
     
     async def _validate_rate_limits(self, config: Dict[str, Any]) -> Dict[str, Any]:
         """Validate rate limits configuration."""
-        result = {"errors": [], "warnings": []}
+        result = {"errors": [], "warnings": []]
         
         required_fields = ["requests_per_second", "burst_size"]
         for field in required_fields:
             if field not in config:
-                result["errors"].append(f"Missing required field: {field}")
+                result["errors"].append(f"Missing required field: {field]")
         
         if "requests_per_second" in config:
             rps = config["requests_per_second"]
             if not isinstance(rps, (int, float)) or rps <= 0:
-                result["errors"].append(f"Invalid requests_per_second: {rps}")
+                result["errors"].append(f"Invalid requests_per_second: {rps]")
         
         if "burst_size" in config:
             burst = config["burst_size"]
             if not isinstance(burst, int) or burst <= 0:
-                result["errors"].append(f"Invalid burst_size: {burst}")
+                result["errors"].append(f"Invalid burst_size: {burst]")
         
         return result
     
     async def _validate_circuit_breaker(self, config: Dict[str, Any]) -> Dict[str, Any]:
         """Validate circuit breaker configuration."""
-        result = {"errors": [], "warnings": []}
+        result = {"errors": [], "warnings": []]
         
         required_fields = ["failure_threshold", "recovery_timeout"]
         for field in required_fields:
             if field not in config:
-                result["errors"].append(f"Missing required field: {field}")
+                result["errors"].append(f"Missing required field: {field]")
         
         if "failure_threshold" in config:
             threshold = config["failure_threshold"]
             if not isinstance(threshold, int) or threshold <= 0:
-                result["errors"].append(f"Invalid failure_threshold: {threshold}")
+                result["errors"].append(f"Invalid failure_threshold: {threshold]")
         
         if "recovery_timeout" in config:
             timeout = config["recovery_timeout"]
             if not isinstance(timeout, (int, float)) or timeout <= 0:
-                result["errors"].append(f"Invalid recovery_timeout: {timeout}")
+                result["errors"].append(f"Invalid recovery_timeout: {timeout]")
         
         return result
     
     async def _validate_database_pool(self, config: Dict[str, Any]) -> Dict[str, Any]:
         """Validate database pool configuration."""
-        result = {"errors": [], "warnings": []}
+        result = {"errors": [], "warnings": []]
         
         required_fields = ["min_connections", "max_connections"]
         for field in required_fields:
             if field not in config:
-                result["errors"].append(f"Missing required field: {field}")
+                result["errors"].append(f"Missing required field: {field]")
         
         min_conn = config.get("min_connections", 0)
         max_conn = config.get("max_connections", 0)
         
         if not isinstance(min_conn, int) or min_conn < 0:
-            result["errors"].append(f"Invalid min_connections: {min_conn}")
+            result["errors"].append(f"Invalid min_connections: {min_conn]")
         
         if not isinstance(max_conn, int) or max_conn <= 0:
-            result["errors"].append(f"Invalid max_connections: {max_conn}")
+            result["errors"].append(f"Invalid max_connections: {max_conn]")
         
         if min_conn > max_conn:
             result["errors"].append("min_connections cannot exceed max_connections")
@@ -234,30 +236,30 @@ class ConfigurationValidator:
     
     async def _validate_cache_settings(self, config: Dict[str, Any]) -> Dict[str, Any]:
         """Validate cache settings configuration."""
-        result = {"errors": [], "warnings": []}
+        result = {"errors": [], "warnings": []]
         
         if "ttl_seconds" in config:
             ttl = config["ttl_seconds"]
             if not isinstance(ttl, (int, float)) or ttl <= 0:
-                result["errors"].append(f"Invalid ttl_seconds: {ttl}")
+                result["errors"].append(f"Invalid ttl_seconds: {ttl]")
         
         if "max_size" in config:
             max_size = config["max_size"]
             if not isinstance(max_size, int) or max_size <= 0:
-                result["errors"].append(f"Invalid max_size: {max_size}")
+                result["errors"].append(f"Invalid max_size: {max_size]")
         
         return result
     
     async def _validate_logging_level(self, config: Dict[str, Any]) -> Dict[str, Any]:
         """Validate logging level configuration."""
-        result = {"errors": [], "warnings": []}
+        result = {"errors": [], "warnings": []]
         
         valid_levels = ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
         
         if "level" in config:
             level = config["level"]
             if level not in valid_levels:
-                result["errors"].append(f"Invalid logging level: {level}")
+                result["errors"].append(f"Invalid logging level: {level]")
         
         return result
 
@@ -266,11 +268,11 @@ class ConfigurationHotReloader:
     
     def __init__(self):
         self.validator = ConfigurationValidator()
-        self.current_configs: Dict[ConfigurationType, ConfigurationSnapshot] = {}
+        self.current_configs: Dict[ConfigurationType, ConfigurationSnapshot] = {]
         self.config_history: List[ConfigurationSnapshot] = []
         self.metrics = ReloadMetrics()
         self.active_reloads: Set[str] = set()
-        self.service_coordinators: Dict[str, AsyncMock] = {}
+        self.service_coordinators: Dict[str, AsyncMock] = {]
         
         # Initialize mock services for coordination
         self._initialize_service_coordinators()
@@ -280,14 +282,14 @@ class ConfigurationHotReloader:
         services = ["web_service", "worker_service", "cache_service", "database_service"]
         for service in services:
             # Mock: Generic component isolation for controlled unit testing
-            self.service_coordinators[service] = AsyncNone  # TODO: Use real service instance
+            self.service_coordinators[service] = AsyncMock()  # TODO: Use real service instance
     
     async def hot_reload_configuration(self, config_type: ConfigurationType,
                                      new_config: Dict[str, Any],
                                      reload_id: Optional[str] = None) -> Dict[str, Any]:
-        """Perform hot reload of configuration with validation and rollback support."""
+                                         """Perform hot reload of configuration with validation and rollback support."""
         if reload_id is None:
-            reload_id = f"reload_{uuid.uuid4().hex[:8]}"
+            reload_id = f"reload_{uuid.uuid4().hex[:8]]"
         
         start_time = time.time()
         self.active_reloads.add(reload_id)
@@ -313,7 +315,7 @@ class ConfigurationHotReloader:
             
             if not validation_result["valid"]:
                 self.metrics.validation_failures += 1
-                raise NetraException(f"Configuration validation failed: {validation_result['errors']}")
+                raise NetraException(f"Configuration validation failed: {validation_result['errors']]")
             
             # Phase 2: Prepare rollback snapshot
             rollback_snapshot = None
@@ -379,7 +381,7 @@ class ConfigurationHotReloader:
     
     async def _coordinate_services_for_reload(self, config_type: ConfigurationType, 
                                             new_config: Dict[str, Any]):
-        """Coordinate with services for configuration reload."""
+                                                """Coordinate with services for configuration reload."""
         # Notify services about incoming configuration change
         coordination_tasks = []
         
@@ -395,11 +397,11 @@ class ConfigurationHotReloader:
     
     async def _apply_configuration(self, config_type: ConfigurationType, 
                                  new_config: Dict[str, Any]) -> ConfigurationSnapshot:
-        """Apply new configuration and create snapshot."""
+                                     """Apply new configuration and create snapshot."""
         import hashlib
         
         # Create new configuration snapshot
-        version = f"v_{int(time.time())}_{uuid.uuid4().hex[:8]}"
+        version = f"v_{int(time.time())]_{uuid.uuid4().hex[:8]]"
         checksum = hashlib.md5(json.dumps(new_config, sort_keys=True).encode()).hexdigest()
         
         snapshot = ConfigurationSnapshot(
@@ -417,7 +419,7 @@ class ConfigurationHotReloader:
     
     async def _verify_configuration_applied(self, config_type: ConfigurationType,
                                           expected_config: Dict[str, Any]) -> bool:
-        """Verify that configuration was applied correctly."""
+                                              """Verify that configuration was applied correctly."""
         # Simulate verification process
         await asyncio.sleep(0.02)
         
@@ -431,7 +433,7 @@ class ConfigurationHotReloader:
     
     async def _rollback_configuration(self, config_type: ConfigurationType,
                                     rollback_snapshot: ConfigurationSnapshot):
-        """Rollback to previous configuration snapshot."""
+                                        """Rollback to previous configuration snapshot."""
         logger.info(f"Rolling back configuration {config_type.value} to version {rollback_snapshot.version}")
         
         # Apply rollback configuration
@@ -545,7 +547,7 @@ class TestConfigurationHotReloadL3:
             
             # Verify reload time SLA
             assert result["duration"] <= 10.0, \
-                f"Reload for {config_type.value} took {result['duration']:.2f}s, should be ≤10s"
+                f"Reload for {config_type.value] took {result['duration']:.2f]s, should be ≤10s"
             
             # Verify successful completion
             assert result["status"] == "completed", \
@@ -554,10 +556,10 @@ class TestConfigurationHotReloadL3:
         # Verify overall metrics
         metrics = reloader.get_reload_metrics()
         assert metrics["max_reload_time"] <= 10.0, \
-            f"Maximum reload time {metrics['max_reload_time']:.2f}s should be ≤10s"
+            f"Maximum reload time {metrics['max_reload_time']:.2f]s should be ≤10s"
         
         assert metrics["average_reload_time"] <= 5.0, \
-            f"Average reload time {metrics['average_reload_time']:.2f}s should be ≤5s"
+            f"Average reload time {metrics['average_reload_time']:.2f]s should be ≤5s"
     
     @pytest.mark.asyncio
     async def test_zero_downtime_updates(self, config_hot_reloader):
@@ -754,13 +756,13 @@ class TestConfigurationHotReloadL3:
         
         # Verify concurrent execution
         assert concurrent_result["total_time"] < 15.0, \
-            f"Concurrent reloads should complete within 15s, took {concurrent_result['total_time']:.2f}s"
+            f"Concurrent reloads should complete within 15s, took {concurrent_result['total_time']:.2f]s"
         
         assert concurrent_result["successful_count"] >= 3, \
-            f"Most concurrent reloads should succeed, got {concurrent_result['successful_count']}/{len(concurrent_configs)}"
+            f"Most concurrent reloads should succeed, got {concurrent_result['successful_count']]/{len(concurrent_configs)]"
         
         assert concurrent_result["concurrent_reload_efficiency"] >= 75.0, \
-            f"Concurrent reload efficiency should be ≥75%, got {concurrent_result['concurrent_reload_efficiency']:.1f}%"
+            f"Concurrent reload efficiency should be ≥75%, got {concurrent_result['concurrent_reload_efficiency']:.1f]%"
         
         # Verify no conflicts occurred
         metrics = reloader.get_reload_metrics()

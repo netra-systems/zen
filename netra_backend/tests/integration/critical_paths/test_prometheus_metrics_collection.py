@@ -3,7 +3,7 @@ from shared.isolated_environment import IsolatedEnvironment
 #!/usr/bin/env python3
 """
 Comprehensive test for Prometheus metrics collection:
-1. Metrics endpoint availability
+    1. Metrics endpoint availability
 2. Counter metrics accuracy
 3. Gauge metrics tracking
 4. Histogram metrics distribution
@@ -11,7 +11,7 @@ Comprehensive test for Prometheus metrics collection:
 6. Custom metrics registration
 7. Label cardinality handling
 8. Metrics aggregation
-"""
+""""
 
 # Test framework import - using pytest fixtures instead
 
@@ -34,7 +34,7 @@ class PrometheusMetricsTester:
     
     def __init__(self):
         self.session: Optional[aiohttp.ClientSession] = None
-        self.baseline_metrics: Dict[str, float] = {}
+        self.baseline_metrics: Dict[str, float] = {]
         
     async def __aenter__(self):
         self.session = aiohttp.ClientSession()
@@ -53,11 +53,11 @@ class PrometheusMetricsTester:
                 if response.status == 200:
                     text = await response.text()
                     families = list(text_string_to_metric_families(text))
-                    print(f"[OK] Metrics endpoint available: {len(families)} metric families")
+                    print(f"[OK] Metrics endpoint available: {len(families)] metric families")
                     return True
                 return False
         except Exception as e:
-            print(f"[ERROR] Metrics endpoint test failed: {e}")
+            print(f"[ERROR] Metrics endpoint test failed: {e]")
             return False
             
     @pytest.mark.asyncio
@@ -85,13 +85,13 @@ class PrometheusMetricsTester:
                         for sample in family.samples:
                             baseline = self.baseline_metrics.get(sample.name, 0)
                             if sample.value > baseline:
-                                print(f"[OK] Counter increased: {sample.name} = {sample.value}")
+                                print(f"[OK] Counter increased: {sample.name] = {sample.value]")
                                 return True
                                 
             return False
             
         except Exception as e:
-            print(f"[ERROR] Counter metrics test failed: {e}")
+            print(f"[ERROR] Counter metrics test failed: {e]")
             return False
             
     @pytest.mark.asyncio
@@ -107,7 +107,7 @@ class PrometheusMetricsTester:
                     if family.type == "gauge":
                         gauge_found = True
                         for sample in family.samples:
-                            print(f"[INFO] Gauge: {sample.name} = {sample.value}")
+                            print(f"[INFO] Gauge: {sample.name] = {sample.value]")
                             
                 if gauge_found:
                     print("[OK] Gauge metrics found and tracking")
@@ -116,7 +116,7 @@ class PrometheusMetricsTester:
             return False
             
         except Exception as e:
-            print(f"[ERROR] Gauge metrics test failed: {e}")
+            print(f"[ERROR] Gauge metrics test failed: {e]")
             return False
             
     @pytest.mark.asyncio
@@ -143,13 +143,13 @@ class PrometheusMetricsTester:
                                 buckets[le] = sample.value
                                 
                         if buckets:
-                            print(f"[OK] Histogram buckets: {len(buckets)}")
+                            print(f"[OK] Histogram buckets: {len(buckets)]")
                             return True
                             
                 return histogram_found
                 
         except Exception as e:
-            print(f"[ERROR] Histogram metrics test failed: {e}")
+            print(f"[ERROR] Histogram metrics test failed: {e]")
             return False
             
     @pytest.mark.asyncio
@@ -169,14 +169,14 @@ class PrometheusMetricsTester:
                                 quantiles[q] = sample.value
                                 
                         if quantiles:
-                            print(f"[OK] Summary quantiles: {quantiles}")
+                            print(f"[OK] Summary quantiles: {quantiles]")
                             return True
                             
                 print("[INFO] No summary metrics found")
                 return True  # Not all apps use summaries
                 
         except Exception as e:
-            print(f"[ERROR] Summary metrics test failed: {e}")
+            print(f"[ERROR] Summary metrics test failed: {e]")
             return False
             
     @pytest.mark.asyncio
@@ -213,7 +213,7 @@ class PrometheusMetricsTester:
             return True  # Custom metrics might not be implemented
             
         except Exception as e:
-            print(f"[ERROR] Custom metrics test failed: {e}")
+            print(f"[ERROR] Custom metrics test failed: {e]")
             return False
             
     @pytest.mark.asyncio
@@ -233,17 +233,17 @@ class PrometheusMetricsTester:
                         
                     if len(unique_label_sets) > 100:
                         high_cardinality_metrics.append(family.name)
-                        print(f"[WARNING] High cardinality: {family.name} = {len(unique_label_sets)}")
+                        print(f"[WARNING] High cardinality: {family.name] = {len(unique_label_sets)]")
                         
                 if not high_cardinality_metrics:
                     print("[OK] No high cardinality metrics detected")
                     return True
                 else:
-                    print(f"[WARNING] {len(high_cardinality_metrics)} high cardinality metrics")
+                    print(f"[WARNING] {len(high_cardinality_metrics)] high cardinality metrics")
                     return len(high_cardinality_metrics) < 5
                     
         except Exception as e:
-            print(f"[ERROR] Label cardinality test failed: {e}")
+            print(f"[ERROR] Label cardinality test failed: {e]")
             return False
             
     @pytest.mark.asyncio
@@ -260,11 +260,11 @@ class PrometheusMetricsTester:
                     data = await response.json()
                     
                     if "request_rate" in data:
-                        print(f"[OK] Request rate: {data['request_rate']}/s")
+                        print(f"[OK] Request rate: {data['request_rate']]/s")
                     if "error_rate" in data:
-                        print(f"[OK] Error rate: {data['error_rate']}%")
+                        print(f"[OK] Error rate: {data['error_rate']]%")
                     if "p95_latency" in data:
-                        print(f"[OK] P95 latency: {data['p95_latency']}ms")
+                        print(f"[OK] P95 latency: {data['p95_latency']]ms")
                         
                     return True
                     
@@ -272,11 +272,11 @@ class PrometheusMetricsTester:
             async with self.session.get(METRICS_URL) as response:
                 text = await response.text()
                 metrics_count = len(list(text_string_to_metric_families(text)))
-                print(f"[INFO] Total metrics available: {metrics_count}")
+                print(f"[INFO] Total metrics available: {metrics_count]")
                 return metrics_count > 0
                 
         except Exception as e:
-            print(f"[ERROR] Metrics aggregation test failed: {e}")
+            print(f"[ERROR] Metrics aggregation test failed: {e]")
             return False
             
     @pytest.mark.asyncio
@@ -301,13 +301,13 @@ class PrometheusMetricsTester:
                         if family.type in types:
                             types[family.type] += 1
                             
-                    print(f"[INFO] Metric types: {types}")
+                    print(f"[INFO] Metric types: {types]")
                     return True
                     
             return False
             
         except Exception as e:
-            print(f"[ERROR] Grafana integration test failed: {e}")
+            print(f"[ERROR] Grafana integration test failed: {e]")
             return False
             
     async def run_all_tests(self) -> Dict[str, bool]:

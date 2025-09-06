@@ -1,15 +1,17 @@
+from unittest.mock import Mock, patch, MagicMock
+
 """
 L3 Integration Test: WebSocket Connection Pooling with Real Redis Pub/Sub
 
 Business Value Justification (BVJ):
-- Segment: Platform/Internal
+    - Segment: Platform/Internal
 - Business Goal: Stability - Ensure scalable WebSocket connection management
 - Value Impact: Enables concurrent user sessions without connection limits
 - Strategic Impact: $60K MRR - Real-time communication scalability for enterprise
 
 L3 Test: Uses real Redis containers and connection pooling for WebSocket validation.
 Performance target: 1000+ concurrent connections with <100ms message latency.
-"""
+""""
 
 from netra_backend.app.websocket_core import WebSocketManager
 # Test framework import - using pytest fixtures instead
@@ -18,7 +20,7 @@ import sys
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
 from test_framework.docker.unified_docker_manager import UnifiedDockerManager
 from test_framework.database.test_database_manager import TestDatabaseManager
-from test_framework.redis.test_redis_manager import TestRedisManager
+from test_framework.redis_test_utils_test_utils.test_redis_manager import TestRedisManager
 from shared.isolated_environment import IsolatedEnvironment
 
 import pytest
@@ -52,12 +54,10 @@ from netra_backend.tests.integration.helpers.redis_l3_helpers import (
 @pytest.mark.integration
 
 class TestWebSocketConnectionPoolingL3:
-    pass
 
     """L3 integration tests for WebSocket connection pooling with Redis."""
     
     @pytest.fixture(scope="class")
-
     async def redis_container(self):
 
         """Set up real Redis container for connection pooling tests."""
@@ -70,9 +70,8 @@ class TestWebSocketConnectionPoolingL3:
 
         await container.stop()
     
-    @pytest.fixture
-
-    async def redis_client(self, redis_container):
+        @pytest.fixture
+        async def redis_client(self, redis_container):
 
         """Create Redis client for connection pool management."""
 
@@ -84,9 +83,8 @@ class TestWebSocketConnectionPoolingL3:
 
         await client.close()
     
-    @pytest.fixture
-
-    async def websocket_manager(self, redis_container):
+        @pytest.fixture
+        async def websocket_manager(self, redis_container):
 
         """Create WebSocket manager with Redis connection pooling."""
 
@@ -95,54 +93,53 @@ class TestWebSocketConnectionPoolingL3:
         # Mock: Redis external service isolation for fast, reliable tests without network dependency
         with patch('netra_backend.app.websocket_manager.redis_manager') as mock_redis_mgr:
 
-            test_redis_mgr = RedisManager()
+        test_redis_mgr = RedisManager()
 
-            test_redis_mgr.enabled = True
+        test_redis_mgr.enabled = True
 
-            test_redis_mgr.redis_client = redis.Redis.from_url(redis_url, decode_responses=True)
+        test_redis_mgr.redis_client = redis.Redis.from_url(redis_url, decode_responses=True)
 
-            mock_redis_mgr.return_value = test_redis_mgr
+        mock_redis_mgr.return_value = test_redis_mgr
 
-            mock_redis_mgr.get_client.return_value = test_redis_mgr.redis_client
+        mock_redis_mgr.get_client.return_value = test_redis_mgr.redis_client
             
-            manager = WebSocketManager()
+        manager = WebSocketManager()
 
-            yield manager
+        yield manager
             
-            await test_redis_mgr.redis_client.close()
+        await test_redis_mgr.redis_client.close()
     
-    @pytest.fixture
-
-    def test_users(self):
-    """Use real service instance."""
-    # TODO: Initialize real service
-    await asyncio.sleep(0)
-    return None
+        @pytest.fixture
+        def test_users(self):
+        """Use real service instance."""
+        # TODO: Initialize real service
+        await asyncio.sleep(0)
+        return None
 
         """Create pool of test users for connection testing."""
 
         return [
 
-            User(
+        User(
 
-                id=f"pool_user_{i}",
+        id=f"pool_user_{i}",
 
-                email=f"pooluser{i}@example.com", 
+        email=f"pooluser{i}@example.com", 
 
-                username=f"pooluser{i}",
+        username=f"pooluser{i}",
 
-                is_active=True,
+        is_active=True,
 
-                created_at=datetime.now(timezone.utc)
+        created_at=datetime.now(timezone.utc)
 
-            )
+        )
 
-            for i in range(100)  # Pool of users for testing
+        for i in range(100)  # Pool of users for testing
 
         ]
     
-    @pytest.mark.asyncio
-    async def test_connection_pool_initialization(self, websocket_manager, redis_client):
+        @pytest.mark.asyncio
+        async def test_connection_pool_initialization(self, websocket_manager, redis_client):
 
         """Test WebSocket connection pool initialization with Redis."""
         # Verify Redis connection pool settings
@@ -165,8 +162,8 @@ class TestWebSocketConnectionPoolingL3:
 
         assert websocket_manager is not None
     
-    @pytest.mark.asyncio
-    async def test_concurrent_connection_establishment(self, websocket_manager, redis_client, test_users):
+        @pytest.mark.asyncio
+        async def test_concurrent_connection_establishment(self, websocket_manager, redis_client, test_users):
 
         """Test concurrent WebSocket connection establishment."""
 
@@ -180,11 +177,11 @@ class TestWebSocketConnectionPoolingL3:
 
         for user in test_users[:batch_size]:
 
-            websocket = MockWebSocketForRedis(user.id)
+        websocket = MockWebSocketForRedis(user.id)
 
-            task = websocket_manager.connect_user(user.id, websocket)
+        task = websocket_manager.connect_user(user.id, websocket)
 
-            tasks.append((user, websocket, task))
+        tasks.append((user, websocket, task))
         
         # Execute connections concurrently
 
@@ -192,9 +189,9 @@ class TestWebSocketConnectionPoolingL3:
 
         results = await asyncio.gather(
 
-            *[task for _, _, task in tasks], 
+        *[task for _, _, task in tasks], 
 
-            return_exceptions=True
+        return_exceptions=True
 
         )
 
@@ -206,13 +203,13 @@ class TestWebSocketConnectionPoolingL3:
 
         for i, result in enumerate(results):
 
-            if not isinstance(result, Exception) and result is not None:
+        if not isinstance(result, Exception) and result is not None:
 
-                successful_connections += 1
+        successful_connections += 1
 
-                user, websocket, _ = tasks[i]
+        user, websocket, _ = tasks[i]
 
-                connections.append((user, websocket))
+        connections.append((user, websocket))
         
         assert successful_connections >= batch_size * 0.9  # 90% success rate
 
@@ -224,10 +221,10 @@ class TestWebSocketConnectionPoolingL3:
 
         for user, websocket in connections:
 
-            await websocket_manager.disconnect_user(user.id, websocket)
+        await websocket_manager.disconnect_user(user.id, websocket)
     
-    @pytest.mark.asyncio
-    async def test_connection_pool_scaling(self, websocket_manager, redis_client, test_users):
+        @pytest.mark.asyncio
+        async def test_connection_pool_scaling(self, websocket_manager, redis_client, test_users):
 
         """Test connection pool scaling under load."""
 
@@ -237,44 +234,44 @@ class TestWebSocketConnectionPoolingL3:
         
         for phase_size in scaling_phases:
 
-            phase_connections = []
+        phase_connections = []
             
-            # Add connections for this phase
+        # Add connections for this phase
 
-            for user in test_users[:phase_size]:
+        for user in test_users[:phase_size]:
 
-                if user.id not in [u.id for u, _ in connections]:
+        if user.id not in [u.id for u, _ in connections]:
 
-                    websocket = MockWebSocketForRedis(user.id)
+        websocket = MockWebSocketForRedis(user.id)
 
-                    connection_info = await websocket_manager.connect_user(user.id, websocket)
+        connection_info = await websocket_manager.connect_user(user.id, websocket)
 
-                    if connection_info:
+        if connection_info:
 
-                        phase_connections.append((user, websocket))
+        phase_connections.append((user, websocket))
             
-            connections.extend(phase_connections)
+        connections.extend(phase_connections)
             
-            # Verify pool handles scaling
+        # Verify pool handles scaling
 
-            assert len(websocket_manager.active_connections) >= len(connections) * 0.9
+        assert len(websocket_manager.active_connections) >= len(connections) * 0.9
             
-            # Test pool performance at this scale
+        # Test pool performance at this scale
 
-            pool_info = await redis_client.info("clients")
+        pool_info = await redis_client.info("clients")
 
-            connected_clients = pool_info.get("connected_clients", 0)
+        connected_clients = pool_info.get("connected_clients", 0)
 
-            assert connected_clients > 0
+        assert connected_clients > 0
         
         # Cleanup all connections
 
         for user, websocket in connections:
 
-            await websocket_manager.disconnect_user(user.id, websocket)
+        await websocket_manager.disconnect_user(user.id, websocket)
     
-    @pytest.mark.asyncio
-    async def test_connection_pool_message_distribution(self, websocket_manager, redis_client, test_users):
+        @pytest.mark.asyncio
+        async def test_connection_pool_message_distribution(self, websocket_manager, redis_client, test_users):
 
         """Test message distribution across connection pool."""
 
@@ -286,21 +283,21 @@ class TestWebSocketConnectionPoolingL3:
 
         for user in test_users[:connection_count]:
 
-            websocket = MockWebSocketForRedis(user.id)
+        websocket = MockWebSocketForRedis(user.id)
 
-            await websocket_manager.connect_user(user.id, websocket)
+        await websocket_manager.connect_user(user.id, websocket)
 
-            connections.append((user, websocket))
+        connections.append((user, websocket))
         
         # Test broadcast message distribution
 
         broadcast_message = create_test_message(
 
-            "pool_broadcast", 
+        "pool_broadcast", 
 
-            "system", 
+        "system", 
 
-            {"content": "Pool distribution test", "timestamp": time.time()}
+        {"content": "Pool distribution test", "timestamp": time.time()}
 
         )
         
@@ -310,11 +307,11 @@ class TestWebSocketConnectionPoolingL3:
 
         for user, _ in connections:
 
-            channel = f"user:{user.id}"
+        channel = f"user:{user.id}"
 
-            task = redis_client.publish(channel, json.dumps(broadcast_message))
+        task = redis_client.publish(channel, json.dumps(broadcast_message))
 
-            publish_tasks.append(task)
+        publish_tasks.append(task)
         
         # Execute all publishes concurrently
 
@@ -328,10 +325,10 @@ class TestWebSocketConnectionPoolingL3:
 
         for user, websocket in connections:
 
-            await websocket_manager.disconnect_user(user.id, websocket)
+        await websocket_manager.disconnect_user(user.id, websocket)
     
-    @pytest.mark.asyncio
-    async def test_connection_pool_failover_handling(self, websocket_manager, redis_client, test_users):
+        @pytest.mark.asyncio
+        async def test_connection_pool_failover_handling(self, websocket_manager, redis_client, test_users):
 
         """Test connection pool resilience during Redis issues."""
 
@@ -351,9 +348,9 @@ class TestWebSocketConnectionPoolingL3:
 
         for i in range(10):
 
-            task = redis_client.set(f"stress_key_{i}", f"value_{i}", ex=1)
+        task = redis_client.set(f"stress_key_{i}", f"value_{i}", ex=1)
 
-            stress_tasks.append(task)
+        stress_tasks.append(task)
         
         stress_results = await asyncio.gather(*stress_tasks, return_exceptions=True)
 
@@ -375,8 +372,8 @@ class TestWebSocketConnectionPoolingL3:
 
         await websocket_manager.disconnect_user(user.id, websocket)
     
-    @pytest.mark.asyncio
-    async def test_connection_pool_resource_management(self, websocket_manager, redis_client, test_users):
+        @pytest.mark.asyncio
+        async def test_connection_pool_resource_management(self, websocket_manager, redis_client, test_users):
 
         """Test connection pool resource management and cleanup."""
 
@@ -389,45 +386,45 @@ class TestWebSocketConnectionPoolingL3:
         resource_phases = [5, 10, 15]  # Gradual resource usage
         
         for phase_size in resource_phases:
-            # Add connections
+        # Add connections
 
-            for user in test_users[:phase_size]:
+        for user in test_users[:phase_size]:
 
-                if user.id not in [u.id for u, _ in connections]:
+        if user.id not in [u.id for u, _ in connections]:
 
-                    websocket = MockWebSocketForRedis(user.id)
+        websocket = MockWebSocketForRedis(user.id)
 
-                    await websocket_manager.connect_user(user.id, websocket)
+        await websocket_manager.connect_user(user.id, websocket)
 
-                    connections.append((user, websocket))
+        connections.append((user, websocket))
                     
-                    # Store connection state in Redis
+        # Store connection state in Redis
 
-                    state_key = f"ws_pool_state:{user.id}"
+        state_key = f"ws_pool_state:{user.id}"
 
-                    state_data = {"connected_at": time.time(), "phase": phase_size}
+        state_data = {"connected_at": time.time(), "phase": phase_size}
 
-                    await redis_client.set(state_key, json.dumps(state_data), ex=300)
+        await redis_client.set(state_key, json.dumps(state_data), ex=300)
             
-            # Check memory usage
+        # Check memory usage
 
-            current_info = await redis_client.info("memory")
+        current_info = await redis_client.info("memory")
 
-            current_memory = current_info.get("used_memory", 0)
+        current_memory = current_info.get("used_memory", 0)
 
-            memory_growth = current_memory - initial_memory
+        memory_growth = current_memory - initial_memory
             
-            # Memory should grow reasonably with connections
+        # Memory should grow reasonably with connections
 
-            assert memory_growth >= 0
+        assert memory_growth >= 0
             
         # Cleanup and verify resource release
 
         for user, websocket in connections:
 
-            await websocket_manager.disconnect_user(user.id, websocket)
+        await websocket_manager.disconnect_user(user.id, websocket)
 
-            await redis_client.delete(f"ws_pool_state:{user.id}")
+        await redis_client.delete(f"ws_pool_state:{user.id}")
         
         # Allow cleanup to complete
 

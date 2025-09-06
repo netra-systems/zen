@@ -1,7 +1,7 @@
 """Frontend Initial Load Authentication Flow L4 Integration Test
 
 Business Value Justification (BVJ):
-- Segment: All segments (100% of users)
+    - Segment: All segments (100% of users)
 - Business Goal: Conversion & Retention
 - Value Impact: First impression and user onboarding experience
 - Revenue Impact: $75K MRR - Initial auth is gateway to all features
@@ -9,14 +9,14 @@ Business Value Justification (BVJ):
 Critical Path: Frontend Initial Load -> Auth Config Fetch -> OAuth Flow -> Token Exchange -> WebSocket -> User Data Load
 
 L4 Test Coverage:
-- Real browser automation with Playwright
+    - Real browser automation with Playwright
 - Actual frontend application in staging environment
 - Real OAuth provider integration
 - Complete user authentication journey
 - Network request validation
 - WebSocket connection establishment
 - Session persistence across page refresh
-"""
+""""
 
 import sys
 from pathlib import Path
@@ -76,7 +76,7 @@ class FrontendInitialAuthFlowL4Test(L4StagingCriticalPathTestBase):
         self.page = None
         self.auth_metrics = FrontendAuthMetrics()
         self.auth_flow_steps: List[AuthFlowStep] = []
-        self.test_user_email = f"test_frontend_auth_{uuid.uuid4().hex[:8]}@staging.netrasystems.ai"
+        self.test_user_email = f"test_frontend_auth_{uuid.uuid4().hex[:8]]@staging.netrasystems.ai"
         self.network_requests: List[Dict[str, Any]] = []
         self.websocket_messages: List[Dict[str, Any]] = []
 
@@ -293,7 +293,7 @@ class FrontendInitialAuthFlowL4Test(L4StagingCriticalPathTestBase):
             }''')
             
             if page_errors['hasJSErrors']:
-                raise Exception(f"JavaScript errors detected: {page_errors['consoleErrors']}")
+                raise Exception(f"JavaScript errors detected: {page_errors['consoleErrors']]")
             
             duration = time.time() - step_start_time
             self.auth_metrics.initial_load_time = duration
@@ -330,7 +330,7 @@ class FrontendInitialAuthFlowL4Test(L4StagingCriticalPathTestBase):
                 if (request['type'] == 'request' and 
                     'auth/config' in request['url'] or 
                     'config' in request['url'] and 'auth' in request['url']):
-                    auth_config_request = request
+                        auth_config_request = request
                     break
             
             if not auth_config_request:
@@ -351,7 +351,7 @@ class FrontendInitialAuthFlowL4Test(L4StagingCriticalPathTestBase):
                 if (request['type'] == 'response' and 
                     'auth/config' in request['url'] and 
                     request['status'] == 200):
-                    auth_config_response = request
+                        auth_config_response = request
                     break
             
             if not auth_config_response:
@@ -931,9 +931,9 @@ async def frontend_auth_l4_test():
     """Fixture for frontend auth flow L4 test."""
     test_instance = FrontendInitialAuthFlowL4Test()
     try:
-        yield test_instance
+    yield test_instance
     finally:
-        await test_instance.cleanup_l4_resources()
+    await test_instance.cleanup_l4_resources()
 
 @pytest.mark.asyncio
 @pytest.mark.integration

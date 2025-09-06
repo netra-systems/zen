@@ -1,17 +1,17 @@
 """Rate Limiting Under Load Protection L4 Critical Test
 
 Business Value Justification (BVJ):
-- Segment: All tiers (platform stability foundation)
+    - Segment: All tiers (platform stability foundation)
 - Business Goal: Ensure system stability and fair resource allocation under high load
 - Value Impact: Protects $30K+ MRR by preventing system overload and ensuring service availability
 - Strategic Impact: Critical for enterprise SLA compliance, system stability, and preventing abuse
 
 Critical Path:
-Normal load baseline -> Gradual load increase -> Rate limit enforcement -> 
+    Normal load baseline -> Gradual load increase -> Rate limit enforcement -> 
 Load spike simulation -> Fair resource allocation -> System recovery validation
 
 Coverage: API rate limiting, per-user quotas, burst protection, graceful degradation
-"""
+""""
 
 import sys
 from pathlib import Path
@@ -63,9 +63,9 @@ class RateLimitingLoadL4Test(L4StagingCriticalPathTestBase):
     def __init__(self):
         super().__init__("Rate Limiting Under Load Protection")
         self.load_scenarios: List[LoadTestScenario] = []
-        self.test_users: Dict[str, Dict] = {}
+        self.test_users: Dict[str, Dict] = {]
         self.load_test_results: List[RateLimitTestResult] = []
-        self.baseline_metrics: Dict[str, float] = {}
+        self.baseline_metrics: Dict[str, float] = {]
         
     async def setup_test_specific_environment(self) -> None:
         """Setup rate limiting specific test environment."""
@@ -199,7 +199,7 @@ class RateLimitingLoadL4Test(L4StagingCriticalPathTestBase):
             successful_requests = 0
             
             headers = {
-                "Authorization": f"Bearer {baseline_user['access_token']}",
+                "Authorization": f"Bearer {baseline_user['access_token']]",
                 "Content-Type": "application/json"
             }
             
@@ -330,7 +330,7 @@ class RateLimitingLoadL4Test(L4StagingCriticalPathTestBase):
     
     async def _execute_tier_load_test(self, scenario: LoadTestScenario, 
                                     tier_users: List[Dict]) -> Dict[str, Any]:
-        """Execute load test for specific tier."""
+                                        """Execute load test for specific tier."""
         try:
             # Create concurrent tasks for all users in this tier
             user_tasks = []
@@ -376,7 +376,7 @@ class RateLimitingLoadL4Test(L4StagingCriticalPathTestBase):
     
     async def _execute_user_load_test(self, user_data: Dict, 
                                     scenario: LoadTestScenario) -> Dict[str, Any]:
-        """Execute load test for individual user."""
+                                        """Execute load test for individual user."""
         try:
             user_id = user_data["user_id"]
             access_token = user_data["access_token"]
@@ -655,7 +655,7 @@ class RateLimitingLoadL4Test(L4StagingCriticalPathTestBase):
             successful_requests = 0
             
             headers = {
-                "Authorization": f"Bearer {recovery_user['access_token']}",
+                "Authorization": f"Bearer {recovery_user['access_token']]",
                 "Content-Type": "application/json"
             }
             
@@ -726,7 +726,7 @@ class RateLimitingLoadL4Test(L4StagingCriticalPathTestBase):
             ]
             
             if not all(critical_phases):
-                failed_phases = [f"phase_{i+1}" for i, success in enumerate(critical_phases) if not success]
+                failed_phases = [f"phase_{i+1]" for i, success in enumerate(critical_phases) if not success]
                 self.test_metrics.errors.append(f"Failed critical phases: {', '.join(failed_phases)}")
                 return False
             
@@ -825,4 +825,4 @@ async def test_burst_protection_effectiveness_l4(rate_limiting_load_test):
     # Validate burst protection was effective for each tier
     for result in burst_results["burst_results"]:
         if result.get("success"):
-            assert result["burst_protection_effective"] is True, f"Burst protection ineffective for {result['tier']} tier"
+            assert result["burst_protection_effective"] is True, f"Burst protection ineffective for {result['tier']] tier"

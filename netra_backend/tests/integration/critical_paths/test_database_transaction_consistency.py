@@ -4,7 +4,7 @@ from shared.isolated_environment import IsolatedEnvironment
 
 env = get_env()
 Business Value Justification (BVJ):
-- Segment: Enterprise ($30K+ MRR) - Critical financial accuracy and audit compliance
+    - Segment: Enterprise ($30K+ MRR) - Critical financial accuracy and audit compliance
 - Business Goal: Ensure ACID properties across PostgreSQL and ClickHouse for billing/analytics
 - Value Impact: Prevents revenue leakage, ensures audit compliance, maintains financial accuracy
 - Strategic Impact: $30K+ MRR protection through guaranteed transaction consistency and data integrity
@@ -17,7 +17,7 @@ Coverage: Real PostgreSQL ACID properties, ClickHouse eventual consistency, cros
 
 L4 Realism: Tests against real staging PostgreSQL and ClickHouse clusters with production-like
            configuration, data volumes, and transaction patterns.
-"""
+""""
 
 import sys
 from pathlib import Path
@@ -107,16 +107,16 @@ class DatabaseTransactionL4Tester:
                         status VARCHAR(20) DEFAULT 'pending',
                         created_at TIMESTAMP DEFAULT NOW()
                     )
-                """)
+                """)"
                 
                 # Insert test transaction
                 result = await conn.execute(
                     f"""
                     INSERT INTO {self.test_data_prefix}_test_transactions 
                     (organization_id, amount, status)
-                    VALUES ('{transaction_data["organization_id"]}', {transaction_data["amount"]}, 'pending')
+                    VALUES ('{transaction_data["organization_id"]]', {transaction_data["amount"]], 'pending')
                     RETURNING id
-                    """,
+                    ""","
                 )
                 row = result.fetchone()
                 record_id = row[0]
@@ -131,7 +131,7 @@ class DatabaseTransactionL4Tester:
                     UPDATE {self.test_data_prefix}_test_transactions 
                     SET status = 'committed'
                     WHERE id = '{record_id}'
-                    """,
+                    ""","
                 )
                 
                 # Transaction commits automatically at context exit
@@ -159,7 +159,7 @@ class DatabaseTransactionL4Tester:
             try:
                 async with engine.begin() as conn:
                     result = await conn.execute(
-                        f"SELECT COUNT(*) as count FROM {self.test_data_prefix}_test_transactions WHERE organization_id = '{transaction_data['organization_id']}'"
+                        f"SELECT COUNT(*) as count FROM {self.test_data_prefix]_test_transactions WHERE organization_id = '{transaction_data['organization_id']]'"
                     )
                     row = result.fetchone()
                     rollback_verified = row[0] == 0
@@ -193,21 +193,21 @@ class DatabaseTransactionL4Tester:
                         created_at DateTime DEFAULT now()
                     ) ENGINE = MergeTree()
                     ORDER BY (organization_id, created_at)
-                """)
+                """)"
                 
                 # Insert test data
                 await client.execute(f"""
                     INSERT INTO {self.test_data_prefix}_analytics_test 
                     (event_id, organization_id, amount)
-                    VALUES ('{sync_id}', '{analytics_data["organization_id"]}', {analytics_data["amount"]})
-                """)
+                    VALUES ('{sync_id]', '{analytics_data["organization_id"]]', {analytics_data["amount"]])
+                """)"
                 
                 # Verify data was inserted
                 result = await client.fetch(f"""
                     SELECT event_id, organization_id, amount 
                     FROM {self.test_data_prefix}_analytics_test 
                     WHERE event_id = '{sync_id}'
-                """)
+                """)"
                 
                 consistency_achieved = len(result) > 0 and result[0]['event_id'] == sync_id
             

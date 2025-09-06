@@ -3,7 +3,7 @@ from shared.isolated_environment import IsolatedEnvironment
 #!/usr/bin/env python3
 """
 Comprehensive test for complete user onboarding flow:
-1. New user registration
+    1. New user registration
 2. Email verification
 3. Profile setup
 4. Initial workspace creation
@@ -13,7 +13,7 @@ Comprehensive test for complete user onboarding flow:
 8. Activity tracking
 
 This test validates the entire new user journey from signup to first AI agent deployment.
-"""
+""""
 
 # Test framework import - using pytest fixtures instead
 
@@ -54,8 +54,8 @@ class UserOnboardingTester:
         self.user_id: Optional[str] = None
         self.workspace_id: Optional[str] = None
         self.agent_id: Optional[str] = None
-        self.test_email = f"{TEST_USER_PREFIX}_{uuid.uuid4().hex[:8]}@{TEST_DOMAIN}"
-        self.test_password = f"SecurePass123_{uuid.uuid4().hex[:8]}"
+        self.test_email = f"{TEST_USER_PREFIX]_{uuid.uuid4().hex[:8]]@{TEST_DOMAIN]"
+        self.test_password = f"SecurePass123_{uuid.uuid4().hex[:8]]"
         self.verification_code: Optional[str] = None
         
     async def __aenter__(self):
@@ -73,13 +73,13 @@ class UserOnboardingTester:
     @pytest.mark.asyncio
     async def test_user_registration(self) -> bool:
         """Step 1: Register new user."""
-        print(f"\n[REGISTER] Step 1: Registering new user {self.test_email}...")
+        print(f"\n[REGISTER] Step 1: Registering new user {self.test_email]...")
         
         try:
             register_data = {
                 "email": self.test_email,
                 "password": self.test_password,
-                "name": f"Test User {uuid.uuid4().hex[:4]}",
+                "name": f"Test User {uuid.uuid4().hex[:4]]",
                 "company": "Test Company Inc",
                 "use_case": "AI Agent Development",
                 "referral_source": "automated_test"
@@ -93,15 +93,15 @@ class UserOnboardingTester:
                     data = await response.json()
                     self.user_id = data.get("user_id")
                     self.verification_code = data.get("verification_code")  # In test mode
-                    print(f"[OK] User registered: {self.user_id}")
-                    print(f"[INFO] Verification required: {data.get('verification_required', False)}")
+                    print(f"[OK] User registered: {self.user_id]")
+                    print(f"[INFO] Verification required: {data.get('verification_required', False)]")
                     return True
                 else:
                     text = await response.text()
-                    print(f"[ERROR] Registration failed: {response.status} - {text}")
+                    print(f"[ERROR] Registration failed: {response.status] - {text]")
                     return False
         except Exception as e:
-            print(f"[ERROR] Registration error: {e}")
+            print(f"[ERROR] Registration error: {e]")
             return False
             
     @pytest.mark.asyncio
@@ -142,10 +142,10 @@ class UserOnboardingTester:
                     return True
                 else:
                     text = await response.text()
-                    print(f"[ERROR] Verification failed: {response.status} - {text}")
+                    print(f"[ERROR] Verification failed: {response.status] - {text]")
                     return False
         except Exception as e:
-            print(f"[ERROR] Verification error: {e}")
+            print(f"[ERROR] Verification error: {e]")
             # Continue anyway for testing
             return True
             
@@ -173,15 +173,15 @@ class UserOnboardingTester:
                     self.auth_token = data.get("access_token")
                     self.refresh_token = data.get("refresh_token")
                     self.user_id = data.get("user_id", self.user_id)
-                    print(f"[OK] Login successful, user_id: {self.user_id}")
-                    print(f"[INFO] First login: {data.get('first_login', False)}")
+                    print(f"[OK] Login successful, user_id: {self.user_id]")
+                    print(f"[INFO] First login: {data.get('first_login', False)]")
                     return True
                 else:
                     text = await response.text()
-                    print(f"[ERROR] Login failed: {response.status} - {text}")
+                    print(f"[ERROR] Login failed: {response.status] - {text]")
                     return False
         except Exception as e:
-            print(f"[ERROR] Login error: {e}")
+            print(f"[ERROR] Login error: {e]")
             return False
             
     @pytest.mark.asyncio
@@ -217,14 +217,14 @@ class UserOnboardingTester:
                 if response.status == 200:
                     data = await response.json()
                     print(f"[OK] Profile updated successfully")
-                    print(f"[INFO] Profile completion: {data.get('profile_completion', 0)}%")
+                    print(f"[INFO] Profile completion: {data.get('profile_completion', 0)]%")
                     return True
                 else:
                     text = await response.text()
-                    print(f"[ERROR] Profile update failed: {response.status} - {text}")
+                    print(f"[ERROR] Profile update failed: {response.status] - {text]")
                     return False
         except Exception as e:
-            print(f"[ERROR] Profile setup error: {e}")
+            print(f"[ERROR] Profile setup error: {e]")
             return False
             
     @pytest.mark.asyncio
@@ -240,7 +240,7 @@ class UserOnboardingTester:
             headers = {"Authorization": f"Bearer {self.auth_token}"}
             
             workspace_data = {
-                "name": f"Test Workspace {uuid.uuid4().hex[:4]}",
+                "name": f"Test Workspace {uuid.uuid4().hex[:4]]",
                 "description": "My first AI agent workspace",
                 "type": "development",
                 "settings": {
@@ -259,15 +259,15 @@ class UserOnboardingTester:
                 if response.status in [200, 201]:
                     data = await response.json()
                     self.workspace_id = data.get("workspace_id")
-                    print(f"[OK] Workspace created: {self.workspace_id}")
-                    print(f"[INFO] Free tier limits: {data.get('tier_limits', {})}")
+                    print(f"[OK] Workspace created: {self.workspace_id]")
+                    print(f"[INFO] Free tier limits: {data.get('tier_limits', {])]")
                     return True
                 else:
                     text = await response.text()
-                    print(f"[ERROR] Workspace creation failed: {response.status} - {text}")
+                    print(f"[ERROR] Workspace creation failed: {response.status] - {text]")
                     return False
         except Exception as e:
-            print(f"[ERROR] Workspace creation error: {e}")
+            print(f"[ERROR] Workspace creation error: {e]")
             return False
             
     @pytest.mark.asyncio
@@ -304,15 +304,15 @@ class UserOnboardingTester:
                 if response.status in [200, 201]:
                     data = await response.json()
                     self.agent_id = data.get("agent_id")
-                    print(f"[OK] Agent deployed: {self.agent_id}")
-                    print(f"[INFO] Agent status: {data.get('status', 'unknown')}")
+                    print(f"[OK] Agent deployed: {self.agent_id]")
+                    print(f"[INFO] Agent status: {data.get('status', 'unknown')]")
                     return True
                 else:
                     text = await response.text()
-                    print(f"[ERROR] Agent deployment failed: {response.status} - {text}")
+                    print(f"[ERROR] Agent deployment failed: {response.status] - {text]")
                     return False
         except Exception as e:
-            print(f"[ERROR] Agent deployment error: {e}")
+            print(f"[ERROR] Agent deployment error: {e]")
             return False
             
     @pytest.mark.asyncio
@@ -335,9 +335,9 @@ class UserOnboardingTester:
                 if response.status == 200:
                     data = await response.json()
                     print(f"[OK] Current usage retrieved")
-                    print(f"[INFO] API calls: {data.get('api_calls', 0)}/{data.get('api_limit', 'unlimited')}")
-                    print(f"[INFO] Agents: {data.get('agent_count', 0)}/{data.get('agent_limit', 'unlimited')}")
-                    print(f"[INFO] Storage: {data.get('storage_used', 0)}MB/{data.get('storage_limit', 'unlimited')}MB")
+                    print(f"[INFO] API calls: {data.get('api_calls', 0)]/{data.get('api_limit', 'unlimited')]")
+                    print(f"[INFO] Agents: {data.get('agent_count', 0)]/{data.get('agent_limit', 'unlimited')]")
+                    print(f"[INFO] Storage: {data.get('storage_used', 0)]MB/{data.get('storage_limit', 'unlimited')]MB")
                     
                     # Try to exceed limits
                     if data.get('agent_count', 0) >= data.get('agent_limit', float('inf')):
@@ -362,10 +362,10 @@ class UserOnboardingTester:
                     return True
                 else:
                     text = await response.text()
-                    print(f"[ERROR] Usage check failed: {response.status} - {text}")
+                    print(f"[ERROR] Usage check failed: {response.status] - {text]")
                     return False
         except Exception as e:
-            print(f"[ERROR] Limits check error: {e}")
+            print(f"[ERROR] Limits check error: {e]")
             return False
             
     @pytest.mark.asyncio
@@ -390,19 +390,19 @@ class UserOnboardingTester:
                     data = await response.json()
                     if response.status == 402:
                         print(f"[OK] Upgrade prompt received")
-                        print(f"[INFO] Message: {data.get('message', '')}")
-                        print(f"[INFO] Upgrade URL: {data.get('upgrade_url', '')}")
-                        print(f"[INFO] Recommended plan: {data.get('recommended_plan', '')}")
+                        print(f"[INFO] Message: {data.get('message', '')]")
+                        print(f"[INFO] Upgrade URL: {data.get('upgrade_url', '')]")
+                        print(f"[INFO] Recommended plan: {data.get('recommended_plan', '')]")
                         return True
                     else:
                         print("[INFO] Limit not yet reached")
                         return True
                 else:
                     text = await response.text()
-                    print(f"[ERROR] Upgrade simulation failed: {response.status} - {text}")
+                    print(f"[ERROR] Upgrade simulation failed: {response.status] - {text]")
                     return False
         except Exception as e:
-            print(f"[ERROR] Upgrade prompt error: {e}")
+            print(f"[ERROR] Upgrade prompt error: {e]")
             # Not critical for onboarding
             return True
             
@@ -427,22 +427,22 @@ class UserOnboardingTester:
                     data = await response.json()
                     activities = data.get("activities", [])
                     print(f"[OK] Activity tracking working")
-                    print(f"[INFO] Total activities: {len(activities)}")
+                    print(f"[INFO] Total activities: {len(activities)]")
                     
                     # Verify key onboarding events are tracked
                     event_types = [a.get("type") for a in activities]
                     expected_events = ["registration", "login", "workspace_created", "agent_deployed"]
                     
                     tracked_events = [e for e in expected_events if e in event_types]
-                    print(f"[INFO] Tracked events: {tracked_events}")
+                    print(f"[INFO] Tracked events: {tracked_events]")
                     
                     return len(tracked_events) > 0
                 else:
                     text = await response.text()
-                    print(f"[ERROR] Activity retrieval failed: {response.status} - {text}")
+                    print(f"[ERROR] Activity retrieval failed: {response.status] - {text]")
                     return False
         except Exception as e:
-            print(f"[ERROR] Activity tracking error: {e}")
+            print(f"[ERROR] Activity tracking error: {e]")
             return False
             
     @pytest.mark.asyncio
@@ -497,14 +497,14 @@ class UserOnboardingTester:
                     print(f"[OK] Subscribed to onboarding updates")
                     return True
                     
-            print(f"[ERROR] WebSocket auth failed: {data}")
+            print(f"[ERROR] WebSocket auth failed: {data]")
             return False
                 
         except asyncio.TimeoutError:
             print("[ERROR] WebSocket timeout")
             return False
         except Exception as e:
-            print(f"[ERROR] WebSocket error: {e}")
+            print(f"[ERROR] WebSocket error: {e]")
             return False
             
     async def run_all_tests(self) -> Dict[str, bool]:

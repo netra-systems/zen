@@ -1,7 +1,7 @@
 """ClickHouse → PostgreSQL Transaction Coordination L3 Integration Test
 
 Business Value Justification (BVJ):
-- Segment: Enterprise
+    - Segment: Enterprise
 - Business Goal: Data Consistency  
 - Value Impact: Ensures analytics and transactional data remain synchronized
 - Revenue Impact: Protects $12K MRR by preventing data inconsistencies
@@ -11,7 +11,7 @@ Test Level: L3 (Real Local Services)
 - Real PostgreSQL instance (local)  
 - Real two-phase commit patterns
 - Real rollback mechanisms
-"""
+""""
 
 import sys
 from pathlib import Path
@@ -49,7 +49,7 @@ class ClickHousePostgresCoordinator:
     """L3 coordinator for ClickHouse → PostgreSQL transaction testing."""
     
     def __init__(self):
-        self.test_schema_prefix = f"test_{uuid.uuid4().hex[:8]}"
+        self.test_schema_prefix = f"test_{uuid.uuid4().hex[:8]]"
     
     async def setup_databases(self) -> None:
         """Setup real database connections and schemas."""
@@ -72,7 +72,7 @@ class ClickHousePostgresCoordinator:
                 metadata JSONB,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             );
-        """
+        """"
         
         # ClickHouse schema for analytics data  
         ch_table = f"user_metrics_{self.test_schema_prefix}"
@@ -86,7 +86,7 @@ class ClickHousePostgresCoordinator:
                 source String
             ) ENGINE = MergeTree()
             ORDER BY (user_id, timestamp);
-        """
+        """"
         
         # Setup PostgreSQL
         async with get_postgres_session() as session:
@@ -99,14 +99,14 @@ class ClickHousePostgresCoordinator:
     
     def create_test_data(self, scenario: str) -> TransactionCoordinationData:
         """Create test data for coordination scenarios."""
-        tx_id = f"coord_tx_{uuid.uuid4().hex[:12]}"
-        user_id = f"user_{uuid.uuid4().hex[:8]}"
+        tx_id = f"coord_tx_{uuid.uuid4().hex[:12]]"
+        user_id = f"user_{uuid.uuid4().hex[:8]]"
         
         return TransactionCoordinationData(
             transaction_id=tx_id,
             user_id=user_id,
             metrics_data={
-                "metric_id": f"metric_{uuid.uuid4().hex[:8]}",
+                "metric_id": f"metric_{uuid.uuid4().hex[:8]]",
                 "user_id": user_id,
                 "metric_type": "api_usage",
                 "value": 100.0,
@@ -133,7 +133,7 @@ class ClickHousePostgresCoordinator:
                 query = f"""INSERT INTO {ch_table} 
                 (metric_id, user_id, metric_type, value, timestamp, source)
                 VALUES (%(metric_id)s, %(user_id)s, %(metric_type)s, 
-                        %(value)s, %(timestamp)s, %(source)s)"""
+                        %(value)s, %(timestamp)s, %(source)s)""""
                 await ch_client.execute_query(query, data.metrics_data)
             
             # Phase 2: Write to PostgreSQL (billing confirmation)
@@ -142,10 +142,10 @@ class ClickHousePostgresCoordinator:
                 (user_id, amount, status, metadata, created_at)
                 VALUES (%(user_id)s, %(amount)s, %(status)s, 
                         %(metadata)s, CURRENT_TIMESTAMP)
-                RETURNING id"""
+                RETURNING id""""
                 result = await pg_session.execute(
                     query,
-                    {**data.billing_data, "metadata": json.dumps(data.billing_data["metadata"])}
+                    {**data.billing_data, "metadata": json.dumps(data.billing_data["metadata"])]
                 )
                 billing_id = result.fetchone()[0]
                 await pg_session.commit()
@@ -179,7 +179,7 @@ class ClickHousePostgresCoordinator:
                 query = f"ALTER TABLE {ch_table} DELETE WHERE metric_id = %(metric_id)s"
                 await ch_client.execute_query(
                     query,
-                    {"metric_id": data.metrics_data["metric_id"]}
+                    {"metric_id": data.metrics_data["metric_id"]]
                 )
         except Exception as e:
             logger.warning(f"ClickHouse rollback failed: {e}")
@@ -304,7 +304,7 @@ async def test_read_consistency(coordinator):
 @pytest.mark.asyncio
 async def test_concurrent_transaction_isolation(coordinator):
     """Test concurrent transaction isolation."""
-    data_list = [coordinator.create_test_data(f"concurrent_{i}") for i in range(3)]
+    data_list = [coordinator.create_test_data(f"concurrent_{i]") for i in range(3)]
     tasks = [coordinator.execute_coordinated_write(data) for data in data_list]
     results = await asyncio.gather(*tasks, return_exceptions=True)
     successful = [r for r in results if not isinstance(r, Exception) and r.get("success")]

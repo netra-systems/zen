@@ -3,7 +3,7 @@ from shared.isolated_environment import IsolatedEnvironment
 #!/usr/bin/env python3
 """
 Comprehensive test for database failover and recovery flow:
-1. Primary database health monitoring
+    1. Primary database health monitoring
 2. Replica synchronization validation
 3. Failover trigger detection
 4. Automatic failover execution
@@ -13,7 +13,7 @@ Comprehensive test for database failover and recovery flow:
 8. Recovery to primary
 
 This test validates database high availability and disaster recovery.
-"""
+""""
 
 # Test framework import - using pytest fixtures instead
 
@@ -51,7 +51,7 @@ class DatabaseFailoverTester:
         self.session: Optional[aiohttp.ClientSession] = None
         self.primary_conn: Optional[asyncpg.Connection] = None
         self.replica_conn: Optional[asyncpg.Connection] = None
-        self.test_data: Dict[str, Any] = {}
+        self.test_data: Dict[str, Any] = {]
         self.checkpoints: List[Tuple[str, datetime]] = []
         self.auth_token: Optional[str] = None
         
@@ -79,9 +79,9 @@ class DatabaseFailoverTester:
                 self.primary_conn = await asyncpg.connect(PRIMARY_DB_URL)
                 primary_version = await self.primary_conn.fetchval("SELECT version()")
                 print(f"[OK] Connected to primary database")
-                print(f"[INFO] Primary version: {primary_version[:50]}...")
+                print(f"[INFO] Primary version: {primary_version[:50]]...")
             except Exception as e:
-                print(f"[WARNING] Primary connection failed: {e}")
+                print(f"[WARNING] Primary connection failed: {e]")
                 # Continue anyway for failover testing
                 
             # Connect to replica
@@ -89,15 +89,15 @@ class DatabaseFailoverTester:
                 self.replica_conn = await asyncpg.connect(REPLICA_DB_URL)
                 replica_version = await self.replica_conn.fetchval("SELECT version()")
                 print(f"[OK] Connected to replica database")
-                print(f"[INFO] Replica version: {replica_version[:50]}...")
+                print(f"[INFO] Replica version: {replica_version[:50]]...")
             except Exception as e:
-                print(f"[WARNING] Replica connection failed: {e}")
+                print(f"[WARNING] Replica connection failed: {e]")
                 # Continue anyway
                 
             return self.primary_conn is not None or self.replica_conn is not None
             
         except Exception as e:
-            print(f"[ERROR] Database connection error: {e}")
+            print(f"[ERROR] Database connection error: {e]")
             return False
             
     @pytest.mark.asyncio
@@ -115,9 +115,9 @@ class DatabaseFailoverTester:
                     primary_status = data.get("primary", {})
                     
                     print(f"[OK] Primary health check successful")
-                    print(f"[INFO] Status: {primary_status.get('status')}")
-                    print(f"[INFO] Connections: {primary_status.get('active_connections')}/{primary_status.get('max_connections')}")
-                    print(f"[INFO] Response time: {primary_status.get('response_time_ms')}ms")
+                    print(f"[INFO] Status: {primary_status.get('status')]")
+                    print(f"[INFO] Connections: {primary_status.get('active_connections')]/{primary_status.get('max_connections')]")
+                    print(f"[INFO] Response time: {primary_status.get('response_time_ms')]ms")
                     
                     # Test direct health check if connected
                     if self.primary_conn:
@@ -126,16 +126,16 @@ class DatabaseFailoverTester:
                         response_time = (time.time() - start_time) * 1000
                         
                         if result == 1:
-                            print(f"[OK] Direct health check passed ({response_time:.2f}ms)")
+                            print(f"[OK] Direct health check passed ({response_time:.2f]ms)")
                             return True
                     
                     return primary_status.get('status') == 'healthy'
                 else:
-                    print(f"[ERROR] Health check failed: {response.status}")
+                    print(f"[ERROR] Health check failed: {response.status]")
                     return False
                     
         except Exception as e:
-            print(f"[ERROR] Health monitoring error: {e}")
+            print(f"[ERROR] Health monitoring error: {e]")
             return False
             
     @pytest.mark.asyncio
@@ -156,7 +156,7 @@ class DatabaseFailoverTester:
                 "INSERT INTO test_replication (id, value, created_at) VALUES ($1, $2, $3)",
                 test_id, test_value, datetime.now(timezone.utc)
             )
-            print(f"[OK] Test data inserted to primary: {test_id}")
+            print(f"[OK] Test data inserted to primary: {test_id]")
             
             # Wait for replication
             max_wait = REPLICATION_LAG_THRESHOLD
@@ -173,27 +173,27 @@ class DatabaseFailoverTester:
                 
                 if result == test_value:
                     replicated = True
-                    print(f"[OK] Data replicated in {i+1} seconds")
+                    print(f"[OK] Data replicated in {i+1] seconds")
                     break
                     
             if not replicated:
-                print(f"[WARNING] Replication lag > {max_wait} seconds")
+                print(f"[WARNING] Replication lag > {max_wait] seconds")
                 
             # Check replication lag via system views
             lag_query = """
                 SELECT 
                     EXTRACT(EPOCH FROM (now() - pg_last_xact_replay_timestamp())) AS lag_seconds
-            """
+            """"
             
             lag = await self.replica_conn.fetchval(lag_query)
             if lag is not None:
-                print(f"[INFO] Current replication lag: {lag:.2f} seconds")
+                print(f"[INFO] Current replication lag: {lag:.2f] seconds")
                 return lag < REPLICATION_LAG_THRESHOLD
             
             return replicated
             
         except Exception as e:
-            print(f"[ERROR] Replica sync test error: {e}")
+            print(f"[ERROR] Replica sync test error: {e]")
             return False
             
     @pytest.mark.asyncio
@@ -236,11 +236,11 @@ class DatabaseFailoverTester:
                             if trigger.get("condition") == scenario["condition"]:
                                 if trigger.get("triggered", False):
                                     triggers_detected.append(scenario["name"])
-                                    print(f"[OK] Trigger detected: {scenario['name']}")
+                                    print(f"[OK] Trigger detected: {scenario['name']]")
                                 else:
                                     current_value = trigger.get("current_value")
                                     threshold = trigger.get("threshold")
-                                    print(f"[INFO] {scenario['name']}: {current_value}/{threshold}")
+                                    print(f"[INFO] {scenario['name']]: {current_value]/{threshold]")
                                     
             # Test manual trigger
             trigger_request = {
@@ -264,7 +264,7 @@ class DatabaseFailoverTester:
             return len(triggers_detected) > 0 or True  # Pass if monitoring works
             
         except Exception as e:
-            print(f"[ERROR] Failover trigger test error: {e}")
+            print(f"[ERROR] Failover trigger test error: {e]")
             return False
             
     @pytest.mark.asyncio
@@ -305,7 +305,7 @@ class DatabaseFailoverTester:
                         elif status == "failover_completed":
                             failover_completed = True
                             elapsed = time.time() - start_time
-                            print(f"[OK] Failover completed in {elapsed:.2f} seconds")
+                            print(f"[OK] Failover completed in {elapsed:.2f] seconds")
                             self.checkpoints.append(("failover_completed", datetime.now(timezone.utc)))
                             break
                         elif status == "normal":
@@ -324,13 +324,13 @@ class DatabaseFailoverTester:
                         
                         if new_primary.get("status") == "healthy":
                             print(f"[OK] New primary is healthy")
-                            print(f"[INFO] New primary: {new_primary.get('host')}")
+                            print(f"[INFO] New primary: {new_primary.get('host')]")
                             return True
                             
             return failover_completed or True  # Pass if monitoring works
             
         except Exception as e:
-            print(f"[ERROR] Automatic failover test error: {e}")
+            print(f"[ERROR] Automatic failover test error: {e]")
             return False
             
     async def capture_database_state(self) -> Dict[str, Any]:
@@ -350,7 +350,7 @@ class DatabaseFailoverTester:
                     SELECT tablename, n_live_tup as row_count
                     FROM pg_stat_user_tables
                     WHERE schemaname = 'public'
-                    """
+                    """"
                 )
                 
                 for table in tables:
@@ -373,7 +373,7 @@ class DatabaseFailoverTester:
                             state["checksums"][table] = checksum
                             
         except Exception as e:
-            print(f"[WARNING] Failed to capture state: {e}")
+            print(f"[WARNING] Failed to capture state: {e]")
             
         return state
         
@@ -399,7 +399,7 @@ class DatabaseFailoverTester:
                         
                         consistency_checks.append((check_name, passed))
                         status = "[PASS]" if passed else "[FAIL]"
-                        print(f"[{status}] {check_name}: {check.get('message', '')}")
+                        print(f"[{status]] {check_name]: {check.get('message', '')]")
                         
             # Perform manual consistency checks
             if self.primary_conn and self.replica_conn:
@@ -417,13 +417,13 @@ class DatabaseFailoverTester:
                         
                         if primary_count == replica_count:
                             consistency_checks.append((f"{table}_count", True))
-                            print(f"[PASS] {table}: {primary_count} rows match")
+                            print(f"[PASS] {table]: {primary_count] rows match")
                         else:
                             consistency_checks.append((f"{table}_count", False))
-                            print(f"[FAIL] {table}: Primary={primary_count}, Replica={replica_count}")
+                            print(f"[FAIL] {table]: Primary={primary_count], Replica={replica_count]")
                             
                     except Exception as e:
-                        print(f"[WARNING] Could not check {table}: {e}")
+                        print(f"[WARNING] Could not check {table]: {e]")
                         
             # Summary
             passed_checks = sum(1 for _, passed in consistency_checks if passed)
@@ -431,13 +431,13 @@ class DatabaseFailoverTester:
             
             if total_checks > 0:
                 consistency_rate = (passed_checks / total_checks) * 100
-                print(f"\n[SUMMARY] Consistency: {passed_checks}/{total_checks} ({consistency_rate:.1f}%)")
+                print(f"\n[SUMMARY] Consistency: {passed_checks]/{total_checks] ({consistency_rate:.1f]%)")
                 return consistency_rate >= 90  # Allow some minor inconsistencies
             
             return True  # Pass if no checks performed
             
         except Exception as e:
-            print(f"[ERROR] Data consistency test error: {e}")
+            print(f"[ERROR] Data consistency test error: {e]")
             return False
             
     @pytest.mark.asyncio
@@ -452,8 +452,8 @@ class DatabaseFailoverTester:
             ) as response:
                 if response.status == 200:
                     initial_stats = await response.json()
-                    print(f"[INFO] Initial pool size: {initial_stats.get('size')}")
-                    print(f"[INFO] Active connections: {initial_stats.get('active')}")
+                    print(f"[INFO] Initial pool size: {initial_stats.get('size')]")
+                    print(f"[INFO] Active connections: {initial_stats.get('active')]")
                     
             # Simulate connection stress
             concurrent_requests = 20
@@ -475,7 +475,7 @@ class DatabaseFailoverTester:
             results = await asyncio.gather(*tasks)
             successful = sum(1 for r in results if r)
             
-            print(f"[INFO] Concurrent requests: {successful}/{concurrent_requests} successful")
+            print(f"[INFO] Concurrent requests: {successful]/{concurrent_requests] successful")
             
             # Check pool recovery
             await asyncio.sleep(2)
@@ -493,17 +493,17 @@ class DatabaseFailoverTester:
                     
                     if pool_healthy:
                         print(f"[OK] Connection pool recovered")
-                        print(f"[INFO] Pool size: {recovery_stats.get('size')}")
-                        print(f"[INFO] Idle connections: {recovery_stats.get('idle')}")
+                        print(f"[INFO] Pool size: {recovery_stats.get('size')]")
+                        print(f"[INFO] Idle connections: {recovery_stats.get('idle')]")
                         return True
                     else:
-                        print(f"[WARNING] Pool issues: {recovery_stats.get('errors')} errors")
+                        print(f"[WARNING] Pool issues: {recovery_stats.get('errors')] errors")
                         return False
                         
             return successful >= concurrent_requests * 0.8  # 80% success rate
             
         except Exception as e:
-            print(f"[ERROR] Connection pool test error: {e}")
+            print(f"[ERROR] Connection pool test error: {e]")
             return False
             
     @pytest.mark.asyncio
@@ -516,7 +516,7 @@ class DatabaseFailoverTester:
             test_transactions = []
             
             for i in range(5):
-                tx_id = f"tx_{uuid.uuid4().hex[:8]}"
+                tx_id = f"tx_{uuid.uuid4().hex[:8]]"
                 tx_data = {
                     "id": tx_id,
                     "type": "test_transaction",
@@ -538,10 +538,10 @@ class DatabaseFailoverTester:
                 ) as response:
                     if response.status in [200, 201]:
                         submitted.append(tx["id"])
-                        print(f"[OK] Transaction submitted: {tx['id']}")
+                        print(f"[OK] Transaction submitted: {tx['id']]")
                     else:
                         failed.append(tx["id"])
-                        print(f"[ERROR] Transaction failed: {tx['id']}")
+                        print(f"[ERROR] Transaction failed: {tx['id']]")
                         
             # Check transaction log
             async with self.session.get(
@@ -552,14 +552,14 @@ class DatabaseFailoverTester:
                     replayed = data.get("replayed_transactions", [])
                     
                     if replayed:
-                        print(f"[OK] {len(replayed)} transactions replayed")
+                        print(f"[OK] {len(replayed)] transactions replayed")
                         for tx_id in replayed:
-                            print(f"[INFO] Replayed: {tx_id}")
+                            print(f"[INFO] Replayed: {tx_id]")
                             
             return len(submitted) > len(failed)
             
         except Exception as e:
-            print(f"[ERROR] Transaction replay test error: {e}")
+            print(f"[ERROR] Transaction replay test error: {e]")
             return False
             
     @pytest.mark.asyncio
@@ -594,7 +594,7 @@ class DatabaseFailoverTester:
                 if response.status in [200, 202]:
                     data = await response.json()
                     recovery_id = data.get("recovery_id")
-                    print(f"[OK] Recovery initiated: {recovery_id}")
+                    print(f"[OK] Recovery initiated: {recovery_id]")
                     
                     # Monitor recovery
                     recovery_complete = False
@@ -615,19 +615,19 @@ class DatabaseFailoverTester:
                                     print(f"[OK] Recovery completed")
                                     break
                                 elif status == "failed":
-                                    print(f"[ERROR] Recovery failed: {status_data.get('error')}")
+                                    print(f"[ERROR] Recovery failed: {status_data.get('error')]")
                                     break
                                 else:
                                     progress = status_data.get("progress", 0)
-                                    print(f"[INFO] Recovery progress: {progress}%")
+                                    print(f"[INFO] Recovery progress: {progress]%")
                                     
                     return recovery_complete
                 else:
-                    print(f"[ERROR] Recovery request failed: {response.status}")
+                    print(f"[ERROR] Recovery request failed: {response.status]")
                     return False
                     
         except Exception as e:
-            print(f"[ERROR] Recovery test error: {e}")
+            print(f"[ERROR] Recovery test error: {e]")
             return False
             
     @pytest.mark.asyncio
@@ -645,7 +645,7 @@ class DatabaseFailoverTester:
                     clusters = data.get("data", [])
                     
                     for cluster in clusters:
-                        print(f"[INFO] Cluster: {cluster.get('cluster')}")
+                        print(f"[INFO] Cluster: {cluster.get('cluster')]")
                         print(f"       Shards: {cluster.get('shard_num')}")
                         print(f"       Replicas: {cluster.get('replica_num')}")
                         
@@ -659,14 +659,14 @@ class DatabaseFailoverTester:
                 if response.status == 200:
                     data = await response.json()
                     print(f"[OK] ClickHouse query successful")
-                    print(f"[INFO] Result: {data.get('result')}")
+                    print(f"[INFO] Result: {data.get('result')]")
                     return True
                 else:
-                    print(f"[WARNING] ClickHouse query failed: {response.status}")
+                    print(f"[WARNING] ClickHouse query failed: {response.status]")
                     return False
                     
         except Exception as e:
-            print(f"[ERROR] ClickHouse failover test error: {e}")
+            print(f"[ERROR] ClickHouse failover test error: {e]")
             # ClickHouse might not be configured
             return True
             
@@ -726,7 +726,7 @@ async def test_database_failover_recovery_flow():
             print("\n[SUCCESS] Database failover and recovery fully validated!")
         else:
             failed = [name for name, passed in results.items() if not passed]
-            print(f"\n[WARNING] Failed tests: {', '.join(failed)}")
+            print(f"\n[WARNING] Failed tests: {', '.join(failed)]")
             
         # Assert critical tests passed
         critical_tests = [

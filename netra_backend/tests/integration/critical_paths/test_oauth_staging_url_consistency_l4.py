@@ -1,7 +1,9 @@
+from unittest.mock import AsyncMock, Mock, patch, MagicMock
+
 """OAuth Staging URL Consistency L4 Integration Tests
 
 Business Value Justification (BVJ):
-- Segment: Enterprise 
+    - Segment: Enterprise 
 - Business Goal: Platform Stability and Authentication Security
 - Value Impact: $25K MRR - Prevents authentication failures in staging caused by incorrect OAuth URLs
 - Strategic Impact: Ensures all services use correct subdomain architecture for OAuth redirects
@@ -10,13 +12,13 @@ Critical Path: Configuration scanning -> URL validation -> Cross-service consist
 Coverage: Complete OAuth URL consistency across Python, TypeScript, configuration files, and deployment scripts
 
 L4 Realism Level: Tests against actual staging configuration and real service endpoints
-"""
+""""
 
 import sys
 from pathlib import Path
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
 from test_framework.docker.unified_docker_manager import UnifiedDockerManager
-from test_framework.redis.test_redis_manager import TestRedisManager
+from test_framework.redis_test_utils_test_utils.test_redis_manager import TestRedisManager
 from auth_service.core.auth_manager import AuthManager
 from shared.isolated_environment import IsolatedEnvironment
 
@@ -165,11 +167,11 @@ class OAuthURLConsistencyL4TestSuite(L4StagingCriticalPathTestBase):
                 response = await self.test_client.get(health_url, timeout=10.0)
                 # Accept 200, 404, or 405 as "accessible" - we just need DNS/routing to work
                 if response.status_code in [200, 404, 405]:
-                    self.test_metrics.details[f"{service_name}_endpoint_accessible"] = True
+                    self.test_metrics.details[f"{service_name]_endpoint_accessible"] = True
                 else:
-                    self.test_metrics.details[f"{service_name}_endpoint_accessible"] = False
+                    self.test_metrics.details[f"{service_name]_endpoint_accessible"] = False
             except Exception as e:
-                self.test_metrics.details[f"{service_name}_endpoint_error"] = str(e)
+                self.test_metrics.details[f"{service_name]_endpoint_error"] = str(e)
         
     async def execute_oauth_url_audit(self) -> Dict[str, Any]:
         """Execute comprehensive OAuth URL consistency audit across all services."""
@@ -606,7 +608,7 @@ async def test_oauth_staging_url_consistency_comprehensive_l4(oauth_url_consiste
     
     This test validates that all staging OAuth URLs follow the correct subdomain architecture.
     BVJ: $25K MRR - Prevents authentication failures caused by incorrect OAuth URLs.
-    """
+    """"
     # Execute the complete critical path test with L4 metrics
     test_metrics = await oauth_url_consistency_l4_suite.run_complete_critical_path_test()
     
@@ -640,7 +642,7 @@ async def test_auth_client_config_fallback_url_l4(oauth_url_consistency_l4_suite
     """L4 Test: Specific validation of auth_client_config.py fallback configuration.
     
     Tests the specific line mentioned in BVJ that contains incorrect fallback URL.
-    """
+    """"
     await oauth_url_consistency_l4_suite.initialize_l4_environment()
     
     result = await oauth_url_consistency_l4_suite.check_critical_file_line(
@@ -699,7 +701,7 @@ async def test_staging_oauth_endpoints_accessibility_l4(oauth_url_consistency_l4
     
     This test verifies that the expected staging subdomains are actually reachable,
     providing L4 realism by testing against the actual staging environment.
-    """
+    """"
     await oauth_url_consistency_l4_suite.initialize_l4_environment()
     
     endpoint_results = await oauth_url_consistency_l4_suite.test_oauth_endpoints_accessibility()
@@ -714,7 +716,7 @@ async def test_staging_oauth_endpoints_accessibility_l4(oauth_url_consistency_l4
     # but require at least 50% accessibility
     assert success_rate >= 0.5, (
         f"OAuth endpoint accessibility too low: {success_rate:.1%} "
-        f"({endpoint_results['successful_responses']}/{total_count})"
+        f"({endpoint_results['successful_responses']]/{total_count])"
     )
 
 @pytest.mark.asyncio

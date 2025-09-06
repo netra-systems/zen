@@ -5,14 +5,14 @@ Tests agent-to-agent communication, message routing, and coordination
 from multiple angles including error cases and concurrent operations.
 
 Business Value Justification (BVJ):
-- Segment: All tiers (core communication functionality)
+    - Segment: All tiers (core communication functionality)
 - Business Goal: Reliable inter-agent communication and message routing
 - Value Impact: Prevents communication failures, ensures message delivery
 - Strategic Impact: $15K-30K MRR protection through reliable agent coordination
 
 Critical Path: Message routing -> Agent assignment -> Processing -> Response -> Delivery
 Coverage: Real agent communication, message persistence, error handling, concurrent processing
-"""
+""""
 
 import asyncio
 import json
@@ -46,11 +46,11 @@ class RealAgentCommunicationTest:
     """Real agent communication tests using actual agent instances.
     
     Following CLAUDE.md standards:
-    - No mocks allowed
+        - No mocks allowed
     - Real agent instances with real LLM and database connections
     - Real message passing and state management
     - Uses IsolatedEnvironment for configuration
-    """
+    """"
     
     def __init__(self):
         # Initialize environment management per CLAUDE.md

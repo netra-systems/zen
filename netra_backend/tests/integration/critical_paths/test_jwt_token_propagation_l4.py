@@ -1,7 +1,7 @@
 """L4 Integration Test: JWT Token Propagation Across Service Boundaries
 
 Business Value Justification (BVJ):
-- Segment: Enterprise
+    - Segment: Enterprise
 - Business Goal: Security and Authentication Integrity
 - Value Impact: Prevents unauthorized access patterns that could lead to data breaches
 - Strategic Impact: Ensures secure token flow across all microservices
@@ -12,13 +12,13 @@ staging environment services, real cryptographic validation, and production-like
 network conditions.
 
 Critical Security Requirements:
-- JWT signature validation using RS256/HS256
+    - JWT signature validation using RS256/HS256
 - Token expiry validation (access: 15min, refresh: 7 days)
 - Audience and issuer validation
 - Cross-service token forwarding headers
 - WebSocket authentication during connection upgrade
 - Protection against token replay attacks
-"""
+""""
 
 import sys
 from pathlib import Path
@@ -84,8 +84,8 @@ class JWTTokenPropagationL4Suite(L4StagingCriticalPathTestBase):
         super().__init__("JWT_Token_Propagation_L4")
         self.oauth_client_id = None
         self.oauth_client_secret = None
-        self.test_tokens: Dict[str, JWTTokenData] = {}
-        self.websocket_connections: Dict[str, websockets.ServerConnection] = {}
+        self.test_tokens: Dict[str, JWTTokenData] = {]
+        self.websocket_connections: Dict[str, websockets.ServerConnection] = {]
         self.security_test_results: List[Dict[str, Any]] = []
         
     async def setup_test_specific_environment(self) -> None:
@@ -231,7 +231,7 @@ class JWTTokenPropagationL4Suite(L4StagingCriticalPathTestBase):
                 "response_type": "code",
                 "scope": "openid email profile",
                 "redirect_uri": f"{self.service_endpoints.auth}/auth/callback",
-                "state": f"test_state_{uuid.uuid4().hex[:16]}"
+                "state": f"test_state_{uuid.uuid4().hex[:16]]"
             }
             
             oauth_url = f"{self.service_endpoints.auth}/api/oauth/authorize?" + \
@@ -239,7 +239,7 @@ class JWTTokenPropagationL4Suite(L4StagingCriticalPathTestBase):
             
             # Step 2: Simulate OAuth provider response
             # In staging, we'll use the test OAuth endpoint
-            auth_code = f"test_auth_code_{uuid.uuid4().hex[:16]}"
+            auth_code = f"test_auth_code_{uuid.uuid4().hex[:16]]"
             
             # Step 3: Exchange code for token
             token_exchange_data = {
@@ -259,7 +259,7 @@ class JWTTokenPropagationL4Suite(L4StagingCriticalPathTestBase):
             if token_response.status_code != 200:
                 # Try alternative test endpoint for staging
                 test_user_data = {
-                    "email": f"test_user_{uuid.uuid4().hex[:8]}@staging-test.netrasystems.ai",
+                    "email": f"test_user_{uuid.uuid4().hex[:8]]@staging-test.netrasystems.ai",
                     "name": "L4 Test User",
                     "provider": "google",
                     "test_mode": True
@@ -550,7 +550,7 @@ class JWTTokenPropagationL4Suite(L4StagingCriticalPathTestBase):
             except (websockets.exceptions.ConnectionClosed, 
                    websockets.exceptions.InvalidHandshake, 
                    asyncio.TimeoutError) as e:
-                websocket_result["websocket_error"] = str(e)
+                       websocket_result["websocket_error"] = str(e)
             
             return websocket_result
             
@@ -784,7 +784,7 @@ class JWTTokenPropagationL4Suite(L4StagingCriticalPathTestBase):
                     json.dumps(decoded_payload).encode()
                 ).decode().rstrip('=')
                 
-                tampered_token = f"{token_parts[0]}.{tampered_payload}.{token_parts[2]}"
+                tampered_token = f"{token_parts[0]].{tampered_payload].{token_parts[2]]"
                 
                 # Try using tampered token
                 tampered_headers = {
@@ -872,7 +872,7 @@ class JWTTokenPropagationL4Suite(L4StagingCriticalPathTestBase):
             
             # Replace signature with garbage
             invalid_signature = "invalid_signature_data_base64"
-            invalid_token = f"{token_parts[0]}.{token_parts[1]}.{invalid_signature}"
+            invalid_token = f"{token_parts[0]].{token_parts[1]].{invalid_signature]"
             
             # Try using token with invalid signature
             invalid_headers = {
@@ -993,8 +993,8 @@ class TestJWTTokenPropagationL4:
         yield suite
         await suite.cleanup_l4_resources()
     
-    @pytest.mark.asyncio
-    async def test_complete_jwt_token_propagation_flow(self, jwt_l4_suite):
+        @pytest.mark.asyncio
+        async def test_complete_jwt_token_propagation_flow(self, jwt_l4_suite):
         """Test complete JWT token propagation across all service boundaries."""
         # Execute the critical path test
         test_metrics = await jwt_l4_suite.run_complete_critical_path_test()
@@ -1012,8 +1012,8 @@ class TestJWTTokenPropagationL4:
         logger.info(f"Service calls made: {test_metrics.service_calls}")
         logger.info(f"Success rate: {test_metrics.success_rate:.1f}%")
     
-    @pytest.mark.asyncio
-    async def test_jwt_security_requirements_enterprise(self, jwt_l4_suite):
+        @pytest.mark.asyncio
+        async def test_jwt_security_requirements_enterprise(self, jwt_l4_suite):
         """Test JWT security requirements specifically for enterprise tier."""
         # Validate enterprise-specific security requirements are met
         test_metrics = await jwt_l4_suite.run_complete_critical_path_test()

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Comprehensive test to verify database migration and rollback:
-1. Check current database schema version
+    1. Check current database schema version
 2. Apply forward migrations
 3. Verify schema changes
 4. Test data integrity during migration
@@ -11,7 +11,7 @@ Comprehensive test to verify database migration and rollback:
 8. Test zero-downtime migration
 
 This test ensures database migrations are safe and reversible.
-"""
+""""
 
 # Test framework import - using pytest fixtures instead
 
@@ -48,7 +48,7 @@ class DatabaseMigrationTester:
         self.db_connection = None
         self.initial_schema_version: Optional[int] = None
         self.current_schema_version: Optional[int] = None
-        self.backup_data: Dict[str, List] = {}
+        self.backup_data: Dict[str, List] = {]
         self.migration_log: List[Dict] = []
         
     async def __aenter__(self):
@@ -72,11 +72,11 @@ class DatabaseMigrationTester:
             
             # Test connection
             version = await self.db_connection.fetchval("SELECT version()")
-            print(f"[OK] Connected to database: {version[:50]}...")
+            print(f"[OK] Connected to database: {version[:50]]...")
             return True
             
         except Exception as e:
-            print(f"[ERROR] Database connection failed: {e}")
+            print(f"[ERROR] Database connection failed: {e]")
             return False
             
     @pytest.mark.asyncio
@@ -96,7 +96,7 @@ class DatabaseMigrationTester:
                     WHERE table_schema = 'public' 
                     AND table_name = 'schema_migrations'
                 )
-            """)
+            """)"
             
             if not table_exists:
                 # Create migration tracking table
@@ -107,15 +107,15 @@ class DatabaseMigrationTester:
                         description TEXT,
                         checksum VARCHAR(64)
                     )
-                """)
+                """)"
                 print("[INFO] Created schema_migrations table")
                 
             # Get current version
             self.initial_schema_version = await self.db_connection.fetchval("""
                 SELECT COALESCE(MAX(version), 0) FROM schema_migrations
-            """)
+            """)"
             
-            print(f"[OK] Current schema version: {self.initial_schema_version}")
+            print(f"[OK] Current schema version: {self.initial_schema_version]")
             
             # Log migration state
             self.migration_log.append({
@@ -127,7 +127,7 @@ class DatabaseMigrationTester:
             return True
             
         except Exception as e:
-            print(f"[ERROR] Version check failed: {e}")
+            print(f"[ERROR] Version check failed: {e]")
             return False
             
     @pytest.mark.asyncio
@@ -151,7 +151,7 @@ class DatabaseMigrationTester:
                         WHERE table_schema = 'public' 
                         AND table_name = '{table}'
                     )
-                """)
+                """)"
                 
                 if table_exists:
                     # Get row count
@@ -161,14 +161,14 @@ class DatabaseMigrationTester:
                     rows = await self.db_connection.fetch(f"SELECT * FROM {table} LIMIT 100")
                     self.backup_data[table] = [dict(row) for row in rows]
                     
-                    print(f"[OK] Backed up {table}: {count} total rows, {len(self.backup_data[table])} sampled")
+                    print(f"[OK] Backed up {table]: {count] total rows, {len(self.backup_data[table])] sampled")
                 else:
-                    print(f"[INFO] Table {table} does not exist yet")
+                    print(f"[INFO] Table {table] does not exist yet")
                     
             return True
             
         except Exception as e:
-            print(f"[ERROR] Backup failed: {e}")
+            print(f"[ERROR] Backup failed: {e]")
             return False
             
     @pytest.mark.asyncio
@@ -198,7 +198,7 @@ class DatabaseMigrationTester:
                         INDEX idx_user_id (user_id),
                         INDEX idx_created_at (created_at)
                     )
-                """)
+                """)"
                 
                 # Migration 2: Add column to existing table (if exists)
                 table_exists = await self.db_connection.fetchval("""
@@ -207,7 +207,7 @@ class DatabaseMigrationTester:
                         WHERE table_schema = 'public' 
                         AND table_name = 'users'
                     )
-                """)
+                """)"
                 
                 if table_exists:
                     # Check if column already exists
@@ -217,13 +217,13 @@ class DatabaseMigrationTester:
                             WHERE table_name = 'users' 
                             AND column_name = 'last_migration_test'
                         )
-                    """)
+                    """)"
                     
                     if not column_exists:
                         await self.db_connection.execute("""
                             ALTER TABLE users 
                             ADD COLUMN last_migration_test TIMESTAMP
-                        """)
+                        """)"
                         
                 # Record migration
                 migration_desc = "Add analytics tables and user columns"
@@ -232,11 +232,11 @@ class DatabaseMigrationTester:
                 await self.db_connection.execute("""
                     INSERT INTO schema_migrations (version, description, checksum)
                     VALUES ($1, $2, $3)
-                """, new_version, migration_desc, checksum)
+                """, new_version, migration_desc, checksum)"
                 
                 self.current_schema_version = new_version
                 
-            print(f"[OK] Migration applied: version {new_version}")
+            print(f"[OK] Migration applied: version {new_version]")
             
             # Log migration
             self.migration_log.append({
@@ -249,7 +249,7 @@ class DatabaseMigrationTester:
             return True
             
         except Exception as e:
-            print(f"[ERROR] Forward migration failed: {e}")
+            print(f"[ERROR] Forward migration failed: {e]")
             return False
             
     @pytest.mark.asyncio
@@ -269,7 +269,7 @@ class DatabaseMigrationTester:
                     WHERE table_schema = 'public' 
                     AND table_name = 'analytics_events'
                 )
-            """)
+            """)"
             
             if not analytics_exists:
                 print("[ERROR] Analytics table not created")
@@ -279,9 +279,9 @@ class DatabaseMigrationTester:
             indexes = await self.db_connection.fetch("""
                 SELECT indexname FROM pg_indexes 
                 WHERE tablename = 'analytics_events'
-            """)
+            """)"
             
-            print(f"[OK] New table created with {len(indexes)} indexes")
+            print(f"[OK] New table created with {len(indexes)] indexes")
             
             # Verify column addition
             column_info = await self.db_connection.fetchrow("""
@@ -289,15 +289,15 @@ class DatabaseMigrationTester:
                 FROM information_schema.columns 
                 WHERE table_name = 'users' 
                 AND column_name = 'last_migration_test'
-            """)
+            """)"
             
             if column_info:
-                print(f"[OK] New column added: {column_info['column_name']} ({column_info['data_type']})")
+                print(f"[OK] New column added: {column_info['column_name']] ({column_info['data_type']])")
                 
             return True
             
         except Exception as e:
-            print(f"[ERROR] Schema verification failed: {e}")
+            print(f"[ERROR] Schema verification failed: {e]")
             return False
             
     @pytest.mark.asyncio
@@ -323,7 +323,7 @@ class DatabaseMigrationTester:
                     if 'id' in sample_row:
                         exists = await self.db_connection.fetchval(f"""
                             SELECT EXISTS(SELECT 1 FROM {table} WHERE id = $1)
-                        """, sample_row['id'])
+                        """, sample_row['id'])"
                         
                         integrity_checks.append({
                             "table": table,
@@ -336,16 +336,16 @@ class DatabaseMigrationTester:
             all_passed = all(check.get("sample_exists", True) for check in integrity_checks)
             
             if all_passed:
-                print(f"[OK] Data integrity verified for {len(integrity_checks)} tables")
+                print(f"[OK] Data integrity verified for {len(integrity_checks)] tables")
                 for check in integrity_checks:
-                    print(f"  - {check['table']}: {check['current_count']} rows")
+                    print(f"  - {check['table']]: {check['current_count']] rows")
                 return True
             else:
                 print("[ERROR] Data integrity check failed")
                 return False
                 
         except Exception as e:
-            print(f"[ERROR] Integrity check failed: {e}")
+            print(f"[ERROR] Integrity check failed: {e]")
             return False
             
     @pytest.mark.asyncio
@@ -369,24 +369,24 @@ class DatabaseMigrationTester:
                             id SERIAL PRIMARY KEY,
                             INVALID SYNTAX HERE
                         )
-                    """)
+                    """)"
                     
                     # This should not be reached
                     await self.db_connection.execute("""
                         INSERT INTO schema_migrations (version, description, checksum)
                         VALUES ($1, $2, $3)
-                    """, failed_version, "Failed migration", "test")
+                    """, failed_version, "Failed migration", "test")"
                     
             except Exception as migration_error:
-                print(f"[OK] Migration failed as expected: {str(migration_error)[:100]}...")
+                print(f"[OK] Migration failed as expected: {str(migration_error)[:100]]...")
                 
                 # Verify version didn't change
                 current_version = await self.db_connection.fetchval("""
                     SELECT MAX(version) FROM schema_migrations
-                """)
+                """)"
                 
                 if current_version == self.current_schema_version:
-                    print(f"[OK] Version unchanged: {current_version}")
+                    print(f"[OK] Version unchanged: {current_version]")
                     
                     # Log failure
                     self.migration_log.append({
@@ -402,7 +402,7 @@ class DatabaseMigrationTester:
                     return False
                     
         except Exception as e:
-            print(f"[ERROR] Failure simulation error: {e}")
+            print(f"[ERROR] Failure simulation error: {e]")
             return False
             
     @pytest.mark.asyncio
@@ -431,7 +431,7 @@ class DatabaseMigrationTester:
                         WHERE table_schema = 'public' 
                         AND table_name = 'users'
                     )
-                """)
+                """)"
                 
                 if table_exists:
                     column_exists = await self.db_connection.fetchval("""
@@ -440,27 +440,27 @@ class DatabaseMigrationTester:
                             WHERE table_name = 'users' 
                             AND column_name = 'last_migration_test'
                         )
-                    """)
+                    """)"
                     
                     if column_exists:
                         await self.db_connection.execute("""
                             ALTER TABLE users 
                             DROP COLUMN last_migration_test
-                        """)
+                        """)"
                         
                 # Remove migration record
                 await self.db_connection.execute("""
                     DELETE FROM schema_migrations 
                     WHERE version = $1
-                """, self.current_schema_version)
+                """, self.current_schema_version)"
                 
             # Verify rollback
             new_version = await self.db_connection.fetchval("""
                 SELECT COALESCE(MAX(version), 0) FROM schema_migrations
-            """)
+            """)"
             
             if new_version == self.initial_schema_version:
-                print(f"[OK] Rolled back to version {new_version}")
+                print(f"[OK] Rolled back to version {new_version]")
                 
                 # Log rollback
                 self.migration_log.append({
@@ -473,11 +473,11 @@ class DatabaseMigrationTester:
                 self.current_schema_version = new_version
                 return True
             else:
-                print(f"[ERROR] Rollback failed: version is {new_version}, expected {self.initial_schema_version}")
+                print(f"[ERROR] Rollback failed: version is {new_version], expected {self.initial_schema_version]")
                 return False
                 
         except Exception as e:
-            print(f"[ERROR] Rollback execution failed: {e}")
+            print(f"[ERROR] Rollback execution failed: {e]")
             return False
             
     @pytest.mark.asyncio
@@ -497,7 +497,7 @@ class DatabaseMigrationTester:
                     WHERE table_schema = 'public' 
                     AND table_name = 'analytics_events'
                 )
-            """)
+            """)"
             
             if analytics_exists:
                 print("[ERROR] Analytics table still exists")
@@ -510,7 +510,7 @@ class DatabaseMigrationTester:
                     WHERE table_name = 'users' 
                     AND column_name = 'last_migration_test'
                 )
-            """)
+            """)"
             
             if column_exists:
                 print("[ERROR] Migration column still exists")
@@ -523,17 +523,17 @@ class DatabaseMigrationTester:
                 if backup_rows and 'id' in backup_rows[0]:
                     exists = await self.db_connection.fetchval(f"""
                         SELECT EXISTS(SELECT 1 FROM {table} WHERE id = $1)
-                    """, backup_rows[0]['id'])
+                    """, backup_rows[0]['id'])"
                     
                     if not exists:
-                        print(f"[ERROR] Data lost in {table} during rollback")
+                        print(f"[ERROR] Data lost in {table] during rollback")
                         return False
                         
             print("[OK] Data integrity maintained after rollback")
             return True
             
         except Exception as e:
-            print(f"[ERROR] Rollback verification failed: {e}")
+            print(f"[ERROR] Rollback verification failed: {e]")
             return False
             
     @pytest.mark.asyncio
@@ -553,20 +553,20 @@ class DatabaseMigrationTester:
                     CREATE TABLE IF NOT EXISTS users_shadow (
                         LIKE users INCLUDING ALL
                     )
-                """)
+                """)"
                 
                 # Step 2: Add new column to shadow table
                 await self.db_connection.execute("""
                     ALTER TABLE users_shadow 
                     ADD COLUMN IF NOT EXISTS zero_dt_test VARCHAR(100)
-                """)
+                """)"
                 
                 # Step 3: Copy data to shadow table
                 await self.db_connection.execute("""
                     INSERT INTO users_shadow 
                     SELECT *, NULL as zero_dt_test FROM users
                     ON CONFLICT DO NOTHING
-                """)
+                """)"
                 
                 # Step 4: Create trigger for real-time sync
                 await self.db_connection.execute("""
@@ -583,13 +583,13 @@ class DatabaseMigrationTester:
                         RETURN NEW;
                     END;
                     $$ LANGUAGE plpgsql
-                """)
+                """)"
                 
                 await self.db_connection.execute("""
                     CREATE TRIGGER sync_users_trigger
                     AFTER INSERT OR UPDATE OR DELETE ON users
                     FOR EACH ROW EXECUTE FUNCTION sync_users_shadow()
-                """)
+                """)"
                 
             print("[OK] Zero-downtime migration prepared with shadow table")
             
@@ -606,7 +606,7 @@ class DatabaseMigrationTester:
             return True
             
         except Exception as e:
-            print(f"[ERROR] Zero-downtime migration failed: {e}")
+            print(f"[ERROR] Zero-downtime migration failed: {e]")
             return False
             
     async def run_all_tests(self) -> Dict[str, bool]:
@@ -655,7 +655,7 @@ async def test_database_migration_rollback():
         # Print migration log
         print(f"\nMigration Log ({len(tester.migration_log)} events):")
         for event in tester.migration_log:
-            print(f"  - {event['action']}: {event.get('to_version', 'N/A')}")
+            print(f"  - {event['action']]: {event.get('to_version', 'N/A')]")
             
         # Calculate overall result
         total_tests = len(results)
@@ -666,7 +666,7 @@ async def test_database_migration_rollback():
         if passed_tests == total_tests:
             print("\n[SUCCESS] All database migration tests passed!")
         else:
-            print(f"\n[WARNING] {total_tests - passed_tests} tests failed.")
+            print(f"\n[WARNING] {total_tests - passed_tests] tests failed.")
             
         # Assert all tests passed
         assert all(results.values()), f"Some tests failed: {results}"

@@ -1,7 +1,7 @@
 """Session Invalidation Across Services L4 Critical Path Test
 
 Business Value Justification (BVJ):
-- Segment: Security/Compliance - Business Goal: Complete session termination
+    - Segment: Security/Compliance - Business Goal: Complete session termination
 - Value Impact: $18K MRR - Logout must invalidate sessions everywhere
 - Strategic Impact: Ensures security compliance by preventing lingering sessions
 
@@ -10,7 +10,7 @@ Tests logout propagation across all services with real auth, Redis, PostgreSQL, 
 
 Critical scenarios: Single logout invalidates all sessions, WebSocket termination, 
 Redis sessions removed, JWT tokens blacklisted, API calls rejected, multi-device invalidation.
-"""
+""""
 
 import sys
 from pathlib import Path
@@ -43,7 +43,7 @@ class SessionInvalidationL4TestSuite(L4StagingCriticalPathTestBase):
     
     def __init__(self):
         super().__init__("session_invalidation_across_services_l4")
-        self.active_sessions: Dict[str, SessionData] = {}
+        self.active_sessions: Dict[str, SessionData] = {]
         self._test_users: List[Dict[str, Any]] = []
         
     async def setup_test_specific_environment(self) -> None:
@@ -216,10 +216,10 @@ class SessionInvalidationL4TestSuite(L4StagingCriticalPathTestBase):
             self._test_users.append(user_data)
             
             session = SessionData(
-                session_id=f"session_l4_{tier}_{uuid.uuid4().hex[:8]}",
+                session_id=f"session_l4_{tier]_{uuid.uuid4().hex[:8]]",
                 user_id=user_data["user_id"],
                 access_token=user_data["access_token"],
-                device_id=device_id or f"device_{uuid.uuid4().hex[:8]}"
+                device_id=device_id or f"device_{uuid.uuid4().hex[:8]]"
             )
             
             # Create session in backend
@@ -377,7 +377,7 @@ class SessionInvalidationL4TestSuite(L4StagingCriticalPathTestBase):
         for user_data in self._test_users:
             try:
                 await self.test_client.delete(
-                    f"{self.service_endpoints.auth}/api/users/{user_data['user_id']}/cleanup",
+                    f"{self.service_endpoints.auth]/api/users/{user_data['user_id']]/cleanup",
                     timeout=5.0
                 )
             except Exception:

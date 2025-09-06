@@ -1,23 +1,25 @@
+from unittest.mock import AsyncMock, Mock, patch, MagicMock
+
 """Authentication Flow End-to-End L4 Integration Tests
 
 Business Value Justification (BVJ):
-- Segment: All tiers (security foundation for entire platform)
+    - Segment: All tiers (security foundation for entire platform)
 - Business Goal: Ensure complete authentication pipeline works under production conditions
 - Value Impact: Protects $15K MRR through secure access control and session management
 - Strategic Impact: Critical for user trust, compliance, and preventing unauthorized access across all services
 
 Critical Path: 
-OAuth initiation -> JWT generation -> WebSocket authentication -> Token refresh -> Session consistency -> Logout
+    OAuth initiation -> JWT generation -> WebSocket authentication -> Token refresh -> Session consistency -> Logout
 
 Coverage: Complete OAuth flow, JWT lifecycle, WebSocket authentication, token refresh, cross-service session validation
-"""
+""""
 
 import sys
 from pathlib import Path
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
 from test_framework.docker.unified_docker_manager import UnifiedDockerManager
 from test_framework.database.test_database_manager import TestDatabaseManager
-from test_framework.redis.test_redis_manager import TestRedisManager
+from test_framework.redis_test_utils_test_utils.test_redis_manager import TestRedisManager
 from auth_service.core.auth_manager import AuthManager
 from shared.isolated_environment import IsolatedEnvironment
 
@@ -44,16 +46,16 @@ OAuthService = AsyncMock
 # # from app.auth_integration.auth import create_access_token
 
 # Mock: Generic component isolation for controlled unit testing
-create_access_token = AsyncNone  # TODO: Use real service instance
+create_access_token = AsyncMock()  # TODO: Use real service instance
 # # from app.core.unified.jwt_validator import validate_token_jwt
 
 # Mock: Generic component isolation for controlled unit testing
-validate_token_jwt = AsyncNone  # TODO: Use real service instance
+validate_token_jwt = AsyncMock()  # TODO: Use real service instance
 
 # Mock: Generic component isolation for controlled unit testing
-create_access_token = AsyncNone  # TODO: Use real service instance
+create_access_token = AsyncMock()  # TODO: Use real service instance
 # Mock: Generic component isolation for controlled unit testing
-validate_token_jwt = AsyncNone  # TODO: Use real service instance
+validate_token_jwt = AsyncMock()  # TODO: Use real service instance
 JWTService = AsyncMock
 # Session manager replaced with mock
 SessionManager = AsyncMock
@@ -84,8 +86,8 @@ class AuthFlowL4TestSuite:
         self.jwt_service: Optional[JWTService] = None
         self.session_manager: Optional[SessionManager] = None
         self.redis_session: Optional[RedisSessionManager] = None
-        self.service_endpoints: Dict[str, str] = {}
-        self.active_sessions: Dict[str, Dict] = {}
+        self.service_endpoints: Dict[str, str] = {]
+        self.active_sessions: Dict[str, Dict] = {]
         self.test_metrics = AuthFlowMetrics(
             total_auth_attempts=0,
             successful_authentications=0,
@@ -129,14 +131,14 @@ class AuthFlowL4TestSuite:
     async def _validate_auth_service_connectivity(self) -> None:
         """Validate connectivity to authentication services in staging."""
         # Test auth service health
-        auth_health_url = f"{self.service_endpoints['auth']}/health"
+        auth_health_url = f"{self.service_endpoints['auth']]/health"
         health_status = await self.staging_suite.check_service_health(auth_health_url)
         
         if not health_status.healthy:
             raise RuntimeError(f"Auth service unhealthy: {health_status.details}")
         
         # Test backend auth endpoints
-        backend_auth_url = f"{self.service_endpoints['backend']}/auth/health"
+        backend_auth_url = f"{self.service_endpoints['backend']]/auth/health"
         backend_health = await self.staging_suite.check_service_health(backend_auth_url)
         
         if not backend_health.healthy:
@@ -145,7 +147,7 @@ class AuthFlowL4TestSuite:
     async def execute_complete_oauth_flow(self, user_scenario: str) -> Dict[str, Any]:
         """Execute complete OAuth flow with real staging services."""
         flow_start_time = time.time()
-        flow_id = f"oauth_flow_{user_scenario}_{uuid.uuid4().hex[:8]}"
+        flow_id = f"oauth_flow_{user_scenario]_{uuid.uuid4().hex[:8]]"
         
         try:
             self.test_metrics.total_auth_attempts += 1
@@ -153,7 +155,7 @@ class AuthFlowL4TestSuite:
             # Step 1: Initiate OAuth flow
             oauth_initiation = await self._initiate_oauth_flow(user_scenario, flow_id)
             if not oauth_initiation["success"]:
-                raise Exception(f"OAuth initiation failed: {oauth_initiation['error']}")
+                raise Exception(f"OAuth initiation failed: {oauth_initiation['error']]")
             
             # Step 2: Simulate user authorization
             authorization_result = await self._simulate_user_authorization(
@@ -162,7 +164,7 @@ class AuthFlowL4TestSuite:
                 user_scenario
             )
             if not authorization_result["success"]:
-                raise Exception(f"User authorization failed: {authorization_result['error']}")
+                raise Exception(f"User authorization failed: {authorization_result['error']]")
             
             # Step 3: Exchange authorization code for tokens
             token_exchange = await self._exchange_authorization_code(
@@ -170,14 +172,14 @@ class AuthFlowL4TestSuite:
                 oauth_initiation["code_verifier"]
             )
             if not token_exchange["success"]:
-                raise Exception(f"Token exchange failed: {token_exchange['error']}")
+                raise Exception(f"Token exchange failed: {token_exchange['error']]")
             
             self.test_metrics.token_generations += 1
             
             # Step 4: Validate JWT token
             jwt_validation = await self._validate_jwt_token(token_exchange["access_token"])
             if not jwt_validation["success"]:
-                raise Exception(f"JWT validation failed: {jwt_validation['error']}")
+                raise Exception(f"JWT validation failed: {jwt_validation['error']]")
             
             # Step 5: Create authenticated session
             session_creation = await self._create_authenticated_session(
@@ -186,7 +188,7 @@ class AuthFlowL4TestSuite:
                 flow_id
             )
             if not session_creation["success"]:
-                raise Exception(f"Session creation failed: {session_creation['error']}")
+                raise Exception(f"Session creation failed: {session_creation['error']]")
             
             # Step 6: Test cross-service authentication
             cross_service_auth = await self._test_cross_service_authentication(
@@ -224,24 +226,24 @@ class AuthFlowL4TestSuite:
             # Generate PKCE parameters
             code_verifier = self._generate_code_verifier()
             code_challenge = self._generate_code_challenge(code_verifier)
-            state = f"{flow_id}_{uuid.uuid4().hex[:16]}"
+            state = f"{flow_id]_{uuid.uuid4().hex[:16]]"
             
             # Define user scenarios
             user_configs = {
                 "enterprise_user": {
                     "client_id": "netra_enterprise_client",
                     "scope": "read write admin",
-                    "redirect_uri": f"{self.service_endpoints['frontend']}/auth/callback"
+                    "redirect_uri": f"{self.service_endpoints['frontend']]/auth/callback"
                 },
                 "free_tier_user": {
                     "client_id": "netra_free_client", 
                     "scope": "read",
-                    "redirect_uri": f"{self.service_endpoints['frontend']}/auth/callback"
+                    "redirect_uri": f"{self.service_endpoints['frontend']]/auth/callback"
                 },
                 "api_user": {
                     "client_id": "netra_api_client",
                     "scope": "api:read api:write",
-                    "redirect_uri": f"{self.service_endpoints['backend']}/auth/callback"
+                    "redirect_uri": f"{self.service_endpoints['backend']]/auth/callback"
                 }
             }
             
@@ -258,7 +260,7 @@ class AuthFlowL4TestSuite:
                 "code_challenge_method": "S256"
             }
             
-            auth_url = f"{self.service_endpoints['auth']}/oauth/authorize?{urlencode(auth_params)}"
+            auth_url = f"{self.service_endpoints['auth']]/oauth/authorize?{urlencode(auth_params)]"
             
             # Test authorization endpoint accessibility
             async with httpx.AsyncClient(timeout=10.0) as client:
@@ -281,11 +283,11 @@ class AuthFlowL4TestSuite:
     
     async def _simulate_user_authorization(self, auth_url: str, state: str, 
                                          user_scenario: str) -> Dict[str, Any]:
-        """Simulate user authorization process."""
+                                             """Simulate user authorization process."""
         try:
             # In real L4 testing, this would interact with the actual auth UI
             # For staging, we'll use the test authorization endpoint
-            test_auth_endpoint = f"{self.service_endpoints['auth']}/oauth/test_authorize"
+            test_auth_endpoint = f"{self.service_endpoints['auth']]/oauth/test_authorize"
             
             # Simulate user credentials based on scenario
             user_credentials = {
@@ -349,9 +351,9 @@ class AuthFlowL4TestSuite:
     
     async def _exchange_authorization_code(self, auth_code: str, 
                                          code_verifier: str) -> Dict[str, Any]:
-        """Exchange authorization code for access and refresh tokens."""
+                                             """Exchange authorization code for access and refresh tokens."""
         try:
-            token_endpoint = f"{self.service_endpoints['auth']}/oauth/token"
+            token_endpoint = f"{self.service_endpoints['auth']]/oauth/token"
             
             token_data = {
                 "grant_type": "authorization_code",
@@ -411,7 +413,7 @@ class AuthFlowL4TestSuite:
             
             # Validate issuer
             if decoded_token["iss"] != "netra-auth-service":
-                raise Exception(f"Invalid issuer: {decoded_token['iss']}")
+                raise Exception(f"Invalid issuer: {decoded_token['iss']]")
             
             return {
                 "success": True,
@@ -426,9 +428,9 @@ class AuthFlowL4TestSuite:
     
     async def _create_authenticated_session(self, access_token: str, user_claims: Dict, 
                                           flow_id: str) -> Dict[str, Any]:
-        """Create authenticated session with staging services."""
+                                              """Create authenticated session with staging services."""
         try:
-            session_id = f"session_{flow_id}_{uuid.uuid4().hex[:8]}"
+            session_id = f"session_{flow_id]_{uuid.uuid4().hex[:8]]"
             user_id = user_claims["sub"]
             
             # Create session in Redis
@@ -470,7 +472,7 @@ class AuthFlowL4TestSuite:
     
     async def _test_cross_service_authentication(self, session_id: str, 
                                                access_token: str) -> Dict[str, Any]:
-        """Test authentication across all staging services."""
+                                                   """Test authentication across all staging services."""
         try:
             auth_results = {}
             
@@ -506,7 +508,7 @@ class AuthFlowL4TestSuite:
         """Test backend API authentication with JWT token."""
         try:
             # Test protected backend endpoint
-            protected_endpoint = f"{self.service_endpoints['backend']}/api/user/profile"
+            protected_endpoint = f"{self.service_endpoints['backend']]/api/user/profile"
             
             headers = {
                 "Authorization": f"Bearer {access_token}",
@@ -601,7 +603,7 @@ class AuthFlowL4TestSuite:
                     return {"success": False, "error": f"Missing session field: {field}"}
             
             # Test session validation endpoint
-            validation_endpoint = f"{self.service_endpoints['backend']}/auth/validate_session"
+            validation_endpoint = f"{self.service_endpoints['backend']]/auth/validate_session"
             
             validation_data = {"session_id": session_id}
             
@@ -636,7 +638,7 @@ class AuthFlowL4TestSuite:
             self.test_metrics.token_refreshes += 1
             
             # Test token refresh endpoint
-            refresh_endpoint = f"{self.service_endpoints['auth']}/oauth/token"
+            refresh_endpoint = f"{self.service_endpoints['auth']]/oauth/token"
             
             refresh_data = {
                 "grant_type": "refresh_token",
@@ -660,7 +662,7 @@ class AuthFlowL4TestSuite:
                 # Validate new token
                 token_validation = await self._validate_jwt_token(new_access_token)
                 if not token_validation["success"]:
-                    raise Exception(f"New token validation failed: {token_validation['error']}")
+                    raise Exception(f"New token validation failed: {token_validation['error']]")
                 
                 # Update session with new token
                 session_update = await self._update_session_token(session_id, new_access_token)
@@ -717,7 +719,7 @@ class AuthFlowL4TestSuite:
             self.test_metrics.logout_operations += 1
             
             # Test logout endpoint
-            logout_endpoint = f"{self.service_endpoints['auth']}/oauth/logout"
+            logout_endpoint = f"{self.service_endpoints['auth']]/oauth/logout"
             
             headers = {"Authorization": f"Bearer {access_token}"}
             logout_data = {"session_id": session_id}
@@ -813,8 +815,8 @@ async def test_complete_oauth_flow_enterprise_user_l4(auth_flow_l4_suite):
     flow_result = await auth_flow_l4_suite.execute_complete_oauth_flow("enterprise_user")
     
     # Validate OAuth flow success
-    assert flow_result["success"] is True, f"OAuth flow failed: {flow_result.get('error')}"
-    assert flow_result["flow_duration"] < 30.0, f"OAuth flow took too long: {flow_result['flow_duration']}s"
+    assert flow_result["success"] is True, f"OAuth flow failed: {flow_result.get('error')]"
+    assert flow_result["flow_duration"] < 30.0, f"OAuth flow took too long: {flow_result['flow_duration']]s"
     
     # Validate OAuth initiation
     oauth_initiation = flow_result["oauth_initiation"]
@@ -896,7 +898,7 @@ async def test_token_refresh_flow_l4(auth_flow_l4_suite):
     refresh_result = await auth_flow_l4_suite.test_token_refresh_flow(refresh_token, session_id)
     
     # Validate refresh success
-    assert refresh_result["success"] is True, f"Token refresh failed: {refresh_result.get('error')}"
+    assert refresh_result["success"] is True, f"Token refresh failed: {refresh_result.get('error')]"
     
     # Validate new token
     token_validation = refresh_result["token_validation"]
@@ -927,7 +929,7 @@ async def test_websocket_authentication_flow_l4(auth_flow_l4_suite):
     ws_auth_result = await auth_flow_l4_suite._test_websocket_authentication(access_token)
     
     # Validate WebSocket authentication
-    assert ws_auth_result["success"] is True, f"WebSocket auth failed: {ws_auth_result.get('error')}"
+    assert ws_auth_result["success"] is True, f"WebSocket auth failed: {ws_auth_result.get('error')]"
     assert ws_auth_result["connection_established"] is True
     
     # Validate authentication response
@@ -998,7 +1000,7 @@ async def test_logout_flow_complete_l4(auth_flow_l4_suite):
     logout_result = await auth_flow_l4_suite.test_logout_flow(session_id, access_token)
     
     # Validate logout success
-    assert logout_result["success"] is True, f"Logout failed: {logout_result.get('error')}"
+    assert logout_result["success"] is True, f"Logout failed: {logout_result.get('error')]"
     assert logout_result["logout_endpoint_success"] is True
     assert logout_result["session_removed"] is True
     
@@ -1059,7 +1061,7 @@ async def test_auth_flow_performance_metrics_l4(auth_flow_l4_suite):
         flow_result = await auth_flow_l4_suite.execute_complete_oauth_flow(scenario)
         
         # Each flow should succeed for performance validation
-        assert flow_result["success"] is True, f"Performance test flow {i} failed"
+        assert flow_result["success"] is True, f"Performance test flow {i] failed"
     
     # Validate performance metrics
     metrics = auth_flow_l4_suite.test_metrics

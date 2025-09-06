@@ -1,21 +1,23 @@
+from unittest.mock import Mock, patch, MagicMock
+
 """
 L3 Integration Test: Agent Tool Authorization
 
 Business Value Justification (BVJ):
-- Segment: Enterprise (security-critical AI operations)
+    - Segment: Enterprise (security-critical AI operations)
 - Business Goal: Ensure secure tool access control and prevent unauthorized operations
 - Value Impact: Protects customer data and prevents security breaches through tool misuse
 - Strategic Impact: $150K MRR - Security and compliance for enterprise AI workflows
 
 L3 Test: Uses real authorization service with role-based access control.
 Security target: Zero unauthorized tool access with comprehensive audit trail.
-"""
+""""
 
 import sys
 from pathlib import Path
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
 from test_framework.database.test_database_manager import TestDatabaseManager
-from test_framework.redis.test_redis_manager import TestRedisManager
+from test_framework.redis_test_utils_test_utils.test_redis_manager import TestRedisManager
 from auth_service.core.auth_manager import AuthManager
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
@@ -69,7 +71,7 @@ class MockTool:
     
     def __init__(self, tool_id: str, name: str, permission_level: ToolPermissionLevel, 
                  required_capabilities: List[str] = None):
-        self.tool_id = tool_id
+                     self.tool_id = tool_id
         self.name = name
         self.permission_level = permission_level
         self.required_capabilities = required_capabilities or []
@@ -93,11 +95,10 @@ class ToolAuthorizationService:
     """Service for managing tool authorization and access control."""
     
     def __init__(self, redis_manager: Optional[RedisManager] = None):
-    pass
         self.redis_manager = redis_manager
-        self.tool_registry: Dict[str, MockTool] = {}
-        self.agent_permissions: Dict[str, Dict[str, Any]] = {}
-        self.authorization_cache: Dict[str, Dict] = {}
+        self.tool_registry: Dict[str, MockTool] = {]
+        self.agent_permissions: Dict[str, Dict[str, Any]] = {]
+        self.authorization_cache: Dict[str, Dict] = {]
         self.audit_log: List[Dict[str, Any]] = []
         self.failed_authorizations: List[Dict[str, Any]] = []
         
@@ -108,7 +109,7 @@ class ToolAuthorizationService:
     def set_agent_permissions(self, agent_id: str, role: AgentRole, 
                             capabilities: List[str] = None, 
                             tool_access: List[str] = None) -> None:
-        """Set permissions for an agent."""
+                                """Set permissions for an agent."""
         self.agent_permissions[agent_id] = {
             "role": role,
             "capabilities": capabilities or [],
@@ -119,7 +120,7 @@ class ToolAuthorizationService:
         
     async def authorize_tool_access(self, agent_id: str, tool_id: str, 
                                   context: Dict[str, Any] = None) -> bool:
-        """Authorize tool access for an agent."""
+                                      """Authorize tool access for an agent."""
         # Check cache first
         cache_key = f"{agent_id}:{tool_id}"
         if cache_key in self.authorization_cache:
@@ -144,7 +145,7 @@ class ToolAuthorizationService:
         
     async def _check_authorization(self, agent_id: str, tool_id: str, 
                                  context: Dict[str, Any] = None) -> bool:
-        """Perform actual authorization check."""
+                                     """Perform actual authorization check."""
         # Get agent permissions
         agent_perms = self.agent_permissions.get(agent_id)
         if not agent_perms:
@@ -174,7 +175,7 @@ class ToolAuthorizationService:
         
     def _log_authorization_attempt(self, agent_id: str, tool_id: str, 
                                  authorized: bool, context: Dict[str, Any] = None) -> None:
-        """Log authorization attempt for audit trail."""
+                                     """Log authorization attempt for audit trail."""
         log_entry = {
             "timestamp": datetime.now(timezone.utc),
             "agent_id": agent_id,
@@ -192,7 +193,7 @@ class ToolAuthorizationService:
     async def execute_tool_with_authorization(self, agent_id: str, tool_id: str, 
                                             parameters: Dict[str, Any], 
                                             context: Dict[str, Any] = None) -> Dict[str, Any]:
-        """Execute tool with authorization check."""
+                                                """Execute tool with authorization check."""
         # Authorization check
         authorized = await self.authorize_tool_access(agent_id, tool_id, context)
         
@@ -234,7 +235,7 @@ class ToolAuthorizationService:
             if "tool_id" in log:
                 tool_id = log["tool_id"]
                 if tool_id not in tool_usage:
-                    tool_usage[tool_id] = {"count": 0, "last_used": None}
+                    tool_usage[tool_id] = {"count": 0, "last_used": None]
                 tool_usage[tool_id]["count"] += 1
                 tool_usage[tool_id]["last_used"] = log["timestamp"]
                 
@@ -251,7 +252,7 @@ class MockAuthorizedAgent(BaseAgent):
     
     def __init__(self, agent_id: str, role: AgentRole, 
                  authorization_service: ToolAuthorizationService):
-        super().__init__(agent_id=agent_id)
+                     super().__init__(agent_id=agent_id)
         self.role = role
         self.authorization_service = authorization_service
         self.tool_usage_count = 0
@@ -259,7 +260,7 @@ class MockAuthorizedAgent(BaseAgent):
         
     async def use_tool(self, tool_id: str, parameters: Dict[str, Any], 
                       context: Dict[str, Any] = None) -> Dict[str, Any]:
-        """Use a tool through the authorization system."""
+                          """Use a tool through the authorization system."""
         try:
             result = await self.authorization_service.execute_tool_with_authorization(
                 self.agent_id, tool_id, parameters, context
@@ -282,76 +283,74 @@ class TestAgentToolAuthorizationL3:
         redis_mgr.enabled = True
         yield redis_mgr
         
-    @pytest.fixture
-    async def authorization_service(self, redis_manager):
+        @pytest.fixture
+        async def authorization_service(self, redis_manager):
         """Create tool authorization service."""
-    pass
         service = ToolAuthorizationService(redis_manager=redis_manager)
         
         # Register test tools
         tools = [
-            MockTool("public_tool", "Public Tool", ToolPermissionLevel.PUBLIC),
-            MockTool("user_tool", "User Tool", ToolPermissionLevel.USER),
-            MockTool("admin_tool", "Admin Tool", ToolPermissionLevel.ADMIN),
-            MockTool("system_tool", "System Tool", ToolPermissionLevel.SYSTEM),
-            MockTool("file_access", "File Access", ToolPermissionLevel.USER, ["file_read"]),
-            MockTool("db_write", "Database Write", ToolPermissionLevel.ADMIN, ["db_write"]),
+        MockTool("public_tool", "Public Tool", ToolPermissionLevel.PUBLIC),
+        MockTool("user_tool", "User Tool", ToolPermissionLevel.USER),
+        MockTool("admin_tool", "Admin Tool", ToolPermissionLevel.ADMIN),
+        MockTool("system_tool", "System Tool", ToolPermissionLevel.SYSTEM),
+        MockTool("file_access", "File Access", ToolPermissionLevel.USER, ["file_read"]),
+        MockTool("db_write", "Database Write", ToolPermissionLevel.ADMIN, ["db_write"]),
         ]
         
         for tool in tools:
-            service.register_tool(tool)
+        service.register_tool(tool)
             
         yield service
         
-    @pytest.fixture
-    def test_agents(self, authorization_service):
-    """Use real service instance."""
-    # TODO: Initialize real service
+        @pytest.fixture
+        def test_agents(self, authorization_service):
+        """Use real service instance."""
+        # TODO: Initialize real service
         """Create test agents with different roles."""
-    pass
         agents = {}
         
         # Basic agent
         basic_agent = MockAuthorizedAgent("basic_agent_1", AgentRole.BASIC_AGENT, authorization_service)
         authorization_service.set_agent_permissions(
-            "basic_agent_1", AgentRole.BASIC_AGENT, 
-            capabilities=["basic_operations"], 
-            tool_access=["public_tool", "user_tool"]
+        "basic_agent_1", AgentRole.BASIC_AGENT, 
+        capabilities=["basic_operations"], 
+        tool_access=["public_tool", "user_tool"]
         )
         agents["basic"] = basic_agent
         
         # Advanced agent
         advanced_agent = MockAuthorizedAgent("advanced_agent_1", AgentRole.ADVANCED_AGENT, authorization_service)
         authorization_service.set_agent_permissions(
-            "advanced_agent_1", AgentRole.ADVANCED_AGENT,
-            capabilities=["basic_operations", "file_read"],
-            tool_access=["public_tool", "user_tool", "file_access"]
+        "advanced_agent_1", AgentRole.ADVANCED_AGENT,
+        capabilities=["basic_operations", "file_read"],
+        tool_access=["public_tool", "user_tool", "file_access"]
         )
         agents["advanced"] = advanced_agent
         
         # Admin agent
         admin_agent = MockAuthorizedAgent("admin_agent_1", AgentRole.ADMIN_AGENT, authorization_service)
         authorization_service.set_agent_permissions(
-            "admin_agent_1", AgentRole.ADMIN_AGENT,
-            capabilities=["basic_operations", "file_read", "db_write", "admin_operations"],
-            tool_access=["public_tool", "user_tool", "admin_tool", "file_access", "db_write"]
+        "admin_agent_1", AgentRole.ADMIN_AGENT,
+        capabilities=["basic_operations", "file_read", "db_write", "admin_operations"],
+        tool_access=["public_tool", "user_tool", "admin_tool", "file_access", "db_write"]
         )
         agents["admin"] = admin_agent
         
         # System agent
         system_agent = MockAuthorizedAgent("system_agent_1", AgentRole.SYSTEM_AGENT, authorization_service)
         authorization_service.set_agent_permissions(
-            "system_agent_1", AgentRole.SYSTEM_AGENT,
-            capabilities=["all"],
-            tool_access=["*"]  # Access to all tools
+        "system_agent_1", AgentRole.SYSTEM_AGENT,
+        capabilities=["all"],
+        tool_access=["*"]  # Access to all tools
         )
         agents["system"] = system_agent
         
         await asyncio.sleep(0)
-    return agents
+        return agents
         
-    @pytest.mark.asyncio
-    async def test_role_based_tool_permissions(self, authorization_service, test_agents):
+        @pytest.mark.asyncio
+        async def test_role_based_tool_permissions(self, authorization_service, test_agents):
         """Test role-based tool access permissions."""
         # Test basic agent permissions
         basic_agent = test_agents["basic"]
@@ -365,11 +364,11 @@ class TestAgentToolAuthorizationL3:
         
         # Should NOT have access to admin tools
         with pytest.raises(AuthorizationException):
-            await basic_agent.use_tool("admin_tool", {"test": "data"})
+        await basic_agent.use_tool("admin_tool", {"test": "data"})
             
         # Should NOT have access to system tools
         with pytest.raises(AuthorizationException):
-            await basic_agent.use_tool("system_tool", {"test": "data"})
+        await basic_agent.use_tool("system_tool", {"test": "data"})
             
         # Test admin agent permissions
         admin_agent = test_agents["admin"]
@@ -381,7 +380,7 @@ class TestAgentToolAuthorizationL3:
         
         # Should NOT have access to system tools
         with pytest.raises(AuthorizationException):
-            await admin_agent.use_tool("system_tool", {"test": "data"})
+        await admin_agent.use_tool("system_tool", {"test": "data"})
             
         # Test system agent permissions
         system_agent = test_agents["system"]
@@ -400,30 +399,28 @@ class TestAgentToolAuthorizationL3:
         assert system_agent.tool_usage_count == 4
         assert system_agent.authorization_failures == 0
         
-    @pytest.mark.asyncio
-    async def test_zero_unauthorized_access(self, authorization_service, test_agents):
+        @pytest.mark.asyncio
+        async def test_zero_unauthorized_access(self, authorization_service, test_agents):
         """Test that there is zero unauthorized tool access."""
-    pass
         unauthorized_attempts = []
         
         # Test various unauthorized access attempts
         test_cases = [
-            ("basic", "admin_tool"),
-            ("basic", "system_tool"),
-            ("advanced", "admin_tool"), 
-            ("advanced", "system_tool"),
-            ("admin", "system_tool"),
+        ("basic", "admin_tool"),
+        ("basic", "system_tool"),
+        ("advanced", "admin_tool"), 
+        ("advanced", "system_tool"),
+        ("admin", "system_tool"),
         ]
         
         for agent_type, tool_id in test_cases:
-            agent = test_agents[agent_type]
-            try:
-                await agent.use_tool(tool_id, {"unauthorized": "attempt"})
-                # If we get here, unauthorized access occurred
-                unauthorized_attempts.append((agent_type, tool_id))
-            except AuthorizationException:
-                # Expected - authorization properly blocked
-                pass
+        agent = test_agents[agent_type]
+        try:
+        await agent.use_tool(tool_id, {"unauthorized": "attempt"})
+        # If we get here, unauthorized access occurred
+        unauthorized_attempts.append((agent_type, tool_id))
+        except AuthorizationException:
+        # Expected - authorization properly blocked
                 
         # Verify zero unauthorized access
         assert len(unauthorized_attempts) == 0, f"Unauthorized access detected: {unauthorized_attempts}"
@@ -432,37 +429,36 @@ class TestAgentToolAuthorizationL3:
         failed_auth_count = len(authorization_service.failed_authorizations)
         assert failed_auth_count == len(test_cases)
         
-    @pytest.mark.asyncio
-    async def test_tool_usage_tracking_and_audit(self, authorization_service, test_agents):
+        @pytest.mark.asyncio
+        async def test_tool_usage_tracking_and_audit(self, authorization_service, test_agents):
         """Test comprehensive tool usage tracking and audit trail."""
         # Perform various tool operations
         operations = [
-            ("basic", "public_tool", {"operation": "basic_public"}),
-            ("advanced", "file_access", {"file": "test.txt"}),
-            ("admin", "db_write", {"table": "users", "action": "update"}),
-            ("system", "system_tool", {"system_operation": "maintenance"}),
+        ("basic", "public_tool", {"operation": "basic_public"}),
+        ("advanced", "file_access", {"file": "test.txt"}),
+        ("admin", "db_write", {"table": "users", "action": "update"}),
+        ("system", "system_tool", {"system_operation": "maintenance"}),
         ]
         
         for agent_type, tool_id, params in operations:
-            agent = test_agents[agent_type]
-            await agent.use_tool(tool_id, params)
+        agent = test_agents[agent_type]
+        await agent.use_tool(tool_id, params)
             
         # Check audit log
         assert len(authorization_service.audit_log) >= len(operations)
         
         # Verify tool usage statistics
         for agent_type in ["basic", "advanced", "admin", "system"]:
-            agent = test_agents[agent_type]
-            usage_stats = authorization_service.get_agent_tool_usage(agent.agent_id)
+        agent = test_agents[agent_type]
+        usage_stats = authorization_service.get_agent_tool_usage(agent.agent_id)
             
-            assert usage_stats["agent_id"] == agent.agent_id
-            assert usage_stats["total_tool_calls"] > 0
-            assert len(usage_stats["tool_usage"]) > 0
+        assert usage_stats["agent_id"] == agent.agent_id
+        assert usage_stats["total_tool_calls"] > 0
+        assert len(usage_stats["tool_usage"]) > 0
             
-    @pytest.mark.asyncio
-    async def test_authorization_caching_performance(self, authorization_service, test_agents):
+        @pytest.mark.asyncio
+        async def test_authorization_caching_performance(self, authorization_service, test_agents):
         """Test authorization caching for performance optimization."""
-    pass
         agent = test_agents["admin"]
         tool_id = "admin_tool"
         
@@ -489,18 +485,18 @@ class TestAgentToolAuthorizationL3:
         cache_key = f"{agent.agent_id}:{tool_id}"
         assert cache_key in authorization_service.authorization_cache
         
-    @pytest.mark.asyncio
-    async def test_cross_service_authorization_validation(self, authorization_service, test_agents):
+        @pytest.mark.asyncio
+        async def test_cross_service_authorization_validation(self, authorization_service, test_agents):
         """Test authorization validation across service boundaries."""
         # Simulate cross-service authorization checks
         cross_service_tools = [
-            MockTool("external_api", "External API", ToolPermissionLevel.ADMIN),
-            MockTool("data_export", "Data Export", ToolPermissionLevel.SYSTEM),
-            MockTool("user_management", "User Management", ToolPermissionLevel.ADMIN),
+        MockTool("external_api", "External API", ToolPermissionLevel.ADMIN),
+        MockTool("data_export", "Data Export", ToolPermissionLevel.SYSTEM),
+        MockTool("user_management", "User Management", ToolPermissionLevel.ADMIN),
         ]
         
         for tool in cross_service_tools:
-            authorization_service.register_tool(tool)
+        authorization_service.register_tool(tool)
             
         # Test cross-service authorization
         admin_agent = test_agents["admin"]
@@ -512,7 +508,7 @@ class TestAgentToolAuthorizationL3:
         
         # Admin should NOT access data export (system level)
         with pytest.raises(AuthorizationException):
-            await admin_agent.use_tool("data_export", {"export": "users"})
+        await admin_agent.use_tool("data_export", {"export": "users"})
             
         # System should access all
         await system_agent.use_tool("external_api", {"api_call": "system"})
@@ -521,16 +517,15 @@ class TestAgentToolAuthorizationL3:
         
         # Verify cross-service audit trail
         cross_service_logs = [
-            log for log in authorization_service.audit_log 
-            if log.get("tool_id") in ["external_api", "data_export", "user_management"]
+        log for log in authorization_service.audit_log 
+        if log.get("tool_id") in ["external_api", "data_export", "user_management"]
         ]
         
         assert len(cross_service_logs) >= 5  # 5 successful operations
         
-    @pytest.mark.asyncio
-    async def test_authorization_under_concurrent_load(self, authorization_service, test_agents):
+        @pytest.mark.asyncio
+        async def test_authorization_under_concurrent_load(self, authorization_service, test_agents):
         """Test authorization system under concurrent load."""
-    pass
         # Create concurrent authorization requests
         concurrent_requests = []
         
@@ -539,22 +534,22 @@ class TestAgentToolAuthorizationL3:
         
         # Generate concurrent authorization checks
         for i in range(50):
-            agent = agents[i % len(agents)]
-            tool_id = tools[i % len(tools)]
+        agent = agents[i % len(agents)]
+        tool_id = tools[i % len(tools)]
             
-            # Create authorization check task
-            task = authorization_service.authorize_tool_access(
-                agent.agent_id, 
-                tool_id, 
-                {"concurrent_test": True, "request_id": i}
-            )
-            concurrent_requests.append((agent.agent_id, tool_id, task))
+        # Create authorization check task
+        task = authorization_service.authorize_tool_access(
+        agent.agent_id, 
+        tool_id, 
+        {"concurrent_test": True, "request_id": i}
+        )
+        concurrent_requests.append((agent.agent_id, tool_id, task))
             
         # Execute all authorization checks concurrently
         start_time = time.time()
         results = await asyncio.gather(
-            *[task for _, _, task in concurrent_requests],
-            return_exceptions=True
+        *[task for _, _, task in concurrent_requests],
+        return_exceptions=True
         )
         total_time = time.time() - start_time
         
@@ -564,12 +559,12 @@ class TestAgentToolAuthorizationL3:
         errors = 0
         
         for i, result in enumerate(results):
-            if isinstance(result, Exception):
-                errors += 1
-            elif result:
-                successful_checks += 1
-            else:
-                failed_checks += 1
+        if isinstance(result, Exception):
+        errors += 1
+        elif result:
+        successful_checks += 1
+        else:
+        failed_checks += 1
                 
         # Performance validation
         assert total_time < 10.0  # Should complete in under 10 seconds
@@ -580,8 +575,8 @@ class TestAgentToolAuthorizationL3:
         
         # Verify cache effectiveness under load
         cache_hits = len([
-            entry for entry in authorization_service.authorization_cache.values()
-            if time.time() - entry["timestamp"] < 300
+        entry for entry in authorization_service.authorization_cache.values()
+        if time.time() - entry["timestamp"] < 300
         ])
         assert cache_hits > 0  # Should have cache entries
 

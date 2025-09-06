@@ -1,3 +1,5 @@
+from unittest.mock import Mock, patch, MagicMock
+
 """
 Comprehensive tests for Data Analysis Helper Flow (Flow #2 from MULTI_AGENT_ORCHESTRATION_TEST_ACTION_PLAN.md).
 
@@ -6,7 +8,7 @@ Validates conditional routing, direct data-to-report flow, and caching behavior.
 
 Business Impact: Enables faster responses for simple data queries without optimization overhead.
 BVJ: Early/Mid segments | Customer Experience | 40% faster response for data queries
-"""
+""""
 
 import asyncio
 import json
@@ -15,7 +17,7 @@ import uuid
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
-from test_framework.redis.test_redis_manager import TestRedisManager
+from test_framework.redis_test_utils_test_utils.test_redis_manager import TestRedisManager
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
 from shared.isolated_environment import IsolatedEnvironment
@@ -48,7 +50,6 @@ class MockTriageAgentWithRouting:
     """Mock triage agent with conditional routing logic for data analysis"""
     
     def __init__(self, name: str = "TriageAgent"):
-    pass
         self.name = name
         self.agent_type = "triage"
         self.execution_count = 0
@@ -65,7 +66,7 @@ class MockTriageAgentWithRouting:
         request = state.user_request.lower()
         
         # Check cache for repeated requests
-        cache_key = f"triage_{request[:50]}"
+        cache_key = f"triage_{request[:50]]"
         if cache_key in self.cached_decisions:
             routing_decision = self.cached_decisions[cache_key]
             from_cache = True
@@ -159,7 +160,6 @@ class MockDataAgentWithValidation:
     """Mock data agent with validation and error handling"""
     
     def __init__(self, name: str = "DataAgent"):
-    pass
         self.name = name
         self.agent_type = "data"
         self.execution_count = 0
@@ -180,7 +180,7 @@ class MockDataAgentWithValidation:
         await asyncio.sleep(0.1)
         
         request = state.user_request.lower()
-        cache_key = f"data_{request[:50]}"
+        cache_key = f"data_{request[:50]]"
         
         # Check cache
         if cache_key in self.cached_results:
@@ -258,7 +258,6 @@ class MockReportingAgentDirect:
     """Mock reporting agent that can work with or without optimization data"""
     
     def __init__(self, name: str = "ReportingAgent"):
-    pass
         self.name = name
         self.agent_type = "reporting"
         self.execution_count = 0
@@ -323,7 +322,6 @@ class MockOptimizationAgent:
     """Mock optimization agent that should be skipped in data analysis helper flow"""
     
     def __init__(self, name: str = "OptimizationAgent"):
-    pass
         self.name = name
         self.agent_type = "optimization"
         self.execution_count = 0
@@ -347,16 +345,15 @@ class MockOptimizationAgent:
 # ==================== Test Fixtures ====================
 
 @pytest.fixture
- def real_agents():
+def real_agents():
     """Use real service instance."""
     # TODO: Initialize real service
     """Create mock agents for testing"""
-    pass
     return {
-        "triage": MockTriageAgentWithRouting(),
-        "data": MockDataAgentWithValidation(),
-        "reporting": MockReportingAgentDirect(),
-        "optimization": MockOptimizationAgent()
+    "triage": MockTriageAgentWithRouting(),
+    "data": MockDataAgentWithValidation(),
+    "reporting": MockReportingAgentDirect(),
+    "optimization": MockOptimizationAgent()
     }
 
 
@@ -365,12 +362,11 @@ def initial_state():
     """Use real service instance."""
     # TODO: Initialize real service
     """Create initial state for testing"""
-    pass
     return DeepAgentState(
-        user_request="Analyze my API usage metrics for the last month",
-        chat_thread_id=str(uuid.uuid4()),
-        user_id="test_user_123",
-        step_count=0
+    user_request="Analyze my API usage metrics for the last month",
+    chat_thread_id=str(uuid.uuid4()),
+    user_id="test_user_123",
+    step_count=0
     )
 
 
@@ -379,48 +375,47 @@ async def mock_orchestrator(mock_agents):
     """Create a mock orchestrator that routes based on triage decisions"""
     
     class MockOrchestrator:
-        def __init__(self, agents):
+    def __init__(self, agents):
     """Use real service instance."""
     # TODO: Initialize real service
-    pass
-            self.agents = agents
-            self.execution_history = []
+    self.agents = agents
+    self.execution_history = []
             
-        async def execute_flow(self, state: DeepAgentState, run_id: str) -> DeepAgentState:
-            """Execute agent flow based on triage routing decision"""
+    async def execute_flow(self, state: DeepAgentState, run_id: str) -> DeepAgentState:
+    """Execute agent flow based on triage routing decision"""
             
-            # Always start with triage
-            state = await self.agents["triage"].execute(state, run_id)
-            self.execution_history.append("triage")
+    # Always start with triage
+    state = await self.agents["triage"].execute(state, run_id)
+    self.execution_history.append("triage")
             
-            # Route based on triage decision
-            if state.triage_result:
-                route_type = getattr(state.triage_result, '_route_type', state.triage_result.category)
+    # Route based on triage decision
+    if state.triage_result:
+    route_type = getattr(state.triage_result, '_route_type', state.triage_result.category)
                 
-                if route_type == "data_analysis_helper":
-                    # Data analysis flow: Data → Report (skip optimization)
-                    if getattr(state.triage_result, '_needs_data', False):
-                        state = await self.agents["data"].execute(state, run_id)
-                        self.execution_history.append("data")
-                    state = await self.agents["reporting"].execute(state, run_id)
-                    self.execution_history.append("reporting")
+    if route_type == "data_analysis_helper":
+    # Data analysis flow: Data → Report (skip optimization)
+    if getattr(state.triage_result, '_needs_data', False):
+    state = await self.agents["data"].execute(state, run_id)
+    self.execution_history.append("data")
+    state = await self.agents["reporting"].execute(state, run_id)
+    self.execution_history.append("reporting")
                     
-                elif route_type == "full_optimization":
-                    # Full flow: Data → Optimization → Report
-                    if getattr(state.triage_result, '_needs_data', False):
-                        state = await self.agents["data"].execute(state, run_id)
-                        self.execution_history.append("data")
-                    state = await self.agents["optimization"].execute(state, run_id)
-                    self.execution_history.append("optimization")
-                    state = await self.agents["reporting"].execute(state, run_id)
-                    self.execution_history.append("reporting")
+    elif route_type == "full_optimization":
+    # Full flow: Data → Optimization → Report
+    if getattr(state.triage_result, '_needs_data', False):
+    state = await self.agents["data"].execute(state, run_id)
+    self.execution_history.append("data")
+    state = await self.agents["optimization"].execute(state, run_id)
+    self.execution_history.append("optimization")
+    state = await self.agents["reporting"].execute(state, run_id)
+    self.execution_history.append("reporting")
                     
-                elif route_type == "direct_report":
-                    # Direct to report
-                    state = await self.agents["reporting"].execute(state, run_id)
-                    self.execution_history.append("reporting")
+    elif route_type == "direct_report":
+    # Direct to report
+    state = await self.agents["reporting"].execute(state, run_id)
+    self.execution_history.append("reporting")
             
-            await asyncio.sleep(0)
+    await asyncio.sleep(0)
     return state
     
     return MockOrchestrator(mock_agents)
@@ -459,7 +454,6 @@ class TestDataAnalysisHelperFlow:
     @pytest.mark.asyncio
     async def test_conditional_routing_optimization_request(self, mock_agents, initial_state, mock_orchestrator):
         """Test that optimization requests follow the full flow"""
-    pass
         # Arrange
         initial_state.user_request = "Optimize my AI costs and reduce spending"
         run_id = str(uuid.uuid4())
@@ -502,7 +496,6 @@ class TestDataAnalysisHelperFlow:
     @pytest.mark.asyncio
     async def test_direct_report_without_data(self, mock_agents, initial_state, mock_orchestrator):
         """Test requests that go directly to report without data or optimization"""
-    pass
         # Arrange
         initial_state.user_request = "What is your pricing model?"
         run_id = str(uuid.uuid4())
@@ -542,7 +535,6 @@ class TestDataAnalysisHelperFlow:
     @pytest.mark.asyncio
     async def test_data_agent_error_handling(self, mock_agents, initial_state, mock_orchestrator):
         """Test error handling when data agent fails"""
-    pass
         # Arrange
         initial_state.user_request = "Analyze my usage data"
         mock_agents["data"].fail_on_execute = True
@@ -588,7 +580,6 @@ class TestDataAnalysisHelperFlow:
     @pytest.mark.asyncio
     async def test_cache_invalidation_different_requests(self, mock_agents):
         """Test that different requests don't use cached results"""
-    pass
         # Arrange
         triage_agent = mock_agents["triage"]
         request1 = "Analyze my API usage"
@@ -639,7 +630,6 @@ class TestDataAnalysisHelperFlow:
     @pytest.mark.asyncio
     async def test_data_quality_validation(self, mock_agents, initial_state):
         """Test data quality scoring and validation in the helper flow"""
-    pass
         # Arrange
         triage_agent = mock_agents["triage"]
         data_agent = mock_agents["data"]
@@ -692,7 +682,6 @@ class TestDataAnalysisPerformance:
     @pytest.mark.asyncio
     async def test_cached_requests_performance(self, mock_agents):
         """Test that cached requests are significantly faster"""
-    pass
         # Arrange
         triage = mock_agents["triage"]
         data = mock_agents["data"]
@@ -742,7 +731,6 @@ class TestDataAnalysisEdgeCases:
     @pytest.mark.asyncio
     async def test_empty_data_result_handling(self, mock_agents):
         """Test handling of empty or minimal data results"""
-    pass
         # Arrange
         data_agent = mock_agents["data"]
         reporting_agent = mock_agents["reporting"]
@@ -815,89 +803,88 @@ async def integrated_orchestrator():
     """Create a more realistic orchestrator for integration testing"""
     
     class IntegratedOrchestrator:
-        def __init__(self):
+    def __init__(self):
     """Use real service instance."""
     # TODO: Initialize real service
-            self.agents = {
-                "triage": MockTriageAgentWithRouting(),
-                "data": MockDataAgentWithValidation(),
-                "reporting": MockReportingAgentDirect(),
-                "optimization": MockOptimizationAgent()
-            }
-            self.execution_log = []
-            self.timing_log = []
+    self.agents = {
+    "triage": MockTriageAgentWithRouting(),
+    "data": MockDataAgentWithValidation(),
+    "reporting": MockReportingAgentDirect(),
+    "optimization": MockOptimizationAgent()
+    }
+    self.execution_log = []
+    self.timing_log = []
             
-        async def execute_with_monitoring(self, state: DeepAgentState) -> DeepAgentState:
-            """Execute flow with detailed monitoring"""
-    pass
-            run_id = str(uuid.uuid4())
-            start_time = time.time()
+    async def execute_with_monitoring(self, state: DeepAgentState) -> DeepAgentState:
+    """Execute flow with detailed monitoring"""
+    run_id = str(uuid.uuid4())
+    start_time = time.time()
             
-            try:
-                # Triage phase
-                phase_start = time.time()
-                state = await self.agents["triage"].execute(state, run_id)
-                self.timing_log.append(("triage", time.time() - phase_start))
+    try:
+    # Triage phase
+    phase_start = time.time()
+    state = await self.agents["triage"].execute(state, run_id)
+    self.timing_log.append(("triage", time.time() - phase_start))
                 
-                if not state.triage_result:
-                    raise ValueError("Triage failed to produce routing decision")
+    if not state.triage_result:
+    raise ValueError("Triage failed to produce routing decision")
                 
-                # Execute based on routing
-                route = getattr(state.triage_result, '_route_type', state.triage_result.category)
+    # Execute based on routing
+    route = getattr(state.triage_result, '_route_type', state.triage_result.category)
                 
-                if route == "data_analysis_helper":
-                    # Data phase
-                    if getattr(state.triage_result, '_needs_data', False):
-                        phase_start = time.time()
-                        state = await self.agents["data"].execute(state, run_id)
-                        self.timing_log.append(("data", time.time() - phase_start))
+    if route == "data_analysis_helper":
+    # Data phase
+    if getattr(state.triage_result, '_needs_data', False):
+    phase_start = time.time()
+    state = await self.agents["data"].execute(state, run_id)
+    self.timing_log.append(("data", time.time() - phase_start))
                     
-                    # Direct to report (skip optimization)
-                    phase_start = time.time()
-                    state = await self.agents["reporting"].execute(state, run_id)
-                    self.timing_log.append(("reporting", time.time() - phase_start))
+    # Direct to report (skip optimization)
+    phase_start = time.time()
+    state = await self.agents["reporting"].execute(state, run_id)
+    self.timing_log.append(("reporting", time.time() - phase_start))
                     
-                elif route == "full_optimization":
-                    # Full pipeline
-                    if getattr(state.triage_result, '_needs_data', False):
-                        phase_start = time.time()
-                        state = await self.agents["data"].execute(state, run_id)
-                        self.timing_log.append(("data", time.time() - phase_start))
+    elif route == "full_optimization":
+    # Full pipeline
+    if getattr(state.triage_result, '_needs_data', False):
+    phase_start = time.time()
+    state = await self.agents["data"].execute(state, run_id)
+    self.timing_log.append(("data", time.time() - phase_start))
                     
-                    phase_start = time.time()
-                    state = await self.agents["optimization"].execute(state, run_id)
-                    self.timing_log.append(("optimization", time.time() - phase_start))
+    phase_start = time.time()
+    state = await self.agents["optimization"].execute(state, run_id)
+    self.timing_log.append(("optimization", time.time() - phase_start))
                     
-                    phase_start = time.time()
-                    state = await self.agents["reporting"].execute(state, run_id)
-                    self.timing_log.append(("reporting", time.time() - phase_start))
+    phase_start = time.time()
+    state = await self.agents["reporting"].execute(state, run_id)
+    self.timing_log.append(("reporting", time.time() - phase_start))
                     
-                elif route == "direct_report":
-                    # Straight to report
-                    phase_start = time.time()
-                    state = await self.agents["reporting"].execute(state, run_id)
-                    self.timing_log.append(("reporting", time.time() - phase_start))
+    elif route == "direct_report":
+    # Straight to report
+    phase_start = time.time()
+    state = await self.agents["reporting"].execute(state, run_id)
+    self.timing_log.append(("reporting", time.time() - phase_start))
                 
-                # Log execution
-                self.execution_log.append({
-                    "run_id": run_id,
-                    "route": route,
-                    "total_time": time.time() - start_time,
-                    "phases": self.timing_log.copy(),
-                    "success": True
-                })
+    # Log execution
+    self.execution_log.append({
+    "run_id": run_id,
+    "route": route,
+    "total_time": time.time() - start_time,
+    "phases": self.timing_log.copy(),
+    "success": True
+    })
                 
-                await asyncio.sleep(0)
+    await asyncio.sleep(0)
     return state
                 
-            except Exception as e:
-                self.execution_log.append({
-                    "run_id": run_id,
-                    "error": str(e),
-                    "total_time": time.time() - start_time,
-                    "success": False
-                })
-                raise
+    except Exception as e:
+    self.execution_log.append({
+    "run_id": run_id,
+    "error": str(e),
+    "total_time": time.time() - start_time,
+    "success": False
+    })
+    raise
     
     return IntegratedOrchestrator()
 
@@ -938,7 +925,6 @@ class TestIntegratedDataAnalysisFlow:
     @pytest.mark.asyncio
     async def test_performance_improvement_metrics(self, integrated_orchestrator):
         """Validate 40% performance improvement for data analysis requests"""
-    pass
         # Execute multiple flows and measure
         data_times = []
         optimization_times = []

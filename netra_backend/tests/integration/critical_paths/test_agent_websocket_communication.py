@@ -3,13 +3,13 @@
 Comprehensive Agent WebSocket Communication Test
 
 This test validates:
-1. Agent creation via WebSocket
+    1. Agent creation via WebSocket
 2. Message passing between agents
 3. Agent state management and synchronization
 4. Error handling and recovery
 5. Concurrent agent operations
 6. Agent supervisor functionality
-"""
+""""
 
 import asyncio
 import json
@@ -61,9 +61,9 @@ class AgentWebSocketTester:
         self.websocket_url = websocket_url
         self.auth_token = auth_token
         self.websocket = None
-        self.agents: Dict[str, Dict[str, Any]] = {}
+        self.agents: Dict[str, Dict[str, Any]] = {]
         self.messages: List[Dict[str, Any]] = []
-        self.response_futures: Dict[str, asyncio.Future] = {}
+        self.response_futures: Dict[str, asyncio.Future] = {]
         
     async def connect(self):
         """Connect to WebSocket with authentication."""
@@ -100,7 +100,7 @@ class AgentWebSocketTester:
                 elif data.get("type") == "agent_status":
                     agent_id = data.get("agent_id")
                     if agent_id:
-                        self.agents[agent_id] = data.get("status", {})
+                        self.agents[agent_id] = data.get("status", {])
                         
         except websockets.exceptions.ConnectionClosed:
             pass
@@ -128,7 +128,7 @@ class AgentWebSocketTester:
             
     async def create_agent(self, agent_type: str, capabilities: List[str] = None) -> str:
         """Create a new agent."""
-        agent_id = f"test_agent_{uuid.uuid4().hex[:8]}"
+        agent_id = f"test_agent_{uuid.uuid4().hex[:8]]"
         message = AgentTestMessage(
             message_id=str(uuid.uuid4()),
             message_type=MessageType.AGENT_CREATE,

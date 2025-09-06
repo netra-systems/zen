@@ -1,15 +1,17 @@
+from unittest.mock import Mock, patch, MagicMock
+
 """
 L3 Integration Test: WebSocket Heartbeat Monitoring with Redis
 
 Business Value Justification (BVJ):
-- Segment: Platform/Internal
+    - Segment: Platform/Internal
 - Business Goal: Reliability - Detect and handle dead connections promptly
 - Value Impact: Prevents resource waste from zombie connections
 - Strategic Impact: $60K MRR - Connection health for enterprise reliability
 
 L3 Test: Uses real Redis for heartbeat tracking and connection health monitoring.
 Health target: <30 second dead connection detection with automated cleanup.
-"""
+""""
 
 from netra_backend.app.websocket_core import WebSocketManager
 # Test framework import - using pytest fixtures instead
@@ -17,7 +19,7 @@ from pathlib import Path
 import sys
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
 from test_framework.docker.unified_docker_manager import UnifiedDockerManager
-from test_framework.redis.test_redis_manager import TestRedisManager
+from test_framework.redis_test_utils_test_utils.test_redis_manager import TestRedisManager
 from shared.isolated_environment import IsolatedEnvironment
 
 import pytest
@@ -46,7 +48,6 @@ from netra_backend.tests.integration.helpers.redis_l3_helpers import (
 )
 
 class HeartbeatMonitor:
-    pass
 
     """Monitor WebSocket connection heartbeats."""
     
@@ -153,12 +154,10 @@ class HeartbeatMonitor:
 @pytest.mark.integration
 
 class TestWebSocketHeartbeatMonitoringL3:
-    pass
 
     """L3 integration tests for WebSocket heartbeat monitoring."""
     
     @pytest.fixture(scope="class")
-
     async def redis_container(self):
 
         """Set up Redis container for heartbeat monitoring."""
@@ -171,9 +170,8 @@ class TestWebSocketHeartbeatMonitoringL3:
 
         await container.stop()
     
-    @pytest.fixture
-
-    async def redis_client(self, redis_container):
+        @pytest.fixture
+        async def redis_client(self, redis_container):
 
         """Create Redis client for heartbeat tracking."""
 
@@ -185,9 +183,8 @@ class TestWebSocketHeartbeatMonitoringL3:
 
         await client.close()
     
-    @pytest.fixture
-
-    async def websocket_manager(self, redis_container):
+        @pytest.fixture
+        async def websocket_manager(self, redis_container):
 
         """Create WebSocket manager with heartbeat monitoring."""
 
@@ -196,62 +193,60 @@ class TestWebSocketHeartbeatMonitoringL3:
         # Mock: Redis external service isolation for fast, reliable tests without network dependency
         with patch('netra_backend.app.websocket_manager.redis_manager') as mock_redis_mgr:
 
-            test_redis_mgr = RedisManager()
+        test_redis_mgr = RedisManager()
 
-            test_redis_mgr.enabled = True
+        test_redis_mgr.enabled = True
 
-            test_redis_mgr.redis_client = redis.Redis.from_url(redis_url, decode_responses=True)
+        test_redis_mgr.redis_client = redis.Redis.from_url(redis_url, decode_responses=True)
 
-            mock_redis_mgr.return_value = test_redis_mgr
+        mock_redis_mgr.return_value = test_redis_mgr
 
-            mock_redis_mgr.get_client.return_value = test_redis_mgr.redis_client
+        mock_redis_mgr.get_client.return_value = test_redis_mgr.redis_client
             
-            manager = WebSocketManager()
+        manager = WebSocketManager()
 
-            yield manager
+        yield manager
             
-            await test_redis_mgr.redis_client.close()
+        await test_redis_mgr.redis_client.close()
     
-    @pytest.fixture
-
-    async def heartbeat_monitor(self, redis_client):
+        @pytest.fixture
+        async def heartbeat_monitor(self, redis_client):
 
         """Create heartbeat monitor instance."""
 
         await asyncio.sleep(0)
-    return HeartbeatMonitor(redis_client)
+        return HeartbeatMonitor(redis_client)
     
-    @pytest.fixture
-
-    def test_users(self):
-    """Use real service instance."""
-    # TODO: Initialize real service
-    return None
+        @pytest.fixture
+        def test_users(self):
+        """Use real service instance."""
+        # TODO: Initialize real service
+        return None
 
         """Create test users for heartbeat testing."""
 
         return [
 
-            User(
+        User(
 
-                id=f"heartbeat_user_{i}",
+        id=f"heartbeat_user_{i}",
 
-                email=f"heartbeatuser{i}@example.com", 
+        email=f"heartbeatuser{i}@example.com", 
 
-                username=f"heartbeatuser{i}",
+        username=f"heartbeatuser{i}",
 
-                is_active=True,
+        is_active=True,
 
-                created_at=datetime.now(timezone.utc)
+        created_at=datetime.now(timezone.utc)
 
-            )
+        )
 
-            for i in range(5)
+        for i in range(5)
 
         ]
     
-    @pytest.mark.asyncio
-    async def test_basic_heartbeat_functionality(self, websocket_manager, heartbeat_monitor, test_users):
+        @pytest.mark.asyncio
+        async def test_basic_heartbeat_functionality(self, websocket_manager, heartbeat_monitor, test_users):
 
         """Test basic heartbeat send and check functionality."""
 
@@ -295,8 +290,8 @@ class TestWebSocketHeartbeatMonitoringL3:
 
         await heartbeat_monitor.cleanup_dead_connection(user.id, connection_info.connection_id)
     
-    @pytest.mark.asyncio
-    async def test_heartbeat_expiration_detection(self, websocket_manager, heartbeat_monitor, test_users):
+        @pytest.mark.asyncio
+        async def test_heartbeat_expiration_detection(self, websocket_manager, heartbeat_monitor, test_users):
 
         """Test detection of expired heartbeats."""
 
@@ -350,8 +345,8 @@ class TestWebSocketHeartbeatMonitoringL3:
 
         await heartbeat_monitor.cleanup_dead_connection(user.id, connection_info.connection_id)
     
-    @pytest.mark.asyncio
-    async def test_multiple_connection_heartbeat_tracking(self, websocket_manager, heartbeat_monitor, test_users):
+        @pytest.mark.asyncio
+        async def test_multiple_connection_heartbeat_tracking(self, websocket_manager, heartbeat_monitor, test_users):
 
         """Test heartbeat tracking for multiple connections."""
 
@@ -361,19 +356,19 @@ class TestWebSocketHeartbeatMonitoringL3:
 
         for user in test_users:
 
-            websocket = MockWebSocketForRedis(user.id)
+        websocket = MockWebSocketForRedis(user.id)
 
-            connection_info = await websocket_manager.connect_user(user.id, websocket)
+        connection_info = await websocket_manager.connect_user(user.id, websocket)
 
-            if connection_info:
+        if connection_info:
 
-                connections.append((user, websocket, connection_info))
+        connections.append((user, websocket, connection_info))
         
         # Send heartbeats for all connections
 
         for user, _, connection_info in connections:
 
-            await heartbeat_monitor.send_heartbeat(user.id, connection_info.connection_id)
+        await heartbeat_monitor.send_heartbeat(user.id, connection_info.connection_id)
         
         # Verify all heartbeats
 
@@ -381,11 +376,11 @@ class TestWebSocketHeartbeatMonitoringL3:
 
         for user, _, connection_info in connections:
 
-            heartbeat_data = await heartbeat_monitor.check_heartbeat(user.id, connection_info.connection_id)
+        heartbeat_data = await heartbeat_monitor.check_heartbeat(user.id, connection_info.connection_id)
 
-            if heartbeat_data and heartbeat_data["status"] == "alive":
+        if heartbeat_data and heartbeat_data["status"] == "alive":
 
-                active_heartbeats += 1
+        active_heartbeats += 1
         
         assert active_heartbeats == len(connections)
         
@@ -395,9 +390,9 @@ class TestWebSocketHeartbeatMonitoringL3:
 
         for i in range(dead_count):
 
-            user, _, connection_info = connections[i]
+        user, _, connection_info = connections[i]
 
-            await heartbeat_monitor.mark_connection_dead(user.id, connection_info.connection_id)
+        await heartbeat_monitor.mark_connection_dead(user.id, connection_info.connection_id)
         
         # Check dead connection detection
 
@@ -409,12 +404,12 @@ class TestWebSocketHeartbeatMonitoringL3:
 
         for user, websocket, connection_info in connections:
 
-            await websocket_manager.disconnect_user(user.id, websocket)
+        await websocket_manager.disconnect_user(user.id, websocket)
 
-            await heartbeat_monitor.cleanup_dead_connection(user.id, connection_info.connection_id)
+        await heartbeat_monitor.cleanup_dead_connection(user.id, connection_info.connection_id)
     
-    @pytest.mark.asyncio
-    async def test_heartbeat_recovery_after_reconnection(self, websocket_manager, heartbeat_monitor, test_users):
+        @pytest.mark.asyncio
+        async def test_heartbeat_recovery_after_reconnection(self, websocket_manager, heartbeat_monitor, test_users):
 
         """Test heartbeat recovery after connection drop and reconnection."""
 
@@ -470,8 +465,8 @@ class TestWebSocketHeartbeatMonitoringL3:
 
         await heartbeat_monitor.cleanup_dead_connection(user.id, second_connection.connection_id)
     
-    @pytest.mark.asyncio
-    async def test_heartbeat_performance_under_load(self, websocket_manager, heartbeat_monitor, test_users):
+        @pytest.mark.asyncio
+        async def test_heartbeat_performance_under_load(self, websocket_manager, heartbeat_monitor, test_users):
 
         """Test heartbeat performance with multiple concurrent connections."""
 
@@ -483,15 +478,15 @@ class TestWebSocketHeartbeatMonitoringL3:
 
         for i in range(connection_count):
 
-            user_id = f"load_user_{i}"
+        user_id = f"load_user_{i}"
 
-            websocket = MockWebSocketForRedis(user_id)
+        websocket = MockWebSocketForRedis(user_id)
 
-            connection_info = await websocket_manager.connect_user(user_id, websocket)
+        connection_info = await websocket_manager.connect_user(user_id, websocket)
 
-            if connection_info:
+        if connection_info:
 
-                connections.append((user_id, websocket, connection_info))
+        connections.append((user_id, websocket, connection_info))
         
         # Send heartbeats concurrently
 
@@ -501,9 +496,9 @@ class TestWebSocketHeartbeatMonitoringL3:
         
         for user_id, _, connection_info in connections:
 
-            task = heartbeat_monitor.send_heartbeat(user_id, connection_info.connection_id)
+        task = heartbeat_monitor.send_heartbeat(user_id, connection_info.connection_id)
 
-            heartbeat_tasks.append(task)
+        heartbeat_tasks.append(task)
         
         await asyncio.gather(*heartbeat_tasks, return_exceptions=True)
 
@@ -521,9 +516,9 @@ class TestWebSocketHeartbeatMonitoringL3:
         
         for user_id, _, connection_info in connections:
 
-            task = heartbeat_monitor.check_heartbeat(user_id, connection_info.connection_id)
+        task = heartbeat_monitor.check_heartbeat(user_id, connection_info.connection_id)
 
-            verification_tasks.append(task)
+        verification_tasks.append(task)
         
         results = await asyncio.gather(*verification_tasks, return_exceptions=True)
 
@@ -533,7 +528,7 @@ class TestWebSocketHeartbeatMonitoringL3:
 
         successful_heartbeats = sum(1 for result in results 
 
-                                  if not isinstance(result, Exception) and result is not None)
+        if not isinstance(result, Exception) and result is not None)
         
         assert successful_heartbeats >= len(connections) * 0.9  # 90% success rate
 
@@ -543,12 +538,12 @@ class TestWebSocketHeartbeatMonitoringL3:
 
         for user_id, websocket, connection_info in connections:
 
-            await websocket_manager.disconnect_user(user_id, websocket)
+        await websocket_manager.disconnect_user(user_id, websocket)
 
-            await heartbeat_monitor.cleanup_dead_connection(user_id, connection_info.connection_id)
+        await heartbeat_monitor.cleanup_dead_connection(user_id, connection_info.connection_id)
     
-    @pytest.mark.asyncio
-    async def test_automated_dead_connection_cleanup(self, websocket_manager, heartbeat_monitor, test_users):
+        @pytest.mark.asyncio
+        async def test_automated_dead_connection_cleanup(self, websocket_manager, heartbeat_monitor, test_users):
 
         """Test automated cleanup of dead connections."""
 
@@ -596,8 +591,8 @@ class TestWebSocketHeartbeatMonitoringL3:
 
         assert heartbeat_check is None
     
-    @pytest.mark.asyncio
-    async def test_heartbeat_monitoring_reliability(self, websocket_manager, heartbeat_monitor, test_users):
+        @pytest.mark.asyncio
+        async def test_heartbeat_monitoring_reliability(self, websocket_manager, heartbeat_monitor, test_users):
 
         """Test reliability of heartbeat monitoring system."""
 
@@ -623,26 +618,26 @@ class TestWebSocketHeartbeatMonitoringL3:
         
         while time.time() - start_time < monitoring_duration:
 
-            try:
-                # Send heartbeat
+        try:
+        # Send heartbeat
 
-                await heartbeat_monitor.send_heartbeat(user.id, connection_info.connection_id)
+        await heartbeat_monitor.send_heartbeat(user.id, connection_info.connection_id)
 
-                heartbeat_count += 1
+        heartbeat_count += 1
                 
-                # Verify heartbeat immediately
+        # Verify heartbeat immediately
 
-                heartbeat_data = await heartbeat_monitor.check_heartbeat(user.id, connection_info.connection_id)
+        heartbeat_data = await heartbeat_monitor.check_heartbeat(user.id, connection_info.connection_id)
 
-                if heartbeat_data is None:
+        if heartbeat_data is None:
 
-                    missed_heartbeats += 1
+        missed_heartbeats += 1
                 
-            except Exception:
+        except Exception:
 
-                missed_heartbeats += 1
+        missed_heartbeats += 1
             
-            await asyncio.sleep(heartbeat_interval)
+        await asyncio.sleep(heartbeat_interval)
         
         # Calculate reliability metrics
 

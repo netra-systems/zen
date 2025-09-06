@@ -3,7 +3,7 @@
 L4 Integration Test: Dev Environment Agent Response Flow
 
 Tests comprehensive agent message processing and response generation:
-1. Message routing to appropriate agents
+    1. Message routing to appropriate agents
 2. Agent processing and analysis
 3. Response generation and streaming
 4. Response completion and validation
@@ -13,11 +13,11 @@ Tests comprehensive agent message processing and response generation:
 8. Performance under various loads
 
 BVJ:
-- Segment: Free, Early, Mid, Enterprise
+    - Segment: Free, Early, Mid, Enterprise
 - Business Goal: Conversion, Retention, Expansion
 - Value Impact: Core AI interaction quality determining user satisfaction
 - Strategic Impact: Direct revenue impact through AI value delivery and user engagement
-"""
+""""
 
 # Test framework import - using pytest fixtures instead
 
@@ -138,9 +138,9 @@ class AgentResponseFlowTester:
     
     def __init__(self):
         self.session: Optional[aiohttp.ClientSession] = None
-        self.user_tokens: Dict[str, str] = {}
-        self.websocket_connections: Dict[str, Any] = {}
-        self.active_threads: Dict[str, List[Dict[str, Any]]] = {}
+        self.user_tokens: Dict[str, str] = {]
+        self.websocket_connections: Dict[str, Any] = {]
+        self.active_threads: Dict[str, List[Dict[str, Any]]] = {]
         self.response_metrics: Dict[str, List[float]] = {
             "response_times": [],
             "first_token_times": [],
@@ -170,7 +170,7 @@ class AgentResponseFlowTester:
     def log_event(self, user: str, event: str, details: str = ""):
         """Log test events for analysis."""
         timestamp = datetime.now().isoformat()
-        log_entry = f"[{timestamp}] [{user}] {event}"
+        log_entry = f"[{timestamp]] [{user]] {event]"
         if details:
             log_entry += f" - {details}"
         self.test_logs.append(log_entry)
@@ -233,7 +233,7 @@ class AgentResponseFlowTester:
         self.log_event(email, "WS_CONNECT_START", "Establishing WebSocket connection")
         
         try:
-            headers = {"Authorization": f"Bearer {self.user_tokens[email]}"}
+            headers = {"Authorization": f"Bearer {self.user_tokens[email]]"]
             
             ws = await websockets.connect(
                 WEBSOCKET_URL,
@@ -330,7 +330,7 @@ class AgentResponseFlowTester:
         message = test_case["message"]
         start_time = time.time()
         
-        self.log_event(email, "MESSAGE_SEND", f"Thread: {thread_id}, Case: {test_case['name']}")
+        self.log_event(email, "MESSAGE_SEND", f"Thread: {thread_id], Case: {test_case['name']]")
         
         try:
             # Send message to agent
@@ -399,7 +399,7 @@ class AgentResponseFlowTester:
                         result["agent_type"] = data.get("agent_type", result["agent_type"])
                         
                         self.log_event(email, "RESPONSE_COMPLETE", 
-                                     f"Agent: {result['agent_type']}, Length: {result['response_length']}")
+                                     f"Agent: {result['agent_type']], Length: {result['response_length']]")
                         
                     elif data.get("type") == "agent_response":
                         # Non-streaming response
@@ -456,12 +456,12 @@ class AgentResponseFlowTester:
             "total_time": 0
         }
         
-        thread_id = await self.create_test_thread(email, f"conversation_{scenario['name']}")
+        thread_id = await self.create_test_thread(email, f"conversation_{scenario['name']]")
         if not thread_id:
             return result
             
         start_time = time.time()
-        self.log_event(email, "CONVERSATION_START", f"Scenario: {scenario['name']}")
+        self.log_event(email, "CONVERSATION_START", f"Scenario: {scenario['name']]")
         
         result["conversation_started"] = True
         previous_responses = []
@@ -469,7 +469,7 @@ class AgentResponseFlowTester:
         try:
             for i, message in enumerate(scenario["messages"]):
                 test_case = {
-                    "name": f"{scenario['name']}_message_{i+1}",
+                    "name": f"{scenario['name']]_message_{i+1]",
                     "message": message,
                     "expected_agent_type": "conversational",
                     "max_response_time": 15,
@@ -483,7 +483,7 @@ class AgentResponseFlowTester:
                     previous_responses.append(response_result["response_content"])
                     
                     self.log_event(email, "CONVERSATION_MESSAGE", 
-                                 f"Message {i+1}/{len(scenario['messages'])} processed")
+                                 f"Message {i+1]/{len(scenario['messages'])] processed")
                 else:
                     self.log_event(email, "CONVERSATION_FAILED", f"Message {i+1} failed")
                     break
@@ -507,7 +507,7 @@ class AgentResponseFlowTester:
         result["total_time"] = time.time() - start_time
         
         self.log_event(email, "CONVERSATION_COMPLETE", 
-                     f"Processed: {result['messages_processed']}/{result['total_messages']}")
+                     f"Processed: {result['messages_processed']]/{result['total_messages']]")
         
         return result
     
@@ -560,7 +560,7 @@ class AgentResponseFlowTester:
                 # Check if handoff was successful
                 if (result["target_agent"] and 
                     result["target_agent"] != result["original_agent"]):
-                    result["handoff_successful"] = True
+                        result["handoff_successful"] = True
                     result["context_preserved"] = self._check_context_preservation(
                         initial_result.get("response_content", ""),
                         followup_result.get("response_content", "")
@@ -572,7 +572,7 @@ class AgentResponseFlowTester:
         result["handoff_time"] = time.time() - start_time
         
         self.log_event(email, "HANDOFF_TEST_COMPLETE", 
-                     f"Success: {result['handoff_successful']}, Time: {result['handoff_time']:.2f}s")
+                     f"Success: {result['handoff_successful']], Time: {result['handoff_time']:.2f]s")
         
         return result
     
@@ -652,7 +652,7 @@ class AgentResponseFlowTester:
             self.log_event(email, "CONCURRENT_ERROR", str(e))
             
         self.log_event(email, "CONCURRENT_TEST_COMPLETE", 
-                     f"Received: {result['responses_received']}/{result['concurrent_messages_sent']}")
+                     f"Received: {result['responses_received']]/{result['concurrent_messages_sent']]")
         
         return result
     
@@ -816,12 +816,12 @@ class AgentResponseFlowTester:
                 thread_id = await self.create_test_thread(email, test_case["name"])
                 if thread_id:
                     result = await self.test_message_processing(email, thread_id, test_case)
-                    user_results[f"message_{test_case['name']}"] = result
+                    user_results[f"message_{test_case['name']]"] = result
             
             # Test conversation scenarios
             for scenario in CONVERSATION_SCENARIOS:
                 result = await self.test_conversation_flow(email, scenario)
-                user_results[f"conversation_{scenario['name']}"] = result
+                user_results[f"conversation_{scenario['name']]"] = result
             
             # Test agent handoff
             handoff_result = await self.test_agent_handoff(email)
@@ -939,24 +939,24 @@ async def test_dev_environment_agent_response_flow():
         print("\n" + "="*60)
         print("PERFORMANCE METRICS")
         print("="*60)
-        print(f"Avg Response Time: {perf['avg_response_time']:.2f}s")
-        print(f"Avg First Token Time: {perf['avg_first_token_time']:.2f}s")
-        print(f"Avg Response Length: {perf['avg_response_length']:.0f} chars")
-        print(f"Total Responses: {perf['total_responses_tested']}")
+        print(f"Avg Response Time: {perf['avg_response_time']:.2f]s")
+        print(f"Avg First Token Time: {perf['avg_first_token_time']:.2f]s")
+        print(f"Avg Response Length: {perf['avg_response_length']:.0f] chars")
+        print(f"Total Responses: {perf['total_responses_tested']]")
         
         # Summary
         summary = results["summary"]
         print("\n" + "="*60)
         print("SUMMARY")
         print("="*60)
-        print(f"Total Tests: {summary['total_tests']}")
-        print(f"Passed Tests: {summary['passed_tests']}")
-        print(f"Success Rate: {summary['success_rate']:.1f}%")
-        print(f"Avg Quality Score: {summary['avg_quality_score']:.2f}")
-        print(f"Total Responses: {summary['total_responses']}")
+        print(f"Total Tests: {summary['total_tests']]")
+        print(f"Passed Tests: {summary['passed_tests']]")
+        print(f"Success Rate: {summary['success_rate']:.1f]%")
+        print(f"Avg Quality Score: {summary['avg_quality_score']:.2f]")
+        print(f"Total Responses: {summary['total_responses']]")
         
         # Assert critical conditions
-        assert summary["success_rate"] >= 70, f"Success rate too low: {summary['success_rate']:.1f}%"
+        assert summary["success_rate"] >= 70, f"Success rate too low: {summary['success_rate']:.1f]%"
         assert summary["total_responses"] >= 10, "Not enough responses tested"
         assert perf["avg_response_time"] < 20, "Average response time too slow"
         assert summary["avg_quality_score"] >= 0.5, "Average quality score too low"

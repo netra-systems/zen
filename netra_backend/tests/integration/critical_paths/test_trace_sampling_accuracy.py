@@ -1,7 +1,9 @@
+from unittest.mock import Mock, patch, MagicMock
+
 """Trace Sampling Accuracy L3 Integration Tests
 
 Business Value Justification (BVJ):
-- Segment: Platform/Internal (operational excellence for all tiers)
+    - Segment: Platform/Internal (operational excellence for all tiers)
 - Business Goal: Accurate trace sampling to balance observability with infrastructure costs
 - Value Impact: Ensures cost-effective tracing while maintaining $20K MRR performance visibility
 - Strategic Impact: Optimizes monitoring costs while preserving critical trace data for debugging
@@ -9,7 +11,7 @@ Business Value Justification (BVJ):
 Critical Path: Trace generation -> Sampling decision -> Sample preservation -> Analysis accuracy -> Cost optimization
 Coverage: Sampling rate accuracy, statistical validity, performance impact, cost control, data quality
 L3 Realism: Tests with real tracing infrastructure and actual sampling algorithms
-"""
+""""
 
 import sys
 from pathlib import Path
@@ -700,7 +702,7 @@ async def test_sampling_rate_accuracy_l3(trace_sampling_validator):
     """Test accuracy of trace sampling rates against configured rules.
     
     L3: Tests with real sampling engine and statistical validation.
-    """
+    """"
     # Generate diverse trace population
     traces = await trace_sampling_validator.generate_trace_population(800)
     
@@ -729,7 +731,7 @@ async def test_sampling_consistency_l3(trace_sampling_validator):
     """Test consistency of sampling decisions across multiple iterations.
     
     L3: Tests sampling stability and repeatability.
-    """
+    """"
     # Test consistency across multiple iterations
     consistency_results = await trace_sampling_validator.test_sampling_consistency(iterations=4)
     
@@ -746,7 +748,7 @@ async def test_sampling_performance_impact_l3(trace_sampling_validator):
     """Test performance impact of sampling decisions under load.
     
     L3: Tests sampling engine performance with realistic trace volumes.
-    """
+    """"
     # Test performance with high trace volume
     performance_results = await trace_sampling_validator.test_sampling_performance_impact(1500)
     
@@ -761,7 +763,7 @@ async def test_priority_based_sampling_l3(trace_sampling_validator):
     """Test priority-based sampling for critical vs normal operations.
     
     L3: Tests sampling prioritization for business-critical traces.
-    """
+    """"
     # Generate traces with mixed priorities
     traces = await trace_sampling_validator.generate_trace_population(600)
     
@@ -786,7 +788,7 @@ async def test_cost_aware_sampling_l3(trace_sampling_validator):
     """Test cost-aware sampling optimization.
     
     L3: Tests sampling efficiency and cost control.
-    """
+    """"
     # Generate traces and apply sampling
     traces = await trace_sampling_validator.generate_trace_population(500)
     await trace_sampling_validator.apply_sampling_decisions(traces)
@@ -815,7 +817,7 @@ async def test_sampling_rule_coverage_l3(trace_sampling_validator):
     """Test coverage and effectiveness of sampling rules.
     
     L3: Tests that all trace types are properly handled by sampling rules.
-    """
+    """"
     # Generate comprehensive trace population
     traces = await trace_sampling_validator.generate_trace_population(400)
     

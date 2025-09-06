@@ -1,7 +1,9 @@
+from unittest.mock import Mock, patch, MagicMock
+
 """Alert Routing and Escalation L3 Integration Tests
 
 Business Value Justification (BVJ):
-- Segment: Platform/Internal (operational excellence protecting all revenue tiers)
+    - Segment: Platform/Internal (operational excellence protecting all revenue tiers)
 - Business Goal: Reliable alert routing to prevent service degradation and revenue loss
 - Value Impact: Prevents $20K MRR loss through proactive incident response
 - Strategic Impact: Ensures SLA compliance and maintains customer trust through rapid issue resolution
@@ -9,7 +11,7 @@ Business Value Justification (BVJ):
 Critical Path: Alert generation -> Routing rules -> Escalation logic -> Notification delivery -> Response tracking
 Coverage: Alert routing accuracy, escalation timing, notification reliability, integration with external systems
 L3 Realism: Tests with real notification services and actual escalation workflows
-"""
+""""
 
 import sys
 from pathlib import Path
@@ -242,7 +244,7 @@ class AlertRoutingValidator:
                 alert_id=str(uuid.uuid4()),
                 component=scenario["component"],
                 severity=scenario["severity"],
-                message=f"{scenario['message']} (instance {i})",
+                message=f"{scenario['message']] (instance {i])",
                 timestamp=datetime.now(timezone.utc),
                 metadata=scenario["metadata"],
                 resolved=False
@@ -327,8 +329,8 @@ class AlertRoutingValidator:
     
     async def _validate_routing_decision(self, alert: SystemAlert, rule: AlertRule, 
                                        decision: Dict[str, Any]) -> Dict[str, Any]:
-        """Validate that routing decision matches rule configuration."""
-        validation = {"correct": True, "issues": []}
+                                           """Validate that routing decision matches rule configuration."""
+        validation = {"correct": True, "issues": []]
         
         # Check severity threshold
         alert_severity = AlertSeverity(alert.severity)
@@ -340,7 +342,7 @@ class AlertRoutingValidator:
             
             if alert_level < threshold_level:
                 validation["correct"] = False
-                validation["issues"].append(f"Alert severity {alert_severity.value} below threshold {rule.severity_threshold.value}")
+                validation["issues"].append(f"Alert severity {alert_severity.value] below threshold {rule.severity_threshold.value]")
         
         # Check channels used
         expected_channels = [ch.value for ch in rule.primary_channels]
@@ -348,7 +350,7 @@ class AlertRoutingValidator:
         
         if set(actual_channels) != set(expected_channels):
             validation["correct"] = False
-            validation["issues"].append(f"Channel mismatch: expected {expected_channels}, got {actual_channels}")
+            validation["issues"].append(f"Channel mismatch: expected {expected_channels], got {actual_channels]")
         
         return validation
     
@@ -545,7 +547,7 @@ class NotificationService:
     
     async def send_notification(self, alert: SystemAlert, channel: NotificationChannel, 
                               recipient: str) -> Dict[str, Any]:
-        """Send notification via specified channel."""
+                                  """Send notification via specified channel."""
         await asyncio.sleep(0.05)  # Simulate delivery time
         
         # Simulate delivery success based on channel reliability
@@ -608,7 +610,7 @@ async def test_alert_routing_accuracy_l3(alert_routing_validator):
     """Test alert routing accuracy with real routing rules.
     
     L3: Tests with real alert routing engine and notification services.
-    """
+    """"
     # Generate diverse test alerts
     test_alerts = await alert_routing_validator.generate_test_alerts(15)
     
@@ -629,7 +631,7 @@ async def test_critical_alert_escalation_l3(alert_routing_validator):
     """Test escalation timing for critical alerts.
     
     L3: Tests escalation workflows with real timing requirements.
-    """
+    """"
     # Generate critical alerts
     test_alerts = await alert_routing_validator.generate_test_alerts(8)
     critical_alerts = [alert for alert in test_alerts if alert.severity == "critical"]
@@ -655,7 +657,7 @@ async def test_notification_delivery_reliability_l3(alert_routing_validator):
     """Test notification delivery reliability across channels.
     
     L3: Tests with real notification services and delivery tracking.
-    """
+    """"
     # Generate test alerts for delivery testing
     test_alerts = await alert_routing_validator.generate_test_alerts(12)
     
@@ -680,7 +682,7 @@ async def test_alert_routing_performance_l3(alert_routing_validator):
     """Test alert routing performance under load.
     
     L3: Tests routing performance with realistic alert volumes.
-    """
+    """"
     # Generate high volume of alerts
     test_alerts = await alert_routing_validator.generate_test_alerts(25)
     
@@ -705,7 +707,7 @@ async def test_alert_deduplication_and_grouping_l3(alert_routing_validator):
     """Test alert deduplication and intelligent grouping.
     
     L3: Tests deduplication logic with real alert patterns.
-    """
+    """"
     # Generate similar alerts that should be deduplicated
     base_alerts = await alert_routing_validator.generate_test_alerts(5)
     

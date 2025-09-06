@@ -1,7 +1,7 @@
 """
 L3 Integration Test: Session Sharing
 Tests session sharing across services and devices
-"""
+""""
 
 import sys
 from pathlib import Path

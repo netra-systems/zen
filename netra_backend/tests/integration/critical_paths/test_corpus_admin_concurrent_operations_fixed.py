@@ -2,17 +2,17 @@
 Tests for concurrent corpus operations and conflict resolution.
 
 This module tests concurrent corpus modifications to ensure:
-- No data corruption under concurrent access
+    - No data corruption under concurrent access
 - Proper resource locking
 - Transaction rollback on failures
 - Multi-tenant isolation
 
 Business Value Justification (BVJ):
-- Segment: Enterprise
+    - Segment: Enterprise
 - Business Goal: Platform Reliability, Multi-tenant Safety
 - Value Impact: Prevents data corruption for enterprise customers with multiple teams
 - Strategic Impact: Critical for enterprise scalability and $100K+ ARR accounts
-"""
+""""
 
 import asyncio
 import pytest
@@ -65,7 +65,7 @@ class TestCorpusAdminConcurrentOperations:
         """
         Test that multiple corpus admin agents can be initialized concurrently
         without conflicts.
-        """
+        """"
         env = await self._setup_concurrent_environment()
         
         # Validate all agents initialized properly
@@ -88,7 +88,7 @@ class TestCorpusAdminConcurrentOperations:
         """
         Test that multiple agents can check entry conditions concurrently
         without interference.
-        """
+        """"
         env = await self._setup_concurrent_environment()
         
         # Create test requests
@@ -133,7 +133,7 @@ class TestCorpusAdminConcurrentOperations:
         """
         Test that concurrent executions are properly isolated and don't
         interfere with each other's state.
-        """
+        """"
         env = await self._setup_concurrent_environment()
         
         # Define concurrent execution function
@@ -206,7 +206,7 @@ class TestCorpusAdminConcurrentOperations:
     async def test_concurrent_cleanup_operations(self):
         """
         Test that concurrent cleanup operations don't interfere with each other.
-        """
+        """"
         env = await self._setup_concurrent_environment()
         
         # First, execute operations to have something to clean up
@@ -256,7 +256,7 @@ class TestCorpusAdminConcurrentOperations:
         """
         Test performance characteristics of concurrent corpus operations
         to ensure system scales properly.
-        """
+        """"
         env = await self._setup_concurrent_environment()
         
         # Benchmark different concurrent operation patterns
@@ -341,14 +341,14 @@ class TestCorpusAdminConcurrentOperations:
     async def test_agent_health_under_concurrent_load(self):
         """
         Test that agent health status remains stable under concurrent load.
-        """
+        """"
         env = await self._setup_concurrent_environment()
         
         # Check initial health
         initial_health = [agent.get_health_status() for agent in env["agents"]]
         
         for i, health in enumerate(initial_health):
-            assert health["agent_health"] == "healthy", f"Agent {i} should start healthy"
+            assert health["agent_health"] == "healthy", f"Agent {i] should start healthy"
         
         # Apply concurrent load
         async def load_operation(agent_index: int, operation_count: int):
@@ -385,7 +385,7 @@ class TestCorpusAdminConcurrentOperations:
         
         for i, health in enumerate(final_health):
             # Agents should maintain health status
-            assert health["agent_health"] in ["healthy", "degraded"], f"Agent {i} health after load: {health['agent_health']}"
+            assert health["agent_health"] in ["healthy", "degraded"], f"Agent {i] health after load: {health['agent_health']]"
         
         # Count successful operations
         total_operations = sum(sum(results) for results in load_results)
@@ -404,7 +404,7 @@ class TestCorpusAdminConcurrentOperations:
         """
         Test concurrent operations that compete for the same resources
         to ensure proper synchronization and data integrity.
-        """
+        """"
         env = await self._setup_concurrent_environment()
         
         # Shared resource identifier that all agents will try to access
@@ -481,9 +481,9 @@ class TestCorpusAdminConcurrentOperations:
         # Log detailed results for debugging
         for result in results:
             status = "SUCCESS" if result["success"] else "FAILED"
-            print(f"Agent {result['agent_index']} {result['operation_type']}: {status} ({result['execution_time']:.2f}s)")
+            print(f"Agent {result['agent_index']] {result['operation_type']]: {status] ({result['execution_time']:.2f]s)")
             if result["error"]:
-                print(f"  Error: {result['error']}")
+                print(f"  Error: {result['error']]")
 
     @pytest.mark.asyncio
     @pytest.mark.integration
@@ -492,11 +492,11 @@ class TestCorpusAdminConcurrentOperations:
         """
         Enhanced test for state isolation with more rigorous validation
         of concurrent state modifications using run_id tracking.
-        """
+        """"
         env = await self._setup_concurrent_environment()
         
         # Track state modifications to detect cross-contamination
-        state_tracking: Dict[str, Dict[str, Any]] = {}
+        state_tracking: Dict[str, Dict[str, Any]] = {]
         
         async def isolated_state_operation(agent_index: int):
             agent = env["agents"][agent_index]

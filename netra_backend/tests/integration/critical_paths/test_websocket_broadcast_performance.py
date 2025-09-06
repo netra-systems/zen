@@ -1,15 +1,17 @@
+from unittest.mock import Mock, patch, MagicMock
+
 """
 L3 Integration Test: WebSocket Broadcast Performance with Redis
 
 Business Value Justification (BVJ):
-- Segment: Enterprise
+    - Segment: Enterprise
 - Business Goal: Scalability - Handle enterprise-scale broadcasts efficiently
 - Value Impact: Enables real-time features for large teams and workspaces
 - Strategic Impact: $60K MRR - Enterprise broadcast capability for collaboration
 
 L3 Test: Uses real Redis for broadcast performance validation.
 Performance target: 1000+ concurrent connections with <100ms broadcast latency.
-"""
+""""
 
 from netra_backend.app.websocket_core import WebSocketManager
 # Test framework import - using pytest fixtures instead
@@ -17,7 +19,7 @@ from pathlib import Path
 import sys
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
 from test_framework.docker.unified_docker_manager import UnifiedDockerManager
-from test_framework.redis.test_redis_manager import TestRedisManager
+from test_framework.redis_test_utils_test_utils.test_redis_manager import TestRedisManager
 from shared.isolated_environment import IsolatedEnvironment
 
 import pytest
@@ -48,7 +50,6 @@ from netra_backend.tests.integration.helpers.redis_l3_helpers import (
 )
 
 class BroadcastPerformanceTracker:
-    pass
 
     """Track broadcast performance metrics."""
     
@@ -113,12 +114,10 @@ class BroadcastPerformanceTracker:
 @pytest.mark.integration
 
 class TestWebSocketBroadcastPerformanceL3:
-    pass
 
     """L3 integration tests for WebSocket broadcast performance."""
     
     @pytest.fixture(scope="class")
-
     async def redis_container(self):
 
         """Set up Redis container for broadcast performance testing."""
@@ -131,9 +130,8 @@ class TestWebSocketBroadcastPerformanceL3:
 
         await container.stop()
     
-    @pytest.fixture
-
-    async def redis_client(self, redis_container):
+        @pytest.fixture
+        async def redis_client(self, redis_container):
 
         """Create Redis client for broadcast operations."""
 
@@ -145,9 +143,8 @@ class TestWebSocketBroadcastPerformanceL3:
 
         await client.close()
     
-    @pytest.fixture
-
-    async def websocket_manager(self, redis_container):
+        @pytest.fixture
+        async def websocket_manager(self, redis_container):
 
         """Create WebSocket manager for broadcast testing."""
 
@@ -156,65 +153,63 @@ class TestWebSocketBroadcastPerformanceL3:
         # Mock: Redis external service isolation for fast, reliable tests without network dependency
         with patch('netra_backend.app.websocket_manager.redis_manager') as mock_redis_mgr:
 
-            test_redis_mgr = RedisManager()
+        test_redis_mgr = RedisManager()
 
-            test_redis_mgr.enabled = True
+        test_redis_mgr.enabled = True
 
-            test_redis_mgr.redis_client = redis.Redis.from_url(redis_url, decode_responses=True)
+        test_redis_mgr.redis_client = redis.Redis.from_url(redis_url, decode_responses=True)
 
-            mock_redis_mgr.return_value = test_redis_mgr
+        mock_redis_mgr.return_value = test_redis_mgr
 
-            mock_redis_mgr.get_client.return_value = test_redis_mgr.redis_client
+        mock_redis_mgr.get_client.return_value = test_redis_mgr.redis_client
             
-            manager = WebSocketManager()
+        manager = WebSocketManager()
 
-            yield manager
+        yield manager
             
-            await test_redis_mgr.redis_client.close()
+        await test_redis_mgr.redis_client.close()
     
-    @pytest.fixture
-
-    def large_user_pool(self):
-    """Use real service instance."""
-    # TODO: Initialize real service
-    await asyncio.sleep(0)
-    return None
+        @pytest.fixture
+        def large_user_pool(self):
+        """Use real service instance."""
+        # TODO: Initialize real service
+        await asyncio.sleep(0)
+        return None
 
         """Create large pool of test users for performance testing."""
 
         return [
 
-            User(
+        User(
 
-                id=f"perf_user_{i:04d}",
+        id=f"perf_user_{i:04d}",
 
-                email=f"perfuser{i:04d}@example.com", 
+        email=f"perfuser{i:04d}@example.com", 
 
-                username=f"perfuser{i:04d}",
+        username=f"perfuser{i:04d}",
 
-                is_active=True,
+        is_active=True,
 
-                created_at=datetime.now(timezone.utc)
+        created_at=datetime.now(timezone.utc)
 
-            )
+        )
 
-            for i in range(1000)  # Large user pool for performance testing
+        for i in range(1000)  # Large user pool for performance testing
 
         ]
     
-    @pytest.fixture
-
-    def performance_tracker(self):
-    """Use real service instance."""
-    # TODO: Initialize real service
-    return None
+        @pytest.fixture
+        def performance_tracker(self):
+        """Use real service instance."""
+        # TODO: Initialize real service
+        return None
 
         """Create performance tracking instance."""
 
         return BroadcastPerformanceTracker()
     
-    @pytest.mark.asyncio
-    async def test_small_scale_broadcast_baseline(self, websocket_manager, redis_client, large_user_pool, performance_tracker):
+        @pytest.mark.asyncio
+        async def test_small_scale_broadcast_baseline(self, websocket_manager, redis_client, large_user_pool, performance_tracker):
 
         """Test broadcast performance baseline with small user count."""
 
@@ -230,13 +225,13 @@ class TestWebSocketBroadcastPerformanceL3:
 
         for user in users:
 
-            websocket = MockWebSocketForRedis(user.id)
+        websocket = MockWebSocketForRedis(user.id)
 
-            connection_info = await websocket_manager.connect_user(user.id, websocket)
+        connection_info = await websocket_manager.connect_user(user.id, websocket)
 
-            if connection_info:
+        if connection_info:
 
-                connections.append((user, websocket))
+        connections.append((user, websocket))
         
         connection_time = time.time() - connection_start
 
@@ -248,19 +243,19 @@ class TestWebSocketBroadcastPerformanceL3:
 
         broadcast_message = create_test_message(
 
-            "small_broadcast", 
+        "small_broadcast", 
 
-            "system", 
+        "system", 
 
-            {
+        {
 
-                "broadcast_id": str(uuid4()),
+        "broadcast_id": str(uuid4()),
 
-                "content": "Small scale broadcast test",
+        "content": "Small scale broadcast test",
 
-                "target_count": actual_connections
+        "target_count": actual_connections
 
-            }
+        }
 
         )
         
@@ -276,23 +271,23 @@ class TestWebSocketBroadcastPerformanceL3:
 
         for user, _ in connections:
 
-            channel = f"user:{user.id}"
+        channel = f"user:{user.id}"
 
-            task = redis_client.publish(channel, json.dumps(broadcast_message))
+        task = redis_client.publish(channel, json.dumps(broadcast_message))
 
-            tasks.append(task)
+        tasks.append(task)
         
         results = await asyncio.gather(*tasks, return_exceptions=True)
         
         for result in results:
 
-            if isinstance(result, Exception):
+        if isinstance(result, Exception):
 
-                error_count += 1
+        error_count += 1
 
-            else:
+        else:
 
-                success_count += 1
+        success_count += 1
         
         broadcast_time = time.time() - broadcast_start
         
@@ -310,10 +305,10 @@ class TestWebSocketBroadcastPerformanceL3:
 
         for user, websocket in connections:
 
-            await websocket_manager.disconnect_user(user.id, websocket)
+        await websocket_manager.disconnect_user(user.id, websocket)
     
-    @pytest.mark.asyncio
-    async def test_medium_scale_broadcast_performance(self, websocket_manager, redis_client, large_user_pool, performance_tracker):
+        @pytest.mark.asyncio
+        async def test_medium_scale_broadcast_performance(self, websocket_manager, redis_client, large_user_pool, performance_tracker):
 
         """Test broadcast performance with medium user count."""
 
@@ -329,33 +324,32 @@ class TestWebSocketBroadcastPerformanceL3:
 
         for i in range(0, len(users), batch_size):
 
-            batch = users[i:i + batch_size]
+        batch = users[i:i + batch_size]
 
-            batch_tasks = []
+        batch_tasks = []
             
-            for user in batch:
+        for user in batch:
 
-                websocket = MockWebSocketForRedis(user.id)
+        websocket = MockWebSocketForRedis(user.id)
 
-                task = websocket_manager.connect_user(user.id, websocket)
+        task = websocket_manager.connect_user(user.id, websocket)
 
-                batch_tasks.append((user, websocket, task))
+        batch_tasks.append((user, websocket, task))
             
-            # Execute batch
+        # Execute batch
 
-            for user, websocket, task in batch_tasks:
+        for user, websocket, task in batch_tasks:
 
-                try:
+        try:
 
-                    connection_info = await task
+        connection_info = await task
 
-                    if connection_info:
+        if connection_info:
 
-                        connections.append((user, websocket))
+        connections.append((user, websocket))
 
-                except Exception:
+        except Exception:
 
-                    pass
         
         actual_connections = len(connections)
 
@@ -365,21 +359,21 @@ class TestWebSocketBroadcastPerformanceL3:
 
         broadcast_message = create_test_message(
 
-            "medium_broadcast", 
+        "medium_broadcast", 
 
-            "system", 
+        "system", 
 
-            {
+        {
 
-                "broadcast_id": str(uuid4()),
+        "broadcast_id": str(uuid4()),
 
-                "content": "Medium scale broadcast test",
+        "content": "Medium scale broadcast test",
 
-                "target_count": actual_connections,
+        "target_count": actual_connections,
 
-                "timestamp": time.time()
+        "timestamp": time.time()
 
-            }
+        }
 
         )
         
@@ -391,9 +385,9 @@ class TestWebSocketBroadcastPerformanceL3:
 
         for user, _ in connections:
 
-            channel = f"user:{user.id}"
+        channel = f"user:{user.id}"
 
-            pipe.publish(channel, json.dumps(broadcast_message))
+        pipe.publish(channel, json.dumps(broadcast_message))
         
         results = await pipe.execute()
 
@@ -417,14 +411,14 @@ class TestWebSocketBroadcastPerformanceL3:
 
         for user, websocket in connections:
 
-            task = websocket_manager.disconnect_user(user.id, websocket)
+        task = websocket_manager.disconnect_user(user.id, websocket)
 
-            cleanup_tasks.append(task)
+        cleanup_tasks.append(task)
         
         await asyncio.gather(*cleanup_tasks, return_exceptions=True)
     
-    @pytest.mark.asyncio
-    async def test_large_scale_broadcast_performance(self, websocket_manager, redis_client, large_user_pool, performance_tracker):
+        @pytest.mark.asyncio
+        async def test_large_scale_broadcast_performance(self, websocket_manager, redis_client, large_user_pool, performance_tracker):
 
         """Test broadcast performance with large user count."""
 
@@ -442,50 +436,49 @@ class TestWebSocketBroadcastPerformanceL3:
         
         for i in range(0, len(users), batch_size):
 
-            batch = users[i:i + batch_size]
+        batch = users[i:i + batch_size]
 
-            batch_connections = []
+        batch_connections = []
             
-            # Connect batch concurrently
+        # Connect batch concurrently
 
-            tasks = []
+        tasks = []
 
-            for user in batch:
+        for user in batch:
 
-                websocket = MockWebSocketForRedis(user.id)
+        websocket = MockWebSocketForRedis(user.id)
 
-                task = websocket_manager.connect_user(user.id, websocket)
+        task = websocket_manager.connect_user(user.id, websocket)
 
-                tasks.append((user, websocket, task))
+        tasks.append((user, websocket, task))
             
-            # Execute batch with timeout
+        # Execute batch with timeout
 
-            try:
+        try:
 
-                results = await asyncio.wait_for(
+        results = await asyncio.wait_for(
 
-                    asyncio.gather(*[task for _, _, task in tasks], return_exceptions=True),
+        asyncio.gather(*[task for _, _, task in tasks], return_exceptions=True),
 
-                    timeout=10.0
+        timeout=10.0
 
-                )
+        )
                 
-                for i, result in enumerate(results):
+        for i, result in enumerate(results):
 
-                    if not isinstance(result, Exception) and result is not None:
+        if not isinstance(result, Exception) and result is not None:
 
-                        user, websocket, _ = tasks[i]
+        user, websocket, _ = tasks[i]
 
-                        batch_connections.append((user, websocket))
+        batch_connections.append((user, websocket))
                 
-                connection_batches.append(batch_connections)
+        connection_batches.append(batch_connections)
 
-                connections.extend(batch_connections)
+        connections.extend(batch_connections)
                 
-            except asyncio.TimeoutError:
-                # Handle partial batch success
+        except asyncio.TimeoutError:
+        # Handle partial batch success
 
-                pass
         
         actual_connections = len(connections)
 
@@ -495,21 +488,21 @@ class TestWebSocketBroadcastPerformanceL3:
 
         broadcast_message = create_test_message(
 
-            "large_broadcast", 
+        "large_broadcast", 
 
-            "system", 
+        "system", 
 
-            {
+        {
 
-                "broadcast_id": str(uuid4()),
+        "broadcast_id": str(uuid4()),
 
-                "content": "Large scale broadcast test",
+        "content": "Large scale broadcast test",
 
-                "target_count": actual_connections,
+        "target_count": actual_connections,
 
-                "scale": "large"
+        "scale": "large"
 
-            }
+        }
 
         )
         
@@ -523,25 +516,24 @@ class TestWebSocketBroadcastPerformanceL3:
         
         for i in range(0, len(connections), batch_size):
 
-            batch = connections[i:i + batch_size]
+        batch = connections[i:i + batch_size]
 
-            pipe = redis_client.pipeline()
+        pipe = redis_client.pipeline()
             
-            for user, _ in batch:
+        for user, _ in batch:
 
-                channel = f"user:{user.id}"
+        channel = f"user:{user.id}"
 
-                pipe.publish(channel, json.dumps(broadcast_message))
+        pipe.publish(channel, json.dumps(broadcast_message))
             
-            try:
+        try:
 
-                results = await pipe.execute()
+        results = await pipe.execute()
 
-                success_count += len([r for r in results if r >= 0])
+        success_count += len([r for r in results if r >= 0])
 
-            except Exception:
+        except Exception:
 
-                pass
         
         broadcast_time = time.time() - broadcast_start
 
@@ -559,18 +551,18 @@ class TestWebSocketBroadcastPerformanceL3:
 
         for batch in connection_batches:
 
-            cleanup_tasks = []
+        cleanup_tasks = []
 
-            for user, websocket in batch:
+        for user, websocket in batch:
 
-                task = websocket_manager.disconnect_user(user.id, websocket)
+        task = websocket_manager.disconnect_user(user.id, websocket)
 
-                cleanup_tasks.append(task)
+        cleanup_tasks.append(task)
             
-            await asyncio.gather(*cleanup_tasks, return_exceptions=True)
+        await asyncio.gather(*cleanup_tasks, return_exceptions=True)
     
-    @pytest.mark.asyncio
-    async def test_broadcast_latency_measurement(self, websocket_manager, redis_client, large_user_pool, performance_tracker):
+        @pytest.mark.asyncio
+        async def test_broadcast_latency_measurement(self, websocket_manager, redis_client, large_user_pool, performance_tracker):
 
         """Test broadcast latency with timing measurements."""
 
@@ -584,13 +576,13 @@ class TestWebSocketBroadcastPerformanceL3:
 
         for user in users:
 
-            websocket = MockWebSocketForRedis(user.id)
+        websocket = MockWebSocketForRedis(user.id)
 
-            connection_info = await websocket_manager.connect_user(user.id, websocket)
+        connection_info = await websocket_manager.connect_user(user.id, websocket)
 
-            if connection_info:
+        if connection_info:
 
-                connections.append((user, websocket))
+        connections.append((user, websocket))
         
         # Test individual delivery latency
 
@@ -598,45 +590,45 @@ class TestWebSocketBroadcastPerformanceL3:
 
         for test_round in range(latency_tests):
 
-            test_message = create_test_message(
+        test_message = create_test_message(
 
-                "latency_test", 
+        "latency_test", 
 
-                "system", 
+        "system", 
 
-                {
+        {
 
-                    "test_round": test_round,
+        "test_round": test_round,
 
-                    "timestamp": time.time(),
+        "timestamp": time.time(),
 
-                    "latency_test": True
+        "latency_test": True
 
-                }
+        }
 
-            )
+        )
             
-            # Measure individual delivery times
+        # Measure individual delivery times
 
-            delivery_times = []
+        delivery_times = []
 
-            for user, _ in connections[:10]:  # Test subset for latency
+        for user, _ in connections[:10]:  # Test subset for latency
 
-                channel = f"user:{user.id}"
+        channel = f"user:{user.id}"
                 
-                delivery_start = time.time()
+        delivery_start = time.time()
 
-                await redis_client.publish(channel, json.dumps(test_message))
+        await redis_client.publish(channel, json.dumps(test_message))
 
-                delivery_time = time.time() - delivery_start
+        delivery_time = time.time() - delivery_start
                 
-                delivery_times.append(delivery_time)
+        delivery_times.append(delivery_time)
 
-                performance_tracker.record_delivery(delivery_time)
+        performance_tracker.record_delivery(delivery_time)
             
-            # Brief pause between tests
+        # Brief pause between tests
 
-            await asyncio.sleep(0.1)
+        await asyncio.sleep(0.1)
         
         # Analyze latency performance
 
@@ -652,10 +644,10 @@ class TestWebSocketBroadcastPerformanceL3:
 
         for user, websocket in connections:
 
-            await websocket_manager.disconnect_user(user.id, websocket)
+        await websocket_manager.disconnect_user(user.id, websocket)
     
-    @pytest.mark.asyncio
-    async def test_concurrent_broadcast_handling(self, websocket_manager, redis_client, large_user_pool, performance_tracker):
+        @pytest.mark.asyncio
+        async def test_concurrent_broadcast_handling(self, websocket_manager, redis_client, large_user_pool, performance_tracker):
 
         """Test handling of concurrent broadcast operations."""
 
@@ -669,13 +661,13 @@ class TestWebSocketBroadcastPerformanceL3:
 
         for user in users:
 
-            websocket = MockWebSocketForRedis(user.id)
+        websocket = MockWebSocketForRedis(user.id)
 
-            connection_info = await websocket_manager.connect_user(user.id, websocket)
+        connection_info = await websocket_manager.connect_user(user.id, websocket)
 
-            if connection_info:
+        if connection_info:
 
-                connections.append((user, websocket))
+        connections.append((user, websocket))
         
         # Create concurrent broadcasts
 
@@ -685,58 +677,57 @@ class TestWebSocketBroadcastPerformanceL3:
         
         for broadcast_id in range(concurrent_broadcasts):
 
-            broadcast_message = create_test_message(
+        broadcast_message = create_test_message(
 
-                "concurrent_broadcast", 
+        "concurrent_broadcast", 
 
-                "system", 
+        "system", 
 
-                {
+        {
 
-                    "broadcast_id": broadcast_id,
+        "broadcast_id": broadcast_id,
 
-                    "content": f"Concurrent broadcast {broadcast_id}",
+        "content": f"Concurrent broadcast {broadcast_id}",
 
-                    "concurrent_test": True
+        "concurrent_test": True
 
-                }
+        }
 
-            )
+        )
             
-            # Create broadcast task
+        # Create broadcast task
 
-            async def execute_broadcast(msg, b_id):
+        async def execute_broadcast(msg, b_id):
 
-                start_time = time.time()
+        start_time = time.time()
 
-                success_count = 0
+        success_count = 0
                 
-                pipe = redis_client.pipeline()
+        pipe = redis_client.pipeline()
 
-                for user, _ in connections:
+        for user, _ in connections:
 
-                    channel = f"user:{user.id}"
+        channel = f"user:{user.id}"
 
-                    pipe.publish(channel, json.dumps(msg))
+        pipe.publish(channel, json.dumps(msg))
                 
-                try:
+        try:
 
-                    results = await pipe.execute()
+        results = await pipe.execute()
 
-                    success_count = len([r for r in results if r >= 0])
+        success_count = len([r for r in results if r >= 0])
 
-                except Exception:
+        except Exception:
 
-                    pass
                 
-                duration = time.time() - start_time
+        duration = time.time() - start_time
 
-                await asyncio.sleep(0)
-    return duration, success_count, b_id
+        await asyncio.sleep(0)
+        return duration, success_count, b_id
             
-            task = execute_broadcast(broadcast_message, broadcast_id)
+        task = execute_broadcast(broadcast_message, broadcast_id)
 
-            broadcast_tasks.append(task)
+        broadcast_tasks.append(task)
         
         # Execute concurrent broadcasts
 
@@ -754,15 +745,15 @@ class TestWebSocketBroadcastPerformanceL3:
         
         for result in results:
 
-            if not isinstance(result, Exception):
+        if not isinstance(result, Exception):
 
-                duration, success_count, broadcast_id = result
+        duration, success_count, broadcast_id = result
 
-                performance_tracker.record_broadcast(duration, success_count, 0)
+        performance_tracker.record_broadcast(duration, success_count, 0)
 
-                successful_broadcasts += 1
+        successful_broadcasts += 1
 
-                total_successes += success_count
+        total_successes += success_count
         
         # Performance assertions
 
@@ -776,10 +767,10 @@ class TestWebSocketBroadcastPerformanceL3:
 
         for user, websocket in connections:
 
-            await websocket_manager.disconnect_user(user.id, websocket)
+        await websocket_manager.disconnect_user(user.id, websocket)
     
-    @pytest.mark.asyncio
-    async def test_broadcast_memory_efficiency(self, websocket_manager, redis_client, large_user_pool, performance_tracker):
+        @pytest.mark.asyncio
+        async def test_broadcast_memory_efficiency(self, websocket_manager, redis_client, large_user_pool, performance_tracker):
 
         """Test memory efficiency during broadcast operations."""
 
@@ -801,13 +792,13 @@ class TestWebSocketBroadcastPerformanceL3:
 
         for user in users:
 
-            websocket = MockWebSocketForRedis(user.id)
+        websocket = MockWebSocketForRedis(user.id)
 
-            connection_info = await websocket_manager.connect_user(user.id, websocket)
+        connection_info = await websocket_manager.connect_user(user.id, websocket)
 
-            if connection_info:
+        if connection_info:
 
-                connections.append((user, websocket))
+        connections.append((user, websocket))
         
         # Monitor memory after connections
 
@@ -822,49 +813,49 @@ class TestWebSocketBroadcastPerformanceL3:
         broadcast_rounds = 5
 
         for round_num in range(broadcast_rounds):
-            # Large message payload
+        # Large message payload
 
-            large_message = create_test_message(
+        large_message = create_test_message(
 
-                "memory_test", 
+        "memory_test", 
 
-                "system", 
+        "system", 
 
-                {
+        {
 
-                    "round": round_num,
+        "round": round_num,
 
-                    "large_payload": "x" * 1000,  # 1KB payload
+        "large_payload": "x" * 1000,  # 1KB payload
 
-                    "metadata": {f"field_{i}": f"value_{i}" for i in range(100)}
+        "metadata": {f"field_{i}": f"value_{i}" for i in range(100)}
 
-                }
+        }
 
-            )
+        )
             
-            # Broadcast with memory monitoring
+        # Broadcast with memory monitoring
 
-            pipe = redis_client.pipeline()
+        pipe = redis_client.pipeline()
 
-            for user, _ in connections:
+        for user, _ in connections:
 
-                channel = f"user:{user.id}"
+        channel = f"user:{user.id}"
 
-                pipe.publish(channel, json.dumps(large_message))
+        pipe.publish(channel, json.dumps(large_message))
             
-            await pipe.execute()
+        await pipe.execute()
             
-            # Monitor memory usage
+        # Monitor memory usage
 
-            current_info = await redis_client.info("memory")
+        current_info = await redis_client.info("memory")
 
-            current_memory = current_info.get("used_memory", 0)
+        current_memory = current_info.get("used_memory", 0)
 
-            performance_tracker.record_memory(current_memory)
+        performance_tracker.record_memory(current_memory)
             
-            # Brief pause for memory cleanup
+        # Brief pause for memory cleanup
 
-            await asyncio.sleep(0.2)
+        await asyncio.sleep(0.2)
         
         # Final memory check
 
@@ -892,7 +883,7 @@ class TestWebSocketBroadcastPerformanceL3:
 
         for user, websocket in connections:
 
-            await websocket_manager.disconnect_user(user.id, websocket)
+        await websocket_manager.disconnect_user(user.id, websocket)
         
         # Get performance summary
 

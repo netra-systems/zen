@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Comprehensive test for enterprise authentication integration:
-1. SAML 2.0 SSO integration
+    1. SAML 2.0 SSO integration
 2. OAuth 2.0 / OpenID Connect
 3. Active Directory / LDAP integration
 4. Multi-factor authentication (MFA)
@@ -11,7 +11,7 @@ Comprehensive test for enterprise authentication integration:
 8. Token refresh and revocation
 
 This test validates complete enterprise authentication capabilities.
-"""
+""""
 
 # Test framework import - using pytest fixtures instead
 
@@ -80,8 +80,8 @@ class EnterpriseAuthTester:
     def __init__(self):
         self.session: Optional[aiohttp.ClientSession] = None
         self.test_users: List[Dict[str, Any]] = []
-        self.auth_tokens: Dict[str, str] = {}
-        self.sessions: Dict[str, Dict[str, Any]] = {}
+        self.auth_tokens: Dict[str, str] = {]
+        self.sessions: Dict[str, Dict[str, Any]] = {]
         self.audit_logs: List[Dict[str, Any]] = []
         
     async def __aenter__(self):
@@ -115,7 +115,7 @@ class EnterpriseAuthTester:
                     data = await response.json()
                     saml_auth_url = data.get("auth_url")
                     saml_request_id = data.get("request_id")
-                    print(f"[OK] SAML request initiated: {saml_request_id}")
+                    print(f"[OK] SAML request initiated: {saml_request_id]")
                     
                     # Step 2: Simulate IDP authentication
                     idp_response = await self._simulate_idp_auth(
@@ -136,11 +136,11 @@ class EnterpriseAuthTester:
                             if token and user:
                                 self.auth_tokens["saml_user"] = token
                                 self.test_users.append(user)
-                                print(f"[OK] SAML SSO successful for {user.get('email')}")
+                                print(f"[OK] SAML SSO successful for {user.get('email')]")
                                 return True
                                 
         except Exception as e:
-            print(f"[ERROR] SAML SSO failed: {e}")
+            print(f"[ERROR] SAML SSO failed: {e]")
             
         return False
         
@@ -216,11 +216,11 @@ class EnterpriseAuthTester:
                                     if userinfo_response.status == 200:
                                         userinfo = await userinfo_response.json()
                                         self.test_users.append(userinfo)
-                                        print(f"[OK] OAuth user info: {userinfo.get('email')}")
+                                        print(f"[OK] OAuth user info: {userinfo.get('email')]")
                                         return True
                                         
         except Exception as e:
-            print(f"[ERROR] OAuth flow failed: {e}")
+            print(f"[ERROR] OAuth flow failed: {e]")
             
         return False
         
@@ -253,7 +253,7 @@ class EnterpriseAuthTester:
                         
                         # Test group membership
                         groups = user.get("groups", [])
-                        print(f"[OK] User groups: {groups}")
+                        print(f"[OK] User groups: {groups]")
                         
                         # Test LDAP search
                         search_params = {
@@ -268,11 +268,11 @@ class EnterpriseAuthTester:
                         ) as search_response:
                             if search_response.status == 200:
                                 results = await search_response.json()
-                                print(f"[OK] LDAP search returned {len(results.get('entries', []))} entries")
+                                print(f"[OK] LDAP search returned {len(results.get('entries', []))] entries")
                                 return True
                                 
         except Exception as e:
-            print(f"[ERROR] LDAP integration failed: {e}")
+            print(f"[ERROR] LDAP integration failed: {e]")
             
         return False
         
@@ -331,12 +331,12 @@ class EnterpriseAuthTester:
                                             # Test backup codes
                                             backup_codes = verify_data.get("backup_codes", [])
                                             if backup_codes:
-                                                print(f"[OK] {len(backup_codes)} backup codes generated")
+                                                print(f"[OK] {len(backup_codes)] backup codes generated")
                                                 
                                             return True
                                             
         except Exception as e:
-            print(f"[ERROR] MFA test failed: {e}")
+            print(f"[ERROR] MFA test failed: {e]")
             
         return False
         
@@ -380,7 +380,7 @@ class EnterpriseAuthTester:
                     headers={"Authorization": f"Bearer {admin_token}"}
                 ) as response:
                     if response.status in [200, 201]:
-                        print(f"[OK] Created role: {role['name']}")
+                        print(f"[OK] Created role: {role['name']]")
                         
             # Test permission checking
             test_permissions = [
@@ -407,15 +407,15 @@ class EnterpriseAuthTester:
                         allowed = data.get("allowed", False)
                         
                         if allowed == expected:
-                            print(f"[OK] {role_name} {permission}: {allowed} (expected)")
+                            print(f"[OK] {role_name] {permission]: {allowed] (expected)")
                         else:
-                            print(f"[ERROR] {role_name} {permission}: {allowed} (expected {expected})")
+                            print(f"[ERROR] {role_name] {permission]: {allowed] (expected {expected])")
                             all_correct = False
                             
             return all_correct
             
         except Exception as e:
-            print(f"[ERROR] RBAC test failed: {e}")
+            print(f"[ERROR] RBAC test failed: {e]")
             
         return False
         
@@ -447,7 +447,7 @@ class EnterpriseAuthTester:
                     key_id = data.get("key_id")
                     
                     if api_key:
-                        print(f"[OK] API key created: {key_id}")
+                        print(f"[OK] API key created: {key_id]")
                         
                         # Test API key authentication
                         async with self.session.get(
@@ -475,7 +475,7 @@ class EnterpriseAuthTester:
                                                 return True
                                                 
         except Exception as e:
-            print(f"[ERROR] API key management failed: {e}")
+            print(f"[ERROR] API key management failed: {e]")
             
         return False
         
@@ -498,7 +498,7 @@ class EnterpriseAuthTester:
                     
                     if session_id:
                         self.sessions[session_id] = data
-                        print(f"[OK] Session created: {session_id}")
+                        print(f"[OK] Session created: {session_id]")
                         
                         # Test session across services
                         services = [
@@ -513,7 +513,7 @@ class EnterpriseAuthTester:
                                 headers={"X-Session-ID": session_id}
                             ) as service_response:
                                 if service_response.status in [200, 401]:
-                                    print(f"[OK] Session validated at {service_url}")
+                                    print(f"[OK] Session validated at {service_url]")
                                     
                         # Test session invalidation
                         async with self.session.delete(
@@ -533,7 +533,7 @@ class EnterpriseAuthTester:
                                         return True
                                         
         except Exception as e:
-            print(f"[ERROR] Session management failed: {e}")
+            print(f"[ERROR] Session management failed: {e]")
             
         return False
         
@@ -603,7 +603,7 @@ class EnterpriseAuthTester:
                                                     return True
                                                     
         except Exception as e:
-            print(f"[ERROR] Token refresh test failed: {e}")
+            print(f"[ERROR] Token refresh test failed: {e]")
             
         return False
         
@@ -633,7 +633,7 @@ class EnterpriseAuthTester:
                     }
                     
                     found_events = event_types.intersection(expected_events)
-                    print(f"[OK] Found audit events: {found_events}")
+                    print(f"[OK] Found audit events: {found_events]")
                     
                     # Verify log structure
                     if logs:
@@ -646,7 +646,7 @@ class EnterpriseAuthTester:
                             return True
                             
         except Exception as e:
-            print(f"[ERROR] Audit logging test failed: {e}")
+            print(f"[ERROR] Audit logging test failed: {e]")
             
         return False
         
@@ -702,7 +702,7 @@ async def test_enterprise_auth_integration():
         print("\nACTIVE TOKENS:")
         print("-"*40)
         for user_type, token in tester.auth_tokens.items():
-            print(f"  {user_type}: {token[:20]}...")
+            print(f"  {user_type]: {token[:20]]...")
             
         print("="*80)
         
@@ -715,7 +715,7 @@ async def test_enterprise_auth_integration():
         if passed_tests == total_tests:
             print("\n[SUCCESS] All enterprise authentication features operational!")
         else:
-            print(f"\n[WARNING] {total_tests - passed_tests} tests failed")
+            print(f"\n[WARNING] {total_tests - passed_tests] tests failed")
             
         # Assert critical auth methods work
         critical_tests = ["saml_sso", "oauth_flow", "rbac", "audit_logging"]

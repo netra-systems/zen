@@ -1,14 +1,16 @@
+from unittest.mock import AsyncMock, Mock, patch, MagicMock
+
 """Auth Token Validation Cross-Service Integration Tests (L3)
 
 Tests token validation and propagation across different services and components.
 Validates JWT handling, service-to-service auth, and token security.
 
 Business Value Justification (BVJ):
-- Segment: All (security foundation for all segments)
+    - Segment: All (security foundation for all segments)
 - Business Goal: Security - prevent unauthorized access
 - Value Impact: Token breaches can compromise entire platform
 - Revenue Impact: Critical - security incidents destroy customer trust
-"""
+""""
 
 from shared.isolated_environment import get_env
 from netra_backend.app.websocket_core import WebSocketManager
@@ -44,32 +46,30 @@ from netra_backend.app.middleware.auth_middleware import AuthMiddleware
 from netra_backend.app.services.user_auth_service import UserAuthService as AuthService
 
 class TestAuthTokenValidationCrossService:
-    pass
 
     """Test auth token validation across different services."""
     
     @pytest.fixture
-
     def valid_jwt_token(self):
-    """Use real service instance."""
-    # TODO: Initialize real service
-    return None
+        """Use real service instance."""
+        # TODO: Initialize real service
+        return None
 
         """Create a valid JWT token for testing."""
 
         payload = {
 
-            "sub": str(uuid.uuid4()),  # user_id
+        "sub": str(uuid.uuid4()),  # user_id
 
-            "email": "test@example.com",
+        "email": "test@example.com",
 
-            "exp": datetime.now(timezone.utc) + timedelta(hours=1),
+        "exp": datetime.now(timezone.utc) + timedelta(hours=1),
 
-            "iat": datetime.now(timezone.utc),
+        "iat": datetime.now(timezone.utc),
 
-            "type": "access",
+        "type": "access",
 
-            "permissions": ["read", "write"]
+        "permissions": ["read", "write"]
 
         }
         
@@ -81,26 +81,25 @@ class TestAuthTokenValidationCrossService:
 
         return token
     
-    @pytest.fixture
-
-    def expired_jwt_token(self):
-    """Use real service instance."""
-    # TODO: Initialize real service
-    return None
+        @pytest.fixture
+        def expired_jwt_token(self):
+        """Use real service instance."""
+        # TODO: Initialize real service
+        return None
 
         """Create an expired JWT token for testing."""
 
         payload = {
 
-            "sub": str(uuid.uuid4()),
+        "sub": str(uuid.uuid4()),
 
-            "email": "test@example.com",
+        "email": "test@example.com",
 
-            "exp": datetime.now(timezone.utc) - timedelta(hours=1),  # Expired
+        "exp": datetime.now(timezone.utc) - timedelta(hours=1),  # Expired
 
-            "iat": datetime.now(timezone.utc) - timedelta(hours=2),
+        "iat": datetime.now(timezone.utc) - timedelta(hours=2),
 
-            "type": "access"
+        "type": "access"
 
         }
         
@@ -111,9 +110,8 @@ class TestAuthTokenValidationCrossService:
 
         return token
     
-    @pytest.fixture
-
-    async def async_client(self):
+        @pytest.fixture
+        async def async_client(self):
 
         """Create async client for testing."""
 
@@ -121,15 +119,15 @@ class TestAuthTokenValidationCrossService:
 
         async with AsyncClient(transport=transport, base_url="http://test") as ac:
 
-            yield ac
+        yield ac
     
-    @pytest.mark.integration
+        @pytest.mark.integration
 
-    @pytest.mark.L3
+        @pytest.mark.L3
 
-    @pytest.mark.skip(reason="Cross-service test requires auth service to be running - needs different test setup")
-    @pytest.mark.asyncio
-    async def test_valid_token_accepted_by_api_endpoint(self, async_client, valid_jwt_token):
+        @pytest.mark.skip(reason="Cross-service test requires auth service to be running - needs different test setup")
+        @pytest.mark.asyncio
+        async def test_valid_token_accepted_by_api_endpoint(self, async_client, valid_jwt_token):
 
         """Test 1: Valid token should be accepted by protected API endpoints."""
 
@@ -138,24 +136,24 @@ class TestAuthTokenValidationCrossService:
         # Mock user lookup
 
         # Mock: Generic component isolation for controlled unit testing
-        with patch('netra_backend.app.services.user_service.CRUDUser.get', return_value=MagicNone  # TODO: Use real service instance):
+        with patch('netra_backend.app.services.user_service.CRUDUser.get', return_value=MagicMock()  # TODO: Use real service instance):
 
-            # Mock: Component isolation for testing without external dependencies
-            with patch('netra_backend.app.auth_integration.auth.get_current_user', return_value={'user_id': '123', 'username': 'test_user', 'email': 'test@example.com'}):
+        # Mock: Component isolation for testing without external dependencies
+        with patch('netra_backend.app.auth_integration.auth.get_current_user', return_value={'user_id': '123', 'username': 'test_user', 'email': 'test@example.com'}):
                 
-                response = await async_client.get("/api/users/profile", headers=headers)
+        response = await async_client.get("/api/users/profile", headers=headers)
                 
-                # Should not await asyncio.sleep(0)
-    return 401/403
+        # Should not await asyncio.sleep(0)
+        return 401/403
 
-                assert response.status_code not in [401, 403], f"Valid token rejected with {response.status_code}"
+        assert response.status_code not in [401, 403], f"Valid token rejected with {response.status_code]"
     
-    @pytest.mark.integration
+        @pytest.mark.integration
 
-    @pytest.mark.L3
+        @pytest.mark.L3
 
-    @pytest.mark.asyncio
-    async def test_expired_token_rejected(self, async_client, expired_jwt_token):
+        @pytest.mark.asyncio
+        async def test_expired_token_rejected(self, async_client, expired_jwt_token):
 
         """Test 2: Expired tokens should be rejected."""
 
@@ -164,7 +162,7 @@ class TestAuthTokenValidationCrossService:
         response = await async_client.get("/api/user/profile", headers=headers)
         
         # Should await asyncio.sleep(0)
-    return 401 Unauthorized
+        return 401 Unauthorized
 
         assert response.status_code == 401
         
@@ -172,59 +170,59 @@ class TestAuthTokenValidationCrossService:
 
         assert "expired" in data.get("detail", "").lower()
     
-    @pytest.mark.integration
+        @pytest.mark.integration
 
-    @pytest.mark.L3
+        @pytest.mark.L3
 
-    @pytest.mark.asyncio
-    async def test_malformed_token_rejected(self, async_client):
+        @pytest.mark.asyncio
+        async def test_malformed_token_rejected(self, async_client):
 
         """Test 3: Malformed tokens should be rejected."""
 
         test_cases = [
 
-            "not.a.valid.jwt",
+        "not.a.valid.jwt",
 
-            "Bearer",
+        "Bearer",
 
-            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9",  # Incomplete JWT
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9",  # Incomplete JWT
 
-            "random_string_123",
+        "random_string_123",
 
         ]
         
         for malformed_token in test_cases:
 
-            headers = {"Authorization": f"Bearer {malformed_token}"}
+        headers = {"Authorization": f"Bearer {malformed_token}"}
             
-            response = await async_client.get("/api/user/profile", headers=headers)
+        response = await async_client.get("/api/user/profile", headers=headers)
             
-            # Should await asyncio.sleep(0)
-    return 401 Unauthorized
+        # Should await asyncio.sleep(0)
+        return 401 Unauthorized
 
-            assert response.status_code == 401, f"Malformed token '{malformed_token}' was not rejected"
+        assert response.status_code == 401, f"Malformed token '{malformed_token}' was not rejected"
     
-    @pytest.mark.integration
+        @pytest.mark.integration
 
-    @pytest.mark.L3
+        @pytest.mark.L3
 
-    @pytest.mark.asyncio
-    async def test_token_with_invalid_signature_rejected(self, async_client):
+        @pytest.mark.asyncio
+        async def test_token_with_invalid_signature_rejected(self, async_client):
 
         """Test 4: Tokens with invalid signatures should be rejected."""
         # Create token with wrong secret
 
         payload = {
 
-            "sub": str(uuid.uuid4()),
+        "sub": str(uuid.uuid4()),
 
-            "email": "test@example.com",
+        "email": "test@example.com",
 
-            "exp": datetime.now(timezone.utc) + timedelta(hours=1),
+        "exp": datetime.now(timezone.utc) + timedelta(hours=1),
 
-            "iat": datetime.now(timezone.utc),
+        "iat": datetime.now(timezone.utc),
 
-            "type": "access"
+        "type": "access"
 
         }
         
@@ -237,7 +235,7 @@ class TestAuthTokenValidationCrossService:
         response = await async_client.get("/api/user/profile", headers=headers)
         
         # Should await asyncio.sleep(0)
-    return 401 Unauthorized
+        return 401 Unauthorized
 
         assert response.status_code == 401
         
@@ -245,12 +243,12 @@ class TestAuthTokenValidationCrossService:
 
         assert "invalid" in data.get("detail", "").lower() or "signature" in data.get("detail", "").lower()
     
-    @pytest.mark.integration
+        @pytest.mark.integration
 
-    @pytest.mark.L3
+        @pytest.mark.L3
 
-    @pytest.mark.asyncio
-    async def test_service_to_service_token_propagation(self):
+        @pytest.mark.asyncio
+        async def test_service_to_service_token_propagation(self):
 
         """Test 5: Tokens should propagate correctly in service-to-service calls."""
 
@@ -261,19 +259,19 @@ class TestAuthTokenValidationCrossService:
         # Mock service clients
 
         # Mock: Generic component isolation for controlled unit testing
-        mock_service_a = AsyncNone  # TODO: Use real service instance
+        mock_service_a = AsyncMock()  # TODO: Use real service instance
 
         # Mock: Generic component isolation for controlled unit testing
-        mock_service_b = AsyncNone  # TODO: Use real service instance
+        mock_service_b = AsyncMock()  # TODO: Use real service instance
         
         # Service A calls Service B with token
 
         async def service_a_call():
 
-            headers = {"Authorization": f"Bearer {token}"}
+        headers = {"Authorization": f"Bearer {token}"}
 
-            await asyncio.sleep(0)
-    return await mock_service_b.call_api(headers=headers)
+        await asyncio.sleep(0)
+        return await mock_service_b.call_api(headers=headers)
         
         mock_service_b.call_api.return_value = {"status": "success"}
         
@@ -289,14 +287,14 @@ class TestAuthTokenValidationCrossService:
 
         assert "headers" in call_args.kwargs
 
-        assert call_args.kwargs["headers"]["Authorization"] == f"Bearer {token}"
+        assert call_args.kwargs["headers"]["Authorization"] == f"Bearer {token]"
     
-    @pytest.mark.integration
+        @pytest.mark.integration
 
-    @pytest.mark.L3
+        @pytest.mark.L3
 
-    @pytest.mark.asyncio
-    async def test_websocket_token_validation(self, async_client, valid_jwt_token):
+        @pytest.mark.asyncio
+        async def test_websocket_token_validation(self, async_client, valid_jwt_token):
 
         """Test 6: WebSocket connections should validate tokens."""
         # WebSocket connection with token
@@ -305,41 +303,41 @@ class TestAuthTokenValidationCrossService:
         
         # Mock: WebSocket connection isolation for testing without network overhead
         with patch('app.websocket.manager.WebSocketManager.validate_token', return_value=True) as mock_validate:
-            # Mock WebSocket connection attempt
+        # Mock WebSocket connection attempt
 
-            mock_validate.return_value = True
+        mock_validate.return_value = True
             
-            # Simulate WebSocket auth check
+        # Simulate WebSocket auth check
 
-            is_valid = mock_validate(valid_jwt_token)
+        is_valid = mock_validate(valid_jwt_token)
             
-            assert is_valid == True
+        assert is_valid == True
 
-            mock_validate.assert_called_with(valid_jwt_token)
+        mock_validate.assert_called_with(valid_jwt_token)
     
-    @pytest.mark.integration
+        @pytest.mark.integration
 
-    @pytest.mark.L3
+        @pytest.mark.L3
 
-    @pytest.mark.asyncio
-    async def test_token_permissions_enforcement(self, async_client):
+        @pytest.mark.asyncio
+        async def test_token_permissions_enforcement(self, async_client):
 
         """Test 7: Token permissions should be enforced at endpoint level."""
         # Create token with limited permissions
 
         payload = {
 
-            "sub": str(uuid.uuid4()),
+        "sub": str(uuid.uuid4()),
 
-            "email": "limited@example.com",
+        "email": "limited@example.com",
 
-            "exp": datetime.now(timezone.utc) + timedelta(hours=1),
+        "exp": datetime.now(timezone.utc) + timedelta(hours=1),
 
-            "iat": datetime.now(timezone.utc),
+        "iat": datetime.now(timezone.utc),
 
-            "type": "access",
+        "type": "access",
 
-            "permissions": ["read"]  # Only read permission
+        "permissions": ["read"]  # Only read permission
 
         }
         
@@ -355,19 +353,19 @@ class TestAuthTokenValidationCrossService:
         # Mock: Component isolation for testing without external dependencies
         with patch('app.middleware.auth_middleware.AuthMiddleware.check_permissions', return_value=False):
 
-            response = await async_client.post("/api/data/create", headers=headers, json={})
+        response = await async_client.post("/api/data/create", headers=headers, json={})
             
-            # Should await asyncio.sleep(0)
-    return 403 Forbidden
+        # Should await asyncio.sleep(0)
+        return 403 Forbidden
 
-            assert response.status_code in [403, 401, 404]  # 404 if endpoint doesn't exist
+        assert response.status_code in [403, 401, 404]  # 404 if endpoint doesn't exist
     
-    @pytest.mark.integration
+        @pytest.mark.integration
 
-    @pytest.mark.L3
+        @pytest.mark.L3
 
-    @pytest.mark.asyncio
-    async def test_token_refresh_maintains_user_context(self, async_client):
+        @pytest.mark.asyncio
+        async def test_token_refresh_maintains_user_context(self, async_client):
 
         """Test 8: Token refresh should maintain user context and permissions."""
 
@@ -379,17 +377,17 @@ class TestAuthTokenValidationCrossService:
 
         original_payload = {
 
-            "sub": user_id,
+        "sub": user_id,
 
-            "email": "admin@example.com",
+        "email": "admin@example.com",
 
-            "exp": datetime.now(timezone.utc) + timedelta(minutes=5),
+        "exp": datetime.now(timezone.utc) + timedelta(minutes=5),
 
-            "iat": datetime.now(timezone.utc),
+        "iat": datetime.now(timezone.utc),
 
-            "type": "access",
+        "type": "access",
 
-            "permissions": original_permissions
+        "permissions": original_permissions
 
         }
         
@@ -397,36 +395,36 @@ class TestAuthTokenValidationCrossService:
 
         refreshed_payload = {
 
-            "sub": user_id,  # Same user
+        "sub": user_id,  # Same user
 
-            "email": "admin@example.com",
+        "email": "admin@example.com",
 
-            "exp": datetime.now(timezone.utc) + timedelta(hours=1),  # New expiry
+        "exp": datetime.now(timezone.utc) + timedelta(hours=1),  # New expiry
 
-            "iat": datetime.now(timezone.utc),
+        "iat": datetime.now(timezone.utc),
 
-            "type": "access",
+        "type": "access",
 
-            "permissions": original_permissions  # Same permissions
+        "permissions": original_permissions  # Same permissions
 
         }
         
         # Mock: Component isolation for testing without external dependencies
         with patch('app.services.auth_service.AuthService.refresh_tokens', return_value=refreshed_payload):
-            # Verify user context is maintained
+        # Verify user context is maintained
 
-            assert refreshed_payload["sub"] == original_payload["sub"]
+        assert refreshed_payload["sub"] == original_payload["sub"]
 
-            assert refreshed_payload["permissions"] == original_payload["permissions"]
+        assert refreshed_payload["permissions"] == original_payload["permissions"]
 
-            assert refreshed_payload["email"] == original_payload["email"]
+        assert refreshed_payload["email"] == original_payload["email"]
     
-    @pytest.mark.integration
+        @pytest.mark.integration
 
-    @pytest.mark.L3
+        @pytest.mark.L3
 
-    @pytest.mark.asyncio
-    async def test_concurrent_token_validation_performance(self, async_client, valid_jwt_token):
+        @pytest.mark.asyncio
+        async def test_concurrent_token_validation_performance(self, async_client, valid_jwt_token):
 
         """Test 9: System should handle concurrent token validations efficiently."""
 
@@ -436,11 +434,11 @@ class TestAuthTokenValidationCrossService:
 
         async def make_request():
 
-            # Mock: Component isolation for testing without external dependencies
-            with patch('netra_backend.app.services.token_service.TokenService.validate_token_jwt', return_value={'valid': True, 'user_id': '123'}):
+        # Mock: Component isolation for testing without external dependencies
+        with patch('netra_backend.app.services.token_service.TokenService.validate_token_jwt', return_value={'valid': True, 'user_id': '123'}):
 
-                await asyncio.sleep(0)
-    return await async_client.get("/api/health", headers=headers)
+        await asyncio.sleep(0)
+        return await async_client.get("/api/health", headers=headers)
         
         # Send 10 concurrent requests
 
@@ -462,12 +460,12 @@ class TestAuthTokenValidationCrossService:
 
         assert success_count >= 8, f"Only {success_count}/10 requests succeeded"
     
-    @pytest.mark.integration
+        @pytest.mark.integration
 
-    @pytest.mark.L3
+        @pytest.mark.L3
 
-    @pytest.mark.asyncio
-    async def test_token_blacklist_enforcement(self, async_client, valid_jwt_token):
+        @pytest.mark.asyncio
+        async def test_token_blacklist_enforcement(self, async_client, valid_jwt_token):
 
         """Test 10: Blacklisted tokens should be rejected even if valid."""
         # Add token to blacklist
@@ -477,15 +475,15 @@ class TestAuthTokenValidationCrossService:
         # Mock: Component isolation for testing without external dependencies
         with patch('app.services.auth_service.AuthService.is_token_blacklisted', return_value=True):
 
-            headers = {"Authorization": f"Bearer {blacklisted_token}"}
+        headers = {"Authorization": f"Bearer {blacklisted_token}"}
             
-            response = await async_client.get("/api/user/profile", headers=headers)
+        response = await async_client.get("/api/user/profile", headers=headers)
             
-            # Should await asyncio.sleep(0)
-    return 401 Unauthorized
+        # Should await asyncio.sleep(0)
+        return 401 Unauthorized
 
-            assert response.status_code == 401
+        assert response.status_code == 401
             
-            data = response.json()
+        data = response.json()
 
-            assert "revoked" in data.get("detail", "").lower() or "blacklisted" in data.get("detail", "").lower()
+        assert "revoked" in data.get("detail", "").lower() or "blacklisted" in data.get("detail", "").lower()

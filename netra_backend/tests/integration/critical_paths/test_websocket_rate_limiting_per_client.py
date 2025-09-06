@@ -1,15 +1,17 @@
+from unittest.mock import Mock, patch, MagicMock
+
 """
 L3 Integration Test: WebSocket Per-Client Rate Limiting with Redis
 
 Business Value Justification (BVJ):
-- Segment: Platform/Internal
+    - Segment: Platform/Internal
 - Business Goal: Stability - Prevent abuse and ensure fair resource usage
 - Value Impact: Protects service availability from malicious or excessive usage
 - Strategic Impact: $60K MRR - Rate limiting for enterprise service reliability
 
 L3 Test: Uses real Redis for rate limiting state and enforcement.
 Rate limiting target: 100 msgs/min per client with 99.9% accuracy.
-"""
+""""
 
 from netra_backend.app.websocket_core import WebSocketManager
 # Test framework import - using pytest fixtures instead
@@ -17,7 +19,7 @@ from pathlib import Path
 import sys
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
 from test_framework.docker.unified_docker_manager import UnifiedDockerManager
-from test_framework.redis.test_redis_manager import TestRedisManager
+from test_framework.redis_test_utils_test_utils.test_redis_manager import TestRedisManager
 from shared.isolated_environment import IsolatedEnvironment
 
 import pytest
@@ -46,7 +48,6 @@ from netra_backend.tests.integration.helpers.redis_l3_helpers import (
 )
 
 class WebSocketRateLimiter:
-    pass
 
     """Rate limiter for WebSocket connections using Redis."""
     
@@ -235,12 +236,10 @@ class WebSocketRateLimiter:
 @pytest.mark.integration
 
 class TestWebSocketRateLimitingPerClientL3:
-    pass
 
     """L3 integration tests for WebSocket per-client rate limiting."""
     
     @pytest.fixture(scope="class")
-
     async def redis_container(self):
 
         """Set up Redis container for rate limiting testing."""
@@ -253,9 +252,8 @@ class TestWebSocketRateLimitingPerClientL3:
 
         await container.stop()
     
-    @pytest.fixture
-
-    async def redis_client(self, redis_container):
+        @pytest.fixture
+        async def redis_client(self, redis_container):
 
         """Create Redis client for rate limiting."""
 
@@ -267,9 +265,8 @@ class TestWebSocketRateLimitingPerClientL3:
 
         await client.close()
     
-    @pytest.fixture
-
-    async def websocket_manager(self, redis_container):
+        @pytest.fixture
+        async def websocket_manager(self, redis_container):
 
         """Create WebSocket manager with rate limiting."""
 
@@ -278,62 +275,60 @@ class TestWebSocketRateLimitingPerClientL3:
         # Mock: Redis external service isolation for fast, reliable tests without network dependency
         with patch('netra_backend.app.websocket_manager.redis_manager') as mock_redis_mgr:
 
-            test_redis_mgr = RedisManager()
+        test_redis_mgr = RedisManager()
 
-            test_redis_mgr.enabled = True
+        test_redis_mgr.enabled = True
 
-            test_redis_mgr.redis_client = redis.Redis.from_url(redis_url, decode_responses=True)
+        test_redis_mgr.redis_client = redis.Redis.from_url(redis_url, decode_responses=True)
 
-            mock_redis_mgr.return_value = test_redis_mgr
+        mock_redis_mgr.return_value = test_redis_mgr
 
-            mock_redis_mgr.get_client.return_value = test_redis_mgr.redis_client
+        mock_redis_mgr.get_client.return_value = test_redis_mgr.redis_client
             
-            manager = WebSocketManager()
+        manager = WebSocketManager()
 
-            yield manager
+        yield manager
             
-            await test_redis_mgr.redis_client.close()
+        await test_redis_mgr.redis_client.close()
     
-    @pytest.fixture
-
-    async def rate_limiter(self, redis_client):
+        @pytest.fixture
+        async def rate_limiter(self, redis_client):
 
         """Create rate limiter instance."""
 
         await asyncio.sleep(0)
-    return WebSocketRateLimiter(redis_client)
+        return WebSocketRateLimiter(redis_client)
     
-    @pytest.fixture
-
-    def test_users(self):
-    """Use real service instance."""
-    # TODO: Initialize real service
-    return None
+        @pytest.fixture
+        def test_users(self):
+        """Use real service instance."""
+        # TODO: Initialize real service
+        return None
 
         """Create test users with different tiers."""
 
         return [
 
-            User(
+        User(
 
-                id=f"rate_user_{i}",
+        id=f"rate_user_{i}",
 
-                email=f"rateuser{i}@example.com", 
+        email=f"rateuser{i}@example.com", 
 
-                username=f"rateuser{i}",
+        username=f"rateuser{i}",
 
-                is_active=True,
+        is_active=True,
 
-                created_at=datetime.now(timezone.utc)
+        created_at=datetime.now(timezone.utc)
 
-            )
+        )
 
-            for i in range(5)
+        for i in range(5)
 
         ]
     
-    @pytest.mark.asyncio
-    async def test_basic_rate_limiting_enforcement(self, rate_limiter, test_users):
+        @pytest.mark.asyncio
+        async def test_basic_rate_limiting_enforcement(self, rate_limiter, test_users):
 
         """Test basic rate limiting enforcement."""
 
@@ -347,9 +342,9 @@ class TestWebSocketRateLimitingPerClientL3:
 
         for i in range(7):  # Exceed burst limit of 5
 
-            allowed = await rate_limiter.record_message(user.id, tier)
+        allowed = await rate_limiter.record_message(user.id, tier)
 
-            burst_results.append(allowed)
+        burst_results.append(allowed)
         
         # First 5 should be allowed, rest blocked
 
@@ -367,13 +362,13 @@ class TestWebSocketRateLimitingPerClientL3:
 
         for i in range(52):  # Exceed rate limit of 50
 
-            allowed = await rate_limiter.record_message(user.id, tier)
+        allowed = await rate_limiter.record_message(user.id, tier)
 
-            rate_results.append(allowed)
+        rate_results.append(allowed)
             
-            if i % 5 == 0:  # Brief pause every 5 messages
+        if i % 5 == 0:  # Brief pause every 5 messages
 
-                await asyncio.sleep(0.1)
+        await asyncio.sleep(0.1)
         
         # Should allow up to 50 messages, then block
 
@@ -383,8 +378,8 @@ class TestWebSocketRateLimitingPerClientL3:
 
         assert allowed_count >= 45  # Most messages allowed
     
-    @pytest.mark.asyncio
-    async def test_tier_based_rate_limiting(self, rate_limiter, test_users):
+        @pytest.mark.asyncio
+        async def test_tier_based_rate_limiting(self, rate_limiter, test_users):
 
         """Test different rate limits based on user tier."""
 
@@ -394,44 +389,44 @@ class TestWebSocketRateLimitingPerClientL3:
         
         for i, (tier, expected_limit) in enumerate(zip(tiers, expected_limits)):
 
-            user = test_users[i]
+        user = test_users[i]
             
-            # Test tier-specific limits
+        # Test tier-specific limits
 
-            status = await rate_limiter.get_rate_limit_status(user.id, tier)
+        status = await rate_limiter.get_rate_limit_status(user.id, tier)
 
-            assert status["limits"]["messages_per_minute"] == expected_limit
+        assert status["limits"]["messages_per_minute"] == expected_limit
             
-            # Test enforcement
+        # Test enforcement
 
-            allowed_count = 0
+        allowed_count = 0
 
-            for j in range(min(expected_limit + 10, 60)):  # Don't test too many for higher tiers
+        for j in range(min(expected_limit + 10, 60)):  # Don't test too many for higher tiers
 
-                allowed = await rate_limiter.record_message(user.id, tier)
+        allowed = await rate_limiter.record_message(user.id, tier)
 
-                if allowed:
+        if allowed:
 
-                    allowed_count += 1
+        allowed_count += 1
                 
-                if j % 10 == 0:  # Pause to avoid burst limits
+        if j % 10 == 0:  # Pause to avoid burst limits
 
-                    await asyncio.sleep(0.1)
+        await asyncio.sleep(0.1)
             
-            # Should respect tier limits
+        # Should respect tier limits
 
-            if expected_limit <= 60:  # Only test full limit for lower tiers
+        if expected_limit <= 60:  # Only test full limit for lower tiers
 
-                assert allowed_count <= expected_limit
+        assert allowed_count <= expected_limit
 
-                assert allowed_count >= expected_limit * 0.8  # Allow some variance
+        assert allowed_count >= expected_limit * 0.8  # Allow some variance
             
-            # Cleanup
+        # Cleanup
 
-            await rate_limiter.reset_rate_limit(user.id)
+        await rate_limiter.reset_rate_limit(user.id)
     
-    @pytest.mark.asyncio
-    async def test_rate_limit_status_tracking(self, rate_limiter, test_users):
+        @pytest.mark.asyncio
+        async def test_rate_limit_status_tracking(self, rate_limiter, test_users):
 
         """Test accurate rate limit status tracking."""
 
@@ -455,11 +450,11 @@ class TestWebSocketRateLimitingPerClientL3:
 
         for i in range(message_count):
 
-            await rate_limiter.record_message(user.id, tier)
+        await rate_limiter.record_message(user.id, tier)
 
-            if i % 3 == 0:  # Pause to avoid burst limit
+        if i % 3 == 0:  # Pause to avoid burst limit
 
-                await asyncio.sleep(0.1)
+        await asyncio.sleep(0.1)
         
         # Check updated status
 
@@ -473,8 +468,8 @@ class TestWebSocketRateLimitingPerClientL3:
 
         await rate_limiter.reset_rate_limit(user.id)
     
-    @pytest.mark.asyncio
-    async def test_concurrent_rate_limiting(self, rate_limiter, test_users):
+        @pytest.mark.asyncio
+        async def test_concurrent_rate_limiting(self, rate_limiter, test_users):
 
         """Test rate limiting with concurrent message sending."""
 
@@ -490,9 +485,9 @@ class TestWebSocketRateLimitingPerClientL3:
         
         for i in range(concurrent_messages):
 
-            task = rate_limiter.record_message(user.id, tier)
+        task = rate_limiter.record_message(user.id, tier)
 
-            tasks.append(task)
+        tasks.append(task)
         
         # Execute concurrently
 
@@ -516,8 +511,8 @@ class TestWebSocketRateLimitingPerClientL3:
 
         await rate_limiter.reset_rate_limit(user.id)
     
-    @pytest.mark.asyncio
-    async def test_rate_limit_window_reset(self, rate_limiter, test_users):
+        @pytest.mark.asyncio
+        async def test_rate_limit_window_reset(self, rate_limiter, test_users):
 
         """Test rate limit window reset behavior."""
 
@@ -529,7 +524,7 @@ class TestWebSocketRateLimitingPerClientL3:
 
         for i in range(5):  # Stay within burst limit
 
-            await rate_limiter.record_message(user.id, tier)
+        await rate_limiter.record_message(user.id, tier)
         
         initial_status = await rate_limiter.get_rate_limit_status(user.id, tier)
 
@@ -559,8 +554,8 @@ class TestWebSocketRateLimitingPerClientL3:
 
         assert post_reset_status["remaining_messages"] == 50
     
-    @pytest.mark.asyncio
-    async def test_websocket_integration_with_rate_limiting(self, websocket_manager, rate_limiter, test_users):
+        @pytest.mark.asyncio
+        async def test_websocket_integration_with_rate_limiting(self, websocket_manager, rate_limiter, test_users):
 
         """Test rate limiting integration with WebSocket messaging."""
 
@@ -583,48 +578,47 @@ class TestWebSocketRateLimitingPerClientL3:
         rate_limited_sends = 0
         
         for i in range(10):  # Test batch
-            # Check rate limit before sending
+        # Check rate limit before sending
 
-            allowed = await rate_limiter.record_message(user.id, tier)
+        allowed = await rate_limiter.record_message(user.id, tier)
             
-            if allowed:
+        if allowed:
 
-                test_message = create_test_message(
+        test_message = create_test_message(
 
-                    "rate_limited_message", 
+        "rate_limited_message", 
 
-                    user.id, 
+        user.id, 
 
-                    {"sequence": i, "allowed": True}
+        {"sequence": i, "allowed": True}
 
-                )
+        )
                 
-                try:
+        try:
 
-                    success = await websocket_manager.send_message_to_user(user.id, test_message)
+        success = await websocket_manager.send_message_to_user(user.id, test_message)
 
-                    if success:
+        if success:
 
-                        successful_sends += 1
+        successful_sends += 1
 
-                except Exception:
+        except Exception:
 
-                    pass
 
-            else:
+        else:
 
-                rate_limited_sends += 1
-                # Could send rate limit exceeded message
+        rate_limited_sends += 1
+        # Could send rate limit exceeded message
 
-                rate_limit_message = create_test_message(
+        rate_limit_message = create_test_message(
 
-                    "rate_limit_exceeded", 
+        "rate_limit_exceeded", 
 
-                    user.id, 
+        user.id, 
 
-                    {"reason": "Rate limit exceeded"}
+        {"reason": "Rate limit exceeded"}
 
-                )
+        )
         
         # Should have some successful sends and possibly some rate limited
 
@@ -642,8 +636,8 @@ class TestWebSocketRateLimitingPerClientL3:
 
         await rate_limiter.reset_rate_limit(user.id)
     
-    @pytest.mark.asyncio
-    async def test_rate_limiting_accuracy_and_performance(self, rate_limiter, test_users):
+        @pytest.mark.asyncio
+        async def test_rate_limiting_accuracy_and_performance(self, rate_limiter, test_users):
 
         """Test rate limiting accuracy and performance under load."""
 
@@ -661,9 +655,9 @@ class TestWebSocketRateLimitingPerClientL3:
         
         for i in range(rapid_messages):
 
-            allowed = await rate_limiter.record_message(user.id, tier)
+        allowed = await rate_limiter.record_message(user.id, tier)
 
-            rapid_results.append(allowed)
+        rapid_results.append(allowed)
         
         performance_time = time.time() - performance_start
 
@@ -691,23 +685,23 @@ class TestWebSocketRateLimitingPerClientL3:
         
         for batch in range(batches):
 
-            batch_results = []
+        batch_results = []
             
-            # Send batch with small delays
+        # Send batch with small delays
 
-            for i in range(batch_size):
+        for i in range(batch_size):
 
-                allowed = await rate_limiter.record_message(user.id, tier)
+        allowed = await rate_limiter.record_message(user.id, tier)
 
-                batch_results.append(allowed)
+        batch_results.append(allowed)
 
-                await asyncio.sleep(0.01)  # Small delay
+        await asyncio.sleep(0.01)  # Small delay
             
-            accuracy_results.extend(batch_results)
+        accuracy_results.extend(batch_results)
             
-            # Pause between batches to avoid burst limits
+        # Pause between batches to avoid burst limits
 
-            await asyncio.sleep(0.5)
+        await asyncio.sleep(0.5)
         
         total_allowed = sum(accuracy_results)
         

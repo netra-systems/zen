@@ -1,17 +1,17 @@
 """WebSocket State Recovery After Service Restart L4 Critical Test
 
 Business Value Justification (BVJ):
-- Segment: Enterprise/All tiers (critical for real-time collaboration)
+    - Segment: Enterprise/All tiers (critical for real-time collaboration)
 - Business Goal: Ensure seamless user experience during system maintenance and updates
 - Value Impact: Protects $18K+ MRR by preventing session loss and work interruption during deployments
 - Strategic Impact: Critical for enterprise trust, SLA compliance, and zero-downtime deployment capability
 
 Critical Path:
-WebSocket connection -> State establishment -> Service restart simulation -> 
+    WebSocket connection -> State establishment -> Service restart simulation -> 
 Automatic reconnection -> State recovery -> Session continuity validation
 
 Coverage: WebSocket resilience, state persistence, automatic recovery, cross-service coordination
-"""
+""""
 
 from netra_backend.app.websocket_core import WebSocketManager
 # Test framework import - using pytest fixtures instead
@@ -72,9 +72,9 @@ class WebSocketStateRecoveryL4Test(L4StagingCriticalPathTestBase):
 
         self.test_websockets: List = []
 
-        self.pre_restart_states: Dict[str, WebSocketStateData] = {}
+        self.pre_restart_states: Dict[str, WebSocketStateData] = {]
 
-        self.post_restart_states: Dict[str, WebSocketStateData] = {}
+        self.post_restart_states: Dict[str, WebSocketStateData] = {]
         
     async def setup_test_specific_environment(self) -> None:
 
@@ -243,7 +243,7 @@ class WebSocketStateRecoveryL4Test(L4StagingCriticalPathTestBase):
 
                                                        user_id: str, scenario: Dict) -> Dict[str, Any]:
 
-        """Create authenticated WebSocket connection with scenario-specific setup."""
+                                                           """Create authenticated WebSocket connection with scenario-specific setup."""
 
         try:
 
@@ -299,7 +299,7 @@ class WebSocketStateRecoveryL4Test(L4StagingCriticalPathTestBase):
 
                 raise Exception(f"Authentication failed: {auth_data}")
             
-            connection_id = auth_data.get("connection_id", f"conn_{uuid.uuid4().hex[:8]}")
+            connection_id = auth_data.get("connection_id", f"conn_{uuid.uuid4().hex[:8]]")
             
             return {
 
@@ -423,7 +423,7 @@ class WebSocketStateRecoveryL4Test(L4StagingCriticalPathTestBase):
 
                                          thread_name: str) -> Dict[str, Any]:
 
-        """Create thread via WebSocket connection."""
+                                             """Create thread via WebSocket connection."""
 
         try:
 
@@ -471,7 +471,7 @@ class WebSocketStateRecoveryL4Test(L4StagingCriticalPathTestBase):
 
                                         thread_id: str, content: str) -> Dict[str, Any]:
 
-        """Send message via WebSocket connection."""
+                                            """Send message via WebSocket connection."""
 
         try:
 
@@ -521,7 +521,7 @@ class WebSocketStateRecoveryL4Test(L4StagingCriticalPathTestBase):
 
                                 messages: List[Dict]) -> str:
 
-        """Calculate checksum for state validation."""
+                                    """Calculate checksum for state validation."""
         import hashlib
         
         state_string = json.dumps({
@@ -675,7 +675,7 @@ class WebSocketStateRecoveryL4Test(L4StagingCriticalPathTestBase):
 
                                             pre_state: WebSocketStateData) -> Dict[str, Any]:
 
-        """Attempt to reconnect WebSocket for a specific user."""
+                                                """Attempt to reconnect WebSocket for a specific user."""
 
         try:
 
@@ -868,7 +868,7 @@ class WebSocketStateRecoveryL4Test(L4StagingCriticalPathTestBase):
 
                                    post_state: Dict[str, Any]) -> float:
 
-        """Calculate state consistency score between pre and post restart."""
+                                       """Calculate state consistency score between pre and post restart."""
 
         consistency_factors = []
         
@@ -923,7 +923,7 @@ class WebSocketStateRecoveryL4Test(L4StagingCriticalPathTestBase):
             
             if not all(phase_results):
 
-                failed_phases = [f"phase_{i+1}" for i, success in enumerate(phase_results) if not success]
+                failed_phases = [f"phase_{i+1]" for i, success in enumerate(phase_results) if not success]
 
                 self.test_metrics.errors.append(f"Failed phases: {', '.join(failed_phases)}")
 
@@ -981,7 +981,6 @@ class WebSocketStateRecoveryL4Test(L4StagingCriticalPathTestBase):
 # Pytest fixtures and test functions
 
 @pytest.fixture
-
 async def websocket_state_recovery_test():
 
     """Create WebSocket state recovery test instance."""

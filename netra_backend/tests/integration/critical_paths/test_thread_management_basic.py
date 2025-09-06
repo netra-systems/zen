@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+from unittest.mock import Mock, patch, MagicMock
+
 """
 L3 Integration Test: Thread Management Basic Operations
 Tests fundamental thread creation, retrieval, updates, and deletion
@@ -10,7 +12,7 @@ from pathlib import Path
 
 # Test framework import - using pytest fixtures instead
 
-"""
+""""
 
 import asyncio
 import json
@@ -199,7 +201,7 @@ class TestThreadManagementBasic(L3IntegrationTest):
                 assert len(data["threads"]) >= 3
                 
                 # Verify created threads are in list
-                listed_titles = {t["title"] for t in data["threads"]}
+                listed_titles = {t["title"] for t in data["threads"]]
                 for title in thread_titles:
                     assert title in listed_titles
                     
@@ -242,8 +244,8 @@ class TestThreadManagementBasic(L3IntegrationTest):
                 assert len(page2["threads"]) == 10
                 
                 # Verify no overlap
-                page1_ids = {t["id"] for t in page1["threads"]}
-                page2_ids = {t["id"] for t in page2["threads"]}
+                page1_ids = {t["id"] for t in page1["threads"]]
+                page2_ids = {t["id"] for t in page2["threads"]]
                 assert len(page1_ids & page2_ids) == 0
                 
     @pytest.mark.asyncio
@@ -407,7 +409,7 @@ class TestThreadManagementBasic(L3IntegrationTest):
                 assert resp.status == 200
                 data = await resp.json()
                 
-                thread_ids = {t["id"] for t in data["threads"]}
+                thread_ids = {t["id"] for t in data["threads"]]
                 assert thread_id not in thread_ids
 
 if __name__ == "__main__":

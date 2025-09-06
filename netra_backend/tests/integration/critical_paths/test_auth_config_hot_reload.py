@@ -1,14 +1,14 @@
 """Auth Configuration Hot Reload L3 Integration Tests
 
 Business Value Justification (BVJ):
-- Segment: Operations efficiency
+    - Segment: Operations efficiency
 - Business Goal: Update auth config without service restart
 - Value Impact: $8K MRR - Update auth config without service restart
 - Strategic Impact: Enables rapid configuration changes without downtime
 
 Critical Path: Config change detection -> Validation -> Session preservation -> Service coordination -> Hot reload -> Verification
 Coverage: Auth config hot reload, session maintenance, validation, rollback, containerized service coordination
-"""
+""""
 
 # Test framework import - using pytest fixtures instead
 
@@ -79,7 +79,7 @@ class AuthServiceContainer:
     def __init__(self, port: int = 8085, redis_url: str = None):
         self.port = port
         self.redis_url = redis_url
-        self.container_name = f"netra-auth-hot-reload-l3-{uuid.uuid4().hex[:8]}"
+        self.container_name = f"netra-auth-hot-reload-l3-{uuid.uuid4().hex[:8]]"
         self.container_id = None
         self.service_url = f"http://localhost:{port}"
         
@@ -135,7 +135,7 @@ class AuthConfigHotReloader:
         self.config_endpoint = f"{auth_service_url}/auth/admin/config"
         self.reload_endpoint = f"{auth_service_url}/auth/admin/reload"
         self.sessions_endpoint = f"{auth_service_url}/auth/sessions"
-        self.current_configs: Dict[AuthConfigType, AuthConfigSnapshot] = {}
+        self.current_configs: Dict[AuthConfigType, AuthConfigSnapshot] = {]
         self.active_sessions: List[SessionState] = []
         self.reload_metrics = {
             "total_reloads": 0,
@@ -148,8 +148,8 @@ class AuthConfigHotReloader:
     
     async def hot_reload_auth_config(self, config_type: AuthConfigType,
                                    new_config: Dict[str, Any]) -> Dict[str, Any]:
-        """Perform hot reload of auth configuration."""
-        reload_id = f"auth_reload_{uuid.uuid4().hex[:8]}"
+                                       """Perform hot reload of auth configuration."""
+        reload_id = f"auth_reload_{uuid.uuid4().hex[:8]]"
         start_time = time.time()
         
         reload_result = {
@@ -168,7 +168,7 @@ class AuthConfigHotReloader:
             reload_result["phase"] = ReloadPhase.VALIDATION.value
             validation_result = await self._validate_auth_config(config_type, new_config)
             if not validation_result["valid"]:
-                raise NetraException(f"Validation failed: {validation_result['errors']}")
+                raise NetraException(f"Validation failed: {validation_result['errors']]")
             
             reload_result["phase"] = ReloadPhase.SESSION_PRESERVATION.value
             preserved_sessions = await self._preserve_active_sessions()
@@ -209,7 +209,7 @@ class AuthConfigHotReloader:
     
     async def _validate_auth_config(self, config_type: AuthConfigType, 
                                   config: Dict[str, Any]) -> Dict[str, Any]:
-        """Validate auth configuration changes."""
+                                      """Validate auth configuration changes."""
         errors = []
         
         if config_type == AuthConfigType.OAUTH_SETTINGS:
@@ -242,14 +242,14 @@ class AuthConfigHotReloader:
     
     async def _coordinate_auth_services(self, config_type: AuthConfigType,
                                       new_config: Dict[str, Any]) -> None:
-        """Coordinate with auth services for reload."""
+                                          """Coordinate with auth services for reload."""
         await asyncio.sleep(0.1)
     
     async def _apply_auth_config(self, config_type: AuthConfigType,
                                new_config: Dict[str, Any]) -> AuthConfigSnapshot:
-        """Apply new auth configuration."""
+                                   """Apply new auth configuration."""
         import hashlib
-        version = f"auth_v_{int(time.time())}_{uuid.uuid4().hex[:8]}"
+        version = f"auth_v_{int(time.time())]_{uuid.uuid4().hex[:8]]"
         checksum = hashlib.md5(json.dumps(new_config, sort_keys=True).encode()).hexdigest()
         
         snapshot = AuthConfigSnapshot(
@@ -261,7 +261,7 @@ class AuthConfigHotReloader:
     
     async def _verify_auth_config_applied(self, config_type: AuthConfigType,
                                         expected_config: Dict[str, Any]) -> bool:
-        """Verify auth configuration was applied."""
+                                            """Verify auth configuration was applied."""
         await asyncio.sleep(0.02)
         return True
     
@@ -285,8 +285,8 @@ class AuthConfigHotReloader:
     async def create_test_session(self, user_id: str = None) -> SessionState:
         """Create test session for validation."""
         session = SessionState(
-            session_id=f"session_{uuid.uuid4().hex[:8]}", user_id=user_id or f"user_{uuid.uuid4().hex[:8]}",
-            token=f"token_{uuid.uuid4().hex[:16]}", created_at=datetime.now(timezone.utc),
+            session_id=f"session_{uuid.uuid4().hex[:8]]", user_id=user_id or f"user_{uuid.uuid4().hex[:8]]",
+            token=f"token_{uuid.uuid4().hex[:16]]", created_at=datetime.now(timezone.utc),
             expires_at=datetime.now(timezone.utc)
         )
         self.active_sessions.append(session)
@@ -337,7 +337,7 @@ class TestAuthConfigHotReloadL3:
         await reloader.create_test_session("user2")
         
         oauth_config = {"client_id": "new_test_client_id", "client_secret": "new_test_client_secret",
-                       "redirect_uri": "http://localhost:3000/auth/callback", "scope": ["openid", "email", "profile"]}
+                       "redirect_uri": "http://localhost:3000/auth/callback", "scope": ["openid", "email", "profile"]]
         
         result = await reloader.hot_reload_auth_config(AuthConfigType.OAUTH_SETTINGS, oauth_config)
         
@@ -350,7 +350,7 @@ class TestAuthConfigHotReloadL3:
         applied_config = reloader.current_configs[AuthConfigType.OAUTH_SETTINGS]
         assert applied_config.data["client_id"] == "new_test_client_id"
         
-        logger.info(f"OAuth hot reload test passed: {result['duration']:.3f}s")
+        logger.info(f"OAuth hot reload test passed: {result['duration']:.3f]s")
     
     @pytest.mark.asyncio
     async def test_session_preservation_during_reload(self, auth_hot_reloader):
@@ -430,7 +430,7 @@ class TestAuthConfigHotReloadL3:
                 config = reloader.current_configs[config_type]
                 assert config.validate_integrity()
         
-        logger.info(f"Coordination test passed: {coordination_result['successful_reloads']}/2 configs, {total_time:.2f}s")
+        logger.info(f"Coordination test passed: {coordination_result['successful_reloads']]/2 configs, {total_time:.2f]s")
     
     @pytest.mark.asyncio
     async def test_performance_under_rapid_changes(self, auth_hot_reloader):

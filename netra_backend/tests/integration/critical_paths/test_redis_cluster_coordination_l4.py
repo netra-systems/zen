@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Comprehensive test for Redis cluster coordination:
-1. Cluster node discovery and failover
+    1. Cluster node discovery and failover
 2. Consistent hashing and key distribution
 3. Master-slave replication monitoring
 4. Resharding and rebalancing operations
@@ -11,7 +11,7 @@ Comprehensive test for Redis cluster coordination:
 8. Performance under network partitions
 
 This test validates Redis cluster coordination at scale.
-"""
+""""
 
 # Test framework import - using pytest fixtures instead
 
@@ -55,10 +55,10 @@ class RedisClusterTester:
     
     def __init__(self):
         self.session: Optional[aiohttp.ClientSession] = None
-        self.redis_clients: Dict[str, redis.Redis] = {}
-        self.cluster_state: Dict[str, Any] = {}
-        self.test_data: Dict[str, str] = {}
-        self.metrics: Dict[str, float] = {}
+        self.redis_clients: Dict[str, redis.Redis] = {]
+        self.cluster_state: Dict[str, Any] = {]
+        self.test_data: Dict[str, str] = {]
+        self.metrics: Dict[str, float] = {]
         
     async def __aenter__(self):
         """Setup test environment."""
@@ -71,7 +71,7 @@ class RedisClusterTester:
                 port=node["port"],
                 decode_responses=True
             )
-            self.redis_clients[f"{node['host']}:{node['port']}"] = client
+            self.redis_clients[f"{node['host']]:{node['port']]"] = client
             
         return self
         
@@ -102,22 +102,22 @@ class RedisClusterTester:
                     expected_count = len(REDIS_NODES)
                     
                     if len(discovered_nodes) == expected_count:
-                        print(f"[OK] All {expected_count} nodes discovered")
+                        print(f"[OK] All {expected_count] nodes discovered")
                         
                         # Check node roles
                         masters = sum(1 for n in discovered_nodes if n.get("role") == "master")
                         slaves = sum(1 for n in discovered_nodes if n.get("role") == "slave")
                         
-                        print(f"[OK] Cluster topology: {masters} masters, {slaves} slaves")
+                        print(f"[OK] Cluster topology: {masters] masters, {slaves] slaves")
                         
                         # Store cluster state
                         self.cluster_state = cluster_info
                         return True
                     else:
-                        print(f"[ERROR] Expected {expected_count} nodes, found {len(discovered_nodes)}")
+                        print(f"[ERROR] Expected {expected_count] nodes, found {len(discovered_nodes)]")
                         
         except Exception as e:
-            print(f"[ERROR] Cluster initialization failed: {e}")
+            print(f"[ERROR] Cluster initialization failed: {e]")
             
         return False
         
@@ -159,14 +159,14 @@ class RedisClusterTester:
             )
             
             if max_deviation < 20:
-                print(f"[OK] Key distribution balanced (max deviation: {max_deviation:.1f}%)")
+                print(f"[OK] Key distribution balanced (max deviation: {max_deviation:.1f]%)")
                 return True
             else:
-                print(f"[WARN] Key distribution imbalanced (max deviation: {max_deviation:.1f}%)")
+                print(f"[WARN] Key distribution imbalanced (max deviation: {max_deviation:.1f]%)")
                 return False
                 
         except Exception as e:
-            print(f"[ERROR] Consistent hashing test failed: {e}")
+            print(f"[ERROR] Consistent hashing test failed: {e]")
             return False
             
     def _get_key_slot(self, key: str) -> int:
@@ -185,7 +185,7 @@ class RedisClusterTester:
             master_index = len(masters) - 1
             
         node = masters[master_index]
-        return f"{node['host']}:{node['port']}"
+        return f"{node['host']]:{node['port']]"
         
     @pytest.mark.asyncio
     async def test_master_slave_replication(self) -> bool:
@@ -198,8 +198,8 @@ class RedisClusterTester:
             masters = [n for n in REDIS_NODES if n["role"] == "master"]
             
             for master in masters:
-                client = self.redis_clients[f"{master['host']}:{master['port']}"]
-                key = f"repl_test_{master['port']}"
+                client = self.redis_clients[f"{master['host']]:{master['port']]"]
+                key = f"repl_test_{master['port']]"
                 
                 await client.set(key, test_value)
                 self.test_data[key] = test_value
@@ -212,16 +212,16 @@ class RedisClusterTester:
             replication_success = True
             
             for slave in slaves:
-                client = self.redis_clients[f"{slave['host']}:{slave['port']}"]
+                client = self.redis_clients[f"{slave['host']]:{slave['port']]"]
                 
                 # Check if slave has replicated data
                 for key, expected_value in self.test_data.items():
                     try:
                         value = await client.get(key)
                         if value == expected_value:
-                            print(f"[OK] Slave {slave['port']} replicated {key}")
+                            print(f"[OK] Slave {slave['port']] replicated {key]")
                         else:
-                            print(f"[ERROR] Slave {slave['port']} missing {key}")
+                            print(f"[ERROR] Slave {slave['port']] missing {key]")
                             replication_success = False
                     except:
                         pass  # Slave might not have this key's slot
@@ -235,14 +235,14 @@ class RedisClusterTester:
                     max_lag = max(lag_data.get("lags", {}).values())
                     
                     if max_lag < REPLICATION_LAG_THRESHOLD:
-                        print(f"[OK] Replication lag within threshold: {max_lag}ms")
+                        print(f"[OK] Replication lag within threshold: {max_lag]ms")
                     else:
-                        print(f"[WARN] High replication lag: {max_lag}ms")
+                        print(f"[WARN] High replication lag: {max_lag]ms")
                         
             return replication_success
             
         except Exception as e:
-            print(f"[ERROR] Replication test failed: {e}")
+            print(f"[ERROR] Replication test failed: {e]")
             return False
             
     @pytest.mark.asyncio
@@ -255,14 +255,14 @@ class RedisClusterTester:
             masters = [n for n in REDIS_NODES if n["role"] == "master"]
             failed_master = masters[0]
             
-            print(f"[INFO] Simulating failure of master {failed_master['port']}")
+            print(f"[INFO] Simulating failure of master {failed_master['port']]")
             
             # Simulate master failure
             failover_start = time.time()
             
             async with self.session.post(
                 f"{CLUSTER_MANAGER_URL}/cluster/node/fail",
-                json={"node": f"{failed_master['host']}:{failed_master['port']}"}
+                json={"node": f"{failed_master['host']]:{failed_master['port']]"]
             ) as response:
                 if response.status == 200:
                     print(f"[OK] Master marked as failed")
@@ -292,15 +292,15 @@ class RedisClusterTester:
             failover_time = (time.time() - failover_start) * 1000
             
             if failover_complete:
-                print(f"[OK] Failover completed in {failover_time:.0f}ms")
+                print(f"[OK] Failover completed in {failover_time:.0f]ms")
                 self.metrics["failover_time"] = failover_time
                 return True
             else:
-                print(f"[ERROR] Failover not completed within {FAILOVER_TIME_THRESHOLD}ms")
+                print(f"[ERROR] Failover not completed within {FAILOVER_TIME_THRESHOLD]ms")
                 return False
                 
         except Exception as e:
-            print(f"[ERROR] Failover test failed: {e}")
+            print(f"[ERROR] Failover test failed: {e]")
             return False
             
     @pytest.mark.asyncio
@@ -317,7 +317,7 @@ class RedisClusterTester:
                 json=new_node
             ) as response:
                 if response.status == 200:
-                    print(f"[OK] New node added: {new_node['port']}")
+                    print(f"[OK] New node added: {new_node['port']]")
                     
             # Trigger resharding
             async with self.session.post(
@@ -338,14 +338,14 @@ class RedisClusterTester:
                                 status = await status_response.json()
                                 
                                 progress = status.get("progress", 0)
-                                print(f"[INFO] Resharding progress: {progress}%")
+                                print(f"[INFO] Resharding progress: {progress]%")
                                 
                                 if status.get("status") == "completed":
                                     print(f"[OK] Resharding completed")
                                     
                                     # Verify new distribution
                                     moved_slots = status.get("moved_slots", 0)
-                                    print(f"[OK] Moved {moved_slots} slots")
+                                    print(f"[OK] Moved {moved_slots] slots")
                                     
                                     return True
                                 elif status.get("status") == "failed":
@@ -355,7 +355,7 @@ class RedisClusterTester:
                         await asyncio.sleep(1)
                         
         except Exception as e:
-            print(f"[ERROR] Resharding test failed: {e}")
+            print(f"[ERROR] Resharding test failed: {e]")
             return False
             
     @pytest.mark.asyncio
@@ -392,7 +392,7 @@ class RedisClusterTester:
                         
                         # Check resolution strategy
                         resolution = health.get("resolution_strategy")
-                        print(f"[INFO] Resolution strategy: {resolution}")
+                        print(f"[INFO] Resolution strategy: {resolution]")
                         
                         # Heal partition
                         async with self.session.post(
@@ -418,7 +418,7 @@ class RedisClusterTester:
                                             return False
                                             
         except Exception as e:
-            print(f"[ERROR] Split-brain test failed: {e}")
+            print(f"[ERROR] Split-brain test failed: {e]")
             return False
             
     @pytest.mark.asyncio
@@ -480,7 +480,7 @@ class RedisClusterTester:
                 return False
                 
         except Exception as e:
-            print(f"[ERROR] Performance test failed: {e}")
+            print(f"[ERROR] Performance test failed: {e]")
             return False
             
     async def _perform_set(self, key: str, value: str) -> bool:
@@ -489,7 +489,7 @@ class RedisClusterTester:
             # Pick random master
             masters = [n for n in REDIS_NODES if n["role"] == "master"]
             node = random.choice(masters)
-            client = self.redis_clients[f"{node['host']}:{node['port']}"]
+            client = self.redis_clients[f"{node['host']]:{node['port']]"]
             
             await client.set(key, value)
             return True
@@ -501,7 +501,7 @@ class RedisClusterTester:
         try:
             # Pick random node
             node = random.choice(REDIS_NODES)
-            client = self.redis_clients[f"{node['host']}:{node['port']}"]
+            client = self.redis_clients[f"{node['host']]:{node['port']]"]
             
             await client.get(key)
             return True
@@ -514,7 +514,7 @@ class RedisClusterTester:
             # Pick random master
             masters = [n for n in REDIS_NODES if n["role"] == "master"]
             node = random.choice(masters)
-            client = self.redis_clients[f"{node['host']}:{node['port']}"]
+            client = self.redis_clients[f"{node['host']]:{node['port']]"]
             
             await client.delete(key)
             return True
@@ -576,7 +576,7 @@ async def test_redis_cluster_coordination():
         if passed_tests == total_tests:
             print("\n[SUCCESS] Redis cluster fully operational!")
         else:
-            print(f"\n[WARNING] {total_tests - passed_tests} tests failed")
+            print(f"\n[WARNING] {total_tests - passed_tests] tests failed")
             
         assert passed_tests >= total_tests * 0.8, f"Too many tests failed: {results}"
 
