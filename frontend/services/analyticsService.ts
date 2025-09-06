@@ -52,7 +52,7 @@ export interface AnalyticsService {
 export function useAnalytics(): AnalyticsService {
   const { client: statsigClient } = useStatsigClient();
   const gtm = useGTM();
-  const { trackCustom, trackEngagement, trackConversion: gtmTrackConversion } = gtm.events();
+  const { trackCustom, trackEngagement, trackConversion: gtmTrackConversion } = gtm.events || {};
 
   const trackEvent = (event: AnalyticsEvent) => {
     // Track in Statsig
@@ -65,15 +65,17 @@ export function useAnalytics(): AnalyticsService {
     }
 
     // Track in GTM
-    const gtmEvent: DataLayerEvent = {
-      event: event.name,
-      event_category: 'custom',
-      event_action: event.name,
-      event_label: event.value?.toString(),
-      value: typeof event.value === 'number' ? event.value : undefined,
-      custom_parameters: event.metadata
-    };
-    trackCustom(gtmEvent);
+    if (trackCustom) {
+      const gtmEvent: DataLayerEvent = {
+        event: event.name,
+        event_category: 'custom',
+        event_action: event.name,
+        event_label: event.value?.toString(),
+        value: typeof event.value === 'number' ? event.value : undefined,
+        custom_parameters: event.metadata
+      };
+      trackCustom(gtmEvent);
+    }
   };
 
   const trackInteraction = (action: string, target: string, metadata?: Record<string, any>) => {
@@ -89,11 +91,13 @@ export function useAnalytics(): AnalyticsService {
     }
 
     // Track in GTM as engagement event
-    trackEngagement('interaction' as any, {
-      event_action: action,
-      event_label: target,
-      custom_parameters: metadata
-    });
+    if (trackEngagement) {
+      trackEngagement('interaction' as any, {
+        event_action: action,
+        event_label: target,
+        custom_parameters: metadata
+      });
+    }
   };
 
   const trackFeatureUsage = (feature: string, action: string, metadata?: Record<string, any>) => {
@@ -109,11 +113,13 @@ export function useAnalytics(): AnalyticsService {
     }
 
     // Track in GTM
-    trackEngagement('feature_usage' as any, {
-      event_action: action,
-      event_label: feature,
-      custom_parameters: metadata
-    });
+    if (trackEngagement) {
+      trackEngagement('feature_usage' as any, {
+        event_action: action,
+        event_label: feature,
+        custom_parameters: metadata
+      });
+    }
   };
 
   const trackConversion = (type: string, value?: number, metadata?: Record<string, any>) => {
@@ -129,11 +135,13 @@ export function useAnalytics(): AnalyticsService {
     }
 
     // Track in GTM
-    gtmTrackConversion('custom_conversion' as any, {
-      event_action: type,
-      transaction_value: value,
-      custom_parameters: metadata
-    });
+    if (gtmTrackConversion) {
+      gtmTrackConversion('custom_conversion' as any, {
+        event_action: type,
+        transaction_value: value,
+        custom_parameters: metadata
+      });
+    }
   };
 
   const trackError = (error: string, context?: Record<string, any>) => {
@@ -148,13 +156,15 @@ export function useAnalytics(): AnalyticsService {
     }
 
     // Track in GTM
-    trackCustom({
-      event: 'error_tracking',
-      event_category: 'errors',
-      event_action: 'error_occurred',
-      event_label: error,
-      custom_parameters: context
-    });
+    if (trackCustom) {
+      trackCustom({
+        event: 'error_tracking',
+        event_category: 'errors',
+        event_action: 'error_occurred',
+        event_label: error,
+        custom_parameters: context
+      });
+    }
   };
 
   return {

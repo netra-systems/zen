@@ -57,9 +57,9 @@ from netra_backend.app.websocket_core.event_validation_framework import (
     EventValidator
 )
 
-# Import test base utilities
+# Import test base utilities - REAL SERVICES ONLY
 from tests.mission_critical.websocket_real_test_base import (
-    is_docker_available, requires_docker, RealWebSocketTestConfig
+    require_docker_services, requires_docker, RealWebSocketTestConfig
 )
 
 
@@ -427,8 +427,8 @@ class TestWebSocketEventValidationSuite:
     @pytest.fixture(scope="class")
     def docker_manager(self):
         """Docker manager fixture for real services."""
-        if not is_docker_available():
-            pytest.skip("Docker not available - skipping real service tests")
+        # CRITICAL: Require Docker - no fallback per CLAUDE.md
+        require_docker_services()
             
         manager = UnifiedDockerManager(environment_type=EnvironmentType.TEST)
         

@@ -12,26 +12,26 @@ ARG NEXT_PUBLIC_ENVIRONMENT
 ARG NEXT_PUBLIC_GTM_ID
 ARG NEXT_PUBLIC_GA_MEASUREMENT_ID
 
-# Install build dependencies
-RUN apk add --no-cache libc6-compat python3 make g++
+# Install minimal build dependencies
+RUN apk add --no-cache libc6-compat
 
 WORKDIR /build
 
 # Copy package files
 COPY frontend/package*.json ./
 
-# Install dependencies with native rebuild
-RUN npm ci && \
-    npm rebuild --update-binary && \
+# Install dependencies efficiently
+RUN npm ci --omit=dev && \
     npm cache clean --force
 
 # Copy source code
 COPY frontend/ .
 
-# Build Next.js application with production optimizations
+# Build Next.js with standalone output for smaller image
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
-RUN npm run build
+RUN npm run build && \
+    rm -rf .next/cache
 
 # Production stage - minimal Alpine image
 FROM node:23-alpine
@@ -49,10 +49,10 @@ RUN addgroup -g 1001 -S nodejs && \
 
 WORKDIR /app
 
-# Copy built application from builder (using Next.js standalone output)
-COPY --from=builder --chown=nextjs:nodejs /build/public ./public
+# Copy only essential files for standalone server
 COPY --from=builder --chown=nextjs:nodejs /build/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /build/.next/static ./.next/static
+COPY --from=builder --chown=nextjs:nodejs /build/public ./public
 
 # Set environment
 ENV NODE_ENV=production

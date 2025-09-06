@@ -77,6 +77,11 @@ for attempt in range(max_retries):
 - `docker-compose.alpine.yml`: Alpine development environment
 - See [`docs/alpine_containers.md`](alpine_containers.md) for comprehensive Alpine usage guide
 
+**⚠️ CRITICAL: Script Copying Prohibition**
+- **NEVER** copy the entire `scripts/` folder into Docker containers
+- Only copy SPECIFIC runtime-required scripts (e.g., `wait_for_db.py`)
+- See [`SPEC/learnings/docker_scripts_prohibition_critical.xml`](../SPEC/learnings/docker_scripts_prohibition_critical.xml) for detailed rationale and patterns
+
 ## Usage Patterns
 
 ### Primary Usage: Through Test Framework

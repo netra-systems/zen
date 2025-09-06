@@ -124,11 +124,13 @@ services:
       POSTGRES_DB: netra_test
       REDIS_HOST: alpine-test-redis
       REDIS_PORT: 6379
+      REDIS_URL: redis://alpine-test-redis:6379
       CLICKHOUSE_HOST: alpine-test-clickhouse
       CLICKHOUSE_PORT: 8123
       CLICKHOUSE_HTTP_PORT: 8123
       CLICKHOUSE_USER: test
       CLICKHOUSE_PASSWORD: test
+      CLICKHOUSE_DB: test_analytics
       AUTH_SERVICE_URL: http://alpine-test-auth:8081
       TEST_MODE: "true"
       WORKERS: 2
@@ -182,6 +184,7 @@ services:
       POSTGRES_DB: netra_test
       REDIS_HOST: alpine-test-redis
       REDIS_PORT: 6379
+      REDIS_URL: redis://alpine-test-redis:6379
       TEST_MODE: "true"
       JWT_SECRET_KEY: rsWwwvq8X6mCSuNv-TMXHDCfb96Xc-Dbay9MZy6EDCU
       SERVICE_SECRET: test_service_secret
@@ -218,9 +221,9 @@ services:
       dockerfile: docker/frontend.alpine.Dockerfile
       args:
         BUILD_ENV: test
-        NEXT_PUBLIC_API_URL: http://alpine-test-backend:8000
-        NEXT_PUBLIC_AUTH_URL: http://alpine-test-auth:8081
-        NEXT_PUBLIC_WS_URL: ws://alpine-test-backend:8000
+        NEXT_PUBLIC_API_URL: http://localhost:8002
+        NEXT_PUBLIC_AUTH_URL: http://localhost:8083
+        NEXT_PUBLIC_WS_URL: ws://localhost:8002
         NEXT_PUBLIC_ENVIRONMENT: test
       cache_from:
         - node:20-alpine3.19

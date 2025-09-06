@@ -5,17 +5,12 @@ FROM python:3.11-alpine3.19 as builder
 # Build arguments
 ARG BUILD_ENV=test
 
-# Install build dependencies in single layer for caching
+# Install only essential build dependencies
 RUN apk add --no-cache \
     gcc \
     musl-dev \
     libffi-dev \
     postgresql-dev \
-    make \
-    g++ \
-    linux-headers \
-    rust \
-    cargo \
     && rm -rf /var/cache/apk/*
 
 # Set working directory
@@ -25,14 +20,8 @@ WORKDIR /build
 # This layer only rebuilds when requirements change, not on code changes
 COPY requirements.txt .
 
-# Install requirements with cache mount for maximum speed
-# Use BuildKit cache mount to persist pip cache across builds
-RUN --mount=type=cache,target=/root/.cache/pip \
-    pip install --no-cache-dir --user \
-    --no-warn-script-location \
-    --disable-pip-version-check \
-    -r requirements.txt || \
-    pip install --no-cache-dir --user \
+# Install Python dependencies efficiently
+RUN pip install --no-cache-dir --user \
     --no-warn-script-location \
     --disable-pip-version-check \
     -r requirements.txt
@@ -43,14 +32,11 @@ FROM python:3.11-alpine3.19
 # Build arguments passed to runtime
 ARG BUILD_ENV=test
 
-# Install runtime dependencies only - combine in single layer
+# Install minimal runtime dependencies
 RUN apk add --no-cache \
     libpq \
     curl \
     tini \
-    lz4-libs \
-    libgcc \
-    libstdc++ \
     && rm -rf /var/cache/apk/*
 
 # Create non-root user and directories in single layer
@@ -65,17 +51,13 @@ WORKDIR /app
 # This is the expensive layer that rarely changes
 COPY --from=builder --chown=netra:netra /root/.local /home/netra/.local
 
-# Copy configuration and migration files (changes less frequently)
-COPY --chown=netra:netra alembic /app/alembic
-COPY --chown=netra:netra SPEC /app/SPEC
+# Note: Migrations handled by separate migration service
+# SPEC folder not needed in runtime container
 
 # Copy shared libraries (changes moderately)
 COPY --chown=netra:netra shared /app/shared
 
-# Copy essential scripts (changes moderately)
-# Create scripts directory and copy only essential files 
-RUN mkdir -p /app/scripts && touch /app/scripts/__init__.py && chown -R netra:netra /app/scripts
-COPY --chown=netra:netra scripts/wait_for_db.py /app/scripts/
+# Scripts not needed - handled by application code
 
 # Copy application code LAST (changes most frequently)
 # This ensures maximum cache hit rate for builds
@@ -103,13 +85,9 @@ HEALTHCHECK --interval=10s --timeout=3s --start-period=15s --retries=3 \
 
 EXPOSE 8000
 
-# Optimized startup command with database migration
+# Start Gunicorn directly (migrations handled by separate service)
 CMD ["sh", "-c", "\
     echo 'Starting backend service...' && \
-    python scripts/wait_for_db.py --max-attempts 30 --delay 2 && \
-    echo 'Running database migrations...' && \
-    alembic -c netra_backend/alembic.ini upgrade head && \
-    echo 'Starting Gunicorn server...' && \
     exec gunicorn netra_backend.app.main:app \
         -w ${WORKERS:-2} \
         -k uvicorn.workers.UvicornWorker \

@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learning>
+    <id>docker_scripts_prohibition_critical</id>
+    <title>CRITICAL: Never Copy Scripts Folder into Docker Containers</title>
+    <date>2025-01-06</date>
+    <severity>CRITICAL</severity>
+    <business_impact>HIGH</business_impact>
+    
+    <problem>
+        <description>
+            Docker images MUST NOT copy the entire scripts/ folder into containers.
+            This creates massive security, size, and maintenance issues.
+        </description>
+        <root_causes>
+            <cause>Scripts folder contains development-only tools</cause>
+            <cause>Scripts may contain sensitive deployment credentials</cause>
+            <cause>Scripts include test runners not needed in production</cause>
+            <cause>Unnecessary bloat increases container size by 100MB+</cause>
+            <cause>Scripts may have different dependencies than runtime code</cause>
+        </root_causes>
+        <impact>
+            <item>Security vulnerability: Deployment scripts with credentials exposed</item>
+            <item>Container size bloat: 100MB+ of unnecessary files</item>
+            <item>Attack surface: More code = more potential vulnerabilities</item>
+            <item>Confusion: Runtime vs development tools mixed together</item>
+            <item>Performance: Larger images = slower deployments</item>
+        </impact>
+    </problem>
+    
+    <solution>
+        <principle>
+            NEVER use "COPY scripts/ ./scripts/" or similar patterns in Dockerfiles.
+            Only copy SPECIFIC, NECESSARY scripts that are required for runtime.
+        </principle>
+        
+        <correct_patterns>
+            <pattern>
+                <description>Copy only specific required scripts</description>
+                <code><![CDATA[
+# GOOD: Copy only the specific script needed for runtime
+COPY --chown=app:app scripts/wait_for_db.py /app/wait_for_db.py
+
+# GOOD: Copy application code without scripts
+COPY --chown=app:app netra_backend/ ./netra_backend/
+COPY --chown=app:app shared/ ./shared/
+# Note: NO scripts/ folder copy
+                ]]></code>
+            </pattern>
+            
+            <pattern>
+                <description>Use multi-stage builds to exclude scripts</description>
+                <code><![CDATA[
+# Build stage
+FROM python:3.11 as builder
+COPY . /build/
+RUN cd /build && pip install -r requirements.txt
+
+# Runtime stage - no scripts
+FROM python:3.11-slim
+COPY --from=builder /build/netra_backend /app/netra_backend
+COPY --from=builder /build/shared /app/shared
+# Scripts are NOT copied to runtime
+                ]]></code>
+            </pattern>
+            
+            <pattern>
+                <description>Embed minimal scripts inline if needed</description>
+                <code><![CDATA[
+# GOOD: Create minimal script inline instead of copying
+RUN echo '#!/bin/sh\n\
+until pg_isready -h $DB_HOST -p $DB_PORT; do\n\
+  echo "Waiting for database..."\n\
+  sleep 2\n\
+done' > /app/wait_for_db.sh && chmod +x /app/wait_for_db.sh
+                ]]></code>
+            </pattern>
+        </correct_patterns>
+        
+        <incorrect_patterns>
+            <pattern>
+                <description>NEVER copy entire scripts folder</description>
+                <code><![CDATA[
+# BAD: Copies ALL scripts including deployment, test, dev tools
+COPY scripts/ ./scripts/
+
+# BAD: Wildcard that includes scripts
+COPY * ./
+
+# BAD: Even with chown, still wrong
+COPY --chown=app:app scripts/ ./scripts/
+                ]]></code>
+            </pattern>
+        </incorrect_patterns>
+        
+        <exceptions>
+            <exception>
+                <case>Database initialization script</case>
+                <rule>Copy ONLY the specific init script, not the folder</rule>
+                <example>COPY scripts/wait_for_db.py /app/wait_for_db.py</example>
+            </exception>
+            <exception>
+                <case>Health check script</case>
+                <rule>Prefer inline script or copy specific file only</rule>
+                <example>COPY scripts/health_check.sh /app/health_check.sh</example>
+            </exception>
+        </exceptions>
+    </solution>
+    
+    <validation>
+        <checklist>
+            <item>Review all Dockerfiles for "COPY.*scripts" patterns</item>
+            <item>Ensure no wildcard copies that include scripts/</item>
+            <item>Verify container doesn't have /app/scripts/ directory</item>
+            <item>Check image size didn't increase by 100MB+</item>
+            <item>Audit what scripts are actually needed at runtime (usually none)</item>
+        </checklist>
+        
+        <test_commands>
+            <command>
+                <description>Check if scripts folder exists in container</description>
+                <code>docker run --rm IMAGE_NAME ls -la /app/ | grep scripts</code>
+                <expected>No output (scripts folder should not exist)</expected>
+            </command>
+            <command>
+                <description>Verify image size is reasonable</description>
+                <code>docker images IMAGE_NAME --format "table {{.Repository}}\t{{.Tag}}\t{{.Size}}"</code>
+                <expected>Size should be under 500MB for Python apps</expected>
+            </command>
+        </test_commands>
+    </validation>
+    
+    <cross_references>
+        <ref>docker_layer_caching_optimization.xml</ref>
+        <ref>docker_file_consolidation.xml</ref>
+        <ref>docker_frontend_image_size_optimization.xml</ref>
+        <ref>../docker_orchestration.md</ref>
+        <ref>../folder_structure_rules.md</ref>
+    </cross_references>
+    
+    <keywords>
+        <keyword>docker</keyword>
+        <keyword>dockerfile</keyword>
+        <keyword>scripts</keyword>
+        <keyword>security</keyword>
+        <keyword>container-size</keyword>
+        <keyword>COPY</keyword>
+        <keyword>runtime</keyword>
+        <keyword>production</keyword>
+    </keywords>
+</learning>

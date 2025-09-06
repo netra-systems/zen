@@ -5,15 +5,12 @@ FROM python:3.11-alpine3.19 AS builder
 # Build arguments
 ARG BUILD_ENV=test
 
-# Install build dependencies
+# Install minimal build dependencies
 RUN apk add --no-cache \
     gcc \
     musl-dev \
     libffi-dev \
-    postgresql-dev \
-    make \
-    g++ \
-    linux-headers
+    postgresql-dev
 
 # Set working directory
 WORKDIR /build
@@ -27,12 +24,11 @@ RUN pip install --no-cache-dir --user \
 # Production stage - minimal Alpine image
 FROM python:3.11-alpine3.19
 
-# Install runtime dependencies only
+# Install minimal runtime dependencies
 RUN apk add --no-cache \
     libpq \
     curl \
     tini \
-    lz4-libs \
     && rm -rf /var/cache/apk/*
 
 # Create non-root user
